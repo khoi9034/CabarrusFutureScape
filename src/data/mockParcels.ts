@@ -1,0 +1,148 @@
+import type { ParcelIntelligence } from "@/lib/types";
+
+export const mockParcels: ParcelIntelligence[] = [
+  {
+    parcelId: "CAB-151-4823",
+    address: "Concord Parkway Growth Node",
+    ownerType: "Commercial",
+    zoning: "MX-2 Mixed Use",
+    acreage: 18.6,
+    assessedValue: 18400000,
+    floodRisk: "Low",
+    opportunityScore: 91,
+    developmentPressure: 84,
+    infrastructureReadiness: 78,
+    taxOpportunity: 72,
+    nearbyPermits: 14,
+    redevelopmentPotential: 88,
+    geometry: {
+      spatialReference: { wkid: 4326 },
+      centroid: [-80.5947, 35.4212],
+      rings: [
+        [
+          [-80.6011, 35.4184],
+          [-80.5908, 35.4178],
+          [-80.5879, 35.4236],
+          [-80.5988, 35.4261],
+          [-80.6011, 35.4184],
+        ],
+      ],
+    },
+  },
+  {
+    parcelId: "CAB-209-7741",
+    address: "Kannapolis Mobility Corridor",
+    ownerType: "Private",
+    zoning: "C-2 Commercial",
+    acreage: 11.4,
+    assessedValue: 9200000,
+    floodRisk: "Moderate",
+    opportunityScore: 82,
+    developmentPressure: 76,
+    infrastructureReadiness: 69,
+    taxOpportunity: 64,
+    nearbyPermits: 9,
+    redevelopmentPotential: 79,
+    geometry: {
+      spatialReference: { wkid: 4326 },
+      centroid: [-80.6231, 35.4926],
+      rings: [
+        [
+          [-80.6294, 35.4896],
+          [-80.6191, 35.4894],
+          [-80.6171, 35.4962],
+          [-80.6257, 35.4991],
+          [-80.6294, 35.4896],
+        ],
+      ],
+    },
+  },
+  {
+    parcelId: "CAB-033-9185",
+    address: "Harrisburg Service Edge",
+    ownerType: "Municipal",
+    zoning: "O-I Office Institutional",
+    acreage: 25.2,
+    assessedValue: 13100000,
+    floodRisk: "Elevated",
+    opportunityScore: 74,
+    developmentPressure: 66,
+    infrastructureReadiness: 86,
+    taxOpportunity: 57,
+    nearbyPermits: 6,
+    redevelopmentPotential: 63,
+    geometry: {
+      spatialReference: { wkid: 4326 },
+      centroid: [-80.6582, 35.3298],
+      rings: [
+        [
+          [-80.6658, 35.3261],
+          [-80.6532, 35.3251],
+          [-80.6504, 35.3334],
+          [-80.6617, 35.3372],
+          [-80.6658, 35.3261],
+        ],
+      ],
+    },
+  },
+  {
+    parcelId: "CAB-712-2042",
+    address: "Midland Industrial Reserve",
+    ownerType: "Institutional",
+    zoning: "LI Light Industrial",
+    acreage: 43.7,
+    assessedValue: 24700000,
+    floodRisk: "Low",
+    opportunityScore: 87,
+    developmentPressure: 71,
+    infrastructureReadiness: 91,
+    taxOpportunity: 83,
+    nearbyPermits: 11,
+    redevelopmentPotential: 74,
+    geometry: {
+      spatialReference: { wkid: 4326 },
+      centroid: [-80.5204, 35.2459],
+      rings: [
+        [
+          [-80.5324, 35.2414],
+          [-80.5156, 35.2399],
+          [-80.5088, 35.2498],
+          [-80.5268, 35.2541],
+          [-80.5324, 35.2414],
+        ],
+      ],
+    },
+  },
+  {
+    parcelId: "CAB-448-6670",
+    address: "Mount Pleasant Town Center",
+    ownerType: "Private",
+    zoning: "TC Town Center",
+    acreage: 8.9,
+    assessedValue: 6800000,
+    floodRisk: "Severe",
+    opportunityScore: 68,
+    developmentPressure: 59,
+    infrastructureReadiness: 61,
+    taxOpportunity: 49,
+    nearbyPermits: 4,
+    redevelopmentPotential: 69,
+    geometry: {
+      spatialReference: { wkid: 4326 },
+      centroid: [-80.4328, 35.4037],
+      rings: [
+        [
+          [-80.4377, 35.4009],
+          [-80.4287, 35.3998],
+          [-80.4261, 35.4061],
+          [-80.4349, 35.4084],
+          [-80.4377, 35.4009],
+        ],
+      ],
+    },
+  },
+];
+
+export function getParcelById(parcelId: string) {
+  return mockParcels.find((parcel) => parcel.parcelId === parcelId);
+}
