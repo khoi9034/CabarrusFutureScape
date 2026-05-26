@@ -1,0 +1,102 @@
+:root {
+  --background: #060b12;
+  --foreground: #edf4ff;
+  --panel: rgba(18, 25, 36, 0.76);
+  --panel-strong: rgba(15, 21, 31, 0.94);
+  --graphite: #171b23;
+  --gold: #d8b86a;
+  --cyan: #68d8ff;
+  --green: #55d38f;
+  --danger: #ff6b6b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(216, 184, 106, 0.13), transparent 28rem),
+    radial-gradient(circle at 82% 18%, rgba(104, 216, 255, 0.1), transparent 30rem),
+    linear-gradient(135deg, #050911 0%, #081320 44%, #0b0f17 100%);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: rgba(216, 184, 106, 0.35);
+  color: #fff8df;
+}
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(22, 30, 43, 0.84), rgba(10, 15, 24, 0.72));
+  border: 1px solid rgba(161, 184, 211, 0.16);
+  box-shadow:
+    0 22px 80px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(18px);
+}
+
+.gold-line {
+  background: linear-gradient(90deg, transparent, rgba(216, 184, 106, 0.95), transparent);
+}
+
+.scene-mask {
+  background:
+    linear-gradient(90deg, rgba(4, 8, 14, 0.8), transparent 18%, transparent 82%, rgba(4, 8, 14, 0.72)),
+    linear-gradient(180deg, rgba(4, 8, 14, 0.7), transparent 24%, transparent 76%, rgba(4, 8, 14, 0.82));
+  mix-blend-mode: normal;
+}
+
+.map-scanline {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 100% 32px;
+}
+
+.metric-grid {
+  background-image:
+    linear-gradient(rgba(104, 216, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(104, 216, 255, 0.07) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.esri-view {
+  --calcite-ui-brand: var(--gold);
+  --calcite-ui-brand-hover: #f0cd79;
+  background: #050911;
+}
+
+.esri-view .esri-view-surface:focus::after {
+  outline: none;
+}
