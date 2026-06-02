@@ -1,0 +1,122 @@
+{
+  "endpoint_implemented": "GET /parcels/governance-warnings",
+  "status": "implemented_and_verified",
+  "source_tables": [
+    "public.parcels_enriched",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "warning_categories_supported": [
+    "jurisdiction_code_semantics_review",
+    "review_sliver_overlap",
+    "review_multi_jurisdiction",
+    "review_low_confidence",
+    "review_near_tie",
+    "no_zoning_match",
+    "safe_for_dashboard"
+  ],
+  "filters_supported": [
+    "warning_category",
+    "zoning_jurisdiction",
+    "zoning_category",
+    "parcel_quality_status",
+    "zoning_confidence",
+    "safe_for_dashboard",
+    "limit",
+    "offset"
+  ],
+  "default_behavior": "No filters returns parcels in the governance review scope where safe_for_dashboard is false.",
+  "pagination": {
+    "default_limit": 20,
+    "max_limit": 100,
+    "limit_behavior": "Values above 100 are clamped to 100.",
+    "offset_supported": true
+  },
+  "response_fields": [
+    "filters_applied",
+    "limit",
+    "offset",
+    "total_count",
+    "warning_summary",
+    "results"
+  ],
+  "result_fields": [
+    "official_parcel_id",
+    "pin14",
+    "subdivision",
+    "neighborhood",
+    "zoning_jurisdiction_name",
+    "dominant_zoning_code_raw",
+    "dominant_zoning_general_normalized",
+    "zoning_assignment_confidence",
+    "parcel_quality_status",
+    "valuation_band",
+    "safe_for_dashboard",
+    "governance_warning_categories"
+  ],
+  "example_response": {
+    "request": "/parcels/governance-warnings",
+    "filters_applied": {
+      "default_scope": "governance_review"
+    },
+    "limit": 20,
+    "offset": 0,
+    "total_count": 35236,
+    "top_warning_summary": [
+      {
+        "warning_category": "jurisdiction_code_semantics_review",
+        "parcel_count": 23793,
+        "percentage": 67.5247
+      },
+      {
+        "warning_category": "review_sliver_overlap",
+        "parcel_count": 13962,
+        "percentage": 39.6242
+      },
+      {
+        "warning_category": "review_multi_jurisdiction",
+        "parcel_count": 4441,
+        "percentage": 12.6036
+      }
+    ],
+    "sample_result": {
+      "official_parcel_id": "CFS-PARCEL-0149720369",
+      "pin14": "132 109",
+      "subdivision": "ROWAN COUNTY PARCEL",
+      "neighborhood": "ROWAN COUNTY PARCEL",
+      "zoning_jurisdiction_name": null,
+      "dominant_zoning_code_raw": null,
+      "dominant_zoning_general_normalized": null,
+      "zoning_assignment_confidence": "no_match",
+      "parcel_quality_status": "review",
+      "valuation_band": "unknown",
+      "safe_for_dashboard": false,
+      "governance_warning_categories": [
+        "no_zoning_match"
+      ]
+    }
+  },
+  "verification": {
+    "compile": "python -m compileall app passed",
+    "tests": "python -m pytest passed: 40 passed, 1 warning",
+    "live_health_database": "GET /health/database returned connected",
+    "live_global_warning_check": "GET /parcels/governance-warnings returned HTTP 200 with 35236 review parcels",
+    "live_warning_category_filter_check": "GET /parcels/governance-warnings?warning_category=review_low_confidence returned HTTP 200 with 831 parcels",
+    "live_jurisdiction_filter_check": "GET /parcels/governance-warnings?zoning_jurisdiction=Concord returned HTTP 200 with 22743 review parcels",
+    "live_safe_dashboard_filter_check": "GET /parcels/governance-warnings?safe_for_dashboard=true returned HTTP 200 with 74781 parcels",
+    "live_empty_result_check": "GET /parcels/governance-warnings?warning_category=NO_SUCH_WARNING returned HTTP 200 with zero results",
+    "live_limit_clamp_check": "GET /parcels/governance-warnings?limit=999 returned limit 100 and 100 results",
+    "openapi_check": "OpenAPI includes /parcels/governance-warnings"
+  },
+  "parcel_api_completion_status": {
+    "completed_endpoints": [
+      "GET /parcels/{official_parcel_id}",
+      "GET /parcels/search",
+      "GET /parcels/filter",
+      "GET /parcels/statistics",
+      "GET /parcels/zoning-summary",
+      "GET /parcels/governance-warnings"
+    ],
+    "assessment": "The core Parcel Intelligence backend endpoint set is complete for detail, discovery, filtering, aggregate statistics, zoning summaries, and governance warning review."
+  }
+}

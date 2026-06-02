@@ -13,6 +13,7 @@ export interface DashboardSearchRequest {
 
 export interface DashboardSearchServiceAdapter {
   searchCommands: (request: DashboardSearchRequest) => SearchResult[];
+  searchDatasets: (request: DashboardSearchRequest) => SearchResult[];
   searchLayers: (request: DashboardSearchRequest) => SearchResult[];
   searchParcels: (request: DashboardSearchRequest) => SearchResult[];
   searchPlaces: (request: DashboardSearchRequest) => SearchResult[];
@@ -30,6 +31,11 @@ export const mockDashboardSearchServiceAdapter: DashboardSearchServiceAdapter = 
   searchLayers: (request) =>
     searchCommandItems(getCommandRegistry(), request.query, {
       categories: ["layer"],
+      limit: request.limit,
+    }),
+  searchDatasets: (request) =>
+    searchCommandItems(getCommandRegistry(), request.query, {
+      categories: ["dataset"],
       limit: request.limit,
     }),
   searchParcels: (request) =>

@@ -1,0 +1,17 @@
+permit_type,permit_count,permit_percentage
+new_construction,28278,43.8922
+other,12076,18.7440
+remodel,6056,9.3999
+addition_residential,4609,7.1539
+extra_feature,4370,6.7830
+commercial_new_construction,3914,6.0752
+upfit,2502,3.8835
+demolition,987,1.5320
+out_building,836,1.2976
+residential_manufactored_home,373,0.5790
+commercial_addition,125,0.1940
+residential_modular,125,0.1940
+comm_extra_features,121,0.1878
+moved_structure,45,0.0698
+,8,0.0124
+personal_property,1,0.0016

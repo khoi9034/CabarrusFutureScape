@@ -1,0 +1,5024 @@
+{
+  "generated_at": "2026-05-31T01:55:39",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "permit_table": "public.real_property_permit_clean",
+    "parcel_table": "public.parcels_enriched",
+    "zoning_table": "public.parcel_zoning_overlay_v2",
+    "zoning_qa_table": "public.parcel_zoning_intelligence_qa",
+    "relationship_table": "public.real_property_permit_parcel_relationship"
+  },
+  "match_summary": {
+    "total_permit_records": 64426,
+    "relationship_row_count": 67277,
+    "permits_matched_to_parcels": 64231,
+    "permits_unmatched": 195,
+    "multiple_parcel_match_permit_count": 2427,
+    "match_rate_pct": 99.6973,
+    "unmatched_rate_pct": 0.3027
+  },
+  "method_counts": {
+    "exact_match_count": 64231,
+    "normalized_match_count": 0,
+    "no_match_count": 195
+  },
+  "relationship_confidence_distribution": [
+    {
+      "relationship_confidence": "high",
+      "permit_count": 61804,
+      "relationship_row_count": 61804,
+      "permit_percentage": 95.9302
+    },
+    {
+      "relationship_confidence": "low",
+      "permit_count": 2427,
+      "relationship_row_count": 5278,
+      "permit_percentage": 3.7671
+    },
+    {
+      "relationship_confidence": "no_match",
+      "permit_count": 195,
+      "relationship_row_count": 195,
+      "permit_percentage": 0.3027
+    }
+  ],
+  "relationship_method_distribution": [
+    {
+      "relationship_method": "exact_pin14",
+      "permit_count": 64231,
+      "relationship_row_count": 67082,
+      "permit_percentage": 99.6973
+    },
+    {
+      "relationship_method": "no_match",
+      "permit_count": 195,
+      "relationship_row_count": 195,
+      "permit_percentage": 0.3027
+    }
+  ],
+  "duplicate_parcel_permit_counts": {
+    "parcels_with_multiple_permits": 11383,
+    "max_permits_on_single_parcel": 286,
+    "avg_permits_per_multi_permit_parcel": 3.074
+  },
+  "top_parcels_by_permit_count": [
+    {
+      "official_parcel_id": "CFS-PARCEL-0149726579",
+      "pin14": "45896367300000",
+      "permit_count": 286,
+      "first_permit_date": "2000-08-02",
+      "latest_permit_date": "2025-10-22",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "C-2",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "review",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "extreme_large",
+      "total_permit_amount": 61926619.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149808150",
+      "pin14": "56213814220000",
+      "permit_count": 170,
+      "first_permit_date": "2008-02-01",
+      "latest_permit_date": "2025-12-12",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "PID",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "review",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 154499165.69
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149752131",
+      "pin14": "55091820390000",
+      "permit_count": 127,
+      "first_permit_date": "2014-05-12",
+      "latest_permit_date": "2025-11-04",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "O-I-CD",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "review",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 31860549.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149728135",
+      "pin14": "45998437730000",
+      "permit_count": 102,
+      "first_permit_date": "2005-02-01",
+      "latest_permit_date": "2025-11-25",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "RV",
+      "dominant_zoning_general_normalized": "residential",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 1034740.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149729262",
+      "pin14": "45999433330000",
+      "permit_count": 69,
+      "first_permit_date": "2004-05-01",
+      "latest_permit_date": "2025-11-13",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "RV",
+      "dominant_zoning_general_normalized": "residential",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 259917.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149789146",
+      "pin14": "56102182090000",
+      "permit_count": 62,
+      "first_permit_date": "2022-05-12",
+      "latest_permit_date": "2025-10-02",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "I-2",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "extreme_large",
+      "total_permit_amount": 775168452.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149783110",
+      "pin14": "56010135370000",
+      "permit_count": 61,
+      "first_permit_date": "2008-04-01",
+      "latest_permit_date": "2025-11-12",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "CD",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 10384365.44
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149736835",
+      "pin14": "46705588120000",
+      "permit_count": 55,
+      "first_permit_date": "2009-08-01",
+      "latest_permit_date": "2025-01-16",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "C-2",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "estate",
+      "total_permit_amount": 3754318.1
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149784413",
+      "pin14": "56017349760000",
+      "permit_count": 49,
+      "first_permit_date": "2006-08-01",
+      "latest_permit_date": "2025-08-20",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "I-2",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 10477711.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727441",
+      "pin14": "45988876150000",
+      "permit_count": 47,
+      "first_permit_date": "2003-11-01",
+      "latest_permit_date": "2025-03-14",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "PID",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "review",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "extreme_large",
+      "total_permit_amount": 5557192.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727442",
+      "pin14": "45988876150000",
+      "permit_count": 47,
+      "first_permit_date": "2003-11-01",
+      "latest_permit_date": "2025-03-14",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "PID",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "review",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "extreme_large",
+      "total_permit_amount": 5557192.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149780354",
+      "pin14": "55385984190000",
+      "permit_count": 45,
+      "first_permit_date": "2007-03-01",
+      "latest_permit_date": "2023-11-22",
+      "zoning_jurisdiction_name": "Cabarrus County / Unincorporated",
+      "dominant_zoning_code_raw": "MDR",
+      "dominant_zoning_general_normalized": "residential",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "luxury",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 164773.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149773228",
+      "pin14": "55435780680000",
+      "permit_count": 45,
+      "first_permit_date": "2010-06-15",
+      "latest_permit_date": "2021-10-14",
+      "zoning_jurisdiction_name": "Cabarrus County / Unincorporated",
+      "dominant_zoning_code_raw": "GI",
+      "dominant_zoning_general_normalized": "industrial",
+      "parcel_quality_status": "review",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "extreme_large",
+      "total_permit_amount": 20566707.72
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149771633",
+      "pin14": "55392445840000",
+      "permit_count": 42,
+      "first_permit_date": "2008-06-01",
+      "latest_permit_date": "2021-09-27",
+      "zoning_jurisdiction_name": "Cabarrus County / Unincorporated",
+      "dominant_zoning_code_raw": "MDR",
+      "dominant_zoning_general_normalized": "residential",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "luxury",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 62500.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149781836",
+      "pin14": "56003687430000",
+      "permit_count": 42,
+      "first_permit_date": "2015-04-02",
+      "latest_permit_date": "2016-09-09",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "C-1",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 24143540.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749102",
+      "pin14": "55078596960000",
+      "permit_count": 40,
+      "first_permit_date": "2017-02-22",
+      "latest_permit_date": "2025-12-12",
+      "zoning_jurisdiction_name": "Harrisburg",
+      "dominant_zoning_code_raw": "CZ-GC",
+      "dominant_zoning_general_normalized": "commercial",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 9904118.81
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149811661",
+      "pin14": "56224522260000",
+      "permit_count": 39,
+      "first_permit_date": "2022-07-29",
+      "latest_permit_date": "2024-06-06",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "R18-CZ",
+      "dominant_zoning_general_normalized": "residential",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 25987394.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149741775",
+      "pin14": "46919268030000",
+      "permit_count": 39,
+      "first_permit_date": "2018-06-04",
+      "latest_permit_date": "2021-01-06",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "CD-R-CZ",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 13574065.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149807384",
+      "pin14": "56212942100000",
+      "permit_count": 38,
+      "first_permit_date": "2009-09-01",
+      "latest_permit_date": "2025-10-13",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "C-2",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 349360.97
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149752474",
+      "pin14": "55093259870000",
+      "permit_count": 36,
+      "first_permit_date": "2007-04-01",
+      "latest_permit_date": "2025-05-29",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "C-2",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "luxury",
+      "parcel_size_category": "estate",
+      "total_permit_amount": 624140.45
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149803800",
+      "pin14": "56202933410000",
+      "permit_count": 35,
+      "first_permit_date": "2008-06-01",
+      "latest_permit_date": "2025-07-01",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "PUD",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 3627585.01
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149734611",
+      "pin14": "45892767620000",
+      "permit_count": 34,
+      "first_permit_date": "2022-11-09",
+      "latest_permit_date": "2025-12-08",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "PUD",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "estate",
+      "total_permit_amount": 46049867.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149728128",
+      "pin14": "45996917900000",
+      "permit_count": 34,
+      "first_permit_date": "2021-08-25",
+      "latest_permit_date": "2025-02-19",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "I-1",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "trusted",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "estate",
+      "total_permit_amount": 8485701.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149781903",
+      "pin14": "56004930300000",
+      "permit_count": 32,
+      "first_permit_date": "2005-12-01",
+      "latest_permit_date": "2025-05-29",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "C-2",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "review",
+      "valuation_band": "ultra_high",
+      "parcel_size_category": "estate",
+      "total_permit_amount": 2363319.0
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149751728",
+      "pin14": "55092173920000",
+      "permit_count": 32,
+      "first_permit_date": "2021-05-28",
+      "latest_permit_date": "2022-07-15",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "C-2",
+      "dominant_zoning_general_normalized": "unknown",
+      "parcel_quality_status": "review",
+      "valuation_band": "unknown",
+      "parcel_size_category": "commercial_large",
+      "total_permit_amount": 27707210.0
+    }
+  ],
+  "permits_by_year_month": [
+    {
+      "activity_year": 1986,
+      "activity_month": 12,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 1989,
+      "activity_month": 9,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 1991,
+      "activity_month": 4,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 1998,
+      "activity_month": 11,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 1999,
+      "activity_month": 5,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2000,
+      "activity_month": 2,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 96790.0
+    },
+    {
+      "activity_year": 2000,
+      "activity_month": 4,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2000,
+      "activity_month": 8,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 38000.0
+    },
+    {
+      "activity_year": 2000,
+      "activity_month": 9,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2000,
+      "activity_month": 11,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 100.0
+    },
+    {
+      "activity_year": 2001,
+      "activity_month": 1,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2001,
+      "activity_month": 4,
+      "permit_count": 2,
+      "parcel_count": 3,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 6000.0
+    },
+    {
+      "activity_year": 2001,
+      "activity_month": 6,
+      "permit_count": 2,
+      "parcel_count": 2,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2001,
+      "activity_month": 7,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 5000.0
+    },
+    {
+      "activity_year": 2001,
+      "activity_month": 8,
+      "permit_count": 2,
+      "parcel_count": 2,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 201000.0
+    },
+    {
+      "activity_year": 2001,
+      "activity_month": 9,
+      "permit_count": 2,
+      "parcel_count": 2,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 155101.0
+    },
+    {
+      "activity_year": 2001,
+      "activity_month": 12,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 1,
+      "permit_count": 2,
+      "parcel_count": 2,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 2000.0
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 2,
+      "permit_count": 2,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 3,
+      "permit_count": 3,
+      "parcel_count": 3,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 237078.0
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 4,
+      "permit_count": 3,
+      "parcel_count": 3,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 83835.0
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 5,
+      "permit_count": 4,
+      "parcel_count": 6,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 900000.0
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 6,
+      "permit_count": 2,
+      "parcel_count": 2,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 7,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 8,
+      "permit_count": 7,
+      "parcel_count": 7,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 246000.0
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 9,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 11,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 139000.0
+    },
+    {
+      "activity_year": 2002,
+      "activity_month": 12,
+      "permit_count": 1,
+      "parcel_count": 1,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 1,
+      "permit_count": 3,
+      "parcel_count": 3,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 2,
+      "permit_count": 2,
+      "parcel_count": 2,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 3,
+      "permit_count": 2,
+      "parcel_count": 2,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 4,
+      "permit_count": 257,
+      "parcel_count": 259,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 5,
+      "permit_count": 219,
+      "parcel_count": 218,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 6,
+      "permit_count": 221,
+      "parcel_count": 225,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 7,
+      "permit_count": 195,
+      "parcel_count": 198,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 8,
+      "permit_count": 219,
+      "parcel_count": 222,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 9,
+      "permit_count": 210,
+      "parcel_count": 195,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 10,
+      "permit_count": 185,
+      "parcel_count": 182,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 11,
+      "permit_count": 170,
+      "parcel_count": 163,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2003,
+      "activity_month": 12,
+      "permit_count": 181,
+      "parcel_count": 180,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 1,
+      "permit_count": 169,
+      "parcel_count": 169,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 2,
+      "permit_count": 184,
+      "parcel_count": 187,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 3,
+      "permit_count": 263,
+      "parcel_count": 271,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 4,
+      "permit_count": 199,
+      "parcel_count": 200,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 5,
+      "permit_count": 177,
+      "parcel_count": 175,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 6,
+      "permit_count": 207,
+      "parcel_count": 215,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 7,
+      "permit_count": 138,
+      "parcel_count": 140,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 8,
+      "permit_count": 183,
+      "parcel_count": 186,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 9,
+      "permit_count": 171,
+      "parcel_count": 175,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 10,
+      "permit_count": 144,
+      "parcel_count": 142,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 11,
+      "permit_count": 31,
+      "parcel_count": 32,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2004,
+      "activity_month": 12,
+      "permit_count": 113,
+      "parcel_count": 116,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 1,
+      "permit_count": 114,
+      "parcel_count": 116,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 2,
+      "permit_count": 136,
+      "parcel_count": 135,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 3,
+      "permit_count": 135,
+      "parcel_count": 137,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 2,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 4,
+      "permit_count": 140,
+      "parcel_count": 141,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 5,
+      "permit_count": 81,
+      "parcel_count": 81,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 6,
+      "permit_count": 77,
+      "parcel_count": 75,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 7,
+      "permit_count": 58,
+      "parcel_count": 65,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 8,
+      "permit_count": 42,
+      "parcel_count": 41,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 2,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 9,
+      "permit_count": 15,
+      "parcel_count": 16,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 10,
+      "permit_count": 17,
+      "parcel_count": 19,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 11,
+      "permit_count": 15,
+      "parcel_count": 13,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2005,
+      "activity_month": 12,
+      "permit_count": 32,
+      "parcel_count": 33,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 1,
+      "permit_count": 27,
+      "parcel_count": 29,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 2,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 2,
+      "permit_count": 21,
+      "parcel_count": 23,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 3,
+      "permit_count": 29,
+      "parcel_count": 29,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 4,
+      "permit_count": 41,
+      "parcel_count": 38,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 5,
+      "permit_count": 52,
+      "parcel_count": 54,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 6,
+      "permit_count": 58,
+      "parcel_count": 59,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 2,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 7,
+      "permit_count": 109,
+      "parcel_count": 112,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 8,
+      "permit_count": 155,
+      "parcel_count": 151,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 9,
+      "permit_count": 165,
+      "parcel_count": 169,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 10,
+      "permit_count": 284,
+      "parcel_count": 285,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 11,
+      "permit_count": 214,
+      "parcel_count": 223,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2006,
+      "activity_month": 12,
+      "permit_count": 241,
+      "parcel_count": 242,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 1,
+      "permit_count": 304,
+      "parcel_count": 314,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 2,
+      "permit_count": 304,
+      "parcel_count": 304,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 3,
+      "permit_count": 339,
+      "parcel_count": 340,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 4,
+      "permit_count": 208,
+      "parcel_count": 209,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 5,
+      "permit_count": 350,
+      "parcel_count": 356,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 6,
+      "permit_count": 290,
+      "parcel_count": 285,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 7,
+      "permit_count": 277,
+      "parcel_count": 272,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 8,
+      "permit_count": 320,
+      "parcel_count": 318,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 9,
+      "permit_count": 229,
+      "parcel_count": 231,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 10,
+      "permit_count": 229,
+      "parcel_count": 230,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 11,
+      "permit_count": 200,
+      "parcel_count": 199,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2007,
+      "activity_month": 12,
+      "permit_count": 122,
+      "parcel_count": 124,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 1,
+      "permit_count": 184,
+      "parcel_count": 187,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 2,
+      "permit_count": 241,
+      "parcel_count": 231,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 3,
+      "permit_count": 194,
+      "parcel_count": 189,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 4,
+      "permit_count": 263,
+      "parcel_count": 254,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 5,
+      "permit_count": 207,
+      "parcel_count": 212,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 6,
+      "permit_count": 237,
+      "parcel_count": 225,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 3500.0
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 7,
+      "permit_count": 234,
+      "parcel_count": 229,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 8,
+      "permit_count": 175,
+      "parcel_count": 176,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 9,
+      "permit_count": 184,
+      "parcel_count": 170,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 10,
+      "permit_count": 165,
+      "parcel_count": 158,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 11,
+      "permit_count": 68,
+      "parcel_count": 67,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 2,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2008,
+      "activity_month": 12,
+      "permit_count": 91,
+      "parcel_count": 84,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 1,
+      "permit_count": 100,
+      "parcel_count": 95,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 40000.0
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 2,
+      "permit_count": 100,
+      "parcel_count": 89,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 100.0
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 3,
+      "permit_count": 135,
+      "parcel_count": 124,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 4,
+      "permit_count": 132,
+      "parcel_count": 121,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 80500.0
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 5,
+      "permit_count": 173,
+      "parcel_count": 148,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 6,
+      "permit_count": 184,
+      "parcel_count": 162,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 2,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 7,
+      "permit_count": 204,
+      "parcel_count": 190,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 8,
+      "permit_count": 141,
+      "parcel_count": 120,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 9,
+      "permit_count": 181,
+      "parcel_count": 149,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 10,
+      "permit_count": 166,
+      "parcel_count": 152,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 11,
+      "permit_count": 126,
+      "parcel_count": 109,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 2,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2009,
+      "activity_month": 12,
+      "permit_count": 48,
+      "parcel_count": 51,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 45000.0
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 1,
+      "permit_count": 107,
+      "parcel_count": 115,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 2,
+      "permit_count": 114,
+      "parcel_count": 115,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 3,
+      "permit_count": 129,
+      "parcel_count": 131,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 4,
+      "permit_count": 143,
+      "parcel_count": 140,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 5,
+      "permit_count": 144,
+      "parcel_count": 138,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 2,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 6,
+      "permit_count": 143,
+      "parcel_count": 138,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 7,
+      "permit_count": 154,
+      "parcel_count": 153,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 117000.0
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 8,
+      "permit_count": 126,
+      "parcel_count": 121,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 478820.0
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 9,
+      "permit_count": 114,
+      "parcel_count": 115,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 10,
+      "permit_count": 89,
+      "parcel_count": 85,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 11,
+      "permit_count": 123,
+      "parcel_count": 118,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 170500.0
+    },
+    {
+      "activity_year": 2010,
+      "activity_month": 12,
+      "permit_count": 109,
+      "parcel_count": 107,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 1,
+      "permit_count": 91,
+      "parcel_count": 92,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 2,
+      "permit_count": 108,
+      "parcel_count": 106,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 3,
+      "permit_count": 142,
+      "parcel_count": 140,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 4,
+      "permit_count": 150,
+      "parcel_count": 141,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 41000.0
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 5,
+      "permit_count": 146,
+      "parcel_count": 148,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 74000.0
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 6,
+      "permit_count": 156,
+      "parcel_count": 145,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 7,
+      "permit_count": 164,
+      "parcel_count": 145,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 8,
+      "permit_count": 163,
+      "parcel_count": 156,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 9,
+      "permit_count": 156,
+      "parcel_count": 154,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 10,
+      "permit_count": 133,
+      "parcel_count": 132,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 11,
+      "permit_count": 138,
+      "parcel_count": 120,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 4200.0
+    },
+    {
+      "activity_year": 2011,
+      "activity_month": 12,
+      "permit_count": 116,
+      "parcel_count": 113,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 1,
+      "permit_count": 132,
+      "parcel_count": 123,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 12,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 2,
+      "permit_count": 133,
+      "parcel_count": 134,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 82000.0
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 3,
+      "permit_count": 148,
+      "parcel_count": 140,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 3745185.0
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 4,
+      "permit_count": 160,
+      "parcel_count": 159,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 5,
+      "permit_count": 176,
+      "parcel_count": 175,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 6,
+      "permit_count": 159,
+      "parcel_count": 160,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 7,
+      "permit_count": 182,
+      "parcel_count": 152,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 26,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 961500.0
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 8,
+      "permit_count": 164,
+      "parcel_count": 165,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 9,
+      "permit_count": 145,
+      "parcel_count": 137,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 10,
+      "permit_count": 143,
+      "parcel_count": 140,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 11,
+      "permit_count": 124,
+      "parcel_count": 128,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2012,
+      "activity_month": 12,
+      "permit_count": 140,
+      "parcel_count": 139,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 1000.0
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 1,
+      "permit_count": 150,
+      "parcel_count": 133,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 16500.0
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 2,
+      "permit_count": 162,
+      "parcel_count": 162,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 22950.0
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 3,
+      "permit_count": 189,
+      "parcel_count": 185,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 2922168.0
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 4,
+      "permit_count": 178,
+      "parcel_count": 180,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 40864.06
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 5,
+      "permit_count": 200,
+      "parcel_count": 201,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 6,
+      "permit_count": 172,
+      "parcel_count": 168,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 12046847.3
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 7,
+      "permit_count": 179,
+      "parcel_count": 179,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 54800.0
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 8,
+      "permit_count": 188,
+      "parcel_count": 187,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 9,
+      "permit_count": 140,
+      "parcel_count": 137,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 2,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": null
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 10,
+      "permit_count": 179,
+      "parcel_count": 173,
+      "unmatched_permit_count": 5,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 250174.0
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 11,
+      "permit_count": 152,
+      "parcel_count": 155,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 237802.7
+    },
+    {
+      "activity_year": 2013,
+      "activity_month": 12,
+      "permit_count": 179,
+      "parcel_count": 161,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 726469.0
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 1,
+      "permit_count": 185,
+      "parcel_count": 161,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 216705.0
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 2,
+      "permit_count": 150,
+      "parcel_count": 140,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 273956.0
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 3,
+      "permit_count": 279,
+      "parcel_count": 272,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 22882217.44
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 4,
+      "permit_count": 240,
+      "parcel_count": 230,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 31590716.5
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 5,
+      "permit_count": 268,
+      "parcel_count": 259,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 18,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 38475215.0
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 6,
+      "permit_count": 224,
+      "parcel_count": 214,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 27214600.0
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 7,
+      "permit_count": 271,
+      "parcel_count": 260,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 15,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 72172382.65
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 8,
+      "permit_count": 246,
+      "parcel_count": 240,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 21865448.0
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 9,
+      "permit_count": 210,
+      "parcel_count": 194,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 23297175.8
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 10,
+      "permit_count": 248,
+      "parcel_count": 250,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 18,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 41681697.21
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 11,
+      "permit_count": 244,
+      "parcel_count": 234,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 24869185.3
+    },
+    {
+      "activity_year": 2014,
+      "activity_month": 12,
+      "permit_count": 222,
+      "parcel_count": 223,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 28232029.62
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 1,
+      "permit_count": 214,
+      "parcel_count": 213,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 67453289.0
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 2,
+      "permit_count": 177,
+      "parcel_count": 175,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 28889347.06
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 3,
+      "permit_count": 281,
+      "parcel_count": 286,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 50104765.0
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 4,
+      "permit_count": 295,
+      "parcel_count": 253,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 49750766.46
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 5,
+      "permit_count": 239,
+      "parcel_count": 243,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 24354969.38
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 6,
+      "permit_count": 279,
+      "parcel_count": 278,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 34332164.0
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 7,
+      "permit_count": 384,
+      "parcel_count": 377,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 15,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 66146801.61
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 8,
+      "permit_count": 288,
+      "parcel_count": 287,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 42419145.55
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 9,
+      "permit_count": 262,
+      "parcel_count": 251,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 27344448.6
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 10,
+      "permit_count": 288,
+      "parcel_count": 283,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 27457989.0
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 11,
+      "permit_count": 222,
+      "parcel_count": 213,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 30696185.24
+    },
+    {
+      "activity_year": 2015,
+      "activity_month": 12,
+      "permit_count": 212,
+      "parcel_count": 217,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 37602758.47
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 1,
+      "permit_count": 223,
+      "parcel_count": 222,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 25206748.0
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 2,
+      "permit_count": 256,
+      "parcel_count": 250,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 4,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 67985674.5
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 3,
+      "permit_count": 282,
+      "parcel_count": 281,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 15,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 43053932.16
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 4,
+      "permit_count": 333,
+      "parcel_count": 316,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 49566987.8
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 5,
+      "permit_count": 290,
+      "parcel_count": 270,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 12,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 115328627.66
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 6,
+      "permit_count": 343,
+      "parcel_count": 312,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 52580606.0
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 7,
+      "permit_count": 360,
+      "parcel_count": 372,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 49747399.62
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 8,
+      "permit_count": 280,
+      "parcel_count": 276,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 55359508.0
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 9,
+      "permit_count": 278,
+      "parcel_count": 223,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 50196260.5
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 10,
+      "permit_count": 272,
+      "parcel_count": 247,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 50381382.21
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 11,
+      "permit_count": 228,
+      "parcel_count": 223,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 37803378.4
+    },
+    {
+      "activity_year": 2016,
+      "activity_month": 12,
+      "permit_count": 165,
+      "parcel_count": 160,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 26673594.25
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 1,
+      "permit_count": 264,
+      "parcel_count": 259,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 29327630.63
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 2,
+      "permit_count": 239,
+      "parcel_count": 240,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 22633466.03
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 3,
+      "permit_count": 367,
+      "parcel_count": 334,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 27,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 50145725.68
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 4,
+      "permit_count": 283,
+      "parcel_count": 275,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 34216321.6
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 5,
+      "permit_count": 256,
+      "parcel_count": 258,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 30491049.22
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 6,
+      "permit_count": 292,
+      "parcel_count": 290,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 32987609.2
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 7,
+      "permit_count": 260,
+      "parcel_count": 252,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 32531802.26
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 8,
+      "permit_count": 292,
+      "parcel_count": 277,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 51909883.75
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 9,
+      "permit_count": 283,
+      "parcel_count": 275,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 38825029.07
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 10,
+      "permit_count": 347,
+      "parcel_count": 328,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 1,
+      "total_permit_amount": 109631027.73
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 11,
+      "permit_count": 266,
+      "parcel_count": 257,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 74650007.74
+    },
+    {
+      "activity_year": 2017,
+      "activity_month": 12,
+      "permit_count": 233,
+      "parcel_count": 228,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 49566127.96
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 1,
+      "permit_count": 267,
+      "parcel_count": 262,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 65533639.89
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 2,
+      "permit_count": 300,
+      "parcel_count": 289,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 58548114.91
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 3,
+      "permit_count": 301,
+      "parcel_count": 300,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 51541191.16
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 4,
+      "permit_count": 378,
+      "parcel_count": 361,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 54261479.73
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 5,
+      "permit_count": 322,
+      "parcel_count": 312,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 38975911.05
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 6,
+      "permit_count": 363,
+      "parcel_count": 359,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 125900468.02
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 7,
+      "permit_count": 302,
+      "parcel_count": 287,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 32660283.27
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 8,
+      "permit_count": 386,
+      "parcel_count": 312,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 72238533.67
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 9,
+      "permit_count": 247,
+      "parcel_count": 243,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 83123058.38
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 10,
+      "permit_count": 329,
+      "parcel_count": 313,
+      "unmatched_permit_count": 4,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 31893878.76
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 11,
+      "permit_count": 248,
+      "parcel_count": 254,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 62624740.57
+    },
+    {
+      "activity_year": 2018,
+      "activity_month": 12,
+      "permit_count": 150,
+      "parcel_count": 150,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 3,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 13218972.7
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 1,
+      "permit_count": 143,
+      "parcel_count": 140,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 31992312.08
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 2,
+      "permit_count": 265,
+      "parcel_count": 240,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 39006773.89
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 3,
+      "permit_count": 354,
+      "parcel_count": 357,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 48385614.28
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 4,
+      "permit_count": 428,
+      "parcel_count": 427,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 44086275.91
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 5,
+      "permit_count": 346,
+      "parcel_count": 342,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 12,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 37418234.94
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 6,
+      "permit_count": 341,
+      "parcel_count": 317,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 41944605.13
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 7,
+      "permit_count": 369,
+      "parcel_count": 368,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 40781738.67
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 8,
+      "permit_count": 390,
+      "parcel_count": 377,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 12,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 53288325.01
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 9,
+      "permit_count": 353,
+      "parcel_count": 348,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 38326432.73
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 10,
+      "permit_count": 407,
+      "parcel_count": 403,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 57767383.02
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 11,
+      "permit_count": 253,
+      "parcel_count": 238,
+      "unmatched_permit_count": 4,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 36959167.88
+    },
+    {
+      "activity_year": 2019,
+      "activity_month": 12,
+      "permit_count": 71,
+      "parcel_count": 68,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 7293871.93
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 1,
+      "permit_count": 79,
+      "parcel_count": 79,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 1,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 12111096.0
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 2,
+      "permit_count": 172,
+      "parcel_count": 176,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 5,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 18994005.0
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 3,
+      "permit_count": 305,
+      "parcel_count": 301,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 73404613.0
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 4,
+      "permit_count": 380,
+      "parcel_count": 384,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 15,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 44459021.66
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 5,
+      "permit_count": 329,
+      "parcel_count": 333,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 18,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 41656576.54
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 6,
+      "permit_count": 360,
+      "parcel_count": 363,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 18,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 67935974.77
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 7,
+      "permit_count": 441,
+      "parcel_count": 439,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 53255072.5
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 8,
+      "permit_count": 398,
+      "parcel_count": 397,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 90826771.38
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 9,
+      "permit_count": 353,
+      "parcel_count": 359,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 15,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 37398585.21
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 10,
+      "permit_count": 376,
+      "parcel_count": 365,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 44838858.28
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 11,
+      "permit_count": 293,
+      "parcel_count": 289,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 37058616.0
+    },
+    {
+      "activity_year": 2020,
+      "activity_month": 12,
+      "permit_count": 335,
+      "parcel_count": 312,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 131151317.0
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 1,
+      "permit_count": 317,
+      "parcel_count": 318,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 42953551.0
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 2,
+      "permit_count": 316,
+      "parcel_count": 322,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 20,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 45967729.24
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 3,
+      "permit_count": 485,
+      "parcel_count": 489,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 19,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 70357209.52
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 4,
+      "permit_count": 384,
+      "parcel_count": 387,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 31151197.62
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 5,
+      "permit_count": 350,
+      "parcel_count": 362,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 20,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 51162121.0
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 6,
+      "permit_count": 358,
+      "parcel_count": 344,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 15,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 75824885.28
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 7,
+      "permit_count": 359,
+      "parcel_count": 355,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 17,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 33351390.09
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 8,
+      "permit_count": 419,
+      "parcel_count": 397,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 44470096.57
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 9,
+      "permit_count": 309,
+      "parcel_count": 308,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 67806002.9
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 10,
+      "permit_count": 374,
+      "parcel_count": 377,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 42510179.15
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 11,
+      "permit_count": 326,
+      "parcel_count": 325,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 28492987.47
+    },
+    {
+      "activity_year": 2021,
+      "activity_month": 12,
+      "permit_count": 307,
+      "parcel_count": 291,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 36,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 104261699.21
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 1,
+      "permit_count": 279,
+      "parcel_count": 244,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 43378645.0
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 2,
+      "permit_count": 393,
+      "parcel_count": 356,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 40434876.64
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 3,
+      "permit_count": 345,
+      "parcel_count": 325,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 63429504.88
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 4,
+      "permit_count": 329,
+      "parcel_count": 310,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 29158142.04
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 5,
+      "permit_count": 365,
+      "parcel_count": 332,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 31795774.92
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 6,
+      "permit_count": 396,
+      "parcel_count": 387,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 18,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 193688370.79
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 7,
+      "permit_count": 444,
+      "parcel_count": 360,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 93390185.89
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 8,
+      "permit_count": 476,
+      "parcel_count": 306,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 227869506.15
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 9,
+      "permit_count": 296,
+      "parcel_count": 280,
+      "unmatched_permit_count": 6,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 49862290.72
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 10,
+      "permit_count": 351,
+      "parcel_count": 330,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 12,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 68152870.0
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 11,
+      "permit_count": 264,
+      "parcel_count": 250,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 50681674.73
+    },
+    {
+      "activity_year": 2022,
+      "activity_month": 12,
+      "permit_count": 264,
+      "parcel_count": 261,
+      "unmatched_permit_count": 9,
+      "ambiguous_permit_count": 17,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 30238084.47
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 1,
+      "permit_count": 278,
+      "parcel_count": 237,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 150256522.76
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 2,
+      "permit_count": 313,
+      "parcel_count": 288,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 63612030.23
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 3,
+      "permit_count": 305,
+      "parcel_count": 291,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 8,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 1496038154.81
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 4,
+      "permit_count": 258,
+      "parcel_count": 249,
+      "unmatched_permit_count": 6,
+      "ambiguous_permit_count": 7,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 63740228.04
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 5,
+      "permit_count": 419,
+      "parcel_count": 377,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 128566232.3
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 6,
+      "permit_count": 352,
+      "parcel_count": 351,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 27,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 110917482.05
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 7,
+      "permit_count": 294,
+      "parcel_count": 260,
+      "unmatched_permit_count": 7,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 67957849.09
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 8,
+      "permit_count": 417,
+      "parcel_count": 408,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 25,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 79609752.36
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 9,
+      "permit_count": 365,
+      "parcel_count": 352,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 95465967.0
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 10,
+      "permit_count": 403,
+      "parcel_count": 381,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 77535829.33
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 11,
+      "permit_count": 298,
+      "parcel_count": 267,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 47824790.5
+    },
+    {
+      "activity_year": 2023,
+      "activity_month": 12,
+      "permit_count": 342,
+      "parcel_count": 344,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 32,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 47001098.01
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 1,
+      "permit_count": 357,
+      "parcel_count": 325,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 48314522.64
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 2,
+      "permit_count": 360,
+      "parcel_count": 352,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 18,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 49387068.4
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 3,
+      "permit_count": 390,
+      "parcel_count": 365,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 81277087.74
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 4,
+      "permit_count": 437,
+      "parcel_count": 435,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 27,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 79871909.63
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 5,
+      "permit_count": 423,
+      "parcel_count": 366,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 80430755.55
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 6,
+      "permit_count": 284,
+      "parcel_count": 277,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 77915275.11
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 7,
+      "permit_count": 340,
+      "parcel_count": 313,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 57387459.72
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 8,
+      "permit_count": 385,
+      "parcel_count": 359,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 21,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 261942359.45
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 9,
+      "permit_count": 331,
+      "parcel_count": 324,
+      "unmatched_permit_count": 4,
+      "ambiguous_permit_count": 19,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 81965967.39
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 10,
+      "permit_count": 303,
+      "parcel_count": 300,
+      "unmatched_permit_count": 4,
+      "ambiguous_permit_count": 19,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 102054483.09
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 11,
+      "permit_count": 245,
+      "parcel_count": 242,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 16,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 64903303.64
+    },
+    {
+      "activity_year": 2024,
+      "activity_month": 12,
+      "permit_count": 313,
+      "parcel_count": 276,
+      "unmatched_permit_count": 4,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 135068870.18
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 1,
+      "permit_count": 331,
+      "parcel_count": 298,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 10,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 67864380.48
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 2,
+      "permit_count": 252,
+      "parcel_count": 251,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 15,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 39595684.47
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 3,
+      "permit_count": 349,
+      "parcel_count": 317,
+      "unmatched_permit_count": 5,
+      "ambiguous_permit_count": 17,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 90072320.01
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 4,
+      "permit_count": 332,
+      "parcel_count": 310,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 9,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 46427701.93
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 5,
+      "permit_count": 287,
+      "parcel_count": 259,
+      "unmatched_permit_count": 0,
+      "ambiguous_permit_count": 11,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 92469130.05
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 6,
+      "permit_count": 347,
+      "parcel_count": 314,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 18,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 91226265.21
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 7,
+      "permit_count": 343,
+      "parcel_count": 306,
+      "unmatched_permit_count": 3,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 59000733.52
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 8,
+      "permit_count": 283,
+      "parcel_count": 259,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 14,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 57548819.4
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 9,
+      "permit_count": 356,
+      "parcel_count": 341,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 18,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 61533274.45
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 10,
+      "permit_count": 320,
+      "parcel_count": 303,
+      "unmatched_permit_count": 4,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 64569448.28
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 11,
+      "permit_count": 226,
+      "parcel_count": 229,
+      "unmatched_permit_count": 2,
+      "ambiguous_permit_count": 13,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 39297035.11
+    },
+    {
+      "activity_year": 2025,
+      "activity_month": 12,
+      "permit_count": 216,
+      "parcel_count": 211,
+      "unmatched_permit_count": 5,
+      "ambiguous_permit_count": 6,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 26573797.84
+    },
+    {
+      "activity_year": null,
+      "activity_month": null,
+      "permit_count": 26,
+      "parcel_count": 24,
+      "unmatched_permit_count": 1,
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
+      "total_permit_amount": 249555.89
+    }
+  ],
+  "top_permit_types": [
+    {
+      "permit_type": "new_construction",
+      "permit_count": 28278,
+      "parcel_count": 27708,
+      "permit_percentage": 43.8922
+    },
+    {
+      "permit_type": "other",
+      "permit_count": 12076,
+      "parcel_count": 8578,
+      "permit_percentage": 18.744
+    },
+    {
+      "permit_type": "remodel",
+      "permit_count": 6056,
+      "parcel_count": 5476,
+      "permit_percentage": 9.3999
+    },
+    {
+      "permit_type": "addition_residential",
+      "permit_count": 4609,
+      "parcel_count": 4217,
+      "permit_percentage": 7.1539
+    },
+    {
+      "permit_type": "extra_feature",
+      "permit_count": 4370,
+      "parcel_count": 3882,
+      "permit_percentage": 6.783
+    },
+    {
+      "permit_type": "commercial_new_construction",
+      "permit_count": 3914,
+      "parcel_count": 1797,
+      "permit_percentage": 6.0752
+    },
+    {
+      "permit_type": "upfit",
+      "permit_count": 2502,
+      "parcel_count": 1224,
+      "permit_percentage": 3.8835
+    },
+    {
+      "permit_type": "demolition",
+      "permit_count": 987,
+      "parcel_count": 867,
+      "permit_percentage": 1.532
+    },
+    {
+      "permit_type": "out_building",
+      "permit_count": 836,
+      "parcel_count": 815,
+      "permit_percentage": 1.2976
+    },
+    {
+      "permit_type": "residential_manufactored_home",
+      "permit_count": 373,
+      "parcel_count": 195,
+      "permit_percentage": 0.579
+    },
+    {
+      "permit_type": "commercial_addition",
+      "permit_count": 125,
+      "parcel_count": 103,
+      "permit_percentage": 0.194
+    },
+    {
+      "permit_type": "residential_modular",
+      "permit_count": 125,
+      "parcel_count": 123,
+      "permit_percentage": 0.194
+    },
+    {
+      "permit_type": "comm_extra_features",
+      "permit_count": 121,
+      "parcel_count": 107,
+      "permit_percentage": 0.1878
+    },
+    {
+      "permit_type": "moved_structure",
+      "permit_count": 45,
+      "parcel_count": 45,
+      "permit_percentage": 0.0698
+    },
+    {
+      "permit_type": null,
+      "permit_count": 8,
+      "parcel_count": 8,
+      "permit_percentage": 0.0124
+    },
+    {
+      "permit_type": "personal_property",
+      "permit_count": 1,
+      "parcel_count": 1,
+      "permit_percentage": 0.0016
+    }
+  ],
+  "top_work_types": [
+    {
+      "work_type": null,
+      "permit_count": 49660,
+      "parcel_count": 35383,
+      "permit_percentage": 77.0807
+    },
+    {
+      "work_type": "residential_new",
+      "permit_count": 5425,
+      "parcel_count": 5356,
+      "permit_percentage": 8.4205
+    },
+    {
+      "work_type": "residential_repair",
+      "permit_count": 1916,
+      "parcel_count": 1802,
+      "permit_percentage": 2.974
+    },
+    {
+      "work_type": "residential_addition",
+      "permit_count": 1622,
+      "parcel_count": 1541,
+      "permit_percentage": 2.5176
+    },
+    {
+      "work_type": "commercial_upfit",
+      "permit_count": 1112,
+      "parcel_count": 608,
+      "permit_percentage": 1.726
+    },
+    {
+      "work_type": "residential_accessory_structure",
+      "permit_count": 1100,
+      "parcel_count": 1027,
+      "permit_percentage": 1.7074
+    },
+    {
+      "work_type": "commercial_sign",
+      "permit_count": 609,
+      "parcel_count": 480,
+      "permit_percentage": 0.9453
+    },
+    {
+      "work_type": "residential_pool",
+      "permit_count": 522,
+      "parcel_count": 515,
+      "permit_percentage": 0.8102
+    },
+    {
+      "work_type": "commercial_new",
+      "permit_count": 453,
+      "parcel_count": 245,
+      "permit_percentage": 0.7031
+    },
+    {
+      "work_type": "residential_deck",
+      "permit_count": 360,
+      "parcel_count": 360,
+      "permit_percentage": 0.5588
+    },
+    {
+      "work_type": "residential_demolition",
+      "permit_count": 200,
+      "parcel_count": 189,
+      "permit_percentage": 0.3104
+    },
+    {
+      "work_type": "residential_mobile",
+      "permit_count": 189,
+      "parcel_count": 72,
+      "permit_percentage": 0.2934
+    },
+    {
+      "work_type": "commercial_repair",
+      "permit_count": 163,
+      "parcel_count": 147,
+      "permit_percentage": 0.253
+    },
+    {
+      "work_type": "2018",
+      "permit_count": 161,
+      "parcel_count": 157,
+      "permit_percentage": 0.2499
+    },
+    {
+      "work_type": "commercial_abc_store",
+      "permit_count": 153,
+      "parcel_count": 125,
+      "permit_percentage": 0.2375
+    },
+    {
+      "work_type": "2019",
+      "permit_count": 149,
+      "parcel_count": 143,
+      "permit_percentage": 0.2313
+    },
+    {
+      "work_type": "2022",
+      "permit_count": 100,
+      "parcel_count": 101,
+      "permit_percentage": 0.1552
+    },
+    {
+      "work_type": "commercial_wall",
+      "permit_count": 100,
+      "parcel_count": 77,
+      "permit_percentage": 0.1552
+    },
+    {
+      "work_type": "commercial_demolition",
+      "permit_count": 65,
+      "parcel_count": 63,
+      "permit_percentage": 0.1009
+    },
+    {
+      "work_type": "commercial_trailer_construction",
+      "permit_count": 54,
+      "parcel_count": 42,
+      "permit_percentage": 0.0838
+    },
+    {
+      "work_type": "residential",
+      "permit_count": 40,
+      "parcel_count": 35,
+      "permit_percentage": 0.0621
+    },
+    {
+      "work_type": "commercial_shell",
+      "permit_count": 34,
+      "parcel_count": 30,
+      "permit_percentage": 0.0528
+    },
+    {
+      "work_type": "commercial_daycare",
+      "permit_count": 31,
+      "parcel_count": 28,
+      "permit_percentage": 0.0481
+    },
+    {
+      "work_type": "2023",
+      "permit_count": 29,
+      "parcel_count": 29,
+      "permit_percentage": 0.045
+    },
+    {
+      "work_type": "commercial_group_home",
+      "permit_count": 27,
+      "parcel_count": 27,
+      "permit_percentage": 0.0419
+    }
+  ],
+  "top_permit_statuses": [
+    {
+      "permit_status": null,
+      "permit_count": 45735,
+      "parcel_count": 33041,
+      "permit_percentage": 70.9884
+    },
+    {
+      "permit_status": "closed",
+      "permit_count": 8704,
+      "parcel_count": 5780,
+      "permit_percentage": 13.5101
+    },
+    {
+      "permit_status": "inspections",
+      "permit_count": 5306,
+      "parcel_count": 4694,
+      "permit_percentage": 8.2358
+    },
+    {
+      "permit_status": "issued",
+      "permit_count": 4102,
+      "parcel_count": 3760,
+      "permit_percentage": 6.367
+    },
+    {
+      "permit_status": "co_issued",
+      "permit_count": 502,
+      "parcel_count": 502,
+      "permit_percentage": 0.7792
+    },
+    {
+      "permit_status": "void",
+      "permit_count": 76,
+      "parcel_count": 77,
+      "permit_percentage": 0.118
+    },
+    {
+      "permit_status": "pending",
+      "permit_count": 1,
+      "parcel_count": 1,
+      "permit_percentage": 0.0016
+    }
+  ],
+  "permits_by_zoning_jurisdiction": [
+    {
+      "zoning_jurisdiction_name": "Concord",
+      "permit_count": 30620,
+      "parcel_count": 19929,
+      "permit_percentage": 47.5274
+    },
+    {
+      "zoning_jurisdiction_name": "Cabarrus County / Unincorporated",
+      "permit_count": 11603,
+      "parcel_count": 7579,
+      "permit_percentage": 18.0098
+    },
+    {
+      "zoning_jurisdiction_name": "Kannapolis",
+      "permit_count": 11449,
+      "parcel_count": 8186,
+      "permit_percentage": 17.7708
+    },
+    {
+      "zoning_jurisdiction_name": "Harrisburg",
+      "permit_count": 7670,
+      "parcel_count": 5548,
+      "permit_percentage": 11.9051
+    },
+    {
+      "zoning_jurisdiction_name": "Midland",
+      "permit_count": 1769,
+      "parcel_count": 1435,
+      "permit_percentage": 2.7458
+    },
+    {
+      "zoning_jurisdiction_name": "Mt. Pleasant",
+      "permit_count": 752,
+      "parcel_count": 480,
+      "permit_percentage": 1.1672
+    },
+    {
+      "zoning_jurisdiction_name": "Locust",
+      "permit_count": 372,
+      "parcel_count": 316,
+      "permit_percentage": 0.5774
+    },
+    {
+      "zoning_jurisdiction_name": null,
+      "permit_count": 197,
+      "parcel_count": 1,
+      "permit_percentage": 0.3058
+    }
+  ],
+  "permits_by_zoning_category": [
+    {
+      "dominant_zoning_general_normalized": "residential",
+      "permit_count": 36370,
+      "parcel_count": 27001,
+      "permit_percentage": 56.4524
+    },
+    {
+      "dominant_zoning_general_normalized": "unknown",
+      "permit_count": 19255,
+      "parcel_count": 11797,
+      "permit_percentage": 29.887
+    },
+    {
+      "dominant_zoning_general_normalized": "agricultural",
+      "permit_count": 4601,
+      "parcel_count": 2983,
+      "permit_percentage": 7.1415
+    },
+    {
+      "dominant_zoning_general_normalized": "commercial",
+      "permit_count": 2436,
+      "parcel_count": 959,
+      "permit_percentage": 3.7811
+    },
+    {
+      "dominant_zoning_general_normalized": "mixed_use",
+      "permit_count": 658,
+      "parcel_count": 341,
+      "permit_percentage": 1.0213
+    },
+    {
+      "dominant_zoning_general_normalized": "office",
+      "permit_count": 498,
+      "parcel_count": 228,
+      "permit_percentage": 0.773
+    },
+    {
+      "dominant_zoning_general_normalized": "industrial",
+      "permit_count": 422,
+      "parcel_count": 164,
+      "permit_percentage": 0.655
+    },
+    {
+      "dominant_zoning_general_normalized": null,
+      "permit_count": 197,
+      "parcel_count": 1,
+      "permit_percentage": 0.3058
+    }
+  ],
+  "co_date_outlier_summary": {
+    "relationship_rows_with_future_co_date": 1,
+    "distinct_permits_with_future_co_date": 1
+  },
+  "sample_no_match_records": [
+    {
+      "permit_id": "5476966",
+      "permit_number": "BU2025-03837",
+      "parcel_number": "56119179290000",
+      "parcel_number_normalized": "56119179290000",
+      "permit_date": "2025-12-31",
+      "activity_year": 2025,
+      "permit_code": "D",
+      "permit_type": "DEMOLITION",
+      "work_type": "Residential Demolition",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 5000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5274014",
+      "permit_number": "BU2025-03711",
+      "parcel_number": "56608362250000",
+      "parcel_number_normalized": "56608362250000",
+      "permit_date": "2025-12-12",
+      "activity_year": 2025,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "ISSUED",
+      "permit_amount": 390000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5328632",
+      "permit_number": "BU2025-03682",
+      "parcel_number": "56700432430000",
+      "parcel_number_normalized": "56700432430000",
+      "permit_date": "2025-12-12",
+      "activity_year": 2025,
+      "permit_code": "R",
+      "permit_type": "REMODEL",
+      "work_type": "Residential Repair",
+      "permit_status": "ISSUED",
+      "permit_amount": 40000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5475037",
+      "permit_number": "BU2025-03691",
+      "parcel_number": "56137592120000",
+      "parcel_number_normalized": "56137592120000",
+      "permit_date": "2025-12-12",
+      "activity_year": 2025,
+      "permit_code": "R",
+      "permit_type": "REMODEL",
+      "work_type": "Residential Repair",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 37000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5298806",
+      "permit_number": "BU2025-03608",
+      "parcel_number": "56107907530000",
+      "parcel_number_normalized": "56107907530000",
+      "permit_date": "2025-12-09",
+      "activity_year": 2025,
+      "permit_code": "O",
+      "permit_type": "OTHER",
+      "work_type": "Commercial Wall",
+      "permit_status": "CLOSED",
+      "permit_amount": 80000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5481499",
+      "permit_number": "BU2025-03574",
+      "parcel_number": "55159010090000",
+      "parcel_number_normalized": "55159010090000",
+      "permit_date": "2025-11-26",
+      "activity_year": 2025,
+      "permit_code": "O",
+      "permit_type": "OTHER",
+      "work_type": "Commercial Wall",
+      "permit_status": "CLOSED",
+      "permit_amount": 38900.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5295959",
+      "permit_number": "BU2025-03324",
+      "parcel_number": "56133267820000",
+      "parcel_number_normalized": "56133267820000",
+      "permit_date": "2025-11-03",
+      "activity_year": 2025,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 213500.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5306291",
+      "permit_number": "BU2025-03263",
+      "parcel_number": "56433773950000",
+      "parcel_number_normalized": "56433773950000",
+      "permit_date": "2025-10-28",
+      "activity_year": 2025,
+      "permit_code": "U",
+      "permit_type": "UPFIT",
+      "work_type": "Commercial Upfit",
+      "permit_status": "CLOSED",
+      "permit_amount": 18000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5252038",
+      "permit_number": "BU2025-03210",
+      "parcel_number": "55075079870000",
+      "parcel_number_normalized": "55075079870000",
+      "permit_date": "2025-10-23",
+      "activity_year": 2025,
+      "permit_code": "O",
+      "permit_type": "OTHER",
+      "work_type": "Commercial Wall",
+      "permit_status": "CLOSED",
+      "permit_amount": 5000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5286698",
+      "permit_number": "BU2025-03193",
+      "parcel_number": "56221552760000",
+      "parcel_number_normalized": "56221552760000",
+      "permit_date": "2025-10-22",
+      "activity_year": 2025,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 130000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5293585",
+      "permit_number": "BU2025-03186",
+      "parcel_number": "56223092930000",
+      "parcel_number_normalized": "56223092930000",
+      "permit_date": "2025-10-21",
+      "activity_year": 2025,
+      "permit_code": "U",
+      "permit_type": "UPFIT",
+      "work_type": "Commercial Upfit",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 1692000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5469310",
+      "permit_number": "BU2025-02949",
+      "parcel_number": "55291466340000",
+      "parcel_number_normalized": "55291466340000",
+      "permit_date": "2025-09-29",
+      "activity_year": 2025,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 76800.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5452820",
+      "permit_number": "ZNAG2025-00010",
+      "parcel_number": "46824675280000",
+      "parcel_number_normalized": "46824675280000",
+      "permit_date": "2025-09-23",
+      "activity_year": 2025,
+      "permit_code": "O",
+      "permit_type": "OTHER",
+      "work_type": null,
+      "permit_status": "CLOSED",
+      "permit_amount": null,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5286697",
+      "permit_number": "BU2025-02580",
+      "parcel_number": "56221552760000",
+      "parcel_number_normalized": "56221552760000",
+      "permit_date": "2025-08-28",
+      "activity_year": 2025,
+      "permit_code": "D",
+      "permit_type": "DEMOLITION",
+      "work_type": "Residential Demolition",
+      "permit_status": "CLOSED",
+      "permit_amount": 15000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5298804",
+      "permit_number": null,
+      "parcel_number": "56107907530000",
+      "parcel_number_normalized": "56107907530000",
+      "permit_date": "2025-07-31",
+      "activity_year": 2025,
+      "permit_code": "D",
+      "permit_type": "DEMOLITION",
+      "work_type": null,
+      "permit_status": "CLOSED",
+      "permit_amount": null,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5298805",
+      "permit_number": null,
+      "parcel_number": "56107907530000",
+      "parcel_number_normalized": "56107907530000",
+      "permit_date": "2025-07-31",
+      "activity_year": 2025,
+      "permit_code": "D",
+      "permit_type": "DEMOLITION",
+      "work_type": null,
+      "permit_status": "CLOSED",
+      "permit_amount": null,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5291020",
+      "permit_number": "BU2025-02227",
+      "parcel_number": "56503354090000",
+      "parcel_number_normalized": "56503354090000",
+      "permit_date": "2025-07-28",
+      "activity_year": 2025,
+      "permit_code": "XF",
+      "permit_type": "EXTRA FEATURE",
+      "work_type": "Residential Accessory Structure",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 15000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5273930",
+      "permit_number": "BU2025-01747",
+      "parcel_number": "55447880610000",
+      "parcel_number_normalized": "55447880610000",
+      "permit_date": "2025-06-12",
+      "activity_year": 2025,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CLOSED",
+      "permit_amount": 178419.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5082530",
+      "permit_number": "2025-01701",
+      "parcel_number": "56033040250000",
+      "parcel_number_normalized": "56033040250000",
+      "permit_date": "2025-06-06",
+      "activity_year": 2025,
+      "permit_code": "C",
+      "permit_type": "COMMERCIAL NEW CONSTRUCTION",
+      "work_type": "Commercial Trailer Construction",
+      "permit_status": "CLOSED",
+      "permit_amount": 13000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5082531",
+      "permit_number": "BU2025-01701",
+      "parcel_number": "56033040250000",
+      "parcel_number_normalized": "56033040250000",
+      "permit_date": "2025-06-06",
+      "activity_year": 2025,
+      "permit_code": "C",
+      "permit_type": "COMMERCIAL NEW CONSTRUCTION",
+      "work_type": "Commercial Trailer Construction",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 13000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5304863",
+      "permit_number": "BU2025-01256",
+      "parcel_number": "55242891230000",
+      "parcel_number_normalized": "55242891230000",
+      "permit_date": "2025-04-29",
+      "activity_year": 2025,
+      "permit_code": "O",
+      "permit_type": "OTHER",
+      "work_type": "Commercial Wall",
+      "permit_status": "CLOSED",
+      "permit_amount": 540000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5306290",
+      "permit_number": "BU2025-01142",
+      "parcel_number": "56433773950000",
+      "parcel_number_normalized": "56433773950000",
+      "permit_date": "2025-04-16",
+      "activity_year": 2025,
+      "permit_code": "O",
+      "permit_type": "OTHER",
+      "work_type": "Commercial Repair",
+      "permit_status": "CLOSED",
+      "permit_amount": 25000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5246877",
+      "permit_number": "2025-01015",
+      "parcel_number": "46820257380000",
+      "parcel_number_normalized": "46820257380000",
+      "permit_date": "2025-04-07",
+      "activity_year": 2025,
+      "permit_code": "XF",
+      "permit_type": "EXTRA FEATURE",
+      "work_type": "Residential Accessory Structure",
+      "permit_status": "CLOSED",
+      "permit_amount": 51000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5497314",
+      "permit_number": "BU2025-00913",
+      "parcel_number": "56023839820000",
+      "parcel_number_normalized": "56023839820000",
+      "permit_date": "2025-03-26",
+      "activity_year": 2025,
+      "permit_code": "C",
+      "permit_type": "COMMERCIAL NEW CONSTRUCTION",
+      "work_type": "Commercial Shell",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 1042000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    },
+    {
+      "permit_id": "5245325",
+      "permit_number": "BU2025-00895",
+      "parcel_number": "56210065920000",
+      "parcel_number_normalized": "56210065920000",
+      "permit_date": "2025-03-25",
+      "activity_year": 2025,
+      "permit_code": "D",
+      "permit_type": "DEMOLITION",
+      "work_type": "Residential Demolition",
+      "permit_status": "CLOSED",
+      "permit_amount": 15000.0,
+      "relationship_method": "no_match",
+      "relationship_confidence": "no_match",
+      "co_date_future_outlier": false
+    }
+  ],
+  "sample_ambiguous_records": [
+    {
+      "permit_id": "4890994",
+      "permit_number": "BU2024-01298",
+      "parcel_number": "56222955350000",
+      "parcel_number_normalized": "56222955350000",
+      "official_parcel_id": "CFS-PARCEL-0149811814",
+      "objectid_1": 149811814,
+      "pin14": "56222955350000",
+      "permit_date": "2024-04-02",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4890994",
+      "permit_number": "BU2024-01298",
+      "parcel_number": "56222955350000",
+      "parcel_number_normalized": "56222955350000",
+      "official_parcel_id": "CFS-PARCEL-0149811815",
+      "objectid_1": 149811815,
+      "pin14": "56222955350000",
+      "permit_date": "2024-04-02",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4890995",
+      "permit_number": "BU2024-01300",
+      "parcel_number": "56222955550000",
+      "parcel_number_normalized": "56222955550000",
+      "official_parcel_id": "CFS-PARCEL-0149811421",
+      "objectid_1": 149811421,
+      "pin14": "56222955550000",
+      "permit_date": "2024-04-02",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4890995",
+      "permit_number": "BU2024-01300",
+      "parcel_number": "56222955550000",
+      "parcel_number_normalized": "56222955550000",
+      "official_parcel_id": "CFS-PARCEL-0149811422",
+      "objectid_1": 149811422,
+      "pin14": "56222955550000",
+      "permit_date": "2024-04-02",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4890997",
+      "permit_number": "BU2024-01301",
+      "parcel_number": "56222955760000",
+      "parcel_number_normalized": "56222955760000",
+      "official_parcel_id": "CFS-PARCEL-0149819515",
+      "objectid_1": 149819515,
+      "pin14": "56222955760000",
+      "permit_date": "2024-04-02",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4890997",
+      "permit_number": "BU2024-01301",
+      "parcel_number": "56222955760000",
+      "parcel_number_normalized": "56222955760000",
+      "official_parcel_id": "CFS-PARCEL-0149819516",
+      "objectid_1": 149819516,
+      "pin14": "56222955760000",
+      "permit_date": "2024-04-02",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891004",
+      "permit_number": "BU2024-01441",
+      "parcel_number": "56222956390000",
+      "parcel_number_normalized": "56222956390000",
+      "official_parcel_id": "CFS-PARCEL-0149811517",
+      "objectid_1": 149811517,
+      "pin14": "56222956390000",
+      "permit_date": "2024-04-15",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891004",
+      "permit_number": "BU2024-01441",
+      "parcel_number": "56222956390000",
+      "parcel_number_normalized": "56222956390000",
+      "official_parcel_id": "CFS-PARCEL-0149811518",
+      "objectid_1": 149811518,
+      "pin14": "56222956390000",
+      "permit_date": "2024-04-15",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891005",
+      "permit_number": "BU2024-01440",
+      "parcel_number": "56222957610000",
+      "parcel_number_normalized": "56222957610000",
+      "official_parcel_id": "CFS-PARCEL-0149811434",
+      "objectid_1": 149811434,
+      "pin14": "56222957610000",
+      "permit_date": "2024-04-15",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891005",
+      "permit_number": "BU2024-01440",
+      "parcel_number": "56222957610000",
+      "parcel_number_normalized": "56222957610000",
+      "official_parcel_id": "CFS-PARCEL-0149811435",
+      "objectid_1": 149811435,
+      "pin14": "56222957610000",
+      "permit_date": "2024-04-15",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891006",
+      "permit_number": "BU2024-01439",
+      "parcel_number": "56222957810000",
+      "parcel_number_normalized": "56222957810000",
+      "official_parcel_id": "CFS-PARCEL-0149811423",
+      "objectid_1": 149811423,
+      "pin14": "56222957810000",
+      "permit_date": "2024-04-15",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891006",
+      "permit_number": "BU2024-01439",
+      "parcel_number": "56222957810000",
+      "parcel_number_normalized": "56222957810000",
+      "official_parcel_id": "CFS-PARCEL-0149811470",
+      "objectid_1": 149811470,
+      "pin14": "56222957810000",
+      "permit_date": "2024-04-15",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891007",
+      "permit_number": "BU2024-00393",
+      "parcel_number": "56222964020000",
+      "parcel_number_normalized": "56222964020000",
+      "official_parcel_id": "CFS-PARCEL-0149811519",
+      "objectid_1": 149811519,
+      "pin14": "56222964020000",
+      "permit_date": "2024-02-20",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891007",
+      "permit_number": "BU2024-00393",
+      "parcel_number": "56222964020000",
+      "parcel_number_normalized": "56222964020000",
+      "official_parcel_id": "CFS-PARCEL-0149811520",
+      "objectid_1": 149811520,
+      "pin14": "56222964020000",
+      "permit_date": "2024-02-20",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891008",
+      "permit_number": "BU2024-00394",
+      "parcel_number": "56222964230000",
+      "parcel_number_normalized": "56222964230000",
+      "official_parcel_id": "CFS-PARCEL-0149811471",
+      "objectid_1": 149811471,
+      "pin14": "56222964230000",
+      "permit_date": "2024-02-20",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891008",
+      "permit_number": "BU2024-00394",
+      "parcel_number": "56222964230000",
+      "parcel_number_normalized": "56222964230000",
+      "official_parcel_id": "CFS-PARCEL-0149811472",
+      "objectid_1": 149811472,
+      "pin14": "56222964230000",
+      "permit_date": "2024-02-20",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891010",
+      "permit_number": "BU2024-00395",
+      "parcel_number": "56222964440000",
+      "parcel_number_normalized": "56222964440000",
+      "official_parcel_id": "CFS-PARCEL-0149811473",
+      "objectid_1": 149811473,
+      "pin14": "56222964440000",
+      "permit_date": "2024-02-20",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891010",
+      "permit_number": "BU2024-00395",
+      "parcel_number": "56222964440000",
+      "parcel_number_normalized": "56222964440000",
+      "official_parcel_id": "CFS-PARCEL-0149811474",
+      "objectid_1": 149811474,
+      "pin14": "56222964440000",
+      "permit_date": "2024-02-20",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "INSPECTIONS",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891012",
+      "permit_number": "BU2024-00396",
+      "parcel_number": "56222964740000",
+      "parcel_number_normalized": "56222964740000",
+      "official_parcel_id": "CFS-PARCEL-0149811291",
+      "objectid_1": 149811291,
+      "pin14": "56222964740000",
+      "permit_date": "2024-02-20",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891012",
+      "permit_number": "BU2024-00396",
+      "parcel_number": "56222964740000",
+      "parcel_number_normalized": "56222964740000",
+      "official_parcel_id": "CFS-PARCEL-0149811292",
+      "objectid_1": 149811292,
+      "pin14": "56222964740000",
+      "permit_date": "2024-02-20",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891013",
+      "permit_number": "BU2024-01292",
+      "parcel_number": "56222965070000",
+      "parcel_number_normalized": "56222965070000",
+      "official_parcel_id": "CFS-PARCEL-0149811253",
+      "objectid_1": 149811253,
+      "pin14": "56222965070000",
+      "permit_date": "2024-04-02",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891013",
+      "permit_number": "BU2024-01292",
+      "parcel_number": "56222965070000",
+      "parcel_number_normalized": "56222965070000",
+      "official_parcel_id": "CFS-PARCEL-0149811254",
+      "objectid_1": 149811254,
+      "pin14": "56222965070000",
+      "permit_date": "2024-04-02",
+      "activity_year": 2024,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "CO ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891014",
+      "permit_number": "BU2023-04679",
+      "parcel_number": "56222965390000",
+      "parcel_number_normalized": "56222965390000",
+      "official_parcel_id": "CFS-PARCEL-0149811293",
+      "objectid_1": 149811293,
+      "pin14": "56222965390000",
+      "permit_date": "2023-12-29",
+      "activity_year": 2023,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891014",
+      "permit_number": "BU2023-04679",
+      "parcel_number": "56222965390000",
+      "parcel_number_normalized": "56222965390000",
+      "official_parcel_id": "CFS-PARCEL-0149811294",
+      "objectid_1": 149811294,
+      "pin14": "56222965390000",
+      "permit_date": "2023-12-29",
+      "activity_year": 2023,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    },
+    {
+      "permit_id": "4891015",
+      "permit_number": "BU2023-04680",
+      "parcel_number": "56222965680000",
+      "parcel_number_normalized": "56222965680000",
+      "official_parcel_id": "CFS-PARCEL-0149811817",
+      "objectid_1": 149811817,
+      "pin14": "56222965680000",
+      "permit_date": "2023-12-29",
+      "activity_year": 2023,
+      "permit_code": "N",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "Residential New",
+      "permit_status": "ISSUED",
+      "parcel_quality_status": "review",
+      "valuation_band": "medium",
+      "parcel_size_category": "residential_standard",
+      "zoning_jurisdiction_name": "Kannapolis",
+      "dominant_zoning_code_raw": "PD",
+      "dominant_zoning_general_normalized": "unknown",
+      "zoning_assignment_confidence": "high",
+      "governance_warning_categories": [
+        "jurisdiction_code_semantics_review"
+      ],
+      "relationship_method": "exact_pin14",
+      "relationship_confidence": "low"
+    }
+  ],
+  "index_summary": [
+    {
+      "indexname": "real_property_permit_parcel_relationship_activity_date_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_activity_date_idx ON public.real_property_permit_parcel_relationship USING btree (activity_date)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_activity_month_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_activity_month_idx ON public.real_property_permit_parcel_relationship USING btree (activity_month)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_activity_year_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_activity_year_idx ON public.real_property_permit_parcel_relationship USING btree (activity_year)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_confidence_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_confidence_idx ON public.real_property_permit_parcel_relationship USING btree (relationship_confidence)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_official_parcel_id_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_official_parcel_id_idx ON public.real_property_permit_parcel_relationship USING btree (official_parcel_id)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_parcel_number_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_parcel_number_idx ON public.real_property_permit_parcel_relationship USING btree (parcel_number)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_parcel_number_norm_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_parcel_number_norm_idx ON public.real_property_permit_parcel_relationship USING btree (parcel_number_normalized)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_permit_id_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_permit_id_idx ON public.real_property_permit_parcel_relationship USING btree (permit_id)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_permit_number_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_permit_number_idx ON public.real_property_permit_parcel_relationship USING btree (permit_number)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_permit_status_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_permit_status_idx ON public.real_property_permit_parcel_relationship USING btree (permit_status_normalized)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_permit_type_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_permit_type_idx ON public.real_property_permit_parcel_relationship USING btree (permit_type_normalized)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_pin14_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_pin14_idx ON public.real_property_permit_parcel_relationship USING btree (pin14)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_pkey",
+      "indexdef": "CREATE UNIQUE INDEX real_property_permit_parcel_relationship_pkey ON public.real_property_permit_parcel_relationship USING btree (relationship_id)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_relationship_id_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_relationship_id_idx ON public.real_property_permit_parcel_relationship USING btree (relationship_id)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_work_type_idx",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_work_type_idx ON public.real_property_permit_parcel_relationship USING btree (work_type_normalized)"
+    },
+    {
+      "indexname": "real_property_permit_parcel_relationship_zoning_jurisdiction_id",
+      "indexdef": "CREATE INDEX real_property_permit_parcel_relationship_zoning_jurisdiction_id ON public.real_property_permit_parcel_relationship USING btree (zoning_jurisdiction_name)"
+    }
+  ],
+  "outputs": {
+    "validation_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\real_property_permit_parcel_relationship_validation.json",
+    "relationship_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\real_property_permit_parcel_relationship_summary.csv",
+    "no_match_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\real_property_permit_parcel_no_match.csv",
+    "ambiguous_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\real_property_permit_parcel_ambiguous.csv",
+    "by_parcel_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\real_property_permit_by_parcel_summary.csv",
+    "by_year_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\real_property_permit_by_year_summary.csv",
+    "by_zoning_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\real_property_permit_by_zoning_summary.csv"
+  },
+  "duration_seconds": 37.77,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_real_property_permit_parcel_relationship_20260531_015515.log"
+}

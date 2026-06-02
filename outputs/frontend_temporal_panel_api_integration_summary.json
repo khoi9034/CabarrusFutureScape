@@ -1,0 +1,84 @@
+{
+  "generated_at": "2026-06-01T21:24:06-04:00",
+  "phase": "Phase 5",
+  "task": "Temporal Panel API Integration",
+  "status": "completed",
+  "feature_flag_behavior": {
+    "flag": "NEXT_PUBLIC_USE_BACKEND_API",
+    "false": "Temporal Analysis continues to use generated static temporal artifacts.",
+    "true": "Temporal Analysis requests GET /development/temporal-query through the frontend API client.",
+    "backend_failure": "Temporal Analysis falls back independently to generated static temporal artifacts."
+  },
+  "backend_endpoint_used": "GET /development/temporal-query",
+  "filters_supported": [
+    "year",
+    "month",
+    "date_start",
+    "date_end",
+    "rolling_window",
+    "permit_type",
+    "work_type",
+    "zoning_jurisdiction",
+    "zoning_category",
+    "activity_class"
+  ],
+  "files_created": [
+    "src/lib/adapters/temporalQueryAdapter.ts",
+    "src/hooks/useTemporalQuery.ts"
+  ],
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/TemporalAnalysisPanel.tsx",
+    "src/components/dashboard/TemporalFilterControls.tsx",
+    "src/components/dashboard/TemporalTrendSummary.tsx",
+    "src/components/dashboard/TemporalQueryPreview.tsx",
+    "src/data/intelligence/developmentTemporalIndex.ts",
+    "src/hooks/useTemporalAnalysisState.ts"
+  ],
+  "ui_surfaces_updated": [
+    "TemporalAnalysisPanel",
+    "TemporalFilterControls",
+    "TemporalTrendSummary",
+    "TemporalQueryPreview"
+  ],
+  "static_fallback_artifacts": [
+    "cfs-data-pipelines/outputs/development_activity_parcel_summary_validation.json",
+    "cfs-data-pipelines/outputs/development_activity_year_summary.csv",
+    "cfs-data-pipelines/outputs/development_activity_month_summary.csv",
+    "cfs-data-pipelines/outputs/development_activity_zoning_summary.csv"
+  ],
+  "static_artifact_smoke": {
+    "available_years": 32,
+    "recent_months": 36,
+    "zoning_activity_rows": 50,
+    "activity_classes": 5,
+    "min_date": "1986-12-01",
+    "max_date": "2025-12-31",
+    "activity_anchor_date": "2025-12-31"
+  },
+  "api_smoke": {
+    "year_month_request": "/development/temporal-query?year=2025&month=12&limit=3",
+    "year_month_total_count": 222,
+    "year_month_total_permits": 216,
+    "year_month_active_parcels": 211,
+    "rolling_window_request": "/development/temporal-query?rolling_window=12&limit=3",
+    "rolling_window_total_count": 3841,
+    "rolling_window_total_permits": 3664,
+    "rolling_window_active_parcels": 3091,
+    "bbox_support": "accepted by API but inactive for map extent filtering"
+  },
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "production_http_smoke": "http://127.0.0.1:3001 returned 200"
+  },
+  "remaining_static_dependencies": [
+    "Temporal option lists still come from generated static temporal artifacts.",
+    "SceneView playback and map layer filtering remain disconnected.",
+    "Command palette, reports, and event stream remain on their current static/mock pathways."
+  ],
+  "readiness": {
+    "phase_6_gis_map_intelligence": "ready for planning map-safe temporal layer visualization, parcel geometry focus, and time-filtered GIS layer behavior"
+  }
+}

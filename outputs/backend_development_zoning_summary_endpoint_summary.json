@@ -1,0 +1,93 @@
+{
+  "endpoint_implemented": "GET /development/zoning-summary",
+  "status": "implemented_and_verified",
+  "source_tables_available": [
+    "public.development_activity_zoning_summary",
+    "public.development_activity_parcel_summary",
+    "public.real_property_permit_parcel_relationship",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "source_tables_queried": [
+    "public.real_property_permit_parcel_relationship",
+    "public.development_activity_parcel_summary"
+  ],
+  "summary_fields_returned": [
+    "zoning_jurisdiction_name",
+    "dominant_zoning_code_raw",
+    "dominant_zoning_general_normalized",
+    "permit_type",
+    "work_type",
+    "permit_status",
+    "activity_year",
+    "activity_month",
+    "permit_count",
+    "active_parcel_count",
+    "total_permit_amount",
+    "avg_permit_amount",
+    "very_high_activity_parcel_count",
+    "high_activity_parcel_count",
+    "moderate_activity_parcel_count",
+    "low_activity_parcel_count"
+  ],
+  "filters_supported": [
+    "zoning_jurisdiction",
+    "zoning_category",
+    "zoning_code",
+    "permit_type",
+    "work_type",
+    "permit_status",
+    "year",
+    "month"
+  ],
+  "pagination": {
+    "default_limit": 50,
+    "maximum_limit": 100,
+    "limit_above_max_behavior": "clamped_to_100",
+    "offset_supported": true
+  },
+  "empty_result_behavior": "Filtered zoning summary requests with no matches return HTTP 200 with total_count 0 and an empty summary array.",
+  "example_response": {
+    "request": "/development/zoning-summary",
+    "total_count": 3090,
+    "top_summary_row": {
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "PUD",
+      "dominant_zoning_general_normalized": "unknown",
+      "permit_type": "NEW CONSTRUCTION",
+      "work_type": "unknown",
+      "permit_status": "unknown",
+      "activity_year": null,
+      "activity_month": null,
+      "permit_count": 1630,
+      "active_parcel_count": 1601,
+      "total_permit_amount": 173386909.88,
+      "avg_permit_amount": 151827.41670753065,
+      "very_high_activity_parcel_count": 2,
+      "high_activity_parcel_count": 49,
+      "moderate_activity_parcel_count": 1184,
+      "low_activity_parcel_count": 366
+    },
+    "concord_summary_row_count": 1101,
+    "residential_summary_row_count": 1237,
+    "new_construction_summary_row_count": 400,
+    "year_2025_summary_row_count": 828
+  },
+  "verification": {
+    "compile": "python -m compileall app passed",
+    "tests": "python -m pytest passed: 77 passed, 1 warning",
+    "live_health_database": "GET /health/database returned connected",
+    "live_global_zoning_summary_check": "GET /development/zoning-summary returned HTTP 200 with 3090 summary rows",
+    "live_jurisdiction_filter_check": "GET /development/zoning-summary?zoning_jurisdiction=Concord returned 1101 rows",
+    "live_category_filter_check": "GET /development/zoning-summary?zoning_category=residential returned 1237 rows",
+    "live_permit_type_filter_check": "GET /development/zoning-summary?permit_type=NEW%20CONSTRUCTION returned 400 rows",
+    "live_year_filter_check": "GET /development/zoning-summary?year=2025 returned 828 rows",
+    "live_limit_clamp_check": "GET /development/zoning-summary?limit=500 returned limit 100",
+    "live_empty_result_check": "GET /development/zoning-summary?permit_type=NO-SUCH-PERMIT returned HTTP 200 with zero rows",
+    "openapi_check": "OpenAPI includes /development/zoning-summary"
+  },
+  "readiness_for_next_endpoint": {
+    "next_endpoint": "GET /development/activity-summary",
+    "assessment": "Ready. The backend now exposes zoning-specific development activity summaries from real PostGIS permit-to-parcel data with zoning, permit, and time filters."
+  }
+}

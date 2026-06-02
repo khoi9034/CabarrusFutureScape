@@ -1,0 +1,130 @@
+2026-05-28 10:29:22,678 INFO Starting CFS Tax Parcels ingestion pilot.
+2026-05-28 10:29:22,679 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\ingest_tax_parcels_20260528_102922.log
+2026-05-28 10:29:22,680 INFO Fetching layer metadata: https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/46
+2026-05-28 10:29:24,512 INFO Layer metadata: name=Tax Parcels geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 10:29:27,550 INFO Source feature count: 110017
+2026-05-28 10:29:27,551 WARNING Layer metadata has no objectIdField; using OID field OBJECTID_1.
+2026-05-28 10:29:27,551 INFO Downloading features with resultOffset pagination: pageSize=1000 limit=all
+2026-05-28 10:29:28,334 INFO Downloaded 1000/110017 features
+2026-05-28 10:29:29,001 INFO Downloaded 2000/110017 features
+2026-05-28 10:29:29,573 INFO Downloaded 3000/110017 features
+2026-05-28 10:29:32,988 INFO Downloaded 4000/110017 features
+2026-05-28 10:29:33,522 INFO Downloaded 5000/110017 features
+2026-05-28 10:29:34,137 INFO Downloaded 6000/110017 features
+2026-05-28 10:29:35,028 INFO Downloaded 7000/110017 features
+2026-05-28 10:29:35,734 INFO Downloaded 8000/110017 features
+2026-05-28 10:29:36,667 INFO Downloaded 9000/110017 features
+2026-05-28 10:29:37,504 INFO Downloaded 10000/110017 features
+2026-05-28 10:29:38,102 INFO Downloaded 11000/110017 features
+2026-05-28 10:29:38,791 INFO Downloaded 12000/110017 features
+2026-05-28 10:29:39,325 INFO Downloaded 13000/110017 features
+2026-05-28 10:29:39,938 INFO Downloaded 14000/110017 features
+2026-05-28 10:29:40,615 INFO Downloaded 15000/110017 features
+2026-05-28 10:29:41,172 INFO Downloaded 16000/110017 features
+2026-05-28 10:29:41,702 INFO Downloaded 17000/110017 features
+2026-05-28 10:29:42,354 INFO Downloaded 18000/110017 features
+2026-05-28 10:29:43,090 INFO Downloaded 19000/110017 features
+2026-05-28 10:29:43,718 INFO Downloaded 20000/110017 features
+2026-05-28 10:29:44,428 INFO Downloaded 21000/110017 features
+2026-05-28 10:29:45,077 INFO Downloaded 22000/110017 features
+2026-05-28 10:29:45,801 INFO Downloaded 23000/110017 features
+2026-05-28 10:29:46,427 INFO Downloaded 24000/110017 features
+2026-05-28 10:29:47,188 INFO Downloaded 25000/110017 features
+2026-05-28 10:29:48,004 INFO Downloaded 26000/110017 features
+2026-05-28 10:29:48,703 INFO Downloaded 27000/110017 features
+2026-05-28 10:29:49,446 INFO Downloaded 28000/110017 features
+2026-05-28 10:29:50,114 INFO Downloaded 29000/110017 features
+2026-05-28 10:29:50,840 INFO Downloaded 30000/110017 features
+2026-05-28 10:29:51,624 INFO Downloaded 31000/110017 features
+2026-05-28 10:29:52,648 INFO Downloaded 32000/110017 features
+2026-05-28 10:29:53,376 INFO Downloaded 33000/110017 features
+2026-05-28 10:29:54,187 INFO Downloaded 34000/110017 features
+2026-05-28 10:29:54,855 INFO Downloaded 35000/110017 features
+2026-05-28 10:29:55,547 INFO Downloaded 36000/110017 features
+2026-05-28 10:29:56,255 INFO Downloaded 37000/110017 features
+2026-05-28 10:29:56,782 INFO Downloaded 38000/110017 features
+2026-05-28 10:29:57,506 INFO Downloaded 39000/110017 features
+2026-05-28 10:29:58,324 INFO Downloaded 40000/110017 features
+2026-05-28 10:29:59,162 INFO Downloaded 41000/110017 features
+2026-05-28 10:29:59,863 INFO Downloaded 42000/110017 features
+2026-05-28 10:30:00,549 INFO Downloaded 43000/110017 features
+2026-05-28 10:30:01,442 INFO Downloaded 44000/110017 features
+2026-05-28 10:30:02,300 INFO Downloaded 45000/110017 features
+2026-05-28 10:30:03,182 INFO Downloaded 46000/110017 features
+2026-05-28 10:30:04,086 INFO Downloaded 47000/110017 features
+2026-05-28 10:30:04,741 INFO Downloaded 48000/110017 features
+2026-05-28 10:30:05,416 INFO Downloaded 49000/110017 features
+2026-05-28 10:30:06,240 INFO Downloaded 50000/110017 features
+2026-05-28 10:30:07,006 INFO Downloaded 51000/110017 features
+2026-05-28 10:30:07,683 INFO Downloaded 52000/110017 features
+2026-05-28 10:30:09,283 INFO Downloaded 53000/110017 features
+2026-05-28 10:30:10,049 INFO Downloaded 54000/110017 features
+2026-05-28 10:30:10,777 INFO Downloaded 55000/110017 features
+2026-05-28 10:30:11,693 INFO Downloaded 56000/110017 features
+2026-05-28 10:30:12,532 INFO Downloaded 57000/110017 features
+2026-05-28 10:30:13,264 INFO Downloaded 58000/110017 features
+2026-05-28 10:30:13,983 INFO Downloaded 59000/110017 features
+2026-05-28 10:30:14,710 INFO Downloaded 60000/110017 features
+2026-05-28 10:30:15,693 INFO Downloaded 61000/110017 features
+2026-05-28 10:30:16,611 INFO Downloaded 62000/110017 features
+2026-05-28 10:30:17,473 INFO Downloaded 63000/110017 features
+2026-05-28 10:30:18,812 INFO Downloaded 64000/110017 features
+2026-05-28 10:30:19,802 INFO Downloaded 65000/110017 features
+2026-05-28 10:30:20,851 INFO Downloaded 66000/110017 features
+2026-05-28 10:30:21,837 INFO Downloaded 67000/110017 features
+2026-05-28 10:30:22,768 INFO Downloaded 68000/110017 features
+2026-05-28 10:30:23,904 INFO Downloaded 69000/110017 features
+2026-05-28 10:30:24,588 INFO Downloaded 70000/110017 features
+2026-05-28 10:30:25,511 INFO Downloaded 71000/110017 features
+2026-05-28 10:30:26,324 INFO Downloaded 72000/110017 features
+2026-05-28 10:30:27,172 INFO Downloaded 73000/110017 features
+2026-05-28 10:30:28,030 INFO Downloaded 74000/110017 features
+2026-05-28 10:30:28,779 INFO Downloaded 75000/110017 features
+2026-05-28 10:30:29,692 INFO Downloaded 76000/110017 features
+2026-05-28 10:30:30,653 INFO Downloaded 77000/110017 features
+2026-05-28 10:30:31,589 INFO Downloaded 78000/110017 features
+2026-05-28 10:30:32,490 INFO Downloaded 79000/110017 features
+2026-05-28 10:30:33,357 INFO Downloaded 80000/110017 features
+2026-05-28 10:30:34,103 INFO Downloaded 81000/110017 features
+2026-05-28 10:30:35,863 INFO Downloaded 82000/110017 features
+2026-05-28 10:30:36,741 INFO Downloaded 83000/110017 features
+2026-05-28 10:30:37,743 INFO Downloaded 84000/110017 features
+2026-05-28 10:30:38,500 INFO Downloaded 85000/110017 features
+2026-05-28 10:30:39,084 INFO Downloaded 86000/110017 features
+2026-05-28 10:30:39,782 INFO Downloaded 87000/110017 features
+2026-05-28 10:30:40,539 INFO Downloaded 88000/110017 features
+2026-05-28 10:30:41,421 INFO Downloaded 89000/110017 features
+2026-05-28 10:30:42,453 INFO Downloaded 90000/110017 features
+2026-05-28 10:30:43,510 INFO Downloaded 91000/110017 features
+2026-05-28 10:30:44,506 INFO Downloaded 92000/110017 features
+2026-05-28 10:30:45,184 INFO Downloaded 93000/110017 features
+2026-05-28 10:30:46,114 INFO Downloaded 94000/110017 features
+2026-05-28 10:30:47,009 INFO Downloaded 95000/110017 features
+2026-05-28 10:30:47,804 INFO Downloaded 96000/110017 features
+2026-05-28 10:30:48,740 INFO Downloaded 97000/110017 features
+2026-05-28 10:30:49,738 INFO Downloaded 98000/110017 features
+2026-05-28 10:30:50,517 INFO Downloaded 99000/110017 features
+2026-05-28 10:30:51,401 INFO Downloaded 100000/110017 features
+2026-05-28 10:30:52,314 INFO Downloaded 101000/110017 features
+2026-05-28 10:30:53,256 INFO Downloaded 102000/110017 features
+2026-05-28 10:30:54,222 INFO Downloaded 103000/110017 features
+2026-05-28 10:30:55,323 INFO Downloaded 104000/110017 features
+2026-05-28 10:30:56,466 INFO Downloaded 105000/110017 features
+2026-05-28 10:30:57,324 INFO Downloaded 106000/110017 features
+2026-05-28 10:30:58,155 INFO Downloaded 107000/110017 features
+2026-05-28 10:30:59,199 INFO Downloaded 108000/110017 features
+2026-05-28 10:31:00,175 INFO Downloaded 109000/110017 features
+2026-05-28 10:31:01,230 INFO Downloaded 110000/110017 features
+2026-05-28 10:31:01,736 INFO Downloaded 110017/110017 features
+2026-05-28 10:31:01,743 INFO Building GeoDataFrame from 110017 downloaded features.
+2026-05-28 10:31:15,904 INFO GeoDataFrame feature count: 110017
+2026-05-28 10:31:15,905 INFO Geometry type(s): MultiPolygon, Polygon
+2026-05-28 10:31:15,905 INFO CRS: EPSG:4326
+2026-05-28 10:31:15,905 INFO Sample columns: geometry, objectid_1, pin14, objectid, oldpin, subdiv_name, nbh_name, propertyreal_id, legaldesc, marketvalue, assessedvalue, landvalue, deferredvalue, buildingvalue, obxfvalue
+2026-05-28 10:31:16,226 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-28 10:31:16,775 INFO PostGIS available: POSTGIS="3.6.2 3.6.2" [EXTENSION] PGSQL="180" GEOS="3.14.1dev-CAPI-1.20.4" SFCGAL="SFCGAL 2.2.0, CGAL 6.0.1, BOOST 1.88.0" PROJ="8.2.1 NETWORK_ENABLED=OFF URL_ENDPOINT= USER_WRITABLE_DIRECTORY=C:\WINDOWS\ServiceProfiles\NetworkService\AppData\Local/proj" (compiled against PROJ 8.2.1) GDAL="GDAL 3.9.2, released 2024/08/13 GDAL_DATA not found" LIBXML="2.12.5" LIBJSON="0.12" LIBPROTOBUF="1.2.1" WAGYU="0.5.0 (Internal)" TOPOLOGY RASTER
+2026-05-28 10:31:16,777 INFO Writing 110017 features to PostGIS table public.parcels with if_exists=replace.
+2026-05-28 10:31:36,892 INFO Creating spatial index parcels_geometry_gix on public.parcels.
+2026-05-28 10:31:44,061 INFO Ingestion duration: 141.39 seconds
+2026-05-28 10:31:44,065 INFO Wrote ingestion summary: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\ingest_tax_parcels_summary.json
+2026-05-28 10:31:44,065 INFO CFS Tax Parcels ingestion pilot complete.

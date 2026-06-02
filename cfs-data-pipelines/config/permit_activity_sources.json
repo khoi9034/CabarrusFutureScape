@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "description": "Phase 3 permit/development activity ingestion pilot sources for Cabarrus FutureScape.",
+    "frontend_integration": "disabled",
+    "production_system_of_record": "not_connected",
+    "notes": [
+      "The CFS data registry identified Permit Activity as ready for staging, but no approved staging or production endpoint was configured.",
+      "This pilot uses the public Cabarrus County OpenData Permits 2015 layer to validate ingestion, profiling, time fields, parcel/PIN join fields, and geometry handling.",
+      "A future authoritative permitting service URL must be reviewed before production/API use."
+    ]
+  },
+  "sources": [
+    {
+      "id": "cabarrus-permits-2015-opendata",
+      "name": "Cabarrus County Permits 2015",
+      "enabled": true,
+      "source_status": "public-opendata-pilot",
+      "source_year": 2015,
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/33",
+      "target_schema": "public",
+      "target_table": "permit_activity",
+      "expected_geometry_type": "polygon",
+      "known_fields": [
+        "OBJECTID",
+        "PIN14",
+        "PermitNumber",
+        "AppName",
+        "FileDate",
+        "PermitCategory",
+        "PermitGroup",
+        "RecordGroup",
+        "PermitType",
+        "PermitSubtype",
+        "DetailedDescription",
+        "Status",
+        "Lot",
+        "OwnerName",
+        "Address",
+        "Subdivision"
+      ],
+      "notes": [
+        "Historical 2015 permit polygons, suitable for local ingestion and schema profiling only.",
+        "Layer is not treated as the authoritative current permit feed.",
+        "PIN14 is the expected parcel join candidate."
+      ]
+    }
+  ],
+  "required_future_source": {
+    "name": "Authoritative Permit Activity Service",
+    "required_url_status": "missing",
+    "expected_service_type": "ArcGIS FeatureServer or MapServer layer",
+    "expected_fields": [
+      "permit/application identifier",
+      "permit/application status",
+      "permit/application type",
+      "activity or filed date",
+      "parcel identifier or PIN",
+      "address/location",
+      "geometry or geocodable address"
+    ],
+    "security_notes": [
+      "Use an approved staging endpoint before production rollout.",
+      "Do not place private credentials or tokenized production URLs in this config.",
+      "Future API access should use a read-only database role and server-side token strategy."
+    ]
+  }
+}

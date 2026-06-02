@@ -1,0 +1,30 @@
+ordinal_position,column_name,data_type,udt_name,is_nullable,null_count,non_null_count,null_percentage,role_tags,distinct_non_null_count,duplicate_value_count,duplicate_excess_rows
+1,geometry,USER-DEFINED,geometry,YES,0,110017,0.0,geometry,,,
+2,objectid_1,bigint,int8,YES,0,110017,0.0,likely_identifier,110017,0,0
+3,pin14,text,text,YES,10,110007,0.0091,likely_identifier,106560,2930,3447
+4,objectid,bigint,int8,YES,0,110017,0.0,likely_identifier,107151,2660,2866
+5,oldpin,text,text,YES,6039,103978,5.4892,likely_identifier,94023,3628,9955
+6,subdiv_name,text,text,YES,493,109524,0.4481,subdivision_neighborhood,,,
+7,nbh_name,text,text,YES,17,110000,0.0155,subdivision_neighborhood,,,
+8,propertyreal_id,text,text,YES,13,110004,0.0118,likely_identifier,100375,3031,9629
+9,legaldesc,text,text,YES,6390,103627,5.8082,,,,
+10,marketvalue,text,text,YES,6975,103042,6.3399,economic_value,,,
+11,assessedvalue,text,text,YES,6975,103042,6.3399,economic_value,,,
+12,landvalue,text,text,YES,6975,103042,6.3399,economic_value,,,
+13,deferredvalue,text,text,YES,6384,103633,5.8027,economic_value,,,
+14,buildingvalue,text,text,YES,6975,103042,6.3399,economic_value,,,
+15,obxfvalue,text,text,YES,6975,103042,6.3399,economic_value,,,
+16,acctname1,text,text,YES,6435,103582,5.8491,,,,
+17,acctname2,text,text,YES,51304,58713,46.6328,,,,
+18,mailaddr1,text,text,YES,6626,103391,6.0227,address_location,,,
+19,mailaddr2,text,text,YES,96071,13946,87.3238,address_location,,,
+20,mailcity,text,text,YES,6554,103463,5.9573,address_location,,,
+21,mailstate,text,text,YES,6562,103455,5.9645,,,,
+22,mailzipcode,text,text,YES,6528,103489,5.9336,address_location,,,
+23,saleyear,double precision,float8,YES,14593,95424,13.2643,,,,
+24,salemonth,double precision,float8,YES,14593,95424,13.2643,,,,
+25,saleprice,double precision,float8,YES,14593,95424,13.2643,,,,
+26,deedbook,text,text,YES,14593,95424,13.2643,,,,
+27,deedpage,text,text,YES,14593,95424,13.2643,,,,
+28,shape_starea,double precision,float8,YES,0,110017,0.0,,,,
+29,shape_stlength,double precision,float8,YES,0,110017,0.0,,,,

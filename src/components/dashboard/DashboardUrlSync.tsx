@@ -41,6 +41,9 @@ export function DashboardUrlSync() {
 
       lastHydratedSearchRef.current = currentSearch;
       skipUrlWriteForSearchRef.current = currentSearch;
+      // Deserialization validates every dashboard param against mock registries.
+      // Invalid share URLs fall back to the current mock-safe state instead of
+      // throwing or reaching for production county services.
       const nextState = deserializeDashboardUrlState(currentSearch);
 
       if (nextState.roleId) {

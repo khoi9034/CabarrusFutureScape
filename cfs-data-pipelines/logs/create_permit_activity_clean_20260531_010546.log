@@ -1,0 +1,5 @@
+2026-05-31 01:05:46,908 INFO Starting permit activity clean transform.
+2026-05-31 01:05:47,271 INFO Executing permit activity clean SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_permit_activity_clean.sql
+2026-05-31 01:05:48,393 INFO permit_activity_clean row count: 6766
+2026-05-31 01:05:48,394 INFO Invalid geometries after cleaning: 0
+2026-05-31 01:05:48,394 INFO Wrote validation output: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\permit_activity_clean_validation.json

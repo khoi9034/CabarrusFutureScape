@@ -1,0 +1,232 @@
+jurisdiction_name,zoning_code_raw,zoning_general_raw,zoning_type_raw,base_district_raw,conditional_raw,zoning_label_normalized,zoning_general_normalized,feature_count,total_area_acres
+Cabarrus County / Unincorporated,LDR,RESIDENTIAL,,,,LDR,residential,67,13895.5
+Cabarrus County / Unincorporated,OI,OFFICE,,,,OI,office,54,3266.79
+Cabarrus County / Unincorporated,CR,RESIDENTIAL,,,,CR,residential,33,35741.64
+Cabarrus County / Unincorporated,LI,INDUSTRIAL,,,,LI,industrial,33,1202.34
+Cabarrus County / Unincorporated,LC,COMMERCIAL,,,,LC,commercial,23,363.33
+Cabarrus County / Unincorporated,GI,INDUSTRIAL,,,,GI,industrial,15,1213.79
+Cabarrus County / Unincorporated,MDR,RESIDENTIAL,,,,MDR,residential,14,901.37
+Cabarrus County / Unincorporated,LI-SU,INDUSTRIAL,,,,LI-SU,industrial,9,65.47
+Cabarrus County / Unincorporated,AO,AGRICULTURAL,,,,AO,agricultural,6,89245.2
+Cabarrus County / Unincorporated,GC,COMMERCIAL,,,,GC,commercial,6,117.82
+Cabarrus County / Unincorporated,LDR-SU,RESIDENTIAL,,,,LDR-SU,residential,6,25.47
+Cabarrus County / Unincorporated,GI-SU,INDUSTRIAL,,,,GI-SU,industrial,4,145.09
+Cabarrus County / Unincorporated,HDR-SU,RESIDENTIAL,,,,HDR-SU,residential,3,95.25
+Cabarrus County / Unincorporated,AO,RESIDENTIAL,,,,AO,agricultural,2,8.76
+Cabarrus County / Unincorporated,AO-CU,RESIDENTIAL,,,,AO-CU,agricultural,2,253.38
+Cabarrus County / Unincorporated,AO-SU,AGRICULTURAL,,,,AO-SU,agricultural,2,3.72
+Cabarrus County / Unincorporated,LC-SU,COMMERCIAL,,,,LC-SU,commercial,2,59.08
+Cabarrus County / Unincorporated,OI,INSTITUTIONAL,,,,OI,office,2,6.75
+Cabarrus County / Unincorporated,AO,Agriculture,,,,AO,agricultural,1,126.97
+Cabarrus County / Unincorporated,CR,,,,,CR,residential,1,2.99
+Cabarrus County / Unincorporated,GC-SU,COMMERCIAL,,,,GC-SU,commercial,1,3.92
+Cabarrus County / Unincorporated,GI-SU,,,,,GI-SU,industrial,1,143.63
+Cabarrus County / Unincorporated,HDR,RESIDENTIAL,,,,HDR,residential,1,88.51
+Cabarrus County / Unincorporated,LC,RESIDENTIAL,,,,LC,commercial,1,1.98
+Cabarrus County / Unincorporated,LDR,,,,,LDR,residential,1,0.63
+Cabarrus County / Unincorporated,LI,OFFICE,,,,LI,office,1,25.72
+Cabarrus County / Unincorporated,MDR-SU,RESIDENTIAL,,,,MDR-SU,residential,1,2.49
+Cabarrus County / Unincorporated,OI-SU,OFFICE,,,,OI-SU,office,1,1.15
+Concord,C-2,,,,,C-2,unknown,96,4123.87
+Concord,I-1,,,,,I-1,unknown,83,3233.74
+Concord,O-I,,,,,O-I,unknown,83,1462.69
+Concord,RC,,,,,RC,unknown,74,3555.77
+Concord,RM-2,,,,,RM-2,residential,58,3947.53
+Concord,RM-1,,,,,RM-1,residential,57,5844.14
+Concord,RV,,,,,RV,residential,43,3099.48
+Concord,I-2,,,,,I-2,unknown,34,5267.6
+Concord,RV-CD,,,,,RV-CD,residential,29,1011.74
+Concord,C-1,,,,,C-1,unknown,27,250.92
+Concord,PUD,,,,,PUD,unknown,26,1794.28
+Concord,B-1,,,,,B-1,unknown,23,40.34
+Concord,RC-CD,,,,,RC-CD,unknown,21,365.81
+Concord,C-2-CD,,,,,C-2-CD,unknown,17,83.89
+Concord,RL,,,,,RL,residential,13,1844.47
+Concord,AG,,,,,AG,agricultural,12,326.26
+Concord,RE,,,,,RE,residential,12,294.48
+Concord,C-2-CU,,,,,C-2-CU,unknown,11,176.94
+Concord,C-1-CD,,,,,C-1-CD,unknown,9,12.36
+Concord,I-1-CD,,,,,I-1-CD,unknown,8,269.19
+Concord,RC-CU,,,,,RC-CU,unknown,8,270.1
+Concord,,,,,,UNKNOWN,unknown,8,70.4
+Concord,O-I-CD,,,,,O-I-CD,unknown,7,141.99
+Concord,I-1-CU,,,,,I-1-CU,unknown,6,439.01
+Concord,R-CO,,,,,R-CO,residential,6,747.37
+Concord,RM-2-CD,,,,,RM-2-CD,residential,6,200.53
+Concord,RM-2-CU,,,,,RM-2-CU,residential,6,842.01
+Concord,RV-CU,,,,,RV-CU,residential,6,175.04
+Concord,I-2-CD,,,,,I-2-CD,unknown,4,301.8
+Concord,I-2-CU,,,,,I-2-CU,unknown,4,139.86
+Concord,PID,,,,,PID,unknown,4,1212.89
+Concord,C-1-CU,,,,,C-1-CU,unknown,3,5.6
+Concord,MX-IB,,,,,MX-IB,mixed_use,3,56.91
+Concord,PRD,,,,,PRD,unknown,3,470.85
+Concord,TND,,,,,TND,unknown,3,171.61
+Concord,B-1-CU,,,,,B-1-CU,unknown,2,2.02
+Concord,MX-CC2,,,,,MX-CC2,mixed_use,2,100.15
+Concord,MX-NC,,,,,MX-NC,mixed_use,2,10.2
+Concord,AG-CD,,,,,AG-CD,agricultural,1,88.28
+Concord,CC,,,,,CC,commercial,1,103.75
+Concord,CC-CD,,,,,CC-CD,commercial,1,0.4
+Concord,CD,,,,,CD,unknown,1,161.82
+Concord,not-yet-zoned,,,,,NOT-YET-ZONED,unknown,1,48.85
+Concord,O-I-CU,,,,,O-I-CU,unknown,1,6.48
+Concord,RE-CU,,,,,RE-CU,residential,1,21.4
+Harrisburg,RE,RESIDENTIAL,,,,RE,residential,30,890.31
+Harrisburg,GC,COMMERCIAL,,,,GC,commercial,24,241.57
+Harrisburg,OI,OFFICE,,,,OI,office,17,447.84
+Harrisburg,EC,INDUSTRIAL,,,,EC,industrial,16,1281.38
+Harrisburg,RM,RESIDENTIAL,,,,RM,residential,15,1650.0
+Harrisburg,RL,RESIDENTIAL,,,,RL,residential,13,1479.15
+Harrisburg,CZ-RH,RESIDENTIAL,,,,CZ-RH,residential,11,656.77
+Harrisburg,CZ-GC,COMMERCIAL,,,,CZ-GC,commercial,8,69.78
+Harrisburg,CZ-RL,RESIDENTIAL,,,,CZ-RL,residential,5,516.13
+Harrisburg,NC,COMMERCIAL,,,,NC,commercial,5,29.43
+Harrisburg,CZ-RL,,,,,CZ-RL,unknown,4,221.54
+Harrisburg,PUD,MIXED USE,,,,PUD,mixed_use,4,214.65
+Harrisburg,RE,,,,,RE,residential,4,37.15
+Harrisburg,CZ-OI,OFFICE,,,,CZ-OI,office,3,28.27
+Harrisburg,CZ-RM,,,,,CZ-RM,unknown,3,143.07
+Harrisburg,RH,RESIDENTIAL,,,,RH,residential,3,260.55
+Harrisburg,CZ-CC,MIXED USE,,,,CZ-CC,mixed_use,2,16.38
+Harrisburg,CZ-RM,RESIDENTIAL,,,,CZ-RM,residential,2,65.65
+Harrisburg,OI,,,,,OI,office,2,4.27
+Harrisburg,RL,,,,,RL,residential,2,356.71
+Harrisburg,RM,,,,,RM,residential,2,4.18
+Harrisburg,CZ-AG,,,,,CZ-AG,unknown,1,46.33
+Harrisburg,CZ-GC,,,,,CZ-GC,unknown,1,2.63
+Harrisburg,CZ-NC,RESIDENTIAL,,,,CZ-NC,residential,1,14.18
+Harrisburg,CZ-RE,RESIDENTIAL,,,,CZ-RE,residential,1,152.53
+Harrisburg,CZ-RH,,,,,CZ-RH,unknown,1,2.46
+Harrisburg,CZ-RM,RESIDENTIAL MEDIUM,,,,CZ-RM,residential,1,185.1
+Harrisburg,EC,LIGHT INDUSTRIAL,,,,EC,industrial,1,5.01
+Harrisburg,EC,MIXED USE,,,,EC,mixed_use,1,121.64
+Harrisburg,NC,,,,,NC,unknown,1,3.84
+Harrisburg,OI,RESIDENTIAL,,,,OI,office,1,25.83
+Harrisburg,PUD,,,,,PUD,unknown,1,142.95
+Harrisburg,RH,,,,,RH,residential,1,34.05
+Harrisburg,RM,COMMERCIAL,,,,RM,commercial,1,14.25
+Kannapolis,R8,,,RV,,R8,residential,497,3684.9
+Kannapolis,R4,,,RM-2,,R4,residential,362,5288.57
+Kannapolis,GC,,,C-2,,GC,commercial,247,1415.12
+Kannapolis,O-I,,,OI,,O-I,office,158,1085.95
+Kannapolis,R4,,,RM-1,,R4,residential,91,2228.95
+Kannapolis,MU-N,,,B-1,,MU-N,mixed_use,60,65.43
+Kannapolis,CC,,,CC,,CC,commercial,57,285.74
+Kannapolis,R18,,,RC,,R18,residential,37,670.37
+Kannapolis,PD,,,RM-1,,PD,residential,32,954.51
+Kannapolis,R1,,,RE,,R1,residential,25,1355.27
+Kannapolis,CD,,,CD,,CD,unknown,23,765.6
+Kannapolis,LI,,,I-1,,LI,industrial,22,323.12
+Kannapolis,AG,,,AG,,AG,agricultural,20,1724.58
+Kannapolis,PD-TND,,,TND,,PD-TND,unknown,18,308.3
+Kannapolis,C-1,,,C-1,,C-1,unknown,14,41.03
+Kannapolis,MU-N,,,C-2,,MU-N,mixed_use,12,46.88
+Kannapolis,LI-CZ,,,PUD,,LI-CZ,industrial,10,134.61
+Kannapolis,HI,,,I-2,,HI,unknown,9,40.01
+Kannapolis,AG,,,,,AG,agricultural,7,58.98
+Kannapolis,GC-CZ,,,C-2,,GC-CZ,commercial,6,20.47
+Kannapolis,R8,,,C-2,,R8,residential,6,1.98
+Kannapolis,R8,,,OI,,R8,office,6,1.49
+Kannapolis,R8-CZ,,,RV,,R8-CZ,residential,6,238.54
+Kannapolis,GC-CZ,,,RE,,GC-CZ,commercial,5,14.87
+Kannapolis,MU-N,,,OI,,MU-N,mixed_use,5,25.79
+Kannapolis,R8-CZ,,,,,R8-CZ,residential,5,138.55
+Kannapolis,GC-CZ,,,RV,,GC-CZ,commercial,4,4.62
+Kannapolis,PD,,,AG,,PD,agricultural,4,322.11
+Kannapolis,R4,,,,,R4,residential,4,6.52
+Kannapolis,R8,,,,,R8,residential,4,1.38
+Kannapolis,GC-CZ,,,,,GC-CZ,commercial,3,14.64
+Kannapolis,O-I,,,C-2,,O-I,unknown,3,77.64
+Kannapolis,PD,,,PUD,,PD,unknown,3,79.25
+Kannapolis,R18-CZ,,,RC,,R18-CZ,residential,3,96.84
+Kannapolis,R2,,,RL,,R2,residential,3,44.85
+Kannapolis,R2,,,AG,,R2,agricultural,3,38.71
+Kannapolis,CC,,,RV,,CC,commercial,2,3.53
+Kannapolis,GC-CZ,,,OI,,GC-CZ,office,2,4.24
+Kannapolis,LI-CZ,,,I-1,,LI-CZ,industrial,2,92.28
+Kannapolis,PD,,,RV,,PD,residential,2,106.57
+Kannapolis,PD,,,,,PD,unknown,2,238.72
+Kannapolis,PD,,,C-2,,PD,unknown,2,56.75
+Kannapolis,R18-CZ,,,C-1,,R18-CZ,residential,2,15.73
+Kannapolis,R4,,,C-2,,R4,residential,2,0.47
+Kannapolis,R4,,,OI,,R4,office,2,0.88
+Kannapolis,R4-CZ,,,,,R4-CZ,residential,2,3.23
+Kannapolis,R8,,,B-1,,R8,residential,2,0.68
+Kannapolis,R8-CZ,,,C-2,,R8-CZ,residential,2,0.91
+Kannapolis,R8-CZ,,,OI,,R8-CZ,office,2,63.35
+Kannapolis,CC-CZ,,,RV,,CC-CZ,commercial,1,1.95
+Kannapolis,CD-CZ,,,PUD,,CD-CZ,unknown,1,21.96
+Kannapolis,CD-CZ,,,CD,,CD-CZ,unknown,1,111.48
+Kannapolis,CD-R,,,CD-R,,CD-R,unknown,1,41.39
+Kannapolis,CD-R-CZ,,,CD-R,,CD-R-CZ,unknown,1,21.88
+Kannapolis,CD-R-CZ,,,CD,,CD-R-CZ,unknown,1,16.69
+Kannapolis,GC,,,RC,,GC,commercial,1,0.28
+Kannapolis,GC-CZ,,,R1,,GC-CZ,commercial,1,1.45
+Kannapolis,GC-CZ,,,PUD,,GC-CZ,commercial,1,10.0
+Kannapolis,HI-CZ,,,OI,,HI-CZ,office,1,55.64
+Kannapolis,LI-CZ,,,,,LI-CZ,industrial,1,3.24
+Kannapolis,MU-N-CZ,,,RV,,MU-N-CZ,mixed_use,1,0.18
+Kannapolis,O-I,,,O,,O-I,unknown,1,2.24
+Kannapolis,O-I,,,,,O-I,unknown,1,0.34
+Kannapolis,OI-CZ,,,RM-2,,OI-CZ,office,1,3.4
+Kannapolis,PD,,,I-1,,PD,unknown,1,70.1
+Kannapolis,PD,,,CD,,PD,unknown,1,131.21
+Kannapolis,R18,,,AG,,R18,agricultural,1,36.14
+Kannapolis,R18,,,CR,,R18,residential,1,0.12
+Kannapolis,R18,,,OI,,R18,office,1,1.93
+Kannapolis,R18-CZ,,,AG,,R18-CZ,agricultural,1,1.75
+Kannapolis,R18-CZ,,,,,R18-CZ,residential,1,2.68
+Kannapolis,R18-CZ,,,RC-CZ,,R18-CZ,residential,1,45.23
+Kannapolis,R18-CZ,,,CD,,R18-CZ,residential,1,20.17
+Kannapolis,R18-CZ,,,CR,,R18-CZ,residential,1,34.47
+Kannapolis,R18-CZ,,,PUD,,R18-CZ,residential,1,64.96
+Kannapolis,R18-CZ,,,RM-2,,R18-CZ,residential,1,2.51
+Kannapolis,R18-CZ,,,RE,,R18-CZ,residential,1,18.88
+Kannapolis,R2,,,C-2,,R2,residential,1,30.15
+Kannapolis,R4,,,R4,,R4,residential,1,0.99
+Kannapolis,R4,,,CD,,R4,residential,1,1.65
+Kannapolis,R4-CZ,,,RM-2,,R4-CZ,residential,1,60.59
+Kannapolis,R4-CZ,,,RM-1,,R4-CZ,residential,1,128.41
+Kannapolis,R6,,,R6,,R6,residential,1,0.35
+Kannapolis,R6-CZ,,,RM-2,,R6-CZ,residential,1,1.13
+Kannapolis,R8,,,r8,,R8,residential,1,1.01
+Kannapolis,R8,,,I-2,,R8,residential,1,0.63
+Kannapolis,R8-CZ,,,RM-1,,R8-CZ,residential,1,10.18
+Kannapolis,R8-CZ,,,RV-CZ,,R8-CZ,residential,1,3.92
+Locust,OPS,,OPS,,,OPS,unknown,5,1180.15
+Locust,CBI,,CBI,,,CBI,unknown,1,16.91
+Locust,HC,,HC,,,HC,commercial,1,69.58
+Locust,OPS-C,,OPS-C,,,OPS-C,unknown,1,55.54
+Midland,AG,,AG,,,AG,agricultural,31,2222.61
+Midland,SFR,,SFR,,,SFR,unknown,23,3806.76
+Midland,C24/27,,C24/27,,,C24/27,unknown,18,475.51
+Midland,IND,,IND,,,IND,industrial,11,514.15
+Midland,C601,,C601,,,C601,unknown,4,192.54
+Midland,CIV,,CIV,,,CIV,unknown,3,160.09
+Midland,OM,,OM,,,OM,unknown,3,41.36
+Midland,OMP,,OMP,,,OMP,unknown,3,18.69
+Midland,R/OMT,,R/OMT,,,R/OMT,unknown,3,171.88
+Midland,MSP,,MSP,,,MSP,unknown,2,6.15
+Midland,R/MST,,R/MST,,,R/MST,unknown,2,35.67
+Midland,SFR-CZ,,SFR-CZ,,,SFR-CZ,unknown,2,22.09
+Midland,C 601-CZ,,C 601-CZ,,,C 601-CZ,unknown,1,4.16
+Midland,MS,,MS,,,MS,unknown,1,63.33
+Midland,PRD-CZ,,PRD-CZ,,,PRD-CZ,unknown,1,667.04
+Midland,SFR-TNDO-CZ,,SFR-CU,,,SFR-TNDO-CZ,unknown,1,69.88
+Midland,TNDO-CZ,,TNDO-CZ,,,TNDO-CZ,unknown,1,64.93
+Mt. Pleasant,RM,,,,,RM,residential,41,504.64
+Mt. Pleasant,RL,,,,,RL,residential,33,3299.47
+Mt. Pleasant,RH,,,,,RH,residential,26,145.53
+Mt. Pleasant,OI,,,,,OI,office,18,173.56
+Mt. Pleasant,C-1,,,,,C-1,unknown,12,33.35
+Mt. Pleasant,C-2,,,,,C-2,unknown,9,34.4
+Mt. Pleasant,I-1,,,,,I-1,unknown,9,131.38
+Mt. Pleasant,CC,,,,,CC,commercial,6,11.22
+Mt. Pleasant,CZ-RH,,,,,CZ-RH,unknown,5,17.54
+Mt. Pleasant,CZ-C-2,,,,,CZ-C-2,unknown,4,7.07
+Mt. Pleasant,AG,,,,,AG,agricultural,3,759.16
+Mt. Pleasant,CZ-O-I,,,,,CZ-O-I,unknown,3,12.55
+Mt. Pleasant,CZ-R-M,,,,,CZ-R-M,unknown,3,47.82
+Mt. Pleasant,CZ-AG,,,,,CZ-AG,unknown,1,34.19
+Mt. Pleasant,RE,,,,,RE,residential,1,647.4

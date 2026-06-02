@@ -1,0 +1,9 @@
+zoning_jurisdiction_name,total_parcels,assigned_parcels,no_match_parcels,safe_for_dashboard_parcels,review_parcels,low_confidence_count,multi_zoning_count,multi_jurisdiction_count,sliver_overlap_count,near_tie_count,jurisdiction_code_semantics_review_count,avg_dominant_overlap_pct,min_dominant_overlap_pct,max_dominant_overlap_pct
+Concord,43497,43497,0,20754,22743,214,7834,1144,7114,36,18399,0.997103,5e-06,1.0
+Kannapolis,26832,26832,0,22523,4309,321,3571,381,2723,78,1431,0.988457,1e-06,1.0
+Cabarrus County / Unincorporated,24890,24890,0,22204,2686,158,2918,1965,2266,51,0,0.995174,0.0,1.0
+Harrisburg,9444,9444,0,7957,1487,57,1409,373,872,5,509,0.994036,0.304861,1.0
+Midland,3081,3081,0,118,2963,64,835,456,564,9,2777,0.986179,0.0,1.0
+Mt. Pleasant,1675,1675,0,1217,458,17,458,72,380,6,125,0.98835,0.003709,1.0
+Locust,565,565,0,8,557,0,56,50,43,0,552,0.998047,0.861406,1.0
+(no match),33,0,33,0,33,0,0,0,0,0,0,,,

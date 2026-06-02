@@ -1,0 +1,7 @@
+2026-05-28 15:46:53,899 INFO Starting CFS planning_boundaries_clean transform.
+2026-05-28 15:46:53,900 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\create_planning_boundaries_clean_20260528_154653.log
+2026-05-28 15:46:54,877 INFO Executing transform SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_planning_boundaries_clean.sql
+2026-05-28 15:46:55,026 INFO Planning boundary clean feature count: 5
+2026-05-28 15:46:55,027 INFO Invalid geometries before/after: 0/0
+2026-05-28 15:46:55,027 INFO Wrote validation JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\planning_boundaries_clean_validation.json
+2026-05-28 15:46:55,027 INFO Wrote boundary summary CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\planning_boundaries_summary.csv

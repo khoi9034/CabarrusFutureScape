@@ -1,0 +1,4 @@
+relationship_confidence,relationship_method,has_parcel_match,has_multiple_parcel_matches,missing_parcel_match,permit_count,relationship_row_count,parcel_count,permit_percentage
+high,exact_pin14,True,False,False,61804,61804,41035,95.9302
+low,exact_pin14,True,True,False,2427,5278,2439,3.7671
+no_match,no_match,False,False,True,195,195,0,0.3027

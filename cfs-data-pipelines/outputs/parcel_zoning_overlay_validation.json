@@ -1,0 +1,1047 @@
+{
+  "generated_at": "2026-05-28T11:53:26",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "parcel_table": "public.parcels_enriched",
+    "zoning_table": "public.zoning_clean",
+    "overlay_table": "public.parcel_zoning_overlay"
+  },
+  "row_count_summary": {
+    "source_parcel_count": 110017,
+    "overlay_row_count": 110017,
+    "row_count_delta": 0,
+    "row_counts_match": true,
+    "parcels_with_zoning_assignment": 27157,
+    "parcels_with_no_zoning_match": 82860,
+    "parcels_with_multiple_zoning_overlaps": 1420
+  },
+  "confidence_distribution": [
+    {
+      "value": "no_match",
+      "parcel_count": 82860,
+      "parcel_percentage": 75.3156
+    },
+    {
+      "value": "high",
+      "parcel_count": 24443,
+      "parcel_percentage": 22.2175
+    },
+    {
+      "value": "low",
+      "parcel_count": 2399,
+      "parcel_percentage": 2.1806
+    },
+    {
+      "value": "medium",
+      "parcel_count": 315,
+      "parcel_percentage": 0.2863
+    }
+  ],
+  "join_status_distribution": [
+    {
+      "value": "no_match",
+      "parcel_count": 82860,
+      "parcel_percentage": 75.3156
+    },
+    {
+      "value": "assigned",
+      "parcel_count": 23584,
+      "parcel_percentage": 21.4367
+    },
+    {
+      "value": "single_zone_low_confidence",
+      "parcel_count": 2153,
+      "parcel_percentage": 1.957
+    },
+    {
+      "value": "multi_zone_assigned",
+      "parcel_count": 1174,
+      "parcel_percentage": 1.0671
+    },
+    {
+      "value": "multi_zone_low_confidence",
+      "parcel_count": 246,
+      "parcel_percentage": 0.2236
+    }
+  ],
+  "zoning_class_distribution": [
+    {
+      "dominant_zoning_code": "(no match)",
+      "dominant_zoning_general": "(no match)",
+      "dominant_zoning_label": "(no match)",
+      "parcel_count": 82860,
+      "multi_zoning_count": 0,
+      "low_confidence_count": 0,
+      "avg_dominant_overlap_pct": null,
+      "min_dominant_overlap_pct": null,
+      "max_dominant_overlap_pct": null
+    },
+    {
+      "dominant_zoning_code": "AO",
+      "dominant_zoning_general": "AGRICULTURAL",
+      "dominant_zoning_label": "AO",
+      "parcel_count": 10185,
+      "multi_zoning_count": 289,
+      "low_confidence_count": 233,
+      "avg_dominant_overlap_pct": 0.979217,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "LDR",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "LDR",
+      "parcel_count": 8039,
+      "multi_zoning_count": 435,
+      "low_confidence_count": 902,
+      "avg_dominant_overlap_pct": 0.89245,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "CR",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "CR",
+      "parcel_count": 6973,
+      "multi_zoning_count": 331,
+      "low_confidence_count": 536,
+      "avg_dominant_overlap_pct": 0.925713,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "MDR",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "MDR",
+      "parcel_count": 785,
+      "multi_zoning_count": 35,
+      "low_confidence_count": 257,
+      "avg_dominant_overlap_pct": 0.678528,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "OI",
+      "dominant_zoning_general": "OFFICE",
+      "dominant_zoning_label": "OI",
+      "parcel_count": 353,
+      "multi_zoning_count": 109,
+      "low_confidence_count": 188,
+      "avg_dominant_overlap_pct": 0.478384,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "LI",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "LI",
+      "parcel_count": 218,
+      "multi_zoning_count": 43,
+      "low_confidence_count": 125,
+      "avg_dominant_overlap_pct": 0.460367,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "HDR-SU",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "HDR-SU",
+      "parcel_count": 206,
+      "multi_zoning_count": 23,
+      "low_confidence_count": 7,
+      "avg_dominant_overlap_pct": 0.965941,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "LC",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "LC",
+      "parcel_count": 135,
+      "multi_zoning_count": 33,
+      "low_confidence_count": 49,
+      "avg_dominant_overlap_pct": 0.672338,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "GI",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "GI",
+      "parcel_count": 88,
+      "multi_zoning_count": 33,
+      "low_confidence_count": 36,
+      "avg_dominant_overlap_pct": 0.616204,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "GC",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "GC",
+      "parcel_count": 41,
+      "multi_zoning_count": 19,
+      "low_confidence_count": 15,
+      "avg_dominant_overlap_pct": 0.66161,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "HDR",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "HDR",
+      "parcel_count": 29,
+      "multi_zoning_count": 4,
+      "low_confidence_count": 20,
+      "avg_dominant_overlap_pct": 0.31951,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "AO",
+      "dominant_zoning_general": "Agriculture",
+      "dominant_zoning_label": "AO",
+      "parcel_count": 19,
+      "multi_zoning_count": 11,
+      "low_confidence_count": 1,
+      "avg_dominant_overlap_pct": 0.93944,
+      "min_dominant_overlap_pct": 1.6e-05,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "LI-SU",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "LI-SU",
+      "parcel_count": 17,
+      "multi_zoning_count": 9,
+      "low_confidence_count": 6,
+      "avg_dominant_overlap_pct": 0.645293,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "GI-SU",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "GI-SU",
+      "parcel_count": 11,
+      "multi_zoning_count": 7,
+      "low_confidence_count": 5,
+      "avg_dominant_overlap_pct": 0.51731,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 0.999994
+    },
+    {
+      "dominant_zoning_code": "LC-SU",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "LC-SU",
+      "parcel_count": 10,
+      "multi_zoning_count": 5,
+      "low_confidence_count": 7,
+      "avg_dominant_overlap_pct": 0.299442,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 0.999285
+    },
+    {
+      "dominant_zoning_code": "AO-CU",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "AO-CU",
+      "parcel_count": 7,
+      "multi_zoning_count": 5,
+      "low_confidence_count": 0,
+      "avg_dominant_overlap_pct": 0.97708,
+      "min_dominant_overlap_pct": 0.857653,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "LDR-SU",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "LDR-SU",
+      "parcel_count": 7,
+      "multi_zoning_count": 7,
+      "low_confidence_count": 1,
+      "avg_dominant_overlap_pct": 0.894989,
+      "min_dominant_overlap_pct": 0.498982,
+      "max_dominant_overlap_pct": 0.999998
+    },
+    {
+      "dominant_zoning_code": "LI",
+      "dominant_zoning_general": "OFFICE",
+      "dominant_zoning_label": "LI",
+      "parcel_count": 5,
+      "multi_zoning_count": 3,
+      "low_confidence_count": 3,
+      "avg_dominant_overlap_pct": 0.401174,
+      "min_dominant_overlap_pct": 0.000371,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "AO",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "AO",
+      "parcel_count": 4,
+      "multi_zoning_count": 2,
+      "low_confidence_count": 2,
+      "avg_dominant_overlap_pct": 0.493619,
+      "min_dominant_overlap_pct": 6e-06,
+      "max_dominant_overlap_pct": 0.993522
+    },
+    {
+      "dominant_zoning_code": "CR",
+      "dominant_zoning_general": "(no match)",
+      "dominant_zoning_label": "CR",
+      "parcel_count": 4,
+      "multi_zoning_count": 0,
+      "low_confidence_count": 2,
+      "avg_dominant_overlap_pct": 0.500215,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 0.999996
+    },
+    {
+      "dominant_zoning_code": "LDR",
+      "dominant_zoning_general": "(no match)",
+      "dominant_zoning_label": "LDR",
+      "parcel_count": 4,
+      "multi_zoning_count": 1,
+      "low_confidence_count": 3,
+      "avg_dominant_overlap_pct": 0.250583,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 0.999999
+    },
+    {
+      "dominant_zoning_code": "MDR-SU",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "MDR-SU",
+      "parcel_count": 4,
+      "multi_zoning_count": 4,
+      "low_confidence_count": 0,
+      "avg_dominant_overlap_pct": 0.935955,
+      "min_dominant_overlap_pct": 0.770832,
+      "max_dominant_overlap_pct": 0.999998
+    },
+    {
+      "dominant_zoning_code": "OI",
+      "dominant_zoning_general": "INSTITUTIONAL",
+      "dominant_zoning_label": "OI",
+      "parcel_count": 4,
+      "multi_zoning_count": 4,
+      "low_confidence_count": 0,
+      "avg_dominant_overlap_pct": 0.99961,
+      "min_dominant_overlap_pct": 0.999184,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "AO-SU",
+      "dominant_zoning_general": "AGRICULTURAL",
+      "dominant_zoning_label": "AO-SU",
+      "parcel_count": 3,
+      "multi_zoning_count": 2,
+      "low_confidence_count": 1,
+      "avg_dominant_overlap_pct": 0.658123,
+      "min_dominant_overlap_pct": 0.024669,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "GC-SU",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "GC-SU",
+      "parcel_count": 2,
+      "multi_zoning_count": 2,
+      "low_confidence_count": 0,
+      "avg_dominant_overlap_pct": 1.0,
+      "min_dominant_overlap_pct": 1.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "dominant_zoning_code": "GI-SU",
+      "dominant_zoning_general": "(no match)",
+      "dominant_zoning_label": "GI-SU",
+      "parcel_count": 2,
+      "multi_zoning_count": 2,
+      "low_confidence_count": 0,
+      "avg_dominant_overlap_pct": 0.998141,
+      "min_dominant_overlap_pct": 0.998141,
+      "max_dominant_overlap_pct": 0.998141
+    },
+    {
+      "dominant_zoning_code": "LC",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "LC",
+      "parcel_count": 1,
+      "multi_zoning_count": 1,
+      "low_confidence_count": 0,
+      "avg_dominant_overlap_pct": 0.996065,
+      "min_dominant_overlap_pct": 0.996065,
+      "max_dominant_overlap_pct": 0.996065
+    },
+    {
+      "dominant_zoning_code": "OI-SU",
+      "dominant_zoning_general": "OFFICE",
+      "dominant_zoning_label": "OI-SU",
+      "parcel_count": 1,
+      "multi_zoning_count": 1,
+      "low_confidence_count": 0,
+      "avg_dominant_overlap_pct": 0.997277,
+      "min_dominant_overlap_pct": 0.997277,
+      "max_dominant_overlap_pct": 0.997277
+    }
+  ],
+  "top_low_confidence_examples": [
+    {
+      "official_parcel_id": "CFS-PARCEL-0149735648",
+      "objectid_1": 149735648,
+      "pin14": "46806363880000",
+      "dominant_zoning_code": "GI-SU",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "GI-SU",
+      "zoning_overlap_count": 3,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 41.72311
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727315",
+      "objectid_1": 149727315,
+      "pin14": "45986213580000",
+      "dominant_zoning_code": "LI",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "LI",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 20.937501
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727441",
+      "objectid_1": 149727441,
+      "pin14": "45988876150000",
+      "dominant_zoning_code": "LC-SU",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "LC-SU",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 839.555545
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727442",
+      "objectid_1": 149727442,
+      "pin14": "45988876150000",
+      "dominant_zoning_code": "LC-SU",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "LC-SU",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 839.555545
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149732798",
+      "objectid_1": 149732798,
+      "pin14": "46724951030000",
+      "dominant_zoning_code": "AO",
+      "dominant_zoning_general": "AGRICULTURAL",
+      "dominant_zoning_label": "AO",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 29.603644
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149739731",
+      "objectid_1": 149739731,
+      "pin14": "46824023240000",
+      "dominant_zoning_code": "LC",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "LC",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 4.121226
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149741533",
+      "objectid_1": 149741533,
+      "pin14": "46913100550000",
+      "dominant_zoning_code": "CR",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "CR",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 1.853595
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149759838",
+      "objectid_1": 149759838,
+      "pin14": "55249820480000",
+      "dominant_zoning_code": "OI",
+      "dominant_zoning_general": "OFFICE",
+      "dominant_zoning_label": "OI",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 18.354337
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149759839",
+      "objectid_1": 149759839,
+      "pin14": "55249820480000",
+      "dominant_zoning_code": "OI",
+      "dominant_zoning_general": "OFFICE",
+      "dominant_zoning_label": "OI",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 18.354337
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149766446",
+      "objectid_1": 149766446,
+      "pin14": "55298419710000",
+      "dominant_zoning_code": "OI",
+      "dominant_zoning_general": "OFFICE",
+      "dominant_zoning_label": "OI",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 12.314528
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149766719",
+      "objectid_1": 149766719,
+      "pin14": "55331912910000",
+      "dominant_zoning_code": "CR",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "CR",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 5.762858
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149768283",
+      "objectid_1": 149768283,
+      "pin14": "55196201760000",
+      "dominant_zoning_code": "OI",
+      "dominant_zoning_general": "OFFICE",
+      "dominant_zoning_label": "OI",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 0.52594
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149773109",
+      "objectid_1": 149773109,
+      "pin14": "55445057350000",
+      "dominant_zoning_code": "GI",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "GI",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 22.085306
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149773766",
+      "objectid_1": 149773766,
+      "pin14": "55449147090000",
+      "dominant_zoning_code": "GI",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "GI",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 7.390242
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149774542",
+      "objectid_1": 149774542,
+      "pin14": "55449200750000",
+      "dominant_zoning_code": "GI",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "GI",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 4.299023
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149779145",
+      "objectid_1": 149779145,
+      "pin14": "55384101920000",
+      "dominant_zoning_code": "LDR",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "LDR",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 15.94315
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149821282",
+      "objectid_1": 149821282,
+      "pin14": "56347012520000",
+      "dominant_zoning_code": "LC",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "LC",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 1e-06,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 3.243577
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149821283",
+      "objectid_1": 149821283,
+      "pin14": "56347012520000",
+      "dominant_zoning_code": "LC",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "LC",
+      "zoning_overlap_count": 2,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 1e-06,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": true,
+      "zoning_join_status": "multi_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 3.243577
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149721154",
+      "objectid_1": 149721154,
+      "pin14": "00000",
+      "dominant_zoning_code": "LDR",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "LDR",
+      "zoning_overlap_count": 1,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": false,
+      "zoning_join_status": "single_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 3.838252
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149722818",
+      "objectid_1": 149722818,
+      "pin14": "145 023",
+      "dominant_zoning_code": "LC",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "LC",
+      "zoning_overlap_count": 1,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": false,
+      "zoning_join_status": "single_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 55.259337
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149726011",
+      "objectid_1": 149726011,
+      "pin14": "45890831260000",
+      "dominant_zoning_code": "LDR",
+      "dominant_zoning_general": "RESIDENTIAL",
+      "dominant_zoning_label": "LDR",
+      "zoning_overlap_count": 1,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": false,
+      "zoning_join_status": "single_zone_low_confidence",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 0.537192
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149726630",
+      "objectid_1": 149726630,
+      "pin14": "45897139520000",
+      "dominant_zoning_code": "LI",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "LI",
+      "zoning_overlap_count": 1,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": false,
+      "zoning_join_status": "single_zone_low_confidence",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 1.505689
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727066",
+      "objectid_1": 149727066,
+      "pin14": "45983649540000",
+      "dominant_zoning_code": "GC",
+      "dominant_zoning_general": "COMMERCIAL",
+      "dominant_zoning_label": "GC",
+      "zoning_overlap_count": 1,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": false,
+      "zoning_join_status": "single_zone_low_confidence",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 2.058786
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727073",
+      "objectid_1": 149727073,
+      "pin14": "45897191440000",
+      "dominant_zoning_code": "LI",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "LI",
+      "zoning_overlap_count": 1,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": false,
+      "zoning_join_status": "single_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 4.072694
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727086",
+      "objectid_1": 149727086,
+      "pin14": "45985492450000",
+      "dominant_zoning_code": "LI",
+      "dominant_zoning_general": "INDUSTRIAL",
+      "dominant_zoning_label": "LI",
+      "zoning_overlap_count": 1,
+      "dominant_overlap_pct": 0.0,
+      "total_zoning_overlap_pct": 0.0,
+      "zoning_assignment_confidence": "low",
+      "has_multiple_zoning": false,
+      "zoning_join_status": "single_zone_low_confidence",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 1.034788
+    }
+  ],
+  "top_no_match_examples": [
+    {
+      "official_parcel_id": "CFS-PARCEL-0149760035",
+      "objectid_1": 149760035,
+      "pin14": "55198962310000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 670.271489,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149758869",
+      "objectid_1": 149758869,
+      "pin14": "55194706110000",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 489.431721,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149782624",
+      "objectid_1": 149782624,
+      "pin14": "56004040690000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 442.85781,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149789146",
+      "objectid_1": 149789146,
+      "pin14": "56102182090000",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 383.586843,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727653",
+      "objectid_1": 149727653,
+      "pin14": "45995270340000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 315.398177,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149725625",
+      "objectid_1": 149725625,
+      "pin14": "249C094",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 300.070552,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149721567",
+      "objectid_1": 149721567,
+      "pin14": "144 001000001",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 259.596888,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149736050",
+      "objectid_1": 149736050,
+      "pin14": "45994563490000",
+      "parcel_quality_status": "trusted",
+      "parcel_area_acres_calc": 237.215836,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749980",
+      "objectid_1": 149749980,
+      "pin14": "46903099120000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 217.782203,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749981",
+      "objectid_1": 149749981,
+      "pin14": "46903099120000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 217.782203,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149788886",
+      "objectid_1": 149788886,
+      "pin14": "56103323360000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 213.826571,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149787201",
+      "objectid_1": 149787201,
+      "pin14": "56034088290000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 160.87677,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749606",
+      "objectid_1": 149749606,
+      "pin14": "55082246090000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 155.019551,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749607",
+      "objectid_1": 149749607,
+      "pin14": "55082246090000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 155.019551,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149726579",
+      "objectid_1": 149726579,
+      "pin14": "45896367300000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 141.834174,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149720805",
+      "objectid_1": 149720805,
+      "pin14": "142 049",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 139.846602,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149720733",
+      "objectid_1": 149720733,
+      "pin14": "141 0010000001",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 135.63988,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749346",
+      "objectid_1": 149749346,
+      "pin14": "55082425460000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 131.566403,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149725396",
+      "objectid_1": 149725396,
+      "pin14": "244 011",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 130.456884,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149720631",
+      "objectid_1": 149720631,
+      "pin14": "132 108",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 124.772876,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149794476",
+      "objectid_1": 149794476,
+      "pin14": "56123158220000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 119.053148,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149752187",
+      "objectid_1": 149752187,
+      "pin14": "55097361790000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 118.389709,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149817395",
+      "objectid_1": 149817395,
+      "pin14": "56300113340000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 116.284232,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149820198",
+      "objectid_1": 149820198,
+      "pin14": "56317103210000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 108.667356,
+      "zoning_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149752668",
+      "objectid_1": 149752668,
+      "pin14": "55097577930000",
+      "parcel_quality_status": "review",
+      "parcel_area_acres_calc": 108.473734,
+      "zoning_join_status": "no_match"
+    }
+  ],
+  "geometry_summary": {
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 110017
+      }
+    ],
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "feature_count": 110017
+      }
+    ],
+    "invalid_geometry_count": 0
+  },
+  "index_summary": [
+    {
+      "indexname": "parcel_zoning_overlay_confidence_idx",
+      "indexdef": "CREATE INDEX parcel_zoning_overlay_confidence_idx ON public.parcel_zoning_overlay USING btree (zoning_assignment_confidence)"
+    },
+    {
+      "indexname": "parcel_zoning_overlay_dominant_zoning_code_idx",
+      "indexdef": "CREATE INDEX parcel_zoning_overlay_dominant_zoning_code_idx ON public.parcel_zoning_overlay USING btree (dominant_zoning_code)"
+    },
+    {
+      "indexname": "parcel_zoning_overlay_dominant_zoning_general_idx",
+      "indexdef": "CREATE INDEX parcel_zoning_overlay_dominant_zoning_general_idx ON public.parcel_zoning_overlay USING btree (dominant_zoning_general)"
+    },
+    {
+      "indexname": "parcel_zoning_overlay_geometry_gix",
+      "indexdef": "CREATE INDEX parcel_zoning_overlay_geometry_gix ON public.parcel_zoning_overlay USING gist (geometry)"
+    },
+    {
+      "indexname": "parcel_zoning_overlay_pin14_idx",
+      "indexdef": "CREATE INDEX parcel_zoning_overlay_pin14_idx ON public.parcel_zoning_overlay USING btree (pin14)"
+    },
+    {
+      "indexname": "parcel_zoning_overlay_pkey",
+      "indexdef": "CREATE UNIQUE INDEX parcel_zoning_overlay_pkey ON public.parcel_zoning_overlay USING btree (official_parcel_id)"
+    },
+    {
+      "indexname": "parcel_zoning_overlay_zoning_join_status_idx",
+      "indexdef": "CREATE INDEX parcel_zoning_overlay_zoning_join_status_idx ON public.parcel_zoning_overlay USING btree (zoning_join_status)"
+    }
+  ],
+  "duration_seconds": 69.56,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcel_zoning_overlay_20260528_115217.log",
+  "outputs": {
+    "validation_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_zoning_overlay_validation.json",
+    "parcel_zoning_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_zoning_summary.csv",
+    "low_confidence_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_zoning_low_confidence.csv",
+    "no_match_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_zoning_no_match.csv"
+  }
+}

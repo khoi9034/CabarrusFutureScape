@@ -1,0 +1,383 @@
+{
+  "generated_at": "2026-05-31T01:26:57",
+  "artifact_type": "real_property_permit_source_profile",
+  "source": {
+    "accessible": true,
+    "content_length": 9721612,
+    "content_type": "application/octet-stream",
+    "content_disposition": "attachment; filename*=utf-8''vdx%5fRP%5fPermit%2ecsv; filename=\"vdx_RP_Permit.csv\"",
+    "etag": "\"{6B146A13-715F-4AAC-AC73-6B81D29A4DAA},74\"",
+    "filename": "vdx_RP_Permit.csv",
+    "final_url": "https://cabarruscountync.sharepoint.com/CabarrusCounty/TaxData/vdx_RP_Permit.csv?ga=1",
+    "last_modified": "Mon, 18 May 2026 15:02:44 GMT",
+    "requested_url": "https://cabarruscountync.sharepoint.com/:x:/g/CabarrusCounty/ERNqFGtfcaxKrHNrgdKaTaoBBgVAADJsQVXPezRfkYQ6Xw?e=HJ0xjl&download=1",
+    "status_code": 200
+  },
+  "profile": {
+    "row_count": 64426,
+    "column_count": 14,
+    "column_names": [
+      "ParcelID",
+      "ParcelNumber",
+      "PermitID",
+      "PermitDate",
+      "PermitNumber",
+      "PermitCode",
+      "PermitAmount",
+      "PermitNotes",
+      "BuildingNumber",
+      "WorkType",
+      "PermitType",
+      "CODate",
+      "PermitStatus",
+      "Appraiser"
+    ],
+    "data_types": {
+      "ParcelID": "string",
+      "ParcelNumber": "string",
+      "PermitID": "string",
+      "PermitDate": "string",
+      "PermitNumber": "string",
+      "PermitCode": "string",
+      "PermitAmount": "string",
+      "PermitNotes": "string",
+      "BuildingNumber": "string",
+      "WorkType": "string",
+      "PermitType": "string",
+      "CODate": "string",
+      "PermitStatus": "string",
+      "Appraiser": "string"
+    },
+    "column_profiles": [
+      {
+        "column_name": "ParcelID",
+        "pandas_dtype": "string",
+        "null_count": 0,
+        "non_null_count": 64426,
+        "null_percentage": 0.0,
+        "distinct_non_null_count": 42279,
+        "role_tags": "pin_parcel_fields",
+        "sample_values": [
+          "12352887",
+          "12353038",
+          "12353045",
+          "12354265",
+          "12355610"
+        ]
+      },
+      {
+        "column_name": "ParcelNumber",
+        "pandas_dtype": "string",
+        "null_count": 0,
+        "non_null_count": 64426,
+        "null_percentage": 0.0,
+        "distinct_non_null_count": 42279,
+        "role_tags": "pin_parcel_fields",
+        "sample_values": [
+          "55497787160000",
+          "46715784890000",
+          "56119939470000",
+          "55590012590000",
+          "55160692830000"
+        ]
+      },
+      {
+        "column_name": "PermitID",
+        "pandas_dtype": "string",
+        "null_count": 0,
+        "non_null_count": 64426,
+        "null_percentage": 0.0,
+        "distinct_non_null_count": 64426,
+        "role_tags": "permit_id_fields",
+        "sample_values": [
+          "4794824",
+          "4795612",
+          "4795623",
+          "4797647",
+          "4800926"
+        ]
+      },
+      {
+        "column_name": "PermitDate",
+        "pandas_dtype": "string",
+        "null_count": 26,
+        "non_null_count": 64400,
+        "null_percentage": 0.0404,
+        "distinct_non_null_count": 4299,
+        "role_tags": "date_fields",
+        "sample_values": [
+          "3/29/2019 12:00:00 AM",
+          "1/27/2015 12:00:00 AM",
+          "8/26/2011 12:00:00 AM",
+          "4/21/2017 12:00:00 AM",
+          "5/1/2007 12:00:00 AM"
+        ]
+      },
+      {
+        "column_name": "PermitNumber",
+        "pandas_dtype": "string",
+        "null_count": 13557,
+        "non_null_count": 50869,
+        "null_percentage": 21.0427,
+        "distinct_non_null_count": 50465,
+        "role_tags": "permit_id_fields",
+        "sample_values": [
+          "2019-00938",
+          "2015-00175",
+          "2011-01406",
+          "2017-01128",
+          "2020-01700"
+        ]
+      },
+      {
+        "column_name": "PermitCode",
+        "pandas_dtype": "string",
+        "null_count": 8,
+        "non_null_count": 64418,
+        "null_percentage": 0.0124,
+        "distinct_non_null_count": 15,
+        "role_tags": "permit_type_status_fields",
+        "sample_values": [
+          "OB",
+          "N",
+          "O",
+          "XF",
+          "A"
+        ]
+      },
+      {
+        "column_name": "PermitAmount",
+        "pandas_dtype": "string",
+        "null_count": 22132,
+        "non_null_count": 42294,
+        "null_percentage": 34.3526,
+        "distinct_non_null_count": 10627,
+        "role_tags": "",
+        "sample_values": [
+          "10000",
+          "203199",
+          "200000",
+          "25000",
+          "120000"
+        ]
+      },
+      {
+        "column_name": "PermitNotes",
+        "pandas_dtype": "string",
+        "null_count": 1542,
+        "non_null_count": 62884,
+        "null_percentage": 2.3934,
+        "distinct_non_null_count": 39137,
+        "role_tags": "",
+        "sample_values": [
+          "ACCESSORY BLDG 1300 SF 26 X 50 DIMENSIONS",
+          "NEW RESIDENCE",
+          "NEW HOUSE",
+          "64094",
+          "APPROX 20X39 SWIMMING POOL"
+        ]
+      },
+      {
+        "column_name": "BuildingNumber",
+        "pandas_dtype": "string",
+        "null_count": 52258,
+        "non_null_count": 12168,
+        "null_percentage": 81.1132,
+        "distinct_non_null_count": 13,
+        "role_tags": "address_location_fields",
+        "sample_values": [
+          "1",
+          "3",
+          "2",
+          "9",
+          "6"
+        ]
+      },
+      {
+        "column_name": "WorkType",
+        "pandas_dtype": "string",
+        "null_count": 49660,
+        "non_null_count": 14766,
+        "null_percentage": 77.0807,
+        "distinct_non_null_count": 50,
+        "role_tags": "permit_type_status_fields",
+        "sample_values": [
+          "Residential New",
+          "Residential Addition",
+          "Commercial New",
+          "Commercial Sign",
+          "Commercial Upfit"
+        ]
+      },
+      {
+        "column_name": "PermitType",
+        "pandas_dtype": "string",
+        "null_count": 8,
+        "non_null_count": 64418,
+        "null_percentage": 0.0124,
+        "distinct_non_null_count": 15,
+        "role_tags": "permit_type_status_fields",
+        "sample_values": [
+          "OUT BUILDING",
+          "NEW CONSTRUCTION",
+          "OTHER",
+          "EXTRA FEATURE",
+          "ADDITION RESIDENTIAL"
+        ]
+      },
+      {
+        "column_name": "CODate",
+        "pandas_dtype": "string",
+        "null_count": 62581,
+        "non_null_count": 1845,
+        "null_percentage": 97.1362,
+        "distinct_non_null_count": 650,
+        "role_tags": "date_fields",
+        "sample_values": [
+          "11/28/2017 12:00:00 AM",
+          "8/20/2024 12:00:00 AM",
+          "9/26/2024 12:00:00 AM",
+          "9/11/2024 12:00:00 AM",
+          "10/22/2024 12:00:00 AM"
+        ]
+      },
+      {
+        "column_name": "PermitStatus",
+        "pandas_dtype": "string",
+        "null_count": 45735,
+        "non_null_count": 18691,
+        "null_percentage": 70.9884,
+        "distinct_non_null_count": 6,
+        "role_tags": "permit_type_status_fields",
+        "sample_values": [
+          "CLOSED",
+          "INSPECTIONS",
+          "CO ISSUED",
+          "ISSUED",
+          "VOID"
+        ]
+      },
+      {
+        "column_name": "Appraiser",
+        "pandas_dtype": "string",
+        "null_count": 64426,
+        "non_null_count": 0,
+        "null_percentage": 100.0,
+        "distinct_non_null_count": 0,
+        "role_tags": "",
+        "sample_values": []
+      }
+    ],
+    "date_fields": [
+      {
+        "column_name": "PermitDate",
+        "parsed_count": 64400,
+        "parse_percentage": 99.9596,
+        "min_date": "1986-12-01",
+        "max_date": "2025-12-31",
+        "future_date_count_after_profile_date": 0
+      },
+      {
+        "column_name": "CODate",
+        "parsed_count": 1845,
+        "parse_percentage": 2.8638,
+        "min_date": "2007-03-01",
+        "max_date": "2201-02-22",
+        "future_date_count_after_profile_date": 1
+      }
+    ],
+    "permit_id_fields": [
+      {
+        "column_name": "PermitID",
+        "non_null_count": 64426,
+        "non_null_percentage": 100.0,
+        "distinct_non_null_count": 64426,
+        "duplicate_value_group_count": 0,
+        "appears_unique": true
+      },
+      {
+        "column_name": "PermitNumber",
+        "non_null_count": 50869,
+        "non_null_percentage": 78.9573,
+        "distinct_non_null_count": 50465,
+        "duplicate_value_group_count": 396,
+        "appears_unique": false
+      }
+    ],
+    "pin_parcel_fields": [
+      {
+        "column_name": "ParcelID",
+        "non_null_count": 64426,
+        "non_null_percentage": 100.0,
+        "distinct_non_null_count": 42279,
+        "duplicate_value_group_count": 11004,
+        "appears_unique": false
+      },
+      {
+        "column_name": "ParcelNumber",
+        "non_null_count": 64426,
+        "non_null_percentage": 100.0,
+        "distinct_non_null_count": 42279,
+        "duplicate_value_group_count": 11004,
+        "appears_unique": false
+      }
+    ],
+    "address_location_fields": [
+      "BuildingNumber"
+    ],
+    "permit_type_status_fields": [
+      "PermitCode",
+      "WorkType",
+      "PermitType",
+      "PermitStatus"
+    ]
+  },
+  "current_2015_pilot_comparison": {
+    "available": true,
+    "table": "public.permit_activity_clean",
+    "row_count": 6766,
+    "geometry_available": true,
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 6766
+      }
+    ],
+    "srid_distribution": [
+      {
+        "srid": 4326,
+        "feature_count": 6766
+      }
+    ],
+    "date_range": {
+      "min_activity_date": "2015-01-02",
+      "max_activity_date": "2015-12-30",
+      "parsed_activity_date_count": 6766
+    },
+    "key_field_counts": {
+      "permit_id_non_null_count": 6766,
+      "pin14_non_null_count": 6766,
+      "address_non_null_count": 6765,
+      "status_non_null_count": 6762,
+      "type_non_null_count": 6766,
+      "category_non_null_count": 6766
+    },
+    "duplicate_summary": {
+      "duplicate_permit_id_groups": 196,
+      "duplicate_pin14_groups": 1461
+    }
+  },
+  "recommendation": {
+    "primary_phase_3_source": "real_property_permit_source",
+    "keep_2015_pilot_role": "historical_spatial_reference_only",
+    "rationale": [
+      "Real Property Permit source has a much larger multi-year record set.",
+      "PermitID appears unique and ParcelNumber is a strong parcel/PIN join candidate.",
+      "The 2015 pilot source has geometry but only covers historical 2015 activity.",
+      "Real Property source lacks geometry, so parcel geometry should be attached through a governed parcel/PIN relationship model."
+    ],
+    "next_step": "Create a new raw/clean ingestion path for the Real Property Permit source, then model permit-to-parcel relationships by ParcelNumber/PIN with QA checks."
+  },
+  "duration_seconds": 6.47,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\inspect_real_property_permit_source_20260531_012650.log"
+}

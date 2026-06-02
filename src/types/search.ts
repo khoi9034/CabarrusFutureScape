@@ -15,6 +15,7 @@ import type { DashboardViewMode } from "@/types/workspace";
 export type CommandCategory =
   | "briefing"
   | "comparison"
+  | "dataset"
   | "event"
   | "layer"
   | "parcel"
@@ -81,6 +82,10 @@ export type CommandAction =
       type: "select-parcel";
     }
   | {
+      officialParcelId: string;
+      type: "inspect-intelligence-parcel";
+    }
+  | {
       type: "noop";
     }
   | {
@@ -114,7 +119,7 @@ export interface CommandItem {
     badge?: string;
     layerCategory?: LayerCategory;
     score?: number;
-    source?: "mock" | "placeholder";
+    source?: "generated" | "mock" | "placeholder";
   };
 }
 

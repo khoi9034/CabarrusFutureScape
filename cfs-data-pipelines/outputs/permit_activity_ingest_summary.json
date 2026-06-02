@@ -1,0 +1,68 @@
+{
+  "feature_count": 6766,
+  "geometry_types": [
+    "MultiPolygon",
+    "Polygon"
+  ],
+  "null_geometry_count": 0,
+  "crs": "EPSG:4326",
+  "sample_columns": [
+    "geometry",
+    "objectid",
+    "pin14",
+    "permitnumber",
+    "appname",
+    "filedate",
+    "permitcategory",
+    "permitgroup",
+    "recordgroup",
+    "permittype",
+    "permitsubtype",
+    "detaileddescription",
+    "status",
+    "lot",
+    "ownername",
+    "address",
+    "subdivision",
+    "shape_starea",
+    "shape_stlength",
+    "cfs_source_id"
+  ],
+  "permit_id_candidates": [
+    "permitnumber"
+  ],
+  "parcel_pin_candidates": [
+    "pin14"
+  ],
+  "date_candidates": [
+    "filedate"
+  ],
+  "arcgis_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/33",
+  "source": {
+    "id": "cabarrus-permits-2015-opendata",
+    "name": "Cabarrus County Permits 2015",
+    "source_status": "public-opendata-pilot",
+    "source_year": 2015
+  },
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "schema": "public",
+    "table": "permit_activity",
+    "written": true,
+    "if_exists": "replace",
+    "indexes": [
+      "permit_activity_geometry_gix",
+      "permit_activity_permitnumber_idx",
+      "permit_activity_pin14_idx",
+      "permit_activity_status_idx",
+      "permit_activity_permittype_idx",
+      "permit_activity_permitcategory_idx",
+      "permit_activity_filedate_idx"
+    ]
+  },
+  "duration_seconds": 31.71,
+  "generated_at": "2026-05-31T01:05:35",
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_permit_activity_20260531_010503.log"
+}

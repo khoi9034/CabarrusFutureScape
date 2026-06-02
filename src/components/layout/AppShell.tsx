@@ -18,9 +18,9 @@ export function AppShell() {
 
         <TopNav />
 
-        <div className="relative z-10 grid min-h-0 flex-1 grid-cols-1 gap-3 p-3 lg:grid-cols-[320px_minmax(0,1fr)_360px] lg:p-4 lg:pb-3 xl:grid-cols-[340px_minmax(0,1fr)_380px]">
+        <div className="relative z-10 grid min-h-0 flex-1 grid-cols-1 gap-3 p-3 md:grid-cols-2 lg:grid-cols-[320px_minmax(0,1fr)_360px] lg:p-4 lg:pb-3 xl:grid-cols-[340px_minmax(0,1fr)_380px]">
           <Sidebar />
-          <main className="order-1 min-h-[58vh] lg:order-2 lg:min-h-0">
+          <main className="order-1 min-h-[58vh] md:col-span-2 md:min-h-[62vh] lg:order-2 lg:col-span-1 lg:min-h-0">
             <SceneViewContainer />
           </main>
           <IntelligencePanel />

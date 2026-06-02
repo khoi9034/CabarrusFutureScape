@@ -1,0 +1,90 @@
+{
+  "phase": "Phase 5: Parcel Detail API Integration",
+  "generated_at": "2026-06-01T00:00:00-04:00",
+  "status": "completed",
+  "backend_endpoint_used": "GET /parcels/{official_parcel_id}",
+  "feature_flag": {
+    "name": "NEXT_PUBLIC_USE_BACKEND_API",
+    "false_behavior": "Parcel Detail Drawer continues to render the selected static parcel-search record.",
+    "true_behavior": "Parcel Detail Drawer opens immediately from the selected static/search record, then hydrates richer parcel detail from FastAPI.",
+    "fallback_behavior": "If the backend request fails, times out, returns 404, or returns an invalid shape, the drawer keeps rendering the static selected parcel and shows a non-blocking fallback status."
+  },
+  "files_created": [
+    "src/lib/adapters/parcelDetailAdapter.ts",
+    "outputs/frontend_parcel_detail_api_integration_summary.json"
+  ],
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/ParcelDetailDrawer.tsx",
+    "src/data/intelligence/parcelSearchData.ts",
+    "src/lib/adapters/parcelSearchAdapter.ts"
+  ],
+  "backend_fields_mapped": [
+    "official_parcel_id",
+    "pin14",
+    "objectid_1",
+    "subdivision",
+    "neighborhood",
+    "marketvalue_numeric",
+    "assessedvalue_numeric",
+    "valuation_band",
+    "parcel_size_category",
+    "parcel_quality_status",
+    "zoning_jurisdiction_name",
+    "dominant_zoning_code_raw",
+    "dominant_zoning_general_normalized",
+    "zoning_assignment_confidence",
+    "governance_warning_categories",
+    "safe_for_dashboard",
+    "planning_jurisdiction",
+    "transformed_at"
+  ],
+  "static_context_preserved": [
+    "owner_display",
+    "mailing_city",
+    "mailing_state",
+    "static parcel-search record fallback"
+  ],
+  "remaining_static_dependencies": [
+    "public/intelligence/parcel-search-index.json remains available for static search and detail fallback.",
+    "Owner and mailing context remain static until the backend parcel detail response includes those fields.",
+    "Map selection and geometry focus remain unchanged and are not connected to backend parcel detail."
+  ],
+  "not_modified": [
+    "SceneView",
+    "CommandPalette",
+    "backend endpoints",
+    "PostGIS schema",
+    "development panels",
+    "temporal panels"
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "backend_detail_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/parcels/CFS-PARCEL-0149720360",
+      "observed_fields": {
+        "official_parcel_id": "CFS-PARCEL-0149720360",
+        "pin14": "131 092",
+        "objectid_1": 149720360,
+        "zoning_code": "R4",
+        "zoning_assignment_confidence": "high",
+        "valuation_band": "unknown"
+      }
+    },
+    "dev_server_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:3000",
+      "http_status": 200
+    },
+    "browser_smoke_note": "Full in-browser flag-on drawer interaction was not fully repeated in this pass; compiled frontend path, backend endpoint, and dev server health were verified."
+  },
+  "readiness": {
+    "parcel_filter_api_integration": "ready",
+    "parcel_statistics_api_integration": "ready",
+    "map_geometry_focus": "not_started",
+    "sceneview_modified": false
+  }
+}

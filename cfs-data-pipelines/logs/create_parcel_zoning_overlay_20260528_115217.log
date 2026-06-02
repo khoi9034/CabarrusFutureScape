@@ -1,0 +1,13 @@
+2026-05-28 11:52:17,212 INFO Starting CFS parcel_zoning_overlay build.
+2026-05-28 11:52:17,212 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\create_parcel_zoning_overlay_20260528_115217.log
+2026-05-28 11:52:17,454 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-28 11:52:17,553 INFO Executing overlay SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_parcel_zoning_overlay.sql
+2026-05-28 11:53:28,051 INFO Source parcel count: 110017
+2026-05-28 11:53:28,052 INFO Overlay row count: 110017
+2026-05-28 11:53:28,063 INFO Assigned/no-match/multiple: 27157/82860/1420
+2026-05-28 11:53:28,063 INFO Confidence distribution: [{'value': 'no_match', 'parcel_count': 82860, 'parcel_percentage': Decimal('75.3156')}, {'value': 'high', 'parcel_count': 24443, 'parcel_percentage': Decimal('22.2175')}, {'value': 'low', 'parcel_count': 2399, 'parcel_percentage': Decimal('2.1806')}, {'value': 'medium', 'parcel_count': 315, 'parcel_percentage': Decimal('0.2863')}]
+2026-05-28 11:53:28,063 INFO Wrote validation JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_zoning_overlay_validation.json
+2026-05-28 11:53:28,063 INFO Wrote parcel zoning summary CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_zoning_summary.csv
+2026-05-28 11:53:28,063 INFO Wrote low-confidence CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_zoning_low_confidence.csv
+2026-05-28 11:53:28,064 INFO Wrote no-match CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_zoning_no_match.csv
+2026-05-28 11:53:28,064 INFO Overlay duration: 69.56 seconds

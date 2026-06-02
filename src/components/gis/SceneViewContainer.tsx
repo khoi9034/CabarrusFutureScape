@@ -135,6 +135,8 @@ export function SceneViewContainer() {
     initializeScene(containerRef.current);
 
     return () => {
+      // Keep ArcGIS lifecycle cleanup isolated here so dashboard state can
+      // remount the client-only SceneView without leaking handles or layers.
       cancelled = true;
       clickHandle?.remove();
       hoverHandle?.remove();
@@ -174,6 +176,7 @@ export function SceneViewContainer() {
         aria-label="Cabarrus County ArcGIS SceneView"
         className="absolute inset-0"
         ref={containerRef}
+        title="Interactive ArcGIS SceneView with mock Cabarrus County operational layers"
       />
     </MapViewportPlaceholder>
   );

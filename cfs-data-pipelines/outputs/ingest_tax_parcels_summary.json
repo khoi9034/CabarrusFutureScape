@@ -1,0 +1,38 @@
+{
+  "feature_count": 110017,
+  "geometry_types": [
+    "MultiPolygon",
+    "Polygon"
+  ],
+  "crs": "EPSG:4326",
+  "sample_columns": [
+    "geometry",
+    "objectid_1",
+    "pin14",
+    "objectid",
+    "oldpin",
+    "subdiv_name",
+    "nbh_name",
+    "propertyreal_id",
+    "legaldesc",
+    "marketvalue",
+    "assessedvalue",
+    "landvalue",
+    "deferredvalue",
+    "buildingvalue",
+    "obxfvalue"
+  ],
+  "arcgis_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/46",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "schema": "public",
+    "table": "parcels",
+    "written": true,
+    "if_exists": "replace"
+  },
+  "duration_seconds": 141.39,
+  "generated_at": "2026-05-28T10:31:44",
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_tax_parcels_20260528_102922.log"
+}

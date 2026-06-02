@@ -1,0 +1,99 @@
+{
+  "generated_at": "2026-06-01T21:41:01-04:00",
+  "phase": "Phase 6",
+  "task": "Map-Safe Parcel Focus and Highlight Readiness",
+  "status": "completed",
+  "backend_geometry_status": {
+    "parcel_detail_endpoint": "GET /parcels/{official_parcel_id}",
+    "provides_centroid": false,
+    "provides_extent": false,
+    "provides_geometry": false,
+    "notes": [
+      "The current frontend ParcelDetailResponse type contains identity, location, valuation, parcel context, zoning, governance, planning, and metadata fields only.",
+      "The current FastAPI parcel detail router does not expose include_geometry or geometry_format parameters yet.",
+      "Backend planning documents identify centroid/geometry as future API fields, but implemented endpoint responses are attribute-only."
+    ]
+  },
+  "files_created": [
+    "src/types/map/parcelFocus.ts",
+    "src/hooks/useParcelMapFocus.ts",
+    "src/lib/map/parcelMapFocus.ts"
+  ],
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/ParcelDetailDrawer.tsx",
+    "src/components/dashboard/ParcelSearchPanel.tsx"
+  ],
+  "map_focus_state_support": {
+    "selectedParcelFocus": true,
+    "setParcelFocus": true,
+    "setParcelFocusFromRecord": true,
+    "clearParcelFocus": true,
+    "focusStatus": [
+      "idle",
+      "pending-geometry",
+      "ready",
+      "focused",
+      "unsupported"
+    ],
+    "focusSource": [
+      "search",
+      "detail",
+      "command",
+      "mock"
+    ]
+  },
+  "no_op_safety_behavior": {
+    "when_geometry_missing": "resolveParcelMapFocus returns pending-geometry with canFocus=false.",
+    "sceneview_mutation": "none",
+    "mock_graphics_mutation": "none",
+    "current_ui_status": "Parcel Detail Drawer displays Map focus pending geometry for real parcel search/detail selections."
+  },
+  "integration_points": [
+    "Parcel search result selection creates a ParcelMapFocus object with focusSource=search.",
+    "Command palette parcel inspection creates a ParcelMapFocus object with focusSource=command.",
+    "Parcel detail close clears local parcel map focus state.",
+    "Parcel Detail Drawer displays focus source, focus status, centroid availability, and SceneView action readiness."
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "parcel_detail_shape_smoke": {
+      "endpoint": "GET /parcels/CFS-PARCEL-0149726579",
+      "has_centroid": false,
+      "has_extent": false,
+      "has_geometry": false,
+      "fields_returned": [
+        "official_parcel_id",
+        "pin14",
+        "objectid_1",
+        "location",
+        "valuation",
+        "parcel_context",
+        "zoning",
+        "governance",
+        "planning",
+        "metadata"
+      ]
+    },
+    "static_search_artifact_smoke": {
+      "record_count": 110017,
+      "has_centroid": false,
+      "has_extent": false,
+      "has_geometry": false
+    },
+    "parcel_search_api_smoke": {
+      "endpoint": "GET /parcels/search?q=CFS-PARCEL-0149726579&limit=1",
+      "total_count": 1,
+      "first_result": "CFS-PARCEL-0149726579"
+    },
+    "production_http_smoke": "http://127.0.0.1:3001 returned 200",
+    "browser_console_smoke": "not run; in-app Browser tool was not callable in this session"
+  },
+  "next_required_step": {
+    "backend": "Add governed parcel centroid/extent support to the parcel detail endpoint or a dedicated parcel map-focus endpoint.",
+    "frontend": "After centroid/extent support exists, connect the SceneView bridge to zoom and draw a non-destructive parcel highlight overlay.",
+    "phase_6_gis_map_intelligence": "Ready for true parcel highlight planning; not ready for zoom/highlight execution until centroid or geometry is returned by the API."
+  }
+}

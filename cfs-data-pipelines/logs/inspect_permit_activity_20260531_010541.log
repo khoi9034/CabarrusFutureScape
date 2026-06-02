@@ -1,0 +1,7 @@
+2026-05-31 01:05:41,418 INFO Starting permit activity profile.
+2026-05-31 01:05:42,096 INFO Permit activity row count: 6766
+2026-05-31 01:05:42,097 INFO Date candidates: ['filedate', 'cfs_source_year']
+2026-05-31 01:05:42,097 INFO Permit ID candidates: ['permitnumber']
+2026-05-31 01:05:42,097 INFO Parcel/PIN candidates: ['pin14']
+2026-05-31 01:05:42,097 INFO Wrote profile summary: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\permit_activity_profile_summary.json
+2026-05-31 01:05:42,097 INFO Wrote column profile: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\permit_activity_column_profile.csv

@@ -1,0 +1,13 @@
+2026-05-28 11:27:29,195 INFO Starting CFS parcels_enriched build.
+2026-05-28 11:27:29,195 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\create_parcels_enriched_20260528_112729.log
+2026-05-28 11:27:29,418 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-28 11:27:29,526 INFO Executing enrichment SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_parcels_enriched.sql
+2026-05-28 11:27:46,689 INFO Clean row count: 110017
+2026-05-28 11:27:46,689 INFO Enriched row count: 110017
+2026-05-28 11:27:46,689 INFO Geometry summary: {'geometry_type_counts': [{'geometry_type': 'ST_MultiPolygon', 'feature_count': 110017}], 'srid_counts': [{'srid': 4326, 'feature_count': 110017}], 'invalid_geometry_count': 0, 'source_geometry_repaired_count': 6}
+2026-05-28 11:27:46,690 INFO Flagged parcel count: 45099
+2026-05-28 11:27:46,690 INFO Duplicate PIN14 group count: 2930
+2026-05-28 11:27:46,690 INFO Wrote summary JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcels_enriched_summary.json
+2026-05-28 11:27:46,690 INFO Wrote quality flags CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcels_quality_flags.csv
+2026-05-28 11:27:46,690 INFO Wrote outlier summary CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcels_outlier_summary.csv
+2026-05-28 11:27:46,690 INFO Enrichment duration: 13.89 seconds

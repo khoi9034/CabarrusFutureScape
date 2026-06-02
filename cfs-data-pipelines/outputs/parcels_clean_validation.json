@@ -1,0 +1,432 @@
+{
+  "generated_at": "2026-05-28T11:12:15",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "raw_table": "public.parcels",
+    "clean_table": "public.parcels_clean"
+  },
+  "row_count_comparison": {
+    "raw_table": "public.parcels",
+    "clean_table": "public.parcels_clean",
+    "raw_row_count": 110017,
+    "clean_row_count": 110017,
+    "row_count_delta": 0,
+    "row_counts_match": true
+  },
+  "geometry_validation": {
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 110017
+      }
+    ],
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "feature_count": 110017
+      }
+    ],
+    "invalid_geometry_count": 0,
+    "null_geometry_count": 0,
+    "geometry_cleaning_policy": "ST_MakeValid is applied, polygonal components are extracted with ST_CollectionExtract(..., 3), and geometries are coerced to MultiPolygon in SRID 4326."
+  },
+  "numeric_cast_validation": {
+    "marketvalue": {
+      "raw_non_empty_count": 103042,
+      "clean_numeric_count": 103042,
+      "failed_cast_count": 0,
+      "min_value": 0.0,
+      "max_value": 473824360.0,
+      "avg_value": 495416.4285048815
+    },
+    "assessedvalue": {
+      "raw_non_empty_count": 103042,
+      "clean_numeric_count": 103042,
+      "failed_cast_count": 0,
+      "min_value": 0.0,
+      "max_value": 473824360.0,
+      "avg_value": 480217.7005104715
+    },
+    "landvalue": {
+      "raw_non_empty_count": 103042,
+      "clean_numeric_count": 103042,
+      "failed_cast_count": 0,
+      "min_value": 0.0,
+      "max_value": 91897890.0,
+      "avg_value": 139891.2949185769
+    },
+    "deferredvalue": {
+      "raw_non_empty_count": 103633,
+      "clean_numeric_count": 103633,
+      "failed_cast_count": 0,
+      "min_value": -10780.0,
+      "max_value": 19423880.0,
+      "avg_value": 15381.07282429342
+    },
+    "buildingvalue": {
+      "raw_non_empty_count": 103042,
+      "clean_numeric_count": 103042,
+      "failed_cast_count": 0,
+      "min_value": 0.0,
+      "max_value": 417194960.0,
+      "avg_value": 342726.63971972594
+    },
+    "obxfvalue": {
+      "raw_non_empty_count": 103042,
+      "clean_numeric_count": 103042,
+      "failed_cast_count": 0,
+      "min_value": 0.0,
+      "max_value": 61503670.0,
+      "avg_value": 12798.493866578678
+    }
+  },
+  "duplicate_pin14_summary": {
+    "distinct_non_null_pin14_count": 106560,
+    "duplicate_pin14_value_count": 2930,
+    "duplicate_pin14_excess_rows": 3447.0,
+    "null_pin14_count": 10
+  },
+  "primary_key_summary": [
+    {
+      "constraint_name": "parcels_clean_pkey",
+      "constraint_definition": "PRIMARY KEY (objectid_1)"
+    }
+  ],
+  "index_summary": [
+    {
+      "indexname": "parcels_clean_assessedvalue_numeric_idx",
+      "indexdef": "CREATE INDEX parcels_clean_assessedvalue_numeric_idx ON public.parcels_clean USING btree (assessedvalue_numeric)"
+    },
+    {
+      "indexname": "parcels_clean_geometry_gix",
+      "indexdef": "CREATE INDEX parcels_clean_geometry_gix ON public.parcels_clean USING gist (geometry)"
+    },
+    {
+      "indexname": "parcels_clean_marketvalue_numeric_idx",
+      "indexdef": "CREATE INDEX parcels_clean_marketvalue_numeric_idx ON public.parcels_clean USING btree (marketvalue_numeric)"
+    },
+    {
+      "indexname": "parcels_clean_nbh_name_idx",
+      "indexdef": "CREATE INDEX parcels_clean_nbh_name_idx ON public.parcels_clean USING btree (nbh_name)"
+    },
+    {
+      "indexname": "parcels_clean_pin14_idx",
+      "indexdef": "CREATE INDEX parcels_clean_pin14_idx ON public.parcels_clean USING btree (pin14)"
+    },
+    {
+      "indexname": "parcels_clean_pkey",
+      "indexdef": "CREATE UNIQUE INDEX parcels_clean_pkey ON public.parcels_clean USING btree (objectid_1)"
+    },
+    {
+      "indexname": "parcels_clean_subdiv_name_idx",
+      "indexdef": "CREATE INDEX parcels_clean_subdiv_name_idx ON public.parcels_clean USING btree (subdiv_name)"
+    }
+  ],
+  "derived_field_summary": {
+    "parcel_area_sq_m_count": 110017,
+    "min_area_sq_m": 2.574670361354947e-07,
+    "max_area_sq_m": 7538782.734410646,
+    "avg_area_sq_m": 8958.135766691918,
+    "parcel_area_acres_count": 110017,
+    "min_area_acres": 6.362149017948186e-11,
+    "max_area_acres": 1862.8737833846226,
+    "avg_area_acres": 2.213603555863061,
+    "value_per_acre_count": 103042,
+    "min_value_per_acre": 0.0,
+    "max_value_per_acre": 66734722198509.08,
+    "avg_value_per_acre": 1057500887.7554823
+  },
+  "top_subdivisions_by_parcel_count": [
+    {
+      "subdivision": "ROWAN COUNTY PARCEL",
+      "parcel_count": 6054,
+      "total_area_acres": 6643.33,
+      "avg_marketvalue": null,
+      "avg_assessedvalue": null
+    },
+    {
+      "subdivision": "MOSS CREEK",
+      "parcel_count": 1056,
+      "total_area_acres": 211.88,
+      "avg_marketvalue": 438635.04,
+      "avg_assessedvalue": 438635.04
+    },
+    {
+      "subdivision": "HIGHLAND CREEK",
+      "parcel_count": 970,
+      "total_area_acres": 344.05,
+      "avg_marketvalue": 466636.53,
+      "avg_assessedvalue": 466636.53
+    },
+    {
+      "subdivision": "NO SUBDIVISION",
+      "parcel_count": 742,
+      "total_area_acres": 9133.89,
+      "avg_marketvalue": 757928.64,
+      "avg_assessedvalue": 612180.41
+    },
+    {
+      "subdivision": "ROCKY RIVER CROSSING",
+      "parcel_count": 504,
+      "total_area_acres": 184.05,
+      "avg_marketvalue": 427446.65,
+      "avg_assessedvalue": 427446.65
+    },
+    {
+      "subdivision": "ALLEN MILLS",
+      "parcel_count": 494,
+      "total_area_acres": 229.93,
+      "avg_marketvalue": 734813.0,
+      "avg_assessedvalue": 734813.0
+    },
+    {
+      "subdivision": "ST ANDREWS",
+      "parcel_count": 492,
+      "total_area_acres": 132.05,
+      "avg_marketvalue": 310244.72,
+      "avg_assessedvalue": 310244.72
+    },
+    {
+      "subdivision": "CABARRUS WOODS",
+      "parcel_count": 468,
+      "total_area_acres": 167.1,
+      "avg_marketvalue": 297049.15,
+      "avg_assessedvalue": 297049.15
+    },
+    {
+      "subdivision": "COVINGTON",
+      "parcel_count": 448,
+      "total_area_acres": 120.83,
+      "avg_marketvalue": 400003.3,
+      "avg_assessedvalue": 400003.3
+    },
+    {
+      "subdivision": "LAUREL PARK",
+      "parcel_count": 434,
+      "total_area_acres": 127.14,
+      "avg_marketvalue": 528538.78,
+      "avg_assessedvalue": 528538.78
+    },
+    {
+      "subdivision": "HARRISBURG PARK",
+      "parcel_count": 389,
+      "total_area_acres": 224.27,
+      "avg_marketvalue": 315246.36,
+      "avg_assessedvalue": 315246.36
+    },
+    {
+      "subdivision": "HUNTON FOREST",
+      "parcel_count": 344,
+      "total_area_acres": 88.36,
+      "avg_marketvalue": 448265.23,
+      "avg_assessedvalue": 448265.23
+    },
+    {
+      "subdivision": "CANTERFIELD ESTATES",
+      "parcel_count": 333,
+      "total_area_acres": 160.35,
+      "avg_marketvalue": 343661.59,
+      "avg_assessedvalue": 343661.59
+    },
+    {
+      "subdivision": "SKYBROOK",
+      "parcel_count": 330,
+      "total_area_acres": 187.2,
+      "avg_marketvalue": 813866.84,
+      "avg_assessedvalue": 813866.84
+    },
+    {
+      "subdivision": "PIPER LANDING",
+      "parcel_count": 316,
+      "total_area_acres": 55.48,
+      "avg_marketvalue": 321198.1,
+      "avg_assessedvalue": 321198.1
+    },
+    {
+      "subdivision": "SHEFFIELD MANOR",
+      "parcel_count": 316,
+      "total_area_acres": 88.14,
+      "avg_marketvalue": 423385.63,
+      "avg_assessedvalue": 423385.63
+    },
+    {
+      "subdivision": "ANNSBOROUGH PARK",
+      "parcel_count": 314,
+      "total_area_acres": 252.59,
+      "avg_marketvalue": 525092.48,
+      "avg_assessedvalue": 525092.48
+    },
+    {
+      "subdivision": "HARRISBURG TOWN CENTER",
+      "parcel_count": 313,
+      "total_area_acres": 74.35,
+      "avg_marketvalue": 470940.8,
+      "avg_assessedvalue": 470940.8
+    },
+    {
+      "subdivision": "CABARRUS CROSSING",
+      "parcel_count": 300,
+      "total_area_acres": 88.53,
+      "avg_marketvalue": 373030.3,
+      "avg_assessedvalue": 373030.3
+    },
+    {
+      "subdivision": "CARRIAGE DOWNS",
+      "parcel_count": 292,
+      "total_area_acres": 183.36,
+      "avg_marketvalue": 597319.18,
+      "avg_assessedvalue": 597319.18
+    }
+  ],
+  "top_neighborhoods_by_parcel_count": [
+    {
+      "neighborhood": "ROWAN COUNTY PARCEL",
+      "parcel_count": 6054,
+      "total_area_acres": 6643.33,
+      "avg_marketvalue": null,
+      "avg_assessedvalue": null
+    },
+    {
+      "neighborhood": "THE MILLS AT ROCKY RIVER",
+      "parcel_count": 1007,
+      "total_area_acres": 462.1,
+      "avg_marketvalue": 498185.75,
+      "avg_assessedvalue": 498185.75
+    },
+    {
+      "neighborhood": "BROOKWOOD NORTH",
+      "parcel_count": 930,
+      "total_area_acres": 406.96,
+      "avg_marketvalue": 236293.26,
+      "avg_assessedvalue": 236293.26
+    },
+    {
+      "neighborhood": "FLOWES STORE EAST",
+      "parcel_count": 926,
+      "total_area_acres": 8841.64,
+      "avg_marketvalue": 390727.95,
+      "avg_assessedvalue": 316031.19
+    },
+    {
+      "neighborhood": "LITTLE BUFFALO CREEK",
+      "parcel_count": 844,
+      "total_area_acres": 11642.74,
+      "avg_marketvalue": 349666.45,
+      "avg_assessedvalue": 247147.72
+    },
+    {
+      "neighborhood": "MIAMI CHURCH RD",
+      "parcel_count": 839,
+      "total_area_acres": 11105.98,
+      "avg_marketvalue": 421075.04,
+      "avg_assessedvalue": 305234.67
+    },
+    {
+      "neighborhood": "RIMER TOWN",
+      "parcel_count": 779,
+      "total_area_acres": 7225.55,
+      "avg_marketvalue": 354370.17,
+      "avg_assessedvalue": 275917.53
+    },
+    {
+      "neighborhood": "MIDWAY WEST",
+      "parcel_count": 771,
+      "total_area_acres": 288.77,
+      "avg_marketvalue": 216463.11,
+      "avg_assessedvalue": 216463.11
+    },
+    {
+      "neighborhood": "HARTSELL SCHOOL",
+      "parcel_count": 749,
+      "total_area_acres": 310.09,
+      "avg_marketvalue": 160594.01,
+      "avg_assessedvalue": 160594.01
+    },
+    {
+      "neighborhood": "ST JOHNS CHURCH",
+      "parcel_count": 712,
+      "total_area_acres": 7223.94,
+      "avg_marketvalue": 385010.75,
+      "avg_assessedvalue": 284168.59
+    },
+    {
+      "neighborhood": "WATTS CROSSROADS",
+      "parcel_count": 699,
+      "total_area_acres": 9279.26,
+      "avg_marketvalue": 324320.22,
+      "avg_assessedvalue": 233699.96
+    },
+    {
+      "neighborhood": "DEWEESE",
+      "parcel_count": 670,
+      "total_area_acres": 5280.24,
+      "avg_marketvalue": 463024.43,
+      "avg_assessedvalue": 356462.69
+    },
+    {
+      "neighborhood": "KELLSWATER BRIDGE",
+      "parcel_count": 669,
+      "total_area_acres": 217.64,
+      "avg_marketvalue": 446487.25,
+      "avg_assessedvalue": 446487.25
+    },
+    {
+      "neighborhood": "BETHEL ELEMENTARY SCHOOL",
+      "parcel_count": 660,
+      "total_area_acres": 4474.41,
+      "avg_marketvalue": 396005.31,
+      "avg_assessedvalue": 350848.93
+    },
+    {
+      "neighborhood": "LAKE CONCORD RD",
+      "parcel_count": 645,
+      "total_area_acres": 221.68,
+      "avg_marketvalue": 210726.9,
+      "avg_assessedvalue": 210726.9
+    },
+    {
+      "neighborhood": "ST. ANDREWS PLACE / BRAXTON PLACE",
+      "parcel_count": 637,
+      "total_area_acres": 171.59,
+      "avg_marketvalue": 307522.1,
+      "avg_assessedvalue": 307522.1
+    },
+    {
+      "neighborhood": "LAKE LYNN LODGE",
+      "parcel_count": 631,
+      "total_area_acres": 3439.09,
+      "avg_marketvalue": 313004.98,
+      "avg_assessedvalue": 275632.41
+    },
+    {
+      "neighborhood": "WEST C ST",
+      "parcel_count": 602,
+      "total_area_acres": 197.91,
+      "avg_marketvalue": 183764.39,
+      "avg_assessedvalue": 183764.39
+    },
+    {
+      "neighborhood": "MT PLEASANT HIGH SCHOOL",
+      "parcel_count": 600,
+      "total_area_acres": 5156.9,
+      "avg_marketvalue": 391920.34,
+      "avg_assessedvalue": 320634.29
+    },
+    {
+      "neighborhood": "HAHN SCOTT RD",
+      "parcel_count": 598,
+      "total_area_acres": 6787.31,
+      "avg_marketvalue": 400165.93,
+      "avg_assessedvalue": 278691.1
+    }
+  ],
+  "duration_seconds": 12.63,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcels_clean_20260528_111203.log",
+  "outputs": {
+    "validation_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcels_clean_validation.json",
+    "subdivision_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcels_subdivision_summary.csv",
+    "neighborhood_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcels_neighborhood_summary.csv"
+  }
+}

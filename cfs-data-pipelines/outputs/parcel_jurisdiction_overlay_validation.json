@@ -1,0 +1,1122 @@
+{
+  "generated_at": "2026-05-28T15:58:01",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "parcel_table": "public.parcels_enriched",
+    "planning_boundary_table": "public.planning_boundaries_clean",
+    "overlay_table": "public.parcel_jurisdiction_overlay"
+  },
+  "row_count_summary": {
+    "source_parcel_count": 110017,
+    "overlay_row_count": 110017,
+    "row_count_delta": 0,
+    "row_counts_match": true,
+    "parcels_assigned_to_planning_boundary": 2979,
+    "parcels_with_no_planning_boundary_match": 107038,
+    "parcels_with_multiple_jurisdiction_overlaps": 0
+  },
+  "confidence_distribution": [
+    {
+      "value": "no_match",
+      "parcel_count": 107038,
+      "parcel_percentage": 97.2922
+    },
+    {
+      "value": "high",
+      "parcel_count": 2071,
+      "parcel_percentage": 1.8824
+    },
+    {
+      "value": "low",
+      "parcel_count": 833,
+      "parcel_percentage": 0.7572
+    },
+    {
+      "value": "medium",
+      "parcel_count": 75,
+      "parcel_percentage": 0.0682
+    }
+  ],
+  "join_status_distribution": [
+    {
+      "value": "no_match",
+      "parcel_count": 107038,
+      "parcel_percentage": 97.2922
+    },
+    {
+      "value": "assigned",
+      "parcel_count": 2146,
+      "parcel_percentage": 1.9506
+    },
+    {
+      "value": "single_boundary_low_confidence",
+      "parcel_count": 833,
+      "parcel_percentage": 0.7572
+    }
+  ],
+  "planning_jurisdiction_distribution": [
+    {
+      "planning_jurisdiction_name": "(no match)",
+      "planning_boundary_type": "(no match)",
+      "boundary_name": "(no match)",
+      "parcel_count": 107038,
+      "multiple_jurisdiction_count": 0,
+      "low_confidence_count": 0,
+      "no_match_count": 107038,
+      "avg_dominant_overlap_pct": null,
+      "min_dominant_overlap_pct": null,
+      "max_dominant_overlap_pct": null
+    },
+    {
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "parcel_count": 1030,
+      "multiple_jurisdiction_count": 0,
+      "low_confidence_count": 112,
+      "no_match_count": 0,
+      "avg_dominant_overlap_pct": 0.897016,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "planning_jurisdiction_name": "Mt. Pleasant",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Mt. Pleasant",
+      "parcel_count": 912,
+      "multiple_jurisdiction_count": 0,
+      "low_confidence_count": 162,
+      "no_match_count": 0,
+      "avg_dominant_overlap_pct": 0.831704,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "planning_jurisdiction_name": "Concord",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Concord",
+      "parcel_count": 541,
+      "multiple_jurisdiction_count": 0,
+      "low_confidence_count": 271,
+      "no_match_count": 0,
+      "avg_dominant_overlap_pct": 0.536833,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    },
+    {
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "parcel_count": 496,
+      "multiple_jurisdiction_count": 0,
+      "low_confidence_count": 288,
+      "no_match_count": 0,
+      "avg_dominant_overlap_pct": 0.44485,
+      "min_dominant_overlap_pct": 0.0,
+      "max_dominant_overlap_pct": 1.0
+    }
+  ],
+  "top_no_match_neighborhoods": [
+    {
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "parcel_count": 5029
+    },
+    {
+      "nbh_name": "THE MILLS AT ROCKY RIVER",
+      "parcel_count": 1007
+    },
+    {
+      "nbh_name": "BROOKWOOD NORTH",
+      "parcel_count": 930
+    },
+    {
+      "nbh_name": "FLOWES STORE EAST",
+      "parcel_count": 926
+    },
+    {
+      "nbh_name": "LITTLE BUFFALO CREEK",
+      "parcel_count": 844
+    },
+    {
+      "nbh_name": "MIAMI CHURCH RD",
+      "parcel_count": 839
+    },
+    {
+      "nbh_name": "RIMER TOWN",
+      "parcel_count": 779
+    },
+    {
+      "nbh_name": "MIDWAY WEST",
+      "parcel_count": 771
+    },
+    {
+      "nbh_name": "HARTSELL SCHOOL",
+      "parcel_count": 749
+    },
+    {
+      "nbh_name": "WATTS CROSSROADS",
+      "parcel_count": 699
+    },
+    {
+      "nbh_name": "ST JOHNS CHURCH",
+      "parcel_count": 695
+    },
+    {
+      "nbh_name": "DEWEESE",
+      "parcel_count": 670
+    },
+    {
+      "nbh_name": "KELLSWATER BRIDGE",
+      "parcel_count": 669
+    },
+    {
+      "nbh_name": "BETHEL ELEMENTARY SCHOOL",
+      "parcel_count": 660
+    },
+    {
+      "nbh_name": "LAKE CONCORD RD",
+      "parcel_count": 645
+    },
+    {
+      "nbh_name": "ST. ANDREWS PLACE / BRAXTON PLACE",
+      "parcel_count": 637
+    },
+    {
+      "nbh_name": "WEST C ST",
+      "parcel_count": 602
+    },
+    {
+      "nbh_name": "BOYS CLUB",
+      "parcel_count": 596
+    },
+    {
+      "nbh_name": "LAKE HOWELL WATERSHED",
+      "parcel_count": 591
+    },
+    {
+      "nbh_name": "CAR TOWN",
+      "parcel_count": 590
+    },
+    {
+      "nbh_name": "HAHN SCOTT RD",
+      "parcel_count": 587
+    },
+    {
+      "nbh_name": "MIDWAY EAST",
+      "parcel_count": 584
+    },
+    {
+      "nbh_name": "LAKE LYNN LODGE",
+      "parcel_count": 576
+    },
+    {
+      "nbh_name": "MT PLEASANT HIGH SCHOOL",
+      "parcel_count": 576
+    },
+    {
+      "nbh_name": "FOREST PARK ELEMENTARY SCHOOL",
+      "parcel_count": 574
+    },
+    {
+      "nbh_name": "BETHPAGE RD AREA",
+      "parcel_count": 570
+    },
+    {
+      "nbh_name": "NCRC/KANNAPOLIS DOWNTOWN",
+      "parcel_count": 565
+    },
+    {
+      "nbh_name": "SKYBROOK VILLAGE",
+      "parcel_count": 553
+    },
+    {
+      "nbh_name": "RIVERWALK",
+      "parcel_count": 546
+    },
+    {
+      "nbh_name": "AZALEA AVE AREA",
+      "parcel_count": 545
+    }
+  ],
+  "top_no_match_subdivisions": [
+    {
+      "subdiv_name": "(unknown)",
+      "parcel_count": 32576
+    },
+    {
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_count": 5029
+    },
+    {
+      "subdiv_name": "MOSS CREEK",
+      "parcel_count": 1056
+    },
+    {
+      "subdiv_name": "HIGHLAND CREEK",
+      "parcel_count": 970
+    },
+    {
+      "subdiv_name": "NO SUBDIVISION",
+      "parcel_count": 700
+    },
+    {
+      "subdiv_name": "ALLEN MILLS",
+      "parcel_count": 494
+    },
+    {
+      "subdiv_name": "ST ANDREWS",
+      "parcel_count": 492
+    },
+    {
+      "subdiv_name": "ROCKY RIVER CROSSING",
+      "parcel_count": 490
+    },
+    {
+      "subdiv_name": "CABARRUS WOODS",
+      "parcel_count": 468
+    },
+    {
+      "subdiv_name": "COVINGTON",
+      "parcel_count": 448
+    },
+    {
+      "subdiv_name": "LAUREL PARK",
+      "parcel_count": 434
+    },
+    {
+      "subdiv_name": "HARRISBURG PARK",
+      "parcel_count": 389
+    },
+    {
+      "subdiv_name": "HUNTON FOREST",
+      "parcel_count": 344
+    },
+    {
+      "subdiv_name": "CANTERFIELD ESTATES",
+      "parcel_count": 333
+    },
+    {
+      "subdiv_name": "SKYBROOK",
+      "parcel_count": 330
+    },
+    {
+      "subdiv_name": "PIPER LANDING",
+      "parcel_count": 316
+    },
+    {
+      "subdiv_name": "SHEFFIELD MANOR",
+      "parcel_count": 316
+    },
+    {
+      "subdiv_name": "ANNSBOROUGH PARK",
+      "parcel_count": 314
+    },
+    {
+      "subdiv_name": "HARRISBURG TOWN CENTER",
+      "parcel_count": 312
+    },
+    {
+      "subdiv_name": "CABARRUS CROSSING",
+      "parcel_count": 300
+    },
+    {
+      "subdiv_name": "CARRIAGE DOWNS",
+      "parcel_count": 292
+    },
+    {
+      "subdiv_name": "RIDGE CROSSING",
+      "parcel_count": 279
+    },
+    {
+      "subdiv_name": "CAROLANDO",
+      "parcel_count": 278
+    },
+    {
+      "subdiv_name": "CHILDERS PARK",
+      "parcel_count": 276
+    },
+    {
+      "subdiv_name": "BRANDON RIDGE",
+      "parcel_count": 264
+    },
+    {
+      "subdiv_name": "RIVERWALK",
+      "parcel_count": 260
+    },
+    {
+      "subdiv_name": "BRADFORD PARK",
+      "parcel_count": 250
+    },
+    {
+      "subdiv_name": "FARM AT RIVERPOINTE",
+      "parcel_count": 244
+    },
+    {
+      "subdiv_name": "OAK PARK",
+      "parcel_count": 244
+    },
+    {
+      "subdiv_name": "ORCHARD PARK",
+      "parcel_count": 239
+    }
+  ],
+  "sample_low_confidence_records": [
+    {
+      "official_parcel_id": "CFS-PARCEL-0149720369",
+      "objectid_1": 149720369,
+      "pin14": "132 109",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 2.000694
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149720805",
+      "objectid_1": 149720805,
+      "pin14": "142 049",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 139.846602
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149721018",
+      "objectid_1": 149721018,
+      "pin14": "142A035",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 0.383854
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149721147",
+      "objectid_1": 149721147,
+      "pin14": "142 156",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 0.902445
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149721171",
+      "objectid_1": 149721171,
+      "pin14": "143 030",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 3.781882
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149721458",
+      "objectid_1": 149721458,
+      "pin14": "132 0130000001",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 69.552437
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149721571",
+      "objectid_1": 149721571,
+      "pin14": "140B181",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 0.443945
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149722667",
+      "objectid_1": 149722667,
+      "pin14": "143B025",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 0.368103
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149722818",
+      "objectid_1": 149722818,
+      "pin14": "145 023",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 55.259337
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149725560",
+      "objectid_1": 149725560,
+      "pin14": "244F005",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 1.023978
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149725930",
+      "objectid_1": 149725930,
+      "pin14": "244 046",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 24.854814
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727501",
+      "objectid_1": 149727501,
+      "pin14": "151 594",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 0.449171
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149729785",
+      "objectid_1": 149729785,
+      "pin14": "244 012",
+      "planning_jurisdiction_name": "Kannapolis",
+      "planning_boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "ROWAN COUNTY PARCEL",
+      "subdiv_name": "ROWAN COUNTY PARCEL",
+      "parcel_area_acres_calc": 24.695839
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149744156",
+      "objectid_1": 149744156,
+      "pin14": "55060984780000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "HUNTWICK",
+      "subdiv_name": "HUNTWICK",
+      "parcel_area_acres_calc": 1.049878
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149748435",
+      "objectid_1": 149748435,
+      "pin14": "55075121310000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "WINDSOR FOREST",
+      "subdiv_name": "WINDSOR FOREST",
+      "parcel_area_acres_calc": 0.189095
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749449",
+      "objectid_1": 149749449,
+      "pin14": "55079209630000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "CAMELLIA GARDENS",
+      "subdiv_name": "CAMELLIA GARDENS",
+      "parcel_area_acres_calc": 0.299218
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149754701",
+      "objectid_1": 149754701,
+      "pin14": "55171393120000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "STALLINGS FARM",
+      "subdiv_name": "STALLINGS FARM",
+      "parcel_area_acres_calc": 0.999847
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149754744",
+      "objectid_1": 149754744,
+      "pin14": "55172302150000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "STALLINGS FARM",
+      "subdiv_name": "STALLINGS FARM",
+      "parcel_area_acres_calc": 1.124424
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149754814",
+      "objectid_1": 149754814,
+      "pin14": "55170277860000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "CAMELLIA GARDENS",
+      "subdiv_name": "CAMELLIA GARDENS PH 1 (REVISED)",
+      "parcel_area_acres_calc": 31.472427
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149755111",
+      "objectid_1": 149755111,
+      "pin14": "55172145850000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "review",
+      "nbh_name": "HARRISBURG",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 17.846307
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149755181",
+      "objectid_1": 149755181,
+      "pin14": "55173393210000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "HARMONY",
+      "subdiv_name": "HARMONY",
+      "parcel_area_acres_calc": 0.349912
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149755359",
+      "objectid_1": 149755359,
+      "pin14": "55171355680000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "STALLINGS FARM",
+      "subdiv_name": "STALLINGS FARM",
+      "parcel_area_acres_calc": 0.675121
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149755360",
+      "objectid_1": 149755360,
+      "pin14": "55171384000000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "STALLINGS FARM",
+      "subdiv_name": "STALLINGS FARM",
+      "parcel_area_acres_calc": 0.846481
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149755485",
+      "objectid_1": 149755485,
+      "pin14": "55174323410000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "FLOWERS FARM",
+      "subdiv_name": "FLOWERS FARM",
+      "parcel_area_acres_calc": 0.647429
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149755723",
+      "objectid_1": 149755723,
+      "pin14": "55173573400000",
+      "planning_jurisdiction_name": "Harrisburg",
+      "planning_boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "jurisdiction_overlap_count": 1,
+      "dominant_jurisdiction_overlap_pct": 0.0,
+      "total_jurisdiction_overlap_pct": 0.0,
+      "jurisdiction_assignment_confidence": "low",
+      "has_multiple_jurisdictions": false,
+      "jurisdiction_join_status": "single_boundary_low_confidence",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "HARMONY",
+      "subdiv_name": "HARMONY",
+      "parcel_area_acres_calc": 0.875408
+    }
+  ],
+  "sample_no_match_records": [
+    {
+      "official_parcel_id": "CFS-PARCEL-0149751011",
+      "objectid_1": 149751011,
+      "pin14": "46920592590000",
+      "parcel_quality_status": "review",
+      "nbh_name": "LAKE HOWELL WATERSHED",
+      "subdiv_name": "LAKE DON T. HOWELL",
+      "parcel_area_acres_calc": 1862.873783,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727441",
+      "objectid_1": 149727441,
+      "pin14": "45988876150000",
+      "parcel_quality_status": "review",
+      "nbh_name": "CHARLOTTE MOTOR SPEEDWAY",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 839.555545,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727442",
+      "objectid_1": 149727442,
+      "pin14": "45988876150000",
+      "parcel_quality_status": "review",
+      "nbh_name": "CHARLOTTE MOTOR SPEEDWAY",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 839.555545,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149760035",
+      "objectid_1": 149760035,
+      "pin14": "55198962310000",
+      "parcel_quality_status": "review",
+      "nbh_name": "CONCORD PARKWAY SOUTH",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 670.271489,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149777974",
+      "objectid_1": 149777974,
+      "pin14": "55579909940000",
+      "parcel_quality_status": "review",
+      "nbh_name": "MIAMI CHURCH RD",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 642.007548,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149828946",
+      "objectid_1": 149828946,
+      "pin14": "56829114560000",
+      "parcel_quality_status": "review",
+      "nbh_name": "WATTS CROSSROADS",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 614.002839,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749977",
+      "objectid_1": 149749977,
+      "pin14": "46900022520000",
+      "parcel_quality_status": "review",
+      "nbh_name": "AIRPORT",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 586.4664,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749978",
+      "objectid_1": 149749978,
+      "pin14": "46900022520000",
+      "parcel_quality_status": "review",
+      "nbh_name": "AIRPORT",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 586.4664,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149778854",
+      "objectid_1": 149778854,
+      "pin14": "55665127460000",
+      "parcel_quality_status": "review",
+      "nbh_name": "REED GOLD MINE",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 516.983039,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149758869",
+      "objectid_1": 149758869,
+      "pin14": "55194706110000",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "CONCORD PARKWAY SOUTH",
+      "subdiv_name": "AQUAMARINE",
+      "parcel_area_acres_calc": 489.431721,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149828470",
+      "objectid_1": 149828470,
+      "pin14": "56732839770000",
+      "parcel_quality_status": "review",
+      "nbh_name": "LITTLE BUFFALO CREEK",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 486.029546,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149753167",
+      "objectid_1": 149753167,
+      "pin14": "55159011120000",
+      "parcel_quality_status": "review",
+      "nbh_name": "PINE GROVE CHURCH RD",
+      "subdiv_name": "CAROLINA RIDGE",
+      "parcel_area_acres_calc": 465.539879,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149777845",
+      "objectid_1": 149777845,
+      "pin14": "55562590580000",
+      "parcel_quality_status": "review",
+      "nbh_name": "REED GOLD MINE",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 450.812071,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149777876",
+      "objectid_1": 149777876,
+      "pin14": "55562590580000",
+      "parcel_quality_status": "review",
+      "nbh_name": "REED GOLD MINE",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 450.812071,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149782624",
+      "objectid_1": 149782624,
+      "pin14": "56004040690000",
+      "parcel_quality_status": "review",
+      "nbh_name": "CONCORD PARKWAY SOUTH",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 442.85781,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149789146",
+      "objectid_1": 149789146,
+      "pin14": "56102182090000",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "CONCORD PARKWAY SOUTH",
+      "subdiv_name": "LILLY CONCORD",
+      "parcel_area_acres_calc": 383.586843,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149778663",
+      "objectid_1": 149778663,
+      "pin14": "55669419330000",
+      "parcel_quality_status": "review",
+      "nbh_name": "REED GOLD MINE",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 381.483049,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149778672",
+      "objectid_1": 149778672,
+      "pin14": "55669419330000",
+      "parcel_quality_status": "review",
+      "nbh_name": "REED GOLD MINE",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 381.483049,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149778673",
+      "objectid_1": 149778673,
+      "pin14": "55669419330000",
+      "parcel_quality_status": "review",
+      "nbh_name": "REED GOLD MINE",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 381.483049,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149778674",
+      "objectid_1": 149778674,
+      "pin14": "55669419330000",
+      "parcel_quality_status": "review",
+      "nbh_name": "REED GOLD MINE",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 381.483049,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149777095",
+      "objectid_1": 149777095,
+      "pin14": "55573632240000",
+      "parcel_quality_status": "review",
+      "nbh_name": "REED GOLD MINE",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 362.557992,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149823274",
+      "objectid_1": 149823274,
+      "pin14": "56413356950000",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "NEW GILEAD",
+      "subdiv_name": "LEATHERMAN PROPERTIES",
+      "parcel_area_acres_calc": 354.778901,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149778605",
+      "objectid_1": 149778605,
+      "pin14": "55654520920000",
+      "parcel_quality_status": "trusted",
+      "nbh_name": "GLENWOOD",
+      "subdiv_name": "THE VILLAGES AT REDBRIDGE GLENWOOD VILLAGE",
+      "parcel_area_acres_calc": 340.670508,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727653",
+      "objectid_1": 149727653,
+      "pin14": "45995270340000",
+      "parcel_quality_status": "review",
+      "nbh_name": "CONCORD MILLS",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 315.398177,
+      "jurisdiction_join_status": "no_match"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149777297",
+      "objectid_1": 149777297,
+      "pin14": "55535710820000",
+      "parcel_quality_status": "review",
+      "nbh_name": "MIDLAND COMMERCIAL",
+      "subdiv_name": null,
+      "parcel_area_acres_calc": 308.493435,
+      "jurisdiction_join_status": "no_match"
+    }
+  ],
+  "geometry_summary": {
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 110017
+      }
+    ],
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "feature_count": 110017
+      }
+    ],
+    "invalid_geometry_count": 0
+  },
+  "index_summary": [
+    {
+      "indexname": "parcel_jurisdiction_overlay_boundary_type_idx",
+      "indexdef": "CREATE INDEX parcel_jurisdiction_overlay_boundary_type_idx ON public.parcel_jurisdiction_overlay USING btree (planning_boundary_type)"
+    },
+    {
+      "indexname": "parcel_jurisdiction_overlay_confidence_idx",
+      "indexdef": "CREATE INDEX parcel_jurisdiction_overlay_confidence_idx ON public.parcel_jurisdiction_overlay USING btree (jurisdiction_assignment_confidence)"
+    },
+    {
+      "indexname": "parcel_jurisdiction_overlay_geometry_gix",
+      "indexdef": "CREATE INDEX parcel_jurisdiction_overlay_geometry_gix ON public.parcel_jurisdiction_overlay USING gist (geometry)"
+    },
+    {
+      "indexname": "parcel_jurisdiction_overlay_join_status_idx",
+      "indexdef": "CREATE INDEX parcel_jurisdiction_overlay_join_status_idx ON public.parcel_jurisdiction_overlay USING btree (jurisdiction_join_status)"
+    },
+    {
+      "indexname": "parcel_jurisdiction_overlay_pin14_idx",
+      "indexdef": "CREATE INDEX parcel_jurisdiction_overlay_pin14_idx ON public.parcel_jurisdiction_overlay USING btree (pin14)"
+    },
+    {
+      "indexname": "parcel_jurisdiction_overlay_pkey",
+      "indexdef": "CREATE UNIQUE INDEX parcel_jurisdiction_overlay_pkey ON public.parcel_jurisdiction_overlay USING btree (official_parcel_id)"
+    },
+    {
+      "indexname": "parcel_jurisdiction_overlay_planning_jurisdiction_idx",
+      "indexdef": "CREATE INDEX parcel_jurisdiction_overlay_planning_jurisdiction_idx ON public.parcel_jurisdiction_overlay USING btree (planning_jurisdiction_name)"
+    }
+  ],
+  "duration_seconds": 10.44,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcel_jurisdiction_overlay_20260528_155751.log",
+  "outputs": {
+    "validation_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_jurisdiction_overlay_validation.json",
+    "parcel_jurisdiction_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_jurisdiction_summary.csv",
+    "no_match_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_jurisdiction_no_match.csv",
+    "low_confidence_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_jurisdiction_low_confidence.csv"
+  }
+}

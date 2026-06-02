@@ -7,13 +7,23 @@ import {
   DatabaseZap,
   FileSearch,
 } from "lucide-react";
+import { DevelopmentActivityPanel } from "@/components/dashboard/DevelopmentActivityPanel";
+import { DevelopmentHotspotsPanel } from "@/components/dashboard/DevelopmentHotspotsPanel";
+import { DevelopmentTrendPanel } from "@/components/dashboard/DevelopmentTrendPanel";
+import { DevelopmentZoningPanel } from "@/components/dashboard/DevelopmentZoningPanel";
 import { EventStreamPanel } from "@/components/dashboard/EventStreamPanel";
 import { ExecutiveBriefingPanel } from "@/components/dashboard/ExecutiveBriefingPanel";
 import { ExecutiveReportPanel } from "@/components/dashboard/ExecutiveReportPanel";
+import { GovernanceWarningsPanel } from "@/components/dashboard/GovernanceWarningsPanel";
+import { ParcelIntelligencePanel } from "@/components/dashboard/ParcelIntelligencePanel";
+import { ParcelQualityPanel } from "@/components/dashboard/ParcelQualityPanel";
+import { ParcelSearchPanel } from "@/components/dashboard/ParcelSearchPanel";
 import { ParcelSummaryPanel } from "@/components/dashboard/ParcelSummaryPanel";
 import { PrintLayoutPreview } from "@/components/dashboard/PrintLayoutPreview";
 import { RoleIntelligencePanel } from "@/components/dashboard/RoleIntelligencePanel";
 import { ScenarioComparisonPanel } from "@/components/dashboard/ScenarioComparisonPanel";
+import { TemporalAnalysisPanel } from "@/components/dashboard/TemporalAnalysisPanel";
+import { ZoningDistributionPanel } from "@/components/dashboard/ZoningDistributionPanel";
 import { ScoreCard } from "@/components/ui/ScoreCard";
 import { mockParcels } from "@/data/mock/parcelMockData";
 import { formatCurrency } from "@/lib/utils";
@@ -32,7 +42,10 @@ export function IntelligencePanel() {
   );
 
   return (
-    <aside className="glass-panel no-scrollbar order-3 min-h-0 overflow-auto rounded-lg p-4">
+    <aside
+      aria-label="Parcel intelligence and executive briefing panel"
+      className="glass-panel no-scrollbar order-3 min-h-0 overflow-auto rounded-lg p-4 md:max-h-[72vh] lg:max-h-none"
+    >
       <div className="mb-5 flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase text-slate-500">
@@ -42,13 +55,36 @@ export function IntelligencePanel() {
             Parcel Command
           </h2>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/30 bg-[#68d8ff]/10 text-[#8fe7ff]">
+        <div
+          aria-hidden="true"
+          className="flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/30 bg-[#68d8ff]/10 text-[#8fe7ff]"
+        >
           <BrainCircuit className="h-4 w-4" />
         </div>
       </div>
 
       <div className="space-y-4">
         <ParcelSummaryPanel parcel={selectedParcel} />
+
+        <ParcelIntelligencePanel />
+
+        <DevelopmentActivityPanel />
+
+        <DevelopmentTrendPanel />
+
+        <DevelopmentHotspotsPanel />
+
+        <DevelopmentZoningPanel />
+
+        <TemporalAnalysisPanel />
+
+        <ParcelSearchPanel />
+
+        <ZoningDistributionPanel />
+
+        <GovernanceWarningsPanel />
+
+        <ParcelQualityPanel />
 
         <div className="grid grid-cols-2 gap-3">
           <ScoreCard

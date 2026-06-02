@@ -1,0 +1,249 @@
+{
+  "generated_at": "2026-05-28T11:44:19",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "schema": "public",
+    "table": "zoning"
+  },
+  "total_row_count": 295,
+  "column_count": 6,
+  "columns": [
+    {
+      "ordinal_position": 1,
+      "column_name": "geometry",
+      "data_type": "USER-DEFINED",
+      "udt_name": "geometry",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 2,
+      "column_name": "objectid",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 3,
+      "column_name": "zoningcode",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 4,
+      "column_name": "zoning_gen",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 5,
+      "column_name": "shape_starea",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 6,
+      "column_name": "shape_stlength",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    }
+  ],
+  "geometry_type_counts": [
+    {
+      "geometry_type": "ST_Polygon",
+      "feature_count": 270
+    },
+    {
+      "geometry_type": "ST_MultiPolygon",
+      "feature_count": 25
+    }
+  ],
+  "srid_counts": [
+    {
+      "srid": 4326,
+      "feature_count": 295
+    }
+  ],
+  "invalid_geometry_count": 7,
+  "null_geometry_count": 0,
+  "bounding_box": {
+    "xmin": -80.78714859986349,
+    "ymin": 35.185001484384316,
+    "xmax": -80.29542844239033,
+    "ymax": 35.507172428574506
+  },
+  "likely_zoning_fields": [
+    "zoningcode",
+    "zoning_gen"
+  ],
+  "zoning_class_summary": {
+    "likely_zoning_code_column": "zoningcode",
+    "likely_zoning_general_column": "zoning_gen",
+    "unique_zoning_class_count": 28,
+    "zoning_classes": [
+      {
+        "zoning_code": "LDR",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 68
+      },
+      {
+        "zoning_code": "OI",
+        "zoning_general": "OFFICE",
+        "feature_count": 55
+      },
+      {
+        "zoning_code": "CR",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 33
+      },
+      {
+        "zoning_code": "LI",
+        "zoning_general": "INDUSTRIAL",
+        "feature_count": 33
+      },
+      {
+        "zoning_code": "LC",
+        "zoning_general": "COMMERCIAL",
+        "feature_count": 23
+      },
+      {
+        "zoning_code": "GI",
+        "zoning_general": "INDUSTRIAL",
+        "feature_count": 15
+      },
+      {
+        "zoning_code": "MDR",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 14
+      },
+      {
+        "zoning_code": "LI-SU",
+        "zoning_general": "INDUSTRIAL",
+        "feature_count": 9
+      },
+      {
+        "zoning_code": "AO",
+        "zoning_general": "AGRICULTURAL",
+        "feature_count": 6
+      },
+      {
+        "zoning_code": "GC",
+        "zoning_general": "COMMERCIAL",
+        "feature_count": 6
+      },
+      {
+        "zoning_code": "LDR-SU",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 6
+      },
+      {
+        "zoning_code": "GI-SU",
+        "zoning_general": "INDUSTRIAL",
+        "feature_count": 4
+      },
+      {
+        "zoning_code": "HDR-SU",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 3
+      },
+      {
+        "zoning_code": "AO",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 2
+      },
+      {
+        "zoning_code": "AO-CU",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 2
+      },
+      {
+        "zoning_code": "AO-SU",
+        "zoning_general": "AGRICULTURAL",
+        "feature_count": 2
+      },
+      {
+        "zoning_code": "LC-SU",
+        "zoning_general": "COMMERCIAL",
+        "feature_count": 2
+      },
+      {
+        "zoning_code": "OI",
+        "zoning_general": "INSTITUTIONAL",
+        "feature_count": 2
+      },
+      {
+        "zoning_code": "AO",
+        "zoning_general": "Agriculture",
+        "feature_count": 1
+      },
+      {
+        "zoning_code": "CR",
+        "zoning_general": null,
+        "feature_count": 1
+      },
+      {
+        "zoning_code": "GC-SU",
+        "zoning_general": "COMMERCIAL",
+        "feature_count": 1
+      },
+      {
+        "zoning_code": "GI-SU",
+        "zoning_general": null,
+        "feature_count": 1
+      },
+      {
+        "zoning_code": "HDR",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 1
+      },
+      {
+        "zoning_code": "LC",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 1
+      },
+      {
+        "zoning_code": "LDR",
+        "zoning_general": null,
+        "feature_count": 1
+      },
+      {
+        "zoning_code": "LI",
+        "zoning_general": "OFFICE",
+        "feature_count": 1
+      },
+      {
+        "zoning_code": "MDR-SU",
+        "zoning_general": "RESIDENTIAL",
+        "feature_count": 1
+      },
+      {
+        "zoning_code": "OI-SU",
+        "zoning_general": "OFFICE",
+        "feature_count": 1
+      }
+    ]
+  },
+  "spatial_indexes": [
+    {
+      "indexname": "idx_zoning_geometry",
+      "indexdef": "CREATE INDEX idx_zoning_geometry ON public.zoning USING gist (geometry)"
+    },
+    {
+      "indexname": "zoning_geometry_gix",
+      "indexdef": "CREATE INDEX zoning_geometry_gix ON public.zoning USING gist (geometry)"
+    }
+  ],
+  "spatial_index_exists": true,
+  "high_null_columns": [],
+  "duration_seconds": 0.64,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\inspect_zoning_postgis_20260528_114419.log",
+  "outputs": {
+    "summary_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\zoning_profile_summary.json",
+    "column_profile_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\zoning_column_profile.csv"
+  }
+}

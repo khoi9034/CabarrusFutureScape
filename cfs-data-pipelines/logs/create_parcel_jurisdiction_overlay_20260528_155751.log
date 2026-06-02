@@ -1,0 +1,13 @@
+2026-05-28 15:57:51,521 INFO Starting CFS parcel_jurisdiction_overlay build.
+2026-05-28 15:57:51,522 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\create_parcel_jurisdiction_overlay_20260528_155751.log
+2026-05-28 15:57:51,755 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-28 15:57:51,854 INFO Executing overlay SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_parcel_jurisdiction_overlay.sql
+2026-05-28 15:58:04,344 INFO Source parcel count: 110017
+2026-05-28 15:58:04,345 INFO Overlay row count: 110017
+2026-05-28 15:58:04,345 INFO Assigned/no-match/multiple: 2979/107038/0
+2026-05-28 15:58:04,345 INFO Confidence distribution: [{'value': 'no_match', 'parcel_count': 107038, 'parcel_percentage': Decimal('97.2922')}, {'value': 'high', 'parcel_count': 2071, 'parcel_percentage': Decimal('1.8824')}, {'value': 'low', 'parcel_count': 833, 'parcel_percentage': Decimal('0.7572')}, {'value': 'medium', 'parcel_count': 75, 'parcel_percentage': Decimal('0.0682')}]
+2026-05-28 15:58:04,346 INFO Wrote validation JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_jurisdiction_overlay_validation.json
+2026-05-28 15:58:04,346 INFO Wrote parcel jurisdiction summary CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_jurisdiction_summary.csv
+2026-05-28 15:58:04,346 INFO Wrote no-match CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_jurisdiction_no_match.csv
+2026-05-28 15:58:04,346 INFO Wrote low-confidence CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_jurisdiction_low_confidence.csv
+2026-05-28 15:58:04,346 INFO Overlay duration: 10.44 seconds

@@ -1,0 +1,119 @@
+{
+  "endpoint_implemented": "GET /parcels/search",
+  "status": "implemented",
+  "scope": "real backend parcel search against PostGIS",
+  "tables_used": [
+    "public.parcels_enriched",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "query_parameters": {
+    "q": {
+      "required": true,
+      "type": "string"
+    },
+    "limit": {
+      "default": 20,
+      "max": 100,
+      "behavior_above_max": "clamped_to_100"
+    },
+    "offset": {
+      "default": 0
+    },
+    "zoning_jurisdiction": "optional string",
+    "zoning_category": "optional string",
+    "parcel_quality_status": "optional string",
+    "zoning_confidence": "optional string",
+    "valuation_band": "optional string",
+    "safe_for_dashboard": "optional boolean"
+  },
+  "fields_searched": [
+    "official_parcel_id",
+    "pin14",
+    "acctname1",
+    "acctname2",
+    "mailaddr1",
+    "mailaddr2",
+    "mailcity",
+    "mailstate",
+    "mailzipcode",
+    "subdiv_name",
+    "nbh_name",
+    "dominant_zoning_code_raw",
+    "zoning_jurisdiction_name",
+    "dominant_zoning_general_normalized",
+    "planning_jurisdiction_name"
+  ],
+  "filters_supported": [
+    "zoning_jurisdiction",
+    "zoning_category",
+    "parcel_quality_status",
+    "zoning_confidence",
+    "valuation_band",
+    "safe_for_dashboard"
+  ],
+  "ranking_strategy": [
+    "exact official_parcel_id",
+    "exact pin14",
+    "pin14 prefix",
+    "owner/account partial",
+    "subdivision/neighborhood partial",
+    "other matched searchable fields",
+    "safe_for_dashboard true before review rows when otherwise tied",
+    "official_parcel_id stable tie-breaker"
+  ],
+  "response_fields": [
+    "official_parcel_id",
+    "pin14",
+    "subdivision",
+    "neighborhood",
+    "owner_display",
+    "mailing_city",
+    "mailing_state",
+    "zoning_jurisdiction_name",
+    "dominant_zoning_code_raw",
+    "dominant_zoning_general_normalized",
+    "zoning_assignment_confidence",
+    "parcel_quality_status",
+    "valuation_band",
+    "safe_for_dashboard",
+    "governance_warning_categories"
+  ],
+  "example_successful_search": {
+    "request": "/parcels/search?q=45896367300000",
+    "expected_first_result": {
+      "official_parcel_id": "CFS-PARCEL-0149726579",
+      "pin14": "45896367300000",
+      "neighborhood": "CONCORD MILLS",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "C-2"
+    }
+  },
+  "tests_executed": [
+    "python -m compileall app",
+    "python -m pytest",
+    "GET http://127.0.0.1:8000/parcels/search?q=45896367300000",
+    "GET http://127.0.0.1:8000/parcels/search?q=CFS-PARCEL-0149726579",
+    "GET http://127.0.0.1:8000/parcels/search?q=CONCORD%20MILLS",
+    "GET http://127.0.0.1:8000/parcels/search?q=CONCORD%20MILLS&zoning_jurisdiction=Concord",
+    "GET http://127.0.0.1:8000/parcels/search?q=NO-SUCH-CFS-PARCEL-SEARCH-VALUE",
+    "GET http://127.0.0.1:8000/openapi.json"
+  ],
+  "not_implemented": [
+    "keyset cursor pagination",
+    "bbox/spatial search",
+    "GET /parcels/filter",
+    "development activity endpoints",
+    "frontend integration",
+    "PostGIS schema changes"
+  ],
+  "readiness_for_parcel_filter_endpoint": {
+    "status": "ready_for_next_endpoint",
+    "recommended_next_endpoint": "GET /parcels/filter",
+    "notes": [
+      "Repository joins and response shaping are established.",
+      "Filter predicates exist for the search endpoint and can be expanded for structured filter browsing.",
+      "GET /parcels/filter still needs no-query browsing, broader filter sets, sorting, pagination strategy, and optional aggregate counts."
+    ]
+  }
+}

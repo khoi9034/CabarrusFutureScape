@@ -1,0 +1,87 @@
+{
+  "endpoint_implemented": "GET /parcels/{official_parcel_id}",
+  "example_path": "/parcels/CFS-PARCEL-0149726579",
+  "status": "implemented",
+  "scope": "first real Parcel Intelligence read-only endpoint",
+  "tables_used": [
+    "public.parcels_enriched",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "fields_returned": {
+    "identity": [
+      "official_parcel_id",
+      "pin14",
+      "objectid_1"
+    ],
+    "location": [
+      "subdivision",
+      "neighborhood"
+    ],
+    "valuation": [
+      "marketvalue_numeric",
+      "assessedvalue_numeric",
+      "valuation_band"
+    ],
+    "parcel_context": [
+      "parcel_size_category",
+      "parcel_quality_status"
+    ],
+    "zoning": [
+      "zoning_jurisdiction_name",
+      "dominant_zoning_code_raw",
+      "dominant_zoning_general_normalized",
+      "zoning_assignment_confidence"
+    ],
+    "governance": [
+      "governance_warning_categories",
+      "safe_for_dashboard"
+    ],
+    "planning": [
+      "planning_jurisdiction"
+    ],
+    "metadata": [
+      "transformed_at"
+    ]
+  },
+  "backend_files_added_or_updated": [
+    "backend/app/models/parcel.py",
+    "backend/app/repositories/parcel_repository.py",
+    "backend/app/services/parcel_service.py",
+    "backend/app/schemas/parcel.py",
+    "backend/app/routers/parcel_router.py",
+    "backend/tests/test_parcel_detail.py",
+    "backend/README.md"
+  ],
+  "error_handling": {
+    "missing_parcel_status_code": 404,
+    "missing_parcel_response": {
+      "detail": "Parcel not found"
+    }
+  },
+  "tests_executed": [
+    "python -m compileall app",
+    "python -m pytest",
+    "GET http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579",
+    "GET http://127.0.0.1:8000/parcels/CFS-PARCEL-NOT-REAL",
+    "GET http://127.0.0.1:8000/openapi.json"
+  ],
+  "readiness_for_parcel_search_endpoint": {
+    "status": "ready_for_next_endpoint",
+    "recommended_next_endpoint": "GET /parcels/search",
+    "notes": [
+      "Database connectivity is verified.",
+      "Parcel repository/service/router pattern is established.",
+      "Parcel detail response schema is implemented.",
+      "Search still needs query parameters, result pagination, ranking, and field matching from parcel_search_specification.md."
+    ]
+  },
+  "not_implemented": [
+    "parcel search",
+    "pagination",
+    "bbox queries",
+    "development activity endpoints",
+    "frontend integration",
+    "PostGIS schema changes"
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-05-28T15:46:54",
+  "raw_table": "public.planning_boundaries",
+  "clean_table": "public.planning_boundaries_clean",
+  "raw_feature_count": 5,
+  "clean_feature_count": 5,
+  "raw_geometry_type_counts": [
+    {
+      "geometry_type": "ST_MultiPolygon",
+      "feature_count": 3
+    },
+    {
+      "geometry_type": "ST_Polygon",
+      "feature_count": 2
+    }
+  ],
+  "clean_geometry_type_counts": [
+    {
+      "geometry_type": "ST_MultiPolygon",
+      "feature_count": 5
+    }
+  ],
+  "clean_srid_counts": [
+    {
+      "srid": 4326,
+      "feature_count": 5
+    }
+  ],
+  "raw_invalid_geometry_count": 0,
+  "clean_invalid_geometry_count": 0,
+  "raw_field_inventory": [
+    {
+      "column_name": "geometry",
+      "data_type": "USER-DEFINED",
+      "udt_name": "geometry",
+      "ordinal_position": 1
+    },
+    {
+      "column_name": "objectid",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "ordinal_position": 2
+    },
+    {
+      "column_name": "district",
+      "data_type": "text",
+      "udt_name": "text",
+      "ordinal_position": 3
+    },
+    {
+      "column_name": "shape_starea",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "ordinal_position": 4
+    },
+    {
+      "column_name": "shape_stlength",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "ordinal_position": 5
+    }
+  ],
+  "inferred_boundary_summary": [
+    {
+      "jurisdiction_name": "Concord",
+      "boundary_type": "etj",
+      "boundary_name": "City of Concord",
+      "feature_count": 1,
+      "total_area_acres": 1428.4
+    },
+    {
+      "jurisdiction_name": "Harrisburg",
+      "boundary_type": "etj",
+      "boundary_name": "Town of Harrisburg",
+      "feature_count": 2,
+      "total_area_acres": 1290.34
+    },
+    {
+      "jurisdiction_name": "Kannapolis",
+      "boundary_type": "etj",
+      "boundary_name": "City of Kannapolis",
+      "feature_count": 1,
+      "total_area_acres": 2150.91
+    },
+    {
+      "jurisdiction_name": "Mt. Pleasant",
+      "boundary_type": "etj",
+      "boundary_name": "Town of Mt. Pleasant",
+      "feature_count": 1,
+      "total_area_acres": 3937.61
+    }
+  ],
+  "index_summary": [
+    {
+      "indexname": "planning_boundaries_clean_geometry_gix",
+      "indexdef": "CREATE INDEX planning_boundaries_clean_geometry_gix ON public.planning_boundaries_clean USING gist (geometry)"
+    },
+    {
+      "indexname": "planning_boundaries_clean_jurisdiction_idx",
+      "indexdef": "CREATE INDEX planning_boundaries_clean_jurisdiction_idx ON public.planning_boundaries_clean USING btree (jurisdiction_name)"
+    },
+    {
+      "indexname": "planning_boundaries_clean_name_idx",
+      "indexdef": "CREATE INDEX planning_boundaries_clean_name_idx ON public.planning_boundaries_clean USING btree (boundary_name)"
+    },
+    {
+      "indexname": "planning_boundaries_clean_pkey",
+      "indexdef": "CREATE UNIQUE INDEX planning_boundaries_clean_pkey ON public.planning_boundaries_clean USING btree (boundary_internal_id)"
+    },
+    {
+      "indexname": "planning_boundaries_clean_type_idx",
+      "indexdef": "CREATE INDEX planning_boundaries_clean_type_idx ON public.planning_boundaries_clean USING btree (boundary_type)"
+    }
+  ],
+  "duration_seconds": 1.13,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_planning_boundaries_clean_20260528_154653.log",
+  "outputs": {
+    "validation_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\planning_boundaries_clean_validation.json",
+    "summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\planning_boundaries_summary.csv"
+  }
+}

@@ -1,6 +1,8 @@
 "use client";
 
 import { BrainCircuit, SlidersHorizontal } from "lucide-react";
+import { DataRegistryPanel } from "@/components/dashboard/DataRegistryPanel";
+import { GISIntegrationReadinessPanel } from "@/components/dashboard/GISIntegrationReadinessPanel";
 import { LayerToggle } from "@/components/dashboard/LayerToggle";
 import { ScenarioControls } from "@/components/dashboard/ScenarioControls";
 import { ScoreCard } from "@/components/ui/ScoreCard";
@@ -11,7 +13,10 @@ export function Sidebar() {
   const { selectedParcel } = useDashboardState();
 
   return (
-    <aside className="glass-panel no-scrollbar order-2 min-h-0 overflow-auto rounded-lg p-4 lg:order-1">
+    <aside
+      aria-label="Growth operations control panel"
+      className="glass-panel no-scrollbar order-2 min-h-0 overflow-auto rounded-lg p-4 md:max-h-[72vh] lg:order-1 lg:max-h-none"
+    >
       <div className="mb-5 flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase text-slate-500">
@@ -21,13 +26,24 @@ export function Sidebar() {
             Growth Operations
           </h2>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-[#d8b86a]">
+        <div
+          aria-hidden="true"
+          className="flex h-10 w-10 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-[#d8b86a]"
+        >
           <SlidersHorizontal className="h-4 w-4" />
         </div>
       </div>
 
       <div className="space-y-6">
         <LayerToggle />
+
+        <div className="h-px bg-white/10" />
+
+        <GISIntegrationReadinessPanel />
+
+        <div className="h-px bg-white/10" />
+
+        <DataRegistryPanel />
 
         <div className="h-px bg-white/10" />
 

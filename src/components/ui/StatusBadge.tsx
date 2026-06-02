@@ -21,6 +21,7 @@ export function StatusBadge({ icon: Icon, label, tone }: StatusBadgeProps) {
         "flex h-10 max-w-full items-center gap-2 rounded-lg border px-3 text-xs font-medium",
         toneStyles[tone],
       )}
+      title={label}
     >
       <Icon className="h-3.5 w-3.5 shrink-0" />
       <span className="truncate">{label}</span>

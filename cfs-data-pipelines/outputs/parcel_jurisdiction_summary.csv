@@ -1,0 +1,6 @@
+planning_jurisdiction_name,planning_boundary_type,boundary_name,parcel_count,multiple_jurisdiction_count,low_confidence_count,no_match_count,avg_dominant_overlap_pct,min_dominant_overlap_pct,max_dominant_overlap_pct
+(no match),(no match),(no match),107038,0,0,107038,,,
+Kannapolis,etj,City of Kannapolis,1030,0,112,0,0.897016,0.0,1.0
+Mt. Pleasant,etj,Town of Mt. Pleasant,912,0,162,0,0.831704,0.0,1.0
+Concord,etj,City of Concord,541,0,271,0,0.536833,0.0,1.0
+Harrisburg,etj,Town of Harrisburg,496,0,288,0,0.44485,0.0,1.0

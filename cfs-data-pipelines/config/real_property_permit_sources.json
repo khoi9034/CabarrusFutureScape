@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "description": "Primary Phase 3 Real Property Permit source configuration for Cabarrus FutureScape.",
+  "sources": [
+    {
+      "id": "cabarrus_real_property_permit_sharepoint",
+      "name": "Cabarrus County Real Property Permit CSV",
+      "source_status": "authoritative_candidate",
+      "enabled": true,
+      "url": "https://cabarruscountync.sharepoint.com/:x:/g/CabarrusCounty/ERNqFGtfcaxKrHNrgdKaTaoBBgVAADJsQVXPezRfkYQ6Xw?e=HJ0xjl&download=1",
+      "expected_filename": "vdx_RP_Permit.csv",
+      "target_schema": "public",
+      "target_table": "real_property_permit",
+      "clean_table": "real_property_permit_clean",
+      "notes": [
+        "This source supersedes the public 2015 OpenData permit layer for current Phase 3 permit intelligence planning.",
+        "The source has no geometry; future spatial context should be derived by joining ParcelNumber to the trusted parcel layer.",
+        "Do not overwrite public.permit_activity or public.permit_activity_clean when ingesting this source."
+      ]
+    }
+  ]
+}

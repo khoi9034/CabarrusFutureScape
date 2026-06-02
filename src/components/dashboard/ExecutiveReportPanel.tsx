@@ -27,6 +27,22 @@ export function ExecutiveReportPanel() {
     selectReportPackage,
   } = useDashboardState();
 
+  if (!reportPackages.length) {
+    return (
+      <section className="rounded-lg border border-white/10 bg-black/20 p-4">
+        <p className="text-xs font-medium uppercase text-slate-500">
+          Report Package
+        </p>
+        <h3 className="mt-1 text-base font-semibold text-white">
+          No report packages available
+        </h3>
+        <p className="mt-2 text-xs leading-5 text-slate-400">
+          Phase 1 report packages are mock-local. No export service is connected.
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section className="rounded-lg border border-white/10 bg-black/20 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -46,6 +62,9 @@ export function ExecutiveReportPanel() {
       <p className="mt-2 text-xs leading-5 text-slate-400">
         {activeReportPackage.subtitle}
       </p>
+      <div className="mt-3 inline-flex rounded-md border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-[10px] font-semibold uppercase text-[#f0cd79]">
+        Mock export only
+      </div>
 
       <label className="mt-3 block">
         <span className="mb-1 block text-[10px] font-medium uppercase text-slate-500">
@@ -117,24 +136,30 @@ export function ExecutiveReportPanel() {
 
       <div className="mt-3 grid grid-cols-3 gap-2">
         <button
+          aria-label={`Prepare mock PDF export for ${activeReportPackage.title}`}
           className="flex min-h-10 items-center justify-center gap-2 rounded-md border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 text-[11px] font-semibold text-[#f0cd79] transition hover:border-[#d8b86a]/40 hover:bg-[#d8b86a]/15"
           onClick={() => runMockExport("pdf")}
+          title="Prepare mock PDF export state"
           type="button"
         >
           <Download className="h-3.5 w-3.5" />
           Export
         </button>
         <button
+          aria-label={`Open print preview for ${activeReportPackage.title}`}
           className="flex min-h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-2 text-[11px] font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
           onClick={() => openPrintLayout("briefing")}
+          title="Open mock print layout"
           type="button"
         >
           <Printer className="h-3.5 w-3.5" />
           Print
         </button>
         <button
+          aria-label="Generate mock board brief"
           className="flex min-h-10 items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-2 text-[11px] font-semibold text-[#8fe7ff] transition hover:border-[#68d8ff]/40 hover:bg-[#68d8ff]/15"
           onClick={generateBoardBrief}
+          title="Generate mock board brief"
           type="button"
         >
           <FileText className="h-3.5 w-3.5" />

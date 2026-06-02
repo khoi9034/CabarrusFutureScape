@@ -1,0 +1,17 @@
+2026-05-28 15:45:06,231 INFO Starting CFS planning_boundaries_clean transform.
+2026-05-28 15:45:06,231 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\create_planning_boundaries_clean_20260528_154506.log
+2026-05-28 15:45:06,698 INFO Executing transform SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_planning_boundaries_clean.sql
+2026-05-28 15:45:06,726 ERROR CFS planning_boundaries_clean transform failed.
+Traceback (most recent call last):
+  File "C:\CabarrusFutureScape\cfs-data-pipelines\transform\create_planning_boundaries_clean.py", line 246, in main
+    execute_transform_sql(engine)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\CabarrusFutureScape\cfs-data-pipelines\transform\create_planning_boundaries_clean.py", line 104, in execute_transform_sql
+    cursor.execute(SQL_FILE.read_text(encoding="utf-8"))
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\khoia\AppData\Local\Temp\cfs-data-pipelines-venv\Lib\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UndefinedColumn: column "district_" does not exist
+LINE 12:     NULLIF(btrim(district_), '') AS boundary_name,
+                          ^
+HINT:  Perhaps you meant to reference the column "planning_boundaries.district".

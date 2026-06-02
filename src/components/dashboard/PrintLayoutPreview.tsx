@@ -54,6 +54,7 @@ export function PrintLayoutPreview() {
 
             return (
               <button
+                aria-pressed={active}
                 className={cn(
                   "min-h-9 rounded-md border px-2 text-[11px] font-semibold transition",
                   active
@@ -62,6 +63,7 @@ export function PrintLayoutPreview() {
                 )}
                 key={mode}
                 onClick={() => setPrintableViewMode(mode)}
+                title={`Switch print preview to ${printableModeLabels[mode]}`}
                 type="button"
               >
                 {printableModeLabels[mode]}
@@ -106,22 +108,28 @@ export function PrintLayoutPreview() {
         </div>
 
         <div className="mt-3 space-y-2">
-          {previewSections.map((section) => (
-            <div
-              className={cn(
-                "rounded border bg-white/45 p-2",
-                severityClass[section.severity],
-              )}
-              key={section.id}
-            >
-              <p className="text-[10px] font-bold text-[#17202c]">
-                {section.title}
-              </p>
-              <p className="mt-1 line-clamp-2 text-[9px] leading-4 text-[#465268]">
-                {section.body}
-              </p>
+          {previewSections.length ? (
+            previewSections.map((section) => (
+              <div
+                className={cn(
+                  "rounded border bg-white/45 p-2",
+                  severityClass[section.severity],
+                )}
+                key={section.id}
+              >
+                <p className="text-[10px] font-bold text-[#17202c]">
+                  {section.title}
+                </p>
+                <p className="mt-1 line-clamp-2 text-[9px] leading-4 text-[#465268]">
+                  {section.body}
+                </p>
+              </div>
+            ))
+          ) : (
+            <div className="rounded border border-[#17202c]/10 bg-white/45 p-2 text-[9px] text-[#465268]">
+              No printable sections are available for this mock package.
             </div>
-          ))}
+          )}
         </div>
       </div>
 

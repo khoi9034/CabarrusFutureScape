@@ -1,0 +1,10 @@
+2026-05-28 10:55:12,822 INFO Starting CFS parcels PostGIS profile.
+2026-05-28 10:55:12,822 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\inspect_parcels_postgis_20260528_105512.log
+2026-05-28 10:55:16,399 INFO Total rows: 110017
+2026-05-28 10:55:16,399 INFO Geometry types: [{'geometry_type': 'ST_Polygon', 'feature_count': 109279}, {'geometry_type': 'ST_MultiPolygon', 'feature_count': 738}]
+2026-05-28 10:55:16,399 INFO SRID distribution: [{'srid': 4326, 'feature_count': 110017}]
+2026-05-28 10:55:16,399 INFO Invalid geometry count: 6
+2026-05-28 10:55:16,411 INFO Spatial index exists: True
+2026-05-28 10:55:16,411 INFO Wrote summary JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcels_profile_summary.json
+2026-05-28 10:55:16,412 INFO Wrote column profile CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcels_column_profile.csv
+2026-05-28 10:55:16,412 INFO Profile duration: 3.58 seconds

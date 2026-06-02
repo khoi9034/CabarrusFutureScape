@@ -1,0 +1,135 @@
+{
+  "phase": "Phase 5: Parcel Statistics, Zoning Summary, and Governance API Integration",
+  "generated_at": "2026-06-01T00:00:00-04:00",
+  "status": "completed",
+  "backend_endpoints_used": [
+    "GET /parcels/statistics",
+    "GET /parcels/zoning-summary",
+    "GET /parcels/governance-warnings"
+  ],
+  "feature_flag": {
+    "name": "NEXT_PUBLIC_USE_BACKEND_API",
+    "false_behavior": "Parcel intelligence summary panels use generated static artifacts.",
+    "true_behavior": "Parcel intelligence summary panels request their corresponding FastAPI endpoint.",
+    "fallback_behavior": "Each panel falls back independently to generated static artifacts if its backend request fails, times out, or returns an invalid shape."
+  },
+  "files_created": [
+    "src/hooks/useParcelGovernanceWarningsMetrics.ts",
+    "src/hooks/useParcelQualityMetrics.ts",
+    "src/hooks/useParcelZoningSummaryMetrics.ts",
+    "src/lib/adapters/parcelGovernanceWarningsAdapter.ts",
+    "src/lib/adapters/parcelStatisticsAdapter.ts",
+    "src/lib/adapters/parcelZoningSummaryAdapter.ts",
+    "outputs/frontend_parcel_summary_api_integration_summary.json"
+  ],
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/GovernanceWarningsPanel.tsx",
+    "src/components/dashboard/ParcelQualityPanel.tsx",
+    "src/components/dashboard/ZoningDistributionPanel.tsx"
+  ],
+  "panels_migrated": [
+    {
+      "panel": "ParcelIntelligencePanel",
+      "endpoint": "GET /parcels/statistics",
+      "status": "previously integrated and preserved",
+      "fallback": "cfs-data-pipelines/outputs/parcel_zoning_intelligence_qa_summary.json and parcels_enriched_summary.json"
+    },
+    {
+      "panel": "ParcelQualityPanel",
+      "endpoint": "GET /parcels/statistics",
+      "status": "integrated",
+      "fallback": "static parcel quality metrics from generated parcel dashboard artifacts"
+    },
+    {
+      "panel": "ZoningDistributionPanel",
+      "endpoint": "GET /parcels/zoning-summary",
+      "status": "integrated",
+      "fallback": "static zoning jurisdiction distribution from generated parcel zoning QA artifacts"
+    },
+    {
+      "panel": "GovernanceWarningsPanel",
+      "endpoint": "GET /parcels/governance-warnings",
+      "status": "integrated",
+      "fallback": "static governance warning distribution from generated parcel zoning QA artifacts"
+    }
+  ],
+  "fallback_behavior_per_panel": {
+    "ParcelIntelligencePanel": "Falls back through useParcelDashboardMetrics if GET /parcels/statistics fails.",
+    "ParcelQualityPanel": "Falls back through useParcelQualityMetrics if GET /parcels/statistics fails.",
+    "ZoningDistributionPanel": "Falls back through useParcelZoningSummaryMetrics if GET /parcels/zoning-summary fails.",
+    "GovernanceWarningsPanel": "Falls back through useParcelGovernanceWarningsMetrics if GET /parcels/governance-warnings fails."
+  },
+  "static_dependencies_preserved": [
+    "cfs-data-pipelines/outputs/parcel_zoning_intelligence_qa_summary.json",
+    "cfs-data-pipelines/outputs/parcels_enriched_summary.json",
+    "public/intelligence/parcel-search-index.json"
+  ],
+  "not_modified": [
+    "SceneView",
+    "CommandPalette",
+    "Parcel Search behavior",
+    "Parcel Detail behavior",
+    "Development panels",
+    "Temporal panels",
+    "backend endpoints",
+    "PostGIS schema",
+    "static generated output files"
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "backend_statistics_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/parcels/statistics",
+      "observed": {
+        "total_parcels": 110017,
+        "zoned_parcels": 109984,
+        "safe_for_dashboard_parcels": 74781,
+        "quality_bucket_count": 2
+      }
+    },
+    "backend_zoning_summary_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/parcels/zoning-summary",
+      "observed": {
+        "total_parcels": 110017,
+        "jurisdiction_count": 8,
+        "top_jurisdiction": "Concord",
+        "top_jurisdiction_count": 43497
+      }
+    },
+    "backend_governance_warnings_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/parcels/governance-warnings?limit=2",
+      "observed": {
+        "total_count": 35236,
+        "warning_summary_count": 6,
+        "top_warning": "jurisdiction_code_semantics_review",
+        "top_warning_count": 23793
+      }
+    },
+    "static_artifact_fallback_smoke": {
+      "status": "passed",
+      "observed": {
+        "static_total_parcels": 110017,
+        "static_jurisdiction_count": 8,
+        "static_warning_count": 7,
+        "static_quality_count": 2
+      }
+    },
+    "app_server_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:3001",
+      "http_status": 200,
+      "note": "A temporary production server was started on port 3001 and stopped after the smoke check because the existing port 3000 dev server was accepting TCP but not returning HTTP within the timeout."
+    },
+    "browser_smoke_note": "Browser plugin tools were not exposed in this session, so interactive flag-on/fallback panel clicks were not browser-tested. Endpoint shape checks, static artifact checks, typecheck, lint, and production build all passed."
+  },
+  "readiness": {
+    "development_dashboard_api_integration": "ready",
+    "sceneview_modified": false,
+    "backend_modified": false
+  }
+}

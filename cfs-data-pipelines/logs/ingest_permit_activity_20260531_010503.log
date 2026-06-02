@@ -1,0 +1,29 @@
+2026-05-31 01:05:03,926 INFO Starting CFS permit activity ingestion pilot.
+2026-05-31 01:05:03,940 INFO Fetching layer metadata: https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/33
+2026-05-31 01:05:04,559 INFO Layer metadata: name=Permits 2015 geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-31 01:05:04,710 INFO Source feature count: 6766
+2026-05-31 01:05:04,710 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-31 01:05:09,762 INFO Downloaded 1000/6766 permit features
+2026-05-31 01:05:17,017 INFO Downloaded 2000/6766 permit features
+2026-05-31 01:05:25,178 INFO Downloaded 3000/6766 permit features
+2026-05-31 01:05:26,162 INFO Downloaded 4000/6766 permit features
+2026-05-31 01:05:27,653 INFO Downloaded 5000/6766 permit features
+2026-05-31 01:05:28,940 INFO Downloaded 6000/6766 permit features
+2026-05-31 01:05:29,573 INFO Downloaded 6766/6766 permit features
+2026-05-31 01:05:29,573 INFO Building GeoDataFrame from 6766 permit features.
+2026-05-31 01:05:30,117 INFO GeoDataFrame feature count: 6766
+2026-05-31 01:05:30,117 INFO Geometry type(s): MultiPolygon, Polygon
+2026-05-31 01:05:30,117 INFO CRS: EPSG:4326
+2026-05-31 01:05:30,117 INFO Sample columns: geometry, objectid, pin14, permitnumber, appname, filedate, permitcategory, permitgroup, recordgroup, permittype, permitsubtype, detaileddescription, status, lot, ownername, address, subdivision, shape_starea, shape_stlength, cfs_source_id
+2026-05-31 01:05:30,439 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-31 01:05:33,060 INFO PostGIS available: POSTGIS="3.6.2 3.6.2" [EXTENSION] PGSQL="180" GEOS="3.14.1dev-CAPI-1.20.4" SFCGAL="SFCGAL 2.2.0, CGAL 6.0.1, BOOST 1.88.0" PROJ="8.2.1 NETWORK_ENABLED=OFF URL_ENDPOINT=https://cdn.proj.org USER_WRITABLE_DIRECTORY=C:\WINDOWS\ServiceProfiles\NetworkService\AppData\Local/proj DATABASE_PATH=C:\Program Files\PostgreSQL\18\share\contrib\postgis-3.6\proj\proj.db" (compiled against PROJ 8.2.1) GDAL="GDAL 3.9.2, released 2024/08/13" LIBXML="2.12.5" LIBJSON="0.12" LIBPROTOBUF="1.2.1" WAGYU="0.5.0 (Internal)" TOPOLOGY RASTER
+2026-05-31 01:05:33,061 INFO Writing 6766 permit activity features to public.permit_activity with if_exists=replace.
+2026-05-31 01:05:35,157 INFO Creating gist index permit_activity_geometry_gix on public.permit_activity(geometry).
+2026-05-31 01:05:35,190 INFO Creating btree index permit_activity_permitnumber_idx on public.permit_activity(permitnumber).
+2026-05-31 01:05:35,227 INFO Creating btree index permit_activity_pin14_idx on public.permit_activity(pin14).
+2026-05-31 01:05:35,263 INFO Creating btree index permit_activity_status_idx on public.permit_activity(status).
+2026-05-31 01:05:35,275 INFO Creating btree index permit_activity_permittype_idx on public.permit_activity(permittype).
+2026-05-31 01:05:35,283 INFO Creating btree index permit_activity_permitcategory_idx on public.permit_activity(permitcategory).
+2026-05-31 01:05:35,298 INFO Creating btree index permit_activity_filedate_idx on public.permit_activity(filedate).
+2026-05-31 01:05:35,639 INFO Wrote permit activity ingestion summary: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\permit_activity_ingest_summary.json
+2026-05-31 01:05:35,640 INFO CFS permit activity ingestion pilot complete.

@@ -1,0 +1,150 @@
+{
+  "generated_at": "2026-05-30T00:00:00-04:00",
+  "artifact_type": "backend_readiness_contract",
+  "status": "planning_only_no_api_implemented",
+  "source_tables": [
+    "public.parcels_enriched",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "current_data_readiness": {
+    "total_parcels": 110017,
+    "zoning_assigned_parcels": 109984,
+    "zoning_no_match_parcels": 33,
+    "safe_for_dashboard_parcels": 74781,
+    "qa_review_parcels": 35236
+  },
+  "planned_endpoints": [
+    {
+      "method": "GET",
+      "path": "/parcels/search",
+      "purpose": "Search parcel identity, owner, address, subdivision, neighborhood, zoning, and jurisdiction fields."
+    },
+    {
+      "method": "GET",
+      "path": "/parcels/{official_parcel_id}",
+      "purpose": "Return full parcel intelligence detail by stable CFS parcel ID."
+    },
+    {
+      "method": "GET",
+      "path": "/parcels/filter",
+      "purpose": "Return paginated parcel results from structured filters."
+    },
+    {
+      "method": "GET",
+      "path": "/parcels/statistics",
+      "purpose": "Return parcel counts, acreage, valuation, zoning, and QA aggregates."
+    },
+    {
+      "method": "GET",
+      "path": "/parcels/zoning-summary",
+      "purpose": "Return zoning distribution by jurisdiction, code, confidence, and QA status."
+    },
+    {
+      "method": "GET",
+      "path": "/parcels/governance-warnings",
+      "purpose": "Return parcels and aggregates requiring zoning governance review."
+    }
+  ],
+  "recommended_detail_payload_sections": [
+    "identity",
+    "parcel",
+    "valuation",
+    "zoning",
+    "planning_context",
+    "governance",
+    "geometry"
+  ],
+  "recommended_search_fields": [
+    "official_parcel_id",
+    "pin14",
+    "acctname1",
+    "acctname2",
+    "mailaddr1",
+    "mailaddr2",
+    "mailcity",
+    "mailzipcode",
+    "subdiv_name",
+    "nbh_name",
+    "dominant_zoning_code_raw",
+    "dominant_zoning_general_normalized",
+    "zoning_jurisdiction_name",
+    "planning_jurisdiction_name",
+    "municipality_future"
+  ],
+  "recommended_filter_fields": [
+    "zoning_jurisdiction_name",
+    "dominant_zoning_general_normalized",
+    "dominant_zoning_code_raw",
+    "subdiv_name",
+    "nbh_name",
+    "parcel_size_category",
+    "valuation_band",
+    "parcel_quality_status",
+    "zoning_assignment_confidence",
+    "governance_warning_categories",
+    "primary_governance_warning",
+    "safe_for_dashboard",
+    "needs_governance_review",
+    "planning_jurisdiction_name",
+    "municipality_future",
+    "parcel_area_acres_calc",
+    "valuation_basis"
+  ],
+  "pagination_strategy": {
+    "type": "keyset",
+    "default_limit": 25,
+    "max_limit": 100,
+    "tie_breaker": "official_parcel_id"
+  },
+  "spatial_query_support_planned": [
+    "bbox",
+    "radius",
+    "polygon",
+    "map_viewport"
+  ],
+  "governance_warning_categories": [
+    "safe_for_dashboard",
+    "review_low_confidence",
+    "review_multi_jurisdiction",
+    "review_near_tie",
+    "review_sliver_overlap",
+    "no_zoning_match",
+    "jurisdiction_code_semantics_review"
+  ],
+  "performance_requirements": {
+    "parcel_detail_target_ms": 100,
+    "search_filter_first_page_target_ms": 500,
+    "statistics_target_ms": 1500,
+    "viewport_query_target_ms": 750
+  },
+  "materialized_view_candidates": [
+    "public.parcel_intelligence_api_view",
+    "public.parcel_zoning_summary_api_view",
+    "public.parcel_governance_warning_api_view"
+  ],
+  "caching_opportunities_future": [
+    "zoning summary aggregates",
+    "governance warning counts",
+    "statistics endpoint results",
+    "map viewport tile/extent summaries",
+    "parcel detail response cache keyed by official_parcel_id"
+  ],
+  "remaining_blockers_before_api_implementation": [
+    "Choose FastAPI project structure and database session pattern.",
+    "Create read-only database role for API access.",
+    "Define authentication and authorization approach.",
+    "Create jurisdiction-specific zoning codebooks for unknown categories.",
+    "Create authoritative municipality/jurisdiction overlay instead of using mailcity.",
+    "Decide API behavior for low-confidence, multi-jurisdiction, near-tie, and sliver warnings.",
+    "Add production-grade request logging, rate limits, and monitoring.",
+    "Benchmark search/filter queries and add trigram/materialized-view indexes as needed."
+  ],
+  "documentation": [
+    "docs/backend/parcel_intelligence_api_contract.md",
+    "docs/backend/parcel_intelligence_data_dictionary.md",
+    "docs/backend/parcel_search_specification.md",
+    "docs/backend/parcel_filter_specification.md",
+    "docs/backend/parcel_intelligence_response_examples.md"
+  ]
+}

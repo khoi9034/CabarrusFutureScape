@@ -1,0 +1,56 @@
+2026-05-28 15:44:04,799 INFO Starting CFS multi-jurisdiction zoning ingestion.
+2026-05-28 15:44:04,800 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\ingest_zoning_sources_20260528_154404.log
+2026-05-28 15:44:08,840 INFO PostGIS available: POSTGIS="3.6.2 3.6.2" [EXTENSION] PGSQL="180" GEOS="3.14.1dev-CAPI-1.20.4" SFCGAL="SFCGAL 2.2.0, CGAL 6.0.1, BOOST 1.88.0" PROJ="8.2.1 NETWORK_ENABLED=OFF URL_ENDPOINT= USER_WRITABLE_DIRECTORY=C:\WINDOWS\ServiceProfiles\NetworkService\AppData\Local/proj" (compiled against PROJ 8.2.1) GDAL="GDAL 3.9.2, released 2024/08/13 GDAL_DATA not found" LIBXML="2.12.5" LIBJSON="0.12" LIBPROTOBUF="1.2.1" WAGYU="0.5.0 (Internal)" TOPOLOGY RASTER
+2026-05-28 15:44:08,842 INFO Ingesting zoning source county -> public.zoning_county
+2026-05-28 15:44:10,494 INFO Layer metadata: name=Cabarrus County Zoning geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 15:44:10,624 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:10,624 INFO Source feature count: 295
+2026-05-28 15:44:12,553 INFO Downloaded 295/295 features
+2026-05-28 15:44:12,744 INFO Writing 295 features to public.zoning_county
+2026-05-28 15:44:13,345 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:13,351 INFO Ingesting zoning source concord -> public.zoning_concord
+2026-05-28 15:44:13,408 INFO Layer metadata: name=Concord Zoning geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 15:44:16,177 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:16,178 INFO Source feature count: 826
+2026-05-28 15:44:22,695 INFO Downloaded 826/826 features
+2026-05-28 15:44:22,853 INFO Writing 826 features to public.zoning_concord
+2026-05-28 15:44:23,069 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:23,074 INFO Ingesting zoning source harrisburg -> public.zoning_harrisburg
+2026-05-28 15:44:23,123 INFO Layer metadata: name=Harrisburg Zoning geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 15:44:23,236 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:23,237 INFO Source feature count: 188
+2026-05-28 15:44:23,665 INFO Downloaded 188/188 features
+2026-05-28 15:44:23,693 INFO Writing 188 features to public.zoning_harrisburg
+2026-05-28 15:44:23,783 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:23,785 INFO Ingesting zoning source kannapolis -> public.zoning_kannapolis
+2026-05-28 15:44:23,858 INFO Layer metadata: name=Kannapolis Zoning geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 15:44:23,978 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:23,978 INFO Source feature count: 1839
+2026-05-28 15:44:29,718 INFO Downloaded 1000/1839 features
+2026-05-28 15:44:30,917 INFO Downloaded 1839/1839 features
+2026-05-28 15:44:31,182 INFO Writing 1839 features to public.zoning_kannapolis
+2026-05-28 15:44:31,748 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:31,765 INFO Ingesting zoning source locust -> public.zoning_locust
+2026-05-28 15:44:31,823 INFO Layer metadata: name=Locust Zoning geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 15:44:35,674 WARNING Layer metadata has no objectIdField; using OID field OBJECTID_1.
+2026-05-28 15:44:35,675 INFO Source feature count: 8
+2026-05-28 15:44:35,838 INFO Downloaded 8/8 features
+2026-05-28 15:44:35,845 INFO Writing 8 features to public.zoning_locust
+2026-05-28 15:44:35,872 WARNING Layer metadata has no objectIdField; using OID field OBJECTID_1.
+2026-05-28 15:44:35,872 INFO Ingesting zoning source midland -> public.zoning_midland
+2026-05-28 15:44:35,929 INFO Layer metadata: name=Midland Zoning geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 15:44:37,904 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:37,905 INFO Source feature count: 110
+2026-05-28 15:44:38,292 INFO Downloaded 110/110 features
+2026-05-28 15:44:38,307 INFO Writing 110 features to public.zoning_midland
+2026-05-28 15:44:38,401 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:38,403 INFO Ingesting zoning source mount_pleasant -> public.zoning_mount_pleasant
+2026-05-28 15:44:38,456 INFO Layer metadata: name=Mt Pleasant Zoning geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 15:44:39,877 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:39,877 INFO Source feature count: 174
+2026-05-28 15:44:40,258 INFO Downloaded 174/174 features
+2026-05-28 15:44:40,305 INFO Writing 174 features to public.zoning_mount_pleasant
+2026-05-28 15:44:40,444 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:40,451 INFO Wrote zoning sources ingestion summary: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_sources_ingest_summary.json
+2026-05-28 15:44:40,451 INFO Total zoning feature count: 3440
+2026-05-28 15:44:40,451 INFO Ingestion duration: 35.65 seconds

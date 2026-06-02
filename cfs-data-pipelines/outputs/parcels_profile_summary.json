@@ -1,0 +1,375 @@
+{
+  "generated_at": "2026-05-28T10:55:16",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "schema": "public",
+    "table": "parcels"
+  },
+  "total_row_count": 110017,
+  "column_count": 29,
+  "columns": [
+    {
+      "ordinal_position": 1,
+      "column_name": "geometry",
+      "data_type": "USER-DEFINED",
+      "udt_name": "geometry",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 2,
+      "column_name": "objectid_1",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 3,
+      "column_name": "pin14",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 4,
+      "column_name": "objectid",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 5,
+      "column_name": "oldpin",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 6,
+      "column_name": "subdiv_name",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 7,
+      "column_name": "nbh_name",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 8,
+      "column_name": "propertyreal_id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 9,
+      "column_name": "legaldesc",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 10,
+      "column_name": "marketvalue",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 11,
+      "column_name": "assessedvalue",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 12,
+      "column_name": "landvalue",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 13,
+      "column_name": "deferredvalue",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 14,
+      "column_name": "buildingvalue",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 15,
+      "column_name": "obxfvalue",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 16,
+      "column_name": "acctname1",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 17,
+      "column_name": "acctname2",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 18,
+      "column_name": "mailaddr1",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 19,
+      "column_name": "mailaddr2",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 20,
+      "column_name": "mailcity",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 21,
+      "column_name": "mailstate",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 22,
+      "column_name": "mailzipcode",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 23,
+      "column_name": "saleyear",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 24,
+      "column_name": "salemonth",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 25,
+      "column_name": "saleprice",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 26,
+      "column_name": "deedbook",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 27,
+      "column_name": "deedpage",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 28,
+      "column_name": "shape_starea",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 29,
+      "column_name": "shape_stlength",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    }
+  ],
+  "geometry_type_counts": [
+    {
+      "geometry_type": "ST_Polygon",
+      "feature_count": 109279
+    },
+    {
+      "geometry_type": "ST_MultiPolygon",
+      "feature_count": 738
+    }
+  ],
+  "srid_counts": [
+    {
+      "srid": 4326,
+      "feature_count": 110017
+    }
+  ],
+  "invalid_geometry_count": 6,
+  "null_geometry_count": 0,
+  "bounding_box": {
+    "xmin": -80.78714859986353,
+    "ymin": 35.185001484384316,
+    "xmax": -80.29542844362561,
+    "ymax": 35.55345527610693
+  },
+  "spatial_indexes": [
+    {
+      "indexname": "idx_parcels_geometry",
+      "indexdef": "CREATE INDEX idx_parcels_geometry ON public.parcels USING gist (geometry)"
+    },
+    {
+      "indexname": "parcels_geometry_gix",
+      "indexdef": "CREATE INDEX parcels_geometry_gix ON public.parcels USING gist (geometry)"
+    }
+  ],
+  "spatial_index_exists": true,
+  "likely_identifier_fields": [
+    "objectid_1",
+    "pin14",
+    "objectid",
+    "oldpin",
+    "propertyreal_id"
+  ],
+  "economic_value_fields": [
+    "marketvalue",
+    "assessedvalue",
+    "landvalue",
+    "deferredvalue",
+    "buildingvalue",
+    "obxfvalue"
+  ],
+  "subdivision_neighborhood_fields": [
+    "subdiv_name",
+    "nbh_name"
+  ],
+  "address_location_fields": [
+    "mailaddr1",
+    "mailaddr2",
+    "mailcity",
+    "mailzipcode"
+  ],
+  "zoning_land_use_fields": [],
+  "identifier_duplicate_profiles": {
+    "objectid_1": {
+      "distinct_non_null_count": 110017,
+      "duplicate_value_count": 0,
+      "duplicate_excess_rows": 0,
+      "null_percentage": 0.0
+    },
+    "pin14": {
+      "distinct_non_null_count": 106560,
+      "duplicate_value_count": 2930,
+      "duplicate_excess_rows": 3447,
+      "null_percentage": 0.0091
+    },
+    "objectid": {
+      "distinct_non_null_count": 107151,
+      "duplicate_value_count": 2660,
+      "duplicate_excess_rows": 2866,
+      "null_percentage": 0.0
+    },
+    "oldpin": {
+      "distinct_non_null_count": 94023,
+      "duplicate_value_count": 3628,
+      "duplicate_excess_rows": 9955,
+      "null_percentage": 5.4892
+    },
+    "propertyreal_id": {
+      "distinct_non_null_count": 100375,
+      "duplicate_value_count": 3031,
+      "duplicate_excess_rows": 9629,
+      "null_percentage": 0.0118
+    }
+  },
+  "economic_field_stats": {
+    "marketvalue": {
+      "non_null_text_count": 103042,
+      "parseable_numeric_count": 103042,
+      "non_parseable_count": 0,
+      "min_value": 0.0,
+      "max_value": 473824360.0,
+      "avg_value": 495416.4285048815
+    },
+    "assessedvalue": {
+      "non_null_text_count": 103042,
+      "parseable_numeric_count": 103042,
+      "non_parseable_count": 0,
+      "min_value": 0.0,
+      "max_value": 473824360.0,
+      "avg_value": 480217.7005104715
+    },
+    "landvalue": {
+      "non_null_text_count": 103042,
+      "parseable_numeric_count": 103042,
+      "non_parseable_count": 0,
+      "min_value": 0.0,
+      "max_value": 91897890.0,
+      "avg_value": 139891.2949185769
+    },
+    "deferredvalue": {
+      "non_null_text_count": 103633,
+      "parseable_numeric_count": 103633,
+      "non_parseable_count": 0,
+      "min_value": -10780.0,
+      "max_value": 19423880.0,
+      "avg_value": 15381.07282429342
+    },
+    "buildingvalue": {
+      "non_null_text_count": 103042,
+      "parseable_numeric_count": 103042,
+      "non_parseable_count": 0,
+      "min_value": 0.0,
+      "max_value": 417194960.0,
+      "avg_value": 342726.63971972594
+    },
+    "obxfvalue": {
+      "non_null_text_count": 103042,
+      "parseable_numeric_count": 103042,
+      "non_parseable_count": 0,
+      "min_value": 0.0,
+      "max_value": 61503670.0,
+      "avg_value": 12798.493866578678
+    }
+  },
+  "high_null_columns": [
+    {
+      "column_name": "mailaddr2",
+      "null_percentage": 87.3238,
+      "role_tags": [
+        "address_location"
+      ]
+    }
+  ],
+  "duration_seconds": 3.58,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\inspect_parcels_postgis_20260528_105512.log",
+  "outputs": {
+    "summary_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcels_profile_summary.json",
+    "column_profile_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcels_column_profile.csv"
+  }
+}

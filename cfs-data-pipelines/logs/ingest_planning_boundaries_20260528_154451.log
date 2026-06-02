@@ -1,0 +1,9 @@
+2026-05-28 15:44:51,050 INFO Starting CFS planning boundary ingestion.
+2026-05-28 15:44:51,050 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\ingest_planning_boundaries_20260528_154451.log
+2026-05-28 15:44:51,835 INFO Layer metadata: name=ETJ Boundary geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 15:44:51,942 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:51,942 INFO Source feature count: 5
+2026-05-28 15:44:52,236 INFO Downloaded 5/5 boundary features
+2026-05-28 15:44:52,612 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 15:44:52,615 INFO Wrote planning boundary ingestion summary: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\planning_boundaries_ingest_summary.json
+2026-05-28 15:44:52,615 INFO Planning boundary feature count: 5

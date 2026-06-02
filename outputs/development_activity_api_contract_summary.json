@@ -1,0 +1,195 @@
+{
+  "contract": "development_activity_api_contract",
+  "status": "planning_only",
+  "generated_on": "2026-05-31",
+  "scope": "Development Activity and Temporal Analytics backend readiness",
+  "source_tables": [
+    "public.real_property_permit_clean",
+    "public.real_property_permit_parcel_relationship",
+    "public.development_activity_parcel_summary",
+    "public.development_activity_time_summary",
+    "public.development_activity_zoning_summary"
+  ],
+  "documents_created": [
+    "docs/backend/development_activity_api_contract.md",
+    "docs/backend/development_activity_data_dictionary.md",
+    "docs/backend/development_activity_temporal_query_specification.md",
+    "docs/backend/development_activity_response_examples.md"
+  ],
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/development/statistics",
+      "purpose": "Top-level permit, parcel activity, relationship QA, and activity class statistics"
+    },
+    {
+      "method": "GET",
+      "path": "/development/trends",
+      "purpose": "Annual, monthly, quarterly, and year-over-year permit trend aggregates"
+    },
+    {
+      "method": "GET",
+      "path": "/development/hotspots",
+      "purpose": "High-activity parcel rankings and future hotspot map payloads"
+    },
+    {
+      "method": "GET",
+      "path": "/development/zoning-summary",
+      "purpose": "Permit activity grouped by zoning jurisdiction, raw zoning code, normalized category, and permit type"
+    },
+    {
+      "method": "GET",
+      "path": "/development/activity-summary",
+      "purpose": "Executive-ready development activity summary with top jurisdictions, hotspots, and QA caveats"
+    },
+    {
+      "method": "GET",
+      "path": "/development/temporal-query",
+      "purpose": "Flexible time-slice query for future time slider controls and map filtering"
+    },
+    {
+      "method": "GET",
+      "path": "/development/permit-types",
+      "purpose": "Permit type metadata and counts"
+    },
+    {
+      "method": "GET",
+      "path": "/development/work-types",
+      "purpose": "Work type metadata and counts"
+    },
+    {
+      "method": "GET",
+      "path": "/development/jurisdictions",
+      "purpose": "Zoning jurisdiction metadata and counts"
+    },
+    {
+      "method": "GET",
+      "path": "/development/activity-classes",
+      "purpose": "Development activity class metadata and parcel counts"
+    }
+  ],
+  "supported_filters": [
+    "year",
+    "month",
+    "start_date",
+    "end_date",
+    "permit_type",
+    "work_type",
+    "zoning_jurisdiction",
+    "zoning_code",
+    "activity_class",
+    "permit_status",
+    "bbox"
+  ],
+  "temporal_query_modes": [
+    "single_year",
+    "month",
+    "date_range",
+    "rolling_12",
+    "rolling_36",
+    "year_over_year"
+  ],
+  "response_schemas_defined": [
+    "Statistics Response",
+    "Trend Response",
+    "Hotspot Response",
+    "Zoning Activity Response",
+    "Temporal Query Response",
+    "Activity Summary Response"
+  ],
+  "aggregation_strategy": {
+    "statistics": [
+      "public.development_activity_parcel_summary",
+      "public.development_activity_time_summary"
+    ],
+    "trends": [
+      "public.development_activity_time_summary"
+    ],
+    "hotspots": [
+      "public.development_activity_parcel_summary"
+    ],
+    "zoning_summary": [
+      "public.development_activity_zoning_summary"
+    ],
+    "combined_detail_queries": [
+      "public.real_property_permit_parcel_relationship"
+    ]
+  },
+  "recommended_materialized_views": [
+    "mv_development_activity_api_statistics",
+    "mv_development_activity_api_trends_monthly",
+    "mv_development_activity_api_hotspots",
+    "mv_development_activity_api_zoning_summary",
+    "mv_development_activity_api_filter_facets",
+    "mv_development_activity_api_extent_summary"
+  ],
+  "recommended_indexes": [
+    "real_property_permit_clean(permit_id)",
+    "real_property_permit_clean(permit_date)",
+    "real_property_permit_clean(activity_year, activity_month)",
+    "real_property_permit_clean(permit_type)",
+    "real_property_permit_clean(work_type)",
+    "real_property_permit_clean(permit_status)",
+    "real_property_permit_clean(parcel_number)",
+    "real_property_permit_parcel_relationship(permit_id)",
+    "real_property_permit_parcel_relationship(official_parcel_id)",
+    "real_property_permit_parcel_relationship(activity_date)",
+    "real_property_permit_parcel_relationship(activity_year, activity_month)",
+    "real_property_permit_parcel_relationship(permit_type)",
+    "real_property_permit_parcel_relationship(work_type)",
+    "real_property_permit_parcel_relationship(permit_status)",
+    "real_property_permit_parcel_relationship(zoning_jurisdiction_name)",
+    "development_activity_parcel_summary(official_parcel_id)",
+    "development_activity_parcel_summary(development_activity_class)",
+    "development_activity_parcel_summary(latest_permit_date)",
+    "development_activity_parcel_summary(total_permit_count)",
+    "development_activity_parcel_summary(zoning_jurisdiction_name)",
+    "development_activity_time_summary(activity_year, activity_month)",
+    "development_activity_time_summary(permit_type)",
+    "development_activity_time_summary(work_type)",
+    "development_activity_time_summary(permit_status)",
+    "development_activity_time_summary(zoning_jurisdiction_name)",
+    "development_activity_zoning_summary(zoning_jurisdiction_name)",
+    "development_activity_zoning_summary(dominant_zoning_code_raw)",
+    "development_activity_zoning_summary(dominant_zoning_general_normalized)",
+    "development_activity_zoning_summary(permit_type)"
+  ],
+  "future_postgis_support": [
+    "bbox queries",
+    "map extent queries",
+    "hotspot map requests",
+    "time-enabled map filtering",
+    "bounded centroid payloads",
+    "server-side geometry simplification by zoom level"
+  ],
+  "explicitly_not_implemented": [
+    "FastAPI endpoints",
+    "frontend-to-PostGIS connection",
+    "authentication",
+    "vector search",
+    "AI forecasting",
+    "SceneView playback",
+    "live permit feed"
+  ],
+  "backend_readiness_assessment": {
+    "readiness": "contract_ready",
+    "ready_items": [
+      "source tables exist",
+      "development activity analytics layer exists",
+      "frontend uses generated output artifacts",
+      "temporal frontend state and query preview exist",
+      "endpoint inventory and schemas are defined"
+    ],
+    "remaining_blockers": [
+      "FastAPI project scaffold",
+      "database settings and connection management",
+      "Pydantic response models",
+      "query builder and validation layer",
+      "materialized view refresh strategy",
+      "spatial hotspot payload strategy",
+      "cache policy implementation",
+      "performance testing",
+      "auth and deployment strategy if exposed beyond local development"
+    ]
+  }
+}

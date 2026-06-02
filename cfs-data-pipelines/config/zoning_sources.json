@@ -1,0 +1,60 @@
+{
+  "sources": [
+    {
+      "id": "county",
+      "jurisdiction_name": "Cabarrus County / Unincorporated",
+      "raw_table": "zoning_county",
+      "schema": "public",
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/35",
+      "expected_fields": ["OBJECTID", "ZONINGCODE", "ZONING_GEN", "Shape", "Shape.STArea()", "Shape.STLength()"]
+    },
+    {
+      "id": "concord",
+      "jurisdiction_name": "Concord",
+      "raw_table": "zoning_concord",
+      "schema": "public",
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/36",
+      "expected_fields": ["OBJECTID", "ZONINGCODE", "Shape", "Shape.STArea()", "Shape.STLength()"]
+    },
+    {
+      "id": "harrisburg",
+      "jurisdiction_name": "Harrisburg",
+      "raw_table": "zoning_harrisburg",
+      "schema": "public",
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/37",
+      "expected_fields": ["OBJECTID", "ZONINGCODE", "ZONING_GEN", "Shape", "Shape.STArea()", "Shape.STLength()"]
+    },
+    {
+      "id": "kannapolis",
+      "jurisdiction_name": "Kannapolis",
+      "raw_table": "zoning_kannapolis",
+      "schema": "public",
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/38",
+      "expected_fields": ["OBJECTID", "BASE_DISTR", "CONDITIONA", "Shape", "ZONINGCODE", "Shape.STArea()", "Shape.STLength()"]
+    },
+    {
+      "id": "locust",
+      "jurisdiction_name": "Locust",
+      "raw_table": "zoning_locust",
+      "schema": "public",
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/39",
+      "expected_fields": ["OBJECTID_1", "OBJECTID", "ZONING", "Shape", "ZONINGCODE", "Shape.STArea()", "Shape.STLength()"]
+    },
+    {
+      "id": "midland",
+      "jurisdiction_name": "Midland",
+      "raw_table": "zoning_midland",
+      "schema": "public",
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/40",
+      "expected_fields": ["OBJECTID", "Zoning_Typ", "Shape", "ZONINGCODE", "Shape.STArea()", "Shape.STLength()"]
+    },
+    {
+      "id": "mount_pleasant",
+      "jurisdiction_name": "Mt. Pleasant",
+      "raw_table": "zoning_mount_pleasant",
+      "schema": "public",
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/41",
+      "expected_fields": ["OBJECTID", "ZONINGCODE", "Shape", "Shape.STArea()", "Shape.STLength()"]
+    }
+  ]
+}

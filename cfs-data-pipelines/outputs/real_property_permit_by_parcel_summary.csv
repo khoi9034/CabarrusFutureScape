@@ -1,0 +1,501 @@
+official_parcel_id,objectid_1,pin14,parcel_quality_status,valuation_band,parcel_size_category,zoning_jurisdiction_name,dominant_zoning_code_raw,dominant_zoning_general_normalized,zoning_assignment_confidence,governance_warning_categories,permit_count,first_permit_date,latest_permit_date,permit_type_count,total_permit_amount,co_date_future_outlier_count
+CFS-PARCEL-0149726579,149726579,45896367300000,review,ultra_high,extreme_large,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],286,2000-08-02,2025-10-22,5,61926619.0,0
+CFS-PARCEL-0149808150,149808150,56213814220000,review,ultra_high,commercial_large,Concord,PID,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",170,2008-02-01,2025-12-12,6,154499165.69,0
+CFS-PARCEL-0149752131,149752131,55091820390000,review,ultra_high,commercial_large,Concord,O-I-CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",127,2014-05-12,2025-11-04,5,31860549.0,0
+CFS-PARCEL-0149728135,149728135,45998437730000,trusted,ultra_high,commercial_large,Concord,RV,residential,high,['review_sliver_overlap'],102,2005-02-01,2025-11-25,6,1034740.0,0
+CFS-PARCEL-0149729262,149729262,45999433330000,trusted,ultra_high,commercial_large,Concord,RV,residential,high,['review_sliver_overlap'],69,2004-05-01,2025-11-13,9,259917.0,0
+CFS-PARCEL-0149789146,149789146,56102182090000,trusted,ultra_high,extreme_large,Concord,I-2,unknown,medium,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",62,2022-05-12,2025-10-02,4,775168452.0,0
+CFS-PARCEL-0149783110,149783110,56010135370000,trusted,ultra_high,commercial_large,Kannapolis,CD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",61,2008-04-01,2025-11-12,6,10384365.44,0
+CFS-PARCEL-0149736835,149736835,46705588120000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],55,2009-08-01,2025-01-16,7,3754318.1,0
+CFS-PARCEL-0149784413,149784413,56017349760000,trusted,ultra_high,commercial_large,Concord,I-2,unknown,high,['jurisdiction_code_semantics_review'],49,2006-08-01,2025-08-20,3,10477711.0,0
+CFS-PARCEL-0149727441,149727441,45988876150000,review,ultra_high,extreme_large,Concord,PID,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",47,2003-11-01,2025-03-14,5,5557192.0,0
+CFS-PARCEL-0149727442,149727442,45988876150000,review,ultra_high,extreme_large,Concord,PID,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",47,2003-11-01,2025-03-14,5,5557192.0,0
+CFS-PARCEL-0149780354,149780354,55385984190000,trusted,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],45,2007-03-01,2023-11-22,8,164773.0,0
+CFS-PARCEL-0149773228,149773228,55435780680000,review,ultra_high,extreme_large,Cabarrus County / Unincorporated,GI,industrial,high,['review_sliver_overlap'],45,2010-06-15,2021-10-14,5,20566707.72,0
+CFS-PARCEL-0149771633,149771633,55392445840000,trusted,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],42,2008-06-01,2021-09-27,3,62500.0,0
+CFS-PARCEL-0149781836,149781836,56003687430000,trusted,ultra_high,commercial_large,Concord,C-1,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",42,2015-04-02,2016-09-09,4,24143540.0,0
+CFS-PARCEL-0149749102,149749102,55078596960000,trusted,ultra_high,commercial_large,Harrisburg,CZ-GC,commercial,high,['review_sliver_overlap'],40,2017-02-22,2025-12-12,4,9904118.81,0
+CFS-PARCEL-0149811661,149811661,56224522260000,trusted,ultra_high,commercial_large,Kannapolis,R18-CZ,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",39,2022-07-29,2024-06-06,7,25987394.0,0
+CFS-PARCEL-0149741775,149741775,46919268030000,trusted,ultra_high,commercial_large,Kannapolis,CD-R-CZ,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",39,2018-06-04,2021-01-06,2,13574065.0,0
+CFS-PARCEL-0149807384,149807384,56212942100000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",38,2009-09-01,2025-10-13,5,349360.97,0
+CFS-PARCEL-0149752474,149752474,55093259870000,trusted,luxury,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",36,2007-04-01,2025-05-29,5,624140.45,0
+CFS-PARCEL-0149803800,149803800,56202933410000,trusted,ultra_high,commercial_large,Concord,PUD,unknown,medium,['jurisdiction_code_semantics_review'],35,2008-06-01,2025-07-01,5,3627585.01,0
+CFS-PARCEL-0149734611,149734611,45892767620000,trusted,ultra_high,estate,Concord,PUD,unknown,high,"['review_multi_jurisdiction', 'jurisdiction_code_semantics_review']",34,2022-11-09,2025-12-08,3,46049867.0,0
+CFS-PARCEL-0149728128,149728128,45996917900000,trusted,ultra_high,estate,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",34,2021-08-25,2025-02-19,3,8485701.0,0
+CFS-PARCEL-0149781903,149781903,56004930300000,review,ultra_high,estate,Concord,C-2,unknown,medium,['jurisdiction_code_semantics_review'],32,2005-12-01,2025-05-29,5,2363319.0,0
+CFS-PARCEL-0149751728,149751728,55092173920000,review,unknown,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",32,2021-05-28,2022-07-15,3,27707210.0,0
+CFS-PARCEL-0149751729,149751729,55092173920000,review,unknown,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",32,2021-05-28,2022-07-15,3,27707210.0,0
+CFS-PARCEL-0149733192,149733192,46725271000000,trusted,ultra_high,commercial_large,Kannapolis,GC,commercial,medium,"['review_multi_jurisdiction', 'review_sliver_overlap']",31,2011-06-09,2025-12-05,5,22970511.0,0
+CFS-PARCEL-0149746632,149746632,55070349970000,trusted,ultra_high,estate,Harrisburg,CZ-GC,commercial,high,['review_sliver_overlap'],31,2011-01-14,2025-06-13,3,8932189.0,0
+CFS-PARCEL-0149820657,149820657,56228509330000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",31,2015-04-21,2025-03-14,4,4894164.0,0
+CFS-PARCEL-0149790288,149790288,56109358970000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",30,2005-09-01,2025-01-07,6,6343387.0,0
+CFS-PARCEL-0149811576,149811576,56225480760000,review,ultra_high,commercial_large,Concord,PID,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",30,2007-08-01,2024-11-18,5,6347076.0,0
+CFS-PARCEL-0149783785,149783785,56010286760000,trusted,luxury,estate,Kannapolis,GC-CZ,commercial,high,['review_sliver_overlap'],30,2017-08-16,2024-05-14,3,2553350.0,0
+CFS-PARCEL-0149726859,149726859,45899406520000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,medium,['jurisdiction_code_semantics_review'],30,2007-06-01,2024-03-22,6,6940581.0,0
+CFS-PARCEL-0149736197,149736197,46810179110000,trusted,ultra_high,estate,Concord,C-2-CU,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",29,2007-08-01,2025-11-21,5,2415548.0,0
+CFS-PARCEL-0149824129,149824129,56507660350000,review,ultra_high,commercial_large,Cabarrus County / Unincorporated,CR,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",29,2003-10-01,2025-11-18,3,1104100.0,0
+CFS-PARCEL-0149744805,149744805,55061281970000,review,ultra_high,commercial_large,Harrisburg,PUD,unknown,high,['jurisdiction_code_semantics_review'],29,2003-10-01,2025-09-09,5,11931749.0,0
+CFS-PARCEL-0149744806,149744806,55061281970000,review,ultra_high,commercial_large,Harrisburg,PUD,unknown,high,['jurisdiction_code_semantics_review'],29,2003-10-01,2025-09-09,5,11931749.0,0
+CFS-PARCEL-0149766209,149766209,55298044070000,review,ultra_high,commercial_large,Concord,O-I,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",29,2002-08-01,2025-06-27,4,3805304.0,0
+CFS-PARCEL-0149736000,149736000,45985840790000,review,luxury,commercial_large,Cabarrus County / Unincorporated,GC,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",29,2009-07-01,2025-05-02,6,460486.0,0
+CFS-PARCEL-0149736001,149736001,45985840790000,review,luxury,commercial_large,Cabarrus County / Unincorporated,GC,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",29,2009-07-01,2025-05-02,6,460486.0,0
+CFS-PARCEL-0149726376,149726376,45894448210000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",29,2007-01-01,2024-01-18,3,1178560.0,0
+CFS-PARCEL-0149726377,149726377,45894448210000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",29,2007-01-01,2024-01-18,3,1178560.0,0
+CFS-PARCEL-0149813206,149813206,56232416450000,trusted,low,estate,Kannapolis,R18,residential,high,['review_sliver_overlap'],29,2018-07-25,2022-06-27,2,715700.0,0
+CFS-PARCEL-0149729544,149729544,46705666960000,trusted,ultra_high,commercial_large,Cabarrus County / Unincorporated,LDR,residential,high,['safe_for_dashboard'],29,2016-09-29,2017-05-15,1,17031000.0,0
+CFS-PARCEL-0149760103,149760103,55094309100000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],28,2010-10-14,2025-05-23,5,2578788.0,0
+CFS-PARCEL-0149807988,149807988,56211500060000,review,luxury,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],28,2008-04-01,2024-12-20,3,738800.0,0
+CFS-PARCEL-0149807989,149807989,56211500060000,review,luxury,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],28,2008-04-01,2024-12-20,3,738800.0,0
+CFS-PARCEL-0149788698,149788698,56049121540000,trusted,luxury,commercial_large,Kannapolis,R18,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",28,2003-12-01,2023-05-23,5,77700.0,0
+CFS-PARCEL-0149791512,149791512,56114740970000,trusted,luxury,estate,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",28,2003-05-01,2018-10-04,4,2212000.0,0
+CFS-PARCEL-0149742041,149742041,46918500940000,trusted,ultra_high,commercial_large,Kannapolis,R18-CZ,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",27,2024-05-30,2025-10-03,4,26768521.5,0
+CFS-PARCEL-0149772008,149772008,55393469600000,review,ultra_high,commercial_large,Concord,I-2,unknown,medium,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",27,2004-04-01,2025-09-17,3,2420551.0,0
+CFS-PARCEL-0149781661,149781661,56001675750000,review,ultra_high,commercial_large,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",27,2008-02-01,2025-07-25,6,7554052.0,0
+CFS-PARCEL-0149750051,149750051,46906762670000,review,ultra_high,commercial_large,Concord,MX-IB,mixed_use,high,['review_sliver_overlap'],27,2016-02-22,2025-01-27,4,23468616.0,0
+CFS-PARCEL-0149771121,149771121,55391385590000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],27,2009-05-01,2022-12-30,4,275089.0,0
+CFS-PARCEL-0149771122,149771122,55391385590000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],27,2009-05-01,2022-12-30,4,275089.0,0
+CFS-PARCEL-0149771162,149771162,55391385590000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],27,2009-05-01,2022-12-30,4,275089.0,0
+CFS-PARCEL-0149809420,149809420,56216125040000,trusted,luxury,residential_standard,Concord,PUD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",26,2008-02-01,2025-12-23,4,451000.0,0
+CFS-PARCEL-0149735622,149735622,45899170630000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],26,2008-04-01,2025-12-01,6,1903318.0,0
+CFS-PARCEL-0149806835,149806835,56209779530000,review,ultra_high,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],26,2006-11-01,2025-09-03,9,1325041388.0,0
+CFS-PARCEL-0149772858,149772858,55398353410000,review,ultra_high,estate,Concord,C-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",26,2006-07-01,2025-05-12,4,4118947.0,0
+CFS-PARCEL-0149805720,149805720,56209209330000,trusted,medium,residential_standard,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],26,2023-10-30,2023-11-07,1,1630070.0,0
+CFS-PARCEL-0149748819,149748819,55077567190000,trusted,ultra_high,estate,Harrisburg,GC,commercial,high,['safe_for_dashboard'],26,2007-05-01,2019-11-05,4,4445486.0,0
+CFS-PARCEL-0149820563,149820563,56225731840000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",25,2003-08-01,2025-12-11,4,4510453.0,0
+CFS-PARCEL-0149820564,149820564,56225731840000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",25,2003-08-01,2025-12-11,4,4510453.0,0
+CFS-PARCEL-0149775432,149775432,55484514010000,review,luxury,commercial_large,Cabarrus County / Unincorporated,LDR,residential,high,['review_sliver_overlap'],25,2014-06-24,2025-02-10,2,973503.0,0
+CFS-PARCEL-0149735609,149735609,45897556660000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",25,2012-07-16,2019-10-11,3,5000.0,0
+CFS-PARCEL-0149735610,149735610,45897556660000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",25,2012-07-16,2019-10-11,3,5000.0,0
+CFS-PARCEL-0149782758,149782758,56005991350000,trusted,ultra_high,commercial_large,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",25,2016-08-05,2018-01-24,3,17938749.0,0
+CFS-PARCEL-0149726720,149726720,45896543610000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],24,2006-09-01,2025-06-19,4,1221736.0,0
+CFS-PARCEL-0149726721,149726721,45896543610000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],24,2006-09-01,2025-06-19,4,1221736.0,0
+CFS-PARCEL-0149727590,149727590,45982865590000,trusted,ultra_high,commercial_large,Concord,I-2-CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",24,2014-05-15,2025-04-29,3,332200.0,0
+CFS-PARCEL-0149786774,149786774,56031232270000,trusted,ultra_high,estate,Kannapolis,R18,agricultural,high,['review_sliver_overlap'],24,2022-06-24,2024-03-13,2,9047100.0,0
+CFS-PARCEL-0149742043,149742043,46919019270000,trusted,ultra_high,commercial_large,Kannapolis,CD-R,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",24,2012-12-03,2016-08-15,2,9960337.0,0
+CFS-PARCEL-0149736377,149736377,46808418530000,trusted,ultra_high,commercial_large,Concord,I-2-CD,unknown,high,['jurisdiction_code_semantics_review'],23,2018-06-07,2025-12-12,3,10334182.0,0
+CFS-PARCEL-0149735340,149735340,45893509410000,trusted,ultra_high,commercial_large,Concord,MX-CC2,mixed_use,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",23,2016-07-19,2025-11-26,4,7425700.0,0
+CFS-PARCEL-0149785588,149785588,56023939950000,review,ultra_high,commercial_large,Kannapolis,GC,commercial,medium,['review_sliver_overlap'],23,2014-06-12,2024-09-18,3,15505546.0,0
+CFS-PARCEL-0149752049,149752049,55095307260000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",23,2016-06-01,2018-05-09,4,15085500.0,0
+CFS-PARCEL-0149749977,149749977,46900022520000,review,ultra_high,extreme_large,Concord,I-1,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",22,2010-12-01,2025-11-20,3,30481722.93,0
+CFS-PARCEL-0149749978,149749978,46900022520000,review,ultra_high,extreme_large,Concord,I-1,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",22,2010-12-01,2025-11-20,3,30481722.93,0
+CFS-PARCEL-0149726479,149726479,45895557940000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],22,2007-10-01,2025-08-18,3,509976.0,0
+CFS-PARCEL-0149810942,149810942,56221269970000,trusted,ultra_high,commercial_large,Kannapolis,GC,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",22,2008-01-01,2025-07-28,4,498445.39,0
+CFS-PARCEL-0149782644,149782644,56003847100000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],22,2003-09-01,2025-04-29,5,3548107.0,0
+CFS-PARCEL-0149799983,149799983,56136905890000,trusted,low,residential_standard,Kannapolis,CC,commercial,high,['safe_for_dashboard'],22,2018-09-06,2025-03-13,5,39915776.0,0
+CFS-PARCEL-0149761259,149761259,55263554150000,trusted,luxury,commercial_large,Cabarrus County / Unincorporated,CR,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",22,2008-07-01,2024-11-26,3,21650.0,0
+CFS-PARCEL-0149783366,149783366,56010745830000,trusted,ultra_high,commercial_large,Kannapolis,R18-CZ,residential,high,['review_sliver_overlap'],22,2021-08-19,2024-09-03,3,10311692.0,0
+CFS-PARCEL-0149811426,149811426,56222877650000,review,luxury,commercial_large,Kannapolis,PD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",21,2025-06-03,2025-06-04,1,23704775.0,0
+CFS-PARCEL-0149782253,149782253,56005303600000,review,ultra_high,commercial_large,Concord,C-2-CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",21,2015-01-30,2025-01-08,4,6005656.5,0
+CFS-PARCEL-0149782254,149782254,56005303600000,review,ultra_high,commercial_large,Concord,C-2-CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",21,2015-01-30,2025-01-08,4,6005656.5,0
+CFS-PARCEL-0149782270,149782270,56005303600000,review,ultra_high,commercial_large,Concord,C-2-CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",21,2015-01-30,2025-01-08,4,6005656.5,0
+CFS-PARCEL-0149811299,149811299,56223167640000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],21,2007-03-01,2024-12-12,4,68344.25,0
+CFS-PARCEL-0149740691,149740691,46904402680000,review,ultra_high,commercial_large,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",21,2019-03-07,2024-06-13,3,8967559.75,0
+CFS-PARCEL-0149733014,149733014,46725015280000,trusted,ultra_high,estate,Kannapolis,GC,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",20,2007-09-01,2025-12-10,4,204300.0,0
+CFS-PARCEL-0149726723,149726723,45896608890000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",20,2008-09-01,2025-12-01,3,5740150.0,0
+CFS-PARCEL-0149772500,149772500,55399331220000,review,luxury,commercial_large,Cabarrus County / Unincorporated,GC,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",20,2007-03-01,2025-11-17,4,465900.0,0
+CFS-PARCEL-0149772105,149772105,55394963240000,trusted,ultra_high,commercial_large,Concord,I-1,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",20,2004-05-01,2025-01-17,3,1974808.0,0
+CFS-PARCEL-0149813601,149813601,56233088450000,review,luxury,residential_standard,Kannapolis,PD,unknown,high,['jurisdiction_code_semantics_review'],20,2008-02-01,2024-03-26,2,11119.0,0
+CFS-PARCEL-0149726777,149726777,45894568390000,trusted,ultra_high,residential_standard,Concord,MX-CC2,mixed_use,high,['safe_for_dashboard'],20,2014-04-02,2023-04-17,4,2019988.0,0
+CFS-PARCEL-0149811948,149811948,56223800390000,review,ultra_high,commercial_large,Kannapolis,R18,residential,high,['review_sliver_overlap'],20,2013-07-08,2014-01-17,2,,0
+CFS-PARCEL-0149811780,149811780,56225706610000,review,luxury,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],19,2007-01-01,2025-11-17,6,746080.46,0
+CFS-PARCEL-0149811781,149811781,56225706610000,review,luxury,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],19,2007-01-01,2025-11-17,6,746080.46,0
+CFS-PARCEL-0149797602,149797602,56106087490000,trusted,ultra_high,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",19,2010-05-27,2025-09-08,3,1277417.0,0
+CFS-PARCEL-0149800004,149800004,56136949870000,trusted,luxury,residential_standard,Kannapolis,CC,commercial,high,['safe_for_dashboard'],19,2018-11-07,2025-08-12,3,2374108.0,0
+CFS-PARCEL-0149783695,149783695,55470645480000,review,ultra_high,extreme_large,Concord,O-I,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",19,2011-10-17,2025-01-15,5,29137945.0,0
+CFS-PARCEL-0149771552,149771552,55391313540000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],19,2006-02-01,2024-06-10,3,584987.0,0
+CFS-PARCEL-0149771553,149771553,55391313540000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],19,2006-02-01,2024-06-10,3,584987.0,0
+CFS-PARCEL-0149771554,149771554,55391313540000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],19,2006-02-01,2024-06-10,3,584987.0,0
+CFS-PARCEL-0149807742,149807742,56209997520000,review,luxury,estate,Concord,CC,commercial,high,['review_sliver_overlap'],19,2014-05-15,2024-03-15,4,346900.0,0
+CFS-PARCEL-0149820152,149820152,56223216710000,trusted,luxury,residential_standard,Kannapolis,GC,commercial,medium,"['review_multi_jurisdiction', 'review_sliver_overlap']",19,2004-02-01,2023-11-30,4,41272.53,0
+CFS-PARCEL-0149772234,149772234,55394172350000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",19,2004-02-01,2022-03-30,5,25200.0,0
+CFS-PARCEL-0149790854,149790854,56113661820000,review,low,estate,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",19,2021-08-06,2021-08-06,1,201900.0,0
+CFS-PARCEL-0149749235,149749235,55078580460000,review,ultra_high,estate,Harrisburg,CZ-GC,commercial,high,['review_sliver_overlap'],19,2017-03-15,2018-01-04,2,4803800.0,0
+CFS-PARCEL-0149749236,149749236,55078580460000,review,ultra_high,estate,Harrisburg,CZ-GC,commercial,high,['review_sliver_overlap'],19,2017-03-15,2018-01-04,2,4803800.0,0
+CFS-PARCEL-0149725985,149725985,45893530650000,trusted,luxury,residential_standard,Concord,MX-CC2,mixed_use,high,['safe_for_dashboard'],18,2019-03-18,2025-12-19,4,1798379.0,0
+CFS-PARCEL-0149735734,149735734,46807386190000,trusted,ultra_high,commercial_large,Concord,I-2-CD,unknown,high,['jurisdiction_code_semantics_review'],18,2016-04-21,2025-10-28,4,14973966.0,0
+CFS-PARCEL-0149814320,149814320,56211661860000,review,ultra_high,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",18,2006-12-01,2025-08-08,3,262900.0,0
+CFS-PARCEL-0149758361,149758361,55189651270000,trusted,high,commercial_large,Cabarrus County / Unincorporated,GI,industrial,high,['safe_for_dashboard'],18,2013-03-12,2025-06-02,3,211700.0,0
+CFS-PARCEL-0149742039,149742039,46917964890000,trusted,ultra_high,commercial_large,Kannapolis,CD-CZ,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",18,2009-01-01,2025-04-11,4,48682413.0,0
+CFS-PARCEL-0149784401,149784401,56015864270000,review,ultra_high,commercial_large,Kannapolis,GC,commercial,high,['review_sliver_overlap'],18,2008-02-01,2024-07-24,5,3471854.0,0
+CFS-PARCEL-0149792403,149792403,56115725670000,trusted,ultra_high,commercial_large,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",18,2015-11-16,2022-06-02,1,188500.0,0
+CFS-PARCEL-0149811765,149811765,56201413890000,review,ultra_high,commercial_large,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",18,2008-06-01,2021-05-19,3,613000.0,0
+CFS-PARCEL-0149793532,149793532,56024325590000,review,ultra_high,commercial_large,Kannapolis,AG,agricultural,high,['safe_for_dashboard'],18,2007-11-01,2019-11-07,3,951584.0,0
+CFS-PARCEL-0149744624,149744624,46808733070000,trusted,ultra_high,commercial_large,Concord,I-1-CD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",17,2015-09-29,2025-11-07,4,15296671.0,0
+CFS-PARCEL-0149806406,149806406,56208870090000,review,luxury,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],17,2006-01-01,2025-10-14,3,60739.31,0
+CFS-PARCEL-0149727361,149727361,45991079970000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],17,2014-03-11,2025-09-11,3,8414001.0,0
+CFS-PARCEL-0149727362,149727362,45991079970000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],17,2014-03-11,2025-09-11,3,8414001.0,0
+CFS-PARCEL-0149794784,149794784,56126032870000,trusted,ultra_high,estate,Kannapolis,GC,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",17,2008-01-01,2025-06-18,3,1954625.44,0
+CFS-PARCEL-0149779246,149779246,55654122450000,trusted,luxury,estate,Locust,HC,commercial,high,['safe_for_dashboard'],17,2010-06-03,2025-03-07,3,210816.0,0
+CFS-PARCEL-0149726686,149726686,45895661000000,review,luxury,residential_standard,Concord,C-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",17,2009-09-01,2022-09-12,2,9400.0,0
+CFS-PARCEL-0149726687,149726687,45895661000000,review,luxury,residential_standard,Concord,C-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",17,2009-09-01,2022-09-12,2,9400.0,0
+CFS-PARCEL-0149811691,149811691,56224073020000,review,luxury,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],17,2009-03-01,2021-10-29,5,665378.0,0
+CFS-PARCEL-0149727599,149727599,45992503930000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],17,2013-01-30,2018-11-27,4,182350.0,0
+CFS-PARCEL-0149752484,149752484,55053761620000,trusted,high,residential_standard,Harrisburg,CZ-RH,residential,high,['safe_for_dashboard'],17,2017-03-29,2018-07-09,2,1351946.0,0
+CFS-PARCEL-0149791208,149791208,56113751810000,review,ultra_high,commercial_large,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",17,2010-08-19,2016-06-27,3,72899.0,0
+CFS-PARCEL-0149793095,149793095,56015145010000,review,ultra_high,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",16,2008-12-01,2025-10-30,4,9002313.0,0
+CFS-PARCEL-0149793096,149793096,56015145010000,review,ultra_high,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",16,2008-12-01,2025-10-30,4,9002313.0,0
+CFS-PARCEL-0149819993,149819993,56311156540000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",16,2007-11-01,2025-06-19,4,3255530.0,0
+CFS-PARCEL-0149790032,149790032,56106037550000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",16,2007-02-01,2025-06-16,4,5220846.8,0
+CFS-PARCEL-0149748364,149748364,55078747080000,trusted,luxury,residential_standard,Harrisburg,PUD,mixed_use,high,['review_sliver_overlap'],16,2007-02-01,2025-06-12,5,650660.0,0
+CFS-PARCEL-0149751765,149751765,55092316480000,review,low,residential_standard,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],16,2007-02-01,2025-04-04,3,234000.0,0
+CFS-PARCEL-0149735572,149735572,45895521330000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],16,2010-10-06,2025-04-02,5,680500.0,0
+CFS-PARCEL-0149747721,149747721,55074564430000,trusted,luxury,estate,Harrisburg,CZ-OI,office,medium,['review_sliver_overlap'],16,2004-06-01,2025-04-02,4,3041900.0,0
+CFS-PARCEL-0149811721,149811721,56226708010000,trusted,luxury,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],16,2005-01-01,2024-12-04,3,423685.0,0
+CFS-PARCEL-0149811578,149811578,56225756070000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],16,2003-07-01,2023-03-16,3,137934.0,0
+CFS-PARCEL-0149781892,149781892,56004805840000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],16,2012-07-20,2022-06-16,3,1199329.0,0
+CFS-PARCEL-0149828039,149828039,56718015270000,review,luxury,commercial_large,Mt. Pleasant,RL,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",16,2012-08-06,2021-02-26,3,103502.0,0
+CFS-PARCEL-0149828076,149828076,56718015270000,review,luxury,commercial_large,Mt. Pleasant,RL,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",16,2012-08-06,2021-02-26,3,103502.0,0
+CFS-PARCEL-0149727363,149727363,45991179960000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],15,2004-06-01,2025-11-06,4,22581159.0,0
+CFS-PARCEL-0149782931,149782931,56007794780000,review,medium,estate,Concord,RV,residential,high,['review_sliver_overlap'],15,2009-11-01,2025-07-14,2,482456.0,0
+CFS-PARCEL-0149810003,149810003,56218680090000,review,ultra_high,estate,Concord,RM-1,residential,high,['safe_for_dashboard'],15,2005-09-01,2025-07-10,6,3380765.0,0
+CFS-PARCEL-0149810011,149810011,56218680090000,review,ultra_high,commercial_large,Concord,RM-1,residential,high,['safe_for_dashboard'],15,2005-09-01,2025-07-10,6,3380765.0,0
+CFS-PARCEL-0149801115,149801115,56118939950000,review,ultra_high,micro,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],15,2012-12-30,2024-12-12,4,2676213.0,0
+CFS-PARCEL-0149801116,149801116,56118939950000,review,ultra_high,micro,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],15,2012-12-30,2024-12-12,4,2676213.0,0
+CFS-PARCEL-0149801117,149801117,56118939950000,review,ultra_high,estate,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],15,2012-12-30,2024-12-12,4,2676213.0,0
+CFS-PARCEL-0149801118,149801118,56118939950000,review,ultra_high,estate,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],15,2012-12-30,2024-12-12,4,2676213.0,0
+CFS-PARCEL-0149790843,149790843,56105098290000,trusted,luxury,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",15,2008-12-01,2024-09-19,3,336179.0,0
+CFS-PARCEL-0149736402,149736402,46809702100000,trusted,ultra_high,commercial_large,Concord,I-1-CD,unknown,high,['jurisdiction_code_semantics_review'],15,2014-07-07,2024-07-08,3,11168339.0,0
+CFS-PARCEL-0149749255,149749255,55078850340000,trusted,low,residential_standard,Harrisburg,PUD,mixed_use,high,['review_sliver_overlap'],15,2006-03-01,2024-05-06,3,770104.0,0
+CFS-PARCEL-0149771939,149771939,55394235410000,review,ultra_high,commercial_large,Concord,I-1,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",15,2022-01-20,2023-11-03,4,20624134.0,0
+CFS-PARCEL-0149771940,149771940,55394235410000,review,ultra_high,commercial_large,Concord,I-1,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",15,2022-01-20,2023-11-03,4,20624134.0,0
+CFS-PARCEL-0149726646,149726646,45895538230000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",15,2008-03-01,2022-11-02,3,154500.0,0
+CFS-PARCEL-0149726315,149726315,45894630620000,trusted,ultra_high,residential_standard,Concord,MX-CC2,mixed_use,high,['safe_for_dashboard'],15,2014-11-14,2022-08-10,4,2898225.34,0
+CFS-PARCEL-0149760035,149760035,55198962310000,review,unknown,extreme_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",15,2015-04-01,2020-04-20,4,5123199.0,0
+CFS-PARCEL-0149736505,149736505,45997905260000,trusted,ultra_high,estate,Concord,C-2-CU,unknown,high,['jurisdiction_code_semantics_review'],15,2017-04-03,2019-11-01,3,2825500.0,0
+CFS-PARCEL-0149800458,149800458,56138856170000,review,high,residential_standard,Kannapolis,R8,residential,high,['safe_for_dashboard'],14,2004-06-01,2025-11-21,4,1335331.01,0
+CFS-PARCEL-0149800459,149800459,56138856170000,review,high,commercial_large,Kannapolis,R8,residential,high,['safe_for_dashboard'],14,2004-06-01,2025-11-21,4,1335331.01,0
+CFS-PARCEL-0149790169,149790169,56107169820000,trusted,luxury,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],14,2004-01-01,2025-10-29,4,324965.75,0
+CFS-PARCEL-0149793846,149793846,56119900970000,review,luxury,residential_standard,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],14,2020-10-08,2025-09-12,3,1343000.0,0
+CFS-PARCEL-0149807597,149807597,56209718780000,review,high,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],14,2005-12-01,2025-08-28,3,113300.0,0
+CFS-PARCEL-0149790333,149790333,56107486060000,review,medium,estate,Concord,RM-2,residential,high,['review_sliver_overlap'],14,2007-03-01,2025-07-25,2,251240.63,0
+CFS-PARCEL-0149790334,149790334,56107486060000,review,medium,estate,Concord,RM-2,residential,high,['review_sliver_overlap'],14,2007-03-01,2025-07-25,2,251240.63,0
+CFS-PARCEL-0149802127,149802127,56145014040000,trusted,ultra_high,estate,Kannapolis,CC,commercial,high,['safe_for_dashboard'],14,2007-11-01,2025-07-14,3,5891842.0,0
+CFS-PARCEL-0149807605,149807605,56212641750000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],14,2009-08-01,2025-06-27,3,1162699.0,0
+CFS-PARCEL-0149749296,149749296,55079310320000,trusted,high,residential_standard,Harrisburg,CZ-RH,residential,high,['safe_for_dashboard'],14,2017-08-14,2025-06-24,4,156500.0,0
+CFS-PARCEL-0149800175,149800175,56135929920000,review,ultra_high,estate,Kannapolis,CC,commercial,high,['review_sliver_overlap'],14,2004-04-01,2025-06-12,4,2303898.0,0
+CFS-PARCEL-0149800176,149800176,56135929920000,review,ultra_high,estate,Kannapolis,CC,commercial,high,['review_sliver_overlap'],14,2004-04-01,2025-06-12,4,2303898.0,0
+CFS-PARCEL-0149800177,149800177,56135929920000,review,ultra_high,estate,Kannapolis,CC,commercial,high,['review_sliver_overlap'],14,2004-04-01,2025-06-12,4,2303898.0,0
+CFS-PARCEL-0149725986,149725986,45893577900000,trusted,ultra_high,residential_standard,Concord,MX-CC2,mixed_use,high,['safe_for_dashboard'],14,2016-10-06,2025-05-21,4,1397167.79,0
+CFS-PARCEL-0149734102,149734102,46803214760000,review,ultra_high,commercial_large,Cabarrus County / Unincorporated,LDR,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",14,2008-05-01,2025-04-10,3,1117278.0,0
+CFS-PARCEL-0149755111,149755111,55172145850000,review,ultra_high,commercial_large,Harrisburg,OI,office,high,['review_sliver_overlap'],14,2007-09-01,2025-04-10,4,1910978.0,0
+CFS-PARCEL-0149755112,149755112,55172145850000,review,ultra_high,commercial_large,Harrisburg,OI,office,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",14,2007-09-01,2025-04-10,4,1910978.0,0
+CFS-PARCEL-0149747487,149747487,55074536670000,review,low,residential_standard,Harrisburg,GC,commercial,high,['review_sliver_overlap'],14,2008-03-01,2025-02-27,2,218456.0,0
+CFS-PARCEL-0149747488,149747488,55074536670000,review,low,residential_standard,Harrisburg,GC,commercial,high,['review_sliver_overlap'],14,2008-03-01,2025-02-27,2,218456.0,0
+CFS-PARCEL-0149810654,149810654,56218431610000,review,ultra_high,estate,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",14,2024-05-17,2025-01-09,2,219375.0,0
+CFS-PARCEL-0149800178,149800178,56135935600000,trusted,luxury,residential_standard,Kannapolis,CC,commercial,high,['safe_for_dashboard'],14,2006-05-01,2024-09-06,5,380595.0,0
+CFS-PARCEL-0149818389,149818389,56303369230000,review,ultra_high,commercial_large,Concord,RM-2,residential,high,['review_sliver_overlap'],14,2004-06-01,2024-07-22,3,26866249.0,0
+CFS-PARCEL-0149755293,149755293,55170468020000,review,ultra_high,commercial_large,Harrisburg,OI,office,high,['review_sliver_overlap'],14,2009-10-01,2023-08-02,3,558582.0,0
+CFS-PARCEL-0149731709,149731709,46719184870000,review,ultra_high,estate,Concord,PUD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",14,2018-03-23,2023-07-12,3,7128353.0,0
+CFS-PARCEL-0149731710,149731710,46719184870000,review,ultra_high,estate,Concord,PUD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",14,2018-03-23,2023-07-12,3,7128353.0,0
+CFS-PARCEL-0149807898,149807898,56210691920000,review,luxury,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",14,2013-12-16,2023-01-24,3,978800.0,0
+CFS-PARCEL-0149764835,149764835,55293986640000,review,ultra_high,estate,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",14,2019-02-04,2020-12-03,2,5549339.0,0
+CFS-PARCEL-0149735806,149735806,46802732160000,trusted,high,residential_standard,Concord,PRD,unknown,high,['jurisdiction_code_semantics_review'],14,2018-01-10,2020-09-25,2,2710319.0,0
+CFS-PARCEL-0149784257,149784257,56016443100000,trusted,ultra_high,commercial_large,Concord,I-2,unknown,high,['jurisdiction_code_semantics_review'],14,2007-07-01,2018-08-02,3,7353000.0,0
+CFS-PARCEL-0149762662,149762662,55275237690000,trusted,ultra_high,commercial_large,Concord,PUD,unknown,high,['jurisdiction_code_semantics_review'],13,2025-03-03,2025-12-31,2,11800000.0,0
+CFS-PARCEL-0149747939,149747939,55075462160000,review,ultra_high,commercial_large,Harrisburg,OI,office,high,['review_sliver_overlap'],13,2005-06-01,2025-12-12,5,16761198.0,0
+CFS-PARCEL-0149787750,149787750,56039998030000,review,ultra_high,estate,Kannapolis,R18,residential,high,['safe_for_dashboard'],13,2003-06-01,2025-09-30,4,8469780.0,0
+CFS-PARCEL-0149747526,149747526,55070193500000,review,ultra_high,commercial_large,Harrisburg,PUD,mixed_use,high,['review_sliver_overlap'],13,2007-04-01,2025-08-29,4,3162209.0,0
+CFS-PARCEL-0149738503,149738503,46814991920000,review,ultra_high,commercial_large,Concord,O-I,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2014-08-07,2025-08-08,6,13165577.0,0
+CFS-PARCEL-0149736343,149736343,46808151590000,trusted,ultra_high,commercial_large,Concord,I-1,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2014-04-03,2025-07-08,3,20388333.0,0
+CFS-PARCEL-0149726478,149726478,45895508020000,review,unknown,residential_standard,Concord,MX-CC2,mixed_use,high,['safe_for_dashboard'],13,2014-11-20,2025-05-29,3,1966261.82,0
+CFS-PARCEL-0149741878,149741878,46918795730000,trusted,ultra_high,commercial_large,Kannapolis,CD-CZ,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2023-07-18,2025-03-07,3,48809342.0,0
+CFS-PARCEL-0149800086,149800086,56112769640000,review,ultra_high,commercial_large,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2003-08-01,2025-02-19,5,1628979.0,0
+CFS-PARCEL-0149726096,149726096,45893633730000,trusted,luxury,residential_standard,Concord,MX-CC2,mixed_use,high,['safe_for_dashboard'],13,2015-07-31,2024-12-13,2,3360895.0,0
+CFS-PARCEL-0149811575,149811575,56225440280000,review,medium,residential_standard,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2013-08-23,2024-12-12,4,252200.0,0
+CFS-PARCEL-0149737057,149737057,46811572640000,trusted,ultra_high,commercial_large,Cabarrus County / Unincorporated,OI,office,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",13,2009-07-01,2024-09-23,3,1488426.0,0
+CFS-PARCEL-0149780431,149780431,55694648110000,trusted,luxury,commercial_large,Cabarrus County / Unincorporated,CR,residential,high,['safe_for_dashboard'],13,2004-03-01,2024-06-18,4,61800.0,0
+CFS-PARCEL-0149764871,149764871,55294079690000,review,ultra_high,commercial_large,Concord,O-I,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2002-08-01,2024-06-04,4,679130.0,0
+CFS-PARCEL-0149811532,149811532,56223087780000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],13,2003-06-01,2024-01-26,4,939218.0,0
+CFS-PARCEL-0149811540,149811540,56223087780000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],13,2003-06-01,2024-01-26,4,939218.0,0
+CFS-PARCEL-0149811541,149811541,56223087780000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],13,2003-06-01,2024-01-26,4,939218.0,0
+CFS-PARCEL-0149811542,149811542,56223087780000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],13,2003-06-01,2024-01-26,4,939218.0,0
+CFS-PARCEL-0149797928,149797928,56133499440000,review,ultra_high,commercial_large,Kannapolis,R8,residential,high,['safe_for_dashboard'],13,2018-06-19,2024-01-17,2,4815770.91,0
+CFS-PARCEL-0149804254,149804254,56204952260000,review,luxury,estate,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],13,2014-05-22,2023-08-07,3,185802.0,0
+CFS-PARCEL-0149806557,149806557,56209758020000,review,ultra_high,estate,Concord,CC,commercial,high,['safe_for_dashboard'],13,2010-02-04,2023-06-22,4,39515000.0,0
+CFS-PARCEL-0149826829,149826829,56702301440000,trusted,medium,residential_standard,Mt. Pleasant,CC,commercial,high,['safe_for_dashboard'],13,2003-08-01,2023-05-31,2,91000.0,0
+CFS-PARCEL-0149750203,149750203,46907739870000,review,luxury,estate,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2007-03-01,2023-02-02,3,200100.0,0
+CFS-PARCEL-0149727311,149727311,45984818210000,review,ultra_high,commercial_large,Cabarrus County / Unincorporated,LC-SU,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",13,2004-06-01,2022-05-23,5,80000.0,0
+CFS-PARCEL-0149789642,149789642,56003988470000,review,luxury,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2018-09-19,2021-03-11,2,798867.0,0
+CFS-PARCEL-0149726062,149726062,45892637300000,review,ultra_high,commercial_large,Cabarrus County / Unincorporated,OI,office,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",13,2020-12-17,2020-12-18,1,38637772.0,0
+CFS-PARCEL-0149806439,149806439,56209314400000,trusted,ultra_high,estate,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],13,2008-12-01,2020-08-11,4,383260.5,0
+CFS-PARCEL-0149782696,149782696,56005548850000,review,ultra_high,commercial_large,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2016-10-06,2020-03-26,2,199300.0,0
+CFS-PARCEL-0149736211,149736211,46809802820000,trusted,luxury,estate,Concord,C-2-CD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",13,2015-01-05,2019-04-18,4,2132190.0,0
+CFS-PARCEL-0149726808,149726808,45897491730000,review,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],12,2009-01-01,2025-12-08,4,2687825.0,0
+CFS-PARCEL-0149821298,149821298,56348144260000,review,medium,estate,Cabarrus County / Unincorporated,LDR-SU,residential,high,['review_sliver_overlap'],12,2012-06-27,2025-12-05,2,210956.0,0
+CFS-PARCEL-0149727763,149727763,45992935780000,review,medium,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],12,2015-02-05,2025-10-23,3,174400.0,0
+CFS-PARCEL-0149810484,149810484,56220108290000,trusted,ultra_high,commercial_large,Kannapolis,LI,industrial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",12,2012-08-13,2025-09-04,5,132100.0,0
+CFS-PARCEL-0149741426,149741426,46905708090000,review,ultra_high,commercial_large,Concord,I-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",12,2011-03-31,2025-07-25,3,50282450.33,0
+CFS-PARCEL-0149772621,149772621,55397383670000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],12,2007-04-01,2025-06-30,3,113000.0,0
+CFS-PARCEL-0149728449,149728449,45982810130000,trusted,ultra_high,commercial_large,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",12,2008-02-01,2025-05-20,5,6885668.83,0
+CFS-PARCEL-0149806407,149806407,56208882520000,trusted,ultra_high,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],12,2016-12-15,2024-08-26,4,3869999.0,0
+CFS-PARCEL-0149815874,149815874,56238797490000,review,ultra_high,commercial_large,Kannapolis,R4,residential,high,['review_sliver_overlap'],12,2005-09-01,2024-08-05,2,157800.0,0
+CFS-PARCEL-0149734311,149734311,46805332680000,review,ultra_high,commercial_large,Concord,RL,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",12,2008-01-01,2024-07-02,3,493439.35,0
+CFS-PARCEL-0149734312,149734312,46805332680000,review,ultra_high,commercial_large,Concord,RL,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",12,2008-01-01,2024-07-02,3,493439.35,0
+CFS-PARCEL-0149804453,149804453,56205758410000,trusted,luxury,estate,Concord,C-2-CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",12,2010-07-08,2024-05-02,4,1638750.0,0
+CFS-PARCEL-0149820886,149820886,56230408030000,review,luxury,estate,Kannapolis,GC,commercial,high,['review_sliver_overlap'],12,2006-10-01,2024-03-21,3,352772.0,0
+CFS-PARCEL-0149741092,149741092,46907973010000,trusted,ultra_high,commercial_large,Kannapolis,CD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",12,2014-05-02,2024-02-08,4,10267330.0,0
+CFS-PARCEL-0149784354,149784354,56015640740000,trusted,ultra_high,commercial_large,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",12,2014-11-21,2023-09-19,3,2389354.0,0
+CFS-PARCEL-0149740820,149740820,46834621220000,trusted,luxury,estate,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],12,2014-11-03,2023-07-20,4,505750.0,0
+CFS-PARCEL-0149734339,149734339,46724076740000,trusted,luxury,residential_standard,Kannapolis,GC,commercial,medium,['safe_for_dashboard'],12,2007-10-01,2023-04-06,3,319700.0,0
+CFS-PARCEL-0149767429,149767429,55349823130000,review,high,commercial_large,Midland,SFR,unknown,medium,"['review_multi_jurisdiction', 'jurisdiction_code_semantics_review']",12,2014-05-08,2023-03-02,3,137478.0,0
+CFS-PARCEL-0149735896,149735896,46806495590000,trusted,ultra_high,commercial_large,Concord,I-2-CD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",12,2017-08-02,2023-01-24,3,12222843.73,0
+CFS-PARCEL-0149776844,149776844,55555161510000,trusted,ultra_high,commercial_large,Midland,C24/27,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",12,2016-09-22,2022-10-12,4,3728900.0,0
+CFS-PARCEL-0149735746,149735746,46806049020000,trusted,luxury,estate,Concord,I-2-CU,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",12,2008-04-01,2022-09-16,3,1894533.0,0
+CFS-PARCEL-0149726514,149726514,45894593980000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],12,2008-04-01,2022-07-07,5,305100.0,0
+CFS-PARCEL-0149796352,149796352,56129682520000,trusted,ultra_high,commercial_large,Kannapolis,R18,residential,medium,['safe_for_dashboard'],12,2019-06-24,2021-05-24,2,8317486.0,0
+CFS-PARCEL-0149807133,149807133,56211853700000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],12,2014-01-13,2016-04-14,3,2172985.0,0
+CFS-PARCEL-0149790287,149790287,56109294590000,review,ultra_high,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",12,2004-02-01,2016-01-15,4,161840.0,0
+CFS-PARCEL-0149731066,149731066,46718136990000,review,luxury,commercial_large,Cabarrus County / Unincorporated,LDR,residential,medium,"['review_multi_jurisdiction', 'review_sliver_overlap']",11,2015-11-24,2025-11-19,2,140500.0,0
+CFS-PARCEL-0149734624,149734624,46803324860000,review,low,residential_standard,Concord,O-I,unknown,high,['jurisdiction_code_semantics_review'],11,2025-08-15,2025-10-15,3,2685751.83,0
+CFS-PARCEL-0149775786,149775786,55484416580000,review,luxury,commercial_large,Cabarrus County / Unincorporated,LDR,residential,high,['safe_for_dashboard'],11,2018-04-18,2025-10-13,2,307211.0,0
+CFS-PARCEL-0149733296,149733296,46733930650000,trusted,medium,estate,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],11,2017-03-24,2025-07-25,2,189508.0,0
+CFS-PARCEL-0149811553,149811553,56223393280000,review,luxury,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",11,2008-01-01,2025-07-11,3,1205419.0,0
+CFS-PARCEL-0149808295,149808295,56211827970000,review,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],11,2008-02-01,2025-05-29,4,560883.0,0
+CFS-PARCEL-0149791320,149791320,56108217340000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],11,2016-04-07,2025-05-22,3,1252047.0,0
+CFS-PARCEL-0149813847,149813847,56209703770000,review,ultra_high,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],11,2018-01-02,2025-03-11,4,17957322.0,0
+CFS-PARCEL-0149813848,149813848,56209703770000,review,ultra_high,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],11,2018-01-02,2025-03-11,4,17957322.0,0
+CFS-PARCEL-0149821457,149821457,56345033580000,trusted,luxury,commercial_large,Cabarrus County / Unincorporated,LC,commercial,high,['review_sliver_overlap'],11,2005-06-01,2025-01-31,2,447000.0,0
+CFS-PARCEL-0149803148,149803148,56146088720001,trusted,ultra_high,residential_standard,Kannapolis,CC,commercial,high,['safe_for_dashboard'],11,2013-12-13,2025-01-21,2,7736515.0,0
+CFS-PARCEL-0149749222,149749222,55078667140000,trusted,ultra_high,estate,Harrisburg,GC,commercial,high,['safe_for_dashboard'],11,2011-06-17,2024-12-12,3,4427115.0,0
+CFS-PARCEL-0149811694,149811694,56224251290000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",11,2008-03-01,2024-12-03,3,36177458.0,0
+CFS-PARCEL-0149727236,149727236,45990322710000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],11,2006-01-01,2024-09-03,2,235054.0,0
+CFS-PARCEL-0149782442,149782442,55441611820000,trusted,luxury,commercial_large,Midland,CIV,unknown,medium,['jurisdiction_code_semantics_review'],11,2014-05-21,2024-07-29,4,284529.73,0
+CFS-PARCEL-0149783059,149783059,56008278680000,review,ultra_high,commercial_large,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",11,2007-01-01,2024-07-02,4,1600280.0,0
+CFS-PARCEL-0149801986,149801986,56138924070000,review,ultra_high,estate,Kannapolis,R8,residential,high,['safe_for_dashboard'],11,2005-10-01,2024-04-24,3,269000.0,0
+CFS-PARCEL-0149786549,149786549,56026051100000,review,ultra_high,commercial_large,Kannapolis,R18,residential,high,['review_sliver_overlap'],11,2009-01-01,2023-11-07,2,60999.98,0
+CFS-PARCEL-0149790275,149790275,56108888920000,trusted,ultra_high,commercial_large,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],11,2010-07-14,2023-10-20,5,2175418.0,0
+CFS-PARCEL-0149788068,149788068,55685723050000,review,luxury,commercial_large,Cabarrus County / Unincorporated,CR,residential,high,['safe_for_dashboard'],11,2014-09-12,2023-07-03,3,60000.0,0
+CFS-PARCEL-0149784187,149784187,56012731800000,review,luxury,estate,Kannapolis,LI,industrial,high,['review_sliver_overlap'],11,2014-06-13,2023-06-26,3,513010.0,0
+CFS-PARCEL-0149726700,149726700,45899165350000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],11,2007-09-01,2023-06-01,4,113129.0,0
+CFS-PARCEL-0149741759,149741759,46919079970000,review,ultra_high,commercial_large,Kannapolis,CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",11,2002-05-14,2022-07-18,3,5584300.0,0
+CFS-PARCEL-0149741760,149741760,46919079970000,review,ultra_high,commercial_large,Kannapolis,CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",11,2002-05-14,2022-07-18,3,5584300.0,0
+CFS-PARCEL-0149741761,149741761,46919079970000,review,ultra_high,commercial_large,Kannapolis,CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",11,2002-05-14,2022-07-18,3,5584300.0,0
+CFS-PARCEL-0149776457,149776457,55498074420000,review,ultra_high,commercial_large,Cabarrus County / Unincorporated,OI,office,high,['safe_for_dashboard'],11,2009-07-01,2022-03-14,5,60015.0,0
+CFS-PARCEL-0149764413,149764413,55292044970000,trusted,ultra_high,extreme_large,Cabarrus County / Unincorporated,LI,industrial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",11,2010-02-09,2021-08-27,3,784300.4,0
+CFS-PARCEL-0149815459,149815459,56240049960000,trusted,ultra_high,estate,Kannapolis,GC,commercial,high,['review_sliver_overlap'],11,2012-12-06,2021-07-26,3,204850.0,0
+CFS-PARCEL-0149741907,149741907,46919871380000,trusted,luxury,residential_standard,Kannapolis,CD,unknown,medium,['jurisdiction_code_semantics_review'],11,2006-11-01,2021-07-06,2,40550.0,0
+CFS-PARCEL-0149828568,149828568,56802257450000,review,medium,commercial_large,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],10,2008-09-01,2025-12-31,3,174500.0,0
+CFS-PARCEL-0149772192,149772192,55397521930000,trusted,luxury,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2013-01-22,2025-12-16,4,187786.0,0
+CFS-PARCEL-0149784549,149784549,56018447400000,trusted,ultra_high,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2016-09-13,2025-12-11,5,24969904.0,0
+CFS-PARCEL-0149805752,149805752,56208212260000,review,high,estate,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],10,2017-08-21,2025-10-31,4,2201667.0,0
+CFS-PARCEL-0149785044,149785044,56020084910000,trusted,ultra_high,commercial_large,Kannapolis,CD,unknown,medium,['jurisdiction_code_semantics_review'],10,2018-06-08,2025-10-29,3,20555220.0,0
+CFS-PARCEL-0149811598,149811598,56223347560000,trusted,high,residential_standard,Concord,C-2,unknown,medium,"['review_multi_jurisdiction', 'jurisdiction_code_semantics_review']",10,2011-10-25,2025-10-27,3,90905.0,0
+CFS-PARCEL-0149792067,149792067,56008150960000,review,ultra_high,commercial_large,Concord,RM-2,residential,high,['review_sliver_overlap'],10,2009-07-01,2025-09-04,5,2691400.0,0
+CFS-PARCEL-0149793136,149793136,56015331620000,trusted,ultra_high,commercial_large,Concord,I-2,unknown,high,['jurisdiction_code_semantics_review'],10,2010-11-29,2025-08-15,3,10173000.0,0
+CFS-PARCEL-0149803885,149803885,56204434980000,review,ultra_high,commercial_large,Concord,O-I,unknown,low,"['review_low_confidence', 'review_near_tie', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2020-08-05,2025-07-03,5,6666478.0,0
+CFS-PARCEL-0149808530,149808530,56214025350000,review,luxury,residential_standard,Concord,B-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2009-01-01,2025-07-01,4,1581465.0,0
+CFS-PARCEL-0149727653,149727653,45995270340000,review,ultra_high,extreme_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2006-09-01,2025-06-30,4,1465867.24,0
+CFS-PARCEL-0149770835,149770835,55392376370000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],10,2010-01-07,2025-06-13,3,82000.0,0
+CFS-PARCEL-0149770836,149770836,55392376370000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],10,2010-01-07,2025-06-13,3,82000.0,0
+CFS-PARCEL-0149770837,149770837,55392376370000,review,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],10,2010-01-07,2025-06-13,3,82000.0,0
+CFS-PARCEL-0149805705,149805705,56208785080000,trusted,ultra_high,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],10,2020-12-08,2025-06-12,4,28074895.0,0
+CFS-PARCEL-0149784288,149784288,56014424370000,trusted,ultra_high,commercial_large,Concord,I-2,unknown,medium,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2016-02-26,2025-04-30,4,22538020.0,0
+CFS-PARCEL-0149820784,149820784,56230021240000,review,luxury,estate,Kannapolis,GC,commercial,high,['safe_for_dashboard'],10,2011-08-09,2025-04-17,4,1545029.0,0
+CFS-PARCEL-0149814152,149814152,56211083240000,review,luxury,residential_standard,Concord,C-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2017-12-21,2025-04-15,3,773500.0,0
+CFS-PARCEL-0149776915,149776915,55551062150000,review,luxury,estate,Midland,C24/27,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2006-06-01,2025-01-28,4,431400.0,0
+CFS-PARCEL-0149752220,149752220,55094057000000,review,ultra_high,commercial_large,Concord,RM-1,residential,high,['review_sliver_overlap'],10,2004-06-01,2024-09-13,3,1619800.0,0
+CFS-PARCEL-0149799356,149799356,56135763230000,trusted,medium,residential_standard,Kannapolis,CC,commercial,high,['safe_for_dashboard'],10,2009-07-01,2024-09-03,3,1700.0,0
+CFS-PARCEL-0149744623,149744623,46808661890000,trusted,ultra_high,commercial_large,Concord,I-1-CD,unknown,medium,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2015-12-02,2024-08-28,3,5432000.0,0
+CFS-PARCEL-0149812195,149812195,56226733100000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],10,2003-04-01,2024-08-02,4,1891153.0,0
+CFS-PARCEL-0149812196,149812196,56226733100000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],10,2003-04-01,2024-08-02,4,1891153.0,0
+CFS-PARCEL-0149763422,149763422,55283332310000,review,ultra_high,commercial_large,Cabarrus County / Unincorporated,OI,office,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",10,2012-11-02,2024-05-24,4,684097.0,0
+CFS-PARCEL-0149740870,149740870,46904306160000,trusted,ultra_high,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2023-01-18,2024-05-02,4,17635893.0,0
+CFS-PARCEL-0149766170,149766170,55297716940000,review,high,residential_standard,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],10,2007-05-01,2024-03-05,3,179456.0,0
+CFS-PARCEL-0149826984,149826984,56702395090000,trusted,luxury,commercial_large,Mt. Pleasant,OI,office,high,['review_sliver_overlap'],10,2017-03-23,2024-02-19,4,2305753.86,0
+CFS-PARCEL-0149808822,149808822,56216278250000,review,luxury,residential_standard,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],10,2014-01-30,2024-01-04,1,833000.0,0
+CFS-PARCEL-0149797262,149797262,56131794120000,review,medium,residential_standard,Kannapolis,LI,industrial,high,['review_sliver_overlap'],10,2008-01-01,2023-12-18,3,113600.0,0
+CFS-PARCEL-0149806814,149806814,56209724780000,review,luxury,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],10,2003-10-01,2023-01-26,4,26253.06,0
+CFS-PARCEL-0149792729,149792729,56118576120000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2007-11-01,2021-09-15,2,,0
+CFS-PARCEL-0149744737,149744737,55061600350000,trusted,low,commercial_large,Harrisburg,PUD,unknown,medium,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2021-06-23,2021-07-08,1,413700.0,0
+CFS-PARCEL-0149726988,149726988,45895589380000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],10,2006-11-01,2021-05-26,3,150100.0,0
+CFS-PARCEL-0149786775,149786775,56031282460000,review,ultra_high,estate,Kannapolis,GC,commercial,high,['review_sliver_overlap'],10,2009-04-01,2020-06-02,2,7800.0,0
+CFS-PARCEL-0149786776,149786776,56031282460000,review,ultra_high,estate,Kannapolis,GC,commercial,high,['review_sliver_overlap'],10,2009-04-01,2020-06-02,2,7800.0,0
+CFS-PARCEL-0149786777,149786777,56031282460000,review,ultra_high,estate,Kannapolis,GC,commercial,high,['review_sliver_overlap'],10,2009-04-01,2020-06-02,2,7800.0,0
+CFS-PARCEL-0149784209,149784209,56011782070000,review,ultra_high,commercial_large,Kannapolis,LI,industrial,low,['review_low_confidence'],10,2017-01-20,2019-11-26,3,4801850.0,0
+CFS-PARCEL-0149784210,149784210,56011782070000,review,ultra_high,commercial_large,Kannapolis,LI,industrial,low,['review_low_confidence'],10,2017-01-20,2019-11-26,3,4801850.0,0
+CFS-PARCEL-0149784266,149784266,56011782070000,review,ultra_high,commercial_large,Kannapolis,LI,industrial,low,['review_low_confidence'],10,2017-01-20,2019-11-26,3,4801850.0,0
+CFS-PARCEL-0149746526,149746526,55063286730000,review,luxury,estate,Harrisburg,OI,office,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",10,2012-10-08,2018-01-23,3,1782264.0,0
+CFS-PARCEL-0149824677,149824677,56609504400000,review,luxury,estate,Mt. Pleasant,CZ-RH,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",10,2015-09-25,2016-09-26,4,3498495.0,0
+CFS-PARCEL-0149812046,149812046,56225739990000,trusted,luxury,residential_standard,Kannapolis,GC,commercial,high,['safe_for_dashboard'],10,2015-05-12,2016-08-22,4,1430984.0,0
+CFS-PARCEL-0149812830,149812830,56232431600000,trusted,luxury,commercial_large,Kannapolis,R18,residential,high,['review_sliver_overlap'],10,2011-11-02,2012-05-23,2,,0
+CFS-PARCEL-0149807214,149807214,56212074070000,trusted,medium,residential_standard,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2023-05-11,2025-10-30,3,1214550.0,0
+CFS-PARCEL-0149808497,149808497,56213801090001,review,ultra_high,residential_standard,Concord,PID,unknown,high,['jurisdiction_code_semantics_review'],9,2004-10-01,2025-09-23,3,2244569.0,0
+CFS-PARCEL-0149733353,149733353,46735613280000,trusted,ultra_high,commercial_large,Kannapolis,CD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2016-09-09,2025-09-16,5,3122000.0,0
+CFS-PARCEL-0149811733,149811733,56201115750000,trusted,ultra_high,commercial_large,Concord,O-I,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2008-08-01,2025-09-15,3,249918.0,0
+CFS-PARCEL-0149801077,149801077,56118390090000,review,luxury,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2007-10-01,2025-09-12,4,167600.0,0
+CFS-PARCEL-0149801086,149801086,56118390090000,review,luxury,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2007-10-01,2025-09-12,4,167600.0,0
+CFS-PARCEL-0149805350,149805350,56207842210000,review,ultra_high,estate,Concord,RM-2,residential,high,['safe_for_dashboard'],9,2011-07-19,2025-07-31,5,16207.0,0
+CFS-PARCEL-0149803298,149803298,56203431470000,review,ultra_high,commercial_large,Concord,PUD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2003-07-01,2025-06-19,4,6337448.0,0
+CFS-PARCEL-0149786033,149786033,56025407630000,review,ultra_high,commercial_large,Kannapolis,AG,agricultural,high,['safe_for_dashboard'],9,2009-08-01,2025-06-17,3,46993.0,0
+CFS-PARCEL-0149808607,149808607,56214651550000,review,ultra_high,commercial_large,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2010-09-03,2025-05-05,3,11993922.0,0
+CFS-PARCEL-0149811300,149811300,56223244710000,trusted,high,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],9,2003-08-01,2025-02-17,3,339000.0,0
+CFS-PARCEL-0149810545,149810545,56220289880000,trusted,ultra_high,estate,Kannapolis,GC,commercial,high,['safe_for_dashboard'],9,2012-02-22,2025-02-10,4,215340.0,0
+CFS-PARCEL-0149783143,149783143,56010964230000,trusted,ultra_high,commercial_large,Kannapolis,CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2006-06-01,2025-01-29,4,5617894.8,0
+CFS-PARCEL-0149784286,149784286,56014252270000,trusted,ultra_high,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2012-03-12,2025-01-06,4,28171492.0,0
+CFS-PARCEL-0149790125,149790125,56109576190000,trusted,ultra_high,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2023-06-14,2024-12-18,3,4069310.0,0
+CFS-PARCEL-0149758762,149758762,55192043000000,review,ultra_high,commercial_large,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2018-06-06,2024-12-06,2,2251976.0,0
+CFS-PARCEL-0149761272,149761272,55263904480000,review,luxury,commercial_large,Cabarrus County / Unincorporated,CR,residential,high,['safe_for_dashboard'],9,2007-02-01,2024-08-29,2,90000.0,0
+CFS-PARCEL-0149794157,149794157,56122900100000,review,ultra_high,commercial_large,Kannapolis,R4,residential,high,['safe_for_dashboard'],9,2013-03-15,2024-08-22,2,779250.0,0
+CFS-PARCEL-0149826714,149826714,56701779360000,review,luxury,commercial_large,Mt. Pleasant,C-2,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2003-06-01,2024-07-03,4,1011964.0,0
+CFS-PARCEL-0149826715,149826715,56701779360000,review,luxury,commercial_large,Mt. Pleasant,C-2,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2003-06-01,2024-07-03,4,1011964.0,0
+CFS-PARCEL-0149826731,149826731,56701779360000,review,luxury,commercial_large,Mt. Pleasant,C-2,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2003-06-01,2024-07-03,4,1011964.0,0
+CFS-PARCEL-0149756805,149756805,55078798490102,review,luxury,residential_standard,Harrisburg,PUD,mixed_use,high,['safe_for_dashboard'],9,2014-03-21,2024-04-17,4,208414.0,0
+CFS-PARCEL-0149802883,149802883,56201067770000,review,medium,residential_standard,Concord,RM-2,residential,high,['safe_for_dashboard'],9,2018-10-09,2024-03-18,3,40500.0,0
+CFS-PARCEL-0149781893,149781893,56004902950000,review,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],9,2006-04-01,2023-11-21,2,160211.0,0
+CFS-PARCEL-0149735819,149735819,46807566840000,trusted,ultra_high,commercial_large,Concord,I-1-CD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2016-02-03,2023-09-18,4,9927886.0,0
+CFS-PARCEL-0149745158,149745158,55061209020000,review,luxury,residential_standard,Harrisburg,PUD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2022-07-25,2023-09-12,2,2192683.0,0
+CFS-PARCEL-0149745159,149745159,55061209020000,review,luxury,residential_standard,Harrisburg,PUD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2022-07-25,2023-09-12,2,2192683.0,0
+CFS-PARCEL-0149785996,149785996,56024048900000,trusted,ultra_high,commercial_large,Kannapolis,CD,unknown,high,['jurisdiction_code_semantics_review'],9,2007-09-01,2023-07-24,3,473248.0,0
+CFS-PARCEL-0149812045,149812045,56225719020000,trusted,luxury,residential_standard,Kannapolis,GC,commercial,high,['safe_for_dashboard'],9,2015-04-17,2023-07-18,2,665579.0,0
+CFS-PARCEL-0149759840,149759840,55250411690000,trusted,high,estate,Cabarrus County / Unincorporated,CR,residential,high,['safe_for_dashboard'],9,2022-09-06,2023-05-31,2,728860.0,0
+CFS-PARCEL-0149775591,149775591,55475181740000,review,luxury,commercial_large,Midland,IND,industrial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",9,2012-06-14,2023-01-05,4,1194413.0,0
+CFS-PARCEL-0149762386,149762386,55274280380000,trusted,luxury,estate,Concord,PUD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2022-07-28,2022-12-07,3,14463000.0,0
+CFS-PARCEL-0149726554,149726554,45895591950000,review,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],9,2012-02-02,2022-11-15,3,397321.0,0
+CFS-PARCEL-0149749356,149749356,55079718340000,review,luxury,residential_standard,Harrisburg,PUD,mixed_use,high,['safe_for_dashboard'],9,2007-12-01,2022-09-13,3,337456.5,0
+CFS-PARCEL-0149749357,149749357,55079718340000,review,luxury,residential_standard,Harrisburg,PUD,mixed_use,high,['safe_for_dashboard'],9,2007-12-01,2022-09-13,3,337456.5,0
+CFS-PARCEL-0149791319,149791319,56108128310000,trusted,luxury,estate,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2009-03-01,2022-07-14,3,659697.0,0
+CFS-PARCEL-0149824915,149824915,56608515310000,trusted,high,residential_standard,Mt. Pleasant,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2013-09-24,2021-09-13,4,483000.0,0
+CFS-PARCEL-0149727550,149727550,45992845100000,trusted,luxury,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],9,2008-06-01,2021-07-23,3,12502505.0,0
+CFS-PARCEL-0149726553,149726553,45897489230000,review,luxury,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],9,2010-03-19,2021-04-15,3,2524444.0,0
+CFS-PARCEL-0149783861,149783861,56010810590000,trusted,luxury,residential_standard,Kannapolis,CD,unknown,high,['jurisdiction_code_semantics_review'],9,2008-04-01,2021-01-28,3,38950.0,0
+CFS-PARCEL-0149824521,149824521,56526619520000,review,high,commercial_large,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],9,2008-03-01,2021-01-12,4,363440.0,0
+CFS-PARCEL-0149784359,149784359,56016087740000,trusted,ultra_high,commercial_large,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2012-07-09,2020-12-21,5,6469825.0,0
+CFS-PARCEL-0149799725,149799725,56135999030000,trusted,high,residential_standard,Kannapolis,CC,commercial,high,['review_sliver_overlap'],9,2010-08-17,2019-08-08,4,35394733.0,0
+CFS-PARCEL-0149763010,149763010,55277131270000,trusted,ultra_high,commercial_large,Concord,PUD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2012-03-20,2019-07-08,1,145245.0,0
+CFS-PARCEL-0149726515,149726515,45894603780000,trusted,luxury,residential_standard,Concord,MX-CC2,mixed_use,high,['safe_for_dashboard'],9,2017-09-07,2019-03-12,3,1611673.0,0
+CFS-PARCEL-0149803721,149803721,56125226020000,trusted,luxury,estate,Kannapolis,R18,residential,high,['review_sliver_overlap'],9,2008-08-01,2018-02-12,2,22000.0,0
+CFS-PARCEL-0149790248,149790248,56108268690000,review,ultra_high,estate,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],9,2008-10-01,2017-06-21,3,636555.0,0
+CFS-PARCEL-0149755224,149755224,55169888590000,review,luxury,estate,Harrisburg,OI,office,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",9,2008-06-01,2017-03-17,4,398852.34,0
+CFS-PARCEL-0149767866,149767866,55188615540000,trusted,luxury,residential_standard,Concord,I-1,unknown,high,"['review_multi_jurisdiction', 'jurisdiction_code_semantics_review']",9,2007-08-01,2013-03-07,1,,0
+CFS-PARCEL-0149766041,149766041,55296611490000,trusted,medium,estate,Concord,RC,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",9,2009-10-01,2012-09-28,2,,0
+CFS-PARCEL-0149761819,149761819,55171713120000,trusted,low,residential_standard,Harrisburg,GC,commercial,high,['safe_for_dashboard'],9,2007-09-01,2012-08-23,1,,0
+CFS-PARCEL-0149752688,149752688,55097668820000,trusted,ultra_high,commercial_large,Concord,CD,unknown,high,['jurisdiction_code_semantics_review'],8,2024-12-18,2025-12-15,3,14203630.0,0
+CFS-PARCEL-0149793477,149793477,56023847880000,trusted,luxury,residential_standard,Kannapolis,GC,commercial,high,['safe_for_dashboard'],8,2025-06-18,2025-12-12,2,3702092.0,0
+CFS-PARCEL-0149797505,149797505,56131134490000,review,ultra_high,estate,Kannapolis,R4,residential,high,['safe_for_dashboard'],8,2012-12-05,2025-12-12,4,279676.0,0
+CFS-PARCEL-0149726304,149726304,45893692210000,trusted,ultra_high,estate,Concord,MX-CC2,mixed_use,high,['safe_for_dashboard'],8,2017-02-22,2025-12-09,4,2522206.0,0
+CFS-PARCEL-0149806805,149806805,56210458510000,trusted,luxury,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2011-10-28,2025-12-08,4,256860.0,0
+CFS-PARCEL-0149801105,149801105,56118789920000,review,ultra_high,estate,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2009-07-01,2025-12-02,4,1832290.0,0
+CFS-PARCEL-0149753190,149753190,55160525850000,review,medium,estate,Harrisburg,RM,residential,medium,"['review_multi_jurisdiction', 'review_sliver_overlap']",8,2015-03-31,2025-11-07,3,183375.0,0
+CFS-PARCEL-0149753191,149753191,55160525850000,review,medium,estate,Harrisburg,RM,residential,medium,"['review_multi_jurisdiction', 'review_sliver_overlap']",8,2015-03-31,2025-11-07,3,183375.0,0
+CFS-PARCEL-0149830300,149830300,56926337080000,trusted,medium,commercial_large,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],8,2017-03-23,2025-10-23,2,183575.0,0
+CFS-PARCEL-0149726572,149726572,45895765320000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],8,2022-12-21,2025-10-17,4,699000.0,0
+CFS-PARCEL-0149750925,149750925,46918146950000,trusted,ultra_high,commercial_large,Kannapolis,CD,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2017-03-17,2025-10-09,4,8238991.0,0
+CFS-PARCEL-0149823347,149823347,56420608910000,review,high,commercial_large,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],8,2010-11-10,2025-09-16,2,83660.0,0
+CFS-PARCEL-0149766322,149766322,55297884590000,trusted,luxury,estate,Concord,C-2,unknown,medium,['jurisdiction_code_semantics_review'],8,2008-07-01,2025-08-28,4,40000.0,0
+CFS-PARCEL-0149726619,149726619,45899200440000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],8,2008-07-01,2025-07-30,3,2588676.0,0
+CFS-PARCEL-0149726262,149726262,45894378180000,trusted,ultra_high,estate,Concord,RC-CD,unknown,low,"['review_low_confidence', 'review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2024-06-14,2025-07-29,2,8387500.0,0
+CFS-PARCEL-0149727308,149727308,45982809390000,trusted,ultra_high,estate,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2004-05-01,2025-02-18,3,2234460.0,0
+CFS-PARCEL-0149750790,149750790,55087356900000,trusted,luxury,commercial_large,Cabarrus County / Unincorporated,MDR,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",8,2013-10-30,2025-01-29,2,108800.0,0
+CFS-PARCEL-0149817756,149817756,56300052580000,review,luxury,estate,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2020-06-26,2025-01-23,4,1952865.0,0
+CFS-PARCEL-0149753703,149753703,55165212580000,trusted,high,residential_standard,Harrisburg,CZ-RM,unknown,high,['jurisdiction_code_semantics_review'],8,2015-04-30,2025-01-16,3,353283.0,0
+CFS-PARCEL-0149826108,149826108,56605607490000,trusted,high,residential_standard,Mt. Pleasant,RM,residential,high,['safe_for_dashboard'],8,2022-08-22,2025-01-13,4,383182.0,0
+CFS-PARCEL-0149726703,149726703,45899263000000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],8,2006-05-01,2025-01-08,3,80800.0,0
+CFS-PARCEL-0149755575,149755575,55176928810000,review,ultra_high,commercial_large,Harrisburg,EC,industrial,high,['review_sliver_overlap'],8,2004-05-01,2024-12-27,3,209600.0,0
+CFS-PARCEL-0149758954,149758954,55194568360000,review,ultra_high,commercial_large,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2014-05-22,2024-12-19,3,1172427.02,0
+CFS-PARCEL-0149784301,149784301,56015728890000,review,luxury,residential_standard,Kannapolis,GC,commercial,medium,['review_sliver_overlap'],8,2013-02-06,2024-12-11,3,246650.0,0
+CFS-PARCEL-0149784339,149784339,56015728890000,review,luxury,residential_standard,Kannapolis,GC,commercial,medium,['review_sliver_overlap'],8,2013-02-06,2024-12-11,3,246650.0,0
+CFS-PARCEL-0149735918,149735918,46807003990000,trusted,ultra_high,commercial_large,Concord,I-2-CU,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2004-03-01,2024-12-09,4,2193479.0,0
+CFS-PARCEL-0149727801,149727801,45994890890000,trusted,luxury,residential_standard,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],8,2008-11-01,2024-11-18,2,71000.0,0
+CFS-PARCEL-0149812225,149812225,56203046580000,review,high,commercial_large,Concord,RV,residential,high,['safe_for_dashboard'],8,2008-05-01,2024-11-07,4,68245.0,0
+CFS-PARCEL-0149758514,149758514,55187931960000,review,luxury,commercial_large,Concord,I-2,unknown,high,['jurisdiction_code_semantics_review'],8,2023-09-25,2024-10-24,2,723000.0,0
+CFS-PARCEL-0149784179,149784179,56012589120000,review,luxury,residential_standard,Kannapolis,LI,industrial,high,['safe_for_dashboard'],8,2012-08-20,2024-09-18,4,268800.0,0
+CFS-PARCEL-0149784180,149784180,56012589120000,review,luxury,residential_standard,Kannapolis,LI,industrial,high,['safe_for_dashboard'],8,2012-08-20,2024-09-18,4,268800.0,0
+CFS-PARCEL-0149827638,149827638,56706948320000,trusted,medium,estate,Mt. Pleasant,RL,residential,high,['safe_for_dashboard'],8,2021-05-27,2024-08-07,1,414223.29,0
+CFS-PARCEL-0149823721,149823721,56500093660000,review,ultra_high,commercial_large,Concord,PID,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2010-03-05,2024-07-11,4,334000.0,0
+CFS-PARCEL-0149810396,149810396,56222097740000,review,luxury,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2007-03-01,2024-06-25,3,311000.0,0
+CFS-PARCEL-0149812218,149812218,56227791770000,trusted,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],8,2013-12-31,2024-06-25,2,10500.0,0
+CFS-PARCEL-0149781856,149781856,56001813430000,review,luxury,commercial_large,Concord,PUD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2003-07-01,2024-04-04,4,380300.0,0
+CFS-PARCEL-0149740689,149740689,46903539550000,review,luxury,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],8,2013-02-22,2024-03-07,4,6070295.0,0
+CFS-PARCEL-0149804163,149804163,56205904090000,review,luxury,estate,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2015-12-10,2024-03-07,2,208115.0,0
+CFS-PARCEL-0149732543,149732543,46719294850000,trusted,medium,residential_standard,Concord,RV,residential,high,['safe_for_dashboard'],8,2020-12-07,2023-11-29,5,483700.0,0
+CFS-PARCEL-0149739853,149739853,46824337170000,review,medium,residential_standard,Cabarrus County / Unincorporated,CR,residential,high,['safe_for_dashboard'],8,2016-09-30,2023-11-28,2,147300.0,0
+CFS-PARCEL-0149801946,149801946,56146030170000,trusted,luxury,residential_standard,Kannapolis,CC,commercial,high,['safe_for_dashboard'],8,2020-10-29,2023-11-03,3,133000.0,0
+CFS-PARCEL-0149727835,149727835,45996963280000,trusted,luxury,residential_standard,Concord,C-2-CU,unknown,high,['jurisdiction_code_semantics_review'],8,2011-08-12,2023-10-11,3,553500.0,0
+CFS-PARCEL-0149739233,149739233,46818217130000,review,low,residential_standard,Concord,RV-CD,residential,high,['safe_for_dashboard'],8,2021-06-01,2023-09-25,2,405980.0,0
+CFS-PARCEL-0149739234,149739234,46818217130000,review,low,residential_standard,Concord,RV-CD,residential,high,['safe_for_dashboard'],8,2021-06-01,2023-09-25,2,405980.0,0
+CFS-PARCEL-0149735747,149735747,46806152280000,trusted,luxury,estate,Concord,I-2-CU,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2006-12-01,2023-09-08,3,202343.0,0
+CFS-PARCEL-0149811624,149811624,56224135610000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],8,2008-06-01,2023-07-12,4,149190.43,0
+CFS-PARCEL-0149764154,149764154,55280312750000,trusted,ultra_high,commercial_large,Concord,I-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2020-04-14,2023-05-09,4,4421928.0,0
+CFS-PARCEL-0149726701,149726701,45899198770000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],8,2009-04-01,2022-11-07,3,140700.0,0
+CFS-PARCEL-0149783833,149783833,56009582390000,review,ultra_high,extreme_large,Concord,RV,residential,high,['review_sliver_overlap'],8,2017-10-06,2022-08-01,3,,0
+CFS-PARCEL-0149783834,149783834,56009582390000,review,ultra_high,extreme_large,Concord,RV,residential,high,['review_sliver_overlap'],8,2017-10-06,2022-08-01,3,,0
+CFS-PARCEL-0149783835,149783835,56009582390000,review,ultra_high,extreme_large,Concord,RV,residential,high,['review_sliver_overlap'],8,2017-10-06,2022-08-01,3,,0
+CFS-PARCEL-0149799887,149799887,56136917230000,trusted,medium,residential_standard,Kannapolis,CC,commercial,high,['safe_for_dashboard'],8,2020-08-03,2022-05-13,4,669500.0,0
+CFS-PARCEL-0149740649,149740649,46839987180000,review,medium,estate,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],8,2016-09-30,2022-02-16,3,59000.0,0
+CFS-PARCEL-0149729513,149729513,46704601530000,review,medium,estate,Cabarrus County / Unincorporated,OI,office,low,"['review_low_confidence', 'review_sliver_overlap']",8,2013-12-30,2021-08-24,2,150115.0,0
+CFS-PARCEL-0149726812,149726812,45898474550000,review,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],8,2010-07-30,2021-05-06,5,2870931.0,0
+CFS-PARCEL-0149807132,149807132,56211799000000,review,medium,residential_standard,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],8,2019-11-19,2021-05-06,3,2533921.0,0
+CFS-PARCEL-0149751783,149751783,55092441170000,review,luxury,estate,Concord,I-1,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2008-10-01,2021-03-02,2,255000.0,0
+CFS-PARCEL-0149727839,149727839,45995708060000,trusted,luxury,residential_standard,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],8,2018-07-24,2020-12-21,3,405000.0,0
+CFS-PARCEL-0149794969,149794969,56127121340000,trusted,ultra_high,estate,Concord,O-I,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2003-11-01,2020-12-03,4,14200.0,0
+CFS-PARCEL-0149784542,149784542,56018308130000,trusted,ultra_high,estate,Concord,I-2,unknown,high,['jurisdiction_code_semantics_review'],8,2008-09-01,2020-08-20,3,2063339.0,0
+CFS-PARCEL-0149782380,149782380,56001768970000,review,luxury,residential_standard,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2004-09-01,2020-06-17,3,6650.0,0
+CFS-PARCEL-0149782381,149782381,56001768970000,review,luxury,residential_standard,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2004-09-01,2020-06-17,3,6650.0,0
+CFS-PARCEL-0149782382,149782382,56001768970000,review,luxury,residential_standard,Concord,O-I,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2004-09-01,2020-06-17,3,6650.0,0
+CFS-PARCEL-0149796683,149796683,56129861640000,review,ultra_high,commercial_large,Kannapolis,R4,residential,high,['review_sliver_overlap'],8,2016-04-01,2020-04-24,4,17922897.0,0
+CFS-PARCEL-0149772352,149772352,55399182650000,review,ultra_high,estate,Cabarrus County / Unincorporated,LDR,residential,high,['safe_for_dashboard'],8,2004-06-01,2020-01-29,3,124250.0,0
+CFS-PARCEL-0149784828,149784828,56018311480000,trusted,ultra_high,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2003-06-01,2019-11-07,5,6020024.0,0
+CFS-PARCEL-0149776413,149776413,55541966550000,review,luxury,residential_standard,Midland,C24/27,unknown,high,['jurisdiction_code_semantics_review'],8,2004-02-01,2019-10-02,4,244000.0,0
+CFS-PARCEL-0149776414,149776414,55541966550000,review,luxury,residential_standard,Midland,C24/27,unknown,high,['jurisdiction_code_semantics_review'],8,2004-02-01,2019-10-02,4,244000.0,0
+CFS-PARCEL-0149821741,149821741,56343049810000,review,ultra_high,commercial_large,Kannapolis,GC,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",8,2010-09-08,2019-08-01,4,175000.0,0
+CFS-PARCEL-0149823099,149823099,56246159080000,review,medium,residential_standard,Kannapolis,C-1,unknown,high,['jurisdiction_code_semantics_review'],8,2010-06-24,2019-05-28,2,,0
+CFS-PARCEL-0149782119,149782119,56004789770000,trusted,ultra_high,commercial_large,Concord,C-1,unknown,medium,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2017-10-25,2019-03-29,2,1928800.0,0
+CFS-PARCEL-0149812430,149812430,56227521610000,review,luxury,estate,Concord,C-2,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2004-08-01,2018-09-06,3,1100.0,0
+CFS-PARCEL-0149811970,149811970,56230151620000,review,luxury,residential_standard,Kannapolis,GC,commercial,high,['safe_for_dashboard'],8,2009-11-01,2018-04-06,2,178000.0,0
+CFS-PARCEL-0149735977,149735977,46808022840000,trusted,ultra_high,estate,Concord,I-1,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2015-09-14,2017-08-15,3,7806602.0,0
+CFS-PARCEL-0149793670,149793670,56119831840000,trusted,luxury,residential_standard,Concord,RC,unknown,high,['jurisdiction_code_semantics_review'],8,2016-10-13,2016-10-13,1,480500.0,0
+CFS-PARCEL-0149813340,149813340,56231342450000,review,unknown,commercial_large,Kannapolis,R8,residential,high,['safe_for_dashboard'],8,2014-09-09,2015-11-30,2,4774242.0,0
+CFS-PARCEL-0149819373,149819373,56320625130000,trusted,luxury,estate,Concord,RM-1,residential,high,['review_sliver_overlap'],8,2009-09-01,2015-01-06,3,191428.0,0
+CFS-PARCEL-0149812115,149812115,56227563260000,review,luxury,residential_standard,Concord,C-2,unknown,low,"['review_low_confidence', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",8,2007-02-01,2014-03-03,1,8000.0,0
+CFS-PARCEL-0149806676,149806676,56209725090000,review,luxury,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],7,2011-10-26,2025-12-12,3,856570.0,0
+CFS-PARCEL-0149784437,149784437,56018104980000,review,luxury,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2004-03-01,2025-11-20,2,67500.0,0
+CFS-PARCEL-0149784460,149784460,56018104980000,review,luxury,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2004-03-01,2025-11-20,2,67500.0,0
+CFS-PARCEL-0149784461,149784461,56018104980000,review,luxury,commercial_large,Concord,I-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2004-03-01,2025-11-20,2,67500.0,0
+CFS-PARCEL-0149727290,149727290,45992282340000,trusted,ultra_high,estate,Concord,C-2,unknown,high,['jurisdiction_code_semantics_review'],7,2007-03-01,2025-11-17,3,120976.0,0
+CFS-PARCEL-0149768146,149768146,55372952660000,trusted,luxury,commercial_large,Cabarrus County / Unincorporated,LDR,residential,high,['safe_for_dashboard'],7,2004-02-01,2025-11-03,4,83680.0,0
+CFS-PARCEL-0149754276,149754276,55061797940000,trusted,medium,residential_standard,Harrisburg,RL,residential,high,['safe_for_dashboard'],7,2019-03-06,2025-10-22,3,64253.0,0
+CFS-PARCEL-0149755075,149755075,55171713120103,review,luxury,residential_standard,Harrisburg,GC,commercial,high,['safe_for_dashboard'],7,2013-04-30,2025-10-01,3,779644.0,0
+CFS-PARCEL-0149755076,149755076,55171713120103,review,luxury,micro,Harrisburg,GC,commercial,high,['safe_for_dashboard'],7,2013-04-30,2025-10-01,3,779644.0,0
+CFS-PARCEL-0149756892,149756892,55079691640000,trusted,luxury,estate,Harrisburg,GC,commercial,high,['safe_for_dashboard'],7,2014-07-29,2025-09-04,4,229000.0,0
+CFS-PARCEL-0149727312,149727312,45985657920000,review,luxury,residential_standard,Concord,C-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2017-05-19,2025-08-28,3,106347.0,0
+CFS-PARCEL-0149727313,149727313,45985657920000,review,luxury,residential_standard,Concord,C-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2017-05-19,2025-08-28,3,106347.0,0
+CFS-PARCEL-0149727314,149727314,45985657920000,review,luxury,residential_standard,Concord,C-2,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2017-05-19,2025-08-28,3,106347.0,0
+CFS-PARCEL-0149787181,149787181,56033188930000,review,high,commercial_large,Kannapolis,AG,agricultural,high,['safe_for_dashboard'],7,2016-03-22,2025-08-12,2,119500.0,0
+CFS-PARCEL-0149740960,149740960,46837905970000,trusted,high,estate,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],7,2013-03-13,2025-07-24,3,224668.0,0
+CFS-PARCEL-0149727488,149727488,45989396020000,trusted,luxury,estate,Harrisburg,EC,industrial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",7,2015-08-25,2025-07-23,3,3632735.91,0
+CFS-PARCEL-0149778356,149778356,55592933870000,review,medium,estate,Cabarrus County / Unincorporated,GC,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",7,2019-08-20,2025-07-15,2,201000.0,0
+CFS-PARCEL-0149811533,149811533,56224905540000,trusted,ultra_high,estate,Kannapolis,GC,commercial,high,['review_sliver_overlap'],7,2019-02-19,2025-07-01,3,1521500.0,0
+CFS-PARCEL-0149736729,149736729,46809641010000,review,ultra_high,estate,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],7,2015-07-23,2025-06-23,3,4834909.0,0
+CFS-PARCEL-0149736730,149736730,46809641010000,review,ultra_high,estate,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],7,2015-07-23,2025-06-23,3,4834909.0,0
+CFS-PARCEL-0149822153,149822153,56407969290000,review,medium,estate,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],7,2015-09-24,2025-06-06,4,110500.0,0
+CFS-PARCEL-0149758473,149758473,55187496190000,review,ultra_high,commercial_large,Concord,I-1,unknown,high,"['review_multi_jurisdiction', 'review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2023-06-16,2025-06-05,3,1624054.0,0
+CFS-PARCEL-0149810555,149810555,56220999010000,review,low,residential_standard,Kannapolis,GC,commercial,high,['safe_for_dashboard'],7,2013-12-17,2025-06-02,2,109158.0,0
+CFS-PARCEL-0149754387,149754387,55063300540000,trusted,ultra_high,commercial_large,Harrisburg,GC,commercial,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",7,2013-07-29,2025-05-30,3,775000.0,0
+CFS-PARCEL-0149728602,149728602,45993001290000,trusted,ultra_high,commercial_large,Concord,I-2-CD,unknown,high,['jurisdiction_code_semantics_review'],7,2024-03-11,2025-05-23,3,15448312.0,0
+CFS-PARCEL-0149815244,149815244,56235225110000,trusted,high,residential_standard,Cabarrus County / Unincorporated,MDR,residential,high,['safe_for_dashboard'],7,2023-01-03,2025-05-20,3,58700.0,0
+CFS-PARCEL-0149726170,149726170,45892802850000,trusted,ultra_high,estate,Concord,PUD,unknown,high,['jurisdiction_code_semantics_review'],7,2024-09-06,2025-05-13,2,2346500.0,0
+CFS-PARCEL-0149791494,149791494,56109632240000,review,high,residential_standard,Concord,RM-2,residential,high,['safe_for_dashboard'],7,2022-05-17,2025-05-06,2,226000.0,0
+CFS-PARCEL-0149790311,149790311,56109972510000,trusted,ultra_high,estate,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2003-07-01,2025-03-17,3,6600.0,0
+CFS-PARCEL-0149811659,149811659,56224356290000,trusted,luxury,residential_standard,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],7,2016-02-18,2025-02-26,3,737600.0,0
+CFS-PARCEL-0149748239,149748239,46815973980000,trusted,luxury,estate,Concord,PUD,unknown,high,['jurisdiction_code_semantics_review'],7,2021-05-18,2025-01-23,3,5194819.9,0
+CFS-PARCEL-0149819338,149819338,56319266860000,trusted,medium,commercial_large,Cabarrus County / Unincorporated,LDR,residential,medium,['review_multi_jurisdiction'],7,2012-12-19,2024-12-16,1,81000.0,0
+CFS-PARCEL-0149765882,149765882,55295976920000,review,medium,residential_standard,Concord,RV,residential,high,['safe_for_dashboard'],7,2024-04-26,2024-11-22,2,450000.0,0
+CFS-PARCEL-0149765883,149765883,55295976920000,review,medium,residential_standard,Concord,RV,residential,high,['safe_for_dashboard'],7,2024-04-26,2024-11-22,2,450000.0,0
+CFS-PARCEL-0149812048,149812048,56225910880000,review,unknown,estate,Kannapolis,GC,commercial,high,['safe_for_dashboard'],7,2024-11-18,2024-11-21,1,,0
+CFS-PARCEL-0149740648,149740648,46900635500000,trusted,ultra_high,estate,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],7,2014-12-02,2024-10-25,3,16222824.0,0
+CFS-PARCEL-0149784008,149784008,56011243110000,review,ultra_high,residential_standard,Kannapolis,GC-CZ,commercial,high,['review_sliver_overlap'],7,2023-07-31,2024-09-27,3,5391957.0,0
+CFS-PARCEL-0149784009,149784009,56011243110000,review,ultra_high,residential_standard,Kannapolis,GC-CZ,commercial,high,['review_sliver_overlap'],7,2023-07-31,2024-09-27,3,5391957.0,0
+CFS-PARCEL-0149813854,149813854,56209800380000,review,luxury,residential_standard,Concord,CC,commercial,high,['safe_for_dashboard'],7,2014-02-12,2024-09-20,3,25042.0,0
+CFS-PARCEL-0149742089,149742089,46919176540000,trusted,ultra_high,estate,Kannapolis,CD,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2023-11-02,2024-09-19,3,12462740.0,0
+CFS-PARCEL-0149727360,149727360,45991026210000,review,ultra_high,commercial_large,Concord,C-2,unknown,high,"['review_sliver_overlap', 'jurisdiction_code_semantics_review']",7,2005-04-01,2024-08-09,5,1178190.0,0
+CFS-PARCEL-0149828962,149828962,56814371650000,review,luxury,commercial_large,Cabarrus County / Unincorporated,AO,agricultural,high,['safe_for_dashboard'],7,2013-04-22,2024-07-25,3,531500.0,0
+CFS-PARCEL-0149802582,149802582,56145072260000,trusted,ultra_high,estate,Kannapolis,CC,commercial,high,['review_sliver_overlap'],7,2017-10-30,2024-06-18,3,1568232.0,0
+CFS-PARCEL-0149812510,149812510,56230209800000,review,medium,residential_standard,Kannapolis,GC,commercial,high,['safe_for_dashboard'],7,2012-08-20,2024-06-13,3,153200.0,0
+CFS-PARCEL-0149783635,149783635,56010806010000,trusted,luxury,estate,Kannapolis,CD,unknown,high,['jurisdiction_code_semantics_review'],7,2006-07-01,2024-06-06,2,5314307.0,0
+CFS-PARCEL-0149776007,149776007,55484647930000,trusted,luxury,commercial_large,Cabarrus County / Unincorporated,LDR,residential,high,['review_sliver_overlap'],7,2004-03-01,2024-05-21,4,146897.0,0
+CFS-PARCEL-0149733548,149733548,46726826420000,trusted,medium,residential_standard,Kannapolis,R8-CZ,residential,high,['safe_for_dashboard'],7,2021-01-19,2024-05-14,4,1238471.0,0
+CFS-PARCEL-0149803242,149803242,56203224930000,review,medium,residential_standard,Concord,RV,residential,high,['safe_for_dashboard'],7,2019-05-14,2024-05-13,5,86699.0,0
+CFS-PARCEL-0149728606,149728606,45994874180000,trusted,luxury,residential_standard,Concord,I-1,unknown,high,['jurisdiction_code_semantics_review'],7,2017-03-17,2024-04-16,2,825000.0,0
+CFS-PARCEL-0149752353,149752353,55157667990000,review,luxury,commercial_large,Cabarrus County / Unincorporated,CR,residential,high,"['review_multi_jurisdiction', 'review_sliver_overlap']",7,2021-04-23,2024-04-15,3,1161896.4,0
+CFS-PARCEL-0149777760,149777760,55560086840000,review,high,estate,Midland,AG,agricultural,medium,['safe_for_dashboard'],7,2004-09-01,2024-04-08,2,100000.0,0
+CFS-PARCEL-0149810204,149810204,56217983380000,review,medium,residential_standard,Concord,RM-1,residential,high,['safe_for_dashboard'],7,2012-05-14,2024-02-09,4,745000.0,0

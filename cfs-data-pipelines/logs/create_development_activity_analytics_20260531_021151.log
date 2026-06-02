@@ -1,0 +1,8 @@
+2026-05-31 02:11:51,455 INFO Starting Phase 3 development activity analytics build.
+2026-05-31 02:11:51,648 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-31 02:11:51,924 INFO Executing development activity analytics SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_development_activity_analytics.sql
+2026-05-31 02:12:02,476 INFO Total parcels: 110017
+2026-05-31 02:12:02,476 INFO Parcels with permits: 43474
+2026-05-31 02:12:02,476 INFO Parcels without permits: 66543
+2026-05-31 02:12:02,477 INFO Activity class distribution: [{'development_activity_class': 'very_high_activity', 'parcel_count': 551, 'parcel_percentage': Decimal('0.5008'), 'ambiguous_flag_parcel_count': 128, 'avg_development_activity_score': Decimal('86.7459')}, {'development_activity_class': 'high_activity', 'parcel_count': 2430, 'parcel_percentage': Decimal('2.2087'), 'ambiguous_flag_parcel_count': 180, 'avg_development_activity_score': Decimal('43.3760')}, {'development_activity_class': 'moderate_activity', 'parcel_count': 27425, 'parcel_percentage': Decimal('24.9280'), 'ambiguous_flag_parcel_count': 1491, 'avg_development_activity_score': Decimal('23.5711')}, {'development_activity_class': 'low_activity', 'parcel_count': 13068, 'parcel_percentage': Decimal('11.8782'), 'ambiguous_flag_parcel_count': 640, 'avg_development_activity_score': Decimal('6.7556')}, {'development_activity_class': 'no_activity', 'parcel_count': 66543, 'parcel_percentage': Decimal('60.4843'), 'ambiguous_flag_parcel_count': 0, 'avg_development_activity_score': Decimal('0.0000')}]
+2026-05-31 02:12:02,477 INFO Wrote validation output: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\development_activity_parcel_summary_validation.json

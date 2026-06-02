@@ -1,0 +1,112 @@
+{
+  "endpoint_implemented": "GET /parcels/zoning-summary",
+  "status": "implemented_and_verified",
+  "source_tables": [
+    "public.parcels_enriched",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "aggregate_fields_returned": [
+    "total_parcels",
+    "zoned_parcels",
+    "no_match_parcels",
+    "jurisdiction_summary",
+    "zoning_code_summary",
+    "zoning_category_summary",
+    "confidence_summary",
+    "multi_jurisdiction_count",
+    "governance_warning_summary",
+    "filters_applied"
+  ],
+  "filters_supported": [
+    "zoning_jurisdiction",
+    "zoning_category",
+    "zoning_code",
+    "parcel_quality_status",
+    "zoning_confidence",
+    "safe_for_dashboard"
+  ],
+  "empty_result_behavior": "Filtered populations with no matching parcels return HTTP 200 with zero counts and empty arrays.",
+  "example_response": {
+    "request": "/parcels/zoning-summary",
+    "total_parcels": 110017,
+    "zoned_parcels": 109984,
+    "no_match_parcels": 33,
+    "multi_jurisdiction_count": 4441,
+    "top_jurisdiction_summary": [
+      {
+        "zoning_jurisdiction_name": "Concord",
+        "parcel_count": 43497,
+        "percentage": 39.5366,
+        "high_confidence_count": 43066,
+        "review_count": 22743,
+        "safe_for_dashboard_count": 20754
+      },
+      {
+        "zoning_jurisdiction_name": "Kannapolis",
+        "parcel_count": 26832,
+        "percentage": 24.389,
+        "high_confidence_count": 25618,
+        "review_count": 4309,
+        "safe_for_dashboard_count": 22523
+      },
+      {
+        "zoning_jurisdiction_name": "Cabarrus County / Unincorporated",
+        "parcel_count": 24890,
+        "percentage": 22.6238,
+        "high_confidence_count": 24426,
+        "review_count": 2686,
+        "safe_for_dashboard_count": 22204
+      }
+    ],
+    "top_zoning_categories": [
+      {
+        "zoning_category": "residential",
+        "parcel_count": 70640,
+        "percentage": 64.2083
+      },
+      {
+        "zoning_category": "unknown",
+        "parcel_count": 23826,
+        "percentage": 21.6576
+      },
+      {
+        "zoning_category": "agricultural",
+        "parcel_count": 10663,
+        "percentage": 9.6921
+      }
+    ],
+    "top_confidence_summary": [
+      {
+        "confidence": "high",
+        "parcel_count": 107318,
+        "percentage": 97.5467
+      },
+      {
+        "confidence": "medium",
+        "parcel_count": 1835,
+        "percentage": 1.668
+      },
+      {
+        "confidence": "low",
+        "parcel_count": 831,
+        "percentage": 0.7553
+      }
+    ],
+    "filters_applied": {}
+  },
+  "verification": {
+    "compile": "python -m compileall app passed",
+    "tests": "python -m pytest passed: 33 passed, 1 warning",
+    "live_health_database": "GET /health/database returned connected",
+    "live_global_zoning_summary_check": "GET /parcels/zoning-summary returned HTTP 200 with 110017 total parcels",
+    "live_jurisdiction_filter_check": "GET /parcels/zoning-summary?zoning_jurisdiction=Concord returned HTTP 200 with 43497 parcels",
+    "live_code_filter_check": "GET /parcels/zoning-summary?zoning_code=RV returned HTTP 200 with 6237 parcels",
+    "live_empty_result_check": "GET /parcels/zoning-summary?zoning_code=NO-SUCH-CODE returned HTTP 200 with zero counts",
+    "openapi_check": "OpenAPI includes /parcels/zoning-summary"
+  },
+  "readiness_for_next_endpoint": {
+    "next_endpoint": "GET /parcels/governance-warnings",
+    "assessment": "Ready. The backend now exposes parcel detail, search, filter, statistics, and zoning-specific summaries from real PostGIS intelligence tables."
+  }
+}

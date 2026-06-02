@@ -1,0 +1,229 @@
+{
+  "generated_at": "2026-05-31T01:05:42",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "table": "public.permit_activity"
+  },
+  "row_count": 6766,
+  "geometry_available": true,
+  "geometry_type_counts": [
+    {
+      "geometry_type": "ST_Polygon",
+      "feature_count": 6691
+    },
+    {
+      "geometry_type": "ST_MultiPolygon",
+      "feature_count": 75
+    }
+  ],
+  "srid_distribution": [
+    {
+      "srid": 4326,
+      "feature_count": 6766
+    }
+  ],
+  "invalid_geometry_count": 0,
+  "field_inventory": [
+    {
+      "ordinal_position": 1,
+      "column_name": "geometry",
+      "data_type": "USER-DEFINED",
+      "udt_name": "geometry",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 2,
+      "column_name": "objectid",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 3,
+      "column_name": "pin14",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 4,
+      "column_name": "permitnumber",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 5,
+      "column_name": "appname",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 6,
+      "column_name": "filedate",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 7,
+      "column_name": "permitcategory",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 8,
+      "column_name": "permitgroup",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 9,
+      "column_name": "recordgroup",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 10,
+      "column_name": "permittype",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 11,
+      "column_name": "permitsubtype",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 12,
+      "column_name": "detaileddescription",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 13,
+      "column_name": "status",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 14,
+      "column_name": "lot",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 15,
+      "column_name": "ownername",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 16,
+      "column_name": "address",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 17,
+      "column_name": "subdivision",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 18,
+      "column_name": "shape_starea",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 19,
+      "column_name": "shape_stlength",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 20,
+      "column_name": "cfs_source_id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 21,
+      "column_name": "cfs_source_name",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 22,
+      "column_name": "cfs_source_url",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 23,
+      "column_name": "cfs_source_year",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 24,
+      "column_name": "cfs_ingested_at",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    }
+  ],
+  "date_field_candidates": [
+    "filedate",
+    "cfs_source_year"
+  ],
+  "permit_id_candidates": [
+    "permitnumber"
+  ],
+  "parcel_pin_join_candidates": [
+    "pin14"
+  ],
+  "address_field_candidates": [
+    "address"
+  ],
+  "permit_type_status_candidates": [
+    "permitcategory",
+    "permitgroup",
+    "recordgroup",
+    "permittype",
+    "permitsubtype",
+    "status"
+  ],
+  "date_ranges": [
+    {
+      "column_name": "filedate",
+      "min_date": "2015-01-02",
+      "max_date": "2015-12-30",
+      "parsed_count": 6766
+    }
+  ],
+  "duration_seconds": 0.68,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\inspect_permit_activity_20260531_010541.log"
+}

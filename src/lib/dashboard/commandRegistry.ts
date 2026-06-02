@@ -2,6 +2,7 @@ import {
   scenarioPresets,
   timeHorizonTicks,
 } from "@/data/mock/dashboardMockData";
+import { mockDatasetRegistryEntries } from "@/data/mock/dataRegistryMockData";
 import { mockOperationalEvents } from "@/data/mock/eventsMockData";
 import { mockParcels } from "@/data/mock/parcelMockData";
 import {
@@ -18,6 +19,7 @@ import type { CommandAction, CommandCategory, CommandItem } from "@/types/search
 export const commandCategoryLabels: Record<CommandCategory, string> = {
   briefing: "Briefings",
   comparison: "Comparisons",
+  dataset: "Datasets",
   event: "Events",
   layer: "Layers",
   parcel: "Parcels",
@@ -36,6 +38,7 @@ export const commandCategoryOrder: CommandCategory[] = [
   "briefing",
   "comparison",
   "report",
+  "dataset",
   "event",
   "parcel",
   "layer",
@@ -52,6 +55,7 @@ export function getCommandRegistry(): CommandItem[] {
     ...createBriefingCommands(),
     ...createComparisonCommands(),
     ...createReportCommands(),
+    ...createDatasetCommands(),
     ...createParcelCommands(),
     ...createLayerCommands(),
     ...createEventCommands(),
@@ -59,6 +63,70 @@ export function getCommandRegistry(): CommandItem[] {
     ...createSimulationCommands(),
     createClearSelectionCommand(),
   ];
+}
+
+function createDatasetCommands(): CommandItem[] {
+  const operationalLayerIds = new Set(
+    operationalLayerRegistry.map((layer) => layer.id),
+  );
+
+  return mockDatasetRegistryEntries.map((dataset) => {
+    const relatedLayerId =
+      dataset.relatedCfsLayerId && operationalLayerIds.has(dataset.relatedCfsLayerId)
+        ? dataset.relatedCfsLayerId
+        : null;
+
+    return {
+      accent: getDatasetAccent(dataset.integrationStatus),
+      action: relatedLayerId
+        ? {
+            layerId: relatedLayerId,
+            type: "set-layer-visibility" as const,
+            visible: true,
+          }
+        : {
+            type: "noop" as const,
+          },
+      category: "dataset" as const,
+      id: `dataset:${dataset.id}`,
+      keywords: [
+        dataset.id,
+        dataset.name,
+        dataset.category,
+        dataset.description,
+        dataset.integrationStatus,
+        dataset.integrationPriority,
+        dataset.qualityStatus,
+        dataset.accessLevel,
+        dataset.refreshCadence,
+        dataset.sourceType,
+        dataset.relatedCfsLayerId ?? "",
+        dataset.relatedServiceRegistryId ?? "",
+        dataset.layerContractId ?? "",
+        dataset.owner.department,
+        dataset.owner.stewardRole,
+        dataset.expectedKeyFields
+          .map((field) => `${field.alias} ${field.sourceField} ${field.cfsField}`)
+          .join(" "),
+        dataset.notes.join(" "),
+        dataset.risks.join(" "),
+        dataset.unknowns.join(" "),
+        "dataset",
+        "data",
+        "inventory",
+        "registry",
+      ],
+      meta: {
+        badge: dataset.integrationStatus.replaceAll("-", " "),
+        source: "mock" as const,
+      },
+      resultType: "dataset" as const,
+      subtitle: `${dataset.category} / ${dataset.integrationStatus} / ${dataset.description}`,
+      title: relatedLayerId
+        ? `Open ${dataset.name} dataset layer`
+        : `View ${dataset.name} dataset inventory`,
+    };
+  });
 }
 
 function createReportCommands(): CommandItem[] {
@@ -583,4 +651,20 @@ function eventTypeLabel(type: OperationalEvent["type"]) {
     .split("_")
     .map((word) => word[0]?.toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+function getDatasetAccent(status: string) {
+  switch (status) {
+    case "ready-for-staging":
+      return "#55d38f";
+    case "schema-review":
+      return "#d8b86a";
+    case "production-disabled":
+    case "blocked":
+      return "#ff6b6b";
+    case "candidate":
+      return "#68d8ff";
+    default:
+      return "#b8c7d9";
+  }
 }

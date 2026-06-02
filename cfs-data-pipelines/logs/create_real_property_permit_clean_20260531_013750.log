@@ -1,0 +1,5 @@
+2026-05-31 01:37:50,699 INFO Starting Real Property Permit clean transform.
+2026-05-31 01:37:51,110 INFO Executing Real Property Permit clean SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_real_property_permit_clean.sql
+2026-05-31 01:37:59,227 INFO real_property_permit_clean row count: 64426
+2026-05-31 01:37:59,228 INFO Future CODate warning count: 1
+2026-05-31 01:37:59,228 INFO Wrote validation output: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\real_property_permit_clean_validation.json

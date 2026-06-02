@@ -30,7 +30,10 @@ export function KPICard({
   const maxTrend = Math.max(...trend, 1);
 
   return (
-    <article className="min-w-[184px] rounded-lg border border-white/10 bg-white/[0.045] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+    <article
+      className="min-w-[184px] rounded-lg border border-white/10 bg-white/[0.045] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+      title={`${label}: ${value}, ${delta}`}
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-black/20">
           <Icon className="h-4 w-4" style={{ color: accent }} />

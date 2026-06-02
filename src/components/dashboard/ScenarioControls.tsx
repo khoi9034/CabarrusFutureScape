@@ -40,8 +40,9 @@ export function ScenarioControls() {
 
           return (
             <button
+              aria-pressed={active}
               className={cn(
-                "rounded-lg border p-3 text-left transition",
+                "rounded-lg border p-3 text-left transition focus:outline-none focus-visible:border-[#d8b86a]/55 focus-visible:ring-2 focus-visible:ring-[#d8b86a]/20",
                 active
                   ? "border-[#d8b86a]/40 bg-[#d8b86a]/[0.12] text-white shadow-[0_0_22px_rgba(216,184,106,0.12)]"
                   : "border-white/10 bg-black/10 text-slate-400 hover:border-white/20 hover:text-slate-100",
@@ -71,6 +72,7 @@ export function ScenarioControls() {
             <span className="font-mono text-slate-200">{simulationYear}</span>
           </span>
           <input
+            aria-label="Scenario time horizon year"
             className="h-1.5 w-full accent-[#d8b86a]"
             max={timeHorizonRange.max}
             min={timeHorizonRange.min}
@@ -92,6 +94,7 @@ export function ScenarioControls() {
             </span>
           </span>
           <input
+            aria-label="Scenario simulation intensity"
             className="h-1.5 w-full accent-[#68d8ff]"
             max="100"
             min="0"

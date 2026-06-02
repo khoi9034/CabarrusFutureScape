@@ -1,0 +1,13 @@
+2026-05-28 11:45:24,954 INFO Starting CFS zoning_clean transform.
+2026-05-28 11:45:24,954 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\create_zoning_clean_20260528_114524.log
+2026-05-28 11:45:25,174 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-28 11:45:25,276 INFO Executing transform SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_zoning_clean.sql
+2026-05-28 11:45:25,843 INFO Raw zoning row count: 295
+2026-05-28 11:45:25,843 INFO Clean zoning row count: 293
+2026-05-28 11:45:25,843 INFO Invalid geometries before/after cleaning: 7/0
+2026-05-28 11:45:25,844 INFO Clean geometry types: [{'geometry_type': 'ST_MultiPolygon', 'feature_count': 293}]
+2026-05-28 11:45:25,844 INFO Clean SRID distribution: [{'srid': 4326, 'feature_count': 293}]
+2026-05-28 11:45:25,844 INFO Zoning class count: 28
+2026-05-28 11:45:25,844 INFO Wrote validation JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_clean_validation.json
+2026-05-28 11:45:25,844 INFO Wrote class summary CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_class_summary.csv
+2026-05-28 11:45:25,844 INFO Transform duration: 0.85 seconds

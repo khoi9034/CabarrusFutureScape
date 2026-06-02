@@ -5,6 +5,7 @@ import {
   Bell,
   Command,
   CornerDownLeft,
+  Database,
   FileText,
   GitBranch,
   Layers3,
@@ -14,6 +15,7 @@ import {
   Search,
   SlidersHorizontal,
   UserRound,
+  X,
   XCircle,
 } from "lucide-react";
 import {
@@ -29,6 +31,8 @@ import {
   commandCategoryLabels,
   commandCategoryOrder,
 } from "@/lib/dashboard/commandRegistry";
+import { PARCEL_SEARCH_INSPECT_EVENT } from "@/components/dashboard/ParcelSearchState";
+import { searchParcelIndex } from "@/data/intelligence/parcelSearchData";
 import { mockDashboardSearchServiceAdapter } from "@/lib/dashboard/searchServiceAdapter";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import { cn } from "@/lib/utils";
@@ -45,6 +49,7 @@ const categoryIcons: Record<
 > = {
   briefing: FileText,
   comparison: BarChart3,
+  dataset: Database,
   event: Bell,
   layer: Layers3,
   parcel: MapPin,
@@ -62,8 +67,13 @@ export function CommandPalette({
   open,
 }: CommandPaletteProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [generatedParcelResults, setGeneratedParcelResults] = useState<
+    SearchResult[]
+  >([]);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const searchInputId = "command-palette-search";
+  const titleId = "command-palette-title";
   const listboxId = "command-palette-results";
   const {
     applyRolePreset,
@@ -86,7 +96,7 @@ export function CommandPalette({
     toggleLayer,
   } = useDashboardState();
 
-  const results = useMemo(
+  const commandResults = useMemo(
     () =>
       mockDashboardSearchServiceAdapter.searchCommands({
         limit: 18,
@@ -94,6 +104,80 @@ export function CommandPalette({
         activeRoleId: roleId,
       }),
     [query, roleId],
+  );
+
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+
+    if (!open || trimmedQuery.length < 3) {
+      return;
+    }
+
+    let cancelled = false;
+
+    searchParcelIndex({
+      limit: 6,
+      query: trimmedQuery,
+    })
+      .then((parcelResults) => {
+        if (cancelled) {
+          return;
+        }
+
+        setGeneratedParcelResults(
+          parcelResults.map((parcel, index) => ({
+            accent: "#68d8ff",
+            action: {
+              officialParcelId: parcel.officialParcelId,
+              type: "inspect-intelligence-parcel",
+            },
+            category: "parcel",
+            id: `parcel-intelligence:${parcel.officialParcelId}`,
+            keywords: [
+              parcel.officialParcelId,
+              parcel.pin14 ?? "",
+              parcel.ownerName ?? "",
+              parcel.ownerSecondaryName ?? "",
+              parcel.mailingAddress ?? "",
+              parcel.subdivision ?? "",
+              parcel.neighborhood ?? "",
+              parcel.zoningJurisdiction ?? "",
+              parcel.zoningCode ?? "",
+              parcel.zoningCategory ?? "",
+              parcel.parcelQualityStatus ?? "",
+              parcel.valuationBand ?? "",
+              parcel.governanceWarnings.join(" "),
+            ],
+            matchedFields: ["parcel intelligence index"],
+            matchScore: 1000 - index,
+            meta: {
+              badge: parcel.zoningCode ?? parcel.zoningConfidence ?? "Parcel",
+              source: "generated",
+            },
+            resultType: "parcel",
+            subtitle: `${parcel.pin14 ?? "No PIN"} / ${
+              parcel.zoningJurisdiction ?? "No zoning jurisdiction"
+            } / ${parcel.subdivision ?? parcel.neighborhood ?? "No location context"}`,
+            title: parcel.ownerName
+              ? `${parcel.ownerName} / ${parcel.officialParcelId}`
+              : parcel.officialParcelId,
+          })),
+        );
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setGeneratedParcelResults([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, query]);
+
+  const results = useMemo(
+    () => [...generatedParcelResults, ...commandResults].slice(0, 24),
+    [commandResults, generatedParcelResults],
   );
 
   const groupedResults = useMemo(
@@ -150,6 +234,15 @@ export function CommandPalette({
           break;
         case "select-parcel":
           selectParcel(action.parcelId, { source: "dashboard" });
+          break;
+        case "inspect-intelligence-parcel":
+          window.dispatchEvent(
+            new CustomEvent(PARCEL_SEARCH_INSPECT_EVENT, {
+              detail: {
+                officialParcelId: action.officialParcelId,
+              },
+            }),
+          );
           break;
         case "set-layer-visibility":
           setLayerVisibility(action.layerId, action.visible);
@@ -221,6 +314,19 @@ export function CommandPalette({
     window.setTimeout(() => inputRef.current?.focus(), 0);
   }, [open]);
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [open]);
+
   if (!open) {
     return null;
   }
@@ -231,6 +337,8 @@ export function CommandPalette({
 
   function closePalette() {
     setActiveIndex(0);
+    setGeneratedParcelResults([]);
+    setQuery("");
     onOpenChange(false);
   }
 
@@ -265,8 +373,9 @@ export function CommandPalette({
 
   return (
     <div
+      aria-labelledby={titleId}
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-start justify-center bg-[#02050a]/70 px-3 pt-24 backdrop-blur-md sm:px-6"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[#02050a]/72 px-3 py-5 backdrop-blur-md sm:px-6 sm:py-10 lg:pt-24"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           closePalette();
@@ -279,8 +388,14 @@ export function CommandPalette({
         onKeyDown={handleKeyDown}
         onMouseDown={(event) => event.stopPropagation()}
       >
+        <h2 className="sr-only" id={titleId}>
+          Command palette
+        </h2>
         <div className="flex items-center gap-3 border-b border-white/10 bg-white/[0.035] px-4 py-3">
           <Search className="h-4 w-4 text-[#d8b86a]" />
+          <label className="sr-only" htmlFor={searchInputId}>
+            Search dashboard commands
+          </label>
           <input
             aria-activedescendant={
               results[selectedIndex]
@@ -291,9 +406,14 @@ export function CommandPalette({
             aria-expanded="true"
             aria-label="Search command"
             className="h-10 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-slate-600"
+            id={searchInputId}
             onChange={(event) => {
+              const nextQuery = event.target.value;
               setActiveIndex(0);
-              setQuery(event.target.value);
+              setQuery(nextQuery);
+              if (nextQuery.trim().length < 3) {
+                setGeneratedParcelResults([]);
+              }
             }}
             placeholder="Search command"
             ref={inputRef}
@@ -302,16 +422,29 @@ export function CommandPalette({
             value={query}
           />
           <Command className="h-4 w-4 text-slate-500" />
+          <button
+            aria-label="Close command palette"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-white/20 hover:text-white"
+            onClick={closePalette}
+            title="Close command palette"
+            type="button"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
         </div>
 
         <div
-          className="max-h-[62vh] overflow-y-auto p-3"
+          className="max-h-[min(680px,calc(100dvh-9.5rem))] overflow-y-auto overscroll-contain p-3"
           id={listboxId}
           role="listbox"
         >
           {results.length === 0 ? (
-            <div className="flex min-h-[160px] items-center justify-center rounded-lg border border-white/10 bg-black/20 text-sm text-slate-500">
-              No results
+            <div className="flex min-h-[160px] flex-col items-center justify-center rounded-lg border border-white/10 bg-black/20 px-4 text-center text-sm text-slate-500">
+              <Search className="mb-3 h-5 w-5 text-slate-600" />
+              <p className="font-medium text-slate-400">No commands found</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Try a parcel ID, layer name, role, report, event, or scenario.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -368,11 +501,12 @@ function CommandResultGroup({
             <button
               aria-selected={active}
               className={cn(
-                "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition",
+                "grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition focus:outline-none focus-visible:border-[#d8b86a]/55 focus-visible:ring-2 focus-visible:ring-[#d8b86a]/20",
                 active
                   ? "border-[#d8b86a]/35 bg-[#d8b86a]/[0.1] text-white shadow-[0_0_24px_rgba(216,184,106,0.1)]"
                   : "border-transparent bg-white/[0.025] text-slate-300 hover:border-white/10 hover:bg-white/[0.05]",
               )}
+              disabled={result.disabled}
               id={`command-result-${index}`}
               key={result.id}
               onClick={() => onExecute(result)}

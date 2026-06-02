@@ -1,0 +1,8 @@
+permit_status,permit_count,permit_percentage
+,45735,70.9884
+closed,8704,13.5101
+inspections,5306,8.2358
+issued,4102,6.3670
+co_issued,502,0.7792
+void,76,0.1180
+pending,1,0.0016

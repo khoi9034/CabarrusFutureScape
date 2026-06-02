@@ -1,0 +1,112 @@
+{
+  "generated_at": "2026-05-28T15:44:52",
+  "config_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\config\\planning_boundary_sources.json",
+  "source": {
+    "id": "etj_boundaries",
+    "name": "ETJ Boundary",
+    "raw_table": "planning_boundaries",
+    "schema": "public",
+    "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/32",
+    "expected_fields": [
+      "SHAPE",
+      "OBJECTID",
+      "DISTRICT_",
+      "SHAPE.STArea()",
+      "SHAPE.STLength()"
+    ],
+    "boundary_type_hint": "etj",
+    "arcgis_name": "ETJ Boundary",
+    "arcgis_geometry_type": "esriGeometryPolygon",
+    "arcgis_object_id_field": "OBJECTID",
+    "arcgis_fields": [
+      {
+        "name": "SHAPE",
+        "type": "esriFieldTypeGeometry",
+        "alias": "Shape",
+        "length": null
+      },
+      {
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID",
+        "alias": "OBJECTID",
+        "length": null
+      },
+      {
+        "name": "DISTRICT_",
+        "type": "esriFieldTypeString",
+        "alias": "DISTRICT_",
+        "length": 30
+      },
+      {
+        "name": "SHAPE.STArea()",
+        "type": "esriFieldTypeDouble",
+        "alias": "SHAPE.STArea()",
+        "length": null
+      },
+      {
+        "name": "SHAPE.STLength()",
+        "type": "esriFieldTypeDouble",
+        "alias": "SHAPE.STLength()",
+        "length": null
+      }
+    ]
+  },
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "schema": "public",
+    "table": "planning_boundaries",
+    "written": true
+  },
+  "feature_count": 5,
+  "geometry_types": [
+    "MultiPolygon",
+    "Polygon"
+  ],
+  "crs": "EPSG:4326",
+  "columns": [
+    "geometry",
+    "objectid",
+    "district",
+    "shape_starea",
+    "shape_stlength"
+  ],
+  "sample_records": [
+    {
+      "objectid": 405,
+      "district": "Town of Mt. Pleasant",
+      "shape_starea": 171478898.43947747,
+      "shape_stlength": 127667.50170897505
+    },
+    {
+      "objectid": 406,
+      "district": "City of Concord",
+      "shape_starea": 62205340.665634066,
+      "shape_stlength": 167608.57912905217
+    },
+    {
+      "objectid": 407,
+      "district": "Town of Harrisburg",
+      "shape_starea": 55544119.81622693,
+      "shape_stlength": 181034.80139395682
+    },
+    {
+      "objectid": 408,
+      "district": "Town of Harrisburg",
+      "shape_starea": 673198.2458453955,
+      "shape_stlength": 4272.717675050826
+    },
+    {
+      "objectid": 409,
+      "district": "City of Kannapolis",
+      "shape_starea": 93671564.81297736,
+      "shape_stlength": 147404.77985482116
+    }
+  ],
+  "duration_seconds": 1.56,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_planning_boundaries_20260528_154451.log",
+  "outputs": {
+    "summary_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\planning_boundaries_ingest_summary.json"
+  }
+}

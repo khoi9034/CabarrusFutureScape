@@ -1,0 +1,820 @@
+{
+  "generated_at": "2026-05-28T15:45:04",
+  "config_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\config\\zoning_sources.json",
+  "raw_source_summary": [
+    {
+      "id": "county",
+      "jurisdiction_name": "Cabarrus County / Unincorporated",
+      "raw_table": "public.zoning_county",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/35",
+      "feature_count": 295,
+      "geometry_type_counts": [
+        {
+          "geometry_type": "ST_Polygon",
+          "feature_count": 270
+        },
+        {
+          "geometry_type": "ST_MultiPolygon",
+          "feature_count": 25
+        }
+      ],
+      "invalid_geometry_count": 7,
+      "zoning_fields_found": [
+        "zoning_gen",
+        "zoningcode"
+      ],
+      "columns": [
+        {
+          "column_name": "geometry",
+          "data_type": "USER-DEFINED",
+          "udt_name": "geometry",
+          "ordinal_position": 1
+        },
+        {
+          "column_name": "objectid",
+          "data_type": "bigint",
+          "udt_name": "int8",
+          "ordinal_position": 2
+        },
+        {
+          "column_name": "zoningcode",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 3
+        },
+        {
+          "column_name": "zoning_gen",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 4
+        },
+        {
+          "column_name": "shape_starea",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 5
+        },
+        {
+          "column_name": "shape_stlength",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 6
+        }
+      ]
+    },
+    {
+      "id": "concord",
+      "jurisdiction_name": "Concord",
+      "raw_table": "public.zoning_concord",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/36",
+      "feature_count": 826,
+      "geometry_type_counts": [
+        {
+          "geometry_type": "ST_Polygon",
+          "feature_count": 821
+        },
+        {
+          "geometry_type": "ST_MultiPolygon",
+          "feature_count": 5
+        }
+      ],
+      "invalid_geometry_count": 1,
+      "zoning_fields_found": [
+        "zoningcode"
+      ],
+      "columns": [
+        {
+          "column_name": "geometry",
+          "data_type": "USER-DEFINED",
+          "udt_name": "geometry",
+          "ordinal_position": 1
+        },
+        {
+          "column_name": "objectid",
+          "data_type": "bigint",
+          "udt_name": "int8",
+          "ordinal_position": 2
+        },
+        {
+          "column_name": "zoningcode",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 3
+        },
+        {
+          "column_name": "shape_starea",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 4
+        },
+        {
+          "column_name": "shape_stlength",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 5
+        }
+      ]
+    },
+    {
+      "id": "harrisburg",
+      "jurisdiction_name": "Harrisburg",
+      "raw_table": "public.zoning_harrisburg",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/37",
+      "feature_count": 188,
+      "geometry_type_counts": [
+        {
+          "geometry_type": "ST_Polygon",
+          "feature_count": 181
+        },
+        {
+          "geometry_type": "ST_MultiPolygon",
+          "feature_count": 7
+        }
+      ],
+      "invalid_geometry_count": 2,
+      "zoning_fields_found": [
+        "zoning_gen",
+        "zoningcode"
+      ],
+      "columns": [
+        {
+          "column_name": "geometry",
+          "data_type": "USER-DEFINED",
+          "udt_name": "geometry",
+          "ordinal_position": 1
+        },
+        {
+          "column_name": "objectid",
+          "data_type": "bigint",
+          "udt_name": "int8",
+          "ordinal_position": 2
+        },
+        {
+          "column_name": "zoningcode",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 3
+        },
+        {
+          "column_name": "zoning_gen",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 4
+        },
+        {
+          "column_name": "shape_starea",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 5
+        },
+        {
+          "column_name": "shape_stlength",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 6
+        }
+      ]
+    },
+    {
+      "id": "kannapolis",
+      "jurisdiction_name": "Kannapolis",
+      "raw_table": "public.zoning_kannapolis",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/38",
+      "feature_count": 1839,
+      "geometry_type_counts": [
+        {
+          "geometry_type": "ST_Polygon",
+          "feature_count": 1806
+        },
+        {
+          "geometry_type": "ST_MultiPolygon",
+          "feature_count": 33
+        }
+      ],
+      "invalid_geometry_count": 1,
+      "zoning_fields_found": [
+        "base_distr",
+        "conditiona",
+        "zoningcode"
+      ],
+      "columns": [
+        {
+          "column_name": "geometry",
+          "data_type": "USER-DEFINED",
+          "udt_name": "geometry",
+          "ordinal_position": 1
+        },
+        {
+          "column_name": "objectid",
+          "data_type": "bigint",
+          "udt_name": "int8",
+          "ordinal_position": 2
+        },
+        {
+          "column_name": "base_distr",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 3
+        },
+        {
+          "column_name": "conditiona",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 4
+        },
+        {
+          "column_name": "zoningcode",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 5
+        },
+        {
+          "column_name": "shape_starea",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 6
+        },
+        {
+          "column_name": "shape_stlength",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 7
+        }
+      ]
+    },
+    {
+      "id": "locust",
+      "jurisdiction_name": "Locust",
+      "raw_table": "public.zoning_locust",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/39",
+      "feature_count": 8,
+      "geometry_type_counts": [
+        {
+          "geometry_type": "ST_Polygon",
+          "feature_count": 7
+        },
+        {
+          "geometry_type": "ST_MultiPolygon",
+          "feature_count": 1
+        }
+      ],
+      "invalid_geometry_count": 0,
+      "zoning_fields_found": [
+        "zoning",
+        "zoningcode"
+      ],
+      "columns": [
+        {
+          "column_name": "geometry",
+          "data_type": "USER-DEFINED",
+          "udt_name": "geometry",
+          "ordinal_position": 1
+        },
+        {
+          "column_name": "objectid_1",
+          "data_type": "bigint",
+          "udt_name": "int8",
+          "ordinal_position": 2
+        },
+        {
+          "column_name": "objectid",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 3
+        },
+        {
+          "column_name": "zoning",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 4
+        },
+        {
+          "column_name": "zoningcode",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 5
+        },
+        {
+          "column_name": "shape_starea",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 6
+        },
+        {
+          "column_name": "shape_stlength",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 7
+        }
+      ]
+    },
+    {
+      "id": "midland",
+      "jurisdiction_name": "Midland",
+      "raw_table": "public.zoning_midland",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/40",
+      "feature_count": 110,
+      "geometry_type_counts": [
+        {
+          "geometry_type": "ST_Polygon",
+          "feature_count": 100
+        },
+        {
+          "geometry_type": "ST_MultiPolygon",
+          "feature_count": 10
+        }
+      ],
+      "invalid_geometry_count": 0,
+      "zoning_fields_found": [
+        "zoning_typ",
+        "zoningcode"
+      ],
+      "columns": [
+        {
+          "column_name": "geometry",
+          "data_type": "USER-DEFINED",
+          "udt_name": "geometry",
+          "ordinal_position": 1
+        },
+        {
+          "column_name": "objectid",
+          "data_type": "bigint",
+          "udt_name": "int8",
+          "ordinal_position": 2
+        },
+        {
+          "column_name": "zoning_typ",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 3
+        },
+        {
+          "column_name": "zoningcode",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 4
+        },
+        {
+          "column_name": "shape_starea",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 5
+        },
+        {
+          "column_name": "shape_stlength",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 6
+        }
+      ]
+    },
+    {
+      "id": "mount_pleasant",
+      "jurisdiction_name": "Mt. Pleasant",
+      "raw_table": "public.zoning_mount_pleasant",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/41",
+      "feature_count": 174,
+      "geometry_type_counts": [
+        {
+          "geometry_type": "ST_Polygon",
+          "feature_count": 167
+        },
+        {
+          "geometry_type": "ST_MultiPolygon",
+          "feature_count": 7
+        }
+      ],
+      "invalid_geometry_count": 0,
+      "zoning_fields_found": [
+        "zoningcode"
+      ],
+      "columns": [
+        {
+          "column_name": "geometry",
+          "data_type": "USER-DEFINED",
+          "udt_name": "geometry",
+          "ordinal_position": 1
+        },
+        {
+          "column_name": "objectid",
+          "data_type": "bigint",
+          "udt_name": "int8",
+          "ordinal_position": 2
+        },
+        {
+          "column_name": "zoningcode",
+          "data_type": "text",
+          "udt_name": "text",
+          "ordinal_position": 3
+        },
+        {
+          "column_name": "shape_starea",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 4
+        },
+        {
+          "column_name": "shape_stlength",
+          "data_type": "double precision",
+          "udt_name": "float8",
+          "ordinal_position": 5
+        }
+      ]
+    }
+  ],
+  "clean_summary": {
+    "total_normalized_zoning_polygon_count": 3438,
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 3438
+      }
+    ],
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "feature_count": 3438
+      }
+    ],
+    "invalid_geometry_count": 0,
+    "feature_count_per_jurisdiction": [
+      {
+        "jurisdiction_name": "Cabarrus County / Unincorporated",
+        "feature_count": 293
+      },
+      {
+        "jurisdiction_name": "Concord",
+        "feature_count": 826
+      },
+      {
+        "jurisdiction_name": "Harrisburg",
+        "feature_count": 188
+      },
+      {
+        "jurisdiction_name": "Kannapolis",
+        "feature_count": 1839
+      },
+      {
+        "jurisdiction_name": "Locust",
+        "feature_count": 8
+      },
+      {
+        "jurisdiction_name": "Midland",
+        "feature_count": 110
+      },
+      {
+        "jurisdiction_name": "Mt. Pleasant",
+        "feature_count": 174
+      }
+    ],
+    "zoning_class_count_per_jurisdiction": [
+      {
+        "jurisdiction_name": "Cabarrus County / Unincorporated",
+        "feature_count": 293,
+        "zoning_class_count": 28
+      },
+      {
+        "jurisdiction_name": "Concord",
+        "feature_count": 826,
+        "zoning_class_count": 45
+      },
+      {
+        "jurisdiction_name": "Harrisburg",
+        "feature_count": 188,
+        "zoning_class_count": 34
+      },
+      {
+        "jurisdiction_name": "Kannapolis",
+        "feature_count": 1839,
+        "zoning_class_count": 88
+      },
+      {
+        "jurisdiction_name": "Locust",
+        "feature_count": 8,
+        "zoning_class_count": 4
+      },
+      {
+        "jurisdiction_name": "Midland",
+        "feature_count": 110,
+        "zoning_class_count": 17
+      },
+      {
+        "jurisdiction_name": "Mt. Pleasant",
+        "feature_count": 174,
+        "zoning_class_count": 15
+      }
+    ],
+    "general_category_distribution": [
+      {
+        "jurisdiction_name": "Cabarrus County / Unincorporated",
+        "zoning_general_normalized": "residential",
+        "feature_count": 127
+      },
+      {
+        "jurisdiction_name": "Cabarrus County / Unincorporated",
+        "zoning_general_normalized": "industrial",
+        "feature_count": 62
+      },
+      {
+        "jurisdiction_name": "Cabarrus County / Unincorporated",
+        "zoning_general_normalized": "office",
+        "feature_count": 58
+      },
+      {
+        "jurisdiction_name": "Cabarrus County / Unincorporated",
+        "zoning_general_normalized": "commercial",
+        "feature_count": 33
+      },
+      {
+        "jurisdiction_name": "Cabarrus County / Unincorporated",
+        "zoning_general_normalized": "agricultural",
+        "feature_count": 13
+      },
+      {
+        "jurisdiction_name": "Concord",
+        "zoning_general_normalized": "unknown",
+        "feature_count": 567
+      },
+      {
+        "jurisdiction_name": "Concord",
+        "zoning_general_normalized": "residential",
+        "feature_count": 237
+      },
+      {
+        "jurisdiction_name": "Concord",
+        "zoning_general_normalized": "agricultural",
+        "feature_count": 13
+      },
+      {
+        "jurisdiction_name": "Concord",
+        "zoning_general_normalized": "mixed_use",
+        "feature_count": 7
+      },
+      {
+        "jurisdiction_name": "Concord",
+        "zoning_general_normalized": "commercial",
+        "feature_count": 2
+      },
+      {
+        "jurisdiction_name": "Harrisburg",
+        "zoning_general_normalized": "residential",
+        "feature_count": 91
+      },
+      {
+        "jurisdiction_name": "Harrisburg",
+        "zoning_general_normalized": "commercial",
+        "feature_count": 38
+      },
+      {
+        "jurisdiction_name": "Harrisburg",
+        "zoning_general_normalized": "office",
+        "feature_count": 23
+      },
+      {
+        "jurisdiction_name": "Harrisburg",
+        "zoning_general_normalized": "industrial",
+        "feature_count": 17
+      },
+      {
+        "jurisdiction_name": "Harrisburg",
+        "zoning_general_normalized": "unknown",
+        "feature_count": 12
+      },
+      {
+        "jurisdiction_name": "Harrisburg",
+        "zoning_general_normalized": "mixed_use",
+        "feature_count": 7
+      },
+      {
+        "jurisdiction_name": "Kannapolis",
+        "zoning_general_normalized": "residential",
+        "feature_count": 1106
+      },
+      {
+        "jurisdiction_name": "Kannapolis",
+        "zoning_general_normalized": "commercial",
+        "feature_count": 328
+      },
+      {
+        "jurisdiction_name": "Kannapolis",
+        "zoning_general_normalized": "office",
+        "feature_count": 173
+      },
+      {
+        "jurisdiction_name": "Kannapolis",
+        "zoning_general_normalized": "unknown",
+        "feature_count": 83
+      },
+      {
+        "jurisdiction_name": "Kannapolis",
+        "zoning_general_normalized": "mixed_use",
+        "feature_count": 78
+      },
+      {
+        "jurisdiction_name": "Kannapolis",
+        "zoning_general_normalized": "agricultural",
+        "feature_count": 36
+      },
+      {
+        "jurisdiction_name": "Kannapolis",
+        "zoning_general_normalized": "industrial",
+        "feature_count": 35
+      },
+      {
+        "jurisdiction_name": "Locust",
+        "zoning_general_normalized": "unknown",
+        "feature_count": 7
+      },
+      {
+        "jurisdiction_name": "Locust",
+        "zoning_general_normalized": "commercial",
+        "feature_count": 1
+      },
+      {
+        "jurisdiction_name": "Midland",
+        "zoning_general_normalized": "unknown",
+        "feature_count": 68
+      },
+      {
+        "jurisdiction_name": "Midland",
+        "zoning_general_normalized": "agricultural",
+        "feature_count": 31
+      },
+      {
+        "jurisdiction_name": "Midland",
+        "zoning_general_normalized": "industrial",
+        "feature_count": 11
+      },
+      {
+        "jurisdiction_name": "Mt. Pleasant",
+        "zoning_general_normalized": "residential",
+        "feature_count": 101
+      },
+      {
+        "jurisdiction_name": "Mt. Pleasant",
+        "zoning_general_normalized": "unknown",
+        "feature_count": 46
+      },
+      {
+        "jurisdiction_name": "Mt. Pleasant",
+        "zoning_general_normalized": "office",
+        "feature_count": 18
+      },
+      {
+        "jurisdiction_name": "Mt. Pleasant",
+        "zoning_general_normalized": "commercial",
+        "feature_count": 6
+      },
+      {
+        "jurisdiction_name": "Mt. Pleasant",
+        "zoning_general_normalized": "agricultural",
+        "feature_count": 3
+      }
+    ],
+    "index_summary": [
+      {
+        "indexname": "zoning_jurisdictional_clean_code_idx",
+        "indexdef": "CREATE INDEX zoning_jurisdictional_clean_code_idx ON public.zoning_jurisdictional_clean USING btree (zoning_code_raw)"
+      },
+      {
+        "indexname": "zoning_jurisdictional_clean_general_idx",
+        "indexdef": "CREATE INDEX zoning_jurisdictional_clean_general_idx ON public.zoning_jurisdictional_clean USING btree (zoning_general_normalized)"
+      },
+      {
+        "indexname": "zoning_jurisdictional_clean_geometry_gix",
+        "indexdef": "CREATE INDEX zoning_jurisdictional_clean_geometry_gix ON public.zoning_jurisdictional_clean USING gist (geometry)"
+      },
+      {
+        "indexname": "zoning_jurisdictional_clean_jurisdiction_idx",
+        "indexdef": "CREATE INDEX zoning_jurisdictional_clean_jurisdiction_idx ON public.zoning_jurisdictional_clean USING btree (jurisdiction_name)"
+      },
+      {
+        "indexname": "zoning_jurisdictional_clean_label_idx",
+        "indexdef": "CREATE INDEX zoning_jurisdictional_clean_label_idx ON public.zoning_jurisdictional_clean USING btree (zoning_label_normalized)"
+      },
+      {
+        "indexname": "zoning_jurisdictional_clean_pkey",
+        "indexdef": "CREATE UNIQUE INDEX zoning_jurisdictional_clean_pkey ON public.zoning_jurisdictional_clean USING btree (zoning_jurisdictional_id)"
+      }
+    ]
+  },
+  "schema_comparison_columns": [
+    {
+      "column_name": "base_distr",
+      "county": "",
+      "concord": "",
+      "harrisburg": "",
+      "kannapolis": "text",
+      "locust": "",
+      "midland": "",
+      "mount_pleasant": ""
+    },
+    {
+      "column_name": "conditiona",
+      "county": "",
+      "concord": "",
+      "harrisburg": "",
+      "kannapolis": "text",
+      "locust": "",
+      "midland": "",
+      "mount_pleasant": ""
+    },
+    {
+      "column_name": "geometry",
+      "county": "USER-DEFINED",
+      "concord": "USER-DEFINED",
+      "harrisburg": "USER-DEFINED",
+      "kannapolis": "USER-DEFINED",
+      "locust": "USER-DEFINED",
+      "midland": "USER-DEFINED",
+      "mount_pleasant": "USER-DEFINED"
+    },
+    {
+      "column_name": "objectid",
+      "county": "bigint",
+      "concord": "bigint",
+      "harrisburg": "bigint",
+      "kannapolis": "bigint",
+      "locust": "double precision",
+      "midland": "bigint",
+      "mount_pleasant": "bigint"
+    },
+    {
+      "column_name": "objectid_1",
+      "county": "",
+      "concord": "",
+      "harrisburg": "",
+      "kannapolis": "",
+      "locust": "bigint",
+      "midland": "",
+      "mount_pleasant": ""
+    },
+    {
+      "column_name": "shape_starea",
+      "county": "double precision",
+      "concord": "double precision",
+      "harrisburg": "double precision",
+      "kannapolis": "double precision",
+      "locust": "double precision",
+      "midland": "double precision",
+      "mount_pleasant": "double precision"
+    },
+    {
+      "column_name": "shape_stlength",
+      "county": "double precision",
+      "concord": "double precision",
+      "harrisburg": "double precision",
+      "kannapolis": "double precision",
+      "locust": "double precision",
+      "midland": "double precision",
+      "mount_pleasant": "double precision"
+    },
+    {
+      "column_name": "zoning",
+      "county": "",
+      "concord": "",
+      "harrisburg": "",
+      "kannapolis": "",
+      "locust": "text",
+      "midland": "",
+      "mount_pleasant": ""
+    },
+    {
+      "column_name": "zoning_gen",
+      "county": "text",
+      "concord": "",
+      "harrisburg": "text",
+      "kannapolis": "",
+      "locust": "",
+      "midland": "",
+      "mount_pleasant": ""
+    },
+    {
+      "column_name": "zoning_typ",
+      "county": "",
+      "concord": "",
+      "harrisburg": "",
+      "kannapolis": "",
+      "locust": "",
+      "midland": "text",
+      "mount_pleasant": ""
+    },
+    {
+      "column_name": "zoningcode",
+      "county": "text",
+      "concord": "text",
+      "harrisburg": "text",
+      "kannapolis": "text",
+      "locust": "text",
+      "midland": "text",
+      "mount_pleasant": "text"
+    }
+  ],
+  "duration_seconds": 2.31,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_zoning_jurisdictional_clean_20260528_154502.log",
+  "outputs": {
+    "validation_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\zoning_jurisdictional_clean_validation.json",
+    "class_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\zoning_jurisdictional_class_summary.csv",
+    "schema_comparison_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\zoning_jurisdictional_schema_comparison.csv"
+  }
+}

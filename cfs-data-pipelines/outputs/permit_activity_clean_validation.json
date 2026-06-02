@@ -1,0 +1,356 @@
+{
+  "generated_at": "2026-05-31T01:05:48",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "raw_table": "public.permit_activity",
+    "clean_table": "public.permit_activity_clean"
+  },
+  "row_count_comparison": {
+    "raw_row_count": 6766,
+    "clean_row_count": 6766,
+    "row_count_delta": 0,
+    "row_counts_match": true
+  },
+  "geometry_summary": {
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 6766
+      }
+    ],
+    "srid_distribution": [
+      {
+        "srid": 4326,
+        "feature_count": 6766
+      }
+    ],
+    "invalid_geometry_count": 0,
+    "null_geometry_count": 0
+  },
+  "date_summary": {
+    "min_activity_date": "2015-01-02",
+    "max_activity_date": "2015-12-30",
+    "parsed_activity_date_count": 6766,
+    "missing_activity_date_count": 0
+  },
+  "candidate_field_summary": {
+    "permit_id_non_null_count": 6766,
+    "pin14_non_null_count": 6766,
+    "address_non_null_count": 6765,
+    "status_non_null_count": 6762,
+    "type_non_null_count": 6766
+  },
+  "duplicate_summary": {
+    "duplicate_permit_id_groups": 196,
+    "duplicate_pin14_groups": 1461
+  },
+  "status_distribution": [
+    {
+      "value": "issued",
+      "permit_count": 3475,
+      "permit_percentage": 51.3597
+    },
+    {
+      "value": "final_complete",
+      "permit_count": 1396,
+      "permit_percentage": 20.6326
+    },
+    {
+      "value": "co_issued",
+      "permit_count": 1098,
+      "permit_percentage": 16.2282
+    },
+    {
+      "value": "inspections_in_progress",
+      "permit_count": 204,
+      "permit_percentage": 3.0151
+    },
+    {
+      "value": "closed",
+      "permit_count": 144,
+      "permit_percentage": 2.1283
+    },
+    {
+      "value": "void",
+      "permit_count": 105,
+      "permit_percentage": 1.5519
+    },
+    {
+      "value": "in_progress",
+      "permit_count": 103,
+      "permit_percentage": 1.5223
+    },
+    {
+      "value": "review",
+      "permit_count": 65,
+      "permit_percentage": 0.9607
+    },
+    {
+      "value": "atc_issued",
+      "permit_count": 42,
+      "permit_percentage": 0.6208
+    },
+    {
+      "value": "pending",
+      "permit_count": 41,
+      "permit_percentage": 0.606
+    },
+    {
+      "value": "approved",
+      "permit_count": 39,
+      "permit_percentage": 0.5764
+    },
+    {
+      "value": "coc_issued",
+      "permit_count": 14,
+      "permit_percentage": 0.2069
+    },
+    {
+      "value": "letter_issued",
+      "permit_count": 10,
+      "permit_percentage": 0.1478
+    },
+    {
+      "value": "cc_issued",
+      "permit_count": 7,
+      "permit_percentage": 0.1035
+    },
+    {
+      "value": "in_review",
+      "permit_count": 7,
+      "permit_percentage": 0.1035
+    },
+    {
+      "value": "cha_pending",
+      "permit_count": 5,
+      "permit_percentage": 0.0739
+    },
+    {
+      "value": "sent_to_cha",
+      "permit_count": 4,
+      "permit_percentage": 0.0591
+    },
+    {
+      "value": null,
+      "permit_count": 4,
+      "permit_percentage": 0.0591
+    },
+    {
+      "value": "accepted",
+      "permit_count": 1,
+      "permit_percentage": 0.0148
+    },
+    {
+      "value": "conditions",
+      "permit_count": 1,
+      "permit_percentage": 0.0148
+    },
+    {
+      "value": "ec3_information_complete",
+      "permit_count": 1,
+      "permit_percentage": 0.0148
+    }
+  ],
+  "type_distribution": [
+    {
+      "value": "building",
+      "permit_count": 3277,
+      "permit_percentage": 48.4333
+    },
+    {
+      "value": "trade",
+      "permit_count": 2151,
+      "permit_percentage": 31.7913
+    },
+    {
+      "value": "zoning_harrisburg",
+      "permit_count": 468,
+      "permit_percentage": 6.9169
+    },
+    {
+      "value": "zoning",
+      "permit_count": 439,
+      "permit_percentage": 6.4883
+    },
+    {
+      "value": "aca",
+      "permit_count": 221,
+      "permit_percentage": 3.2663
+    },
+    {
+      "value": "health_alliance",
+      "permit_count": 170,
+      "permit_percentage": 2.5126
+    },
+    {
+      "value": "plan_review",
+      "permit_count": 40,
+      "permit_percentage": 0.5912
+    }
+  ],
+  "category_distribution": [
+    {
+      "value": "na",
+      "permit_count": 3011,
+      "permit_percentage": 44.5019
+    },
+    {
+      "value": "new",
+      "permit_count": 1592,
+      "permit_percentage": 23.5294
+    },
+    {
+      "value": "addition",
+      "permit_count": 397,
+      "permit_percentage": 5.8676
+    },
+    {
+      "value": "repair",
+      "permit_count": 380,
+      "permit_percentage": 5.6163
+    },
+    {
+      "value": "upfit",
+      "permit_count": 289,
+      "permit_percentage": 4.2714
+    },
+    {
+      "value": "accessory_structure",
+      "permit_count": 203,
+      "permit_percentage": 3.0003
+    },
+    {
+      "value": "single_family_detached",
+      "permit_count": 161,
+      "permit_percentage": 2.3795
+    },
+    {
+      "value": "accessory",
+      "permit_count": 115,
+      "permit_percentage": 1.6997
+    },
+    {
+      "value": "sign",
+      "permit_count": 112,
+      "permit_percentage": 1.6553
+    },
+    {
+      "value": "demolition",
+      "permit_count": 97,
+      "permit_percentage": 1.4336
+    },
+    {
+      "value": "mobile",
+      "permit_count": 85,
+      "permit_percentage": 1.2563
+    },
+    {
+      "value": "pool",
+      "permit_count": 72,
+      "permit_percentage": 1.0641
+    },
+    {
+      "value": "deck",
+      "permit_count": 71,
+      "permit_percentage": 1.0494
+    },
+    {
+      "value": "commercial",
+      "permit_count": 35,
+      "permit_percentage": 0.5173
+    },
+    {
+      "value": "abc_store",
+      "permit_count": 34,
+      "permit_percentage": 0.5025
+    },
+    {
+      "value": "mobile_home",
+      "permit_count": 25,
+      "permit_percentage": 0.3695
+    },
+    {
+      "value": "trailer_construction",
+      "permit_count": 16,
+      "permit_percentage": 0.2365
+    },
+    {
+      "value": "temporaryuse",
+      "permit_count": 12,
+      "permit_percentage": 0.1774
+    },
+    {
+      "value": "modular",
+      "permit_count": 11,
+      "permit_percentage": 0.1626
+    },
+    {
+      "value": "industrial",
+      "permit_count": 10,
+      "permit_percentage": 0.1478
+    },
+    {
+      "value": "wall",
+      "permit_count": 7,
+      "permit_percentage": 0.1035
+    },
+    {
+      "value": "house_move_in",
+      "permit_count": 6,
+      "permit_percentage": 0.0887
+    },
+    {
+      "value": "institutional_public",
+      "permit_count": 6,
+      "permit_percentage": 0.0887
+    },
+    {
+      "value": "daycare",
+      "permit_count": 4,
+      "permit_percentage": 0.0591
+    },
+    {
+      "value": "agriculture_exemption",
+      "permit_count": 3,
+      "permit_percentage": 0.0443
+    }
+  ],
+  "index_summary": [
+    {
+      "indexname": "permit_activity_clean_activity_date_idx",
+      "indexdef": "CREATE INDEX permit_activity_clean_activity_date_idx ON public.permit_activity_clean USING btree (activity_date)"
+    },
+    {
+      "indexname": "permit_activity_clean_category_idx",
+      "indexdef": "CREATE INDEX permit_activity_clean_category_idx ON public.permit_activity_clean USING btree (permit_category_normalized)"
+    },
+    {
+      "indexname": "permit_activity_clean_geometry_gix",
+      "indexdef": "CREATE INDEX permit_activity_clean_geometry_gix ON public.permit_activity_clean USING gist (geometry)"
+    },
+    {
+      "indexname": "permit_activity_clean_internal_id_idx",
+      "indexdef": "CREATE INDEX permit_activity_clean_internal_id_idx ON public.permit_activity_clean USING btree (permit_activity_internal_id)"
+    },
+    {
+      "indexname": "permit_activity_clean_permit_id_idx",
+      "indexdef": "CREATE INDEX permit_activity_clean_permit_id_idx ON public.permit_activity_clean USING btree (permit_id)"
+    },
+    {
+      "indexname": "permit_activity_clean_pin14_idx",
+      "indexdef": "CREATE INDEX permit_activity_clean_pin14_idx ON public.permit_activity_clean USING btree (pin14)"
+    },
+    {
+      "indexname": "permit_activity_clean_status_idx",
+      "indexdef": "CREATE INDEX permit_activity_clean_status_idx ON public.permit_activity_clean USING btree (permit_status_normalized)"
+    },
+    {
+      "indexname": "permit_activity_clean_type_idx",
+      "indexdef": "CREATE INDEX permit_activity_clean_type_idx ON public.permit_activity_clean USING btree (permit_type_normalized)"
+    }
+  ],
+  "duration_seconds": 1.31,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_permit_activity_clean_20260531_010546.log"
+}

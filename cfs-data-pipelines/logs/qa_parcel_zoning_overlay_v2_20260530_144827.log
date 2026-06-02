@@ -1,0 +1,14 @@
+2026-05-30 14:48:27,931 INFO Starting CFS parcel zoning intelligence QA.
+2026-05-30 14:48:27,932 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\qa_parcel_zoning_overlay_v2_20260530_144827.log
+2026-05-30 14:48:29,634 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-30 14:48:36,326 INFO Executing QA SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\qa_parcel_zoning_overlay_v2.sql
+2026-05-30 14:48:59,845 INFO Total parcels: 110017
+2026-05-30 14:48:59,846 INFO Safe-for-dashboard parcels: 74781
+2026-05-30 14:48:59,847 INFO Review parcels: 35236
+2026-05-30 14:48:59,848 INFO No-match parcels: 33
+2026-05-30 14:48:59,849 INFO Most common warning categories: [{'warning_category': 'safe_for_dashboard', 'parcel_count': 74781, 'parcel_percentage': Decimal('67.9722')}, {'warning_category': 'jurisdiction_code_semantics_review', 'parcel_count': 23793, 'parcel_percentage': Decimal('21.6267')}, {'warning_category': 'review_sliver_overlap', 'parcel_count': 13962, 'parcel_percentage': Decimal('12.6908')}, {'warning_category': 'review_multi_jurisdiction', 'parcel_count': 4441, 'parcel_percentage': Decimal('4.0366')}, {'warning_category': 'review_low_confidence', 'parcel_count': 831, 'parcel_percentage': Decimal('0.7553')}]
+2026-05-30 14:48:59,849 INFO Wrote QA summary JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_zoning_intelligence_qa_summary.json
+2026-05-30 14:48:59,850 INFO Wrote governance warnings CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_zoning_governance_warnings.csv
+2026-05-30 14:48:59,850 INFO Wrote jurisdiction summary CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_zoning_by_jurisdiction_summary.csv
+2026-05-30 14:48:59,851 INFO Wrote ambiguity hotspots CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_zoning_ambiguity_hotspots.csv
+2026-05-30 14:48:59,851 INFO QA duration: 26.16 seconds

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { TimeSliderPanel } from "@/components/dashboard/TimeSliderPanel";
 import { KPICard } from "@/components/ui/KPICard";
+import { parcelDashboardKpiMetric } from "@/data/intelligence/parcelDashboardMetrics";
 import { kpiMetrics } from "@/data/mock/dashboardMockData";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import type { MetricCard } from "@/types";
@@ -22,14 +23,20 @@ const iconMap = {
   risk: ShieldAlert,
 };
 
+const dashboardKpiMetrics = kpiMetrics.map((metric) =>
+  metric.id === parcelDashboardKpiMetric.id ? parcelDashboardKpiMetric : metric,
+);
+
 export function MetricsBar() {
   const { activeRole, simulationYear, setSimulationYear } = useDashboardState();
   const roleFocusedMetrics = useMemo(() => {
     const preferredMetricIds = new Set(activeRole.preferredKpiCardIds);
     const preferredMetrics = activeRole.preferredKpiCardIds
-      .map((metricId) => kpiMetrics.find((metric) => metric.id === metricId))
+      .map((metricId) =>
+        dashboardKpiMetrics.find((metric) => metric.id === metricId),
+      )
       .filter((metric): metric is MetricCard => Boolean(metric));
-    const remainingMetrics = kpiMetrics.filter(
+    const remainingMetrics = dashboardKpiMetrics.filter(
       (metric) => !preferredMetricIds.has(metric.id),
     );
 

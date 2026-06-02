@@ -1,0 +1,315 @@
+{
+  "generated_at": "2026-05-28T11:45:25",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "raw_table": "public.zoning",
+    "clean_table": "public.zoning_clean"
+  },
+  "row_count_comparison": {
+    "raw_table": "public.zoning",
+    "clean_table": "public.zoning_clean",
+    "raw_row_count": 295,
+    "clean_row_count": 293,
+    "row_count_delta": -2,
+    "row_counts_match": false
+  },
+  "geometry_validation": {
+    "raw_invalid_geometry_count": 7,
+    "clean_invalid_geometry_count": 0,
+    "clean_null_geometry_count": 0,
+    "clean_geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 293
+      }
+    ],
+    "clean_srid_counts": [
+      {
+        "srid": 4326,
+        "feature_count": 293
+      }
+    ],
+    "geometry_cleaning_policy": "ST_MakeValid is applied, polygonal components are extracted with ST_CollectionExtract(..., 3), and geometries are coerced to MultiPolygon in SRID 4326."
+  },
+  "dropped_feature_count": 2,
+  "dropped_features": [
+    {
+      "source_objectid": 19127,
+      "zoning_code": "OI",
+      "zoning_general": "OFFICE",
+      "raw_geometry_type": "ST_Polygon",
+      "raw_is_valid": false,
+      "raw_validity_reason": "Too few points in geometry component[-80.5141508812685 35.3075936808291]"
+    },
+    {
+      "source_objectid": 26370,
+      "zoning_code": "LDR",
+      "zoning_general": "RESIDENTIAL",
+      "raw_geometry_type": "ST_Polygon",
+      "raw_is_valid": false,
+      "raw_validity_reason": "Too few points in geometry component[-80.7110977062135 35.4255957591322]"
+    }
+  ],
+  "dropped_feature_policy": "Features are dropped from zoning_clean only when ST_MakeValid plus polygon extraction cannot produce a non-empty polygonal geometry.",
+  "zoning_class_count": 28,
+  "zoning_class_summary": [
+    {
+      "zoning_code": "LDR",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "LDR",
+      "feature_count": 67,
+      "total_area_acres": 13895.5,
+      "avg_feature_area_acres": 207.4
+    },
+    {
+      "zoning_code": "OI",
+      "zoning_general": "OFFICE",
+      "zoning_label": "OI",
+      "feature_count": 54,
+      "total_area_acres": 3266.79,
+      "avg_feature_area_acres": 60.5
+    },
+    {
+      "zoning_code": "CR",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "CR",
+      "feature_count": 33,
+      "total_area_acres": 35741.64,
+      "avg_feature_area_acres": 1083.08
+    },
+    {
+      "zoning_code": "LI",
+      "zoning_general": "INDUSTRIAL",
+      "zoning_label": "LI",
+      "feature_count": 33,
+      "total_area_acres": 1202.34,
+      "avg_feature_area_acres": 36.43
+    },
+    {
+      "zoning_code": "LC",
+      "zoning_general": "COMMERCIAL",
+      "zoning_label": "LC",
+      "feature_count": 23,
+      "total_area_acres": 363.33,
+      "avg_feature_area_acres": 15.8
+    },
+    {
+      "zoning_code": "GI",
+      "zoning_general": "INDUSTRIAL",
+      "zoning_label": "GI",
+      "feature_count": 15,
+      "total_area_acres": 1213.79,
+      "avg_feature_area_acres": 80.92
+    },
+    {
+      "zoning_code": "MDR",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "MDR",
+      "feature_count": 14,
+      "total_area_acres": 901.37,
+      "avg_feature_area_acres": 64.38
+    },
+    {
+      "zoning_code": "LI-SU",
+      "zoning_general": "INDUSTRIAL",
+      "zoning_label": "LI-SU",
+      "feature_count": 9,
+      "total_area_acres": 65.47,
+      "avg_feature_area_acres": 7.27
+    },
+    {
+      "zoning_code": "AO",
+      "zoning_general": "AGRICULTURAL",
+      "zoning_label": "AO",
+      "feature_count": 6,
+      "total_area_acres": 89245.2,
+      "avg_feature_area_acres": 14874.2
+    },
+    {
+      "zoning_code": "GC",
+      "zoning_general": "COMMERCIAL",
+      "zoning_label": "GC",
+      "feature_count": 6,
+      "total_area_acres": 117.82,
+      "avg_feature_area_acres": 19.64
+    },
+    {
+      "zoning_code": "LDR-SU",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "LDR-SU",
+      "feature_count": 6,
+      "total_area_acres": 25.47,
+      "avg_feature_area_acres": 4.25
+    },
+    {
+      "zoning_code": "GI-SU",
+      "zoning_general": "INDUSTRIAL",
+      "zoning_label": "GI-SU",
+      "feature_count": 4,
+      "total_area_acres": 145.09,
+      "avg_feature_area_acres": 36.27
+    },
+    {
+      "zoning_code": "HDR-SU",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "HDR-SU",
+      "feature_count": 3,
+      "total_area_acres": 95.25,
+      "avg_feature_area_acres": 31.75
+    },
+    {
+      "zoning_code": "AO",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "AO",
+      "feature_count": 2,
+      "total_area_acres": 8.76,
+      "avg_feature_area_acres": 4.38
+    },
+    {
+      "zoning_code": "AO-CU",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "AO-CU",
+      "feature_count": 2,
+      "total_area_acres": 253.38,
+      "avg_feature_area_acres": 126.69
+    },
+    {
+      "zoning_code": "AO-SU",
+      "zoning_general": "AGRICULTURAL",
+      "zoning_label": "AO-SU",
+      "feature_count": 2,
+      "total_area_acres": 3.72,
+      "avg_feature_area_acres": 1.86
+    },
+    {
+      "zoning_code": "LC-SU",
+      "zoning_general": "COMMERCIAL",
+      "zoning_label": "LC-SU",
+      "feature_count": 2,
+      "total_area_acres": 59.08,
+      "avg_feature_area_acres": 29.54
+    },
+    {
+      "zoning_code": "OI",
+      "zoning_general": "INSTITUTIONAL",
+      "zoning_label": "OI",
+      "feature_count": 2,
+      "total_area_acres": 6.75,
+      "avg_feature_area_acres": 3.37
+    },
+    {
+      "zoning_code": "AO",
+      "zoning_general": "Agriculture",
+      "zoning_label": "AO",
+      "feature_count": 1,
+      "total_area_acres": 126.97,
+      "avg_feature_area_acres": 126.97
+    },
+    {
+      "zoning_code": "CR",
+      "zoning_general": null,
+      "zoning_label": "CR",
+      "feature_count": 1,
+      "total_area_acres": 2.99,
+      "avg_feature_area_acres": 2.99
+    },
+    {
+      "zoning_code": "GC-SU",
+      "zoning_general": "COMMERCIAL",
+      "zoning_label": "GC-SU",
+      "feature_count": 1,
+      "total_area_acres": 3.92,
+      "avg_feature_area_acres": 3.92
+    },
+    {
+      "zoning_code": "GI-SU",
+      "zoning_general": null,
+      "zoning_label": "GI-SU",
+      "feature_count": 1,
+      "total_area_acres": 143.63,
+      "avg_feature_area_acres": 143.63
+    },
+    {
+      "zoning_code": "HDR",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "HDR",
+      "feature_count": 1,
+      "total_area_acres": 88.51,
+      "avg_feature_area_acres": 88.51
+    },
+    {
+      "zoning_code": "LC",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "LC",
+      "feature_count": 1,
+      "total_area_acres": 1.98,
+      "avg_feature_area_acres": 1.98
+    },
+    {
+      "zoning_code": "LDR",
+      "zoning_general": null,
+      "zoning_label": "LDR",
+      "feature_count": 1,
+      "total_area_acres": 0.63,
+      "avg_feature_area_acres": 0.63
+    },
+    {
+      "zoning_code": "LI",
+      "zoning_general": "OFFICE",
+      "zoning_label": "LI",
+      "feature_count": 1,
+      "total_area_acres": 25.72,
+      "avg_feature_area_acres": 25.72
+    },
+    {
+      "zoning_code": "MDR-SU",
+      "zoning_general": "RESIDENTIAL",
+      "zoning_label": "MDR-SU",
+      "feature_count": 1,
+      "total_area_acres": 2.49,
+      "avg_feature_area_acres": 2.49
+    },
+    {
+      "zoning_code": "OI-SU",
+      "zoning_general": "OFFICE",
+      "zoning_label": "OI-SU",
+      "feature_count": 1,
+      "total_area_acres": 1.15,
+      "avg_feature_area_acres": 1.15
+    }
+  ],
+  "index_summary": [
+    {
+      "indexname": "zoning_clean_geometry_gix",
+      "indexdef": "CREATE INDEX zoning_clean_geometry_gix ON public.zoning_clean USING gist (geometry)"
+    },
+    {
+      "indexname": "zoning_clean_pkey",
+      "indexdef": "CREATE UNIQUE INDEX zoning_clean_pkey ON public.zoning_clean USING btree (zoning_internal_id)"
+    },
+    {
+      "indexname": "zoning_clean_source_objectid_uidx",
+      "indexdef": "CREATE UNIQUE INDEX zoning_clean_source_objectid_uidx ON public.zoning_clean USING btree (source_objectid)"
+    },
+    {
+      "indexname": "zoning_clean_zoning_code_idx",
+      "indexdef": "CREATE INDEX zoning_clean_zoning_code_idx ON public.zoning_clean USING btree (zoning_code)"
+    },
+    {
+      "indexname": "zoning_clean_zoning_general_idx",
+      "indexdef": "CREATE INDEX zoning_clean_zoning_general_idx ON public.zoning_clean USING btree (zoning_general)"
+    },
+    {
+      "indexname": "zoning_clean_zoning_label_idx",
+      "indexdef": "CREATE INDEX zoning_clean_zoning_label_idx ON public.zoning_clean USING btree (zoning_label)"
+    }
+  ],
+  "duration_seconds": 0.85,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_zoning_clean_20260528_114524.log",
+  "outputs": {
+    "validation_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\zoning_clean_validation.json",
+    "zoning_class_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\zoning_class_summary.csv"
+  }
+}

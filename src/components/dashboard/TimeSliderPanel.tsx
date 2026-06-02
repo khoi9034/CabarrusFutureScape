@@ -38,6 +38,7 @@ export function TimeSliderPanel({
           ))}
         </div>
         <input
+          aria-label="Bottom forecast horizon year"
           className="mt-3 h-1.5 w-full accent-[#d8b86a]"
           max={timeHorizonRange.max}
           min={timeHorizonRange.min}

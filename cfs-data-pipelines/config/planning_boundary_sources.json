@@ -1,0 +1,13 @@
+{
+  "sources": [
+    {
+      "id": "etj_boundaries",
+      "name": "ETJ Boundary",
+      "raw_table": "planning_boundaries",
+      "schema": "public",
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/32",
+      "expected_fields": ["SHAPE", "OBJECTID", "DISTRICT_", "SHAPE.STArea()", "SHAPE.STLength()"],
+      "boundary_type_hint": "etj"
+    }
+  ]
+}

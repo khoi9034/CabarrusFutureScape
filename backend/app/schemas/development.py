@@ -1,0 +1,282 @@
+from datetime import date
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class DevelopmentSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    permit_count: int = 0
+    active_parcel_count: int = 0
+    unmatched_permit_count: int = 0
+    ambiguous_permit_count: int = 0
+    activity_anchor_date: date | None = None
+
+
+class DevelopmentActivityClassSummary(BaseModel):
+    no_activity: int = 0
+    low_activity: int = 0
+    moderate_activity: int = 0
+    high_activity: int = 0
+    very_high_activity: int = 0
+
+
+class DevelopmentStatisticsBucket(BaseModel):
+    value: str
+    count: int
+
+
+class DevelopmentStatisticsResponse(BaseModel):
+    total_permits: int
+    parcels_with_activity: int
+    parcels_without_activity: int
+    recent_activity_parcels_1yr: int
+    recent_activity_parcels_3yr: int
+    activity_date_min: date | None = None
+    activity_date_max: date | None = None
+    activity_classes: DevelopmentActivityClassSummary
+    by_permit_type: list[DevelopmentStatisticsBucket] = Field(default_factory=list)
+    by_work_type: list[DevelopmentStatisticsBucket] = Field(default_factory=list)
+    by_status: list[DevelopmentStatisticsBucket] = Field(default_factory=list)
+    by_zoning_jurisdiction: list[DevelopmentStatisticsBucket] = Field(
+        default_factory=list,
+    )
+    by_zoning_category: list[DevelopmentStatisticsBucket] = Field(
+        default_factory=list,
+    )
+    filters_applied: dict[str, int | str] = Field(default_factory=dict)
+
+
+class DevelopmentTrendPoint(BaseModel):
+    year: int | None = None
+    month: int | None = None
+    permit_count: int
+    parcel_count: int | None = None
+    total_permit_amount: float | None = None
+    zoning_jurisdiction_name: str | None = None
+    zoning_category: str | None = None
+    permit_type: str | None = None
+    work_type: str | None = None
+
+
+class DevelopmentRollingSummary(BaseModel):
+    window_months: int
+    start_date: date
+    end_date: date
+    permit_count: int
+    parcel_count: int
+    total_permit_amount: float | None = None
+
+
+class DevelopmentTrendDateRange(BaseModel):
+    start_year: int | None = None
+    end_year: int | None = None
+    activity_date_min: date | None = None
+    activity_date_max: date | None = None
+
+
+class DevelopmentTrendsResponse(BaseModel):
+    filters_applied: dict[str, int | str] = Field(default_factory=dict)
+    group_by: str | None = None
+    rolling_window: int | None = None
+    date_range: DevelopmentTrendDateRange
+    annual_trends: list[DevelopmentTrendPoint] = Field(default_factory=list)
+    monthly_trends: list[DevelopmentTrendPoint] = Field(default_factory=list)
+    grouped_trends: list[DevelopmentTrendPoint] = Field(default_factory=list)
+    rolling_summary: DevelopmentRollingSummary | None = None
+    trend_direction: str
+    peak_year: int | None = None
+    peak_month: str | None = None
+    total_permits: int
+
+
+class DevelopmentHotspotResult(BaseModel):
+    official_parcel_id: str
+    pin14: str | None = None
+    subdivision: str | None = None
+    neighborhood: str | None = None
+    zoning_jurisdiction_name: str | None = None
+    dominant_zoning_code_raw: str | None = None
+    dominant_zoning_general_normalized: str | None = None
+    parcel_quality_status: str | None = None
+    zoning_assignment_confidence: str | None = None
+    total_permit_count: int
+    recent_permit_count_1yr: int
+    recent_permit_count_3yr: int
+    total_permit_amount: float | None = None
+    avg_permit_amount: float | None = None
+    latest_permit_date: date | None = None
+    dominant_permit_type: str | None = None
+    dominant_work_type: str | None = None
+    latest_permit_status: str | None = None
+    development_activity_score: float | None = None
+    development_activity_class: str | None = None
+    has_unmatched_or_ambiguous_permit_flag: bool
+
+
+class DevelopmentHotspotsResponse(BaseModel):
+    filters_applied: dict[str, int | str] = Field(default_factory=dict)
+    sort_by: str
+    limit: int
+    offset: int
+    total_count: int
+    results: list[DevelopmentHotspotResult] = Field(default_factory=list)
+
+
+class DevelopmentZoningSummaryRow(BaseModel):
+    zoning_jurisdiction_name: str
+    dominant_zoning_code_raw: str
+    dominant_zoning_general_normalized: str
+    permit_type: str
+    work_type: str
+    permit_status: str
+    activity_year: int | None = None
+    activity_month: int | None = None
+    permit_count: int
+    active_parcel_count: int
+    total_permit_amount: float | None = None
+    avg_permit_amount: float | None = None
+    very_high_activity_parcel_count: int = 0
+    high_activity_parcel_count: int = 0
+    moderate_activity_parcel_count: int = 0
+    low_activity_parcel_count: int = 0
+
+
+class DevelopmentZoningSummaryResponse(BaseModel):
+    filters_applied: dict[str, int | str] = Field(default_factory=dict)
+    limit: int
+    offset: int
+    total_count: int
+    summary: list[DevelopmentZoningSummaryRow] = Field(default_factory=list)
+
+
+class DevelopmentActivitySummaryBucket(BaseModel):
+    value: str
+    permit_count: int
+    active_parcel_count: int
+    total_permit_amount: float | None = None
+
+
+class DevelopmentActivitySummaryYearBucket(BaseModel):
+    year: int
+    permit_count: int
+    active_parcel_count: int
+    total_permit_amount: float | None = None
+
+
+class DevelopmentActivitySummaryMonthBucket(BaseModel):
+    year: int
+    month: int
+    permit_count: int
+    active_parcel_count: int
+    total_permit_amount: float | None = None
+
+
+class DevelopmentActivitySummaryDateRange(BaseModel):
+    activity_date_min: date | None = None
+    activity_date_max: date | None = None
+
+
+class DevelopmentActivityRecentSummary(BaseModel):
+    recent_1yr_parcels: int
+    recent_3yr_parcels: int
+
+
+class DevelopmentActivitySummaryResponse(BaseModel):
+    filters_applied: dict[str, int | str] = Field(default_factory=dict)
+    total_permits: int
+    active_parcel_count: int
+    total_permit_amount: float | None = None
+    avg_permit_amount: float | None = None
+    date_range: DevelopmentActivitySummaryDateRange
+    by_permit_type: list[DevelopmentActivitySummaryBucket] = Field(
+        default_factory=list,
+    )
+    by_work_type: list[DevelopmentActivitySummaryBucket] = Field(default_factory=list)
+    by_status: list[DevelopmentActivitySummaryBucket] = Field(default_factory=list)
+    by_activity_class: list[DevelopmentActivitySummaryBucket] = Field(
+        default_factory=list,
+    )
+    by_year: list[DevelopmentActivitySummaryYearBucket] = Field(default_factory=list)
+    by_month: list[DevelopmentActivitySummaryMonthBucket] = Field(default_factory=list)
+    by_zoning_jurisdiction: list[DevelopmentActivitySummaryBucket] = Field(
+        default_factory=list,
+    )
+    by_zoning_category: list[DevelopmentActivitySummaryBucket] = Field(
+        default_factory=list,
+    )
+    recent_activity: DevelopmentActivityRecentSummary
+
+
+class DevelopmentTemporalQueryResult(BaseModel):
+    permit_id: str | None = None
+    permit_number: str | None = None
+    official_parcel_id: str | None = None
+    pin14: str | None = None
+    activity_date: date | None = None
+    activity_year: int | None = None
+    activity_month: int | None = None
+    permit_type: str | None = None
+    work_type: str | None = None
+    permit_status: str | None = None
+    permit_amount: float | None = None
+    zoning_jurisdiction_name: str | None = None
+    dominant_zoning_code_raw: str | None = None
+    dominant_zoning_general_normalized: str | None = None
+    development_activity_class: str | None = None
+    relationship_confidence: str | None = None
+
+
+class DevelopmentTemporalContext(BaseModel):
+    mode: str
+    year: int | None = None
+    month: int | None = None
+    date_start: date | None = None
+    date_end: date | None = None
+    rolling_window: int | None = None
+    defaulted_to_recent_window: bool = False
+
+
+class DevelopmentTemporalQuerySummary(BaseModel):
+    total_permits: int
+    active_parcel_count: int
+    date_start: date | None = None
+    date_end: date | None = None
+    permit_type_breakdown: list[DevelopmentActivitySummaryBucket] = Field(
+        default_factory=list,
+    )
+    work_type_breakdown: list[DevelopmentActivitySummaryBucket] = Field(
+        default_factory=list,
+    )
+    zoning_jurisdiction_breakdown: list[DevelopmentActivitySummaryBucket] = Field(
+        default_factory=list,
+    )
+
+
+class DevelopmentTemporalBBoxSupport(BaseModel):
+    requested: bool
+    active: bool
+    note: str
+
+
+class DevelopmentTemporalQueryResponse(BaseModel):
+    filters_applied: dict[str, int | str | bool] = Field(default_factory=dict)
+    temporal_context: DevelopmentTemporalContext
+    limit: int
+    offset: int
+    total_count: int
+    summary: DevelopmentTemporalQuerySummary
+    results: list[DevelopmentTemporalQueryResult] = Field(default_factory=list)
+    bbox_support: DevelopmentTemporalBBoxSupport
+
+
+class DevelopmentLookupItem(BaseModel):
+    value: str
+    label: str
+    count: int
+
+
+class DevelopmentLookupResponse(BaseModel):
+    lookup_type: str
+    total_options: int
+    options: list[DevelopmentLookupItem] = Field(default_factory=list)

@@ -1,0 +1,80 @@
+2026-05-31 01:49:26,568 INFO Starting Real Property Permit-to-Parcel relationship build.
+2026-05-31 01:49:26,776 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-31 01:49:26,916 INFO Executing Real Property Permit relationship SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_real_property_permit_parcel_relationship.sql
+2026-05-31 01:53:59,924 ERROR Exception during reset or similar
+Traceback (most recent call last):
+  File "C:\CabarrusFutureScape\cfs-data-pipelines\enrich\create_real_property_permit_parcel_relationship.py", line 135, in execute_relationship_sql
+    cursor.execute(SQL_FILE.read_text(encoding="utf-8"))
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.AdminShutdown: terminating connection due to administrator command
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\CabarrusFutureScape\cfs-data-pipelines\enrich\create_real_property_permit_parcel_relationship.py", line 138, in execute_relationship_sql
+    raw_connection.rollback()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\psycopg\connection.py", line 310, in rollback
+    self.wait(self._rollback_gen())
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\psycopg\connection.py", line 484, in wait
+    return waiting.wait(gen, self.pgconn.socket, interval=interval)
+                             ^^^^^^^^^^^^^^^^^^
+  File "psycopg_binary/pq/pgconn.pyx", line 255, in psycopg_binary.pq.PGconn.socket.__get__
+psycopg.OperationalError: the connection is lost
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\sqlalchemy\pool\base.py", line 986, in _finalize_fairy
+    fairy._reset(
+    ~~~~~~~~~~~~^
+        pool,
+        ^^^^^
+    ...<2 lines>...
+        asyncio_safe=can_manipulate_connection,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\sqlalchemy\pool\base.py", line 1441, in _reset
+    pool._dialect.do_rollback(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\sqlalchemy\engine\default.py", line 712, in do_rollback
+    dbapi_connection.rollback()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\psycopg\connection.py", line 310, in rollback
+    self.wait(self._rollback_gen())
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\psycopg\connection.py", line 484, in wait
+    return waiting.wait(gen, self.pgconn.socket, interval=interval)
+                             ^^^^^^^^^^^^^^^^^^
+  File "psycopg_binary/pq/pgconn.pyx", line 255, in psycopg_binary.pq.PGconn.socket.__get__
+psycopg.OperationalError: the connection is lost
+2026-05-31 01:53:59,966 ERROR Real Property Permit-to-Parcel relationship build failed.
+Traceback (most recent call last):
+  File "C:\CabarrusFutureScape\cfs-data-pipelines\enrich\create_real_property_permit_parcel_relationship.py", line 135, in execute_relationship_sql
+    cursor.execute(SQL_FILE.read_text(encoding="utf-8"))
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.AdminShutdown: terminating connection due to administrator command
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\CabarrusFutureScape\cfs-data-pipelines\enrich\create_real_property_permit_parcel_relationship.py", line 635, in main
+    execute_relationship_sql(engine)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\CabarrusFutureScape\cfs-data-pipelines\enrich\create_real_property_permit_parcel_relationship.py", line 138, in execute_relationship_sql
+    raw_connection.rollback()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\psycopg\connection.py", line 310, in rollback
+    self.wait(self._rollback_gen())
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\psycopg\connection.py", line 484, in wait
+    return waiting.wait(gen, self.pgconn.socket, interval=interval)
+                             ^^^^^^^^^^^^^^^^^^
+  File "psycopg_binary/pq/pgconn.pyx", line 255, in psycopg_binary.pq.PGconn.socket.__get__
+psycopg.OperationalError: the connection is lost

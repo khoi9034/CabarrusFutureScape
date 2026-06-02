@@ -1,0 +1,14 @@
+2026-05-28 11:12:03,211 INFO Starting CFS parcels_clean transform.
+2026-05-28 11:12:03,211 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\create_parcels_clean_20260528_111203.log
+2026-05-28 11:12:03,489 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-28 11:12:03,993 INFO Executing transform SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_parcels_clean.sql
+2026-05-28 11:12:17,604 INFO Raw row count: 110017
+2026-05-28 11:12:17,605 INFO Clean row count: 110017
+2026-05-28 11:12:17,605 INFO Geometry types: [{'geometry_type': 'ST_MultiPolygon', 'feature_count': 110017}]
+2026-05-28 11:12:17,605 INFO SRID distribution: [{'srid': 4326, 'feature_count': 110017}]
+2026-05-28 11:12:17,606 INFO Invalid geometry count after cleaning: 0
+2026-05-28 11:12:17,606 INFO PIN14 duplicates: values=2930 excess_rows=3447 nulls=10
+2026-05-28 11:12:17,606 INFO Wrote validation JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcels_clean_validation.json
+2026-05-28 11:12:17,606 INFO Wrote subdivision summary CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcels_subdivision_summary.csv
+2026-05-28 11:12:17,606 INFO Wrote neighborhood summary CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcels_neighborhood_summary.csv
+2026-05-28 11:12:17,606 INFO Transform duration: 12.63 seconds

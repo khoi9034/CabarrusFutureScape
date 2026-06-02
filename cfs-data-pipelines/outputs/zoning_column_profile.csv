@@ -1,0 +1,7 @@
+ordinal_position,column_name,data_type,udt_name,is_nullable,null_count,non_null_count,null_percentage,role_tags
+1,geometry,USER-DEFINED,geometry,YES,0,295,0.0,geometry
+2,objectid,bigint,int8,YES,0,295,0.0,likely_identifier
+3,zoningcode,text,text,YES,0,295,0.0,likely_zoning_field
+4,zoning_gen,text,text,YES,3,292,1.0169,likely_zoning_field
+5,shape_starea,double precision,float8,YES,0,295,0.0,source_shape_measure
+6,shape_stlength,double precision,float8,YES,0,295,0.0,source_shape_measure

@@ -1,0 +1,272 @@
+zoning_jurisdiction_name,dominant_zoning_general_normalized,dominant_zoning_code_raw,zoning_assignment_confidence,permit_count,parcel_count,ambiguous_permit_count,total_permit_amount
+Cabarrus County / Unincorporated,agricultural,AO,high,4253,2786,140,372859838.18
+Concord,unknown,RC,high,3399,2549,117,177566604.24
+Cabarrus County / Unincorporated,residential,CR,high,3332,2246,87,264366277.88
+Concord,residential,RM-2,high,3285,2507,80,157982021.31
+Concord,residential,RV,high,3219,2320,109,102193254.8
+Kannapolis,residential,R4,high,3202,2548,80,143741855.06
+Concord,unknown,C-2,high,3074,908,338,611398271.57
+Concord,unknown,PUD,high,3053,2288,49,412452323.0
+Cabarrus County / Unincorporated,residential,LDR,high,3032,2118,49,113474963.31
+Kannapolis,residential,R8,high,2698,2101,80,166309661.59
+Concord,residential,RM-1,high,2523,1734,83,127336852.54
+Harrisburg,residential,RM,high,2108,1571,66,93014965.3
+Concord,residential,R-CO,high,1603,1317,33,35435690.68
+Harrisburg,residential,CZ-RH,high,1517,1256,9,172356987.12
+Concord,residential,RV-CD,high,1502,1359,34,240956906.05
+Midland,unknown,SFR,high,1149,916,34,93003756.82
+Concord,residential,RM-2-CU,high,1115,923,15,11033992.91
+Concord,residential,RL,high,1010,655,27,33158117.84
+Harrisburg,residential,RL,high,939,658,30,21839530.94
+Concord,unknown,RC-CD,high,843,751,4,177534044.2
+Harrisburg,residential,CZ-RL,high,801,562,5,118867968.79
+Concord,unknown,PRD,high,771,542,5,129638804.73
+Kannapolis,commercial,GC,high,771,393,45,77535782.92
+Kannapolis,unknown,PD-TND,high,648,568,7,74011685.0
+Concord,unknown,I-1,high,647,184,55,282449619.44
+Kannapolis,residential,R18,high,598,416,3,46731622.14
+Concord,unknown,RC-CU,high,520,413,11,24330476.29
+Kannapolis,residential,R1,high,461,284,10,36168704.29
+Kannapolis,unknown,PD,high,460,464,67,81228281.49
+Harrisburg,unknown,PUD,high,448,368,52,114140409.1
+Kannapolis,commercial,CC,high,445,222,17,345714766.48
+Concord,unknown,O-I,high,436,176,26,136039302.85
+Concord,unknown,I-2,high,407,121,40,263024750.21
+Concord,commercial,CC,high,401,114,24,1478787796.07
+Concord,unknown,TND,high,399,316,13,21662801.44
+Cabarrus County / Unincorporated,residential,MDR,high,353,157,64,7359110.0
+Harrisburg,mixed_use,PUD,high,351,257,24,22189291.05
+Concord,residential,RM-2-CD,high,328,229,1,53380313.0
+Harrisburg,residential,CZ-RM,high,327,266,5,59355331.7
+Concord,unknown,PID,high,286,17,51,203033508.69
+Harrisburg,residential,RH,high,279,227,7,5003225.12
+Mt. Pleasant,residential,RL,high,249,170,27,11227645.7
+Locust,unknown,OPS,high,241,210,5,20806368.04
+Kannapolis,residential,R4-CZ,high,225,202,2,56093961.8
+Kannapolis,unknown,CD,high,214,37,11,130715110.56
+Harrisburg,commercial,GC,high,196,57,26,28272996.47
+(unmatched parcel),(unknown),(unknown),,195,0,0,55718833.77
+Concord,mixed_use,MX-CC2,high,184,23,3,42454810.16
+Kannapolis,residential,R18-CZ,high,173,78,0,76868700.1
+Midland,unknown,R/OMT,high,171,237,77,19326216.0
+Concord,unknown,C-1,high,168,78,13,11953772.5
+Mt. Pleasant,residential,RM,high,161,118,2,11399443.86
+Kannapolis,office,O-I,high,156,115,4,7502611.09
+Kannapolis,residential,R4,medium,153,119,3,7204869.5
+Concord,unknown,O-I-CD,high,151,9,2,46329184.0
+Kannapolis,commercial,GC,medium,150,31,13,53452570.53
+Kannapolis,residential,R8-CZ,high,147,134,0,23286209.0
+Kannapolis,agricultural,AG,high,140,75,8,12649929.99
+Concord,residential,RV-CU,high,130,102,0,14121795.0
+Harrisburg,industrial,EC,high,118,56,6,37168739.91
+Harrisburg,commercial,CZ-GC,high,114,15,19,39648647.81
+Concord,unknown,I-2-CD,high,112,12,0,80065963.21
+Locust,unknown,OPS-C,high,106,102,0,15961315.0
+Harrisburg,office,OI,high,105,23,17,60170079.98
+Kannapolis,residential,R8,medium,102,89,4,5320717.49
+Concord,unknown,I-2,medium,101,4,0,803193023.0
+Concord,unknown,C-2,medium,92,11,2,10761748.0
+Kannapolis,industrial,LI,high,92,37,11,5779458.61
+Midland,unknown,C24/27,high,90,30,11,12193714.0
+Midland,unknown,TNDO-CZ,high,89,84,0,12558534.0
+Cabarrus County / Unincorporated,office,OI,high,88,29,3,43902042.0
+Cabarrus County / Unincorporated,industrial,GI,high,87,12,0,37616265.77
+Kannapolis,commercial,GC-CZ,high,81,14,8,24036281.0
+Concord,unknown,C-2-CU,high,78,13,0,7545987.0
+Harrisburg,residential,RM,medium,78,57,9,7659766.0
+Concord,unknown,C-2,low,67,11,0,6766872.66
+Concord,unknown,C-2-CD,high,67,16,22,34574758.5
+Cabarrus County / Unincorporated,commercial,GC,high,65,10,31,1588272.0
+Harrisburg,residential,RE,high,63,36,5,4717381.0
+Cabarrus County / Unincorporated,residential,LDR,medium,61,33,1,1683382.0
+Midland,unknown,SFR,medium,61,40,0,4983720.6
+Mt. Pleasant,residential,RH,high,59,49,3,3682274.5
+Concord,unknown,I-1-CD,high,56,7,4,80477157.0
+Cabarrus County / Unincorporated,residential,HDR-SU,high,51,39,1,451296.0
+Kannapolis,mixed_use,MU-N,high,49,34,5,2728600.0
+Midland,agricultural,AG,high,49,39,6,4199241.0
+Concord,unknown,I-2-CU,high,45,8,0,23544952.0
+Mt. Pleasant,unknown,CZ-R-M,high,43,43,1,5715183.0
+Concord,unknown,C-1,low,42,1,0,24143540.0
+Kannapolis,unknown,CD-R-CZ,high,42,4,0,13574065.0
+Mt. Pleasant,commercial,CC,high,41,14,2,2646395.09
+Mt. Pleasant,office,OI,high,39,11,5,67598560.86
+Cabarrus County / Unincorporated,residential,CR,medium,38,26,1,9711974.0
+Concord,unknown,O-I,low,38,4,0,8300526.0
+Concord,unknown,PUD,medium,38,4,0,3627585.01
+Harrisburg,unknown,CZ-RM,high,34,27,0,7470408.48
+Midland,industrial,IND,high,34,16,1,15590956.0
+Cabarrus County / Unincorporated,commercial,LC,high,33,18,1,741017.0
+Concord,unknown,B-1,high,33,14,0,1686417.0
+Concord,mixed_use,MX-IB,high,33,4,0,24705416.0
+Kannapolis,unknown,CD-CZ,high,32,4,1,97498755.0
+Cabarrus County / Unincorporated,industrial,LI,high,31,14,4,1923383.4
+Kannapolis,office,O-I,medium,31,19,1,3883207.0
+Kannapolis,residential,R1,medium,30,20,2,2366490.0
+Concord,unknown,I-1,low,29,4,0,2224808.0
+Kannapolis,agricultural,R18,high,28,4,0,12312620.0
+Midland,agricultural,AG,medium,27,16,3,867066.0
+Harrisburg,residential,CZ-RH,medium,25,20,0,3255174.63
+Kannapolis,unknown,CD,medium,25,5,0,22515770.0
+Mt. Pleasant,agricultural,AG,high,25,14,0,1471001.0
+Mt. Pleasant,unknown,I-1,high,25,11,1,3116092.0
+Cabarrus County / Unincorporated,agricultural,AO,medium,24,17,0,1385788.0
+Kannapolis,unknown,CD-R,high,24,1,0,9960337.0
+Kannapolis,unknown,PD-TND,medium,24,18,3,8057750.0
+Kannapolis,commercial,CC,medium,23,17,0,1587442.0
+Kannapolis,residential,R2,high,23,11,0,3058225.0
+Cabarrus County / Unincorporated,residential,LDR,low,22,15,4,342700.0
+Locust,commercial,HC,high,22,3,0,224716.0
+Midland,unknown,C601,high,22,18,1,156029.55
+Concord,residential,RM-1,medium,21,11,0,460573.0
+Mt. Pleasant,unknown,C-1,high,21,11,3,645567.25
+Concord,unknown,I-1-CU,high,20,12,0,696910.0
+Concord,residential,RM-2-CU,low,20,10,0,687948.0
+Kannapolis,unknown,C-1,high,20,5,0,6386615.0
+Concord,unknown,C-1-CD,high,19,8,0,1119820.0
+Concord,unknown,I-1,medium,19,8,3,18421051.1
+Mt. Pleasant,unknown,CZ-RH,high,19,7,0,4153215.0
+Concord,residential,RM-2,low,18,11,0,1131230.0
+Cabarrus County / Unincorporated,agricultural,AO,low,17,12,1,1374293.0
+Cabarrus County / Unincorporated,residential,CR,low,17,11,0,2396430.0
+Mt. Pleasant,unknown,C-2,high,17,4,4,4291198.0
+Cabarrus County / Unincorporated,office,OI,low,16,3,0,1561262.0
+Concord,unknown,O-I,medium,16,4,7,40000.0
+Concord,residential,RM-2-CD,low,16,11,0,1572107.0
+Harrisburg,office,CZ-OI,medium,16,1,0,3041900.0
+Harrisburg,commercial,GC,medium,16,5,3,3457641.0
+Harrisburg,commercial,NC,high,16,10,2,2129106.0
+Kannapolis,residential,R18,medium,16,6,1,8506814.0
+Concord,residential,RM-1,low,15,10,2,644973.0
+Kannapolis,commercial,GC,low,15,10,4,272000.0
+Kannapolis,mixed_use,MU-N,medium,15,11,0,893230.0
+Cabarrus County / Unincorporated,commercial,LC-SU,high,14,2,0,82000.0
+Midland,unknown,SFR-CZ,high,14,11,0,4122200.0
+Mt. Pleasant,residential,RL,medium,14,5,4,3684198.0
+Concord,residential,RM-2,medium,13,10,1,763480.0
+Kannapolis,industrial,LI,medium,13,4,0,1243452.5
+Kannapolis,residential,R8,low,13,10,0,930655.0
+Midland,unknown,OM,high,13,9,0,397160.0
+Cabarrus County / Unincorporated,residential,LDR-SU,high,12,1,0,210956.0
+Concord,unknown,RC,medium,12,8,0,530555.0
+Concord,residential,RV,medium,12,8,0,192600.0
+Kannapolis,office,O-I,low,12,7,1,101000.0
+Harrisburg,mixed_use,PUD,medium,11,5,4,1769357.4
+Harrisburg,residential,RE,medium,11,8,1,525000.0
+Kannapolis,industrial,LI,low,11,4,10,14420550.0
+Midland,unknown,CIV,medium,11,1,0,284529.73
+Concord,unknown,C-1,medium,10,2,0,1928800.0
+Concord,unknown,I-1-CD,medium,10,1,0,5432000.0
+Harrisburg,unknown,PUD,medium,10,1,0,413700.0
+Kannapolis,unknown,PD-TND,low,10,6,3,7068490.0
+Midland,unknown,CIV,high,10,4,0,1030161.0
+Concord,residential,R-CO,low,9,8,0,
+Kannapolis,industrial,LI-CZ,high,9,3,0,44722700.0
+Kannapolis,residential,R4,low,9,7,0,316650.0
+Midland,agricultural,AG,low,9,4,0,161489.89
+Mt. Pleasant,unknown,C-2,low,9,3,9,3035892.0
+Concord,unknown,CD,high,8,1,0,14203630.0
+Concord,unknown,RC-CD,low,8,1,0,8387500.0
+Concord,residential,RM-2-CD,medium,8,7,0,781501.0
+Harrisburg,residential,RL,medium,8,5,0,170000.0
+Kannapolis,commercial,CC,low,8,6,3,539792.0
+Cabarrus County / Unincorporated,office,LI,high,7,1,0,80000.0
+Cabarrus County / Unincorporated,residential,MDR-SU,high,7,3,0,196250.0
+Concord,agricultural,AG,high,7,6,0,832992.0
+Concord,unknown,C-1-CU,high,7,2,0,388800.0
+Concord,residential,R-CO,medium,7,6,0,42000.0
+Concord,residential,RV-CD,medium,7,4,0,974978.0
+Harrisburg,residential,CZ-RE,high,7,7,1,370000.0
+Harrisburg,residential,CZ-RH,low,7,7,0,1907846.0
+Harrisburg,commercial,NC,medium,7,3,0,12000.0
+Harrisburg,residential,RE,low,7,5,0,118063.0
+Kannapolis,commercial,CC-CZ,high,7,7,0,1335113.0
+Kannapolis,office,GC-CZ,high,7,2,0,481850.0
+Kannapolis,residential,R2,medium,7,4,0,948750.0
+Midland,unknown,SFR,low,7,3,0,405542.0
+Mt. Pleasant,residential,RM,medium,7,4,0,294600.0
+Cabarrus County / Unincorporated,agricultural,AO-CU,high,6,3,0,206000.0
+Cabarrus County / Unincorporated,commercial,LC,low,6,3,0,715000.0
+Concord,unknown,B-1,medium,6,1,0,21000.0
+Concord,commercial,CC,medium,6,2,0,341610.0
+Concord,residential,RM-2-CU,medium,6,6,0,157516.0
+Concord,unknown,TND,low,6,1,0,245266.0
+Harrisburg,mixed_use,CZ-CC,high,6,1,0,1665829.26
+Harrisburg,residential,CZ-RL,medium,6,5,0,1224974.0
+Harrisburg,industrial,EC,medium,6,3,0,785691.0
+Harrisburg,office,OI,medium,6,3,4,81500.0
+Kannapolis,agricultural,AG,medium,6,3,0,31000.0
+Kannapolis,unknown,O-I,high,6,1,0,29000.0
+Cabarrus County / Unincorporated,industrial,LI,medium,5,3,0,
+Concord,unknown,I-2,low,5,1,0,
+Concord,mixed_use,MX-NC,high,5,2,0,461500.0
+Kannapolis,agricultural,R2,high,5,1,0,195500.0
+Mt. Pleasant,unknown,CZ-C-2,high,5,2,0,294254.0
+Mt. Pleasant,residential,RL,low,5,3,0,773570.0
+Cabarrus County / Unincorporated,industrial,GI,medium,4,3,0,1278503.0
+Cabarrus County / Unincorporated,industrial,LI-SU,high,4,4,0,30500.0
+Cabarrus County / Unincorporated,residential,MDR,medium,4,2,0,66000.0
+Concord,unknown,PUD,low,4,4,0,12000.0
+Concord,unknown,RC,low,4,3,0,139093.0
+Harrisburg,residential,CZ-RM,low,4,4,0,1133309.0
+Harrisburg,residential,RL,low,4,2,0,159350.0
+Midland,unknown,C 601-CZ,high,4,1,0,1473000.0
+Midland,unknown,R/OMT,medium,4,1,0,94311.0
+Mt. Pleasant,unknown,CZ-O-I,high,4,2,0,27000.0
+Cabarrus County / Unincorporated,industrial,LI-SU,medium,3,1,0,400000.0
+Cabarrus County / Unincorporated,office,OI,medium,3,2,0,1046975.0
+Cabarrus County / Unincorporated,office,OI-SU,high,3,1,0,90000.0
+Concord,unknown,C-2-CD,low,3,1,0,869438.0
+Concord,unknown,O-I-CU,high,3,1,0,175000.0
+Concord,residential,RE,medium,3,1,0,507273.0
+Concord,residential,RE,high,3,2,0,119000.0
+Concord,residential,RV-CD,low,3,2,1,204801.0
+Harrisburg,residential,CZ-RM,medium,3,3,0,931023.0
+Harrisburg,industrial,EC,low,3,2,1,
+Harrisburg,unknown,NC,medium,3,1,0,2878376.14
+Harrisburg,residential,RM,low,3,3,0,265568.0
+Kannapolis,office,R18,high,3,3,0,300000.0
+Kannapolis,agricultural,R2,medium,3,1,0,168000.0
+Kannapolis,office,R8,high,3,2,0,140242.0
+Locust,unknown,CBI,high,3,1,0,180000.0
+(unmatched parcel),(unknown),(unknown),no_match,2,1,0,12500.0
+Cabarrus County / Unincorporated,commercial,GC,low,2,1,0,16393.0
+Cabarrus County / Unincorporated,residential,HDR,high,2,1,0,138000.0
+Cabarrus County / Unincorporated,residential,MDR-SU,medium,2,1,0,
+Concord,residential,RL,medium,2,2,0,365000.0
+Concord,residential,RV,low,2,2,0,
+Harrisburg,unknown,CZ-GC,high,2,1,0,1557828.24
+Harrisburg,residential,CZ-RE,low,2,1,0,150000.0
+Harrisburg,unknown,CZ-RL,high,2,2,0,450000.0
+Kannapolis,unknown,C-1,medium,2,2,0,0.0
+Kannapolis,mixed_use,MU-N,low,2,2,0,102500.0
+Kannapolis,agricultural,R18-CZ,medium,2,1,0,328000.0
+Kannapolis,residential,R8-CZ,low,2,2,0,10001.0
+Kannapolis,office,R8-CZ,high,2,2,0,15600.0
+Midland,unknown,MSP,high,2,1,0,718000.0
+Mt. Pleasant,unknown,C-2,medium,2,1,0,2100.0
+Mt. Pleasant,commercial,CC,medium,2,1,0,58000.0
+Mt. Pleasant,office,OI,medium,2,1,0,9890.0
+Mt. Pleasant,residential,RH,medium,2,2,0,25000.0
+Mt. Pleasant,residential,RH,low,2,1,0,1570000.0
+Cabarrus County / Unincorporated,industrial,GI-SU,high,1,1,0,250000.0
+Concord,residential,RL,low,1,1,0,120000.0
+Harrisburg,mixed_use,CZ-CC,low,1,1,0,68512.0
+Harrisburg,office,OI,low,1,1,0,725000.0
+Harrisburg,mixed_use,PUD,low,1,1,0,20000.0
+Harrisburg,residential,RH,medium,1,1,0,
+Kannapolis,commercial,GC-CZ,medium,1,1,0,
+Kannapolis,unknown,HI,high,1,2,1,
+Kannapolis,unknown,HI,medium,1,2,1,
+Kannapolis,residential,R1,low,1,1,0,800000.0
+Kannapolis,residential,R18,low,1,1,0,705612.0
+Kannapolis,residential,R18-CZ,medium,1,1,0,0.0
+Kannapolis,office,R4,high,1,1,0,160000.0
+Kannapolis,office,R8,low,1,1,0,70000.0
+Midland,unknown,C24/27,medium,1,1,0,
+Midland,industrial,IND,low,1,1,0,
+Midland,unknown,R/MST,high,1,1,0,
+Midland,unknown,R/OMT,low,1,1,0,275000.0
+Mt. Pleasant,agricultural,AG,medium,1,1,0,0.0
+Mt. Pleasant,unknown,C-1,medium,1,1,0,2500.0
+Mt. Pleasant,unknown,I-1,medium,1,1,0,

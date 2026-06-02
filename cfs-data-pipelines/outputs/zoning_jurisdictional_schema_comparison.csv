@@ -1,0 +1,12 @@
+column_name,county,concord,harrisburg,kannapolis,locust,midland,mount_pleasant
+base_distr,,,,text,,,
+conditiona,,,,text,,,
+geometry,USER-DEFINED,USER-DEFINED,USER-DEFINED,USER-DEFINED,USER-DEFINED,USER-DEFINED,USER-DEFINED
+objectid,bigint,bigint,bigint,bigint,double precision,bigint,bigint
+objectid_1,,,,,bigint,,
+shape_starea,double precision,double precision,double precision,double precision,double precision,double precision,double precision
+shape_stlength,double precision,double precision,double precision,double precision,double precision,double precision,double precision
+zoning,,,,,text,,
+zoning_gen,text,,text,,,,
+zoning_typ,,,,,,text,
+zoningcode,text,text,text,text,text,text,text

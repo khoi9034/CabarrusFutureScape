@@ -1,0 +1,102 @@
+{
+  "endpoint_implemented": "GET /development/activity-summary",
+  "status": "implemented_and_verified",
+  "source_tables_available": [
+    "public.real_property_permit_clean",
+    "public.real_property_permit_parcel_relationship",
+    "public.development_activity_parcel_summary",
+    "public.development_activity_time_summary",
+    "public.development_activity_zoning_summary"
+  ],
+  "source_tables_queried": [
+    "public.real_property_permit_parcel_relationship",
+    "public.development_activity_parcel_summary"
+  ],
+  "summary_fields_returned": [
+    "filters_applied",
+    "total_permits",
+    "active_parcel_count",
+    "total_permit_amount",
+    "avg_permit_amount",
+    "date_range",
+    "by_permit_type",
+    "by_work_type",
+    "by_status",
+    "by_activity_class",
+    "by_year",
+    "by_month",
+    "by_zoning_jurisdiction",
+    "by_zoning_category",
+    "recent_activity"
+  ],
+  "bucket_fields_returned": [
+    "value",
+    "permit_count",
+    "active_parcel_count",
+    "total_permit_amount"
+  ],
+  "filters_supported": [
+    "year",
+    "month",
+    "date_start",
+    "date_end",
+    "permit_type",
+    "work_type",
+    "permit_status",
+    "zoning_jurisdiction",
+    "zoning_category",
+    "activity_class"
+  ],
+  "empty_result_behavior": "Filtered activity summary requests with no matches return HTTP 200 with zero counts, null date bounds, and empty breakdown arrays.",
+  "invalid_date_range_behavior": "Requests where date_start is after date_end return HTTP 422.",
+  "example_response": {
+    "request": "/development/activity-summary",
+    "total_permits": 64426,
+    "active_parcel_count": 43474,
+    "total_permit_amount": 9691120157.78,
+    "avg_permit_amount": 219907.87532687376,
+    "date_range": {
+      "activity_date_min": "1986-12-01",
+      "activity_date_max": "2025-12-31"
+    },
+    "top_permit_type": {
+      "value": "NEW CONSTRUCTION",
+      "permit_count": 28278,
+      "active_parcel_count": 27708,
+      "total_permit_amount": 3168429134.03
+    },
+    "top_zoning_jurisdiction": {
+      "value": "Concord",
+      "permit_count": 30620,
+      "active_parcel_count": 19929,
+      "total_permit_amount": 5968845712.0
+    },
+    "latest_year": {
+      "year": 2025,
+      "permit_count": 3642,
+      "active_parcel_count": 3074,
+      "total_permit_amount": 736178590.75
+    },
+    "recent_activity": {
+      "recent_1yr_parcels": 3091,
+      "recent_3yr_parcels": 9388
+    }
+  },
+  "verification": {
+    "compile": "python -m compileall app passed",
+    "tests": "python -m pytest passed: 85 passed, 1 warning",
+    "live_health_database": "GET /health/database returned connected",
+    "live_global_activity_summary_check": "GET /development/activity-summary returned HTTP 200 with 64426 permits",
+    "live_year_filter_check": "GET /development/activity-summary?year=2025 returned 3642 permits",
+    "live_date_range_check": "GET /development/activity-summary?date_start=2025-01-01&date_end=2025-12-31 returned 3642 permits",
+    "live_permit_type_filter_check": "GET /development/activity-summary?permit_type=NEW%20CONSTRUCTION returned 28278 permits",
+    "live_zoning_jurisdiction_filter_check": "GET /development/activity-summary?zoning_jurisdiction=Concord returned 30620 permits",
+    "live_empty_result_check": "GET /development/activity-summary?permit_type=NO-SUCH-PERMIT returned HTTP 200 with zero counts",
+    "live_validation_check": "Invalid date range returned HTTP 422",
+    "openapi_check": "OpenAPI includes /development/activity-summary"
+  },
+  "readiness_for_next_endpoint": {
+    "next_endpoint": "GET /development/temporal-query",
+    "assessment": "Ready. The backend now exposes a broad development activity rollup with permit, work, status, year/month, zoning, activity class, date range, and recent activity summaries from real PostGIS data."
+  }
+}

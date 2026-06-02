@@ -1,0 +1,12 @@
+outlier_flag,parcel_count,parcel_percentage,max_area_acres,max_value_per_acre
+missing_subdivision,33459,30.4126,839.5555,12089964706177.0
+missing_value_fields,6975,6.3399,670.2715,
+suspicious_subdivision,6817,6.1963,420.8963,109847469715.86
+null_heavy_record,6390,5.8082,300.0706,
+duplicate_pin14,6377,5.7964,839.5555,66734722198509.1
+extreme_value_per_acre,734,0.6672,1.7684,66734722198509.1
+tiny_area_outlier,370,0.3363,0.01,66734722198509.1
+missing_neighborhood,17,0.0155,1.4941,268720.92
+huge_area_outlier,10,0.0091,1862.8738,109460.17
+missing_pin14,10,0.0091,0.5135,
+source_geometry_repaired,6,0.0055,45.333,482095.97

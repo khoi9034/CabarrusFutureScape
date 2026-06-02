@@ -1,0 +1,8 @@
+2026-05-31 01:36:36,365 INFO Starting primary Real Property Permit ingestion.
+2026-05-31 01:36:36,366 INFO Downloading Real Property Permit source: https://cabarruscountync.sharepoint.com/:x:/g/CabarrusCounty/ERNqFGtfcaxKrHNrgdKaTaoBBgVAADJsQVXPezRfkYQ6Xw?e=HJ0xjl&download=1
+2026-05-31 01:36:38,641 INFO Downloaded 9721612 bytes from https://cabarruscountync.sharepoint.com/CabarrusCounty/TaxData/vdx_RP_Permit.csv?ga=1 as vdx_RP_Permit.csv
+2026-05-31 01:36:41,726 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-31 01:36:41,884 INFO Writing 64426 Real Property Permit rows to public.real_property_permit with if_exists=replace.
+2026-05-31 01:37:43,298 INFO Wrote Real Property Permit ingestion summary: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\real_property_permit_ingest_summary.json
+2026-05-31 01:37:43,298 INFO Real Property Permit row count: 64426
+2026-05-31 01:37:43,298 INFO Primary Real Property Permit ingestion complete.

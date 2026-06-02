@@ -1,0 +1,634 @@
+{
+  "generated_at": "2026-05-28T15:44:40",
+  "config_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\config\\zoning_sources.json",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev"
+  },
+  "source_count": 7,
+  "total_feature_count": 3440,
+  "sources": [
+    {
+      "id": "county",
+      "jurisdiction_name": "Cabarrus County / Unincorporated",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/35",
+      "raw_table": "public.zoning_county",
+      "arcgis_name": "Cabarrus County Zoning",
+      "arcgis_geometry_type": "esriGeometryPolygon",
+      "arcgis_object_id_field": "OBJECTID",
+      "arcgis_fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "length": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "length": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "length": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "length": null
+        }
+      ],
+      "expected_fields": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "feature_count": 295,
+      "geometry_types": [
+        "MultiPolygon",
+        "Polygon"
+      ],
+      "crs": "EPSG:4326",
+      "columns": [
+        "geometry",
+        "objectid",
+        "zoningcode",
+        "zoning_gen",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "sample_columns": [
+        "geometry",
+        "objectid",
+        "zoningcode",
+        "zoning_gen",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "database_written": true,
+      "indexes": [
+        {
+          "indexname": "idx_zoning_county_geometry",
+          "indexdef": "CREATE INDEX idx_zoning_county_geometry ON public.zoning_county USING gist (geometry)"
+        },
+        {
+          "indexname": "zoning_county_geometry_gix",
+          "indexdef": "CREATE INDEX zoning_county_geometry_gix ON public.zoning_county USING gist (geometry)"
+        }
+      ]
+    },
+    {
+      "id": "concord",
+      "jurisdiction_name": "Concord",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/36",
+      "raw_table": "public.zoning_concord",
+      "arcgis_name": "Concord Zoning",
+      "arcgis_geometry_type": "esriGeometryPolygon",
+      "arcgis_object_id_field": "OBJECTID",
+      "arcgis_fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "length": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "length": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "length": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "length": null
+        }
+      ],
+      "expected_fields": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "feature_count": 826,
+      "geometry_types": [
+        "MultiPolygon",
+        "Polygon"
+      ],
+      "crs": "EPSG:4326",
+      "columns": [
+        "geometry",
+        "objectid",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "sample_columns": [
+        "geometry",
+        "objectid",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "database_written": true,
+      "indexes": [
+        {
+          "indexname": "idx_zoning_concord_geometry",
+          "indexdef": "CREATE INDEX idx_zoning_concord_geometry ON public.zoning_concord USING gist (geometry)"
+        },
+        {
+          "indexname": "zoning_concord_geometry_gix",
+          "indexdef": "CREATE INDEX zoning_concord_geometry_gix ON public.zoning_concord USING gist (geometry)"
+        }
+      ]
+    },
+    {
+      "id": "harrisburg",
+      "jurisdiction_name": "Harrisburg",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/37",
+      "raw_table": "public.zoning_harrisburg",
+      "arcgis_name": "Harrisburg Zoning",
+      "arcgis_geometry_type": "esriGeometryPolygon",
+      "arcgis_object_id_field": "OBJECTID",
+      "arcgis_fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "length": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "length": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "length": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "length": null
+        }
+      ],
+      "expected_fields": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "feature_count": 188,
+      "geometry_types": [
+        "MultiPolygon",
+        "Polygon"
+      ],
+      "crs": "EPSG:4326",
+      "columns": [
+        "geometry",
+        "objectid",
+        "zoningcode",
+        "zoning_gen",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "sample_columns": [
+        "geometry",
+        "objectid",
+        "zoningcode",
+        "zoning_gen",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "database_written": true,
+      "indexes": [
+        {
+          "indexname": "idx_zoning_harrisburg_geometry",
+          "indexdef": "CREATE INDEX idx_zoning_harrisburg_geometry ON public.zoning_harrisburg USING gist (geometry)"
+        },
+        {
+          "indexname": "zoning_harrisburg_geometry_gix",
+          "indexdef": "CREATE INDEX zoning_harrisburg_geometry_gix ON public.zoning_harrisburg USING gist (geometry)"
+        }
+      ]
+    },
+    {
+      "id": "kannapolis",
+      "jurisdiction_name": "Kannapolis",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/38",
+      "raw_table": "public.zoning_kannapolis",
+      "arcgis_name": "Kannapolis Zoning",
+      "arcgis_geometry_type": "esriGeometryPolygon",
+      "arcgis_object_id_field": "OBJECTID",
+      "arcgis_fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "length": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6
+        },
+        {
+          "name": "CONDITIONA",
+          "type": "esriFieldTypeString",
+          "alias": "CONDITIONA",
+          "length": 16
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "length": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZoningCode",
+          "length": 20
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "length": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "length": null
+        }
+      ],
+      "expected_fields": [
+        "OBJECTID",
+        "BASE_DISTR",
+        "CONDITIONA",
+        "Shape",
+        "ZONINGCODE",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "feature_count": 1839,
+      "geometry_types": [
+        "MultiPolygon",
+        "Polygon"
+      ],
+      "crs": "EPSG:4326",
+      "columns": [
+        "geometry",
+        "objectid",
+        "base_distr",
+        "conditiona",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "sample_columns": [
+        "geometry",
+        "objectid",
+        "base_distr",
+        "conditiona",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "database_written": true,
+      "indexes": [
+        {
+          "indexname": "idx_zoning_kannapolis_geometry",
+          "indexdef": "CREATE INDEX idx_zoning_kannapolis_geometry ON public.zoning_kannapolis USING gist (geometry)"
+        },
+        {
+          "indexname": "zoning_kannapolis_geometry_gix",
+          "indexdef": "CREATE INDEX zoning_kannapolis_geometry_gix ON public.zoning_kannapolis USING gist (geometry)"
+        }
+      ]
+    },
+    {
+      "id": "locust",
+      "jurisdiction_name": "Locust",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/39",
+      "raw_table": "public.zoning_locust",
+      "arcgis_name": "Locust Zoning",
+      "arcgis_geometry_type": "esriGeometryPolygon",
+      "arcgis_object_id_field": "OBJECTID_1",
+      "arcgis_fields": [
+        {
+          "name": "OBJECTID_1",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID_1",
+          "length": null
+        },
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeDouble",
+          "alias": "OBJECTID",
+          "length": null
+        },
+        {
+          "name": "ZONING",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING",
+          "length": 10
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "length": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZoningCode",
+          "length": 20
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "length": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "length": null
+        }
+      ],
+      "expected_fields": [
+        "OBJECTID_1",
+        "OBJECTID",
+        "ZONING",
+        "Shape",
+        "ZONINGCODE",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "feature_count": 8,
+      "geometry_types": [
+        "MultiPolygon",
+        "Polygon"
+      ],
+      "crs": "EPSG:4326",
+      "columns": [
+        "geometry",
+        "objectid_1",
+        "objectid",
+        "zoning",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "sample_columns": [
+        "geometry",
+        "objectid_1",
+        "objectid",
+        "zoning",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "database_written": true,
+      "indexes": [
+        {
+          "indexname": "idx_zoning_locust_geometry",
+          "indexdef": "CREATE INDEX idx_zoning_locust_geometry ON public.zoning_locust USING gist (geometry)"
+        },
+        {
+          "indexname": "zoning_locust_geometry_gix",
+          "indexdef": "CREATE INDEX zoning_locust_geometry_gix ON public.zoning_locust USING gist (geometry)"
+        }
+      ]
+    },
+    {
+      "id": "midland",
+      "jurisdiction_name": "Midland",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/40",
+      "raw_table": "public.zoning_midland",
+      "arcgis_name": "Midland Zoning",
+      "arcgis_geometry_type": "esriGeometryPolygon",
+      "arcgis_object_id_field": "OBJECTID",
+      "arcgis_fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "length": null
+        },
+        {
+          "name": "Zoning_Typ",
+          "type": "esriFieldTypeString",
+          "alias": "Zoning_Typ",
+          "length": 50
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "length": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZoningCode",
+          "length": 20
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "length": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "length": null
+        }
+      ],
+      "expected_fields": [
+        "OBJECTID",
+        "Zoning_Typ",
+        "Shape",
+        "ZONINGCODE",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "feature_count": 110,
+      "geometry_types": [
+        "MultiPolygon",
+        "Polygon"
+      ],
+      "crs": "EPSG:4326",
+      "columns": [
+        "geometry",
+        "objectid",
+        "zoning_typ",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "sample_columns": [
+        "geometry",
+        "objectid",
+        "zoning_typ",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "database_written": true,
+      "indexes": [
+        {
+          "indexname": "idx_zoning_midland_geometry",
+          "indexdef": "CREATE INDEX idx_zoning_midland_geometry ON public.zoning_midland USING gist (geometry)"
+        },
+        {
+          "indexname": "zoning_midland_geometry_gix",
+          "indexdef": "CREATE INDEX zoning_midland_geometry_gix ON public.zoning_midland USING gist (geometry)"
+        }
+      ]
+    },
+    {
+      "id": "mount_pleasant",
+      "jurisdiction_name": "Mt. Pleasant",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/41",
+      "raw_table": "public.zoning_mount_pleasant",
+      "arcgis_name": "Mt Pleasant Zoning",
+      "arcgis_geometry_type": "esriGeometryPolygon",
+      "arcgis_object_id_field": "OBJECTID",
+      "arcgis_fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "length": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "length": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "length": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "length": null
+        }
+      ],
+      "expected_fields": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "feature_count": 174,
+      "geometry_types": [
+        "MultiPolygon",
+        "Polygon"
+      ],
+      "crs": "EPSG:4326",
+      "columns": [
+        "geometry",
+        "objectid",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "sample_columns": [
+        "geometry",
+        "objectid",
+        "zoningcode",
+        "shape_starea",
+        "shape_stlength"
+      ],
+      "database_written": true,
+      "indexes": [
+        {
+          "indexname": "idx_zoning_mount_pleasant_geometry",
+          "indexdef": "CREATE INDEX idx_zoning_mount_pleasant_geometry ON public.zoning_mount_pleasant USING gist (geometry)"
+        },
+        {
+          "indexname": "zoning_mount_pleasant_geometry_gix",
+          "indexdef": "CREATE INDEX zoning_mount_pleasant_geometry_gix ON public.zoning_mount_pleasant USING gist (geometry)"
+        }
+      ]
+    }
+  ],
+  "duration_seconds": 35.65,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_zoning_sources_20260528_154404.log",
+  "outputs": {
+    "summary_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\zoning_sources_ingest_summary.json"
+  }
+}

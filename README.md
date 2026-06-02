@@ -4,9 +4,9 @@ Cabarrus FutureScape (CFS) is the frontend foundation for a Cabarrus County, NC 
 
 ## Current Phase
 
-Phase 1: Next.js + TypeScript App Scaffold with hardened ArcGIS SceneView, dashboard interaction state, operational layer service readiness, map interaction event readiness, shareable dashboard URL state, command/search readiness, workspace modes, event stream readiness, frontend-only role-based dashboard readiness, mock scenario comparison / executive briefing readiness, and export/report package readiness.
+Phase 5: Frontend API integration, building on completed Parcel Intelligence and Development Activity backend endpoint suites while preserving generated static-output fallback data.
 
-This phase preserves the early futuristic dashboard shell while organizing the codebase into a scalable application foundation. The current app is frontend-only, uses mock operational data, renders a real ArcGIS `SceneView` in the central viewport, keeps interaction state modular, and prepares GIS layer, map interaction, role-aware workspace, scenario comparison, briefing, export/report, and shareable state architecture for future service-backed ArcGIS workflows.
+This phase preserves the futuristic dashboard shell, renders a real ArcGIS `SceneView` in the central viewport, and migrates dashboard surfaces to FastAPI one panel at a time behind `NEXT_PUBLIC_USE_BACKEND_API`. Static/generated artifacts remain the default and fallback mode; the frontend still does not connect directly to PostGIS.
 
 ## Tech Stack
 
@@ -38,6 +38,40 @@ npm run lint
 npm run build
 ```
 
+## FastAPI Backend Foundation
+
+CFS now includes a read-only FastAPI backend under `backend/`. It exposes health
+checks, database connectivity, parcel intelligence endpoints, development
+activity endpoints, temporal query endpoints, and lookup endpoints for the
+existing API contracts. It does not implement authentication, caching,
+materialized view refresh, frontend writes, or direct browser-to-PostGIS access.
+
+Install and run locally:
+
+```powershell
+cd C:\CabarrusFutureScape\backend
+python -m pip install -r requirements.txt
+$env:POSTGRES_HOST = "localhost"
+$env:POSTGRES_PORT = "5433"
+$env:POSTGRES_DB = "cfs_dev"
+$env:POSTGRES_USER = "postgres"
+$env:POSTGRES_PASSWORD = $env:CFS_POSTGRES_PASSWORD
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Health and docs:
+
+```text
+GET http://127.0.0.1:8000/health
+GET http://127.0.0.1:8000/health/database
+OpenAPI docs: http://127.0.0.1:8000/docs
+OpenAPI JSON: http://127.0.0.1:8000/openapi.json
+```
+
+Backend environment variables are documented in `backend/.env.example`.
+`POSTGRES_PASSWORD` is preferred for the API, while `CFS_POSTGRES_PASSWORD`
+remains supported for local development against the existing PostGIS database.
+
 ## Folder Structure
 
 ```text
@@ -52,6 +86,7 @@ src/
     layout/              App-level dashboard layout shell
     ui/                  Reusable UI primitives
   data/
+    intelligence/        Static generated parcel and development activity dashboard metrics
     mock/                Mock dashboard, layer, parcel, event, role, scenario, and report data
   hooks/
     useDashboardState.tsx Shared dashboard state provider and public hook
@@ -77,10 +112,160 @@ src/
     userRoles.ts         Frontend-only role metadata and role preset types
 ```
 
+## Phase 2 Parcel Intelligence Dashboard
+
+The dashboard now includes a Parcel Intelligence section in the right rail and replaces the bottom parcel KPI with metrics derived from generated pipeline outputs.
+
+Data source artifacts:
+
+- `cfs-data-pipelines/outputs/parcel_zoning_intelligence_qa_summary.json`
+- `cfs-data-pipelines/outputs/parcels_enriched_summary.json`
+
+The new dashboard panels surface:
+
+- Total parcels, zoned parcels, high/low confidence parcels, unmatched parcels, safe-for-dashboard parcels, review parcels, and multi-jurisdiction parcels
+- Zoning parcel distribution for Concord, Kannapolis, Cabarrus County, Harrisburg, Midland, Mt. Pleasant, and Locust
+- Governance warning counts for jurisdiction code semantics review, sliver overlap, multi-jurisdiction review, low confidence review, near tie review, and no zoning match
+- Parcel quality counts for trusted, review, and critical parcel classes
+- Executive summary statements such as zoning coverage, dashboard readiness, governance review volume, and unmatched parcel count
+
+This is not a live database integration. The frontend imports static generated artifacts from the local pipeline outputs so the dashboard can show real Phase 2 parcel intelligence results without FastAPI, direct PostGIS access, authentication, or frontend database credentials.
+
+## Phase 2 Parcel Search And Filter UX
+
+The dashboard now includes a Parcel Discovery panel for searching, filtering, and inspecting generated parcel intelligence records.
+
+Core files:
+
+- `cfs-data-pipelines/inspect/export_parcel_search_index.py` exports a geometry-free static search artifact from the existing Phase 2 parcel intelligence tables.
+- `public/intelligence/parcel-search-index.json` is the generated browser-facing parcel search index.
+- `src/data/intelligence/parcelSearchData.ts` loads and normalizes the compact static artifact without bundling it into the JavaScript build.
+- `src/components/dashboard/ParcelSearchPanel.tsx` owns the local search/filter/detail workflow.
+- `src/components/dashboard/ParcelFilterPanel.tsx` exposes structured filters.
+- `src/components/dashboard/ParcelResultList.tsx` displays parcel results.
+- `src/components/dashboard/ParcelDetailDrawer.tsx` displays selected parcel intelligence details.
+- `src/components/dashboard/ParcelSearchState.ts` defines local search state, filters, and command-palette event wiring.
+
+Supported search fields:
+
+- `official_parcel_id`
+- `pin14`
+- Owner/account names from `acctname1` and `acctname2`
+- Mailing address fields
+- Subdivision
+- Neighborhood
+- Zoning code
+- Zoning jurisdiction
+- Partial text across the indexed parcel context
+
+Supported filters:
+
+- Zoning jurisdiction
+- Zoning category
+- Parcel quality status
+- Zoning confidence
+- Governance warning category
+- Valuation band
+- Subdivision
+- Neighborhood
+
+Parcel result cards show parcel ID, PIN14, owner/account label, subdivision, neighborhood, zoning jurisdiction, zoning code, parcel quality status, zoning confidence, and warning count. Selecting a result opens the detail drawer with identity, location context, zoning, quality, valuation, and planning context.
+
+The command palette can also surface generated parcel intelligence results for typed queries and dispatches them into the Parcel Discovery panel. This keeps the generated parcel index separate from the existing mock SceneView parcel selection model until a backend/API parcel service is introduced.
+
+This remains static and frontend-only. There is no FastAPI endpoint, direct browser-to-PostGIS connection, authentication layer, permit workflow, or live database query in the dashboard.
+
+## Phase 3 Development Activity Dashboard
+
+The dashboard now includes Development Activity intelligence panels in the right rail. These panels surface generated Real Property Permit analytics without connecting the browser to PostGIS or a backend API.
+
+Core files:
+
+- `src/data/intelligence/developmentActivityMetrics.ts` normalizes generated development activity outputs for dashboard use.
+- `src/components/dashboard/DevelopmentActivityPanel.tsx` displays core permit activity metrics and activity class distribution.
+- `src/components/dashboard/DevelopmentTrendPanel.tsx` displays annual and recent monthly trend readiness.
+- `src/components/dashboard/DevelopmentHotspotsPanel.tsx` displays top active parcels from the generated activity outputs.
+- `src/components/dashboard/DevelopmentZoningPanel.tsx` displays top zoning jurisdiction, code, and type combinations by permit count.
+
+Generated source artifacts:
+
+- `cfs-data-pipelines/outputs/development_activity_parcel_summary_validation.json`
+- `cfs-data-pipelines/outputs/development_activity_top_parcels.csv`
+- `cfs-data-pipelines/outputs/development_activity_year_summary.csv`
+- `cfs-data-pipelines/outputs/development_activity_month_summary.csv`
+- `cfs-data-pipelines/outputs/development_activity_zoning_summary.csv`
+
+Core metrics surfaced:
+
+- Total permit records: `64,426`
+- Parcels with permit activity: `43,474`
+- Parcels without permit activity: `66,543`
+- Recent 1-year activity parcels: `3,091`
+- Recent 3-year activity parcels: `9,388`
+- Activity date range: `1986-12-01` to `2025-12-31`
+- Activity anchor date: `2025-12-31`
+
+Activity class distribution:
+
+- `very_high_activity`: `551`
+- `high_activity`: `2,430`
+- `moderate_activity`: `27,425`
+- `low_activity`: `13,068`
+- `no_activity`: `66,543`
+
+The data layer imports the generated validation JSON, which carries the same top parcel, annual trend, monthly trend, and zoning summary records exported to companion CSV files. The CSV artifact paths are preserved in the data source metadata for auditability and future backend migration.
+
+This remains static and generated-output based. There is no live permit API, direct PostGIS connection, temporal slider UI, hotspot map rendering, authentication layer, or real-time permit feed in the dashboard yet.
+
+## Phase 3 Temporal Analysis Framework
+
+The dashboard now includes a frontend-only temporal analysis framework for future permit maps, growth playback, and time-enabled analytics.
+
+Core files:
+
+- `src/data/intelligence/developmentTemporalIndex.ts` exposes available years, recent months, min/max dates, activity anchor date, permit totals by year/month, zoning activity summaries, permit categories, work type metadata, activity classes, and future query-preview helpers.
+- `src/hooks/useTemporalAnalysisState.ts` owns selected year, month, rolling window, date range, permit type, work type, zoning jurisdiction, zoning category, activity class, static query results, static trend summary, and reset behavior.
+- `src/hooks/useTemporalQuery.ts` owns the feature-flagged `GET /development/temporal-query` handoff and static fallback state.
+- `src/lib/adapters/temporalQueryAdapter.ts` normalizes live temporal API responses and generated static temporal artifacts into the same UI shape.
+- `src/components/dashboard/TemporalAnalysisPanel.tsx` adds the compact temporal intelligence shell.
+- `src/components/dashboard/TemporalFilterControls.tsx` provides year, month, rolling window, date range, permit type, work type, zoning jurisdiction, zoning category, and activity class controls.
+- `src/components/dashboard/TemporalTrendSummary.tsx` summarizes the selected time context and trend direction.
+- `src/components/dashboard/TemporalQueryPreview.tsx` previews the API request or static SQL shape without altering the map.
+
+Generated source artifacts:
+
+- `cfs-data-pipelines/outputs/development_activity_year_summary.csv`
+- `cfs-data-pipelines/outputs/development_activity_month_summary.csv`
+- `cfs-data-pipelines/outputs/development_activity_zoning_summary.csv`
+- `cfs-data-pipelines/outputs/development_activity_parcel_summary_validation.json`
+
+Supported temporal filters:
+
+- Year
+- Recent month
+- Rolling 12-month or 36-month window
+- Date range
+- Permit type
+- Work type
+- Zoning jurisdiction
+- Zoning category
+- Activity class
+
+With `NEXT_PUBLIC_USE_BACKEND_API=true`, the panel calls `GET /development/temporal-query` and passes year, month, `date_start`, `date_end`, `rolling_window`, permit type, work type, zoning jurisdiction, zoning category, and activity class. With the flag disabled, or if the backend fails, the panel uses static generated aggregates. The static SQL preview is intentionally display-only; it does not connect the frontend to PostGIS.
+
+Future integration path:
+
+1. Add lookup API integration for permit type, work type, jurisdiction, and activity class option lists.
+2. Add map-safe development activity geometry sources for temporal extent queries.
+3. Add SceneView layer filtering once map-safe time-enabled permit layers exist.
+4. Add animated playback only after static filtering, backend query performance, and map layer governance are stable.
+
+The SceneView remains unchanged in this task. No map animation, direct browser-to-PostGIS connection, or permit playback has been added.
+
 ## What Is Mocked
 
 - Parcel summaries and sample parcel geometry
-- KPI cards and trend values
+- Non-parcel KPI cards and trend values
 - Scenario horizon presets
 - Layer registry metadata
 - Development pressure, readiness, tax opportunity, and risk scores
@@ -91,8 +276,9 @@ src/
 - Role presets, role KPI emphasis, role insights, and role-aware command suggestions
 - Scenario comparison metrics, executive narratives, and briefing sections
 - Executive report packages, briefing packets, print previews, and export history
+- Animated temporal playback and hotspot map rendering
 
-No backend, database, live parcel feed, forecasting model, AI system, or production GIS service is connected yet.
+No direct browser database connection, live parcel or permit feed, forecasting model, AI system, or production GIS service is connected yet. FastAPI-backed parcel and development activity reads are available only through the Phase 5 feature flag and keep generated artifacts as fallback data.
 
 ## ArcGIS SceneView
 
@@ -308,6 +494,252 @@ Command palette search also includes recent operational events. Event commands j
 
 `eventStreamAdapter.ts` is the future boundary for service-backed permit feeds, infrastructure alerts, risk notifications, scenario notices, and system status messages. Phase 1 keeps event state local to the browser; read/dismiss/filter state is not written to URL params and no production notification service is connected.
 
+## Phase 1 Polish And Resilience
+
+The dashboard shell has a targeted polish pass for responsive behavior, safer state surfaces, and accessibility readiness.
+
+Responsive notes:
+
+- Desktop keeps the three-zone operating layout: control rail, dominant SceneView, and intelligence rail.
+- Tablet widths give the SceneView a full-width row, then place the control and intelligence rails below it.
+- Narrow widths stack the map, controls, intelligence panels, and metrics with scroll-safe overflow.
+- SceneView overlays compress on smaller screens so selected parcel labels and KPI stat chips do not push outside the map frame.
+
+Accessibility and interaction improvements include:
+
+- Clearer ARIA labels for command palette controls, report actions, event actions, sliders, layer toggles, and map viewport regions.
+- Keyboard-visible focus rings for buttons, inputs, and selects.
+- Command palette close affordance, escape handling, body-scroll containment, safer result scrolling, and a stronger no-results state.
+- Active/inactive layer badges, mock-source badges, role/workspace status labels, event read/unread affordances, and mock-only report/export labels.
+- Safer empty states for no reports, no comparisons, no command results, no matching events, no selected parcel, SceneView loading, and SceneView degraded/error states.
+
+Remaining limitations:
+
+- The app is still frontend-only and mock-backed.
+- Production county services remain disconnected.
+- Report/export buttons prepare local mock state only; no real PDF or print renderer is connected.
+- Event read/dismiss/filter state is local to the browser session.
+- Camera bookmarks and responsive map-view presets are not persisted yet.
+
+## GIS Service Onboarding And Contract Readiness
+
+Phase 1 now includes a planning-only architecture for future Cabarrus County ArcGIS service onboarding. No production GIS services are connected.
+
+Core files:
+
+- `src/types/gisContracts.ts` defines service definitions, layer contracts, field mappings, ownership metadata, connection statuses, parcel query contracts, and migration planning result types.
+- `src/lib/gis/serviceRegistry.ts` lists safe placeholder candidate services for parcels, zoning, future land use, floodplain, transportation, utilities, and permit activity.
+- `src/lib/gis/layerContractTemplates.ts` defines reusable contract templates for parcel, zoning, infrastructure, permit, and operational event layers.
+- `src/lib/gis/gisIntegrationPlanner.ts` provides mock-safe planning helpers for contract validation, service readiness summaries, mock-to-live comparisons, migration planning, and integration risk summaries.
+- `src/lib/gis/environmentConfig.ts` documents local, staging, production-disabled, and production environment modes. Live connections remain disabled in every Phase 1 mode.
+- `src/components/dashboard/GISIntegrationReadinessPanel.tsx` surfaces candidate service readiness, onboarding stages, field mapping counts, disabled-production status, and first migration blockers inside the control rail.
+
+Supported planning concepts:
+
+- ArcGIS service candidates: parcel feature service, zoning feature layer, future land-use layer, floodplain map layer, transportation layer, utilities infrastructure layer, and permit activity service.
+- Layer contracts: expected geometry type, ArcGIS service type, target mock replacement layer, required fields, optional fields, display labels, popup expectations, renderer expectations, and search fields.
+- Ownership metadata: department, steward role, technical owner placeholder, update authority, and data sensitivity.
+- Readiness statuses: `planned`, `schema-review`, `ready-for-testing`, `staging`, `disconnected`, and `production-disabled`.
+- Environments: `local`, `staging`, `production-disabled`, and reserved `production`.
+
+The registry uses `example.invalid` placeholder URLs only. This prevents accidental production service usage while still documenting the future onboarding shape. Real service activation should happen later through an approved environment strategy, reviewed field mappings, data-owner signoff, and a token/auth approach that does not leak credentials into client code.
+
+Mock-to-live migration path:
+
+1. Confirm service ownership, refresh cadence, and data sensitivity.
+2. Validate the service schema against the layer contract template.
+3. Test in a staging environment with mock fallback still available.
+4. Update the operational layer registry only after approval.
+5. Recheck SceneView rendering, URL state, identify/query, popups, reports, and command search after each layer migration.
+
+## Initial Dataset Inventory And Data Registry
+
+Phase 1 now includes a static CFS data registry for future GIS, planning, infrastructure, risk, demographic, and reporting datasets. This is a governance and planning layer only; it does not connect live data.
+
+Core files:
+
+- `src/types/dataRegistry.ts` defines dataset entries, categories, source types, geometry types, refresh cadences, access levels, quality statuses, integration statuses, owner metadata, field mappings, and usage contexts.
+- `src/data/mock/dataRegistryMockData.ts` contains the first mock inventory entries.
+- `src/lib/data/dataRegistry.ts` provides helpers for retrieving datasets, filtering by category/status, calculating readiness summaries, identifying risks, and checking references to service/layer/contract registries.
+- `src/components/dashboard/DataRegistryPanel.tsx` displays dataset count, integration status summary, high-priority datasets, unknown/blocker warnings, and compact dataset readiness badges in the control rail.
+
+Initial dataset categories include:
+
+- Parcels
+- Zoning
+- Future Land Use
+- Floodplain
+- Roads / Transportation
+- Utilities / Infrastructure
+- Permit Activity
+- Building Footprints
+- Census / Demographics
+- Parks / Public Facilities
+
+Each registry entry tracks dataset name, category, expected geometry, source owner/steward placeholder, source type, access level, refresh cadence, quality status, integration status, expected key fields, related CFS layer ID, related service registry ID, notes, risks, and unknowns.
+
+High-priority datasets for early Phase 2 planning are:
+
+- `Parcels`: required for live identify/query and parcel intelligence.
+- `Zoning`: required for planning review and parcel context.
+- `Floodplain`: required for risk review and executive constraint reporting.
+- `Utilities / Infrastructure`: required for readiness scoring but production-disabled until security review.
+- `Permit Activity`: best candidate for a first approved non-production service pilot if staging access exists.
+
+Supported dataset integration statuses are `mocked`, `candidate`, `contract-draft`, `schema-review`, `ready-for-staging`, `blocked`, `production-disabled`, and `not-started`.
+
+Dataset registry entries reference the GIS service onboarding system through stable IDs such as `relatedServiceRegistryId`, `layerContractId`, and `relatedCfsLayerId`. This lets Phase 2 compare a dataset record, service candidate, layer contract, and dashboard layer before replacing any mock data.
+
+Remaining unknowns include approved field lists, authoritative service endpoints, ownership signoff, refresh cadences, sensitive attribute handling, staging availability, and future token/auth strategy. All entries remain mock/static and frontend-only.
+
+## Phase 5 API Integration Foundation
+
+The frontend now has a feature-flagged FastAPI integration layer that allows backend-backed data to be adopted one dashboard surface at a time while preserving generated static artifacts.
+
+Core files:
+
+- `src/lib/api/client.ts` defines the frontend API client, base URL handling, GET helper, timeout behavior, and API error wrapper.
+- `src/lib/api/parcels.ts` exposes typed parcel API methods for detail, search, filter, statistics, zoning summary, and governance warnings.
+- `src/lib/api/development.ts` exposes typed development activity API methods for statistics, trends, hotspots, zoning summary, activity summary, temporal queries, and lookup options.
+- `src/types/api/` mirrors the current FastAPI response schemas for frontend consumption.
+- `src/lib/adapters/parcelDashboardMetricsAdapter.ts` normalizes backend parcel statistics and existing static parcel artifacts into the same UI shape.
+- `src/lib/adapters/parcelStatisticsAdapter.ts` normalizes `GET /parcels/statistics` quality-status buckets into the Parcel Quality panel shape.
+- `src/lib/adapters/parcelZoningSummaryAdapter.ts` normalizes `GET /parcels/zoning-summary` jurisdiction summaries into the Zoning Distribution panel shape.
+- `src/lib/adapters/parcelGovernanceWarningsAdapter.ts` normalizes `GET /parcels/governance-warnings` warning summaries into the Governance Warnings panel shape.
+- `src/lib/adapters/parcelSearchAdapter.ts` normalizes `GET /parcels/search` responses into the existing Parcel Discovery UI record shape.
+- `src/lib/adapters/parcelFilterAdapter.ts` normalizes `GET /parcels/filter` responses into the existing Parcel Discovery UI record shape while preserving static owner and mailing context when available.
+- `src/lib/adapters/parcelDetailAdapter.ts` normalizes `GET /parcels/{official_parcel_id}` responses into the existing Parcel Detail Drawer record shape.
+- `src/lib/adapters/developmentStatisticsAdapter.ts` normalizes `GET /development/statistics` responses into core development metrics and activity class cards.
+- `src/lib/adapters/developmentActivitySummaryAdapter.ts` normalizes `GET /development/activity-summary` broad rollups, including total permit amount and recent activity windows.
+- `src/lib/adapters/developmentTrendsAdapter.ts` normalizes `GET /development/trends` annual and monthly trends into the existing timeline card shape.
+- `src/lib/adapters/developmentHotspotsAdapter.ts` normalizes `GET /development/hotspots` rows into the top active parcel card shape.
+- `src/lib/adapters/developmentZoningSummaryAdapter.ts` normalizes `GET /development/zoning-summary` rows into the permit density by zoning card shape.
+- `src/lib/adapters/temporalQueryAdapter.ts` normalizes `GET /development/temporal-query` responses into the Temporal Analysis panel shape.
+- `src/hooks/useParcelDashboardMetrics.ts` owns the first feature-flagged API handoff.
+- `src/hooks/useParcelQualityMetrics.ts`, `src/hooks/useParcelZoningSummaryMetrics.ts`, and `src/hooks/useParcelGovernanceWarningsMetrics.ts` keep parcel summary panel API calls and fallbacks independent.
+- `src/hooks/useDevelopmentStatistics.ts`, `src/hooks/useDevelopmentActivitySummary.ts`, `src/hooks/useDevelopmentTrends.ts`, `src/hooks/useDevelopmentHotspots.ts`, and `src/hooks/useDevelopmentZoningSummary.ts` keep development dashboard panel API calls and fallbacks independent.
+- `src/hooks/useTemporalQuery.ts` keeps the Temporal Analysis panel API call and fallback independent.
+
+Feature flags:
+
+- `NEXT_PUBLIC_USE_BACKEND_API=false` keeps the dashboard in the existing static/generated-output mode.
+- `NEXT_PUBLIC_USE_BACKEND_API=true` lets the first migrated dashboard surface request the FastAPI backend.
+- `NEXT_PUBLIC_CFS_API_BASE_URL=http://127.0.0.1:8000` configures the local FastAPI base URL.
+
+Current migration status:
+
+- Migrated: `ParcelIntelligencePanel` can load `GET /parcels/statistics` when the backend feature flag is enabled.
+- Migrated: `ParcelQualityPanel` can load quality buckets from `GET /parcels/statistics` when the backend feature flag is enabled.
+- Migrated: `ZoningDistributionPanel` can load jurisdiction coverage from `GET /parcels/zoning-summary` when the backend feature flag is enabled.
+- Migrated: `GovernanceWarningsPanel` can load warning summaries from `GET /parcels/governance-warnings` when the backend feature flag is enabled.
+- Migrated: `ParcelSearchPanel` can call `GET /parcels/search` for searches of three or more characters when the backend feature flag is enabled.
+- Migrated: `ParcelFilterPanel` can call `GET /parcels/filter` for structured filter-only parcel discovery when the backend feature flag is enabled.
+- Migrated: `ParcelDetailDrawer` can hydrate selected search results from `GET /parcels/{official_parcel_id}` when the backend feature flag is enabled.
+- Migrated: `DevelopmentActivityPanel` can load `GET /development/statistics` and `GET /development/activity-summary` when the backend feature flag is enabled.
+- Migrated: `DevelopmentTrendPanel` can load `GET /development/trends` when the backend feature flag is enabled.
+- Migrated: `DevelopmentHotspotsPanel` can load `GET /development/hotspots` when the backend feature flag is enabled.
+- Migrated: `DevelopmentZoningPanel` can load `GET /development/zoning-summary` when the backend feature flag is enabled.
+- Migrated: `TemporalAnalysisPanel` can load `GET /development/temporal-query` when the backend feature flag is enabled.
+- Preserved: static parcel metrics and `public/intelligence/parcel-search-index.json` remain the immediate fallback and the default mode.
+- Preserved: generated development activity artifacts remain the fallback for all migrated development panels.
+- Preserved: generated temporal artifacts remain the fallback for the Temporal Analysis panel.
+- Not migrated yet: Command Palette, reports, event stream, and SceneView still use their existing static or mock pathways.
+
+This keeps frontend and backend migration reversible. If the backend is unavailable, times out, or returns an invalid shape, migrated parcel surfaces fall back to generated static artifacts without changing the rest of the dashboard.
+
+Parcel Search API behavior:
+
+- Blank searches can use the backend parcel filter endpoint when the backend flag is enabled.
+- Queries shorter than three characters with typed text stay on the generated static search index.
+- Queries of three or more characters call `GET /parcels/search` when `NEXT_PUBLIC_USE_BACKEND_API=true`.
+- Supported backend filters are passed through for zoning jurisdiction, zoning category, parcel quality status, zoning confidence, and valuation band.
+- When a text search is active, subdivision, neighborhood, zoning code, parcel size, safe-for-dashboard, and governance warning filters remain client-side filters over the normalized result set.
+- Selected search results still open the existing parcel detail drawer; no map focus or SceneView selection is connected yet.
+
+Parcel Filter API behavior:
+
+- With `NEXT_PUBLIC_USE_BACKEND_API=true` and no active text search, structured filter changes call `GET /parcels/filter`.
+- Supported backend filters include zoning jurisdiction, zoning category, zoning code, parcel quality status, zoning confidence, governance warning, valuation band, parcel size category, subdivision, neighborhood, safe-for-dashboard, limit, and offset.
+- Backend filter rows are normalized into the existing Parcel Discovery result shape, then merged with static search-index records when available so owner and mailing context remain visible.
+- If the filter endpoint fails, times out, or returns an invalid shape, Parcel Discovery falls back to the generated static search index and shows a non-blocking fallback status.
+- The static search index remains the default mode when `NEXT_PUBLIC_USE_BACKEND_API=false`.
+
+Parcel Summary Panel API behavior:
+
+- `ParcelIntelligencePanel` and `ParcelQualityPanel` can request `GET /parcels/statistics` when `NEXT_PUBLIC_USE_BACKEND_API=true`.
+- `ZoningDistributionPanel` can request `GET /parcels/zoning-summary` when `NEXT_PUBLIC_USE_BACKEND_API=true`.
+- `GovernanceWarningsPanel` can request `GET /parcels/governance-warnings` when `NEXT_PUBLIC_USE_BACKEND_API=true`.
+- Each panel owns its own request and fallback state, so one backend failure does not downgrade every parcel intelligence panel.
+- API, loading, static, and fallback badges identify the active source for each panel.
+- If an endpoint fails, times out, or returns an invalid shape, only that panel falls back to its generated static artifact data.
+
+Development Dashboard API behavior:
+
+- `DevelopmentActivityPanel` can request `GET /development/statistics` for core metrics and `GET /development/activity-summary` for broad rollups.
+- `DevelopmentTrendPanel` can request `GET /development/trends` for annual and monthly permit timelines.
+- `DevelopmentHotspotsPanel` can request `GET /development/hotspots` for top active parcels.
+- `DevelopmentZoningPanel` can request `GET /development/zoning-summary` for permit density by zoning jurisdiction, code, and category.
+- Each development panel owns its own request and fallback state, so one backend failure does not downgrade every development panel.
+- API, loading, static, and fallback badges identify the active source for each panel.
+- If an endpoint fails, times out, or returns an invalid shape, only that panel falls back to generated static development activity artifacts.
+
+Temporal Panel API behavior:
+
+- `TemporalAnalysisPanel` can request `GET /development/temporal-query` when `NEXT_PUBLIC_USE_BACKEND_API=true`.
+- Supported API filters are year, month, `date_start`, `date_end`, `rolling_window`, permit type, work type, zoning jurisdiction, zoning category, and activity class.
+- The temporal hook passes `limit=50` and leaves `bbox` and `include_geometry` inactive because map extent filtering is not connected yet.
+- The trend summary and query preview use a normalized API/static view model, so backend responses and generated artifacts render through the same UI surface.
+- If the temporal endpoint fails, times out, or returns an invalid shape, only the Temporal Analysis panel falls back to generated static temporal artifacts.
+- SceneView playback, map layer filtering, and hotspot geometry rendering remain disconnected.
+
+Parcel Detail API behavior:
+
+- Selected search results open immediately using the existing static/search record.
+- When `NEXT_PUBLIC_USE_BACKEND_API=true`, the drawer requests `GET /parcels/{official_parcel_id}` and overlays backend parcel detail fields when available.
+- Backend detail hydration preserves static owner and mailing context because those fields are not part of the current parcel detail response yet.
+- If the backend request fails, times out, returns `404`, or returns an invalid shape, the drawer keeps rendering the static selected parcel record and shows a non-blocking fallback status.
+- Backend-enriched detail fields include `objectid_1`, market value, assessed value, valuation band, parcel size category, parcel quality status, zoning jurisdiction/code/category/confidence, governance warnings, safe-for-dashboard status, and planning jurisdiction.
+
+## Phase 6 GIS Map Intelligence
+
+Phase 6 has started with map-safe parcel focus and highlight readiness. This is the first bridge between real parcel discovery/detail records and the ArcGIS SceneView experience, but it does not zoom, highlight, replace mock graphics, or mutate the current SceneView layer system yet.
+
+Core files:
+
+- `src/types/map/parcelFocus.ts` defines the parcel map focus contract, optional centroid, extent, geometry, focus source, and focus status.
+- `src/hooks/useParcelMapFocus.ts` owns selected parcel focus state, clear behavior, readiness status, and geometry-missing fallback state.
+- `src/lib/map/parcelMapFocus.ts` validates whether a parcel focus request has enough spatial information to become a future SceneView action.
+- `src/components/dashboard/ParcelSearchPanel.tsx` now creates a parcel focus object when a parcel result is selected from search or command inspection.
+- `src/components/dashboard/ParcelDetailDrawer.tsx` surfaces map focus status alongside FastAPI/static detail source status.
+
+Current geometry status:
+
+- The current frontend `ParcelDetailResponse` type does not include centroid, extent, or geometry.
+- The current FastAPI `GET /parcels/{official_parcel_id}` route does not expose `include_geometry` or `geometry_format` query parameters yet.
+- Backend planning documents already describe future centroid/GeoJSON support, but the implemented response is still attribute-only.
+- Because no governed spatial payload is available, real parcel selections show `Map focus pending geometry`.
+
+Safe no-op behavior:
+
+- Parcel selections create `ParcelMapFocus` objects with official parcel ID, PIN14, and focus source.
+- If centroid, extent, and geometry are missing, `resolveParcelMapFocus()` returns a no-op result instead of touching ArcGIS runtime objects.
+- Existing mock GraphicsLayers, mock parcel highlights, layer toggles, hit-test behavior, and SceneView lifecycle remain unchanged.
+
+Next backend/data requirement for true parcel highlight:
+
+1. Add a governed backend map-focus response for `GET /parcels/{official_parcel_id}` or a dedicated parcel focus endpoint.
+2. Return at least parcel centroid in EPSG:4326, preferably with a lightweight extent.
+3. Optionally support simplified display geometry or GeoJSON behind `geometry_format=geojson`.
+4. Keep list/search responses geometry-light by default.
+5. Only after that, connect the SceneView bridge to zoom and draw a non-destructive highlight overlay.
+
+Future path:
+
+- Parcel centroid endpoint or detail geometry option
+- SceneView parcel zoom and highlight overlay
+- Development permit hotspot layer
+- Temporal map filtering and playback
+
 ## Dashboard State Architecture
 
 Dashboard interaction state is exposed through `useDashboardState`, but the implementation is split into smaller hooks:
@@ -330,6 +762,6 @@ The public dashboard API remains simple for UI components, while the internals a
 
 ## Next Step
 
-Next planned task: Phase 1 polish and resilience pass.
+Next planned task: Phase 6 Parcel Centroid API and Highlight Pilot.
 
-That task should keep the app frontend-only while tightening responsive behavior, empty/loading states, interaction affordances, accessibility labels, and visual QA around the dashboard shell before connecting real GIS services.
+That task should add governed parcel centroid or lightweight extent support to the backend, then connect a non-destructive SceneView zoom/highlight overlay that leaves mock graphics, layer toggles, and static/API fallback behavior intact.

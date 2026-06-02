@@ -1,0 +1,10 @@
+2026-05-28 11:44:19,144 INFO Starting CFS zoning PostGIS profile.
+2026-05-28 11:44:19,144 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\inspect_zoning_postgis_20260528_114419.log
+2026-05-28 11:44:19,792 INFO Total zoning rows: 295
+2026-05-28 11:44:19,792 INFO Geometry types: [{'geometry_type': 'ST_Polygon', 'feature_count': 270}, {'geometry_type': 'ST_MultiPolygon', 'feature_count': 25}]
+2026-05-28 11:44:19,792 INFO SRID distribution: [{'srid': 4326, 'feature_count': 295}]
+2026-05-28 11:44:19,792 INFO Invalid geometry count: 7
+2026-05-28 11:44:19,793 INFO Unique zoning classes: 28
+2026-05-28 11:44:19,793 INFO Wrote summary JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_profile_summary.json
+2026-05-28 11:44:19,793 INFO Wrote column profile CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_column_profile.csv
+2026-05-28 11:44:19,793 INFO Profile duration: 0.64 seconds

@@ -1,0 +1,77 @@
+{
+  "phase": "Phase 5 Frontend API Integration Foundation",
+  "generated_at": "2026-06-01T03:07:45-04:00",
+  "backend_base_url": "http://127.0.0.1:8000",
+  "files_created": [
+    ".env.example",
+    "src/lib/api/client.ts",
+    "src/lib/api/parcels.ts",
+    "src/lib/api/development.ts",
+    "src/lib/adapters/parcelDashboardMetricsAdapter.ts",
+    "src/types/api/index.ts",
+    "src/types/api/parcels.ts",
+    "src/types/api/development.ts",
+    "src/hooks/useParcelDashboardMetrics.ts"
+  ],
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/ParcelIntelligencePanel.tsx"
+  ],
+  "feature_flag_behavior": {
+    "flag": "NEXT_PUBLIC_USE_BACKEND_API",
+    "false": "Parcel dashboard metrics remain sourced from generated static PostGIS output artifacts.",
+    "true": "Parcel dashboard metrics request GET /parcels/statistics from the configured FastAPI backend.",
+    "fallback": "If the FastAPI request fails, times out, or is unavailable, the UI falls back to generated static parcel metric artifacts."
+  },
+  "backend_url_configuration": {
+    "env_var": "NEXT_PUBLIC_CFS_API_BASE_URL",
+    "default": "http://127.0.0.1:8000"
+  },
+  "api_modules": {
+    "parcel_methods": [
+      "getParcelDetail",
+      "searchParcels",
+      "filterParcels",
+      "getParcelStatistics",
+      "getParcelZoningSummary",
+      "getParcelGovernanceWarnings"
+    ],
+    "development_methods": [
+      "getDevelopmentStatistics",
+      "getDevelopmentTrends",
+      "getDevelopmentHotspots",
+      "getDevelopmentZoningSummary",
+      "getDevelopmentActivitySummary",
+      "getDevelopmentTemporalQuery",
+      "getPermitTypes",
+      "getWorkTypes",
+      "getJurisdictions",
+      "getActivityClasses"
+    ]
+  },
+  "first_integrated_component": "src/components/dashboard/ParcelIntelligencePanel.tsx",
+  "remaining_components_not_migrated": [
+    "Parcel Search and Filter UX",
+    "Development Activity panels",
+    "Temporal Analysis panel",
+    "Command Palette",
+    "SceneView",
+    "Event stream",
+    "Scenario comparison",
+    "Export/report surfaces"
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "flag_false_browser_smoke": "passed: dashboard rendered Core Metrics, Parcel Command, Cabarrus shell, and Static badge",
+    "backend_statistics_endpoint_shell_check": "passed: GET /parcels/statistics returned parcel statistics"
+  },
+  "readiness": {
+    "parcel_search_api_integration": "ready",
+    "static_fallback_preserved": true,
+    "sceneview_modified": false,
+    "postgis_modified": false,
+    "backend_endpoints_modified": false
+  }
+}

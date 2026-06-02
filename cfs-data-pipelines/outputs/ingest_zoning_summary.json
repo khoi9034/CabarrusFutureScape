@@ -1,0 +1,51 @@
+{
+  "feature_count": 295,
+  "geometry_types": [
+    "MultiPolygon",
+    "Polygon"
+  ],
+  "crs": "EPSG:4326",
+  "sample_columns": [
+    "geometry",
+    "objectid",
+    "zoningcode",
+    "zoning_gen",
+    "shape_starea",
+    "shape_stlength"
+  ],
+  "zoning_code_sample": [
+    "AO",
+    "AO-CU",
+    "AO-SU",
+    "CR",
+    "GC",
+    "GC-SU",
+    "GI",
+    "GI-SU",
+    "HDR",
+    "HDR-SU",
+    "LC",
+    "LC-SU",
+    "LDR",
+    "LDR-SU",
+    "LI",
+    "LI-SU",
+    "MDR",
+    "MDR-SU",
+    "OI",
+    "OI-SU"
+  ],
+  "arcgis_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/35",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "schema": "public",
+    "table": "zoning",
+    "written": true,
+    "if_exists": "replace"
+  },
+  "duration_seconds": 2.8,
+  "generated_at": "2026-05-28T11:44:09",
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_zoning_20260528_114406.log"
+}

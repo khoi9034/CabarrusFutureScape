@@ -72,6 +72,22 @@ export function ScenarioComparisonPanel() {
     applyComparisonPair(nextScenarioId, nextRightScenarioId);
   }
 
+  if (!comparisonOptions.length) {
+    return (
+      <section className="rounded-lg border border-white/10 bg-black/20 p-4">
+        <p className="text-xs font-medium uppercase text-slate-500">
+          Scenario Comparison
+        </p>
+        <h3 className="mt-1 text-base font-semibold text-white">
+          No comparison models available
+        </h3>
+        <p className="mt-2 text-xs leading-5 text-slate-400">
+          Phase 1 comparisons are mock-local and no forecasting service is connected.
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section className="rounded-lg border border-white/10 bg-black/20 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -94,11 +110,14 @@ export function ScenarioComparisonPanel() {
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <ScenarioSelect
+          ariaLabel="Comparison baseline scenario"
           label="From"
           onChange={handleLeftScenarioChange}
           value={comparisonPair.leftScenarioId}
         />
         <ScenarioSelect
+          ariaLabel="Comparison target scenario"
+          disabled={!compatibleRightScenarios.length}
           label="To"
           onChange={(nextScenarioId) =>
             applyComparisonPair(comparisonPair.leftScenarioId, nextScenarioId)
@@ -147,6 +166,8 @@ export function ScenarioComparisonPanel() {
 }
 
 interface ScenarioSelectProps {
+  ariaLabel: string;
+  disabled?: boolean;
   label: string;
   onChange: (scenarioId: ScenarioId) => void;
   options?: typeof scenarioPresets;
@@ -154,6 +175,8 @@ interface ScenarioSelectProps {
 }
 
 function ScenarioSelect({
+  ariaLabel,
+  disabled = false,
   label,
   onChange,
   options = scenarioPresets,
@@ -165,8 +188,9 @@ function ScenarioSelect({
         {label}
       </span>
       <select
-        aria-label={label}
-        className="h-9 w-full rounded-md border border-white/10 bg-white/[0.045] px-2 text-xs text-white outline-none transition focus:border-[#d8b86a]/50"
+        aria-label={ariaLabel}
+        className="h-9 w-full rounded-md border border-white/10 bg-white/[0.045] px-2 text-xs text-white outline-none transition focus:border-[#d8b86a]/50 disabled:cursor-not-allowed disabled:opacity-50"
+        disabled={disabled}
         onChange={(event) => onChange(event.target.value as ScenarioId)}
         value={value}
       >

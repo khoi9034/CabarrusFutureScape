@@ -1,0 +1,13 @@
+2026-05-28 12:34:43,265 INFO Starting CFS zoning coverage diagnostics.
+2026-05-28 12:34:43,266 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\diagnose_zoning_coverage_20260528_123443.log
+2026-05-28 12:34:43,560 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-28 12:35:36,886 INFO Total parcels: 110017
+2026-05-28 12:35:36,886 INFO Assigned parcels: 27157
+2026-05-28 12:35:36,886 INFO No-match parcels: 82860
+2026-05-28 12:35:36,886 INFO No-match outside zoning extent: 4888
+2026-05-28 12:35:36,887 INFO Median nearest zoning distance (m): 1474.39
+2026-05-28 12:35:36,887 INFO Wrote diagnostics JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_coverage_diagnostics.json
+2026-05-28 12:35:36,887 INFO Wrote no-match neighborhood CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_no_match_by_neighborhood.csv
+2026-05-28 12:35:36,887 INFO Wrote no-match subdivision CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_no_match_by_subdivision.csv
+2026-05-28 12:35:36,887 INFO Wrote no-match sample CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_no_match_samples.csv
+2026-05-28 12:35:36,888 INFO Diagnostics duration: 2.16 seconds

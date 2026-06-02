@@ -1,0 +1,834 @@
+official_parcel_id,objectid_1,pin14,planning_jurisdiction_name,planning_boundary_type,boundary_name,jurisdiction_overlap_count,dominant_jurisdiction_overlap_pct,total_jurisdiction_overlap_pct,jurisdiction_assignment_confidence,has_multiple_jurisdictions,jurisdiction_join_status,parcel_quality_status,nbh_name,subdiv_name,parcel_area_acres_calc
+CFS-PARCEL-0149720369,149720369,132 109,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,2.000694
+CFS-PARCEL-0149720805,149720805,142 049,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,139.846602
+CFS-PARCEL-0149721018,149721018,142A035,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.383854
+CFS-PARCEL-0149721147,149721147,142 156,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.902445
+CFS-PARCEL-0149721171,149721171,143 030,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,3.781882
+CFS-PARCEL-0149721458,149721458,132 0130000001,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,69.552437
+CFS-PARCEL-0149721571,149721571,140B181,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.443945
+CFS-PARCEL-0149722667,149722667,143B025,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.368103
+CFS-PARCEL-0149722818,149722818,145 023,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,55.259337
+CFS-PARCEL-0149725560,149725560,244F005,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.023978
+CFS-PARCEL-0149725930,149725930,244 046,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,24.854814
+CFS-PARCEL-0149727501,149727501,151 594,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.449171
+CFS-PARCEL-0149729785,149729785,244 012,Kannapolis,etj,City of Kannapolis,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,24.695839
+CFS-PARCEL-0149744156,149744156,55060984780000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,HUNTWICK,HUNTWICK,1.049878
+CFS-PARCEL-0149748435,149748435,55075121310000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.189095
+CFS-PARCEL-0149749449,149749449,55079209630000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,CAMELLIA GARDENS,CAMELLIA GARDENS,0.299218
+CFS-PARCEL-0149754701,149754701,55171393120000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,STALLINGS FARM,STALLINGS FARM,0.999847
+CFS-PARCEL-0149754744,149754744,55172302150000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,STALLINGS FARM,STALLINGS FARM,1.124424
+CFS-PARCEL-0149754814,149754814,55170277860000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,CAMELLIA GARDENS,CAMELLIA GARDENS PH 1 (REVISED),31.472427
+CFS-PARCEL-0149755111,149755111,55172145850000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,review,HARRISBURG,,17.846307
+CFS-PARCEL-0149755181,149755181,55173393210000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY,0.349912
+CFS-PARCEL-0149755359,149755359,55171355680000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,STALLINGS FARM,STALLINGS FARM,0.675121
+CFS-PARCEL-0149755360,149755360,55171384000000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,STALLINGS FARM,STALLINGS FARM,0.846481
+CFS-PARCEL-0149755485,149755485,55174323410000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.647429
+CFS-PARCEL-0149755723,149755723,55173573400000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY,0.875408
+CFS-PARCEL-0149758378,149758378,55185016440000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,review,STOUGH ROAD,,5.025762
+CFS-PARCEL-0149761812,149761812,55171364990000,Harrisburg,etj,Town of Harrisburg,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,STALLINGS FARM,STALLINGS FARM,0.858969
+CFS-PARCEL-0149775256,149775256,55492551860000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,8.621855
+CFS-PARCEL-0149777004,149777004,55492421500000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,FAGGARTS EAST,,70.987427
+CFS-PARCEL-0149777005,149777005,55492421500000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,FAGGARTS EAST,,70.987427
+CFS-PARCEL-0149780447,149780447,55697717920000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,MT PLEASANT HIGH SCHOOL,FINK SCHOOL SUBD,4.338617
+CFS-PARCEL-0149810110,149810110,56219924520000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,1.553911
+CFS-PARCEL-0149810516,149810516,56219665110000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,OVERBROOK,,0.457192
+CFS-PARCEL-0149810542,149810542,56219990990000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,1.173237
+CFS-PARCEL-0149810709,149810709,56218858230000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,ALLISON WOODS,,0.656669
+CFS-PARCEL-0149811933,149811933,56229577610000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,SYCAMORE RIDGE,GARDENS AT COLDWATER\SYCAMORE RDG,0.801208
+CFS-PARCEL-0149811953,149811953,56228002550000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,OVERBROOK,,6.26401
+CFS-PARCEL-0149811982,149811982,56229006070000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,BRIDLEWOOD PLACE,,4.368581
+CFS-PARCEL-0149811984,149811984,56229189550000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,0.329141
+CFS-PARCEL-0149812003,149812003,56229537500000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,SYCAMORE RIDGE,GARDENS AT COLDWATER\SYCAMORE RDG,0.835176
+CFS-PARCEL-0149812010,149812010,56229293860000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,2.301776
+CFS-PARCEL-0149812064,149812064,56224432880000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,OLD EARNHARDT,CABARRUS EXECUTIVE PARK,11.107986
+CFS-PARCEL-0149815693,149815693,56239170190000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,NORTHLIGHT,,47.602734
+CFS-PARCEL-0149815694,149815694,56239170190000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,NORTHLIGHT,,47.602734
+CFS-PARCEL-0149818920,149818920,56307885890000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.816722
+CFS-PARCEL-0149818922,149818922,56308286350000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,PENDLETON,PENDLETON,11.815925
+CFS-PARCEL-0149819125,149819125,56310724210000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,OVERBROOK,LUVINE HILLS,1.169595
+CFS-PARCEL-0149819142,149819142,56309593040000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.413388
+CFS-PARCEL-0149819373,149819373,56320625130000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,SYCAMORE RIDGE,SYCAMORE RIDGE Revision,5.10266
+CFS-PARCEL-0149819550,149819550,56314639890000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,CENTERGROVE,,58.410319
+CFS-PARCEL-0149819660,149819660,56320426120000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,1.589992
+CFS-PARCEL-0149819766,149819766,56307641420000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,PRESERVE AT COLDWATER CREEK,THE PRESERVE AT Coldwater Creek,9.308157
+CFS-PARCEL-0149819790,149819790,56309583210000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.437479
+CFS-PARCEL-0149819848,149819848,56310959270000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,1.723213
+CFS-PARCEL-0149819919,149819919,56311686580000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,OVERBROOK,LUVINE HILLS,0.482278
+CFS-PARCEL-0149819927,149819927,56310940480000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,0.950364
+CFS-PARCEL-0149820029,149820029,56311704890000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,OVERBROOK,LUVINE HILLS,0.516652
+CFS-PARCEL-0149820038,149820038,56313243270000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,DEAL ST,,12.77253
+CFS-PARCEL-0149820111,149820111,56314872340000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,CENTERGROVE,CLYDE D COOK EST,190.246138
+CFS-PARCEL-0149820244,149820244,56320328070000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,2.200529
+CFS-PARCEL-0149820266,149820266,56320610600000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,SYCAMORE RIDGE,GARDENS AT COLDWATER\SYCAMORE RDG,2.123082
+CFS-PARCEL-0149820290,149820290,56321000560000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,CHARLES & LINDA ABERNATHY,1.470698
+CFS-PARCEL-0149820294,149820294,56322426000000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,review,CENTERGROVE,,144.718783
+CFS-PARCEL-0149824641,149824641,56608554330000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,2.748114
+CFS-PARCEL-0149824678,149824678,56609559530000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.3068
+CFS-PARCEL-0149824887,149824887,56606595780000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,FOOD LION SHOPPING CENTER,1.201628
+CFS-PARCEL-0149825283,149825283,56609538910000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.260066
+CFS-PARCEL-0149825731,149825731,56700616120000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.464033
+CFS-PARCEL-0149825773,149825773,56701823360000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,NORTH WOOD SUBDIVISION,NORTH WOOD,0.667864
+CFS-PARCEL-0149825929,149825929,56701837450000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,NORTH WOOD SUBDIVISION,NORTH WOOD,0.558256
+CFS-PARCEL-0149826375,149826375,56701818980000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,NORTH WOOD SUBDIVISION,NORTH WOOD,0.547697
+CFS-PARCEL-0149826399,149826399,56701920620000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,NORTH WOOD SUBDIVISION,NORTH WOOD,0.56677
+CFS-PARCEL-0149826849,149826849,56320326140000,Concord,etj,City of Concord,1,0.0,0.0,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,2.617871
+CFS-PARCEL-0149827577,149827577,56709212100000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,,22.044598
+CFS-PARCEL-0149828296,149828296,56609558180000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.34628
+CFS-PARCEL-0149829816,149829816,56705242300000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,,1.159635
+CFS-PARCEL-0149829861,149829861,56705242300000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0,0.0,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,,1.159635
+CFS-PARCEL-0149720494,149720494,145 067,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.543621
+CFS-PARCEL-0149720631,149720631,132 108,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,124.772876
+CFS-PARCEL-0149721994,149721994,131 143,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,7.186907
+CFS-PARCEL-0149722567,149722567,143 029,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.749375
+CFS-PARCEL-0149722647,149722647,143 093,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,6.774602
+CFS-PARCEL-0149722825,149722825,145 117,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.909486
+CFS-PARCEL-0149722948,149722948,151 516,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.48863
+CFS-PARCEL-0149723837,149723837,244F001,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,2.758358
+CFS-PARCEL-0149724162,149724162,151 523,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.488419
+CFS-PARCEL-0149725499,149725499,244F001C,Kannapolis,etj,City of Kannapolis,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,2.557012
+CFS-PARCEL-0149749452,149749452,55079235000000,Harrisburg,etj,Town of Harrisburg,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,CAMELLIA GARDENS,CAMELLIA GARDENS PH 2,0.630458
+CFS-PARCEL-0149754856,149754856,55173393780000,Harrisburg,etj,Town of Harrisburg,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY,0.344517
+CFS-PARCEL-0149756227,149756227,55174304460000,Harrisburg,etj,Town of Harrisburg,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY,0.345701
+CFS-PARCEL-0149775698,149775698,55492947980000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,24.802029
+CFS-PARCEL-0149809956,149809956,56217949310000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,OVERBROOK,,0.703402
+CFS-PARCEL-0149810431,149810431,56219859260000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,BRANCHVIEW COMMERCIAL,,3.733044
+CFS-PARCEL-0149811900,149811900,56229298360000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,3.04379
+CFS-PARCEL-0149811914,149811914,56227954490000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,NORTHLIGHT,LOWE'S HOME CENTERS INC,22.486072
+CFS-PARCEL-0149812191,149812191,56229557500000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,SYCAMORE RIDGE,SYCAMORE RIDE PH 1,0.796693
+CFS-PARCEL-0149812321,149812321,56229286840000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,3.12106
+CFS-PARCEL-0149819216,149819216,56313129170000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,DEAL ST,,13.810303
+CFS-PARCEL-0149820009,149820009,56311687090000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,OVERBROOK,LUVINE HILLS,0.452631
+CFS-PARCEL-0149820051,149820051,56313329070000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,OVERBROOK,HOLLINGSWORTH,5.052871
+CFS-PARCEL-0149820228,149820228,56320322180000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,5.903971
+CFS-PARCEL-0149820267,149820267,56320679650000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,CENTERGROVE,,6.474801
+CFS-PARCEL-0149820269,149820269,56321613400000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,CENTERGROVE,,24.669842
+CFS-PARCEL-0149821707,149821707,56400426810000,Concord,etj,City of Concord,1,1e-06,1e-06,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.433606
+CFS-PARCEL-0149826931,149826931,56702838800000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,1e-06,1e-06,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,0.52641
+CFS-PARCEL-0149720533,149720533,131 07201,Kannapolis,etj,City of Kannapolis,1,2e-06,2e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,15.904944
+CFS-PARCEL-0149725474,149725474,244 047,Kannapolis,etj,City of Kannapolis,1,2e-06,2e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,3.718071
+CFS-PARCEL-0149725489,149725489,244F014,Kannapolis,etj,City of Kannapolis,1,2e-06,2e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,2.78531
+CFS-PARCEL-0149725955,149725955,244 158,Kannapolis,etj,City of Kannapolis,1,2e-06,2e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,3.980215
+CFS-PARCEL-0149811925,149811925,56229032470000,Concord,etj,City of Concord,1,2e-06,2e-06,low,False,single_boundary_low_confidence,review,OVERBROOK,,4.874476
+CFS-PARCEL-0149819527,149819527,56312455760000,Concord,etj,City of Concord,1,2e-06,2e-06,low,False,single_boundary_low_confidence,trusted,OVERBROOK,HOLLINGSWORTH,6.066094
+CFS-PARCEL-0149819846,149819846,56310877120000,Concord,etj,City of Concord,1,2e-06,2e-06,low,False,single_boundary_low_confidence,review,ALLISON WOODS,,9.32354
+CFS-PARCEL-0149819989,149819989,56310929040000,Concord,etj,City of Concord,1,2e-06,2e-06,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,1.947712
+CFS-PARCEL-0149820013,149820013,56311773590000,Concord,etj,City of Concord,1,2e-06,2e-06,low,False,single_boundary_low_confidence,trusted,OVERBROOK,LUVINE HILLS SEC 2 REV,3.607448
+CFS-PARCEL-0149820816,149820816,56331876880000,Kannapolis,etj,City of Kannapolis,1,2e-06,2e-06,low,False,single_boundary_low_confidence,review,I-85 AT LANE STREET,,13.552147
+CFS-PARCEL-0149822237,149822237,56400163090000,Concord,etj,City of Concord,1,2e-06,2e-06,low,False,single_boundary_low_confidence,trusted,PENDLETON,FUTURE PENDLETON,19.537555
+CFS-PARCEL-0149822752,149822752,56239266660000,Concord,etj,City of Concord,1,2e-06,2e-06,low,False,single_boundary_low_confidence,trusted,HARBOUR TOWNE,HARBOUR TOWNE,0.239165
+CFS-PARCEL-0149826717,149826717,56311770770000,Concord,etj,City of Concord,1,2e-06,2e-06,low,False,single_boundary_low_confidence,trusted,OVERBROOK,LUVINE HILLS SEC 2 REV,1.334844
+CFS-PARCEL-0149827515,149827515,56705159080000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,2e-06,2e-06,low,False,single_boundary_low_confidence,review,MT PLEASANT SOUTH,,0.184805
+CFS-PARCEL-0149720452,149720452,143 044,Kannapolis,etj,City of Kannapolis,1,3e-06,3e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.413157
+CFS-PARCEL-0149720770,149720770,145 066A,Kannapolis,etj,City of Kannapolis,1,3e-06,3e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.763675
+CFS-PARCEL-0149721351,149721351,143C044,Kannapolis,etj,City of Kannapolis,1,3e-06,3e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.322344
+CFS-PARCEL-0149725961,149725961,244F004,Kannapolis,etj,City of Kannapolis,1,3e-06,3e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.320294
+CFS-PARCEL-0149726015,149726015,244F030,Kannapolis,etj,City of Kannapolis,1,3e-06,3e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.089939
+CFS-PARCEL-0149812189,149812189,56229497220000,Concord,etj,City of Concord,1,3e-06,3e-06,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,0.962818
+CFS-PARCEL-0149820717,149820717,56229037720000,Concord,etj,City of Concord,1,3e-06,3e-06,low,False,single_boundary_low_confidence,review,BRIDLEWOOD PLACE,,4.299536
+CFS-PARCEL-0149720472,149720472,143B017,Kannapolis,etj,City of Kannapolis,1,4e-06,4e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.334767
+CFS-PARCEL-0149721301,149721301,143B020,Kannapolis,etj,City of Kannapolis,1,4e-06,4e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.339658
+CFS-PARCEL-0149721927,149721927,143B021,Kannapolis,etj,City of Kannapolis,1,4e-06,4e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.340939
+CFS-PARCEL-0149725475,149725475,244 169,Kannapolis,etj,City of Kannapolis,1,4e-06,4e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,3.95782
+CFS-PARCEL-0149725488,149725488,244F013,Kannapolis,etj,City of Kannapolis,1,4e-06,4e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,2.7553
+CFS-PARCEL-0149770951,149770951,55391627510000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,19.60407
+CFS-PARCEL-0149810925,149810925,56219926490000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,1.396161
+CFS-PARCEL-0149811931,149811931,56229477230000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,0.921531
+CFS-PARCEL-0149811932,149811932,56229516650000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,trusted,SYCAMORE RIDGE,GARDENS AT COLDWATER\SYCAMORE RDG,0.984296
+CFS-PARCEL-0149815208,149815208,56238179710000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,trusted,HARBOUR TOWNE,HARBOUR TOWNE,10.797592
+CFS-PARCEL-0149815339,149815339,56239265780000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,trusted,HARBOUR TOWNE,HARBOUR TOWNE,0.264962
+CFS-PARCEL-0149819512,149819512,56305393330000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,review,EASTCLIFF,,8.250511
+CFS-PARCEL-0149819589,149819589,56317090330000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,review,EAST 73 / 49,,0.41712
+CFS-PARCEL-0149819890,149819890,56310497150000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,review,OVERBROOK,,2.3689
+CFS-PARCEL-0149819983,149819983,56311678580000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,trusted,OVERBROOK,LUVINE HILLS,0.47365
+CFS-PARCEL-0149821586,149821586,56400401970000,Concord,etj,City of Concord,1,4e-06,4e-06,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.415964
+CFS-PARCEL-0149723087,149723087,151 607,Kannapolis,etj,City of Kannapolis,1,5e-06,5e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.301348
+CFS-PARCEL-0149819662,149819662,56321051640000,Concord,etj,City of Concord,1,5e-06,5e-06,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,CHARLES & LINDA ABERNATHY,3.62824
+CFS-PARCEL-0149819782,149819782,56309873320000,Concord,etj,City of Concord,1,5e-06,5e-06,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,0.715856
+CFS-PARCEL-0149725500,149725500,244F002,Kannapolis,etj,City of Kannapolis,1,6e-06,6e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.943159
+CFS-PARCEL-0149725960,149725960,244F003,Kannapolis,etj,City of Kannapolis,1,6e-06,6e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.928414
+CFS-PARCEL-0149810111,149810111,56219968450000,Concord,etj,City of Concord,1,6e-06,6e-06,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,1.023253
+CFS-PARCEL-0149722105,149722105,145 224,Kannapolis,etj,City of Kannapolis,1,7e-06,7e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.446196
+CFS-PARCEL-0149723101,149723101,151 503,Kannapolis,etj,City of Kannapolis,1,7e-06,7e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.392517
+CFS-PARCEL-0149810017,149810017,56218925040000,Concord,etj,City of Concord,1,7e-06,7e-06,low,False,single_boundary_low_confidence,review,OVERBROOK,,1.275696
+CFS-PARCEL-0149810480,149810480,56219989710000,Concord,etj,City of Concord,1,7e-06,7e-06,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,1.052576
+CFS-PARCEL-0149721504,149721504,143B018,Kannapolis,etj,City of Kannapolis,1,8e-06,8e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.336434
+CFS-PARCEL-0149722116,149722116,140 0410000001,Kannapolis,etj,City of Kannapolis,1,8e-06,8e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,6.451212
+CFS-PARCEL-0149725646,149725646,249D072,Kannapolis,etj,City of Kannapolis,1,8e-06,8e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,11.413863
+CFS-PARCEL-0149725821,149725821,161 038,Kannapolis,etj,City of Kannapolis,1,8e-06,8e-06,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.602782
+CFS-PARCEL-0149781258,149781258,55395346930000,Concord,etj,City of Concord,1,8e-06,8e-06,low,False,single_boundary_low_confidence,trusted,WINDROSE,WINDROSE,0.337073
+CFS-PARCEL-0149788436,149788436,56045258970000,Kannapolis,etj,City of Kannapolis,1,9e-06,9e-06,low,False,single_boundary_low_confidence,review,RAINBOW DR,,7.931116
+CFS-PARCEL-0149827259,149827259,56400370580000,Concord,etj,City of Concord,1,9e-06,9e-06,low,False,single_boundary_low_confidence,trusted,PENDLETON,PENDLETON PH 1 MAP 1,0.359502
+CFS-PARCEL-0149720495,149720495,145 067A,Kannapolis,etj,City of Kannapolis,1,1e-05,1e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.548076
+CFS-PARCEL-0149721094,149721094,143 090,Kannapolis,etj,City of Kannapolis,1,1e-05,1e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,5.946138
+CFS-PARCEL-0149750812,149750812,55089018800000,Harrisburg,etj,Town of Harrisburg,1,1e-05,1e-05,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,19.330505
+CFS-PARCEL-0149819478,149819478,56306377510000,Concord,etj,City of Concord,1,1e-05,1e-05,low,False,single_boundary_low_confidence,review,EASTCLIFF,,1.546635
+CFS-PARCEL-0149821588,149821588,56400443460000,Concord,etj,City of Concord,1,1e-05,1e-05,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.631975
+CFS-PARCEL-0149725319,149725319,161 035,Kannapolis,etj,City of Kannapolis,1,1.1e-05,1.1e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.34447
+CFS-PARCEL-0149724474,149724474,161 036,Kannapolis,etj,City of Kannapolis,1,1.2e-05,1.2e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.723294
+CFS-PARCEL-0149820354,149820354,56321298510000,Concord,etj,City of Concord,1,1.2e-05,1.2e-05,low,False,single_boundary_low_confidence,review,CENTERGROVE,,18.182579
+CFS-PARCEL-0149824677,149824677,56609504400000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,1.2e-05,1.2e-05,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,9.503897
+CFS-PARCEL-0149818931,149818931,56308482180000,Concord,etj,City of Concord,1,1.3e-05,1.3e-05,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,10.233346
+CFS-PARCEL-0149721190,149721190,143 060000001,Kannapolis,etj,City of Kannapolis,1,1.4e-05,1.4e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,14.30328
+CFS-PARCEL-0149725903,149725903,161 037,Kannapolis,etj,City of Kannapolis,1,1.4e-05,1.4e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.675106
+CFS-PARCEL-0149821924,149821924,56401130260000,Concord,etj,City of Concord,1,1.4e-05,1.4e-05,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,NO SUBDIVISION,1.426689
+CFS-PARCEL-0149822009,149822009,56401153530000,Concord,etj,City of Concord,1,1.4e-05,1.4e-05,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,2.806802
+CFS-PARCEL-0149720473,149720473,143C045,Kannapolis,etj,City of Kannapolis,1,1.5e-05,1.5e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.308117
+CFS-PARCEL-0149819062,149819062,56309874240000,Concord,etj,City of Concord,1,1.5e-05,1.5e-05,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,0.414071
+CFS-PARCEL-0149725320,149725320,161 039,Kannapolis,etj,City of Kannapolis,1,1.6e-05,1.6e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.34446
+CFS-PARCEL-0149747546,149747546,55070574150000,Harrisburg,etj,Town of Harrisburg,1,1.6e-05,1.6e-05,low,False,single_boundary_low_confidence,review,HARRISBURG,,17.306679
+CFS-PARCEL-0149747547,149747547,55070574150000,Harrisburg,etj,Town of Harrisburg,1,1.6e-05,1.6e-05,low,False,single_boundary_low_confidence,review,HARRISBURG,,17.306679
+CFS-PARCEL-0149820050,149820050,56312483690000,Concord,etj,City of Concord,1,1.6e-05,1.6e-05,low,False,single_boundary_low_confidence,trusted,OVERBROOK,HOLLINGSWORTH,7.355463
+CFS-PARCEL-0149827310,149827310,56704876050000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,1.8e-05,1.8e-05,low,False,single_boundary_low_confidence,trusted,HILLTOP ACRES,HILLTOP ACRES,0.771787
+CFS-PARCEL-0149822140,149822140,56400411870000,Concord,etj,City of Concord,1,1.9e-05,1.9e-05,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.461539
+CFS-PARCEL-0149722412,149722412,142A040,Kannapolis,etj,City of Kannapolis,1,2.1e-05,2.1e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.885161
+CFS-PARCEL-0149810434,149810434,56219948220000,Concord,etj,City of Concord,1,2.1e-05,2.1e-05,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,0.948068
+CFS-PARCEL-0149727046,149727046,45979537230000,Harrisburg,etj,Town of Harrisburg,1,2.2e-05,2.2e-05,low,False,single_boundary_low_confidence,trusted,BENTLEY HILLS,ELDORADO HILLS,0.766218
+CFS-PARCEL-0149723100,149723100,151 502,Kannapolis,etj,City of Kannapolis,1,2.5e-05,2.5e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.379438
+CFS-PARCEL-0149819015,149819015,56309407510000,Concord,etj,City of Concord,1,2.7e-05,2.7e-05,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.628548
+CFS-PARCEL-0149815395,149815395,56239679650000,Kannapolis,etj,City of Kannapolis,1,2.8e-05,2.8e-05,low,False,single_boundary_low_confidence,review,I-85 AT LANE STREET,,108.824037
+CFS-PARCEL-0149721302,149721302,143B024,Kannapolis,etj,City of Kannapolis,1,2.9e-05,2.9e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.40342
+CFS-PARCEL-0149812072,149812072,56226360790000,Concord,etj,City of Concord,1,2.9e-05,2.9e-05,low,False,single_boundary_low_confidence,trusted,GOVERNORS POINTE,GOVERNORS POINT,6.870487
+CFS-PARCEL-0149819123,149819123,56310542720000,Concord,etj,City of Concord,1,2.9e-05,2.9e-05,low,False,single_boundary_low_confidence,review,OVERBROOK,,0.918988
+CFS-PARCEL-0149772501,149772501,55399440600000,Concord,etj,City of Concord,1,3e-05,3e-05,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,53.695065
+CFS-PARCEL-0149721182,149721182,142A036,Kannapolis,etj,City of Kannapolis,1,3.1e-05,3.1e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.510781
+CFS-PARCEL-0149771022,149771022,55391403900000,Concord,etj,City of Concord,1,3.1e-05,3.1e-05,low,False,single_boundary_low_confidence,review,JACKSON PARK,,59.167398
+CFS-PARCEL-0149771023,149771023,55391403900000,Concord,etj,City of Concord,1,3.1e-05,3.1e-05,low,False,single_boundary_low_confidence,review,JACKSON PARK,,59.167398
+CFS-PARCEL-0149771031,149771031,55391403900000,Concord,etj,City of Concord,1,3.1e-05,3.1e-05,low,False,single_boundary_low_confidence,review,JACKSON PARK,,59.167398
+CFS-PARCEL-0149826123,149826123,56306477360000,Concord,etj,City of Concord,1,3.1e-05,3.1e-05,low,False,single_boundary_low_confidence,trusted,CRESTSIDE,MOUNTAINBROOK,0.627397
+CFS-PARCEL-0149819822,149819822,56309491970000,Concord,etj,City of Concord,1,3.3e-05,3.3e-05,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.42568
+CFS-PARCEL-0149826548,149826548,56700652890000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,3.7e-05,3.7e-05,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.473785
+CFS-PARCEL-0149828850,149828850,56701857550000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,3.7e-05,3.7e-05,low,False,single_boundary_low_confidence,trusted,NORTH WOOD SUBDIVISION,NORTH WOOD,0.546913
+CFS-PARCEL-0149721306,149721306,143C038,Kannapolis,etj,City of Kannapolis,1,3.8e-05,3.8e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.262015
+CFS-PARCEL-0149721506,149721506,143C041,Kannapolis,etj,City of Kannapolis,1,3.8e-05,3.8e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.374088
+CFS-PARCEL-0149749657,149749657,55083773350000,Harrisburg,etj,Town of Harrisburg,1,3.8e-05,3.8e-05,low,False,single_boundary_low_confidence,review,CONCORD PARKWAY SOUTH,,573.693883
+CFS-PARCEL-0149820291,149820291,56321283570000,Concord,etj,City of Concord,1,4e-05,4e-05,low,False,single_boundary_low_confidence,trusted,CENTERGROVE,DIVISION OF 14.208 AC,5.610052
+CFS-PARCEL-0149747251,149747251,55071992620000,Harrisburg,etj,Town of Harrisburg,1,4.1e-05,4.1e-05,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.752834
+CFS-PARCEL-0149750785,149750785,55085017460000,Harrisburg,etj,Town of Harrisburg,1,4.1e-05,4.1e-05,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.326947
+CFS-PARCEL-0149821755,149821755,56400439720000,Concord,etj,City of Concord,1,4.1e-05,4.1e-05,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.53375
+CFS-PARCEL-0149720426,149720426,142 046,Kannapolis,etj,City of Kannapolis,1,4.4e-05,4.4e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,3.713966
+CFS-PARCEL-0149821908,149821908,56400503070000,Concord,etj,City of Concord,1,4.4e-05,4.4e-05,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.499569
+CFS-PARCEL-0149744778,149744778,55060887390000,Harrisburg,etj,Town of Harrisburg,1,4.5e-05,4.5e-05,low,False,single_boundary_low_confidence,trusted,HUNTWICK,HUNTWICK,1.030294
+CFS-PARCEL-0149721350,149721350,143C040,Kannapolis,etj,City of Kannapolis,1,4.6e-05,4.6e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.184772
+CFS-PARCEL-0149827566,149827566,56705109680000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,4.9e-05,4.9e-05,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,,1.139238
+CFS-PARCEL-0149720755,149720755,143C039,Kannapolis,etj,City of Kannapolis,1,5e-05,5e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.266817
+CFS-PARCEL-0149755217,149755217,55173229480000,Harrisburg,etj,Town of Harrisburg,1,5.2e-05,5.2e-05,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH1A,4.102643
+CFS-PARCEL-0149820629,149820629,56227454500000,Concord,etj,City of Concord,1,5.5e-05,5.5e-05,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,0.291379
+CFS-PARCEL-0149819772,149819772,56309779190000,Concord,etj,City of Concord,1,5.6e-05,5.6e-05,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,5.086897
+CFS-PARCEL-0149828688,149828688,56800463280000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,5.6e-05,5.6e-05,low,False,single_boundary_low_confidence,review,PRUITT FARMS,,12.343217
+CFS-PARCEL-0149724276,149724276,158 056,Kannapolis,etj,City of Kannapolis,1,5.7e-05,5.7e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.326331
+CFS-PARCEL-0149819865,149819865,56309481970000,Concord,etj,City of Concord,1,5.8e-05,5.8e-05,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.384042
+CFS-PARCEL-0149721588,149721588,151 599,Kannapolis,etj,City of Kannapolis,1,5.9e-05,5.9e-05,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.383345
+CFS-PARCEL-0149812430,149812430,56227521610000,Concord,etj,City of Concord,1,6.4e-05,6.4e-05,low,False,single_boundary_low_confidence,review,NORTHLIGHT,,2.338439
+CFS-PARCEL-0149780858,149780858,55793566300000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,6.8e-05,6.8e-05,low,False,single_boundary_low_confidence,trusted,MT PLEASANT OUTSIDE,CATAWBA LANDS CONSERVANCY,392.8185
+CFS-PARCEL-0149819608,149819608,56308676890000,Concord,etj,City of Concord,1,6.8e-05,6.8e-05,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,1.410594
+CFS-PARCEL-0149820744,149820744,56229429820000,Concord,etj,City of Concord,1,7.2e-05,7.2e-05,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,0.147137
+CFS-PARCEL-0149747658,149747658,55071479620000,Harrisburg,etj,Town of Harrisburg,1,7.6e-05,7.6e-05,low,False,single_boundary_low_confidence,trusted,HARRISBURG,HIGHWAY 49 INVESTMENT GROUP,6.018987
+CFS-PARCEL-0149819670,149819670,56306328420000,Concord,etj,City of Concord,1,7.6e-05,7.6e-05,low,False,single_boundary_low_confidence,review,EASTCLIFF,,4.489358
+CFS-PARCEL-0149819603,149819603,56308644360000,Concord,etj,City of Concord,1,7.8e-05,7.8e-05,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK PHASE 6 MAP 1,3.441966
+CFS-PARCEL-0149819253,149819253,56309451010000,Concord,etj,City of Concord,1,8.1e-05,8.1e-05,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.466221
+CFS-PARCEL-0149819535,149819535,56308321750000,Concord,etj,City of Concord,1,8.7e-05,8.7e-05,low,False,single_boundary_low_confidence,trusted,MYERS PARK,TOWNCREEK,2.937989
+CFS-PARCEL-0149811964,149811964,56229731280000,Concord,etj,City of Concord,1,8.9e-05,8.9e-05,low,False,single_boundary_low_confidence,trusted,NORTHLIGHT,40.066A COPPERFIELD BLVD,17.157307
+CFS-PARCEL-0149826693,149826693,56700617650000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,8.9e-05,8.9e-05,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.810636
+CFS-PARCEL-0149765122,149765122,55173391470000,Harrisburg,etj,Town of Harrisburg,1,9.3e-05,9.3e-05,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY,0.183214
+CFS-PARCEL-0149788266,149788266,55697745390000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,9.3e-05,9.3e-05,low,False,single_boundary_low_confidence,trusted,MT PLEASANT HIGH SCHOOL,FINK SCHOOL SUBD,4.367998
+CFS-PARCEL-0149826848,149826848,56320221030000,Concord,etj,City of Concord,1,0.000101,0.000101,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,2.576068
+CFS-PARCEL-0149812113,149812113,56227328500000,Concord,etj,City of Concord,1,0.000103,0.000103,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,PARTRIDGE BLUFF,1.473086
+CFS-PARCEL-0149750435,149750435,55084096330000,Harrisburg,etj,Town of Harrisburg,1,0.000104,0.000104,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.295014
+CFS-PARCEL-0149818794,149818794,56306407460000,Concord,etj,City of Concord,1,0.000105,0.000105,low,False,single_boundary_low_confidence,review,SUMMIT DRIVE,,3.606052
+CFS-PARCEL-0149781116,149781116,55794971100000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000106,0.000106,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.825334
+CFS-PARCEL-0149771775,149771775,55395357210000,Concord,etj,City of Concord,1,0.000107,0.000107,low,False,single_boundary_low_confidence,trusted,WINDROSE,WINDROSE,0.287733
+CFS-PARCEL-0149819374,149819374,56321224910000,Concord,etj,City of Concord,1,0.000122,0.000122,low,False,single_boundary_low_confidence,trusted,CENTERGROVE,DIVISION OF 14.208 AC,2.361365
+CFS-PARCEL-0149826546,149826546,56700643870000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000125,0.000125,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.599843
+CFS-PARCEL-0149720479,149720479,143D033,Kannapolis,etj,City of Kannapolis,1,0.000128,0.000128,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,4.039423
+CFS-PARCEL-0149827336,149827336,56704856910000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000129,0.000129,low,False,single_boundary_low_confidence,trusted,HILLTOP ACRES,HILLTOP ACRES,0.681209
+CFS-PARCEL-0149762456,149762456,55173289860000,Harrisburg,etj,Town of Harrisburg,1,0.000131,0.000131,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH1A,0.55368
+CFS-PARCEL-0149820715,149820715,56228928450000,Concord,etj,City of Concord,1,0.000135,0.000135,low,False,single_boundary_low_confidence,trusted,NORTHLIGHT,LOWE'S HOME CENTERS INC,0.089719
+CFS-PARCEL-0149720633,149720633,140B184,Kannapolis,etj,City of Kannapolis,1,0.000141,0.000141,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.770279
+CFS-PARCEL-0149819534,149819534,56308304170000,Concord,etj,City of Concord,1,0.000145,0.000145,low,False,single_boundary_low_confidence,trusted,MYERS PARK,TOWNCREEK SEC 6,1.247057
+CFS-PARCEL-0149825296,149825296,56609660120000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000145,0.000145,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.682809
+CFS-PARCEL-0149756665,149756665,55181069050000,Harrisburg,etj,Town of Harrisburg,1,0.000147,0.000147,low,False,single_boundary_low_confidence,trusted,PROVIDENCE MANOR,PROVIDENCE MANOR C.O.S,15.95184
+CFS-PARCEL-0149825880,149825880,56700644140000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.00015,0.00015,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.485255
+CFS-PARCEL-0149755551,149755551,55070929580000,Harrisburg,etj,Town of Harrisburg,1,0.000155,0.000155,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,1.012889
+CFS-PARCEL-0149822334,149822334,56400421880000,Concord,etj,City of Concord,1,0.000161,0.000161,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.44148
+CFS-PARCEL-0149826556,149826556,56309481060000,Concord,etj,City of Concord,1,0.000167,0.000167,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.39485
+CFS-PARCEL-0149819870,149819870,56309882510000,Concord,etj,City of Concord,1,0.00017,0.00017,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,1.086088
+CFS-PARCEL-0149826789,149826789,56317668140000,Concord,etj,City of Concord,1,0.000171,0.000171,low,False,single_boundary_low_confidence,review,NEW GILEAD,,33.970824
+CFS-PARCEL-0149781012,149781012,55794797910000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000173,0.000173,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.730287
+CFS-PARCEL-0149811950,149811950,56227313060000,Concord,etj,City of Concord,1,0.000174,0.000174,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,OVERBROOK,0.281761
+CFS-PARCEL-0149747549,149747549,55070938000000,Harrisburg,etj,Town of Harrisburg,1,0.000179,0.000179,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.823839
+CFS-PARCEL-0149750746,149750746,55089350100000,Harrisburg,etj,Town of Harrisburg,1,0.00018,0.00018,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE II MAP III,0.222569
+CFS-PARCEL-0149819771,149819771,56309764700000,Concord,etj,City of Concord,1,0.000181,0.000181,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,3.764593
+CFS-PARCEL-0149824965,149824965,56609694560000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000192,0.000192,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.488033
+CFS-PARCEL-0149818985,149818985,56307500120000,Concord,etj,City of Concord,1,0.000196,0.000196,low,False,single_boundary_low_confidence,trusted,CRESTSIDE,MOUNTAINBROOK,0.592679
+CFS-PARCEL-0149744483,149744483,55060975560000,Harrisburg,etj,Town of Harrisburg,1,0.000198,0.000198,low,False,single_boundary_low_confidence,trusted,HUNTWICK,HUNTWICK,1.024571
+CFS-PARCEL-0149749777,149749777,55085130860000,Harrisburg,etj,Town of Harrisburg,1,0.000199,0.000199,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.445989
+CFS-PARCEL-0149819796,149819796,56309812100000,Concord,etj,City of Concord,1,0.000209,0.000209,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,1.037345
+CFS-PARCEL-0149826163,149826163,56306497370000,Concord,etj,City of Concord,1,0.000211,0.000211,low,False,single_boundary_low_confidence,trusted,CRESTSIDE,MOUNTAINBROOK,1.399272
+CFS-PARCEL-0149771349,149771349,55392269800000,Concord,etj,City of Concord,1,0.000213,0.000213,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,17.728432
+CFS-PARCEL-0149826255,149826255,56700605230000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.00022,0.00022,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.44593
+CFS-PARCEL-0149818930,149818930,56308443770000,Concord,etj,City of Concord,1,0.000222,0.000222,low,False,single_boundary_low_confidence,review,SUMMIT DRIVE,,0.582509
+CFS-PARCEL-0149826140,149826140,56617142060000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000224,0.000224,low,False,single_boundary_low_confidence,trusted,ST JOHNS CHURCH,REVISED JOHN & SARA ESTEP,4.461144
+CFS-PARCEL-0149747964,149747964,55073524560000,Harrisburg,etj,Town of Harrisburg,1,0.000231,0.000231,low,False,single_boundary_low_confidence,review,HARRISBURG,,4.671738
+CFS-PARCEL-0149820147,149820147,56316612700000,Concord,etj,City of Concord,1,0.000233,0.000233,low,False,single_boundary_low_confidence,review,BRANCHVIEW COMMERCIAL,,1.725117
+CFS-PARCEL-0149746881,149746881,55070936060000,Harrisburg,etj,Town of Harrisburg,1,0.000235,0.000235,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.665173
+CFS-PARCEL-0149828290,149828290,56608525900000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000235,0.000235,low,False,single_boundary_low_confidence,trusted,MT PLEASANT COMMERCIAL,MT PLEASANT NC FD LLC,0.903077
+CFS-PARCEL-0149819852,149819852,56309831260000,Concord,etj,City of Concord,1,0.000236,0.000236,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,1.420491
+CFS-PARCEL-0149819769,149819769,56309750110000,Concord,etj,City of Concord,1,0.000238,0.000238,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.650733
+CFS-PARCEL-0149824915,149824915,56608515310000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.00024,0.00024,low,False,single_boundary_low_confidence,trusted,MT PLEASANT COMMERCIAL,MT PLEASANT NC FD LLC,0.606396
+CFS-PARCEL-0149826464,149826464,56308806020000,Concord,etj,City of Concord,1,0.00025,0.00025,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.760003
+CFS-PARCEL-0149755218,149755218,55173288310000,Harrisburg,etj,Town of Harrisburg,1,0.000257,0.000257,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH1A,0.518163
+CFS-PARCEL-0149819864,149819864,56309461020000,Concord,etj,City of Concord,1,0.000257,0.000257,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.351215
+CFS-PARCEL-0149819504,149819504,56307327330000,Concord,etj,City of Concord,1,0.00026,0.00026,low,False,single_boundary_low_confidence,review,EASTCLIFF,,0.683417
+CFS-PARCEL-0149827121,149827121,56704392100000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000269,0.000269,low,False,single_boundary_low_confidence,review,MT PLEASANT EAST,,0.590816
+CFS-PARCEL-0149745258,149745258,55060956480000,Harrisburg,etj,Town of Harrisburg,1,0.00027,0.00027,low,False,single_boundary_low_confidence,trusted,HUNTWICK,HUNTWICK,1.079293
+CFS-PARCEL-0149780906,149780906,55794793060000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000283,0.000283,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.66654
+CFS-PARCEL-0149818956,149818956,56308816150000,Concord,etj,City of Concord,1,0.000283,0.000283,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.719638
+CFS-PARCEL-0149826736,149826736,56702030460000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000298,0.000298,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.48423
+CFS-PARCEL-0149819615,149819615,56317593650000,Concord,etj,City of Concord,1,0.000314,0.000314,low,False,single_boundary_low_confidence,review,NEW GILEAD,,13.868021
+CFS-PARCEL-0149819760,149819760,56309649050000,Concord,etj,City of Concord,1,0.000334,0.000334,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.463125
+CFS-PARCEL-0149776054,149776054,55492837250000,Concord,etj,City of Concord,1,0.000336,0.000336,low,False,single_boundary_low_confidence,trusted,BEDFORD FARMS,BEDFORD FARMS PH4,6.193962
+CFS-PARCEL-0149750093,149750093,55085006780000,Harrisburg,etj,Town of Harrisburg,1,0.000382,0.000382,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.359732
+CFS-PARCEL-0149736002,149736002,45987164350000,Harrisburg,etj,Town of Harrisburg,1,0.000384,0.000384,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,52.738117
+CFS-PARCEL-0149736003,149736003,45987164350000,Harrisburg,etj,Town of Harrisburg,1,0.000384,0.000384,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,52.738117
+CFS-PARCEL-0149727315,149727315,45986213580000,Harrisburg,etj,Town of Harrisburg,1,0.000385,0.000385,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,20.937501
+CFS-PARCEL-0149819401,149819401,56306435480000,Concord,etj,City of Concord,1,0.000395,0.000395,low,False,single_boundary_low_confidence,trusted,CRESTSIDE,MOUNTAINBROOK,0.541037
+CFS-PARCEL-0149818952,149818952,56308884890000,Concord,etj,City of Concord,1,0.000401,0.000401,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.683435
+CFS-PARCEL-0149826392,149826392,56308532450000,Concord,etj,City of Concord,1,0.000412,0.000412,low,False,single_boundary_low_confidence,trusted,BRAMBLE WOODS,BRAMBLEWOODS,4.585846
+CFS-PARCEL-0149749327,149749327,55080011960000,Harrisburg,etj,Town of Harrisburg,1,0.000419,0.000419,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,1.029911
+CFS-PARCEL-0149826524,149826524,56309471040000,Concord,etj,City of Concord,1,0.000421,0.000421,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.402743
+CFS-PARCEL-0149826467,149826467,56308867250000,Concord,etj,City of Concord,1,0.000438,0.000438,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.553571
+CFS-PARCEL-0149826391,149826391,56308518180000,Concord,etj,City of Concord,1,0.000443,0.000443,low,False,single_boundary_low_confidence,trusted,PRESERVE AT COLDWATER CREEK,the preserve,3.749765
+CFS-PARCEL-0149819453,149819453,56307318210000,Concord,etj,City of Concord,1,0.000463,0.000463,low,False,single_boundary_low_confidence,review,EASTCLIFF,,1.192684
+CFS-PARCEL-0149826465,149826465,56308826390000,Concord,etj,City of Concord,1,0.000469,0.000469,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.682365
+CFS-PARCEL-0149819024,149819024,56309439050000,Concord,etj,City of Concord,1,0.000481,0.000481,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.464249
+CFS-PARCEL-0149747531,149747531,55070061840000,Harrisburg,etj,Town of Harrisburg,1,0.000489,0.000489,low,False,single_boundary_low_confidence,review,COVENTRY,,0.37462
+CFS-PARCEL-0149749606,149749606,55082246090000,Harrisburg,etj,Town of Harrisburg,1,0.000502,0.000502,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,155.019551
+CFS-PARCEL-0149749607,149749607,55082246090000,Harrisburg,etj,Town of Harrisburg,1,0.000502,0.000502,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,155.019551
+CFS-PARCEL-0149819866,149819866,56309628990000,Concord,etj,City of Concord,1,0.000505,0.000505,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.514225
+CFS-PARCEL-0149828623,149828623,56800275280000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.00051,0.00051,low,False,single_boundary_low_confidence,review,HAHN SCOTT RD,,19.588605
+CFS-PARCEL-0149750637,149750637,55088290320000,Harrisburg,etj,Town of Harrisburg,1,0.000528,0.000528,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION P/O PHASE III,0.327255
+CFS-PARCEL-0149819805,149819805,56308877260000,Concord,etj,City of Concord,1,0.000531,0.000531,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.452594
+CFS-PARCEL-0149796741,149796741,56047259060000,Kannapolis,etj,City of Kannapolis,1,0.000538,0.000538,low,False,single_boundary_low_confidence,trusted,PRIVATE ACRES,PRIVATE ACRES,0.522055
+CFS-PARCEL-0149828098,149828098,56719056290000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000555,0.000555,low,False,single_boundary_low_confidence,review,LENTZ HARNESS SHOP RD,,35.875045
+CFS-PARCEL-0149819759,149819759,56309618830000,Concord,etj,City of Concord,1,0.000557,0.000557,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.530677
+CFS-PARCEL-0149750698,149750698,55080053040000,Harrisburg,etj,Town of Harrisburg,1,0.000566,0.000566,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.518977
+CFS-PARCEL-0149819878,149819878,56310469030000,Concord,etj,City of Concord,1,0.000595,0.000595,low,False,single_boundary_low_confidence,review,OVERBROOK,,2.173485
+CFS-PARCEL-0149749392,149749392,55078169250000,Harrisburg,etj,Town of Harrisburg,1,0.0006,0.0006,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,3.15917
+CFS-PARCEL-0149819456,149819456,56307409110000,Concord,etj,City of Concord,1,0.000614,0.000614,low,False,single_boundary_low_confidence,trusted,CRESTSIDE,MOUNTAINBROOK,0.604673
+CFS-PARCEL-0149819851,149819851,56309766480000,Concord,etj,City of Concord,1,0.000644,0.000644,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.745111
+CFS-PARCEL-0149748797,149748797,55077333460000,Harrisburg,etj,Town of Harrisburg,1,0.000648,0.000648,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,2.811792
+CFS-PARCEL-0149796724,149796724,56047239560000,Kannapolis,etj,City of Kannapolis,1,0.00068,0.00068,low,False,single_boundary_low_confidence,trusted,PRIVATE ACRES,PRIVATE ACRES,1.072276
+CFS-PARCEL-0149746459,149746459,55067942830000,Harrisburg,etj,Town of Harrisburg,1,0.000685,0.000685,low,False,single_boundary_low_confidence,trusted,CHURCHILL FARMS,CHURCHILL FARMS PH2,25.549285
+CFS-PARCEL-0149779788,149779788,55696851510000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000696,0.000696,low,False,single_boundary_low_confidence,trusted,MT PLEASANT HIGH SCHOOL,FINK SCHOOL SUBD,7.40351
+CFS-PARCEL-0149749419,149749419,55078490610000,Harrisburg,etj,Town of Harrisburg,1,0.000698,0.000698,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,NO SUBDIVISION,0.995389
+CFS-PARCEL-0149725396,149725396,244 011,Kannapolis,etj,City of Kannapolis,1,0.000727,0.000727,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,130.456884
+CFS-PARCEL-0149748074,149748074,55075224440000,Harrisburg,etj,Town of Harrisburg,1,0.000779,0.000779,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.466598
+CFS-PARCEL-0149755129,149755129,55172373710000,Harrisburg,etj,Town of Harrisburg,1,0.000799,0.000799,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH1A,0.178219
+CFS-PARCEL-0149750702,149750702,55081097760000,Harrisburg,etj,Town of Harrisburg,1,0.000833,0.000833,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,7.987109
+CFS-PARCEL-0149826854,149826854,56322086670000,Concord,etj,City of Concord,1,0.00091,0.00091,low,False,single_boundary_low_confidence,review,CENTERGROVE,NO SUBDIVISION,138.635527
+CFS-PARCEL-0149826855,149826855,56322086670000,Concord,etj,City of Concord,1,0.00091,0.00091,low,False,single_boundary_low_confidence,review,CENTERGROVE,NO SUBDIVISION,138.635527
+CFS-PARCEL-0149828634,149828634,56800438780000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.000939,0.000939,low,False,single_boundary_low_confidence,review,PRUITT FARMS,,11.487625
+CFS-PARCEL-0149819479,149819479,56306446580000,Concord,etj,City of Concord,1,0.000955,0.000955,low,False,single_boundary_low_confidence,trusted,CRESTSIDE,MOUNTAINBROOK,0.498835
+CFS-PARCEL-0149721443,149721443,145 0640000001,Kannapolis,etj,City of Kannapolis,1,0.000976,0.000976,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.953993
+CFS-PARCEL-0149818957,149818957,56308837620000,Concord,etj,City of Concord,1,0.000977,0.000977,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.615366
+CFS-PARCEL-0149821754,149821754,56400438530000,Concord,etj,City of Concord,1,0.00098,0.00098,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.519914
+CFS-PARCEL-0149727303,149727303,45979433280000,Harrisburg,etj,Town of Harrisburg,1,0.001027,0.001027,low,False,single_boundary_low_confidence,review,HARRISBURG,,6.656573
+CFS-PARCEL-0149819825,149819825,56309607680000,Concord,etj,City of Concord,1,0.00103,0.00103,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,1.506379
+CFS-PARCEL-0149826466,149826466,56308847940000,Concord,etj,City of Concord,1,0.001087,0.001087,low,False,single_boundary_low_confidence,trusted,MOUNTAINBROOK II,MOUNTAINBROOK II,0.64813
+CFS-PARCEL-0149819756,149819756,56309418120000,Concord,etj,City of Concord,1,0.001088,0.001088,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.637512
+CFS-PARCEL-0149745079,149745079,55060817970000,Harrisburg,etj,Town of Harrisburg,1,0.001104,0.001104,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,2.031109
+CFS-PARCEL-0149721606,149721606,145 1220000001,Kannapolis,etj,City of Kannapolis,1,0.001119,0.001119,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.589114
+CFS-PARCEL-0149761356,149761356,55170152360000,Harrisburg,etj,Town of Harrisburg,1,0.001136,0.001136,low,False,single_boundary_low_confidence,review,HARRISBURG,,63.423761
+CFS-PARCEL-0149727305,149727305,45979447960000,Harrisburg,etj,Town of Harrisburg,1,0.001147,0.001147,low,False,single_boundary_low_confidence,review,HARRISBURG CITY NORTH,,9.916349
+CFS-PARCEL-0149819213,149819213,56309428190000,Concord,etj,City of Concord,1,0.001182,0.001182,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.458656
+CFS-PARCEL-0149727036,149727036,45978406690000,Harrisburg,etj,Town of Harrisburg,1,0.001199,0.001199,low,False,single_boundary_low_confidence,review,HARRISBURG CITY NORTH,,3.230866
+CFS-PARCEL-0149720492,149720492,145 02220000001,Kannapolis,etj,City of Kannapolis,1,0.00124,0.00124,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.581943
+CFS-PARCEL-0149745709,149745709,55065978800000,Harrisburg,etj,Town of Harrisburg,1,0.001269,0.001269,low,False,single_boundary_low_confidence,trusted,COURTYARDS ON ROBINSON CHURCH,COURTYARDS ON ROBINSON CHURCH,6.442113
+CFS-PARCEL-0149754280,149754280,55061902870000,Harrisburg,etj,Town of Harrisburg,1,0.001269,0.001269,low,False,single_boundary_low_confidence,trusted,HUNTWICK,HUNTWICK,1.021586
+CFS-PARCEL-0149721825,149721825,145A136,Kannapolis,etj,City of Kannapolis,1,0.001277,0.001277,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,2.196607
+CFS-PARCEL-0149757046,149757046,55085029970000,Harrisburg,etj,Town of Harrisburg,1,0.001284,0.001284,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.405079
+CFS-PARCEL-0149756887,149756887,55079467830000,Harrisburg,etj,Town of Harrisburg,1,0.00129,0.00129,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,8.618687
+CFS-PARCEL-0149828450,149828450,56700324470000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.001301,0.001301,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,5.259307
+CFS-PARCEL-0149828589,149828589,56800200080000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.001321,0.001321,low,False,single_boundary_low_confidence,review,HAHN SCOTT RD,,3.598851
+CFS-PARCEL-0149780679,149780679,55795671650000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.00135,0.00135,low,False,single_boundary_low_confidence,trusted,HAHN SCOTT RD,TROUTMAN LAND INVESTMENTS INC,13.221058
+CFS-PARCEL-0149781022,149781022,55793925230000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.001357,0.001357,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,1.367914
+CFS-PARCEL-0149820138,149820138,56318010500000,Concord,etj,City of Concord,1,0.001401,0.001401,low,False,single_boundary_low_confidence,review,EAST 73 / 49,,0.24671
+CFS-PARCEL-0149811660,149811660,56224369610000,Concord,etj,City of Concord,1,0.001544,0.001544,low,False,single_boundary_low_confidence,trusted,OLD EARNHARDT,CABARRUS EXECUTIVE PARK,2.689263
+CFS-PARCEL-0149746670,149746670,55071603940000,Harrisburg,etj,Town of Harrisburg,1,0.001549,0.001549,low,False,single_boundary_low_confidence,trusted,VALHALLA,VALHALLA,0.460417
+CFS-PARCEL-0149826305,149826305,56700635070000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.001576,0.001576,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.419694
+CFS-PARCEL-0149819612,149819612,56308876880000,Concord,etj,City of Concord,1,0.001595,0.001595,low,False,single_boundary_low_confidence,review,MOUNTAINBROOK II,MOUNTAINBROOK II,0.006664
+CFS-PARCEL-0149747718,149747718,55074342350000,Harrisburg,etj,Town of Harrisburg,1,0.001653,0.001653,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,4.745818
+CFS-PARCEL-0149747572,149747572,55071428660000,Harrisburg,etj,Town of Harrisburg,1,0.001708,0.001708,low,False,single_boundary_low_confidence,review,HARRISBURG,,4.041221
+CFS-PARCEL-0149826850,149826850,56321250250000,Concord,etj,City of Concord,1,0.001755,0.001755,low,False,single_boundary_low_confidence,trusted,CENTERGROVE,DIVISION OF 14.208 AC,2.359639
+CFS-PARCEL-0149819898,149819898,56311455500000,Concord,etj,City of Concord,1,0.001788,0.001788,low,False,single_boundary_low_confidence,trusted,CORDERA,CORDERA,0.494141
+CFS-PARCEL-0149756343,149756343,55076368850000,Harrisburg,etj,Town of Harrisburg,1,0.001843,0.001843,low,False,single_boundary_low_confidence,review,HARRISBURG,,3.01769
+CFS-PARCEL-0149725625,149725625,249C094,Kannapolis,etj,City of Kannapolis,1,0.001889,0.001889,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,300.070552
+CFS-PARCEL-0149757522,149757522,55183101630000,Harrisburg,etj,Town of Harrisburg,1,0.001891,0.001891,low,False,single_boundary_low_confidence,trusted,ALLBURN,ALLBURN,0.46028
+CFS-PARCEL-0149746776,149746776,55072809350000,Harrisburg,etj,Town of Harrisburg,1,0.002021,0.002021,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.635768
+CFS-PARCEL-0149745136,149745136,55063969360000,Harrisburg,etj,Town of Harrisburg,1,0.002043,0.002043,low,False,single_boundary_low_confidence,trusted,CAMELOT,CAMELOT,0.607642
+CFS-PARCEL-0149826712,149826712,56701614400000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002046,0.002046,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,9.484928
+CFS-PARCEL-0149827422,149827422,56709620700000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002067,0.002067,low,False,single_boundary_low_confidence,review,LENTZ HARNESS SHOP RD,,7.051444
+CFS-PARCEL-0149780687,149780687,55794891680000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002069,0.002069,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.780761
+CFS-PARCEL-0149720720,149720720,140B182,Kannapolis,etj,City of Kannapolis,1,0.00211,0.00211,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.907665
+CFS-PARCEL-0149826532,149826532,56700443330000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002222,0.002222,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.842209
+CFS-PARCEL-0149745081,149745081,55060898510000,Harrisburg,etj,Town of Harrisburg,1,0.002223,0.002223,low,False,single_boundary_low_confidence,trusted,HUNTWICK,HUNTWICK,1.100892
+CFS-PARCEL-0149781131,149781131,55794970500000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002227,0.002227,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,1.019639
+CFS-PARCEL-0149744126,149744126,55060907600000,Harrisburg,etj,Town of Harrisburg,1,0.002286,0.002286,low,False,single_boundary_low_confidence,trusted,COVENTRY,COVENTRY,0.33915
+CFS-PARCEL-0149825298,149825298,56609683960000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002294,0.002294,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.434676
+CFS-PARCEL-0149755112,149755112,55172145850000,Harrisburg,etj,Town of Harrisburg,1,0.002356,0.002356,low,False,single_boundary_low_confidence,review,HARRISBURG,,81.777087
+CFS-PARCEL-0149824964,149824964,56609661910000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.0024,0.0024,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.425896
+CFS-PARCEL-0149746672,149746672,55071627130000,Harrisburg,etj,Town of Harrisburg,1,0.002421,0.002421,low,False,single_boundary_low_confidence,trusted,VALHALLA,VALHALLA,0.916325
+CFS-PARCEL-0149754692,149754692,55172353290000,Harrisburg,etj,Town of Harrisburg,1,0.002445,0.002445,low,False,single_boundary_low_confidence,trusted,HARRISBURG SOUTH,R/W DEDICATION & ESMNT PLAT HARMONY SUBDIV,1.28109
+CFS-PARCEL-0149748057,149748057,55075204860000,Harrisburg,etj,Town of Harrisburg,1,0.002548,0.002548,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,2.310277
+CFS-PARCEL-0149788598,149788598,55795719070000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002617,0.002617,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,1.477818
+CFS-PARCEL-0149748556,149748556,55075128200000,Harrisburg,etj,Town of Harrisburg,1,0.002649,0.002649,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.480445
+CFS-PARCEL-0149749328,149749328,55080083010000,Harrisburg,etj,Town of Harrisburg,1,0.002682,0.002682,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.880387
+CFS-PARCEL-0149779930,149779930,55697633240000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.00279,0.00279,low,False,single_boundary_low_confidence,trusted,MT PLEASANT HIGH SCHOOL,FINK SCHOOL SUBD,7.55111
+CFS-PARCEL-0149749732,149749732,55081144640000,Harrisburg,etj,Town of Harrisburg,1,0.002811,0.002811,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,MOREHEAD RD BOUNDARY,4.534453
+CFS-PARCEL-0149749733,149749733,55081144640000,Harrisburg,etj,Town of Harrisburg,1,0.002811,0.002811,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,MOREHEAD RD BOUNDARY,4.534453
+CFS-PARCEL-0149828299,149828299,56609672620000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002817,0.002817,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.458163
+CFS-PARCEL-0149826361,149826361,56700628440000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002836,0.002836,low,False,single_boundary_low_confidence,trusted,MT PLEASANT OUTSIDE,EAGLE HEIGHTS,0.501313
+CFS-PARCEL-0149826771,149826771,56703087180000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002857,0.002857,low,False,single_boundary_low_confidence,review,MT PLEASANT SOUTH,,12.07238
+CFS-PARCEL-0149828099,149828099,56719156790000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002932,0.002932,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,37.321301
+CFS-PARCEL-0149746668,149746668,55071403860000,Harrisburg,etj,Town of Harrisburg,1,0.002935,0.002935,low,False,single_boundary_low_confidence,trusted,HARRISBURG,MIDLAND LEASING,8.662115
+CFS-PARCEL-0149756336,149756336,55180333560000,Harrisburg,etj,Town of Harrisburg,1,0.002937,0.002937,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW,0.539616
+CFS-PARCEL-0149826246,149826246,56609671270000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.002946,0.002946,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.109756
+CFS-PARCEL-0149726922,149726922,45979513820000,Harrisburg,etj,Town of Harrisburg,1,0.002953,0.002953,low,False,single_boundary_low_confidence,trusted,BENTLEY HILLS,ELDORADO HILLS,0.651272
+CFS-PARCEL-0149761819,149761819,55171713120000,Harrisburg,etj,Town of Harrisburg,1,0.003173,0.003173,low,False,single_boundary_low_confidence,trusted,HARRISBURG,HERITAGE COMMONS,1.689732
+CFS-PARCEL-0149827516,149827516,56705212930000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.003222,0.003222,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,,1.970033
+CFS-PARCEL-0149820025,149820025,56311483140000,Concord,etj,City of Concord,1,0.003269,0.003269,low,False,single_boundary_low_confidence,trusted,OVERBROOK,HOLLINGSWORTH,1.735444
+CFS-PARCEL-0149811936,149811936,56228065380000,Concord,etj,City of Concord,1,0.003276,0.003276,low,False,single_boundary_low_confidence,review,BRIDLEWOOD PLACE,,5.820677
+CFS-PARCEL-0149750740,149750740,55084064620000,Harrisburg,etj,Town of Harrisburg,1,0.003304,0.003304,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.486024
+CFS-PARCEL-0149747340,149747340,55073061500000,Harrisburg,etj,Town of Harrisburg,1,0.003314,0.003314,low,False,single_boundary_low_confidence,trusted,CAMELOT,CAMELOT,0.645057
+CFS-PARCEL-0149820198,149820198,56317103210000,Concord,etj,City of Concord,1,0.003361,0.003361,low,False,single_boundary_low_confidence,review,NEW GILEAD,,108.667356
+CFS-PARCEL-0149824737,149824737,56609682390000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.003501,0.003501,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.473883
+CFS-PARCEL-0149750741,149750741,55089208580000,Harrisburg,etj,Town of Harrisburg,1,0.003658,0.003658,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION P/O PHASE III,0.39949
+CFS-PARCEL-0149812215,149812215,56227647830000,Concord,etj,City of Concord,1,0.003836,0.003836,low,False,single_boundary_low_confidence,review,NORTHLIGHT,,2.402287
+CFS-PARCEL-0149779521,149779521,55698529100000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.003843,0.003843,low,False,single_boundary_low_confidence,trusted,FINK / ROSS LEE,FINK SCHOOL SUBD,1.120729
+CFS-PARCEL-0149746702,149746702,55071988970000,Harrisburg,etj,Town of Harrisburg,1,0.003868,0.003868,low,False,single_boundary_low_confidence,review,HARRISBURG CITY NORTH,,14.434505
+CFS-PARCEL-0149812216,149812216,56227676490000,Concord,etj,City of Concord,1,0.003906,0.003906,low,False,single_boundary_low_confidence,trusted,NORTHLIGHT,COPPERFIELD BLVD - 49.413 AC,2.003102
+CFS-PARCEL-0149726784,149726784,45969918260000,Harrisburg,etj,Town of Harrisburg,1,0.00393,0.00393,low,False,single_boundary_low_confidence,review,COVENTRY,COVENTRY,3.065384
+CFS-PARCEL-0149726785,149726785,45969918260000,Harrisburg,etj,Town of Harrisburg,1,0.00393,0.00393,low,False,single_boundary_low_confidence,review,COVENTRY,COVENTRY,3.065384
+CFS-PARCEL-0149756786,149756786,55078071860000,Harrisburg,etj,Town of Harrisburg,1,0.004032,0.004032,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 2,0.54633
+CFS-PARCEL-0149748055,149748055,55075126380000,Harrisburg,etj,Town of Harrisburg,1,0.004097,0.004097,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.349967
+CFS-PARCEL-0149748061,149748061,55075122590000,Harrisburg,etj,Town of Harrisburg,1,0.004198,0.004198,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.423843
+CFS-PARCEL-0149826714,149826714,56701779360000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.004298,0.004298,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,26.890 AC - NC HWY 49 & N MAIN STREET,20.017359
+CFS-PARCEL-0149826715,149826715,56701779360000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.004298,0.004298,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,26.890 AC - NC HWY 49 & N MAIN STREET,20.017359
+CFS-PARCEL-0149826731,149826731,56701779360000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.004298,0.004298,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,26.890 AC - NC HWY 49 & N MAIN STREET,20.017359
+CFS-PARCEL-0149748062,149748062,55075124490000,Harrisburg,etj,Town of Harrisburg,1,0.004312,0.004312,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.371586
+CFS-PARCEL-0149756094,149756094,55075125490000,Harrisburg,etj,Town of Harrisburg,1,0.004362,0.004362,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.347725
+CFS-PARCEL-0149749674,149749674,55084075840000,Harrisburg,etj,Town of Harrisburg,1,0.004364,0.004364,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.282103
+CFS-PARCEL-0149748054,149748054,55075123590000,Harrisburg,etj,Town of Harrisburg,1,0.004397,0.004397,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.401606
+CFS-PARCEL-0149819742,149819742,56306942010000,Concord,etj,City of Concord,1,0.004435,0.004435,low,False,single_boundary_low_confidence,review,SUMMIT DRIVE,,16.146205
+CFS-PARCEL-0149772008,149772008,55393469600000,Concord,etj,City of Concord,1,0.004454,0.004454,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,75.087235
+CFS-PARCEL-0149757873,149757873,55182083470000,Harrisburg,etj,Town of Harrisburg,1,0.004479,0.004479,low,False,single_boundary_low_confidence,trusted,ALLBURN,ALLBURN,10.693435
+CFS-PARCEL-0149726737,149726737,45969984260000,Harrisburg,etj,Town of Harrisburg,1,0.004516,0.004516,low,False,single_boundary_low_confidence,trusted,COVENTRY,COVENTRY,0.644072
+CFS-PARCEL-0149746701,149746701,55071964520000,Harrisburg,etj,Town of Harrisburg,1,0.004571,0.004571,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.69743
+CFS-PARCEL-0149819935,149819935,56310991640000,Concord,etj,City of Concord,1,0.004584,0.004584,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,0.726993
+CFS-PARCEL-0149820056,149820056,56312435220000,Concord,etj,City of Concord,1,0.004612,0.004612,low,False,single_boundary_low_confidence,trusted,OVERBROOK,HOLLINGSWORTH,3.789774
+CFS-PARCEL-0149810356,149810356,56217987990000,Concord,etj,City of Concord,1,0.004646,0.004646,low,False,single_boundary_low_confidence,review,OVERBROOK,,0.159814
+CFS-PARCEL-0149827028,149827028,56703946940000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.004976,0.004976,low,False,single_boundary_low_confidence,trusted,MT PLEASANT COMMERCIAL,L. A. LIPE ESTATE,30.643564
+CFS-PARCEL-0149771939,149771939,55394235410000,Concord,etj,City of Concord,1,0.00501,0.00501,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,53.366666
+CFS-PARCEL-0149771940,149771940,55394235410000,Concord,etj,City of Concord,1,0.00501,0.00501,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,53.366666
+CFS-PARCEL-0149755759,149755759,55072590130000,Harrisburg,etj,Town of Harrisburg,1,0.005029,0.005029,low,False,single_boundary_low_confidence,review,HARRISBURG,,5.887687
+CFS-PARCEL-0149780751,149780751,55794876590000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.005093,0.005093,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.639764
+CFS-PARCEL-0149721002,149721002,145A046,Kannapolis,etj,City of Kannapolis,1,0.005146,0.005146,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.950095
+CFS-PARCEL-0149747768,149747768,55074443490000,Harrisburg,etj,Town of Harrisburg,1,0.00522,0.00522,low,False,single_boundary_low_confidence,trusted,HARRISBURG,600 RACING,16.697477
+CFS-PARCEL-0149810855,149810855,56219767160000,Concord,etj,City of Concord,1,0.005401,0.005401,low,False,single_boundary_low_confidence,review,OVERBROOK,,13.105814
+CFS-PARCEL-0149750413,149750413,55080063120000,Harrisburg,etj,Town of Harrisburg,1,0.005449,0.005449,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.429857
+CFS-PARCEL-0149825713,149825713,56700421650000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.005521,0.005521,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,PLAT FOR 550 SOUTH HALIFAX ST,1.074865
+CFS-PARCEL-0149758977,149758977,55088199340000,Harrisburg,etj,Town of Harrisburg,1,0.005552,0.005552,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION P/O PHASE III,0.306855
+CFS-PARCEL-0149815367,149815367,56239370840000,Concord,etj,City of Concord,1,0.005577,0.005577,low,False,single_boundary_low_confidence,review,DALE EARNHARDT BLVD,,1.992106
+CFS-PARCEL-0149820010,149820010,56311695130000,Concord,etj,City of Concord,1,0.005577,0.005577,low,False,single_boundary_low_confidence,trusted,OVERBROOK,LUVINE HILLS,0.622362
+CFS-PARCEL-0149825692,149825692,56700237270000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.005749,0.005749,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,6.743971
+CFS-PARCEL-0149827851,149827851,56716488760000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.005766,0.005766,low,False,single_boundary_low_confidence,trusted,MT PLEASANT OUTSIDE,LT 3 JEAN HARWOOD-STANHOPE,40.655239
+CFS-PARCEL-0149735799,149735799,45969829780000,Harrisburg,etj,Town of Harrisburg,1,0.005816,0.005816,low,False,single_boundary_low_confidence,trusted,COVENTRY,COVENTRY,0.677271
+CFS-PARCEL-0149747274,149747274,55073471040000,Harrisburg,etj,Town of Harrisburg,1,0.005859,0.005859,low,False,single_boundary_low_confidence,review,HARRISBURG,,9.77636
+CFS-PARCEL-0149747244,149747244,55073374760000,Harrisburg,etj,Town of Harrisburg,1,0.00591,0.00591,low,False,single_boundary_low_confidence,review,HARRISBURG,,8.153955
+CFS-PARCEL-0149748955,149748955,55079132150000,Harrisburg,etj,Town of Harrisburg,1,0.005975,0.005975,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.730055
+CFS-PARCEL-0149728318,149728318,45978670520000,Harrisburg,etj,Town of Harrisburg,1,0.006,0.006,low,False,single_boundary_low_confidence,trusted,BENTLEY HILLS,ELDORADO HILLS,0.331681
+CFS-PARCEL-0149759060,149759060,55089283000000,Harrisburg,etj,Town of Harrisburg,1,0.00622,0.00622,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.248672
+CFS-PARCEL-0149747939,149747939,55075462160000,Harrisburg,etj,Town of Harrisburg,1,0.006258,0.006258,low,False,single_boundary_low_confidence,review,HARRISBURG,NO SUBDIVISION,29.484517
+CFS-PARCEL-0149820002,149820002,56313187910000,Concord,etj,City of Concord,1,0.006424,0.006424,low,False,single_boundary_low_confidence,review,DEAL ST,,13.31218
+CFS-PARCEL-0149756178,149756178,55174203100000,Harrisburg,etj,Town of Harrisburg,1,0.006487,0.006487,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.574688
+CFS-PARCEL-0149756528,149756528,55180343220000,Harrisburg,etj,Town of Harrisburg,1,0.006493,0.006493,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW,0.590524
+CFS-PARCEL-0149750992,149750992,55089292680000,Harrisburg,etj,Town of Harrisburg,1,0.0066,0.0066,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.301144
+CFS-PARCEL-0149726909,149726909,45977942470000,Harrisburg,etj,Town of Harrisburg,1,0.006631,0.006631,low,False,single_boundary_low_confidence,review,HARRISBURG CITY NORTH,,71.484715
+CFS-PARCEL-0149726910,149726910,45977942470000,Harrisburg,etj,Town of Harrisburg,1,0.006631,0.006631,low,False,single_boundary_low_confidence,review,HARRISBURG CITY NORTH,,71.484715
+CFS-PARCEL-0149721819,149721819,145A06016,Kannapolis,etj,City of Kannapolis,1,0.006685,0.006685,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,2.390141
+CFS-PARCEL-0149721477,149721477,145A035,Kannapolis,etj,City of Kannapolis,1,0.006701,0.006701,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.122353
+CFS-PARCEL-0149812203,149812203,56229835310000,Concord,etj,City of Concord,1,0.006719,0.006719,low,False,single_boundary_low_confidence,trusted,NORTHLIGHT,EDDLEMAN LAND,17.719452
+CFS-PARCEL-0149761388,149761388,55170659900000,Harrisburg,etj,Town of Harrisburg,1,0.006825,0.006825,low,False,single_boundary_low_confidence,trusted,HARRISBURG,HARRISBURG TOWN CENTER,0.992942
+CFS-PARCEL-0149824403,149824403,56603627660000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.006853,0.006853,low,False,single_boundary_low_confidence,review,MT PLEASANT HIGH SCHOOL,,32.87584
+CFS-PARCEL-0149781106,149781106,55793906600000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.006857,0.006857,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.494124
+CFS-PARCEL-0149755167,149755167,55173266800000,Harrisburg,etj,Town of Harrisburg,1,0.006991,0.006991,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,1.662704
+CFS-PARCEL-0149750090,149750090,55084060840000,Harrisburg,etj,Town of Harrisburg,1,0.006998,0.006998,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.316772
+CFS-PARCEL-0149747248,149747248,55071954550000,Harrisburg,etj,Town of Harrisburg,1,0.007003,0.007003,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.649769
+CFS-PARCEL-0149757757,149757757,55185163730000,Harrisburg,etj,Town of Harrisburg,1,0.007154,0.007154,low,False,single_boundary_low_confidence,review,STOUGH ROAD,,21.195331
+CFS-PARCEL-0149824674,149824674,56609498470000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.007391,0.007391,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.576093
+CFS-PARCEL-0149824675,149824675,56609498470000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.007391,0.007391,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.576093
+CFS-PARCEL-0149824676,149824676,56609498470000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.007391,0.007391,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,,0.576093
+CFS-PARCEL-0149826146,149826146,56619224500000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.007432,0.007432,low,False,single_boundary_low_confidence,review,ST JOHNS CHURCH,,59.214142
+CFS-PARCEL-0149751038,149751038,55089295750000,Harrisburg,etj,Town of Harrisburg,1,0.007451,0.007451,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.396793
+CFS-PARCEL-0149825495,149825495,56603526040000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.007489,0.007489,low,False,single_boundary_low_confidence,review,MT PLEASANT HIGH SCHOOL,,40.840991
+CFS-PARCEL-0149830191,149830191,56801323600000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.007527,0.007527,low,False,single_boundary_low_confidence,trusted,LENTZ HARNESS SHOP RD,PROPERTY OF DORIS E HORTON,53.570838
+CFS-PARCEL-0149755629,149755629,55174212130000,Harrisburg,etj,Town of Harrisburg,1,0.007654,0.007654,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.513359
+CFS-PARCEL-0149828061,149828061,56718383240000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.007673,0.007673,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,43.72269
+CFS-PARCEL-0149779486,149779486,55697671250000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.007764,0.007764,low,False,single_boundary_low_confidence,review,MT PLEASANT HIGH SCHOOL,FINK SCHOOL SUBD,8.503758
+CFS-PARCEL-0149779487,149779487,55697671250000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.007764,0.007764,low,False,single_boundary_low_confidence,review,MT PLEASANT HIGH SCHOOL,FINK SCHOOL SUBD,8.503758
+CFS-PARCEL-0149749291,149749291,55079131020000,Harrisburg,etj,Town of Harrisburg,1,0.007937,0.007937,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.422838
+CFS-PARCEL-0149726919,149726919,45979361610000,Harrisburg,etj,Town of Harrisburg,1,0.007963,0.007963,low,False,single_boundary_low_confidence,review,HARRISBURG,,2.518805
+CFS-PARCEL-0149748681,149748681,55078051760000,Harrisburg,etj,Town of Harrisburg,1,0.007965,0.007965,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 2,1.540369
+CFS-PARCEL-0149780900,149780900,55793973210000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.008069,0.008069,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.481326
+CFS-PARCEL-0149746671,149746671,55071614490000,Harrisburg,etj,Town of Harrisburg,1,0.008078,0.008078,low,False,single_boundary_low_confidence,trusted,VALHALLA,VALHALLA,0.952244
+CFS-PARCEL-0149781016,149781016,55792996770000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.00811,0.00811,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.522174
+CFS-PARCEL-0149749417,149749417,55079120910000,Harrisburg,etj,Town of Harrisburg,1,0.008185,0.008185,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.399374
+CFS-PARCEL-0149756870,149756870,55079029810000,Harrisburg,etj,Town of Harrisburg,1,0.008255,0.008255,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.441105
+CFS-PARCEL-0149746987,149746987,55070955140000,Harrisburg,etj,Town of Harrisburg,1,0.008314,0.008314,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.391566
+CFS-PARCEL-0149751041,149751041,55089350800000,Harrisburg,etj,Town of Harrisburg,1,0.008314,0.008314,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE II MAP III,0.226878
+CFS-PARCEL-0149721085,149721085,143 0280000001,Kannapolis,etj,City of Kannapolis,1,0.008322,0.008322,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.306863
+CFS-PARCEL-0149748063,149748063,55075221640000,Harrisburg,etj,Town of Harrisburg,1,0.00838,0.00838,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.345648
+CFS-PARCEL-0149747806,149747806,55075220440000,Harrisburg,etj,Town of Harrisburg,1,0.008454,0.008454,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.3486
+CFS-PARCEL-0149826276,149826276,56701114770000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.008486,0.008486,low,False,single_boundary_low_confidence,review,MT PLEASANT SOUTH,,31.988954
+CFS-PARCEL-0149771872,149771872,55394642480000,Concord,etj,City of Concord,1,0.0085,0.0085,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,25.68421
+CFS-PARCEL-0149754691,149754691,55172297290000,Harrisburg,etj,Town of Harrisburg,1,0.008506,0.008506,low,False,single_boundary_low_confidence,trusted,HARRISBURG SOUTH,R/W DEDICATION & EASEMENT PLAT,4.522847
+CFS-PARCEL-0149780937,149780937,55792987820000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.00858,0.00858,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.541735
+CFS-PARCEL-0149750145,149750145,55085171330000,Harrisburg,etj,Town of Harrisburg,1,0.008606,0.008606,low,False,single_boundary_low_confidence,review,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.902623
+CFS-PARCEL-0149748440,149748440,55075222850000,Harrisburg,etj,Town of Harrisburg,1,0.008687,0.008687,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.35665
+CFS-PARCEL-0149726945,149726945,45969940070000,Harrisburg,etj,Town of Harrisburg,1,0.008694,0.008694,low,False,single_boundary_low_confidence,trusted,COVENTRY,COVENTRY,1.218621
+CFS-PARCEL-0149754778,149754778,55172467180000,Harrisburg,etj,Town of Harrisburg,1,0.008705,0.008705,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.15607
+CFS-PARCEL-0149727381,149727381,45979534480000,Harrisburg,etj,Town of Harrisburg,1,0.00871,0.00871,low,False,single_boundary_low_confidence,trusted,BENTLEY HILLS,ELDORADO HILLS,0.513686
+CFS-PARCEL-0149779795,149779795,55697811190000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.008783,0.008783,low,False,single_boundary_low_confidence,trusted,MT PLEASANT HIGH SCHOOL,FINK SCHOOL SUBD,10.973468
+CFS-PARCEL-0149781015,149781015,55792987080000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.008817,0.008817,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.559149
+CFS-PARCEL-0149762455,149762455,55173284040000,Harrisburg,etj,Town of Harrisburg,1,0.008846,0.008846,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.871817
+CFS-PARCEL-0149746962,149746962,55071945500000,Harrisburg,etj,Town of Harrisburg,1,0.008916,0.008916,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.637232
+CFS-PARCEL-0149826430,149826430,56701856740000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.009022,0.009022,low,False,single_boundary_low_confidence,trusted,NORTH WOOD SUBDIVISION,NORTH WOOD,0.545765
+CFS-PARCEL-0149746895,149746895,55067898940000,Harrisburg,etj,Town of Harrisburg,1,0.009076,0.009076,low,False,single_boundary_low_confidence,trusted,CHURCHILL FARMS,CHURCHILL FARMS,0.829971
+CFS-PARCEL-0149748436,149748436,55075129330000,Harrisburg,etj,Town of Harrisburg,1,0.009183,0.009183,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.432259
+CFS-PARCEL-0149780936,149780936,55792978250000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.009266,0.009266,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.596713
+CFS-PARCEL-0149824451,149824451,56604180880000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.009274,0.009274,low,False,single_boundary_low_confidence,trusted,BIRKDALE,BIRKDALE,1.290003
+CFS-PARCEL-0149826252,149826252,56700432460000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.009317,0.009317,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,PLAT FOR 540 SOUTH HALIFAX ST,0.795508
+CFS-PARCEL-0149726895,149726895,45978652400000,Harrisburg,etj,Town of Harrisburg,1,0.009428,0.009428,low,False,single_boundary_low_confidence,trusted,BENTLEY HILLS,ELDORADO HILLS,0.381036
+CFS-PARCEL-0149727108,149727108,45978661140000,Harrisburg,etj,Town of Harrisburg,1,0.009644,0.009644,low,False,single_boundary_low_confidence,trusted,BENTLEY HILLS,ELDORADO HILLS,0.357481
+CFS-PARCEL-0149824486,149824486,56605017470000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.009672,0.009672,low,False,single_boundary_low_confidence,trusted,BIRKDALE,BIRKDALE,2.344425
+CFS-PARCEL-0149725582,149725582,245 163,Kannapolis,etj,City of Kannapolis,1,0.009698,0.009698,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,25.638862
+CFS-PARCEL-0149748812,149748812,55077317690000,Harrisburg,etj,Town of Harrisburg,1,0.009766,0.009766,low,False,single_boundary_low_confidence,trusted,HARRISBURG SOUTH,PROPERTIES OF JAMES H HOUSTON JR & WF JEAN H,1.716905
+CFS-PARCEL-0149727107,149727107,45978660880000,Harrisburg,etj,Town of Harrisburg,1,0.009831,0.009831,low,False,single_boundary_low_confidence,trusted,BENTLEY HILLS,ELDORADO HILLS,0.310616
+CFS-PARCEL-0149824841,149824841,56604099560000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.009919,0.009919,low,False,single_boundary_low_confidence,trusted,BIRKDALE,BIRKDALE,1.164502
+CFS-PARCEL-0149780686,149780686,55794876700000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.009981,0.009981,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.659085
+CFS-PARCEL-0149748990,149748990,55077275370000,Harrisburg,etj,Town of Harrisburg,1,0.010097,0.010097,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE,13.129179
+CFS-PARCEL-0149727053,149727053,45969992580000,Harrisburg,etj,Town of Harrisburg,1,0.010285,0.010285,low,False,single_boundary_low_confidence,trusted,FRANCES HAVEN,FRANCES HAVEN,0.328845
+CFS-PARCEL-0149825208,149825208,56605024590000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.010331,0.010331,low,False,single_boundary_low_confidence,trusted,BIRKDALE,BIRKDALE,2.46492
+CFS-PARCEL-0149824888,149824888,56606595780000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.010339,0.010339,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,FOOD LION SHOPPING CENTER,5.883819
+CFS-PARCEL-0149825209,149825209,56605033630000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.010565,0.010565,low,False,single_boundary_low_confidence,trusted,BIRKDALE,BIRKDALE,1.25505
+CFS-PARCEL-0149756225,149756225,55174250520000,Harrisburg,etj,Town of Harrisburg,1,0.010763,0.010763,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.534659
+CFS-PARCEL-0149755040,149755040,55171398040000,Harrisburg,etj,Town of Harrisburg,1,0.011102,0.011102,low,False,single_boundary_low_confidence,trusted,STALLINGS FARM,STALLINGS FARM,0.534455
+CFS-PARCEL-0149744481,149744481,55060928010000,Harrisburg,etj,Town of Harrisburg,1,0.011127,0.011127,low,False,single_boundary_low_confidence,trusted,COVENTRY,COVENTRY,0.463332
+CFS-PARCEL-0149746988,149746988,55070965160000,Harrisburg,etj,Town of Harrisburg,1,0.01121,0.01121,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.466341
+CFS-PARCEL-0149826720,149826720,56312404300000,Concord,etj,City of Concord,1,0.011275,0.011275,low,False,single_boundary_low_confidence,trusted,OVERBROOK,HOLLINGSWORTH,1.845239
+CFS-PARCEL-0149747158,149747158,55070975150000,Harrisburg,etj,Town of Harrisburg,1,0.011307,0.011307,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.466999
+CFS-PARCEL-0149747105,149747105,55070985940000,Harrisburg,etj,Town of Harrisburg,1,0.011358,0.011358,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.466899
+CFS-PARCEL-0149747590,149747590,55070985050000,Harrisburg,etj,Town of Harrisburg,1,0.011368,0.011368,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.465274
+CFS-PARCEL-0149727382,149727382,45979546120000,Harrisburg,etj,Town of Harrisburg,1,0.011394,0.011394,low,False,single_boundary_low_confidence,trusted,BENTLEY HILLS,ELDORADO HILLS,0.723029
+CFS-PARCEL-0149780935,149780935,55792969200000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.011395,0.011395,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.756865
+CFS-PARCEL-0149746698,149746698,55071905030000,Harrisburg,etj,Town of Harrisburg,1,0.01143,0.01143,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.468746
+CFS-PARCEL-0149727532,149727532,45979524610000,Harrisburg,etj,Town of Harrisburg,1,0.011454,0.011454,low,False,single_boundary_low_confidence,trusted,BENTLEY HILLS,ELDORADO HILLS,0.513111
+CFS-PARCEL-0149826245,149826245,56609669480000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.011533,0.011533,low,False,single_boundary_low_confidence,trusted,MT PLEASANT COMMERCIAL,ROBERT E. LEE ALLMAN PROPOSED STRIP MALL,2.238127
+CFS-PARCEL-0149755293,149755293,55170468020000,Harrisburg,etj,Town of Harrisburg,1,0.011581,0.011581,low,False,single_boundary_low_confidence,review,HARRISBURG,,25.583641
+CFS-PARCEL-0149810093,149810093,56219682160000,Concord,etj,City of Concord,1,0.011607,0.011607,low,False,single_boundary_low_confidence,trusted,OVERBROOK,BURRAGE ROAD 5.364 AC,0.956789
+CFS-PARCEL-0149788597,149788597,55794883750000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.011635,0.011635,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.766177
+CFS-PARCEL-0149755658,149755658,55071915030000,Harrisburg,etj,Town of Harrisburg,1,0.011681,0.011681,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.49817
+CFS-PARCEL-0149747917,149747917,55073082260000,Harrisburg,etj,Town of Harrisburg,1,0.011941,0.011941,low,False,single_boundary_low_confidence,trusted,FENTON-DELL,CAMELOT,0.98654
+CFS-PARCEL-0149746961,149746961,55071915940000,Harrisburg,etj,Town of Harrisburg,1,0.011952,0.011952,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.473712
+CFS-PARCEL-0149744781,149744781,55060917350000,Harrisburg,etj,Town of Harrisburg,1,0.01208,0.01208,low,False,single_boundary_low_confidence,trusted,COVENTRY,COVENTRY,0.343732
+CFS-PARCEL-0149827652,149827652,56712436790000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.012118,0.012118,low,False,single_boundary_low_confidence,trusted,ST JOHNS CHURCH,JAMES W HONEYCUTT EST,107.925414
+CFS-PARCEL-0149755661,149755661,55071935020000,Harrisburg,etj,Town of Harrisburg,1,0.012203,0.012203,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.46921
+CFS-PARCEL-0149749414,149749414,55079006600000,Harrisburg,etj,Town of Harrisburg,1,0.012246,0.012246,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.352921
+CFS-PARCEL-0149749274,149749274,55079005120000,Harrisburg,etj,Town of Harrisburg,1,0.012435,0.012435,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.357344
+CFS-PARCEL-0149749141,149749141,55079016160000,Harrisburg,etj,Town of Harrisburg,1,0.012689,0.012689,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.37072
+CFS-PARCEL-0149749303,149749303,55079017730000,Harrisburg,etj,Town of Harrisburg,1,0.012769,0.012769,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.377432
+CFS-PARCEL-0149720478,149720478,143D025,Kannapolis,etj,City of Kannapolis,1,0.012878,0.012878,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.188234
+CFS-PARCEL-0149749032,149749032,55078094550000,Harrisburg,etj,Town of Harrisburg,1,0.012996,0.012996,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.36711
+CFS-PARCEL-0149824873,149824873,56604166310000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.013127,0.013127,low,False,single_boundary_low_confidence,trusted,BIRKDALE,BIRKDALE,1.250774
+CFS-PARCEL-0149754770,149754770,55173444080000,Harrisburg,etj,Town of Harrisburg,1,0.013314,0.013314,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.443087
+CFS-PARCEL-0149826404,149826404,56702050740000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.013355,0.013355,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,1.127338
+CFS-PARCEL-0149754779,149754779,55172467540000,Harrisburg,etj,Town of Harrisburg,1,0.013537,0.013537,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.344438
+CFS-PARCEL-0149762188,149762188,55172477210000,Harrisburg,etj,Town of Harrisburg,1,0.01356,0.01356,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.344447
+CFS-PARCEL-0149755531,149755531,55172486530000,Harrisburg,etj,Town of Harrisburg,1,0.013561,0.013561,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.344433
+CFS-PARCEL-0149755612,149755612,55172476870000,Harrisburg,etj,Town of Harrisburg,1,0.013564,0.013564,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.344444
+CFS-PARCEL-0149756761,149756761,55077380600000,Harrisburg,etj,Town of Harrisburg,1,0.01361,0.01361,low,False,single_boundary_low_confidence,trusted,HARRISBURG SOUTH,MIKE RUTKOWSKI PROPERTY,3.600118
+CFS-PARCEL-0149818909,149818909,56307551940000,Concord,etj,City of Concord,1,0.013785,0.013785,low,False,single_boundary_low_confidence,trusted,BRAMBLE WOODS,BRAMBLEWOODS,0.472451
+CFS-PARCEL-0149755613,149755613,55172495190000,Harrisburg,etj,Town of Harrisburg,1,0.01409,0.01409,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.350921
+CFS-PARCEL-0149755183,149755183,55173434180000,Harrisburg,etj,Town of Harrisburg,1,0.014117,0.014117,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.38391
+CFS-PARCEL-0149780685,149780685,55794875920000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.014125,0.014125,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.677348
+CFS-PARCEL-0149781047,149781047,55794892050000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.01416,0.01416,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.761544
+CFS-PARCEL-0149749742,149749742,55084061310000,Harrisburg,etj,Town of Harrisburg,1,0.014214,0.014214,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.299403
+CFS-PARCEL-0149754730,149754730,55173424280000,Harrisburg,etj,Town of Harrisburg,1,0.0144,0.0144,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.383911
+CFS-PARCEL-0149749142,149749142,55079028310000,Harrisburg,etj,Town of Harrisburg,1,0.01443,0.01443,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PH I MAP 1,0.446647
+CFS-PARCEL-0149744782,149744782,55060919670000,Harrisburg,etj,Town of Harrisburg,1,0.014446,0.014446,low,False,single_boundary_low_confidence,trusted,FRANCES HAVEN,FRANCES HAVEN PH 1  M4,0.354189
+CFS-PARCEL-0149754802,149754802,55170680020000,Harrisburg,etj,Town of Harrisburg,1,0.014648,0.014648,low,False,single_boundary_low_confidence,trusted,HARRISBURG,SADDLE CREEK PH 2,7.248181
+CFS-PARCEL-0149748558,149748558,55075233050000,Harrisburg,etj,Town of Harrisburg,1,0.014843,0.014843,low,False,single_boundary_low_confidence,trusted,WINDSOR FOREST,WINDSOR FOREST,0.358769
+CFS-PARCEL-0149745292,149745292,55064990280000,Harrisburg,etj,Town of Harrisburg,1,0.014855,0.014855,low,False,single_boundary_low_confidence,trusted,FENTON-DELL,FENTON-DELL,3.434122
+CFS-PARCEL-0149746082,149746082,55064951960000,Harrisburg,etj,Town of Harrisburg,1,0.015039,0.015039,low,False,single_boundary_low_confidence,trusted,FENTON-DELL,FENTON-DELL,0.994534
+CFS-PARCEL-0149748699,149748699,55076376390000,Harrisburg,etj,Town of Harrisburg,1,0.01514,0.01514,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,2.116259
+CFS-PARCEL-0149810856,149810856,56219856730000,Concord,etj,City of Concord,1,0.015256,0.015256,low,False,single_boundary_low_confidence,review,OVERBROOK,,1.434403
+CFS-PARCEL-0149727033,149727033,45978257840000,Harrisburg,etj,Town of Harrisburg,1,0.015563,0.015563,low,False,single_boundary_low_confidence,trusted,HARRISBURG,ABERNETHY FAMILY HOLDINGS LLC,6.982377
+CFS-PARCEL-0149827825,149827825,56714431280000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.015706,0.015706,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,42.450796
+CFS-PARCEL-0149725186,149725186,158B055,Kannapolis,etj,City of Kannapolis,1,0.01574,0.01574,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,8.187181
+CFS-PARCEL-0149755460,149755460,55173414490000,Harrisburg,etj,Town of Harrisburg,1,0.015773,0.015773,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.383912
+CFS-PARCEL-0149747594,149747594,55071991200000,Harrisburg,etj,Town of Harrisburg,1,0.015892,0.015892,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.735255
+CFS-PARCEL-0149755114,149755114,55171734470000,Harrisburg,etj,Town of Harrisburg,1,0.016185,0.016185,low,False,single_boundary_low_confidence,trusted,HARRISBURG,TR2 HERITAGE COMMONS REVISED,0.460486
+CFS-PARCEL-0149758093,149758093,55183112280000,Harrisburg,etj,Town of Harrisburg,1,0.016337,0.016337,low,False,single_boundary_low_confidence,trusted,ALLBURN,ALLBURN,0.441042
+CFS-PARCEL-0149756437,149756437,55180312630000,Harrisburg,etj,Town of Harrisburg,1,0.01638,0.01638,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW,0.302635
+CFS-PARCEL-0149756180,149756180,55174211970000,Harrisburg,etj,Town of Harrisburg,1,0.016693,0.016693,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.449871
+CFS-PARCEL-0149828848,149828848,56701733170000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.016712,0.016712,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,,1.60551
+CFS-PARCEL-0149828238,149828238,56604183410000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.017079,0.017079,low,False,single_boundary_low_confidence,trusted,BIRKDALE,BIRKDALE,1.176085
+CFS-PARCEL-0149746636,149746636,55064930690000,Harrisburg,etj,Town of Harrisburg,1,0.017299,0.017299,low,False,single_boundary_low_confidence,trusted,FENTON-DELL,FENTON- DELL,1.294673
+CFS-PARCEL-0149772367,149772367,55395315560000,Concord,etj,City of Concord,1,0.017396,0.017396,low,False,single_boundary_low_confidence,review,CENTRAL CABARRUS HIGH SCHOOL,,0.234434
+CFS-PARCEL-0149755569,149755569,55173405620000,Harrisburg,etj,Town of Harrisburg,1,0.0174,0.0174,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.383918
+CFS-PARCEL-0149754696,149754696,55172495850000,Harrisburg,etj,Town of Harrisburg,1,0.017522,0.017522,low,False,single_boundary_low_confidence,trusted,HARMONY,HARMONY PH2,0.383924
+CFS-PARCEL-0149827575,149827575,56709168870000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.017595,0.017595,low,False,single_boundary_low_confidence,review,HAHN SCOTT RD,,3.417352
+CFS-PARCEL-0149747587,149747587,55070925830000,Harrisburg,etj,Town of Harrisburg,1,0.017693,0.017693,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.631063
+CFS-PARCEL-0149825206,149825206,56604712900000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.018171,0.018171,low,False,single_boundary_low_confidence,review,MT PLEASANT HIGH SCHOOL,,1.896142
+CFS-PARCEL-0149812005,149812005,56228826980000,Concord,etj,City of Concord,1,0.018289,0.018289,low,False,single_boundary_low_confidence,trusted,NORTHLIGHT,DICKENS PLACE EXTENSION,13.413929
+CFS-PARCEL-0149781112,149781112,55794884440000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.018869,0.018869,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.759872
+CFS-PARCEL-0149748698,149748698,55076141280000,Harrisburg,etj,Town of Harrisburg,1,0.019016,0.019016,low,False,single_boundary_low_confidence,trusted,HARRISBURG SOUTH,BETTY BARBEE LEE PROPERTY,0.97073
+CFS-PARCEL-0149759042,149759042,55089269590000,Harrisburg,etj,Town of Harrisburg,1,0.019414,0.019414,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE II MAP III,0.216073
+CFS-PARCEL-0149827607,149827607,56710366540000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.019444,0.019444,low,False,single_boundary_low_confidence,review,ST JOHNS CHURCH,,1.01206
+CFS-PARCEL-0149756176,149756176,55174168650000,Harrisburg,etj,Town of Harrisburg,1,0.019533,0.019533,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.51542
+CFS-PARCEL-0149826059,149826059,56605041790000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.019947,0.019947,low,False,single_boundary_low_confidence,trusted,BIRKDALE,BIRKDALE,1.807891
+CFS-PARCEL-0149755113,149755113,55171734030000,Harrisburg,etj,Town of Harrisburg,1,0.020197,0.020197,low,False,single_boundary_low_confidence,trusted,HARRISBURG,TR2 HERITAGE COMMONS REVISED,0.111403
+CFS-PARCEL-0149780697,149780697,55795718420000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.020507,0.020507,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,1.896197
+CFS-PARCEL-0149748343,149748343,55078175190000,Harrisburg,etj,Town of Harrisburg,1,0.020546,0.020546,low,False,single_boundary_low_confidence,trusted,BRIDGE POINTE,BRIDGE POINTE PHASE 4 MAP 1,3.370292
+CFS-PARCEL-0149827265,149827265,56704401870000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.02062,0.02062,low,False,single_boundary_low_confidence,trusted,MT PLEASANT OUTSIDE,WILLIAM E & VIRGINIA E FOIL,28.16478
+CFS-PARCEL-0149824444,149824444,56603699050000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.021209,0.021209,low,False,single_boundary_low_confidence,review,MT PLEASANT HIGH SCHOOL,,3.059662
+CFS-PARCEL-0149720618,149720618,140 212,Kannapolis,etj,City of Kannapolis,1,0.021387,0.021387,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.996368
+CFS-PARCEL-0149750738,149750738,55084051970000,Harrisburg,etj,Town of Harrisburg,1,0.021647,0.021647,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.290195
+CFS-PARCEL-0149827603,149827603,56708652090000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.022357,0.022357,low,False,single_boundary_low_confidence,review,LENTZ HARNESS SHOP RD,,16.230073
+CFS-PARCEL-0149747157,149747157,55070945330000,Harrisburg,etj,Town of Harrisburg,1,0.022418,0.022418,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.393073
+CFS-PARCEL-0149822430,149822430,56401572270000,Concord,etj,City of Concord,1,0.022729,0.022729,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,20.089548
+CFS-PARCEL-0149722756,149722756,144A02204,Kannapolis,etj,City of Kannapolis,1,0.022943,0.022943,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.517033
+CFS-PARCEL-0149820268,149820268,56320754700000,Concord,etj,City of Concord,1,0.023859,0.023859,low,False,single_boundary_low_confidence,review,CENTERGROVE,,6.59213
+CFS-PARCEL-0149745342,149745342,55064924200000,Harrisburg,etj,Town of Harrisburg,1,0.024244,0.024244,low,False,single_boundary_low_confidence,trusted,FENTON-DELL,FENTON- DELL,1.008009
+CFS-PARCEL-0149725117,149725117,158 055,Kannapolis,etj,City of Kannapolis,1,0.024346,0.024346,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,2.255756
+CFS-PARCEL-0149825792,149825792,56701865110000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.025128,0.025128,low,False,single_boundary_low_confidence,trusted,NORTH WOOD SUBDIVISION,NORTH WOOD,0.56404
+CFS-PARCEL-0149819268,149819268,56315037970000,Concord,etj,City of Concord,1,0.025789,0.025789,low,False,single_boundary_low_confidence,review,BRANCHVIEW COMMERCIAL,,19.837764
+CFS-PARCEL-0149721357,149721357,143D034,Kannapolis,etj,City of Kannapolis,1,0.025878,0.025878,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.318077
+CFS-PARCEL-0149827290,149827290,56400559180000,Concord,etj,City of Concord,1,0.026095,0.026095,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,0.965492
+CFS-PARCEL-0149824884,149824884,56604905920000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.026966,0.026966,low,False,single_boundary_low_confidence,review,MT PLEASANT HIGH SCHOOL,,89.59752
+CFS-PARCEL-0149828325,149828325,56617145370000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.027329,0.027329,low,False,single_boundary_low_confidence,trusted,ST JOHNS CHURCH,REVISED JOHN & SARA ESTEP,2.423494
+CFS-PARCEL-0149757653,149757653,55184177410000,Harrisburg,etj,Town of Harrisburg,1,0.027882,0.027882,low,False,single_boundary_low_confidence,review,STOUGH ROAD,NO SUBDIVISION,70.152948
+CFS-PARCEL-0149826590,149826590,56702011610000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.028389,0.028389,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.885597
+CFS-PARCEL-0149750991,149750991,55089285840000,Harrisburg,etj,Town of Harrisburg,1,0.028537,0.028537,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.291113
+CFS-PARCEL-0149750699,149750699,55080092370000,Harrisburg,etj,Town of Harrisburg,1,0.028843,0.028843,low,False,single_boundary_low_confidence,trusted,TIMBER FOREST,TIMBER FOREST,0.561936
+CFS-PARCEL-0149821810,149821810,56401535150000,Concord,etj,City of Concord,1,0.02896,0.02896,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,4.957544
+CFS-PARCEL-0149820250,149820250,56320850930000,Concord,etj,City of Concord,1,0.029162,0.029162,low,False,single_boundary_low_confidence,review,CENTERGROVE,,8.852521
+CFS-PARCEL-0149721093,149721093,143 0840000002,Kannapolis,etj,City of Kannapolis,1,0.02926,0.02926,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,7.388672
+CFS-PARCEL-0149727296,149727296,45978613490000,Harrisburg,etj,Town of Harrisburg,1,0.029277,0.029277,low,False,single_boundary_low_confidence,trusted,FOUNDERS RESERVE,FOUNDERS RESERVE PH 1,0.510408
+CFS-PARCEL-0149826326,149826326,56616067980000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.030406,0.030406,low,False,single_boundary_low_confidence,review,ST JOHNS CHURCH,NO SUBDIVISION,27.131895
+CFS-PARCEL-0149747063,149747063,55072349300000,Harrisburg,etj,Town of Harrisburg,1,0.030779,0.030779,low,False,single_boundary_low_confidence,trusted,HARRISBURG,HARRISBURG 49/GRANITE LLC,29.080189
+CFS-PARCEL-0149750773,149750773,55089370300000,Harrisburg,etj,Town of Harrisburg,1,0.031152,0.031152,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE II MAP III,0.227696
+CFS-PARCEL-0149749673,149749673,55084053460000,Harrisburg,etj,Town of Harrisburg,1,0.031471,0.031471,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.419686
+CFS-PARCEL-0149747548,149747548,55070597590000,Harrisburg,etj,Town of Harrisburg,1,0.032065,0.032065,low,False,single_boundary_low_confidence,trusted,VALHALLA,VALHALLA,0.639376
+CFS-PARCEL-0149755630,149755630,55174221720000,Harrisburg,etj,Town of Harrisburg,1,0.034139,0.034139,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.493918
+CFS-PARCEL-0149745341,149745341,55064922530000,Harrisburg,etj,Town of Harrisburg,1,0.034174,0.034174,low,False,single_boundary_low_confidence,trusted,FENTON-DELL,FENTON- DELL,0.49126
+CFS-PARCEL-0149824448,149824448,56604346050000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.035988,0.035988,low,False,single_boundary_low_confidence,trusted,MT PLEASANT HIGH SCHOOL,LONG FARM LANE/NC HWY 49,5.073886
+CFS-PARCEL-0149827018,149827018,56703811540000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.036232,0.036232,low,False,single_boundary_low_confidence,trusted,HILLTOP ACRES,THE LAGOON TRACT,7.309555
+CFS-PARCEL-0149810430,149810430,56219830960000,Concord,etj,City of Concord,1,0.037301,0.037301,low,False,single_boundary_low_confidence,review,OVERBROOK,,1.175754
+CFS-PARCEL-0149820003,149820003,56313326810000,Concord,etj,City of Concord,1,0.037539,0.037539,low,False,single_boundary_low_confidence,review,OVERBROOK,,0.942616
+CFS-PARCEL-0149756044,149756044,55174159410000,Harrisburg,etj,Town of Harrisburg,1,0.037851,0.037851,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.490601
+CFS-PARCEL-0149826486,149826486,56702100030000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.038433,0.038433,low,False,single_boundary_low_confidence,review,MT PLEASANT SOUTH,,2.525403
+CFS-PARCEL-0149746204,149746204,55068923650000,Harrisburg,etj,Town of Harrisburg,1,0.038854,0.038854,low,False,single_boundary_low_confidence,trusted,CHURCHILL FARMS,CHURCHILL FARMS,0.480327
+CFS-PARCEL-0149756940,149756940,55181312220000,Harrisburg,etj,Town of Harrisburg,1,0.039622,0.039622,low,False,single_boundary_low_confidence,trusted,ROBERTA MEADOWS,ROBERTA MEADOWS,0.239236
+CFS-PARCEL-0149765267,149765267,55174230560000,Harrisburg,etj,Town of Harrisburg,1,0.039959,0.039959,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.478724
+CFS-PARCEL-0149818908,149818908,56307541430000,Concord,etj,City of Concord,1,0.040757,0.040757,low,False,single_boundary_low_confidence,trusted,BRAMBLE WOODS,BRAMBLEWOODS,0.498675
+CFS-PARCEL-0149750744,149750744,55089285150000,Harrisburg,etj,Town of Harrisburg,1,0.043552,0.043552,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.313733
+CFS-PARCEL-0149781076,149781076,55795705640000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.043749,0.043749,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.567126
+CFS-PARCEL-0149750953,149750953,55089289280000,Harrisburg,etj,Town of Harrisburg,1,0.044092,0.044092,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE II MAP III,0.239869
+CFS-PARCEL-0149755952,149755952,55180372070000,Harrisburg,etj,Town of Harrisburg,1,0.04415,0.04415,low,False,single_boundary_low_confidence,trusted,ROBERTA MEADOWS,ROBERTA MEADOWS,0.30842
+CFS-PARCEL-0149756238,149756238,55180311040000,Harrisburg,etj,Town of Harrisburg,1,0.044636,0.044636,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE II MAP III,0.287557
+CFS-PARCEL-0149751298,149751298,55089207630000,Harrisburg,etj,Town of Harrisburg,1,0.044921,0.044921,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.227442
+CFS-PARCEL-0149780188,149780188,55695960510000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.047643,0.047643,low,False,single_boundary_low_confidence,trusted,MT PLEASANT HIGH SCHOOL,BRANHAM PROPERTY,40.835337
+CFS-PARCEL-0149810853,149810853,56219664850000,Concord,etj,City of Concord,1,0.048433,0.048433,low,False,single_boundary_low_confidence,trusted,OVERBROOK,BURRAGE ROAD 5.364 AC,0.631529
+CFS-PARCEL-0149747359,149747359,55073926550000,Harrisburg,etj,Town of Harrisburg,1,0.051448,0.051448,low,False,single_boundary_low_confidence,trusted,HARRISBURG PARK,DOUG SLOOP,0.907399
+CFS-PARCEL-0149781075,149781075,55795704200000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.052023,0.052023,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.589458
+CFS-PARCEL-0149751025,149751025,55089078810000,Harrisburg,etj,Town of Harrisburg,1,0.053888,0.053888,low,False,single_boundary_low_confidence,trusted,HARRISBURG ESTATES,HARRISBURG ESTATES,0.758673
+CFS-PARCEL-0149751313,149751313,55089390100000,Harrisburg,etj,Town of Harrisburg,1,0.05466,0.05466,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE II MAP III,0.219226
+CFS-PARCEL-0149720477,149720477,143D024,Kannapolis,etj,City of Kannapolis,1,0.054808,0.054808,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.185613
+CFS-PARCEL-0149827635,149827635,56410106790000,Concord,etj,City of Concord,1,0.055209,0.055209,low,False,single_boundary_low_confidence,review,NEW GILEAD,EVELYN PARK/COLD WATER HILLS,7.161633
+CFS-PARCEL-0149827636,149827636,56410106790000,Concord,etj,City of Concord,1,0.055209,0.055209,low,False,single_boundary_low_confidence,review,NEW GILEAD,EVELYN PARK/COLD WATER HILLS,7.161633
+CFS-PARCEL-0149815940,149815940,56239336910000,Concord,etj,City of Concord,1,0.055369,0.055369,low,False,single_boundary_low_confidence,review,DALE EARNHARDT BLVD,,7.602473
+CFS-PARCEL-0149826528,149826528,56615043560000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.05542,0.05542,low,False,single_boundary_low_confidence,review,ST JOHNS CHURCH,,8.645386
+CFS-PARCEL-0149751273,149751273,55089122480000,Harrisburg,etj,Town of Harrisburg,1,0.055787,0.055787,low,False,single_boundary_low_confidence,trusted,MERIDIAN,MERIDIAN SUBDIVISION MAP 1,4.297274
+CFS-PARCEL-0149723914,149723914,151 0030000001,Kannapolis,etj,City of Kannapolis,1,0.056152,0.056152,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.863141
+CFS-PARCEL-0149824955,149824955,56607528600000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.056623,0.056623,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,,0.896982
+CFS-PARCEL-0149750739,149750739,55084052250000,Harrisburg,etj,Town of Harrisburg,1,0.059662,0.059662,low,False,single_boundary_low_confidence,trusted,ROCKY RIVER CROSSING,ROCKY RIVER CROSSING,0.428613
+CFS-PARCEL-0149827325,149827325,56401438970000,Concord,etj,City of Concord,1,0.061388,0.061388,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,14.02182
+CFS-PARCEL-0149750506,149750506,55089275470000,Harrisburg,etj,Town of Harrisburg,1,0.061412,0.061412,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.309724
+CFS-PARCEL-0149759037,149759037,55089088730000,Harrisburg,etj,Town of Harrisburg,1,0.062605,0.062605,low,False,single_boundary_low_confidence,trusted,HARRISBURG ESTATES,HARRISBURG ESTATES,0.43965
+CFS-PARCEL-0149780725,149780725,55793983760000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.065049,0.065049,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.560192
+CFS-PARCEL-0149821753,149821753,56400437420000,Concord,etj,City of Concord,1,0.065277,0.065277,low,False,single_boundary_low_confidence,trusted,RAMA WOODS,RAMA WOODS,0.751237
+CFS-PARCEL-0149748713,149748713,55076492210000,Harrisburg,etj,Town of Harrisburg,1,0.065672,0.065672,low,False,single_boundary_low_confidence,review,HARRISBURG,,0.149633
+CFS-PARCEL-0149781069,149781069,55793994360000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.066223,0.066223,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.470732
+CFS-PARCEL-0149781070,149781070,55793995840000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.067134,0.067134,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.47074
+CFS-PARCEL-0149750993,149750993,55089299990000,Harrisburg,etj,Town of Harrisburg,1,0.067697,0.067697,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE II MAP III,0.234941
+CFS-PARCEL-0149780688,149780688,55794906320000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.068049,0.068049,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.470739
+CFS-PARCEL-0149756512,149756512,55180362050000,Harrisburg,etj,Town of Harrisburg,1,0.068183,0.068183,low,False,single_boundary_low_confidence,trusted,ROBERTA MEADOWS,ROBERTA MEADOWS,0.254883
+CFS-PARCEL-0149781048,149781048,55794907910000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.068959,0.068959,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.47073
+CFS-PARCEL-0149720849,149720849,140A054,Kannapolis,etj,City of Kannapolis,1,0.069728,0.069728,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,5.299803
+CFS-PARCEL-0149756233,149756233,55180219290000,Harrisburg,etj,Town of Harrisburg,1,0.073317,0.073317,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE II MAP III,0.382526
+CFS-PARCEL-0149751301,149751301,55089282860000,Harrisburg,etj,Town of Harrisburg,1,0.073539,0.073539,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.251268
+CFS-PARCEL-0149727190,149727190,45988224190000,Harrisburg,etj,Town of Harrisburg,1,0.074746,0.074746,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,1.013031
+CFS-PARCEL-0149750743,149750743,55089265790000,Harrisburg,etj,Town of Harrisburg,1,0.079742,0.079742,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.305703
+CFS-PARCEL-0149780769,149780769,55794918610000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.080898,0.080898,low,False,single_boundary_low_confidence,trusted,OLDENBURG,OLDENBURG,0.601631
+CFS-PARCEL-0149758211,149758211,55188305270000,Harrisburg,etj,Town of Harrisburg,1,0.083816,0.083816,low,False,single_boundary_low_confidence,review,STOUGH ROAD,,7.831343
+CFS-PARCEL-0149747208,149747208,55071338860000,Harrisburg,etj,Town of Harrisburg,1,0.085482,0.085482,low,False,single_boundary_low_confidence,review,HARRISBURG,NO SUBDIVISION,7.02182
+CFS-PARCEL-0149756188,149756188,55180203950000,Harrisburg,etj,Town of Harrisburg,1,0.089322,0.089322,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.969729
+CFS-PARCEL-0149749329,149749329,55080119410000,Harrisburg,etj,Town of Harrisburg,1,0.089875,0.089875,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,19.098603
+CFS-PARCEL-0149820024,149820024,56311447020000,Concord,etj,City of Concord,1,0.092447,0.092447,low,False,single_boundary_low_confidence,trusted,CORDERA,CORDERA,0.458471
+CFS-PARCEL-0149820017,149820017,56314177340000,Concord,etj,City of Concord,1,0.094189,0.094189,low,False,single_boundary_low_confidence,review,DEAL ST,KASEN BLUFF,3.442599
+CFS-PARCEL-0149820018,149820018,56314177340000,Concord,etj,City of Concord,1,0.094189,0.094189,low,False,single_boundary_low_confidence,review,DEAL ST,KASEN BLUFF,3.442599
+CFS-PARCEL-0149771773,149771773,55395305020000,Concord,etj,City of Concord,1,0.095451,0.095451,low,False,single_boundary_low_confidence,review,CENTRAL CABARRUS HIGH SCHOOL,,0.542239
+CFS-PARCEL-0149755455,149755455,55173286830000,Harrisburg,etj,Town of Harrisburg,1,0.096893,0.096893,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.696443
+CFS-PARCEL-0149750505,149750505,55089266000000,Harrisburg,etj,Town of Harrisburg,1,0.098557,0.098557,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.301697
+CFS-PARCEL-0149756384,149756384,55180382880000,Harrisburg,etj,Town of Harrisburg,1,0.101144,0.101144,low,False,single_boundary_low_confidence,trusted,ROBERTA MEADOWS,ROBERTA MEADOWS,0.404123
+CFS-PARCEL-0149825190,149825190,56604438050000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.101807,0.101807,low,False,single_boundary_low_confidence,review,MT PLEASANT COMMERCIAL,,1.257834
+CFS-PARCEL-0149771885,149771885,55395326500000,Concord,etj,City of Concord,1,0.109317,0.109317,low,False,single_boundary_low_confidence,review,CENTRAL CABARRUS HIGH SCHOOL,,0.263301
+CFS-PARCEL-0149822429,149822429,56401508560000,Concord,etj,City of Concord,1,0.110325,0.110325,low,False,single_boundary_low_confidence,trusted,LAKE LYNN LODGE,1.166 AC - CRESTMONT DRIVE,11.10204
+CFS-PARCEL-0149747141,149747141,55070701070000,Harrisburg,etj,Town of Harrisburg,1,0.110615,0.110615,low,False,single_boundary_low_confidence,review,HARRISBURG CITY NORTH,"RECOMBINATION  SPEEDWAY MOTORSPORTS, INC",68.932245
+CFS-PARCEL-0149747156,149747156,55070701070000,Harrisburg,etj,Town of Harrisburg,1,0.110615,0.110615,low,False,single_boundary_low_confidence,review,HARRISBURG CITY NORTH,"RECOMBINATION  SPEEDWAY MOTORSPORTS, INC",68.932245
+CFS-PARCEL-0149827868,149827868,56718270230000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.110777,0.110777,low,False,single_boundary_low_confidence,trusted,MT PLEASANT OUTSIDE,BARRINGER PROPERTIES,5.068609
+CFS-PARCEL-0149819892,149819892,56310533940000,Concord,etj,City of Concord,1,0.113381,0.113381,low,False,single_boundary_low_confidence,trusted,OVERBROOK,1.425 AC - BURRAGE ROAD,1.171162
+CFS-PARCEL-0149811793,149811793,56227455490000,Concord,etj,City of Concord,1,0.115138,0.115138,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,STAFFORD PROPERTY,7.117545
+CFS-PARCEL-0149727864,149727864,45977759610000,Harrisburg,etj,Town of Harrisburg,1,0.117689,0.117689,low,False,single_boundary_low_confidence,review,HARRISBURG CITY NORTH,,32.607626
+CFS-PARCEL-0149727865,149727865,45977759610000,Harrisburg,etj,Town of Harrisburg,1,0.117689,0.117689,low,False,single_boundary_low_confidence,review,HARRISBURG CITY NORTH,,32.607626
+CFS-PARCEL-0149750952,149750952,55089256420000,Harrisburg,etj,Town of Harrisburg,1,0.117879,0.117879,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.297677
+CFS-PARCEL-0149724804,149724804,159 248,Kannapolis,etj,City of Kannapolis,1,0.119814,0.119814,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,6.134774
+CFS-PARCEL-0149744480,149744480,55060905850000,Harrisburg,etj,Town of Harrisburg,1,0.122941,0.122941,low,False,single_boundary_low_confidence,review,FRANCES HAVEN,,0.189956
+CFS-PARCEL-0149819893,149819893,56310535330000,Concord,etj,City of Concord,1,0.135641,0.135641,low,False,single_boundary_low_confidence,review,OVERBROOK,,0.956582
+CFS-PARCEL-0149751300,149751300,55089246740000,Harrisburg,etj,Town of Harrisburg,1,0.137724,0.137724,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.293669
+CFS-PARCEL-0149810026,149810026,56218898070000,Concord,etj,City of Concord,1,0.145395,0.145395,low,False,single_boundary_low_confidence,review,OVERBROOK,,1.384875
+CFS-PARCEL-0149825527,149825527,56617252300000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.147237,0.147237,low,False,single_boundary_low_confidence,trusted,ST JOHNS CHURCH,JESLYN BLAIR,1.568342
+CFS-PARCEL-0149812073,149812073,56226464610000,Concord,etj,City of Concord,1,0.148802,0.148802,low,False,single_boundary_low_confidence,trusted,NORTHLIGHT,COPPERFIELD INC PH  11,2.93534
+CFS-PARCEL-0149745147,149745147,55063989640000,Harrisburg,etj,Town of Harrisburg,1,0.150139,0.150139,low,False,single_boundary_low_confidence,trusted,FENTON-DELL,FENTON-DELL PH 3 MAP 4,0.527521
+CFS-PARCEL-0149775930,149775930,55491418820000,Concord,etj,City of Concord,1,0.156541,0.156541,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,14.270573
+CFS-PARCEL-0149750990,149750990,55089246050000,Harrisburg,etj,Town of Harrisburg,1,0.158124,0.158124,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.28965
+CFS-PARCEL-0149819622,149819622,56319005010000,Concord,etj,City of Concord,1,0.159149,0.159149,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,29.08666
+CFS-PARCEL-0149822391,149822391,56400595490000,Concord,etj,City of Concord,1,0.161853,0.161853,low,False,single_boundary_low_confidence,trusted,LAKE LYNN LODGE,REVISION 1.166 AC - CRESTMONT DRIVE,1.136156
+CFS-PARCEL-0149821756,149821756,56400483910000,Concord,etj,City of Concord,1,0.163194,0.163194,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,5.525972
+CFS-PARCEL-0149722120,149722120,140 195,Kannapolis,etj,City of Kannapolis,1,0.165874,0.165874,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.763802
+CFS-PARCEL-0149755039,149755039,55171387320000,Harrisburg,etj,Town of Harrisburg,1,0.167324,0.167324,low,False,single_boundary_low_confidence,trusted,STALLINGS FARM,STALLINGS FARM,0.639557
+CFS-PARCEL-0149819965,149819965,56313465040000,Concord,etj,City of Concord,1,0.174694,0.174694,low,False,single_boundary_low_confidence,review,CENTERGROVE,NO SUBDIVISION,25.067616
+CFS-PARCEL-0149750859,149750859,55089236370000,Harrisburg,etj,Town of Harrisburg,1,0.179089,0.179089,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.285641
+CFS-PARCEL-0149756464,149756464,55180372860000,Harrisburg,etj,Town of Harrisburg,1,0.182257,0.182257,low,False,single_boundary_low_confidence,trusted,ROBERTA MEADOWS,ROBERTA MEADOWS,0.390468
+CFS-PARCEL-0149820072,149820072,56314518740000,Concord,etj,City of Concord,1,0.185262,0.185262,low,False,single_boundary_low_confidence,review,CENTERGROVE,,101.371568
+CFS-PARCEL-0149824849,149824849,56605926490000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.186385,0.186385,low,False,single_boundary_low_confidence,trusted,MT PLEASANT HIGH SCHOOL,The William N. Misenheimer Estate Lands,3.465943
+CFS-PARCEL-0149747815,149747815,55075443310000,Harrisburg,etj,Town of Harrisburg,1,0.195609,0.195609,low,False,single_boundary_low_confidence,review,ALEXANDER HILLS,NORTH CAROLINA RAILROAD COMPANY,77.981776
+CFS-PARCEL-0149755698,149755698,55174312370000,Harrisburg,etj,Town of Harrisburg,1,0.200617,0.200617,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.756238
+CFS-PARCEL-0149751030,149751030,55089226690000,Harrisburg,etj,Town of Harrisburg,1,0.200664,0.200664,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.281618
+CFS-PARCEL-0149820213,149820213,56319360290000,Concord,etj,City of Concord,1,0.210849,0.210849,low,False,single_boundary_low_confidence,trusted,NEW GILEAD,RECOMB BATTEN & MORGAN TRACTS,5.005847
+CFS-PARCEL-0149757620,149757620,55181330790000,Harrisburg,etj,Town of Harrisburg,1,0.213499,0.213499,low,False,single_boundary_low_confidence,review,ROBERTA MILLS,,1.082588
+CFS-PARCEL-0149755545,149755545,55173099770000,Harrisburg,etj,Town of Harrisburg,1,0.219851,0.219851,low,False,single_boundary_low_confidence,trusted,HARRISBURG SOUTH,RECOMB PLAT FOR FLOWERS-TURNER PROPERTY,59.388478
+CFS-PARCEL-0149750491,149750491,55089227000000,Harrisburg,etj,Town of Harrisburg,1,0.222849,0.222849,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.277604
+CFS-PARCEL-0149779473,149779473,55696848750000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.229327,0.229327,low,False,single_boundary_low_confidence,trusted,MT PLEASANT HIGH SCHOOL,ROSS MINOR SUB,11.922101
+CFS-PARCEL-0149812044,149812044,56225333840000,Concord,etj,City of Concord,1,0.234054,0.234054,low,False,single_boundary_low_confidence,review,NORTHLIGHT,,22.409236
+CFS-PARCEL-0149819338,149819338,56319266860000,Concord,etj,City of Concord,1,0.234917,0.234917,low,False,single_boundary_low_confidence,trusted,NEW GILEAD,RECOMB BATTEN & MORGAN TRACTS,14.128325
+CFS-PARCEL-0149822393,149822393,56400738520000,Concord,etj,City of Concord,1,0.236294,0.236294,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,9.029276
+CFS-PARCEL-0149750471,149750471,55089217320000,Harrisburg,etj,Town of Harrisburg,1,0.245687,0.245687,low,False,single_boundary_low_confidence,trusted,YATES MEADOW,YATES MEADOW SUBDIVISION PHASE V,0.273598
+CFS-PARCEL-0149822392,149822392,56400653480000,Concord,etj,City of Concord,1,0.245898,0.245898,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,1.158603
+CFS-PARCEL-0149724307,149724307,158 061,Kannapolis,etj,City of Kannapolis,1,0.246545,0.246545,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.863538
+CFS-PARCEL-0149723639,149723639,161 169,Kannapolis,etj,City of Kannapolis,1,0.253476,0.253476,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.210767
+CFS-PARCEL-0149816526,149816526,56238046370000,Concord,etj,City of Concord,1,0.26324,0.26324,low,False,single_boundary_low_confidence,review,DALE EARNHARDT BLVD,,12.297724
+CFS-PARCEL-0149781117,149781117,55797654030000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.280088,0.280088,low,False,single_boundary_low_confidence,review,HAHN SCOTT RD,,53.662743
+CFS-PARCEL-0149720396,149720396,140A210,Kannapolis,etj,City of Kannapolis,1,0.280458,0.280458,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,5.213503
+CFS-PARCEL-0149755793,149755793,55174656450000,Harrisburg,etj,Town of Harrisburg,1,0.281296,0.281296,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,33.456615
+CFS-PARCEL-0149820107,149820107,56314459520000,Concord,etj,City of Concord,1,0.281518,0.281518,low,False,single_boundary_low_confidence,review,CENTERGROVE,,8.389706
+CFS-PARCEL-0149819854,149819854,56309940940000,Concord,etj,City of Concord,1,0.299686,0.299686,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,31.506352
+CFS-PARCEL-0149720843,149720843,140 196,Kannapolis,etj,City of Kannapolis,1,0.307616,0.307616,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,5.580666
+CFS-PARCEL-0149820061,149820061,56313359170000,Concord,etj,City of Concord,1,0.309439,0.309439,low,False,single_boundary_low_confidence,review,CENTERGROVE,,0.934415
+CFS-PARCEL-0149810471,149810471,56218868860000,Concord,etj,City of Concord,1,0.311238,0.311238,low,False,single_boundary_low_confidence,review,ALLISON WOODS,,0.527802
+CFS-PARCEL-0149755680,149755680,55174300720000,Harrisburg,etj,Town of Harrisburg,1,0.312157,0.312157,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.624643
+CFS-PARCEL-0149725346,149725346,161 104,Kannapolis,etj,City of Kannapolis,1,0.314651,0.314651,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,2.510032
+CFS-PARCEL-0149756046,149756046,55174209510000,Harrisburg,etj,Town of Harrisburg,1,0.317377,0.317377,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.578111
+CFS-PARCEL-0149726153,149726153,249D017,Kannapolis,etj,City of Kannapolis,1,0.324198,0.324198,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,9.902523
+CFS-PARCEL-0149812213,149812213,56227420830000,Concord,etj,City of Concord,1,0.328562,0.328562,low,False,single_boundary_low_confidence,trusted,BRIDLEWOOD PLACE,PARTRIDGE BLUFF& LT REAR,2.32803
+CFS-PARCEL-0149820142,149820142,56315558500000,Concord,etj,City of Concord,1,0.331411,0.331411,low,False,single_boundary_low_confidence,review,CENTERGROVE,,1.484171
+CFS-PARCEL-0149747807,149747807,55075443310000,Harrisburg,etj,Town of Harrisburg,1,0.34058,0.34058,low,False,single_boundary_low_confidence,review,ALEXANDER HILLS,NORTH CAROLINA RAILROAD COMPANY,70.562967
+CFS-PARCEL-0149820158,149820158,56315568750000,Concord,etj,City of Concord,1,0.342332,0.342332,low,False,single_boundary_low_confidence,review,CENTERGROVE,,1.492308
+CFS-PARCEL-0149819427,149819427,56310819780000,Concord,etj,City of Concord,1,0.344587,0.344587,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,1.941762
+CFS-PARCEL-0149745707,149745707,55065858650000,Harrisburg,etj,Town of Harrisburg,1,0.349981,0.349981,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,9.352215
+CFS-PARCEL-0149756441,149756441,55180352030000,Harrisburg,etj,Town of Harrisburg,1,0.350725,0.350725,low,False,single_boundary_low_confidence,trusted,ROBERTA MEADOWS,ROBERTA MEADOWS,0.241321
+CFS-PARCEL-0149780681,149780681,55796642330000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.360874,0.360874,low,False,single_boundary_low_confidence,trusted,HAHN SCOTT RD,NEW LIFE DEVELOPERS LLC,6.33347
+CFS-PARCEL-0149820130,149820130,56315589240000,Concord,etj,City of Concord,1,0.361046,0.361046,low,False,single_boundary_low_confidence,trusted,CENTERGROVE,M C DRYE EST,2.431344
+CFS-PARCEL-0149819188,149819188,56310655830000,Concord,etj,City of Concord,1,0.365477,0.365477,low,False,single_boundary_low_confidence,review,OVERBROOK,,1.473287
+CFS-PARCEL-0149819189,149819189,56310655830000,Concord,etj,City of Concord,1,0.365477,0.365477,low,False,single_boundary_low_confidence,review,OVERBROOK,,1.473287
+CFS-PARCEL-0149755690,149755690,55174535690000,Harrisburg,etj,Town of Harrisburg,1,0.369517,0.369517,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,26.850131
+CFS-PARCEL-0149810082,149810082,56219900620000,Concord,etj,City of Concord,1,0.376526,0.376526,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,1.660753
+CFS-PARCEL-0149827606,149827606,56709719190000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.380741,0.380741,low,False,single_boundary_low_confidence,trusted,MT PLEASANT OUTSIDE,J.L. PECK LANDS,87.661152
+CFS-PARCEL-0149820321,149820321,56319102590000,Concord,etj,City of Concord,1,0.384759,0.384759,low,False,single_boundary_low_confidence,review,NEW GILEAD,,1.764109
+CFS-PARCEL-0149755451,149755451,55174301850000,Harrisburg,etj,Town of Harrisburg,1,0.390628,0.390628,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.762332
+CFS-PARCEL-0149757348,149757348,55183157410000,Harrisburg,etj,Town of Harrisburg,1,0.395869,0.395869,low,False,single_boundary_low_confidence,review,ROBERTA MILLS,,27.687429
+CFS-PARCEL-0149724278,149724278,158 068,Kannapolis,etj,City of Kannapolis,1,0.400589,0.400589,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.116255
+CFS-PARCEL-0149810760,149810760,56218941500000,Concord,etj,City of Concord,1,0.404354,0.404354,low,False,single_boundary_low_confidence,review,ALLISON WOODS,,2.094394
+CFS-PARCEL-0149765266,149765266,55174208200000,Harrisburg,etj,Town of Harrisburg,1,0.405718,0.405718,low,False,single_boundary_low_confidence,trusted,FLOWERS FARM,FLOWERS FARM,0.716227
+CFS-PARCEL-0149820193,149820193,56318464740000,Concord,etj,City of Concord,1,0.408779,0.408779,low,False,single_boundary_low_confidence,review,NEW GILEAD,,76.724655
+CFS-PARCEL-0149826122,149826122,56306457800000,Concord,etj,City of Concord,1,0.411853,0.411853,low,False,single_boundary_low_confidence,trusted,CRESTSIDE,MOUNTAINBROOK,0.64773
+CFS-PARCEL-0149825596,149825596,56605914420000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.41237,0.41237,low,False,single_boundary_low_confidence,review,MT PLEASANT HIGH SCHOOL,,13.377086
+CFS-PARCEL-0149820204,149820204,56318180270000,Concord,etj,City of Concord,1,0.415309,0.415309,low,False,single_boundary_low_confidence,review,NEW GILEAD,,5.061851
+CFS-PARCEL-0149830040,149830040,56717317790000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.419019,0.419019,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,CHARLES R & VICKIE K FISHER,2.433592
+CFS-PARCEL-0149830041,149830041,56717317790000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.419019,0.419019,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,CHARLES R & VICKIE K FISHER,2.433592
+CFS-PARCEL-0149829809,149829809,56704374870000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.429732,0.429732,low,False,single_boundary_low_confidence,review,MT PLEASANT EAST,NO SUBDIVISION,2.195941
+CFS-PARCEL-0149821907,149821907,56400466860000,Concord,etj,City of Concord,1,0.445424,0.445424,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,0.949097
+CFS-PARCEL-0149821706,149821706,56400388810000,Concord,etj,City of Concord,1,0.45138,0.45138,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,5.936527
+CFS-PARCEL-0149780702,149780702,55798975800000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.461629,0.461629,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,344.521667
+CFS-PARCEL-0149780703,149780703,55798975800000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.461629,0.461629,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,344.521667
+CFS-PARCEL-0149780704,149780704,55798975800000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.461629,0.461629,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,344.521667
+CFS-PARCEL-0149820014,149820014,56311921610000,Concord,etj,City of Concord,1,0.465263,0.465263,low,False,single_boundary_low_confidence,trusted,ALLISON WOODS,ALLISON WOODS,0.586042
+CFS-PARCEL-0149720491,149720491,145 001,Kannapolis,etj,City of Kannapolis,1,0.471213,0.471213,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,51.345558
+CFS-PARCEL-0149727161,149727161,45988276020000,Harrisburg,etj,Town of Harrisburg,1,0.476929,0.476929,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,2.98208
+CFS-PARCEL-0149810355,149810355,56217978520000,Concord,etj,City of Concord,1,0.478362,0.478362,low,False,single_boundary_low_confidence,review,OVERBROOK,,2.097074
+CFS-PARCEL-0149815736,149815736,56239291730000,Concord,etj,City of Concord,1,0.488036,0.488036,low,False,single_boundary_low_confidence,review,CENTERGROVE,,2.989339
+CFS-PARCEL-0149826778,149826778,56315599790000,Concord,etj,City of Concord,1,0.488203,0.488203,low,False,single_boundary_low_confidence,review,CENTERGROVE,,0.765531
+CFS-PARCEL-0149818433,149818433,56218918040000,Concord,etj,City of Concord,1,0.497235,0.497235,low,False,single_boundary_low_confidence,review,OVERBROOK,,1.858093
+CFS-PARCEL-0149819586,149819586,56316600240000,Concord,etj,City of Concord,1,0.501627,0.501627,low,False,single_boundary_low_confidence,review,CENTERGROVE,,0.695883
+CFS-PARCEL-0149771740,149771740,55394712300000,Concord,etj,City of Concord,1,0.505716,0.505716,low,False,single_boundary_low_confidence,review,HWY 601 / 49,,2.173405
+CFS-PARCEL-0149819587,149819587,56316600690000,Concord,etj,City of Concord,1,0.508939,0.508939,low,False,single_boundary_low_confidence,review,CENTERGROVE,,0.51845
+CFS-PARCEL-0149755475,149755475,55069819880000,Harrisburg,etj,Town of Harrisburg,1,0.512826,0.512826,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,168.309617
+CFS-PARCEL-0149824463,149824463,56604369900000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.519523,0.519523,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,16.314673
+CFS-PARCEL-0149821987,149821987,56400583700000,Concord,etj,City of Concord,1,0.520839,0.520839,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,1.487201
+CFS-PARCEL-0149721521,149721521,140A209,Kannapolis,etj,City of Kannapolis,1,0.533708,0.533708,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.313255
+CFS-PARCEL-0149821989,149821989,56401059120000,Concord,etj,City of Concord,1,0.543934,0.543934,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,NO SUBDIVISION,6.091111
+CFS-PARCEL-0149826230,149826230,56700210980000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.546446,0.546446,low,False,single_boundary_low_confidence,review,MT PLEASANT NORTH,NO SUBDIVISION,33.707776
+CFS-PARCEL-0149810636,149810636,56219853030000,Concord,etj,City of Concord,1,0.550758,0.550758,low,False,single_boundary_low_confidence,review,OVERBROOK,,4.21468
+CFS-PARCEL-0149810031,149810031,56218943150000,Concord,etj,City of Concord,1,0.557466,0.557466,low,False,single_boundary_low_confidence,review,OVERBROOK,,1.409476
+CFS-PARCEL-0149781214,149781214,55795677910000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.56287,0.56287,low,False,single_boundary_low_confidence,trusted,HAHN SCOTT RD,NEW LIFE DEVELOPERS LLC,9.723316
+CFS-PARCEL-0149720815,149720815,140 163,Kannapolis,etj,City of Kannapolis,1,0.569404,0.569404,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,22.402981
+CFS-PARCEL-0149826846,149826846,56319332100000,Concord,etj,City of Concord,1,0.576629,0.576629,low,False,single_boundary_low_confidence,review,NEW GILEAD,,2.508631
+CFS-PARCEL-0149721424,149721424,145 005,Kannapolis,etj,City of Kannapolis,1,0.581676,0.581676,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,147.594177
+CFS-PARCEL-0149754993,149754993,55171335980000,Harrisburg,etj,Town of Harrisburg,1,0.583013,0.583013,low,False,single_boundary_low_confidence,trusted,HARRISBURG SOUTH,"DAVIS, TALBERT & PHIFER",0.860803
+CFS-PARCEL-0149762133,149762133,55172010060000,Harrisburg,etj,Town of Harrisburg,1,0.58406,0.58406,low,False,single_boundary_low_confidence,review,HARRISBURG SOUTH,,64.086548
+CFS-PARCEL-0149822145,149822145,56400580330000,Concord,etj,City of Concord,1,0.58549,0.58549,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,1.062949
+CFS-PARCEL-0149824452,149824452,56604279480000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.587742,0.587742,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,19.99327
+CFS-PARCEL-0149721567,149721567,144 001000001,Kannapolis,etj,City of Kannapolis,1,0.592717,0.592717,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,259.596888
+CFS-PARCEL-0149754725,149754725,55173199730000,Harrisburg,etj,Town of Harrisburg,1,0.597512,0.597512,low,False,single_boundary_low_confidence,trusted,HARRISBURG SOUTH,JAMES R FLOWERS JR/WF VIRGINIA KALE FLOWERS & AMEL,3.718163
+CFS-PARCEL-0149827115,149827115,56704186740000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.603013,0.603013,low,False,single_boundary_low_confidence,trusted,MT PLEASANT SOUTH,ARTHUR W BARRIER ESTATE,7.5142
+CFS-PARCEL-0149826368,149826368,56617168910000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.606712,0.606712,low,False,single_boundary_low_confidence,review,ST JOHNS CHURCH,,4.995607
+CFS-PARCEL-0149722119,149722119,140 194,Kannapolis,etj,City of Kannapolis,1,0.635794,0.635794,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.513496
+CFS-PARCEL-0149772033,149772033,55395336250000,Concord,etj,City of Concord,1,0.638916,0.638916,low,False,single_boundary_low_confidence,review,CENTRAL CABARRUS HIGH SCHOOL,,0.234916
+CFS-PARCEL-0149722830,149722830,145 206,Kannapolis,etj,City of Kannapolis,1,0.639233,0.639233,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,0.814063
+CFS-PARCEL-0149756478,149756478,55180342200000,Harrisburg,etj,Town of Harrisburg,1,0.645161,0.645161,low,False,single_boundary_low_confidence,trusted,ROBERTA MEADOWS,ROBERTA MEADOWS,0.241585
+CFS-PARCEL-0149828014,149828014,56716382550000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.673744,0.673744,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,NO SUBDIVISION,4.543735
+CFS-PARCEL-0149819921,149819921,56311839410000,Concord,etj,City of Concord,1,0.682981,0.682981,low,False,single_boundary_low_confidence,review,OVERBROOK,,15.425469
+CFS-PARCEL-0149727248,149727248,45979331550000,Harrisburg,etj,Town of Harrisburg,1,0.683538,0.683538,low,False,single_boundary_low_confidence,review,HARRISBURG,NO SUBDIVISION,0.096767
+CFS-PARCEL-0149755497,149755497,55171326790000,Harrisburg,etj,Town of Harrisburg,1,0.683979,0.683979,low,False,single_boundary_low_confidence,trusted,HARRISBURG SOUTH,"DAVIS, TALBERT & PHIFER",0.724642
+CFS-PARCEL-0149725695,149725695,249D033000001,Kannapolis,etj,City of Kannapolis,1,0.701543,0.701543,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,29.108424
+CFS-PARCEL-0149819151,149819151,56311457040000,Concord,etj,City of Concord,1,0.704778,0.704778,low,False,single_boundary_low_confidence,trusted,CORDERA,CORDERA,0.374264
+CFS-PARCEL-0149810414,149810414,56218952690000,Concord,etj,City of Concord,1,0.706409,0.706409,low,False,single_boundary_low_confidence,review,ALLISON WOODS,,0.232631
+CFS-PARCEL-0149819960,149819960,56311429680000,Concord,etj,City of Concord,1,0.710544,0.710544,low,False,single_boundary_low_confidence,trusted,CORDERA,CORDERA,3.035805
+CFS-PARCEL-0149721408,149721408,143 157,Kannapolis,etj,City of Kannapolis,1,0.713412,0.713412,low,False,single_boundary_low_confidence,review,ROWAN COUNTY PARCEL,ROWAN COUNTY PARCEL,1.011334
+CFS-PARCEL-0149821607,149821607,56400811770000,Concord,etj,City of Concord,1,0.717387,0.717387,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,2.201653
+CFS-PARCEL-0149736029,149736029,45989228330000,Harrisburg,etj,Town of Harrisburg,1,0.722385,0.722385,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,1.979664
+CFS-PARCEL-0149736030,149736030,45989228330000,Harrisburg,etj,Town of Harrisburg,1,0.722385,0.722385,low,False,single_boundary_low_confidence,review,CHARLOTTE MOTOR SPEEDWAY,,1.979664
+CFS-PARCEL-0149828293,149828293,56609377580000,Mt. Pleasant,etj,Town of Mt. Pleasant,1,0.733559,0.733559,low,False,single_boundary_low_confidence,review,MT PLEASANT OUTSIDE,,6.584603
+CFS-PARCEL-0149819549,149819549,56314424670000,Concord,etj,City of Concord,1,0.744566,0.744566,low,False,single_boundary_low_confidence,review,CENTERGROVE,,1.096124
+CFS-PARCEL-0149821991,149821991,56401122240000,Concord,etj,City of Concord,1,0.746111,0.746111,low,False,single_boundary_low_confidence,review,LAKE LYNN LODGE,,2.178231

@@ -1,0 +1,8 @@
+2026-05-28 15:45:02,674 INFO Starting CFS zoning_jurisdictional_clean transform.
+2026-05-28 15:45:02,675 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\create_zoning_jurisdictional_clean_20260528_154502.log
+2026-05-28 15:45:03,102 INFO Executing transform SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_zoning_jurisdictional_clean.sql
+2026-05-28 15:45:05,001 INFO Normalized zoning polygon count: 3438
+2026-05-28 15:45:05,001 INFO Wrote validation JSON: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_jurisdictional_clean_validation.json
+2026-05-28 15:45:05,002 INFO Wrote class summary CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_jurisdictional_class_summary.csv
+2026-05-28 15:45:05,002 INFO Wrote schema comparison CSV: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\zoning_jurisdictional_schema_comparison.csv
+2026-05-28 15:45:05,003 INFO Transform duration: 2.31 seconds

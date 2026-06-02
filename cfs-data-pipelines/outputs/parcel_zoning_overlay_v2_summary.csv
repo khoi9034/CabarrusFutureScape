@@ -1,0 +1,169 @@
+zoning_jurisdiction_name,dominant_zoning_code_raw,dominant_zoning_general_normalized,dominant_zoning_label_normalized,parcel_count,multiple_zoning_count,multiple_zoning_jurisdiction_count,low_confidence_count,no_match_count,municipal_dominates_county_count,nearly_equal_split_count,tiny_sliver_count,avg_dominant_overlap_pct,min_dominant_overlap_pct,max_dominant_overlap_pct
+Kannapolis,R4,residential,R4,10874,1141,104,84,0,93,18,889,0.991045,1e-06,1.0
+Cabarrus County / Unincorporated,AO,agricultural,AO,10014,472,219,42,0,0,2,336,0.997075,0.001956,1.0
+Kannapolis,R8,residential,R8,8739,812,63,75,0,62,23,583,0.990685,1e-06,1.0
+Concord,RC,unknown,RC,8537,1333,95,11,0,91,1,1245,0.999075,0.404613,1.0
+Cabarrus County / Unincorporated,LDR,residential,LDR,7179,1061,755,54,0,0,19,806,0.9941,0.0,1.0
+Cabarrus County / Unincorporated,CR,residential,CR,6474,788,558,38,0,0,11,613,0.995311,0.0,1.0
+Concord,RV,residential,RV,6237,1053,49,12,0,22,2,980,0.998494,0.514691,1.0
+Concord,RM-2,residential,RM-2,6192,1424,182,26,0,176,1,1320,0.99784,0.51542,1.0
+Concord,RM-1,residential,RM-1,4647,899,151,35,0,150,5,796,0.995771,0.45138,1.0
+Concord,PUD,unknown,PUD,3264,208,66,5,0,66,3,180,0.998802,0.512801,1.0
+Harrisburg,RM,residential,RM,2931,412,112,9,0,112,2,246,0.994818,0.512804,1.0
+Concord,R-CO,residential,R-CO,2238,238,125,21,0,125,1,195,0.993551,0.00795,1.0
+Midland,SFR,unknown,SFR,1954,430,235,24,0,233,5,277,0.990536,0.166119,1.0
+Concord,C-2,unknown,C-2,1717,568,39,25,0,32,1,530,0.992768,0.413064,1.0
+Concord,RV-CD,residential,RV-CD,1672,197,63,6,0,63,1,179,0.997399,5e-06,1.0
+Concord,RM-2-CU,residential,RM-2-CU,1651,184,85,12,0,58,1,128,0.996426,0.503758,1.0
+Harrisburg,RL,residential,RL,1535,255,37,7,0,37,0,183,0.99589,0.546031,1.0
+Concord,RL,residential,RL,1510,281,28,1,0,28,0,272,0.999389,0.668464,1.0
+Harrisburg,CZ-RH,residential,CZ-RH,1475,125,34,9,0,34,0,61,0.995199,0.569565,1.0
+Kannapolis,GC,commercial,GC,1359,387,41,45,0,14,5,333,0.978733,6.8e-05,1.0
+Concord,RC-CD,unknown,RC-CD,874,70,13,3,0,13,1,54,0.998121,0.534713,1.0
+Kannapolis,R18,residential,R18,853,93,21,6,0,16,2,71,0.994267,0.325177,1.0
+Concord,RC-CU,unknown,RC-CU,833,118,0,0,0,0,0,117,0.999795,0.906558,1.0
+Harrisburg,RH,residential,RH,804,46,4,1,0,0,0,30,0.9981,0.53376,1.0
+Mt. Pleasant,RL,residential,RL,800,157,47,7,0,47,4,112,0.988822,0.520314,1.0
+Kannapolis,R1,residential,R1,733,159,43,9,0,32,0,114,0.983913,1.8e-05,1.0
+Concord,TND,unknown,TND,718,72,1,1,0,1,0,70,0.999106,0.729083,1.0
+Kannapolis,O-I,office,O-I,712,316,20,27,0,15,14,245,0.967937,3.5e-05,1.0
+Kannapolis,PD-TND,unknown,PD-TND,682,47,0,7,0,0,1,28,0.990058,0.011887,1.0
+Harrisburg,CZ-RL,residential,CZ-RL,626,54,35,1,0,35,0,31,0.997406,0.586873,1.0
+Harrisburg,PUD,mixed_use,PUD,624,78,0,1,0,0,0,21,0.99537,0.534997,1.0
+Concord,PRD,unknown,PRD,605,16,10,2,0,10,2,12,0.998095,0.501469,1.0
+Kannapolis,PD,unknown,PD,563,29,11,2,0,3,0,25,0.995108,1.1e-05,1.0
+Concord,I-1,unknown,I-1,529,279,65,15,0,62,1,238,0.984199,0.572273,1.0
+Cabarrus County / Unincorporated,MDR,residential,MDR,527,179,162,2,0,0,6,168,0.996376,0.553958,1.0
+Kannapolis,CC,commercial,CC,519,66,0,11,0,0,5,36,0.978954,0.000183,1.0
+Harrisburg,PUD,unknown,PUD,444,13,8,0,0,8,0,10,0.998983,0.842363,1.0
+Locust,OPS,unknown,OPS,431,37,34,0,0,34,0,28,0.998291,0.861406,1.0
+Concord,RV-CU,residential,RV-CU,399,68,36,0,0,33,0,50,0.999671,0.956171,1.0
+Mt. Pleasant,RM,residential,RM,390,109,0,4,0,0,0,98,0.990725,0.609664,1.0
+Harrisburg,CZ-RM,residential,CZ-RM,359,80,40,6,0,40,0,30,0.989579,0.52658,1.0
+Midland,R/OMT,unknown,R/OMT,347,34,21,3,0,21,0,20,0.992698,0.653729,1.0
+Concord,I-2,unknown,I-2,339,215,33,9,0,31,6,189,0.980593,0.346163,1.0
+Concord,O-I,unknown,O-I,295,171,22,9,0,18,2,160,0.98344,0.456795,1.0
+Kannapolis,AG,agricultural,AG,270,83,2,3,0,2,1,59,0.981773,0.000289,1.0
+Midland,AG,agricultural,AG,265,172,126,26,0,125,3,117,0.946493,0.0,1.0
+Concord,RM-2-CD,residential,RM-2-CD,263,46,22,12,0,22,4,20,0.97823,0.360821,1.0
+Kannapolis,PD,residential,PD,262,40,0,15,0,0,4,27,0.959101,4e-06,1.0
+Kannapolis,MU-N,mixed_use,MU-N,235,119,2,8,0,1,1,98,0.970257,0.037032,1.0
+Mt. Pleasant,RH,residential,RH,224,58,1,1,0,1,0,51,0.990653,0.743174,1.0
+Concord,CC,commercial,CC,215,32,0,0,0,0,0,29,0.99907,0.895608,1.0
+Kannapolis,R4-CZ,residential,R4-CZ,214,10,5,0,0,5,0,8,0.998963,0.865462,1.0
+Concord,C-2-CU,unknown,C-2-CU,210,15,2,0,0,2,0,15,0.999906,0.990922,1.0
+Cabarrus County / Unincorporated,HDR-SU,residential,HDR-SU,199,63,45,0,0,0,0,60,0.999915,0.99078,1.0
+Kannapolis,R18-CZ,residential,R18-CZ,197,28,15,1,0,14,1,26,0.993704,0.359653,1.0
+Kannapolis,R8-CZ,residential,R8-CZ,187,24,15,4,0,15,0,19,0.988709,0.542219,1.0
+Cabarrus County / Unincorporated,OI,office,OI,176,120,72,9,0,0,3,107,0.960537,0.0,1.0
+Concord,C-1,unknown,C-1,167,115,1,3,0,1,0,112,0.991029,0.574646,1.0
+Harrisburg,EC,industrial,EC,155,84,39,7,0,27,1,70,0.965509,0.304861,1.0
+Harrisburg,RE,residential,RE,151,76,26,9,0,18,1,55,0.960388,0.515045,1.0
+Midland,TNDO-CZ,unknown,TNDO-CZ,142,9,0,1,0,0,0,3,0.995517,0.701148,1.0
+Harrisburg,GC,commercial,GC,139,53,1,3,0,1,0,36,0.98292,0.555798,1.0
+Locust,OPS-C,unknown,OPS-C,119,12,11,0,0,10,0,9,0.997528,0.866917,1.0
+Midland,C24/27,unknown,C24/27,115,66,29,1,0,29,0,53,0.986325,0.625753,1.0
+Kannapolis,LI,industrial,LI,99,49,11,9,0,1,2,34,0.950992,0.362168,1.0
+Concord,PID,unknown,PID,98,26,13,0,0,8,0,26,0.999678,0.991601,1.0
+Cabarrus County / Unincorporated,LC,commercial,LC,93,48,35,6,0,0,0,33,0.969603,0.601535,1.0
+Cabarrus County / Unincorporated,LI,industrial,LI,92,78,63,2,0,0,8,51,0.971975,0.522038,1.0
+Kannapolis,CD,unknown,CD,84,32,9,4,0,3,0,26,0.965522,0.555314,1.0
+Midland,C601,unknown,C601,63,41,2,3,0,2,1,31,0.975306,0.452178,1.0
+Mt. Pleasant,AG,agricultural,AG,62,8,8,2,0,8,0,5,0.971666,0.003709,1.0
+Midland,OM,unknown,OM,59,13,5,2,0,5,0,7,0.982861,0.560497,1.0
+Mt. Pleasant,CZ-R-M,unknown,CZ-R-M,54,19,8,0,0,8,0,19,0.999006,0.990997,1.0
+Cabarrus County / Unincorporated,GI,industrial,GI,52,33,20,2,0,0,1,28,0.978612,0.630872,1.0
+Harrisburg,CZ-RM,unknown,CZ-RM,50,17,8,0,0,8,0,10,0.996084,0.951882,1.0
+Kannapolis,HI,unknown,HI,50,14,0,3,0,0,0,11,0.968417,0.516755,1.0
+Concord,B-1,unknown,B-1,49,44,3,1,0,3,0,40,0.985303,0.649677,1.0
+Harrisburg,OI,office,OI,47,42,14,2,0,14,1,31,0.969502,0.501965,1.0
+Midland,IND,industrial,IND,39,29,28,1,0,28,0,25,0.983909,0.661741,1.0
+Concord,C-2-CD,unknown,C-2-CD,37,33,5,2,0,5,0,31,0.983324,0.68635,1.0
+Mt. Pleasant,OI,office,OI,37,30,4,0,0,4,1,25,0.990035,0.884233,1.0
+Mt. Pleasant,CC,commercial,CC,36,15,0,0,0,0,0,13,0.995534,0.942733,1.0
+Concord,I-1-CU,unknown,I-1-CU,35,8,4,1,0,4,0,8,0.991275,0.695859,1.0
+Kannapolis,R2,residential,R2,35,13,0,1,0,0,0,8,0.976761,0.625242,1.0
+(no match),(no match),(no match),(no match),33,0,0,0,33,0,0,0,,,
+Kannapolis,C-1,unknown,C-1,33,15,5,0,0,4,0,12,0.983613,0.85506,1.0
+Kannapolis,GC-CZ,commercial,GC-CZ,29,27,6,2,0,4,1,23,0.943101,0.084046,1.0
+Cabarrus County / Unincorporated,GC,commercial,GC,28,27,18,2,0,0,0,27,0.968633,0.504063,1.0
+Concord,MX-CC2,mixed_use,MX-CC2,27,7,3,0,0,3,0,7,0.999529,0.994635,1.0
+Harrisburg,CZ-GC,commercial,CZ-GC,27,21,3,0,0,3,0,17,0.995692,0.966198,1.0
+Midland,OMP,unknown,OMP,27,3,0,1,0,0,0,2,0.98918,0.708466,1.0
+Harrisburg,NC,commercial,NC,25,16,0,0,0,0,0,11,0.986586,0.862909,1.0
+Mt. Pleasant,C-1,unknown,C-1,24,23,0,0,0,0,0,23,0.984819,0.812246,1.0
+Concord,I-2-CD,unknown,I-2-CD,21,11,6,1,0,6,0,10,0.984789,0.682295,1.0
+Concord,RE,residential,RE,20,16,5,0,0,4,0,16,0.987582,0.880129,1.0
+Kannapolis,PD,agricultural,PD,20,9,0,1,0,0,0,3,0.934875,2e-06,1.0
+Harrisburg,CZ-RE,residential,CZ-RE,18,7,0,1,0,0,0,6,0.98185,0.676418,1.0
+Midland,PRD-CZ,unknown,PRD-CZ,18,5,5,0,0,5,0,4,0.99686,0.949692,1.0
+Midland,SFR-CZ,unknown,SFR-CZ,18,15,0,0,0,0,0,15,0.998235,0.991753,1.0
+Midland,CIV,unknown,CIV,17,8,1,0,0,1,0,3,0.974167,0.781712,1.0
+Mt. Pleasant,I-1,unknown,I-1,17,11,2,0,0,2,1,9,0.992914,0.948778,1.0
+Kannapolis,R8-CZ,office,R8-CZ,16,6,0,0,0,0,0,6,0.997139,0.976379,1.0
+Concord,I-1-CD,unknown,I-1-CD,15,12,3,1,0,3,0,12,0.9772,0.749383,1.0
+Concord,I-2-CU,unknown,I-2-CU,14,12,4,0,0,4,0,12,0.99991,0.999496,1.0
+Concord,O-I-CD,unknown,O-I-CD,14,14,1,0,0,1,0,13,0.998995,0.98886,0.999998
+Concord,AG,agricultural,AG,13,10,1,0,0,1,0,10,0.999933,0.999597,1.0
+Locust,HC,commercial,HC,13,5,3,0,0,3,0,4,0.994953,0.946092,1.0
+Cabarrus County / Unincorporated,LI-SU,industrial,LI-SU,11,8,5,0,0,0,0,7,0.988541,0.913658,1.0
+Concord,C-1-CD,unknown,C-1-CD,11,11,0,0,0,0,0,11,0.999306,0.996858,1.0
+Mt. Pleasant,C-2,unknown,C-2,11,10,1,3,0,1,0,10,0.844928,0.52434,1.0
+Mt. Pleasant,CZ-RH,unknown,CZ-RH,10,8,0,0,0,0,0,6,0.97273,0.838976,1.0
+Cabarrus County / Unincorporated,HDR,residential,HDR,9,7,5,0,0,0,0,6,0.978631,0.887063,1.0
+Harrisburg,EC,mixed_use,EC,9,5,0,0,0,0,0,1,0.961169,0.873987,1.0
+Kannapolis,LI-CZ,industrial,LI-CZ,9,9,6,0,0,5,0,9,0.995405,0.983079,1.0
+Cabarrus County / Unincorporated,GI-SU,industrial,GI-SU,8,8,3,0,0,0,0,8,0.960836,0.83453,0.999994
+Kannapolis,CC-CZ,commercial,CC-CZ,8,2,0,0,0,0,0,2,0.999999,0.999991,1.0
+Cabarrus County / Unincorporated,AO-CU,agricultural,AO-CU,7,5,0,0,0,0,0,3,0.97708,0.857653,1.0
+Cabarrus County / Unincorporated,LDR-SU,residential,LDR-SU,7,7,0,1,0,0,1,4,0.894989,0.498982,0.999998
+Concord,MX-IB,mixed_use,MX-IB,7,5,0,0,0,0,0,5,0.999982,0.999885,1.0
+Kannapolis,R8,office,R8,7,7,0,1,0,0,0,3,0.935523,0.712526,0.996458
+Midland,MS,unknown,MS,7,4,0,0,0,0,0,2,0.962617,0.792651,1.0
+Harrisburg,CZ-RL,unknown,CZ-RL,6,6,6,0,0,6,0,6,0.991785,0.973993,0.999301
+Kannapolis,CD-R-CZ,unknown,CD-R-CZ,6,5,0,0,0,0,0,5,0.995835,0.98446,1.0
+Kannapolis,O-I,unknown,O-I,6,6,1,3,0,1,0,5,0.811235,0.592793,1.0
+Harrisburg,CZ-OI,office,CZ-OI,5,5,0,0,0,0,0,5,0.971003,0.859992,1.0
+Kannapolis,CD-CZ,unknown,CD-CZ,5,3,0,0,0,0,0,3,0.990388,0.971752,1.0
+Kannapolis,GC-CZ,office,GC-CZ,5,2,0,0,0,0,0,0,0.974423,0.905122,1.0
+Midland,R/MST,unknown,R/MST,5,2,1,2,0,1,0,1,0.821756,0.495305,1.0
+Mt. Pleasant,CZ-C-2,unknown,CZ-C-2,5,5,0,0,0,0,0,4,0.989398,0.974159,1.0
+Cabarrus County / Unincorporated,MDR-SU,residential,MDR-SU,4,4,0,0,0,0,0,2,0.935955,0.770832,0.999998
+Concord,(no match),unknown,UNKNOWN,4,4,4,0,0,4,4,4,0.999983,0.999944,1.0
+Concord,MX-NC,mixed_use,MX-NC,4,4,0,0,0,0,0,4,0.998492,0.995849,0.999999
+Harrisburg,NC,unknown,NC,4,4,0,0,0,0,0,2,0.981045,0.945888,0.996293
+Kannapolis,R18,agricultural,R18,4,2,0,0,0,0,0,2,0.993482,0.978343,0.999974
+Kannapolis,R2,agricultural,R2,4,4,0,0,0,0,0,2,0.979631,0.935539,1.0
+Mt. Pleasant,CZ-O-I,unknown,CZ-O-I,4,4,0,0,0,0,0,4,0.999769,0.999083,1.0
+Cabarrus County / Unincorporated,LC-SU,commercial,LC-SU,3,3,2,0,0,0,0,3,0.993645,0.989869,0.999285
+Concord,C-1-CU,unknown,C-1-CU,3,3,0,0,0,0,0,3,0.998833,0.996559,0.999997
+Concord,CD,unknown,CD,3,2,0,0,0,0,0,1,0.971826,0.916737,1.0
+Concord,not-yet-zoned,unknown,NOT-YET-ZONED,3,3,3,0,0,3,0,3,0.999697,0.999645,0.999781
+Kannapolis,R18,office,R18,3,2,0,0,0,0,0,1,0.991439,0.977172,0.999982
+Midland,SFR-TNDO-CZ,unknown,SFR-TNDO-CZ,3,2,2,0,0,2,0,2,0.999252,0.998018,1.0
+Cabarrus County / Unincorporated,AO-SU,agricultural,AO-SU,2,2,1,0,0,0,0,0,0.97485,0.949701,1.0
+Cabarrus County / Unincorporated,GC-SU,commercial,GC-SU,2,2,0,0,0,0,0,1,1.0,1.0,1.0
+Cabarrus County / Unincorporated,LI,office,LI,2,2,2,0,0,0,0,2,0.999408,0.998817,1.0
+Concord,B-1-CU,unknown,B-1-CU,2,2,1,0,0,1,0,2,0.996342,0.992687,0.999998
+Concord,O-I-CU,unknown,O-I-CU,2,2,0,0,0,0,0,2,0.999818,0.999638,0.999999
+Harrisburg,CZ-CC,mixed_use,CZ-CC,2,2,0,1,0,0,0,2,0.847115,0.69423,1.0
+Harrisburg,CZ-GC,unknown,CZ-GC,2,2,0,0,0,0,0,2,0.97892,0.974288,0.983552
+Harrisburg,CZ-RH,unknown,CZ-RH,2,2,2,0,0,2,0,2,0.919041,0.838082,1.0
+Harrisburg,RM,commercial,RM,2,2,2,0,0,2,0,2,0.876219,0.876219,0.876219
+Kannapolis,CD-R,unknown,CD-R,2,2,0,0,0,0,0,2,0.999979,0.999966,0.999992
+Kannapolis,OI-CZ,office,OI-CZ,2,2,0,0,0,0,0,1,0.988314,0.986539,0.99009
+Kannapolis,R4,office,R4,2,2,0,0,0,0,0,2,0.97005,0.969918,0.970182
+Locust,CBI,unknown,CBI,2,2,2,0,0,0,0,2,0.996458,0.992915,1.0
+Cabarrus County / Unincorporated,OI-SU,office,OI-SU,1,1,0,0,0,0,0,1,0.997277,0.997277,0.997277
+Concord,AG-CD,agricultural,AG-CD,1,1,0,0,0,0,0,1,0.999945,0.999945,0.999945
+Concord,CC-CD,commercial,CC-CD,1,1,0,0,0,0,0,1,0.999998,0.999998,0.999998
+Concord,RE-CU,residential,RE-CU,1,1,0,0,0,0,0,1,0.982459,0.982459,0.982459
+Harrisburg,CZ-AG,unknown,CZ-AG,1,1,1,0,0,1,0,1,0.985243,0.985243,0.985243
+Harrisburg,CZ-NC,residential,CZ-NC,1,1,1,0,0,1,0,1,0.989371,0.989371,0.989371
+Kannapolis,HI-CZ,office,HI-CZ,1,1,1,0,0,1,0,1,0.999765,0.999765,0.999765
+Kannapolis,R18-CZ,agricultural,R18-CZ,1,1,0,0,0,0,0,1,0.917406,0.917406,0.917406
+Kannapolis,R6,residential,R6,1,1,0,0,0,0,0,0,0.962721,0.962721,0.962721
+Kannapolis,R6-CZ,residential,R6-CZ,1,1,0,0,0,0,0,0,0.978341,0.978341,0.978341
+Midland,C 601-CZ,unknown,C 601-CZ,1,1,1,0,0,1,0,1,1.0,1.0,1.0
+Midland,MSP,unknown,MSP,1,1,0,0,0,0,0,1,1.0,1.0,1.0
+Mt. Pleasant,RE,residential,RE,1,1,1,0,0,1,0,1,0.997386,0.997386,0.997386

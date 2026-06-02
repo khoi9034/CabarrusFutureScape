@@ -1,0 +1,108 @@
+{
+  "endpoint_implemented": "GET /development/hotspots",
+  "status": "implemented_and_verified",
+  "source_tables_available": [
+    "public.development_activity_parcel_summary",
+    "public.real_property_permit_parcel_relationship",
+    "public.parcels_enriched",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "source_tables_queried": [
+    "public.development_activity_parcel_summary",
+    "public.real_property_permit_parcel_relationship"
+  ],
+  "hotspot_fields_returned": [
+    "official_parcel_id",
+    "pin14",
+    "subdivision",
+    "neighborhood",
+    "zoning_jurisdiction_name",
+    "dominant_zoning_code_raw",
+    "dominant_zoning_general_normalized",
+    "parcel_quality_status",
+    "zoning_assignment_confidence",
+    "total_permit_count",
+    "recent_permit_count_1yr",
+    "recent_permit_count_3yr",
+    "total_permit_amount",
+    "avg_permit_amount",
+    "latest_permit_date",
+    "dominant_permit_type",
+    "dominant_work_type",
+    "latest_permit_status",
+    "development_activity_score",
+    "development_activity_class",
+    "has_unmatched_or_ambiguous_permit_flag"
+  ],
+  "filters_supported": [
+    "activity_class",
+    "zoning_jurisdiction",
+    "zoning_category",
+    "permit_type",
+    "work_type",
+    "year",
+    "recent_window"
+  ],
+  "sort_by_supported": [
+    "development_activity_score",
+    "total_permit_count",
+    "recent_permit_count_1yr",
+    "recent_permit_count_3yr",
+    "total_permit_amount"
+  ],
+  "recent_windows_supported": [
+    1,
+    3
+  ],
+  "pagination": {
+    "default_limit": 20,
+    "maximum_limit": 100,
+    "limit_above_max_behavior": "clamped_to_100",
+    "offset_supported": true
+  },
+  "empty_result_behavior": "Filtered hotspot requests with no matches return HTTP 200 with total_count 0 and an empty results array.",
+  "example_response": {
+    "request": "/development/hotspots",
+    "total_count": 43474,
+    "sort_by": "development_activity_score",
+    "top_result": {
+      "official_parcel_id": "CFS-PARCEL-0149726579",
+      "pin14": "45896367300000",
+      "neighborhood": "CONCORD MILLS",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "C-2",
+      "total_permit_count": 286,
+      "recent_permit_count_1yr": 24,
+      "recent_permit_count_3yr": 59,
+      "total_permit_amount": 61926619.0,
+      "latest_permit_date": "2025-10-22",
+      "development_activity_score": 100.0,
+      "development_activity_class": "very_high_activity"
+    },
+    "very_high_activity_count": 551,
+    "concord_hotspot_count": 19929,
+    "recent_1yr_hotspot_count": 3091,
+    "top_total_permit_amount_result": {
+      "official_parcel_id": "CFS-PARCEL-0149806835",
+      "total_permit_amount": 1325041388.0
+    }
+  },
+  "verification": {
+    "compile": "python -m compileall app passed",
+    "tests": "python -m pytest passed: 68 passed, 1 warning",
+    "live_health_database": "GET /health/database returned connected",
+    "live_global_hotspots_check": "GET /development/hotspots returned HTTP 200 with 43474 hotspot parcels",
+    "live_activity_class_check": "GET /development/hotspots?activity_class=very_high_activity returned 551 parcels",
+    "live_zoning_jurisdiction_check": "GET /development/hotspots?zoning_jurisdiction=Concord returned 19929 parcels",
+    "live_recent_window_check": "GET /development/hotspots?recent_window=1 returned 3091 parcels",
+    "live_sort_check": "GET /development/hotspots?sort_by=total_permit_amount returned CFS-PARCEL-0149806835 as the top parcel",
+    "live_validation_check": "Invalid recent_window and sort_by requests returned HTTP 422",
+    "live_empty_result_check": "GET /development/hotspots?activity_class=NO-SUCH returned HTTP 200 with zero results",
+    "openapi_check": "OpenAPI includes /development/hotspots"
+  },
+  "readiness_for_next_endpoint": {
+    "next_endpoint": "GET /development/zoning-summary",
+    "assessment": "Ready. The backend now exposes parcel-level development hotspots from real PostGIS activity analytics with sorting, filtering, pagination, validation, and OpenAPI coverage."
+  }
+}

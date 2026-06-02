@@ -1,0 +1,1417 @@
+{
+  "generated_at": "2026-05-28T11:27:43",
+  "database": {
+    "host": "localhost",
+    "port": 5433,
+    "database": "cfs_dev",
+    "clean_table": "public.parcels_clean",
+    "enriched_table": "public.parcels_enriched"
+  },
+  "row_count_comparison": {
+    "clean_table": "public.parcels_clean",
+    "enriched_table": "public.parcels_enriched",
+    "clean_row_count": 110017,
+    "enriched_row_count": 110017,
+    "row_count_delta": 0,
+    "row_counts_match": true
+  },
+  "geometry_summary": {
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 110017
+      }
+    ],
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "feature_count": 110017
+      }
+    ],
+    "invalid_geometry_count": 0,
+    "source_geometry_repaired_count": 6
+  },
+  "flagged_parcel_count": 45099,
+  "flag_summary": [
+    {
+      "outlier_flag": "missing_subdivision",
+      "parcel_count": 33459,
+      "parcel_percentage": 30.4126,
+      "max_area_acres": 839.5555,
+      "max_value_per_acre": 12089964706177.0
+    },
+    {
+      "outlier_flag": "missing_value_fields",
+      "parcel_count": 6975,
+      "parcel_percentage": 6.3399,
+      "max_area_acres": 670.2715,
+      "max_value_per_acre": null
+    },
+    {
+      "outlier_flag": "suspicious_subdivision",
+      "parcel_count": 6817,
+      "parcel_percentage": 6.1963,
+      "max_area_acres": 420.8963,
+      "max_value_per_acre": 109847469715.86
+    },
+    {
+      "outlier_flag": "null_heavy_record",
+      "parcel_count": 6390,
+      "parcel_percentage": 5.8082,
+      "max_area_acres": 300.0706,
+      "max_value_per_acre": null
+    },
+    {
+      "outlier_flag": "duplicate_pin14",
+      "parcel_count": 6377,
+      "parcel_percentage": 5.7964,
+      "max_area_acres": 839.5555,
+      "max_value_per_acre": 66734722198509.1
+    },
+    {
+      "outlier_flag": "extreme_value_per_acre",
+      "parcel_count": 734,
+      "parcel_percentage": 0.6672,
+      "max_area_acres": 1.7684,
+      "max_value_per_acre": 66734722198509.1
+    },
+    {
+      "outlier_flag": "tiny_area_outlier",
+      "parcel_count": 370,
+      "parcel_percentage": 0.3363,
+      "max_area_acres": 0.01,
+      "max_value_per_acre": 66734722198509.1
+    },
+    {
+      "outlier_flag": "missing_neighborhood",
+      "parcel_count": 17,
+      "parcel_percentage": 0.0155,
+      "max_area_acres": 1.4941,
+      "max_value_per_acre": 268720.92
+    },
+    {
+      "outlier_flag": "huge_area_outlier",
+      "parcel_count": 10,
+      "parcel_percentage": 0.0091,
+      "max_area_acres": 1862.8738,
+      "max_value_per_acre": 109460.17
+    },
+    {
+      "outlier_flag": "missing_pin14",
+      "parcel_count": 10,
+      "parcel_percentage": 0.0091,
+      "max_area_acres": 0.5135,
+      "max_value_per_acre": null
+    },
+    {
+      "outlier_flag": "source_geometry_repaired",
+      "parcel_count": 6,
+      "parcel_percentage": 0.0055,
+      "max_area_acres": 45.333,
+      "max_value_per_acre": 482095.97
+    }
+  ],
+  "duplicate_pin14_group_count": 2930,
+  "duplicate_pin14_groups_top_25": [
+    {
+      "pin14": "00000",
+      "parcel_count": 84,
+      "sample_official_parcel_id": "CFS-PARCEL-0149720863",
+      "objectid_1_values": "149720863,149720864,149720865,149720866,149720867,149720868,149720869,149720870,149720871,149720872,149720873,149720874,149720875,149720876,149720877,149720888,149720889,149720890,149720891,149720892,149720893,149720894,149720895,149720896,149720897,149721097,149721098,149721099,149721100,149721101,149721102,149721103,149721104,149721105,149721106,149721107,149721108,149721109,149721110,149721111,149721112,149721113,149721114,149721115,149721116,149721117,149721153,149721154,149721155,149721156,149721157,149721158,149721159,149721160,149721161,149721162,149721163,149721851,149721852,149721853,149721854,149721855,149721856,149721857,149721858,149721859,149721860,149721861,149721862,149721863,149721864,149721865,149721866,149721867,149721868,149721869,149721870,149721871,149721872,149721873,149721874,149721875,149721987,149721988"
+    },
+    {
+      "pin14": "10000000000",
+      "parcel_count": 77,
+      "sample_official_parcel_id": "CFS-PARCEL-0149720735",
+      "objectid_1_values": "149720735,149720736,149720737,149720738,149720739,149720740,149720741,149720742,149720743,149720744,149720745,149720746,149720747,149720878,149720879,149720880,149720881,149720882,149720883,149720884,149720885,149720886,149720887,149720898,149720899,149720900,149720901,149720902,149720903,149720904,149720905,149720906,149720907,149720908,149720919,149720920,149720921,149720922,149720923,149720924,149720925,149720926,149720927,149720928,149720929,149720980,149720981,149720982,149720983,149720984,149720985,149720986,149721042,149721043,149721044,149721045,149721046,149721047,149721048,149721049,149721164,149721165,149721166,149721167,149721168,149721169,149721259,149721260,149721261,149721262,149721263,149721264,149721265,149721266,149721267,149721268,149721409"
+    },
+    {
+      "pin14": "55079854410000",
+      "parcel_count": 20,
+      "sample_official_parcel_id": "CFS-PARCEL-0149749620",
+      "objectid_1_values": "149749620,149749621,149749622,149749623,149749624,149749625,149749626,149749627,149749628,149749629,149749630,149749631,149749632,149749633,149749642,149749643,149749644,149749645,149749646,149749647"
+    },
+    {
+      "pin14": "55079941300000",
+      "parcel_count": 19,
+      "sample_official_parcel_id": "CFS-PARCEL-0149749930",
+      "objectid_1_values": "149749930,149749931,149749932,149749941,149749942,149749943,149749944,149749945,149749946,149749947,149749948,149749949,149749950,149749951,149749952,149749953,149749954,149749955,149749956"
+    },
+    {
+      "pin14": "55079892080000",
+      "parcel_count": 13,
+      "sample_official_parcel_id": "CFS-PARCEL-0149749587",
+      "objectid_1_values": "149749587,149749588,149749589,149749598,149749599,149749600,149749601,149749602,149749603,149749608,149749609,149749610,149749611"
+    },
+    {
+      "pin14": "55672493330000",
+      "parcel_count": 9,
+      "sample_official_parcel_id": "CFS-PARCEL-0149778500",
+      "objectid_1_values": "149778500,149778501,149778502,149778503,149778504,149778505,149778506,149778507,149778514"
+    },
+    {
+      "pin14": "154 076",
+      "parcel_count": 7,
+      "sample_official_parcel_id": "CFS-PARCEL-0149723626",
+      "objectid_1_values": "149723626,149723627,149723628,149723629,149723818,149723819,149723820"
+    },
+    {
+      "pin14": "46718462320000",
+      "parcel_count": 6,
+      "sample_official_parcel_id": "CFS-PARCEL-0149731219",
+      "objectid_1_values": "149731219,149731220,149731221,149731222,149731223,149731285"
+    },
+    {
+      "pin14": "55240543940000",
+      "parcel_count": 6,
+      "sample_official_parcel_id": "CFS-PARCEL-0149759380",
+      "objectid_1_values": "149759380,149759381,149759382,149759391,149759392,149759393"
+    },
+    {
+      "pin14": "55295889330000",
+      "parcel_count": 6,
+      "sample_official_parcel_id": "CFS-PARCEL-0149765823",
+      "objectid_1_values": "149765823,149765824,149765825,149765826,149765827,149765828"
+    },
+    {
+      "pin14": "55492421500000",
+      "parcel_count": 6,
+      "sample_official_parcel_id": "CFS-PARCEL-0149777004",
+      "objectid_1_values": "149777004,149777005,149777006,149777007,149777029,149777030"
+    },
+    {
+      "pin14": "56114849040000",
+      "parcel_count": 6,
+      "sample_official_parcel_id": "CFS-PARCEL-0149791943",
+      "objectid_1_values": "149791943,149791944,149791945,149791946,149791947,149791948"
+    },
+    {
+      "pin14": "56339933240000",
+      "parcel_count": 6,
+      "sample_official_parcel_id": "CFS-PARCEL-0149827184",
+      "objectid_1_values": "149827184,149827185,149827186,149827187,149827188,149827189"
+    },
+    {
+      "pin14": "56833684880000",
+      "parcel_count": 6,
+      "sample_official_parcel_id": "CFS-PARCEL-0149829168",
+      "objectid_1_values": "149829168,149829169,149829170,149829193,149829194,149829195"
+    },
+    {
+      "pin14": "45898328980000",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149726658",
+      "objectid_1_values": "149726658,149726659,149726660,149726661,149726662"
+    },
+    {
+      "pin14": "46743310370000",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149733976",
+      "objectid_1_values": "149733976,149733977,149733978,149734032,149734033"
+    },
+    {
+      "pin14": "46812740230000",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149737921",
+      "objectid_1_values": "149737921,149737922,149737923,149737924,149737925"
+    },
+    {
+      "pin14": "46826966730000",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149740095",
+      "objectid_1_values": "149740095,149740127,149740128,149740129,149740130"
+    },
+    {
+      "pin14": "55079868430000",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149749666",
+      "objectid_1_values": "149749666,149749667,149749668,149749669,149749670"
+    },
+    {
+      "pin14": "56002885360000",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149782548",
+      "objectid_1_values": "149782548,149782549,149782550,149782551,149782552"
+    },
+    {
+      "pin14": "56119799570000",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149793191",
+      "objectid_1_values": "149793191,149793192,149793193,149793194,149793195"
+    },
+    {
+      "pin14": "56331876880000",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149820804",
+      "objectid_1_values": "149820804,149820805,149820806,149820807,149820816"
+    },
+    {
+      "pin14": "56712016960000",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149827437",
+      "objectid_1_values": "149827437,149827438,149827439,149827449,149827450"
+    },
+    {
+      "pin14": "NCR NCR",
+      "parcel_count": 5,
+      "sample_official_parcel_id": "CFS-PARCEL-0149830004",
+      "objectid_1_values": "149830004,149830005,149830006,149830098,149830099"
+    },
+    {
+      "pin14": "0",
+      "parcel_count": 4,
+      "sample_official_parcel_id": "CFS-PARCEL-0149720597",
+      "objectid_1_values": "149720597,149720598,149720599,149720600"
+    }
+  ],
+  "quality_distributions": {
+    "parcel_quality_status": [
+      {
+        "value": "trusted",
+        "parcel_count": 64918,
+        "parcel_percentage": 59.0072
+      },
+      {
+        "value": "review",
+        "parcel_count": 45099,
+        "parcel_percentage": 40.9928
+      }
+    ],
+    "geometry_quality_status": [
+      {
+        "value": "valid",
+        "parcel_count": 110011,
+        "parcel_percentage": 99.9945
+      },
+      {
+        "value": "repaired_from_source",
+        "parcel_count": 6,
+        "parcel_percentage": 0.0055
+      }
+    ],
+    "area_quality_status": [
+      {
+        "value": "valid",
+        "parcel_count": 109406,
+        "parcel_percentage": 99.4446
+      },
+      {
+        "value": "micro_area_review",
+        "parcel_count": 370,
+        "parcel_percentage": 0.3363
+      },
+      {
+        "value": "large_area_review",
+        "parcel_count": 231,
+        "parcel_percentage": 0.21
+      },
+      {
+        "value": "extreme_large_area_review",
+        "parcel_count": 10,
+        "parcel_percentage": 0.0091
+      }
+    ],
+    "valuation_quality_status": [
+      {
+        "value": "valid",
+        "parcel_count": 102308,
+        "parcel_percentage": 92.9929
+      },
+      {
+        "value": "missing_values",
+        "parcel_count": 6975,
+        "parcel_percentage": 6.3399
+      },
+      {
+        "value": "extreme_value_per_acre_review",
+        "parcel_count": 734,
+        "parcel_percentage": 0.6672
+      }
+    ],
+    "subdivision_quality_status": [
+      {
+        "value": "valid",
+        "parcel_count": 69741,
+        "parcel_percentage": 63.3911
+      },
+      {
+        "value": "missing_subdivision",
+        "parcel_count": 33459,
+        "parcel_percentage": 30.4126
+      },
+      {
+        "value": "administrative_or_placeholder_review",
+        "parcel_count": 6817,
+        "parcel_percentage": 6.1963
+      }
+    ],
+    "parcel_size_category": [
+      {
+        "value": "residential_standard",
+        "parcel_count": 94975,
+        "parcel_percentage": 86.3276
+      },
+      {
+        "value": "estate",
+        "parcel_count": 10238,
+        "parcel_percentage": 9.3058
+      },
+      {
+        "value": "commercial_large",
+        "parcel_count": 4193,
+        "parcel_percentage": 3.8112
+      },
+      {
+        "value": "micro",
+        "parcel_count": 370,
+        "parcel_percentage": 0.3363
+      },
+      {
+        "value": "extreme_large",
+        "parcel_count": 241,
+        "parcel_percentage": 0.2191
+      }
+    ],
+    "valuation_band": [
+      {
+        "value": "medium",
+        "parcel_count": 63212,
+        "parcel_percentage": 57.4566
+      },
+      {
+        "value": "high",
+        "parcel_count": 18335,
+        "parcel_percentage": 16.6656
+      },
+      {
+        "value": "low",
+        "parcel_count": 17889,
+        "parcel_percentage": 16.2602
+      },
+      {
+        "value": "unknown",
+        "parcel_count": 6975,
+        "parcel_percentage": 6.3399
+      },
+      {
+        "value": "luxury",
+        "parcel_count": 2971,
+        "parcel_percentage": 2.7005
+      },
+      {
+        "value": "ultra_high",
+        "parcel_count": 635,
+        "parcel_percentage": 0.5772
+      }
+    ],
+    "neighborhood_density_class": [
+      {
+        "value": "moderate",
+        "parcel_count": 40980,
+        "parcel_percentage": 37.2488
+      },
+      {
+        "value": "low",
+        "parcel_count": 32992,
+        "parcel_percentage": 29.9881
+      },
+      {
+        "value": "high",
+        "parcel_count": 22457,
+        "parcel_percentage": 20.4123
+      },
+      {
+        "value": "very_high",
+        "parcel_count": 7061,
+        "parcel_percentage": 6.4181
+      },
+      {
+        "value": "sparse",
+        "parcel_count": 6510,
+        "parcel_percentage": 5.9173
+      },
+      {
+        "value": "unknown",
+        "parcel_count": 17,
+        "parcel_percentage": 0.0155
+      }
+    ]
+  },
+  "top_suspicious_subdivisions": [
+    {
+      "subdivision": "(missing)",
+      "subdivision_quality_status": "missing_subdivision",
+      "parcel_count": 33459,
+      "total_area_acres": 139204.06
+    },
+    {
+      "subdivision": "ROWAN COUNTY PARCEL",
+      "subdivision_quality_status": "administrative_or_placeholder_review",
+      "parcel_count": 6054,
+      "total_area_acres": 6643.33
+    },
+    {
+      "subdivision": "NO SUBDIVISION",
+      "subdivision_quality_status": "administrative_or_placeholder_review",
+      "parcel_count": 742,
+      "total_area_acres": 9133.89
+    },
+    {
+      "subdivision": "N/A",
+      "subdivision_quality_status": "administrative_or_placeholder_review",
+      "parcel_count": 9,
+      "total_area_acres": 61.19
+    },
+    {
+      "subdivision": "NO MAN'S LAND",
+      "subdivision_quality_status": "administrative_or_placeholder_review",
+      "parcel_count": 6,
+      "total_area_acres": 1.83
+    },
+    {
+      "subdivision": "NO SUBDIV",
+      "subdivision_quality_status": "administrative_or_placeholder_review",
+      "parcel_count": 3,
+      "total_area_acres": 141.41
+    },
+    {
+      "subdivision": "NO NAME",
+      "subdivision_quality_status": "administrative_or_placeholder_review",
+      "parcel_count": 1,
+      "total_area_acres": 2.23
+    },
+    {
+      "subdivision": "No Subdivision",
+      "subdivision_quality_status": "administrative_or_placeholder_review",
+      "parcel_count": 1,
+      "total_area_acres": 20.72
+    },
+    {
+      "subdivision": "NO SUBDIVISIONAUSTIN CORNERS",
+      "subdivision_quality_status": "administrative_or_placeholder_review",
+      "parcel_count": 1,
+      "total_area_acres": 0.28
+    }
+  ],
+  "largest_parcels": [
+    {
+      "official_parcel_id": "CFS-PARCEL-0149751011",
+      "objectid_1": 149751011,
+      "pin14": "46920592590000",
+      "subdiv_name": "LAKE DON T. HOWELL",
+      "nbh_name": "LAKE HOWELL WATERSHED",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 1862.8738,
+      "marketvalue_numeric": 55034560.0,
+      "assessedvalue_numeric": 55034560.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727442",
+      "objectid_1": 149727442,
+      "pin14": "45988876150000",
+      "subdiv_name": null,
+      "nbh_name": "CHARLOTTE MOTOR SPEEDWAY",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 839.5555,
+      "marketvalue_numeric": 204830470.0,
+      "assessedvalue_numeric": 204830470.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149727441",
+      "objectid_1": 149727441,
+      "pin14": "45988876150000",
+      "subdiv_name": null,
+      "nbh_name": "CHARLOTTE MOTOR SPEEDWAY",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 839.5555,
+      "marketvalue_numeric": 204830470.0,
+      "assessedvalue_numeric": 204830470.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149760035",
+      "objectid_1": 149760035,
+      "pin14": "55198962310000",
+      "subdiv_name": null,
+      "nbh_name": "CONCORD PARKWAY SOUTH",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 670.2715,
+      "marketvalue_numeric": null,
+      "assessedvalue_numeric": null,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier|missing_subdivision|missing_value_fields"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149777974",
+      "objectid_1": 149777974,
+      "pin14": "55579909940000",
+      "subdiv_name": null,
+      "nbh_name": "MIAMI CHURCH RD",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 642.0075,
+      "marketvalue_numeric": 5768980.0,
+      "assessedvalue_numeric": 5768980.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149828946",
+      "objectid_1": 149828946,
+      "pin14": "56829114560000",
+      "subdiv_name": null,
+      "nbh_name": "WATTS CROSSROADS",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 614.0028,
+      "marketvalue_numeric": 5000980.0,
+      "assessedvalue_numeric": 5000980.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749977",
+      "objectid_1": 149749977,
+      "pin14": "46900022520000",
+      "subdiv_name": null,
+      "nbh_name": "AIRPORT",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 586.4664,
+      "marketvalue_numeric": 85756820.0,
+      "assessedvalue_numeric": 85756820.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749978",
+      "objectid_1": 149749978,
+      "pin14": "46900022520000",
+      "subdiv_name": null,
+      "nbh_name": "AIRPORT",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 586.4664,
+      "marketvalue_numeric": 85756820.0,
+      "assessedvalue_numeric": 85756820.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149749657",
+      "objectid_1": 149749657,
+      "pin14": "55083773350000",
+      "subdiv_name": null,
+      "nbh_name": "CONCORD PARKWAY SOUTH",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 573.6939,
+      "marketvalue_numeric": 18850570.0,
+      "assessedvalue_numeric": 18850570.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149778854",
+      "objectid_1": 149778854,
+      "pin14": "55665127460000",
+      "subdiv_name": null,
+      "nbh_name": "REED GOLD MINE",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 516.983,
+      "marketvalue_numeric": 9523350.0,
+      "assessedvalue_numeric": 9523350.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "huge_area_outlier|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149758869",
+      "objectid_1": 149758869,
+      "pin14": "55194706110000",
+      "subdiv_name": "AQUAMARINE",
+      "nbh_name": "CONCORD PARKWAY SOUTH",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 489.4317,
+      "marketvalue_numeric": 69091960.0,
+      "assessedvalue_numeric": 69091960.0,
+      "parcel_quality_status": "trusted",
+      "outlier_flags": ""
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149828470",
+      "objectid_1": 149828470,
+      "pin14": "56732839770000",
+      "subdiv_name": null,
+      "nbh_name": "LITTLE BUFFALO CREEK",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 486.0295,
+      "marketvalue_numeric": 5374580.0,
+      "assessedvalue_numeric": 1192100.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149753167",
+      "objectid_1": 149753167,
+      "pin14": "55159011120000",
+      "subdiv_name": "CAROLINA RIDGE",
+      "nbh_name": "PINE GROVE CHURCH RD",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 465.5399,
+      "marketvalue_numeric": null,
+      "assessedvalue_numeric": null,
+      "parcel_quality_status": "review",
+      "outlier_flags": "missing_value_fields"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149777876",
+      "objectid_1": 149777876,
+      "pin14": "55562590580000",
+      "subdiv_name": null,
+      "nbh_name": "REED GOLD MINE",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 450.8121,
+      "marketvalue_numeric": 8504740.0,
+      "assessedvalue_numeric": 8504740.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149777845",
+      "objectid_1": 149777845,
+      "pin14": "55562590580000",
+      "subdiv_name": null,
+      "nbh_name": "REED GOLD MINE",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 450.8121,
+      "marketvalue_numeric": 8504740.0,
+      "assessedvalue_numeric": 8504740.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149782624",
+      "objectid_1": 149782624,
+      "pin14": "56004040690000",
+      "subdiv_name": null,
+      "nbh_name": "CONCORD PARKWAY SOUTH",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 442.8578,
+      "marketvalue_numeric": 18471620.0,
+      "assessedvalue_numeric": 3484180.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149827587",
+      "objectid_1": 149827587,
+      "pin14": "56706536840000",
+      "subdiv_name": "NO SUBDIVISION",
+      "nbh_name": "MT PLEASANT OUTSIDE",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 420.8963,
+      "marketvalue_numeric": 4959420.0,
+      "assessedvalue_numeric": 582310.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "suspicious_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149780858",
+      "objectid_1": 149780858,
+      "pin14": "55793566300000",
+      "subdiv_name": "CATAWBA LANDS CONSERVANCY",
+      "nbh_name": "MT PLEASANT OUTSIDE",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 392.8185,
+      "marketvalue_numeric": 4879080.0,
+      "assessedvalue_numeric": 4879080.0,
+      "parcel_quality_status": "trusted",
+      "outlier_flags": ""
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149789146",
+      "objectid_1": 149789146,
+      "pin14": "56102182090000",
+      "subdiv_name": "LILLY CONCORD",
+      "nbh_name": "CONCORD PARKWAY SOUTH",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 383.5868,
+      "marketvalue_numeric": 473824360.0,
+      "assessedvalue_numeric": 473824360.0,
+      "parcel_quality_status": "trusted",
+      "outlier_flags": ""
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149778673",
+      "objectid_1": 149778673,
+      "pin14": "55669419330000",
+      "subdiv_name": null,
+      "nbh_name": "REED GOLD MINE",
+      "parcel_size_category": "extreme_large",
+      "parcel_area_acres_calc": 381.483,
+      "marketvalue_numeric": 7179830.0,
+      "assessedvalue_numeric": 7179830.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "duplicate_pin14|missing_subdivision"
+    }
+  ],
+  "highest_value_per_acre_parcels": [
+    {
+      "official_parcel_id": "CFS-PARCEL-0149810663",
+      "objectid_1": 149810663,
+      "pin14": "56220578330000",
+      "subdiv_name": "ROYAL OAKS",
+      "nbh_name": "SOUTH CANNON BLVD",
+      "valuation_band": "ultra_high",
+      "parcel_area_acres_calc": 4e-08,
+      "marketvalue_numeric": 5643610.0,
+      "landvalue_numeric": 2344880.0,
+      "value_per_acre": 66734722198509.1,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149734085",
+      "objectid_1": 149734085,
+      "pin14": "46722780830000",
+      "subdiv_name": "THE FARM AT RIVERPOINTE PH 4B MAP 1",
+      "nbh_name": "FARM AT RIVERPOINTE BACK",
+      "valuation_band": "medium",
+      "parcel_area_acres_calc": 1e-08,
+      "marketvalue_numeric": 498160.0,
+      "landvalue_numeric": 95000.0,
+      "value_per_acre": 17230528991270.1,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149816302",
+      "objectid_1": 149816302,
+      "pin14": "56241122120000",
+      "subdiv_name": null,
+      "nbh_name": "NORTH CANNON BLVD",
+      "valuation_band": "luxury",
+      "parcel_area_acres_calc": 9e-08,
+      "marketvalue_numeric": 3127540.0,
+      "landvalue_numeric": 1107060.0,
+      "value_per_acre": 12089964706177.0,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149756169",
+      "objectid_1": 149756169,
+      "pin14": "55075689090000",
+      "subdiv_name": "HARRISBURG PARK",
+      "nbh_name": "HARRISBURG PARK",
+      "valuation_band": "medium",
+      "parcel_area_acres_calc": 2e-08,
+      "marketvalue_numeric": 241440.0,
+      "landvalue_numeric": 65000.0,
+      "value_per_acre": 3893423455496.38,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149756716",
+      "objectid_1": 149756716,
+      "pin14": "55179001560000",
+      "subdiv_name": "HEATHERSTONE",
+      "nbh_name": "HEATHERSTONE",
+      "valuation_band": "high",
+      "parcel_area_acres_calc": 4e-08,
+      "marketvalue_numeric": 541740.0,
+      "landvalue_numeric": 100000.0,
+      "value_per_acre": 2830026633702.51,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149792777",
+      "objectid_1": 149792777,
+      "pin14": "56118358800000",
+      "subdiv_name": "#51 PORTER ST",
+      "nbh_name": "HERTFORDSHIRE",
+      "valuation_band": "medium",
+      "parcel_area_acres_calc": 2e-08,
+      "marketvalue_numeric": 249860.0,
+      "landvalue_numeric": 55000.0,
+      "value_per_acre": 2671209046644.32,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149787273",
+      "objectid_1": 149787273,
+      "pin14": "56035024880000",
+      "subdiv_name": "KELLSWATER COMMONS  APARTMENT SITE",
+      "nbh_name": "NORTHWEST CABARRUS SCHOOL",
+      "valuation_band": "medium",
+      "parcel_area_acres_calc": 2.4e-07,
+      "marketvalue_numeric": 319900.0,
+      "landvalue_numeric": 319900.0,
+      "value_per_acre": 1313663048419.59,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149828096",
+      "objectid_1": 149828096,
+      "pin14": "56718383240000",
+      "subdiv_name": null,
+      "nbh_name": "MT PLEASANT OUTSIDE",
+      "valuation_band": "high",
+      "parcel_area_acres_calc": 9.4e-07,
+      "marketvalue_numeric": 573200.0,
+      "landvalue_numeric": 573200.0,
+      "value_per_acre": 612214657920.86,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149801115",
+      "objectid_1": 149801115,
+      "pin14": "56118939950000",
+      "subdiv_name": null,
+      "nbh_name": "PARKWOOD",
+      "valuation_band": "ultra_high",
+      "parcel_area_acres_calc": 1.22e-06,
+      "marketvalue_numeric": 23026110.0,
+      "landvalue_numeric": 276700.0,
+      "value_per_acre": 227325081279.76,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149801116",
+      "objectid_1": 149801116,
+      "pin14": "56118939950000",
+      "subdiv_name": null,
+      "nbh_name": "PARKWOOD",
+      "valuation_band": "ultra_high",
+      "parcel_area_acres_calc": 1.22e-06,
+      "marketvalue_numeric": 23026110.0,
+      "landvalue_numeric": 276700.0,
+      "value_per_acre": 227325081279.76,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149783394",
+      "objectid_1": 149783394,
+      "pin14": "56007262150000",
+      "subdiv_name": "SHEFFIELD MANOR",
+      "nbh_name": "SHEFFIELD MANOR",
+      "valuation_band": "medium",
+      "parcel_area_acres_calc": 4.3e-07,
+      "marketvalue_numeric": 412060.0,
+      "landvalue_numeric": 80000.0,
+      "value_per_acre": 185547077370.86,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149827158",
+      "objectid_1": 149827158,
+      "pin14": "56704096200000",
+      "subdiv_name": null,
+      "nbh_name": "MT PLEASANT OUTSIDE",
+      "valuation_band": "medium",
+      "parcel_area_acres_calc": 7.1e-07,
+      "marketvalue_numeric": 497660.0,
+      "landvalue_numeric": 87360.0,
+      "value_per_acre": 122790995302.94,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149806493",
+      "objectid_1": 149806493,
+      "pin14": "56134231700000",
+      "subdiv_name": null,
+      "nbh_name": "MIDWAY WEST",
+      "valuation_band": "medium",
+      "parcel_area_acres_calc": 5.3e-07,
+      "marketvalue_numeric": 180410.0,
+      "landvalue_numeric": 58300.0,
+      "value_per_acre": 111042928121.95,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149775912",
+      "objectid_1": 149775912,
+      "pin14": "55484729070000",
+      "subdiv_name": "NO SUBDIVISION",
+      "nbh_name": "FAGGARTS EAST",
+      "valuation_band": "high",
+      "parcel_area_acres_calc": 5.9e-06,
+      "marketvalue_numeric": 851490.0,
+      "landvalue_numeric": 648560.0,
+      "value_per_acre": 109847469715.86,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|suspicious_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149767812",
+      "objectid_1": 149767812,
+      "pin14": "55364700100000",
+      "subdiv_name": null,
+      "nbh_name": "FLOWE FARM",
+      "valuation_band": "luxury",
+      "parcel_area_acres_calc": 5.49e-06,
+      "marketvalue_numeric": 1108920.0,
+      "landvalue_numeric": 410100.0,
+      "value_per_acre": 74760361360.88,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149744908",
+      "objectid_1": 149744908,
+      "pin14": "55062487870000",
+      "subdiv_name": null,
+      "nbh_name": "BROOKDALE AT PLAZA RD",
+      "valuation_band": "high",
+      "parcel_area_acres_calc": 1.064e-05,
+      "marketvalue_numeric": 672810.0,
+      "landvalue_numeric": 672810.0,
+      "value_per_acre": 63240116853.34,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149821878",
+      "objectid_1": 149821878,
+      "pin14": "56409220850000",
+      "subdiv_name": null,
+      "nbh_name": "LAKE LYNN LODGE",
+      "valuation_band": "high",
+      "parcel_area_acres_calc": 9.82e-06,
+      "marketvalue_numeric": 844780.0,
+      "landvalue_numeric": 445060.0,
+      "value_per_acre": 45300605489.59,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149752295",
+      "objectid_1": 149752295,
+      "pin14": "55150297920000",
+      "subdiv_name": "PEACH ORCHARD ESTATES PH 3",
+      "nbh_name": "PEACH ORCHARD",
+      "valuation_band": "high",
+      "parcel_area_acres_calc": 2.48e-06,
+      "marketvalue_numeric": 543010.0,
+      "landvalue_numeric": 100000.0,
+      "value_per_acre": 40375663026.64,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149811756",
+      "objectid_1": 149811756,
+      "pin14": "56225507640000",
+      "subdiv_name": "REALTICORP",
+      "nbh_name": "NORTHLIGHT",
+      "valuation_band": "medium",
+      "parcel_area_acres_calc": 1.026e-05,
+      "marketvalue_numeric": 410720.0,
+      "landvalue_numeric": 410720.0,
+      "value_per_acre": 40031929720.68,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14"
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149790679",
+      "objectid_1": 149790679,
+      "pin14": "56103813040000",
+      "subdiv_name": null,
+      "nbh_name": "MONTFORD AVE AREA",
+      "valuation_band": "medium",
+      "parcel_area_acres_calc": 2.94e-06,
+      "marketvalue_numeric": 253090.0,
+      "landvalue_numeric": 117060.0,
+      "value_per_acre": 39793568128.99,
+      "parcel_quality_status": "review",
+      "outlier_flags": "tiny_area_outlier|extreme_value_per_acre|duplicate_pin14|missing_subdivision"
+    }
+  ],
+  "subdivision_quality_summary": [
+    {
+      "subdivision": "(missing)",
+      "parcel_count": 33459,
+      "trusted_count": 0,
+      "review_count": 33459,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 1.1
+    },
+    {
+      "subdivision": "ROWAN COUNTY PARCEL",
+      "parcel_count": 6054,
+      "trusted_count": 0,
+      "review_count": 6054,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 3.006
+    },
+    {
+      "subdivision": "NO SUBDIVISION",
+      "parcel_count": 742,
+      "trusted_count": 0,
+      "review_count": 742,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 1.102
+    },
+    {
+      "subdivision": "WYNTREE",
+      "parcel_count": 228,
+      "trusted_count": 55,
+      "review_count": 173,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 1.031
+    },
+    {
+      "subdivision": "THE WAYFORTH AT CONCORD",
+      "parcel_count": 159,
+      "trusted_count": 8,
+      "review_count": 151,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.95
+    },
+    {
+      "subdivision": "CONCORD LAKES TOWNHOMES",
+      "parcel_count": 186,
+      "trusted_count": 68,
+      "review_count": 118,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.634
+    },
+    {
+      "subdivision": "CONDOS @ HARRISBURG TOWN CENTER",
+      "parcel_count": 64,
+      "trusted_count": 0,
+      "review_count": 64,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 1.25
+    },
+    {
+      "subdivision": "HIGHLAND CREEK",
+      "parcel_count": 970,
+      "trusted_count": 909,
+      "review_count": 61,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.066
+    },
+    {
+      "subdivision": "THE COURTYARDS ON ROBINSON CHURCH",
+      "parcel_count": 52,
+      "trusted_count": 0,
+      "review_count": 52,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 1.0
+    },
+    {
+      "subdivision": "EMERSON GLEN",
+      "parcel_count": 94,
+      "trusted_count": 46,
+      "review_count": 48,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.532
+    },
+    {
+      "subdivision": "HARRISBURG TOWN CENTER",
+      "parcel_count": 313,
+      "trusted_count": 266,
+      "review_count": 47,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.15
+    },
+    {
+      "subdivision": "MOSS CREEK",
+      "parcel_count": 1056,
+      "trusted_count": 1010,
+      "review_count": 46,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.044
+    },
+    {
+      "subdivision": "CHARLOTTE MOTORSPEEDWAY CONDOS",
+      "parcel_count": 43,
+      "trusted_count": 0,
+      "review_count": 43,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 1.884
+    },
+    {
+      "subdivision": "CABARRUS WOODS",
+      "parcel_count": 468,
+      "trusted_count": 427,
+      "review_count": 41,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.088
+    },
+    {
+      "subdivision": "CLARE HAVEN",
+      "parcel_count": 129,
+      "trusted_count": 88,
+      "review_count": 41,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.318
+    },
+    {
+      "subdivision": "RED HILL",
+      "parcel_count": 124,
+      "trusted_count": 83,
+      "review_count": 41,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.331
+    },
+    {
+      "subdivision": "MIDLAND CROSSING",
+      "parcel_count": 89,
+      "trusted_count": 48,
+      "review_count": 41,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.494
+    },
+    {
+      "subdivision": "ROCKY RIVER CROSSING",
+      "parcel_count": 504,
+      "trusted_count": 473,
+      "review_count": 31,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.062
+    },
+    {
+      "subdivision": "TOWNS AT CLIFFWOOD CONDOS",
+      "parcel_count": 31,
+      "trusted_count": 1,
+      "review_count": 30,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.968
+    },
+    {
+      "subdivision": "KASEN BLUFF",
+      "parcel_count": 30,
+      "trusted_count": 0,
+      "review_count": 30,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 1.0
+    }
+  ],
+  "neighborhood_quality_summary": [
+    {
+      "neighborhood": "ROWAN COUNTY PARCEL",
+      "parcel_count": 6054,
+      "trusted_count": 0,
+      "review_count": 6054,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 3.006
+    },
+    {
+      "neighborhood": "BROOKWOOD NORTH",
+      "parcel_count": 930,
+      "trusted_count": 198,
+      "review_count": 732,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.834
+    },
+    {
+      "neighborhood": "FLOWES STORE EAST",
+      "parcel_count": 926,
+      "trusted_count": 195,
+      "review_count": 731,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.847
+    },
+    {
+      "neighborhood": "LITTLE BUFFALO CREEK",
+      "parcel_count": 844,
+      "trusted_count": 205,
+      "review_count": 639,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.846
+    },
+    {
+      "neighborhood": "MIAMI CHURCH RD",
+      "parcel_count": 839,
+      "trusted_count": 218,
+      "review_count": 621,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.85
+    },
+    {
+      "neighborhood": "MIDWAY WEST",
+      "parcel_count": 771,
+      "trusted_count": 169,
+      "review_count": 602,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.829
+    },
+    {
+      "neighborhood": "HARTSELL SCHOOL",
+      "parcel_count": 749,
+      "trusted_count": 156,
+      "review_count": 593,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.832
+    },
+    {
+      "neighborhood": "RIMER TOWN",
+      "parcel_count": 779,
+      "trusted_count": 195,
+      "review_count": 584,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.788
+    },
+    {
+      "neighborhood": "LAKE CONCORD RD",
+      "parcel_count": 645,
+      "trusted_count": 87,
+      "review_count": 558,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.895
+    },
+    {
+      "neighborhood": "BOYS CLUB",
+      "parcel_count": 596,
+      "trusted_count": 54,
+      "review_count": 542,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.966
+    },
+    {
+      "neighborhood": "ST JOHNS CHURCH",
+      "parcel_count": 712,
+      "trusted_count": 172,
+      "review_count": 540,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.822
+    },
+    {
+      "neighborhood": "CAR TOWN",
+      "parcel_count": 590,
+      "trusted_count": 70,
+      "review_count": 520,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.915
+    },
+    {
+      "neighborhood": "WATTS CROSSROADS",
+      "parcel_count": 699,
+      "trusted_count": 190,
+      "review_count": 509,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.844
+    },
+    {
+      "neighborhood": "BETHEL ELEMENTARY SCHOOL",
+      "parcel_count": 660,
+      "trusted_count": 158,
+      "review_count": 502,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.832
+    },
+    {
+      "neighborhood": "CENTERGROVE",
+      "parcel_count": 570,
+      "trusted_count": 78,
+      "review_count": 492,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.925
+    },
+    {
+      "neighborhood": "DEWEESE",
+      "parcel_count": 670,
+      "trusted_count": 189,
+      "review_count": 481,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.773
+    },
+    {
+      "neighborhood": "WEST C ST",
+      "parcel_count": 602,
+      "trusted_count": 127,
+      "review_count": 475,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.879
+    },
+    {
+      "neighborhood": "LAKE LYNN LODGE",
+      "parcel_count": 631,
+      "trusted_count": 165,
+      "review_count": 466,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.808
+    },
+    {
+      "neighborhood": "MT PLEASANT HIGH SCHOOL",
+      "parcel_count": 600,
+      "trusted_count": 135,
+      "review_count": 465,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.84
+    },
+    {
+      "neighborhood": "R BROWN MCALLISTER SCHOOL",
+      "parcel_count": 533,
+      "trusted_count": 74,
+      "review_count": 459,
+      "critical_count": 0,
+      "avg_outlier_flag_count": 0.91
+    }
+  ],
+  "index_summary": [
+    {
+      "indexname": "parcels_enriched_geometry_gix",
+      "indexdef": "CREATE INDEX parcels_enriched_geometry_gix ON public.parcels_enriched USING gist (geometry)"
+    },
+    {
+      "indexname": "parcels_enriched_nbh_name_idx",
+      "indexdef": "CREATE INDEX parcels_enriched_nbh_name_idx ON public.parcels_enriched USING btree (nbh_name)"
+    },
+    {
+      "indexname": "parcels_enriched_neighborhood_density_class_idx",
+      "indexdef": "CREATE INDEX parcels_enriched_neighborhood_density_class_idx ON public.parcels_enriched USING btree (neighborhood_density_class)"
+    },
+    {
+      "indexname": "parcels_enriched_objectid_1_uidx",
+      "indexdef": "CREATE UNIQUE INDEX parcels_enriched_objectid_1_uidx ON public.parcels_enriched USING btree (objectid_1)"
+    },
+    {
+      "indexname": "parcels_enriched_parcel_quality_status_idx",
+      "indexdef": "CREATE INDEX parcels_enriched_parcel_quality_status_idx ON public.parcels_enriched USING btree (parcel_quality_status)"
+    },
+    {
+      "indexname": "parcels_enriched_parcel_size_category_idx",
+      "indexdef": "CREATE INDEX parcels_enriched_parcel_size_category_idx ON public.parcels_enriched USING btree (parcel_size_category)"
+    },
+    {
+      "indexname": "parcels_enriched_pin14_idx",
+      "indexdef": "CREATE INDEX parcels_enriched_pin14_idx ON public.parcels_enriched USING btree (pin14)"
+    },
+    {
+      "indexname": "parcels_enriched_pkey",
+      "indexdef": "CREATE UNIQUE INDEX parcels_enriched_pkey ON public.parcels_enriched USING btree (official_parcel_id)"
+    },
+    {
+      "indexname": "parcels_enriched_subdiv_name_idx",
+      "indexdef": "CREATE INDEX parcels_enriched_subdiv_name_idx ON public.parcels_enriched USING btree (subdiv_name)"
+    },
+    {
+      "indexname": "parcels_enriched_subdivision_quality_status_idx",
+      "indexdef": "CREATE INDEX parcels_enriched_subdivision_quality_status_idx ON public.parcels_enriched USING btree (subdivision_quality_status)"
+    },
+    {
+      "indexname": "parcels_enriched_valuation_band_idx",
+      "indexdef": "CREATE INDEX parcels_enriched_valuation_band_idx ON public.parcels_enriched USING btree (valuation_band)"
+    }
+  ],
+  "duration_seconds": 13.89,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcels_enriched_20260528_112729.log",
+  "outputs": {
+    "summary_json": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcels_enriched_summary.json",
+    "quality_flags_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcels_quality_flags.csv",
+    "outlier_summary_csv": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcels_outlier_summary.csv"
+  }
+}

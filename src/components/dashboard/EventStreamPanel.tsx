@@ -148,6 +148,7 @@ export function EventStreamPanel() {
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button
+          aria-pressed={!selectedParcelFilterActive && Boolean(activeFilter.includeRead)}
           className={filterButtonClass(
             !selectedParcelFilterActive && Boolean(activeFilter.includeRead),
           )}
@@ -157,6 +158,7 @@ export function EventStreamPanel() {
           All
         </button>
         <button
+          aria-pressed={activeFilter.includeRead === false}
           className={filterButtonClass(activeFilter.includeRead === false)}
           onClick={() => setActiveFilter({ includeRead: false })}
           type="button"
@@ -164,6 +166,7 @@ export function EventStreamPanel() {
           Unread
         </button>
         <button
+          aria-pressed={selectedParcelFilterActive}
           className={filterButtonClass(selectedParcelFilterActive)}
           disabled={!selectedParcelId}
           onClick={() =>
@@ -173,6 +176,11 @@ export function EventStreamPanel() {
             })
           }
           type="button"
+          title={
+            selectedParcelId
+              ? "Show events tied to the selected parcel"
+              : "Select a parcel to filter parcel-specific events"
+          }
         >
           Parcel {selectedParcelEvents.length}
         </button>
@@ -259,6 +267,7 @@ function EventStreamItem({
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {event.action ? (
           <button
+            aria-label={`${event.action.label}: ${event.title}`}
             className="rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2.5 py-1.5 text-xs font-medium text-[#8fe7ff] transition hover:border-[#68d8ff]/40 hover:bg-[#68d8ff]/15"
             onClick={onExecute}
             type="button"
@@ -267,11 +276,13 @@ function EventStreamItem({
           </button>
         ) : null}
         <button
-          className="rounded-md border border-white/10 bg-white/[0.035] px-2.5 py-1.5 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:text-white"
+          aria-label={read ? `${event.title} already read` : `Mark ${event.title} read`}
+          className="rounded-md border border-white/10 bg-white/[0.035] px-2.5 py-1.5 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={read}
           onClick={onMarkRead}
           type="button"
         >
-          Mark read
+          {read ? "Read" : "Mark read"}
         </button>
         <button
           aria-label={`Dismiss ${event.title}`}

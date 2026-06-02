@@ -1,0 +1,12 @@
+comparison_dimension,real_property_permit_source,public_2015_permit_activity_clean,recommendation_notes
+accessibility,Accessible CSV; final URL https://cabarruscountync.sharepoint.com/CabarrusCounty/TaxData/vdx_RP_Permit.csv?ga=1,Already ingested local PostGIS table,SharePoint source is accessible for profiling.
+source currency,"HTTP Last-Modified Mon, 18 May 2026 15:02:44 GMT; PermitDate max 2025-12-31",Historical 2015 OpenData layer,Real Property source is substantially newer and broader.
+row count,64426,6766,Real Property source contains a much larger permit history.
+primary date range,1986-12-01 to 2025-12-31 (64400 parsed),2015-01-02 to 2015-12-30 (6766 parsed),Real Property source supports multi-year temporal analysis.
+certificate/completion date range,2007-03-01 to 2201-02-22 (1845 parsed),Not standardized in the 2015 pilot table,CODate includes a suspicious far-future max and needs QA rules.
+geometry,No geometry columns in CSV,ST_MultiPolygon=6766,Real Property source should join to parcel geometry by ParcelNumber/PIN.
+permit identifiers,"PermitID: non-null 64426, distinct 64426, duplicate groups 0, unique=True; PermitNumber: non-null 50869, distinct 50465, duplicate groups 396, unique=False",permit_id non-null 6766; duplicate permit groups 196,PermitID appears to be the best stable permit key in the Real Property source.
+parcel join fields,"ParcelID: non-null 64426, distinct 42279, duplicate groups 11004, unique=False; ParcelNumber: non-null 64426, distinct 42279, duplicate groups 11004, unique=False",pin14 non-null 6766; duplicate PIN groups 1461,ParcelNumber is the expected PIN join field for parcel relationship modeling.
+address/location fields,BuildingNumber,address non-null 6765,The 2015 pilot has address text; Real Property CSV mainly relies on parcel/PIN context.
+permit type/status fields,"PermitCode, WorkType, PermitType, PermitStatus","permit_status_normalized, permit_type_normalized, permit_category_normalized",Real Property has usable code/type/status fields but domains need mapping.
+primary source recommendation,Recommended as primary Phase 3 permit source,Keep as historical spatial pilot/reference,Use Real Property source for current permit intelligence; derive geometry from parcel joins.

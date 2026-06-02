@@ -1,0 +1,9 @@
+2026-05-31 01:55:15,011 INFO Starting Real Property Permit-to-Parcel relationship build.
+2026-05-31 01:55:15,293 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-31 01:55:15,546 INFO Executing Real Property Permit relationship SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_real_property_permit_parcel_relationship.sql
+2026-05-31 01:55:52,790 INFO Total permit records: 64426
+2026-05-31 01:55:52,791 INFO Permits matched: 64231
+2026-05-31 01:55:52,791 INFO Permits unmatched: 195
+2026-05-31 01:55:52,792 INFO Multiple parcel match permit count: 2427
+2026-05-31 01:55:52,792 INFO Relationship confidence distribution: [{'relationship_confidence': 'high', 'permit_count': 61804, 'relationship_row_count': 61804, 'permit_percentage': Decimal('95.9302')}, {'relationship_confidence': 'low', 'permit_count': 2427, 'relationship_row_count': 5278, 'permit_percentage': Decimal('3.7671')}, {'relationship_confidence': 'no_match', 'permit_count': 195, 'relationship_row_count': 195, 'permit_percentage': Decimal('0.3027')}]
+2026-05-31 01:55:52,793 INFO Wrote validation output: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\real_property_permit_parcel_relationship_validation.json

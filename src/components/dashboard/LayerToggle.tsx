@@ -2,6 +2,7 @@
 
 import { Layers3 } from "lucide-react";
 import {
+  isLayerPlaceholder,
   layerCategories,
   operationalLayerRegistry,
 } from "@/lib/gis/layerRegistry";
@@ -45,20 +46,29 @@ export function LayerToggle() {
               <div className="space-y-2">
                 {layers.map((layer) => {
                   const active = isLayerActive(layer.id);
+                  const unavailable = isLayerPlaceholder(layer) || !layer.visibility;
 
                   return (
                     <label
                       className={cn(
-                        "group flex items-center gap-3 rounded-lg border p-3 transition",
+                        "group flex items-center gap-3 rounded-lg border p-3 transition focus-within:border-[#d8b86a]/45 focus-within:ring-2 focus-within:ring-[#d8b86a]/15",
+                        unavailable && "cursor-not-allowed opacity-55",
                         active
                           ? "border-white/15 bg-white/[0.065]"
                           : "border-white/[0.08] bg-black/10 hover:border-white/[0.12] hover:bg-white/[0.04]",
                       )}
                       key={layer.id}
+                      title={
+                        unavailable
+                          ? `${layer.title} is a disabled placeholder service.`
+                          : layer.description
+                      }
                     >
                       <input
+                        aria-label={`${active ? "Hide" : "Show"} ${layer.title}`}
                         checked={active}
                         className="sr-only"
+                        disabled={unavailable}
                         onChange={(event) =>
                           setLayerVisibility(layer.id, event.target.checked)
                         }
@@ -69,11 +79,26 @@ export function LayerToggle() {
                         style={{ color: layer.accent, background: layer.accent }}
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-medium text-slate-100">
+                        <span className="block truncate text-sm font-medium text-slate-100">
                           {layer.title}
                         </span>
                         <span className="mt-1 block truncate text-xs text-slate-500">
                           {layer.description}
+                        </span>
+                        <span className="mt-2 flex flex-wrap items-center gap-1.5">
+                          <span
+                            className={cn(
+                              "rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase",
+                              active
+                                ? "border-[#d8b86a]/30 bg-[#d8b86a]/10 text-[#f0cd79]"
+                                : "border-white/10 bg-white/[0.025] text-slate-500",
+                            )}
+                          >
+                            {active ? "Active" : "Hidden"}
+                          </span>
+                          <span className="rounded border border-white/10 bg-white/[0.025] px-1.5 py-0.5 text-[10px] font-medium uppercase text-slate-500">
+                            {layer.sourceStatus}
+                          </span>
                         </span>
                       </span>
                       <span

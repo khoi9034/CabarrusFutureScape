@@ -25,13 +25,20 @@ export function MapViewportPlaceholder({
   const hasError = mapStatus === "degraded";
 
   return (
-    <section className="relative h-full min-h-[58vh] overflow-hidden rounded-lg border border-white/10 bg-[#050911] shadow-[0_28px_120px_rgba(0,0,0,0.46)] lg:min-h-0">
+    <section
+      aria-label="Cabarrus County 3D map viewport"
+      className="relative h-full min-h-[58vh] overflow-hidden rounded-lg border border-white/10 bg-[#050911] shadow-[0_28px_120px_rgba(0,0,0,0.46)] md:min-h-[62vh] lg:min-h-0"
+    >
       {children}
       <div className="scene-mask pointer-events-none absolute inset-0" />
       <div className="map-scanline pointer-events-none absolute inset-0 opacity-40" />
 
       {(isLoading || hasError) && (
-        <div className="pointer-events-none absolute inset-0 z-10 grid place-items-center px-6">
+        <div
+          aria-live="polite"
+          className="pointer-events-none absolute inset-0 z-10 grid place-items-center px-6"
+          role={hasError ? "alert" : "status"}
+        >
           <div className="max-w-sm rounded-lg border border-white/10 bg-[#060b12]/82 p-4 text-center shadow-2xl backdrop-blur-xl">
             {hasError ? (
               <AlertTriangle className="mx-auto h-5 w-5 text-amber-200" />
@@ -46,11 +53,14 @@ export function MapViewportPlaceholder({
                 ? sceneError ?? "ArcGIS scene initialization did not complete."
                 : "Loading the Cabarrus County 3D operating scene."}
             </p>
+            <p className="mt-2 text-[10px] uppercase text-slate-500">
+              {hasError ? "Refresh the page to retry" : "Client-only ArcGIS runtime"}
+            </p>
           </div>
         </div>
       )}
 
-      <div className="pointer-events-none absolute left-4 top-4 max-w-[calc(100%-2rem)] rounded-lg border border-white/10 bg-[#060b12]/72 p-3 shadow-2xl backdrop-blur-xl">
+      <div className="pointer-events-none absolute left-3 top-3 max-w-[calc(100%-1.5rem)] rounded-lg border border-white/10 bg-[#060b12]/72 p-3 shadow-2xl backdrop-blur-xl sm:left-4 sm:top-4 sm:max-w-[calc(100%-2rem)]">
         <div className="flex items-center gap-2">
           <Satellite className="h-4 w-4 text-[#d8b86a]" />
           <p className="text-xs font-medium uppercase text-slate-400">
@@ -70,21 +80,21 @@ export function MapViewportPlaceholder({
         </div>
       </div>
 
-      <div className="pointer-events-none absolute bottom-4 left-4 right-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div className="rounded-lg border border-white/10 bg-[#060b12]/74 p-3 backdrop-blur-xl">
+      <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex flex-col gap-3 sm:bottom-4 sm:left-4 sm:right-4 md:flex-row md:items-end md:justify-between">
+        <div className="min-w-0 rounded-lg border border-white/10 bg-[#060b12]/74 p-3 backdrop-blur-xl md:max-w-[58%]">
           <div className="flex items-center gap-2 text-xs font-medium uppercase text-slate-400">
             <MousePointer2 className="h-3.5 w-3.5 text-[#68d8ff]" />
             Active Selection
           </div>
-          <p className="mt-1 text-lg font-semibold text-white">
+          <p className="mt-1 truncate text-lg font-semibold text-white">
             {selectedParcel?.parcelId ?? "No parcel selected"}
           </p>
-          <p className="text-xs text-slate-400">
+          <p className="truncate text-xs text-slate-400">
             {selectedParcel?.address ?? "Awaiting map or dashboard selection"}
           </p>
         </div>
 
-        <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-white/10 bg-[#060b12]/74 text-center backdrop-blur-xl">
+        <div className="grid w-full grid-cols-3 overflow-hidden rounded-lg border border-white/10 bg-[#060b12]/74 text-center backdrop-blur-xl md:w-auto">
           <SceneStat
             label="Opportunity"
             value={selectedParcel?.opportunityScore ?? null}
@@ -111,9 +121,11 @@ export function MapViewportPlaceholder({
 
 function SceneStat({ label, value }: { label: string; value: number | null }) {
   return (
-    <div className="min-w-[92px] border-r border-white/10 px-3 py-2 last:border-r-0">
+    <div className="min-w-0 border-r border-white/10 px-2 py-2 last:border-r-0 sm:min-w-[92px] sm:px-3">
       <p className="text-[10px] uppercase text-slate-500">{label}</p>
-      <p className="mt-1 font-mono text-lg text-white">{value ?? "--"}</p>
+      <p className="mt-1 truncate font-mono text-lg text-white">
+        {value ?? "--"}
+      </p>
     </div>
   );
 }

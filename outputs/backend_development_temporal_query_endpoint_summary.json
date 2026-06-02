@@ -1,0 +1,140 @@
+{
+  "endpoint_implemented": "GET /development/temporal-query",
+  "status": "implemented_and_verified",
+  "source_tables_available": [
+    "public.real_property_permit_clean",
+    "public.real_property_permit_parcel_relationship",
+    "public.development_activity_parcel_summary",
+    "public.development_activity_time_summary",
+    "public.development_activity_zoning_summary"
+  ],
+  "source_tables_queried": [
+    "public.real_property_permit_parcel_relationship",
+    "public.development_activity_parcel_summary"
+  ],
+  "temporal_filters_supported": [
+    "year",
+    "month",
+    "date_start",
+    "date_end",
+    "rolling_window",
+    "permit_type",
+    "work_type",
+    "permit_status",
+    "zoning_jurisdiction",
+    "zoning_category",
+    "activity_class"
+  ],
+  "rolling_windows_supported": [
+    12,
+    36
+  ],
+  "default_temporal_behavior": {
+    "mode": "default_recent_12_months",
+    "description": "When no temporal filters are supplied, the endpoint uses the latest available activity date and returns the latest 12-month activity context."
+  },
+  "bbox_status": {
+    "accepted_format": "minx,miny,maxx,maxy",
+    "active": false,
+    "note": "bbox and include_geometry are parsed and reported, but spatial filtering is not active until the service is backed by a safe geometry source."
+  },
+  "pagination": {
+    "default_limit": 50,
+    "maximum_limit": 100,
+    "limit_above_max_behavior": "clamped_to_100",
+    "offset_supported": true
+  },
+  "result_fields_returned": [
+    "permit_id",
+    "permit_number",
+    "official_parcel_id",
+    "pin14",
+    "activity_date",
+    "activity_year",
+    "activity_month",
+    "permit_type",
+    "work_type",
+    "permit_status",
+    "permit_amount",
+    "zoning_jurisdiction_name",
+    "dominant_zoning_code_raw",
+    "dominant_zoning_general_normalized",
+    "development_activity_class",
+    "relationship_confidence"
+  ],
+  "summary_fields_returned": [
+    "total_permits",
+    "active_parcel_count",
+    "date_start",
+    "date_end",
+    "permit_type_breakdown",
+    "work_type_breakdown",
+    "zoning_jurisdiction_breakdown"
+  ],
+  "empty_result_behavior": "Filtered temporal requests with no matches return HTTP 200 with zero counts and an empty results array.",
+  "example_response": {
+    "request": "/development/temporal-query",
+    "temporal_context": {
+      "mode": "default_recent_12_months",
+      "date_start": "2024-12-31",
+      "date_end": "2025-12-31",
+      "rolling_window": 12,
+      "defaulted_to_recent_window": true
+    },
+    "total_count": 3841,
+    "summary": {
+      "total_permits": 3664,
+      "active_parcel_count": 3091,
+      "date_start": "2024-12-31",
+      "date_end": "2025-12-31",
+      "top_permit_type": {
+        "value": "NEW CONSTRUCTION",
+        "permit_count": 1262,
+        "active_parcel_count": 1226,
+        "total_permit_amount": 259380112.35
+      }
+    },
+    "top_result": {
+      "permit_id": "5319989",
+      "permit_number": "BU2025-03827",
+      "official_parcel_id": "CFS-PARCEL-0149755811",
+      "pin14": "55175188060000",
+      "activity_date": "2025-12-31",
+      "activity_year": 2025,
+      "activity_month": 12,
+      "permit_type": "REMODEL",
+      "work_type": "Residential Repair",
+      "permit_status": "INSPECTIONS",
+      "permit_amount": 21989.0,
+      "zoning_jurisdiction_name": "Cabarrus County / Unincorporated",
+      "dominant_zoning_code_raw": "LDR",
+      "dominant_zoning_general_normalized": "residential",
+      "development_activity_class": "high_activity",
+      "relationship_confidence": "high"
+    }
+  },
+  "verification": {
+    "compile": "python -m compileall app passed",
+    "tests": "python -m pytest passed: 98 passed, 1 warning",
+    "live_health_database": "GET /health/database returned connected",
+    "live_default_temporal_query_check": "GET /development/temporal-query returned HTTP 200 with 3664 permits in the default recent 12-month context",
+    "live_year_filter_check": "GET /development/temporal-query?year=2025 returned 3642 permits",
+    "live_date_range_check": "GET /development/temporal-query?date_start=2025-01-01&date_end=2025-12-31 returned 3642 permits",
+    "live_rolling_12_check": "GET /development/temporal-query?rolling_window=12 returned 3664 permits",
+    "live_rolling_36_check": "GET /development/temporal-query?rolling_window=36 returned 11854 permits",
+    "live_bbox_placeholder_check": "GET /development/temporal-query?bbox=-81,35,-80,36 returned bbox_support requested true and active false",
+    "live_limit_clamp_check": "GET /development/temporal-query?limit=500 returned limit 100",
+    "live_empty_result_check": "GET /development/temporal-query?permit_type=NO-SUCH-PERMIT returned HTTP 200 with zero results",
+    "live_validation_check": "Invalid rolling_window, date range, and bbox requests returned HTTP 422",
+    "openapi_check": "OpenAPI includes /development/temporal-query"
+  },
+  "readiness_for_next_endpoints": {
+    "next_endpoints": [
+      "GET /development/permit-types",
+      "GET /development/work-types",
+      "GET /development/jurisdictions",
+      "GET /development/activity-classes"
+    ],
+    "assessment": "Ready. The backend now exposes a time-aware development query endpoint suitable for future time slider, temporal filtering, and map extent integration work."
+  }
+}

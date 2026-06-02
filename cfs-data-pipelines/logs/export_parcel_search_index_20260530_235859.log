@@ -1,0 +1,7 @@
+2026-05-30 23:58:59,846 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-30 23:59:00,121 INFO Exporting static parcel search index.
+2026-05-30 23:59:20,487 INFO Parcel search records exported: 110017
+2026-05-30 23:59:20,488 INFO Output: public\intelligence\parcel-search-index.json
+2026-05-30 23:59:20,488 INFO File size: 34156947 bytes
+2026-05-30 23:59:20,489 INFO Duration: 21.41 seconds
+2026-05-30 23:59:20,491 INFO Log written to: C:\CabarrusFutureScape\cfs-data-pipelines\logs\export_parcel_search_index_20260530_235859.log

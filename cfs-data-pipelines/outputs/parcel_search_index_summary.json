@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-05-30T23:59:19",
+  "artifact_type": "parcel_search_index",
+  "status": "static_artifact_no_api_implemented",
+  "source_tables": [
+    "public.parcels_enriched",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "output": "public\\intelligence\\parcel-search-index.json",
+  "record_count": 110017,
+  "fields": [
+    "officialParcelId",
+    "pin14",
+    "ownerName",
+    "ownerSecondaryName",
+    "mailingAddress",
+    "subdivision",
+    "neighborhood",
+    "zoningJurisdiction",
+    "zoningCode",
+    "zoningCategory",
+    "zoningConfidence",
+    "governanceWarnings",
+    "governanceWarningCount",
+    "primaryGovernanceWarning",
+    "parcelQualityStatus",
+    "valuationBand",
+    "parcelSizeCategory",
+    "planningJurisdiction",
+    "planningBoundaryType",
+    "safeForDashboard",
+    "needsGovernanceReview"
+  ],
+  "file_size_bytes": 34156947
+}

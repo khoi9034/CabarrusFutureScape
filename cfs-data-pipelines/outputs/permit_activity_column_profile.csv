@@ -1,0 +1,25 @@
+ordinal_position,column_name,data_type,udt_name,is_nullable,null_count,non_null_count,null_percentage,role_tags
+1,geometry,USER-DEFINED,geometry,YES,0,6766,0.0,
+2,objectid,bigint,int8,YES,0,6766,0.0,
+3,pin14,text,text,YES,0,6766,0.0,parcel_pin_join_candidates
+4,permitnumber,text,text,YES,0,6766,0.0,permit_id_candidates
+5,appname,text,text,YES,15,6751,0.2217,
+6,filedate,text,text,YES,0,6766,0.0,date_field_candidates
+7,permitcategory,text,text,YES,0,6766,0.0,permit_type_status_candidates
+8,permitgroup,text,text,YES,0,6766,0.0,permit_type_status_candidates
+9,recordgroup,text,text,YES,0,6766,0.0,permit_type_status_candidates
+10,permittype,text,text,YES,0,6766,0.0,permit_type_status_candidates
+11,permitsubtype,text,text,YES,0,6766,0.0,permit_type_status_candidates
+12,detaileddescription,text,text,YES,247,6519,3.6506,
+13,status,text,text,YES,4,6762,0.0591,permit_type_status_candidates
+14,lot,text,text,YES,3509,3257,51.8623,
+15,ownername,text,text,YES,720,6046,10.6414,
+16,address,text,text,YES,1,6765,0.0148,address_field_candidates
+17,subdivision,text,text,YES,61,6705,0.9016,
+18,shape_starea,double precision,float8,YES,0,6766,0.0,
+19,shape_stlength,double precision,float8,YES,0,6766,0.0,
+20,cfs_source_id,text,text,YES,0,6766,0.0,
+21,cfs_source_name,text,text,YES,0,6766,0.0,
+22,cfs_source_url,text,text,YES,0,6766,0.0,
+23,cfs_source_year,bigint,int8,YES,0,6766,0.0,date_field_candidates
+24,cfs_ingested_at,text,text,YES,0,6766,0.0,

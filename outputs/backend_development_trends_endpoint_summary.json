@@ -1,0 +1,106 @@
+{
+  "endpoint_implemented": "GET /development/trends",
+  "status": "implemented_and_verified",
+  "source_tables_available": [
+    "public.real_property_permit_clean",
+    "public.real_property_permit_parcel_relationship",
+    "public.development_activity_time_summary",
+    "public.development_activity_zoning_summary"
+  ],
+  "source_tables_queried": [
+    "public.real_property_permit_parcel_relationship"
+  ],
+  "trend_fields_returned": [
+    "filters_applied",
+    "group_by",
+    "rolling_window",
+    "date_range",
+    "annual_trends",
+    "monthly_trends",
+    "grouped_trends",
+    "rolling_summary",
+    "trend_direction",
+    "peak_year",
+    "peak_month",
+    "total_permits"
+  ],
+  "trend_point_fields": [
+    "year",
+    "month",
+    "permit_count",
+    "parcel_count",
+    "total_permit_amount",
+    "zoning_jurisdiction_name",
+    "zoning_category",
+    "permit_type",
+    "work_type"
+  ],
+  "filters_supported": [
+    "start_year",
+    "end_year",
+    "year",
+    "month",
+    "permit_type",
+    "work_type",
+    "permit_status",
+    "zoning_jurisdiction",
+    "zoning_category"
+  ],
+  "group_by_supported": [
+    "year",
+    "month",
+    "permit_type",
+    "work_type",
+    "zoning_jurisdiction",
+    "zoning_category"
+  ],
+  "rolling_windows_supported": [
+    12,
+    36
+  ],
+  "empty_result_behavior": "Filtered permit populations with no matches return HTTP 200 with zero totals and empty trend arrays.",
+  "example_response": {
+    "request": "/development/trends",
+    "total_permits": 64426,
+    "trend_direction": "down",
+    "peak_year": 2021,
+    "peak_month": "2021-03",
+    "annual_trend_count": 31,
+    "monthly_trend_count": 304,
+    "latest_annual_point": {
+      "year": 2025,
+      "month": null,
+      "permit_count": 3642,
+      "parcel_count": 3074,
+      "total_permit_amount": 736178590.75
+    },
+    "rolling_36_month_example": {
+      "window_months": 36,
+      "start_date": "2022-12-31",
+      "end_date": "2025-12-31",
+      "permit_count": 11854,
+      "parcel_count": 9388,
+      "total_permit_amount": 4285223589.77
+    },
+    "top_group_by_zoning_jurisdiction": {
+      "zoning_jurisdiction_name": "Concord",
+      "permit_count": 30620
+    }
+  },
+  "verification": {
+    "compile": "python -m compileall app passed",
+    "tests": "python -m pytest passed: 58 passed, 1 warning",
+    "live_health_database": "GET /health/database returned connected",
+    "live_global_trends_check": "GET /development/trends returned HTTP 200 with 64426 permits",
+    "live_year_range_check": "GET /development/trends?start_year=2020&end_year=2025 returned HTTP 200 with 24181 permits",
+    "live_group_by_check": "GET /development/trends?group_by=zoning_jurisdiction returned Concord as the top group",
+    "live_rolling_window_check": "GET /development/trends?rolling_window=36 returned a 36-month summary with 11854 permits",
+    "live_validation_check": "GET /development/trends?rolling_window=13 returned HTTP 422",
+    "live_empty_result_check": "GET /development/trends?permit_type=NO-SUCH-PERMIT returned HTTP 200 with zero totals",
+    "openapi_check": "OpenAPI includes /development/trends"
+  },
+  "readiness_for_next_endpoint": {
+    "next_endpoint": "GET /development/hotspots",
+    "assessment": "Ready. The backend now exposes real annual, monthly, grouped, and rolling development activity trends with validation over PostGIS permit relationship data."
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "phase": "Phase 5: Development Dashboard API Integration",
+  "generated_at": "2026-06-01T00:00:00-04:00",
+  "status": "completed",
+  "backend_endpoints_used": [
+    "GET /development/statistics",
+    "GET /development/trends",
+    "GET /development/hotspots",
+    "GET /development/zoning-summary",
+    "GET /development/activity-summary"
+  ],
+  "feature_flag": {
+    "name": "NEXT_PUBLIC_USE_BACKEND_API",
+    "false_behavior": "Development dashboard panels use generated static artifacts.",
+    "true_behavior": "Development dashboard panels request their corresponding FastAPI endpoints.",
+    "fallback_behavior": "Each development panel falls back independently to generated static artifacts if its backend request fails, times out, or returns an invalid shape."
+  },
+  "files_created": [
+    "src/hooks/useDevelopmentActivitySummary.ts",
+    "src/hooks/useDevelopmentHotspots.ts",
+    "src/hooks/useDevelopmentStatistics.ts",
+    "src/hooks/useDevelopmentTrends.ts",
+    "src/hooks/useDevelopmentZoningSummary.ts",
+    "src/lib/adapters/developmentActivitySummaryAdapter.ts",
+    "src/lib/adapters/developmentHotspotsAdapter.ts",
+    "src/lib/adapters/developmentStatisticsAdapter.ts",
+    "src/lib/adapters/developmentTrendsAdapter.ts",
+    "src/lib/adapters/developmentZoningSummaryAdapter.ts",
+    "outputs/frontend_development_dashboard_api_integration_summary.json"
+  ],
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/DevelopmentActivityPanel.tsx",
+    "src/components/dashboard/DevelopmentHotspotsPanel.tsx",
+    "src/components/dashboard/DevelopmentTrendPanel.tsx",
+    "src/components/dashboard/DevelopmentZoningPanel.tsx",
+    "src/data/intelligence/developmentActivityMetrics.ts"
+  ],
+  "panels_migrated": [
+    {
+      "panel": "DevelopmentActivityPanel",
+      "endpoints": [
+        "GET /development/statistics",
+        "GET /development/activity-summary"
+      ],
+      "status": "integrated",
+      "fallback": "static core metrics and activity class distribution from development_activity_parcel_summary_validation.json"
+    },
+    {
+      "panel": "DevelopmentTrendPanel",
+      "endpoints": [
+        "GET /development/trends"
+      ],
+      "status": "integrated",
+      "fallback": "static annual and monthly summaries from generated development activity outputs"
+    },
+    {
+      "panel": "DevelopmentHotspotsPanel",
+      "endpoints": [
+        "GET /development/hotspots"
+      ],
+      "status": "integrated",
+      "fallback": "static top active parcels from generated development activity outputs"
+    },
+    {
+      "panel": "DevelopmentZoningPanel",
+      "endpoints": [
+        "GET /development/zoning-summary"
+      ],
+      "status": "integrated",
+      "fallback": "static zoning activity summaries from generated development activity outputs"
+    }
+  ],
+  "fallback_behavior_per_panel": {
+    "DevelopmentActivityPanel": "Falls back through useDevelopmentStatistics and useDevelopmentActivitySummary if statistics or activity-summary endpoints fail.",
+    "DevelopmentTrendPanel": "Falls back through useDevelopmentTrends if GET /development/trends fails.",
+    "DevelopmentHotspotsPanel": "Falls back through useDevelopmentHotspots if GET /development/hotspots fails.",
+    "DevelopmentZoningPanel": "Falls back through useDevelopmentZoningSummary if GET /development/zoning-summary fails."
+  },
+  "static_dependencies_preserved": [
+    "cfs-data-pipelines/outputs/development_activity_parcel_summary_validation.json",
+    "cfs-data-pipelines/outputs/development_activity_top_parcels.csv",
+    "cfs-data-pipelines/outputs/development_activity_year_summary.csv",
+    "cfs-data-pipelines/outputs/development_activity_month_summary.csv",
+    "cfs-data-pipelines/outputs/development_activity_zoning_summary.csv"
+  ],
+  "not_modified": [
+    "SceneView",
+    "CommandPalette",
+    "Parcel Search behavior",
+    "Parcel Detail behavior",
+    "Parcel Filter behavior",
+    "Temporal Panel",
+    "backend endpoints",
+    "PostGIS schema",
+    "static generated output files"
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "backend_statistics_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/development/statistics",
+      "observed": {
+        "total_permits": 64426,
+        "parcels_with_activity": 43474,
+        "recent_activity_parcels_1yr": 3091,
+        "activity_classes": [
+          "no_activity",
+          "low_activity",
+          "moderate_activity",
+          "high_activity",
+          "very_high_activity"
+        ]
+      }
+    },
+    "backend_trends_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/development/trends",
+      "observed": {
+        "total_permits": 64426,
+        "annual_count": 31,
+        "monthly_count": 304,
+        "trend_direction": "down",
+        "peak_year": 2021
+      }
+    },
+    "backend_hotspots_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/development/hotspots?limit=3",
+      "observed": {
+        "total_count": 43474,
+        "result_count": 3,
+        "top_parcel": "CFS-PARCEL-0149726579",
+        "top_permit_count": 286
+      }
+    },
+    "backend_zoning_summary_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/development/zoning-summary?limit=5",
+      "observed": {
+        "total_count": 3090,
+        "result_count": 5,
+        "top_jurisdiction": "Concord",
+        "top_code": "PUD",
+        "top_permit_count": 1630
+      }
+    },
+    "backend_activity_summary_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/development/activity-summary",
+      "observed": {
+        "total_permits": 64426,
+        "active_parcel_count": 43474,
+        "total_permit_amount": 9691120157.78,
+        "by_year_count": 31,
+        "by_month_count": 304,
+        "recent_1yr": 3091,
+        "recent_3yr": 9388
+      }
+    },
+    "static_artifact_fallback_smoke": {
+      "status": "passed",
+      "observed": {
+        "static_total_permits": 64426,
+        "static_parcels_with_activity": 43474,
+        "static_annual_count": 32,
+        "static_monthly_count": 36,
+        "static_hotspot_count": 25,
+        "static_zoning_count": 50
+      }
+    },
+    "app_server_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:3001",
+      "http_status": 200,
+      "note": "A temporary production server was started on port 3001 and stopped after the smoke check."
+    },
+    "browser_smoke_note": "Browser plugin tools were not exposed in this session, so interactive flag-on/fallback panel clicks were not browser-tested. Endpoint shape checks, static artifact checks, typecheck, lint, production build, and app server smoke all passed."
+  },
+  "remaining_development_static_dependencies": [
+    "Generated development outputs remain the default and fallback source.",
+    "TemporalAnalysisPanel still uses generated static temporal artifacts and has not been migrated to GET /development/temporal-query.",
+    "Development lookup endpoints are available but not yet integrated into the frontend."
+  ],
+  "readiness": {
+    "temporal_panel_api_integration": "ready",
+    "sceneview_modified": false,
+    "backend_modified": false
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "endpoint_implemented": "GET /parcels/filter",
+  "status": "implemented_and_verified",
+  "source_tables": [
+    "public.parcels_enriched",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "filters_supported": [
+    "zoning_jurisdiction",
+    "zoning_category",
+    "zoning_code",
+    "parcel_quality_status",
+    "zoning_confidence",
+    "governance_warning",
+    "valuation_band",
+    "parcel_size_category",
+    "subdivision",
+    "neighborhood",
+    "safe_for_dashboard"
+  ],
+  "pagination": {
+    "default_limit": 20,
+    "max_limit": 100,
+    "limit_behavior": "Values above 100 are clamped to 100.",
+    "offset_supported": true
+  },
+  "matching_behavior": {
+    "case_insensitive_exact_filters": [
+      "zoning_jurisdiction",
+      "zoning_category",
+      "zoning_code",
+      "parcel_quality_status",
+      "zoning_confidence",
+      "governance_warning",
+      "valuation_band",
+      "parcel_size_category"
+    ],
+    "case_insensitive_partial_filters": [
+      "subdivision",
+      "neighborhood"
+    ],
+    "boolean_filters": [
+      "safe_for_dashboard"
+    ],
+    "empty_filter_behavior": "Returns the first page of parcels ordered by official_parcel_id.",
+    "no_result_behavior": "Returns HTTP 200 with total_count 0 and an empty results array."
+  },
+  "response_fields": [
+    "official_parcel_id",
+    "pin14",
+    "subdivision",
+    "neighborhood",
+    "zoning_jurisdiction_name",
+    "dominant_zoning_code_raw",
+    "dominant_zoning_general_normalized",
+    "zoning_assignment_confidence",
+    "parcel_quality_status",
+    "valuation_band",
+    "parcel_size_category",
+    "safe_for_dashboard",
+    "governance_warning_categories"
+  ],
+  "example_successful_filter": {
+    "request": "/parcels/filter?zoning_jurisdiction=Concord&limit=2",
+    "total_count": 43497,
+    "sample_result": {
+      "official_parcel_id": "CFS-PARCEL-0149720598",
+      "pin14": "0",
+      "subdivision": "0",
+      "neighborhood": "0",
+      "zoning_jurisdiction_name": "Concord",
+      "dominant_zoning_code_raw": "RV",
+      "dominant_zoning_general_normalized": "residential",
+      "zoning_assignment_confidence": "high",
+      "parcel_quality_status": "review",
+      "valuation_band": "unknown",
+      "parcel_size_category": "residential_standard",
+      "safe_for_dashboard": false,
+      "governance_warning_categories": [
+        "review_sliver_overlap"
+      ]
+    }
+  },
+  "verification": {
+    "compile": "python -m compileall app passed",
+    "tests": "python -m pytest passed: 22 passed, 1 warning",
+    "live_health_database": "GET /health/database returned connected",
+    "live_filter_check": "GET /parcels/filter?zoning_jurisdiction=Concord&limit=2 returned HTTP 200",
+    "live_limit_clamp_check": "GET /parcels/filter?limit=999 returned limit 100 and 100 results",
+    "live_empty_result_check": "GET /parcels/filter?zoning_jurisdiction=NO-SUCH-JURISDICTION returned HTTP 200 with zero results",
+    "openapi_check": "OpenAPI includes /parcels/filter"
+  },
+  "readiness_for_next_endpoint": {
+    "next_endpoint": "GET /parcels/statistics",
+    "assessment": "Ready. Repository/service/router patterns now support parcel detail, search, and filter against PostGIS with read-only sessions and contract-shaped responses."
+  }
+}

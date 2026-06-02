@@ -1,0 +1,19 @@
+2026-05-28 11:44:06,559 INFO Starting CFS Current Zoning ingestion pilot.
+2026-05-28 11:44:06,560 INFO Log file: C:\CabarrusFutureScape\cfs-data-pipelines\logs\ingest_zoning_20260528_114406.log
+2026-05-28 11:44:06,560 INFO Fetching layer metadata: https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/35
+2026-05-28 11:44:07,116 INFO Layer metadata: name=Cabarrus County Zoning geometryType=esriGeometryPolygon maxRecordCount=1000
+2026-05-28 11:44:07,211 INFO Source feature count: 295
+2026-05-28 11:44:07,211 WARNING Layer metadata has no objectIdField; using OID field OBJECTID.
+2026-05-28 11:44:07,212 INFO Downloading zoning features with pagination: pageSize=1000 limit=all
+2026-05-28 11:44:08,463 INFO Downloaded 295/295 zoning features
+2026-05-28 11:44:08,463 INFO Building GeoDataFrame from 295 zoning features.
+2026-05-28 11:44:08,568 INFO GeoDataFrame feature count: 295
+2026-05-28 11:44:08,568 INFO Geometry type(s): MultiPolygon, Polygon
+2026-05-28 11:44:08,568 INFO CRS: EPSG:4326
+2026-05-28 11:44:08,568 INFO Sample columns: geometry, objectid, zoningcode, zoning_gen, shape_starea, shape_stlength
+2026-05-28 11:44:08,693 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-05-28 11:44:08,958 INFO PostGIS available: POSTGIS="3.6.2 3.6.2" [EXTENSION] PGSQL="180" GEOS="3.14.1dev-CAPI-1.20.4" SFCGAL="SFCGAL 2.2.0, CGAL 6.0.1, BOOST 1.88.0" PROJ="8.2.1 NETWORK_ENABLED=OFF URL_ENDPOINT= USER_WRITABLE_DIRECTORY=C:\WINDOWS\ServiceProfiles\NetworkService\AppData\Local/proj" (compiled against PROJ 8.2.1) GDAL="GDAL 3.9.2, released 2024/08/13 GDAL_DATA not found" LIBXML="2.12.5" LIBJSON="0.12" LIBPROTOBUF="1.2.1" WAGYU="0.5.0 (Internal)" TOPOLOGY RASTER
+2026-05-28 11:44:08,959 INFO Writing 295 zoning features to PostGIS table public.zoning with if_exists=replace.
+2026-05-28 11:44:09,330 INFO Creating spatial index zoning_geometry_gix on public.zoning.
+2026-05-28 11:44:09,359 INFO Wrote zoning ingestion summary: C:\CabarrusFutureScape\cfs-data-pipelines\outputs\ingest_zoning_summary.json
+2026-05-28 11:44:09,359 INFO CFS Current Zoning ingestion pilot complete.

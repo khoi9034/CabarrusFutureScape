@@ -1,0 +1,82 @@
+{
+  "phase": "Phase 5 Parcel Search API Integration",
+  "generated_at": "2026-06-01T05:23:19-04:00",
+  "backend_endpoint_used": "GET /parcels/search",
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/ParcelDetailDrawer.tsx",
+    "src/components/dashboard/ParcelSearchPanel.tsx",
+    "src/data/intelligence/parcelSearchData.ts"
+  ],
+  "files_created": [
+    "src/lib/adapters/parcelSearchAdapter.ts"
+  ],
+  "feature_flag_behavior": {
+    "flag": "NEXT_PUBLIC_USE_BACKEND_API",
+    "false": "Parcel Discovery continues to use public/intelligence/parcel-search-index.json and local filtering.",
+    "true": "Search queries of three or more characters request GET /parcels/search and normalize the response into the existing ParcelSearchRecord UI shape.",
+    "short_queries": "Queries shorter than three characters continue using the generated static search index.",
+    "static_index_preserved": true
+  },
+  "backend_search_parameters": [
+    "q",
+    "limit",
+    "offset",
+    "zoning_jurisdiction",
+    "zoning_category",
+    "parcel_quality_status",
+    "zoning_confidence",
+    "valuation_band"
+  ],
+  "preserved_ui_fields": [
+    "official_parcel_id",
+    "pin14",
+    "owner_display",
+    "mailing_city",
+    "mailing_state",
+    "subdivision",
+    "neighborhood",
+    "zoning_jurisdiction",
+    "zoning_code",
+    "zoning_category",
+    "confidence",
+    "parcel_quality",
+    "valuation_band",
+    "warning_categories"
+  ],
+  "fallback_behavior": {
+    "api_failure": "Falls back to existing static parcel-search-index.json behavior.",
+    "api_timeout": "Falls back to existing static parcel-search-index.json behavior.",
+    "invalid_shape": "Adapter throws a safe error and the panel falls back to static results.",
+    "status_indicator": "Parcel Discovery badge can show FastAPI, API search, Static Index, or Static fallback."
+  },
+  "remaining_static_dependencies": [
+    "public/intelligence/parcel-search-index.json",
+    "static filter option generation",
+    "client-side subdivision, neighborhood, and governance warning filters",
+    "static parcel detail drawer fallback"
+  ],
+  "not_modified": [
+    "SceneView",
+    "CommandPalette",
+    "backend endpoints",
+    "PostGIS schema",
+    "development panels",
+    "temporal panels"
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "backend_endpoint_shell_check": "passed: /parcels/search?q=0149720360 returned CFS-PARCEL-0149720360",
+    "flag_false_dev_server": "restored and reachable on http://127.0.0.1:3000",
+    "flag_true_browser_smoke": "partial: flag-on app opened and input enabled; browser automation did not reliably dispatch React input events, so endpoint usage was verified by direct backend request"
+  },
+  "readiness": {
+    "parcel_detail_api_integration": "ready",
+    "parcel_filter_endpoint_migration": "ready after detail integration",
+    "map_selection_connection": "not started",
+    "sceneview_modified": false
+  }
+}
+

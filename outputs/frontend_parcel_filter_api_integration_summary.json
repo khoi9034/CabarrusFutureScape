@@ -1,0 +1,121 @@
+{
+  "phase": "Phase 5: Parcel Filter API Integration",
+  "generated_at": "2026-06-01T00:00:00-04:00",
+  "status": "completed",
+  "backend_endpoint_used": "GET /parcels/filter",
+  "feature_flag": {
+    "name": "NEXT_PUBLIC_USE_BACKEND_API",
+    "false_behavior": "Parcel Discovery continues to use public/intelligence/parcel-search-index.json and local static filtering.",
+    "true_behavior": "Blank-query structured parcel filters call the FastAPI GET /parcels/filter endpoint. Text searches of three or more characters continue to use GET /parcels/search.",
+    "fallback_behavior": "If the backend filter request fails, times out, or returns an invalid shape, Parcel Discovery falls back to the generated static parcel search index and shows a non-blocking fallback status."
+  },
+  "files_created": [
+    "src/lib/adapters/parcelFilterAdapter.ts",
+    "outputs/frontend_parcel_filter_api_integration_summary.json"
+  ],
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/ParcelFilterPanel.tsx",
+    "src/components/dashboard/ParcelResultList.tsx",
+    "src/components/dashboard/ParcelSearchPanel.tsx",
+    "src/components/dashboard/ParcelSearchState.ts",
+    "src/data/intelligence/parcelSearchData.ts"
+  ],
+  "filters_supported": [
+    "zoning_jurisdiction",
+    "zoning_category",
+    "zoning_code",
+    "parcel_quality_status",
+    "zoning_confidence",
+    "governance_warning",
+    "valuation_band",
+    "parcel_size_category",
+    "subdivision",
+    "neighborhood",
+    "safe_for_dashboard",
+    "limit",
+    "offset"
+  ],
+  "ui_fields_preserved": [
+    "official_parcel_id",
+    "pin14",
+    "owner_display via static enrichment when available",
+    "mailing city/state via static enrichment when available",
+    "subdivision",
+    "neighborhood",
+    "zoning jurisdiction",
+    "zoning code",
+    "zoning category",
+    "zoning confidence",
+    "parcel quality",
+    "valuation band",
+    "parcel size category",
+    "warning categories",
+    "safe_for_dashboard"
+  ],
+  "static_fallback": {
+    "artifact": "public/intelligence/parcel-search-index.json",
+    "record_count_verified": 110017,
+    "expanded_static_filters": [
+      "zoningCode",
+      "parcelSizeCategory",
+      "safeForDashboard"
+    ],
+    "notes": "Static filtering remains the default when NEXT_PUBLIC_USE_BACKEND_API is false and the fallback when the filter API is unavailable."
+  },
+  "not_modified": [
+    "SceneView",
+    "CommandPalette",
+    "backend endpoints",
+    "PostGIS schema",
+    "development panels",
+    "temporal panels",
+    "static parcel-search-index.json"
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": {
+      "status": "passed",
+      "note": "The first build attempt reached the command timeout; rerun with a wider timeout completed successfully."
+    },
+    "backend_filter_endpoint_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:8000/parcels/filter?zoning_jurisdiction=Concord&limit=2",
+      "observed_total_count": 43497,
+      "observed_first_result": {
+        "official_parcel_id": "CFS-PARCEL-0149720598",
+        "zoning_jurisdiction_name": "Concord",
+        "dominant_zoning_code_raw": "RV",
+        "zoning_assignment_confidence": "high",
+        "parcel_quality_status": "review"
+      }
+    },
+    "static_filter_fallback_smoke": {
+      "status": "passed",
+      "record_count": 110017,
+      "sample_dimensions_verified": [
+        "zoningJurisdiction=Concord",
+        "zoningCode=RV",
+        "parcelSizeCategory=residential_standard",
+        "safeForDashboard=true"
+      ]
+    },
+    "dev_server_smoke": {
+      "status": "passed",
+      "url": "http://127.0.0.1:3000",
+      "http_status": 200
+    },
+    "browser_smoke_note": "The Browser plugin tools were not exposed in this session, so smoke checks were performed through local HTTP/API calls and static artifact validation."
+  },
+  "remaining_static_dependencies": [
+    "public/intelligence/parcel-search-index.json remains the default and fallback search/filter source.",
+    "Owner and mailing context for filter endpoint rows are preserved by merging with the static index when matching parcel IDs are available.",
+    "Map selection, parcel geometry focus, and SceneView interactions remain disconnected from backend parcel filtering."
+  ],
+  "readiness": {
+    "parcel_statistics_zoning_governance_panel_api_integration": "ready",
+    "map_geometry_focus": "not_started",
+    "sceneview_modified": false
+  }
+}
