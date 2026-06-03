@@ -1,13 +1,17 @@
 "use client";
 
 import { Building2, Loader2, MapPinned, ShieldAlert, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
-import { normalizeBackendParcelDetailResponse } from "@/lib/adapters/parcelDetailAdapter";
+import {
+  normalizeBackendParcelDetailResponse,
+  normalizeBackendParcelMapFocusResponse,
+} from "@/lib/adapters/parcelDetailAdapter";
 import { USE_BACKEND_API } from "@/lib/api/client";
 import { getParcelDetail } from "@/lib/api/parcels";
 import { getParcelMapFocusStatusLabel } from "@/lib/map/parcelMapFocus";
+import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
 import type {
   ParcelMapFocus,
   ParcelMapFocusResult,
@@ -17,6 +21,7 @@ interface ParcelDetailDrawerProps {
   mapFocus: ParcelMapFocus | null;
   mapFocusResult: ParcelMapFocusResult;
   onClose: () => void;
+  onMapFocusHydrated: (focus: ParcelMapFocus) => void;
   parcel: ParcelSearchRecord | null;
 }
 
@@ -41,8 +46,10 @@ export function ParcelDetailDrawer({
   mapFocus,
   mapFocusResult,
   onClose,
+  onMapFocusHydrated,
   parcel,
 }: ParcelDetailDrawerProps) {
+  const hydrationRequestRef = useRef(0);
   const [hydrationState, setHydrationState] =
     useState<ParcelDetailHydrationState>({
       error: null,
@@ -52,24 +59,98 @@ export function ParcelDetailDrawer({
 
   useEffect(() => {
     if (!USE_BACKEND_API || !parcel) {
+      hydrationRequestRef.current += 1;
+      logParcelMapFocusDiagnostic("parcel detail hydration skipped", {
+        hasParcel: Boolean(parcel),
+        officialParcelId: parcel?.officialParcelId ?? null,
+        useBackendApi: USE_BACKEND_API,
+      });
       return;
     }
 
     const controller = new AbortController();
     const parcelId = parcel.officialParcelId;
+    const requestId = hydrationRequestRef.current + 1;
+    hydrationRequestRef.current = requestId;
+
+    logParcelMapFocusDiagnostic("request parcel detail hydration", {
+      officialParcelId: parcelId,
+      requestId,
+    });
 
     getParcelDetail(parcelId, { signal: controller.signal })
       .then((response) => {
+        const responseParcelId = response.official_parcel_id;
+
+        if (
+          controller.signal.aborted ||
+          requestId !== hydrationRequestRef.current
+        ) {
+          logParcelMapFocusDiagnostic("stale parcel detail hydration ignored", {
+            latestRequestId: hydrationRequestRef.current,
+            requestId,
+            responseParcelId,
+            selectedParcelId: parcelId,
+          });
+          return;
+        }
+
+        if (responseParcelId !== parcelId) {
+          logParcelMapFocusDiagnostic("mismatched parcel detail response ignored", {
+            requestId,
+            responseParcelId,
+            selectedParcelId: parcelId,
+          });
+          return;
+        }
+
+        logParcelMapFocusDiagnostic("received parcel detail response", {
+          hasMapFocus: Boolean(response.map_focus),
+          mapFocus: response.map_focus ?? null,
+          requestId,
+          responseParcelId,
+          selectedParcelId: parcelId,
+        });
+
+        const hydratedRecord = normalizeBackendParcelDetailResponse(
+          response,
+          parcel,
+        );
+        const backendMapFocus = normalizeBackendParcelMapFocusResponse(
+          response,
+          hydratedRecord,
+        );
+
         setHydrationState({
           error: null,
           parcelId,
-          record: normalizeBackendParcelDetailResponse(response, parcel),
+          record: hydratedRecord,
         });
+
+        if (backendMapFocus) {
+          onMapFocusHydrated(backendMapFocus);
+        } else {
+          logParcelMapFocusDiagnostic("no backend focus emitted", {
+            officialParcelId: parcelId,
+          });
+        }
       })
       .catch((detailError: unknown) => {
-        if (controller.signal.aborted) {
+        if (
+          controller.signal.aborted ||
+          requestId !== hydrationRequestRef.current
+        ) {
           return;
         }
+
+        logParcelMapFocusDiagnostic("parcel detail hydration failed", {
+          error:
+            detailError instanceof Error
+              ? detailError.message
+              : "Parcel detail API is unavailable.",
+          officialParcelId: parcelId,
+          requestId,
+        });
 
         setHydrationState({
           error:
@@ -82,7 +163,7 @@ export function ParcelDetailDrawer({
       });
 
     return () => controller.abort();
-  }, [parcel]);
+  }, [onMapFocusHydrated, parcel]);
 
   if (!parcel) {
     return (

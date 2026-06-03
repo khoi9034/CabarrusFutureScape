@@ -1,0 +1,136 @@
+{
+  "task": "Backend Runtime Mismatch Debug",
+  "status": "resolved",
+  "source_code_status": {
+    "router": {
+      "file": "backend/app/routers/parcel_router.py",
+      "status": "ok",
+      "details": "GET /parcels/{official_parcel_id} uses response_model=ParcelDetailResponse and returns ParcelService.get_parcel_detail()."
+    },
+    "repository": {
+      "file": "backend/app/repositories/parcel_repository.py",
+      "status": "ok",
+      "details": "ParcelRepository.get_by_official_parcel_id computes ST_PointOnSurface-derived longitude/latitude and Box2D extent values from public.parcels_enriched.geometry."
+    },
+    "service": {
+      "file": "backend/app/services/parcel_service.py",
+      "status": "ok",
+      "details": "ParcelService.get_parcel_detail maps centroid and extent values into ParcelMapFocus and includes map_focus in ParcelDetailResponse."
+    },
+    "schema": {
+      "file": "backend/app/schemas/parcel.py",
+      "status": "ok",
+      "details": "ParcelDetailResponse exposes map_focus: ParcelMapFocus with centroid, extent, spatial_reference, geometry_available, and full_geometry_returned."
+    }
+  },
+  "runtime_status_before_restart": {
+    "port": 8000,
+    "pid": 17552,
+    "command_line": "\"C:\\Python314\\python.exe\" -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+    "working_directory": "C:\\CabarrusFutureScape\\backend\\",
+    "creation_time": "2026-06-01 02:32:26 local",
+    "openapi_has_parcel_map_focus_schema": false,
+    "openapi_parcel_detail_has_map_focus": false,
+    "live_endpoint_has_map_focus": false,
+    "live_endpoint_properties": [
+      "official_parcel_id",
+      "pin14",
+      "objectid_1",
+      "location",
+      "valuation",
+      "parcel_context",
+      "zoning",
+      "governance",
+      "planning",
+      "metadata"
+    ]
+  },
+  "duplicate_backend_scan": {
+    "real_backend_directories_found": [
+      "C:\\CabarrusFutureScape\\backend"
+    ],
+    "ignored_matches": [
+      "C:\\CabarrusFutureScape\\docs\\backend",
+      "C:\\CabarrusFutureScape\\node_modules\\@amcharts\\amcharts5\\.internal\\core\\render\\backend"
+    ],
+    "parcel_service_files_found": [
+      "C:\\CabarrusFutureScape\\backend\\app\\services\\parcel_service.py"
+    ],
+    "conclusion": "No duplicate executable CFS backend source tree was found inside the repository."
+  },
+  "root_cause": {
+    "category": "stale runtime process",
+    "description": "The uvicorn process serving port 8000 was running from the correct backend directory, but it was started before the source code was updated with map_focus. Because it was not running with reload, it continued serving the old imported schema and route response.",
+    "not_a_source_code_defect": true,
+    "not_a_postgis_issue": true
+  },
+  "corrective_action_taken": {
+    "stopped_process": {
+      "pid": 17552,
+      "port": 8000
+    },
+    "started_process": {
+      "pid": 8348,
+      "port": 8000,
+      "working_directory": "C:\\CabarrusFutureScape\\backend\\",
+      "command": "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000"
+    }
+  },
+  "runtime_status_after_restart": {
+    "port": 8000,
+    "pid": 8348,
+    "working_directory": "C:\\CabarrusFutureScape\\backend\\",
+    "openapi_has_parcel_map_focus_schema": true,
+    "openapi_parcel_detail_has_map_focus": true,
+    "openapi_parcel_detail_properties": [
+      "official_parcel_id",
+      "pin14",
+      "objectid_1",
+      "location",
+      "valuation",
+      "parcel_context",
+      "zoning",
+      "governance",
+      "planning",
+      "metadata",
+      "map_focus"
+    ]
+  },
+  "final_endpoint_response_validation": {
+    "endpoint": "GET http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579",
+    "map_focus_present": true,
+    "map_focus": {
+      "centroid": {
+        "longitude": -80.72215279793367,
+        "latitude": 35.369349462827685
+      },
+      "extent": {
+        "xmin": -80.72933764277025,
+        "ymin": 35.365247848682806,
+        "xmax": -80.7156828678656,
+        "ymax": 35.37346110981544
+      },
+      "spatial_reference": {
+        "wkid": 4326
+      },
+      "geometry_available": true,
+      "full_geometry_returned": false
+    }
+  },
+  "validation": {
+    "python_m_compileall_app": "passed",
+    "python_m_pytest": "passed; 103 passed, 1 warning",
+    "get_health": {
+      "status": "ok"
+    },
+    "get_health_database": {
+      "database": "connected"
+    },
+    "get_parcel_detail_map_focus": "passed"
+  },
+  "recommendations": [
+    "For active local development, start FastAPI with --reload from C:\\CabarrusFutureScape\\backend so backend code changes are picked up automatically.",
+    "Before testing frontend map focus, ensure the frontend is started with NEXT_PUBLIC_USE_BACKEND_API=true and NEXT_PUBLIC_CFS_API_BASE_URL=http://127.0.0.1:8000.",
+    "If the endpoint appears stale again, compare /openapi.json with backend/app/schemas/parcel.py first; OpenAPI quickly reveals whether the running process imported the current schema."
+  ]
+}

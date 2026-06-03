@@ -34,6 +34,7 @@ import {
 } from "@/lib/adapters/parcelSearchAdapter";
 import { USE_BACKEND_API } from "@/lib/api/client";
 import { filterParcels, searchParcels } from "@/lib/api/parcels";
+import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
 import { useParcelMapFocus } from "@/hooks/useParcelMapFocus";
 import type { ParcelFocusSource } from "@/types/map/parcelFocus";
 
@@ -132,6 +133,7 @@ export function ParcelSearchPanel() {
     focusMessage,
     focusResult,
     selectedParcelFocus,
+    setParcelFocus,
     setParcelFocusFromRecord,
   } = useParcelMapFocus();
   const deferredQuery = useDeferredValue(query);
@@ -313,6 +315,12 @@ export function ParcelSearchPanel() {
       record: ParcelSearchRecord,
       focusSource: ParcelFocusSource = "search",
     ) => {
+      logParcelMapFocusDiagnostic("parcel search result selected", {
+        focusSource,
+        officialParcelId: record.officialParcelId,
+        pin14: record.pin14,
+      });
+
       setSelectedRecord(record);
       setParcelFocusFromRecord(
         {
@@ -556,6 +564,7 @@ export function ParcelSearchPanel() {
           mapFocus={selectedParcelFocus}
           mapFocusResult={focusResult}
           onClose={handleCloseDetail}
+          onMapFocusHydrated={setParcelFocus}
           parcel={selectedRecord}
         />
       </div>

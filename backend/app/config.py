@@ -7,6 +7,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 EnvironmentName = Literal["dev", "test", "prod"]
 BACKEND_ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
+LOCAL_FRONTEND_CORS_ORIGINS = (
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "http://localhost:3003",
+    "http://127.0.0.1:3003",
+)
 
 
 class Settings(BaseSettings):
@@ -46,6 +54,10 @@ class Settings(BaseSettings):
         default=False,
         validation_alias=AliasChoices("SQLALCHEMY_ECHO"),
     )
+    cors_allowed_origins: str = Field(
+        default=",".join(LOCAL_FRONTEND_CORS_ORIGINS),
+        validation_alias=AliasChoices("CORS_ALLOWED_ORIGINS", "CFS_CORS_ALLOWED_ORIGINS"),
+    )
 
     model_config = SettingsConfigDict(
         env_file=BACKEND_ENV_FILE,
@@ -56,6 +68,21 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.app_env == "prod"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        origins = [
+            origin.strip()
+            for origin in self.cors_allowed_origins.split(",")
+            if origin.strip()
+        ]
+
+        if self.is_production:
+            # Production deployments must opt into explicit origins; never carry
+            # a permissive wildcard from a local/dev environment by accident.
+            return [origin for origin in origins if origin != "*"]
+
+        return origins
 
 
 @lru_cache

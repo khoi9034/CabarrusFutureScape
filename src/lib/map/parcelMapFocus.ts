@@ -3,8 +3,11 @@ import type {
   ParcelMapCentroid,
   ParcelMapExtent,
   ParcelMapFocus,
+  ParcelMapFocusRequestEventDetail,
   ParcelMapFocusResult,
+  ParcelMapFocusResultEventDetail,
 } from "@/types/map/parcelFocus";
+import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
 
 export interface ParcelFocusRecordLike {
   officialParcelId: string;
@@ -16,6 +19,12 @@ const REQUIRED_BACKEND_FIELDS = [
   "centroid.latitude",
   "extent or geometry",
 ];
+
+export const CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT =
+  "cfs:parcel-map-focus-request";
+
+export const CFS_PARCEL_MAP_FOCUS_RESULT_EVENT =
+  "cfs:parcel-map-focus-result";
 
 function isFiniteNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value);
@@ -93,6 +102,28 @@ export function resolveParcelMapFocus(
     };
   }
 
+  if (focus.focusStatus === "failed") {
+    return {
+      canFocus: false,
+      focusStatus: "failed",
+      message:
+        "Map focus failed. The selected parcel remains available in the detail drawer.",
+      mode: "focus-failed",
+      requiredBackendFields: REQUIRED_BACKEND_FIELDS,
+    };
+  }
+
+  if (focus.focusStatus === "unsupported") {
+    return {
+      canFocus: false,
+      focusStatus: "unsupported",
+      message:
+        "SceneView focus is unavailable, so the selected parcel remains in static detail mode.",
+      mode: "no-op",
+      requiredBackendFields: REQUIRED_BACKEND_FIELDS,
+    };
+  }
+
   if (
     hasUsableCentroid(focus.centroid) ||
     hasUsableExtent(focus.extent) ||
@@ -102,7 +133,9 @@ export function resolveParcelMapFocus(
       canFocus: true,
       focusStatus: focus.focusStatus === "focused" ? "focused" : "ready",
       message:
-        "Map focus ready. A future SceneView bridge can zoom and highlight this parcel.",
+        focus.focusStatus === "focused"
+          ? "Focused on map with backend parcel centroid and extent."
+          : "Map focus ready. SceneView can zoom and show a lightweight focus marker for this parcel.",
       mode: "focus-ready",
       requiredBackendFields: [],
     };
@@ -125,8 +158,10 @@ export function getParcelMapFocusStatusLabel(
   focusResult: ParcelMapFocusResult,
 ) {
   switch (focusResult.focusStatus) {
+    case "failed":
+      return "Map focus failed";
     case "focused":
-      return "Map focus active";
+      return "Focused on map";
     case "ready":
       return "Map focus ready";
     case "pending-geometry":
@@ -137,4 +172,51 @@ export function getParcelMapFocusStatusLabel(
     default:
       return "Static map mode";
   }
+}
+
+export function dispatchParcelMapFocusRequest(focus: ParcelMapFocus) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  logParcelMapFocusDiagnostic("dispatch focus request", {
+    centroid: focus.centroid,
+    extent: focus.extent,
+    focusSource: focus.focusSource,
+    focusStatus: focus.focusStatus,
+    officialParcelId: focus.officialParcelId,
+    pin14: focus.pin14,
+  });
+
+  window.dispatchEvent(
+    new CustomEvent<ParcelMapFocusRequestEventDetail>(
+      CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
+      {
+        detail: { focus },
+      },
+    ),
+  );
+}
+
+export function dispatchParcelMapFocusResult(
+  detail: ParcelMapFocusResultEventDetail,
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  logParcelMapFocusDiagnostic("dispatch focus result", {
+    focusStatus: detail.focusStatus,
+    message: detail.message,
+    officialParcelId: detail.officialParcelId,
+  });
+
+  window.dispatchEvent(
+    new CustomEvent<ParcelMapFocusResultEventDetail>(
+      CFS_PARCEL_MAP_FOCUS_RESULT_EVENT,
+      {
+        detail,
+      },
+    ),
+  );
 }

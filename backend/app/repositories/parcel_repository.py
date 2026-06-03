@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import and_, case, func, or_, select
+from sqlalchemy import and_, case, func, literal_column, or_, select
 from sqlalchemy.orm import Session
 
 from app.models import (
@@ -32,6 +32,13 @@ class ParcelDetailRecord:
     safe_for_dashboard: bool | None
     planning_jurisdiction: str | None
     transformed_at: datetime | None
+    centroid_longitude: float | None
+    centroid_latitude: float | None
+    extent_xmin: float | None
+    extent_ymin: float | None
+    extent_xmax: float | None
+    extent_ymax: float | None
+    geometry_available: bool | None
 
 
 @dataclass(frozen=True)
@@ -392,6 +399,14 @@ class ParcelRepository:
         self,
         official_parcel_id: str,
     ) -> ParcelDetailRecord | None:
+        parcel_geometry = literal_column("public.parcels_enriched.geometry")
+        focus_point = func.ST_PointOnSurface(parcel_geometry)
+        parcel_bbox = func.Box2D(parcel_geometry)
+        geometry_available = case(
+            (parcel_geometry.is_(None), False),
+            (func.ST_IsEmpty(parcel_geometry), False),
+            else_=True,
+        )
         statement = (
             select(
                 ParcelEnriched.official_parcel_id,
@@ -414,6 +429,13 @@ class ParcelRepository:
                     "planning_jurisdiction",
                 ),
                 ParcelEnriched.transformed_at,
+                func.ST_X(focus_point).label("centroid_longitude"),
+                func.ST_Y(focus_point).label("centroid_latitude"),
+                func.ST_XMin(parcel_bbox).label("extent_xmin"),
+                func.ST_YMin(parcel_bbox).label("extent_ymin"),
+                func.ST_XMax(parcel_bbox).label("extent_xmax"),
+                func.ST_YMax(parcel_bbox).label("extent_ymax"),
+                geometry_available.label("geometry_available"),
             )
             .outerjoin(
                 ParcelZoningOverlayV2,

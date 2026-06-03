@@ -1,6 +1,7 @@
 export type ParcelFocusSource = "command" | "detail" | "mock" | "search";
 
 export type ParcelMapFocusStatus =
+  | "failed"
   | "focused"
   | "idle"
   | "pending-geometry"
@@ -40,6 +41,16 @@ export interface ParcelMapFocusResult {
   canFocus: boolean;
   focusStatus: ParcelMapFocusStatus;
   message: string;
-  mode: "focus-ready" | "no-selection" | "no-op";
+  mode: "focus-failed" | "focus-ready" | "no-selection" | "no-op";
   requiredBackendFields: string[];
+}
+
+export interface ParcelMapFocusRequestEventDetail {
+  focus: ParcelMapFocus;
+}
+
+export interface ParcelMapFocusResultEventDetail {
+  focusStatus: ParcelMapFocusStatus;
+  message: string;
+  officialParcelId: string;
 }

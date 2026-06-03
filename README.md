@@ -702,41 +702,36 @@ Parcel Detail API behavior:
 
 ## Phase 6 GIS Map Intelligence
 
-Phase 6 has started with map-safe parcel focus and highlight readiness. This is the first bridge between real parcel discovery/detail records and the ArcGIS SceneView experience, but it does not zoom, highlight, replace mock graphics, or mutate the current SceneView layer system yet.
+Phase 6 has started with a map-safe parcel focus bridge between real parcel detail responses and the ArcGIS SceneView. Backend parcel detail now returns governed `map_focus` centroid and extent fields, and the frontend can use those fields to zoom the SceneView and draw a lightweight temporary focus marker without replacing the existing mock GraphicsLayer system.
 
 Core files:
 
 - `src/types/map/parcelFocus.ts` defines the parcel map focus contract, optional centroid, extent, geometry, focus source, and focus status.
-- `src/hooks/useParcelMapFocus.ts` owns selected parcel focus state, clear behavior, readiness status, and geometry-missing fallback state.
-- `src/lib/map/parcelMapFocus.ts` validates whether a parcel focus request has enough spatial information to become a future SceneView action.
+- `src/hooks/useParcelMapFocus.ts` owns selected parcel focus state, clear behavior, readiness status, focus request dispatch, and SceneView result handling.
+- `src/lib/map/parcelMapFocus.ts` validates whether a parcel focus request has enough spatial information and emits typed focus request/result events.
+- `src/lib/adapters/parcelDetailAdapter.ts` maps backend `map_focus.centroid` and `map_focus.extent` into the frontend `ParcelMapFocus` contract.
 - `src/components/dashboard/ParcelSearchPanel.tsx` now creates a parcel focus object when a parcel result is selected from search or command inspection.
-- `src/components/dashboard/ParcelDetailDrawer.tsx` surfaces map focus status alongside FastAPI/static detail source status.
+- `src/components/dashboard/ParcelDetailDrawer.tsx` hydrates map focus from backend parcel detail and surfaces focus status alongside FastAPI/static detail source status.
+- `src/components/gis/SceneViewContainer.tsx` listens for parcel focus requests, calls `SceneView.goTo()` with centroid/extent targets, and maintains a non-destructive temporary focus marker layer.
 
-Current geometry status:
+Current map focus status:
 
-- The current frontend `ParcelDetailResponse` type does not include centroid, extent, or geometry.
-- The current FastAPI `GET /parcels/{official_parcel_id}` route does not expose `include_geometry` or `geometry_format` query parameters yet.
-- Backend planning documents already describe future centroid/GeoJSON support, but the implemented response is still attribute-only.
-- Because no governed spatial payload is available, real parcel selections show `Map focus pending geometry`.
+- `GET /parcels/{official_parcel_id}` can provide `map_focus.centroid.longitude`, `map_focus.centroid.latitude`, `map_focus.extent`, and `spatial_reference.wkid = 4326`.
+- The frontend uses centroid/extent only. Full parcel geometry is intentionally not requested or rendered yet.
+- When backend focus data is available, parcel detail hydration dispatches a SceneView-safe focus request and the drawer can move from `Map focus ready` to `Focused on map`.
+- If backend focus data is missing, unavailable, or the SceneView is not ready, the drawer falls back to `Map focus pending geometry` or `Map focus failed` without breaking the dashboard.
 
-Safe no-op behavior:
+Safe SceneView behavior:
 
 - Parcel selections create `ParcelMapFocus` objects with official parcel ID, PIN14, and focus source.
 - If centroid, extent, and geometry are missing, `resolveParcelMapFocus()` returns a no-op result instead of touching ArcGIS runtime objects.
-- Existing mock GraphicsLayers, mock parcel highlights, layer toggles, hit-test behavior, and SceneView lifecycle remain unchanged.
-
-Next backend/data requirement for true parcel highlight:
-
-1. Add a governed backend map-focus response for `GET /parcels/{official_parcel_id}` or a dedicated parcel focus endpoint.
-2. Return at least parcel centroid in EPSG:4326, preferably with a lightweight extent.
-3. Optionally support simplified display geometry or GeoJSON behind `geometry_format=geojson`.
-4. Keep list/search responses geometry-light by default.
-5. Only after that, connect the SceneView bridge to zoom and draw a non-destructive highlight overlay.
+- The focus marker lives in a dedicated hidden `cfs-parcel-focus-layer`, so existing mock GraphicsLayers, mock parcel hit-tests, layer toggles, and selection symbols remain unchanged.
+- The focus layer is cleared during SceneView cleanup and is recreated only inside the client-side ArcGIS lifecycle.
+- Geometry-only focus objects remain unsupported until a future full-geometry highlight task explicitly enables them.
 
 Future path:
 
-- Parcel centroid endpoint or detail geometry option
-- SceneView parcel zoom and highlight overlay
+- Full parcel geometry highlight with simplified governed geometry
 - Development permit hotspot layer
 - Temporal map filtering and playback
 
@@ -762,6 +757,6 @@ The public dashboard API remains simple for UI components, while the internals a
 
 ## Next Step
 
-Next planned task: Phase 6 Parcel Centroid API and Highlight Pilot.
+Next planned task: Phase 6 Full Parcel Geometry Highlight Readiness.
 
-That task should add governed parcel centroid or lightweight extent support to the backend, then connect a non-destructive SceneView zoom/highlight overlay that leaves mock graphics, layer toggles, and static/API fallback behavior intact.
+That task should add a governed, lightweight parcel display geometry option or dedicated focus endpoint, then render a non-destructive polygon highlight while keeping list/search responses geometry-light by default.

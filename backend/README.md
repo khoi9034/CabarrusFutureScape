@@ -21,6 +21,10 @@ $env:POSTGRES_PASSWORD = $env:CFS_POSTGRES_PASSWORD
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
+Local development CORS is enabled for the Next.js frontend on ports `3000`,
+`3001`, and `3003` via `CORS_ALLOWED_ORIGINS`. Production deployments should
+set explicit deployment origins only.
+
 OpenAPI docs:
 
 ```text
@@ -81,6 +85,23 @@ Example response shape:
   },
   "metadata": {
     "transformed_at": "2026-05-30T00:00:00+00:00"
+  },
+  "map_focus": {
+    "centroid": {
+      "longitude": -80.72215279793367,
+      "latitude": 35.369349462827685
+    },
+    "extent": {
+      "xmin": -80.72933764277025,
+      "ymin": 35.365247848682806,
+      "xmax": -80.7156828678656,
+      "ymax": 35.37346110981544
+    },
+    "spatial_reference": {
+      "wkid": 4326
+    },
+    "geometry_available": true,
+    "full_geometry_returned": false
   }
 }
 ```
@@ -98,6 +119,14 @@ Missing parcels return:
   "detail": "Parcel not found"
 }
 ```
+
+Map focus notes:
+
+- `map_focus.centroid` is generated from `ST_PointOnSurface(geometry)` so the focus point remains inside parcel polygons more reliably than a raw centroid.
+- `map_focus.extent` is generated from the parcel geometry bounding box.
+- `spatial_reference.wkid` is `4326`.
+- `full_geometry_returned` is always `false` for this endpoint version. Full parcel geometry is intentionally not returned yet.
+- Future frontend SceneView zoom/highlight behavior can use `centroid` and `extent` without requesting full parcel geometry.
 
 ## Parcel Search Endpoint
 

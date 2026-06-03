@@ -1,0 +1,64 @@
+{
+  "phase": "Phase 6 GIS Map Intelligence",
+  "task": "Frontend Parcel SceneView Focus and Highlight",
+  "status": "complete",
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/ParcelDetailDrawer.tsx",
+    "src/components/dashboard/ParcelSearchPanel.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/hooks/useParcelMapFocus.ts",
+    "src/lib/adapters/parcelDetailAdapter.ts",
+    "src/types/api/parcels.ts"
+  ],
+  "map_focus_fields_consumed": {
+    "centroid": [
+      "map_focus.centroid.longitude",
+      "map_focus.centroid.latitude"
+    ],
+    "extent": [
+      "map_focus.extent.xmin",
+      "map_focus.extent.ymin",
+      "map_focus.extent.xmax",
+      "map_focus.extent.ymax"
+    ],
+    "spatial_reference": "map_focus.spatial_reference.wkid",
+    "geometry_flags": [
+      "map_focus.geometry_available",
+      "map_focus.full_geometry_returned"
+    ]
+  },
+  "focus_behavior_implemented": [
+    "Backend parcel detail map_focus is normalized into the frontend ParcelMapFocus contract.",
+    "Hydrated parcel detail dispatches a typed parcel map focus request when centroid or extent data is available.",
+    "SceneViewContainer listens for focus requests only after ArcGIS view.when() completes.",
+    "SceneViewContainer calls SceneView.goTo() using parcel extent when available, otherwise parcel centroid.",
+    "A dedicated hidden cfs-parcel-focus-layer displays a temporary simple-marker focus indicator at the centroid.",
+    "Existing mock GraphicsLayers, parcel hit-test selection, layer toggles, and operational layer registry behavior are preserved."
+  ],
+  "fallback_behavior": [
+    "If map_focus is missing or invalid, the drawer remains in pending-geometry/static fallback mode.",
+    "If SceneView is unavailable or goTo fails, a focus result event marks the focus state as failed without breaking the dashboard.",
+    "Geometry-only focus objects are not acted on yet because full parcel geometry highlight remains future work.",
+    "Static parcel search/detail fallback remains intact when NEXT_PUBLIC_USE_BACKEND_API is disabled or backend hydration fails."
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build": "passed",
+    "production_http_smoke": {
+      "command": "npm run start -- --port 3003",
+      "result": "passed",
+      "status_code": 200
+    },
+    "browser_console_smoke": "not available in this session; browser connector search returned no callable tools"
+  },
+  "remaining_map_intelligence_gaps": [
+    "Full parcel polygon geometry is still not requested or rendered.",
+    "The current marker is centroid-based and temporary, not a governed polygon highlight.",
+    "Permit hotspot map rendering is not implemented.",
+    "Temporal map filtering and playback are not implemented.",
+    "Parcel geometry focus should be added through a lightweight governed geometry response or dedicated focus endpoint before polygon highlighting."
+  ],
+  "next_recommended_step": "Phase 6 Full Parcel Geometry Highlight Readiness"
+}

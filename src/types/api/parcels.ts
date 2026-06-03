@@ -43,9 +43,34 @@ export interface ParcelMetadata {
   transformed_at: string | null;
 }
 
+export interface ParcelMapFocusCentroidResponse {
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface ParcelMapFocusExtentResponse {
+  xmax: number | null;
+  xmin: number | null;
+  ymax: number | null;
+  ymin: number | null;
+}
+
+export interface ParcelMapFocusSpatialReferenceResponse {
+  wkid: number;
+}
+
+export interface ParcelMapFocusResponse {
+  centroid: ParcelMapFocusCentroidResponse | null;
+  extent: ParcelMapFocusExtentResponse | null;
+  full_geometry_returned: boolean;
+  geometry_available: boolean;
+  spatial_reference: ParcelMapFocusSpatialReferenceResponse;
+}
+
 export interface ParcelDetailResponse {
   governance: ParcelGovernance;
   location: ParcelLocation;
+  map_focus?: ParcelMapFocusResponse | null;
   metadata: ParcelMetadata;
   objectid_1: number | null;
   official_parcel_id: string;
@@ -201,4 +226,3 @@ export interface ParcelGovernanceWarningResponse {
   total_count: number;
   warning_summary: ParcelGovernanceWarningSummary[];
 }
-

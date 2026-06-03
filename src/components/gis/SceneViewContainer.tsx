@@ -1,10 +1,15 @@
 "use client";
 
+import type Graphic from "@arcgis/core/Graphic";
+import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type SceneView from "@arcgis/core/views/SceneView";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapViewportPlaceholder } from "@/components/gis/MapViewportPlaceholder";
 import { useDashboardState } from "@/hooks/useDashboardState";
-import { loadArcGISRuntime } from "@/lib/gis/arcgisRuntime";
+import {
+  loadArcGISRuntime,
+  type ArcGISRuntime,
+} from "@/lib/gis/arcgisRuntime";
 import {
   updateSelectedParcelSymbols,
 } from "@/lib/gis/mockSceneLayers";
@@ -18,16 +23,40 @@ import {
 import { operationalLayerRegistry } from "@/lib/gis/layerRegistry";
 import { createMapInteractionController } from "@/lib/gis/mapInteractionController";
 import { createCabarrusSceneView } from "@/lib/gis/sceneViewFactory";
+import {
+  CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
+  dispatchParcelMapFocusResult,
+  resolveParcelMapFocus,
+} from "@/lib/map/parcelMapFocus";
+import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
+import type {
+  ParcelMapFocus,
+  ParcelMapFocusRequestEventDetail,
+} from "@/types/map/parcelFocus";
 
 type ArcGISHandle = {
   remove: () => void;
 };
 
+interface ParcelFocusBeacon {
+  officialParcelId: string;
+  pin14?: string | null;
+}
+
 export function SceneViewContainer() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<SceneView | null>(null);
   const layerRefs = useRef<OperationalLayerInstanceMap>({});
+  const focusLayerRef = useRef<GraphicsLayer | null>(null);
+  const lastFocusedParcelIdRef = useRef<string | null>(null);
+  const runtimeRef = useRef<ArcGISRuntime | null>(null);
   const activeLayerIdsRef = useRef<string[]>([]);
+  const focusBeaconTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const [focusBeacon, setFocusBeacon] = useState<ParcelFocusBeacon | null>(
+    null,
+  );
   const {
     activeLayerIds,
     clearMapError,
@@ -57,8 +86,172 @@ export function SceneViewContainer() {
 
     let cancelled = false;
     let clickHandle: ArcGISHandle | null = null;
+    let focusEventHandler: ((event: Event) => void) | null = null;
     let hoverHandle: ArcGISHandle | null = null;
     let localView: SceneView | null = null;
+
+    async function applyParcelFocus(focus: ParcelMapFocus) {
+      const focusResult = resolveParcelMapFocus(focus);
+      const previousFocusId = lastFocusedParcelIdRef.current;
+
+      logParcelMapFocusDiagnostic("SceneView received focus request", {
+        canFocus: focusResult.canFocus,
+        centroid: focus.centroid,
+        extent: focus.extent,
+        focusStatus: focusResult.focusStatus,
+        hasSceneView: Boolean(viewRef.current),
+        hasRuntime: Boolean(runtimeRef.current),
+        officialParcelId: focus.officialParcelId,
+        previousFocusId,
+      });
+
+      if (!focusResult.canFocus) {
+        dispatchParcelMapFocusResult({
+          focusStatus: focusResult.focusStatus,
+          message: focusResult.message,
+          officialParcelId: focus.officialParcelId,
+        });
+        return;
+      }
+
+      const view = viewRef.current;
+      const runtime = runtimeRef.current;
+
+      if (!focus.centroid && !focus.extent) {
+        dispatchParcelMapFocusResult({
+          focusStatus: "unsupported",
+          message:
+            "SceneView parcel focus currently supports centroid or extent targets only.",
+          officialParcelId: focus.officialParcelId,
+        });
+        return;
+      }
+
+      if (!view || view.destroyed || !runtime) {
+        dispatchParcelMapFocusResult({
+          focusStatus: "failed",
+          message:
+            "SceneView is not ready, so parcel map focus could not run.",
+          officialParcelId: focus.officialParcelId,
+        });
+        return;
+      }
+
+      try {
+        const focusLayer = ensureParcelFocusLayer(runtime, view);
+        const focusGraphic = createParcelFocusGraphic(runtime, focus);
+
+        focusLayerRef.current = focusLayer;
+        focusLayer.removeAll();
+
+        if (focusGraphic) {
+          focusLayer.add(focusGraphic);
+        }
+
+        logParcelMapFocusDiagnostic("SceneView focus graphic prepared", {
+          graphicCreated: Boolean(focusGraphic),
+          layerId: focusLayer.id,
+          layerVisible: focusLayer.visible,
+          officialParcelId: focus.officialParcelId,
+        });
+
+        const goToTarget = buildParcelFocusGoToTarget(runtime, focus);
+        const goToDiagnostic = {
+          currentCenterBeforeGoTo: describeSceneViewCenter(view),
+          currentZoomBeforeGoTo: view.zoom,
+          goToCentroid: focus.centroid
+            ? {
+                latitude: focus.centroid.latitude,
+                longitude: focus.centroid.longitude,
+                wkid: focus.centroid.spatialReference?.wkid ?? 4326,
+              }
+            : null,
+          goToExtent: focus.extent
+            ? {
+                xmax: focus.extent.xmax,
+                xmin: focus.extent.xmin,
+                ymax: focus.extent.ymax,
+                ymin: focus.extent.ymin,
+                wkid: focus.extent.spatialReference?.wkid ?? 4326,
+              }
+            : null,
+          goToCalled: true,
+          officialParcelId: focus.officialParcelId,
+          previousFocusId,
+          target: describeParcelFocusGoToTarget(focus),
+        };
+
+        recordSceneViewFocusDebug("SceneView goTo start", goToDiagnostic);
+        logParcelMapFocusDiagnostic("SceneView goTo start", goToDiagnostic);
+
+        await view.goTo(goToTarget, {
+          animate: true,
+          duration: 900,
+        });
+
+        const goToSuccessDiagnostic = {
+          currentCenterAfterGoTo: describeSceneViewCenter(view),
+          currentZoomAfterGoTo: view.zoom,
+          goToResolved: true,
+          officialParcelId: focus.officialParcelId,
+          previousFocusId,
+        };
+
+        recordSceneViewFocusDebug(
+          "SceneView goTo success",
+          goToSuccessDiagnostic,
+        );
+        logParcelMapFocusDiagnostic(
+          "SceneView goTo success",
+          goToSuccessDiagnostic,
+        );
+        lastFocusedParcelIdRef.current = focus.officialParcelId;
+
+        setFocusBeacon({
+          officialParcelId: focus.officialParcelId,
+          pin14: focus.pin14,
+        });
+        if (focusBeaconTimeoutRef.current) {
+          clearTimeout(focusBeaconTimeoutRef.current);
+        }
+        focusBeaconTimeoutRef.current = setTimeout(() => {
+          setFocusBeacon(null);
+          focusBeaconTimeoutRef.current = null;
+        }, 12000);
+
+        dispatchParcelMapFocusResult({
+          focusStatus: "focused",
+          message:
+            "Focused on map with backend parcel centroid and extent.",
+          officialParcelId: focus.officialParcelId,
+        });
+      } catch (focusError) {
+        console.error("Parcel SceneView focus failed", focusError);
+        const goToFailureDiagnostic = {
+          error:
+            focusError instanceof Error
+              ? focusError.message
+              : "SceneView parcel focus failed.",
+          goToRejected: true,
+          officialParcelId: focus.officialParcelId,
+          previousFocusId,
+        };
+
+        recordSceneViewFocusDebug("SceneView goTo failed", goToFailureDiagnostic);
+        logParcelMapFocusDiagnostic(
+          "SceneView goTo failed",
+          goToFailureDiagnostic,
+        );
+        dispatchParcelMapFocusResult({
+          focusStatus: "failed",
+          message:
+            focusError instanceof Error
+              ? focusError.message
+              : "SceneView parcel focus failed.",
+          officialParcelId: focus.officialParcelId,
+        });
+      }
+    }
 
     async function initializeScene(container: HTMLDivElement) {
       clearMapError();
@@ -66,6 +259,7 @@ export function SceneViewContainer() {
 
       try {
         const runtime = await loadArcGISRuntime();
+        runtimeRef.current = runtime;
 
         if (cancelled) {
           return;
@@ -87,6 +281,8 @@ export function SceneViewContainer() {
           operationalLayerRegistry,
         );
         map.addMany(getRenderableOperationalLayers(layers));
+        focusLayerRef.current = createParcelFocusLayer(runtime);
+        map.add(focusLayerRef.current);
         layerRefs.current = layers;
         applyOperationalLayerVisibility(layers, activeLayerIdsRef.current);
         updateSelectedParcelSymbols(
@@ -119,6 +315,23 @@ export function SceneViewContainer() {
         hoverHandle = view.on("pointer-move", (event) => {
           interactionController.handleHover(event);
         });
+        focusEventHandler = (event: Event) => {
+          const detail = (
+            event as CustomEvent<ParcelMapFocusRequestEventDetail>
+          ).detail;
+
+          if (detail?.focus) {
+            void applyParcelFocus(detail.focus);
+          }
+        };
+        window.addEventListener(
+          CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
+          focusEventHandler,
+        );
+        logParcelMapFocusDiagnostic("SceneView focus listener registered", {
+          hasSceneView: Boolean(viewRef.current),
+          mapStatus: "online",
+        });
 
         setMapStatus("online");
       } catch (error) {
@@ -139,8 +352,21 @@ export function SceneViewContainer() {
       // remount the client-only SceneView without leaking handles or layers.
       cancelled = true;
       clickHandle?.remove();
+      if (focusEventHandler) {
+        window.removeEventListener(
+          CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
+          focusEventHandler,
+        );
+      }
       hoverHandle?.remove();
+      if (focusBeaconTimeoutRef.current) {
+        clearTimeout(focusBeaconTimeoutRef.current);
+        focusBeaconTimeoutRef.current = null;
+      }
+      focusLayerRef.current?.removeAll();
+      focusLayerRef.current = null;
       layerRefs.current = {};
+      runtimeRef.current = null;
       viewRef.current = null;
 
       if (localView && !localView.destroyed) {
@@ -178,6 +404,27 @@ export function SceneViewContainer() {
         ref={containerRef}
         title="Interactive ArcGIS SceneView with mock Cabarrus County operational layers"
       />
+      {focusBeacon && (
+        <div className="pointer-events-none fixed left-1/2 top-20 z-[80] flex -translate-x-1/2 items-center gap-3 rounded-lg border border-[#68d8ff]/55 bg-[#06101a]/94 px-4 py-3 text-left shadow-[0_0_52px_rgba(104,216,255,0.48)] backdrop-blur-xl">
+          <span className="relative flex h-7 w-7 items-center justify-center">
+            <span className="absolute h-7 w-7 animate-ping rounded-full bg-[#68d8ff]/35" />
+            <span className="relative h-4 w-4 rounded-full border-2 border-white bg-[#d8b86a] shadow-[0_0_24px_rgba(216,184,106,0.85)]" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
+              Parcel Focus
+            </span>
+            <span className="block max-w-[220px] truncate font-mono text-xs font-semibold text-white">
+              {focusBeacon.officialParcelId}
+            </span>
+            {focusBeacon.pin14 && (
+              <span className="block truncate text-[10px] text-slate-300">
+                PIN {focusBeacon.pin14}
+              </span>
+            )}
+          </span>
+        </div>
+      )}
     </MapViewportPlaceholder>
   );
 }
@@ -188,4 +435,213 @@ function getSceneErrorMessage(error: unknown) {
   }
 
   return "ArcGIS modules could not initialize in the browser.";
+}
+
+function createParcelFocusLayer(runtime: ArcGISRuntime) {
+  return new runtime.GraphicsLayer({
+    elevationInfo: {
+      mode: "relative-to-ground",
+      offset: 45,
+    },
+    id: "cfs-parcel-focus-layer",
+    listMode: "hide",
+    title: "Parcel Focus Marker",
+  });
+}
+
+function ensureParcelFocusLayer(runtime: ArcGISRuntime, view: SceneView) {
+  const map = view.map;
+
+  if (!map) {
+    throw new Error("SceneView map is unavailable for parcel focus.");
+  }
+
+  const existingLayer = map.findLayerById("cfs-parcel-focus-layer");
+
+  if (existingLayer) {
+    return existingLayer as GraphicsLayer;
+  }
+
+  const focusLayer = createParcelFocusLayer(runtime);
+  map.add(focusLayer);
+  return focusLayer;
+}
+
+function createParcelFocusGraphic(runtime: ArcGISRuntime, focus: ParcelMapFocus) {
+  if (!focus.centroid) {
+    return null;
+  }
+
+  const point = createParcelFocusPoint(runtime, focus);
+
+  return new runtime.Graphic({
+    attributes: {
+      focusSource: focus.focusSource,
+      officialParcelId: focus.officialParcelId,
+      pin14: focus.pin14,
+    },
+    geometry: point,
+    popupTemplate: {
+      content:
+        "Backend parcel centroid/extent focus marker. Full parcel geometry highlight is intentionally not loaded yet.",
+      title: focus.officialParcelId,
+    },
+    symbol: {
+      callout: {
+        color: [104, 216, 255, 0.95],
+        size: 2,
+        type: "line",
+      },
+      symbolLayers: [
+        {
+          material: {
+            color: [104, 216, 255, 0.95],
+          },
+          outline: {
+            color: [255, 255, 255, 0.95],
+            size: 2,
+          },
+          resource: {
+            primitive: "circle",
+          },
+          size: 34,
+          type: "icon",
+        },
+        {
+          material: {
+            color: [216, 184, 106, 0.95],
+          },
+          resource: {
+            primitive: "sphere",
+          },
+          depth: 130,
+          height: 130,
+          type: "object",
+          width: 130,
+        },
+      ],
+      type: "point-3d",
+      verticalOffset: {
+        maxWorldLength: 700,
+        minWorldLength: 60,
+        screenLength: 50,
+      },
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createParcelFocusPoint(
+  runtime: ArcGISRuntime,
+  focus: ParcelMapFocus,
+) {
+  return new runtime.Point({
+    spatialReference: {
+      wkid: focus.centroid?.spatialReference?.wkid ?? 4326,
+    },
+    x: focus.centroid?.longitude,
+    y: focus.centroid?.latitude,
+  });
+}
+
+function createParcelFocusExtent(runtime: ArcGISRuntime, focus: ParcelMapFocus) {
+  if (!focus.extent) {
+    return null;
+  }
+
+  return new runtime.Extent({
+    spatialReference: {
+      wkid: focus.extent.spatialReference?.wkid ?? 4326,
+    },
+    xmax: focus.extent.xmax,
+    xmin: focus.extent.xmin,
+    ymax: focus.extent.ymax,
+    ymin: focus.extent.ymin,
+  });
+}
+
+function buildParcelFocusGoToTarget(
+  runtime: ArcGISRuntime,
+  focus: ParcelMapFocus,
+) {
+  if (focus.centroid) {
+    return {
+      center: createParcelFocusPoint(runtime, focus),
+      zoom: 18,
+    } as Parameters<SceneView["goTo"]>[0];
+  }
+
+  return {
+    target: createParcelFocusExtent(runtime, focus),
+    zoom: 17,
+  } as Parameters<SceneView["goTo"]>[0];
+}
+
+function describeSceneViewCenter(view: SceneView) {
+  const center = view.center;
+
+  if (!center) {
+    return null;
+  }
+
+  return {
+    latitude: center.latitude,
+    longitude: center.longitude,
+    wkid: center.spatialReference?.wkid,
+    x: center.x,
+    y: center.y,
+  };
+}
+
+function recordSceneViewFocusDebug(
+  stage: string,
+  detail: Record<string, unknown>,
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const debugEntry = {
+    detail,
+    stage,
+    timestamp: new Date().toISOString(),
+  };
+  const debugWindow = window as Window & {
+    __cfsLastSceneViewFocusDebug?: typeof debugEntry;
+    __cfsSceneViewFocusDebugLog?: typeof debugEntry[];
+  };
+  const debugLog = debugWindow.__cfsSceneViewFocusDebugLog ?? [];
+
+  debugWindow.__cfsLastSceneViewFocusDebug = debugEntry;
+  debugWindow.__cfsSceneViewFocusDebugLog = [...debugLog, debugEntry].slice(
+    -80,
+  );
+  console.debug("[CFS parcel map focus camera]", stage, detail);
+}
+
+function describeParcelFocusGoToTarget(focus: ParcelMapFocus) {
+  if (focus.centroid) {
+    return {
+      latitude: focus.centroid.latitude,
+      longitude: focus.centroid.longitude,
+      spatialReference: {
+        wkid: focus.centroid.spatialReference?.wkid ?? 4326,
+      },
+      type: "point",
+    };
+  }
+
+  if (focus.extent) {
+    return {
+      spatialReference: {
+        wkid: focus.extent.spatialReference?.wkid ?? 4326,
+      },
+      type: "extent",
+      xmax: focus.extent.xmax,
+      xmin: focus.extent.xmin,
+      ymax: focus.extent.ymax,
+      ymin: focus.extent.ymin,
+    };
+  }
+
+  return null;
 }

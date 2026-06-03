@@ -1,0 +1,78 @@
+{
+  "generated_at": "2026-06-01T22:22:56-04:00",
+  "task": "Backend Parcel Map Focus Support",
+  "status": "completed",
+  "endpoint_updated": "GET /parcels/{official_parcel_id}",
+  "tables_used": [
+    "public.parcels_enriched",
+    "public.parcel_zoning_overlay_v2",
+    "public.parcel_zoning_intelligence_qa"
+  ],
+  "postgis_functions_used": [
+    "ST_PointOnSurface",
+    "ST_X",
+    "ST_Y",
+    "Box2D",
+    "ST_XMin",
+    "ST_YMin",
+    "ST_XMax",
+    "ST_YMax",
+    "ST_IsEmpty"
+  ],
+  "fields_added": {
+    "map_focus": {
+      "centroid": {
+        "longitude": "number | null",
+        "latitude": "number | null"
+      },
+      "extent": {
+        "xmin": "number | null",
+        "ymin": "number | null",
+        "xmax": "number | null",
+        "ymax": "number | null"
+      },
+      "spatial_reference": {
+        "wkid": 4326
+      },
+      "geometry_available": "boolean",
+      "full_geometry_returned": false
+    }
+  },
+  "example_map_focus_response": {
+    "centroid": {
+      "longitude": -80.72215279793367,
+      "latitude": 35.369349462827685
+    },
+    "extent": {
+      "xmin": -80.72933764277025,
+      "ymin": 35.365247848682806,
+      "xmax": -80.7156828678656,
+      "ymax": 35.37346110981544
+    },
+    "spatial_reference": {
+      "wkid": 4326
+    },
+    "geometry_available": true,
+    "full_geometry_returned": false
+  },
+  "response_behavior": {
+    "geometry_exists": "Return point-on-surface centroid and parcel extent in EPSG:4326 with geometry_available=true and full_geometry_returned=false.",
+    "geometry_missing": "Return null centroid and extent with geometry_available=false and full_geometry_returned=false.",
+    "full_geometry": "Not returned in this phase."
+  },
+  "tests_executed": [
+    {
+      "command": "python -m pytest tests/test_parcel_detail.py -q",
+      "result": "2 passed"
+    },
+    {
+      "command": "python -m pytest -q",
+      "result": "103 passed"
+    }
+  ],
+  "readiness": {
+    "frontend_sceneview_parcel_zoom_highlight": "ready for frontend integration using centroid and extent",
+    "full_geometry_highlight": "not ready; full parcel geometry remains intentionally excluded",
+    "postgis_schema_changes": "none"
+  }
+}
