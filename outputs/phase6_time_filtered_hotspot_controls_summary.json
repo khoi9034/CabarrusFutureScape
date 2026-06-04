@@ -1,0 +1,69 @@
+{
+  "phase": "Phase 6 GIS Map Intelligence",
+  "task": "Time-Filtered Development Hotspot Controls",
+  "completed_at": "2026-06-04",
+  "component_updated": "src/components/dashboard/LayerToggle.tsx",
+  "state_updated": "src/hooks/useDashboardState.tsx",
+  "hook_updated": "src/hooks/useDevelopmentHotspotLayer.ts",
+  "controls_added": {
+    "activity_class": [
+      "very_high_activity",
+      "high_activity",
+      "moderate_activity"
+    ],
+    "recent_window": [
+      "all",
+      "1",
+      "3"
+    ],
+    "zoning_jurisdiction": [
+      "all",
+      "Concord",
+      "Kannapolis",
+      "Harrisburg",
+      "Midland",
+      "Mt. Pleasant",
+      "Locust",
+      "Cabarrus County / Unincorporated"
+    ],
+    "sort_by": [
+      "development_activity_score",
+      "total_permit_count",
+      "recent_permit_count_1yr",
+      "recent_permit_count_3yr"
+    ],
+    "limit": [
+      25,
+      50,
+      100
+    ]
+  },
+  "endpoint_query_params": {
+    "endpoint": "GET /development/hotspots",
+    "params": [
+      "activity_class",
+      "recent_window",
+      "zoning_jurisdiction",
+      "sort_by",
+      "limit",
+      "offset=0"
+    ]
+  },
+  "map_behavior": {
+    "on_filter_change": "Refetches hotspot endpoint when layer is enabled.",
+    "marker_refresh": "SceneView clears old markers while loading and renders filtered results when ready.",
+    "empty_state": "No hotspots match filters.",
+    "click_behavior": "Hotspot marker clicks still dispatch the existing parcel inspection event."
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "visual_browser_smoke": "not available; no Browser/Playwright tool was exposed in this session"
+  },
+  "remaining_gaps": [
+    "Visual browser smoke should be confirmed manually by toggling and changing each filter.",
+    "Temporal playback remains future work.",
+    "Map extent filtering and clustering remain future work."
+  ]
+}

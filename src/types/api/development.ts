@@ -86,6 +86,17 @@ export interface DevelopmentHotspotResult {
   has_unmatched_or_ambiguous_permit_flag: boolean;
   latest_permit_date: string | null;
   latest_permit_status: string | null;
+  map_focus?: {
+    centroid: {
+      latitude: number;
+      longitude: number;
+    } | null;
+    full_geometry_returned: boolean;
+    geometry_available: boolean;
+    spatial_reference: {
+      wkid: number;
+    };
+  } | null;
   neighborhood: string | null;
   official_parcel_id: string;
   parcel_quality_status: string | null;

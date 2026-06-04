@@ -1,12 +1,19 @@
 "use client";
 
 import {
+  Activity,
   AlertTriangle,
   ArrowUpRight,
   BrainCircuit,
+  ChevronDown,
+  Clock3,
   FileSearch,
   Info,
+  MapPin,
+  Monitor,
+  type LucideIcon,
 } from "lucide-react";
+import { useState } from "react";
 import { DevelopmentActivityPanel } from "@/components/dashboard/DevelopmentActivityPanel";
 import { DevelopmentHotspotsPanel } from "@/components/dashboard/DevelopmentHotspotsPanel";
 import { DevelopmentTrendPanel } from "@/components/dashboard/DevelopmentTrendPanel";
@@ -28,8 +35,95 @@ import { TemporalAnalysisPanel } from "@/components/dashboard/TemporalAnalysisPa
 import { ZoningDistributionPanel } from "@/components/dashboard/ZoningDistributionPanel";
 import { mockParcels } from "@/data/mock/parcelMockData";
 import { useDashboardState } from "@/hooks/useDashboardState";
+import { CFS_API_BASE_URL, USE_BACKEND_API } from "@/lib/api/client";
+
+type IntelligenceSectionId =
+  | "overview"
+  | "parcel"
+  | "development"
+  | "temporal"
+  | "system";
+
+const intelligenceSections: Array<{
+  description: string;
+  icon: LucideIcon;
+  id: IntelligenceSectionId;
+  label: string;
+}> = [
+  {
+    description: "Selected parcel, permit timeline, and headline metrics.",
+    icon: BrainCircuit,
+    id: "overview",
+    label: "Overview",
+  },
+  {
+    description: "Search, filters, zoning, quality, and governance warnings.",
+    icon: MapPin,
+    id: "parcel",
+    label: "Parcel Intelligence",
+  },
+  {
+    description: "Permit activity, trends, hotspots, and zoning rollups.",
+    icon: Activity,
+    id: "development",
+    label: "Development Activity",
+  },
+  {
+    description: "Time windows, trend context, and query preview.",
+    icon: Clock3,
+    id: "temporal",
+    label: "Temporal Analysis",
+  },
+  {
+    description: "API mode, events, reports, briefing, and diagnostics.",
+    icon: Monitor,
+    id: "system",
+    label: "System Status",
+  },
+];
+
+function IntelligenceModeBadge() {
+  return (
+    <div
+      className={`rounded-md border px-2 py-1 text-right ${
+        USE_BACKEND_API
+          ? "border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-100"
+          : "border-white/10 bg-white/[0.035] text-slate-300"
+      }`}
+      title={
+        USE_BACKEND_API
+          ? `FastAPI mode enabled: ${CFS_API_BASE_URL}`
+          : "Static/generated-output fallback mode"
+      }
+    >
+      <p className="text-[10px] font-semibold uppercase leading-none">
+        {USE_BACKEND_API ? "API Live" : "Static Mode"}
+      </p>
+      <p className="mt-1 max-w-28 truncate text-[10px] leading-none opacity-75">
+        {USE_BACKEND_API ? CFS_API_BASE_URL : "Generated fallback"}
+      </p>
+    </div>
+  );
+}
+
+function TabSectionHeading({
+  description,
+  title,
+}: {
+  description: string;
+  title: string;
+}) {
+  return (
+    <div className="pb-1">
+      <p className="text-xs font-medium uppercase text-slate-500">{title}</p>
+      <p className="mt-1 text-xs leading-5 text-slate-400">{description}</p>
+    </div>
+  );
+}
 
 export function IntelligencePanel() {
+  const [activeSection, setActiveSection] =
+    useState<IntelligenceSectionId>("overview");
   const {
     selectedParcel,
     selectedParcelIntelligence,
@@ -42,6 +136,10 @@ export function IntelligencePanel() {
   const rankedParcels = [...mockParcels].sort(
     (a, b) => b.opportunityScore - a.opportunityScore,
   );
+  const activeSectionMetadata =
+    intelligenceSections.find((section) => section.id === activeSection) ??
+    intelligenceSections[0]!;
+  const ActiveSectionIcon = activeSectionMetadata.icon;
 
   return (
     <aside
@@ -57,15 +155,69 @@ export function IntelligencePanel() {
             Parcel Command
           </h2>
         </div>
-        <div
-          aria-hidden="true"
-          className="flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/30 bg-[#68d8ff]/10 text-[#8fe7ff]"
-        >
-          <BrainCircuit className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          <IntelligenceModeBadge />
+          <div
+            aria-hidden="true"
+            className="flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/30 bg-[#68d8ff]/10 text-[#8fe7ff]"
+          >
+            <BrainCircuit className="h-4 w-4" />
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="mb-4 rounded-lg border border-white/10 bg-black/20 p-3">
+        <label
+          className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500"
+          htmlFor="intelligence-section-selector"
+        >
+          Section
+        </label>
+        <div className="relative mt-2 rounded-lg border border-[#68d8ff]/20 bg-[#06101a]/80 shadow-[0_0_24px_rgba(104,216,255,0.08)] transition focus-within:border-[#68d8ff]/55 focus-within:ring-2 focus-within:ring-[#68d8ff]/35">
+          <div className="pointer-events-none absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#8fe7ff]">
+            <ActiveSectionIcon className="h-4 w-4" />
+          </div>
+          <select
+            aria-describedby="intelligence-section-description"
+            className="h-12 w-full appearance-none rounded-lg bg-transparent py-2 pl-14 pr-10 text-sm font-semibold text-white outline-none"
+            id="intelligence-section-selector"
+            onChange={(event) =>
+              setActiveSection(event.target.value as IntelligenceSectionId)
+            }
+            value={activeSection}
+          >
+            {intelligenceSections.map((section) => (
+              <option
+                className="bg-[#06101a] text-white"
+                key={section.id}
+                value={section.id}
+              >
+                {section.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            aria-hidden="true"
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+          />
+        </div>
+        <p
+          className="mt-2 text-xs leading-5 text-slate-400"
+          id="intelligence-section-description"
+        >
+          {activeSectionMetadata.description}
+        </p>
+      </div>
+
+      <div
+        aria-label="Overview intelligence section"
+        className="space-y-4"
+        hidden={activeSection !== "overview"}
+      >
+        <TabSectionHeading
+          description="Selected parcel intelligence, development activity, permit events, and countywide headline metrics."
+          title="Overview"
+        />
         <ParcelSummaryPanel
           parcel={selectedParcelIntelligence}
           source={selectedParcelIntelligenceSource}
@@ -82,15 +234,17 @@ export function IntelligencePanel() {
         <ParcelIntelligencePanel />
 
         <DevelopmentActivityPanel />
+      </div>
 
-        <DevelopmentTrendPanel />
-
-        <DevelopmentHotspotsPanel />
-
-        <DevelopmentZoningPanel />
-
-        <TemporalAnalysisPanel />
-
+      <div
+        aria-label="Parcel intelligence section"
+        className="space-y-4"
+        hidden={activeSection !== "parcel"}
+      >
+        <TabSectionHeading
+          description="Parcel discovery, structured filters, zoning distribution, governance warnings, and quality posture."
+          title="Parcel"
+        />
         <ParcelSearchPanel />
 
         <ZoningDistributionPanel />
@@ -98,6 +252,65 @@ export function IntelligencePanel() {
         <GovernanceWarningsPanel />
 
         <ParcelQualityPanel />
+      </div>
+
+      <div
+        aria-label="Development activity section"
+        className="space-y-4"
+        hidden={activeSection !== "development"}
+      >
+        <TabSectionHeading
+          description="Development activity trends, hotspot summaries, and zoning-related permit rollups."
+          title="Development"
+        />
+
+        <DevelopmentTrendPanel />
+
+        <DevelopmentHotspotsPanel />
+
+        <DevelopmentZoningPanel />
+      </div>
+
+      <div
+        aria-label="Temporal analysis section"
+        className="space-y-4"
+        hidden={activeSection !== "temporal"}
+      >
+        <TabSectionHeading
+          description="Time-window controls, temporal query preview, trend context, and future map playback readiness."
+          title="Temporal"
+        />
+        <TemporalAnalysisPanel />
+      </div>
+
+      <div
+        aria-label="System status section"
+        className="space-y-4"
+        hidden={activeSection !== "system"}
+      >
+        <TabSectionHeading
+          description="API mode, executive briefing/report surfaces, operational events, mock watchlists, and system caveats."
+          title="System"
+        />
+
+        <section className="rounded-lg border border-white/10 bg-black/20 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium uppercase text-slate-500">
+                Data Source Mode
+              </p>
+              <h3 className="mt-1 text-sm font-semibold text-white">
+                {USE_BACKEND_API ? "FastAPI enabled" : "Static fallback mode"}
+              </h3>
+            </div>
+            <IntelligenceModeBadge />
+          </div>
+          <p className="mt-3 text-xs leading-5 text-slate-400">
+            {USE_BACKEND_API
+              ? "Migrated parcel, development, and temporal panels can call the local FastAPI backend. Each panel still falls back independently to generated static artifacts if a request fails."
+              : "The dashboard is using generated static artifacts and mock readiness data. API-backed panels stay fallback-safe until NEXT_PUBLIC_USE_BACKEND_API is enabled."}
+          </p>
+        </section>
 
         <section className="rounded-lg border border-white/10 bg-black/20 p-4">
           <div className="flex items-center justify-between">

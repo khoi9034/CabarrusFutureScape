@@ -28,6 +28,12 @@ def test_global_development_hotspots() -> None:
     assert body["results"][0]["official_parcel_id"] == "CFS-PARCEL-0149726579"
     assert body["results"][0]["total_permit_count"] == 286
     assert body["results"][0]["development_activity_class"] == "very_high_activity"
+    map_focus = body["results"][0]["map_focus"]
+    assert map_focus["geometry_available"] is True
+    assert map_focus["full_geometry_returned"] is False
+    assert map_focus["spatial_reference"] == {"wkid": 4326}
+    assert isinstance(map_focus["centroid"]["longitude"], float)
+    assert isinstance(map_focus["centroid"]["latitude"], float)
 
 
 def test_development_hotspots_activity_class_filter() -> None:

@@ -28,6 +28,9 @@ from app.schemas.development import (
     DevelopmentActivitySummaryYearBucket,
     DevelopmentLookupItem,
     DevelopmentLookupResponse,
+    DevelopmentHotspotMapCentroid,
+    DevelopmentHotspotMapFocus,
+    DevelopmentHotspotSpatialReference,
     DevelopmentParcelPermitEvent,
     DevelopmentTemporalBBoxSupport,
     DevelopmentTemporalContext,
@@ -707,6 +710,17 @@ def rolling_summary(summary) -> DevelopmentRollingSummary | None:
 
 
 def hotspot_result(result) -> DevelopmentHotspotResult:
+    centroid_longitude = optional_float(result.centroid_longitude)
+    centroid_latitude = optional_float(result.centroid_latitude)
+    centroid = (
+        DevelopmentHotspotMapCentroid(
+            longitude=centroid_longitude,
+            latitude=centroid_latitude,
+        )
+        if centroid_longitude is not None and centroid_latitude is not None
+        else None
+    )
+
     return DevelopmentHotspotResult(
         official_parcel_id=result.official_parcel_id,
         pin14=result.pin14,
@@ -741,7 +755,24 @@ def hotspot_result(result) -> DevelopmentHotspotResult:
         has_unmatched_or_ambiguous_permit_flag=bool(
             result.has_unmatched_or_ambiguous_permit_flag,
         ),
+        map_focus=DevelopmentHotspotMapFocus(
+            centroid=centroid,
+            geometry_available=bool(result.geometry_available)
+            and centroid is not None,
+            full_geometry_returned=False,
+            spatial_reference=DevelopmentHotspotSpatialReference(wkid=4326),
+        ),
     )
+
+
+def optional_float(value: object) -> float | None:
+    if value is None:
+        return None
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def zoning_summary_row(row) -> DevelopmentZoningSummaryRow:

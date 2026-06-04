@@ -5,12 +5,14 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useState,
   type ReactNode,
 } from "react";
 import {
   useExecutiveBriefing,
   type BriefingGenerationState,
 } from "@/hooks/useExecutiveBriefing";
+import { useDevelopmentHotspotLayer } from "@/hooks/useDevelopmentHotspotLayer";
 import { useExecutiveReports } from "@/hooks/useExecutiveReports";
 import { useLayerVisibility } from "@/hooks/useLayerVisibility";
 import { useMapInteractionState } from "@/hooks/useMapInteractionState";
@@ -70,6 +72,11 @@ import type {
   ReportExportResult,
   ReportPackageId,
 } from "@/types/reports";
+import {
+  defaultDevelopmentHotspotControls,
+  type DevelopmentHotspotControls,
+  type DevelopmentHotspotLayerState,
+} from "@/types/map/developmentHotspots";
 
 interface DashboardContextValue {
   activeLayerIds: string[];
@@ -88,6 +95,9 @@ interface DashboardContextValue {
   comparisonMetrics: ScenarioComparisonMetric[];
   comparisonPair: ScenarioComparisonPair;
   dashboardUrlState: DashboardUrlState;
+  developmentHotspotControls: DevelopmentHotspotControls;
+  developmentHotspotLayer: DevelopmentHotspotLayerState;
+  developmentHotspotsEnabled: boolean;
   executiveBriefing: ExecutiveBriefing;
   exportHistory: MockExportHistoryItem[];
   exportJobState: ExportJobState;
@@ -147,6 +157,10 @@ interface DashboardContextValue {
   setSimulationIntensity: (intensity: number) => void;
   setDashboardRoleId: (roleId: DashboardRoleId) => void;
   setDashboardViewMode: (viewMode: DashboardViewMode) => void;
+  setDevelopmentHotspotControls: (
+    controls: DevelopmentHotspotControls,
+  ) => void;
+  setDevelopmentHotspotsEnabled: (enabled: boolean) => void;
   setMapStatus: (status: DashboardStatus) => void;
   restoreDefaultWorkspace: () => void;
 }
@@ -169,6 +183,23 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setMapError,
     setMapStatus,
   } = useMapInteractionState();
+  const [developmentHotspotControls, setDevelopmentHotspotControls] =
+    useState<DevelopmentHotspotControls>(defaultDevelopmentHotspotControls);
+  const [developmentHotspotsEnabled, setDevelopmentHotspotsEnabled] =
+    useState(false);
+  const developmentHotspotLayer = useDevelopmentHotspotLayer({
+    activityClass: developmentHotspotControls.activityClass,
+    enabled: developmentHotspotsEnabled,
+    limit: developmentHotspotControls.limit,
+    recentWindow:
+      developmentHotspotControls.recentWindow === "all"
+        ? undefined
+        : Number(developmentHotspotControls.recentWindow) === 1
+          ? 1
+          : 3,
+    sortBy: developmentHotspotControls.sortBy,
+    zoningJurisdiction: developmentHotspotControls.zoningJurisdiction || undefined,
+  });
   const {
     activeScenario,
     scenarioId,
@@ -356,6 +387,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       comparisonMetrics,
       comparisonPair,
       dashboardUrlState,
+      developmentHotspotControls,
+      developmentHotspotLayer,
+      developmentHotspotsEnabled,
       executiveBriefing,
       exportHistory,
       exportJobState,
@@ -391,6 +425,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setComparisonScenarioIds,
       setDashboardRoleId,
       setDashboardViewMode,
+      setDevelopmentHotspotControls,
+      setDevelopmentHotspotsEnabled,
       setLayerVisibility,
       setMapError,
       setMapStatus,
@@ -426,6 +462,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       comparisonMetrics,
       comparisonPair,
       dashboardUrlState,
+      developmentHotspotControls,
+      developmentHotspotLayer,
+      developmentHotspotsEnabled,
       executiveBriefing,
       exportHistory,
       exportJobState,
@@ -461,6 +500,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setComparisonScenarioIds,
       setDashboardRoleId,
       setDashboardViewMode,
+      setDevelopmentHotspotControls,
+      setDevelopmentHotspotsEnabled,
       setLayerVisibility,
       setMapError,
       setMapStatus,

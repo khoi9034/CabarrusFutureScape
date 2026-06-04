@@ -1,0 +1,58 @@
+{
+  "phase": "Phase 6 GIS Map Intelligence",
+  "task": "Development Hotspot Map Rendering",
+  "completed_at": "2026-06-04",
+  "hotspot_endpoint_used": "GET /development/hotspots?activity_class=very_high_activity&limit=100",
+  "backend_centroid_enhancement_needed": true,
+  "backend_changes": {
+    "endpoint": "GET /development/hotspots",
+    "source_tables": [
+      "public.development_activity_parcel_summary",
+      "public.parcels_enriched"
+    ],
+    "fields_added": [
+      "results[].map_focus.centroid.longitude",
+      "results[].map_focus.centroid.latitude",
+      "results[].map_focus.spatial_reference.wkid",
+      "results[].map_focus.geometry_available",
+      "results[].map_focus.full_geometry_returned"
+    ],
+    "postgis_functions_used": [
+      "ST_PointOnSurface",
+      "ST_X",
+      "ST_Y",
+      "ST_IsEmpty"
+    ],
+    "full_geometry_returned": false
+  },
+  "frontend_changes": {
+    "map_toggle": "Development Hotspots toggle added to Layer Registry",
+    "default_state": "off",
+    "hook": "src/hooks/useDevelopmentHotspotLayer.ts",
+    "adapter": "src/lib/adapters/developmentHotspotMapAdapter.ts",
+    "map_types": "src/types/map/developmentHotspots.ts",
+    "sceneview_layer": "cfs-development-hotspots-layer",
+    "selection_behavior": "Hotspot marker clicks dispatch the existing parcel inspection event so selected parcel detail, boundary highlight, development activity, and permit events reuse the current selected parcel flow."
+  },
+  "fallback_behavior": {
+    "backend_unavailable": "Hotspot overlay reports unavailable/error and draws no markers.",
+    "static_mode": "Static generated hotspot artifacts are not used for map markers because they do not include map-safe coordinates.",
+    "missing_coordinates": "Rows without real centroid coordinates are skipped."
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "112 passed, 1 warning",
+    "live_backend_hotspot_payload": "verified map_focus centroid for CFS-PARCEL-0149726579",
+    "frontend_dev_server": "restarted on http://localhost:3000",
+    "visual_browser_smoke": "not available; no Browser/Playwright tool was exposed in this session"
+  },
+  "remaining_map_intelligence_gaps": [
+    "Visual click smoke should be confirmed in the browser by toggling Development Hotspots and selecting a marker.",
+    "Temporal map playback remains future work.",
+    "Permit heat/cluster styling remains future work.",
+    "Map extent filtering for hotspot queries remains future work."
+  ]
+}

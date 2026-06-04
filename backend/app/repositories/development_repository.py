@@ -2,11 +2,12 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 
-from sqlalchemy import and_, func, literal, select
+from sqlalchemy import and_, case, func, literal, literal_column, select
 from sqlalchemy.orm import Session
 
 from app.models import (
     DevelopmentActivityParcelSummary,
+    ParcelEnriched,
     RealPropertyPermitParcelRelationship,
 )
 
@@ -142,6 +143,9 @@ class DevelopmentHotspotRecord:
     development_activity_score: Decimal | None
     development_activity_class: str | None
     has_unmatched_or_ambiguous_permit_flag: bool | None
+    centroid_longitude: float | None
+    centroid_latitude: float | None
+    geometry_available: bool | None
 
 
 @dataclass(frozen=True)
@@ -1057,6 +1061,18 @@ class DevelopmentRepository:
     ) -> DevelopmentHotspotsPage:
         predicates = self._hotspot_predicates(filters)
         where_clause = and_(*predicates)
+        hotspot_from = DevelopmentActivityParcelSummary.__table__.outerjoin(
+            ParcelEnriched.__table__,
+            ParcelEnriched.official_parcel_id
+            == DevelopmentActivityParcelSummary.official_parcel_id,
+        )
+        parcel_geometry = literal_column("public.parcels_enriched.geometry")
+        focus_point = func.ST_PointOnSurface(parcel_geometry)
+        geometry_available = case(
+            (parcel_geometry.is_(None), False),
+            (func.ST_IsEmpty(parcel_geometry), False),
+            else_=True,
+        )
 
         sort_columns = {
             "development_activity_score": DevelopmentActivityParcelSummary.development_activity_score,
@@ -1100,8 +1116,11 @@ class DevelopmentRepository:
                 DevelopmentActivityParcelSummary.development_activity_score,
                 DevelopmentActivityParcelSummary.development_activity_class,
                 DevelopmentActivityParcelSummary.has_unmatched_or_ambiguous_permit_flag,
+                func.ST_X(focus_point).label("centroid_longitude"),
+                func.ST_Y(focus_point).label("centroid_latitude"),
+                geometry_available.label("geometry_available"),
             )
-            .select_from(DevelopmentActivityParcelSummary)
+            .select_from(hotspot_from)
             .where(where_clause)
             .order_by(
                 sort_column.desc().nulls_last(),

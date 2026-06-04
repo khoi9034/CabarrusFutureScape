@@ -3,7 +3,18 @@
 import type Graphic from "@arcgis/core/Graphic";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type SceneView from "@arcgis/core/views/SceneView";
-import { useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent,
+} from "react";
+import { ChevronDown, ChevronUp, GripHorizontal, X } from "lucide-react";
+import {
+  PARCEL_SEARCH_INSPECT_EVENT,
+  type ParcelSearchEventDetail,
+} from "@/components/dashboard/ParcelSearchState";
 import { MapViewportPlaceholder } from "@/components/gis/MapViewportPlaceholder";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
@@ -33,21 +44,44 @@ import type {
   ParcelMapFocus,
   ParcelMapFocusRequestEventDetail,
 } from "@/types/map/parcelFocus";
+import type { DevelopmentHotspotMapMarker } from "@/types/map/developmentHotspots";
 
 type ArcGISHandle = {
   remove: () => void;
 };
 
 interface ParcelFocusBeacon {
+  boundaryHighlighted: boolean;
   officialParcelId: string;
   pin14?: string | null;
+  statusMessage: string;
+}
+
+interface DevelopmentHotspotInfoCard {
+  developmentActivityClass: string | null;
+  developmentActivityScore: number | null;
+  dominantZoningCodeRaw: string | null;
+  officialParcelId: string;
+  pin14: string | null;
+  recentPermitCount1yr: number;
+  recentPermitCount3yr: number;
+  totalPermitCount: number;
+  zoningJurisdictionName: string | null;
+}
+
+interface OverlayCardPosition {
+  x: number;
+  y: number;
 }
 
 export function SceneViewContainer() {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const parcelFocusCardRef = useRef<HTMLDivElement | null>(null);
+  const hotspotInfoCardRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<SceneView | null>(null);
   const layerRefs = useRef<OperationalLayerInstanceMap>({});
   const focusLayerRef = useRef<GraphicsLayer | null>(null);
+  const hotspotLayerRef = useRef<GraphicsLayer | null>(null);
   const lastFocusedParcelIdRef = useRef<string | null>(null);
   const latestFocusRequestParcelIdRef = useRef<string | null>(null);
   const runtimeRef = useRef<ArcGISRuntime | null>(null);
@@ -55,13 +89,32 @@ export function SceneViewContainer() {
   const focusBeaconTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+  const hotspotInfoDragRef = useRef<{
+    offsetX: number;
+    offsetY: number;
+    pointerId: number;
+  } | null>(null);
+  const parcelFocusDragRef = useRef<{
+    offsetX: number;
+    offsetY: number;
+    pointerId: number;
+  } | null>(null);
   const [focusBeacon, setFocusBeacon] = useState<ParcelFocusBeacon | null>(
     null,
   );
+  const [focusBeaconCollapsed, setFocusBeaconCollapsed] = useState(false);
+  const [focusBeaconPosition, setFocusBeaconPosition] =
+    useState<OverlayCardPosition | null>(null);
+  const [hotspotInfo, setHotspotInfo] =
+    useState<DevelopmentHotspotInfoCard | null>(null);
+  const [hotspotInfoPosition, setHotspotInfoPosition] =
+    useState<OverlayCardPosition | null>(null);
   const {
     activeLayerIds,
     clearMapError,
     clearSelectedParcel,
+    developmentHotspotLayer,
+    developmentHotspotsEnabled,
     mapStatus,
     mapError,
     selectedParcel,
@@ -79,6 +132,150 @@ export function SceneViewContainer() {
   useEffect(() => {
     selectedParcelIdRef.current = selectedParcelId;
   }, [selectedParcelId]);
+
+  const closeHotspotInfo = useCallback(() => {
+    setHotspotInfo(null);
+    setHotspotInfoPosition(null);
+  }, []);
+
+  const closeFocusBeacon = useCallback(() => {
+    if (focusBeaconTimeoutRef.current) {
+      clearTimeout(focusBeaconTimeoutRef.current);
+      focusBeaconTimeoutRef.current = null;
+    }
+
+    setFocusBeacon(null);
+  }, []);
+
+  const handleFocusCardPointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const rect = parcelFocusCardRef.current?.getBoundingClientRect();
+
+      if (!rect) {
+        return;
+      }
+
+      parcelFocusDragRef.current = {
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        pointerId: event.pointerId,
+      };
+      setFocusBeaconPosition({
+        x: rect.left,
+        y: rect.top,
+      });
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    [],
+  );
+
+  const handleFocusCardPointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const dragState = parcelFocusDragRef.current;
+
+      if (!dragState || dragState.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const card = parcelFocusCardRef.current;
+      const cardWidth = card?.offsetWidth ?? 320;
+      const cardHeight = card?.offsetHeight ?? 160;
+      const maxX = Math.max(12, window.innerWidth - cardWidth - 12);
+      const maxY = Math.max(12, window.innerHeight - cardHeight - 12);
+      const nextX = Math.min(
+        Math.max(12, event.clientX - dragState.offsetX),
+        maxX,
+      );
+      const nextY = Math.min(
+        Math.max(12, event.clientY - dragState.offsetY),
+        maxY,
+      );
+
+      setFocusBeaconPosition({
+        x: nextX,
+        y: nextY,
+      });
+    },
+    [],
+  );
+
+  const handleFocusCardPointerUp = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (parcelFocusDragRef.current?.pointerId === event.pointerId) {
+        parcelFocusDragRef.current = null;
+      }
+
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    },
+    [],
+  );
+
+  const handleHotspotCardPointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const rect = hotspotInfoCardRef.current?.getBoundingClientRect();
+
+      if (!rect) {
+        return;
+      }
+
+      hotspotInfoDragRef.current = {
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        pointerId: event.pointerId,
+      };
+      setHotspotInfoPosition({
+        x: rect.left,
+        y: rect.top,
+      });
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    [],
+  );
+
+  const handleHotspotCardPointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const dragState = hotspotInfoDragRef.current;
+
+      if (!dragState || dragState.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const card = hotspotInfoCardRef.current;
+      const cardWidth = card?.offsetWidth ?? 300;
+      const cardHeight = card?.offsetHeight ?? 220;
+      const maxX = Math.max(12, window.innerWidth - cardWidth - 12);
+      const maxY = Math.max(12, window.innerHeight - cardHeight - 12);
+      const nextX = Math.min(
+        Math.max(12, event.clientX - dragState.offsetX),
+        maxX,
+      );
+      const nextY = Math.min(
+        Math.max(12, event.clientY - dragState.offsetY),
+        maxY,
+      );
+
+      setHotspotInfoPosition({
+        x: nextX,
+        y: nextY,
+      });
+    },
+    [],
+  );
+
+  const handleHotspotCardPointerUp = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (hotspotInfoDragRef.current?.pointerId === event.pointerId) {
+        hotspotInfoDragRef.current = null;
+      }
+
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!containerRef.current) {
@@ -225,10 +422,16 @@ export function SceneViewContainer() {
         );
         lastFocusedParcelIdRef.current = focus.officialParcelId;
 
+        const focusStatusMessage = boundaryGraphic
+          ? "Parcel boundary highlighted."
+          : "Focused on map - boundary unavailable.";
         setFocusBeacon({
+          boundaryHighlighted: Boolean(boundaryGraphic),
           officialParcelId: focus.officialParcelId,
           pin14: focus.pin14,
+          statusMessage: focusStatusMessage,
         });
+        setFocusBeaconCollapsed(false);
         if (focusBeaconTimeoutRef.current) {
           clearTimeout(focusBeaconTimeoutRef.current);
         }
@@ -304,6 +507,8 @@ export function SceneViewContainer() {
           operationalLayerRegistry,
         );
         map.addMany(getRenderableOperationalLayers(layers));
+        hotspotLayerRef.current = createDevelopmentHotspotLayer(runtime);
+        map.add(hotspotLayerRef.current);
         focusLayerRef.current = createParcelFocusLayer(runtime);
         map.add(focusLayerRef.current);
         layerRefs.current = layers;
@@ -333,7 +538,16 @@ export function SceneViewContainer() {
         });
 
         clickHandle = view.on("click", (event) => {
-          void interactionController.handleClick(event);
+          void handleDevelopmentHotspotClick(
+            view,
+            event,
+            hotspotLayerRef.current,
+            setHotspotInfo,
+          ).then((handledHotspotClick) => {
+            if (!handledHotspotClick) {
+              void interactionController.handleClick(event);
+            }
+          });
         });
         hoverHandle = view.on("pointer-move", (event) => {
           interactionController.handleHover(event);
@@ -388,6 +602,8 @@ export function SceneViewContainer() {
       }
       focusLayerRef.current?.removeAll();
       focusLayerRef.current = null;
+      hotspotLayerRef.current?.removeAll();
+      hotspotLayerRef.current = null;
       layerRefs.current = {};
       runtimeRef.current = null;
       viewRef.current = null;
@@ -409,11 +625,55 @@ export function SceneViewContainer() {
   }, [activeLayerIds]);
 
   useEffect(() => {
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+
+    if (!runtime || !view || view.destroyed) {
+      return;
+    }
+
+    const hotspotLayer = ensureDevelopmentHotspotLayer(runtime, view);
+    hotspotLayerRef.current = hotspotLayer;
+    hotspotLayer.removeAll();
+
+    if (
+      !developmentHotspotsEnabled ||
+      developmentHotspotLayer.status !== "ready"
+    ) {
+      return;
+    }
+
+    developmentHotspotLayer.markers.forEach((marker) => {
+      hotspotLayer.add(createDevelopmentHotspotGraphic(runtime, marker));
+    });
+
+    console.debug("[CFS development hotspots]", "rendered map markers", {
+      markerCount: developmentHotspotLayer.markers.length,
+      totalCount: developmentHotspotLayer.totalCount,
+    });
+  }, [
+    developmentHotspotLayer.markers,
+    developmentHotspotLayer.status,
+    developmentHotspotLayer.totalCount,
+    developmentHotspotsEnabled,
+    mapStatus,
+  ]);
+
+  useEffect(() => {
     updateSelectedParcelSymbols(
       getMockGraphicsLayerSubset(layerRefs.current, operationalLayerRegistry),
       selectedParcelId,
     );
   }, [selectedParcelId]);
+
+  const visibleHotspotInfo =
+    hotspotInfo &&
+    developmentHotspotsEnabled &&
+    developmentHotspotLayer.markers.some(
+      (marker) => marker.officialParcelId === hotspotInfo.officialParcelId,
+    )
+      ? hotspotInfo
+      : null;
 
   return (
     <MapViewportPlaceholder
@@ -428,24 +688,199 @@ export function SceneViewContainer() {
         title="Interactive ArcGIS SceneView with mock Cabarrus County operational layers"
       />
       {focusBeacon && (
-        <div className="pointer-events-none fixed left-1/2 top-20 z-[80] flex -translate-x-1/2 items-center gap-3 rounded-lg border border-[#68d8ff]/55 bg-[#06101a]/94 px-4 py-3 text-left shadow-[0_0_52px_rgba(104,216,255,0.48)] backdrop-blur-xl">
-          <span className="relative flex h-7 w-7 items-center justify-center">
-            <span className="absolute h-7 w-7 animate-ping rounded-full bg-[#68d8ff]/35" />
-            <span className="relative h-4 w-4 rounded-full border-2 border-white bg-[#d8b86a] shadow-[0_0_24px_rgba(216,184,106,0.85)]" />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
-              Parcel Focus
-            </span>
-            <span className="block max-w-[220px] truncate font-mono text-xs font-semibold text-white">
-              {focusBeacon.officialParcelId}
-            </span>
-            {focusBeacon.pin14 && (
-              <span className="block truncate text-[10px] text-slate-300">
-                PIN {focusBeacon.pin14}
+        <div
+          aria-label="Selected parcel map focus information"
+          className="fixed z-[80] w-[min(340px,calc(100vw-24px))] rounded-lg border border-[#68d8ff]/55 bg-[#06101a]/94 text-left shadow-[0_0_52px_rgba(104,216,255,0.34)] backdrop-blur-xl"
+          ref={parcelFocusCardRef}
+          style={
+            focusBeaconPosition
+              ? {
+                  left: focusBeaconPosition.x,
+                  top: focusBeaconPosition.y,
+                }
+              : {
+                  bottom: "1rem",
+                  left: "1rem",
+                }
+          }
+        >
+          <div
+            className="flex cursor-move touch-none items-center justify-between gap-3 border-b border-white/10 px-3 py-2"
+            onPointerCancel={handleFocusCardPointerUp}
+            onPointerDown={handleFocusCardPointerDown}
+            onPointerMove={handleFocusCardPointerMove}
+            onPointerUp={handleFocusCardPointerUp}
+            title="Drag selected parcel focus card"
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <GripHorizontal className="h-3.5 w-3.5 shrink-0 text-[#8fe7ff]/70" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
+                  Parcel Focus
+                </p>
+                <p className="mt-0.5 truncate font-mono text-xs font-semibold text-white">
+                  {focusBeacon.officialParcelId}
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                aria-label={
+                  focusBeaconCollapsed
+                    ? "Expand selected parcel focus card"
+                    : "Collapse selected parcel focus card"
+                }
+                className="rounded border border-white/10 bg-white/[0.04] p-1.5 text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                onClick={() =>
+                  setFocusBeaconCollapsed((collapsed) => !collapsed)
+                }
+                onPointerDown={(event) => event.stopPropagation()}
+                title={
+                  focusBeaconCollapsed
+                    ? "Expand focus card"
+                    : "Collapse focus card"
+                }
+                type="button"
+              >
+                {focusBeaconCollapsed ? (
+                  <ChevronUp className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+              </button>
+              <button
+                aria-label="Close selected parcel focus card"
+                className="rounded border border-white/10 bg-white/[0.04] p-1.5 text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                onClick={closeFocusBeacon}
+                onPointerDown={(event) => event.stopPropagation()}
+                title="Close focus card"
+                type="button"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+          {!focusBeaconCollapsed && (
+            <div className="flex items-start gap-3 px-3 py-3">
+              <span className="relative mt-1 flex h-7 w-7 shrink-0 items-center justify-center">
+                <span className="absolute h-7 w-7 animate-ping rounded-full bg-[#68d8ff]/35" />
+                <span className="relative h-4 w-4 rounded-full border-2 border-white bg-[#d8b86a] shadow-[0_0_24px_rgba(216,184,106,0.85)]" />
               </span>
-            )}
-          </span>
+              <div className="min-w-0 space-y-2">
+                {focusBeacon.pin14 && (
+                  <p className="truncate text-[11px] text-slate-300">
+                    PIN {focusBeacon.pin14}
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="rounded border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-2 py-1 text-[10px] font-semibold uppercase text-[#8fe7ff]">
+                    {focusBeacon.statusMessage}
+                  </span>
+                  <span
+                    className={`rounded border px-2 py-1 text-[10px] font-semibold uppercase ${
+                      focusBeacon.boundaryHighlighted
+                        ? "border-[#d8b86a]/35 bg-[#d8b86a]/10 text-[#f0cd79]"
+                        : "border-white/10 bg-white/[0.04] text-slate-300"
+                    }`}
+                  >
+                    {focusBeacon.boundaryHighlighted
+                      ? "Boundary highlighted"
+                      : "Boundary unavailable"}
+                  </span>
+                </div>
+                <p className="text-[11px] leading-5 text-slate-500">
+                  Drag this card or collapse it to keep SceneView controls
+                  clear.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      {visibleHotspotInfo && (
+        <div
+          aria-label="Development hotspot information"
+          className="fixed z-[85] w-[min(320px,calc(100vw-24px))] rounded-lg border border-[#ffb454]/35 bg-[#06101a]/95 text-left shadow-[0_0_42px_rgba(255,180,84,0.26)] backdrop-blur-xl"
+          ref={hotspotInfoCardRef}
+          style={
+            hotspotInfoPosition
+              ? {
+                  left: hotspotInfoPosition.x,
+                  top: hotspotInfoPosition.y,
+                }
+              : {
+                  bottom: "1.5rem",
+                  right: "1.5rem",
+                }
+          }
+        >
+          <div
+            className="flex cursor-move touch-none items-start justify-between gap-3 border-b border-white/10 px-3 py-2"
+            onPointerCancel={handleHotspotCardPointerUp}
+            onPointerDown={handleHotspotCardPointerDown}
+            onPointerMove={handleHotspotCardPointerMove}
+            onPointerUp={handleHotspotCardPointerUp}
+            title="Drag hotspot info card"
+          >
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ffcf92]">
+                Development Hotspot
+              </p>
+              <p className="mt-1 truncate font-mono text-xs font-semibold text-white">
+                {visibleHotspotInfo.officialParcelId}
+              </p>
+            </div>
+            <button
+              aria-label="Close development hotspot information"
+              className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              onClick={closeHotspotInfo}
+              title="Close hotspot info"
+              type="button"
+            >
+              Close
+            </button>
+          </div>
+          <div className="space-y-2 px-3 py-3 text-xs">
+            <div className="grid grid-cols-2 gap-2">
+              <HotspotInfoMetric label="PIN" value={visibleHotspotInfo.pin14} />
+              <HotspotInfoMetric
+                label="Activity"
+                value={formatHotspotPopupLabel(
+                  visibleHotspotInfo.developmentActivityClass,
+                )}
+              />
+              <HotspotInfoMetric
+                label="Permits"
+                value={visibleHotspotInfo.totalPermitCount}
+              />
+              <HotspotInfoMetric
+                label="Score"
+                value={formatHotspotScore(
+                  visibleHotspotInfo.developmentActivityScore,
+                )}
+              />
+              <HotspotInfoMetric
+                label="Recent 1yr"
+                value={visibleHotspotInfo.recentPermitCount1yr}
+              />
+              <HotspotInfoMetric
+                label="Recent 3yr"
+                value={visibleHotspotInfo.recentPermitCount3yr}
+              />
+            </div>
+            <div className="rounded border border-white/10 bg-black/20 px-2 py-2">
+              <p className="text-[10px] uppercase text-slate-500">Zoning</p>
+              <p className="mt-1 truncate text-slate-200">
+                {visibleHotspotInfo.zoningJurisdictionName ?? "Unavailable"} /{" "}
+                {visibleHotspotInfo.dominantZoningCodeRaw ?? "No code"}
+              </p>
+            </div>
+            <p className="text-[11px] leading-5 text-slate-500">
+              This marker already selected the parcel. The selected parcel card,
+              boundary highlight, and permit events use the standard parcel
+              flow.
+            </p>
+          </div>
         </div>
       )}
     </MapViewportPlaceholder>
@@ -460,6 +895,31 @@ function getSceneErrorMessage(error: unknown) {
   return "ArcGIS modules could not initialize in the browser.";
 }
 
+function HotspotInfoMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | string | null | undefined;
+}) {
+  return (
+    <div className="rounded border border-white/10 bg-black/20 px-2 py-2">
+      <p className="text-[10px] uppercase text-slate-500">{label}</p>
+      <p className="mt-1 truncate text-xs font-semibold text-slate-100">
+        {value ?? "Unavailable"}
+      </p>
+    </div>
+  );
+}
+
+function formatHotspotScore(value: number | null | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return value.toFixed(1);
+}
+
 function createParcelFocusLayer(runtime: ArcGISRuntime) {
   return new runtime.GraphicsLayer({
     elevationInfo: {
@@ -469,6 +929,18 @@ function createParcelFocusLayer(runtime: ArcGISRuntime) {
     id: "cfs-parcel-focus-layer",
     listMode: "hide",
     title: "Selected Parcel Focus",
+  });
+}
+
+function createDevelopmentHotspotLayer(runtime: ArcGISRuntime) {
+  return new runtime.GraphicsLayer({
+    elevationInfo: {
+      mode: "relative-to-ground",
+      offset: 70,
+    },
+    id: "cfs-development-hotspots-layer",
+    listMode: "hide",
+    title: "Development Hotspots",
   });
 }
 
@@ -488,6 +960,191 @@ function ensureParcelFocusLayer(runtime: ArcGISRuntime, view: SceneView) {
   const focusLayer = createParcelFocusLayer(runtime);
   map.add(focusLayer);
   return focusLayer;
+}
+
+function ensureDevelopmentHotspotLayer(
+  runtime: ArcGISRuntime,
+  view: SceneView,
+) {
+  const map = view.map;
+
+  if (!map) {
+    throw new Error("SceneView map is unavailable for development hotspots.");
+  }
+
+  const existingLayer = map.findLayerById("cfs-development-hotspots-layer");
+
+  if (existingLayer) {
+    return existingLayer as GraphicsLayer;
+  }
+
+  const hotspotLayer = createDevelopmentHotspotLayer(runtime);
+  map.add(hotspotLayer);
+  return hotspotLayer;
+}
+
+function createDevelopmentHotspotGraphic(
+  runtime: ArcGISRuntime,
+  marker: DevelopmentHotspotMapMarker,
+) {
+  const isVeryHigh =
+    marker.developmentActivityClass === "very_high_activity";
+  const isHigh = marker.developmentActivityClass === "high_activity";
+  const size = isVeryHigh ? 24 : isHigh ? 19 : 15;
+  const color = isVeryHigh
+    ? [255, 126, 79, 0.94]
+    : isHigh
+      ? [255, 180, 84, 0.86]
+      : [104, 216, 255, 0.78];
+
+  return new runtime.Graphic({
+    attributes: {
+      developmentActivityClass: marker.developmentActivityClass,
+      developmentActivityScore: marker.developmentActivityScore,
+      dominantZoningCodeRaw: marker.dominantZoningCodeRaw,
+      graphicRole: "development-hotspot",
+      officialParcelId: marker.officialParcelId,
+      pin14: marker.pin14,
+      recentPermitCount1yr: marker.recentPermitCount1yr,
+      recentPermitCount3yr: marker.recentPermitCount3yr,
+      totalPermitCount: marker.totalPermitCount,
+      zoningJurisdictionName: marker.zoningJurisdictionName,
+    },
+    geometry: new runtime.Point({
+      spatialReference: {
+        wkid: marker.centroid.spatialReference?.wkid ?? 4326,
+      },
+      x: marker.centroid.longitude,
+      y: marker.centroid.latitude,
+    }),
+    symbol: {
+      symbolLayers: [
+        {
+          material: {
+            color,
+          },
+          outline: {
+            color: [255, 255, 255, 0.92],
+            size: 1.5,
+          },
+          resource: {
+            primitive: "circle",
+          },
+          size,
+          type: "icon",
+        },
+      ],
+      type: "point-3d",
+      verticalOffset: {
+        maxWorldLength: 520,
+        minWorldLength: 60,
+        screenLength: isVeryHigh ? 42 : 32,
+      },
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function formatHotspotPopupLabel(value: string | null | undefined) {
+  if (!value) {
+    return "Unknown";
+  }
+
+  return value
+    .split("_")
+    .filter(Boolean)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
+}
+
+async function handleDevelopmentHotspotClick(
+  view: SceneView,
+  event: Parameters<SceneView["hitTest"]>[0],
+  hotspotLayer: GraphicsLayer | null,
+  onHotspotInfo: (hotspotInfo: DevelopmentHotspotInfoCard) => void,
+) {
+  if (!hotspotLayer || !hotspotLayer.visible) {
+    return false;
+  }
+
+  try {
+    const response = await view.hitTest(event, {
+      include: [hotspotLayer],
+    });
+    const results = response.results as Array<{ graphic?: Graphic }>;
+    const hotspotGraphic = results.find(
+      (result) =>
+        result.graphic?.attributes?.graphicRole === "development-hotspot",
+    )?.graphic;
+    const officialParcelId =
+      hotspotGraphic?.attributes?.officialParcelId as string | undefined;
+
+    if (!hotspotGraphic || !officialParcelId) {
+      return false;
+    }
+
+    closeSceneViewPopup(view);
+    onHotspotInfo(createDevelopmentHotspotInfoCard(hotspotGraphic));
+
+    console.debug("[CFS development hotspots]", "hotspot selected", {
+      officialParcelId,
+      pin14: hotspotGraphic?.attributes?.pin14,
+    });
+
+    window.dispatchEvent(
+      new CustomEvent<ParcelSearchEventDetail>(PARCEL_SEARCH_INSPECT_EVENT, {
+        detail: {
+          officialParcelId,
+        },
+      }),
+    );
+    return true;
+  } catch (error) {
+    console.warn("Development hotspot hit test failed", error);
+    return false;
+  }
+}
+
+function createDevelopmentHotspotInfoCard(
+  graphic: Graphic,
+): DevelopmentHotspotInfoCard {
+  const attributes = graphic.attributes ?? {};
+
+  return {
+    developmentActivityClass: stringAttribute(
+      attributes.developmentActivityClass,
+    ),
+    developmentActivityScore: numberAttribute(
+      attributes.developmentActivityScore,
+    ),
+    dominantZoningCodeRaw: stringAttribute(attributes.dominantZoningCodeRaw),
+    officialParcelId:
+      stringAttribute(attributes.officialParcelId) ?? "Unknown parcel",
+    pin14: stringAttribute(attributes.pin14),
+    recentPermitCount1yr: numberAttribute(attributes.recentPermitCount1yr) ?? 0,
+    recentPermitCount3yr: numberAttribute(attributes.recentPermitCount3yr) ?? 0,
+    totalPermitCount: numberAttribute(attributes.totalPermitCount) ?? 0,
+    zoningJurisdictionName: stringAttribute(attributes.zoningJurisdictionName),
+  };
+}
+
+function closeSceneViewPopup(view: SceneView) {
+  const popupView = view as SceneView & {
+    closePopup?: () => void;
+    popup?: {
+      close?: () => void;
+    };
+  };
+
+  popupView.closePopup?.();
+  popupView.popup?.close?.();
+}
+
+function stringAttribute(value: unknown) {
+  return typeof value === "string" && value ? value : null;
+}
+
+function numberAttribute(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 function createParcelFocusGraphics(

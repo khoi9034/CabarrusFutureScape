@@ -1,0 +1,49 @@
+{
+  "task": "Phase 6 parcel focus card UI fix",
+  "status": "completed",
+  "files_changed": [
+    "src/components/gis/SceneViewContainer.tsx"
+  ],
+  "default_card_position": {
+    "placement": "bottom-left",
+    "css": {
+      "bottom": "1rem",
+      "left": "1rem",
+      "width": "min(340px, calc(100vw - 24px))"
+    },
+    "reason": "Keeps the selected parcel focus information away from top SceneView controls such as fullscreen and map buttons."
+  },
+  "behavior": {
+    "draggable": true,
+    "collapsible": true,
+    "closable": true,
+    "updates_on_new_parcel_focus": true,
+    "preserves_focus_marker": true,
+    "preserves_parcel_boundary_highlight": true,
+    "hotspot_markers_unchanged": true
+  },
+  "displayed_fields": [
+    "selected parcel officialParcelId",
+    "pin14 when available",
+    "map focus status message",
+    "boundary highlighted or unavailable status"
+  ],
+  "safety": [
+    "No backend changes",
+    "No PostGIS changes",
+    "No parcel focus logic changes",
+    "No hotspot marker changes",
+    "Overlay clamps drag position inside viewport bounds",
+    "Control buttons do not initiate drag gestures"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "visual_smoke_test": "not run; no browser automation tool was available in this session"
+  },
+  "remaining_ui_issues": [
+    "Manual browser smoke test should confirm exact position against the ArcGIS controls in the live viewport.",
+    "The focus card still auto-dismisses after the existing 12-second beacon timeout; this preserves prior behavior but can be revisited if a persistent inspector is preferred."
+  ]
+}

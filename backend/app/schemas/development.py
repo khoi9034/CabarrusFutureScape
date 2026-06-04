@@ -90,6 +90,24 @@ class DevelopmentTrendsResponse(BaseModel):
     total_permits: int
 
 
+class DevelopmentHotspotMapCentroid(BaseModel):
+    longitude: float
+    latitude: float
+
+
+class DevelopmentHotspotSpatialReference(BaseModel):
+    wkid: int = 4326
+
+
+class DevelopmentHotspotMapFocus(BaseModel):
+    centroid: DevelopmentHotspotMapCentroid | None = None
+    spatial_reference: DevelopmentHotspotSpatialReference = Field(
+        default_factory=DevelopmentHotspotSpatialReference,
+    )
+    geometry_available: bool = False
+    full_geometry_returned: bool = False
+
+
 class DevelopmentHotspotResult(BaseModel):
     official_parcel_id: str
     pin14: str | None = None
@@ -116,6 +134,7 @@ class DevelopmentHotspotResult(BaseModel):
     development_activity_score: float | None = None
     development_activity_class: str | None = None
     has_unmatched_or_ambiguous_permit_flag: bool
+    map_focus: DevelopmentHotspotMapFocus | None = None
 
 
 class DevelopmentHotspotsResponse(BaseModel):

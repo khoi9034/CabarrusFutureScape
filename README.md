@@ -714,6 +714,16 @@ Selected Parcel card behavior:
 - Permit event rows use `public.real_property_permit_parcel_relationship` through the backend endpoint. There is no static permit-event fallback and no use of the old 2015 `permit_activity_clean` pilot layer.
 - Speculative demo metrics such as development pressure, infrastructure readiness, redevelopment potential, and tax opportunity are no longer shown as selected-parcel facts.
 
+Intelligence Panel structure:
+
+- `src/components/dashboard/IntelligencePanel.tsx` is organized behind a full-width section selector so the narrow right rail can scale beyond five intelligence modules without truncated horizontal tabs.
+- The default `Overview` section keeps the selected parcel card, selected parcel development activity, selected parcel permit events, parcel headline metrics, and development headline metrics close to the map workflow.
+- The `Parcel Intelligence` section contains Parcel Discovery/Search/Filter, zoning distribution, governance warnings, and parcel quality panels.
+- The `Development Activity` section contains development trend, hotspot summary, and zoning-development summary panels. The real Development Hotspots map toggle remains in the visible Operational Layers registry, not inside the Intelligence Panel.
+- The `Temporal Analysis` section contains the temporal analysis, filters, trend summary, and query preview surface.
+- The `System Status` section contains API/static mode status, scenario snapshot, executive briefing/report surfaces, role intelligence, operational events, mock parcel watchlist, and remaining mock/static caveats.
+- The panel header and System Status section show whether the dashboard is running in FastAPI-backed mode or generated static fallback mode. API-integrated panels still preserve their independent static fallback behavior.
+
 ## Phase 6 GIS Map Intelligence
 
 Phase 6 has started with a map-safe parcel focus bridge between real parcel detail responses and the ArcGIS SceneView. Backend parcel detail now returns governed `map_focus` centroid and extent fields, plus opt-in `highlight_geometry` for selected parcel boundary display. The frontend can zoom the SceneView, draw a lightweight temporary focus marker, and outline the actively selected parcel without replacing the existing mock GraphicsLayer system.
@@ -727,6 +737,9 @@ Core files:
 - `src/components/dashboard/ParcelSearchPanel.tsx` now creates a parcel focus object when a parcel result is selected from search or command inspection.
 - `src/components/dashboard/ParcelDetailDrawer.tsx` requests `GET /parcels/{official_parcel_id}?include_geometry=true` after a parcel result is selected, hydrates map focus from backend parcel detail, and surfaces focus status alongside FastAPI/static detail source status.
 - `src/components/gis/SceneViewContainer.tsx` listens for parcel focus requests, calls `SceneView.goTo()` with centroid/extent targets, converts selected parcel GeoJSON `Polygon` or `MultiPolygon` into ArcGIS polygon rings, and maintains a non-destructive temporary focus marker/boundary layer.
+- `src/hooks/useDevelopmentHotspotLayer.ts` loads map-safe hotspot marker candidates from `GET /development/hotspots?activity_class=very_high_activity&limit=100` only when the layer toggle is enabled.
+- `src/lib/adapters/developmentHotspotMapAdapter.ts` converts backend hotspot rows into map marker objects only when real centroid coordinates are present.
+- `src/types/map/developmentHotspots.ts` defines the temporary hotspot layer state, marker contract, and layer status labels.
 
 Current map focus status:
 
@@ -737,18 +750,31 @@ Current map focus status:
 - If geometry is unavailable but centroid/extent exists, the SceneView keeps zoom and marker behavior and reports `Focused on map - boundary unavailable`.
 - If backend focus data is missing, unavailable, or the SceneView is not ready, the drawer falls back to `Map focus pending geometry` or `Map focus failed` without breaking the dashboard.
 
+Development hotspot map status:
+
+- The visible `Permit Activity` row in the layer registry is repurposed and labeled as `Development Hotspots` when backend API mode is enabled. It controls the real temporary hotspot overlay instead of the old disabled mock permit layer.
+- The `Development Hotspots` layer registry toggle is off by default.
+- When enabled in backend API mode, it requests the real development hotspots endpoint and renders filtered temporary centroid markers in a dedicated `cfs-development-hotspots-layer`.
+- The hotspot row includes compact filters for activity class, recent activity window, zoning jurisdiction, sort order, and result limit. Filter changes refetch `GET /development/hotspots` and clear/re-render the temporary marker layer.
+- The hotspot row includes a compact legend explaining very-high, high, and moderate activity markers. Marker size and color communicate development activity class: warmer/larger markers represent stronger activity.
+- Hotspot marker clicks disable the default ArcGIS popup and show a custom draggable map-overlay info card away from the top-center parcel focus beacon. The card shows parcel ID, PIN, total permit count, recent 1-year permits, recent 3-year permits, development activity class, zoning jurisdiction, and zoning code.
+- The hotspot layer does not use generated static artifacts because those do not carry map-safe coordinates. If the backend is unavailable or no coordinates are present, the UI reports an unavailable state and draws nothing.
+- Hotspot marker clicks dispatch the existing parcel inspection event, so selected parcel detail hydration, selected parcel card updates, parcel boundary highlight, development activity, and permit event panels all reuse the same selected parcel flow.
+- The layer clears all hotspot graphics when the toggle is disabled and never adds a permanent parcel or permit layer.
+
 Safe SceneView behavior:
 
 - Parcel selections create `ParcelMapFocus` objects with official parcel ID, PIN14, and focus source.
 - If centroid, extent, and highlight geometry are missing, `resolveParcelMapFocus()` returns a no-op result instead of touching ArcGIS runtime objects.
 - The focus marker and selected parcel boundary live in a dedicated hidden `cfs-parcel-focus-layer`, so existing mock GraphicsLayers, mock parcel hit-tests, layer toggles, and selection symbols remain unchanged.
+- Development hotspot markers live in a separate hidden `cfs-development-hotspots-layer`, keeping hotspot rendering independent from selected parcel focus graphics.
 - The focus layer is cleared during SceneView cleanup and is recreated only inside the client-side ArcGIS lifecycle.
 - Each new selected parcel clears the previous marker/boundary before rendering the new one. Search result lists are never highlighted as a group.
 
 Future path:
 
-- Development permit hotspot layer
 - Temporal map filtering and playback
+- Permit hotspot heat/cluster styling after map extent and performance guardrails are defined
 
 ## Dashboard State Architecture
 
@@ -772,6 +798,6 @@ The public dashboard API remains simple for UI components, while the internals a
 
 ## Next Step
 
-Next planned task: Phase 6 Development Hotspot Map Layer Readiness.
+Next planned task: Phase 6 Temporal Map Filter Readiness.
 
-That task should prepare real development activity hotspot rendering from backend development endpoints while keeping permit playback and temporal animation separate.
+That task should prepare SceneView-safe time-filtered map requests and layer-state boundaries while keeping animated playback separate.

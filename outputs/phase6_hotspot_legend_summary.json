@@ -1,0 +1,52 @@
+{
+  "phase": "Phase 6 GIS Map Intelligence",
+  "task": "Development Hotspot Legend and Marker Explanation",
+  "completed_at": "2026-06-04",
+  "legend_location": "Inside the visible Development Hotspots row in the Layer Registry / Operational Layers panel, beneath the hotspot filter controls.",
+  "fields_explained": [
+    "total permit count",
+    "recent 1-year permit count",
+    "recent 3-year permit count",
+    "development activity score/class"
+  ],
+  "marker_classes_shown": [
+    {
+      "class": "very_high_activity",
+      "legend_label": "Very high",
+      "marker_style": "largest warm orange-red marker"
+    },
+    {
+      "class": "high_activity",
+      "legend_label": "High",
+      "marker_style": "medium amber marker"
+    },
+    {
+      "class": "moderate_activity",
+      "legend_label": "Moderate",
+      "marker_style": "smaller cyan marker"
+    }
+  ],
+  "popup_fields": [
+    "official parcel ID",
+    "PIN14",
+    "total permit count",
+    "recent 1-year permits",
+    "recent 3-year permits",
+    "activity class",
+    "zoning jurisdiction",
+    "zoning code"
+  ],
+  "preserved_behavior": [
+    "existing hotspot filters",
+    "hotspot marker click parcel selection",
+    "selected parcel card updates",
+    "boundary highlight updates",
+    "permit event panel updates"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "visual_browser_smoke": "not available; no Browser/Playwright tool was exposed in this session"
+  }
+}

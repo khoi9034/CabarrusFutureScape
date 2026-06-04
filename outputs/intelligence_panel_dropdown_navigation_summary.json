@@ -1,0 +1,72 @@
+{
+  "task": "Intelligence Panel dropdown navigation refactor",
+  "status": "completed",
+  "navigation_pattern": "full-width native section selector",
+  "files_changed": [
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "README.md"
+  ],
+  "files_added": [
+    "outputs/intelligence_panel_dropdown_navigation_summary.json"
+  ],
+  "sections_supported": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "description": "Selected parcel, permit timeline, and headline metrics."
+    },
+    {
+      "id": "parcel",
+      "label": "Parcel Intelligence",
+      "description": "Search, filters, zoning, quality, and governance warnings."
+    },
+    {
+      "id": "development",
+      "label": "Development Activity",
+      "description": "Permit activity, trends, hotspots, and zoning rollups."
+    },
+    {
+      "id": "temporal",
+      "label": "Temporal Analysis",
+      "description": "Time windows, trend context, and query preview."
+    },
+    {
+      "id": "system",
+      "label": "System Status",
+      "description": "API mode, events, reports, briefing, and diagnostics."
+    }
+  ],
+  "removed_ui_issues": [
+    "Removed cramped horizontal tab strip",
+    "Removed truncated labels such as Overview, Development, Temporal, and System in the narrow right rail",
+    "Moved section navigation to a scalable single selector"
+  ],
+  "preserved_behaviors": [
+    "Existing child component rendering logic",
+    "Active section state",
+    "Selected parcel flow",
+    "Parcel search and detail drawer behavior",
+    "Selected parcel permit events",
+    "Development activity panels",
+    "Temporal panel",
+    "API/static fallback behavior",
+    "Development Hotspots controls in the Layer Registry",
+    "SceneView behavior"
+  ],
+  "accessibility": [
+    "Native select preserves keyboard and screen-reader support",
+    "Selector has a visible label and description",
+    "Current section is displayed clearly with a section icon and full label"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "browser_smoke_test": "not run; no browser automation tool was available in this session"
+  },
+  "future_scalability_benefits": [
+    "New intelligence modules can be added as select options without compressing labels",
+    "Section descriptions can clarify module scope without adding horizontal clutter",
+    "The right rail stays usable at narrow widths"
+  ]
+}
