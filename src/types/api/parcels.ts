@@ -67,8 +67,15 @@ export interface ParcelMapFocusResponse {
   spatial_reference: ParcelMapFocusSpatialReferenceResponse;
 }
 
+export interface ParcelHighlightGeometryResponse {
+  coordinates: unknown[];
+  spatial_reference?: ParcelMapFocusSpatialReferenceResponse;
+  type: "MultiPolygon" | "Polygon";
+}
+
 export interface ParcelDetailResponse {
   governance: ParcelGovernance;
+  highlight_geometry?: ParcelHighlightGeometryResponse | null;
   location: ParcelLocation;
   map_focus?: ParcelMapFocusResponse | null;
   metadata: ParcelMetadata;

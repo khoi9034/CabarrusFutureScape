@@ -50,6 +50,18 @@ Example:
 GET http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579
 ```
 
+Optional lightweight parcel highlight geometry:
+
+```text
+GET /parcels/{official_parcel_id}?include_geometry=true
+```
+
+`include_geometry` defaults to `false`, so the standard parcel detail response
+continues to return only identity, intelligence fields, centroid, and extent.
+When set to `true`, the endpoint may return `highlight_geometry` as lightweight
+GeoJSON from `public.parcels_enriched.geometry` for future SceneView parcel
+boundary highlighting.
+
 Example response shape:
 
 ```json
@@ -106,6 +118,26 @@ Example response shape:
 }
 ```
 
+Example `highlight_geometry` shape when requested:
+
+```json
+{
+  "type": "Polygon",
+  "coordinates": [
+    [
+      [-80.7221, 35.3693],
+      [-80.7220, 35.3694],
+      [-80.7219, 35.3692],
+      [-80.7220, 35.3691],
+      [-80.7221, 35.3693]
+    ]
+  ],
+  "spatial_reference": {
+    "wkid": 4326
+  }
+}
+```
+
 Source tables:
 
 - `public.parcels_enriched`
@@ -125,8 +157,10 @@ Map focus notes:
 - `map_focus.centroid` is generated from `ST_PointOnSurface(geometry)` so the focus point remains inside parcel polygons more reliably than a raw centroid.
 - `map_focus.extent` is generated from the parcel geometry bounding box.
 - `spatial_reference.wkid` is `4326`.
-- `full_geometry_returned` is always `false` for this endpoint version. Full parcel geometry is intentionally not returned yet.
-- Future frontend SceneView zoom/highlight behavior can use `centroid` and `extent` without requesting full parcel geometry.
+- `include_geometry=true` uses `ST_AsGeoJSON(geometry, 6)` and keeps coordinates in SRID `4326`.
+- Geometry is returned under `highlight_geometry` only when explicitly requested and only when the serialized GeoJSON clears the lightweight safety guard.
+- `map_focus.full_geometry_returned` remains `false` by default and is `true` only when `highlight_geometry` is included.
+- Future frontend SceneView parcel boundary highlighting can opt into `highlight_geometry` without changing the default parcel detail payload.
 
 ## Parcel Search Endpoint
 
@@ -684,6 +718,7 @@ Example requests:
 GET http://127.0.0.1:8000/development/hotspots
 GET http://127.0.0.1:8000/development/hotspots?activity_class=very_high_activity
 GET http://127.0.0.1:8000/development/hotspots?zoning_jurisdiction=Concord
+GET http://127.0.0.1:8000/development/hotspots?official_parcel_id=CFS-PARCEL-0149726579&limit=1
 GET http://127.0.0.1:8000/development/hotspots?recent_window=1
 GET http://127.0.0.1:8000/development/hotspots?sort_by=total_permit_amount&limit=10
 ```
@@ -691,6 +726,7 @@ GET http://127.0.0.1:8000/development/hotspots?sort_by=total_permit_amount&limit
 Supported filters:
 
 - `activity_class`
+- `official_parcel_id`
 - `zoning_jurisdiction`
 - `zoning_category`
 - `permit_type`
@@ -740,17 +776,70 @@ Example response shape:
       "parcel_quality_status": "review",
       "zoning_assignment_confidence": "high",
       "total_permit_count": 286,
+      "first_permit_date": "2000-08-02",
       "recent_permit_count_1yr": 24,
       "recent_permit_count_3yr": 59,
       "total_permit_amount": 61926619.0,
       "avg_permit_amount": 290735.30046948354,
       "latest_permit_date": "2025-10-22",
+      "active_year_count": 19,
       "dominant_permit_type": "upfit",
       "dominant_work_type": "commercial_upfit",
       "latest_permit_status": "closed",
+      "ambiguous_permit_count": 0,
+      "co_date_future_outlier_count": 0,
       "development_activity_score": 100.0,
       "development_activity_class": "very_high_activity",
       "has_unmatched_or_ambiguous_permit_flag": false
+    }
+  ]
+}
+```
+
+## Selected Parcel Permit Events Endpoint
+
+```text
+GET /development/parcel/{official_parcel_id}/permits
+```
+
+Example requests:
+
+```text
+GET http://127.0.0.1:8000/development/parcel/CFS-PARCEL-0149726579/permits
+GET http://127.0.0.1:8000/development/parcel/CFS-PARCEL-0149726579/permits?limit=5&sort=oldest_first
+```
+
+Query parameters:
+
+- `limit`: default `10`, clamped to max `50`.
+- `offset`: default `0`.
+- `sort`: `latest_first` by default; `oldest_first` is also supported.
+
+This endpoint reads from `public.real_property_permit_parcel_relationship`,
+which is the current authoritative permit-to-parcel relationship layer for CFS.
+It does not use the old 2015 `permit_activity_clean` pilot table and does not
+write to PostGIS.
+
+Example response shape:
+
+```json
+{
+  "official_parcel_id": "CFS-PARCEL-0149726579",
+  "total_count": 286,
+  "limit": 10,
+  "offset": 0,
+  "sort": "latest_first",
+  "permits": [
+    {
+      "permit_id": "example-permit-id",
+      "permit_number": "example-permit-number",
+      "activity_date": "2025-10-22",
+      "activity_year": 2025,
+      "permit_type": "upfit",
+      "work_type": "commercial_upfit",
+      "permit_status": "closed",
+      "permit_amount": 125000.0,
+      "relationship_confidence": "high"
     }
   ]
 }

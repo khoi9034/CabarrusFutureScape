@@ -1,0 +1,56 @@
+{
+  "artifact": "phase6_selected_parcel_polygon_highlight_summary",
+  "status": "implemented",
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/ParcelDetailDrawer.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/hooks/useParcelMapFocus.ts",
+    "src/lib/adapters/parcelDetailAdapter.ts",
+    "src/lib/api/parcels.ts",
+    "src/lib/gis/arcgisRuntime.ts",
+    "src/lib/map/parcelMapFocus.ts",
+    "src/types/api/parcels.ts",
+    "src/types/map/parcelFocus.ts"
+  ],
+  "backend_modified": false,
+  "postgis_modified": false,
+  "api_request_behavior": {
+    "typing_search": "does not request highlight geometry",
+    "selected_result": "requests GET /parcels/{official_parcel_id}?include_geometry=true when backend API mode is enabled",
+    "fallback": "if highlight_geometry is missing or invalid, centroid/extent zoom and marker behavior remain active"
+  },
+  "geometry_conversion": {
+    "source": "backend highlight_geometry GeoJSON",
+    "supported_types": ["Polygon", "MultiPolygon"],
+    "arcgis_target": "ArcGIS Polygon rings with wkid 4326 by default",
+    "multi_polygon_strategy": "flatten polygon rings into one ArcGIS Polygon graphic for the selected parcel",
+    "invalid_geometry_behavior": "log warning and skip boundary graphic without crashing SceneView"
+  },
+  "sceneview_behavior": {
+    "layer": "existing cfs-parcel-focus-layer",
+    "boundary_style": "transparent fill with visible gold outline",
+    "marker_behavior": "existing marker and beacon preserved",
+    "selection_scope": "only the actively selected parcel is highlighted",
+    "previous_selection": "focus layer removeAll clears prior marker and boundary before rendering the new selection"
+  },
+  "ux_status": {
+    "boundary_success": "Parcel boundary highlighted",
+    "geometry_missing": "Focused on map - boundary unavailable"
+  },
+  "remaining_map_intelligence_gaps": [
+    "permit hotspot layer rendering",
+    "temporal map filtering",
+    "animated temporal playback",
+    "parcel geometry simplification strategy for very large features",
+    "backend geometry generalization endpoint if production payloads grow"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "dev_server": "http://127.0.0.1:3000 returned 200",
+    "backend_geometry_endpoint": "GET /parcels/CFS-PARCEL-0149726579?include_geometry=true returned parcel detail with highlight geometry content",
+    "visual_smoke_test": "not automated; Playwright is not installed and the in-app Browser tool is not exposed in this session"
+  }
+}

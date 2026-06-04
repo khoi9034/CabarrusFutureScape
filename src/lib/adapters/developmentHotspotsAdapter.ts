@@ -18,10 +18,10 @@ export interface DevelopmentHotspotsViewModel {
 
 function mapHotspotResult(result: DevelopmentHotspotResult): DevelopmentHotspotRecord {
   return {
-    active_year_count: 0,
-    ambiguous_permit_count: 0,
+    active_year_count: result.active_year_count ?? 0,
+    ambiguous_permit_count: result.ambiguous_permit_count ?? 0,
     avg_permit_amount: result.avg_permit_amount,
-    co_date_future_outlier_count: 0,
+    co_date_future_outlier_count: result.co_date_future_outlier_count ?? 0,
     development_activity_class: result.development_activity_class ?? "unknown",
     development_activity_score: result.development_activity_score ?? 0,
     dominant_permit_type: result.dominant_permit_type,
@@ -29,7 +29,7 @@ function mapHotspotResult(result: DevelopmentHotspotResult): DevelopmentHotspotR
     dominant_zoning_code_raw: result.dominant_zoning_code_raw,
     dominant_zoning_general_normalized:
       result.dominant_zoning_general_normalized,
-    first_permit_date: null,
+    first_permit_date: result.first_permit_date ?? null,
     has_unmatched_or_ambiguous_permit_flag:
       result.has_unmatched_or_ambiguous_permit_flag,
     latest_permit_date: result.latest_permit_date,

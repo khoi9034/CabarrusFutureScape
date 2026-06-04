@@ -58,7 +58,7 @@ export function createParcelMapFocus(
   record: ParcelFocusRecordLike,
   focusSource: ParcelFocusSource,
   spatialTarget: Partial<
-    Pick<ParcelMapFocus, "centroid" | "extent" | "geometry">
+    Pick<ParcelMapFocus, "centroid" | "extent" | "highlightGeometry">
   > = {},
 ): ParcelMapFocus {
   const candidate: ParcelMapFocus = {
@@ -66,7 +66,7 @@ export function createParcelMapFocus(
     extent: spatialTarget.extent ?? null,
     focusSource,
     focusStatus: "pending-geometry",
-    geometry: spatialTarget.geometry ?? null,
+    highlightGeometry: spatialTarget.highlightGeometry ?? null,
     officialParcelId: record.officialParcelId,
     pin14: record.pin14 ?? null,
   };
@@ -127,14 +127,18 @@ export function resolveParcelMapFocus(
   if (
     hasUsableCentroid(focus.centroid) ||
     hasUsableExtent(focus.extent) ||
-    hasUsableGeometry(focus.geometry)
+    hasUsableGeometry(focus.highlightGeometry)
   ) {
+    const hasHighlightGeometry = hasUsableGeometry(focus.highlightGeometry);
+
     return {
       canFocus: true,
       focusStatus: focus.focusStatus === "focused" ? "focused" : "ready",
       message:
         focus.focusStatus === "focused"
-          ? "Focused on map with backend parcel centroid and extent."
+          ? hasHighlightGeometry
+            ? "Parcel boundary highlighted."
+            : "Focused on map — boundary unavailable."
           : "Map focus ready. SceneView can zoom and show a lightweight focus marker for this parcel.",
       mode: "focus-ready",
       requiredBackendFields: [],
@@ -161,6 +165,10 @@ export function getParcelMapFocusStatusLabel(
     case "failed":
       return "Map focus failed";
     case "focused":
+      if (focusResult.message === "Parcel boundary highlighted.") {
+        return "Parcel boundary highlighted";
+      }
+
       return "Focused on map";
     case "ready":
       return "Map focus ready";
@@ -184,6 +192,7 @@ export function dispatchParcelMapFocusRequest(focus: ParcelMapFocus) {
     extent: focus.extent,
     focusSource: focus.focusSource,
     focusStatus: focus.focusStatus,
+    highlightGeometryType: focus.highlightGeometry?.type ?? null,
     officialParcelId: focus.officialParcelId,
     pin14: focus.pin14,
   });

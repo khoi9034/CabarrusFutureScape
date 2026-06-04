@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import { mockParcels } from "@/data/mock/parcelMockData";
 import type { ParcelSelectionSource } from "@/types";
 
@@ -8,12 +9,18 @@ interface SelectParcelOptions {
   source?: ParcelSelectionSource;
 }
 
+export type SelectedParcelIntelligenceSource = "api" | "fallback" | "static";
+
 export function useSelectedParcel() {
-  const [selectedParcelId, setSelectedParcelId] = useState<string | null>(
-    mockParcels[0]?.parcelId ?? null,
-  );
+  const [selectedParcelId, setSelectedParcelId] = useState<string | null>(null);
   const [selectedParcelSource, setSelectedParcelSource] =
-    useState<ParcelSelectionSource | null>("dashboard");
+    useState<ParcelSelectionSource | null>(null);
+  const [selectedParcelIntelligence, setSelectedParcelIntelligenceState] =
+    useState<ParcelSearchRecord | null>(null);
+  const [
+    selectedParcelIntelligenceSource,
+    setSelectedParcelIntelligenceSource,
+  ] = useState<SelectedParcelIntelligenceSource | null>(null);
 
   const selectedParcel = useMemo(
     () =>
@@ -26,14 +33,23 @@ export function useSelectedParcel() {
 
   const selectParcel = useCallback(
     (parcelId: string, options: SelectParcelOptions = {}) => {
-      const nextParcel = mockParcels.find((parcel) => parcel.parcelId === parcelId);
-
-      if (!nextParcel) {
-        return;
-      }
-
-      setSelectedParcelId(nextParcel.parcelId);
+      setSelectedParcelId(parcelId);
       setSelectedParcelSource(options.source ?? "dashboard");
+      setSelectedParcelIntelligenceState(null);
+      setSelectedParcelIntelligenceSource(null);
+    },
+    [],
+  );
+
+  const setSelectedParcelIntelligence = useCallback(
+    (
+      parcel: ParcelSearchRecord,
+      source: SelectedParcelIntelligenceSource,
+    ) => {
+      setSelectedParcelId(parcel.officialParcelId);
+      setSelectedParcelSource("dashboard");
+      setSelectedParcelIntelligenceState(parcel);
+      setSelectedParcelIntelligenceSource(source);
     },
     [],
   );
@@ -41,6 +57,8 @@ export function useSelectedParcel() {
   const clearSelectedParcel = useCallback(() => {
     setSelectedParcelId(null);
     setSelectedParcelSource(null);
+    setSelectedParcelIntelligenceState(null);
+    setSelectedParcelIntelligenceSource(null);
   }, []);
 
   return {
@@ -48,6 +66,9 @@ export function useSelectedParcel() {
     selectParcel,
     selectedParcel,
     selectedParcelId,
+    selectedParcelIntelligence,
+    selectedParcelIntelligenceSource,
     selectedParcelSource,
+    setSelectedParcelIntelligence,
   };
 }

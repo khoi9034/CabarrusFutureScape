@@ -2,6 +2,7 @@ from app.schemas.development import (
     DevelopmentActivitySummaryResponse,
     DevelopmentHotspotsResponse,
     DevelopmentLookupResponse,
+    DevelopmentParcelPermitEventsResponse,
     DevelopmentStatisticsResponse,
     DevelopmentSummary,
     DevelopmentTemporalQueryResponse,
@@ -26,6 +27,7 @@ from app.schemas.temporal import TemporalQuery
 __all__ = [
     "DevelopmentActivitySummaryResponse",
     "DevelopmentLookupResponse",
+    "DevelopmentParcelPermitEventsResponse",
     "DevelopmentTemporalQueryResponse",
     "DevelopmentSummary",
     "DevelopmentStatisticsResponse",

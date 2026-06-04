@@ -16,11 +16,16 @@ import type {
   ParcelMapFocus,
   ParcelMapFocusResult,
 } from "@/types/map/parcelFocus";
+import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
 
 interface ParcelDetailDrawerProps {
   mapFocus: ParcelMapFocus | null;
   mapFocusResult: ParcelMapFocusResult;
   onClose: () => void;
+  onParcelDetailHydrated: (
+    record: ParcelSearchRecord,
+    source: SelectedParcelIntelligenceSource,
+  ) => void;
   onMapFocusHydrated: (focus: ParcelMapFocus) => void;
   parcel: ParcelSearchRecord | null;
 }
@@ -47,6 +52,7 @@ export function ParcelDetailDrawer({
   mapFocusResult,
   onClose,
   onMapFocusHydrated,
+  onParcelDetailHydrated,
   parcel,
 }: ParcelDetailDrawerProps) {
   const hydrationRequestRef = useRef(0);
@@ -78,7 +84,11 @@ export function ParcelDetailDrawer({
       requestId,
     });
 
-    getParcelDetail(parcelId, { signal: controller.signal })
+    getParcelDetail(
+      parcelId,
+      { include_geometry: true },
+      { signal: controller.signal },
+    )
       .then((response) => {
         const responseParcelId = response.official_parcel_id;
 
@@ -126,6 +136,7 @@ export function ParcelDetailDrawer({
           parcelId,
           record: hydratedRecord,
         });
+        onParcelDetailHydrated(hydratedRecord, "api");
 
         if (backendMapFocus) {
           onMapFocusHydrated(backendMapFocus);
@@ -160,10 +171,11 @@ export function ParcelDetailDrawer({
           parcelId,
           record: null,
         });
+        onParcelDetailHydrated(parcel, "fallback");
       });
 
     return () => controller.abort();
-  }, [onMapFocusHydrated, parcel]);
+  }, [onMapFocusHydrated, onParcelDetailHydrated, parcel]);
 
   if (!parcel) {
     return (

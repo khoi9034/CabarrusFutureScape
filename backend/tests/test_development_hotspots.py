@@ -59,6 +59,26 @@ def test_development_hotspots_zoning_jurisdiction_filter() -> None:
     assert body["results"][0]["zoning_jurisdiction_name"] == "Concord"
 
 
+def test_development_hotspots_official_parcel_filter() -> None:
+    response = client.get(
+        "/development/hotspots",
+        params={"official_parcel_id": "CFS-PARCEL-0149726579"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["filters_applied"] == {
+        "official_parcel_id": "CFS-PARCEL-0149726579",
+    }
+    assert body["total_count"] == 1
+    result = body["results"][0]
+    assert result["official_parcel_id"] == "CFS-PARCEL-0149726579"
+    assert result["total_permit_count"] == 286
+    assert result["first_permit_date"] == "2000-08-02"
+    assert result["latest_permit_date"] == "2025-10-22"
+    assert result["active_year_count"] == 19
+
+
 def test_development_hotspots_recent_window_validation() -> None:
     response = client.get("/development/hotspots", params={"recent_window": 2})
 

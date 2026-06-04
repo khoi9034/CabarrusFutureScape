@@ -13,6 +13,7 @@ from app.repositories.development_repository import (
 from app.schemas import (
     DevelopmentActivitySummaryResponse,
     DevelopmentHotspotsResponse,
+    DevelopmentParcelPermitEventsResponse,
     DevelopmentStatisticsResponse,
     DevelopmentTemporalQueryResponse,
     DevelopmentTrendsResponse,
@@ -27,6 +28,7 @@ from app.schemas.development import (
     DevelopmentActivitySummaryYearBucket,
     DevelopmentLookupItem,
     DevelopmentLookupResponse,
+    DevelopmentParcelPermitEvent,
     DevelopmentTemporalBBoxSupport,
     DevelopmentTemporalContext,
     DevelopmentTemporalQueryResult,
@@ -57,6 +59,8 @@ ALLOWED_HOTSPOT_SORT_BY = {
     "total_permit_count",
 }
 MAX_DEVELOPMENT_PAGE_LIMIT = 100
+MAX_SELECTED_PARCEL_PERMIT_LIMIT = 50
+ALLOWED_SELECTED_PARCEL_PERMIT_SORT = {"latest_first", "oldest_first"}
 
 
 class DevelopmentService:
@@ -225,6 +229,7 @@ class DevelopmentService:
         clamped_limit = min(max(limit, 1), MAX_DEVELOPMENT_PAGE_LIMIT)
         normalized_filters = DevelopmentHotspotsFilters(
             activity_class=normalize_filter_value(filters.activity_class),
+            official_parcel_id=normalize_filter_value(filters.official_parcel_id),
             permit_type=normalize_filter_value(filters.permit_type),
             recent_window=filters.recent_window,
             work_type=normalize_filter_value(filters.work_type),
@@ -510,6 +515,46 @@ class DevelopmentService:
             records=self.repository.get_activity_classes(),
         )
 
+    def get_parcel_permit_events(
+        self,
+        *,
+        official_parcel_id: str,
+        limit: int,
+        offset: int,
+        sort: str,
+    ) -> DevelopmentParcelPermitEventsResponse:
+        """Return permit events tied to one official parcel ID."""
+
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for selected parcel permits.",
+            )
+
+        normalized_parcel_id = normalize_filter_value(official_parcel_id)
+        if normalized_parcel_id is None:
+            raise ValueError("official_parcel_id is required")
+
+        normalized_sort = normalize_filter_value(sort) or "latest_first"
+        if normalized_sort not in ALLOWED_SELECTED_PARCEL_PERMIT_SORT:
+            raise ValueError("sort must be latest_first or oldest_first")
+
+        clamped_limit = min(max(limit, 1), MAX_SELECTED_PARCEL_PERMIT_LIMIT)
+        page = self.repository.get_parcel_permit_events(
+            official_parcel_id=normalized_parcel_id,
+            limit=clamped_limit,
+            offset=offset,
+            sort=normalized_sort,
+        )
+
+        return DevelopmentParcelPermitEventsResponse(
+            official_parcel_id=page.official_parcel_id,
+            total_count=page.total_count,
+            limit=clamped_limit,
+            offset=offset,
+            sort=normalized_sort,
+            permits=[parcel_permit_event(row) for row in page.permits],
+        )
+
 
 def normalize_filter_value(value: str | None) -> str | None:
     if value is None:
@@ -598,6 +643,20 @@ def temporal_query_result(row) -> DevelopmentTemporalQueryResult:
     )
 
 
+def parcel_permit_event(row) -> DevelopmentParcelPermitEvent:
+    return DevelopmentParcelPermitEvent(
+        activity_date=row.activity_date,
+        activity_year=row.activity_year,
+        permit_amount=float(row.permit_amount) if row.permit_amount is not None else None,
+        permit_id=row.permit_id,
+        permit_number=row.permit_number,
+        permit_status=row.permit_status,
+        permit_type=row.permit_type,
+        relationship_confidence=row.relationship_confidence,
+        work_type=row.work_type,
+    )
+
+
 def summary_bucket(bucket) -> DevelopmentActivitySummaryBucket:
     return DevelopmentActivitySummaryBucket(
         value=bucket.value,
@@ -659,6 +718,7 @@ def hotspot_result(result) -> DevelopmentHotspotResult:
         parcel_quality_status=result.parcel_quality_status,
         zoning_assignment_confidence=result.zoning_assignment_confidence,
         total_permit_count=result.total_permit_count or 0,
+        first_permit_date=result.first_permit_date,
         recent_permit_count_1yr=result.recent_permit_count_1yr or 0,
         recent_permit_count_3yr=result.recent_permit_count_3yr or 0,
         total_permit_amount=float(result.total_permit_amount)
@@ -668,9 +728,12 @@ def hotspot_result(result) -> DevelopmentHotspotResult:
         if result.avg_permit_amount is not None
         else None,
         latest_permit_date=result.latest_permit_date,
+        active_year_count=result.active_year_count or 0,
         dominant_permit_type=result.dominant_permit_type,
         dominant_work_type=result.dominant_work_type,
         latest_permit_status=result.latest_permit_status,
+        ambiguous_permit_count=result.ambiguous_permit_count or 0,
+        co_date_future_outlier_count=result.co_date_future_outlier_count or 0,
         development_activity_score=float(result.development_activity_score)
         if result.development_activity_score is not None
         else None,

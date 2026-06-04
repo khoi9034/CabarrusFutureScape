@@ -1,3 +1,6 @@
+import json
+from json import JSONDecodeError
+
 from app.core.contracts import (
     PARCEL_FILTER_SPECIFICATION,
     PARCEL_INTELLIGENCE_CONTRACT,
@@ -116,11 +119,16 @@ class ParcelService:
     def get_parcel_detail(
         self,
         official_parcel_id: str,
+        *,
+        include_geometry: bool = False,
     ) -> ParcelDetailResponse | None:
         if self.repository is None:
             raise RuntimeError("ParcelRepository is required for parcel detail lookup.")
 
-        record = self.repository.get_by_official_parcel_id(official_parcel_id)
+        record = self.repository.get_by_official_parcel_id(
+            official_parcel_id,
+            include_geometry=include_geometry,
+        )
         if record is None:
             return None
 
@@ -155,6 +163,9 @@ class ParcelService:
                 and extent_ymax is not None
             )
             else None
+        )
+        highlight_geometry = parse_highlight_geometry(
+            record.highlight_geometry_geojson,
         )
 
         return ParcelDetailResponse(
@@ -199,8 +210,9 @@ class ParcelService:
                 geometry_available=bool(record.geometry_available)
                 and centroid is not None
                 and extent is not None,
-                full_geometry_returned=False,
+                full_geometry_returned=highlight_geometry is not None,
             ),
+            highlight_geometry=highlight_geometry,
         )
 
     def filter_parcels(
@@ -494,6 +506,22 @@ def optional_float(value: object) -> float | None:
         return None
 
     return float(value)
+
+
+def parse_highlight_geometry(geojson_text: str | None) -> dict | None:
+    if not geojson_text:
+        return None
+
+    try:
+        geometry = json.loads(geojson_text)
+    except JSONDecodeError:
+        return None
+
+    if not isinstance(geometry, dict):
+        return None
+
+    geometry["spatial_reference"] = {"wkid": 4326}
+    return geometry
 
 
 def percentage(count: int, total: int) -> float:

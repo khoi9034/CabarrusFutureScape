@@ -27,12 +27,20 @@ export interface ParcelMapExtent {
   ymin: number;
 }
 
+export type ParcelHighlightGeometryType = "MultiPolygon" | "Polygon";
+
+export interface ParcelHighlightGeometry {
+  coordinates: unknown[];
+  spatialReference?: ParcelMapSpatialReference | null;
+  type: ParcelHighlightGeometryType;
+}
+
 export interface ParcelMapFocus {
   centroid?: ParcelMapCentroid | null;
   extent?: ParcelMapExtent | null;
   focusSource: ParcelFocusSource;
   focusStatus: ParcelMapFocusStatus;
-  geometry?: unknown | null;
+  highlightGeometry?: ParcelHighlightGeometry | null;
   officialParcelId: string;
   pin14?: string | null;
 }

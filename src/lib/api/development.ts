@@ -3,6 +3,7 @@ import type {
   DevelopmentActivitySummaryResponse,
   DevelopmentHotspotsResponse,
   DevelopmentLookupResponse,
+  DevelopmentParcelPermitEventsResponse,
   DevelopmentStatisticsResponse,
   DevelopmentTemporalQueryResponse,
   DevelopmentTrendsResponse,
@@ -30,6 +31,7 @@ export interface DevelopmentTrendsParams extends DevelopmentStatisticsParams {
 export interface DevelopmentHotspotsParams extends DevelopmentStatisticsParams {
   limit?: number;
   offset?: number;
+  official_parcel_id?: string;
   recent_window?: 1 | 3;
   sort_by?:
     | "development_activity_score"
@@ -65,6 +67,12 @@ export interface DevelopmentTemporalQueryParams
   limit?: number;
   offset?: number;
   rolling_window?: 12 | 36;
+}
+
+export interface DevelopmentParcelPermitEventsParams extends ApiQueryParams {
+  limit?: number;
+  offset?: number;
+  sort?: "latest_first" | "oldest_first";
 }
 
 export function getDevelopmentStatistics(
@@ -133,6 +141,18 @@ export function getDevelopmentTemporalQuery(
   );
 }
 
+export function getDevelopmentParcelPermits(
+  officialParcelId: string,
+  params: DevelopmentParcelPermitEventsParams = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<DevelopmentParcelPermitEventsResponse>(
+    `/development/parcel/${encodeURIComponent(officialParcelId)}/permits`,
+    params,
+    options,
+  );
+}
+
 export function getPermitTypes(options?: ApiRequestOptions) {
   return apiGet<DevelopmentLookupResponse>(
     "/development/permit-types",
@@ -164,4 +184,3 @@ export function getActivityClasses(options?: ApiRequestOptions) {
     options,
   );
 }
-

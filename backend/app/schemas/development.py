@@ -101,14 +101,18 @@ class DevelopmentHotspotResult(BaseModel):
     parcel_quality_status: str | None = None
     zoning_assignment_confidence: str | None = None
     total_permit_count: int
+    first_permit_date: date | None = None
     recent_permit_count_1yr: int
     recent_permit_count_3yr: int
     total_permit_amount: float | None = None
     avg_permit_amount: float | None = None
     latest_permit_date: date | None = None
+    active_year_count: int = 0
     dominant_permit_type: str | None = None
     dominant_work_type: str | None = None
     latest_permit_status: str | None = None
+    ambiguous_permit_count: int = 0
+    co_date_future_outlier_count: int = 0
     development_activity_score: float | None = None
     development_activity_class: str | None = None
     has_unmatched_or_ambiguous_permit_flag: bool
@@ -268,6 +272,27 @@ class DevelopmentTemporalQueryResponse(BaseModel):
     summary: DevelopmentTemporalQuerySummary
     results: list[DevelopmentTemporalQueryResult] = Field(default_factory=list)
     bbox_support: DevelopmentTemporalBBoxSupport
+
+
+class DevelopmentParcelPermitEvent(BaseModel):
+    permit_id: str | None = None
+    permit_number: str | None = None
+    activity_date: date | None = None
+    activity_year: int | None = None
+    permit_type: str | None = None
+    work_type: str | None = None
+    permit_status: str | None = None
+    permit_amount: float | None = None
+    relationship_confidence: str | None = None
+
+
+class DevelopmentParcelPermitEventsResponse(BaseModel):
+    official_parcel_id: str
+    total_count: int
+    limit: int
+    offset: int
+    sort: str
+    permits: list[DevelopmentParcelPermitEvent] = Field(default_factory=list)
 
 
 class DevelopmentLookupItem(BaseModel):

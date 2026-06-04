@@ -4,8 +4,8 @@ import {
   AlertTriangle,
   ArrowUpRight,
   BrainCircuit,
-  DatabaseZap,
   FileSearch,
+  Info,
 } from "lucide-react";
 import { DevelopmentActivityPanel } from "@/components/dashboard/DevelopmentActivityPanel";
 import { DevelopmentHotspotsPanel } from "@/components/dashboard/DevelopmentHotspotsPanel";
@@ -22,20 +22,22 @@ import { ParcelSummaryPanel } from "@/components/dashboard/ParcelSummaryPanel";
 import { PrintLayoutPreview } from "@/components/dashboard/PrintLayoutPreview";
 import { RoleIntelligencePanel } from "@/components/dashboard/RoleIntelligencePanel";
 import { ScenarioComparisonPanel } from "@/components/dashboard/ScenarioComparisonPanel";
+import { SelectedParcelDevelopmentActivityPanel } from "@/components/dashboard/SelectedParcelDevelopmentActivityPanel";
+import { SelectedParcelPermitEventsPanel } from "@/components/dashboard/SelectedParcelPermitEventsPanel";
 import { TemporalAnalysisPanel } from "@/components/dashboard/TemporalAnalysisPanel";
 import { ZoningDistributionPanel } from "@/components/dashboard/ZoningDistributionPanel";
-import { ScoreCard } from "@/components/ui/ScoreCard";
 import { mockParcels } from "@/data/mock/parcelMockData";
-import { formatCurrency } from "@/lib/utils";
 import { useDashboardState } from "@/hooks/useDashboardState";
 
 export function IntelligencePanel() {
-  const { selectedParcel, selectParcel, scenarioName } = useDashboardState();
+  const {
+    selectedParcel,
+    selectedParcelIntelligence,
+    selectedParcelIntelligenceSource,
+    selectParcel,
+    scenarioName,
+  } = useDashboardState();
   const selectedParcelScore = selectedParcel?.opportunityScore ?? 0;
-  const readinessScore = selectedParcel?.infrastructureReadiness ?? 0;
-  const pressureScore = selectedParcel?.developmentPressure ?? 0;
-  const taxOpportunity = selectedParcel?.taxOpportunity ?? 0;
-  const nearbyPermits = selectedParcel?.nearbyPermits ?? 0;
 
   const rankedParcels = [...mockParcels].sort(
     (a, b) => b.opportunityScore - a.opportunityScore,
@@ -64,7 +66,18 @@ export function IntelligencePanel() {
       </div>
 
       <div className="space-y-4">
-        <ParcelSummaryPanel parcel={selectedParcel} />
+        <ParcelSummaryPanel
+          parcel={selectedParcelIntelligence}
+          source={selectedParcelIntelligenceSource}
+        />
+
+        <SelectedParcelDevelopmentActivityPanel
+          officialParcelId={selectedParcelIntelligence?.officialParcelId}
+        />
+
+        <SelectedParcelPermitEventsPanel
+          officialParcelId={selectedParcelIntelligence?.officialParcelId}
+        />
 
         <ParcelIntelligencePanel />
 
@@ -86,21 +99,6 @@ export function IntelligencePanel() {
 
         <ParcelQualityPanel />
 
-        <div className="grid grid-cols-2 gap-3">
-          <ScoreCard
-            accent="#55d38f"
-            caption="Service capacity and corridor proximity placeholder."
-            label="Readiness"
-            score={readinessScore}
-          />
-          <ScoreCard
-            accent="#ffb454"
-            caption="Growth pressure from nearby permits and demand."
-            label="Pressure"
-            score={pressureScore}
-          />
-        </div>
-
         <section className="rounded-lg border border-white/10 bg-black/20 p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -111,27 +109,32 @@ export function IntelligencePanel() {
                 {scenarioName}
               </h3>
             </div>
-            <DatabaseZap className="h-4 w-4 text-[#d8b86a]" />
+            <Info className="h-4 w-4 text-[#d8b86a]" />
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-md border border-white/10 bg-white/[0.035] p-3">
               <p className="text-[11px] uppercase text-slate-500">
-                Tax Opportunity
+                Permit Activity
               </p>
-              <p className="mt-1 text-lg font-semibold text-white">
-                {formatCurrency(taxOpportunity * 125000)}
+              <p className="mt-1 text-sm font-semibold text-white">
+                Development panel
               </p>
             </div>
             <div className="rounded-md border border-white/10 bg-white/[0.035] p-3">
               <p className="text-[11px] uppercase text-slate-500">
-                Nearby Permits
+                Fiscal Detail
               </p>
-              <p className="mt-1 text-lg font-semibold text-white">
-                {nearbyPermits}
+              <p className="mt-1 text-sm font-semibold text-white">
+                Not connected
               </p>
             </div>
           </div>
+          <p className="mt-3 text-[11px] leading-5 text-slate-500">
+            Parcel-level development pressure, infrastructure readiness,
+            redevelopment potential, and tax opportunity are not shown here
+            until real backend fields are connected.
+          </p>
         </section>
 
         <ExecutiveBriefingPanel />

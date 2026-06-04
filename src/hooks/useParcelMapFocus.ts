@@ -36,6 +36,7 @@ export function useParcelMapFocus() {
       centroid: normalizedFocus.centroid,
       extent: normalizedFocus.extent,
       focusStatus: normalizedFocus.focusStatus,
+      highlightGeometryType: normalizedFocus.highlightGeometry?.type ?? null,
       officialParcelId: normalizedFocus.officialParcelId,
       pin14: normalizedFocus.pin14,
     });

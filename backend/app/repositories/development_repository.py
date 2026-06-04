@@ -106,6 +106,7 @@ class DevelopmentTrendsRecord:
 @dataclass(frozen=True)
 class DevelopmentHotspotsFilters:
     activity_class: str | None = None
+    official_parcel_id: str | None = None
     permit_type: str | None = None
     recent_window: int | None = None
     work_type: str | None = None
@@ -126,14 +127,18 @@ class DevelopmentHotspotRecord:
     parcel_quality_status: str | None
     zoning_assignment_confidence: str | None
     total_permit_count: int | None
+    first_permit_date: date | None
     recent_permit_count_1yr: int | None
     recent_permit_count_3yr: int | None
     total_permit_amount: Decimal | None
     avg_permit_amount: Decimal | None
     latest_permit_date: date | None
+    active_year_count: int | None
     dominant_permit_type: str | None
     dominant_work_type: str | None
     latest_permit_status: str | None
+    ambiguous_permit_count: int | None
+    co_date_future_outlier_count: int | None
     development_activity_score: Decimal | None
     development_activity_class: str | None
     has_unmatched_or_ambiguous_permit_flag: bool | None
@@ -313,6 +318,26 @@ class DevelopmentTemporalQueryPage:
 
 
 @dataclass(frozen=True)
+class DevelopmentParcelPermitEventRecord:
+    activity_date: date | None
+    activity_year: int | None
+    permit_amount: Decimal | None
+    permit_id: str | None
+    permit_number: str | None
+    permit_status: str | None
+    permit_type: str | None
+    relationship_confidence: str | None
+    work_type: str | None
+
+
+@dataclass(frozen=True)
+class DevelopmentParcelPermitEventsPage:
+    official_parcel_id: str
+    permits: list[DevelopmentParcelPermitEventRecord]
+    total_count: int
+
+
+@dataclass(frozen=True)
 class DevelopmentLookupRecord:
     count: int
     value: str
@@ -444,6 +469,11 @@ class DevelopmentRepository:
             predicates.append(
                 func.lower(DevelopmentActivityParcelSummary.development_activity_class)
                 == filters.activity_class.lower(),
+            )
+        if filters.official_parcel_id:
+            predicates.append(
+                func.lower(DevelopmentActivityParcelSummary.official_parcel_id)
+                == filters.official_parcel_id.lower(),
             )
         if filters.zoning_jurisdiction:
             predicates.append(
@@ -1055,14 +1085,18 @@ class DevelopmentRepository:
                 DevelopmentActivityParcelSummary.parcel_quality_status,
                 DevelopmentActivityParcelSummary.zoning_assignment_confidence,
                 DevelopmentActivityParcelSummary.total_permit_count,
+                DevelopmentActivityParcelSummary.first_permit_date,
                 DevelopmentActivityParcelSummary.recent_permit_count_1yr,
                 DevelopmentActivityParcelSummary.recent_permit_count_3yr,
                 DevelopmentActivityParcelSummary.total_permit_amount,
                 DevelopmentActivityParcelSummary.avg_permit_amount,
                 DevelopmentActivityParcelSummary.latest_permit_date,
+                DevelopmentActivityParcelSummary.active_year_count,
                 DevelopmentActivityParcelSummary.dominant_permit_type,
                 DevelopmentActivityParcelSummary.dominant_work_type,
                 DevelopmentActivityParcelSummary.latest_permit_status,
+                DevelopmentActivityParcelSummary.ambiguous_permit_count,
+                DevelopmentActivityParcelSummary.co_date_future_outlier_count,
                 DevelopmentActivityParcelSummary.development_activity_score,
                 DevelopmentActivityParcelSummary.development_activity_class,
                 DevelopmentActivityParcelSummary.has_unmatched_or_ambiguous_permit_flag,
@@ -1711,6 +1745,65 @@ class DevelopmentRepository:
             DevelopmentLookupRecord(count=row["count"], value=row["value"])
             for row in self.db.execute(statement).mappings().all()
         ]
+
+    def get_parcel_permit_events(
+        self,
+        *,
+        official_parcel_id: str,
+        limit: int,
+        offset: int,
+        sort: str,
+    ) -> DevelopmentParcelPermitEventsPage:
+        where_clause = (
+            func.lower(RealPropertyPermitParcelRelationship.official_parcel_id)
+            == official_parcel_id.lower()
+        )
+
+        total_count = self.db.execute(
+            select(func.count())
+            .select_from(RealPropertyPermitParcelRelationship)
+            .where(where_clause),
+        ).scalar_one()
+
+        if sort == "oldest_first":
+            order_by = (
+                RealPropertyPermitParcelRelationship.activity_date.asc().nulls_last(),
+                RealPropertyPermitParcelRelationship.permit_id.asc().nulls_last(),
+            )
+        else:
+            order_by = (
+                RealPropertyPermitParcelRelationship.activity_date.desc().nulls_last(),
+                RealPropertyPermitParcelRelationship.permit_id.desc().nulls_last(),
+            )
+
+        statement = (
+            select(
+                RealPropertyPermitParcelRelationship.permit_id,
+                RealPropertyPermitParcelRelationship.permit_number,
+                RealPropertyPermitParcelRelationship.activity_date,
+                RealPropertyPermitParcelRelationship.activity_year,
+                RealPropertyPermitParcelRelationship.permit_type,
+                RealPropertyPermitParcelRelationship.work_type,
+                RealPropertyPermitParcelRelationship.permit_status,
+                RealPropertyPermitParcelRelationship.permit_amount,
+                RealPropertyPermitParcelRelationship.relationship_confidence,
+            )
+            .select_from(RealPropertyPermitParcelRelationship)
+            .where(where_clause)
+            .order_by(*order_by)
+            .limit(limit)
+            .offset(offset)
+        )
+        permits = [
+            DevelopmentParcelPermitEventRecord(**row)
+            for row in self.db.execute(statement).mappings().all()
+        ]
+
+        return DevelopmentParcelPermitEventsPage(
+            official_parcel_id=official_parcel_id,
+            permits=permits,
+            total_count=total_count or 0,
+        )
 
     def _relationship_lookup(self, column) -> list[DevelopmentLookupRecord]:
         value_label = func.btrim(column).label("value")

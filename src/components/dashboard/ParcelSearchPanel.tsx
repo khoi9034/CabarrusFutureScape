@@ -35,7 +35,9 @@ import {
 import { USE_BACKEND_API } from "@/lib/api/client";
 import { filterParcels, searchParcels } from "@/lib/api/parcels";
 import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
+import { useDashboardState } from "@/hooks/useDashboardState";
 import { useParcelMapFocus } from "@/hooks/useParcelMapFocus";
+import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
 import type { ParcelFocusSource } from "@/types/map/parcelFocus";
 
 const RESULT_LIMIT = 50;
@@ -102,6 +104,10 @@ function asOptionalBoolean(value: string) {
 }
 
 export function ParcelSearchPanel() {
+  const {
+    clearSelectedParcel,
+    setSelectedParcelIntelligence,
+  } = useDashboardState();
   const [backendFilterState, setBackendFilterState] =
     useState<BackendFilterState>({
       error: null,
@@ -322,6 +328,10 @@ export function ParcelSearchPanel() {
       });
 
       setSelectedRecord(record);
+      setSelectedParcelIntelligence(
+        record,
+        USE_BACKEND_API ? "fallback" : "static",
+      );
       setParcelFocusFromRecord(
         {
           officialParcelId: record.officialParcelId,
@@ -330,13 +340,24 @@ export function ParcelSearchPanel() {
         focusSource,
       );
     },
-    [setParcelFocusFromRecord],
+    [setParcelFocusFromRecord, setSelectedParcelIntelligence],
   );
 
   const handleCloseDetail = useCallback(() => {
     setSelectedRecord(null);
     clearParcelFocus();
-  }, [clearParcelFocus]);
+    clearSelectedParcel();
+  }, [clearParcelFocus, clearSelectedParcel]);
+
+  const handleParcelDetailHydrated = useCallback(
+    (
+      record: ParcelSearchRecord,
+      source: SelectedParcelIntelligenceSource,
+    ) => {
+      setSelectedParcelIntelligence(record, source);
+    },
+    [setSelectedParcelIntelligence],
+  );
 
   useEffect(() => {
     function handleInspectParcel(event: Event) {
@@ -565,6 +586,7 @@ export function ParcelSearchPanel() {
           mapFocusResult={focusResult}
           onClose={handleCloseDetail}
           onMapFocusHydrated={setParcelFocus}
+          onParcelDetailHydrated={handleParcelDetailHydrated}
           parcel={selectedRecord}
         />
       </div>

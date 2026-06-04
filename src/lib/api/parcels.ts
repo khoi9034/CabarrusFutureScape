@@ -55,13 +55,18 @@ export interface ParcelGovernanceWarningsParams extends ParcelStatisticsParams {
   warning_category?: string;
 }
 
+export interface ParcelDetailParams extends ApiQueryParams {
+  include_geometry?: boolean;
+}
+
 export function getParcelDetail(
   officialParcelId: string,
+  params: ParcelDetailParams = {},
   options?: ApiRequestOptions,
 ) {
   return apiGet<ParcelDetailResponse>(
     `/parcels/${encodeURIComponent(officialParcelId)}`,
-    undefined,
+    params,
     options,
   );
 }
@@ -108,4 +113,3 @@ export function getParcelGovernanceWarnings(
     options,
   );
 }
-

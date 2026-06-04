@@ -322,8 +322,24 @@ export const developmentActivityClassMetrics: DevelopmentActivityClassMetric[] =
     tone: classTones[record.development_activity_class] ?? "neutral",
   }));
 
+export const developmentTopActivityParcels = validation.top_activity_parcels;
+
 export const developmentHotspotParcels =
-  validation.top_activity_parcels.slice(0, 10);
+  developmentTopActivityParcels.slice(0, 10);
+
+export function getStaticDevelopmentActivityForParcel(
+  officialParcelId: string | null | undefined,
+) {
+  if (!officialParcelId) {
+    return null;
+  }
+
+  return (
+    developmentTopActivityParcels.find(
+      (parcel) => parcel.official_parcel_id === officialParcelId,
+    ) ?? null
+  );
+}
 
 export const developmentAnnualTrend = validation.annual_trend_summary.filter(
   (record) => typeof record.activity_year === "number",

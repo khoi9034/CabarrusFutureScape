@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -96,6 +98,7 @@ class ParcelDetailResponse(BaseModel):
     planning: ParcelPlanning
     metadata: ParcelMetadata
     map_focus: ParcelMapFocus
+    highlight_geometry: dict[str, Any] | None = None
 
 
 class ParcelSearchResult(BaseModel):

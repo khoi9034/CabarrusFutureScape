@@ -90,13 +90,17 @@ export interface DevelopmentHotspotResult {
   official_parcel_id: string;
   parcel_quality_status: string | null;
   pin14: string | null;
+  first_permit_date?: string | null;
   recent_permit_count_1yr: number;
   recent_permit_count_3yr: number;
   subdivision: string | null;
   total_permit_amount: number | null;
   total_permit_count: number;
+  active_year_count?: number;
   zoning_assignment_confidence: string | null;
   zoning_jurisdiction_name: string | null;
+  ambiguous_permit_count?: number;
+  co_date_future_outlier_count?: number;
 }
 
 export interface DevelopmentHotspotsResponse {
@@ -231,6 +235,27 @@ export interface DevelopmentTemporalQueryResponse {
   total_count: number;
 }
 
+export interface DevelopmentParcelPermitEvent {
+  activity_date: string | null;
+  activity_year: number | null;
+  permit_amount: number | null;
+  permit_id: string | null;
+  permit_number: string | null;
+  permit_status: string | null;
+  permit_type: string | null;
+  relationship_confidence: string | null;
+  work_type: string | null;
+}
+
+export interface DevelopmentParcelPermitEventsResponse {
+  official_parcel_id: string;
+  limit: number;
+  offset: number;
+  permits: DevelopmentParcelPermitEvent[];
+  sort: string;
+  total_count: number;
+}
+
 export interface DevelopmentLookupItem {
   count: number;
   label: string;
@@ -242,4 +267,3 @@ export interface DevelopmentLookupResponse {
   options: DevelopmentLookupItem[];
   total_options: number;
 }
-

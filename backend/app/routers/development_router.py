@@ -17,6 +17,7 @@ from app.schemas import (
     DevelopmentActivitySummaryResponse,
     DevelopmentHotspotsResponse,
     DevelopmentLookupResponse,
+    DevelopmentParcelPermitEventsResponse,
     DevelopmentStatisticsResponse,
     DevelopmentTemporalQueryResponse,
     DevelopmentTrendsResponse,
@@ -94,6 +95,7 @@ def get_development_trends(
 @router.get("/hotspots", response_model=DevelopmentHotspotsResponse)
 def get_development_hotspots(
     activity_class: str | None = Query(default=None),
+    official_parcel_id: str | None = Query(default=None),
     zoning_jurisdiction: str | None = Query(default=None),
     zoning_category: str | None = Query(default=None),
     permit_type: str | None = Query(default=None),
@@ -110,6 +112,7 @@ def get_development_hotspots(
         return service.get_hotspots(
             filters=DevelopmentHotspotsFilters(
                 activity_class=activity_class,
+                official_parcel_id=official_parcel_id,
                 permit_type=permit_type,
                 recent_window=recent_window,
                 work_type=work_type,
@@ -240,6 +243,29 @@ def get_development_permit_types(
 ) -> DevelopmentLookupResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_permit_types()
+
+
+@router.get(
+    "/parcel/{official_parcel_id}/permits",
+    response_model=DevelopmentParcelPermitEventsResponse,
+)
+def get_development_parcel_permits(
+    official_parcel_id: str,
+    limit: int = Query(default=10, ge=1),
+    offset: int = Query(default=0, ge=0),
+    sort: str = Query(default="latest_first"),
+    db: Session = Depends(get_read_only_db),
+) -> DevelopmentParcelPermitEventsResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    try:
+        return service.get_parcel_permit_events(
+            official_parcel_id=official_parcel_id,
+            limit=limit,
+            offset=offset,
+            sort=sort,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get("/work-types", response_model=DevelopmentLookupResponse)

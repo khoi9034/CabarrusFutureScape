@@ -16,7 +16,10 @@ import { useLayerVisibility } from "@/hooks/useLayerVisibility";
 import { useMapInteractionState } from "@/hooks/useMapInteractionState";
 import { useRoleState } from "@/hooks/useRoleState";
 import { useScenarioState } from "@/hooks/useScenarioState";
-import { useSelectedParcel } from "@/hooks/useSelectedParcel";
+import {
+  useSelectedParcel,
+  type SelectedParcelIntelligenceSource,
+} from "@/hooks/useSelectedParcel";
 import { useWorkspaceState } from "@/hooks/useWorkspaceState";
 import {
   applyRolePreset as applyRolePresetToDashboard,
@@ -37,6 +40,7 @@ import type {
   ScenarioHorizon,
   ScenarioId,
 } from "@/types";
+import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import type {
   DashboardRoleDefinition,
   DashboardPanelId,
@@ -95,6 +99,8 @@ interface DashboardContextValue {
   reportPackages: ExecutiveReportPackage[];
   selectedParcelId: string | null;
   selectedParcel: ParcelSummary | null;
+  selectedParcelIntelligence: ParcelSearchRecord | null;
+  selectedParcelIntelligenceSource: SelectedParcelIntelligenceSource | null;
   selectedParcelSource: ParcelSelectionSource | null;
   selectedExecutiveNarrative: ExecutiveNarrative;
   selectedNarrativeId: string | null;
@@ -130,6 +136,10 @@ interface DashboardContextValue {
   selectParcel: (
     parcelId: string,
     options?: { source?: ParcelSelectionSource },
+  ) => void;
+  setSelectedParcelIntelligence: (
+    parcel: ParcelSearchRecord,
+    source: SelectedParcelIntelligenceSource,
   ) => void;
   setMapError: (error: string | null) => void;
   setScenarioId: (scenarioId: ScenarioId) => void;
@@ -174,7 +184,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectParcel,
     selectedParcel,
     selectedParcelId,
+    selectedParcelIntelligence,
+    selectedParcelIntelligenceSource,
     selectedParcelSource,
+    setSelectedParcelIntelligence,
   } = useSelectedParcel();
   const {
     activeWorkspacePreset,
@@ -369,6 +382,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectedNarrativeId,
       selectedParcel,
       selectedParcelId,
+      selectedParcelIntelligence,
+      selectedParcelIntelligenceSource,
       selectedParcelSource,
       setActiveLayerIds,
       setBriefingMode,
@@ -379,6 +394,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setLayerVisibility,
       setMapError,
       setMapStatus,
+      setSelectedParcelIntelligence,
       setPrintableViewMode,
       setReportIntent,
       setScenarioId,
@@ -436,6 +452,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectedNarrativeId,
       selectedParcel,
       selectedParcelId,
+      selectedParcelIntelligence,
+      selectedParcelIntelligenceSource,
       selectedParcelSource,
       setActiveLayerIds,
       setBriefingMode,
@@ -446,6 +464,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setLayerVisibility,
       setMapError,
       setMapStatus,
+      setSelectedParcelIntelligence,
       setPrintableViewMode,
       setReportIntent,
       setScenarioId,

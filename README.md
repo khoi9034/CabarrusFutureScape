@@ -4,7 +4,7 @@ Cabarrus FutureScape (CFS) is the frontend foundation for a Cabarrus County, NC 
 
 ## Current Phase
 
-Phase 5: Frontend API integration, building on completed Parcel Intelligence and Development Activity backend endpoint suites while preserving generated static-output fallback data.
+Phase 6: GIS Map Intelligence and selected parcel operational intelligence, building on completed Parcel Intelligence and Development Activity backend endpoint suites while preserving generated static-output fallback data.
 
 This phase preserves the futuristic dashboard shell, renders a real ArcGIS `SceneView` in the central viewport, and migrates dashboard surfaces to FastAPI one panel at a time behind `NEXT_PUBLIC_USE_BACKEND_API`. Static/generated artifacts remain the default and fallback mode; the frontend still does not connect directly to PostGIS.
 
@@ -654,7 +654,7 @@ Parcel Search API behavior:
 - Queries of three or more characters call `GET /parcels/search` when `NEXT_PUBLIC_USE_BACKEND_API=true`.
 - Supported backend filters are passed through for zoning jurisdiction, zoning category, parcel quality status, zoning confidence, and valuation band.
 - When a text search is active, subdivision, neighborhood, zoning code, parcel size, safe-for-dashboard, and governance warning filters remain client-side filters over the normalized result set.
-- Selected search results still open the existing parcel detail drawer; no map focus or SceneView selection is connected yet.
+- Selected search results still open the existing parcel detail drawer and can dispatch SceneView-safe map focus when backend `map_focus` data is available.
 
 Parcel Filter API behavior:
 
@@ -700,38 +700,53 @@ Parcel Detail API behavior:
 - If the backend request fails, times out, returns `404`, or returns an invalid shape, the drawer keeps rendering the static selected parcel record and shows a non-blocking fallback status.
 - Backend-enriched detail fields include `objectid_1`, market value, assessed value, valuation band, parcel size category, parcel quality status, zoning jurisdiction/code/category/confidence, governance warnings, safe-for-dashboard status, and planning jurisdiction.
 
+Selected Parcel card behavior:
+
+- `src/components/dashboard/ParcelSummaryPanel.tsx` now uses the selected Parcel Discovery record instead of the old mock parcel summary.
+- When FastAPI detail hydration succeeds, the card displays real selected parcel intelligence: official parcel ID, PIN14, owner/account label when available, subdivision, neighborhood, zoning jurisdiction/code/category/confidence, assessed value, market value, valuation band, parcel size category, parcel quality status, safe-for-dashboard status, and governance warning categories.
+- When backend detail is unavailable, the card preserves the selected static/search record and marks the source as static or fallback.
+- When no parcel is selected, the card shows a clean empty state: “No parcel selected” and “Search and select a parcel to view live parcel intelligence.”
+- `src/components/dashboard/SelectedParcelDevelopmentActivityPanel.tsx` now appears below the selected parcel card and shows real matched Real Property Permit activity for the active parcel when available.
+- When `NEXT_PUBLIC_USE_BACKEND_API=true`, the panel requests `GET /development/hotspots?official_parcel_id={official_parcel_id}&limit=1` and displays total permits, latest permit date/status, dominant permit type, dominant work type, activity class, recent 1-year and 3-year counts, permit amount totals, first permit year, latest permit year, and active permit-year count.
+- If the selected parcel has no activity row, the panel says “Development activity not yet available for this parcel.” If the backend is unavailable, it falls back only to generated top-activity parcel artifacts when the selected parcel is present there.
+- `src/components/dashboard/SelectedParcelPermitEventsPanel.tsx` now appears below the selected parcel development activity card and lists the latest real permit events tied to the active parcel.
+- When `NEXT_PUBLIC_USE_BACKEND_API=true`, the permit event panel requests `GET /development/parcel/{official_parcel_id}/permits` and displays date, permit type, work type, status, permit amount, permit number/ID, and relationship confidence for the latest 10 events.
+- Permit event rows use `public.real_property_permit_parcel_relationship` through the backend endpoint. There is no static permit-event fallback and no use of the old 2015 `permit_activity_clean` pilot layer.
+- Speculative demo metrics such as development pressure, infrastructure readiness, redevelopment potential, and tax opportunity are no longer shown as selected-parcel facts.
+
 ## Phase 6 GIS Map Intelligence
 
-Phase 6 has started with a map-safe parcel focus bridge between real parcel detail responses and the ArcGIS SceneView. Backend parcel detail now returns governed `map_focus` centroid and extent fields, and the frontend can use those fields to zoom the SceneView and draw a lightweight temporary focus marker without replacing the existing mock GraphicsLayer system.
+Phase 6 has started with a map-safe parcel focus bridge between real parcel detail responses and the ArcGIS SceneView. Backend parcel detail now returns governed `map_focus` centroid and extent fields, plus opt-in `highlight_geometry` for selected parcel boundary display. The frontend can zoom the SceneView, draw a lightweight temporary focus marker, and outline the actively selected parcel without replacing the existing mock GraphicsLayer system.
 
 Core files:
 
-- `src/types/map/parcelFocus.ts` defines the parcel map focus contract, optional centroid, extent, geometry, focus source, and focus status.
+- `src/types/map/parcelFocus.ts` defines the parcel map focus contract, optional centroid, extent, selected-parcel highlight geometry, focus source, and focus status.
 - `src/hooks/useParcelMapFocus.ts` owns selected parcel focus state, clear behavior, readiness status, focus request dispatch, and SceneView result handling.
 - `src/lib/map/parcelMapFocus.ts` validates whether a parcel focus request has enough spatial information and emits typed focus request/result events.
-- `src/lib/adapters/parcelDetailAdapter.ts` maps backend `map_focus.centroid` and `map_focus.extent` into the frontend `ParcelMapFocus` contract.
+- `src/lib/adapters/parcelDetailAdapter.ts` maps backend `map_focus.centroid`, `map_focus.extent`, and opt-in `highlight_geometry` into the frontend `ParcelMapFocus` contract.
 - `src/components/dashboard/ParcelSearchPanel.tsx` now creates a parcel focus object when a parcel result is selected from search or command inspection.
-- `src/components/dashboard/ParcelDetailDrawer.tsx` hydrates map focus from backend parcel detail and surfaces focus status alongside FastAPI/static detail source status.
-- `src/components/gis/SceneViewContainer.tsx` listens for parcel focus requests, calls `SceneView.goTo()` with centroid/extent targets, and maintains a non-destructive temporary focus marker layer.
+- `src/components/dashboard/ParcelDetailDrawer.tsx` requests `GET /parcels/{official_parcel_id}?include_geometry=true` after a parcel result is selected, hydrates map focus from backend parcel detail, and surfaces focus status alongside FastAPI/static detail source status.
+- `src/components/gis/SceneViewContainer.tsx` listens for parcel focus requests, calls `SceneView.goTo()` with centroid/extent targets, converts selected parcel GeoJSON `Polygon` or `MultiPolygon` into ArcGIS polygon rings, and maintains a non-destructive temporary focus marker/boundary layer.
 
 Current map focus status:
 
 - `GET /parcels/{official_parcel_id}` can provide `map_focus.centroid.longitude`, `map_focus.centroid.latitude`, `map_focus.extent`, and `spatial_reference.wkid = 4326`.
-- The frontend uses centroid/extent only. Full parcel geometry is intentionally not requested or rendered yet.
-- When backend focus data is available, parcel detail hydration dispatches a SceneView-safe focus request and the drawer can move from `Map focus ready` to `Focused on map`.
+- `GET /parcels/{official_parcel_id}?include_geometry=true` can also provide lightweight `highlight_geometry` for the selected parcel only.
+- Typing/searching alone does not request or draw parcel boundaries. A boundary is highlighted only after the user clicks/selects a parcel result.
+- When backend focus data and highlight geometry are available, parcel detail hydration dispatches a SceneView-safe focus request and the drawer can move from `Map focus ready` to `Parcel boundary highlighted`.
+- If geometry is unavailable but centroid/extent exists, the SceneView keeps zoom and marker behavior and reports `Focused on map - boundary unavailable`.
 - If backend focus data is missing, unavailable, or the SceneView is not ready, the drawer falls back to `Map focus pending geometry` or `Map focus failed` without breaking the dashboard.
 
 Safe SceneView behavior:
 
 - Parcel selections create `ParcelMapFocus` objects with official parcel ID, PIN14, and focus source.
-- If centroid, extent, and geometry are missing, `resolveParcelMapFocus()` returns a no-op result instead of touching ArcGIS runtime objects.
-- The focus marker lives in a dedicated hidden `cfs-parcel-focus-layer`, so existing mock GraphicsLayers, mock parcel hit-tests, layer toggles, and selection symbols remain unchanged.
+- If centroid, extent, and highlight geometry are missing, `resolveParcelMapFocus()` returns a no-op result instead of touching ArcGIS runtime objects.
+- The focus marker and selected parcel boundary live in a dedicated hidden `cfs-parcel-focus-layer`, so existing mock GraphicsLayers, mock parcel hit-tests, layer toggles, and selection symbols remain unchanged.
 - The focus layer is cleared during SceneView cleanup and is recreated only inside the client-side ArcGIS lifecycle.
-- Geometry-only focus objects remain unsupported until a future full-geometry highlight task explicitly enables them.
+- Each new selected parcel clears the previous marker/boundary before rendering the new one. Search result lists are never highlighted as a group.
 
 Future path:
 
-- Full parcel geometry highlight with simplified governed geometry
 - Development permit hotspot layer
 - Temporal map filtering and playback
 
@@ -740,7 +755,7 @@ Future path:
 Dashboard interaction state is exposed through `useDashboardState`, but the implementation is split into smaller hooks:
 
 - `useLayerVisibility` controls active operational layer IDs and validates them against the layer registry.
-- `useSelectedParcel` tracks the selected parcel, selection source, and clear/select actions.
+- `useSelectedParcel` tracks selected parcel IDs, mock SceneView selections, real/static selected parcel intelligence records, source status, and clear/select actions.
 - `useScenarioState` owns the active scenario horizon, simulation year, and intensity.
 - `useMapInteractionState` owns SceneView status and error state.
 - `useRoleState` owns the active frontend stakeholder role and role preset metadata.
@@ -757,6 +772,6 @@ The public dashboard API remains simple for UI components, while the internals a
 
 ## Next Step
 
-Next planned task: Phase 6 Full Parcel Geometry Highlight Readiness.
+Next planned task: Phase 6 Development Hotspot Map Layer Readiness.
 
-That task should add a governed, lightweight parcel display geometry option or dedicated focus endpoint, then render a non-destructive polygon highlight while keeping list/search responses geometry-light by default.
+That task should prepare real development activity hotspot rendering from backend development endpoints while keeping permit playback and temporal animation separate.

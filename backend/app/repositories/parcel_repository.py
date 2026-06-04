@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import and_, case, func, literal_column, or_, select
+from sqlalchemy import and_, case, func, literal, literal_column, or_, select
 from sqlalchemy.orm import Session
 
 from app.models import (
@@ -10,6 +10,8 @@ from app.models import (
     ParcelZoningIntelligenceQA,
     ParcelZoningOverlayV2,
 )
+
+MAX_HIGHLIGHT_GEOMETRY_BYTES = 1_000_000
 
 
 @dataclass(frozen=True)
@@ -39,6 +41,8 @@ class ParcelDetailRecord:
     extent_xmax: float | None
     extent_ymax: float | None
     geometry_available: bool | None
+    highlight_geometry_geojson: str | None
+    highlight_geometry_size_bytes: int | None
 
 
 @dataclass(frozen=True)
@@ -398,14 +402,39 @@ class ParcelRepository:
     def get_by_official_parcel_id(
         self,
         official_parcel_id: str,
+        *,
+        include_geometry: bool = False,
     ) -> ParcelDetailRecord | None:
         parcel_geometry = literal_column("public.parcels_enriched.geometry")
         focus_point = func.ST_PointOnSurface(parcel_geometry)
         parcel_bbox = func.Box2D(parcel_geometry)
+        highlight_geojson = func.ST_AsGeoJSON(parcel_geometry, 6)
+        highlight_geojson_size = func.octet_length(highlight_geojson)
+        geometry_present = and_(
+            parcel_geometry.is_not(None),
+            func.ST_IsEmpty(parcel_geometry).is_(False),
+        )
         geometry_available = case(
             (parcel_geometry.is_(None), False),
             (func.ST_IsEmpty(parcel_geometry), False),
             else_=True,
+        )
+        highlight_geometry_geojson = (
+            case(
+                (
+                    and_(
+                        geometry_present,
+                        highlight_geojson_size <= MAX_HIGHLIGHT_GEOMETRY_BYTES,
+                    ),
+                    highlight_geojson,
+                ),
+                else_=None,
+            )
+            if include_geometry
+            else literal(None)
+        )
+        highlight_geometry_size_bytes = (
+            highlight_geojson_size if include_geometry else literal(None)
         )
         statement = (
             select(
@@ -436,6 +465,10 @@ class ParcelRepository:
                 func.ST_XMax(parcel_bbox).label("extent_xmax"),
                 func.ST_YMax(parcel_bbox).label("extent_ymax"),
                 geometry_available.label("geometry_available"),
+                highlight_geometry_geojson.label("highlight_geometry_geojson"),
+                highlight_geometry_size_bytes.label(
+                    "highlight_geometry_size_bytes",
+                ),
             )
             .outerjoin(
                 ParcelZoningOverlayV2,

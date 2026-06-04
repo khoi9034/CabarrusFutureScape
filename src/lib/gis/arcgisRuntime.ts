@@ -5,6 +5,7 @@ import type Extent from "@arcgis/core/geometry/Extent";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import type Point from "@arcgis/core/geometry/Point";
+import type Polygon from "@arcgis/core/geometry/Polygon";
 import type SceneLayer from "@arcgis/core/layers/SceneLayer";
 import type SceneView from "@arcgis/core/views/SceneView";
 
@@ -16,6 +17,7 @@ export interface ArcGISRuntime {
   Map: typeof ArcGISMap;
   MapImageLayer: typeof MapImageLayer;
   Point: typeof Point;
+  Polygon: typeof Polygon;
   SceneLayer: typeof SceneLayer;
   SceneView: typeof SceneView;
 }
@@ -30,6 +32,7 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     { default: SceneLayer },
     { default: Graphic },
     { default: Point },
+    { default: Polygon },
     { default: Extent },
   ] = await Promise.all([
     import("@arcgis/core/Map.js"),
@@ -40,6 +43,7 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     import("@arcgis/core/layers/SceneLayer.js"),
     import("@arcgis/core/Graphic.js"),
     import("@arcgis/core/geometry/Point.js"),
+    import("@arcgis/core/geometry/Polygon.js"),
     import("@arcgis/core/geometry/Extent.js"),
   ]);
 
@@ -51,6 +55,7 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     Map,
     MapImageLayer,
     Point,
+    Polygon,
     SceneLayer,
     SceneView,
   };

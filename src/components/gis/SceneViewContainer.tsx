@@ -49,6 +49,7 @@ export function SceneViewContainer() {
   const layerRefs = useRef<OperationalLayerInstanceMap>({});
   const focusLayerRef = useRef<GraphicsLayer | null>(null);
   const lastFocusedParcelIdRef = useRef<string | null>(null);
+  const latestFocusRequestParcelIdRef = useRef<string | null>(null);
   const runtimeRef = useRef<ArcGISRuntime | null>(null);
   const activeLayerIdsRef = useRef<string[]>([]);
   const focusBeaconTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -101,6 +102,7 @@ export function SceneViewContainer() {
         focusStatus: focusResult.focusStatus,
         hasSceneView: Boolean(viewRef.current),
         hasRuntime: Boolean(runtimeRef.current),
+        highlightGeometryType: focus.highlightGeometry?.type ?? null,
         officialParcelId: focus.officialParcelId,
         previousFocusId,
       });
@@ -138,18 +140,23 @@ export function SceneViewContainer() {
       }
 
       try {
+        latestFocusRequestParcelIdRef.current = focus.officialParcelId;
         const focusLayer = ensureParcelFocusLayer(runtime, view);
-        const focusGraphic = createParcelFocusGraphic(runtime, focus);
+        const focusGraphics = createParcelFocusGraphics(runtime, focus);
+        const boundaryGraphic = focusGraphics.find(
+          (graphic) => graphic.attributes?.graphicRole === "parcel-boundary",
+        );
 
         focusLayerRef.current = focusLayer;
         focusLayer.removeAll();
 
-        if (focusGraphic) {
-          focusLayer.add(focusGraphic);
+        if (focusGraphics.length) {
+          focusGraphics.forEach((graphic) => focusLayer.add(graphic));
         }
 
         logParcelMapFocusDiagnostic("SceneView focus graphic prepared", {
-          graphicCreated: Boolean(focusGraphic),
+          boundaryCreated: Boolean(boundaryGraphic),
+          graphicCount: focusGraphics.length,
           layerId: focusLayer.id,
           layerVisible: focusLayer.visible,
           officialParcelId: focus.officialParcelId,
@@ -176,6 +183,7 @@ export function SceneViewContainer() {
               }
             : null,
           goToCalled: true,
+          highlightGeometryType: focus.highlightGeometry?.type ?? null,
           officialParcelId: focus.officialParcelId,
           previousFocusId,
           target: describeParcelFocusGoToTarget(focus),
@@ -189,10 +197,20 @@ export function SceneViewContainer() {
           duration: 900,
         });
 
+        if (latestFocusRequestParcelIdRef.current !== focus.officialParcelId) {
+          logParcelMapFocusDiagnostic("stale SceneView focus result ignored", {
+            latestFocusRequestParcelId:
+              latestFocusRequestParcelIdRef.current,
+            officialParcelId: focus.officialParcelId,
+          });
+          return;
+        }
+
         const goToSuccessDiagnostic = {
           currentCenterAfterGoTo: describeSceneViewCenter(view),
           currentZoomAfterGoTo: view.zoom,
           goToResolved: true,
+          parcelBoundaryHighlighted: Boolean(boundaryGraphic),
           officialParcelId: focus.officialParcelId,
           previousFocusId,
         };
@@ -221,11 +239,16 @@ export function SceneViewContainer() {
 
         dispatchParcelMapFocusResult({
           focusStatus: "focused",
-          message:
-            "Focused on map with backend parcel centroid and extent.",
+          message: boundaryGraphic
+            ? "Parcel boundary highlighted."
+            : "Focused on map — boundary unavailable.",
           officialParcelId: focus.officialParcelId,
         });
       } catch (focusError) {
+        if (latestFocusRequestParcelIdRef.current !== focus.officialParcelId) {
+          return;
+        }
+
         console.error("Parcel SceneView focus failed", focusError);
         const goToFailureDiagnostic = {
           error:
@@ -445,7 +468,7 @@ function createParcelFocusLayer(runtime: ArcGISRuntime) {
     },
     id: "cfs-parcel-focus-layer",
     listMode: "hide",
-    title: "Parcel Focus Marker",
+    title: "Selected Parcel Focus",
   });
 }
 
@@ -467,7 +490,29 @@ function ensureParcelFocusLayer(runtime: ArcGISRuntime, view: SceneView) {
   return focusLayer;
 }
 
-function createParcelFocusGraphic(runtime: ArcGISRuntime, focus: ParcelMapFocus) {
+function createParcelFocusGraphics(
+  runtime: ArcGISRuntime,
+  focus: ParcelMapFocus,
+) {
+  const graphics: Graphic[] = [];
+  const boundaryGraphic = createParcelBoundaryGraphic(runtime, focus);
+  const markerGraphic = createParcelFocusMarkerGraphic(runtime, focus);
+
+  if (boundaryGraphic) {
+    graphics.push(boundaryGraphic);
+  }
+
+  if (markerGraphic) {
+    graphics.push(markerGraphic);
+  }
+
+  return graphics;
+}
+
+function createParcelFocusMarkerGraphic(
+  runtime: ArcGISRuntime,
+  focus: ParcelMapFocus,
+) {
   if (!focus.centroid) {
     return null;
   }
@@ -477,13 +522,14 @@ function createParcelFocusGraphic(runtime: ArcGISRuntime, focus: ParcelMapFocus)
   return new runtime.Graphic({
     attributes: {
       focusSource: focus.focusSource,
+      graphicRole: "parcel-marker",
       officialParcelId: focus.officialParcelId,
       pin14: focus.pin14,
     },
     geometry: point,
     popupTemplate: {
       content:
-        "Backend parcel centroid/extent focus marker. Full parcel geometry highlight is intentionally not loaded yet.",
+        "Backend parcel centroid/extent focus marker for the selected parcel.",
       title: focus.officialParcelId,
     },
     symbol: {
@@ -530,6 +576,58 @@ function createParcelFocusGraphic(runtime: ArcGISRuntime, focus: ParcelMapFocus)
   });
 }
 
+function createParcelBoundaryGraphic(
+  runtime: ArcGISRuntime,
+  focus: ParcelMapFocus,
+) {
+  const rings = convertGeoJsonToArcGisRings(focus.highlightGeometry);
+
+  if (!rings.length) {
+    if (focus.highlightGeometry) {
+      console.warn("Selected parcel highlight geometry could not be converted", {
+        officialParcelId: focus.officialParcelId,
+        type: focus.highlightGeometry.type,
+      });
+      logParcelMapFocusDiagnostic("parcel boundary conversion failed", {
+        officialParcelId: focus.officialParcelId,
+        type: focus.highlightGeometry.type,
+      });
+    }
+
+    return null;
+  }
+
+  return new runtime.Graphic({
+    attributes: {
+      focusSource: focus.focusSource,
+      graphicRole: "parcel-boundary",
+      officialParcelId: focus.officialParcelId,
+      pin14: focus.pin14,
+    },
+    geometry: new runtime.Polygon({
+      rings,
+      spatialReference: {
+        wkid: focus.highlightGeometry?.spatialReference?.wkid ?? 4326,
+      },
+    }),
+    popupTemplate: {
+      content:
+        "Selected parcel boundary from the opt-in parcel detail highlight geometry.",
+      title: focus.officialParcelId,
+    },
+    symbol: {
+      color: [104, 216, 255, 0.08],
+      outline: {
+        color: [255, 218, 120, 1],
+        style: "solid",
+        width: 3,
+      },
+      style: "solid",
+      type: "simple-fill",
+    } as unknown as Graphic["symbol"],
+  });
+}
+
 function createParcelFocusPoint(
   runtime: ArcGISRuntime,
   focus: ParcelMapFocus,
@@ -541,6 +639,70 @@ function createParcelFocusPoint(
     x: focus.centroid?.longitude,
     y: focus.centroid?.latitude,
   });
+}
+
+function convertGeoJsonToArcGisRings(
+  geometry: ParcelMapFocus["highlightGeometry"],
+) {
+  if (!geometry) {
+    return [];
+  }
+
+  const polygonCoordinates =
+    geometry.type === "Polygon"
+      ? [geometry.coordinates]
+      : geometry.coordinates;
+
+  if (!Array.isArray(polygonCoordinates)) {
+    return [];
+  }
+
+  return polygonCoordinates.flatMap((polygon) => {
+    if (!Array.isArray(polygon)) {
+      return [];
+    }
+
+    return polygon
+      .map(normalizeGeoJsonRing)
+      .filter((ring): ring is number[][] => ring.length >= 4);
+  });
+}
+
+function normalizeGeoJsonRing(ring: unknown) {
+  if (!Array.isArray(ring)) {
+    return [];
+  }
+
+  const normalizedRing = ring
+    .map((position) => {
+      if (!Array.isArray(position) || position.length < 2) {
+        return null;
+      }
+
+      const x = Number(position[0]);
+      const y = Number(position[1]);
+
+      if (!Number.isFinite(x) || !Number.isFinite(y)) {
+        return null;
+      }
+
+      return [x, y];
+    })
+    .filter((position): position is number[] => Boolean(position));
+
+  if (normalizedRing.length < 3) {
+    return [];
+  }
+
+  const first = normalizedRing[0];
+  const last = normalizedRing[normalizedRing.length - 1];
+  const closed =
+    first &&
+    last &&
+    first[0] === last[0] &&
+    first[1] === last[1];
+
+  return closed ? normalizedRing : [...normalizedRing, [...first]];
 }
 
 function createParcelFocusExtent(runtime: ArcGISRuntime, focus: ParcelMapFocus) {
