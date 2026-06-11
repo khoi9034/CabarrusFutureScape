@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-06-10T21:45:00-04:00",
+  "task": "GitHub branch consolidation",
+  "starting_worktree": "C:\\CabarrusFutureScape",
+  "starting_branch": "codex/phase6-parcel-focus",
+  "target_worktree": "C:\\CabarrusFutureScape-main-merge",
+  "target_branch": "main",
+  "source_branch": "origin/codex/phase6-parcel-focus",
+  "uncommitted_changes_handling": {
+    "phase8a_changes_committed": true,
+    "phase8a_commit_message": "Add Phase 8A school constraint foundation",
+    "phase8a_commit_hash": "89d5f07",
+    "unrelated_local_log_changes_found": true,
+    "unrelated_local_log_changes_committed": false,
+    "unrelated_local_log_changes_preserved_in_stash": true,
+    "stash_note": "Runtime dev log changes in the original worktree were preserved in stash before consolidation. They were not merged to main as part of this task."
+  },
+  "feature_branch_push": {
+    "branch": "codex/phase6-parcel-focus",
+    "remote": "origin",
+    "status": "success",
+    "pushed_commit": "89d5f07"
+  },
+  "main_merge": {
+    "pull_origin_main": "already_up_to_date",
+    "merge_result": "success",
+    "merge_conflicts": false,
+    "merge_commit_hash": "e9dee934f3e1527906c5762c1862e41475f5939a",
+    "merge_command": "git merge --no-ff origin/codex/phase6-parcel-focus -m \"Merge latest CFS platform work into main\""
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": {
+      "status": "passed_on_rerun",
+      "first_attempt": "failed with transient Next.js build worker exit code 3221226505",
+      "second_attempt": "passed"
+    },
+    "backend_compileall_app": "passed",
+    "backend_pytest": {
+      "status": "passed",
+      "tests": 138,
+      "warnings": 2
+    }
+  },
+  "push_status": {
+    "target": "origin main",
+    "status": "success_after_summary_commit"
+  },
+  "working_tree": {
+    "main_merge_worktree_clean_before_summary": true,
+    "summary_artifact_created": "outputs/git_branch_consolidation_summary.json"
+  },
+  "notes": [
+    "No branches were deleted.",
+    "No force push was used.",
+    "No reset --hard was used.",
+    "Application code was not modified beyond committing existing Phase 8A work and the consolidation summary artifact."
+  ]
+}
