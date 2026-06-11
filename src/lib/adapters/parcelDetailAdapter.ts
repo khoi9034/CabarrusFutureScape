@@ -1,5 +1,11 @@
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
+import { createParcelMapFocus } from "@/lib/map/parcelMapFocus";
+import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
 import type { ParcelDetailResponse } from "@/types/api";
+import type {
+  ParcelHighlightGeometry,
+  ParcelMapFocus,
+} from "@/types/map/parcelFocus";
 
 const asString = (value: unknown) => {
   if (value === null || value === undefined) {
@@ -91,3 +97,101 @@ export function normalizeBackendParcelDetailResponse(
   };
 }
 
+export function normalizeBackendParcelMapFocusResponse(
+  response: ParcelDetailResponse,
+  fallbackRecord: ParcelSearchRecord,
+): ParcelMapFocus | null {
+  const officialParcelId = asString(response?.official_parcel_id);
+  const mapFocus = response?.map_focus;
+
+  if (!officialParcelId || !mapFocus) {
+    logParcelMapFocusDiagnostic("backend detail missing map_focus", {
+      hasMapFocus: Boolean(mapFocus),
+      officialParcelId,
+    });
+    return null;
+  }
+
+  const wkid = asNumber(mapFocus.spatial_reference?.wkid) ?? 4326;
+  const centroidLongitude = asNumber(mapFocus.centroid?.longitude);
+  const centroidLatitude = asNumber(mapFocus.centroid?.latitude);
+  const xmin = asNumber(mapFocus.extent?.xmin);
+  const ymin = asNumber(mapFocus.extent?.ymin);
+  const xmax = asNumber(mapFocus.extent?.xmax);
+  const ymax = asNumber(mapFocus.extent?.ymax);
+  const highlightGeometry = normalizeBackendHighlightGeometry(response);
+
+  const centroid =
+    centroidLongitude !== null && centroidLatitude !== null
+      ? {
+          latitude: centroidLatitude,
+          longitude: centroidLongitude,
+          spatialReference: { wkid },
+        }
+      : null;
+  const extent =
+    xmin !== null && ymin !== null && xmax !== null && ymax !== null
+      ? {
+          spatialReference: { wkid },
+          xmax,
+          xmin,
+          ymax,
+          ymin,
+        }
+      : null;
+
+  if (!centroid && !extent) {
+    logParcelMapFocusDiagnostic("backend map_focus has no usable target", {
+      centroid: mapFocus.centroid,
+      extent: mapFocus.extent,
+      officialParcelId,
+      wkid,
+    });
+    return null;
+  }
+
+  logParcelMapFocusDiagnostic("normalized backend map_focus", {
+    centroid,
+    extent,
+    geometryAvailable: mapFocus.geometry_available,
+    highlightGeometryType: highlightGeometry?.type ?? null,
+    officialParcelId,
+    pin14: asString(response.pin14) ?? fallbackRecord.pin14,
+    wkid,
+  });
+
+  return createParcelMapFocus(
+    {
+      officialParcelId,
+      pin14: asString(response.pin14) ?? fallbackRecord.pin14,
+    },
+    "detail",
+    {
+      centroid,
+      extent,
+      highlightGeometry,
+    },
+  );
+}
+
+function normalizeBackendHighlightGeometry(
+  response: ParcelDetailResponse,
+): ParcelHighlightGeometry | null {
+  const geometry = response.highlight_geometry;
+
+  if (
+    !geometry ||
+    (geometry.type !== "Polygon" && geometry.type !== "MultiPolygon") ||
+    !Array.isArray(geometry.coordinates)
+  ) {
+    return null;
+  }
+
+  return {
+    coordinates: geometry.coordinates,
+    spatialReference: {
+      wkid: asNumber(geometry.spatial_reference?.wkid) ?? 4326,
+    },
+    type: geometry.type,
+  };
+}

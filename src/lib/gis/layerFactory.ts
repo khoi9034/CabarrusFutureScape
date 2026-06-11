@@ -64,6 +64,10 @@ export function createOperationalLayers(
       return;
     }
 
+    if (isCustomGraphicsRuntimeLayer(definition)) {
+      return;
+    }
+
     const issue = {
       layerId: definition.id,
       reason: getSkippedLayerReason(definition),
@@ -282,7 +286,18 @@ function isGraphicsLayer(
   return Boolean(layer && "graphics" in layer);
 }
 
+function isCustomGraphicsRuntimeLayer(definition: OperationalLayer) {
+  return (
+    definition.kind === "GraphicsLayer" &&
+    definition.runtimeSource === "custom-graphics"
+  );
+}
+
 function getSkippedLayerReason(definition: OperationalLayer) {
+  if (isCustomGraphicsRuntimeLayer(definition)) {
+    return "Custom graphics layer is managed directly by the SceneView integration.";
+  }
+
   if (isLayerPlaceholder(definition)) {
     return "Layer definition is placeholder or disabled until an approved service URL is configured.";
   }

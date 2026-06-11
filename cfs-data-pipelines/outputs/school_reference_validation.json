@@ -1,0 +1,176 @@
+{
+  "generated_at": "2026-06-10T21:19:08.760646",
+  "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/144",
+  "source_status": "downloaded",
+  "source_error": null,
+  "raw_table": "public.school_reference_raw",
+  "clean_table": "public.school_reference",
+  "raw_row_count": 53,
+  "clean_row_count": 53,
+  "included_cfs_v1_count": 41,
+  "excluded_or_preserved_qa_count": 12,
+  "level_distribution": [
+    {
+      "school_level": "elementary",
+      "school_count": 23
+    },
+    {
+      "school_level": "high",
+      "school_count": 9
+    },
+    {
+      "school_level": "middle",
+      "school_count": 10
+    },
+    {
+      "school_level": "unknown",
+      "school_count": 11
+    }
+  ],
+  "included_excluded_summary": [
+    {
+      "school_level": "elementary",
+      "school_system": "CCS",
+      "school_type": "public",
+      "include_in_cfs_v1": true,
+      "exclusion_reason": "included",
+      "school_count": 19
+    },
+    {
+      "school_level": "elementary",
+      "school_system": "KCS",
+      "school_type": "public",
+      "include_in_cfs_v1": true,
+      "exclusion_reason": "included",
+      "school_count": 4
+    },
+    {
+      "school_level": "high",
+      "school_system": "KCS",
+      "school_type": "public",
+      "include_in_cfs_v1": true,
+      "exclusion_reason": "included",
+      "school_count": 1
+    },
+    {
+      "school_level": "high",
+      "school_system": "CCS",
+      "school_type": "public",
+      "include_in_cfs_v1": true,
+      "exclusion_reason": "included",
+      "school_count": 8
+    },
+    {
+      "school_level": "middle",
+      "school_system": "CCS",
+      "school_type": "public",
+      "include_in_cfs_v1": true,
+      "exclusion_reason": "included",
+      "school_count": 7
+    },
+    {
+      "school_level": "middle",
+      "school_system": "KCS",
+      "school_type": "public",
+      "include_in_cfs_v1": true,
+      "exclusion_reason": "included",
+      "school_count": 2
+    },
+    {
+      "school_level": "middle",
+      "school_system": "CCS",
+      "school_type": "non_cfs_v1",
+      "include_in_cfs_v1": false,
+      "exclusion_reason": "magnet_not_v1",
+      "school_count": 1
+    },
+    {
+      "school_level": "unknown",
+      "school_system": "CCS",
+      "school_type": "non_cfs_v1",
+      "include_in_cfs_v1": false,
+      "exclusion_reason": "level_not_v1",
+      "school_count": 3
+    },
+    {
+      "school_level": "unknown",
+      "school_system": "CCS",
+      "school_type": "public",
+      "include_in_cfs_v1": false,
+      "exclusion_reason": "level_not_v1",
+      "school_count": 8
+    }
+  ],
+  "geometry_validation": {
+    "invalid_geometry_count": 0,
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "school_count": 53
+      }
+    ]
+  },
+  "service_metadata": {
+    "name": "Schools",
+    "geometry_type": "esriGeometryPoint",
+    "max_record_count": 1000,
+    "fields": [
+      {
+        "name": "SHAPE",
+        "alias": "Shape",
+        "type": "esriFieldTypeGeometry"
+      },
+      {
+        "name": "LEVEL_",
+        "alias": "LEVEL",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "name": "OBJECTID",
+        "alias": "OBJECTID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "name": "STATUS",
+        "alias": "STATUS",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "name": "PARKTYPE",
+        "alias": "PARKTYPE",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "name": "CODE",
+        "alias": "CODE",
+        "type": "esriFieldTypeSmallInteger"
+      },
+      {
+        "name": "LABEL",
+        "alias": "LABEL",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "name": "SCHOOL",
+        "alias": "SCHOOL",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "name": "ADD_",
+        "alias": "ADD_",
+        "type": "esriFieldTypeString"
+      }
+    ]
+  },
+  "cfs_v1_policy": {
+    "included": "Public elementary, middle, and high schools only.",
+    "excluded_preserved_for_qa": [
+      "private",
+      "magnet",
+      "Other / non elementary-middle-high"
+    ],
+    "parcel_assignment_policy": "Do not use school point distance for parcel assignment."
+  },
+  "elapsed_seconds": 2.62,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_school_reference_points_20260610_211906.log"
+}

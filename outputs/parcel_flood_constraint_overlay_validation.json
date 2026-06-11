@@ -1,0 +1,304 @@
+{
+  "generated_at": "2026-06-05T21:05:00.061977",
+  "source_tables": {
+    "parcels": "public.parcels_enriched",
+    "fema_flood_zones": "public.fema_nfhl_flood_zones_clean"
+  },
+  "overlay_table": "public.parcel_flood_constraint_overlay",
+  "row_count_validation": {
+    "parcel_table": "public.parcels_enriched",
+    "overlay_table": "public.parcel_flood_constraint_overlay",
+    "parcel_row_count": 110017,
+    "overlay_row_count": 110017,
+    "row_count_delta": 0,
+    "row_counts_match": true,
+    "null_official_parcel_id_count": 0
+  },
+  "geometry_validation": {
+    "invalid_geometry_count": 0,
+    "null_geometry_count": 0,
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "parcel_count": 110017
+      }
+    ],
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "parcel_count": 110017
+      }
+    ]
+  },
+  "core_counts": {
+    "total_parcels": 110017,
+    "floodplain_parcel_count": 8661,
+    "floodway_parcel_count": 3229,
+    "sfha_parcel_count": 7254,
+    "moderate_flood_parcel_count": 6995,
+    "minimal_flood_parcel_count": 109049,
+    "review_required_count": 7989,
+    "high_or_severe_buildability_count": 6362,
+    "no_flood_constraint_count": 0,
+    "severe_count": 3229,
+    "high_count": 4025,
+    "moderate_count": 1407,
+    "low_count": 101356
+  },
+  "severity_distribution": [
+    {
+      "value": "low",
+      "parcel_count": 101356,
+      "parcel_percentage": 92.1276,
+      "review_required_count": 0,
+      "avg_percent_constrained": 0.0,
+      "max_percent_constrained": 0.0
+    },
+    {
+      "value": "high",
+      "parcel_count": 4025,
+      "parcel_percentage": 3.6585,
+      "review_required_count": 4025,
+      "avg_percent_constrained": 41.8501,
+      "max_percent_constrained": 100.0
+    },
+    {
+      "value": "severe",
+      "parcel_count": 3229,
+      "parcel_percentage": 2.935,
+      "review_required_count": 3229,
+      "avg_percent_constrained": 52.3311,
+      "max_percent_constrained": 100.0
+    },
+    {
+      "value": "moderate",
+      "parcel_count": 1407,
+      "parcel_percentage": 1.2789,
+      "review_required_count": 735,
+      "avg_percent_constrained": 20.2594,
+      "max_percent_constrained": 100.0
+    }
+  ],
+  "buildability_impact_distribution": [
+    {
+      "value": "low",
+      "parcel_count": 102582,
+      "parcel_percentage": 93.242,
+      "review_required_count": 554,
+      "avg_percent_constrained": 0.0197,
+      "max_percent_constrained": 4.9726
+    },
+    {
+      "value": "severe",
+      "parcel_count": 4880,
+      "parcel_percentage": 4.4357,
+      "review_required_count": 4880,
+      "avg_percent_constrained": 62.7758,
+      "max_percent_constrained": 100.0
+    },
+    {
+      "value": "high",
+      "parcel_count": 1482,
+      "parcel_percentage": 1.3471,
+      "review_required_count": 1482,
+      "avg_percent_constrained": 30.3623,
+      "max_percent_constrained": 49.9693
+    },
+    {
+      "value": "moderate",
+      "parcel_count": 1073,
+      "parcel_percentage": 0.9753,
+      "review_required_count": 1073,
+      "avg_percent_constrained": 11.7122,
+      "max_percent_constrained": 24.9466
+    }
+  ],
+  "dominant_flood_zone_distribution": [
+    {
+      "value": "X",
+      "parcel_count": 107860,
+      "parcel_percentage": 98.0394,
+      "review_required_count": 5832,
+      "avg_percent_constrained": 1.6745,
+      "max_percent_constrained": 100.0
+    },
+    {
+      "value": "AE",
+      "parcel_count": 2157,
+      "parcel_percentage": 1.9606,
+      "review_required_count": 2157,
+      "avg_percent_constrained": 85.9149,
+      "max_percent_constrained": 100.0
+    }
+  ],
+  "overlay_confidence_distribution": [
+    {
+      "value": "high",
+      "parcel_count": 109948,
+      "parcel_percentage": 99.9373,
+      "review_required_count": 7984,
+      "avg_percent_constrained": 3.3236,
+      "max_percent_constrained": 100.0
+    },
+    {
+      "value": "medium",
+      "parcel_count": 69,
+      "parcel_percentage": 0.0627,
+      "review_required_count": 5,
+      "avg_percent_constrained": 7.2464,
+      "max_percent_constrained": 100.0
+    }
+  ],
+  "percent_constrained_sanity_check": {
+    "min_percent_constrained": 0.0,
+    "max_percent_constrained": 100.0,
+    "avg_percent_constrained": 3.326109,
+    "min_percent_floodway": 0.0,
+    "max_percent_floodway": 100.0,
+    "min_percent_sfha": 0.0,
+    "max_percent_sfha": 100.0,
+    "out_of_range_percent_count": 0
+  },
+  "indexes": [
+    {
+      "indexname": "parcel_flood_constraint_overlay_buildability_idx",
+      "indexdef": "CREATE INDEX parcel_flood_constraint_overlay_buildability_idx ON public.parcel_flood_constraint_overlay USING btree (buildability_impact)"
+    },
+    {
+      "indexname": "parcel_flood_constraint_overlay_geometry_gix",
+      "indexdef": "CREATE INDEX parcel_flood_constraint_overlay_geometry_gix ON public.parcel_flood_constraint_overlay USING gist (geometry)"
+    },
+    {
+      "indexname": "parcel_flood_constraint_overlay_objectid_1_idx",
+      "indexdef": "CREATE INDEX parcel_flood_constraint_overlay_objectid_1_idx ON public.parcel_flood_constraint_overlay USING btree (objectid_1)"
+    },
+    {
+      "indexname": "parcel_flood_constraint_overlay_pin14_idx",
+      "indexdef": "CREATE INDEX parcel_flood_constraint_overlay_pin14_idx ON public.parcel_flood_constraint_overlay USING btree (pin14)"
+    },
+    {
+      "indexname": "parcel_flood_constraint_overlay_pkey",
+      "indexdef": "CREATE UNIQUE INDEX parcel_flood_constraint_overlay_pkey ON public.parcel_flood_constraint_overlay USING btree (official_parcel_id)"
+    },
+    {
+      "indexname": "parcel_flood_constraint_overlay_review_idx",
+      "indexdef": "CREATE INDEX parcel_flood_constraint_overlay_review_idx ON public.parcel_flood_constraint_overlay USING btree (flood_review_required)"
+    },
+    {
+      "indexname": "parcel_flood_constraint_overlay_score_idx",
+      "indexdef": "CREATE INDEX parcel_flood_constraint_overlay_score_idx ON public.parcel_flood_constraint_overlay USING btree (flood_constraint_score)"
+    },
+    {
+      "indexname": "parcel_flood_constraint_overlay_severity_idx",
+      "indexdef": "CREATE INDEX parcel_flood_constraint_overlay_severity_idx ON public.parcel_flood_constraint_overlay USING btree (flood_severity_class)"
+    },
+    {
+      "indexname": "parcel_flood_constraint_overlay_zone_idx",
+      "indexdef": "CREATE INDEX parcel_flood_constraint_overlay_zone_idx ON public.parcel_flood_constraint_overlay USING btree (dominant_flood_zone)"
+    }
+  ],
+  "sample_rows": {
+    "severe_examples": [
+      {
+        "official_parcel_id": "CFS-PARCEL-0149756299",
+        "pin14": "55180047650000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      },
+      {
+        "official_parcel_id": "CFS-PARCEL-0149827553",
+        "pin14": "56706061020000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      },
+      {
+        "official_parcel_id": "CFS-PARCEL-0149756852",
+        "pin14": "55181004510000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      },
+      {
+        "official_parcel_id": "CFS-PARCEL-0149756184",
+        "pin14": "55180067520000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      },
+      {
+        "official_parcel_id": "CFS-PARCEL-0149752957",
+        "pin14": "55056814810000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      },
+      {
+        "official_parcel_id": "CFS-PARCEL-0149743115",
+        "pin14": "55054563920000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      },
+      {
+        "official_parcel_id": "CFS-PARCEL-0149738075",
+        "pin14": "46718693490000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      },
+      {
+        "official_parcel_id": "CFS-PARCEL-0149787023",
+        "pin14": "55673104090000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      },
+      {
+        "official_parcel_id": "CFS-PARCEL-0149822036",
+        "pin14": "56402349470000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      },
+      {
+        "official_parcel_id": "CFS-PARCEL-0149756185",
+        "pin14": "55180077500000",
+        "dominant_flood_zone": "AE",
+        "flood_severity_class": "severe",
+        "buildability_impact": "severe",
+        "percent_parcel_constrained": 100.0,
+        "flood_constraint_score": 100.0
+      }
+    ],
+    "no_constraint_examples": []
+  },
+  "qa_pass": {
+    "row_count_equals_parcels": true,
+    "no_null_official_parcel_id": true,
+    "srid_4326_only": true,
+    "no_invalid_geometries": true,
+    "percentages_in_range": true
+  },
+  "elapsed_seconds": 277.85,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcel_flood_constraint_overlay_20260605_210022.log"
+}

@@ -90,6 +90,24 @@ class DevelopmentTrendsResponse(BaseModel):
     total_permits: int
 
 
+class DevelopmentHotspotMapCentroid(BaseModel):
+    longitude: float
+    latitude: float
+
+
+class DevelopmentHotspotSpatialReference(BaseModel):
+    wkid: int = 4326
+
+
+class DevelopmentHotspotMapFocus(BaseModel):
+    centroid: DevelopmentHotspotMapCentroid | None = None
+    spatial_reference: DevelopmentHotspotSpatialReference = Field(
+        default_factory=DevelopmentHotspotSpatialReference,
+    )
+    geometry_available: bool = False
+    full_geometry_returned: bool = False
+
+
 class DevelopmentHotspotResult(BaseModel):
     official_parcel_id: str
     pin14: str | None = None
@@ -101,17 +119,38 @@ class DevelopmentHotspotResult(BaseModel):
     parcel_quality_status: str | None = None
     zoning_assignment_confidence: str | None = None
     total_permit_count: int
+    first_permit_date: date | None = None
     recent_permit_count_1yr: int
     recent_permit_count_3yr: int
     total_permit_amount: float | None = None
     avg_permit_amount: float | None = None
     latest_permit_date: date | None = None
+    active_year_count: int = 0
     dominant_permit_type: str | None = None
     dominant_work_type: str | None = None
     latest_permit_status: str | None = None
+    ambiguous_permit_count: int = 0
+    co_date_future_outlier_count: int = 0
     development_activity_score: float | None = None
     development_activity_class: str | None = None
     has_unmatched_or_ambiguous_permit_flag: bool
+    residential_growth_permits: int = 0
+    commercial_activity_permits: int = 0
+    industrial_activity_permits: int = 0
+    institutional_activity_permits: int = 0
+    redevelopment_signal_permits: int = 0
+    minor_maintenance_permits: int = 0
+    demolition_permits: int = 0
+    active_construction_permits: int = 0
+    completed_permits: int = 0
+    high_value_permits: int = 0
+    major_value_permits: int = 0
+    dominant_permit_segment: str | None = None
+    dominant_growth_signal: str | None = None
+    permit_signal_score_max: float | None = None
+    permit_signal_score_avg: float | None = None
+    current_activity_status: str | None = None
+    map_focus: DevelopmentHotspotMapFocus | None = None
 
 
 class DevelopmentHotspotsResponse(BaseModel):
@@ -270,6 +309,33 @@ class DevelopmentTemporalQueryResponse(BaseModel):
     bbox_support: DevelopmentTemporalBBoxSupport
 
 
+class DevelopmentParcelPermitEvent(BaseModel):
+    permit_id: str | None = None
+    permit_number: str | None = None
+    activity_date: date | None = None
+    activity_year: int | None = None
+    permit_type: str | None = None
+    work_type: str | None = None
+    permit_status: str | None = None
+    permit_amount: float | None = None
+    permit_segment: str | None = None
+    permit_growth_signal: str | None = None
+    development_domain: str | None = None
+    permit_status_stage: str | None = None
+    permit_value_class: str | None = None
+    permit_signal_score: float | None = None
+    relationship_confidence: str | None = None
+
+
+class DevelopmentParcelPermitEventsResponse(BaseModel):
+    official_parcel_id: str
+    total_count: int
+    limit: int
+    offset: int
+    sort: str
+    permits: list[DevelopmentParcelPermitEvent] = Field(default_factory=list)
+
+
 class DevelopmentLookupItem(BaseModel):
     value: str
     label: str
@@ -280,3 +346,54 @@ class DevelopmentLookupResponse(BaseModel):
     lookup_type: str
     total_options: int
     options: list[DevelopmentLookupItem] = Field(default_factory=list)
+
+
+class PermitSegmentStatisticsResponse(BaseModel):
+    total_permits: int
+    by_permit_segment: list[DevelopmentStatisticsBucket] = Field(default_factory=list)
+    by_permit_growth_signal: list[DevelopmentStatisticsBucket] = Field(
+        default_factory=list,
+    )
+    by_permit_status_stage: list[DevelopmentStatisticsBucket] = Field(
+        default_factory=list,
+    )
+    by_permit_value_class: list[DevelopmentStatisticsBucket] = Field(
+        default_factory=list,
+    )
+    by_development_domain: list[DevelopmentStatisticsBucket] = Field(
+        default_factory=list,
+    )
+
+
+class ParcelPermitSegmentSummaryResponse(BaseModel):
+    official_parcel_id: str
+    pin14: str | None = None
+    total_permits: int = 0
+    residential_growth_permits: int = 0
+    commercial_activity_permits: int = 0
+    industrial_activity_permits: int = 0
+    institutional_activity_permits: int = 0
+    redevelopment_signal_permits: int = 0
+    minor_maintenance_permits: int = 0
+    demolition_permits: int = 0
+    active_construction_permits: int = 0
+    completed_permits: int = 0
+    high_value_permits: int = 0
+    major_value_permits: int = 0
+    total_permit_amount: float | None = None
+    latest_permit_date: date | None = None
+    first_permit_date: date | None = None
+    active_year_count: int = 0
+    dominant_permit_segment: str | None = None
+    dominant_growth_signal: str | None = None
+    permit_signal_score_max: float | None = None
+    permit_signal_score_avg: float | None = None
+    current_activity_status: str | None = None
+
+
+class PermitSegmentOptionsResponse(BaseModel):
+    permit_segments: list[DevelopmentLookupItem] = Field(default_factory=list)
+    growth_signals: list[DevelopmentLookupItem] = Field(default_factory=list)
+    status_stages: list[DevelopmentLookupItem] = Field(default_factory=list)
+    value_classes: list[DevelopmentLookupItem] = Field(default_factory=list)
+    development_domains: list[DevelopmentLookupItem] = Field(default_factory=list)

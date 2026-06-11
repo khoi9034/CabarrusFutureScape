@@ -27,19 +27,60 @@ import {
   type ParcelSearchIndexMetadata,
   type ParcelSearchRecord,
 } from "@/data/intelligence/parcelSearchData";
+import {
+  normalizeBackendParcelDetailResponse,
+  normalizeBackendParcelMapFocusResponse,
+} from "@/lib/adapters/parcelDetailAdapter";
 import { normalizeBackendParcelFilterResponse } from "@/lib/adapters/parcelFilterAdapter";
 import {
   applyParcelSearchUiFilters,
   normalizeBackendParcelSearchResponse,
 } from "@/lib/adapters/parcelSearchAdapter";
 import { USE_BACKEND_API } from "@/lib/api/client";
-import { filterParcels, searchParcels } from "@/lib/api/parcels";
+import { filterParcels, getParcelDetail, searchParcels } from "@/lib/api/parcels";
+import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
+import { useDashboardState } from "@/hooks/useDashboardState";
 import { useParcelMapFocus } from "@/hooks/useParcelMapFocus";
+import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
 import type { ParcelFocusSource } from "@/types/map/parcelFocus";
 
 const RESULT_LIMIT = 50;
 const API_RESULT_LIMIT = 100;
 const MIN_BACKEND_QUERY_LENGTH = 3;
+
+function createParcelDetailFallbackRecord(
+  officialParcelId: string,
+): ParcelSearchRecord {
+  return {
+    assessedValue: null,
+    governanceWarningCount: 0,
+    governanceWarnings: [],
+    mailingAddress: null,
+    mailingCity: null,
+    mailingState: null,
+    marketValue: null,
+    needsGovernanceReview: false,
+    neighborhood: null,
+    objectId1: null,
+    officialParcelId,
+    ownerName: null,
+    ownerSecondaryName: null,
+    parcelQualityStatus: null,
+    parcelSizeCategory: null,
+    pin14: null,
+    planningBoundaryType: null,
+    planningJurisdiction: null,
+    primaryGovernanceWarning: null,
+    safeForDashboard: false,
+    searchText: officialParcelId.toLowerCase(),
+    subdivision: null,
+    valuationBand: null,
+    zoningCategory: null,
+    zoningCode: null,
+    zoningConfidence: null,
+    zoningJurisdiction: null,
+  };
+}
 
 interface BackendSearchState {
   error: string | null;
@@ -101,6 +142,10 @@ function asOptionalBoolean(value: string) {
 }
 
 export function ParcelSearchPanel() {
+  const {
+    clearSelectedParcel,
+    setSelectedParcelIntelligence,
+  } = useDashboardState();
   const [backendFilterState, setBackendFilterState] =
     useState<BackendFilterState>({
       error: null,
@@ -132,6 +177,7 @@ export function ParcelSearchPanel() {
     focusMessage,
     focusResult,
     selectedParcelFocus,
+    setParcelFocus,
     setParcelFocusFromRecord,
   } = useParcelMapFocus();
   const deferredQuery = useDeferredValue(query);
@@ -313,7 +359,17 @@ export function ParcelSearchPanel() {
       record: ParcelSearchRecord,
       focusSource: ParcelFocusSource = "search",
     ) => {
+      logParcelMapFocusDiagnostic("parcel search result selected", {
+        focusSource,
+        officialParcelId: record.officialParcelId,
+        pin14: record.pin14,
+      });
+
       setSelectedRecord(record);
+      setSelectedParcelIntelligence(
+        record,
+        USE_BACKEND_API ? "fallback" : "static",
+      );
       setParcelFocusFromRecord(
         {
           officialParcelId: record.officialParcelId,
@@ -322,13 +378,24 @@ export function ParcelSearchPanel() {
         focusSource,
       );
     },
-    [setParcelFocusFromRecord],
+    [setParcelFocusFromRecord, setSelectedParcelIntelligence],
   );
 
   const handleCloseDetail = useCallback(() => {
     setSelectedRecord(null);
     clearParcelFocus();
-  }, [clearParcelFocus]);
+    clearSelectedParcel();
+  }, [clearParcelFocus, clearSelectedParcel]);
+
+  const handleParcelDetailHydrated = useCallback(
+    (
+      record: ParcelSearchRecord,
+      source: SelectedParcelIntelligenceSource,
+    ) => {
+      setSelectedParcelIntelligence(record, source);
+    },
+    [setSelectedParcelIntelligence],
+  );
 
   useEffect(() => {
     function handleInspectParcel(event: Event) {
@@ -346,7 +413,50 @@ export function ParcelSearchPanel() {
 
         if (nextRecord) {
           handleSelectRecord(nextRecord, "command");
+          return;
         }
+
+        if (!USE_BACKEND_API) {
+          return;
+        }
+
+        getParcelDetail(detail.officialParcelId)
+          .then((response) => {
+            const fallbackRecord = createParcelDetailFallbackRecord(
+              detail.officialParcelId,
+            );
+            const hydratedRecord = normalizeBackendParcelDetailResponse(
+              response,
+              fallbackRecord,
+            );
+            const backendMapFocus = normalizeBackendParcelMapFocusResponse(
+              response,
+              hydratedRecord,
+            );
+
+            setSelectedRecord(hydratedRecord);
+            setSelectedParcelIntelligence(hydratedRecord, "api");
+
+            if (backendMapFocus) {
+              setParcelFocus(backendMapFocus);
+              return;
+            }
+
+            setParcelFocusFromRecord(
+              {
+                officialParcelId: hydratedRecord.officialParcelId,
+                pin14: hydratedRecord.pin14,
+              },
+              "command",
+            );
+          })
+          .catch((apiError: unknown) => {
+            setError(
+              apiError instanceof Error
+                ? apiError.message
+                : "Parcel detail API is unavailable.",
+            );
+          });
       });
     }
 
@@ -358,7 +468,12 @@ export function ParcelSearchPanel() {
         handleInspectParcel,
       );
     };
-  }, [handleSelectRecord]);
+  }, [
+    handleSelectRecord,
+    setParcelFocus,
+    setParcelFocusFromRecord,
+    setSelectedParcelIntelligence,
+  ]);
 
   const results = useMemo(
     () => {
@@ -556,6 +671,8 @@ export function ParcelSearchPanel() {
           mapFocus={selectedParcelFocus}
           mapFocusResult={focusResult}
           onClose={handleCloseDetail}
+          onMapFocusHydrated={setParcelFocus}
+          onParcelDetailHydrated={handleParcelDetailHydrated}
           parcel={selectedRecord}
         />
       </div>

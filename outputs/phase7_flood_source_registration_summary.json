@@ -1,0 +1,88 @@
+{
+  "task": "Phase 7 flood source registration",
+  "generated_at": "2026-06-05",
+  "scope": "source_configuration_and_documentation_only",
+  "layers_ingested": false,
+  "postgis_schema_modified": false,
+  "frontend_modified": false,
+  "backend_modified": false,
+  "google_cloud_data_modified": false,
+  "fema_urls_registered": [
+    {
+      "source_key": "fema_nfhl_flood_hazard_zones",
+      "title": "FEMA NFHL Flood Hazard Zones",
+      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+      "layer_id": 28,
+      "role": "authoritative_regulatory_constraint",
+      "geometry_type": "polygon",
+      "primary_for": "floodplain/floodway parcel overlay",
+      "authoritative": true,
+      "status": "registered_not_ingested"
+    },
+    {
+      "source_key": "fema_nfhl_flood_hazard_boundaries",
+      "title": "FEMA NFHL Flood Hazard Boundaries",
+      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/27",
+      "layer_id": 27,
+      "role": "qa_reference_boundary",
+      "geometry_type": "polyline",
+      "authoritative": true,
+      "use": "QA/reference for flood boundary review",
+      "status": "registered_not_ingested"
+    },
+    {
+      "source_key": "fema_nfhl_water_areas",
+      "title": "FEMA NFHL Water Areas",
+      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/32",
+      "layer_id": 32,
+      "role": "future_hydrology_reference",
+      "geometry_type": "polygon",
+      "authoritative": true,
+      "use": "later hydrology/environmental constraint reference, not first flood overlay",
+      "status": "registered_not_ingested"
+    }
+  ],
+  "google_cloud_reference_documented": {
+    "project_id": "newproject-461002",
+    "bucket": "gs://cfs-model-data-khoi/",
+    "metadata_registry_command": "gcloud storage ls gs://cfs-model-data-khoi/metadata/cfs_engine_registry/",
+    "project_check_command": "gcloud config get-value project"
+  },
+  "existing_tiff_role_retained": {
+    "source_key": "gcs_flood_risk_tiff",
+    "role": "modeled_reference_or_future_prediction_input",
+    "authoritative": false,
+    "not_primary_for": "regulatory parcel flood constraints",
+    "do_not_delete": true,
+    "future_use": [
+      "modeled flood risk reference",
+      "raster comparison against FEMA NFHL",
+      "future prediction input after regulatory overlays are stable"
+    ]
+  },
+  "source_authority_decision": {
+    "primary_regulatory_source": "FEMA NFHL Flood Hazard Zones Layer 28",
+    "qa_reference_source": "FEMA NFHL Flood Hazard Boundaries Layer 27",
+    "future_hydrology_source": "FEMA NFHL Water Areas Layer 32",
+    "modeled_reference_source": "Existing Google Cloud flood TIFF",
+    "decision_summary": "FEMA NFHL Layer 28 is primary for the first parcel flood constraint overlay. The Google Cloud TIFF remains retained but non-authoritative for regulatory parcel flood constraints."
+  },
+  "metadata_validation": [
+    "FEMA Layer 28 verified as Flood Hazard Zones with polygon geometry.",
+    "FEMA Layer 27 verified as Flood Hazard Boundaries with polyline geometry.",
+    "FEMA Layer 32 verified as Water Areas with polygon geometry."
+  ],
+  "files_changed": [
+    "config/constraint_sources.json",
+    "docs/constraints/flood_constraint_strategy.md",
+    "docs/constraints/constraint_intelligence_plan.md",
+    "outputs/phase7_flood_source_registration_summary.json"
+  ],
+  "validation": {
+    "json_config_parses": true,
+    "summary_json_parses": true,
+    "secrets_added": false,
+    "env_local_committed": false
+  },
+  "next_ingestion_step": "Build FEMA NFHL Layer 28 ingestion scoped to Cabarrus County extent, write raw/clean flood hazard zone tables, and prepare parcel overlay validation without touching the existing Google Cloud TIFF."
+}

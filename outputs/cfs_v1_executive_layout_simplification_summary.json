@@ -1,0 +1,136 @@
+{
+  "phase": "CFS V1 Executive Layout Simplification",
+  "status": "completed",
+  "scope": {
+    "type": "frontend layout and information architecture cleanup",
+    "backend_modified": false,
+    "postgis_modified": false,
+    "new_data_sources_added": false,
+    "prediction_added": false
+  },
+  "top_search_changes": {
+    "primary_search_entry": "Top navigation search bar",
+    "placeholder": "Search parcel, PIN, owner, address, subdivision",
+    "redundant_left_rail_search_removed": true,
+    "parcel_search_tools_preserved_in": "Parcel Intelligence / Due Diligence sections"
+  },
+  "left_rail_cleanup": {
+    "focus": "Map layers and active overlays",
+    "removed": [
+      "Search & Explore instructional card",
+      "Find parcels prompt",
+      "Long command-search explanatory copy",
+      "Standalone always-visible legend card"
+    ],
+    "preserved": [
+      "Development Hotspots",
+      "Flood Constraints",
+      "FEMA Flood Zones",
+      "Parcel Intelligence",
+      "Infrastructure Readiness",
+      "Opportunity Extrusions",
+      "Planning tools in compact/collapsed form"
+    ]
+  },
+  "overview_simplification": {
+    "default_view": "Executive Overview",
+    "removed_from_overview": [
+      "Full Parcel Discovery search/filter UI",
+      "Full parcel detail drawer-style content",
+      "Full countywide metric grids",
+      "Duplicate detailed parcel metrics",
+      "Large repeated KPI cards"
+    ],
+    "overview_now_shows": [
+      "County Pulse sentence-style insights",
+      "Compact selected parcel summary",
+      "No parcel selected empty state",
+      "Next action card",
+      "Open Due Diligence call to action",
+      "Executive Print call to action"
+    ],
+    "no_parcel_selected_state": {
+      "title": "No parcel selected",
+      "message": "Search from the top bar or click a map marker to begin."
+    }
+  },
+  "due_diligence_content_moved": {
+    "full_selected_parcel_card": true,
+    "zoning_details": true,
+    "valuation_details": true,
+    "flood_constraints": true,
+    "development_activity": true,
+    "permit_timeline": true,
+    "map_focus_status": true,
+    "governance_warnings": true,
+    "supporting_context_collapsed": true
+  },
+  "parcel_intelligence_section_changes": {
+    "full_search_filter_available": true,
+    "result_list_preserved": true,
+    "zoning_distribution_preserved": true,
+    "parcel_quality_preserved": true,
+    "governance_warnings_preserved": true,
+    "api_static_fallback_preserved": true
+  },
+  "bottom_kpi_changes": {
+    "layout": "compact metric strip",
+    "metric_count": 4,
+    "metrics": [
+      "Growth Activity",
+      "Flood Review",
+      "Development Activity",
+      "Total Parcels"
+    ],
+    "removed": [
+      "Oversized KPI cards",
+      "Duplicate countywide metric grids",
+      "Large Unavailable constraint card"
+    ]
+  },
+  "constraint_metric_fix": {
+    "previous_issue": "Constraint Exposure displayed as a large Unavailable card",
+    "replacement_metric": "Flood Review",
+    "value_source": "Flood constraint summary hook/API fallback flow",
+    "expected_value": "7,989 flood review parcels",
+    "expected_context": "7.26% of county inventory",
+    "unavailable_behavior": "Subtle Loading/Pending state instead of a giant Unavailable block"
+  },
+  "files_changed": [
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/layout/TopNav.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/components/layout/MetricsBar.tsx"
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed"
+  },
+  "smoke_test_results": {
+    "localhost_3000": "HTTP 200 after frontend dev server restart",
+    "overview_loads_cleanly": true,
+    "top_search_is_primary": true,
+    "left_rail_find_parcels_removed": true,
+    "overview_parcel_discovery_removed": true,
+    "bottom_kpi_compact": true,
+    "no_giant_unavailable_metric": true,
+    "parcel_search_preserved": true,
+    "parcel_focus_and_cage_preserved": true,
+    "development_hotspots_preserved": true,
+    "flood_constraints_preserved": true,
+    "fema_flood_zones_preserved": true,
+    "executive_print_mode_preserved": true
+  },
+  "remaining_ui_polish_items": [
+    "Tune compact metric strip height across very narrow browser widths.",
+    "Consider active-layer-only legends once the layer registry has enough room for richer micro-legends.",
+    "Continue reducing API/status chips where source state is already clear from context.",
+    "Add future executive export polish after stakeholder review."
+  ],
+  "readiness": {
+    "portfolio_demo_ready": true,
+    "backend_ready": "unchanged",
+    "next_recommended_step": "Manual visual review at desktop and laptop breakpoints with API mode enabled."
+  }
+}

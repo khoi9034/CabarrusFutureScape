@@ -1,0 +1,70 @@
+{
+  "artifact": "frontend_selected_parcel_card_real_data_summary",
+  "status": "completed",
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/ParcelDetailDrawer.tsx",
+    "src/components/dashboard/ParcelSearchPanel.tsx",
+    "src/components/dashboard/ParcelSummaryPanel.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "src/hooks/useSelectedParcel.ts"
+  ],
+  "component_updated": "src/components/dashboard/ParcelSummaryPanel.tsx",
+  "real_fields_displayed": [
+    "official_parcel_id",
+    "pin14",
+    "owner/account display when available",
+    "subdivision",
+    "neighborhood",
+    "zoning_jurisdiction_name",
+    "dominant_zoning_code_raw",
+    "dominant_zoning_general_normalized",
+    "assessedvalue_numeric",
+    "marketvalue_numeric",
+    "valuation_band",
+    "parcel_size_category",
+    "parcel_quality_status",
+    "zoning_assignment_confidence",
+    "governance_warning_categories",
+    "safe_for_dashboard"
+  ],
+  "mock_fields_removed_or_hidden": [
+    "CAB-151-4823 mock selected parcel default",
+    "Concord Parkway Growth Node mock card label",
+    "flood risk selected parcel field",
+    "owner type selected parcel field",
+    "acreage selected parcel field",
+    "nearby permit count selected parcel field",
+    "development pressure percentage",
+    "infrastructure readiness percentage",
+    "redevelopment potential percentage",
+    "tax opportunity amount"
+  ],
+  "empty_state": {
+    "title": "No parcel selected",
+    "message": "Search and select a parcel to view live parcel intelligence."
+  },
+  "fallback_behavior": {
+    "static": "Selected static Parcel Discovery records can populate the card when backend API mode is disabled.",
+    "fallback": "If parcel detail hydration fails, the selected static/search record remains visible and the source badge marks static fallback.",
+    "api": "When FastAPI detail hydration succeeds, the card is upgraded to the API-normalized selected parcel record."
+  },
+  "remaining_missing_fields": [
+    "parcel-level permit/development activity detail",
+    "parcel-level development pressure",
+    "parcel-level infrastructure readiness",
+    "parcel-level redevelopment potential",
+    "parcel-level tax opportunity",
+    "full polygon highlight"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "dev_server_smoke": "http://127.0.0.1:3000 returned 200 after existing Next.js dev server finished recompiling"
+  },
+  "backend_modified": false,
+  "postgis_modified": false,
+  "sceneview_behavior_modified": false
+}

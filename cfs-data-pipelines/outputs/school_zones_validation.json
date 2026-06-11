@@ -1,0 +1,96 @@
+{
+  "generated_at": "2026-06-10T21:19:15.859479",
+  "clean_table": "public.school_zones",
+  "raw_tables": {
+    "elementary": "public.school_zones_elementary_raw",
+    "middle": "public.school_zones_middle_raw",
+    "high": "public.school_zones_high_raw"
+  },
+  "layer_statuses": {
+    "elementary": {
+      "source_status": "downloaded",
+      "source_error": null,
+      "feature_count": 25,
+      "metadata": {
+        "name": "Elementary School Districts",
+        "geometry_type": "esriGeometryPolygon",
+        "max_record_count": 1000
+      }
+    },
+    "middle": {
+      "source_status": "downloaded",
+      "source_error": null,
+      "feature_count": 10,
+      "metadata": {
+        "name": "Middle School Districts",
+        "geometry_type": "esriGeometryPolygon",
+        "max_record_count": 1000
+      }
+    },
+    "high": {
+      "source_status": "downloaded",
+      "source_error": null,
+      "feature_count": 9,
+      "metadata": {
+        "name": "High School Districts",
+        "geometry_type": "esriGeometryPolygon",
+        "max_record_count": 1000
+      }
+    }
+  },
+  "raw_counts_by_level": {
+    "elementary": 25,
+    "middle": 10,
+    "high": 9
+  },
+  "clean_zone_count": 44,
+  "included_cfs_v1_zone_count": 44,
+  "unmatched_zone_name_count": 6,
+  "match_confidence_distribution": [
+    {
+      "match_confidence": "normalized_exact",
+      "zone_count": 32
+    },
+    {
+      "match_confidence": "fuzzy_review",
+      "zone_count": 6
+    },
+    {
+      "match_confidence": "unmatched_reference_review",
+      "zone_count": 6
+    }
+  ],
+  "zone_count_by_level": [
+    {
+      "school_level": "elementary",
+      "zone_count": 25
+    },
+    {
+      "school_level": "high",
+      "zone_count": 9
+    },
+    {
+      "school_level": "middle",
+      "zone_count": 10
+    }
+  ],
+  "geometry_validation": {
+    "invalid_geometry_count": 0,
+    "null_geometry_count": 0,
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "zone_count": 44
+      }
+    ],
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "zone_count": 44
+      }
+    ]
+  },
+  "assignment_policy": "Attendance-zone polygons will be used for parcel assignment. School reference points are used only for name matching and QA.",
+  "elapsed_seconds": 5.13,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_school_attendance_zones_20260610_211910.log"
+}

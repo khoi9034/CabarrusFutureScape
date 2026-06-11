@@ -1,0 +1,113 @@
+{
+  "generated_at": "2026-06-07T02:56:00-04:00",
+  "status": "recovered",
+  "root_cause": "The FastAPI backend was not listening on port 8000 while the frontend was running in API mode against http://127.0.0.1:8000. After backend recovery, the local frontend also needed a clean Next dev-server restart. The API client timeout was increased from 8000 ms to 20000 ms because concurrent local PostGIS aggregate requests can exceed 8 seconds and were producing false fallback timeout states.",
+  "changes_made": [
+    {
+      "file": "src/lib/api/client.ts",
+      "change": "Raised DEFAULT_TIMEOUT_MS from 8000 to 20000 to avoid false local API outage messages while preserving explicit fallback/error reporting."
+    }
+  ],
+  "backend_runtime": {
+    "status": "running",
+    "host": "127.0.0.1",
+    "port": 8000,
+    "command": "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+    "working_directory": "C:\\CabarrusFutureScape\\backend"
+  },
+  "frontend_runtime": {
+    "status": "running",
+    "url": "http://localhost:3000",
+    "alternate_url": "http://127.0.0.1:3000",
+    "command": "npm run dev -- --hostname 0.0.0.0 --port 3000",
+    "working_directory": "C:\\CabarrusFutureScape"
+  },
+  "frontend_env": {
+    "file": "C:\\CabarrusFutureScape\\.env.local",
+    "NEXT_PUBLIC_USE_BACKEND_API": "true",
+    "NEXT_PUBLIC_CFS_API_BASE_URL": "http://127.0.0.1:8000",
+    "status": "present_and_correct"
+  },
+  "backend_endpoint_verification": {
+    "health": {
+      "url": "http://127.0.0.1:8000/health",
+      "status": 200,
+      "response": {
+        "status": "ok"
+      }
+    },
+    "database": {
+      "url": "http://127.0.0.1:8000/health/database",
+      "status": 200,
+      "response": {
+        "database": "connected"
+      }
+    },
+    "openapi": {
+      "url": "http://127.0.0.1:8000/openapi.json",
+      "status": 200,
+      "parcel_routes": 6,
+      "development_routes": 11,
+      "constraints_routes": 5,
+      "required_routes_present": [
+        "/parcels/{official_parcel_id}",
+        "/parcels/search",
+        "/development/hotspots",
+        "/constraints/flood/high-review",
+        "/constraints/flood/summary"
+      ]
+    },
+    "parcel_search": {
+      "url": "http://127.0.0.1:8000/parcels/search?q=CFS-PARCEL-0149726579",
+      "status": 200
+    },
+    "parcel_detail_with_geometry": {
+      "url": "http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579?include_geometry=true",
+      "status": 200,
+      "map_focus_present": true,
+      "highlight_geometry_present": true
+    },
+    "development_hotspots": {
+      "url": "http://127.0.0.1:8000/development/hotspots?limit=2",
+      "status": 200
+    },
+    "flood_high_review": {
+      "url": "http://127.0.0.1:8000/constraints/flood/high-review?limit=2",
+      "status": 200
+    },
+    "flood_summary": {
+      "url": "http://127.0.0.1:8000/constraints/flood/summary",
+      "status": 200
+    }
+  },
+  "cors_verification": {
+    "request": "OPTIONS http://127.0.0.1:8000/constraints/flood/high-review?limit=2",
+    "origin": "http://localhost:3000",
+    "status": 200,
+    "access_control_allow_origin": "http://localhost:3000",
+    "access_control_allow_methods": "GET, OPTIONS"
+  },
+  "frontend_verification": {
+    "url": "http://localhost:3000/",
+    "status": 200,
+    "response_bytes": 296266
+  },
+  "smoke_tests": {
+    "parcel_search": "Verified FastAPI search returned CFS-PARCEL-0149726579.",
+    "parcel_selection": "Verified selected parcel UI loaded CFS-PARCEL-0149726579, reported map focus, and reported parcel boundary highlight.",
+    "development_hotspots": "Verified layer toggle reached live state showing 100 hotspots before final dev-server restart.",
+    "flood_constraints": "Verified layer toggle reached live state showing 100 flood review parcels before final dev-server restart.",
+    "flood_summary": "Verified /constraints/flood/summary returned 200."
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "passed: 125 passed, 1 warning"
+  },
+  "remaining_issues": [
+    "The browser may still log the existing mock flood-risk ArcGIS layer warning because the old mock layer definition intentionally has no valid HTTPS ArcGIS service URL. This is separate from the real FEMA Flood Constraints API layer.",
+    "The in-app browser helper retained a stale Chrome connection-refused error tab from the earlier outage; the actual local frontend responds successfully at http://localhost:3000."
+  ]
+}

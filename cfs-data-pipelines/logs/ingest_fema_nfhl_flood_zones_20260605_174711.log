@@ -1,0 +1,4 @@
+2026-06-05 17:47:11,702 INFO Fetching FEMA layer metadata: https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28
+2026-06-05 17:47:12,269 INFO FEMA metadata: name=Flood Hazard Zones geometryType=esriGeometryPolygon maxRecordCount=2000
+2026-06-05 17:47:20,009 INFO FEMA feature count intersecting Cabarrus extent: 7712
+2026-06-05 17:47:20,010 INFO Downloading FEMA features with pagination: pageSize=2000 target=7712

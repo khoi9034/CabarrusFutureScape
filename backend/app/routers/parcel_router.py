@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.dependencies.database import get_read_only_db
@@ -173,12 +175,24 @@ def get_parcel_governance_warnings(
 @router.get("/{official_parcel_id}", response_model=ParcelDetailResponse)
 def get_parcel_detail(
     official_parcel_id: str,
+    include_geometry: bool = Query(
+        False,
+        description="Return lightweight GeoJSON parcel geometry for map highlighting.",
+    ),
     db: Session = Depends(get_read_only_db),
-) -> ParcelDetailResponse:
+) -> JSONResponse:
     service = ParcelService(ParcelRepository(db))
-    parcel = service.get_parcel_detail(official_parcel_id)
+    parcel = service.get_parcel_detail(
+        official_parcel_id,
+        include_geometry=include_geometry,
+    )
 
     if parcel is None:
         raise HTTPException(status_code=404, detail="Parcel not found")
 
-    return parcel
+    body = jsonable_encoder(parcel)
+    if body.get("highlight_geometry") is None:
+        # Keep the default parcel detail response lightweight and shape-stable.
+        body.pop("highlight_geometry", None)
+
+    return JSONResponse(content=body)

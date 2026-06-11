@@ -1,3 +1,6 @@
+import json
+from json import JSONDecodeError
+
 from app.core.contracts import (
     PARCEL_FILTER_SPECIFICATION,
     PARCEL_INTELLIGENCE_CONTRACT,
@@ -26,6 +29,9 @@ from app.schemas.parcel import (
     ParcelGovernanceWarningResult,
     ParcelGovernanceWarningSummary,
     ParcelLocation,
+    ParcelMapFocus,
+    ParcelMapFocusCentroid,
+    ParcelMapFocusExtent,
     ParcelMetadata,
     ParcelPlanning,
     ParcelSearchResult,
@@ -113,16 +119,53 @@ class ParcelService:
     def get_parcel_detail(
         self,
         official_parcel_id: str,
+        *,
+        include_geometry: bool = False,
     ) -> ParcelDetailResponse | None:
         if self.repository is None:
             raise RuntimeError("ParcelRepository is required for parcel detail lookup.")
 
-        record = self.repository.get_by_official_parcel_id(official_parcel_id)
+        record = self.repository.get_by_official_parcel_id(
+            official_parcel_id,
+            include_geometry=include_geometry,
+        )
         if record is None:
             return None
 
         transformed_at = (
             record.transformed_at.isoformat() if record.transformed_at else None
+        )
+        centroid_longitude = optional_float(record.centroid_longitude)
+        centroid_latitude = optional_float(record.centroid_latitude)
+        extent_xmin = optional_float(record.extent_xmin)
+        extent_ymin = optional_float(record.extent_ymin)
+        extent_xmax = optional_float(record.extent_xmax)
+        extent_ymax = optional_float(record.extent_ymax)
+        centroid = (
+            ParcelMapFocusCentroid(
+                longitude=centroid_longitude,
+                latitude=centroid_latitude,
+            )
+            if centroid_longitude is not None and centroid_latitude is not None
+            else None
+        )
+        extent = (
+            ParcelMapFocusExtent(
+                xmin=extent_xmin,
+                ymin=extent_ymin,
+                xmax=extent_xmax,
+                ymax=extent_ymax,
+            )
+            if (
+                extent_xmin is not None
+                and extent_ymin is not None
+                and extent_xmax is not None
+                and extent_ymax is not None
+            )
+            else None
+        )
+        highlight_geometry = parse_highlight_geometry(
+            record.highlight_geometry_geojson,
         )
 
         return ParcelDetailResponse(
@@ -161,6 +204,15 @@ class ParcelService:
                 planning_jurisdiction=record.planning_jurisdiction,
             ),
             metadata=ParcelMetadata(transformed_at=transformed_at),
+            map_focus=ParcelMapFocus(
+                centroid=centroid,
+                extent=extent,
+                geometry_available=bool(record.geometry_available)
+                and centroid is not None
+                and extent is not None,
+                full_geometry_returned=highlight_geometry is not None,
+            ),
+            highlight_geometry=highlight_geometry,
         )
 
     def filter_parcels(
@@ -447,6 +499,29 @@ def normalize_filter_value(value: str | None) -> str | None:
 
     normalized = " ".join(value.strip().split())
     return normalized or None
+
+
+def optional_float(value: object) -> float | None:
+    if value is None:
+        return None
+
+    return float(value)
+
+
+def parse_highlight_geometry(geojson_text: str | None) -> dict | None:
+    if not geojson_text:
+        return None
+
+    try:
+        geometry = json.loads(geojson_text)
+    except JSONDecodeError:
+        return None
+
+    if not isinstance(geometry, dict):
+        return None
+
+    geometry["spatial_reference"] = {"wkid": 4326}
+    return geometry
 
 
 def percentage(count: int, total: int) -> float:

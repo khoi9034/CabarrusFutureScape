@@ -1,0 +1,45 @@
+{
+  "phase": "Phase 6 GIS Map Intelligence",
+  "task": "Development Hotspot Layer Registry Wiring",
+  "completed_at": "2026-06-04",
+  "component_fixed": "src/components/dashboard/LayerToggle.tsx",
+  "old_mock_layer_status": {
+    "layer_id": "permit-activity",
+    "previous_visible_label": "Permit Activity",
+    "previous_source_status": "mock",
+    "previous_visibility": false,
+    "issue": "The visible row was disabled by mock layer visibility, while the real hotspot control was rendered separately and could be missed."
+  },
+  "new_visible_toggle_behavior": {
+    "visible_label": "Development Hotspots",
+    "layer_id_reused": "permit-activity",
+    "clickable_when": "NEXT_PUBLIC_USE_BACKEND_API=true",
+    "on_toggle_on": [
+      "setDevelopmentHotspotsEnabled(true)",
+      "GET /development/hotspots?activity_class=very_high_activity&limit=100",
+      "SceneView renders temporary markers in cfs-development-hotspots-layer"
+    ],
+    "on_toggle_off": [
+      "setDevelopmentHotspotsEnabled(false)",
+      "SceneView clears cfs-development-hotspots-layer"
+    ],
+    "status_labels": [
+      "Hotspots off",
+      "Loading hotspots",
+      "Showing X hotspots",
+      "Hotspots unavailable"
+    ],
+    "source_badge": "api when backend API mode is enabled; unavailable otherwise"
+  },
+  "preserved_controls": [
+    "County Boundary",
+    "Parcel Intelligence",
+    "Infrastructure Readiness"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "visual_browser_smoke": "not available; no Browser/Playwright tool was exposed in this session"
+  }
+}

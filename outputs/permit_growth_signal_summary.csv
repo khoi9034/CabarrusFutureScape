@@ -1,0 +1,6 @@
+permit_growth_signal,permit_count,permit_percentage,avg_permit_signal_score,max_permit_signal_score,map_relevant_count,future_prediction_relevant_count
+major_growth,34611,53.7221,80.7,100.0,34611,34611
+moderate_activity,10619,16.4825,67.01,84.0,10619,10619
+redevelopment_signal,9287,14.415,65.7,100.0,9287,9287
+unknown,5792,8.9902,9.67,42.0,0,0
+minor_activity,4117,6.3903,28.02,56.0,155,0

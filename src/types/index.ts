@@ -21,6 +21,8 @@ export type LayerSourceStatus = "disabled" | "live" | "mock" | "placeholder";
 
 export type LayerSourceMode = LayerSourceStatus;
 
+export type LayerRuntimeSource = "arcgis-service" | "custom-graphics";
+
 export interface OperationalLayerFieldMetadata {
   alias?: string;
   display?: boolean;
@@ -59,6 +61,8 @@ export type DashboardStatus = "idle" | "loading" | "online" | "degraded";
 
 export type MapStatus = DashboardStatus;
 
+export type ProductMode = "overview" | "due_diligence" | "executive_print";
+
 export type ParcelSelectionSource = "dashboard" | "map" | "url";
 
 export interface OperationalLayer {
@@ -78,6 +82,7 @@ export interface OperationalLayer {
   renderer?: OperationalLayerRendererMetadata;
   layerType?: ArcGISLayerType;
   futureSource?: string;
+  runtimeSource?: LayerRuntimeSource;
 }
 
 export type LayerDefinition = OperationalLayer;

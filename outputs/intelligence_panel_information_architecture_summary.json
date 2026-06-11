@@ -1,0 +1,100 @@
+{
+  "task": "Intelligence Panel information architecture refactor",
+  "status": "completed",
+  "organization_pattern": "mounted tab panels",
+  "default_tab": "overview",
+  "tabs": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "contains": [
+        "Selected parcel summary",
+        "Selected parcel development activity",
+        "Selected parcel permit events",
+        "Parcel headline metrics",
+        "Development headline metrics"
+      ]
+    },
+    {
+      "id": "parcel",
+      "label": "Parcel",
+      "contains": [
+        "Parcel Discovery search and filter",
+        "Zoning distribution",
+        "Governance warnings",
+        "Parcel quality"
+      ]
+    },
+    {
+      "id": "development",
+      "label": "Development",
+      "contains": [
+        "Development trend panel",
+        "Development hotspots summary panel",
+        "Development zoning summary panel"
+      ]
+    },
+    {
+      "id": "temporal",
+      "label": "Temporal",
+      "contains": [
+        "Temporal analysis panel",
+        "Temporal filters",
+        "Temporal trend summary",
+        "Temporal query preview"
+      ]
+    },
+    {
+      "id": "system",
+      "label": "System",
+      "contains": [
+        "API/static data source mode status",
+        "Scenario snapshot",
+        "Executive briefing",
+        "Scenario comparison",
+        "Executive report package",
+        "Print layout preview",
+        "Role intelligence",
+        "Operational event stream",
+        "Mock parcel watchlist",
+        "Constraint monitor caveat"
+      ]
+    }
+  ],
+  "preserved_behaviors": [
+    "Selected parcel summary remains connected to selected parcel intelligence state",
+    "Selected parcel development activity remains keyed by official parcel id",
+    "Selected parcel permit events remain keyed by official parcel id",
+    "Parcel Discovery remains mounted so command-palette and hotspot inspection events can still reach it",
+    "API/static fallback behavior is unchanged",
+    "SceneView behavior is unchanged",
+    "Development Hotspots layer toggle remains in the visible Layer Registry"
+  ],
+  "mode_status_indicator": {
+    "locations": [
+      "Intelligence Panel header",
+      "System tab"
+    ],
+    "api_mode_label": "API Live",
+    "static_mode_label": "Static Mode"
+  },
+  "files_changed": [
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "README.md"
+  ],
+  "files_added": [
+    "outputs/intelligence_panel_information_architecture_summary.json"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "dev_server_http_check": "http://localhost:3000 returned HTTP 200",
+    "browser_smoke_test": "not available; no browser automation tool or Playwright package was available in this session"
+  },
+  "remaining_cleanup_opportunities": [
+    "Consider keyboard arrow-key tab navigation if the tab bar grows more interactive",
+    "Consider moving executive briefing/report surfaces into their own future top-level workspace if System becomes too dense",
+    "Consider a visual browser QA pass in the in-app browser when browser automation is available"
+  ]
+}

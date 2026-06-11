@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -56,6 +58,32 @@ class ParcelMetadata(BaseModel):
     transformed_at: str | None = None
 
 
+class ParcelMapFocusCentroid(BaseModel):
+    longitude: float
+    latitude: float
+
+
+class ParcelMapFocusExtent(BaseModel):
+    xmin: float
+    ymin: float
+    xmax: float
+    ymax: float
+
+
+class ParcelMapFocusSpatialReference(BaseModel):
+    wkid: int = 4326
+
+
+class ParcelMapFocus(BaseModel):
+    centroid: ParcelMapFocusCentroid | None = None
+    extent: ParcelMapFocusExtent | None = None
+    spatial_reference: ParcelMapFocusSpatialReference = Field(
+        default_factory=ParcelMapFocusSpatialReference,
+    )
+    geometry_available: bool = False
+    full_geometry_returned: bool = False
+
+
 class ParcelDetailResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -69,6 +97,8 @@ class ParcelDetailResponse(BaseModel):
     governance: ParcelGovernance
     planning: ParcelPlanning
     metadata: ParcelMetadata
+    map_focus: ParcelMapFocus
+    highlight_geometry: dict[str, Any] | None = None
 
 
 class ParcelSearchResult(BaseModel):

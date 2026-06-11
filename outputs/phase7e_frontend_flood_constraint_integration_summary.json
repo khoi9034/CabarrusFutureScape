@@ -1,0 +1,105 @@
+{
+  "phase": "Phase 7E",
+  "name": "Frontend Flood Constraint Integration",
+  "status": "complete",
+  "backend_endpoints_used": [
+    "GET /constraints/flood/summary",
+    "GET /constraints/flood/{official_parcel_id}",
+    "GET /constraints/flood/high-review",
+    "GET /parcels/{official_parcel_id}"
+  ],
+  "postgis_schema_modified": false,
+  "forecasting_added": false,
+  "old_tiff_used_as_primary": false,
+  "frontend_files_created": [
+    "src/lib/api/constraints.ts",
+    "src/types/api/constraints.ts",
+    "src/hooks/useSelectedParcelFloodConstraint.ts",
+    "src/hooks/useFloodConstraintSummary.ts",
+    "src/hooks/useFloodConstraintLayer.ts",
+    "src/lib/adapters/selectedParcelFloodConstraintAdapter.ts",
+    "src/lib/adapters/floodConstraintSummaryAdapter.ts",
+    "src/lib/adapters/floodConstraintMapAdapter.ts",
+    "src/types/map/floodConstraints.ts",
+    "src/components/dashboard/SelectedParcelFloodConstraintPanel.tsx",
+    "src/components/dashboard/FloodConstraintSummaryPanel.tsx"
+  ],
+  "frontend_files_updated": [
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/dashboard/ParcelSearchPanel.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/data/mock/layersMockData.ts",
+    "src/hooks/useDashboardState.tsx",
+    "src/types/api/index.ts",
+    "README.md"
+  ],
+  "mock_layer_replaced": {
+    "old_label": "Flood Risk",
+    "old_status": "Hidden / mock",
+    "new_label": "Flood Constraints",
+    "new_source": "FEMA NFHL",
+    "new_status": "API when NEXT_PUBLIC_USE_BACKEND_API=true"
+  },
+  "selected_parcel_panel": {
+    "status": "implemented",
+    "fields_displayed": [
+      "dominant_flood_zone",
+      "floodway_present",
+      "sfha_present",
+      "percent_parcel_constrained",
+      "flood_review_required",
+      "buildability_impact",
+      "flood_severity_class",
+      "flood_constraint_score",
+      "flood_zone_codes",
+      "overlay_confidence"
+    ],
+    "empty_state": "Select a parcel to view FEMA flood constraint status.",
+    "unavailable_state": "Graceful unavailable state with no fabricated values."
+  },
+  "layer_toggle_behavior": {
+    "default": "off",
+    "on": "Calls GET /constraints/flood/high-review, hydrates limited parcel centroids through GET /parcels/{official_parcel_id}, and renders temporary SceneView markers.",
+    "off": "Clears flood constraint graphics.",
+    "render_scope": "High-review parcels only; does not render all 110,017 parcels.",
+    "click_behavior": "Dispatches the existing parcel inspect flow so selected parcel card, map focus, boundary highlight, development activity, and permit events update normally."
+  },
+  "map_rendering_approach": {
+    "graphics_layer": "cfs-flood-constraints-layer",
+    "geometry": "Point markers from existing parcel detail map_focus centroids",
+    "styling": [
+      "severe/floodway: larger red marker",
+      "high/SFHA: amber marker",
+      "moderate: blue marker"
+    ],
+    "existing_layers_preserved": [
+      "selected parcel focus/highlight layer",
+      "development hotspots layer",
+      "mock operational layers"
+    ]
+  },
+  "dashboard_summary": {
+    "panel": "FloodConstraintSummaryPanel",
+    "section": "Parcel Intelligence",
+    "fields": [
+      "total_parcels",
+      "floodway_parcels",
+      "sfha_parcels",
+      "review_required_parcels",
+      "high_severe_buildability_parcels"
+    ]
+  },
+  "validation": {
+    "typecheck": "npm run typecheck passed",
+    "lint": "npm run lint passed",
+    "build": "npm run build -- --webpack passed"
+  },
+  "remaining_gaps": [
+    "Flood marker controls are high-review only; richer flood filters can be added later.",
+    "Selected parcel flood panel uses attributes only; no flood polygon/zone geometry is rendered yet.",
+    "No dedicated Constraints navigation section has been added yet.",
+    "School constraints remain future work.",
+    "Forecasting and TIFF comparison remain deferred."
+  ]
+}

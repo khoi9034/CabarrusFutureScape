@@ -1,0 +1,4 @@
+2026-06-05 21:00:22,861 INFO Verifying database connection: host=localhost port=5433 database=cfs_dev user=postgres
+2026-06-05 21:00:23,178 INFO Executing parcel flood overlay SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_parcel_flood_constraint_overlay.sql
+2026-06-05 21:05:00,575 INFO Wrote parcel flood overlay validation to C:\CabarrusFutureScape\cfs-data-pipelines\outputs\parcel_flood_constraint_overlay_validation.json and C:\CabarrusFutureScape\outputs\parcel_flood_constraint_overlay_validation.json
+2026-06-05 21:05:00,575 INFO Parcel flood overlay row count: 110017

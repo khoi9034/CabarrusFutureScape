@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-06-05T18:28:53.317251",
+  "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+  "source_layer": "FEMA NFHL Layer 28 Flood Hazard Zones",
+  "source_authority": "authoritative_regulatory_constraint",
+  "raw_table": "public.fema_nfhl_flood_zones_raw",
+  "parcel_table": "public.parcels_enriched",
+  "cabarrus_extent": {
+    "xmin": -80.78714859986353,
+    "ymin": 35.185001484384316,
+    "xmax": -80.29542844362561,
+    "ymax": 35.55345527610693,
+    "spatialReference": {
+      "wkid": 4326
+    }
+  },
+  "parcel_count_used_for_extent": 110017,
+  "service_feature_count_for_extent": 7712,
+  "downloaded_feature_count": 7712,
+  "download_method": "object_id_fallback_after_pagination_failure",
+  "page_size": 100,
+  "object_id_field": "OBJECTID",
+  "service_metadata": {
+    "name": "Flood Hazard Zones",
+    "geometry_type": "esriGeometryPolygon",
+    "max_record_count": 2000,
+    "supports_pagination": true
+  },
+  "geodataframe_summary": {
+    "row_count": 7712,
+    "columns": [
+      "geometry",
+      "objectid",
+      "dfirm_id",
+      "fld_ar_id",
+      "study_typ",
+      "fld_zone",
+      "zone_subty",
+      "sfha_tf",
+      "static_bfe",
+      "v_datum",
+      "depth",
+      "len_unit",
+      "velocity",
+      "vel_unit",
+      "ar_revert",
+      "ar_subtrv",
+      "bfe_revert",
+      "dep_revert",
+      "dual_zone",
+      "source_cit",
+      "shape_starea",
+      "shape_stlength",
+      "gfid",
+      "globalid",
+      "source_layer",
+      "source_url",
+      "ingested_at"
+    ],
+    "crs": "EPSG:4326",
+    "geometry_type_counts": {
+      "Polygon": 7687,
+      "MultiPolygon": 25
+    },
+    "null_geometry_count": 0,
+    "candidate_flood_zone_fields": [
+      "fld_zone",
+      "zone_subty",
+      "sfha_tf",
+      "dual_zone"
+    ],
+    "candidate_floodway_fields": [
+      "fld_zone",
+      "zone_subty"
+    ]
+  },
+  "wrote_to_postgis": true,
+  "elapsed_seconds": 491.46,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_fema_nfhl_flood_zones_20260605_182041.log"
+}

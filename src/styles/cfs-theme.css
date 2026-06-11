@@ -113,3 +113,76 @@ select:focus-visible {
 .esri-view .esri-view-surface:focus::after {
   outline: none;
 }
+
+@media print {
+  @page {
+    margin: 0.45in;
+    size: letter;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+    min-height: auto;
+  }
+
+  body * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .app-chrome,
+  .esri-ui,
+  .esri-popup,
+  .esri-attribution {
+    display: none !important;
+  }
+
+  .metric-grid {
+    background: #ffffff !important;
+  }
+
+  .print-report {
+    background: #ffffff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #111827 !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .print-report section,
+  .print-report article,
+  .print-report div {
+    break-inside: avoid;
+  }
+
+  .print-report h1,
+  .print-report h2,
+  .print-report h3,
+  .print-report h4,
+  .print-report p,
+  .print-report dt,
+  .print-report dd,
+  .print-report span {
+    color: #111827 !important;
+  }
+
+  .print-report .text-slate-500,
+  .print-report .text-slate-400,
+  .print-report .text-slate-300 {
+    color: #4b5563 !important;
+  }
+
+  .print-report .bg-black\/20,
+  .print-report .bg-white\/\[0\.035\],
+  .print-report .bg-white\/\[0\.025\] {
+    background: #f8fafc !important;
+  }
+
+  .print-report .border-white\/10,
+  .print-report .border-white\/15 {
+    border-color: #d1d5db !important;
+  }
+}

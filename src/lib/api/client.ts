@@ -22,7 +22,7 @@ export class ApiClientError extends Error {
 }
 
 const DEFAULT_BACKEND_BASE_URL = "http://127.0.0.1:8000";
-const DEFAULT_TIMEOUT_MS = 8000;
+const DEFAULT_TIMEOUT_MS = 20000;
 
 export const CFS_API_BASE_URL =
   process.env.NEXT_PUBLIC_CFS_API_BASE_URL ?? DEFAULT_BACKEND_BASE_URL;

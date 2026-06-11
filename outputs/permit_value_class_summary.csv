@@ -1,0 +1,6 @@
+permit_value_class,permit_count,permit_percentage,avg_permit_signal_score,max_permit_signal_score,map_relevant_count,future_prediction_relevant_count
+unknown_value,22142,34.3681,53.35,88.0,16810,16810
+high_value,16604,25.7722,88.71,100.0,16466,16336
+low_value,14359,22.2876,55.29,88.0,11091,11091
+medium_value,9816,15.2361,71.06,96.0,8888,8887
+major_value,1505,2.336,93.34,100.0,1417,1393

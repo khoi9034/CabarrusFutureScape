@@ -1,0 +1,62 @@
+{
+  "task": "Phase 6 selected parcel 3D cage highlight",
+  "generated_at": "2026-06-04",
+  "backend_modified": false,
+  "postgis_modified": false,
+  "api_contracts_changed": false,
+  "files_changed": [
+    "README.md",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/lib/gis/arcgisRuntime.ts"
+  ],
+  "current_flat_highlight_issue": {
+    "cause": "The selected parcel focus GraphicsLayer used relative-to-ground elevation with a 45 meter offset, and the parcel boundary used a flat simple-fill polygon symbol.",
+    "effect": "The selected parcel boundary could read as a floating sheet in the 3D SceneView."
+  },
+  "symbol_and_elevation_approach": {
+    "focus_layer_elevation": "Changed selected parcel focus layer elevationInfo to on-the-ground.",
+    "highlight_symbol": "Changed selected parcel boundary symbol from simple-fill to polygon-3d with an extrude symbol layer.",
+    "cage_height_meters": 7,
+    "material": "Translucent cyan fill so buildings/property context remain visible.",
+    "edges": "Solid warm-gold edges define footprint, top outline, and vertical cage edges."
+  },
+  "polygon_support": [
+    "Existing GeoJSON Polygon conversion path preserved.",
+    "Existing GeoJSON MultiPolygon conversion path preserved.",
+    "Existing clear-and-replace selected parcel focus layer behavior preserved."
+  ],
+  "preserved_behaviors": [
+    "SceneView.goTo parcel focus",
+    "close-zoom scaled selected parcel marker",
+    "selected parcel card",
+    "selected parcel development activity",
+    "selected parcel permit events",
+    "development hotspot markers",
+    "development hotspot click selection"
+  ],
+  "runtime_cleanup": [
+    "Added ArcGIS reactiveUtils to the local runtime loader.",
+    "Changed parcel focus marker zoom scaling listener from deprecated SceneView.watch to reactiveUtils.watch."
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed"
+  },
+  "manual_smoke_test": {
+    "status": "not_completed",
+    "reason": "The in-app browser automation timed out on navigation while the local dev server remained available.",
+    "dev_url": "http://localhost:3000",
+    "recommended_checks": [
+      "Select a parcel with buildings.",
+      "Confirm the parcel highlight reads as a translucent low cage rather than a flat floating sheet.",
+      "Confirm buildings remain visible through the cage.",
+      "Select another parcel and confirm the old cage clears.",
+      "Confirm hotspot markers still render and click selection still works."
+    ]
+  },
+  "remaining_3d_sceneview_polish": [
+    "Tune cage height and opacity after visual inspection against real parcels with dense building footprints.",
+    "Consider separate ground footprint and top-edge graphics if ArcGIS extrusion edges need finer styling."
+  ]
+}

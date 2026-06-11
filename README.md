@@ -4,9 +4,497 @@ Cabarrus FutureScape (CFS) is the frontend foundation for a Cabarrus County, NC 
 
 ## Current Phase
 
-Phase 5: Frontend API integration, building on completed Parcel Intelligence and Development Activity backend endpoint suites while preserving generated static-output fallback data.
+V1 Product Layout Redesign plus Phase 8A school constraint data foundation,
+building on completed GIS Map Intelligence, Parcel Intelligence, Zoning
+Intelligence, Development Activity, FEMA flood constraint intelligence, permit
+intelligence segmentation, and FastAPI integration.
 
-This phase preserves the futuristic dashboard shell, renders a real ArcGIS `SceneView` in the central viewport, and migrates dashboard surfaces to FastAPI one panel at a time behind `NEXT_PUBLIC_USE_BACKEND_API`. Static/generated artifacts remain the default and fallback mode; the frontend still does not connect directly to PostGIS.
+This cleanup turns the working technical prototype into a cleaner product
+experience for portfolio demonstrations, interviews, and stakeholder
+presentations. Phase 8A adds backend/data-only school attendance-zone ingestion
+and parcel assignment; it does not add school frontend UI, SceneView school
+layers, APIs, forecasting, transportation constraints, or prediction models.
+The goal remains less control clutter and more planning intelligence.
+
+Current product modes:
+
+- `Overview`: default map exploration workspace for parcel search, 3D SceneView,
+  active map layers, selected parcel status, and concise headline metrics.
+- `Due Diligence`: selected parcel deep-dive with parcel summary, development
+  activity, permit timeline, FEMA flood constraints, and map context.
+- `Executive Print`: report-style selected parcel summary with a print button,
+  selected parcel summary, development summary, constraint summary, latest
+  permits, map snapshot placeholder, and executive notes.
+
+Developer-only surfaces:
+
+- `Temporal Analysis`
+- `System Status`
+- role/scenario/report diagnostics
+
+These remain collapsed or hidden unless `NEXT_PUBLIC_CFS_DEVELOPER_MODE=true`
+is configured.
+
+The left rail is now an `Explore / Layers` panel. Map layer controls are
+collapsed by default under `Map Layers`, preserving:
+
+- Development Hotspots
+- Flood Constraints
+- FEMA Flood Zones
+- Infrastructure Readiness
+- Opportunity Extrusions
+
+Advanced planning/readiness/scoring controls are collapsed to reduce visual
+noise.
+
+The bottom KPI bar is reduced to four executive cards:
+
+- Growth Activity
+- Constraint Exposure
+- Development Activity
+- Total Parcels
+
+All existing FastAPI/static fallback behavior, parcel search, parcel focus, 3D
+parcel cage highlight, Development Hotspots, Flood Constraints, FEMA Flood
+Zones, selected parcel flood panel, and permit events remain preserved.
+
+Executive Print uses `window.print()` and print CSS that hides app chrome and
+formats the report on a light/white print surface for readability while keeping
+the on-screen CFS interface dark.
+
+## Permit Intelligence Segmentation
+
+CFS now includes a descriptive permit intelligence segmentation layer for
+Real Property Permit records. This is an interpretable rules-based framework,
+not a prediction model.
+
+Module files:
+
+- `models/permit_intelligence/README.md`
+- `models/permit_intelligence/permit_segmentation_rules.yaml`
+- `models/permit_intelligence/classify_permit_segments.py`
+- `models/permit_intelligence/create_parcel_permit_segment_summary.py`
+
+PostGIS outputs:
+
+- `public.permit_intelligence_segments`
+- `public.parcel_permit_segment_summary`
+
+Generated outputs:
+
+- `outputs/permit_segmentation_validation.json`
+- `outputs/permit_segment_summary.csv`
+- `outputs/permit_growth_signal_summary.csv`
+- `outputs/permit_status_stage_summary.csv`
+- `outputs/permit_value_class_summary.csv`
+- `outputs/permit_segment_by_year_summary.csv`
+- `outputs/permit_segment_examples.csv`
+- `outputs/parcel_permit_segment_summary_validation.json`
+- `outputs/parcel_permit_segment_top_residential_growth.csv`
+- `outputs/parcel_permit_segment_top_commercial_activity.csv`
+- `outputs/parcel_permit_segment_top_redevelopment_signal.csv`
+- `outputs/parcel_permit_segment_top_major_value.csv`
+- `outputs/permit_intelligence_segmentation_summary.json`
+
+Current segmentation result:
+
+- Permit source rows: `64,426`
+- Permit segment rows: `64,426`
+- Unique permit IDs: `64,426`
+- Parcel permit segment summary rows: `43,474`
+- Segment row count matches source row count: `true`
+- Parcel summary rows match matched parcels with permit activity: `true`
+
+Top permit segments:
+
+- `residential_growth`: `42,206`
+- `redevelopment_signal`: `7,866`
+- `administrative_or_unknown`: `5,792`
+- `commercial_activity`: `2,993`
+- `accessory_or_misc`: `2,251`
+- `minor_maintenance`: `1,866`
+- `demolition`: `1,421`
+
+The `permit_signal_score` is a 0-100 descriptive signal score derived from
+permit segment, value class, status stage, and configured keyword rules. It is
+not a prediction probability and should not be exposed as a forecast.
+
+Dashboard/API integration:
+
+- `GET /development/permit-segments/statistics` exposes countywide permit
+  segment, growth signal, status stage, value class, and development domain
+  distributions.
+- `GET /development/permit-segments/{official_parcel_id}` exposes selected
+  parcel permit segment rollups from `public.parcel_permit_segment_summary`.
+- `GET /development/permit-segments/options` exposes lookup values for future
+  dropdown/filter surfaces.
+- `GET /development/parcel/{official_parcel_id}/permits` now includes permit
+  segment, growth signal, status stage, value class, development domain, and
+  signal score fields on each permit event.
+- `GET /development/hotspots` can filter hotspot parcels by permit segment,
+  growth signal, status stage, value class, and development domain while
+  preserving the previous activity class, jurisdiction, time, sort, and limit
+  filters.
+
+Frontend integration:
+
+- The Development Activity section includes a compact `Permit Intelligence
+  Segments` panel so users can distinguish residential growth, commercial
+  activity, redevelopment signals, minor maintenance, demolition, active
+  construction, and high/major value permits.
+- The selected parcel development activity card shows dominant segment,
+  dominant growth signal, active construction, redevelopment, high/major value
+  permits, and max/average signal scores when available.
+- Selected parcel permit event rows show compact segment badges without
+  replacing the underlying permit type, work type, status, amount, or
+  relationship confidence.
+- Development Hotspot controls include segment, growth signal, status stage,
+  and value class filters, and the map legend explains hotspots as meaningful
+  permit intelligence rather than raw permit counts alone.
+
+Prediction readiness is documented in
+`docs/backend/permit_segmentation_and_prediction_readiness.md`. Future
+prediction should wait for audited labels, temporal holdout validation, leakage
+controls, parcel constraint overlays, and stakeholder agreement on target
+definitions.
+
+## Phase 7A FEMA Flood Constraint Ingestion
+
+Phase 7A creates the first production-ready flood constraint source pipeline.
+It avoids nationwide FEMA downloads by calculating the Cabarrus footprint from
+`public.parcels_enriched` with `ST_Extent(geometry)` and sending that envelope
+to FEMA NFHL Layer 28 with `esriSpatialRelIntersects`.
+
+FEMA source:
+
+- Layer: FEMA NFHL Flood Hazard Zones, Layer 28
+- URL: `https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28`
+- Role: authoritative regulatory floodplain/floodway constraint source
+
+Pipeline files:
+
+- `cfs-data-pipelines/inspect/inspect_cabarrus_extent.py`
+- `cfs-data-pipelines/ingest/ingest_fema_nfhl_flood_zones.py`
+- `cfs-data-pipelines/inspect/inspect_fema_nfhl_flood_zones.py`
+- `cfs-data-pipelines/sql/create_fema_nfhl_flood_zones_clean.sql`
+- `cfs-data-pipelines/transform/create_fema_nfhl_flood_zones_clean.py`
+
+PostGIS tables:
+
+- `public.fema_nfhl_flood_zones_raw`
+- `public.fema_nfhl_flood_zones_clean`
+
+Generated outputs:
+
+- `cfs-data-pipelines/outputs/cabarrus_extent_validation.json`
+- `cfs-data-pipelines/outputs/fema_nfhl_flood_zone_ingest_summary.json`
+- `cfs-data-pipelines/outputs/fema_nfhl_flood_zones_profile.json`
+- `cfs-data-pipelines/outputs/fema_nfhl_flood_zones_columns.csv`
+- `cfs-data-pipelines/outputs/fema_nfhl_flood_zone_clean_validation.json`
+- `outputs/phase7a_fema_flood_ingestion_summary.json`
+
+Current Phase 7A result:
+
+- Cabarrus envelope: `xmin=-80.78714859986353`, `ymin=35.185001484384316`,
+  `xmax=-80.29542844362561`, `ymax=35.55345527610693`
+- Parcel count used for extent: `110,017`
+- Raw FEMA feature count: `7,712`
+- Clean FEMA feature count: `7,712`
+- Raw invalid geometries: `195`
+- Clean invalid geometries: `0`
+- Clean geometry type: `ST_MultiPolygon`
+- Clean SRID: `4326`
+
+Discovered FEMA fields:
+
+- Flood zone code: `FLD_ZONE`
+- Floodway/subtype context: `ZONE_SUBTY`
+- Special Flood Hazard Area flag: `SFHA_TF`
+- Additional zone field present but empty in this extract: `DUAL_ZONE`
+
+Normalized flood severity mapping:
+
+- `floodway` -> `severe`
+- `special_flood_hazard_area` -> `high`
+- `moderate_flood_hazard` -> `moderate`
+- `minimal_flood_hazard` -> `low`
+
+Phase 7A does not create parcel flood overlay results, frontend flood panels,
+SceneView flood layers, TIFF comparison, or forecasting. The next phase is
+Phase 7B: Parcel Flood Constraint Overlay.
+
+## Phase 7B Parcel Flood Constraint Overlay
+
+Phase 7B creates one parcel-level flood constraint row for every parcel in
+`public.parcels_enriched`.
+
+Core files:
+
+- `cfs-data-pipelines/sql/create_parcel_flood_constraint_overlay.sql`
+- `cfs-data-pipelines/transform/create_parcel_flood_constraint_overlay.py`
+
+PostGIS table:
+
+- `public.parcel_flood_constraint_overlay`
+
+Generated outputs:
+
+- `outputs/parcel_flood_constraint_overlay_validation.json`
+- `outputs/parcel_flood_constraint_summary.csv`
+- `outputs/parcel_flood_constraint_high_review.csv`
+- `outputs/phase7b_parcel_flood_overlay_summary.json`
+
+Overlay logic:
+
+- Intersects `public.parcels_enriched` with
+  `public.fema_nfhl_flood_zones_clean`.
+- Calculates intersection area in acres using geography.
+- Aggregates all flood overlaps per parcel.
+- Assigns `dominant_flood_zone` by largest overlapped area.
+- Assigns parcel severity from the highest-risk overlap:
+  `floodway=severe`, `special_flood_hazard_area=high`,
+  `moderate_flood_hazard=moderate`, `minimal_flood_hazard=low`,
+  no overlap=`none`.
+- Separates review/scoring from low-risk Zone X so minimal flood mapping does
+  not become a fake regulatory development constraint.
+
+Current Phase 7B result:
+
+- Overlay rows: `110,017`
+- Parcel rows matched: `110,017`
+- Invalid overlay geometries: `0`
+- Output SRID: `4326`
+- Floodplain present: `8,661`
+- Floodway present: `3,229`
+- SFHA present: `7,254`
+- Flood review required: `7,989`
+- High/severe buildability impact: `6,362`
+
+Severity distribution:
+
+- `low`: `101,356`
+- `high`: `4,025`
+- `severe`: `3,229`
+- `moderate`: `1,407`
+
+Important caveat:
+
+FEMA Layer 28 maps Zone X across most parcels, so `minimal_flood_present` is
+widespread and `no_flood_constraint_count` is `0` if any FEMA zone overlap is
+counted. CFS should treat Zone X as low-risk mapped context, while SFHA,
+floodway, and meaningful moderate-hazard overlap drive review and buildability
+impact.
+
+Phase 7B does not add frontend flood panels, SceneView flood rendering,
+FastAPI constraint endpoints, TIFF comparison, or prediction models. The next
+step is flood constraint API planning and dashboard-safe display review.
+
+## Phase 7C Flood Constraint API Contract
+
+Phase 7C creates backend planning artifacts for future flood constraint API
+implementation. It does not build FastAPI endpoints, frontend panels,
+SceneView flood rendering, TIFF comparison, or forecasting.
+
+Created docs:
+
+- `docs/backend/flood_constraint_api_contract.md`
+- `docs/backend/flood_constraint_data_dictionary.md`
+- `docs/backend/flood_constraint_response_examples.md`
+
+Generated output:
+
+- `outputs/phase7c_flood_constraint_api_contract_summary.json`
+
+Planned endpoints:
+
+- `GET /constraints/flood/statistics`
+- `GET /constraints/flood/{official_parcel_id}`
+- `GET /constraints/flood/filter`
+- `GET /constraints/flood/high-review`
+- `GET /constraints/flood/summary`
+
+Required filter fields:
+
+- `floodplain_present`
+- `floodway_present`
+- `sfha_present`
+- `moderate_flood_present`
+- `flood_review_required`
+- `buildability_impact`
+- `flood_severity_class`
+- `dominant_flood_zone`
+- percent constrained min/max
+
+Recommended parcel flood detail payload:
+
+- parcel identity: `official_parcel_id`, `pin14`
+- FEMA zone context: `dominant_flood_zone`, `flood_zone_codes`
+- flags: `floodplain_present`, `floodway_present`, `sfha_present`
+- area metrics: constrained acres, floodway acres, SFHA acres, percent
+  constrained
+- review/scoring: `flood_review_required`, `buildability_impact`,
+  `flood_constraint_score`, `overlay_confidence`
+
+Backend readiness:
+
+- Source table ready: `public.parcel_flood_constraint_overlay`
+- Contract docs ready
+- Response examples ready
+- API implementation complete in Phase 7D
+- Frontend and SceneView integration pending
+
+## Phase 7D Flood Constraint FastAPI Endpoints
+
+Phase 7D implements the planned flood constraint endpoints as read-only FastAPI
+routes backed by `public.parcel_flood_constraint_overlay`.
+
+Created backend files:
+
+- `backend/app/routers/constraints_router.py`
+- `backend/app/repositories/constraints_repository.py`
+- `backend/app/services/constraints_service.py`
+- `backend/app/schemas/constraints.py`
+- `backend/tests/test_flood_constraints.py`
+
+Implemented endpoints:
+
+- `GET /constraints/flood/statistics`
+- `GET /constraints/flood/{official_parcel_id}`
+- `GET /constraints/flood/filter`
+- `GET /constraints/flood/high-review`
+- `GET /constraints/flood/summary`
+
+Supported filters:
+
+- `floodplain_present`
+- `floodway_present`
+- `sfha_present`
+- `moderate_flood_present`
+- `flood_review_required`
+- `buildability_impact`
+- `flood_severity_class`
+- `dominant_flood_zone`
+- `percent_constrained_min`
+- `percent_constrained_max`
+
+Current global endpoint metrics:
+
+- Total parcels: `110,017`
+- Floodway parcels: `3,229`
+- SFHA parcels: `7,254`
+- Flood review required parcels: `7,989`
+- High/severe buildability parcels: `6,362`
+
+Phase 7D does not modify the frontend, SceneView, PostGIS schema, school
+constraints, or forecasting.
+
+## Phase 7E Frontend Flood Constraint Integration
+
+Phase 7E connects the completed flood constraint FastAPI endpoints to the
+frontend while preserving the existing parcel search/detail, map focus,
+selected parcel boundary highlight, and Development Hotspots behavior.
+
+Created frontend files:
+
+- `src/lib/api/constraints.ts`
+- `src/types/api/constraints.ts`
+- `src/hooks/useSelectedParcelFloodConstraint.ts`
+- `src/hooks/useFloodConstraintSummary.ts`
+- `src/hooks/useFloodConstraintLayer.ts`
+- `src/lib/adapters/selectedParcelFloodConstraintAdapter.ts`
+- `src/lib/adapters/floodConstraintSummaryAdapter.ts`
+- `src/lib/adapters/floodConstraintMapAdapter.ts`
+- `src/types/map/floodConstraints.ts`
+- `src/components/dashboard/SelectedParcelFloodConstraintPanel.tsx`
+- `src/components/dashboard/FloodConstraintSummaryPanel.tsx`
+
+Frontend behavior:
+
+- The selected parcel workflow now shows a compact FEMA flood constraint panel
+  with dominant flood zone, floodway/SFHA flags, percent constrained, review
+  status, buildability impact, severity class, and constraint score.
+- The old disabled/mock `Flood Risk` layer row is repurposed as
+  `Flood Constraints` with FEMA NFHL / API status.
+- The flood layer is off by default. When enabled, it calls
+  `GET /constraints/flood/high-review`, limits rendering to high-review
+  parcels, enriches those records with existing parcel `map_focus` centroids,
+  and draws temporary SceneView markers.
+- Flood markers use color, size, and shape to communicate FEMA constraint
+  meaning. Red triangles mean severe/floodway, orange kites mean high/SFHA, and
+  yellow circles mean moderate flood constraint review. Low/minimal records are
+  not rendered in the default high-review layer.
+- Marker size grows with `flood_constraint_score` or
+  `percent_parcel_constrained`, whichever is stronger for the selected record.
+  Clicking a marker dispatches the existing parcel inspect flow so the selected
+  parcel card, map focus, parcel boundary highlight, development activity, and
+  permit events update normally.
+- Clicking a flood marker opens a compact movable flood constraint info card
+  with parcel ID, zone, floodway/SFHA flags, percent constrained, buildability
+  impact, severity, and score while still reusing the selected parcel workflow.
+- The Parcel Intelligence section now includes a compact countywide flood
+  summary from `GET /constraints/flood/summary`.
+
+Phase 7E does not modify PostGIS schema, build forecasting, use the old TIFF as
+the primary source, render all parcels, or start school constraints. Remaining
+flood UI work includes richer filtering for the flood layer, optional selected
+parcel flood geometry display, and dedicated constraint dashboard placement.
+
+## Phase 7F FEMA Flood Zone Polygon Visualization
+
+Phase 7F adds FEMA NFHL Layer 28 polygon visualization as a separate map layer
+from parcel-based Flood Constraints markers.
+
+Layer separation:
+
+- `Flood Constraints`: parcel-based review intelligence, high-review parcel
+  markers, and selected parcel flood detail.
+- `FEMA Flood Zones`: official FEMA NFHL Layer 28 source polygons, transparent
+  map reference, and zone-focused inspection.
+
+Backend endpoint:
+
+- `GET /constraints/flood/zones`
+
+Supported backend parameters:
+
+- `flood_severity_class`: `severe`, `high`, or `moderate`.
+- `flood_constraint_type`: normalized FEMA constraint type, such as
+  `floodway` or `special_flood_hazard_area`.
+- `extent`: optional WGS84 envelope in `xmin,ymin,xmax,ymax` format.
+- `limit`: default `500`, max `1000`; `limit=0` is only accepted with an
+  extent and returns all matching polygons for that visible extent.
+- `offset`: default `0`.
+
+Frontend behavior:
+
+- The Layer Registry now includes a separate `FEMA Flood Zones` row under
+  Risk, labeled as official FEMA NFHL Layer 28 polygons with API status.
+- The layer is off by default. When enabled, it uses
+  `GET /constraints/flood/zones` and renders a dedicated SceneView graphics
+  layer: `cfs-fema-flood-zones-layer`.
+- The layer does not select parcels. Clicking a FEMA polygon opens an
+  informational zone card with flood zone code, severity, constraint type,
+  FEMA area ID, source object ID, and source layer.
+- Polygon styling uses transparent fills and visible outlines:
+  red for severe/floodway, orange for high/SFHA, yellow for moderate, and
+  light blue-gray for minimal/low context.
+- Controls support severity filtering and capped loading of `100`, `500`, or
+  visible-extent polygons.
+
+Performance approach:
+
+- Do not render all Cabarrus FEMA polygons by default.
+- Use capped API requests by default.
+- Use extent-based loading for the visible extent mode.
+- Toggle-off clears only the `cfs-fema-flood-zones-layer` and preserves parcel
+  focus, selected parcel boundary cages, flood review markers, and Development
+  Hotspots.
+
+Phase 7F does not modify PostGIS schema, rebuild the flood overlay, use the old
+TIFF as the primary source, build forecasting, or start school constraints.
+Remaining flood UI work includes viewport-driven refresh polish, optional
+simplification/level-of-detail for dense polygon views, and richer flood zone
+filter presets.
 
 ## Tech Stack
 
@@ -18,6 +506,26 @@ This phase preserves the futuristic dashboard shell, renders a real ArcGIS `Scen
 - ArcGIS Maps SDK for JavaScript installed via `@arcgis/core`
 
 ## Run Locally
+
+For the full API-backed CFS prototype, use the guarded local launcher. It
+starts/restarts both FastAPI and Next.js, writes the local frontend API flag,
+then verifies the parcel, development, flood constraint, and FEMA flood zone
+API endpoints before reporting the app ready:
+
+```powershell
+npm run dev:cfs
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+This keeps the frontend from appearing healthy while the FastAPI process is
+stale or unavailable.
+
+Frontend-only static mode is still available:
 
 ```bash
 npm install
@@ -654,7 +1162,7 @@ Parcel Search API behavior:
 - Queries of three or more characters call `GET /parcels/search` when `NEXT_PUBLIC_USE_BACKEND_API=true`.
 - Supported backend filters are passed through for zoning jurisdiction, zoning category, parcel quality status, zoning confidence, and valuation band.
 - When a text search is active, subdivision, neighborhood, zoning code, parcel size, safe-for-dashboard, and governance warning filters remain client-side filters over the normalized result set.
-- Selected search results still open the existing parcel detail drawer; no map focus or SceneView selection is connected yet.
+- Selected search results still open the existing parcel detail drawer and can dispatch SceneView-safe map focus when backend `map_focus` data is available.
 
 Parcel Filter API behavior:
 
@@ -700,52 +1208,190 @@ Parcel Detail API behavior:
 - If the backend request fails, times out, returns `404`, or returns an invalid shape, the drawer keeps rendering the static selected parcel record and shows a non-blocking fallback status.
 - Backend-enriched detail fields include `objectid_1`, market value, assessed value, valuation band, parcel size category, parcel quality status, zoning jurisdiction/code/category/confidence, governance warnings, safe-for-dashboard status, and planning jurisdiction.
 
+Selected Parcel card behavior:
+
+- `src/components/dashboard/ParcelSummaryPanel.tsx` now uses the selected Parcel Discovery record instead of the old mock parcel summary.
+- When FastAPI detail hydration succeeds, the card displays real selected parcel intelligence: official parcel ID, PIN14, owner/account label when available, subdivision, neighborhood, zoning jurisdiction/code/category/confidence, assessed value, market value, valuation band, parcel size category, parcel quality status, safe-for-dashboard status, and governance warning categories.
+- When backend detail is unavailable, the card preserves the selected static/search record and marks the source as static or fallback.
+- When no parcel is selected, the card shows a clean empty state: “No parcel selected” and “Search and select a parcel to view live parcel intelligence.”
+- `src/components/dashboard/SelectedParcelDevelopmentActivityPanel.tsx` now appears below the selected parcel card and shows real matched Real Property Permit activity for the active parcel when available.
+- When `NEXT_PUBLIC_USE_BACKEND_API=true`, the panel requests `GET /development/hotspots?official_parcel_id={official_parcel_id}&limit=1` and displays total permits, latest permit date/status, dominant permit type, dominant work type, activity class, recent 1-year and 3-year counts, permit amount totals, first permit year, latest permit year, and active permit-year count.
+- If the selected parcel has no activity row, the panel says “Development activity not yet available for this parcel.” If the backend is unavailable, it falls back only to generated top-activity parcel artifacts when the selected parcel is present there.
+- `src/components/dashboard/SelectedParcelPermitEventsPanel.tsx` now appears below the selected parcel development activity card and lists the latest real permit events tied to the active parcel.
+- When `NEXT_PUBLIC_USE_BACKEND_API=true`, the permit event panel requests `GET /development/parcel/{official_parcel_id}/permits` and displays date, permit type, work type, status, permit amount, permit number/ID, and relationship confidence for the latest 10 events.
+- Permit event rows use `public.real_property_permit_parcel_relationship` through the backend endpoint. There is no static permit-event fallback and no use of the old 2015 `permit_activity_clean` pilot layer.
+- Speculative demo metrics such as development pressure, infrastructure readiness, redevelopment potential, and tax opportunity are no longer shown as selected-parcel facts.
+
+Intelligence Panel structure:
+
+- `src/components/dashboard/IntelligencePanel.tsx` is organized behind a full-width section selector so the narrow right rail can scale beyond five intelligence modules without truncated horizontal tabs.
+- The default `Overview` section now focuses on the selected parcel workflow: selected parcel card, selected parcel development activity, selected parcel permit events, and three compact countywide headline cards for total parcels, zoned parcels, and parcels with permit activity.
+- When no parcel is selected, selected-parcel-specific activity and permit event panels stay in a `Waiting for parcel selection` state and do not request selected-parcel APIs.
+- The `Parcel Intelligence` section contains Parcel Discovery/Search/Filter, the full Phase 2 parcel core metrics panel, zoning distribution, governance warnings, and parcel quality panels.
+- The `Development Activity` section contains the full Phase 3 development activity metrics panel, development trend, hotspot summary, and zoning-development summary panels. The real Development Hotspots map toggle remains in the visible Operational Layers registry, not inside the Intelligence Panel.
+- The `Temporal Analysis` section contains the temporal analysis, filters, trend summary, and query preview surface.
+- The `System Status` section contains API/static mode status, scenario snapshot, executive briefing/report surfaces, role intelligence, operational events, mock parcel watchlist, and remaining mock/static caveats.
+- The panel header and System Status section show whether the dashboard is running in FastAPI-backed mode or generated static fallback mode. API-integrated panels still preserve their independent static fallback behavior.
+
 ## Phase 6 GIS Map Intelligence
 
-Phase 6 has started with map-safe parcel focus and highlight readiness. This is the first bridge between real parcel discovery/detail records and the ArcGIS SceneView experience, but it does not zoom, highlight, replace mock graphics, or mutate the current SceneView layer system yet.
+Phase 6 has started with a map-safe parcel focus bridge between real parcel detail responses and the ArcGIS SceneView. Backend parcel detail now returns governed `map_focus` centroid and extent fields, plus opt-in `highlight_geometry` for selected parcel boundary display. The frontend can zoom the SceneView, draw a lightweight temporary focus marker, and outline the actively selected parcel without replacing the existing mock GraphicsLayer system.
 
 Core files:
 
-- `src/types/map/parcelFocus.ts` defines the parcel map focus contract, optional centroid, extent, geometry, focus source, and focus status.
-- `src/hooks/useParcelMapFocus.ts` owns selected parcel focus state, clear behavior, readiness status, and geometry-missing fallback state.
-- `src/lib/map/parcelMapFocus.ts` validates whether a parcel focus request has enough spatial information to become a future SceneView action.
+- `src/types/map/parcelFocus.ts` defines the parcel map focus contract, optional centroid, extent, selected-parcel highlight geometry, focus source, and focus status.
+- `src/hooks/useParcelMapFocus.ts` owns selected parcel focus state, clear behavior, readiness status, focus request dispatch, and SceneView result handling.
+- `src/lib/map/parcelMapFocus.ts` validates whether a parcel focus request has enough spatial information and emits typed focus request/result events.
+- `src/lib/adapters/parcelDetailAdapter.ts` maps backend `map_focus.centroid`, `map_focus.extent`, and opt-in `highlight_geometry` into the frontend `ParcelMapFocus` contract.
 - `src/components/dashboard/ParcelSearchPanel.tsx` now creates a parcel focus object when a parcel result is selected from search or command inspection.
-- `src/components/dashboard/ParcelDetailDrawer.tsx` surfaces map focus status alongside FastAPI/static detail source status.
+- `src/components/dashboard/ParcelDetailDrawer.tsx` requests `GET /parcels/{official_parcel_id}?include_geometry=true` after a parcel result is selected, hydrates map focus from backend parcel detail, and surfaces focus status alongside FastAPI/static detail source status.
+- `src/components/gis/SceneViewContainer.tsx` listens for parcel focus requests, calls `SceneView.goTo()` with centroid/extent targets, converts selected parcel GeoJSON `Polygon` or `MultiPolygon` into ArcGIS polygon rings, and maintains a non-destructive temporary focus marker/cage highlight layer.
+- `src/hooks/useDevelopmentHotspotLayer.ts` loads map-safe hotspot marker candidates from `GET /development/hotspots?permit_segment={selected_segment}&limit=100` only when the layer toggle is enabled and a permit segment has been selected.
+- `src/lib/adapters/developmentHotspotMapAdapter.ts` converts backend hotspot rows into map marker objects only when real centroid coordinates are present.
+- `src/types/map/developmentHotspots.ts` defines the temporary hotspot layer state, marker contract, and layer status labels.
 
-Current geometry status:
+Current map focus status:
 
-- The current frontend `ParcelDetailResponse` type does not include centroid, extent, or geometry.
-- The current FastAPI `GET /parcels/{official_parcel_id}` route does not expose `include_geometry` or `geometry_format` query parameters yet.
-- Backend planning documents already describe future centroid/GeoJSON support, but the implemented response is still attribute-only.
-- Because no governed spatial payload is available, real parcel selections show `Map focus pending geometry`.
+- `GET /parcels/{official_parcel_id}` can provide `map_focus.centroid.longitude`, `map_focus.centroid.latitude`, `map_focus.extent`, and `spatial_reference.wkid = 4326`.
+- `GET /parcels/{official_parcel_id}?include_geometry=true` can also provide lightweight `highlight_geometry` for the selected parcel only.
+- Typing/searching alone does not request or draw parcel boundaries. A boundary is highlighted only after the user clicks/selects a parcel result.
+- When backend focus data and highlight geometry are available, parcel detail hydration dispatches a SceneView-safe focus request and the drawer can move from `Map focus ready` to `Parcel boundary highlighted`.
+- Selected parcel boundaries render as a low translucent 3D cage/extrusion tied to ground placement instead of a flat offset fill. The cage keeps the parcel footprint readable in SceneView while letting buildings and property context remain visible through the highlight.
+- If geometry is unavailable but centroid/extent exists, the SceneView keeps zoom and marker behavior and reports `Focused on map - boundary unavailable`.
+- If backend focus data is missing, unavailable, or the SceneView is not ready, the drawer falls back to `Map focus pending geometry` or `Map focus failed` without breaking the dashboard.
 
-Safe no-op behavior:
+Development hotspot map status:
+
+- The visible `Permit Activity` row in the layer registry is repurposed and labeled as `Development Hotspots` when backend API mode is enabled. It controls the real temporary hotspot overlay instead of the old disabled mock permit layer.
+- The `Development Hotspots` layer registry toggle is off by default.
+- When enabled in backend API mode, the layer first asks the user to choose a
+  permit segment. No generic all-permit markers are rendered until a segment is
+  selected.
+- The primary control is `Show permit concentration by`, with residential
+  growth, commercial activity, redevelopment signal, minor maintenance,
+  demolition, industrial activity, and institutional activity options.
+- Segment selection calls the real development hotspots endpoint with
+  `permit_segment={selected_segment}` and renders only parcels relevant to that
+  selected segment in a dedicated `cfs-development-hotspots-layer`.
+- Secondary filters for activity class, recent activity window, zoning
+  jurisdiction, growth signal, status stage, value class, sort order, and result
+  limit are collapsed under `Advanced filters`. Filter changes refetch
+  `GET /development/hotspots` and clear/re-render the temporary marker layer.
+- The hotspot layer also listens to the shared Temporal Analysis state. When the Temporal Analysis panel selects a year, month, date range, or rolling 12/36-month window, the hotspot request automatically includes `year`, `month`, `date_start`, `date_end`, and/or `rolling_window` so map markers reflect the active time context while preserving manual hotspot permit segment, activity class, jurisdiction, sort, and limit controls.
+- The layer row displays the active temporal context, such as `2025 activity context` or `Rolling 12 month activity context`, and reports an empty state when no hotspots match the temporal filters.
+- The hotspot row includes a simplified selected-segment legend. Color and shape
+  match the chosen permit segment, while marker size uses three tiers based on
+  selected segment permit concentration.
+- Hotspot marker clicks disable the default ArcGIS popup and show a custom draggable map-overlay info card away from the top-center parcel focus beacon. The card shows parcel ID, PIN, selected permit segment, selected segment permit count, total permit count, recent 1-year permits, recent 3-year permits, activity class, dominant segment, growth signal, planning domain, high/major value permit counts, zoning jurisdiction, and zoning code.
+- The hotspot layer does not use generated static artifacts because those do not carry map-safe coordinates. If the backend is unavailable or no coordinates are present, the UI reports an unavailable state and draws nothing.
+- Hotspot marker clicks dispatch the existing parcel inspection event, so selected parcel detail hydration, selected parcel card updates, parcel boundary highlight, development activity, and permit event panels all reuse the same selected parcel flow.
+- The layer clears all hotspot graphics when the toggle is disabled and never adds a permanent parcel or permit layer.
+
+Safe SceneView behavior:
 
 - Parcel selections create `ParcelMapFocus` objects with official parcel ID, PIN14, and focus source.
-- If centroid, extent, and geometry are missing, `resolveParcelMapFocus()` returns a no-op result instead of touching ArcGIS runtime objects.
-- Existing mock GraphicsLayers, mock parcel highlights, layer toggles, hit-test behavior, and SceneView lifecycle remain unchanged.
-
-Next backend/data requirement for true parcel highlight:
-
-1. Add a governed backend map-focus response for `GET /parcels/{official_parcel_id}` or a dedicated parcel focus endpoint.
-2. Return at least parcel centroid in EPSG:4326, preferably with a lightweight extent.
-3. Optionally support simplified display geometry or GeoJSON behind `geometry_format=geojson`.
-4. Keep list/search responses geometry-light by default.
-5. Only after that, connect the SceneView bridge to zoom and draw a non-destructive highlight overlay.
+- If centroid, extent, and highlight geometry are missing, `resolveParcelMapFocus()` returns a no-op result instead of touching ArcGIS runtime objects.
+- The focus marker and selected parcel boundary live in a dedicated hidden `cfs-parcel-focus-layer`, so existing mock GraphicsLayers, mock parcel hit-tests, layer toggles, and selection symbols remain unchanged.
+- Development hotspot markers live in a separate hidden `cfs-development-hotspots-layer`, keeping hotspot rendering independent from selected parcel focus graphics.
+- The focus layer is cleared during SceneView cleanup and is recreated only inside the client-side ArcGIS lifecycle.
+- Each new selected parcel clears the previous marker/boundary before rendering the new one. Search result lists are never highlighted as a group.
+- The selected parcel focus marker scales with SceneView zoom. It remains prominent when zoomed out, then becomes a smaller translucent ring at close parcel zooms so it does not obscure the selected parcel boundary highlight.
 
 Future path:
 
-- Parcel centroid endpoint or detail geometry option
-- SceneView parcel zoom and highlight overlay
-- Development permit hotspot layer
 - Temporal map filtering and playback
+- Permit hotspot heat/cluster styling after map extent and performance guardrails are defined
+
+## Phase 8A School Constraint Ingestion
+
+Phase 8A creates the school constraint data foundation. It ingests school
+reference points and elementary/middle/high attendance-zone polygons, then
+assigns parcels by attendance-zone polygon overlap. It does not build frontend
+school panels, SceneView school layers, FastAPI school endpoints, capacity
+scoring, or forecasting.
+
+Source layers:
+
+- Elementary School Attendance Zones: `https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/140`
+- Middle School Attendance Zones: `https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/141`
+- High School Attendance Zones: `https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/142`
+- School Reference Points: `https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/144`
+
+Core pipeline files:
+
+- `cfs-data-pipelines/ingest/ingest_school_reference_points.py`
+- `cfs-data-pipelines/ingest/ingest_school_attendance_zones.py`
+- `cfs-data-pipelines/sql/create_parcel_school_assignment.sql`
+- `cfs-data-pipelines/transform/create_parcel_school_assignment.py`
+- `cfs-data-pipelines/sql/create_school_capacity_placeholder.sql`
+- `cfs-data-pipelines/transform/create_school_capacity_placeholder.py`
+- `cfs-data-pipelines/sql/create_parcel_school_summary.sql`
+- `cfs-data-pipelines/transform/create_parcel_school_summary.py`
+
+PostGIS outputs:
+
+- `public.school_reference_raw`
+- `public.school_reference`
+- `public.school_zones_elementary_raw`
+- `public.school_zones_middle_raw`
+- `public.school_zones_high_raw`
+- `public.school_zones`
+- `public.parcel_school_assignment`
+- `public.school_capacity`
+- `public.parcel_school_summary`
+
+Current Phase 8A results:
+
+- school reference raw rows: `53`
+- clean school reference rows: `53`
+- public elementary/middle/high school references included in CFS V1: `41`
+- clean school attendance zones: `44`
+- school zone names needing reference QA: `6`
+- parcel school assignment rows: `110,017`
+- parcel school summary rows: `110,017`
+- school capacity rows: `0`
+- non-null school constraint scores: `0`
+
+Assignment rules:
+
+- School point distance is not used.
+- Parcel assignments use attendance-zone polygon overlap.
+- For each parcel and school level, the largest overlap area wins.
+- Missing, ambiguous, and non-exact reference matches are preserved as QA flags.
+- Private, magnet, and Other/non elementary-middle-high school records are
+  preserved in raw/QA outputs but excluded from CFS V1 assignment outputs.
+
+Capacity status:
+
+- `public.school_capacity` is intentionally empty.
+- `public.parcel_school_summary.school_constraint_score` remains `NULL`.
+- `school_constraint_class` remains `not_scored`.
+- Real capacity/enrollment data is required before school capacity scoring can
+  be exposed.
+
+Generated outputs:
+
+- `outputs/school_reference_validation.json`
+- `outputs/school_reference_included_excluded_summary.csv`
+- `outputs/school_zones_validation.json`
+- `outputs/school_zone_match_qa.csv`
+- `outputs/school_zone_unmatched_names.csv`
+- `outputs/parcel_school_assignment_validation.json`
+- `outputs/parcel_school_assignment_warnings.csv`
+- `outputs/parcel_school_summary_validation.json`
+- `outputs/phase8a_school_constraint_ingestion_summary.json`
+
+Planning docs:
+
+- `docs/constraints/school_constraint_strategy.md`
+- `docs/backend/school_constraint_data_dictionary.md`
 
 ## Dashboard State Architecture
 
 Dashboard interaction state is exposed through `useDashboardState`, but the implementation is split into smaller hooks:
 
 - `useLayerVisibility` controls active operational layer IDs and validates them against the layer registry.
-- `useSelectedParcel` tracks the selected parcel, selection source, and clear/select actions.
+- `useSelectedParcel` tracks selected parcel IDs, mock SceneView selections, real/static selected parcel intelligence records, source status, and clear/select actions.
 - `useScenarioState` owns the active scenario horizon, simulation year, and intensity.
 - `useMapInteractionState` owns SceneView status and error state.
 - `useRoleState` owns the active frontend stakeholder role and role preset metadata.
@@ -762,6 +1408,6 @@ The public dashboard API remains simple for UI components, while the internals a
 
 ## Next Step
 
-Next planned task: Phase 6 Parcel Centroid API and Highlight Pilot.
+Next planned task: Phase 6 Temporal Map Filter Readiness.
 
-That task should add governed parcel centroid or lightweight extent support to the backend, then connect a non-destructive SceneView zoom/highlight overlay that leaves mock graphics, layer toggles, and static/API fallback behavior intact.
+That task should prepare SceneView-safe time-filtered map requests and layer-state boundaries while keeping animated playback separate.

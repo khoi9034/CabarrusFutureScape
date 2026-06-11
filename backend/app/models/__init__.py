@@ -1,5 +1,7 @@
 from app.models.development import (
     DevelopmentActivityParcelSummary,
+    ParcelPermitSegmentSummary,
+    PermitIntelligenceSegment,
     RealPropertyPermitParcelRelationship,
 )
 from app.models.parcel import (
@@ -12,8 +14,10 @@ from app.models.parcel import (
 __all__ = [
     "Base",
     "DevelopmentActivityParcelSummary",
+    "ParcelPermitSegmentSummary",
     "ParcelEnriched",
     "ParcelZoningIntelligenceQA",
     "ParcelZoningOverlayV2",
+    "PermitIntelligenceSegment",
     "RealPropertyPermitParcelRelationship",
 ]

@@ -1,0 +1,95 @@
+{
+  "phase": "frontend_top_search_parcel_flow_fix",
+  "status": "completed",
+  "root_cause": "The top navigation search input was still a read-only command-palette trigger after the V1 layout cleanup. It did not call the parcel search API or dispatch the selected parcel hydration/map focus pipeline.",
+  "files_changed": [
+    "src/components/layout/TopNav.tsx"
+  ],
+  "top_search_behavior": {
+    "minimum_query_length": 3,
+    "api_mode_endpoint": "GET /parcels/search",
+    "api_query_example": "GET http://127.0.0.1:8000/parcels/search?q=CFS-PARCEL-0149726579&limit=8&offset=0",
+    "static_fallback": "Uses the existing static parcel search index through searchParcelIndex when NEXT_PUBLIC_USE_BACKEND_API is false or when the API request fails.",
+    "dropdown_states": [
+      "Searching parcels...",
+      "No parcels found.",
+      "API Search",
+      "Static Search",
+      "Static fallback",
+      "Parcel search unavailable/error"
+    ],
+    "result_fields": [
+      "official_parcel_id",
+      "pin14",
+      "owner/account name",
+      "mailing address",
+      "neighborhood",
+      "subdivision",
+      "zoning jurisdiction",
+      "zoning code",
+      "zoning category"
+    ]
+  },
+  "selection_behavior": {
+    "detail_endpoint": "GET /parcels/{official_parcel_id}?include_geometry=true",
+    "detail_example": "GET http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579?include_geometry=true",
+    "selected_state": "Reuses setSelectedParcelIntelligence from the shared dashboard state.",
+    "map_focus": "Normalizes backend map_focus/highlight_geometry and dispatches the existing parcel map focus request so SceneView zoom/cage behavior can run.",
+    "duplicate_state_created": false
+  },
+  "preserved_behavior": [
+    "Parcel Intelligence section search/filter remains available",
+    "Selected parcel card uses the shared selected parcel state",
+    "Selected parcel development activity panel remains tied to selected parcel state",
+    "Selected parcel permit events remain tied to selected parcel state",
+    "Selected parcel flood panel remains tied to selected parcel state",
+    "Development Hotspots layer remains unchanged",
+    "Flood Constraints layer remains unchanged",
+    "FEMA Flood Zones layer remains unchanged",
+    "Static fallback behavior remains available"
+  ],
+  "runtime_checks": {
+    "frontend": {
+      "url": "http://localhost:3000",
+      "status": 200
+    },
+    "backend_health": {
+      "url": "http://127.0.0.1:8000/health",
+      "status": 200
+    },
+    "parcel_search": {
+      "url": "http://127.0.0.1:8000/parcels/search?q=CFS-PARCEL-0149726579&limit=1",
+      "status": 200
+    },
+    "parcel_detail": {
+      "url": "http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579?include_geometry=true",
+      "status": 200,
+      "map_focus_present": true,
+      "highlight_geometry_present": true
+    }
+  },
+  "ui_smoke_check": {
+    "page_loaded": true,
+    "top_search_input_present": true,
+    "search_result_observed": "CFS-PARCEL-0149726579 / 45896367300000 / MALL AT CONCORD MILLS LP",
+    "result_click_observed": true,
+    "selected_parcel_card_updated": true,
+    "detail_request_observed": true,
+    "note": "A final post-build in-app browser text-entry retry was blocked by the browser automation virtual clipboard, but the page/input, endpoints, and previously observed UI search/detail click path were verified."
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed"
+  },
+  "local_runtime": {
+    "frontend_restarted": true,
+    "frontend_url": "http://localhost:3000",
+    "backend_url": "http://127.0.0.1:8000",
+    "api_mode_expected": "NEXT_PUBLIC_USE_BACKEND_API=true"
+  },
+  "remaining_notes": [
+    "Full visual confirmation of SceneView movement should be checked manually in the live browser because the final automated text-entry pass was limited by browser tooling.",
+    "The top search now uses the same selected parcel pipeline as the rest of the app, so fixes to selected parcel focus/detail behavior remain centralized."
+  ]
+}

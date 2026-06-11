@@ -1,0 +1,5 @@
+2026-06-09 18:40:53,978 INFO Starting CFS permit intelligence segmentation.
+2026-06-09 18:40:55,567 INFO Fetched 64426 source permit rows.
+2026-06-09 18:41:21,479 INFO Materialized 64426 permit segment rows.
+2026-06-09 18:41:22,741 INFO Wrote validation output: C:\CabarrusFutureScape\outputs\permit_segmentation_validation.json
+2026-06-09 18:41:22,741 INFO Wrote final summary output: C:\CabarrusFutureScape\outputs\permit_intelligence_segmentation_summary.json

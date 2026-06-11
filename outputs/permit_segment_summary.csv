@@ -1,0 +1,10 @@
+permit_segment,permit_count,permit_percentage,avg_permit_signal_score,max_permit_signal_score,map_relevant_count,future_prediction_relevant_count
+residential_growth,42206,65.5108,77.58,100.0,42206,42206
+redevelopment_signal,7866,12.2094,66.71,95.0,7866,7866
+administrative_or_unknown,5792,8.9902,9.67,42.0,0,0
+commercial_activity,2993,4.6456,76.23,100.0,2993,2993
+accessory_or_misc,2251,3.4939,30.69,56.0,48,0
+minor_maintenance,1866,2.8963,24.8,56.0,107,0
+demolition,1421,2.2056,60.06,100.0,1421,1421
+institutional_activity,20,0.031,67.1,98.0,20,20
+industrial_activity,11,0.0171,74.73,100.0,11,11

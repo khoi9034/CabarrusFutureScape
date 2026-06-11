@@ -1,0 +1,165 @@
+{
+  "phase": "Phase 6 GIS Map Intelligence",
+  "task": "Parcel Map Focus Debug",
+  "status": "complete",
+  "debug_timestamp": "2026-06-01T18:00:00-04:00",
+  "summary": {
+    "parcel_focus_functioning_in_live_app": false,
+    "root_cause": "The live frontend is running in static parcel mode and the live FastAPI process on port 8000 is stale. As observed, the visible Parcel Discovery panel reported Static Index mode, so ParcelDetailDrawer does not call GET /parcels/{official_parcel_id}. Separately, the running uvicorn process was started before the backend map_focus update and its HTTP response does not include map_focus, even though the current backend code returns map_focus under TestClient.",
+    "sceneview_go_to_failure_observed": false,
+    "sceneview_go_to_called": false,
+    "why_go_to_was_not_called": "No backend-hydrated ParcelMapFocus object reached SceneViewContainer in the live app because backend API hydration was not active."
+  },
+  "pipeline_stages": [
+    {
+      "stage": "Parcel Search Result Click",
+      "status": "code_path_present",
+      "evidence": "ParcelSearchPanel.handleSelectRecord sets selectedRecord and creates an initial ParcelMapFocus from the static search record.",
+      "notes": "This initial focus has no centroid or extent, so it remains pending-geometry."
+    },
+    {
+      "stage": "Parcel Detail Hydration",
+      "status": "blocked_in_live_app",
+      "evidence": "ParcelDetailDrawer only hydrates backend detail when USE_BACKEND_API is true. Browser inspection found the Parcel Discovery source badge in Static Index mode and no FastAPI badge.",
+      "notes": "With NEXT_PUBLIC_USE_BACKEND_API=false, the drawer does not call getParcelDetail and therefore never receives map_focus."
+    },
+    {
+      "stage": "Backend Parcel Detail Payload",
+      "status": "mixed_runtime_state",
+      "evidence": "Current backend code returns map_focus under TestClient, but the live http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579 response did not include map_focus.",
+      "notes": "The live uvicorn process started at 2026-06-01 02:32:26, before the map_focus backend update."
+    },
+    {
+      "stage": "ParcelMapFocus Creation",
+      "status": "not_reached_in_live_app",
+      "evidence": "normalizeBackendParcelMapFocusResponse can map map_focus centroid/extent into ParcelMapFocus, but it requires backend detail hydration.",
+      "notes": "Static search selection only creates a pending-geometry focus object."
+    },
+    {
+      "stage": "useParcelMapFocus State Update",
+      "status": "partial",
+      "evidence": "Static search selection updates state with pending-geometry. Backend-ready focus state update requires onMapFocusHydrated.",
+      "notes": "Diagnostics now log set parcel focus, set parcel focus from record, and SceneView focus result events."
+    },
+    {
+      "stage": "parcelMapFocus.ts Event Dispatch",
+      "status": "not_reached_for_ready_focus",
+      "evidence": "dispatchParcelMapFocusRequest only fires when resolveParcelMapFocus returns canFocus=true, which requires centroid, extent, or geometry.",
+      "notes": "Because no backend map_focus reached the hook, no ready focus request was dispatched."
+    },
+    {
+      "stage": "SceneViewContainer Event Listener",
+      "status": "code_path_present",
+      "evidence": "SceneViewContainer registers CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT after view.when() and operational layer setup.",
+      "notes": "Diagnostics now log listener registration and received focus request details."
+    },
+    {
+      "stage": "SceneView.goTo()",
+      "status": "not_called_in_live_app",
+      "evidence": "The focus request event was not reached in the live app, so goTo() execution could not be observed.",
+      "notes": "No goTo exception was observed."
+    },
+    {
+      "stage": "Temporary Focus Graphic",
+      "status": "not_created_in_live_app",
+      "evidence": "Graphic creation occurs inside SceneViewContainer.applyParcelFocus after a ready focus request.",
+      "notes": "No ready focus request means the cfs-parcel-focus-layer remains unused."
+    }
+  ],
+  "map_focus_payload_examples": {
+    "live_http_8000_response": {
+      "official_parcel_id": "CFS-PARCEL-0149726579",
+      "map_focus_present": false,
+      "observed_issue": "The live HTTP response omitted map_focus."
+    },
+    "current_backend_code_testclient_response": {
+      "official_parcel_id": "CFS-PARCEL-0149726579",
+      "map_focus": {
+        "centroid": {
+          "longitude": -80.72215279793367,
+          "latitude": 35.369349462827685
+        },
+        "extent": {
+          "xmin": -80.72933764277025,
+          "ymin": 35.365247848682806,
+          "xmax": -80.7156828678656,
+          "ymax": 35.37346110981544
+        },
+        "spatial_reference": {
+          "wkid": 4326
+        },
+        "geometry_available": true,
+        "full_geometry_returned": false
+      }
+    }
+  },
+  "sceneview_status": {
+    "dashboard_visible_status": "Scene Online",
+    "event_listener_code_present": true,
+    "sceneview_reference_verified_at_runtime": "not reached through live selection; diagnostics added to log hasSceneView and hasRuntime when a focus request arrives",
+    "go_to_execution_verified": false,
+    "go_to_exception_observed": false
+  },
+  "graphic_status": {
+    "focus_layer_id": "cfs-parcel-focus-layer",
+    "focus_layer_code_present": true,
+    "graphic_creation_code_present": true,
+    "graphic_created_in_live_app": false,
+    "reason": "No ready focus request reached SceneViewContainer."
+  },
+  "temporary_diagnostics_added": [
+    {
+      "file": "src/lib/map/parcelMapFocusDiagnostics.ts",
+      "purpose": "Central console.debug logger for CFS parcel map focus pipeline."
+    },
+    {
+      "file": "src/components/dashboard/ParcelSearchPanel.tsx",
+      "purpose": "Logs selected parcel id, pin14, and focus source."
+    },
+    {
+      "file": "src/components/dashboard/ParcelDetailDrawer.tsx",
+      "purpose": "Logs backend API skip state, parcel detail request, map_focus payload presence, hydration failures, and no-focus emission."
+    },
+    {
+      "file": "src/lib/adapters/parcelDetailAdapter.ts",
+      "purpose": "Logs map_focus normalization, centroid/extent values, geometry availability, and missing/invalid focus targets."
+    },
+    {
+      "file": "src/hooks/useParcelMapFocus.ts",
+      "purpose": "Logs focus state updates, readiness, dispatch decisions, and SceneView result events."
+    },
+    {
+      "file": "src/lib/map/parcelMapFocus.ts",
+      "purpose": "Logs focus request and focus result event payloads."
+    },
+    {
+      "file": "src/components/gis/SceneViewContainer.tsx",
+      "purpose": "Logs listener registration, SceneView/runtime availability, goTo start/success/failure, focus target, layer visibility, and graphic creation status."
+    }
+  ],
+  "root_cause_analysis": {
+    "primary_runtime_blocker": "NEXT_PUBLIC_USE_BACKEND_API is not enabled for the running frontend, so parcel detail hydration and map_focus consumption do not occur.",
+    "secondary_runtime_blocker": "The live uvicorn process on port 8000 is stale and returns a parcel detail payload without map_focus.",
+    "code_defect_identified": false,
+    "sceneview_defect_identified": false,
+    "confidence": "high"
+  },
+  "recommended_minimal_fix": [
+    "Restart the FastAPI backend process on port 8000 so the live endpoint serves the current parcel detail code with map_focus.",
+    "Start or restart the frontend with NEXT_PUBLIC_USE_BACKEND_API=true and NEXT_PUBLIC_CFS_API_BASE_URL=http://127.0.0.1:8000, preferably via a local .env.local file.",
+    "Retest parcel selection and inspect console logs prefixed with [CFS parcel map focus].",
+    "Only if goTo logs show a SceneView/ArcGIS error after those runtime fixes should SceneViewContainer.tsx be corrected."
+  ],
+  "exact_file_or_runtime_needing_correction": {
+    "runtime_config": ".env.local should enable NEXT_PUBLIC_USE_BACKEND_API=true for this phase test.",
+    "runtime_process": "Restart backend uvicorn process PID 17552 or start a fresh backend process after code changes.",
+    "code_file": "No code file is currently proven defective. SceneViewContainer.tsx should be revisited only after backend hydration reaches it."
+  },
+  "validation": {
+    "backend_testclient_parcel_detail": "passed; map_focus returned",
+    "python_m_pytest_tests_test_parcel_detail_py_q": "passed; 2 tests passed",
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build": "passed"
+  }
+}

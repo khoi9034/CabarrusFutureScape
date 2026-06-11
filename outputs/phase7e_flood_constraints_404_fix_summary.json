@@ -1,0 +1,107 @@
+{
+  "generated_at": "2026-06-06T05:39:10-04:00",
+  "task": "Debug and fix Phase 7E Flood Constraints frontend 404",
+  "root_cause": {
+    "category": "stale_backend_runtime",
+    "description": "The live FastAPI process on port 8000 was started before the constraints router was registered, so /constraints/flood/* routes were absent from the running OpenAPI schema even though the source tree contained the router.",
+    "frontend_path_mismatch_found": false
+  },
+  "backend_runtime": {
+    "stale_process": {
+      "pid": 15396,
+      "command": "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+      "observed_created_time": "2026-06-04T04:08:38-04:00",
+      "status_before_restart": {
+        "openapi_constraints_routes_present": false,
+        "high_review_status": 404
+      }
+    },
+    "corrective_action": "Stopped stale uvicorn process and restarted backend from C:\\CabarrusFutureScape\\backend.",
+    "current_process": {
+      "pid": 21328,
+      "url": "http://127.0.0.1:8000",
+      "logs": [
+        "logs/backend-uvicorn.out.log",
+        "logs/backend-uvicorn.err.log"
+      ]
+    }
+  },
+  "frontend_runtime": {
+    "dev_server_status": "running",
+    "url": "http://localhost:3000",
+    "note": "The Next.js dev server had also become unresponsive during smoke testing, so it was restarted after backend validation.",
+    "status_check": {
+      "status": 200,
+      "content_length": 296183
+    }
+  },
+  "routes_verified": {
+    "openapi_url": "http://127.0.0.1:8000/openapi.json",
+    "docs_url": "http://127.0.0.1:8000/docs",
+    "present_after_restart": [
+      "/constraints/flood/statistics",
+      "/constraints/flood/filter",
+      "/constraints/flood/high-review",
+      "/constraints/flood/summary",
+      "/constraints/flood/{official_parcel_id}"
+    ],
+    "high_review_endpoint": {
+      "url": "http://127.0.0.1:8000/constraints/flood/high-review?limit=2&offset=0",
+      "status": 200,
+      "total_count": 7989,
+      "sample_first_official_parcel_id": "CFS-PARCEL-0149721050"
+    },
+    "summary_endpoint": {
+      "url": "http://127.0.0.1:8000/constraints/flood/summary",
+      "status": 200
+    },
+    "cors_preflight": {
+      "url": "http://127.0.0.1:8000/constraints/flood/high-review?limit=100&offset=0",
+      "origin": "http://localhost:3000",
+      "status": 200,
+      "access_control_allow_origin": "http://localhost:3000",
+      "access_control_allow_methods": "GET, OPTIONS"
+    }
+  },
+  "frontend_endpoint_paths": {
+    "flood_layer_toggle": "/constraints/flood/high-review",
+    "selected_parcel_flood_detail": "/constraints/flood/{official_parcel_id}",
+    "flood_summary_panel": "/constraints/flood/summary",
+    "path_change_required": false,
+    "diagnostic_added": {
+      "file": "src/hooks/useFloodConstraintLayer.ts",
+      "message": "[CFS flood constraints] loading layer",
+      "logged_endpoint": "http://127.0.0.1:8000/constraints/flood/high-review"
+    }
+  },
+  "browser_smoke_test": {
+    "frontend_loaded": true,
+    "visible_layer_row": "Flood Constraints / FEMA NFHL high-review parcel constraints",
+    "toggle_on_status": "Showing 100 review parcels",
+    "toggle_off_status": "Flood constraints off",
+    "mock_disabled_row_replaced": true,
+    "markers_render_inferred_from_layer_status": true,
+    "notes": "The UI no longer reports the 404 unavailable state after backend restart. The visible row status switched to Showing 100 review parcels when enabled."
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": {
+      "status": "passed",
+      "result": "125 passed, 1 warning",
+      "duration_seconds": 213.66
+    }
+  },
+  "files_changed_for_this_fix": [
+    "src/hooks/useFloodConstraintLayer.ts",
+    "outputs/phase7e_flood_constraints_404_fix_summary.json"
+  ],
+  "remaining_notes": [
+    "No PostGIS schema changes were made.",
+    "No flood overlay logic changes were made.",
+    "No SceneView architecture changes were made.",
+    "The 404 was caused by runtime drift, not an incorrect frontend flood path."
+  ]
+}

@@ -1,0 +1,16 @@
+flood_severity_class,buildability_impact,dominant_flood_zone,dominant_flood_constraint_type,parcel_count,review_required_count,floodway_parcel_count,sfha_parcel_count,avg_percent_constrained,max_percent_constrained,avg_constraint_score,max_constraint_score
+severe,severe,X,minimal_flood_hazard,2015,2015,2015,2015,31.5740,72.2990,88.36,94.55
+severe,severe,AE,special_flood_hazard_area,602,602,602,602,84.5870,100.0000,92.41,97.42
+severe,severe,AE,floodway,569,569,569,569,88.9012,100.0000,97.66,100.00
+severe,severe,X,moderate_flood_hazard,43,43,43,43,89.5193,100.0000,91.55,94.76
+high,high,X,minimal_flood_hazard,1316,1316,0,1316,29.8170,49.9693,69.21,74.99
+high,severe,AE,special_flood_hazard_area,986,986,0,986,85.0023,100.0000,79.78,85.00
+high,moderate,X,minimal_flood_hazard,716,716,0,716,11.5361,24.9466,65.89,67.00
+high,low,X,minimal_flood_hazard,554,554,0,554,2.0082,4.9726,65.26,65.99
+high,severe,X,moderate_flood_hazard,333,333,0,333,88.2813,100.0000,68.93,74.81
+high,severe,X,minimal_flood_hazard,120,120,0,120,55.2090,64.1918,71.25,74.18
+moderate,low,X,minimal_flood_hazard,672,0,0,0,1.3480,4.9258,35.27,35.99
+moderate,moderate,X,minimal_flood_hazard,357,357,0,0,12.0654,24.8870,37.41,39.98
+moderate,severe,X,moderate_flood_hazard,212,212,0,0,82.7075,100.0000,51.54,55.00
+moderate,high,X,minimal_flood_hazard,166,166,0,0,34.6854,49.7402,41.94,44.95
+low,low,X,minimal_flood_hazard,101356,0,0,0,0.0000,0.0000,10.00,10.00

@@ -1,0 +1,84 @@
+{
+  "phase": "Development Hotspot marker sizing",
+  "status": "complete",
+  "scope": "Frontend-only marker concentration symbology for existing Development Hotspots layer.",
+  "backend_fields_needed": false,
+  "backend_changes": false,
+  "files_changed": [
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/gis/SceneViewContainer.tsx"
+  ],
+  "selected_segment_count_fields_used": {
+    "residential_growth": "residentialGrowthPermits",
+    "commercial_activity": "commercialActivityPermits",
+    "redevelopment_signal": "redevelopmentSignalPermits",
+    "minor_maintenance": "minorMaintenancePermits",
+    "demolition": "demolitionPermits",
+    "industrial_activity": "industrialActivityPermits",
+    "institutional_activity": "institutionalActivityPermits"
+  },
+  "marker_size_logic": {
+    "basis": "Count of permits for the actively selected permit segment.",
+    "tiers": {
+      "low": "1-2 selected-segment permits",
+      "moderate": "3-10 selected-segment permits",
+      "high": "11-25 selected-segment permits",
+      "very_high": "26+ selected-segment permits"
+    },
+    "size_curve": "Continuous capped sizing inside each tier so high-count parcels no longer collapse into identical dots.",
+    "visual_emphasis": "Each marker now includes a translucent same-color halo sized from selected-segment concentration plus a capped primary icon.",
+    "guardrail": "Maximum icon size is capped to avoid covering the parcel map."
+  },
+  "marker_color_logic": {
+    "basis": "Current selected permit segment.",
+    "colors_preserved": {
+      "residential_growth": "cyan / blue",
+      "commercial_activity": "orange",
+      "redevelopment_signal": "purple",
+      "minor_maintenance": "muted gray",
+      "demolition": "red",
+      "industrial_activity": "amber / steel",
+      "institutional_activity": "green"
+    },
+    "single_segment_mode": true
+  },
+  "legend_updates": {
+    "labels": ["1-2", "3-10", "11-25", "26+"],
+    "message": "Size = number/intensity of the selected permit segment."
+  },
+  "popup_card_updates": {
+    "fields": [
+      "selected permit segment",
+      "selected segment permit count",
+      "concentration tier",
+      "selected segment score if available",
+      "total permits",
+      "recent 1-year permits",
+      "recent 3-year permits",
+      "dominant segment",
+      "zoning jurisdiction",
+      "zoning code"
+    ]
+  },
+  "heatmap_mode": {
+    "implemented": false,
+    "reason": "Deferred to avoid replacing the existing SceneView marker layer with a different renderer path. Sized markers now provide the requested concentration behavior safely."
+  },
+  "preserved_behaviors": [
+    "top search",
+    "parcel search/detail",
+    "selected parcel card",
+    "selected parcel cage highlight",
+    "selected parcel permit events",
+    "selected parcel development activity",
+    "development hotspot marker click selection",
+    "flood constraints",
+    "FEMA flood zones",
+    "executive print mode"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed after retry; initial validation run timed out and left a transient Next build lock"
+  }
+}

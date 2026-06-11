@@ -1,0 +1,116 @@
+{
+  "phase": "CFS V1 Product Layout Redesign",
+  "status": "completed",
+  "product_modes": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "purpose": "Default site-sourcing workspace with map exploration, parcel search, live layers, headline intelligence, and compact countywide context."
+    },
+    {
+      "id": "due_diligence",
+      "label": "Due Diligence",
+      "purpose": "Selected-parcel workflow focused on parcel characteristics, flood constraints, development activity, permit events, and supporting intelligence."
+    },
+    {
+      "id": "executive_print",
+      "label": "Executive Print",
+      "purpose": "Print-friendly executive site intelligence report for the active selected parcel, with a clean no-selected-parcel state."
+    }
+  ],
+  "sections_removed_from_primary_navigation": [
+    "System Status",
+    "Temporal Analysis",
+    "Internal diagnostics",
+    "Scenario comparison and report tooling"
+  ],
+  "developer_mode_preservation": {
+    "enabled_by": "NEXT_PUBLIC_CFS_DEVELOPER_MODE=true",
+    "preserved_surfaces": [
+      "Temporal Analysis Panel",
+      "System Status",
+      "Executive Briefing",
+      "Scenario Comparison",
+      "Executive Report",
+      "Print Layout Preview",
+      "Role Intelligence",
+      "Event Stream"
+    ]
+  },
+  "executive_summary_changes": [
+    "Overview is now the default product mode.",
+    "Overview prioritizes search, map exploration, selected parcel state, headline metrics, and next action guidance.",
+    "Detailed countywide parcel, development, and flood rollups are collapsed below the headline content.",
+    "Selected-parcel-specific panels no longer present as primary Overview clutter."
+  ],
+  "due_diligence_changes": [
+    "Due Diligence hides the left layer rail to give the map and selected-parcel intelligence more room.",
+    "No-selected-parcel state clearly asks the user to select a parcel.",
+    "Selected parcel summary, development activity, permit events, flood constraints, and map context are grouped as the primary due diligence workflow.",
+    "Detailed supporting parcel/development/flood panels remain available in a collapsed section."
+  ],
+  "executive_print_changes": [
+    "Executive Print hides the map, layer rail, and bottom metric bar.",
+    "Print report includes selected parcel, development, flood constraint, latest permit events, map snapshot placeholder, and executive notes.",
+    "A visible print action is available in both selected and no-selected report states.",
+    "Print CSS hides app chrome and map controls while preserving report content."
+  ],
+  "layer_registry_changes": [
+    "Left rail renamed to Explore / Layers.",
+    "Map Layers remains collapsed by default to reduce visual noise.",
+    "Development Hotspots, Flood Constraints, FEMA Flood Zones, and existing supporting controls are preserved.",
+    "Planning tools and legacy composite signals are collapsed to keep the executive experience focused."
+  ],
+  "kpi_bar_changes": [
+    "Bottom metric bar remains limited to compact executive KPIs.",
+    "Executive Print mode hides the bottom KPI bar.",
+    "Overview headline cards emphasize growth activity, flood review parcels, development activity, and total parcels."
+  ],
+  "preserved_functionality": [
+    "Parcel search",
+    "Selected parcel flow",
+    "SceneView map focus",
+    "3D parcel cage highlight",
+    "Development Hotspots",
+    "Flood Constraints",
+    "FEMA Flood Zones",
+    "Selected parcel development activity",
+    "Selected parcel permit events",
+    "FastAPI/static fallback behavior"
+  ],
+  "files_changed": [
+    "C:/CabarrusFutureScape/src/types/index.ts",
+    "C:/CabarrusFutureScape/src/hooks/useDashboardState.tsx",
+    "C:/CabarrusFutureScape/src/components/layout/TopNav.tsx",
+    "C:/CabarrusFutureScape/src/components/layout/AppShell.tsx",
+    "C:/CabarrusFutureScape/src/components/layout/Sidebar.tsx",
+    "C:/CabarrusFutureScape/src/components/dashboard/IntelligencePanel.tsx",
+    "C:/CabarrusFutureScape/src/components/dashboard/ExecutivePrintView.tsx",
+    "C:/CabarrusFutureScape/src/styles/cfs-theme.css",
+    "C:/CabarrusFutureScape/README.md",
+    "C:/CabarrusFutureScape/outputs/cfs_v1_product_layout_redesign_summary.json"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed"
+  },
+  "smoke_test": {
+    "url": "http://localhost:3000",
+    "dev_server_restarted": true,
+    "overview_mode": "passed",
+    "due_diligence_mode": "passed",
+    "executive_print_mode": "passed",
+    "print_action_visible": "passed",
+    "scene_hidden_in_print_mode": "passed",
+    "note": "Use http://localhost:3000 for local Next dev. Opening http://127.0.0.1:3000 can trigger Next dev-origin protection unless allowedDevOrigins includes 127.0.0.1."
+  },
+  "portfolio_readiness": {
+    "status": "ready_for_demo_iteration",
+    "notes": [
+      "The primary user journey is clearer: search and explore, inspect selected parcel, print executive report.",
+      "Advanced diagnostics remain preserved but are no longer part of the default executive path.",
+      "Future cleanup can further tune individual card copy and selected-parcel report pagination."
+    ]
+  }
+}

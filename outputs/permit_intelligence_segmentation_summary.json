@@ -1,0 +1,315 @@
+{
+  "generated_at": "2026-06-09T18:41:22",
+  "rules_version": "2026-06-09",
+  "permit_level_status": "complete",
+  "source_table": "public.real_property_permit_clean",
+  "segment_table": "public.permit_intelligence_segments",
+  "row_count_validation": {
+    "source_row_count": 64426,
+    "segment_row_count": 64426,
+    "source_unique_permit_ids": 64426,
+    "segment_unique_permit_ids": 64426,
+    "row_counts_match": true,
+    "unique_permit_ids_match": true
+  },
+  "permit_segment_summary": [
+    {
+      "permit_segment": "residential_growth",
+      "permit_count": 42206,
+      "permit_percentage": 65.5108,
+      "avg_permit_signal_score": 77.58,
+      "max_permit_signal_score": 100.0,
+      "map_relevant_count": 42206,
+      "future_prediction_relevant_count": 42206
+    },
+    {
+      "permit_segment": "redevelopment_signal",
+      "permit_count": 7866,
+      "permit_percentage": 12.2094,
+      "avg_permit_signal_score": 66.71,
+      "max_permit_signal_score": 95.0,
+      "map_relevant_count": 7866,
+      "future_prediction_relevant_count": 7866
+    },
+    {
+      "permit_segment": "administrative_or_unknown",
+      "permit_count": 5792,
+      "permit_percentage": 8.9902,
+      "avg_permit_signal_score": 9.67,
+      "max_permit_signal_score": 42.0,
+      "map_relevant_count": 0,
+      "future_prediction_relevant_count": 0
+    },
+    {
+      "permit_segment": "commercial_activity",
+      "permit_count": 2993,
+      "permit_percentage": 4.6456,
+      "avg_permit_signal_score": 76.23,
+      "max_permit_signal_score": 100.0,
+      "map_relevant_count": 2993,
+      "future_prediction_relevant_count": 2993
+    },
+    {
+      "permit_segment": "accessory_or_misc",
+      "permit_count": 2251,
+      "permit_percentage": 3.4939,
+      "avg_permit_signal_score": 30.69,
+      "max_permit_signal_score": 56.0,
+      "map_relevant_count": 48,
+      "future_prediction_relevant_count": 0
+    },
+    {
+      "permit_segment": "minor_maintenance",
+      "permit_count": 1866,
+      "permit_percentage": 2.8963,
+      "avg_permit_signal_score": 24.8,
+      "max_permit_signal_score": 56.0,
+      "map_relevant_count": 107,
+      "future_prediction_relevant_count": 0
+    },
+    {
+      "permit_segment": "demolition",
+      "permit_count": 1421,
+      "permit_percentage": 2.2056,
+      "avg_permit_signal_score": 60.06,
+      "max_permit_signal_score": 100.0,
+      "map_relevant_count": 1421,
+      "future_prediction_relevant_count": 1421
+    },
+    {
+      "permit_segment": "institutional_activity",
+      "permit_count": 20,
+      "permit_percentage": 0.031,
+      "avg_permit_signal_score": 67.1,
+      "max_permit_signal_score": 98.0,
+      "map_relevant_count": 20,
+      "future_prediction_relevant_count": 20
+    },
+    {
+      "permit_segment": "industrial_activity",
+      "permit_count": 11,
+      "permit_percentage": 0.0171,
+      "avg_permit_signal_score": 74.73,
+      "max_permit_signal_score": 100.0,
+      "map_relevant_count": 11,
+      "future_prediction_relevant_count": 11
+    }
+  ],
+  "permit_growth_signal_summary": [
+    {
+      "permit_growth_signal": "major_growth",
+      "permit_count": 34611,
+      "permit_percentage": 53.7221,
+      "avg_permit_signal_score": 80.7,
+      "max_permit_signal_score": 100.0,
+      "map_relevant_count": 34611,
+      "future_prediction_relevant_count": 34611
+    },
+    {
+      "permit_growth_signal": "moderate_activity",
+      "permit_count": 10619,
+      "permit_percentage": 16.4825,
+      "avg_permit_signal_score": 67.01,
+      "max_permit_signal_score": 84.0,
+      "map_relevant_count": 10619,
+      "future_prediction_relevant_count": 10619
+    },
+    {
+      "permit_growth_signal": "redevelopment_signal",
+      "permit_count": 9287,
+      "permit_percentage": 14.415,
+      "avg_permit_signal_score": 65.7,
+      "max_permit_signal_score": 100.0,
+      "map_relevant_count": 9287,
+      "future_prediction_relevant_count": 9287
+    },
+    {
+      "permit_growth_signal": "unknown",
+      "permit_count": 5792,
+      "permit_percentage": 8.9902,
+      "avg_permit_signal_score": 9.67,
+      "max_permit_signal_score": 42.0,
+      "map_relevant_count": 0,
+      "future_prediction_relevant_count": 0
+    },
+    {
+      "permit_growth_signal": "minor_activity",
+      "permit_count": 4117,
+      "permit_percentage": 6.3903,
+      "avg_permit_signal_score": 28.02,
+      "max_permit_signal_score": 56.0,
+      "map_relevant_count": 155,
+      "future_prediction_relevant_count": 0
+    }
+  ],
+  "prediction_boundary": {
+    "prediction_model_created": false,
+    "prediction_probabilities_created": false,
+    "frontend_prediction_exposed": false,
+    "notes": "Parcel segment summary is descriptive permit intelligence and modeling readiness only."
+  },
+  "outputs": {
+    "validation_json": "C:\\CabarrusFutureScape\\outputs\\permit_segmentation_validation.json",
+    "segment_summary_csv": "C:\\CabarrusFutureScape\\outputs\\permit_segment_summary.csv",
+    "growth_signal_summary_csv": "C:\\CabarrusFutureScape\\outputs\\permit_growth_signal_summary.csv",
+    "status_stage_summary_csv": "C:\\CabarrusFutureScape\\outputs\\permit_status_stage_summary.csv",
+    "value_class_summary_csv": "C:\\CabarrusFutureScape\\outputs\\permit_value_class_summary.csv",
+    "segment_by_year_summary_csv": "C:\\CabarrusFutureScape\\outputs\\permit_segment_by_year_summary.csv",
+    "segment_examples_csv": "C:\\CabarrusFutureScape\\outputs\\permit_segment_examples.csv"
+  },
+  "parcel_level_status": "complete",
+  "parcel_summary_table": "public.parcel_permit_segment_summary",
+  "parcel_summary_validation": {
+    "matched_parcels_with_permit_activity": 43474,
+    "parcel_summary_rows": 43474,
+    "row_count_matches_matched_parcels": true,
+    "null_official_parcel_id_count": 0
+  },
+  "dominant_permit_segment_distribution": [
+    {
+      "dominant_permit_segment": "residential_growth",
+      "parcel_count": 33086,
+      "parcel_percentage": 76.1053,
+      "permit_count": 48008,
+      "avg_parcel_permit_signal_score": 76.23
+    },
+    {
+      "dominant_permit_segment": "redevelopment_signal",
+      "parcel_count": 4758,
+      "parcel_percentage": 10.9445,
+      "permit_count": 7793,
+      "avg_parcel_permit_signal_score": 63.2
+    },
+    {
+      "dominant_permit_segment": "administrative_or_unknown",
+      "parcel_count": 2508,
+      "parcel_percentage": 5.769,
+      "permit_count": 3985,
+      "avg_parcel_permit_signal_score": 11.04
+    },
+    {
+      "dominant_permit_segment": "accessory_or_misc",
+      "parcel_count": 892,
+      "parcel_percentage": 2.0518,
+      "permit_count": 1148,
+      "avg_parcel_permit_signal_score": 29.64
+    },
+    {
+      "dominant_permit_segment": "commercial_activity",
+      "parcel_count": 846,
+      "parcel_percentage": 1.946,
+      "permit_count": 4201,
+      "avg_parcel_permit_signal_score": 67.99
+    },
+    {
+      "dominant_permit_segment": "minor_maintenance",
+      "parcel_count": 824,
+      "parcel_percentage": 1.8954,
+      "permit_count": 1079,
+      "avg_parcel_permit_signal_score": 24.13
+    },
+    {
+      "dominant_permit_segment": "demolition",
+      "parcel_count": 553,
+      "parcel_percentage": 1.272,
+      "permit_count": 855,
+      "avg_parcel_permit_signal_score": 58.49
+    },
+    {
+      "dominant_permit_segment": "institutional_activity",
+      "parcel_count": 6,
+      "parcel_percentage": 0.0138,
+      "permit_count": 7,
+      "avg_parcel_permit_signal_score": 64.5
+    },
+    {
+      "dominant_permit_segment": "industrial_activity",
+      "parcel_count": 1,
+      "parcel_percentage": 0.0023,
+      "permit_count": 6,
+      "avg_parcel_permit_signal_score": 54.17
+    }
+  ],
+  "dominant_growth_signal_distribution": [
+    {
+      "dominant_growth_signal": "major_growth",
+      "parcel_count": 28707,
+      "parcel_percentage": 66.0326,
+      "permit_count": 42194,
+      "avg_parcel_permit_signal_score": 78.27
+    },
+    {
+      "dominant_growth_signal": "redevelopment_signal",
+      "parcel_count": 5390,
+      "parcel_percentage": 12.3982,
+      "permit_count": 8966,
+      "avg_parcel_permit_signal_score": 62.78
+    },
+    {
+      "dominant_growth_signal": "moderate_activity",
+      "parcel_count": 5105,
+      "parcel_percentage": 11.7427,
+      "permit_count": 9497,
+      "avg_parcel_permit_signal_score": 63.8
+    },
+    {
+      "dominant_growth_signal": "unknown",
+      "parcel_count": 2509,
+      "parcel_percentage": 5.7713,
+      "permit_count": 3967,
+      "avg_parcel_permit_signal_score": 11.03
+    },
+    {
+      "dominant_growth_signal": "minor_activity",
+      "parcel_count": 1763,
+      "parcel_percentage": 4.0553,
+      "permit_count": 2458,
+      "avg_parcel_permit_signal_score": 27.47
+    }
+  ],
+  "current_activity_status_distribution": [
+    {
+      "current_activity_status": "no_recent_activity",
+      "parcel_count": 33263,
+      "parcel_percentage": 76.5124,
+      "permit_count": 45285,
+      "avg_parcel_permit_signal_score": 64.63
+    },
+    {
+      "current_activity_status": "active_construction",
+      "parcel_count": 4694,
+      "parcel_percentage": 10.7973,
+      "permit_count": 10910,
+      "avg_parcel_permit_signal_score": 84.69
+    },
+    {
+      "current_activity_status": "completed_historical",
+      "parcel_count": 3250,
+      "parcel_percentage": 7.4757,
+      "permit_count": 7079,
+      "avg_parcel_permit_signal_score": 79.24
+    },
+    {
+      "current_activity_status": "recently_issued",
+      "parcel_count": 1980,
+      "parcel_percentage": 4.5544,
+      "permit_count": 3419,
+      "avg_parcel_permit_signal_score": 82.07
+    },
+    {
+      "current_activity_status": "unknown",
+      "parcel_count": 287,
+      "parcel_percentage": 0.6602,
+      "permit_count": 389,
+      "avg_parcel_permit_signal_score": 69.25
+    }
+  ],
+  "parcel_outputs": {
+    "validation_json": "C:\\CabarrusFutureScape\\outputs\\parcel_permit_segment_summary_validation.json",
+    "top_residential_growth_csv": "C:\\CabarrusFutureScape\\outputs\\parcel_permit_segment_top_residential_growth.csv",
+    "top_commercial_activity_csv": "C:\\CabarrusFutureScape\\outputs\\parcel_permit_segment_top_commercial_activity.csv",
+    "top_redevelopment_signal_csv": "C:\\CabarrusFutureScape\\outputs\\parcel_permit_segment_top_redevelopment_signal.csv",
+    "top_major_value_csv": "C:\\CabarrusFutureScape\\outputs\\parcel_permit_segment_top_major_value.csv"
+  },
+  "completed_at": "2026-06-09T18:42:08"
+}

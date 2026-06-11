@@ -1,0 +1,7 @@
+permit_status_stage,permit_count,permit_percentage,avg_permit_signal_score,max_permit_signal_score,map_relevant_count,future_prediction_relevant_count
+unknown,45735,70.9884,60.85,100.0,36912,36780
+completed,9206,14.2893,75.02,100.0,8295,8273
+active_construction,5306,8.2358,88.56,100.0,5306,5305
+issued_or_starting,4102,6.367,82.44,100.0,4095,4095
+inactive_or_removed,76,0.118,56.68,78.0,63,63
+pending_or_review,1,0.0016,72.0,72.0,1,1

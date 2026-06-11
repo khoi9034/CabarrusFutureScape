@@ -17,6 +17,10 @@ from app.schemas import (
     DevelopmentActivitySummaryResponse,
     DevelopmentHotspotsResponse,
     DevelopmentLookupResponse,
+    ParcelPermitSegmentSummaryResponse,
+    PermitSegmentOptionsResponse,
+    PermitSegmentStatisticsResponse,
+    DevelopmentParcelPermitEventsResponse,
     DevelopmentStatisticsResponse,
     DevelopmentTemporalQueryResponse,
     DevelopmentTrendsResponse,
@@ -94,12 +98,22 @@ def get_development_trends(
 @router.get("/hotspots", response_model=DevelopmentHotspotsResponse)
 def get_development_hotspots(
     activity_class: str | None = Query(default=None),
+    date_start: date | None = Query(default=None),
+    date_end: date | None = Query(default=None),
+    development_domain: str | None = Query(default=None),
+    growth_signal: str | None = Query(default=None),
+    month: int | None = Query(default=None, ge=1, le=12),
+    official_parcel_id: str | None = Query(default=None),
     zoning_jurisdiction: str | None = Query(default=None),
     zoning_category: str | None = Query(default=None),
+    permit_segment: str | None = Query(default=None),
+    permit_status_stage: str | None = Query(default=None),
     permit_type: str | None = Query(default=None),
+    permit_value_class: str | None = Query(default=None),
     work_type: str | None = Query(default=None),
     year: int | None = Query(default=None, ge=1900, le=2100),
     recent_window: int | None = Query(default=None),
+    rolling_window: int | None = Query(default=None),
     sort_by: str | None = Query(default=None),
     limit: int = Query(default=20, ge=1),
     offset: int = Query(default=0, ge=0),
@@ -110,8 +124,18 @@ def get_development_hotspots(
         return service.get_hotspots(
             filters=DevelopmentHotspotsFilters(
                 activity_class=activity_class,
+                date_end=date_end,
+                date_start=date_start,
+                development_domain=development_domain,
+                growth_signal=growth_signal,
+                month=month,
+                official_parcel_id=official_parcel_id,
+                permit_segment=permit_segment,
+                permit_status_stage=permit_status_stage,
                 permit_type=permit_type,
+                permit_value_class=permit_value_class,
                 recent_window=recent_window,
+                rolling_window=rolling_window,
                 work_type=work_type,
                 year=year,
                 zoning_category=zoning_category,
@@ -240,6 +264,71 @@ def get_development_permit_types(
 ) -> DevelopmentLookupResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_permit_types()
+
+
+@router.get(
+    "/permit-segments/statistics",
+    response_model=PermitSegmentStatisticsResponse,
+)
+def get_development_permit_segment_statistics(
+    db: Session = Depends(get_read_only_db),
+) -> PermitSegmentStatisticsResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_permit_segment_statistics()
+
+
+@router.get(
+    "/permit-segments/options",
+    response_model=PermitSegmentOptionsResponse,
+)
+def get_development_permit_segment_options(
+    db: Session = Depends(get_read_only_db),
+) -> PermitSegmentOptionsResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_permit_segment_options()
+
+
+@router.get(
+    "/permit-segments/{official_parcel_id}",
+    response_model=ParcelPermitSegmentSummaryResponse,
+)
+def get_development_parcel_permit_segment_summary(
+    official_parcel_id: str,
+    db: Session = Depends(get_read_only_db),
+) -> ParcelPermitSegmentSummaryResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    try:
+        summary = service.get_parcel_permit_segment_summary(official_parcel_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    if summary is None:
+        raise HTTPException(status_code=404, detail="Permit segment summary not found")
+
+    return summary
+
+
+@router.get(
+    "/parcel/{official_parcel_id}/permits",
+    response_model=DevelopmentParcelPermitEventsResponse,
+)
+def get_development_parcel_permits(
+    official_parcel_id: str,
+    limit: int = Query(default=10, ge=1),
+    offset: int = Query(default=0, ge=0),
+    sort: str = Query(default="latest_first"),
+    db: Session = Depends(get_read_only_db),
+) -> DevelopmentParcelPermitEventsResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    try:
+        return service.get_parcel_permit_events(
+            official_parcel_id=official_parcel_id,
+            limit=limit,
+            offset=offset,
+            sort=sort,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get("/work-types", response_model=DevelopmentLookupResponse)

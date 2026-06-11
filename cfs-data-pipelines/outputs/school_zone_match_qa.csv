@@ -1,0 +1,45 @@
+zone_id,school_level,school_name_raw,school_name_normalized,matched_school_reference_id,match_confidence,include_in_cfs_v1,exclusion_reason,source_layer_id,source_objectid
+SCHOOLZONE-ELEMENTARY-A_T_ALLEN_ELEMENTARY-54,elementary,A T Allen ES,a_t_allen_elementary,SCHOOLREF-ELEMENTARY-A_T_ALLEN_ELEMENTARY-64,normalized_exact,True,,140,54
+SCHOOLZONE-ELEMENTARY-BETHEL_ELEMENTARY-55,elementary,Bethel ES,bethel_elementary,SCHOOLREF-ELEMENTARY-BETHEL_ELEMENTARY-68,normalized_exact,True,,140,55
+SCHOOLZONE-ELEMENTARY-CARL_A_FURR_ELEMENTARY-56,elementary,Carl A Furr ES,carl_a_furr_elementary,SCHOOLREF-ELEMENTARY-CARL_A_FURR_ELEMENTARY-75,normalized_exact,True,,140,56
+SCHOOLZONE-ELEMENTARY-CHARLES_E_BOGER_ELEMENTARY-57,elementary,Charles E Boger ES,charles_e_boger_elementary,SCHOOLREF-ELEMENTARY-CHARLES_E_BOGER_ELEMENTARY-74,normalized_exact,True,,140,57
+SCHOOLZONE-ELEMENTARY-COLTRANE_WEBB_ELEMENTARY-58,elementary,Coltrane Webb ES,coltrane_webb_elementary,SCHOOLREF-ELEMENTARY-COLTRANE_WEBB_ELEMENTARY-57,normalized_exact,True,,140,58
+SCHOOLZONE-ELEMENTARY-COX_MILL_ELEMENTARY-59,elementary,Cox Mill ES,cox_mill_elementary,SCHOOLREF-ELEMENTARY-COX_MILL_ELEMENTARY-71,normalized_exact,True,,140,59
+SCHOOLZONE-ELEMENTARY-FOREST_PARK_ELEMENTARY-47,elementary,Forest Park ES,forest_park_elementary,SCHOOLREF-ELEMENTARY-FOREST_PARK_ELEMENTARY-5692,normalized_exact,True,,140,47
+SCHOOLZONE-ELEMENTARY-FRED_L_WILSON_ELEMENTARY-48,elementary,Fred L Wilson ES,fred_l_wilson_elementary,SCHOOLREF-ELEMENTARY-FRED_L_WILSON_ELEMENTARY-79,normalized_exact,True,,140,48
+SCHOOLZONE-ELEMENTARY-GW_CARVER_ELEMENTARY-53,elementary,GW Carver ES,gw_carver_elementary,,unmatched_reference_review,True,,140,53
+SCHOOLZONE-ELEMENTARY-HARRISBURG_ELEMENTARY-60,elementary,Harrisburg ES,harrisburg_elementary,SCHOOLREF-ELEMENTARY-HARRISBURG_ELEMENTARY-69,normalized_exact,True,,140,60
+SCHOOLZONE-ELEMENTARY-HICKORY_RIDGE_ELEMENTARY-61,elementary,Hickory Ridge ES,hickory_ridge_elementary,,unmatched_reference_review,True,,140,61
+SCHOOLZONE-ELEMENTARY-JACKSON_PARK_ELEMENTARY-45,elementary,Jackson Park ES,jackson_park_elementary,SCHOOLREF-ELEMENTARY-JACKSON_PARK_ELEMENTARY-78,normalized_exact,True,,140,45
+SCHOOLZONE-ELEMENTARY-MOUNT_PLEASANT_ELEMENTARY-62,elementary,Mount Pleasant ES,mount_pleasant_elementary,SCHOOLREF-ELEMENTARY-MT_PLEASANT_ELEMENTARY-53,fuzzy_review,True,,140,62
+SCHOOLZONE-ELEMENTARY-NORTH_KANNAPOLIS_ELEMENTARY-46,elementary,North Kannapolis ES,north_kannapolis_elementary,,unmatched_reference_review,True,,140,46
+SCHOOLZONE-ELEMENTARY-PATRIOTS_ELEMENTARY-63,elementary,Patriots ES,patriots_elementary,SCHOOLREF-ELEMENTARY-PATRIOTS_ELEMENTARY-5292,normalized_exact,True,,140,63
+SCHOOLZONE-ELEMENTARY-PITTS_ROAD_ELEMENTARY-64,elementary,Pitts School Road ES,pitts_road_elementary,SCHOOLREF-ELEMENTARY-PITTS_ROAD_ELEMENTARY-73,normalized_exact,True,,140,64
+SCHOOLZONE-ELEMENTARY-R_B_MCALLISTER_ELEMENTARY-65,elementary,R B McAllister ES,r_b_mcallister_elementary,SCHOOLREF-ELEMENTARY-R_BROWN_MCALLISTER_ELEMENTARY-60,fuzzy_review,True,,140,65
+SCHOOLZONE-ELEMENTARY-ROCKY_RIVER_ELEMENTARY-66,elementary,Rocky River ES,rocky_river_elementary,SCHOOLREF-ELEMENTARY-ROCKY_RIVER_ELEMENTARY-67,normalized_exact,True,,140,66
+SCHOOLZONE-ELEMENTARY-ROYAL_OAKS_ELEMENTARY-67,elementary,Royal Oaks ES,royal_oaks_elementary,SCHOOLREF-ELEMENTARY-ROYAL_OAKS_ELEMENTARY-44,normalized_exact,True,,140,67
+SCHOOLZONE-ELEMENTARY-SHADY_BROOK_ELEMENTARY-49,elementary,Shady Brook ES,shady_brook_elementary,SCHOOLREF-ELEMENTARY-SHADY_BROOK_ELEMENTARY-82,normalized_exact,True,,140,49
+SCHOOLZONE-ELEMENTARY-W_M_IRVIN_ELEMENTARY-68,elementary,W M Irvin ES,w_m_irvin_elementary,SCHOOLREF-ELEMENTARY-W_M_IRVIN_ELEMENTARY-52,normalized_exact,True,,140,68
+SCHOOLZONE-ELEMENTARY-W_R_ODELL_ELEMENTARY-69,elementary,W R Odell ES,w_r_odell_elementary,SCHOOLREF-ELEMENTARY-W_R_ODELL_ELEMENTARY-5693,normalized_exact,True,,140,69
+SCHOOLZONE-ELEMENTARY-WEDDINGTON_HILLS_ELEMENTARY-70,elementary,Weddington Hills ES,weddington_hills_elementary,SCHOOLREF-ELEMENTARY-WEDDINGTON_HILLS_ELEMENTARY-61,normalized_exact,True,,140,70
+SCHOOLZONE-ELEMENTARY-WINECOFF_ELEMENTARY-71,elementary,Winecoff ES,winecoff_elementary,SCHOOLREF-ELEMENTARY-WINECOFF_ELEMENTARY-47,normalized_exact,True,,140,71
+SCHOOLZONE-ELEMENTARY-WOLF_MEADOW_ELEMENTARY-72,elementary,Wolf Meadow ES,wolf_meadow_elementary,SCHOOLREF-ELEMENTARY-WOLF_MEADOW_ELEMENTARY-62,normalized_exact,True,,140,72
+SCHOOLZONE-HIGH-A_L_BROWN_HIGH-8,high,A.L. Brown HS,a_l_brown_high,SCHOOLREF-HIGH-A_L_BROWN_HIGH-80,normalized_exact,True,,142,8
+SCHOOLZONE-HIGH-CENTRAL_CABARRUS_HIGH-10,high,Central Cabarrus HS,central_cabarrus_high,SCHOOLREF-HIGH-CENTRAL_CABARRUS_HIGH-65,normalized_exact,True,,142,10
+SCHOOLZONE-HIGH-CONCORD_HIGH-11,high,Concord HS,concord_high,SCHOOLREF-HIGH-CONCORD_HIGH-49,normalized_exact,True,,142,11
+SCHOOLZONE-HIGH-COX_MILL_HIGH-12,high,Cox Mill HS,cox_mill_high,SCHOOLREF-HIGH-COX_MILL_HIGH-55,normalized_exact,True,,142,12
+SCHOOLZONE-HIGH-HICKORY_RIDGE_HIGH-13,high,Hickory Ridge HS,hickory_ridge_high,SCHOOLREF-HIGH-HICKORY_RIDGE_HIGH-76,normalized_exact,True,,142,13
+SCHOOLZONE-HIGH-JAY_M_ROBINSON_HIGH-14,high,Jay M Robinson HS,jay_m_robinson_high,SCHOOLREF-HIGH-JAY_M_ROBINSON_HIGH-66,normalized_exact,True,,142,14
+SCHOOLZONE-HIGH-MOUNT_PLEASANT_HIGH-15,high,Mount Pleasant HS,mount_pleasant_high,SCHOOLREF-HIGH-MT_PLEASANT_HIGH-59,fuzzy_review,True,,142,15
+SCHOOLZONE-HIGH-NORTHWEST_CABARRUS_HIGH-16,high,Northwest Cabarrus HS,northwest_cabarrus_high,SCHOOLREF-HIGH-NORTHWEST_CABARRUS_HIGH-46,normalized_exact,True,,142,16
+SCHOOLZONE-HIGH-WEST_CABARRUS_HIGH-17,high,West Cabarrus HS,west_cabarrus_high,,unmatched_reference_review,True,,142,17
+SCHOOLZONE-MIDDLE-C_C_GRIFFIN_MIDDLE-11,middle,C C Griffin MS,c_c_griffin_middle,SCHOOLREF-MIDDLE-C_C_GRIFFIN_MIDDLE-72,normalized_exact,True,,141,11
+SCHOOLZONE-MIDDLE-CONCORD_MIDDLE-12,middle,Concord MS,concord_middle,SCHOOLREF-MIDDLE-CONCORD_MIDDLE-51,normalized_exact,True,,141,12
+SCHOOLZONE-MIDDLE-HAROLD_WINKLER_MIDDLE-13,middle,Harold Winkler MS,harold_winkler_middle,SCHOOLREF-MIDDLE-HAROLD_E_WINKLER_MIDDLE-4892,fuzzy_review,True,,141,13
+SCHOOLZONE-MIDDLE-HARRIS_ROAD_MIDDLE-14,middle,Harris Road MS,harris_road_middle,SCHOOLREF-MIDDLE-HARRIS_RD_MIDDLE-70,fuzzy_review,True,,141,14
+SCHOOLZONE-MIDDLE-HICKORY_RIDGE_MIDDLE-15,middle,Hickory Ridge MS,hickory_ridge_middle,SCHOOLREF-MIDDLE-HICKORY_RIDGE_MIDDLE-5293,normalized_exact,True,,141,15
+SCHOOLZONE-MIDDLE-J_N_FRIES_MIDDLE-16,middle,J N Fries MS,j_n_fries_middle,,unmatched_reference_review,True,,141,16
+SCHOOLZONE-MIDDLE-KANNAPOLIS_MIDDLE-8,middle,Kannapolis MS,kannapolis_middle,SCHOOLREF-MIDDLE-KANNAPOLIS_MIDDLE-81,normalized_exact,True,,141,8
+SCHOOLZONE-MIDDLE-MOUNT_PLEASANT_MIDDLE-17,middle,Mount Pleasant MS,mount_pleasant_middle,SCHOOLREF-MIDDLE-MT_PLEASANT_MIDDLE-58,fuzzy_review,True,,141,17
+SCHOOLZONE-MIDDLE-NORTHWEST_CABARRUS_MIDDLE-18,middle,Northwest Cabarrus MS,northwest_cabarrus_middle,SCHOOLREF-MIDDLE-NORTHWEST_CABARRUS_MIDDLE-45,normalized_exact,True,,141,18
+SCHOOLZONE-MIDDLE-ROBERTA_ROAD_MIDDLE-19,middle,Roberta Road MS,roberta_road_middle,,unmatched_reference_review,True,,141,19

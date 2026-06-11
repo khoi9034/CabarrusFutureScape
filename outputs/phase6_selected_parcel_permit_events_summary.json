@@ -1,0 +1,100 @@
+{
+  "task": "Phase 6 Selected Parcel Permit Event List",
+  "status": "complete",
+  "endpoint_created": {
+    "method": "GET",
+    "path": "/development/parcel/{official_parcel_id}/permits",
+    "source_table": "public.real_property_permit_parcel_relationship",
+    "legacy_source_excluded": "public.permit_activity_clean 2015 pilot layer",
+    "query_params": {
+      "limit": "default 10, clamped to max 50",
+      "offset": "default 0",
+      "sort": "latest_first default; oldest_first supported"
+    }
+  },
+  "files_changed": [
+    "README.md",
+    "backend/README.md",
+    "backend/app/repositories/development_repository.py",
+    "backend/app/routers/development_router.py",
+    "backend/app/schemas/__init__.py",
+    "backend/app/schemas/development.py",
+    "backend/app/services/development_service.py",
+    "backend/tests/test_development_parcel_permits.py",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/SelectedParcelPermitEventsPanel.tsx",
+    "src/hooks/useSelectedParcelPermitEvents.ts",
+    "src/lib/adapters/selectedParcelPermitEventsAdapter.ts",
+    "src/lib/api/development.ts",
+    "src/types/api/development.ts"
+  ],
+  "fields_displayed": [
+    "activity_date",
+    "permit_number",
+    "permit_id",
+    "permit_type",
+    "work_type",
+    "permit_status",
+    "permit_amount",
+    "relationship_confidence"
+  ],
+  "example_selected_parcel_permits": {
+    "official_parcel_id": "CFS-PARCEL-0149726579",
+    "total_count": 286,
+    "sample": [
+      {
+        "permit_id": "5470529",
+        "permit_number": "BU2025-03199",
+        "activity_date": "2025-10-22",
+        "activity_year": 2025,
+        "permit_type": "OTHER",
+        "work_type": "Commercial Sign",
+        "permit_status": "CLOSED",
+        "permit_amount": 4250.0,
+        "relationship_confidence": "high"
+      },
+      {
+        "permit_id": "5470526",
+        "permit_number": "BU2025-02863",
+        "activity_date": "2025-09-23",
+        "activity_year": 2025,
+        "permit_type": "OTHER",
+        "work_type": "Commercial Tent",
+        "permit_status": "CLOSED",
+        "permit_amount": 2000.0,
+        "relationship_confidence": "high"
+      },
+      {
+        "permit_id": "5470523",
+        "permit_number": "BU2025-02486",
+        "activity_date": "2025-08-19",
+        "activity_year": 2025,
+        "permit_type": "OTHER",
+        "work_type": "Commercial Sign",
+        "permit_status": "CLOSED",
+        "permit_amount": 4000.0,
+        "relationship_confidence": "high"
+      }
+    ]
+  },
+  "frontend_behavior": {
+    "placement": "Below SelectedParcelDevelopmentActivityPanel in the intelligence rail",
+    "default_list_size": 10,
+    "empty_state": "No permit events found for this parcel.",
+    "fallback": "If backend is unavailable or API mode is off, no permit records are fabricated; the panel shows an unavailable state."
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "112 passed, 1 warning",
+    "targeted_backend_test": "tests/test_development_parcel_permits.py: 6 passed, 1 warning"
+  },
+  "remaining_gaps": [
+    "Permit event detail drill-in is not implemented yet.",
+    "Permit event pagination controls are not exposed in the compact panel yet.",
+    "Permit hotspot map rendering remains future work.",
+    "Temporal playback remains future work."
+  ]
+}

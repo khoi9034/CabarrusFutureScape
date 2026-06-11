@@ -1,0 +1,103 @@
+{
+  "generated_at": "2026-06-05T22:48:15.499749",
+  "phase": "Phase 7C Flood Constraint API Contract and Backend Readiness",
+  "status": "contract_only_no_api_implementation",
+  "source_table": "public.parcel_flood_constraint_overlay",
+  "baseline_metrics": {
+    "total_parcels": 110017,
+    "flood_review_parcels": 7989,
+    "floodway_parcels": 3229,
+    "sfha_parcels": 7254,
+    "high_severe_buildability_impact_parcels": 6362
+  },
+  "docs_created": [
+    "docs/backend/flood_constraint_api_contract.md",
+    "docs/backend/flood_constraint_data_dictionary.md",
+    "docs/backend/flood_constraint_response_examples.md"
+  ],
+  "planned_endpoints": [
+    "GET /constraints/flood/statistics",
+    "GET /constraints/flood/{official_parcel_id}",
+    "GET /constraints/flood/filter",
+    "GET /constraints/flood/high-review",
+    "GET /constraints/flood/summary"
+  ],
+  "required_filters": [
+    "floodplain_present",
+    "floodway_present",
+    "sfha_present",
+    "moderate_flood_present",
+    "flood_review_required",
+    "buildability_impact",
+    "flood_severity_class",
+    "dominant_flood_zone",
+    "min_percent_constrained",
+    "max_percent_constrained"
+  ],
+  "parcel_detail_fields": [
+    "official_parcel_id",
+    "pin14",
+    "dominant_flood_zone",
+    "flood_zone_codes",
+    "floodplain_present",
+    "floodway_present",
+    "sfha_present",
+    "percent_parcel_constrained",
+    "flood_constrained_area_acres",
+    "floodway_area_acres",
+    "sfha_area_acres",
+    "flood_review_required",
+    "buildability_impact",
+    "flood_constraint_score",
+    "overlay_confidence"
+  ],
+  "statistics_fields": [
+    "total_parcels",
+    "floodplain_parcels",
+    "floodway_parcels",
+    "sfha_parcels",
+    "review_required_parcels",
+    "high_severe_buildability_parcels",
+    "severity_distribution",
+    "dominant_zone_distribution",
+    "buildability_impact_distribution"
+  ],
+  "recommended_indexes": [
+    "primary key on official_parcel_id",
+    "btree on pin14",
+    "btree on dominant_flood_zone",
+    "btree on flood_severity_class",
+    "btree on flood_review_required",
+    "btree on buildability_impact",
+    "btree on flood_constraint_score",
+    "GiST on geometry"
+  ],
+  "materialized_view_candidates": [
+    "public.flood_constraint_statistics_mv",
+    "public.flood_constraint_review_queue_mv",
+    "public.flood_constraint_zone_summary_mv",
+    "public.flood_constraint_map_centroids_mv"
+  ],
+  "caching_opportunities": [
+    "countywide statistics and summary payloads",
+    "filter option counts for severity/impact/zone",
+    "short TTL high-review queues after overlay refresh",
+    "selected parcel flood detail when overlay refresh metadata is present"
+  ],
+  "backend_readiness": {
+    "data_ready": true,
+    "contract_ready": true,
+    "api_implemented": false,
+    "frontend_integrated": false,
+    "sceneview_integrated": false,
+    "forecasting_included": false
+  },
+  "remaining_blockers_before_implementation": [
+    "Create FastAPI constraints router/repository/service/schema modules",
+    "Decide whether constraints endpoints live under a new router prefix or existing parcel router",
+    "Add backend tests with real PostGIS fixtures or guarded integration tests",
+    "Define geometry payload limits for map use",
+    "Review dashboard-safe wording for Zone X versus SFHA/floodway constraints",
+    "Decide caching and refresh metadata strategy"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "task": "Phase 6 Selected Parcel Development Activity Integration",
+  "status": "complete",
+  "files_changed": [
+    "README.md",
+    "backend/README.md",
+    "backend/app/repositories/development_repository.py",
+    "backend/app/routers/development_router.py",
+    "backend/app/schemas/development.py",
+    "backend/app/services/development_service.py",
+    "backend/tests/test_development_hotspots.py",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/SelectedParcelDevelopmentActivityPanel.tsx",
+    "src/data/intelligence/developmentActivityMetrics.ts",
+    "src/hooks/useSelectedParcelDevelopmentActivity.ts",
+    "src/lib/adapters/developmentHotspotsAdapter.ts",
+    "src/lib/adapters/selectedParcelDevelopmentActivityAdapter.ts",
+    "src/lib/api/development.ts",
+    "src/types/api/development.ts"
+  ],
+  "backend_endpoint_used": {
+    "endpoint": "GET /development/hotspots",
+    "selected_parcel_filter": "official_parcel_id",
+    "example": "/development/hotspots?official_parcel_id=CFS-PARCEL-0149726579&limit=1"
+  },
+  "parcel_activity_fields_displayed": [
+    "total_permit_count",
+    "latest_permit_date",
+    "latest_permit_status",
+    "dominant_permit_type",
+    "dominant_work_type",
+    "development_activity_class",
+    "recent_permit_count_1yr",
+    "recent_permit_count_3yr",
+    "total_permit_amount",
+    "first_permit_date",
+    "active_year_count",
+    "has_unmatched_or_ambiguous_permit_flag"
+  ],
+  "backend_response_fields_added": [
+    "first_permit_date",
+    "active_year_count",
+    "ambiguous_permit_count",
+    "co_date_future_outlier_count"
+  ],
+  "example_parcel_activity_result": {
+    "official_parcel_id": "CFS-PARCEL-0149726579",
+    "total_permit_count": 286,
+    "first_permit_date": "2000-08-02",
+    "latest_permit_date": "2025-10-22",
+    "active_year_count": 19,
+    "recent_permit_count_1yr": 24,
+    "recent_permit_count_3yr": 59,
+    "total_permit_amount": 61926619.0,
+    "dominant_permit_type": "upfit",
+    "dominant_work_type": "commercial_upfit",
+    "latest_permit_status": "closed",
+    "development_activity_class": "very_high_activity"
+  },
+  "fallback_behavior": {
+    "api_enabled": "Selected parcel panel requests FastAPI hotspot summary by official parcel ID.",
+    "api_unavailable": "Panel falls back to generated static top-activity parcel artifacts when the selected parcel exists there.",
+    "no_activity_row": "Panel shows 'Development activity not yet available for this parcel.'",
+    "no_selected_parcel": "Panel prompts the user to select a parcel."
+  },
+  "validation": {
+    "frontend_typecheck": "passed",
+    "frontend_lint": "passed",
+    "frontend_build_webpack": "passed",
+    "backend_compileall": "passed",
+    "backend_pytest_full": "106 passed, 1 warning",
+    "backend_hotspot_targeted_test": "11 passed, 1 warning"
+  },
+  "remaining_gaps": [
+    "Selected parcel permit event list/detail is not implemented yet.",
+    "Development activity map layer and hotspot rendering remain future work.",
+    "Temporal permit playback remains future work.",
+    "Static fallback only covers generated top-activity parcel records, not every parcel."
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "task": "Phase 6 temporal hotspot synchronization",
+  "status": "completed",
+  "files_changed": [
+    "README.md",
+    "backend/app/repositories/development_repository.py",
+    "backend/app/routers/development_router.py",
+    "backend/app/services/development_service.py",
+    "backend/tests/test_development_hotspots.py",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/dashboard/TemporalAnalysisPanel.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "src/hooks/useDevelopmentHotspotLayer.ts",
+    "src/lib/api/development.ts",
+    "src/types/map/developmentHotspots.ts"
+  ],
+  "temporal_state_source": "useTemporalAnalysisState is now created once in DashboardProvider and passed to TemporalAnalysisPanel plus useDevelopmentHotspotLayer.",
+  "hotspot_query_parameters_synchronized": [
+    "year",
+    "month",
+    "date_start",
+    "date_end",
+    "rolling_window"
+  ],
+  "manual_hotspot_controls_preserved": [
+    "activity_class",
+    "zoning_jurisdiction",
+    "recent_window",
+    "sort_by",
+    "limit"
+  ],
+  "backend_endpoint_updates": {
+    "endpoint": "GET /development/hotspots",
+    "new_parameters": [
+      "month",
+      "date_start",
+      "date_end",
+      "rolling_window"
+    ],
+    "validation": [
+      "rolling_window must be 12 or 36",
+      "date_start must be on or before date_end"
+    ],
+    "postgis_schema_changed": false
+  },
+  "ui_status_updates": [
+    "Layer row shows synced temporal context when year/month/date/rolling filters are active",
+    "Ready status still reports displayed hotspot marker count",
+    "Empty temporal result reports no hotspots match temporal filters",
+    "Unavailable/error behavior remains graceful"
+  ],
+  "preserved_behaviors": [
+    "Hotspot marker rendering",
+    "Hotspot marker click selection",
+    "Selected parcel card updates",
+    "Parcel boundary highlight",
+    "Selected parcel development activity panel",
+    "Selected parcel permit events panel",
+    "Manual hotspot filtering controls",
+    "No animation or playback was added"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest_development_hotspots": "16 passed, 1 upstream StarletteDeprecationWarning",
+    "python_pytest_full_backend": "117 passed, 1 upstream StarletteDeprecationWarning"
+  },
+  "smoke_test_status": {
+    "manual_browser_smoke_test": "not run; no browser automation tool was available in this session",
+    "recommended_manual_checks": [
+      "Set Temporal Analysis year to 2025 and enable Development Hotspots",
+      "Set year to 2024 and confirm hotspot layer refetches",
+      "Set rolling window to 12 months and confirm synced context label",
+      "Click a hotspot marker and confirm selected parcel flow still updates"
+    ]
+  },
+  "remaining_map_intelligence_gaps": [
+    "No animated temporal playback yet",
+    "Hotspot marker metrics still display parcel-level aggregate activity fields even when temporal filters select a narrower time window",
+    "Future API work could expose time-sliced hotspot scores/counts for marker sizing within each temporal context"
+  ]
+}

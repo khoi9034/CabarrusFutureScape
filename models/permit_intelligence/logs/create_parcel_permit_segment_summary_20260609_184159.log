@@ -1,0 +1,4 @@
+2026-06-09 18:41:59,158 INFO Starting CFS parcel permit segment summary build.
+2026-06-09 18:42:07,542 INFO Materialized public.parcel_permit_segment_summary.
+2026-06-09 18:42:09,141 INFO Wrote validation output: C:\CabarrusFutureScape\outputs\parcel_permit_segment_summary_validation.json
+2026-06-09 18:42:09,142 INFO Wrote final summary output: C:\CabarrusFutureScape\outputs\permit_intelligence_segmentation_summary.json

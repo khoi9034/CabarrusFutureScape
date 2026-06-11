@@ -1,0 +1,14 @@
+2026-06-09 18:41:33,842 INFO Starting CFS parcel permit segment summary build.
+2026-06-09 18:41:34,191 ERROR Parcel permit segment summary build failed.
+Traceback (most recent call last):
+  File "C:\CabarrusFutureScape\models\permit_intelligence\create_parcel_permit_segment_summary.py", line 598, in main
+    create_summary_table(engine)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\CabarrusFutureScape\models\permit_intelligence\create_parcel_permit_segment_summary.py", line 315, in create_summary_table
+    cursor.execute(sql)
+    ~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\khoia\AppData\Roaming\Python\Python314\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UndefinedColumn: column "activity_date" does not exist
+LINE 6:       SELECT MAX(activity_date) AS anchor_date
+                         ^

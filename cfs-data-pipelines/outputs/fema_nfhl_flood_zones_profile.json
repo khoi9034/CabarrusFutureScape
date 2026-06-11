@@ -1,0 +1,641 @@
+{
+  "generated_at": "2026-06-05T18:29:05.071763",
+  "table": "public.fema_nfhl_flood_zones_raw",
+  "row_count": 7712,
+  "geometry_profile": {
+    "geometry_type_counts": [
+      {
+        "geometry_type": "ST_Polygon",
+        "feature_count": 7687
+      },
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 25
+      }
+    ],
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "feature_count": 7712
+      }
+    ],
+    "invalid_geometry_count": 195,
+    "null_geometry_count": 0,
+    "bounding_box": {
+      "xmin": -81.10796491032585,
+      "ymin": 34.81622488818811,
+      "xmax": -80.05378760651419,
+      "ymax": 35.86351882714241
+    }
+  },
+  "field_inventory": [
+    {
+      "ordinal_position": 1,
+      "column_name": "geometry",
+      "data_type": "USER-DEFINED",
+      "udt_name": "geometry",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 2,
+      "column_name": "objectid",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 3,
+      "column_name": "dfirm_id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 4,
+      "column_name": "fld_ar_id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 5,
+      "column_name": "study_typ",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 6,
+      "column_name": "fld_zone",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 7,
+      "column_name": "zone_subty",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 8,
+      "column_name": "sfha_tf",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 9,
+      "column_name": "static_bfe",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 10,
+      "column_name": "v_datum",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 11,
+      "column_name": "depth",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 12,
+      "column_name": "len_unit",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 13,
+      "column_name": "velocity",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 14,
+      "column_name": "vel_unit",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 15,
+      "column_name": "ar_revert",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 16,
+      "column_name": "ar_subtrv",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 17,
+      "column_name": "bfe_revert",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 18,
+      "column_name": "dep_revert",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 19,
+      "column_name": "dual_zone",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 20,
+      "column_name": "source_cit",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 21,
+      "column_name": "shape_starea",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 22,
+      "column_name": "shape_stlength",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 23,
+      "column_name": "gfid",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 24,
+      "column_name": "globalid",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 25,
+      "column_name": "source_layer",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 26,
+      "column_name": "source_url",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "ordinal_position": 27,
+      "column_name": "ingested_at",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES"
+    }
+  ],
+  "column_profile": [
+    {
+      "ordinal_position": 1,
+      "column_name": "geometry",
+      "data_type": "USER-DEFINED",
+      "udt_name": "geometry",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": null,
+      "role_tags": [
+        "geometry"
+      ]
+    },
+    {
+      "ordinal_position": 2,
+      "column_name": "objectid",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 7712,
+      "role_tags": [
+        "likely_identifier"
+      ]
+    },
+    {
+      "ordinal_position": 3,
+      "column_name": "dfirm_id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 6,
+      "role_tags": [
+        "likely_identifier"
+      ]
+    },
+    {
+      "ordinal_position": 4,
+      "column_name": "fld_ar_id",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 7712,
+      "role_tags": [
+        "likely_identifier"
+      ]
+    },
+    {
+      "ordinal_position": 5,
+      "column_name": "study_typ",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 3,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 6,
+      "column_name": "fld_zone",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 2,
+      "role_tags": [
+        "candidate_flood_zone_field",
+        "candidate_floodway_field"
+      ]
+    },
+    {
+      "ordinal_position": 7,
+      "column_name": "zone_subty",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 2546,
+      "non_null_count": 5166,
+      "null_percentage": 33.0135,
+      "distinct_count": 8,
+      "role_tags": [
+        "candidate_flood_zone_field",
+        "candidate_floodway_field"
+      ]
+    },
+    {
+      "ordinal_position": 8,
+      "column_name": "sfha_tf",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 2,
+      "role_tags": [
+        "candidate_flood_zone_field"
+      ]
+    },
+    {
+      "ordinal_position": 9,
+      "column_name": "static_bfe",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 1,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 10,
+      "column_name": "v_datum",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 7712,
+      "non_null_count": 0,
+      "null_percentage": 100.0,
+      "distinct_count": 0,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 11,
+      "column_name": "depth",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 1,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 12,
+      "column_name": "len_unit",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 7712,
+      "non_null_count": 0,
+      "null_percentage": 100.0,
+      "distinct_count": 0,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 13,
+      "column_name": "velocity",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 1,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 14,
+      "column_name": "vel_unit",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 7712,
+      "non_null_count": 0,
+      "null_percentage": 100.0,
+      "distinct_count": 0,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 15,
+      "column_name": "ar_revert",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 7712,
+      "non_null_count": 0,
+      "null_percentage": 100.0,
+      "distinct_count": 0,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 16,
+      "column_name": "ar_subtrv",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 7706,
+      "non_null_count": 6,
+      "null_percentage": 99.9222,
+      "distinct_count": 3,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 17,
+      "column_name": "bfe_revert",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 1,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 18,
+      "column_name": "dep_revert",
+      "data_type": "bigint",
+      "udt_name": "int8",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 1,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 19,
+      "column_name": "dual_zone",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 7712,
+      "non_null_count": 0,
+      "null_percentage": 100.0,
+      "distinct_count": 0,
+      "role_tags": [
+        "candidate_flood_zone_field"
+      ]
+    },
+    {
+      "ordinal_position": 20,
+      "column_name": "source_cit",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 30,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 21,
+      "column_name": "shape_starea",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 7708,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 22,
+      "column_name": "shape_stlength",
+      "data_type": "double precision",
+      "udt_name": "float8",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 7708,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 23,
+      "column_name": "gfid",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 6,
+      "role_tags": [
+        "likely_identifier"
+      ]
+    },
+    {
+      "ordinal_position": 24,
+      "column_name": "globalid",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 7712,
+      "role_tags": [
+        "likely_identifier"
+      ]
+    },
+    {
+      "ordinal_position": 25,
+      "column_name": "source_layer",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 1,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 26,
+      "column_name": "source_url",
+      "data_type": "text",
+      "udt_name": "text",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 1,
+      "role_tags": []
+    },
+    {
+      "ordinal_position": 27,
+      "column_name": "ingested_at",
+      "data_type": "timestamp without time zone",
+      "udt_name": "timestamp",
+      "is_nullable": "YES",
+      "null_count": 0,
+      "non_null_count": 7712,
+      "null_percentage": 0.0,
+      "distinct_count": 1,
+      "role_tags": []
+    }
+  ],
+  "candidate_flood_zone_fields": [
+    "fld_zone",
+    "zone_subty",
+    "sfha_tf",
+    "dual_zone"
+  ],
+  "candidate_floodway_fields": [
+    "fld_zone",
+    "zone_subty"
+  ],
+  "category_counts": {
+    "fld_zone": [
+      {
+        "value": "X",
+        "feature_count": 4329
+      },
+      {
+        "value": "AE",
+        "feature_count": 3383
+      }
+    ],
+    "zone_subty": [
+      {
+        "value": "1 PCT FUTURE CONDITIONS",
+        "feature_count": 3114
+      },
+      {
+        "value": "UNKNOWN",
+        "feature_count": 2546
+      },
+      {
+        "value": "0.2 PCT ANNUAL CHANCE FLOOD HAZARD",
+        "feature_count": 855
+      },
+      {
+        "value": "COMMUNITY ENCROACHMENT AREA",
+        "feature_count": 554
+      },
+      {
+        "value": "AREA OF MINIMAL FLOOD HAZARD",
+        "feature_count": 325
+      },
+      {
+        "value": "FLOODWAY",
+        "feature_count": 264
+      },
+      {
+        "value": "1 PCT FUTURE CONDITIONS, COMMUNITY ENCROACHMENT",
+        "feature_count": 24
+      },
+      {
+        "value": "FLOODWAY CONTAINED IN STRUCTURE",
+        "feature_count": 19
+      },
+      {
+        "value": "1 PCT FUTURE CONDITIONS CONTAINED IN STRUCTURE",
+        "feature_count": 11
+      }
+    ],
+    "sfha_tf": [
+      {
+        "value": "F",
+        "feature_count": 4329
+      },
+      {
+        "value": "T",
+        "feature_count": 3383
+      }
+    ]
+  },
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\inspect_fema_nfhl_flood_zones_20260605_182904.log"
+}

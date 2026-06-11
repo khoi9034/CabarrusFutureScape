@@ -1,0 +1,6 @@
+2026-06-05 17:50:43,637 INFO Fetching FEMA layer metadata: https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28
+2026-06-05 17:50:44,234 INFO FEMA metadata: name=Flood Hazard Zones geometryType=esriGeometryPolygon maxRecordCount=2000
+2026-06-05 17:50:50,267 INFO FEMA feature count intersecting Cabarrus extent: 7712
+2026-06-05 17:50:50,268 INFO Downloading FEMA features with pagination: pageSize=500 target=7712
+2026-06-05 17:53:29,229 WARNING FEMA pagination failed; falling back to object ID download. Error: HTTPSConnectionPool(host='hazards.fema.gov', port=443): Max retries exceeded with url: /arcgis/rest/services/public/NFHL/MapServer/28/query?f=geojson&where=1%3D1&outFields=%2A&returnGeometry=true&outSR=4326&orderByFields=OBJECTID&resultOffset=0&resultRecordCount=500&geometry=%7B%22xmin%22%3A+-80.78714859986353%2C+%22ymin%22%3A+35.185001484384316%2C+%22xmax%22%3A+-80.29542844362561%2C+%22ymax%22%3A+35.55345527610693%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects (Caused by ResponseError('too many 500 error responses'))
+2026-06-05 17:53:35,381 INFO Fetched 7712 FEMA object IDs by Cabarrus extent

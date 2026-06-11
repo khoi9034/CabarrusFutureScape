@@ -1,0 +1,60 @@
+{
+  "task": "local FastAPI CORS fix for frontend API mode",
+  "status": "completed",
+  "files_changed": [
+    "backend/app/config.py",
+    "backend/app/main.py",
+    "backend/.env.example",
+    "backend/README.md",
+    "backend/tests/test_cors.py"
+  ],
+  "allowed_origins": [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "http://localhost:3003",
+    "http://127.0.0.1:3003"
+  ],
+  "allowed_methods": [
+    "GET",
+    "OPTIONS"
+  ],
+  "preflight_status": {
+    "request": "OPTIONS http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579",
+    "origin": "http://localhost:3000",
+    "status_code": 200,
+    "access_control_allow_origin": "http://localhost:3000",
+    "access_control_allow_methods": "GET, OPTIONS"
+  },
+  "frontend_api_request_status": {
+    "frontend_url": "http://localhost:3000",
+    "backend_url": "http://127.0.0.1:8000",
+    "parcel_search_request_observed": true,
+    "parcel_detail_request_observed": true,
+    "parcel_detail_status_code": 200
+  },
+  "map_focus_response_status": {
+    "parcel_id": "CFS-PARCEL-0149726579",
+    "map_focus_present": true,
+    "centroid_present": true,
+    "extent_present": true,
+    "geometry_available": true,
+    "full_geometry_returned": false
+  },
+  "frontend_map_focus_status": {
+    "parcel_discovery_mode": "FastAPI Search",
+    "detail_fallback_visible": false,
+    "pending_geometry_visible": false,
+    "focused_on_map_visible": true,
+    "sceneview_focus_observed": true
+  },
+  "validation": {
+    "compileall": "passed",
+    "pytest": "104 passed, 1 warning",
+    "backend_restarted": true
+  },
+  "remaining_issues": [
+    "Development trends and temporal panels may still show independent timeout fallback messages under heavy local load; this CORS fix unblocks browser API access and parcel map_focus specifically."
+  ]
+}
