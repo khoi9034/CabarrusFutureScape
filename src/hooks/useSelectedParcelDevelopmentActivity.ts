@@ -14,6 +14,15 @@ interface ApiSelectedParcelDevelopmentActivityState
   parcelId: string | null;
 }
 
+function waitingState(): SelectedParcelDevelopmentActivityViewModel {
+  return {
+    activity: null,
+    errorMessage: null,
+    isLoading: false,
+    source: "waiting",
+  };
+}
+
 function emptyState(): SelectedParcelDevelopmentActivityViewModel {
   return {
     activity: null,
@@ -37,7 +46,11 @@ export function useSelectedParcelDevelopmentActivity(
     });
 
   useEffect(() => {
-    if (!USE_BACKEND_API || !officialParcelId) {
+    if (!officialParcelId) {
+      return;
+    }
+
+    if (!USE_BACKEND_API) {
       return;
     }
 
@@ -81,7 +94,7 @@ export function useSelectedParcelDevelopmentActivity(
   }, [officialParcelId, staticActivity]);
 
   if (!officialParcelId) {
-    return emptyState();
+    return waitingState();
   }
 
   if (!USE_BACKEND_API) {

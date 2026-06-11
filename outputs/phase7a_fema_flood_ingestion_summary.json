@@ -1,0 +1,205 @@
+{
+  "generated_at": "2026-06-05T18:33:15.680715",
+  "phase": "Phase 7A FEMA NFHL Flood Hazard Zone Ingestion",
+  "source": {
+    "name": "FEMA NFHL Flood Hazard Zones",
+    "layer": 28,
+    "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+    "authority_role": "authoritative_regulatory_constraint",
+    "gcs_tiff_role": "modeled_reference_or_future_prediction_input_not_primary"
+  },
+  "cabarrus_extent_used": {
+    "xmin": -80.78714859986353,
+    "ymin": 35.185001484384316,
+    "xmax": -80.29542844362561,
+    "ymax": 35.55345527610693
+  },
+  "parcel_count_used_for_extent": 110017,
+  "srid": 4326,
+  "county_area_estimate": {
+    "method": "sum_of_parcel_geometry_area_geography",
+    "note": "This is a parcel-footprint aggregate used for source filtering, not an official county boundary area.",
+    "sq_m": 985547222.64,
+    "acres": 243534.02,
+    "sq_km": 985.55
+  },
+  "download": {
+    "service_feature_count_for_extent": 7712,
+    "downloaded_feature_count": 7712,
+    "download_method": "object_id_fallback_after_pagination_failure",
+    "note": "Object ID fallback was used after FEMA paginated GeoJSON requests returned service errors for large geometry payloads. Object IDs were still selected using the Cabarrus envelope filter."
+  },
+  "postgis_tables": {
+    "raw": "public.fema_nfhl_flood_zones_raw",
+    "clean": "public.fema_nfhl_flood_zones_clean"
+  },
+  "counts": {
+    "raw_feature_count": 7712,
+    "clean_feature_count": 7712,
+    "row_counts_match": true
+  },
+  "discovered_fields": {
+    "candidate_flood_zone_fields": [
+      "fld_zone",
+      "zone_subty",
+      "sfha_tf",
+      "dual_zone"
+    ],
+    "candidate_floodway_fields": [
+      "fld_zone",
+      "zone_subty"
+    ],
+    "primary_flood_zone_field": "fld_zone",
+    "primary_floodway_field": "zone_subty",
+    "sfha_flag_field": "sfha_tf"
+  },
+  "geometry_qa": {
+    "raw_invalid_geometry_count": 195,
+    "clean_invalid_geometry_count": 0,
+    "clean_null_geometry_count": 0,
+    "clean_geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 7712
+      }
+    ],
+    "clean_srid_counts": [
+      {
+        "srid": 4326,
+        "feature_count": 7712
+      }
+    ],
+    "geometry_cleaning_policy": "ST_MakeValid repairs invalid geometries, polygonal components are extracted with ST_CollectionExtract(..., 3), and outputs are coerced to MultiPolygon in SRID 4326."
+  },
+  "flood_zone_distribution": [
+    {
+      "value": "X",
+      "feature_count": 4329,
+      "total_area_acres": 1318064.04
+    },
+    {
+      "value": "AE",
+      "feature_count": 3383,
+      "total_area_acres": 57245.67
+    }
+  ],
+  "flood_constraint_type_distribution": [
+    {
+      "value": "minimal_flood_hazard",
+      "feature_count": 3474,
+      "total_area_acres": 1314873.64
+    },
+    {
+      "value": "special_flood_hazard_area",
+      "feature_count": 3100,
+      "total_area_acres": 43908.53
+    },
+    {
+      "value": "moderate_flood_hazard",
+      "feature_count": 855,
+      "total_area_acres": 3190.4
+    },
+    {
+      "value": "floodway",
+      "feature_count": 283,
+      "total_area_acres": 13337.14
+    }
+  ],
+  "flood_severity_distribution": [
+    {
+      "value": "low",
+      "feature_count": 3474,
+      "total_area_acres": 1314873.64
+    },
+    {
+      "value": "high",
+      "feature_count": 3100,
+      "total_area_acres": 43908.53
+    },
+    {
+      "value": "moderate",
+      "feature_count": 855,
+      "total_area_acres": 3190.4
+    },
+    {
+      "value": "severe",
+      "feature_count": 283,
+      "total_area_acres": 13337.14
+    }
+  ],
+  "floodway_counts": [
+    {
+      "is_floodway": true,
+      "feature_count": 283
+    },
+    {
+      "is_floodway": false,
+      "feature_count": 7429
+    }
+  ],
+  "duplicate_identifier_summary": [
+    {
+      "identifier_field": "globalid",
+      "duplicate_groups": 0,
+      "duplicate_rows": 0
+    },
+    {
+      "identifier_field": "gfid",
+      "duplicate_groups": 6,
+      "duplicate_rows": 7712
+    },
+    {
+      "identifier_field": "fld_ar_id",
+      "duplicate_groups": 0,
+      "duplicate_rows": 0
+    }
+  ],
+  "indexes": [
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_constraint_type_idx",
+      "indexdef": "CREATE INDEX fema_nfhl_flood_zones_clean_constraint_type_idx ON public.fema_nfhl_flood_zones_clean USING btree (flood_constraint_type)"
+    },
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_geometry_gix",
+      "indexdef": "CREATE INDEX fema_nfhl_flood_zones_clean_geometry_gix ON public.fema_nfhl_flood_zones_clean USING gist (geometry)"
+    },
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_internal_id_idx",
+      "indexdef": "CREATE UNIQUE INDEX fema_nfhl_flood_zones_clean_internal_id_idx ON public.fema_nfhl_flood_zones_clean USING btree (flood_zone_internal_id)"
+    },
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_severity_idx",
+      "indexdef": "CREATE INDEX fema_nfhl_flood_zones_clean_severity_idx ON public.fema_nfhl_flood_zones_clean USING btree (flood_severity_class)"
+    },
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_zone_idx",
+      "indexdef": "CREATE INDEX fema_nfhl_flood_zones_clean_zone_idx ON public.fema_nfhl_flood_zones_clean USING btree (flood_zone_code)"
+    }
+  ],
+  "qa_pass": {
+    "no_invalid_geometries": true,
+    "srid_4326_only": true,
+    "raw_clean_counts_match": true
+  },
+  "readiness": {
+    "ready_for_parcel_overlay": true,
+    "next_phase": "Phase 7B Parcel Flood Constraint Overlay",
+    "next_outputs": [
+      "floodplain_present",
+      "floodway_present",
+      "dominant_flood_zone",
+      "flood_constrained_area_acres",
+      "percent_parcel_constrained",
+      "flood_review_required",
+      "buildability_impact",
+      "parcel_flood_constraint_score"
+    ]
+  },
+  "artifacts": {
+    "extent_validation": "cfs-data-pipelines/outputs/cabarrus_extent_validation.json",
+    "ingest_summary": "cfs-data-pipelines/outputs/fema_nfhl_flood_zone_ingest_summary.json",
+    "profile_summary": "cfs-data-pipelines/outputs/fema_nfhl_flood_zones_profile.json",
+    "column_profile": "cfs-data-pipelines/outputs/fema_nfhl_flood_zones_columns.csv",
+    "clean_validation": "cfs-data-pipelines/outputs/fema_nfhl_flood_zone_clean_validation.json"
+  }
+}

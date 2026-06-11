@@ -6,11 +6,13 @@ import type { DevelopmentPanelSource } from "@/lib/adapters/developmentActivityS
 import { normalizeDevelopmentHotspots } from "@/lib/adapters/developmentHotspotsAdapter";
 import type { DevelopmentHotspotsResponse } from "@/types/api";
 
+export type SelectedParcelPanelSource = DevelopmentPanelSource | "waiting";
+
 export interface SelectedParcelDevelopmentActivityViewModel {
   activity: DevelopmentHotspotRecord | null;
   errorMessage: string | null;
   isLoading: boolean;
-  source: DevelopmentPanelSource;
+  source: SelectedParcelPanelSource;
 }
 
 export function getStaticSelectedParcelDevelopmentActivity(

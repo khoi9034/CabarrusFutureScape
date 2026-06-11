@@ -102,6 +102,62 @@ def test_development_hotspots_recent_window_filter() -> None:
     assert body["results"][0]["recent_permit_count_1yr"] > 0
 
 
+def test_development_hotspots_month_filter() -> None:
+    response = client.get(
+        "/development/hotspots",
+        params={"year": 2025, "month": 10},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["filters_applied"] == {"month": 10, "year": 2025}
+    assert body["total_count"] > 0
+    assert body["results"]
+
+
+def test_development_hotspots_date_range_filter() -> None:
+    response = client.get(
+        "/development/hotspots",
+        params={"date_start": "2025-01-01", "date_end": "2025-12-31"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["filters_applied"] == {
+        "date_end": "2025-12-31",
+        "date_start": "2025-01-01",
+    }
+    assert body["total_count"] > 0
+
+
+def test_development_hotspots_invalid_date_range() -> None:
+    response = client.get(
+        "/development/hotspots",
+        params={"date_start": "2025-12-31", "date_end": "2025-01-01"},
+    )
+
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": "date_start must be on or before date_end",
+    }
+
+
+def test_development_hotspots_rolling_window_filter() -> None:
+    response = client.get("/development/hotspots", params={"rolling_window": 12})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["filters_applied"] == {"rolling_window": 12}
+    assert body["total_count"] > 0
+
+
+def test_development_hotspots_rolling_window_validation() -> None:
+    response = client.get("/development/hotspots", params={"rolling_window": 13})
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "rolling_window must be 12 or 36"}
+
+
 def test_development_hotspots_sort_by_validation() -> None:
     response = client.get("/development/hotspots", params={"sort_by": "bad"})
 

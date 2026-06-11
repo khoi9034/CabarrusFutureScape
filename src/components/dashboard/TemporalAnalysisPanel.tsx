@@ -6,7 +6,7 @@ import {
   formatDevelopmentDate,
 } from "@/data/intelligence/developmentActivityMetrics";
 import { developmentTemporalIndex } from "@/data/intelligence/developmentTemporalIndex";
-import { useTemporalAnalysisState } from "@/hooks/useTemporalAnalysisState";
+import type { TemporalAnalysisState } from "@/hooks/useTemporalAnalysisState";
 import { useTemporalQuery } from "@/hooks/useTemporalQuery";
 import { TemporalFilterControls } from "@/components/dashboard/TemporalFilterControls";
 import { TemporalQueryPreview } from "@/components/dashboard/TemporalQueryPreview";
@@ -20,8 +20,13 @@ const sourceLabels = {
   static: "Static",
 } as const;
 
-export function TemporalAnalysisPanel() {
-  const temporalState = useTemporalAnalysisState();
+interface TemporalAnalysisPanelProps {
+  temporalState: TemporalAnalysisState;
+}
+
+export function TemporalAnalysisPanel({
+  temporalState,
+}: TemporalAnalysisPanelProps) {
   const temporalQuery = useTemporalQuery(temporalState.temporalFilters);
   const artifactsAvailable =
     developmentTemporalIndex.availableYears.length > 0 &&

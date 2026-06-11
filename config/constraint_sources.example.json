@@ -1,0 +1,139 @@
+{
+  "version": "0.1.0",
+  "environment": "local-planning-only",
+  "production_services_connected": false,
+  "notes": [
+    "Example-only constraint source registry for Phase 7 planning.",
+    "Do not place credentials, private URLs, or production tokens in this file.",
+    "Replace placeholder URLs only after source ownership, security, and dashboard-safe review."
+  ],
+  "constraint_sources": [
+    {
+      "id": "floodplain-floodway",
+      "category": "flood",
+      "title": "Floodplain and Floodway Constraints",
+      "source_status": "candidate",
+      "related_dataset_registry_id": "floodplain",
+      "related_service_registry_id": "floodplain-layer",
+      "placeholder_url": "https://services.example.invalid/arcgis/rest/services/Cabarrus/Floodplain/MapServer",
+      "source_type": "arcgis-map-service",
+      "geometry_type": "polygon",
+      "expected_fields": [
+        "source_feature_id",
+        "flood_zone",
+        "floodway_flag",
+        "effective_date"
+      ],
+      "owner_placeholder": {
+        "department": "Emergency Management / Environmental Review",
+        "steward_role": "Risk data steward",
+        "technical_owner": "Enterprise GIS administrator"
+      },
+      "overlay_method": "intersection_area",
+      "refresh_cadence": "as-needed",
+      "access_level": "public-or-internal-pending-review",
+      "dashboard_safe_default": false
+    },
+    {
+      "id": "school-elementary-boundaries",
+      "category": "school",
+      "title": "Elementary School Assignment Boundaries",
+      "source_status": "planned",
+      "placeholder_url": null,
+      "source_type": "arcgis-feature-service-or-file",
+      "geometry_type": "polygon",
+      "expected_fields": [
+        "school_id",
+        "school_name",
+        "assignment_level",
+        "effective_school_year"
+      ],
+      "owner_placeholder": {
+        "department": "Schools / Planning",
+        "steward_role": "School assignment data steward",
+        "technical_owner": "Enterprise GIS administrator"
+      },
+      "overlay_method": "containment_assignment",
+      "refresh_cadence": "annual-or-as-boundaries-change",
+      "access_level": "internal-pending-review",
+      "dashboard_safe_default": false
+    },
+    {
+      "id": "school-middle-boundaries",
+      "category": "school",
+      "title": "Middle School Assignment Boundaries",
+      "source_status": "planned",
+      "placeholder_url": null,
+      "source_type": "arcgis-feature-service-or-file",
+      "geometry_type": "polygon",
+      "expected_fields": [
+        "school_id",
+        "school_name",
+        "assignment_level",
+        "effective_school_year"
+      ],
+      "overlay_method": "containment_assignment",
+      "refresh_cadence": "annual-or-as-boundaries-change",
+      "access_level": "internal-pending-review",
+      "dashboard_safe_default": false
+    },
+    {
+      "id": "school-high-boundaries",
+      "category": "school",
+      "title": "High School Assignment Boundaries",
+      "source_status": "planned",
+      "placeholder_url": null,
+      "source_type": "arcgis-feature-service-or-file",
+      "geometry_type": "polygon",
+      "expected_fields": [
+        "school_id",
+        "school_name",
+        "assignment_level",
+        "effective_school_year"
+      ],
+      "overlay_method": "containment_assignment",
+      "refresh_cadence": "annual-or-as-boundaries-change",
+      "access_level": "internal-pending-review",
+      "dashboard_safe_default": false
+    },
+    {
+      "id": "school-facilities",
+      "category": "school",
+      "title": "School Facilities",
+      "source_status": "planned",
+      "placeholder_url": null,
+      "source_type": "arcgis-feature-service-or-file",
+      "geometry_type": "point",
+      "expected_fields": [
+        "school_id",
+        "school_name",
+        "school_level",
+        "facility_status"
+      ],
+      "overlay_method": "nearest_distance",
+      "refresh_cadence": "annual-or-as-facilities-change",
+      "access_level": "public-or-internal-pending-review",
+      "dashboard_safe_default": false
+    },
+    {
+      "id": "school-capacity-table",
+      "category": "school",
+      "title": "School Capacity and Enrollment Table",
+      "source_status": "future-governance-review",
+      "placeholder_url": null,
+      "source_type": "governed-table",
+      "geometry_type": "none",
+      "expected_fields": [
+        "school_id",
+        "school_year",
+        "enrollment",
+        "capacity",
+        "utilization_pct"
+      ],
+      "overlay_method": "attribute_join",
+      "refresh_cadence": "annual-or-steward-approved",
+      "access_level": "restricted-pending-review",
+      "dashboard_safe_default": false
+    }
+  ]
+}

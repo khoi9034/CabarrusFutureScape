@@ -79,10 +79,24 @@ export interface DevelopmentHotspotResult {
   avg_permit_amount: number | null;
   development_activity_class: string | null;
   development_activity_score: number | null;
+  active_construction_permits?: number;
+  commercial_activity_permits?: number;
+  completed_permits?: number;
+  current_activity_status?: string | null;
+  demolition_permits?: number;
+  dominant_growth_signal?: string | null;
+  dominant_permit_segment?: string | null;
   dominant_permit_type: string | null;
   dominant_work_type: string | null;
   dominant_zoning_code_raw: string | null;
   dominant_zoning_general_normalized: string | null;
+  high_value_permits?: number;
+  industrial_activity_permits?: number;
+  institutional_activity_permits?: number;
+  major_value_permits?: number;
+  minor_maintenance_permits?: number;
+  permit_signal_score_avg?: number | null;
+  permit_signal_score_max?: number | null;
   has_unmatched_or_ambiguous_permit_flag: boolean;
   latest_permit_date: string | null;
   latest_permit_status: string | null;
@@ -104,6 +118,8 @@ export interface DevelopmentHotspotResult {
   first_permit_date?: string | null;
   recent_permit_count_1yr: number;
   recent_permit_count_3yr: number;
+  redevelopment_signal_permits?: number;
+  residential_growth_permits?: number;
   subdivision: string | null;
   total_permit_amount: number | null;
   total_permit_count: number;
@@ -254,6 +270,12 @@ export interface DevelopmentParcelPermitEvent {
   permit_number: string | null;
   permit_status: string | null;
   permit_type: string | null;
+  permit_segment: string | null;
+  permit_growth_signal: string | null;
+  development_domain: string | null;
+  permit_status_stage: string | null;
+  permit_value_class: string | null;
+  permit_signal_score: number | null;
   relationship_confidence: string | null;
   work_type: string | null;
 }
@@ -277,4 +299,47 @@ export interface DevelopmentLookupResponse {
   lookup_type: string;
   options: DevelopmentLookupItem[];
   total_options: number;
+}
+
+export interface PermitSegmentStatisticsResponse {
+  total_permits: number;
+  by_permit_segment: DevelopmentStatisticsBucket[];
+  by_permit_growth_signal: DevelopmentStatisticsBucket[];
+  by_permit_status_stage: DevelopmentStatisticsBucket[];
+  by_permit_value_class: DevelopmentStatisticsBucket[];
+  by_development_domain: DevelopmentStatisticsBucket[];
+}
+
+export interface ParcelPermitSegmentSummaryResponse {
+  official_parcel_id: string;
+  pin14: string | null;
+  total_permits: number;
+  residential_growth_permits: number;
+  commercial_activity_permits: number;
+  industrial_activity_permits: number;
+  institutional_activity_permits: number;
+  redevelopment_signal_permits: number;
+  minor_maintenance_permits: number;
+  demolition_permits: number;
+  active_construction_permits: number;
+  completed_permits: number;
+  high_value_permits: number;
+  major_value_permits: number;
+  total_permit_amount: number | null;
+  latest_permit_date: string | null;
+  first_permit_date: string | null;
+  active_year_count: number;
+  dominant_permit_segment: string | null;
+  dominant_growth_signal: string | null;
+  permit_signal_score_max: number | null;
+  permit_signal_score_avg: number | null;
+  current_activity_status: string | null;
+}
+
+export interface PermitSegmentOptionsResponse {
+  permit_segments: DevelopmentLookupItem[];
+  growth_signals: DevelopmentLookupItem[];
+  status_stages: DevelopmentLookupItem[];
+  value_classes: DevelopmentLookupItem[];
+  development_domains: DevelopmentLookupItem[];
 }

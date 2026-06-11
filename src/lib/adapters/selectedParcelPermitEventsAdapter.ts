@@ -1,4 +1,4 @@
-import type { DevelopmentPanelSource } from "@/lib/adapters/developmentActivitySummaryAdapter";
+import type { SelectedParcelPanelSource } from "@/lib/adapters/selectedParcelDevelopmentActivityAdapter";
 import type {
   DevelopmentParcelPermitEvent,
   DevelopmentParcelPermitEventsResponse,
@@ -9,13 +9,13 @@ export interface SelectedParcelPermitEventsViewModel {
   isLoading: boolean;
   officialParcelId: string | null;
   permits: DevelopmentParcelPermitEvent[];
-  source: DevelopmentPanelSource;
+  source: SelectedParcelPanelSource;
   totalCount: number;
 }
 
 export function getUnavailableSelectedParcelPermitEvents(
   officialParcelId: string | null | undefined,
-  source: DevelopmentPanelSource,
+  source: SelectedParcelPanelSource,
 ): SelectedParcelPermitEventsViewModel {
   return {
     errorMessage: null,

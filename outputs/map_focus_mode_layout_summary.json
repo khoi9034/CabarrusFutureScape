@@ -1,0 +1,72 @@
+{
+  "phase": "Map-Focused Fullscreen / Explore Mode layout behavior",
+  "status": "complete",
+  "files_changed": [
+    "src/components/layout/AppShell.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/hooks/useDashboardState.tsx"
+  ],
+  "map_focus_state": {
+    "added": true,
+    "state_name": "isMapFocusMode",
+    "setter": "setMapFocusMode",
+    "toggle_action": "toggleMapFocusMode",
+    "location": "DashboardProvider shared dashboard context"
+  },
+  "expand_button_behavior": {
+    "location": "SceneView overlay",
+    "off_label": "Expand Map",
+    "on_label": "Exit Map Focus",
+    "layout_fullscreen_not_browser_fullscreen": true,
+    "escape_key_exit": true
+  },
+  "layout_behavior": {
+    "normal_mode": {
+      "top_nav": "visible",
+      "left_layer_rail": "visible in overview mode",
+      "scene_view": "center workspace",
+      "right_intelligence_panel": "visible",
+      "bottom_kpi_bar": "visible"
+    },
+    "map_focus_mode": {
+      "top_nav": "visible",
+      "left_layer_rail": "visible",
+      "scene_view": "expanded into the right panel and KPI space",
+      "right_intelligence_panel": "hidden",
+      "bottom_kpi_bar": "hidden",
+      "county_pulse_overview": "hidden with the intelligence panel",
+      "compact_selected_parcel_map_card": "preserved"
+    }
+  },
+  "left_rail_behavior": {
+    "preserved": true,
+    "available_layers": [
+      "Development Hotspots",
+      "Flood Constraints",
+      "FEMA Flood Zones",
+      "Parcel Intelligence",
+      "Infrastructure Readiness",
+      "Opportunity Extrusions"
+    ]
+  },
+  "search_behavior_in_map_focus_mode": {
+    "top_nav_modified": false,
+    "parcel_search_modified": false,
+    "selected_parcel_flow_preserved": true,
+    "auto_open_right_panel": false
+  },
+  "scene_resize_behavior": {
+    "implemented": true,
+    "approach": "SceneView resize is requested after isMapFocusMode changes so ArcGIS can adapt to the expanded container."
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "runtime_smoke_test": "not completed; http://localhost:3000 timed out and runtime debugging/restart was intentionally not performed per request"
+  },
+  "remaining_ui_polish": [
+    "Optional mobile-specific rail/map stacking refinements after hands-on browser review.",
+    "Optional animation polish for the intelligence panel collapse/restore transition."
+  ]
+}

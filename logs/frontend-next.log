@@ -1,0 +1,18 @@
+
+> cabarrusfuturescape@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.181:3000
+- Environments: .env.local
+✓ Ready in 1435ms
+
+ HEAD / 200 in 4.7s (next.js: 1542ms, application-code: 3.1s)
+✓ Finished filesystem cache database compaction in 11.1s
+ GET / 200 in 1003ms (next.js: 92ms, application-code: 912ms)
+ GET / 200 in 1198ms (next.js: 65ms, application-code: 1132ms)
+ GET /?parcel=CFS-PARCEL-0149771666&role=county-executive&compare=baseline%2Caccelerated-growth&briefing=executive&report=executive-growth&print=briefing&export=executive&scenario=baseline&view=executive&year=2030&intensity=58&layers=county-boundary%2Cparcel-intelligence%2Copportunity-extrusions%2Cdevelopment-pressure%2Cinfrastructure-readiness%2Cscenario-envelope 200 in 1161ms (next.js: 96ms, application-code: 1065ms)
+ GET /?parcel=CFS-PARCEL-0149771666&role=county-executive&compare=baseline%2Caccelerated-growth&briefing=executive&report=executive-growth&print=briefing&export=executive&scenario=baseline&view=executive&year=2030&intensity=58&layers=county-boundary%2Cparcel-intelligence%2Copportunity-extrusions%2Cdevelopment-pressure%2Cinfrastructure-readiness%2Cscenario-envelope 200 in 527ms (next.js: 97ms, application-code: 430ms)
+ GET /?parcel=CFS-PARCEL-0149771666&role=county-executive&compare=baseline%2Caccelerated-growth&briefing=executive&report=executive-growth&print=briefing&export=executive&scenario=baseline&view=executive&year=2030&intensity=58&layers=county-boundary%2Cparcel-intelligence%2Copportunity-extrusions%2Cdevelopment-pressure%2Cinfrastructure-readiness%2Cscenario-envelope 200 in 981ms (next.js: 147ms, application-code: 834ms)
+ GET /?parcel=CFS-PARCEL-0149771666&role=county-executive&compare=baseline%2Caccelerated-growth&briefing=executive&report=executive-growth&print=briefing&export=executive&scenario=baseline&view=executive&year=2030&intensity=58&layers=county-boundary%2Cparcel-intelligence%2Copportunity-extrusions%2Cdevelopment-pressure%2Cinfrastructure-readiness%2Cscenario-envelope 200 in 1017ms (next.js: 90ms, application-code: 927ms)

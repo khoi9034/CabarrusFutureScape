@@ -1,28 +1,84 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Activity,
-  Bell,
+  ChevronDown,
   Command,
+  FileSearch,
   LayoutDashboard,
+  Loader2,
   Map,
+  MoreHorizontal,
+  Printer,
   RadioTower,
   Search,
-  ShieldCheck,
   UserRound,
+  XCircle,
 } from "lucide-react";
 import {
   appIdentity,
   dashboardStatusLabels,
 } from "@/data/mock/dashboardMockData";
 import { CommandPalette } from "@/components/dashboard/CommandPalette";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { searchParcelIndex, type ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import { useDashboardState } from "@/hooks/useDashboardState";
+import {
+  normalizeBackendParcelDetailResponse,
+  normalizeBackendParcelMapFocusResponse,
+} from "@/lib/adapters/parcelDetailAdapter";
+import { normalizeBackendParcelSearchResponse } from "@/lib/adapters/parcelSearchAdapter";
 import { dashboardRoleRegistry } from "@/lib/dashboard/roleRegistry";
 import { workspaceLayoutPresets } from "@/lib/dashboard/workspacePresets";
+import { USE_BACKEND_API } from "@/lib/api/client";
+import { getParcelDetail, searchParcels } from "@/lib/api/parcels";
+import { dispatchParcelMapFocusRequest } from "@/lib/map/parcelMapFocus";
+import { cn } from "@/lib/utils";
+import type { ProductMode } from "@/types";
 import type { DashboardRoleId } from "@/types/userRoles";
 import type { DashboardViewMode } from "@/types/workspace";
+import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
+
+const productModes: Array<{
+  id: ProductMode;
+  label: string;
+  shortLabel: string;
+  title: string;
+  icon: typeof LayoutDashboard;
+}> = [
+  {
+    icon: LayoutDashboard,
+    id: "overview",
+    label: "Overview",
+    shortLabel: "Overview",
+    title: "Main site-sourcing and map exploration workspace",
+  },
+  {
+    icon: FileSearch,
+    id: "due_diligence",
+    label: "Due Diligence",
+    shortLabel: "Diligence",
+    title: "Selected parcel due diligence assessment",
+  },
+  {
+    icon: Printer,
+    id: "executive_print",
+    label: "Executive Print",
+    shortLabel: "Print",
+    title: "Print-friendly executive site intelligence report",
+  },
+];
+
+const QUICK_SEARCH_LIMIT = 8;
+const QUICK_SEARCH_MIN_LENGTH = 3;
+
+type QuickSearchStatus =
+  | "empty"
+  | "error"
+  | "fallback"
+  | "idle"
+  | "loading"
+  | "ready";
 
 export function TopNav() {
   const {
@@ -33,10 +89,226 @@ export function TopNav() {
     mapStatus,
     roleId,
     scenarioName,
-    selectedParcelId,
+    productMode,
+    setProductMode,
+    setSelectedParcelIntelligence,
     viewMode,
   } = useDashboardState();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [quickSearchError, setQuickSearchError] = useState<string | null>(null);
+  const [quickSearchOpen, setQuickSearchOpen] = useState(false);
+  const [quickSearchQuery, setQuickSearchQuery] = useState("");
+  const [quickSearchResults, setQuickSearchResults] = useState<ParcelSearchRecord[]>([]);
+  const [quickSearchStatus, setQuickSearchStatus] =
+    useState<QuickSearchStatus>("idle");
+  const quickSearchRef = useRef<HTMLDivElement | null>(null);
+  const selectionRequestRef = useRef(0);
+  const trimmedQuickSearchQuery = quickSearchQuery.trim();
+  const quickSearchReady =
+    trimmedQuickSearchQuery.length >= QUICK_SEARCH_MIN_LENGTH;
+  const quickSearchDropdownVisible =
+    quickSearchOpen && (quickSearchReady || quickSearchStatus === "loading");
+
+  useEffect(() => {
+    function handleOutsidePointerDown(event: MouseEvent) {
+      if (
+        quickSearchRef.current &&
+        !quickSearchRef.current.contains(event.target as Node)
+      ) {
+        setQuickSearchOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsidePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsidePointerDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!quickSearchReady) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      setQuickSearchStatus("loading");
+      setQuickSearchError(null);
+
+      const runStaticFallback = async (
+        fallbackMessage: string | null,
+      ) => {
+        const staticResults = await searchParcelIndex({
+          limit: QUICK_SEARCH_LIMIT,
+          query: trimmedQuickSearchQuery,
+        });
+
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        setQuickSearchResults(staticResults);
+        setQuickSearchError(fallbackMessage);
+        setQuickSearchStatus(
+          fallbackMessage
+            ? "fallback"
+            : staticResults.length
+              ? "ready"
+              : "empty",
+        );
+      };
+
+      if (!USE_BACKEND_API) {
+        runStaticFallback(null).catch((error: unknown) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+
+          setQuickSearchResults([]);
+          setQuickSearchError(
+            error instanceof Error
+              ? error.message
+              : "Parcel search index could not be loaded.",
+          );
+          setQuickSearchStatus("error");
+        });
+        return;
+      }
+
+      searchParcels(
+        {
+          limit: QUICK_SEARCH_LIMIT,
+          offset: 0,
+          q: trimmedQuickSearchQuery,
+        },
+        { signal: controller.signal },
+      )
+        .then((response) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+
+          const records = normalizeBackendParcelSearchResponse(response);
+          setQuickSearchResults(records);
+          setQuickSearchError(null);
+          setQuickSearchStatus(records.length ? "ready" : "empty");
+        })
+        .catch((error: unknown) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+
+          const fallbackMessage =
+            error instanceof Error
+              ? `${error.message}; showing static fallback results.`
+              : "Parcel search API is unavailable; showing static fallback results.";
+
+          runStaticFallback(fallbackMessage).catch((fallbackError: unknown) => {
+            if (controller.signal.aborted) {
+              return;
+            }
+
+            setQuickSearchResults([]);
+            setQuickSearchError(
+              fallbackError instanceof Error
+                ? fallbackError.message
+                : "Parcel search is unavailable.",
+            );
+            setQuickSearchStatus("error");
+          });
+        });
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [quickSearchReady, trimmedQuickSearchQuery]);
+
+  const hydrateSelectedParcel = useCallback(
+    (
+      record: ParcelSearchRecord,
+      source: SelectedParcelIntelligenceSource,
+    ) => {
+      setSelectedParcelIntelligence(record, source);
+
+      if (!USE_BACKEND_API) {
+        return;
+      }
+
+      const requestId = selectionRequestRef.current + 1;
+      selectionRequestRef.current = requestId;
+
+      getParcelDetail(
+        record.officialParcelId,
+        { include_geometry: true },
+      )
+        .then((response) => {
+          if (requestId !== selectionRequestRef.current) {
+            return;
+          }
+
+          const hydratedRecord = normalizeBackendParcelDetailResponse(
+            response,
+            record,
+          );
+          const mapFocus = normalizeBackendParcelMapFocusResponse(
+            response,
+            hydratedRecord,
+          );
+
+          setSelectedParcelIntelligence(hydratedRecord, "api");
+
+          if (mapFocus) {
+            dispatchParcelMapFocusRequest(mapFocus);
+          }
+        })
+        .catch((error: unknown) => {
+          if (requestId !== selectionRequestRef.current) {
+            return;
+          }
+
+          setSelectedParcelIntelligence(record, "fallback");
+          setQuickSearchError(
+            error instanceof Error
+              ? `${error.message}; showing selected search result fallback.`
+              : "Parcel detail API is unavailable; showing selected search result fallback.",
+          );
+          setQuickSearchStatus("fallback");
+        });
+    },
+    [
+      setSelectedParcelIntelligence,
+    ],
+  );
+
+  const handleQuickSearchSelect = useCallback(
+    (record: ParcelSearchRecord) => {
+      setQuickSearchOpen(false);
+      setQuickSearchQuery(record.officialParcelId);
+      setQuickSearchResults([record]);
+      setQuickSearchStatus("ready");
+      setQuickSearchError(null);
+      hydrateSelectedParcel(record, USE_BACKEND_API ? "fallback" : "static");
+    },
+    [hydrateSelectedParcel],
+  );
+
+  const handleQuickSearchKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Escape") {
+        setQuickSearchOpen(false);
+        return;
+      }
+
+      if (event.key === "Enter" && quickSearchResults[0]) {
+        event.preventDefault();
+        handleQuickSearchSelect(quickSearchResults[0]);
+      }
+    },
+    [handleQuickSearchSelect, quickSearchResults],
+  );
 
   return (
     <>
@@ -45,115 +317,221 @@ export function TopNav() {
         open={commandPaletteOpen}
       />
 
-      <header className="relative z-20 flex h-auto shrink-0 flex-col gap-3 border-b border-white/10 bg-[#060b12]/88 px-3 py-3 backdrop-blur-2xl lg:h-[76px] lg:flex-row lg:items-center lg:px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#d8b86a]/40 bg-[#d8b86a]/[0.12] shadow-[0_0_28px_rgba(216,184,106,0.22)]">
-            <Map className="h-5 w-5 text-[#f0cd79]" />
+      <header className="relative z-30 flex h-16 shrink-0 items-center gap-3 overflow-visible border-b border-white/10 bg-[#060b12]/92 px-3 backdrop-blur-2xl lg:px-4">
+        <div className="flex min-w-[168px] max-w-[230px] shrink-0 items-center gap-3">
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#d8b86a]/35 bg-[#d8b86a]/[0.12] shadow-[0_0_24px_rgba(216,184,106,0.2)]">
+            <Map className="h-4 w-4 text-[#f0cd79]" />
             <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border border-[#060b12] bg-[#55d38f]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase text-[#d8b86a]">
+            <p className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-[#d8b86a]">
               {appIdentity.eyebrow}
             </p>
-            <h1 className="truncate text-xl font-semibold text-white">
+            <h1 className="truncate text-lg font-semibold leading-5 text-white">
               {appIdentity.productName}
             </h1>
           </div>
         </div>
 
-        <div className="hidden h-10 w-px bg-white/10 lg:block" />
+        <nav
+          aria-label="CFS product mode"
+          className="flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.035] p-0.5"
+        >
+          {productModes.map((mode) => {
+            const Icon = mode.icon;
+            const active = productMode === mode.id;
 
-        <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 md:grid-cols-[minmax(220px,1fr)_minmax(170px,210px)_minmax(190px,230px)] xl:grid-cols-[minmax(220px,1fr)_minmax(170px,210px)_minmax(190px,230px)_minmax(220px,auto)] lg:items-center">
-          <label className="relative block min-w-0">
+            return (
+              <button
+                aria-pressed={active}
+                className={cn(
+                  "inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold transition",
+                  active
+                    ? "bg-[#d8b86a] text-[#08111d] shadow-[0_0_22px_rgba(216,184,106,0.24)]"
+                    : "text-slate-400 hover:bg-white/[0.055] hover:text-white",
+                )}
+                key={mode.id}
+                onClick={() => setProductMode(mode.id)}
+                title={mode.title}
+                type="button"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span className="hidden xl:inline">{mode.label}</span>
+                <span className="hidden md:inline xl:hidden">{mode.shortLabel}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <div
+            className="relative hidden min-w-[180px] flex-1 md:block"
+            ref={quickSearchRef}
+          >
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             <input
-              aria-label="Open command search"
+              aria-controls="top-parcel-search-results"
+              aria-expanded={quickSearchDropdownVisible}
+              aria-label="Search parcels"
+              autoComplete="off"
               className="h-10 w-full rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
-              onClick={() => setCommandPaletteOpen(true)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  setCommandPaletteOpen(true);
+              onChange={(event) => {
+                const nextQuery = event.target.value;
+                setQuickSearchQuery(nextQuery);
+                setQuickSearchOpen(true);
+
+                if (nextQuery.trim().length < QUICK_SEARCH_MIN_LENGTH) {
+                  setQuickSearchResults([]);
+                  setQuickSearchError(null);
+                  setQuickSearchStatus("idle");
                 }
               }}
-              placeholder={appIdentity.searchPlaceholder}
-              readOnly
-              title="Open command palette"
+              onFocus={() => setQuickSearchOpen(true)}
+              onKeyDown={handleQuickSearchKeyDown}
+              placeholder="Search parcel, PIN, owner, address, subdivision"
+              role="combobox"
+              title="Search parcels, PINs, owners, addresses, subdivisions, or neighborhoods"
               type="search"
+              value={quickSearchQuery}
             />
-          </label>
+            {quickSearchQuery ? (
+              <button
+                aria-label="Clear parcel search"
+                className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-white/[0.07] hover:text-white"
+                onClick={() => {
+                  setQuickSearchQuery("");
+                  setQuickSearchResults([]);
+                  setQuickSearchError(null);
+                  setQuickSearchStatus("idle");
+                }}
+                title="Clear parcel search"
+                type="button"
+              >
+                <XCircle className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
 
-          <label className="relative block min-w-0">
-            <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#d8b86a]" />
-            <select
-              aria-label="Active stakeholder role"
-              className="h-10 w-full appearance-none rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-8 text-sm text-white outline-none transition focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
-              onChange={(event) =>
-                applyRolePreset(event.target.value as DashboardRoleId)
-              }
-              title={activeRole.description}
-              value={roleId}
-            >
-              {dashboardRoleRegistry.map((role) => (
-                <option
-                  className="bg-[#08111d] text-white"
-                  key={role.id}
-                  value={role.id}
-                >
-                  {role.displayName}
-                </option>
-              ))}
-            </select>
-          </label>
+            {quickSearchDropdownVisible ? (
+              <div
+                className="absolute left-0 right-0 top-12 z-50 overflow-hidden rounded-lg border border-white/10 bg-[#08111d]/98 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-2xl"
+                id="top-parcel-search-results"
+                role="listbox"
+              >
+                <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                    Parcel Search
+                  </p>
+                  <span
+                    className={cn(
+                      "rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase",
+                      quickSearchStatus === "fallback"
+                        ? "border-amber-300/20 bg-amber-300/[0.08] text-amber-100"
+                        : USE_BACKEND_API
+                          ? "border-emerald-300/20 bg-emerald-300/[0.08] text-emerald-100"
+                          : "border-sky-300/20 bg-sky-300/[0.08] text-sky-100",
+                    )}
+                  >
+                    {quickSearchStatus === "fallback"
+                      ? "Static fallback"
+                      : USE_BACKEND_API
+                        ? "API Search"
+                        : "Static Search"}
+                  </span>
+                </div>
 
-          <label className="relative block min-w-0">
-            <LayoutDashboard className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#d8b86a]" />
-            <select
-              aria-label="Active workspace view mode"
-              className="h-10 w-full appearance-none rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-8 text-sm text-white outline-none transition focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
-              onChange={(event) =>
-                applyWorkspacePreset(event.target.value as DashboardViewMode)
-              }
-              title={activeWorkspacePreset.description}
-              value={viewMode}
-            >
-              {workspaceLayoutPresets.map((preset) => (
-                <option
-                  className="bg-[#08111d] text-white"
-                  key={preset.id}
-                  value={preset.id}
-                >
-                  {preset.label}
-                </option>
-              ))}
-            </select>
-          </label>
+                {quickSearchStatus === "loading" ? (
+                  <div className="flex items-center gap-2 px-3 py-4 text-xs text-slate-400">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-[#d8b86a]" />
+                    Searching parcels...
+                  </div>
+                ) : null}
 
-          <div className="flex min-w-0 flex-wrap items-center gap-2 md:col-span-3 xl:col-span-1">
-            <StatusBadge
+                {quickSearchStatus === "empty" ? (
+                  <div className="px-3 py-4 text-xs text-slate-400">
+                    No parcels found.
+                  </div>
+                ) : null}
+
+                {quickSearchStatus === "error" ? (
+                  <div className="px-3 py-4 text-xs leading-5 text-amber-100">
+                    {quickSearchError ?? "Parcel search is unavailable."}
+                  </div>
+                ) : null}
+
+                {(quickSearchStatus === "ready" ||
+                  quickSearchStatus === "fallback") &&
+                quickSearchResults.length ? (
+                  <div className="max-h-[22rem] overflow-y-auto py-1">
+                    {quickSearchResults.map((record) => (
+                      <button
+                        className="block w-full border-b border-white/[0.055] px-3 py-2.5 text-left transition last:border-b-0 hover:bg-white/[0.055] focus:bg-white/[0.07] focus:outline-none"
+                        key={record.officialParcelId}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => handleQuickSearchSelect(record)}
+                        aria-selected={false}
+                        role="option"
+                        type="button"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-semibold text-white">
+                              {record.officialParcelId}
+                            </p>
+                            <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                              {record.pin14 ?? "PIN unavailable"}
+                              {record.ownerName ? ` / ${record.ownerName}` : ""}
+                            </p>
+                          </div>
+                          <span className="shrink-0 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/10 px-2 py-1 text-[10px] font-semibold text-[#f0cd79]">
+                            {record.zoningCode ?? "No zoning"}
+                          </span>
+                        </div>
+                        <p className="mt-1 truncate text-[11px] text-slate-500">
+                          {[
+                            record.mailingAddress,
+                            record.neighborhood,
+                            record.subdivision,
+                          ]
+                            .filter(Boolean)
+                            .join(" / ") || "No address or neighborhood context"}
+                        </p>
+                        <p className="mt-1 truncate text-[10px] uppercase tracking-[0.08em] text-slate-600">
+                          {[record.zoningJurisdiction, record.zoningCategory]
+                            .filter(Boolean)
+                            .join(" / ") || "Jurisdiction unavailable"}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+
+                {quickSearchStatus === "fallback" && quickSearchError ? (
+                  <p className="border-t border-amber-300/10 px-3 py-2 text-[11px] leading-5 text-amber-100/75">
+                    {quickSearchError}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="hidden shrink-0 items-center gap-2 lg:flex">
+            <CompactStatusChip
               icon={RadioTower}
               label={dashboardStatusLabels[mapStatus]}
-              tone={
-                mapStatus === "online"
-                  ? "green"
-                  : mapStatus === "degraded"
-                    ? "red"
-                    : "gold"
-              }
+              tone={mapStatus === "online" ? "green" : mapStatus === "degraded" ? "red" : "gold"}
             />
-            <StatusBadge icon={Activity} label={scenarioName} tone="blue" />
-            <StatusBadge
-              icon={ShieldCheck}
-              label={selectedParcelId ?? "No parcel"}
-              tone="gold"
+            <CompactStatusChip
+              icon={Activity}
+              label={USE_BACKEND_API ? "API Live" : "Static"}
+              tone={USE_BACKEND_API ? "green" : "blue"}
             />
           </div>
         </div>
 
-        <div className="hidden items-center gap-2 xl:flex">
+        <div className="relative flex shrink-0 items-center gap-2">
           <button
             aria-label="Open command palette"
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white md:hidden xl:flex"
             onClick={() => setCommandPaletteOpen(true)}
             title="Command palette"
             type="button"
@@ -161,16 +539,125 @@ export function TopNav() {
             <Command className="h-4 w-4" />
           </button>
           <button
-            aria-label="Open notification center placeholder"
-            className="flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-lg border border-white/10 bg-white/[0.025] text-slate-500"
-            disabled
-            title="Notifications are represented in the event stream during Phase 1"
+            aria-expanded={moreOpen}
+            aria-label="Open dashboard controls"
+            className="flex h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:text-white"
+            onClick={() => setMoreOpen((open) => !open)}
+            title="Role, workspace, and scenario controls"
             type="button"
           >
-            <Bell className="h-4 w-4" />
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="hidden sm:inline">More</span>
+            <ChevronDown
+              className={cn(
+                "h-3.5 w-3.5 transition",
+                moreOpen && "rotate-180",
+              )}
+            />
           </button>
+
+          {moreOpen ? (
+            <div className="absolute right-0 top-11 z-50 w-[min(24rem,calc(100vw-1.5rem))] rounded-lg border border-white/10 bg-[#08111d]/98 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+              <div className="grid gap-3">
+                <label className="relative block min-w-0">
+                  <UserRound className="pointer-events-none absolute left-3 top-[2.05rem] h-4 w-4 -translate-y-1/2 text-[#d8b86a]" />
+                  <span className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
+                    Role
+                  </span>
+                  <select
+                    aria-label="Active stakeholder role"
+                    className="h-10 w-full appearance-none rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-8 text-sm text-white outline-none transition focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
+                    onChange={(event) =>
+                      applyRolePreset(event.target.value as DashboardRoleId)
+                    }
+                    title={activeRole.description}
+                    value={roleId}
+                  >
+                    {dashboardRoleRegistry.map((role) => (
+                      <option
+                        className="bg-[#08111d] text-white"
+                        key={role.id}
+                        value={role.id}
+                      >
+                        {role.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="relative block min-w-0">
+                  <LayoutDashboard className="pointer-events-none absolute left-3 top-[2.05rem] h-4 w-4 -translate-y-1/2 text-[#d8b86a]" />
+                  <span className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
+                    Workspace
+                  </span>
+                  <select
+                    aria-label="Active workspace view mode"
+                    className="h-10 w-full appearance-none rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-8 text-sm text-white outline-none transition focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
+                    onChange={(event) =>
+                      applyWorkspacePreset(event.target.value as DashboardViewMode)
+                    }
+                    title={activeWorkspacePreset.description}
+                    value={viewMode}
+                  >
+                    {workspaceLayoutPresets.map((preset) => (
+                      <option
+                        className="bg-[#08111d] text-white"
+                        key={preset.id}
+                        value={preset.id}
+                      >
+                        {preset.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <CompactStatusChip
+                    icon={RadioTower}
+                    label={dashboardStatusLabels[mapStatus]}
+                    tone={mapStatus === "online" ? "green" : mapStatus === "degraded" ? "red" : "gold"}
+                  />
+                  <CompactStatusChip
+                    icon={Activity}
+                    label={scenarioName}
+                    tone="blue"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </header>
     </>
+  );
+}
+
+function CompactStatusChip({
+  icon: Icon,
+  label,
+  tone,
+}: {
+  icon: typeof RadioTower;
+  label: string;
+  tone: "gold" | "green" | "blue" | "red";
+}) {
+  const toneStyles = {
+    blue: "border-sky-300/20 bg-sky-300/[0.08] text-sky-100",
+    gold: "border-[#d8b86a]/25 bg-[#d8b86a]/10 text-[#f0cd79]",
+    green: "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-100",
+    red: "border-rose-300/20 bg-rose-400/[0.08] text-rose-100",
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex h-8 min-w-0 max-w-[9.5rem] items-center gap-1.5 rounded-md border px-2 text-[11px] font-semibold",
+        toneStyles[tone],
+      )}
+      title={label}
+    >
+      <Icon className="h-3.5 w-3.5 shrink-0" />
+      <span className="truncate">{label}</span>
+    </div>
   );
 }

@@ -1,0 +1,165 @@
+{
+  "generated_at": "2026-06-05T21:05:00.502997",
+  "phase": "Phase 7B Parcel Flood Constraint Overlay",
+  "overlay_table": "public.parcel_flood_constraint_overlay",
+  "source_tables": {
+    "parcels": "public.parcels_enriched",
+    "fema_flood_zones": "public.fema_nfhl_flood_zones_clean"
+  },
+  "row_count_validation": {
+    "parcel_table": "public.parcels_enriched",
+    "overlay_table": "public.parcel_flood_constraint_overlay",
+    "parcel_row_count": 110017,
+    "overlay_row_count": 110017,
+    "row_count_delta": 0,
+    "row_counts_match": true,
+    "null_official_parcel_id_count": 0
+  },
+  "core_counts": {
+    "total_parcels": 110017,
+    "floodplain_parcel_count": 8661,
+    "floodway_parcel_count": 3229,
+    "sfha_parcel_count": 7254,
+    "moderate_flood_parcel_count": 6995,
+    "minimal_flood_parcel_count": 109049,
+    "review_required_count": 7989,
+    "high_or_severe_buildability_count": 6362,
+    "no_flood_constraint_count": 0,
+    "severe_count": 3229,
+    "high_count": 4025,
+    "moderate_count": 1407,
+    "low_count": 101356
+  },
+  "severity_distribution": [
+    {
+      "value": "low",
+      "parcel_count": 101356,
+      "parcel_percentage": 92.1276,
+      "review_required_count": 0,
+      "avg_percent_constrained": 0.0,
+      "max_percent_constrained": 0.0
+    },
+    {
+      "value": "high",
+      "parcel_count": 4025,
+      "parcel_percentage": 3.6585,
+      "review_required_count": 4025,
+      "avg_percent_constrained": 41.8501,
+      "max_percent_constrained": 100.0
+    },
+    {
+      "value": "severe",
+      "parcel_count": 3229,
+      "parcel_percentage": 2.935,
+      "review_required_count": 3229,
+      "avg_percent_constrained": 52.3311,
+      "max_percent_constrained": 100.0
+    },
+    {
+      "value": "moderate",
+      "parcel_count": 1407,
+      "parcel_percentage": 1.2789,
+      "review_required_count": 735,
+      "avg_percent_constrained": 20.2594,
+      "max_percent_constrained": 100.0
+    }
+  ],
+  "buildability_impact_distribution": [
+    {
+      "value": "low",
+      "parcel_count": 102582,
+      "parcel_percentage": 93.242,
+      "review_required_count": 554,
+      "avg_percent_constrained": 0.0197,
+      "max_percent_constrained": 4.9726
+    },
+    {
+      "value": "severe",
+      "parcel_count": 4880,
+      "parcel_percentage": 4.4357,
+      "review_required_count": 4880,
+      "avg_percent_constrained": 62.7758,
+      "max_percent_constrained": 100.0
+    },
+    {
+      "value": "high",
+      "parcel_count": 1482,
+      "parcel_percentage": 1.3471,
+      "review_required_count": 1482,
+      "avg_percent_constrained": 30.3623,
+      "max_percent_constrained": 49.9693
+    },
+    {
+      "value": "moderate",
+      "parcel_count": 1073,
+      "parcel_percentage": 0.9753,
+      "review_required_count": 1073,
+      "avg_percent_constrained": 11.7122,
+      "max_percent_constrained": 24.9466
+    }
+  ],
+  "dominant_flood_zone_distribution": [
+    {
+      "value": "X",
+      "parcel_count": 107860,
+      "parcel_percentage": 98.0394,
+      "review_required_count": 5832,
+      "avg_percent_constrained": 1.6745,
+      "max_percent_constrained": 100.0
+    },
+    {
+      "value": "AE",
+      "parcel_count": 2157,
+      "parcel_percentage": 1.9606,
+      "review_required_count": 2157,
+      "avg_percent_constrained": 85.9149,
+      "max_percent_constrained": 100.0
+    }
+  ],
+  "percent_constrained_sanity_check": {
+    "min_percent_constrained": 0.0,
+    "max_percent_constrained": 100.0,
+    "avg_percent_constrained": 3.326109,
+    "min_percent_floodway": 0.0,
+    "max_percent_floodway": 100.0,
+    "min_percent_sfha": 0.0,
+    "max_percent_sfha": 100.0,
+    "out_of_range_percent_count": 0
+  },
+  "qa_pass": {
+    "row_count_equals_parcels": true,
+    "no_null_official_parcel_id": true,
+    "srid_4326_only": true,
+    "no_invalid_geometries": true,
+    "percentages_in_range": true
+  },
+  "readiness": {
+    "ready_for_flood_constraint_api_planning": true,
+    "next_phase": "Flood constraint API contract and frontend planning",
+    "not_included": [
+      "frontend flood panels",
+      "SceneView flood layer",
+      "FastAPI flood endpoints",
+      "forecasting or prediction",
+      "Google Cloud TIFF comparison"
+    ]
+  },
+  "artifact_paths": {
+    "validation_json": [
+      "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_flood_constraint_overlay_validation.json",
+      "C:\\CabarrusFutureScape\\outputs\\parcel_flood_constraint_overlay_validation.json"
+    ],
+    "summary_csv": [
+      "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_flood_constraint_summary.csv",
+      "C:\\CabarrusFutureScape\\outputs\\parcel_flood_constraint_summary.csv"
+    ],
+    "high_review_csv": [
+      "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\parcel_flood_constraint_high_review.csv",
+      "C:\\CabarrusFutureScape\\outputs\\parcel_flood_constraint_high_review.csv"
+    ],
+    "phase_summary_json": [
+      "C:\\CabarrusFutureScape\\cfs-data-pipelines\\outputs\\phase7b_parcel_flood_overlay_summary.json",
+      "C:\\CabarrusFutureScape\\outputs\\phase7b_parcel_flood_overlay_summary.json"
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "phase": "Phase 7D",
+  "name": "Flood Constraint FastAPI Endpoints",
+  "status": "complete",
+  "source_table": "public.parcel_flood_constraint_overlay",
+  "frontend_modified": false,
+  "sceneview_modified": false,
+  "postgis_schema_modified": false,
+  "forecasting_added": false,
+  "school_constraints_started": false,
+  "files_created": [
+    "backend/app/routers/constraints_router.py",
+    "backend/app/repositories/constraints_repository.py",
+    "backend/app/services/constraints_service.py",
+    "backend/app/schemas/constraints.py",
+    "backend/tests/test_flood_constraints.py"
+  ],
+  "files_updated": [
+    "backend/app/main.py",
+    "backend/app/repositories/__init__.py",
+    "backend/app/services/__init__.py",
+    "backend/app/schemas/__init__.py",
+    "backend/README.md",
+    "README.md"
+  ],
+  "endpoints_implemented": [
+    "GET /constraints/flood/statistics",
+    "GET /constraints/flood/{official_parcel_id}",
+    "GET /constraints/flood/filter",
+    "GET /constraints/flood/high-review",
+    "GET /constraints/flood/summary"
+  ],
+  "filters_supported": [
+    "floodplain_present",
+    "floodway_present",
+    "sfha_present",
+    "moderate_flood_present",
+    "flood_review_required",
+    "buildability_impact",
+    "flood_severity_class",
+    "dominant_flood_zone",
+    "percent_constrained_min",
+    "percent_constrained_max",
+    "limit",
+    "offset"
+  ],
+  "global_statistics_example": {
+    "total_parcels": 110017,
+    "floodplain_parcels": 8661,
+    "floodway_parcels": 3229,
+    "sfha_parcels": 7254,
+    "review_required_parcels": 7989,
+    "high_severe_buildability_parcels": 6362,
+    "severity_distribution": [
+      {
+        "value": "low",
+        "parcel_count": 101356,
+        "percentage": 92.1276
+      },
+      {
+        "value": "high",
+        "parcel_count": 4025,
+        "percentage": 3.6585
+      },
+      {
+        "value": "severe",
+        "parcel_count": 3229,
+        "percentage": 2.935
+      },
+      {
+        "value": "moderate",
+        "parcel_count": 1407,
+        "percentage": 1.2789
+      }
+    ]
+  },
+  "parcel_detail_example": {
+    "official_parcel_id": "CFS-PARCEL-0149776628",
+    "pin14": "55520518500000",
+    "dominant_flood_zone": "AE",
+    "flood_zone_codes": [
+      "AE"
+    ],
+    "floodplain_present": true,
+    "floodway_present": true,
+    "sfha_present": true,
+    "moderate_flood_present": false,
+    "minimal_flood_present": false,
+    "parcel_area_acres": 0.2554,
+    "flood_constrained_area_acres": 0.2554,
+    "floodway_area_acres": 0.213,
+    "sfha_area_acres": 0.2554,
+    "percent_parcel_constrained": 100.0,
+    "percent_parcel_floodway": 83.3675,
+    "percent_parcel_sfha": 100.0,
+    "flood_review_required": true,
+    "buildability_impact": "severe",
+    "flood_constraint_score": 100.0,
+    "flood_severity_class": "severe",
+    "overlay_confidence": "high"
+  },
+  "validation": {
+    "compile_command": "python -m compileall app",
+    "compile_status": "passed",
+    "targeted_test_command": "python -m pytest backend/tests/test_flood_constraints.py -q",
+    "targeted_test_result": "8 passed, 1 warning",
+    "full_test_command": "python -m pytest",
+    "full_test_result": "125 passed, 1 warning",
+    "warning": "Existing FastAPI TestClient dependency emitted a StarletteDeprecationWarning about httpx."
+  },
+  "readiness": {
+    "frontend_flood_constraint_integration": "ready for planning",
+    "sceneview_flood_layer_integration": "not started",
+    "school_constraints": "not started",
+    "forecasting": "deferred until regulatory constraints are stable"
+  }
+}

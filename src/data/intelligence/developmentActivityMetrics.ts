@@ -76,6 +76,22 @@ export type DevelopmentHotspotRecord = {
   co_date_future_outlier_count: number;
   development_activity_score: number;
   development_activity_class: string;
+  residential_growth_permits?: number;
+  commercial_activity_permits?: number;
+  industrial_activity_permits?: number;
+  institutional_activity_permits?: number;
+  redevelopment_signal_permits?: number;
+  minor_maintenance_permits?: number;
+  demolition_permits?: number;
+  active_construction_permits?: number;
+  completed_permits?: number;
+  high_value_permits?: number;
+  major_value_permits?: number;
+  dominant_permit_segment?: string | null;
+  dominant_growth_signal?: string | null;
+  permit_signal_score_max?: number | null;
+  permit_signal_score_avg?: number | null;
+  current_activity_status?: string | null;
 };
 
 export type DevelopmentTrendRecord = {

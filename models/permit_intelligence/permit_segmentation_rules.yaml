@@ -1,0 +1,374 @@
+rules_version: "2026-06-09"
+description: >
+  CFS permit intelligence segmentation rules. These rules classify observed
+  permit activity into interpretable planning segments. Scores are operational
+  signal scores only; they are not prediction probabilities.
+
+allowed_values:
+  permit_segment:
+    - residential_growth
+    - commercial_activity
+    - industrial_activity
+    - institutional_activity
+    - redevelopment_signal
+    - minor_maintenance
+    - accessory_or_misc
+    - demolition
+    - administrative_or_unknown
+  permit_growth_signal:
+    - major_growth
+    - moderate_activity
+    - minor_activity
+    - redevelopment_signal
+    - unknown
+  development_domain:
+    - residential
+    - commercial
+    - industrial
+    - institutional
+    - mixed_or_unknown
+  permit_value_class:
+    - low_value
+    - medium_value
+    - high_value
+    - major_value
+    - unknown_value
+  permit_status_stage:
+    - completed
+    - active_construction
+    - issued_or_starting
+    - pending_or_review
+    - inactive_or_removed
+    - unknown
+
+value_thresholds:
+  low_value:
+    max_exclusive: 25000
+  medium_value:
+    min_inclusive: 25000
+    max_inclusive: 99999
+  high_value:
+    min_inclusive: 100000
+    max_inclusive: 499999
+  major_value:
+    min_inclusive: 500000
+
+status_mappings:
+  completed:
+    - closed
+    - co_issued
+    - final
+    - complete
+  active_construction:
+    - inspections
+    - inspection
+    - active
+  issued_or_starting:
+    - issued
+    - permit_issued
+  pending_or_review:
+    - pending
+    - review
+    - under_review
+    - plan_review
+  inactive_or_removed:
+    - expired
+    - denied
+    - withdrawn
+    - void
+    - cancelled
+    - canceled
+
+classification_priority:
+  - demolition
+  - major_new_growth
+  - redevelopment_signal
+  - commercial_activity
+  - residential_growth
+  - industrial_activity
+  - institutional_activity
+  - minor_maintenance
+  - accessory_or_misc
+  - administrative_or_unknown
+
+keyword_groups:
+  demolition:
+    - demolition
+    - demo
+    - tear down
+    - remove structure
+  new_growth:
+    - new construction
+    - commercial new construction
+    - residential new
+    - commercial new
+    - new single family
+    - new home
+    - shell
+    - modular
+    - manufactured home
+    - mobile home
+  redevelopment:
+    - remodel
+    - renovation
+    - renovate
+    - upfit
+    - tenant improvement
+    - alteration
+    - change of use
+    - conversion
+    - moved structure
+  residential:
+    - residential
+    - single family
+    - dwelling
+    - home
+    - modular
+    - manufactured
+    - mobile
+    - deck
+    - pool
+  commercial:
+    - commercial
+    - retail
+    - office
+    - restaurant
+    - store
+    - sign
+    - daycare
+    - group home
+    - abc store
+    - trailer office
+  industrial:
+    - industrial
+    - warehouse
+    - manufacturing
+    - distribution
+    - plant
+    - logistics
+  institutional:
+    - school
+    - church
+    - hospital
+    - medical
+    - civic
+    - government
+    - institutional
+  minor_maintenance:
+    - repair
+    - replace
+    - replacement
+    - electrical
+    - plumbing
+    - mechanical
+    - hvac
+    - roof
+    - re-roof
+    - reroof
+    - wall
+    - sign
+  accessory:
+    - accessory
+    - extra feature
+    - out building
+    - shed
+    - garage
+    - carport
+    - pool
+    - deck
+    - fence
+    - detached
+  administrative:
+    - other
+    - personal property
+    - administrative
+    - unknown
+
+segment_rules:
+  demolition:
+    development_domain: mixed_or_unknown
+    default_growth_signal: redevelopment_signal
+    keywords:
+      any: demolition
+    permit_type_keywords:
+      - demolition
+    work_type_keywords:
+      - demolition
+  residential_growth:
+    development_domain: residential
+    default_growth_signal: moderate_activity
+    keywords:
+      any:
+        - residential
+        - new_growth
+    permit_type_keywords:
+      - new_construction
+      - addition_residential
+      - residential_manufactored_home
+      - residential_modular
+    work_type_keywords:
+      - residential_new
+      - residential_addition
+      - residential_mobile
+      - residential_modular
+  commercial_activity:
+    development_domain: commercial
+    default_growth_signal: moderate_activity
+    keywords:
+      any:
+        - commercial
+    permit_type_keywords:
+      - commercial_new_construction
+      - commercial_addition
+      - upfit
+      - comm_extra_features
+    work_type_keywords:
+      - commercial_new
+      - commercial_upfit
+      - commercial_repair
+      - commercial_sign
+      - commercial_addition
+      - commercial_shell
+      - commercial_daycare
+      - commercial_group_home
+      - commercial_abc_store
+  industrial_activity:
+    development_domain: industrial
+    default_growth_signal: moderate_activity
+    keywords:
+      any:
+        - industrial
+    permit_type_keywords:
+      - industrial
+      - warehouse
+      - manufacturing
+    work_type_keywords:
+      - industrial
+      - warehouse
+      - manufacturing
+  institutional_activity:
+    development_domain: institutional
+    default_growth_signal: moderate_activity
+    keywords:
+      any:
+        - institutional
+    permit_type_keywords:
+      - institutional
+      - school
+      - church
+      - hospital
+      - medical
+    work_type_keywords:
+      - school
+      - church
+      - hospital
+      - medical
+      - institutional
+  redevelopment_signal:
+    development_domain: mixed_or_unknown
+    default_growth_signal: redevelopment_signal
+    keywords:
+      any:
+        - redevelopment
+    permit_type_keywords:
+      - remodel
+      - upfit
+      - moved_structure
+    work_type_keywords:
+      - commercial_upfit
+      - commercial_repair
+      - residential_repair
+  minor_maintenance:
+    development_domain: mixed_or_unknown
+    default_growth_signal: minor_activity
+    keywords:
+      any:
+        - minor_maintenance
+    work_type_keywords:
+      - residential_repair
+      - commercial_repair
+      - commercial_sign
+      - commercial_wall
+  accessory_or_misc:
+    development_domain: mixed_or_unknown
+    default_growth_signal: minor_activity
+    keywords:
+      any:
+        - accessory
+    permit_type_keywords:
+      - extra_feature
+      - out_building
+      - comm_extra_features
+    work_type_keywords:
+      - residential_accessory_structure
+      - residential_pool
+      - residential_deck
+      - commercial_deck
+      - commercial_pool
+  administrative_or_unknown:
+    development_domain: mixed_or_unknown
+    default_growth_signal: unknown
+    keywords:
+      any:
+        - administrative
+    permit_type_keywords:
+      - other
+      - personal_property
+
+scoring:
+  base_by_segment:
+    residential_growth: 60
+    commercial_activity: 62
+    industrial_activity: 66
+    institutional_activity: 58
+    redevelopment_signal: 55
+    minor_maintenance: 22
+    accessory_or_misc: 28
+    demolition: 50
+    administrative_or_unknown: 8
+  value_bonus:
+    unknown_value: 0
+    low_value: 0
+    medium_value: 8
+    high_value: 18
+    major_value: 28
+  status_bonus:
+    unknown: 0
+    inactive_or_removed: -8
+    pending_or_review: 4
+    issued_or_starting: 10
+    active_construction: 14
+    completed: 6
+  keyword_bonus:
+    new_growth: 8
+    redevelopment: 6
+    demolition: 4
+  cap: 100
+  floor: 0
+
+map_relevance:
+  relevant_segments:
+    - residential_growth
+    - commercial_activity
+    - industrial_activity
+    - institutional_activity
+    - redevelopment_signal
+    - demolition
+  relevant_value_classes:
+    - high_value
+    - major_value
+  minimum_signal_score: 45
+
+future_prediction_readiness:
+  relevant_segments:
+    - residential_growth
+    - commercial_activity
+    - industrial_activity
+    - institutional_activity
+    - redevelopment_signal
+  relevant_growth_signals:
+    - major_growth
+    - redevelopment_signal
+  relevant_value_classes:
+    - high_value
+    - major_value

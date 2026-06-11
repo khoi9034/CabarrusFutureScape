@@ -1,0 +1,152 @@
+{
+  "generated_at": "2026-06-05T18:30:38.380461",
+  "row_count_comparison": {
+    "raw_table": "public.fema_nfhl_flood_zones_raw",
+    "clean_table": "public.fema_nfhl_flood_zones_clean",
+    "raw_row_count": 7712,
+    "clean_row_count": 7712,
+    "row_count_delta": 0,
+    "row_counts_match": true
+  },
+  "geometry_validation": {
+    "raw_invalid_geometry_count": 195,
+    "clean_invalid_geometry_count": 0,
+    "clean_null_geometry_count": 0,
+    "clean_geometry_type_counts": [
+      {
+        "geometry_type": "ST_MultiPolygon",
+        "feature_count": 7712
+      }
+    ],
+    "clean_srid_counts": [
+      {
+        "srid": 4326,
+        "feature_count": 7712
+      }
+    ],
+    "geometry_cleaning_policy": "ST_MakeValid repairs invalid geometries, polygonal components are extracted with ST_CollectionExtract(..., 3), and outputs are coerced to MultiPolygon in SRID 4326."
+  },
+  "flood_zone_distribution": [
+    {
+      "value": "X",
+      "feature_count": 4329,
+      "total_area_acres": 1318064.04
+    },
+    {
+      "value": "AE",
+      "feature_count": 3383,
+      "total_area_acres": 57245.67
+    }
+  ],
+  "flood_constraint_type_distribution": [
+    {
+      "value": "minimal_flood_hazard",
+      "feature_count": 3474,
+      "total_area_acres": 1314873.64
+    },
+    {
+      "value": "special_flood_hazard_area",
+      "feature_count": 3100,
+      "total_area_acres": 43908.53
+    },
+    {
+      "value": "moderate_flood_hazard",
+      "feature_count": 855,
+      "total_area_acres": 3190.4
+    },
+    {
+      "value": "floodway",
+      "feature_count": 283,
+      "total_area_acres": 13337.14
+    }
+  ],
+  "flood_severity_distribution": [
+    {
+      "value": "low",
+      "feature_count": 3474,
+      "total_area_acres": 1314873.64
+    },
+    {
+      "value": "high",
+      "feature_count": 3100,
+      "total_area_acres": 43908.53
+    },
+    {
+      "value": "moderate",
+      "feature_count": 855,
+      "total_area_acres": 3190.4
+    },
+    {
+      "value": "severe",
+      "feature_count": 283,
+      "total_area_acres": 13337.14
+    }
+  ],
+  "floodway_counts": [
+    {
+      "is_floodway": true,
+      "feature_count": 283
+    },
+    {
+      "is_floodway": false,
+      "feature_count": 7429
+    }
+  ],
+  "duplicate_identifier_summary": [
+    {
+      "identifier_field": "globalid",
+      "duplicate_groups": 0,
+      "duplicate_rows": 0
+    },
+    {
+      "identifier_field": "gfid",
+      "duplicate_groups": 6,
+      "duplicate_rows": 7712
+    },
+    {
+      "identifier_field": "fld_ar_id",
+      "duplicate_groups": 0,
+      "duplicate_rows": 0
+    }
+  ],
+  "county_coverage_sanity_check": {
+    "parcel_xmin": -80.78714859986353,
+    "parcel_ymin": 35.185001484384316,
+    "parcel_xmax": -80.29542844362561,
+    "parcel_ymax": 35.55345527610693,
+    "flood_xmin": -81.10796491032585,
+    "flood_ymin": 34.81622488818811,
+    "flood_xmax": -80.05378760651419,
+    "flood_ymax": 35.86351882714241,
+    "extents_intersect": true
+  },
+  "indexes": [
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_constraint_type_idx",
+      "indexdef": "CREATE INDEX fema_nfhl_flood_zones_clean_constraint_type_idx ON public.fema_nfhl_flood_zones_clean USING btree (flood_constraint_type)"
+    },
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_geometry_gix",
+      "indexdef": "CREATE INDEX fema_nfhl_flood_zones_clean_geometry_gix ON public.fema_nfhl_flood_zones_clean USING gist (geometry)"
+    },
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_internal_id_idx",
+      "indexdef": "CREATE UNIQUE INDEX fema_nfhl_flood_zones_clean_internal_id_idx ON public.fema_nfhl_flood_zones_clean USING btree (flood_zone_internal_id)"
+    },
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_severity_idx",
+      "indexdef": "CREATE INDEX fema_nfhl_flood_zones_clean_severity_idx ON public.fema_nfhl_flood_zones_clean USING btree (flood_severity_class)"
+    },
+    {
+      "indexname": "fema_nfhl_flood_zones_clean_zone_idx",
+      "indexdef": "CREATE INDEX fema_nfhl_flood_zones_clean_zone_idx ON public.fema_nfhl_flood_zones_clean USING btree (flood_zone_code)"
+    }
+  ],
+  "qa_pass": {
+    "no_invalid_geometries": true,
+    "srid_4326_only": true,
+    "raw_clean_counts_match": true
+  },
+  "elapsed_seconds": 121.49,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_fema_nfhl_flood_zones_clean_20260605_182914.log"
+}

@@ -1,0 +1,123 @@
+{
+  "phase": "Development Hotspot Symbology Simplification",
+  "status": "complete",
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/hooks/useDevelopmentHotspotLayer.ts",
+    "src/lib/adapters/developmentHotspotMapAdapter.ts",
+    "src/types/map/developmentHotspots.ts"
+  ],
+  "ui_changes": {
+    "primary_control": "Show permit concentration by",
+    "required_segment_selection": true,
+    "no_segment_behavior": {
+      "markers_rendered": false,
+      "api_request_sent": false,
+      "status_message": "Select a permit segment to view hotspot concentration."
+    },
+    "permit_segment_options": [
+      "Residential Growth",
+      "Commercial Activity",
+      "Redevelopment Signal",
+      "Minor Maintenance",
+      "Demolition",
+      "Industrial Activity",
+      "Institutional Activity"
+    ],
+    "advanced_filters_collapsed": [
+      "Activity Class",
+      "Recent Window",
+      "Growth Signal",
+      "Status Stage",
+      "Value Class",
+      "Zoning Jurisdiction",
+      "Sort",
+      "Limit"
+    ],
+    "legend": "Simplified selected-segment concentration legend with lower, moderate, and higher marker tiers."
+  },
+  "query_behavior": {
+    "endpoint": "GET /development/hotspots",
+    "segment_parameter": "permit_segment",
+    "examples": [
+      "/development/hotspots?permit_segment=residential_growth",
+      "/development/hotspots?permit_segment=commercial_activity",
+      "/development/hotspots?permit_segment=redevelopment_signal",
+      "/development/hotspots?permit_segment=demolition"
+    ],
+    "temporal_sync_preserved": true,
+    "manual_filters_preserved": true
+  },
+  "marker_size_logic": {
+    "basis": "selected permit segment count on the marker row",
+    "tiers": {
+      "small": "selected segment count < 3",
+      "medium": "selected segment count >= 3",
+      "large": "selected segment count >= 10"
+    },
+    "guardrail": "Marker sizes are capped to avoid covering the map."
+  },
+  "marker_color_logic": {
+    "basis": "selected permit segment",
+    "segment_colors": {
+      "residential_growth": "cyan / blue",
+      "commercial_activity": "orange",
+      "redevelopment_signal": "purple",
+      "minor_maintenance": "muted gray",
+      "demolition": "red",
+      "industrial_activity": "amber / steel",
+      "institutional_activity": "green"
+    },
+    "multi_color_mode": false
+  },
+  "popup_card_fields": [
+    "parcel ID",
+    "PIN",
+    "selected permit segment",
+    "selected segment permit count",
+    "total permits",
+    "recent 1-year permits",
+    "recent 3-year permits",
+    "dominant segment",
+    "dominant growth signal",
+    "planning domain",
+    "high value permits",
+    "major value permits",
+    "zoning jurisdiction",
+    "zoning code"
+  ],
+  "backend_changes": {
+    "changed": false,
+    "reason": "Existing hotspot endpoint and segment count fields were sufficient for selected-segment concentration sizing."
+  },
+  "preserved_behaviors": [
+    "top search",
+    "parcel search/detail",
+    "parcel cage highlight",
+    "selected parcel permit events",
+    "development hotspot marker click selection",
+    "flood constraints",
+    "FEMA flood zones",
+    "API/static fallback"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation_required": false,
+    "browser_smoke": {
+      "url": "http://localhost:3000/",
+      "app_loaded": true,
+      "default_segment": "Select segment...",
+      "selected_segment_tested": "Residential Growth",
+      "layer_toggle_result": "Showing 100 Residential Growth hotspots",
+      "advanced_filters_collapsed": true
+    }
+  },
+  "remaining_symbology_polish": [
+    "Optional future use of backend-provided selected_segment_score if added later.",
+    "Optional clustering or extent-aware thinning for dense segment result sets."
+  ]
+}

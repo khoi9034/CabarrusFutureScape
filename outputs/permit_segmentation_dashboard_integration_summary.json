@@ -1,0 +1,149 @@
+{
+  "phase": "Permit Intelligence Segmentation Dashboard and API Integration",
+  "status": "completed",
+  "backend": {
+    "new_endpoints": [
+      {
+        "method": "GET",
+        "path": "/development/permit-segments/statistics",
+        "purpose": "Countywide descriptive permit segment, growth signal, status stage, value class, and development domain distributions"
+      },
+      {
+        "method": "GET",
+        "path": "/development/permit-segments/options",
+        "purpose": "Lookup options for segment-aware filters and future dropdowns"
+      },
+      {
+        "method": "GET",
+        "path": "/development/permit-segments/{official_parcel_id}",
+        "purpose": "Selected parcel permit segment rollup from public.parcel_permit_segment_summary"
+      }
+    ],
+    "updated_endpoints": [
+      {
+        "method": "GET",
+        "path": "/development/hotspots",
+        "updates": [
+          "Added permit_segment filter",
+          "Added growth_signal filter",
+          "Added permit_status_stage filter",
+          "Added permit_value_class filter",
+          "Added development_domain filter",
+          "Added parcel segment rollup fields to hotspot result rows"
+        ]
+      },
+      {
+        "method": "GET",
+        "path": "/development/parcel/{official_parcel_id}/permits",
+        "updates": [
+          "Added permit_segment",
+          "Added permit_growth_signal",
+          "Added development_domain",
+          "Added permit_status_stage",
+          "Added permit_value_class",
+          "Added permit_signal_score"
+        ]
+      }
+    ],
+    "source_tables": [
+      "public.permit_intelligence_segments",
+      "public.parcel_permit_segment_summary",
+      "public.real_property_permit_parcel_relationship"
+    ]
+  },
+  "frontend": {
+    "new_components": [
+      "src/components/dashboard/PermitIntelligenceSegmentsPanel.tsx"
+    ],
+    "new_hooks": [
+      "src/hooks/usePermitSegmentStatistics.ts",
+      "src/hooks/useSelectedParcelPermitSegments.ts"
+    ],
+    "new_adapters": [
+      "src/lib/adapters/permitSegmentsAdapter.ts"
+    ],
+    "updated_components": [
+      "src/components/dashboard/IntelligencePanel.tsx",
+      "src/components/dashboard/SelectedParcelDevelopmentActivityPanel.tsx",
+      "src/components/dashboard/SelectedParcelPermitEventsPanel.tsx",
+      "src/components/dashboard/LayerToggle.tsx",
+      "src/components/gis/SceneViewContainer.tsx"
+    ],
+    "dashboard_surfaces": [
+      "Development Activity section now includes a compact Permit Intelligence Segments panel",
+      "Selected parcel development activity now shows dominant segment, dominant growth signal, active construction, redevelopment, high/major value permits, and signal score summary",
+      "Selected parcel permit events now show segment, growth signal, status stage, and value class badges",
+      "Development Hotspot layer controls now support permit segment, growth signal, status stage, and value class filters",
+      "Development Hotspot info cards and map legend now explain meaningful permit segment context"
+    ],
+    "static_fallback": "Static/generated-output fallback behavior is preserved. Permit segment statistics have no fabricated static substitute; unavailable API mode renders empty/static or unavailable states rather than fake prediction outputs."
+  },
+  "supported_segment_categories": [
+    "residential_growth",
+    "commercial_activity",
+    "redevelopment_signal",
+    "minor_maintenance",
+    "demolition",
+    "active_construction",
+    "completed",
+    "high_value",
+    "major_value"
+  ],
+  "example_parcel_segment_summary": {
+    "official_parcel_id": "CFS-PARCEL-0149726579",
+    "pin14": "45896367300000",
+    "total_permits": 286,
+    "residential_growth_permits": 73,
+    "commercial_activity_permits": 110,
+    "industrial_activity_permits": 0,
+    "institutional_activity_permits": 0,
+    "redevelopment_signal_permits": 57,
+    "minor_maintenance_permits": 5,
+    "demolition_permits": 27,
+    "active_construction_permits": 1,
+    "completed_permits": 68,
+    "high_value_permits": 96,
+    "major_value_permits": 20,
+    "total_permit_amount": 61926619.0,
+    "latest_permit_date": "2025-10-22",
+    "first_permit_date": "2000-08-02",
+    "active_year_count": 19,
+    "dominant_permit_segment": "commercial_activity",
+    "dominant_growth_signal": "major_growth",
+    "permit_signal_score_max": 100.0,
+    "permit_signal_score_avg": 71.43,
+    "current_activity_status": "active_construction"
+  },
+  "validation": {
+    "backend_compile": {
+      "command": "python -m compileall app",
+      "working_directory": "backend",
+      "status": "passed"
+    },
+    "backend_tests": {
+      "command": "python -m pytest",
+      "working_directory": "backend",
+      "status": "passed",
+      "result": "138 passed, 2 warnings"
+    },
+    "frontend_typecheck": {
+      "command": "npm run typecheck",
+      "status": "passed"
+    },
+    "frontend_lint": {
+      "command": "npm run lint",
+      "status": "passed"
+    },
+    "frontend_build": {
+      "command": "npm run build -- --webpack",
+      "status": "passed"
+    }
+  },
+  "remaining_gaps": [
+    "No prediction model was built",
+    "No prediction probabilities are exposed",
+    "No fake prediction outputs are displayed",
+    "Permit segment filter option UI currently uses stable known values rather than dynamically hydrating dropdowns from /development/permit-segments/options",
+    "No PostGIS schema changes, materialized views, or new indexes were added in this integration step"
+  ]
+}

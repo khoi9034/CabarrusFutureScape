@@ -3,6 +3,9 @@ import type {
   DevelopmentActivitySummaryResponse,
   DevelopmentHotspotsResponse,
   DevelopmentLookupResponse,
+  ParcelPermitSegmentSummaryResponse,
+  PermitSegmentOptionsResponse,
+  PermitSegmentStatisticsResponse,
   DevelopmentParcelPermitEventsResponse,
   DevelopmentStatisticsResponse,
   DevelopmentTemporalQueryResponse,
@@ -29,10 +32,18 @@ export interface DevelopmentTrendsParams extends DevelopmentStatisticsParams {
 }
 
 export interface DevelopmentHotspotsParams extends DevelopmentStatisticsParams {
+  date_end?: string;
+  date_start?: string;
+  development_domain?: string;
+  growth_signal?: string;
   limit?: number;
   offset?: number;
   official_parcel_id?: string;
+  permit_segment?: string;
+  permit_status_stage?: string;
+  permit_value_class?: string;
   recent_window?: 1 | 3;
+  rolling_window?: 12 | 36;
   sort_by?:
     | "development_activity_score"
     | "recent_permit_count_1yr"
@@ -149,6 +160,33 @@ export function getDevelopmentParcelPermits(
   return apiGet<DevelopmentParcelPermitEventsResponse>(
     `/development/parcel/${encodeURIComponent(officialParcelId)}/permits`,
     params,
+    options,
+  );
+}
+
+export function getPermitSegmentStatistics(options?: ApiRequestOptions) {
+  return apiGet<PermitSegmentStatisticsResponse>(
+    "/development/permit-segments/statistics",
+    undefined,
+    options,
+  );
+}
+
+export function getParcelPermitSegmentSummary(
+  officialParcelId: string,
+  options?: ApiRequestOptions,
+) {
+  return apiGet<ParcelPermitSegmentSummaryResponse>(
+    `/development/permit-segments/${encodeURIComponent(officialParcelId)}`,
+    undefined,
+    options,
+  );
+}
+
+export function getPermitSegmentOptions(options?: ApiRequestOptions) {
+  return apiGet<PermitSegmentOptionsResponse>(
+    "/development/permit-segments/options",
+    undefined,
     options,
   );
 }

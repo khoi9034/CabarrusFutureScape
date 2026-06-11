@@ -23,6 +23,10 @@ function emptyState(
   );
 }
 
+function waitingState(): SelectedParcelPermitEventsViewModel {
+  return getUnavailableSelectedParcelPermitEvents(null, "waiting");
+}
+
 export function useSelectedParcelPermitEvents(
   officialParcelId: string | null | undefined,
 ): SelectedParcelPermitEventsViewModel {
@@ -33,7 +37,11 @@ export function useSelectedParcelPermitEvents(
     });
 
   useEffect(() => {
-    if (!USE_BACKEND_API || !officialParcelId) {
+    if (!officialParcelId) {
+      return;
+    }
+
+    if (!USE_BACKEND_API) {
       return;
     }
 
@@ -78,7 +86,7 @@ export function useSelectedParcelPermitEvents(
   }, [officialParcelId]);
 
   if (!officialParcelId) {
-    return emptyState(null);
+    return waitingState();
   }
 
   if (!USE_BACKEND_API) {

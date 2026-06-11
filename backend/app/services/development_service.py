@@ -18,6 +18,9 @@ from app.schemas import (
     DevelopmentTemporalQueryResponse,
     DevelopmentTrendsResponse,
     DevelopmentZoningSummaryResponse,
+    ParcelPermitSegmentSummaryResponse,
+    PermitSegmentOptionsResponse,
+    PermitSegmentStatisticsResponse,
 )
 from app.schemas.development import (
     DevelopmentActivityClassSummary,
@@ -222,6 +225,19 @@ class DevelopmentService:
         ):
             raise ValueError("recent_window must be 1 or 3")
 
+        if (
+            filters.rolling_window is not None
+            and filters.rolling_window not in ALLOWED_ROLLING_WINDOWS
+        ):
+            raise ValueError("rolling_window must be 12 or 36")
+
+        if (
+            filters.date_start is not None
+            and filters.date_end is not None
+            and filters.date_start > filters.date_end
+        ):
+            raise ValueError("date_start must be on or before date_end")
+
         normalized_sort_by = normalize_filter_value(sort_by) or "development_activity_score"
         if normalized_sort_by not in ALLOWED_HOTSPOT_SORT_BY:
             raise ValueError(
@@ -232,9 +248,18 @@ class DevelopmentService:
         clamped_limit = min(max(limit, 1), MAX_DEVELOPMENT_PAGE_LIMIT)
         normalized_filters = DevelopmentHotspotsFilters(
             activity_class=normalize_filter_value(filters.activity_class),
+            date_end=filters.date_end,
+            date_start=filters.date_start,
+            development_domain=normalize_filter_value(filters.development_domain),
+            growth_signal=normalize_filter_value(filters.growth_signal),
+            month=filters.month,
             official_parcel_id=normalize_filter_value(filters.official_parcel_id),
+            permit_segment=normalize_filter_value(filters.permit_segment),
+            permit_status_stage=normalize_filter_value(filters.permit_status_stage),
             permit_type=normalize_filter_value(filters.permit_type),
+            permit_value_class=normalize_filter_value(filters.permit_value_class),
             recent_window=filters.recent_window,
+            rolling_window=filters.rolling_window,
             work_type=normalize_filter_value(filters.work_type),
             year=filters.year,
             zoning_category=normalize_filter_value(filters.zoning_category),
@@ -247,11 +272,11 @@ class DevelopmentService:
             offset=offset,
             sort_by=normalized_sort_by,
         )
-        filters_applied: dict[str, int | str] = {
-            key: value
-            for key, value in normalized_filters.__dict__.items()
-            if value is not None
-        }
+        filters_applied: dict[str, int | str] = {}
+        for key, value in normalized_filters.__dict__.items():
+            if value is None:
+                continue
+            filters_applied[key] = value.isoformat() if isinstance(value, date) else value
 
         return DevelopmentHotspotsResponse(
             filters_applied=filters_applied,
@@ -518,6 +543,79 @@ class DevelopmentService:
             records=self.repository.get_activity_classes(),
         )
 
+    def get_permit_segment_statistics(self) -> PermitSegmentStatisticsResponse:
+        """Return countywide permit intelligence segment distributions."""
+
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for permit segmentation.",
+            )
+
+        statistics = self.repository.get_permit_segment_statistics()
+        return PermitSegmentStatisticsResponse(
+            total_permits=statistics.total_permits,
+            by_permit_segment=[
+                DevelopmentStatisticsBucket(value=row.value, count=row.count)
+                for row in statistics.by_permit_segment
+            ],
+            by_permit_growth_signal=[
+                DevelopmentStatisticsBucket(value=row.value, count=row.count)
+                for row in statistics.by_permit_growth_signal
+            ],
+            by_permit_status_stage=[
+                DevelopmentStatisticsBucket(value=row.value, count=row.count)
+                for row in statistics.by_permit_status_stage
+            ],
+            by_permit_value_class=[
+                DevelopmentStatisticsBucket(value=row.value, count=row.count)
+                for row in statistics.by_permit_value_class
+            ],
+            by_development_domain=[
+                DevelopmentStatisticsBucket(value=row.value, count=row.count)
+                for row in statistics.by_development_domain
+            ],
+        )
+
+    def get_parcel_permit_segment_summary(
+        self,
+        official_parcel_id: str,
+    ) -> ParcelPermitSegmentSummaryResponse | None:
+        """Return the permit intelligence segment rollup for one parcel."""
+
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for permit segmentation.",
+            )
+
+        normalized_parcel_id = normalize_filter_value(official_parcel_id)
+        if normalized_parcel_id is None:
+            raise ValueError("official_parcel_id is required")
+
+        summary = self.repository.get_parcel_permit_segment_summary(
+            normalized_parcel_id,
+        )
+        if summary is None:
+            return None
+
+        return parcel_permit_segment_summary(summary)
+
+    def get_permit_segment_options(self) -> PermitSegmentOptionsResponse:
+        """Return permit segmentation lookup options for UI filters."""
+
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for permit segmentation.",
+            )
+
+        options = self.repository.get_permit_segment_options()
+        return PermitSegmentOptionsResponse(
+            development_domains=lookup_items(options.development_domains),
+            growth_signals=lookup_items(options.growth_signals),
+            permit_segments=lookup_items(options.permit_segments),
+            status_stages=lookup_items(options.status_stages),
+            value_classes=lookup_items(options.value_classes),
+        )
+
     def get_parcel_permit_events(
         self,
         *,
@@ -587,7 +685,16 @@ def parse_bbox(value: str) -> tuple[float, float, float, float]:
 
 
 def lookup_response(lookup_type: str, records) -> DevelopmentLookupResponse:
-    options = [
+    options = lookup_items(records)
+    return DevelopmentLookupResponse(
+        lookup_type=lookup_type,
+        total_options=len(options),
+        options=options,
+    )
+
+
+def lookup_items(records) -> list[DevelopmentLookupItem]:
+    return [
         DevelopmentLookupItem(
             value=record.value,
             label=humanize_lookup_label(record.value),
@@ -595,11 +702,6 @@ def lookup_response(lookup_type: str, records) -> DevelopmentLookupResponse:
         )
         for record in records
     ]
-    return DevelopmentLookupResponse(
-        lookup_type=lookup_type,
-        total_options=len(options),
-        options=options,
-    )
 
 
 def humanize_lookup_label(value: str) -> str:
@@ -655,8 +757,50 @@ def parcel_permit_event(row) -> DevelopmentParcelPermitEvent:
         permit_number=row.permit_number,
         permit_status=row.permit_status,
         permit_type=row.permit_type,
+        permit_segment=row.permit_segment,
+        permit_growth_signal=row.permit_growth_signal,
+        development_domain=row.development_domain,
+        permit_status_stage=row.permit_status_stage,
+        permit_value_class=row.permit_value_class,
+        permit_signal_score=float(row.permit_signal_score)
+        if row.permit_signal_score is not None
+        else None,
         relationship_confidence=row.relationship_confidence,
         work_type=row.work_type,
+    )
+
+
+def parcel_permit_segment_summary(row) -> ParcelPermitSegmentSummaryResponse:
+    return ParcelPermitSegmentSummaryResponse(
+        official_parcel_id=row.official_parcel_id,
+        pin14=row.pin14,
+        total_permits=row.total_permits or 0,
+        residential_growth_permits=row.residential_growth_permits or 0,
+        commercial_activity_permits=row.commercial_activity_permits or 0,
+        industrial_activity_permits=row.industrial_activity_permits or 0,
+        institutional_activity_permits=row.institutional_activity_permits or 0,
+        redevelopment_signal_permits=row.redevelopment_signal_permits or 0,
+        minor_maintenance_permits=row.minor_maintenance_permits or 0,
+        demolition_permits=row.demolition_permits or 0,
+        active_construction_permits=row.active_construction_permits or 0,
+        completed_permits=row.completed_permits or 0,
+        high_value_permits=row.high_value_permits or 0,
+        major_value_permits=row.major_value_permits or 0,
+        total_permit_amount=float(row.total_permit_amount)
+        if row.total_permit_amount is not None
+        else None,
+        latest_permit_date=row.latest_permit_date,
+        first_permit_date=row.first_permit_date,
+        active_year_count=row.active_year_count or 0,
+        dominant_permit_segment=row.dominant_permit_segment,
+        dominant_growth_signal=row.dominant_growth_signal,
+        permit_signal_score_max=float(row.permit_signal_score_max)
+        if row.permit_signal_score_max is not None
+        else None,
+        permit_signal_score_avg=float(row.permit_signal_score_avg)
+        if row.permit_signal_score_avg is not None
+        else None,
+        current_activity_status=row.current_activity_status,
     )
 
 
@@ -755,6 +899,26 @@ def hotspot_result(result) -> DevelopmentHotspotResult:
         has_unmatched_or_ambiguous_permit_flag=bool(
             result.has_unmatched_or_ambiguous_permit_flag,
         ),
+        residential_growth_permits=result.residential_growth_permits or 0,
+        commercial_activity_permits=result.commercial_activity_permits or 0,
+        industrial_activity_permits=result.industrial_activity_permits or 0,
+        institutional_activity_permits=result.institutional_activity_permits or 0,
+        redevelopment_signal_permits=result.redevelopment_signal_permits or 0,
+        minor_maintenance_permits=result.minor_maintenance_permits or 0,
+        demolition_permits=result.demolition_permits or 0,
+        active_construction_permits=result.active_construction_permits or 0,
+        completed_permits=result.completed_permits or 0,
+        high_value_permits=result.high_value_permits or 0,
+        major_value_permits=result.major_value_permits or 0,
+        dominant_permit_segment=result.dominant_permit_segment,
+        dominant_growth_signal=result.dominant_growth_signal,
+        permit_signal_score_max=float(result.permit_signal_score_max)
+        if result.permit_signal_score_max is not None
+        else None,
+        permit_signal_score_avg=float(result.permit_signal_score_avg)
+        if result.permit_signal_score_avg is not None
+        else None,
+        current_activity_status=result.current_activity_status,
         map_focus=DevelopmentHotspotMapFocus(
             centroid=centroid,
             geometry_available=bool(result.geometry_available)

@@ -10,7 +10,14 @@ import {
   useState,
   type PointerEvent,
 } from "react";
-import { ChevronDown, ChevronUp, GripHorizontal, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  GripHorizontal,
+  Maximize2,
+  Minimize2,
+  X,
+} from "lucide-react";
 import {
   PARCEL_SEARCH_INSPECT_EVENT,
   type ParcelSearchEventDetail,
@@ -45,6 +52,11 @@ import type {
   ParcelMapFocusRequestEventDetail,
 } from "@/types/map/parcelFocus";
 import type { DevelopmentHotspotMapMarker } from "@/types/map/developmentHotspots";
+import type { FloodConstraintMapMarker } from "@/types/map/floodConstraints";
+import type {
+  FloodZoneExtent,
+  FloodZoneMapPolygon,
+} from "@/types/map/floodZones";
 
 type ArcGISHandle = {
   remove: () => void;
@@ -60,13 +72,44 @@ interface ParcelFocusBeacon {
 interface DevelopmentHotspotInfoCard {
   developmentActivityClass: string | null;
   developmentActivityScore: number | null;
+  dominantGrowthSignal: string | null;
+  dominantPermitSegment: string | null;
   dominantZoningCodeRaw: string | null;
+  highValuePermits: number;
+  majorValuePermits: number;
   officialParcelId: string;
+  permitSignalScoreMax: number | null;
   pin14: string | null;
   recentPermitCount1yr: number;
   recentPermitCount3yr: number;
+  renderedPermitSegment: string | null;
+  selectedSegmentCount: number | null;
+  selectedSegmentIntensity: number | null;
+  selectedSegmentScore: number | null;
+  selectedSegmentSizeTier: string | null;
   totalPermitCount: number;
   zoningJurisdictionName: string | null;
+}
+
+interface FloodConstraintInfoCard {
+  buildabilityImpact: string | null;
+  dominantFloodZone: string | null;
+  floodConstraintScore: number | null;
+  floodSeverityClass: string | null;
+  floodwayPresent: boolean;
+  officialParcelId: string;
+  percentParcelConstrained: number | null;
+  pin14: string | null;
+  sfhaPresent: boolean;
+}
+
+interface FloodZoneInfoCard {
+  floodConstraintType: string | null;
+  floodSeverityClass: string | null;
+  floodZoneCode: string | null;
+  fldArId: string | null;
+  sourceLayer: string | null;
+  sourceObjectid: number | null;
 }
 
 interface OverlayCardPosition {
@@ -78,10 +121,14 @@ export function SceneViewContainer() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const parcelFocusCardRef = useRef<HTMLDivElement | null>(null);
   const hotspotInfoCardRef = useRef<HTMLDivElement | null>(null);
+  const floodInfoCardRef = useRef<HTMLDivElement | null>(null);
+  const floodZoneInfoCardRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<SceneView | null>(null);
   const layerRefs = useRef<OperationalLayerInstanceMap>({});
   const focusLayerRef = useRef<GraphicsLayer | null>(null);
   const hotspotLayerRef = useRef<GraphicsLayer | null>(null);
+  const floodConstraintLayerRef = useRef<GraphicsLayer | null>(null);
+  const floodZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const lastFocusedParcelIdRef = useRef<string | null>(null);
   const latestFocusRequestParcelIdRef = useRef<string | null>(null);
   const runtimeRef = useRef<ArcGISRuntime | null>(null);
@@ -90,6 +137,16 @@ export function SceneViewContainer() {
     null,
   );
   const hotspotInfoDragRef = useRef<{
+    offsetX: number;
+    offsetY: number;
+    pointerId: number;
+  } | null>(null);
+  const floodInfoDragRef = useRef<{
+    offsetX: number;
+    offsetY: number;
+    pointerId: number;
+  } | null>(null);
+  const floodZoneInfoDragRef = useRef<{
     offsetX: number;
     offsetY: number;
     pointerId: number;
@@ -109,19 +166,36 @@ export function SceneViewContainer() {
     useState<DevelopmentHotspotInfoCard | null>(null);
   const [hotspotInfoPosition, setHotspotInfoPosition] =
     useState<OverlayCardPosition | null>(null);
+  const [floodInfo, setFloodInfo] =
+    useState<FloodConstraintInfoCard | null>(null);
+  const [floodInfoPosition, setFloodInfoPosition] =
+    useState<OverlayCardPosition | null>(null);
+  const [floodZoneInfo, setFloodZoneInfo] =
+    useState<FloodZoneInfoCard | null>(null);
+  const [floodZoneInfoPosition, setFloodZoneInfoPosition] =
+    useState<OverlayCardPosition | null>(null);
   const {
     activeLayerIds,
     clearMapError,
     clearSelectedParcel,
+    developmentHotspotControls,
     developmentHotspotLayer,
     developmentHotspotsEnabled,
+    floodConstraintLayer,
+    floodConstraintsEnabled,
+    floodZoneLayer,
+    floodZonesEnabled,
+    isMapFocusMode,
     mapStatus,
     mapError,
     selectedParcel,
     selectedParcelId,
     selectParcel,
+    setFloodZoneViewExtent,
+    setMapFocusMode,
     setMapError,
     setMapStatus,
+    toggleMapFocusMode,
   } = useDashboardState();
   const selectedParcelIdRef = useRef(selectedParcelId);
 
@@ -133,9 +207,33 @@ export function SceneViewContainer() {
     selectedParcelIdRef.current = selectedParcelId;
   }, [selectedParcelId]);
 
+  useEffect(() => {
+    const view = viewRef.current;
+
+    if (!view || view.destroyed) {
+      return;
+    }
+
+    const resizeFrame = window.requestAnimationFrame(() => {
+      resizeSceneView(view);
+    });
+
+    return () => window.cancelAnimationFrame(resizeFrame);
+  }, [isMapFocusMode]);
+
   const closeHotspotInfo = useCallback(() => {
     setHotspotInfo(null);
     setHotspotInfoPosition(null);
+  }, []);
+
+  const closeFloodInfo = useCallback(() => {
+    setFloodInfo(null);
+    setFloodInfoPosition(null);
+  }, []);
+
+  const closeFloodZoneInfo = useCallback(() => {
+    setFloodZoneInfo(null);
+    setFloodZoneInfoPosition(null);
   }, []);
 
   const closeFocusBeacon = useCallback(() => {
@@ -277,6 +375,136 @@ export function SceneViewContainer() {
     [],
   );
 
+  const handleFloodCardPointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const rect = floodInfoCardRef.current?.getBoundingClientRect();
+
+      if (!rect) {
+        return;
+      }
+
+      floodInfoDragRef.current = {
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        pointerId: event.pointerId,
+      };
+      setFloodInfoPosition({
+        x: rect.left,
+        y: rect.top,
+      });
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    [],
+  );
+
+  const handleFloodCardPointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const dragState = floodInfoDragRef.current;
+
+      if (!dragState || dragState.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const card = floodInfoCardRef.current;
+      const cardWidth = card?.offsetWidth ?? 320;
+      const cardHeight = card?.offsetHeight ?? 250;
+      const maxX = Math.max(12, window.innerWidth - cardWidth - 12);
+      const maxY = Math.max(12, window.innerHeight - cardHeight - 12);
+      const nextX = Math.min(
+        Math.max(12, event.clientX - dragState.offsetX),
+        maxX,
+      );
+      const nextY = Math.min(
+        Math.max(12, event.clientY - dragState.offsetY),
+        maxY,
+      );
+
+      setFloodInfoPosition({
+        x: nextX,
+        y: nextY,
+      });
+    },
+    [],
+  );
+
+  const handleFloodCardPointerUp = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (floodInfoDragRef.current?.pointerId === event.pointerId) {
+        floodInfoDragRef.current = null;
+      }
+
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    },
+    [],
+  );
+
+  const handleFloodZoneCardPointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const rect = floodZoneInfoCardRef.current?.getBoundingClientRect();
+
+      if (!rect) {
+        return;
+      }
+
+      floodZoneInfoDragRef.current = {
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        pointerId: event.pointerId,
+      };
+      setFloodZoneInfoPosition({
+        x: rect.left,
+        y: rect.top,
+      });
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    [],
+  );
+
+  const handleFloodZoneCardPointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const dragState = floodZoneInfoDragRef.current;
+
+      if (!dragState || dragState.pointerId !== event.pointerId) {
+        return;
+      }
+
+      const card = floodZoneInfoCardRef.current;
+      const cardWidth = card?.offsetWidth ?? 320;
+      const cardHeight = card?.offsetHeight ?? 230;
+      const maxX = Math.max(12, window.innerWidth - cardWidth - 12);
+      const maxY = Math.max(12, window.innerHeight - cardHeight - 12);
+      const nextX = Math.min(
+        Math.max(12, event.clientX - dragState.offsetX),
+        maxX,
+      );
+      const nextY = Math.min(
+        Math.max(12, event.clientY - dragState.offsetY),
+        maxY,
+      );
+
+      setFloodZoneInfoPosition({
+        x: nextX,
+        y: nextY,
+      });
+    },
+    [],
+  );
+
+  const handleFloodZoneCardPointerUp = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (floodZoneInfoDragRef.current?.pointerId === event.pointerId) {
+        floodZoneInfoDragRef.current = null;
+      }
+
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!containerRef.current) {
       return;
@@ -284,9 +512,11 @@ export function SceneViewContainer() {
 
     let cancelled = false;
     let clickHandle: ArcGISHandle | null = null;
+    let extentWatchHandle: ArcGISHandle | null = null;
     let focusEventHandler: ((event: Event) => void) | null = null;
     let hoverHandle: ArcGISHandle | null = null;
     let localView: SceneView | null = null;
+    let zoomWatchHandle: ArcGISHandle | null = null;
 
     async function applyParcelFocus(focus: ParcelMapFocus) {
       const focusResult = resolveParcelMapFocus(focus);
@@ -339,7 +569,12 @@ export function SceneViewContainer() {
       try {
         latestFocusRequestParcelIdRef.current = focus.officialParcelId;
         const focusLayer = ensureParcelFocusLayer(runtime, view);
-        const focusGraphics = createParcelFocusGraphics(runtime, focus);
+        const focusTargetZoom = getParcelFocusTargetZoom(focus);
+        const focusGraphics = createParcelFocusGraphics(
+          runtime,
+          focus,
+          focusTargetZoom,
+        );
         const boundaryGraphic = focusGraphics.find(
           (graphic) => graphic.attributes?.graphicRole === "parcel-boundary",
         );
@@ -421,6 +656,10 @@ export function SceneViewContainer() {
           goToSuccessDiagnostic,
         );
         lastFocusedParcelIdRef.current = focus.officialParcelId;
+        updateParcelFocusMarkerScale(
+          focusLayer,
+          Number.isFinite(view.zoom) ? view.zoom : focusTargetZoom,
+        );
 
         const focusStatusMessage = boundaryGraphic
           ? "Parcel boundary highlighted."
@@ -509,6 +748,10 @@ export function SceneViewContainer() {
         map.addMany(getRenderableOperationalLayers(layers));
         hotspotLayerRef.current = createDevelopmentHotspotLayer(runtime);
         map.add(hotspotLayerRef.current);
+        floodConstraintLayerRef.current = createFloodConstraintLayer(runtime);
+        map.add(floodConstraintLayerRef.current);
+        floodZoneLayerRef.current = createFemaFloodZoneLayer(runtime);
+        map.add(floodZoneLayerRef.current);
         focusLayerRef.current = createParcelFocusLayer(runtime);
         map.add(focusLayerRef.current);
         layerRefs.current = layers;
@@ -543,10 +786,38 @@ export function SceneViewContainer() {
             event,
             hotspotLayerRef.current,
             setHotspotInfo,
+            closeFloodInfo,
           ).then((handledHotspotClick) => {
-            if (!handledHotspotClick) {
-              void interactionController.handleClick(event);
+            if (handledHotspotClick) {
+              closeFloodZoneInfo();
+              return;
             }
+
+            void handleFloodConstraintClick(
+              view,
+              event,
+              floodConstraintLayerRef.current,
+              setFloodInfo,
+              closeHotspotInfo,
+            ).then((handledFloodClick) => {
+              if (handledFloodClick) {
+                closeFloodZoneInfo();
+                return;
+              }
+
+              void handleFemaFloodZoneClick(
+                view,
+                event,
+                floodZoneLayerRef.current,
+                setFloodZoneInfo,
+                closeHotspotInfo,
+                closeFloodInfo,
+              ).then((handledFloodZoneClick) => {
+                if (!handledFloodZoneClick) {
+                  void interactionController.handleClick(event);
+                }
+              });
+            });
           });
         });
         hoverHandle = view.on("pointer-move", (event) => {
@@ -565,6 +836,27 @@ export function SceneViewContainer() {
           CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
           focusEventHandler,
         );
+        zoomWatchHandle = runtime.reactiveUtils.watch(() => view.zoom, (zoom) => {
+          if (focusLayerRef.current) {
+            updateParcelFocusMarkerScale(focusLayerRef.current, zoom);
+          }
+        }) as ArcGISHandle;
+        const publishFloodZoneExtent = () => {
+          const extent = getSceneViewWgs84Extent(runtime, view);
+
+          if (extent) {
+            setFloodZoneViewExtent(extent);
+          }
+        };
+        publishFloodZoneExtent();
+        extentWatchHandle = runtime.reactiveUtils.watch(
+          () => view.stationary,
+          (stationary) => {
+            if (stationary) {
+              publishFloodZoneExtent();
+            }
+          },
+        ) as ArcGISHandle;
         logParcelMapFocusDiagnostic("SceneView focus listener registered", {
           hasSceneView: Boolean(viewRef.current),
           mapStatus: "online",
@@ -596,6 +888,8 @@ export function SceneViewContainer() {
         );
       }
       hoverHandle?.remove();
+      extentWatchHandle?.remove();
+      zoomWatchHandle?.remove();
       if (focusBeaconTimeoutRef.current) {
         clearTimeout(focusBeaconTimeoutRef.current);
         focusBeaconTimeoutRef.current = null;
@@ -604,6 +898,10 @@ export function SceneViewContainer() {
       focusLayerRef.current = null;
       hotspotLayerRef.current?.removeAll();
       hotspotLayerRef.current = null;
+      floodConstraintLayerRef.current?.removeAll();
+      floodConstraintLayerRef.current = null;
+      floodZoneLayerRef.current?.removeAll();
+      floodZoneLayerRef.current = null;
       layerRefs.current = {};
       runtimeRef.current = null;
       viewRef.current = null;
@@ -614,8 +912,12 @@ export function SceneViewContainer() {
     };
   }, [
     clearMapError,
+    closeFloodInfo,
+    closeFloodZoneInfo,
+    closeHotspotInfo,
     clearSelectedParcel,
     selectParcel,
+    setFloodZoneViewExtent,
     setMapError,
     setMapStatus,
   ]);
@@ -643,8 +945,15 @@ export function SceneViewContainer() {
       return;
     }
 
+    const activePermitSegment =
+      developmentHotspotControls.permitSegment === "all"
+        ? null
+        : developmentHotspotControls.permitSegment;
+
     developmentHotspotLayer.markers.forEach((marker) => {
-      hotspotLayer.add(createDevelopmentHotspotGraphic(runtime, marker));
+      hotspotLayer.add(
+        createDevelopmentHotspotGraphic(runtime, marker, activePermitSegment),
+      );
     });
 
     console.debug("[CFS development hotspots]", "rendered map markers", {
@@ -655,7 +964,74 @@ export function SceneViewContainer() {
     developmentHotspotLayer.markers,
     developmentHotspotLayer.status,
     developmentHotspotLayer.totalCount,
+    developmentHotspotControls.permitSegment,
     developmentHotspotsEnabled,
+    mapStatus,
+  ]);
+
+  useEffect(() => {
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+
+    if (!runtime || !view || view.destroyed) {
+      return;
+    }
+
+    const floodLayer = ensureFloodConstraintLayer(runtime, view);
+    floodConstraintLayerRef.current = floodLayer;
+    floodLayer.removeAll();
+
+    if (!floodConstraintsEnabled || floodConstraintLayer.status !== "ready") {
+      return;
+    }
+
+    floodConstraintLayer.markers.forEach((marker) => {
+      floodLayer.add(createFloodConstraintGraphic(runtime, marker));
+    });
+
+    console.debug("[CFS flood constraints]", "rendered map markers", {
+      markerCount: floodConstraintLayer.markers.length,
+      totalCount: floodConstraintLayer.totalCount,
+    });
+  }, [
+    floodConstraintLayer.markers,
+    floodConstraintLayer.status,
+    floodConstraintLayer.totalCount,
+    floodConstraintsEnabled,
+    mapStatus,
+  ]);
+
+  useEffect(() => {
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+
+    if (!runtime || !view || view.destroyed) {
+      return;
+    }
+
+    const femaFloodZoneGraphicsLayer = ensureFemaFloodZoneLayer(runtime, view);
+    floodZoneLayerRef.current = femaFloodZoneGraphicsLayer;
+    femaFloodZoneGraphicsLayer.removeAll();
+
+    if (!floodZonesEnabled || floodZoneLayer.status !== "ready") {
+      return;
+    }
+
+    femaFloodZoneGraphicsLayer.addMany(
+      floodZoneLayer.polygons
+        .map((polygon) => createFemaFloodZoneGraphic(runtime, polygon))
+        .filter((graphic): graphic is Graphic => Boolean(graphic)),
+    );
+
+    console.debug("[CFS FEMA flood zones]", "rendered source polygons", {
+      polygonCount: floodZoneLayer.polygons.length,
+      totalCount: floodZoneLayer.totalCount,
+    });
+  }, [
+    floodZoneLayer.polygons,
+    floodZoneLayer.status,
+    floodZoneLayer.totalCount,
+    floodZonesEnabled,
     mapStatus,
   ]);
 
@@ -675,6 +1051,19 @@ export function SceneViewContainer() {
       ? hotspotInfo
       : null;
 
+  const visibleFloodInfo =
+    floodInfo &&
+    floodConstraintsEnabled &&
+    floodConstraintLayer.markers.some(
+      (marker) => marker.officialParcelId === floodInfo.officialParcelId,
+    )
+      ? floodInfo
+      : null;
+  const visibleFloodZoneInfo =
+    floodZoneInfo && floodZonesEnabled && floodZoneLayer.status === "ready"
+      ? floodZoneInfo
+      : null;
+
   return (
     <MapViewportPlaceholder
       mapStatus={mapStatus}
@@ -687,6 +1076,33 @@ export function SceneViewContainer() {
         ref={containerRef}
         title="Interactive ArcGIS SceneView with mock Cabarrus County operational layers"
       />
+      <button
+        aria-label={isMapFocusMode ? "Exit map focus" : "Expand map"}
+        aria-pressed={isMapFocusMode}
+        className="app-chrome absolute right-4 top-4 z-[55] inline-flex items-center gap-2 rounded-lg border border-white/15 bg-[#06101a]/88 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-100 shadow-[0_14px_42px_rgba(0,0,0,0.34)] backdrop-blur-xl transition hover:border-[#d8b86a]/45 hover:bg-[#111b29]/92 hover:text-[#f0cd79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/70"
+        onClick={toggleMapFocusMode}
+        title={isMapFocusMode ? "Exit map focus" : "Expand map"}
+        type="button"
+      >
+        {isMapFocusMode ? (
+          <Minimize2 className="h-4 w-4" />
+        ) : (
+          <Maximize2 className="h-4 w-4" />
+        )}
+        <span className="hidden sm:inline">
+          {isMapFocusMode ? "Exit Map Focus" : "Expand Map"}
+        </span>
+      </button>
+      {isMapFocusMode ? (
+        <button
+          className="app-chrome absolute right-4 top-16 z-[55] rounded-md border border-white/10 bg-black/45 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-300 backdrop-blur-xl transition hover:border-white/20 hover:text-white"
+          onClick={() => setMapFocusMode(false)}
+          title="Exit map focus with Escape or this button"
+          type="button"
+        >
+          Esc exits
+        </button>
+      ) : null}
       {focusBeacon && (
         <div
           aria-label="Selected parcel map focus information"
@@ -850,14 +1266,46 @@ export function SceneViewContainer() {
                 )}
               />
               <HotspotInfoMetric
-                label="Permits"
-                value={visibleHotspotInfo.totalPermitCount}
+                label="Selected Segment"
+                value={formatHotspotPopupLabel(
+                  visibleHotspotInfo.renderedPermitSegment ??
+                    visibleHotspotInfo.dominantPermitSegment,
+                )}
               />
               <HotspotInfoMetric
-                label="Score"
-                value={formatHotspotScore(
-                  visibleHotspotInfo.developmentActivityScore,
+                label="Segment Count"
+                value={visibleHotspotInfo.selectedSegmentCount}
+              />
+              <HotspotInfoMetric
+                label="Concentration"
+                value={formatHotspotPopupLabel(
+                  visibleHotspotInfo.selectedSegmentSizeTier,
                 )}
+              />
+              {visibleHotspotInfo.selectedSegmentScore !== null ? (
+                <HotspotInfoMetric
+                  label="Segment Score"
+                  value={formatHotspotScore(
+                    visibleHotspotInfo.selectedSegmentScore,
+                  )}
+                />
+              ) : null}
+              <HotspotInfoMetric
+                label="Growth Signal"
+                value={formatHotspotPopupLabel(
+                  visibleHotspotInfo.dominantGrowthSignal,
+                )}
+              />
+              <HotspotInfoMetric
+                label="Domain"
+                value={formatDevelopmentDomainLabel(
+                  visibleHotspotInfo.renderedPermitSegment ??
+                    visibleHotspotInfo.dominantPermitSegment,
+                )}
+              />
+              <HotspotInfoMetric
+                label="Permits"
+                value={visibleHotspotInfo.totalPermitCount}
               />
               <HotspotInfoMetric
                 label="Recent 1yr"
@@ -866,6 +1314,14 @@ export function SceneViewContainer() {
               <HotspotInfoMetric
                 label="Recent 3yr"
                 value={visibleHotspotInfo.recentPermitCount3yr}
+              />
+              <HotspotInfoMetric
+                label="High Value"
+                value={visibleHotspotInfo.highValuePermits}
+              />
+              <HotspotInfoMetric
+                label="Major Value"
+                value={visibleHotspotInfo.majorValuePermits}
               />
             </div>
             <div className="rounded border border-white/10 bg-black/20 px-2 py-2">
@@ -883,6 +1339,173 @@ export function SceneViewContainer() {
           </div>
         </div>
       )}
+      {visibleFloodInfo && (
+        <div
+          aria-label="Flood constraint information"
+          className="fixed z-[84] w-[min(330px,calc(100vw-24px))] rounded-lg border border-[#ff8d7a]/35 bg-[#06101a]/95 text-left shadow-[0_0_42px_rgba(255,91,91,0.24)] backdrop-blur-xl"
+          ref={floodInfoCardRef}
+          style={
+            floodInfoPosition
+              ? {
+                  left: floodInfoPosition.x,
+                  top: floodInfoPosition.y,
+                }
+              : {
+                  bottom: "1.5rem",
+                  right: "1.5rem",
+                }
+          }
+        >
+          <div
+            className="flex cursor-move touch-none items-start justify-between gap-3 border-b border-white/10 px-3 py-2"
+            onPointerCancel={handleFloodCardPointerUp}
+            onPointerDown={handleFloodCardPointerDown}
+            onPointerMove={handleFloodCardPointerMove}
+            onPointerUp={handleFloodCardPointerUp}
+            title="Drag flood constraint info card"
+          >
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ffb4a8]">
+                Flood Constraint
+              </p>
+              <p className="mt-1 truncate font-mono text-xs font-semibold text-white">
+                {visibleFloodInfo.officialParcelId}
+              </p>
+            </div>
+            <button
+              aria-label="Close flood constraint information"
+              className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              onClick={closeFloodInfo}
+              title="Close flood constraint info"
+              type="button"
+            >
+              Close
+            </button>
+          </div>
+          <div className="space-y-2 px-3 py-3 text-xs">
+            <div className="grid grid-cols-2 gap-2">
+              <FloodInfoMetric label="PIN" value={visibleFloodInfo.pin14} />
+              <FloodInfoMetric
+                label="Zone"
+                value={visibleFloodInfo.dominantFloodZone}
+              />
+              <FloodInfoMetric
+                label="Floodway"
+                value={formatFloodBoolean(visibleFloodInfo.floodwayPresent)}
+              />
+              <FloodInfoMetric
+                label="SFHA"
+                value={formatFloodBoolean(visibleFloodInfo.sfhaPresent)}
+              />
+              <FloodInfoMetric
+                label="Constrained"
+                value={formatFloodPercent(
+                  visibleFloodInfo.percentParcelConstrained,
+                )}
+              />
+              <FloodInfoMetric
+                label="Score"
+                value={formatFloodScore(visibleFloodInfo.floodConstraintScore)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <FloodInfoMetric
+                label="Impact"
+                value={formatFloodPopupLabel(visibleFloodInfo.buildabilityImpact)}
+              />
+              <FloodInfoMetric
+                label="Severity"
+                value={formatFloodPopupLabel(visibleFloodInfo.floodSeverityClass)}
+              />
+            </div>
+            <p className="text-[11px] leading-5 text-slate-500">
+              This marker selected the parcel. The selected parcel card, FEMA
+              flood panel, and boundary highlight use the standard parcel flow.
+            </p>
+          </div>
+        </div>
+      )}
+      {visibleFloodZoneInfo && (
+        <div
+          aria-label="FEMA flood zone information"
+          className="fixed z-[83] w-[min(330px,calc(100vw-24px))] rounded-lg border border-[#ffb454]/35 bg-[#06101a]/95 text-left shadow-[0_0_42px_rgba(255,180,84,0.22)] backdrop-blur-xl"
+          ref={floodZoneInfoCardRef}
+          style={
+            floodZoneInfoPosition
+              ? {
+                  left: floodZoneInfoPosition.x,
+                  top: floodZoneInfoPosition.y,
+                }
+              : {
+                  bottom: "1.5rem",
+                  right: "1.5rem",
+                }
+          }
+        >
+          <div
+            className="flex cursor-move touch-none items-start justify-between gap-3 border-b border-white/10 px-3 py-2"
+            onPointerCancel={handleFloodZoneCardPointerUp}
+            onPointerDown={handleFloodZoneCardPointerDown}
+            onPointerMove={handleFloodZoneCardPointerMove}
+            onPointerUp={handleFloodZoneCardPointerUp}
+            title="Drag FEMA flood zone info card"
+          >
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ffcf92]">
+                FEMA Flood Zone
+              </p>
+              <p className="mt-1 truncate font-mono text-xs font-semibold text-white">
+                {visibleFloodZoneInfo.floodZoneCode ?? "Uncoded zone"}
+              </p>
+            </div>
+            <button
+              aria-label="Close FEMA flood zone information"
+              className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              onClick={closeFloodZoneInfo}
+              title="Close FEMA flood zone info"
+              type="button"
+            >
+              Close
+            </button>
+          </div>
+          <div className="space-y-2 px-3 py-3 text-xs">
+            <div className="grid grid-cols-2 gap-2">
+              <FloodInfoMetric
+                label="Severity"
+                value={formatFloodPopupLabel(
+                  visibleFloodZoneInfo.floodSeverityClass,
+                )}
+              />
+              <FloodInfoMetric
+                label="Type"
+                value={formatFloodPopupLabel(
+                  visibleFloodZoneInfo.floodConstraintType,
+                )}
+              />
+              <FloodInfoMetric
+                label="FEMA Area ID"
+                value={visibleFloodZoneInfo.fldArId}
+              />
+              <FloodInfoMetric
+                label="Object ID"
+                value={visibleFloodZoneInfo.sourceObjectid}
+              />
+            </div>
+            <div className="rounded border border-white/10 bg-black/20 px-2 py-2">
+              <p className="text-[10px] uppercase text-slate-500">Source</p>
+              <p className="mt-1 text-xs font-semibold leading-5 text-slate-100">
+                {visibleFloodZoneInfo.sourceLayer ??
+                  "FEMA NFHL Layer 28 Flood Hazard Zones"}
+              </p>
+            </div>
+            <p className="text-[11px] leading-5 text-slate-500">
+              This is the authoritative FEMA source polygon. Use the separate
+              Flood Constraints marker layer to inspect parcel-based flood
+              review and buildability flags.
+            </p>
+          </div>
+        </div>
+      )}
     </MapViewportPlaceholder>
   );
 }
@@ -895,7 +1518,61 @@ function getSceneErrorMessage(error: unknown) {
   return "ArcGIS modules could not initialize in the browser.";
 }
 
+function getSceneViewWgs84Extent(
+  runtime: ArcGISRuntime,
+  view: SceneView,
+): FloodZoneExtent | null {
+  const rawExtent = view.extent;
+
+  if (!rawExtent) {
+    return null;
+  }
+
+  const rawWkid = rawExtent.spatialReference?.wkid;
+  const geographicExtent =
+    rawWkid === 4326
+      ? rawExtent
+      : (runtime.webMercatorUtils.webMercatorToGeographic(
+          rawExtent,
+        ) as typeof rawExtent | null);
+
+  if (!geographicExtent) {
+    return null;
+  }
+
+  const { xmax, xmin, ymax, ymin } = geographicExtent;
+  const values = [xmax, xmin, ymax, ymin];
+
+  if (!values.every((value) => Number.isFinite(value))) {
+    return null;
+  }
+
+  return {
+    xmax,
+    xmin,
+    ymax,
+    ymin,
+  };
+}
+
 function HotspotInfoMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | string | null | undefined;
+}) {
+  return (
+    <div className="rounded border border-white/10 bg-black/20 px-2 py-2">
+      <p className="text-[10px] uppercase text-slate-500">{label}</p>
+      <p className="mt-1 truncate text-xs font-semibold text-slate-100">
+        {value ?? "Unavailable"}
+      </p>
+    </div>
+  );
+}
+
+function FloodInfoMetric({
   label,
   value,
 }: {
@@ -920,11 +1597,30 @@ function formatHotspotScore(value: number | null | undefined) {
   return value.toFixed(1);
 }
 
+function formatFloodBoolean(value: boolean) {
+  return value ? "Yes" : "No";
+}
+
+function formatFloodPercent(value: number | null | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return `${value.toFixed(1)}%`;
+}
+
+function formatFloodScore(value: number | null | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return value.toFixed(1);
+}
+
 function createParcelFocusLayer(runtime: ArcGISRuntime) {
   return new runtime.GraphicsLayer({
     elevationInfo: {
-      mode: "relative-to-ground",
-      offset: 45,
+      mode: "on-the-ground",
     },
     id: "cfs-parcel-focus-layer",
     listMode: "hide",
@@ -941,6 +1637,29 @@ function createDevelopmentHotspotLayer(runtime: ArcGISRuntime) {
     id: "cfs-development-hotspots-layer",
     listMode: "hide",
     title: "Development Hotspots",
+  });
+}
+
+function createFloodConstraintLayer(runtime: ArcGISRuntime) {
+  return new runtime.GraphicsLayer({
+    elevationInfo: {
+      mode: "relative-to-ground",
+      offset: 58,
+    },
+    id: "cfs-flood-constraints-layer",
+    listMode: "hide",
+    title: "Flood Constraints",
+  });
+}
+
+function createFemaFloodZoneLayer(runtime: ArcGISRuntime) {
+  return new runtime.GraphicsLayer({
+    elevationInfo: {
+      mode: "on-the-ground",
+    },
+    id: "cfs-fema-flood-zones-layer",
+    listMode: "hide",
+    title: "FEMA Flood Zones",
   });
 }
 
@@ -983,27 +1702,69 @@ function ensureDevelopmentHotspotLayer(
   return hotspotLayer;
 }
 
+function ensureFloodConstraintLayer(runtime: ArcGISRuntime, view: SceneView) {
+  const map = view.map;
+
+  if (!map) {
+    throw new Error("SceneView map is unavailable for flood constraints.");
+  }
+
+  const existingLayer = map.findLayerById("cfs-flood-constraints-layer");
+
+  if (existingLayer) {
+    return existingLayer as GraphicsLayer;
+  }
+
+  const floodLayer = createFloodConstraintLayer(runtime);
+  map.add(floodLayer);
+  return floodLayer;
+}
+
+function ensureFemaFloodZoneLayer(runtime: ArcGISRuntime, view: SceneView) {
+  const map = view.map;
+
+  if (!map) {
+    throw new Error("SceneView map is unavailable for FEMA flood zones.");
+  }
+
+  const existingLayer = map.findLayerById("cfs-fema-flood-zones-layer");
+
+  if (existingLayer) {
+    return existingLayer as GraphicsLayer;
+  }
+
+  const floodZoneLayer = createFemaFloodZoneLayer(runtime);
+  map.add(floodZoneLayer);
+  return floodZoneLayer;
+}
+
 function createDevelopmentHotspotGraphic(
   runtime: ArcGISRuntime,
   marker: DevelopmentHotspotMapMarker,
+  activePermitSegment: string | null,
 ) {
-  const isVeryHigh =
-    marker.developmentActivityClass === "very_high_activity";
-  const isHigh = marker.developmentActivityClass === "high_activity";
-  const size = isVeryHigh ? 24 : isHigh ? 19 : 15;
-  const color = isVeryHigh
-    ? [255, 126, 79, 0.94]
-    : isHigh
-      ? [255, 180, 84, 0.86]
-      : [104, 216, 255, 0.78];
+  const profile = getDevelopmentHotspotMarkerProfile(
+    marker,
+    activePermitSegment,
+  );
 
   return new runtime.Graphic({
     attributes: {
       developmentActivityClass: marker.developmentActivityClass,
       developmentActivityScore: marker.developmentActivityScore,
+      dominantGrowthSignal: marker.dominantGrowthSignal,
+      dominantPermitSegment: marker.dominantPermitSegment,
       dominantZoningCodeRaw: marker.dominantZoningCodeRaw,
       graphicRole: "development-hotspot",
+      highValuePermits: marker.highValuePermits,
+      majorValuePermits: marker.majorValuePermits,
       officialParcelId: marker.officialParcelId,
+      permitSignalScoreMax: marker.permitSignalScoreMax,
+      renderedPermitSegment: profile.segment,
+      selectedSegmentCount: profile.selectedSegmentCount,
+      selectedSegmentIntensity: profile.selectedSegmentIntensity,
+      selectedSegmentScore: profile.selectedSegmentScore,
+      selectedSegmentSizeTier: profile.tier,
       pin14: marker.pin14,
       recentPermitCount1yr: marker.recentPermitCount1yr,
       recentPermitCount3yr: marker.recentPermitCount3yr,
@@ -1021,27 +1782,423 @@ function createDevelopmentHotspotGraphic(
       symbolLayers: [
         {
           material: {
-            color,
+            color: profile.haloColor,
           },
           outline: {
-            color: [255, 255, 255, 0.92],
-            size: 1.5,
+            color: profile.haloOutlineColor,
+            size: 1,
           },
           resource: {
-            primitive: "circle",
+            primitive: profile.primitive,
           },
-          size,
+          size: profile.haloSize,
+          type: "icon",
+        },
+        {
+          material: {
+            color: profile.color,
+          },
+          outline: {
+            color: profile.outlineColor,
+            size: profile.outlineSize,
+          },
+          resource: {
+            primitive: profile.primitive,
+          },
+          size: profile.size,
           type: "icon",
         },
       ],
       type: "point-3d",
       verticalOffset: {
-        maxWorldLength: 520,
+        maxWorldLength: profile.maxWorldLength,
         minWorldLength: 60,
-        screenLength: isVeryHigh ? 42 : 32,
+        screenLength: profile.screenLength,
       },
     } as unknown as Graphic["symbol"],
   });
+}
+
+function createFloodConstraintGraphic(
+  runtime: ArcGISRuntime,
+  marker: FloodConstraintMapMarker,
+) {
+  const profile = getFloodConstraintMarkerProfile(marker);
+
+  return new runtime.Graphic({
+    attributes: {
+      buildabilityImpact: marker.buildabilityImpact,
+      dominantFloodZone: marker.dominantFloodZone,
+      floodConstraintScore: marker.floodConstraintScore,
+      floodReviewRequired: marker.floodReviewRequired,
+      floodSeverityClass: marker.floodSeverityClass,
+      floodwayPresent: marker.floodwayPresent,
+      graphicRole: "flood-constraint",
+      officialParcelId: marker.officialParcelId,
+      percentParcelConstrained: marker.percentParcelConstrained,
+      pin14: marker.pin14,
+      sfhaPresent: marker.sfhaPresent,
+    },
+    geometry: new runtime.Point({
+      spatialReference: {
+        wkid: marker.centroid.spatialReference?.wkid ?? 4326,
+      },
+      x: marker.centroid.longitude,
+      y: marker.centroid.latitude,
+    }),
+    symbol: {
+      symbolLayers: [
+        {
+          material: {
+            color: profile.color,
+          },
+          outline: {
+            color: profile.outlineColor,
+            size: profile.outlineSize,
+          },
+          resource: {
+            primitive: profile.primitive,
+          },
+          size: profile.size,
+          type: "icon",
+        },
+      ],
+      type: "point-3d",
+      verticalOffset: {
+        maxWorldLength: profile.maxWorldLength,
+        minWorldLength: 45,
+        screenLength: profile.screenLength,
+      },
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createFemaFloodZoneGraphic(
+  runtime: ArcGISRuntime,
+  polygon: FloodZoneMapPolygon,
+) {
+  const rings = convertGeoJsonPolygonCoordinatesToArcGisRings(
+    polygon.geometry,
+  );
+
+  if (!rings.length) {
+    console.warn("FEMA flood zone geometry could not be converted", {
+      floodZoneInternalId: polygon.floodZoneInternalId,
+      type: polygon.geometry.type,
+    });
+    return null;
+  }
+
+  const profile = getFemaFloodZoneSymbolProfile(polygon);
+
+  return new runtime.Graphic({
+    attributes: {
+      fldArId: polygon.fldArId,
+      floodConstraintType: polygon.floodConstraintType,
+      floodSeverityClass: polygon.floodSeverityClass,
+      floodZoneCode: polygon.floodZoneCode,
+      floodZoneInternalId: polygon.floodZoneInternalId,
+      gfid: polygon.gfid,
+      globalid: polygon.globalid,
+      graphicRole: "fema-flood-zone",
+      sourceLayer: polygon.sourceLayer,
+      sourceObjectid: polygon.sourceObjectid,
+    },
+    geometry: new runtime.Polygon({
+      rings,
+      spatialReference: {
+        wkid: polygon.geometry.spatialReference.wkid,
+      },
+    }),
+    popupTemplate: {
+      content:
+        "Official FEMA NFHL Layer 28 source polygon. Parcel-based review status is available through the Flood Constraints layer.",
+      title: `FEMA Flood Zone ${polygon.floodZoneCode ?? ""}`.trim(),
+    },
+    symbol: {
+      symbolLayers: [
+        {
+          material: {
+            color: profile.fillColor,
+          },
+          outline: {
+            color: profile.outlineColor,
+            size: profile.outlineSize,
+          },
+          type: "fill",
+        },
+      ],
+      type: "polygon-3d",
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function getFemaFloodZoneSymbolProfile(polygon: FloodZoneMapPolygon) {
+  if (
+    polygon.floodSeverityClass === "severe" ||
+    polygon.floodConstraintType === "floodway"
+  ) {
+    return {
+      fillColor: [255, 91, 91, 0.18],
+      outlineColor: [255, 91, 91, 0.95],
+      outlineSize: 2,
+    };
+  }
+
+  if (
+    polygon.floodSeverityClass === "high" ||
+    polygon.floodConstraintType === "special_flood_hazard_area"
+  ) {
+    return {
+      fillColor: [255, 180, 84, 0.15],
+      outlineColor: [255, 180, 84, 0.88],
+      outlineSize: 1.6,
+    };
+  }
+
+  if (polygon.floodSeverityClass === "moderate") {
+    return {
+      fillColor: [247, 217, 76, 0.12],
+      outlineColor: [247, 217, 76, 0.78],
+      outlineSize: 1.2,
+    };
+  }
+
+  return {
+    fillColor: [158, 182, 199, 0.08],
+    outlineColor: [158, 182, 199, 0.42],
+    outlineSize: 0.8,
+  };
+}
+
+function getDevelopmentHotspotMarkerProfile(
+  marker: DevelopmentHotspotMapMarker,
+  activePermitSegment: string | null,
+) {
+  const segment =
+    activePermitSegment ??
+    marker.dominantPermitSegment ??
+    "administrative_or_unknown";
+  const selectedSegmentCount = getSelectedSegmentPermitCount(marker, segment);
+  const intensity = getDevelopmentHotspotMarkerIntensity(selectedSegmentCount);
+  const segmentProfile = getPermitSegmentVisualProfile(segment);
+  const sizeProfile = getDevelopmentHotspotSizeProfile(
+    selectedSegmentCount,
+    intensity,
+  );
+
+  return {
+    ...segmentProfile,
+    ...sizeProfile,
+    segment,
+    selectedSegmentCount,
+    selectedSegmentIntensity: intensity,
+    selectedSegmentScore: null,
+  };
+}
+
+function getDevelopmentHotspotMarkerIntensity(selectedSegmentCount: number) {
+  return Math.min(Math.max(selectedSegmentCount / 40, 0), 1);
+}
+
+function getDevelopmentHotspotSizeProfile(
+  selectedSegmentCount: number,
+  intensity: number,
+) {
+  const tier = getDevelopmentHotspotMarkerTier(selectedSegmentCount);
+  const size = getDevelopmentHotspotMarkerSize(selectedSegmentCount, intensity);
+  const haloSize = Math.round(size * 1.72);
+
+  return {
+    haloOutlineColor: [255, 255, 255, 0.1],
+    haloSize,
+    maxWorldLength: Math.round(size * 18),
+    outlineSize:
+      tier === "very_high"
+        ? 2.8
+        : tier === "high"
+          ? 2.3
+          : tier === "moderate"
+            ? 1.8
+            : 1.4,
+    screenLength: Math.round(size * 1.55),
+    size,
+    tier,
+  };
+}
+
+function getDevelopmentHotspotMarkerSize(
+  selectedSegmentCount: number,
+  intensity: number,
+) {
+  if (selectedSegmentCount >= 26) {
+    return Math.min(46, 36 + Math.log10(selectedSegmentCount - 24) * 7);
+  }
+
+  if (selectedSegmentCount >= 11) {
+    return 27 + Math.min(8, (selectedSegmentCount - 11) * 0.55);
+  }
+
+  if (selectedSegmentCount >= 3) {
+    return 18 + Math.min(8, (selectedSegmentCount - 3) * 0.9);
+  }
+
+  return 12 + Math.max(selectedSegmentCount, intensity * 2) * 2.5;
+}
+
+function getDevelopmentHotspotMarkerTier(selectedSegmentCount: number) {
+  if (selectedSegmentCount >= 26) {
+    return "very_high";
+  }
+
+  if (selectedSegmentCount >= 11) {
+    return "high";
+  }
+
+  if (selectedSegmentCount >= 3) {
+    return "moderate";
+  }
+
+  return "low";
+}
+
+function getSelectedSegmentPermitCount(
+  marker: DevelopmentHotspotMapMarker,
+  segment: string | null | undefined,
+) {
+  switch (segment) {
+    case "residential_growth":
+      return marker.residentialGrowthPermits;
+    case "commercial_activity":
+      return marker.commercialActivityPermits;
+    case "redevelopment_signal":
+      return marker.redevelopmentSignalPermits;
+    case "minor_maintenance":
+      return marker.minorMaintenancePermits;
+    case "demolition":
+      return marker.demolitionPermits;
+    case "industrial_activity":
+      return marker.industrialActivityPermits;
+    case "institutional_activity":
+      return marker.institutionalActivityPermits;
+    default:
+      return 0;
+  }
+}
+
+function getPermitSegmentVisualProfile(segment: string | null | undefined) {
+  switch (segment) {
+    case "residential_growth":
+      return {
+        color: [104, 216, 255, 0.9],
+        haloColor: [104, 216, 255, 0.18],
+        outlineColor: [223, 248, 255, 0.95],
+        primitive: "circle",
+      };
+    case "commercial_activity":
+      return {
+        color: [255, 180, 84, 0.94],
+        haloColor: [255, 180, 84, 0.18],
+        outlineColor: [255, 238, 203, 0.96],
+        primitive: "square",
+      };
+    case "redevelopment_signal":
+      return {
+        color: [188, 139, 255, 0.92],
+        haloColor: [188, 139, 255, 0.18],
+        outlineColor: [239, 224, 255, 0.95],
+        primitive: "kite",
+      };
+    case "minor_maintenance":
+      return {
+        color: [148, 163, 184, 0.74],
+        haloColor: [148, 163, 184, 0.14],
+        outlineColor: [226, 232, 240, 0.82],
+        primitive: "circle",
+      };
+    case "demolition":
+      return {
+        color: [185, 28, 28, 0.95],
+        haloColor: [185, 28, 28, 0.2],
+        outlineColor: [255, 226, 226, 0.94],
+        primitive: "x",
+      };
+    case "industrial_activity":
+      return {
+        color: [214, 161, 70, 0.94],
+        haloColor: [214, 161, 70, 0.18],
+        outlineColor: [255, 238, 196, 0.92],
+        primitive: "square",
+      };
+    case "institutional_activity":
+      return {
+        color: [92, 211, 143, 0.9],
+        haloColor: [92, 211, 143, 0.18],
+        outlineColor: [210, 255, 228, 0.92],
+        primitive: "triangle",
+      };
+    default:
+      return {
+        color: [100, 116, 139, 0.68],
+        haloColor: [100, 116, 139, 0.12],
+        outlineColor: [226, 232, 240, 0.72],
+        primitive: "circle",
+      };
+  }
+}
+
+function getFloodConstraintMarkerProfile(marker: FloodConstraintMapMarker) {
+  const strength = getFloodConstraintMarkerStrength(marker);
+
+  if (marker.floodSeverityClass === "severe" || marker.floodwayPresent) {
+    return {
+      color: [255, 91, 91, 0.96],
+      maxWorldLength: 480,
+      outlineColor: [255, 255, 255, 0.96],
+      outlineSize: 2,
+      primitive: "triangle",
+      screenLength: 34 + strength * 14,
+      size: 19 + strength * 10,
+    };
+  }
+
+  if (marker.floodSeverityClass === "high" || marker.sfhaPresent) {
+    return {
+      color: [255, 180, 84, 0.92],
+      maxWorldLength: 420,
+      outlineColor: [255, 255, 255, 0.92],
+      outlineSize: 1.7,
+      primitive: "kite",
+      screenLength: 28 + strength * 11,
+      size: 16 + strength * 8,
+    };
+  }
+
+  return {
+    color: [247, 217, 76, 0.9],
+    maxWorldLength: 360,
+    outlineColor: [35, 31, 12, 0.72],
+    outlineSize: 1.5,
+    primitive: "circle",
+    screenLength: 24 + strength * 8,
+    size: 13 + strength * 6,
+  };
+}
+
+function getFloodConstraintMarkerStrength(marker: FloodConstraintMapMarker) {
+  const score =
+    typeof marker.floodConstraintScore === "number" &&
+    Number.isFinite(marker.floodConstraintScore)
+      ? marker.floodConstraintScore / 100
+      : null;
+  const constrainedPercent =
+    typeof marker.percentParcelConstrained === "number" &&
+    Number.isFinite(marker.percentParcelConstrained)
+      ? marker.percentParcelConstrained / 100
+      : null;
+  const rawStrength = Math.max(score ?? 0, constrainedPercent ?? 0);
+
+  return Math.min(Math.max(rawStrength, 0), 1);
 }
 
 function formatHotspotPopupLabel(value: string | null | undefined) {
@@ -1056,11 +2213,37 @@ function formatHotspotPopupLabel(value: string | null | undefined) {
     .join(" ");
 }
 
+function formatDevelopmentDomainLabel(segment: string | null | undefined) {
+  switch (segment) {
+    case "residential_growth":
+      return "Residential";
+    case "commercial_activity":
+      return "Commercial";
+    case "industrial_activity":
+      return "Industrial";
+    case "institutional_activity":
+      return "Institutional";
+    case "redevelopment_signal":
+      return "Redevelopment";
+    case "minor_maintenance":
+      return "Maintenance";
+    case "demolition":
+      return "Demolition";
+    default:
+      return "Unknown";
+  }
+}
+
+function formatFloodPopupLabel(value: string | null | undefined) {
+  return formatHotspotPopupLabel(value);
+}
+
 async function handleDevelopmentHotspotClick(
   view: SceneView,
   event: Parameters<SceneView["hitTest"]>[0],
   hotspotLayer: GraphicsLayer | null,
   onHotspotInfo: (hotspotInfo: DevelopmentHotspotInfoCard) => void,
+  onFloodInfoClose: () => void,
 ) {
   if (!hotspotLayer || !hotspotLayer.visible) {
     return false;
@@ -1083,6 +2266,7 @@ async function handleDevelopmentHotspotClick(
     }
 
     closeSceneViewPopup(view);
+    onFloodInfoClose();
     onHotspotInfo(createDevelopmentHotspotInfoCard(hotspotGraphic));
 
     console.debug("[CFS development hotspots]", "hotspot selected", {
@@ -1104,6 +2288,107 @@ async function handleDevelopmentHotspotClick(
   }
 }
 
+async function handleFloodConstraintClick(
+  view: SceneView,
+  event: Parameters<SceneView["hitTest"]>[0],
+  floodLayer: GraphicsLayer | null,
+  onFloodInfo: (floodInfo: FloodConstraintInfoCard) => void,
+  onHotspotInfoClose: () => void,
+) {
+  if (!floodLayer || !floodLayer.visible) {
+    return false;
+  }
+
+  try {
+    const response = await view.hitTest(event, {
+      include: [floodLayer],
+    });
+    const results = response.results as Array<{ graphic?: Graphic }>;
+    const floodGraphic = results.find(
+      (result) =>
+        result.graphic?.attributes?.graphicRole === "flood-constraint",
+    )?.graphic;
+    const officialParcelId =
+      floodGraphic?.attributes?.officialParcelId as string | undefined;
+
+    if (!floodGraphic || !officialParcelId) {
+      return false;
+    }
+
+    closeSceneViewPopup(view);
+    onHotspotInfoClose();
+    onFloodInfo(createFloodConstraintInfoCard(floodGraphic));
+
+    console.debug("[CFS flood constraints]", "flood marker selected", {
+      buildabilityImpact: floodGraphic?.attributes?.buildabilityImpact,
+      dominantFloodZone: floodGraphic?.attributes?.dominantFloodZone,
+      floodSeverityClass: floodGraphic?.attributes?.floodSeverityClass,
+      officialParcelId,
+      percentParcelConstrained:
+        floodGraphic?.attributes?.percentParcelConstrained,
+      pin14: floodGraphic?.attributes?.pin14,
+    });
+
+    window.dispatchEvent(
+      new CustomEvent<ParcelSearchEventDetail>(PARCEL_SEARCH_INSPECT_EVENT, {
+        detail: {
+          officialParcelId,
+        },
+      }),
+    );
+    return true;
+  } catch (error) {
+    console.warn("Flood constraint hit test failed", error);
+    return false;
+  }
+}
+
+async function handleFemaFloodZoneClick(
+  view: SceneView,
+  event: Parameters<SceneView["hitTest"]>[0],
+  floodZoneLayer: GraphicsLayer | null,
+  onFloodZoneInfo: (floodZoneInfo: FloodZoneInfoCard) => void,
+  onHotspotInfoClose: () => void,
+  onFloodInfoClose: () => void,
+) {
+  if (!floodZoneLayer || !floodZoneLayer.visible) {
+    return false;
+  }
+
+  try {
+    const response = await view.hitTest(event, {
+      include: [floodZoneLayer],
+    });
+    const results = response.results as Array<{ graphic?: Graphic }>;
+    const floodZoneGraphic = results.find(
+      (result) =>
+        result.graphic?.attributes?.graphicRole === "fema-flood-zone",
+    )?.graphic;
+
+    if (!floodZoneGraphic) {
+      return false;
+    }
+
+    closeSceneViewPopup(view);
+    onHotspotInfoClose();
+    onFloodInfoClose();
+    onFloodZoneInfo(createFloodZoneInfoCard(floodZoneGraphic));
+
+    console.debug("[CFS FEMA flood zones]", "source polygon selected", {
+      floodConstraintType:
+        floodZoneGraphic?.attributes?.floodConstraintType,
+      floodSeverityClass: floodZoneGraphic?.attributes?.floodSeverityClass,
+      floodZoneCode: floodZoneGraphic?.attributes?.floodZoneCode,
+      sourceObjectid: floodZoneGraphic?.attributes?.sourceObjectid,
+    });
+
+    return true;
+  } catch (error) {
+    console.warn("FEMA flood zone hit test failed", error);
+    return false;
+  }
+}
+
 function createDevelopmentHotspotInfoCard(
   graphic: Graphic,
 ): DevelopmentHotspotInfoCard {
@@ -1116,14 +2401,60 @@ function createDevelopmentHotspotInfoCard(
     developmentActivityScore: numberAttribute(
       attributes.developmentActivityScore,
     ),
+    dominantGrowthSignal: stringAttribute(attributes.dominantGrowthSignal),
+    dominantPermitSegment: stringAttribute(attributes.dominantPermitSegment),
     dominantZoningCodeRaw: stringAttribute(attributes.dominantZoningCodeRaw),
+    highValuePermits: numberAttribute(attributes.highValuePermits) ?? 0,
+    majorValuePermits: numberAttribute(attributes.majorValuePermits) ?? 0,
     officialParcelId:
       stringAttribute(attributes.officialParcelId) ?? "Unknown parcel",
+    permitSignalScoreMax: numberAttribute(attributes.permitSignalScoreMax),
     pin14: stringAttribute(attributes.pin14),
     recentPermitCount1yr: numberAttribute(attributes.recentPermitCount1yr) ?? 0,
     recentPermitCount3yr: numberAttribute(attributes.recentPermitCount3yr) ?? 0,
+    renderedPermitSegment: stringAttribute(attributes.renderedPermitSegment),
+    selectedSegmentCount: numberAttribute(attributes.selectedSegmentCount),
+    selectedSegmentIntensity: numberAttribute(
+      attributes.selectedSegmentIntensity,
+    ),
+    selectedSegmentScore: numberAttribute(attributes.selectedSegmentScore),
+    selectedSegmentSizeTier: stringAttribute(
+      attributes.selectedSegmentSizeTier,
+    ),
     totalPermitCount: numberAttribute(attributes.totalPermitCount) ?? 0,
     zoningJurisdictionName: stringAttribute(attributes.zoningJurisdictionName),
+  };
+}
+
+function createFloodZoneInfoCard(graphic: Graphic): FloodZoneInfoCard {
+  const attributes = graphic.attributes ?? {};
+
+  return {
+    floodConstraintType: stringAttribute(attributes.floodConstraintType),
+    floodSeverityClass: stringAttribute(attributes.floodSeverityClass),
+    floodZoneCode: stringAttribute(attributes.floodZoneCode),
+    fldArId: stringAttribute(attributes.fldArId),
+    sourceLayer: stringAttribute(attributes.sourceLayer),
+    sourceObjectid: numberAttribute(attributes.sourceObjectid),
+  };
+}
+
+function createFloodConstraintInfoCard(graphic: Graphic): FloodConstraintInfoCard {
+  const attributes = graphic.attributes ?? {};
+
+  return {
+    buildabilityImpact: stringAttribute(attributes.buildabilityImpact),
+    dominantFloodZone: stringAttribute(attributes.dominantFloodZone),
+    floodConstraintScore: numberAttribute(attributes.floodConstraintScore),
+    floodSeverityClass: stringAttribute(attributes.floodSeverityClass),
+    floodwayPresent: Boolean(attributes.floodwayPresent),
+    officialParcelId:
+      stringAttribute(attributes.officialParcelId) ?? "Unknown parcel",
+    percentParcelConstrained: numberAttribute(
+      attributes.percentParcelConstrained,
+    ),
+    pin14: stringAttribute(attributes.pin14),
+    sfhaPresent: Boolean(attributes.sfhaPresent),
   };
 }
 
@@ -1139,6 +2470,14 @@ function closeSceneViewPopup(view: SceneView) {
   popupView.popup?.close?.();
 }
 
+function resizeSceneView(view: SceneView) {
+  const resizableView = view as SceneView & {
+    resize?: () => void;
+  };
+
+  resizableView.resize?.();
+}
+
 function stringAttribute(value: unknown) {
   return typeof value === "string" && value ? value : null;
 }
@@ -1150,10 +2489,11 @@ function numberAttribute(value: unknown) {
 function createParcelFocusGraphics(
   runtime: ArcGISRuntime,
   focus: ParcelMapFocus,
+  zoom: number,
 ) {
   const graphics: Graphic[] = [];
   const boundaryGraphic = createParcelBoundaryGraphic(runtime, focus);
-  const markerGraphic = createParcelFocusMarkerGraphic(runtime, focus);
+  const markerGraphic = createParcelFocusMarkerGraphic(runtime, focus, zoom);
 
   if (boundaryGraphic) {
     graphics.push(boundaryGraphic);
@@ -1169,6 +2509,7 @@ function createParcelFocusGraphics(
 function createParcelFocusMarkerGraphic(
   runtime: ArcGISRuntime,
   focus: ParcelMapFocus,
+  zoom: number,
 ) {
   if (!focus.centroid) {
     return null;
@@ -1189,48 +2530,133 @@ function createParcelFocusMarkerGraphic(
         "Backend parcel centroid/extent focus marker for the selected parcel.",
       title: focus.officialParcelId,
     },
-    symbol: {
-      callout: {
-        color: [104, 216, 255, 0.95],
-        size: 2,
-        type: "line",
-      },
-      symbolLayers: [
-        {
-          material: {
-            color: [104, 216, 255, 0.95],
-          },
-          outline: {
-            color: [255, 255, 255, 0.95],
-            size: 2,
-          },
-          resource: {
-            primitive: "circle",
-          },
-          size: 34,
-          type: "icon",
-        },
-        {
-          material: {
-            color: [216, 184, 106, 0.95],
-          },
-          resource: {
-            primitive: "sphere",
-          },
-          depth: 130,
-          height: 130,
-          type: "object",
-          width: 130,
-        },
-      ],
-      type: "point-3d",
-      verticalOffset: {
-        maxWorldLength: 700,
-        minWorldLength: 60,
-        screenLength: 50,
-      },
-    } as unknown as Graphic["symbol"],
+    symbol: createParcelFocusMarkerSymbol(zoom),
   });
+}
+
+function updateParcelFocusMarkerScale(
+  focusLayer: GraphicsLayer,
+  zoom: number,
+) {
+  const markerGraphic = focusLayer.graphics
+    .toArray()
+    .find((graphic) => graphic.attributes?.graphicRole === "parcel-marker");
+
+  if (!markerGraphic) {
+    return;
+  }
+
+  markerGraphic.symbol = createParcelFocusMarkerSymbol(zoom);
+}
+
+function createParcelFocusMarkerSymbol(zoom: number) {
+  const profile = getParcelFocusMarkerProfile(zoom);
+  const symbolLayers: Array<Record<string, unknown>> = [
+    {
+      material: {
+        color: [104, 216, 255, profile.iconOpacity],
+      },
+      outline: {
+        color: [255, 255, 255, profile.outlineOpacity],
+        size: profile.outlineSize,
+      },
+      resource: {
+        primitive: "circle",
+      },
+      size: profile.iconSize,
+      type: "icon",
+    },
+  ];
+
+  if (profile.objectSize > 0) {
+    symbolLayers.push({
+      material: {
+        color: [216, 184, 106, profile.objectOpacity],
+      },
+      resource: {
+        primitive: "sphere",
+      },
+      depth: profile.objectSize,
+      height: profile.objectSize,
+      type: "object",
+      width: profile.objectSize,
+    });
+  }
+
+  return {
+    callout: {
+      color: [104, 216, 255, profile.calloutOpacity],
+      size: profile.calloutSize,
+      type: "line",
+    },
+    symbolLayers,
+    type: "point-3d",
+    verticalOffset: {
+      maxWorldLength: profile.maxWorldLength,
+      minWorldLength: 45,
+      screenLength: profile.screenOffset,
+    },
+  } as unknown as Graphic["symbol"];
+}
+
+function getParcelFocusMarkerProfile(zoom: number) {
+  if (zoom >= 17) {
+    return {
+      calloutOpacity: 0.55,
+      calloutSize: 1,
+      iconOpacity: 0.22,
+      iconSize: 16,
+      maxWorldLength: 220,
+      objectOpacity: 0,
+      objectSize: 0,
+      outlineOpacity: 0.9,
+      outlineSize: 2,
+      screenOffset: 24,
+    };
+  }
+
+  if (zoom >= 16) {
+    return {
+      calloutOpacity: 0.65,
+      calloutSize: 1,
+      iconOpacity: 0.32,
+      iconSize: 20,
+      maxWorldLength: 320,
+      objectOpacity: 0.35,
+      objectSize: 34,
+      outlineOpacity: 0.92,
+      outlineSize: 2,
+      screenOffset: 30,
+    };
+  }
+
+  if (zoom >= 14) {
+    return {
+      calloutOpacity: 0.78,
+      calloutSize: 1.5,
+      iconOpacity: 0.58,
+      iconSize: 26,
+      maxWorldLength: 480,
+      objectOpacity: 0.55,
+      objectSize: 64,
+      outlineOpacity: 0.95,
+      outlineSize: 2,
+      screenOffset: 38,
+    };
+  }
+
+  return {
+    calloutOpacity: 0.9,
+    calloutSize: 2,
+    iconOpacity: 0.86,
+    iconSize: 34,
+    maxWorldLength: 700,
+    objectOpacity: 0.82,
+    objectSize: 110,
+    outlineOpacity: 0.95,
+    outlineSize: 2,
+    screenOffset: 50,
+  };
 }
 
 function createParcelBoundaryGraphic(
@@ -1272,17 +2698,30 @@ function createParcelBoundaryGraphic(
         "Selected parcel boundary from the opt-in parcel detail highlight geometry.",
       title: focus.officialParcelId,
     },
-    symbol: {
-      color: [104, 216, 255, 0.08],
-      outline: {
-        color: [255, 218, 120, 1],
-        style: "solid",
-        width: 3,
-      },
-      style: "solid",
-      type: "simple-fill",
-    } as unknown as Graphic["symbol"],
+    symbol: createParcelCageHighlightSymbol(),
   });
+}
+
+function createParcelCageHighlightSymbol() {
+  // SceneView reads flat fills as hovering sheets, so the selected parcel uses
+  // a low translucent extrusion with visible edges to read as a ground-tied cage.
+  return {
+    symbolLayers: [
+      {
+        edges: {
+          color: [255, 218, 120, 0.98],
+          size: 1.8,
+          type: "solid",
+        },
+        material: {
+          color: [104, 216, 255, 0.13],
+        },
+        size: 7,
+        type: "extrude",
+      },
+    ],
+    type: "polygon-3d",
+  } as unknown as Graphic["symbol"];
 }
 
 function createParcelFocusPoint(
@@ -1300,6 +2739,18 @@ function createParcelFocusPoint(
 
 function convertGeoJsonToArcGisRings(
   geometry: ParcelMapFocus["highlightGeometry"],
+) {
+  return convertGeoJsonPolygonCoordinatesToArcGisRings(geometry);
+}
+
+function convertGeoJsonPolygonCoordinatesToArcGisRings(
+  geometry:
+    | {
+        coordinates: unknown;
+        type: "MultiPolygon" | "Polygon" | string;
+      }
+    | null
+    | undefined,
 ) {
   if (!geometry) {
     return [];
@@ -1378,6 +2829,10 @@ function createParcelFocusExtent(runtime: ArcGISRuntime, focus: ParcelMapFocus) 
   });
 }
 
+function getParcelFocusTargetZoom(focus: ParcelMapFocus) {
+  return focus.centroid ? 18 : 17;
+}
+
 function buildParcelFocusGoToTarget(
   runtime: ArcGISRuntime,
   focus: ParcelMapFocus,
@@ -1385,13 +2840,13 @@ function buildParcelFocusGoToTarget(
   if (focus.centroid) {
     return {
       center: createParcelFocusPoint(runtime, focus),
-      zoom: 18,
+      zoom: getParcelFocusTargetZoom(focus),
     } as Parameters<SceneView["goTo"]>[0];
   }
 
   return {
     target: createParcelFocusExtent(runtime, focus),
-    zoom: 17,
+    zoom: getParcelFocusTargetZoom(focus),
   } as Parameters<SceneView["goTo"]>[0];
 }
 

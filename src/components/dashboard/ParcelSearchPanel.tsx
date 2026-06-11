@@ -27,13 +27,17 @@ import {
   type ParcelSearchIndexMetadata,
   type ParcelSearchRecord,
 } from "@/data/intelligence/parcelSearchData";
+import {
+  normalizeBackendParcelDetailResponse,
+  normalizeBackendParcelMapFocusResponse,
+} from "@/lib/adapters/parcelDetailAdapter";
 import { normalizeBackendParcelFilterResponse } from "@/lib/adapters/parcelFilterAdapter";
 import {
   applyParcelSearchUiFilters,
   normalizeBackendParcelSearchResponse,
 } from "@/lib/adapters/parcelSearchAdapter";
 import { USE_BACKEND_API } from "@/lib/api/client";
-import { filterParcels, searchParcels } from "@/lib/api/parcels";
+import { filterParcels, getParcelDetail, searchParcels } from "@/lib/api/parcels";
 import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import { useParcelMapFocus } from "@/hooks/useParcelMapFocus";
@@ -43,6 +47,40 @@ import type { ParcelFocusSource } from "@/types/map/parcelFocus";
 const RESULT_LIMIT = 50;
 const API_RESULT_LIMIT = 100;
 const MIN_BACKEND_QUERY_LENGTH = 3;
+
+function createParcelDetailFallbackRecord(
+  officialParcelId: string,
+): ParcelSearchRecord {
+  return {
+    assessedValue: null,
+    governanceWarningCount: 0,
+    governanceWarnings: [],
+    mailingAddress: null,
+    mailingCity: null,
+    mailingState: null,
+    marketValue: null,
+    needsGovernanceReview: false,
+    neighborhood: null,
+    objectId1: null,
+    officialParcelId,
+    ownerName: null,
+    ownerSecondaryName: null,
+    parcelQualityStatus: null,
+    parcelSizeCategory: null,
+    pin14: null,
+    planningBoundaryType: null,
+    planningJurisdiction: null,
+    primaryGovernanceWarning: null,
+    safeForDashboard: false,
+    searchText: officialParcelId.toLowerCase(),
+    subdivision: null,
+    valuationBand: null,
+    zoningCategory: null,
+    zoningCode: null,
+    zoningConfidence: null,
+    zoningJurisdiction: null,
+  };
+}
 
 interface BackendSearchState {
   error: string | null;
@@ -375,7 +413,50 @@ export function ParcelSearchPanel() {
 
         if (nextRecord) {
           handleSelectRecord(nextRecord, "command");
+          return;
         }
+
+        if (!USE_BACKEND_API) {
+          return;
+        }
+
+        getParcelDetail(detail.officialParcelId)
+          .then((response) => {
+            const fallbackRecord = createParcelDetailFallbackRecord(
+              detail.officialParcelId,
+            );
+            const hydratedRecord = normalizeBackendParcelDetailResponse(
+              response,
+              fallbackRecord,
+            );
+            const backendMapFocus = normalizeBackendParcelMapFocusResponse(
+              response,
+              hydratedRecord,
+            );
+
+            setSelectedRecord(hydratedRecord);
+            setSelectedParcelIntelligence(hydratedRecord, "api");
+
+            if (backendMapFocus) {
+              setParcelFocus(backendMapFocus);
+              return;
+            }
+
+            setParcelFocusFromRecord(
+              {
+                officialParcelId: hydratedRecord.officialParcelId,
+                pin14: hydratedRecord.pin14,
+              },
+              "command",
+            );
+          })
+          .catch((apiError: unknown) => {
+            setError(
+              apiError instanceof Error
+                ? apiError.message
+                : "Parcel detail API is unavailable.",
+            );
+          });
       });
     }
 
@@ -387,7 +468,12 @@ export function ParcelSearchPanel() {
         handleInspectParcel,
       );
     };
-  }, [handleSelectRecord]);
+  }, [
+    handleSelectRecord,
+    setParcelFocus,
+    setParcelFocusFromRecord,
+    setSelectedParcelIntelligence,
+  ]);
 
   const results = useMemo(
     () => {

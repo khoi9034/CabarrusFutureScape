@@ -1,0 +1,61 @@
+{
+  "task": "Phase 6 Intelligence Panel overview cleanup and parcel focus marker scaling",
+  "generated_at": "2026-06-04",
+  "frontend_only": true,
+  "backend_modified": false,
+  "postgis_modified": false,
+  "overview_layout_changes": [
+    "Overview now focuses on the selected parcel workflow instead of embedding the full countywide parcel and development panels.",
+    "Overview keeps the Selected Parcel card, Selected Parcel Development Activity panel, and Selected Parcel Permit Events panel.",
+    "Overview adds three compact headline cards: Total Parcels, Zoned Parcels, and Parcels With Permit Activity.",
+    "Full parcel metrics moved to the Parcel Intelligence section.",
+    "Full development activity metrics moved to the Development Activity section."
+  ],
+  "no_selected_parcel_behavior": [
+    "Selected Parcel card continues to show the clean no-selection empty state.",
+    "Selected Parcel Development Activity now reports Waiting for parcel selection instead of Loading API when no parcel is selected.",
+    "Selected Parcel Permit Events now reports Waiting for parcel selection instead of Loading API when no parcel is selected.",
+    "Selected-parcel-specific development and permit event hooks do not call backend APIs when no official parcel ID is available."
+  ],
+  "timeout_and_fallback_handling": [
+    "Selected-parcel panels use an explicit waiting source before a parcel is selected.",
+    "Overview headline cards do not render endpoint timeout details.",
+    "Detailed API/static/fallback messaging remains inside the relevant parcel, development, temporal, and selected-parcel panels."
+  ],
+  "parcel_focus_marker_scaling": {
+    "approach": "SceneView zoom-aware selected-parcel marker symbol profiles",
+    "zoomed_out_behavior": "Marker remains larger and beacon-like for parcel discovery at wider camera zooms.",
+    "close_zoom_behavior": "At zoom 17 and above the marker becomes a small translucent ring with no large sphere object so the selected parcel boundary remains visible.",
+    "preserved": [
+      "SceneView.goTo behavior",
+      "selected parcel boundary highlight",
+      "parcel focus status card",
+      "development hotspot markers",
+      "development hotspot layer"
+    ]
+  },
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/SelectedParcelDevelopmentActivityPanel.tsx",
+    "src/components/dashboard/SelectedParcelPermitEventsPanel.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/hooks/useSelectedParcelDevelopmentActivity.ts",
+    "src/hooks/useSelectedParcelPermitEvents.ts",
+    "src/lib/adapters/selectedParcelDevelopmentActivityAdapter.ts",
+    "src/lib/adapters/selectedParcelPermitEventsAdapter.ts"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed"
+  },
+  "smoke_test_notes": [
+    "Interactive browser smoke testing was not run in this turn.",
+    "Static build validation confirms the dashboard compiles with the updated Overview, selected-parcel waiting states, and SceneView marker scaling."
+  ],
+  "remaining_ui_cleanup_opportunities": [
+    "Run an in-browser pass to tune the close-zoom marker opacity against real parcel outlines.",
+    "Consider lazy-mounting inactive Intelligence Panel sections later so hidden sections do not initialize their panel hooks until selected."
+  ]
+}

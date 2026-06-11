@@ -1,0 +1,156 @@
+{
+  "version": "0.2.0",
+  "environment": "local-planning-only",
+  "production_services_connected": false,
+  "google_cloud_reference": {
+    "project_id": "newproject-461002",
+    "bucket": "gs://cfs-model-data-khoi/",
+    "documented_validation_commands": [
+      "gcloud config get-value project",
+      "gcloud storage ls gs://cfs-model-data-khoi/metadata/cfs_engine_registry/"
+    ],
+    "note": "Google Cloud commands are documented for local validation only. This config does not connect to Google Cloud, read bucket contents, or alter existing TIFF data."
+  },
+  "source_authority_decision": {
+    "primary_regulatory_flood_source": "fema_nfhl_flood_hazard_zones",
+    "modeled_reference_source": "gcs_flood_risk_tiff",
+    "decision": "Use FEMA NFHL as the authoritative regulatory flood constraint source. Retain the existing Google Cloud TIFF as modeled/static reference and future prediction input."
+  },
+  "constraint_sources": [
+    {
+      "source_key": "fema_nfhl_flood_hazard_zones",
+      "title": "FEMA NFHL Flood Hazard Zones",
+      "constraint_category": "flood",
+      "role": "authoritative_regulatory_constraint",
+      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+      "layer_id": 28,
+      "layer_name": "Flood Hazard Zones",
+      "service_type": "ArcGIS MapServer Feature Layer",
+      "geometry_type": "polygon",
+      "spatial_reference_wkid": 4269,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "primary_for": "floodplain/floodway parcel overlay",
+      "authoritative": true,
+      "regulatory_source": true,
+      "first_ingestion_candidate": true,
+      "expected_key_fields": [
+        "FLD_AR_ID",
+        "FLD_ZONE",
+        "ZONE_SUBTY",
+        "SFHA_TF",
+        "STATIC_BFE",
+        "V_DATUM",
+        "DEPTH",
+        "LEN_UNIT",
+        "SOURCE_CIT",
+        "GFID",
+        "GlobalID"
+      ],
+      "planned_overlay_outputs": [
+        "floodplain_overlap_pct",
+        "floodway_overlap_pct",
+        "constrained_acres",
+        "flood_severity_class",
+        "review_required",
+        "buildability_impact"
+      ],
+      "status": "registered_not_ingested",
+      "notes": [
+        "Use this layer first for Phase 7 parcel flood constraint overlay.",
+        "Treat floodway values in ZONE_SUBTY as severe/regulatory review candidates.",
+        "Clip/query to Cabarrus County extent during ingestion; do not ingest nationwide data unbounded."
+      ]
+    },
+    {
+      "source_key": "fema_nfhl_flood_hazard_boundaries",
+      "title": "FEMA NFHL Flood Hazard Boundaries",
+      "constraint_category": "flood",
+      "role": "qa_reference_boundary",
+      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/27",
+      "layer_id": 27,
+      "layer_name": "Flood Hazard Boundaries",
+      "service_type": "ArcGIS MapServer Feature Layer",
+      "geometry_type": "polyline",
+      "spatial_reference_wkid": 4269,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "authoritative": true,
+      "regulatory_source": true,
+      "use": "QA/reference for flood boundary review",
+      "primary_for": "QA support, not first parcel flood overlay",
+      "expected_key_fields": [
+        "FLD_LN_ID",
+        "LN_TYP",
+        "SOURCE_CIT",
+        "GFID",
+        "GlobalID"
+      ],
+      "status": "registered_not_ingested",
+      "notes": [
+        "Use to review special flood hazard area boundaries, limit lines, and boundary QA.",
+        "Do not substitute this polyline layer for parcel floodplain/floodway area overlay."
+      ]
+    },
+    {
+      "source_key": "fema_nfhl_water_areas",
+      "title": "FEMA NFHL Water Areas",
+      "constraint_category": "flood_hydrology_reference",
+      "role": "future_hydrology_reference",
+      "url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/32",
+      "layer_id": 32,
+      "layer_name": "Water Areas",
+      "service_type": "ArcGIS MapServer Feature Layer",
+      "geometry_type": "polygon",
+      "spatial_reference_wkid": 4269,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "authoritative": true,
+      "use": "later hydrology/environmental constraint reference, not first flood overlay",
+      "primary_for": "future hydrology/environmental context",
+      "expected_key_fields": [
+        "WTR_AR_ID",
+        "WTR_NM",
+        "SHOWN_FIRM",
+        "SHOWN_INDX",
+        "SOURCE_CIT",
+        "GFID",
+        "GlobalID"
+      ],
+      "status": "registered_not_ingested",
+      "notes": [
+        "Reserve for later hydrology context and environmental sensitivity work.",
+        "Do not include in the first regulatory parcel flood overlay."
+      ]
+    },
+    {
+      "source_key": "gcs_flood_risk_tiff",
+      "title": "Existing Google Cloud Flood TIFF",
+      "constraint_category": "flood_model_reference",
+      "role": "modeled_reference_or_future_prediction_input",
+      "bucket": "gs://cfs-model-data-khoi/",
+      "project_id": "newproject-461002",
+      "source_type": "cloud_storage_raster",
+      "geometry_type": "raster",
+      "authoritative": false,
+      "regulatory_source": false,
+      "use": "future flood risk modeling, raster reference, comparison against FEMA",
+      "not_primary_for": "regulatory parcel flood constraints",
+      "status": "retained_not_connected",
+      "notes": [
+        "Do not delete existing TIFF/raster data.",
+        "Use later for modeled/static reference, raster comparison, or future prediction inputs after regulatory flood overlays are stable.",
+        "This config does not connect to Google Cloud or enumerate bucket contents."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "phase": "CFS V1 Map Symbology Upgrade",
+  "status": "completed",
+  "backend_changed": false,
+  "postgis_schema_changed": false,
+  "prediction_model_built": false,
+  "development_hotspot_symbology": {
+    "color_logic": {
+      "source": "active permit segment filter when selected, otherwise dominant permit segment from hotspot result",
+      "residential_growth": "cyan / blue",
+      "commercial_activity": "orange",
+      "redevelopment_signal": "purple",
+      "minor_maintenance": "muted gray",
+      "demolition": "dark red",
+      "industrial_activity": "amber / steel",
+      "institutional_activity": "green",
+      "administrative_or_unknown": "muted gray"
+    },
+    "shape_logic": {
+      "residential_growth": "circle",
+      "commercial_activity": "square",
+      "redevelopment_signal": "kite",
+      "minor_maintenance": "circle",
+      "demolition": "x",
+      "industrial_activity": "square",
+      "institutional_activity": "triangle",
+      "administrative_or_unknown": "circle"
+    },
+    "size_logic": "Marker size is based on the strongest available activity signal across development_activity_score, permit_signal_score_max, total_permit_count, recent permit counts, and activity class.",
+    "popup_updates": [
+      "selected/rendered permit segment",
+      "growth signal",
+      "planning domain derived from selected/dominant segment",
+      "total permits",
+      "recent 1-year permits",
+      "recent 3-year permits",
+      "high value permit count",
+      "major value permit count",
+      "zoning jurisdiction",
+      "zoning code",
+      "activity class"
+    ]
+  },
+  "flood_constraint_symbology": {
+    "color_logic": {
+      "severe_or_floodway": "red",
+      "high_or_sfha": "orange",
+      "moderate": "yellow"
+    },
+    "shape_logic": {
+      "severe_or_floodway": "triangle",
+      "high_or_sfha": "kite",
+      "moderate": "circle"
+    },
+    "size_logic": "Marker size grows with the stronger of flood_constraint_score or percent_parcel_constrained.",
+    "default_scope": "High-review flood constraint parcels only; low/minimal records are not rendered by default."
+  },
+  "legend_updates": {
+    "development_hotspots": "Legend now explains color/shape as permit segment and size as activity intensity.",
+    "flood_constraints": "Legend now explains color/shape as flood severity and size as constraint score or percent constrained."
+  },
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/lib/adapters/developmentHotspotMapAdapter.ts",
+    "src/types/map/developmentHotspots.ts"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not run; backend was not changed"
+  },
+  "preserved": [
+    "parcel search",
+    "parcel cage highlight",
+    "selected parcel card",
+    "development hotspot toggle and filters",
+    "flood constraints toggle",
+    "FEMA flood zones",
+    "permit event list",
+    "API/static fallback behavior"
+  ],
+  "remaining_gaps": [
+    "Development hotspot domain is shown as a planning-domain label derived from the selected/dominant segment because hotspot rows do not currently expose a separate dominant development_domain field.",
+    "No clustering or density rendering was added.",
+    "No prediction or probability symbology was added."
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "phase": "CFS V1 Executive UX Cleanup",
+  "status": "completed",
+  "goal": "Simplify the working CFS prototype into a cleaner executive-facing dashboard without adding data sources or breaking FastAPI/map workflows.",
+  "sections_removed_or_hidden": [
+    {
+      "section": "Temporal Analysis",
+      "status": "hidden from executive selector",
+      "developer_access": "Available only when NEXT_PUBLIC_CFS_DEVELOPER_MODE=true"
+    },
+    {
+      "section": "System Status",
+      "status": "hidden from executive selector",
+      "developer_access": "Available only when NEXT_PUBLIC_CFS_DEVELOPER_MODE=true"
+    },
+    {
+      "section": "Internal diagnostics",
+      "status": "kept out of default executive flow"
+    }
+  ],
+  "sections_reorganized": [
+    "Executive Summary",
+    "Parcel Intelligence",
+    "Development Activity",
+    "Constraints"
+  ],
+  "executive_summary_changes": [
+    "Executive Summary is now the default section.",
+    "Overview headlines focus on growth activity, flood review workload, development activity, and total parcels.",
+    "Concise insight language summarizes FEMA flood review parcels, development activity parcels, and flood review share of county inventory.",
+    "Detailed countywide metric panels were moved out of the default overview."
+  ],
+  "kpi_changes": [
+    "Bottom KPI bar reduced to four cards.",
+    "Kept Growth Activity, Constraint Exposure, Development Activity, and Total Parcels.",
+    "Removed placeholder fiscal/readiness duplicate cards from the bottom strip.",
+    "Removed the bottom time slider from the executive KPI strip; temporal controls remain in developer-mode Temporal Analysis."
+  ],
+  "layer_registry_changes": [
+    "Layer Registry renamed to Map Layers.",
+    "Map Layers is collapsed by default.",
+    "Development Hotspots, Flood Constraints, FEMA Flood Zones, Infrastructure Readiness, and Opportunity Extrusions remain available.",
+    "Existing hotspot, flood marker, and FEMA polygon functionality is preserved."
+  ],
+  "parcel_intelligence_changes": [
+    "Selected parcel workflow moved into Parcel Intelligence as a structured hierarchy.",
+    "Hierarchy now groups selected parcel characteristics, flood constraints, development activity, and permit timeline.",
+    "Executive Summary keeps only the selected parcel summary card for orientation.",
+    "Selected parcel flood wording uses planning language such as Engineering Review and Flood-Constrained Area."
+  ],
+  "constraint_section_changes": [
+    "Created a dedicated Constraints section.",
+    "Moved Flood Constraint Summary into Constraints.",
+    "Added map context explaining the difference between parcel Flood Constraints markers and FEMA Flood Zones source polygons."
+  ],
+  "ui_simplification_improvements": [
+    "Reduced the main Intelligence Panel selector to executive-facing sections.",
+    "Collapsed map-layer controls to reduce right-panel visual noise.",
+    "Reduced duplicated selected-parcel detail in Executive Summary.",
+    "Kept technical API/static fallback behavior intact but reduced its prominence in the executive flow."
+  ],
+  "preserved_functionality": [
+    "Parcel search",
+    "Parcel focus",
+    "3D parcel cage highlight",
+    "Development Hotspots",
+    "Flood Constraints",
+    "FEMA Flood Zones",
+    "Permit Events",
+    "FastAPI integration",
+    "Static fallback behavior"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "browser_smoke_check": "passed"
+  },
+  "readiness": {
+    "portfolio_demonstration": "ready",
+    "remaining_cleanup_opportunities": [
+      "Further compress individual detailed metric panels for presentation mode.",
+      "Add a one-click developer mode toggle if internal diagnostics need occasional demos.",
+      "Consider a presentation-mode route once V1 story flow stabilizes."
+    ]
+  }
+}

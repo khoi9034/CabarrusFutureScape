@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-06-07T01:10:00-04:00",
+  "phase": "Phase 7 Flood Constraint map marker UX",
+  "goal": "Make FEMA flood constraint markers understandable and interactive without changing PostGIS, flood overlay logic, forecasting, school constraints, or SceneView architecture.",
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/hooks/useFloodConstraintLayer.ts",
+    "src/lib/adapters/floodConstraintMapAdapter.ts",
+    "src/types/map/floodConstraints.ts"
+  ],
+  "marker_styling": {
+    "severity_colors": {
+      "severe_or_floodway": "red",
+      "high_or_sfha": "orange",
+      "moderate": "yellow"
+    },
+    "low_minimal_default_rendering": "suppressed",
+    "size_logic": "Marker size and vertical offset scale by the stronger of flood_constraint_score or percent_parcel_constrained.",
+    "default_layer_scope": "GET /constraints/flood/high-review, limit 100"
+  },
+  "marker_interaction": {
+    "default_arcgis_popup": "closed on flood marker click",
+    "custom_card": "A movable flood constraint information card is shown on marker click.",
+    "card_fields": [
+      "official parcel ID",
+      "PIN",
+      "dominant flood zone",
+      "floodway present",
+      "SFHA present",
+      "percent parcel constrained",
+      "buildability impact",
+      "flood severity class",
+      "flood constraint score"
+    ],
+    "selected_parcel_flow": "Flood marker click still dispatches the existing parcel inspect event so selected parcel card, selected parcel flood panel, map focus, and parcel boundary/cage highlight reuse the standard parcel workflow.",
+    "development_hotspots_preserved": true
+  },
+  "layer_registry": {
+    "status_text": "Showing X flood review parcels",
+    "severity_counts": "Displays live severe/high/moderate counts when the layer is ready.",
+    "legend": [
+      "red = severe / floodway",
+      "orange = high / SFHA",
+      "yellow = moderate",
+      "size = higher score / more constrained"
+    ],
+    "instruction_text": "Click a marker to inspect parcel flood constraints."
+  },
+  "smoke_test": {
+    "api_high_review": {
+      "url": "http://127.0.0.1:8000/constraints/flood/high-review?limit=100&offset=0",
+      "status": "passed",
+      "total_count": 7989,
+      "returned_results": 100,
+      "first_result": {
+        "official_parcel_id": "CFS-PARCEL-0149721050",
+        "flood_severity_class": "severe",
+        "flood_constraint_score": 100.0,
+        "percent_parcel_constrained": 100.0
+      }
+    },
+    "frontend_toggle": {
+      "status": "passed",
+      "observed_text": "Showing 100 flood review parcels",
+      "observed_counts": {
+        "severe": 100,
+        "high": 0,
+        "moderate": 0
+      },
+      "legend_text_visible": true
+    },
+    "marker_click_visual_test": {
+      "status": "partially_verified",
+      "reason": "The in-app browser viewport was only 319px wide and exposed the right panel reliably, but not a usable SceneView marker target for a canvas click. The click handler code path was implemented and inspected, and the layer rendered markers from the live API.",
+      "manual_follow_up": "Open the app in a wider browser window, toggle Flood Constraints, and click a marker to verify the custom flood info card appears next to the standard selected parcel flow."
+    }
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "build_note": "The first build attempts timed out while the Next dev server was also running. After stopping the dev server, npm run build -- --webpack completed successfully, and the dev server was restarted."
+  },
+  "remaining_flood_ui_gaps": [
+    "Manual wide-viewport marker click verification should be performed in the visible app.",
+    "Flood layer filters can later expose severity/buildability controls.",
+    "Selected parcel flood geometry display remains future work.",
+    "Flood constraints are still rendered as high-review markers, not parcel polygon flood overlays."
+  ]
+}

@@ -8,6 +8,8 @@ import type Point from "@arcgis/core/geometry/Point";
 import type Polygon from "@arcgis/core/geometry/Polygon";
 import type SceneLayer from "@arcgis/core/layers/SceneLayer";
 import type SceneView from "@arcgis/core/views/SceneView";
+import type * as ArcGISReactiveUtils from "@arcgis/core/core/reactiveUtils";
+import type * as ArcGISWebMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils";
 
 export interface ArcGISRuntime {
   Extent: typeof Extent;
@@ -18,8 +20,10 @@ export interface ArcGISRuntime {
   MapImageLayer: typeof MapImageLayer;
   Point: typeof Point;
   Polygon: typeof Polygon;
+  reactiveUtils: typeof ArcGISReactiveUtils;
   SceneLayer: typeof SceneLayer;
   SceneView: typeof SceneView;
+  webMercatorUtils: typeof ArcGISWebMercatorUtils;
 }
 
 export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
@@ -34,6 +38,8 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     { default: Point },
     { default: Polygon },
     { default: Extent },
+    reactiveUtils,
+    webMercatorUtils,
   ] = await Promise.all([
     import("@arcgis/core/Map.js"),
     import("@arcgis/core/views/SceneView.js"),
@@ -45,6 +51,8 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     import("@arcgis/core/geometry/Point.js"),
     import("@arcgis/core/geometry/Polygon.js"),
     import("@arcgis/core/geometry/Extent.js"),
+    import("@arcgis/core/core/reactiveUtils.js"),
+    import("@arcgis/core/geometry/support/webMercatorUtils.js"),
   ]);
 
   return {
@@ -56,7 +64,9 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     MapImageLayer,
     Point,
     Polygon,
+    reactiveUtils,
     SceneLayer,
     SceneView,
+    webMercatorUtils,
   };
 }

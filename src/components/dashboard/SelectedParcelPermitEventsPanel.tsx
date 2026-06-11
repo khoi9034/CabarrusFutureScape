@@ -8,7 +8,7 @@ import {
   formatDevelopmentLabel,
 } from "@/data/intelligence/developmentActivityMetrics";
 import { useSelectedParcelPermitEvents } from "@/hooks/useSelectedParcelPermitEvents";
-import type { DevelopmentPanelSource } from "@/lib/adapters/developmentActivitySummaryAdapter";
+import type { SelectedParcelPanelSource } from "@/lib/adapters/selectedParcelDevelopmentActivityAdapter";
 import { cn } from "@/lib/utils";
 import type { DevelopmentParcelPermitEvent } from "@/types/api";
 
@@ -16,11 +16,12 @@ interface SelectedParcelPermitEventsPanelProps {
   officialParcelId: string | null | undefined;
 }
 
-const sourceLabels: Record<DevelopmentPanelSource, string> = {
+const sourceLabels: Record<SelectedParcelPanelSource, string> = {
   api: "FastAPI",
   fallback: "Unavailable",
   loading: "Loading API",
   static: "API off",
+  waiting: "Waiting",
 };
 
 function formatPermitAmount(value: number | null) {
@@ -44,7 +45,9 @@ export function SelectedParcelPermitEventsPanel({
         ? "The permit event API is unavailable. No static permit-event records are shown."
         : source === "loading"
           ? "Loading selected parcel permit events from FastAPI."
-          : "Permit event records require backend API mode; static fallback does not fabricate permit rows.";
+          : source === "waiting"
+            ? "Waiting for parcel selection."
+            : "Permit event records require backend API mode; static fallback does not fabricate permit rows.";
 
   return (
     <section
@@ -68,6 +71,8 @@ export function SelectedParcelPermitEventsPanel({
                 ? "border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-100"
                 : source === "fallback"
                   ? "border-amber-300/25 bg-amber-300/[0.08] text-amber-100"
+                  : source === "waiting"
+                    ? "border-white/10 bg-white/[0.04] text-slate-300"
                   : "border-sky-300/20 bg-sky-300/[0.055] text-sky-100",
             )}
           >
@@ -79,7 +84,7 @@ export function SelectedParcelPermitEventsPanel({
 
       {!hasSelectedParcel ? (
         <p className="mt-4 rounded-md border border-white/10 bg-white/[0.035] p-3 text-xs leading-5 text-slate-400">
-          Select a parcel to view its latest Real Property Permit events.
+          Waiting for parcel selection.
         </p>
       ) : permits.length > 0 ? (
         <div className="mt-4 space-y-2">
@@ -97,8 +102,12 @@ export function SelectedParcelPermitEventsPanel({
       )}
 
       <p className="mt-3 text-[11px] leading-5 text-slate-500">
-        {sourceDescription} Showing {formatDevelopmentCount(permits.length)} of{" "}
-        {formatDevelopmentCount(totalCount)} events.
+        {sourceDescription}
+        {hasSelectedParcel
+          ? ` Showing ${formatDevelopmentCount(
+              permits.length,
+            )} of ${formatDevelopmentCount(totalCount)} events.`
+          : null}
       </p>
       {isLoading ? (
         <p className="mt-2 text-[11px] uppercase text-slate-500">
@@ -152,7 +161,25 @@ function PermitEventRow({ permit }: { permit: DevelopmentParcelPermitEvent }) {
           value={formatDevelopmentLabel(permit.permit_status)}
         />
       </div>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <PermitSegmentBadge value={permit.permit_segment} />
+        <PermitSegmentBadge value={permit.permit_growth_signal} />
+        <PermitSegmentBadge value={permit.permit_status_stage} />
+        <PermitSegmentBadge value={permit.permit_value_class} />
+      </div>
     </article>
+  );
+}
+
+function PermitSegmentBadge({ value }: { value: string | null }) {
+  if (!value || value === "unknown") {
+    return null;
+  }
+
+  return (
+    <span className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/[0.07] px-1.5 py-1 text-[10px] font-semibold uppercase text-[#a7efff]">
+      {formatDevelopmentLabel(value)}
+    </span>
   );
 }
 

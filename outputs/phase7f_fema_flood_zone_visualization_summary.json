@@ -1,0 +1,127 @@
+{
+  "phase": "Phase 7F",
+  "name": "FEMA Flood Zone Polygon Visualization Layer",
+  "status": "completed",
+  "backend": {
+    "endpoint_added": "GET /constraints/flood/zones",
+    "source_table": "public.fema_nfhl_flood_zones_clean",
+    "source_role": "authoritative FEMA NFHL Layer 28 source polygon visualization",
+    "parameters_supported": [
+      "flood_severity_class",
+      "flood_constraint_type",
+      "extent",
+      "limit",
+      "offset"
+    ],
+    "performance_strategy": [
+      "Default response is capped at 500 polygons.",
+      "Limit values above 1000 are clamped to 1000.",
+      "limit=0 is accepted only with an extent and returns all matching visible-extent polygons.",
+      "Extent filtering uses WGS84 xmin,ymin,xmax,ymax and PostGIS ST_MakeEnvelope/ST_Intersects."
+    ],
+    "example_validation": {
+      "url": "http://127.0.0.1:8000/constraints/flood/zones?flood_severity_class=severe&limit=1",
+      "status": 200,
+      "severe_total_count": 283,
+      "geometry_returned": true
+    }
+  },
+  "frontend": {
+    "layer_registry_row": "FEMA Flood Zones",
+    "category": "Risk",
+    "description": "Official FEMA NFHL Layer 28 polygons",
+    "sceneview_layer_id": "cfs-fema-flood-zones-layer",
+    "hook_added": "src/hooks/useFloodZoneLayer.ts",
+    "adapter_added": "src/lib/adapters/floodZoneMapAdapter.ts",
+    "types_added": "src/types/map/floodZones.ts",
+    "api_types_added": "src/types/api/constraints.ts",
+    "api_client_method": "getFloodZones()",
+    "controls": {
+      "severity": [
+        "all",
+        "severe",
+        "high",
+        "moderate"
+      ],
+      "limit": [
+        "100",
+        "500",
+        "visible_extent"
+      ]
+    },
+    "styling": {
+      "severe_floodway": "transparent red fill with red outline",
+      "high_sfha": "transparent orange fill with orange outline",
+      "moderate": "transparent yellow fill with yellow outline",
+      "minimal_low": "very light blue-gray context styling"
+    },
+    "interaction": [
+      "FEMA polygons show an informational zone card on click.",
+      "FEMA polygon clicks do not select parcels automatically.",
+      "Flood Constraints parcel markers remain the parcel-focused review workflow."
+    ],
+    "smoke_test": {
+      "local_url": "http://localhost:3000",
+      "layer_row_visible": true,
+      "toggle_result": "SHOWING 500 FEMA POLYGONS",
+      "false_service_url_warning_fixed": true
+    }
+  },
+  "files_changed": {
+    "backend": [
+      "backend/app/repositories/constraints_repository.py",
+      "backend/app/services/constraints_service.py",
+      "backend/app/schemas/constraints.py",
+      "backend/app/schemas/__init__.py",
+      "backend/app/routers/constraints_router.py",
+      "backend/tests/test_flood_constraints.py",
+      "backend/README.md"
+    ],
+    "frontend": [
+      "src/lib/api/constraints.ts",
+      "src/types/api/constraints.ts",
+      "src/types/map/floodZones.ts",
+      "src/lib/adapters/floodZoneMapAdapter.ts",
+      "src/hooks/useFloodZoneLayer.ts",
+      "src/hooks/useDashboardState.tsx",
+      "src/data/mock/layersMockData.ts",
+      "src/components/dashboard/LayerToggle.tsx",
+      "src/lib/gis/arcgisRuntime.ts",
+      "src/lib/gis/layerFactory.ts",
+      "src/types/index.ts",
+      "src/components/gis/SceneViewContainer.tsx"
+    ],
+    "docs": [
+      "README.md",
+      "docs/backend/flood_constraint_api_contract.md",
+      "docs/backend/flood_constraint_data_dictionary.md",
+      "docs/backend/flood_constraint_response_examples.md"
+    ]
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "130 passed, 2 warnings"
+  },
+  "local_runtime": {
+    "backend": "http://127.0.0.1:8000",
+    "frontend": "http://localhost:3000",
+    "backend_health": "ok",
+    "flood_zones_endpoint": "ok"
+  },
+  "preserved_behavior": [
+    "Existing Flood Constraints high-review parcel markers remain separate.",
+    "Development Hotspots remain separate.",
+    "Selected parcel focus and boundary highlight remain separate.",
+    "No PostGIS schema changes were made.",
+    "No forecasting or school constraint work was added."
+  ],
+  "remaining_flood_ui_improvements": [
+    "Viewport-driven refresh polish for visible-extent mode.",
+    "Optional simplified FEMA polygon map view if dense geometry becomes heavy.",
+    "Additional flood zone presets beyond severity.",
+    "Optional selected parcel flood-zone geometry comparison against the source layer."
+  ]
+}

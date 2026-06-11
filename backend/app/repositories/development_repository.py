@@ -7,7 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.models import (
     DevelopmentActivityParcelSummary,
+    ParcelPermitSegmentSummary,
     ParcelEnriched,
+    PermitIntelligenceSegment,
     RealPropertyPermitParcelRelationship,
 )
 
@@ -107,9 +109,18 @@ class DevelopmentTrendsRecord:
 @dataclass(frozen=True)
 class DevelopmentHotspotsFilters:
     activity_class: str | None = None
+    date_end: date | None = None
+    date_start: date | None = None
+    development_domain: str | None = None
+    growth_signal: str | None = None
+    month: int | None = None
     official_parcel_id: str | None = None
+    permit_segment: str | None = None
+    permit_status_stage: str | None = None
     permit_type: str | None = None
+    permit_value_class: str | None = None
     recent_window: int | None = None
+    rolling_window: int | None = None
     work_type: str | None = None
     year: int | None = None
     zoning_category: str | None = None
@@ -143,6 +154,22 @@ class DevelopmentHotspotRecord:
     development_activity_score: Decimal | None
     development_activity_class: str | None
     has_unmatched_or_ambiguous_permit_flag: bool | None
+    residential_growth_permits: int | None
+    commercial_activity_permits: int | None
+    industrial_activity_permits: int | None
+    institutional_activity_permits: int | None
+    redevelopment_signal_permits: int | None
+    minor_maintenance_permits: int | None
+    demolition_permits: int | None
+    active_construction_permits: int | None
+    completed_permits: int | None
+    high_value_permits: int | None
+    major_value_permits: int | None
+    dominant_permit_segment: str | None
+    dominant_growth_signal: str | None
+    permit_signal_score_max: Decimal | None
+    permit_signal_score_avg: Decimal | None
+    current_activity_status: str | None
     centroid_longitude: float | None
     centroid_latitude: float | None
     geometry_available: bool | None
@@ -330,6 +357,12 @@ class DevelopmentParcelPermitEventRecord:
     permit_number: str | None
     permit_status: str | None
     permit_type: str | None
+    permit_segment: str | None
+    permit_growth_signal: str | None
+    development_domain: str | None
+    permit_status_stage: str | None
+    permit_value_class: str | None
+    permit_signal_score: Decimal | None
     relationship_confidence: str | None
     work_type: str | None
 
@@ -345,6 +378,52 @@ class DevelopmentParcelPermitEventsPage:
 class DevelopmentLookupRecord:
     count: int
     value: str
+
+
+@dataclass(frozen=True)
+class PermitSegmentStatisticsRecord:
+    total_permits: int
+    by_development_domain: list[DevelopmentLookupRecord]
+    by_permit_growth_signal: list[DevelopmentLookupRecord]
+    by_permit_segment: list[DevelopmentLookupRecord]
+    by_permit_status_stage: list[DevelopmentLookupRecord]
+    by_permit_value_class: list[DevelopmentLookupRecord]
+
+
+@dataclass(frozen=True)
+class ParcelPermitSegmentSummaryRecord:
+    official_parcel_id: str
+    pin14: str | None
+    total_permits: int | None
+    residential_growth_permits: int | None
+    commercial_activity_permits: int | None
+    industrial_activity_permits: int | None
+    institutional_activity_permits: int | None
+    redevelopment_signal_permits: int | None
+    minor_maintenance_permits: int | None
+    demolition_permits: int | None
+    active_construction_permits: int | None
+    completed_permits: int | None
+    high_value_permits: int | None
+    major_value_permits: int | None
+    total_permit_amount: Decimal | None
+    latest_permit_date: date | None
+    first_permit_date: date | None
+    active_year_count: int | None
+    dominant_permit_segment: str | None
+    dominant_growth_signal: str | None
+    permit_signal_score_max: Decimal | None
+    permit_signal_score_avg: Decimal | None
+    current_activity_status: str | None
+
+
+@dataclass(frozen=True)
+class PermitSegmentOptionsRecord:
+    development_domains: list[DevelopmentLookupRecord]
+    growth_signals: list[DevelopmentLookupRecord]
+    permit_segments: list[DevelopmentLookupRecord]
+    status_stages: list[DevelopmentLookupRecord]
+    value_classes: list[DevelopmentLookupRecord]
 
 
 class DevelopmentRepository:
@@ -517,6 +596,36 @@ class DevelopmentRepository:
             relationship_predicates.append(
                 RealPropertyPermitParcelRelationship.activity_year == filters.year,
             )
+        if filters.month is not None:
+            relationship_predicates.append(
+                RealPropertyPermitParcelRelationship.activity_month == filters.month,
+            )
+        if filters.date_start is not None:
+            relationship_predicates.append(
+                RealPropertyPermitParcelRelationship.activity_date
+                >= filters.date_start,
+            )
+        if filters.date_end is not None:
+            relationship_predicates.append(
+                RealPropertyPermitParcelRelationship.activity_date <= filters.date_end,
+            )
+        if filters.rolling_window is not None:
+            rolling_end = self.db.execute(
+                select(
+                    func.max(RealPropertyPermitParcelRelationship.activity_date),
+                ).select_from(RealPropertyPermitParcelRelationship),
+            ).scalar_one()
+            if rolling_end is None:
+                relationship_predicates.append(literal(False))
+            else:
+                relationship_predicates.extend(
+                    [
+                        RealPropertyPermitParcelRelationship.activity_date
+                        >= subtract_months(rolling_end, filters.rolling_window),
+                        RealPropertyPermitParcelRelationship.activity_date
+                        <= rolling_end,
+                    ],
+                )
         if filters.permit_type:
             relationship_predicates.append(
                 func.lower(RealPropertyPermitParcelRelationship.permit_type)
@@ -526,6 +635,50 @@ class DevelopmentRepository:
             relationship_predicates.append(
                 func.lower(RealPropertyPermitParcelRelationship.work_type)
                 == filters.work_type.lower(),
+            )
+
+        segment_predicates = [
+            RealPropertyPermitParcelRelationship.official_parcel_id
+            == DevelopmentActivityParcelSummary.official_parcel_id,
+            RealPropertyPermitParcelRelationship.permit_id
+            == PermitIntelligenceSegment.permit_id,
+        ]
+        if filters.permit_segment:
+            segment_predicates.append(
+                func.lower(PermitIntelligenceSegment.permit_segment)
+                == filters.permit_segment.lower(),
+            )
+        if filters.growth_signal:
+            segment_predicates.append(
+                func.lower(PermitIntelligenceSegment.permit_growth_signal)
+                == filters.growth_signal.lower(),
+            )
+        if filters.permit_status_stage:
+            segment_predicates.append(
+                func.lower(PermitIntelligenceSegment.permit_status_stage)
+                == filters.permit_status_stage.lower(),
+            )
+        if filters.permit_value_class:
+            segment_predicates.append(
+                func.lower(PermitIntelligenceSegment.permit_value_class)
+                == filters.permit_value_class.lower(),
+            )
+        if filters.development_domain:
+            segment_predicates.append(
+                func.lower(PermitIntelligenceSegment.development_domain)
+                == filters.development_domain.lower(),
+            )
+        if len(segment_predicates) > 2:
+            predicates.append(
+                select(1)
+                .select_from(RealPropertyPermitParcelRelationship)
+                .join(
+                    PermitIntelligenceSegment,
+                    RealPropertyPermitParcelRelationship.permit_id
+                    == PermitIntelligenceSegment.permit_id,
+                )
+                .where(and_(*segment_predicates))
+                .exists(),
             )
 
         if len(relationship_predicates) > 2:
@@ -1065,6 +1218,10 @@ class DevelopmentRepository:
             ParcelEnriched.__table__,
             ParcelEnriched.official_parcel_id
             == DevelopmentActivityParcelSummary.official_parcel_id,
+        ).outerjoin(
+            ParcelPermitSegmentSummary.__table__,
+            ParcelPermitSegmentSummary.official_parcel_id
+            == DevelopmentActivityParcelSummary.official_parcel_id,
         )
         parcel_geometry = literal_column("public.parcels_enriched.geometry")
         focus_point = func.ST_PointOnSurface(parcel_geometry)
@@ -1116,6 +1273,22 @@ class DevelopmentRepository:
                 DevelopmentActivityParcelSummary.development_activity_score,
                 DevelopmentActivityParcelSummary.development_activity_class,
                 DevelopmentActivityParcelSummary.has_unmatched_or_ambiguous_permit_flag,
+                ParcelPermitSegmentSummary.residential_growth_permits,
+                ParcelPermitSegmentSummary.commercial_activity_permits,
+                ParcelPermitSegmentSummary.industrial_activity_permits,
+                ParcelPermitSegmentSummary.institutional_activity_permits,
+                ParcelPermitSegmentSummary.redevelopment_signal_permits,
+                ParcelPermitSegmentSummary.minor_maintenance_permits,
+                ParcelPermitSegmentSummary.demolition_permits,
+                ParcelPermitSegmentSummary.active_construction_permits,
+                ParcelPermitSegmentSummary.completed_permits,
+                ParcelPermitSegmentSummary.high_value_permits,
+                ParcelPermitSegmentSummary.major_value_permits,
+                ParcelPermitSegmentSummary.dominant_permit_segment,
+                ParcelPermitSegmentSummary.dominant_growth_signal,
+                ParcelPermitSegmentSummary.permit_signal_score_max,
+                ParcelPermitSegmentSummary.permit_signal_score_avg,
+                ParcelPermitSegmentSummary.current_activity_status,
                 func.ST_X(focus_point).label("centroid_longitude"),
                 func.ST_Y(focus_point).label("centroid_latitude"),
                 geometry_available.label("geometry_available"),
@@ -1805,9 +1978,21 @@ class DevelopmentRepository:
                 RealPropertyPermitParcelRelationship.work_type,
                 RealPropertyPermitParcelRelationship.permit_status,
                 RealPropertyPermitParcelRelationship.permit_amount,
+                PermitIntelligenceSegment.permit_segment,
+                PermitIntelligenceSegment.permit_growth_signal,
+                PermitIntelligenceSegment.development_domain,
+                PermitIntelligenceSegment.permit_status_stage,
+                PermitIntelligenceSegment.permit_value_class,
+                PermitIntelligenceSegment.permit_signal_score,
                 RealPropertyPermitParcelRelationship.relationship_confidence,
             )
-            .select_from(RealPropertyPermitParcelRelationship)
+            .select_from(
+                RealPropertyPermitParcelRelationship.__table__.outerjoin(
+                    PermitIntelligenceSegment.__table__,
+                    RealPropertyPermitParcelRelationship.permit_id
+                    == PermitIntelligenceSegment.permit_id,
+                ),
+            )
             .where(where_clause)
             .order_by(*order_by)
             .limit(limit)
@@ -1824,6 +2009,89 @@ class DevelopmentRepository:
             total_count=total_count or 0,
         )
 
+    def get_permit_segment_statistics(self) -> PermitSegmentStatisticsRecord:
+        total_permits = self.db.execute(
+            select(func.count(func.distinct(PermitIntelligenceSegment.permit_id)))
+            .select_from(PermitIntelligenceSegment),
+        ).scalar_one()
+
+        return PermitSegmentStatisticsRecord(
+            total_permits=total_permits or 0,
+            by_development_domain=self._permit_segment_lookup(
+                PermitIntelligenceSegment.development_domain,
+            ),
+            by_permit_growth_signal=self._permit_segment_lookup(
+                PermitIntelligenceSegment.permit_growth_signal,
+            ),
+            by_permit_segment=self._permit_segment_lookup(
+                PermitIntelligenceSegment.permit_segment,
+            ),
+            by_permit_status_stage=self._permit_segment_lookup(
+                PermitIntelligenceSegment.permit_status_stage,
+            ),
+            by_permit_value_class=self._permit_segment_lookup(
+                PermitIntelligenceSegment.permit_value_class,
+            ),
+        )
+
+    def get_parcel_permit_segment_summary(
+        self,
+        official_parcel_id: str,
+    ) -> ParcelPermitSegmentSummaryRecord | None:
+        row = self.db.execute(
+            select(
+                ParcelPermitSegmentSummary.official_parcel_id,
+                ParcelPermitSegmentSummary.pin14,
+                ParcelPermitSegmentSummary.total_permits,
+                ParcelPermitSegmentSummary.residential_growth_permits,
+                ParcelPermitSegmentSummary.commercial_activity_permits,
+                ParcelPermitSegmentSummary.industrial_activity_permits,
+                ParcelPermitSegmentSummary.institutional_activity_permits,
+                ParcelPermitSegmentSummary.redevelopment_signal_permits,
+                ParcelPermitSegmentSummary.minor_maintenance_permits,
+                ParcelPermitSegmentSummary.demolition_permits,
+                ParcelPermitSegmentSummary.active_construction_permits,
+                ParcelPermitSegmentSummary.completed_permits,
+                ParcelPermitSegmentSummary.high_value_permits,
+                ParcelPermitSegmentSummary.major_value_permits,
+                ParcelPermitSegmentSummary.total_permit_amount,
+                ParcelPermitSegmentSummary.latest_permit_date,
+                ParcelPermitSegmentSummary.first_permit_date,
+                ParcelPermitSegmentSummary.active_year_count,
+                ParcelPermitSegmentSummary.dominant_permit_segment,
+                ParcelPermitSegmentSummary.dominant_growth_signal,
+                ParcelPermitSegmentSummary.permit_signal_score_max,
+                ParcelPermitSegmentSummary.permit_signal_score_avg,
+                ParcelPermitSegmentSummary.current_activity_status,
+            )
+            .select_from(ParcelPermitSegmentSummary)
+            .where(
+                func.lower(ParcelPermitSegmentSummary.official_parcel_id)
+                == official_parcel_id.lower(),
+            ),
+        ).mappings().first()
+
+        return ParcelPermitSegmentSummaryRecord(**row) if row else None
+
+    def get_permit_segment_options(self) -> PermitSegmentOptionsRecord:
+        return PermitSegmentOptionsRecord(
+            development_domains=self._permit_segment_lookup(
+                PermitIntelligenceSegment.development_domain,
+            ),
+            growth_signals=self._permit_segment_lookup(
+                PermitIntelligenceSegment.permit_growth_signal,
+            ),
+            permit_segments=self._permit_segment_lookup(
+                PermitIntelligenceSegment.permit_segment,
+            ),
+            status_stages=self._permit_segment_lookup(
+                PermitIntelligenceSegment.permit_status_stage,
+            ),
+            value_classes=self._permit_segment_lookup(
+                PermitIntelligenceSegment.permit_value_class,
+            ),
+        )
+
     def _relationship_lookup(self, column) -> list[DevelopmentLookupRecord]:
         value_label = func.btrim(column).label("value")
         count_label = func.count(
@@ -1832,6 +2100,23 @@ class DevelopmentRepository:
         statement = (
             select(value_label, count_label)
             .select_from(RealPropertyPermitParcelRelationship)
+            .where(column.is_not(None), func.btrim(column) != "")
+            .group_by(value_label)
+            .order_by(count_label.desc(), value_label)
+        )
+        return [
+            DevelopmentLookupRecord(count=row["count"], value=row["value"])
+            for row in self.db.execute(statement).mappings().all()
+        ]
+
+    def _permit_segment_lookup(self, column) -> list[DevelopmentLookupRecord]:
+        value_label = func.btrim(column).label("value")
+        count_label = func.count(
+            func.distinct(PermitIntelligenceSegment.permit_id),
+        ).label("count")
+        statement = (
+            select(value_label, count_label)
+            .select_from(PermitIntelligenceSegment)
             .where(column.is_not(None), func.btrim(column) != "")
             .group_by(value_label)
             .order_by(count_label.desc(), value_label)

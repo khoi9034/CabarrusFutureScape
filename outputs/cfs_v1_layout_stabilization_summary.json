@@ -1,0 +1,86 @@
+{
+  "phase": "CFS V1 Layout Stabilization and Executive UI Repair",
+  "status": "completed",
+  "scope": "UI/layout stabilization only",
+  "top_nav_fixes": [
+    "Converted TopNav to a fixed 64px single-row layout.",
+    "Removed flex wrapping that allowed status chips to spill into the workspace.",
+    "Kept the CFS identity, product mode switch, command search, scene status, API status, and More control as the primary visible nav elements.",
+    "Moved role, workspace, scenario, and secondary status details into a compact absolute More popover.",
+    "Kept product modes compact with icon-first labels that expand on wider viewports."
+  ],
+  "floating_chip_fix": {
+    "status": "fixed",
+    "change": "Removed selected parcel status from TopNav.",
+    "reason": "Selected parcel state is already visible in the map Active Selection card and right Intelligence Panel, where it does not float or wrap into the map area."
+  },
+  "right_panel_fixes": [
+    "Changed the right rail title to the stable short label Intelligence.",
+    "Removed awkward title truncation from the main right panel header.",
+    "Reduced panel padding and shortened overview and due-diligence helper copy.",
+    "Kept API/static state as a subtle one-line badge."
+  ],
+  "left_panel_cleanup": [
+    "Renamed the left rail from Explore / Layers / Site Sourcing to Explore / Map Layers.",
+    "Shortened the search card to Find parcels.",
+    "Renamed the layer registry heading to Active Overlays.",
+    "Replaced the long Development, constraints, and context heading with compact layer language.",
+    "Reduced left rail card padding and collapsed explanatory copy."
+  ],
+  "map_viewport_improvements": [
+    "Reduced overview left rail width from 340px max to 304px.",
+    "Reduced overview intelligence rail width from 380px max to 356px.",
+    "Reduced due-diligence intelligence rail width from 460px max to 412px.",
+    "Adjusted AppShell grid padding and top divider to align with the new 64px nav.",
+    "Desktop smoke test at 1440px showed a 732px map width with 304px left rail and 356px right rail."
+  ],
+  "visual_noise_reduction": [
+    "Removed the top-nav selected parcel chip.",
+    "Collapsed lower-priority controls into More.",
+    "Reduced repeated API wording in the right panel header.",
+    "Shortened left rail descriptions and layer section titles.",
+    "Kept legends inside layer controls instead of adding another visible legend surface."
+  ],
+  "preserved_functionality": [
+    "Parcel search",
+    "Selected parcel card",
+    "Parcel map focus",
+    "3D parcel cage highlight",
+    "Selected parcel permit events",
+    "Development Hotspots layer controls",
+    "Flood Constraints layer controls",
+    "FEMA Flood Zones layer controls",
+    "Executive Print mode",
+    "FastAPI/static fallback behavior"
+  ],
+  "files_changed": [
+    "C:/CabarrusFutureScape/src/components/layout/TopNav.tsx",
+    "C:/CabarrusFutureScape/src/components/layout/AppShell.tsx",
+    "C:/CabarrusFutureScape/src/components/layout/Sidebar.tsx",
+    "C:/CabarrusFutureScape/src/components/dashboard/LayerToggle.tsx",
+    "C:/CabarrusFutureScape/src/components/dashboard/IntelligencePanel.tsx",
+    "C:/CabarrusFutureScape/outputs/cfs_v1_layout_stabilization_summary.json"
+  ],
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed"
+  },
+  "smoke_test": {
+    "url": "http://localhost:3000",
+    "dev_server_restarted": true,
+    "top_nav_fixed_height": "passed",
+    "no_parcel_not_in_top_nav": "passed",
+    "right_panel_title_readable": "passed",
+    "left_panel_compact_labels": "passed",
+    "desktop_three_column_layout": "passed",
+    "mode_switch_overview_due_diligence_print": "passed",
+    "more_menu_contains_role_workspace": "passed",
+    "note": "Use http://localhost:3000 for local Next dev. 127.0.0.1 can trigger Next dev-origin protection unless configured in allowedDevOrigins."
+  },
+  "remaining_ui_polish_items": [
+    "Layer detail cards are still feature-rich when expanded; future polish could add nested compact/advanced toggles per layer.",
+    "Parcel filter controls remain dense in Overview when API data is loaded; future polish could collapse advanced filters by default.",
+    "A screenshot-based visual QA pass would help tune exact rail balance after stakeholder review."
+  ]
+}

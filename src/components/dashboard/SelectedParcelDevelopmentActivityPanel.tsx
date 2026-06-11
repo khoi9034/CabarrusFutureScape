@@ -15,18 +15,20 @@ import {
   formatDevelopmentLabel,
 } from "@/data/intelligence/developmentActivityMetrics";
 import { useSelectedParcelDevelopmentActivity } from "@/hooks/useSelectedParcelDevelopmentActivity";
-import type { DevelopmentPanelSource } from "@/lib/adapters/developmentActivitySummaryAdapter";
+import { useSelectedParcelPermitSegments } from "@/hooks/useSelectedParcelPermitSegments";
+import type { SelectedParcelPanelSource } from "@/lib/adapters/selectedParcelDevelopmentActivityAdapter";
 import { cn } from "@/lib/utils";
 
 interface SelectedParcelDevelopmentActivityPanelProps {
   officialParcelId: string | null | undefined;
 }
 
-const sourceLabels: Record<DevelopmentPanelSource, string> = {
+const sourceLabels: Record<SelectedParcelPanelSource, string> = {
   api: "FastAPI",
   fallback: "Static fallback",
   loading: "Loading API",
   static: "Static",
+  waiting: "Waiting",
 };
 
 function yearFromDate(value: string | null | undefined) {
@@ -42,6 +44,8 @@ export function SelectedParcelDevelopmentActivityPanel({
 }: SelectedParcelDevelopmentActivityPanelProps) {
   const { activity, errorMessage, isLoading, source } =
     useSelectedParcelDevelopmentActivity(officialParcelId);
+  const permitSegments = useSelectedParcelPermitSegments(officialParcelId);
+  const segmentSummary = permitSegments.summary;
   const hasSelectedParcel = Boolean(officialParcelId);
   const sourceDescription =
     source === "api"
@@ -50,7 +54,9 @@ export function SelectedParcelDevelopmentActivityPanel({
         ? "FastAPI selected parcel activity is unavailable, so this panel is using generated static activity artifacts when the selected parcel appears there."
         : source === "loading"
           ? "Checking FastAPI for selected parcel development activity."
-          : "Selected parcel development activity uses generated static artifacts.";
+          : source === "waiting"
+            ? "Waiting for parcel selection."
+            : "Selected parcel development activity uses generated static artifacts.";
 
   return (
     <section
@@ -74,6 +80,8 @@ export function SelectedParcelDevelopmentActivityPanel({
                 ? "border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-100"
                 : source === "fallback"
                   ? "border-amber-300/25 bg-amber-300/[0.08] text-amber-100"
+                  : source === "waiting"
+                    ? "border-white/10 bg-white/[0.04] text-slate-300"
                   : "border-sky-300/20 bg-sky-300/[0.055] text-sky-100",
             )}
           >
@@ -85,7 +93,7 @@ export function SelectedParcelDevelopmentActivityPanel({
 
       {!hasSelectedParcel ? (
         <p className="mt-4 rounded-md border border-white/10 bg-white/[0.035] p-3 text-xs leading-5 text-slate-400">
-          Select a parcel to view matched Real Property Permit activity.
+          Waiting for parcel selection.
         </p>
       ) : activity ? (
         <>
@@ -165,6 +173,75 @@ export function SelectedParcelDevelopmentActivityPanel({
               ? " with relationship QA flags present."
               : " with no unmatched or ambiguous permit relationship flag."}
           </p>
+
+          <div className="mt-3 rounded-md border border-[#55d38f]/15 bg-[#55d38f]/[0.045] p-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[10px] font-medium uppercase text-slate-500">
+                Segment Intelligence
+              </p>
+              <span className="rounded border border-white/10 bg-white/[0.035] px-1.5 py-0.5 text-[10px] uppercase text-slate-400">
+                {permitSegments.source === "api"
+                  ? "FastAPI"
+                  : permitSegments.source === "loading"
+                    ? "Loading"
+                    : permitSegments.source === "waiting"
+                      ? "Waiting"
+                      : "Unavailable"}
+              </span>
+            </div>
+            {segmentSummary ? (
+              <>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <TinyMetric
+                    label="Dominant Segment"
+                    value={formatDevelopmentLabel(
+                      segmentSummary.dominant_permit_segment,
+                    )}
+                  />
+                  <TinyMetric
+                    label="Growth Signal"
+                    value={formatDevelopmentLabel(
+                      segmentSummary.dominant_growth_signal,
+                    )}
+                  />
+                  <TinyMetric
+                    label="Active Construction"
+                    value={formatDevelopmentCount(
+                      segmentSummary.active_construction_permits,
+                    )}
+                  />
+                  <TinyMetric
+                    label="Redevelopment"
+                    value={formatDevelopmentCount(
+                      segmentSummary.redevelopment_signal_permits,
+                    )}
+                  />
+                  <TinyMetric
+                    label="High / Major Value"
+                    value={formatDevelopmentCount(
+                      segmentSummary.high_value_permits +
+                        segmentSummary.major_value_permits,
+                    )}
+                  />
+                  <TinyMetric
+                    label="Avg / Max Score"
+                    value={[
+                      segmentSummary.permit_signal_score_avg?.toFixed(1),
+                      segmentSummary.permit_signal_score_max?.toFixed(1),
+                    ]
+                      .filter(Boolean)
+                      .join(" / ") || "Unavailable"}
+                  />
+                </div>
+              </>
+            ) : (
+              <p className="mt-3 text-xs leading-5 text-slate-400">
+                {permitSegments.source === "loading"
+                  ? "Loading parcel permit segment summary."
+                  : "Permit segment summary is not available for this parcel."}
+              </p>
+            )}
+          </div>
         </>
       ) : (
         <p className="mt-4 rounded-md border border-white/10 bg-white/[0.035] p-3 text-xs leading-5 text-slate-400">

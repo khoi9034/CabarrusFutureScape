@@ -25,11 +25,20 @@ Local development CORS is enabled for the Next.js frontend on ports `3000`,
 `3001`, and `3003` via `CORS_ALLOWED_ORIGINS`. Production deployments should
 set explicit deployment origins only.
 
-OpenAPI docs:
+Useful local URLs:
 
 ```text
-http://127.0.0.1:8000/docs
+GET http://127.0.0.1:8000/
+GET http://127.0.0.1:8000/health
+GET http://127.0.0.1:8000/health/database
+OpenAPI docs: http://127.0.0.1:8000/docs
+OpenAPI JSON: http://127.0.0.1:8000/openapi.json
 ```
+
+The API root now returns a friendly status response with the service name,
+version, docs link, health links, and the major API groups. Use `/docs` for
+interactive endpoint exploration, `/health` for service health, and
+`/health/database` for PostGIS connectivity.
 
 ## Health Endpoints
 
@@ -721,6 +730,8 @@ GET http://127.0.0.1:8000/development/hotspots?zoning_jurisdiction=Concord
 GET http://127.0.0.1:8000/development/hotspots?official_parcel_id=CFS-PARCEL-0149726579&limit=1
 GET http://127.0.0.1:8000/development/hotspots?recent_window=1
 GET http://127.0.0.1:8000/development/hotspots?sort_by=total_permit_amount&limit=10
+GET http://127.0.0.1:8000/development/hotspots?permit_segment=residential_growth
+GET http://127.0.0.1:8000/development/hotspots?growth_signal=redevelopment_signal
 ```
 
 Supported filters:
@@ -731,6 +742,11 @@ Supported filters:
 - `zoning_category`
 - `permit_type`
 - `work_type`
+- `permit_segment`
+- `growth_signal`
+- `permit_status_stage`
+- `permit_value_class`
+- `development_domain`
 - `year`
 - `recent_window`: allowed values are `1` or `3`.
 - `limit`: default `20`, clamped to max `100`.
@@ -747,6 +763,12 @@ Supported `sort_by` values:
 No filters returns parcels with permit activity ordered by development activity
 score. Permit type, work type, and year filters are applied through the real
 permit-to-parcel relationship table while preserving one row per parcel.
+Permit segment, growth signal, status stage, value class, and development
+domain filters are applied through `public.permit_intelligence_segments` and
+the real permit-to-parcel relationship table. This lets hotspot maps focus on
+meaningful development signals such as residential growth, commercial activity,
+redevelopment, active construction, and high-value permit activity rather than
+raw permit count alone.
 Invalid `recent_window` or `sort_by` values return `422`. Empty filtered
 results return `200` with an empty `results` array.
 
@@ -790,9 +812,98 @@ Example response shape:
       "co_date_future_outlier_count": 0,
       "development_activity_score": 100.0,
       "development_activity_class": "very_high_activity",
-      "has_unmatched_or_ambiguous_permit_flag": false
+      "has_unmatched_or_ambiguous_permit_flag": false,
+      "residential_growth_permits": 73,
+      "commercial_activity_permits": 110,
+      "industrial_activity_permits": 0,
+      "institutional_activity_permits": 0,
+      "redevelopment_signal_permits": 57,
+      "minor_maintenance_permits": 5,
+      "demolition_permits": 27,
+      "active_construction_permits": 1,
+      "completed_permits": 68,
+      "high_value_permits": 96,
+      "major_value_permits": 20,
+      "dominant_permit_segment": "commercial_activity",
+      "dominant_growth_signal": "major_growth",
+      "permit_signal_score_max": 100.0,
+      "permit_signal_score_avg": 71.43,
+      "current_activity_status": "active_construction"
     }
   ]
+}
+```
+
+## Permit Intelligence Segment Endpoints
+
+```text
+GET /development/permit-segments/statistics
+GET /development/permit-segments/options
+GET /development/permit-segments/{official_parcel_id}
+```
+
+These endpoints expose descriptive permit segmentation from
+`public.permit_intelligence_segments` and
+`public.parcel_permit_segment_summary`. They do not train a model, return
+prediction probabilities, or modify PostGIS.
+
+Example requests:
+
+```text
+GET http://127.0.0.1:8000/development/permit-segments/statistics
+GET http://127.0.0.1:8000/development/permit-segments/options
+GET http://127.0.0.1:8000/development/permit-segments/CFS-PARCEL-0149726579
+```
+
+Statistics response fields:
+
+- `total_permits`
+- `by_permit_segment`
+- `by_permit_growth_signal`
+- `by_permit_status_stage`
+- `by_permit_value_class`
+- `by_development_domain`
+
+Selected parcel segment summary fields:
+
+- parcel identity: `official_parcel_id`, `pin14`
+- segment counts: residential, commercial, industrial, institutional,
+  redevelopment, minor maintenance, demolition
+- status/value counts: active construction, completed, high value, major value
+- permit amount and date range fields
+- `dominant_permit_segment`
+- `dominant_growth_signal`
+- `permit_signal_score_max`
+- `permit_signal_score_avg`
+- `current_activity_status`
+
+Example selected parcel segment response shape:
+
+```json
+{
+  "official_parcel_id": "CFS-PARCEL-0149726579",
+  "pin14": "45896367300000",
+  "total_permits": 286,
+  "residential_growth_permits": 73,
+  "commercial_activity_permits": 110,
+  "industrial_activity_permits": 0,
+  "institutional_activity_permits": 0,
+  "redevelopment_signal_permits": 57,
+  "minor_maintenance_permits": 5,
+  "demolition_permits": 27,
+  "active_construction_permits": 1,
+  "completed_permits": 68,
+  "high_value_permits": 96,
+  "major_value_permits": 20,
+  "total_permit_amount": 61926619.0,
+  "latest_permit_date": "2025-10-22",
+  "first_permit_date": "2000-08-02",
+  "active_year_count": 19,
+  "dominant_permit_segment": "commercial_activity",
+  "dominant_growth_signal": "major_growth",
+  "permit_signal_score_max": 100.0,
+  "permit_signal_score_avg": 71.43,
+  "current_activity_status": "active_construction"
 }
 ```
 
@@ -817,6 +928,9 @@ Query parameters:
 
 This endpoint reads from `public.real_property_permit_parcel_relationship`,
 which is the current authoritative permit-to-parcel relationship layer for CFS.
+It left-joins `public.permit_intelligence_segments` so each event can carry
+the segment, growth signal, status stage, value class, development domain, and
+descriptive signal score used by the selected parcel permit event badges.
 It does not use the old 2015 `permit_activity_clean` pilot table and does not
 write to PostGIS.
 
@@ -839,7 +953,13 @@ Example response shape:
       "work_type": "commercial_upfit",
       "permit_status": "closed",
       "permit_amount": 125000.0,
-      "relationship_confidence": "high"
+      "relationship_confidence": "high",
+      "permit_segment": "commercial_activity",
+      "permit_growth_signal": "moderate_activity",
+      "development_domain": "commercial",
+      "permit_status_stage": "completed",
+      "permit_value_class": "standard_value",
+      "permit_signal_score": 42.0
     }
   ]
 }
@@ -1207,6 +1327,102 @@ Current option counts:
 - Work types: `50`
 - Jurisdictions: `7`
 - Activity classes: `5`
+
+## Flood Constraint Endpoints
+
+```text
+GET /constraints/flood/statistics
+GET /constraints/flood/{official_parcel_id}
+GET /constraints/flood/filter
+GET /constraints/flood/high-review
+GET /constraints/flood/summary
+GET /constraints/flood/zones
+```
+
+These endpoints expose read-only FEMA NFHL Layer 28 parcel flood constraint
+intelligence from `public.parcel_flood_constraint_overlay` and source polygon
+visualization from `public.fema_nfhl_flood_zones_clean`.
+
+Supported filters:
+
+- `floodplain_present`
+- `floodway_present`
+- `sfha_present`
+- `moderate_flood_present`
+- `flood_review_required`
+- `buildability_impact`
+- `flood_severity_class`
+- `dominant_flood_zone`
+- `percent_constrained_min`
+- `percent_constrained_max`
+- `limit` and `offset` on paginated endpoints
+
+Examples:
+
+```text
+GET http://127.0.0.1:8000/constraints/flood/statistics
+GET http://127.0.0.1:8000/constraints/flood/CFS-PARCEL-0149776628
+GET http://127.0.0.1:8000/constraints/flood/filter?floodway_present=true&limit=10
+GET http://127.0.0.1:8000/constraints/flood/high-review?limit=10
+GET http://127.0.0.1:8000/constraints/flood/summary
+GET http://127.0.0.1:8000/constraints/flood/zones?flood_severity_class=severe&limit=25
+GET http://127.0.0.1:8000/constraints/flood/zones?extent=-80.8,35.18,-80.29,35.56&limit=0
+```
+
+Example parcel flood detail response:
+
+```json
+{
+  "official_parcel_id": "CFS-PARCEL-0149776628",
+  "pin14": "55520518500000",
+  "dominant_flood_zone": "AE",
+  "flood_zone_codes": ["AE"],
+  "floodplain_present": true,
+  "floodway_present": true,
+  "sfha_present": true,
+  "moderate_flood_present": false,
+  "minimal_flood_present": false,
+  "parcel_area_acres": 0.2554,
+  "flood_constrained_area_acres": 0.2554,
+  "floodway_area_acres": 0.213,
+  "sfha_area_acres": 0.2554,
+  "percent_parcel_constrained": 100.0,
+  "percent_parcel_floodway": 83.3675,
+  "percent_parcel_sfha": 100.0,
+  "flood_review_required": true,
+  "buildability_impact": "severe",
+  "flood_constraint_score": 100.0,
+  "flood_severity_class": "severe",
+  "overlay_confidence": "high"
+}
+```
+
+Current global flood statistics:
+
+- Total parcels: `110,017`
+- Floodway parcels: `3,229`
+- SFHA parcels: `7,254`
+- Flood review required parcels: `7,989`
+- High/severe buildability parcels: `6,362`
+
+`/constraints/flood/high-review` defaults to `flood_review_required=true` and
+sorts by `flood_constraint_score` descending, then percent constrained
+descending. `limit` values above `100` are clamped to `100`.
+
+`/constraints/flood/zones` returns lightweight GeoJSON Polygon/MultiPolygon
+features from the authoritative FEMA NFHL Layer 28 clean table. It supports:
+
+- `flood_severity_class`: `severe`, `high`, or `moderate`
+- `flood_constraint_type`: normalized type such as `floodway` or
+  `special_flood_hazard_area`
+- `extent`: WGS84 envelope as `xmin,ymin,xmax,ymax`
+- `limit`: default `500`, max `1000`; `limit=0` requires `extent` and returns
+  all matching features for that visible extent
+- `offset`: default `0`
+
+The zones endpoint is intended for map-safe FEMA source visualization. It is
+separate from the parcel-based Flood Constraints marker workflow and does not
+select parcels by itself.
 
 ## Tests
 

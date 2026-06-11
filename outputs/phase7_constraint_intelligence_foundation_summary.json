@@ -1,0 +1,115 @@
+{
+  "task": "Phase 7 Constraint Intelligence Foundation",
+  "generated_at": "2026-06-05",
+  "scope": "planning_foundation_only",
+  "backend_modified": false,
+  "frontend_modified": false,
+  "sceneview_modified": false,
+  "postgis_schema_modified": false,
+  "layers_ingested": false,
+  "docs_created": [
+    "docs/constraints/constraint_intelligence_plan.md",
+    "docs/constraints/top_constraint_categories.md",
+    "docs/constraints/flood_constraint_strategy.md",
+    "docs/constraints/school_constraint_strategy.md",
+    "docs/constraints/parcel_constraint_overlay_strategy.md",
+    "docs/constraints/constraint_scoring_framework.md"
+  ],
+  "config_created": [
+    "config/constraint_sources.example.json"
+  ],
+  "top_constraint_categories": [
+    "Flood / Floodway Constraint",
+    "School Capacity / District Constraint",
+    "Transportation Access Constraint",
+    "Water / Sewer Constraint",
+    "Fire / EMS Coverage Constraint",
+    "Heat / Impervious / Runoff Constraint",
+    "Environmental Sensitivity Constraint"
+  ],
+  "flood_constraint_strategy": {
+    "recommended_as_first_ingestion_layer": true,
+    "reason": "Flood risk already exists as mock/contextual CFS data and has a floodplain candidate service placeholder, making it the cleanest first deterministic polygon overlay.",
+    "planned_overlay_method": "parcel polygon intersection with floodplain and floodway polygons",
+    "planned_metrics": [
+      "floodplain overlap percent",
+      "floodway overlap percent",
+      "constrained acres",
+      "dominant flood zone",
+      "flood severity class",
+      "review_required",
+      "buildability_impact"
+    ],
+    "future_map_support": [
+      "flood constraint layer toggle",
+      "selected parcel flood badge",
+      "parcel flood footprint overlay",
+      "executive flood review packet"
+    ]
+  },
+  "school_constraint_strategy": {
+    "recommended_as_second_ingestion_layer": true,
+    "reason": "School boundaries provide parcel assignment context, while capacity/enrollment data requires additional stewardship and interpretation review.",
+    "planned_overlay_method": "assign parcels to elementary, middle, and high school boundaries using containment/dominant overlap",
+    "planned_context_fields": [
+      "elementary school district",
+      "middle school district",
+      "high school district",
+      "school assignment confidence",
+      "school boundary overlap count",
+      "review_required"
+    ],
+    "future_capacity_readiness": [
+      "enrollment",
+      "capacity",
+      "utilization percent",
+      "available seats",
+      "source school year"
+    ]
+  },
+  "future_tables_planned": [
+    "public.constraint_layer_registry",
+    "public.parcel_constraint_overlay",
+    "public.parcel_constraint_summary",
+    "public.parcel_constraint_flags",
+    "public.parcel_constraint_score"
+  ],
+  "scoring_defined": {
+    "constraint_score_range": "0-100",
+    "severity_classes": [
+      "low",
+      "moderate",
+      "high",
+      "severe",
+      "unknown"
+    ],
+    "review_required": "boolean",
+    "dashboard_safe": "boolean",
+    "buildability_impact": [
+      "none",
+      "minor",
+      "moderate",
+      "major",
+      "severe",
+      "unknown"
+    ]
+  },
+  "recommended_implementation_order": [
+    "Flood constraint ingestion + parcel overlay",
+    "School constraint ingestion + parcel overlay",
+    "Transportation access",
+    "Water/sewer readiness",
+    "Fire/EMS coverage",
+    "Heat/impervious/runoff",
+    "Environmental sensitivity",
+    "Multi-constraint overlay score"
+  ],
+  "why_forecasting_should_wait": [
+    "Constraint source authority and refresh cadence are not fully governed.",
+    "School capacity/enrollment data needs ownership, privacy, and interpretation review.",
+    "Spatial overlay QA must be measured before model features can be trusted.",
+    "Severity thresholds must be reviewed by domain stewards before predictive use.",
+    "Executive users need transparent deterministic flags before probabilistic growth projections."
+  ],
+  "next_recommended_step": "Begin Flood Constraint ingestion and parcel overlay pilot after confirming the authoritative floodplain/floodway source, effective date, key fields, and steward approval."
+}

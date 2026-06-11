@@ -14,6 +14,8 @@ import {
 } from "@/hooks/useExecutiveBriefing";
 import { useDevelopmentHotspotLayer } from "@/hooks/useDevelopmentHotspotLayer";
 import { useExecutiveReports } from "@/hooks/useExecutiveReports";
+import { useFloodConstraintLayer } from "@/hooks/useFloodConstraintLayer";
+import { useFloodZoneLayer } from "@/hooks/useFloodZoneLayer";
 import { useLayerVisibility } from "@/hooks/useLayerVisibility";
 import { useMapInteractionState } from "@/hooks/useMapInteractionState";
 import { useRoleState } from "@/hooks/useRoleState";
@@ -22,6 +24,10 @@ import {
   useSelectedParcel,
   type SelectedParcelIntelligenceSource,
 } from "@/hooks/useSelectedParcel";
+import {
+  useTemporalAnalysisState,
+  type TemporalAnalysisState,
+} from "@/hooks/useTemporalAnalysisState";
 import { useWorkspaceState } from "@/hooks/useWorkspaceState";
 import {
   applyRolePreset as applyRolePresetToDashboard,
@@ -39,6 +45,7 @@ import type {
   OperationalLayer,
   ParcelSelectionSource,
   ParcelSummary,
+  ProductMode,
   ScenarioHorizon,
   ScenarioId,
 } from "@/types";
@@ -77,6 +84,13 @@ import {
   type DevelopmentHotspotControls,
   type DevelopmentHotspotLayerState,
 } from "@/types/map/developmentHotspots";
+import type { FloodConstraintLayerState } from "@/types/map/floodConstraints";
+import {
+  defaultFloodZoneControls,
+  type FloodZoneControls,
+  type FloodZoneExtent,
+  type FloodZoneLayerState,
+} from "@/types/map/floodZones";
 
 interface DashboardContextValue {
   activeLayerIds: string[];
@@ -98,13 +112,20 @@ interface DashboardContextValue {
   developmentHotspotControls: DevelopmentHotspotControls;
   developmentHotspotLayer: DevelopmentHotspotLayerState;
   developmentHotspotsEnabled: boolean;
+  floodConstraintLayer: FloodConstraintLayerState;
+  floodConstraintsEnabled: boolean;
+  floodZoneControls: FloodZoneControls;
+  floodZoneLayer: FloodZoneLayerState;
+  floodZonesEnabled: boolean;
   executiveBriefing: ExecutiveBriefing;
   exportHistory: MockExportHistoryItem[];
   exportJobState: ExportJobState;
   exportProgress: number;
+  isMapFocusMode: boolean;
   lastExportResult: ReportExportResult | null;
   mapError: string | null;
   printableViewMode: PrintableViewMode;
+  productMode: ProductMode;
   reportExportIntent: ReportExportIntent;
   reportPackages: ExecutiveReportPackage[];
   selectedParcelId: string | null;
@@ -140,6 +161,7 @@ interface DashboardContextValue {
   exportScenarioComparison: () => ReportExportResult;
   selectReportPackage: (packageId: ReportPackageId) => void;
   setPrintableViewMode: (mode: PrintableViewMode) => void;
+  setProductMode: (mode: ProductMode) => void;
   setReportIntent: (intent: ReportExportIntent) => void;
   setLayerVisibility: (layerId: string, visible: boolean) => void;
   toggleLayer: (layerId: string) => void;
@@ -161,8 +183,15 @@ interface DashboardContextValue {
     controls: DevelopmentHotspotControls,
   ) => void;
   setDevelopmentHotspotsEnabled: (enabled: boolean) => void;
+  setFloodConstraintsEnabled: (enabled: boolean) => void;
+  setFloodZoneControls: (controls: FloodZoneControls) => void;
+  setFloodZonesEnabled: (enabled: boolean) => void;
+  setFloodZoneViewExtent: (extent: FloodZoneExtent | null) => void;
+  setMapFocusMode: (enabled: boolean) => void;
   setMapStatus: (status: DashboardStatus) => void;
   restoreDefaultWorkspace: () => void;
+  temporalAnalysisState: TemporalAnalysisState;
+  toggleMapFocusMode: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
@@ -187,10 +216,21 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     useState<DevelopmentHotspotControls>(defaultDevelopmentHotspotControls);
   const [developmentHotspotsEnabled, setDevelopmentHotspotsEnabled] =
     useState(false);
+  const [floodConstraintsEnabled, setFloodConstraintsEnabled] = useState(false);
+  const [floodZoneControls, setFloodZoneControls] =
+    useState<FloodZoneControls>(defaultFloodZoneControls);
+  const [floodZonesEnabled, setFloodZonesEnabled] = useState(false);
+  const [floodZoneViewExtent, setFloodZoneViewExtent] =
+    useState<FloodZoneExtent | null>(null);
+  const [productMode, setProductMode] = useState<ProductMode>("overview");
+  const [isMapFocusMode, setMapFocusMode] = useState(false);
+  const temporalAnalysisState = useTemporalAnalysisState();
   const developmentHotspotLayer = useDevelopmentHotspotLayer({
     activityClass: developmentHotspotControls.activityClass,
     enabled: developmentHotspotsEnabled,
+    growthSignal: developmentHotspotControls.growthSignal,
     limit: developmentHotspotControls.limit,
+    permitSegment: developmentHotspotControls.permitSegment,
     recentWindow:
       developmentHotspotControls.recentWindow === "all"
         ? undefined
@@ -198,7 +238,20 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           ? 1
           : 3,
     sortBy: developmentHotspotControls.sortBy,
+    statusStage: developmentHotspotControls.statusStage,
+    temporalFilters: temporalAnalysisState.temporalFilters,
+    valueClass: developmentHotspotControls.valueClass,
     zoningJurisdiction: developmentHotspotControls.zoningJurisdiction || undefined,
+  });
+  const floodConstraintLayer = useFloodConstraintLayer({
+    enabled: floodConstraintsEnabled,
+    limit: 100,
+  });
+  const floodZoneLayer = useFloodZoneLayer({
+    enabled: floodZonesEnabled,
+    extent: floodZoneViewExtent,
+    limitMode: floodZoneControls.limitMode,
+    severity: floodZoneControls.severity,
   });
   const {
     activeScenario,
@@ -332,6 +385,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     [workspaceControllerActions],
   );
 
+  const toggleMapFocusMode = useCallback(() => {
+    setMapFocusMode((enabled) => !enabled);
+  }, []);
+
   const dashboardUrlState = useMemo(
     () =>
       createDashboardUrlState({
@@ -391,17 +448,24 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       developmentHotspotLayer,
       developmentHotspotsEnabled,
       executiveBriefing,
+      floodConstraintLayer,
+      floodConstraintsEnabled,
+      floodZoneControls,
+      floodZoneLayer,
+      floodZonesEnabled,
       exportHistory,
       exportJobState,
       exportProgress,
       exportScenarioComparison,
       generateBoardBrief,
+      isMapFocusMode,
       isLayerActive,
       lastExportResult,
       mapError,
       mapStatus,
       openPrintLayout,
       printableViewMode,
+      productMode,
       reportExportIntent,
       reportPackages,
       restoreDefaultWorkspace,
@@ -427,18 +491,26 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setDashboardViewMode,
       setDevelopmentHotspotControls,
       setDevelopmentHotspotsEnabled,
+      setFloodConstraintsEnabled,
+      setFloodZoneControls,
+      setFloodZonesEnabled,
+      setFloodZoneViewExtent,
       setLayerVisibility,
       setMapError,
+      setMapFocusMode,
       setMapStatus,
       setSelectedParcelIntelligence,
       setPrintableViewMode,
+      setProductMode,
       setReportIntent,
       setScenarioId,
       setSimulationIntensity,
       setSimulationYear,
+      temporalAnalysisState,
       simulationIntensity,
       simulationYear,
       toggleLayer,
+      toggleMapFocusMode,
       viewMode,
     }),
     [
@@ -466,17 +538,24 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       developmentHotspotLayer,
       developmentHotspotsEnabled,
       executiveBriefing,
+      floodConstraintLayer,
+      floodConstraintsEnabled,
+      floodZoneControls,
+      floodZoneLayer,
+      floodZonesEnabled,
       exportHistory,
       exportJobState,
       exportProgress,
       exportScenarioComparison,
       generateBoardBrief,
+      isMapFocusMode,
       isLayerActive,
       lastExportResult,
       mapError,
       mapStatus,
       openPrintLayout,
       printableViewMode,
+      productMode,
       reportExportIntent,
       reportPackages,
       restoreDefaultWorkspace,
@@ -502,18 +581,26 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setDashboardViewMode,
       setDevelopmentHotspotControls,
       setDevelopmentHotspotsEnabled,
+      setFloodConstraintsEnabled,
+      setFloodZoneControls,
+      setFloodZonesEnabled,
+      setFloodZoneViewExtent,
       setLayerVisibility,
       setMapError,
+      setMapFocusMode,
       setMapStatus,
       setSelectedParcelIntelligence,
       setPrintableViewMode,
+      setProductMode,
       setReportIntent,
       setScenarioId,
       setSimulationIntensity,
       setSimulationYear,
+      temporalAnalysisState,
       simulationIntensity,
       simulationYear,
       toggleLayer,
+      toggleMapFocusMode,
       viewMode,
     ],
   );

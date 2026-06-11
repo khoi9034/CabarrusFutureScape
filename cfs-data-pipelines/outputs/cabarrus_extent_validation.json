@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-06-05T17:46:56.167887",
+  "parcel_table": "public.parcels_enriched",
+  "extent": {
+    "xmin": -80.78714859986353,
+    "ymin": 35.185001484384316,
+    "xmax": -80.29542844362561,
+    "ymax": 35.55345527610693
+  },
+  "arcgis_envelope": {
+    "xmin": -80.78714859986353,
+    "ymin": 35.185001484384316,
+    "xmax": -80.29542844362561,
+    "ymax": 35.55345527610693,
+    "spatialReference": {
+      "wkid": 4326
+    }
+  },
+  "srid": 4326,
+  "srid_distribution": [
+    {
+      "srid": 4326,
+      "feature_count": 110017
+    }
+  ],
+  "parcel_count": 110017,
+  "null_geometry_count": 0,
+  "county_area_estimate": {
+    "method": "sum_of_parcel_geometry_area_geography",
+    "note": "This is a parcel-footprint aggregate used for source filtering, not an official county boundary area.",
+    "sq_m": 985547222.64,
+    "acres": 243534.02,
+    "sq_km": 985.55
+  },
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\inspect_cabarrus_extent_20260605_174652.log"
+}

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:cfs": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-cfs-local.ps1",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
