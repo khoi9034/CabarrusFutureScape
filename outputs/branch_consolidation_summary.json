@@ -1,0 +1,147 @@
+{
+  "generated_at": "2026-06-10T22:05:00-04:00",
+  "repository": "CabarrusFutureScape",
+  "workspace": "C:\\CabarrusFutureScape",
+  "branch_status": {
+    "current_branch": "main",
+    "future_work_branch": "main",
+    "origin_main_commit": "4765411d912aab5ece0a53a0444e35ec5a69a63f",
+    "local_main_commit": "4765411d912aab5ece0a53a0444e35ec5a69a63f",
+    "main_synced_with_origin": true,
+    "feature_branch_preserved": "codex/phase6-parcel-focus",
+    "feature_branch_latest_commit": "89d5f07a518cfcda2a2b603f0a080484dcf48a60",
+    "feature_branch_merged_into_main": true,
+    "branches_deleted": false,
+    "force_push_used": false,
+    "reset_hard_used": false
+  },
+  "consolidated_commits": [
+    {
+      "hash": "89d5f07",
+      "message": "Add Phase 8A school constraint foundation"
+    },
+    {
+      "hash": "e9dee93",
+      "message": "Merge latest CFS platform work into main"
+    },
+    {
+      "hash": "4765411",
+      "message": "Add branch consolidation summary"
+    }
+  ],
+  "uncommitted_files": {
+    "source_code": [],
+    "generated_outputs": [
+      "outputs/branch_consolidation_summary.json"
+    ],
+    "logs_runtime": [
+      "logs/backend-dev.log",
+      "logs/next-dev.log"
+    ],
+    "local_env_cache": [],
+    "notes": "Runtime logs changed after npm run dev:cfs started the local services. Earlier log changes were preserved in git stashes before switching this workspace to main."
+  },
+  "preserved_stashes": [
+    "stash@{0}: Preserve local runtime logs before switching workspace to main",
+    "stash@{1}: Preserve local dev log changes before branch consolidation"
+  ],
+  "env_local_safety": {
+    "env_local_exists": true,
+    "env_local_ignored_by_git": true,
+    "env_local_staged": false,
+    "next_public_use_backend_api": "true",
+    "next_public_cfs_api_base_url": "http://127.0.0.1:8000",
+    "secrets_staged": false
+  },
+  "runtime_health": {
+    "npm_run_dev_cfs": "passed",
+    "fastapi_url": "http://127.0.0.1:8000",
+    "next_url": "http://localhost:3000",
+    "fastapi_listening": true,
+    "next_listening": true,
+    "backend_root_status": 200,
+    "health_status": 200,
+    "database_health_status": 200,
+    "database_connected": true,
+    "frontend_status": 200,
+    "cors_preflight": {
+      "status": 200,
+      "origin": "http://localhost:3000",
+      "allow_origin": "http://localhost:3000",
+      "allow_methods": "GET, OPTIONS"
+    }
+  },
+  "critical_api_checks": [
+    {
+      "name": "parcel_search",
+      "url": "http://127.0.0.1:8000/parcels/search?q=CFS-PARCEL-0149726579",
+      "status": 200
+    },
+    {
+      "name": "parcel_detail_include_geometry",
+      "url": "http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579?include_geometry=true",
+      "status": 200,
+      "map_focus_present": true,
+      "highlight_geometry_present": true
+    },
+    {
+      "name": "development_hotspots",
+      "url": "http://127.0.0.1:8000/development/hotspots?limit=1",
+      "status": 200
+    },
+    {
+      "name": "flood_high_review",
+      "url": "http://127.0.0.1:8000/constraints/flood/high-review?limit=1",
+      "status": 200
+    },
+    {
+      "name": "flood_summary",
+      "url": "http://127.0.0.1:8000/constraints/flood/summary",
+      "status": 200
+    },
+    {
+      "name": "flood_zones",
+      "url": "http://127.0.0.1:8000/constraints/flood/zones?limit=1",
+      "status": 200
+    },
+    {
+      "name": "selected_parcel_permit_events",
+      "url": "http://127.0.0.1:8000/development/parcel/CFS-PARCEL-0149726579/permits?limit=3",
+      "status": 200,
+      "total_count": 286,
+      "rows_returned": 3
+    }
+  ],
+  "browser_verification": {
+    "frontend_loaded": true,
+    "api_live_badge_visible": true,
+    "scene_online_badge_visible": true,
+    "top_search_query": "CFS-PARCEL-0149726579",
+    "top_search_result_visible": true,
+    "selected_parcel_card_updated": true,
+    "selected_parcel_owner_visible": "MALL AT CONCORD MILLS LP",
+    "due_diligence_panel_loaded": true,
+    "development_activity_visible": true,
+    "flood_context_visible": true,
+    "permit_events_visible": true,
+    "console_errors_or_warnings": [],
+    "api_failure_messages_visible": false,
+    "sceneview_camera_focus": "visually centered on Concord Mills selected parcel area",
+    "sceneview_follow_up": "Map overlay still displays 'No parcel selected' and the selected parcel cage was not clearly visible in the browser screenshot. API map_focus/highlight_geometry are present, so this appears to be a frontend SceneView status/highlight verification follow-up rather than an API outage."
+  },
+  "safety_assessment": {
+    "safe_to_start_next_task": true,
+    "safe_for_backend_and_data_work": true,
+    "safe_for_frontend_api_work": true,
+    "sceneview_follow_up_recommended": true,
+    "postgis_modified": false,
+    "application_code_modified_during_verification": false,
+    "next_cache_cleared": false
+  },
+  "next_steps": [
+    "Resume Phase 8 school constraint work from main. Next logical step: school constraint API contract and read-only FastAPI endpoints.",
+    "Review school zone unmatched-name QA before exposing school assignment UI.",
+    "Continue Phase 7/8 constraint layers only after defining authoritative sources and preserving raw/clean/overlay lineage.",
+    "Before new SceneView feature work, fix or verify the stale Active Selection overlay and selected parcel cage visibility."
+  ]
+}
