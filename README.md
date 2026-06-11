@@ -4,15 +4,17 @@ Cabarrus FutureScape (CFS) is the frontend foundation for a Cabarrus County, NC 
 
 ## Current Phase
 
-V1 Product Layout Redesign, building on completed GIS Map Intelligence, Parcel
-Intelligence, Zoning Intelligence, Development Activity, FEMA flood constraint
-intelligence, permit intelligence segmentation, and FastAPI integration.
+V1 Product Layout Redesign plus Phase 8A school constraint data foundation,
+building on completed GIS Map Intelligence, Parcel Intelligence, Zoning
+Intelligence, Development Activity, FEMA flood constraint intelligence, permit
+intelligence segmentation, and FastAPI integration.
 
 This cleanup turns the working technical prototype into a cleaner product
 experience for portfolio demonstrations, interviews, and stakeholder
-presentations. It does not add data sources, forecasting, school constraints,
-transportation constraints, backend changes, or PostGIS schema changes. The
-goal is less control clutter and more planning intelligence.
+presentations. Phase 8A adds backend/data-only school attendance-zone ingestion
+and parcel assignment; it does not add school frontend UI, SceneView school
+layers, APIs, forecasting, transportation constraints, or prediction models.
+The goal remains less control clutter and more planning intelligence.
 
 Current product modes:
 
@@ -1299,6 +1301,90 @@ Future path:
 
 - Temporal map filtering and playback
 - Permit hotspot heat/cluster styling after map extent and performance guardrails are defined
+
+## Phase 8A School Constraint Ingestion
+
+Phase 8A creates the school constraint data foundation. It ingests school
+reference points and elementary/middle/high attendance-zone polygons, then
+assigns parcels by attendance-zone polygon overlap. It does not build frontend
+school panels, SceneView school layers, FastAPI school endpoints, capacity
+scoring, or forecasting.
+
+Source layers:
+
+- Elementary School Attendance Zones: `https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/140`
+- Middle School Attendance Zones: `https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/141`
+- High School Attendance Zones: `https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/142`
+- School Reference Points: `https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/144`
+
+Core pipeline files:
+
+- `cfs-data-pipelines/ingest/ingest_school_reference_points.py`
+- `cfs-data-pipelines/ingest/ingest_school_attendance_zones.py`
+- `cfs-data-pipelines/sql/create_parcel_school_assignment.sql`
+- `cfs-data-pipelines/transform/create_parcel_school_assignment.py`
+- `cfs-data-pipelines/sql/create_school_capacity_placeholder.sql`
+- `cfs-data-pipelines/transform/create_school_capacity_placeholder.py`
+- `cfs-data-pipelines/sql/create_parcel_school_summary.sql`
+- `cfs-data-pipelines/transform/create_parcel_school_summary.py`
+
+PostGIS outputs:
+
+- `public.school_reference_raw`
+- `public.school_reference`
+- `public.school_zones_elementary_raw`
+- `public.school_zones_middle_raw`
+- `public.school_zones_high_raw`
+- `public.school_zones`
+- `public.parcel_school_assignment`
+- `public.school_capacity`
+- `public.parcel_school_summary`
+
+Current Phase 8A results:
+
+- school reference raw rows: `53`
+- clean school reference rows: `53`
+- public elementary/middle/high school references included in CFS V1: `41`
+- clean school attendance zones: `44`
+- school zone names needing reference QA: `6`
+- parcel school assignment rows: `110,017`
+- parcel school summary rows: `110,017`
+- school capacity rows: `0`
+- non-null school constraint scores: `0`
+
+Assignment rules:
+
+- School point distance is not used.
+- Parcel assignments use attendance-zone polygon overlap.
+- For each parcel and school level, the largest overlap area wins.
+- Missing, ambiguous, and non-exact reference matches are preserved as QA flags.
+- Private, magnet, and Other/non elementary-middle-high school records are
+  preserved in raw/QA outputs but excluded from CFS V1 assignment outputs.
+
+Capacity status:
+
+- `public.school_capacity` is intentionally empty.
+- `public.parcel_school_summary.school_constraint_score` remains `NULL`.
+- `school_constraint_class` remains `not_scored`.
+- Real capacity/enrollment data is required before school capacity scoring can
+  be exposed.
+
+Generated outputs:
+
+- `outputs/school_reference_validation.json`
+- `outputs/school_reference_included_excluded_summary.csv`
+- `outputs/school_zones_validation.json`
+- `outputs/school_zone_match_qa.csv`
+- `outputs/school_zone_unmatched_names.csv`
+- `outputs/parcel_school_assignment_validation.json`
+- `outputs/parcel_school_assignment_warnings.csv`
+- `outputs/parcel_school_summary_validation.json`
+- `outputs/phase8a_school_constraint_ingestion_summary.json`
+
+Planning docs:
+
+- `docs/constraints/school_constraint_strategy.md`
+- `docs/backend/school_constraint_data_dictionary.md`
 
 ## Dashboard State Architecture
 

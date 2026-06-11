@@ -1,146 +1,162 @@
 # School Constraint Strategy
 
-School constraints are the recommended second Phase 7 domain after flood
-constraints. The first school implementation should focus on district and
-assignment context. Capacity and enrollment pressure should wait until school
-data ownership and interpretation rules are approved.
+Phase 8A creates the school constraint data foundation for CFS. It focuses on
+deterministic attendance-zone assignment only. Capacity, utilization, and
+forecasting remain future work until a vetted school capacity/enrollment source
+is approved.
 
-This document does not ingest school layers, modify PostGIS, build APIs, or
-add frontend panels.
+This phase does not modify the frontend, SceneView, FastAPI endpoints, PostGIS
+base parcel tables, or prediction models.
 
-## Purpose
+## Source Roles
 
-School Constraint Intelligence should show which elementary, middle, and high
-school assignment areas apply to a parcel and prepare a safe path toward future
-capacity/readiness review.
+Phase 8A registers and ingests four Cabarrus County Open Data layers:
 
-Primary use cases:
+| Source | Layer | Role | Geometry |
+| --- | --- | --- | --- |
+| Elementary School Attendance Zones | `MapServer/140` | Parcel elementary assignment | Polygon |
+| Middle School Attendance Zones | `MapServer/141` | Parcel middle assignment | Polygon |
+| High School Attendance Zones | `MapServer/142` | Parcel high assignment | Polygon |
+| School Reference Points | `MapServer/144` | Name dictionary and QA reference | Point |
 
-- selected parcel school assignment context
-- school district map overlays
-- growth review around permit activity
-- executive service capacity summaries
-- future parcel filters by school district
+School points are never used to assign parcels by distance. They are preserved
+as a reference dictionary for school name normalization and QA.
 
-## Candidate Sources
+## CFS V1 Inclusion Policy
 
-Initial spatial sources:
+CFS V1 includes public elementary, middle, and high schools. Private, magnet,
+and Other/non elementary-middle-high records are preserved in raw/QA outputs
+but excluded from CFS V1 assignment outputs.
 
-- elementary school attendance/district polygons
-- middle school attendance/district polygons
-- high school attendance/district polygons
-- school facility point layer
+The current school reference ingest produced:
 
-Future non-spatial sources, if approved:
+- raw school reference rows: `53`
+- clean school reference rows: `53`
+- CFS V1 included public elementary/middle/high reference rows: `41`
+- excluded QA/reference rows: `12`
 
-- enrollment
-- program capacity
-- utilization
-- projected seats
-- facility status
-- capital project timelines
+## Attendance Zone Ingestion
 
-Capacity sources may be sensitive or interpretation-heavy. They should be
-approved by the appropriate school/system steward before dashboard exposure.
+Phase 8A creates:
 
-## Expected Geometry
+- `public.school_zones_elementary_raw`
+- `public.school_zones_middle_raw`
+- `public.school_zones_high_raw`
+- `public.school_zones`
 
-- school attendance boundaries: polygon
-- school facility locations: point
-- capacity/enrollment: table joined by school ID, not geometry
+Current clean attendance zone results:
 
-## Parcel Overlay Method
+- elementary zones: `25`
+- middle zones: `10`
+- high zones: `9`
+- merged clean zones: `44`
+- included CFS V1 zones: `44`
+- zone names needing school-reference QA: `6`
 
-Recommended district assignment method:
+Unmatched reference names are preserved in
+`outputs/school_zone_unmatched_names.csv` and do not block attendance-zone
+assignment, because the polygon boundary is the authoritative assignment input.
 
-1. Clean elementary, middle, and high school boundary polygons.
-2. Normalize school name, school ID, level, and source metadata.
-3. Intersect or point-on-surface assign each parcel to one boundary per school
-   level.
-4. Flag parcels with no district match or multiple district overlaps.
-5. Preserve assignment method and confidence.
+## Parcel Assignment Method
 
-Recommended fields:
+`public.parcel_school_assignment` assigns each parcel to one elementary, one
+middle, and one high attendance zone by polygon overlap:
 
-- `elementary_school_name`
-- `elementary_school_id`
-- `middle_school_name`
-- `middle_school_id`
-- `high_school_name`
-- `high_school_id`
-- `school_assignment_confidence`
-- `school_boundary_overlap_count`
-- `school_review_required`
+1. Intersect `public.parcels_enriched.geometry` with `public.school_zones`.
+2. Calculate overlap area in acres with geography-safe area.
+3. For each parcel and school level, select the zone with the largest overlap.
+4. Preserve overlap area, overlap percent, match confidence, and QA flags.
+5. Flag missing, ambiguous, or non-exact reference conditions.
 
-## Future Capacity Readiness
+Current parcel assignment result:
 
-Capacity should be introduced only after district assignment is stable.
+- parcel assignment rows: `110,017`
+- elementary assigned parcels: `108,279`
+- middle assigned parcels: `108,272`
+- high assigned parcels: `108,272`
+- missing elementary assignment: `1,738`
+- missing middle assignment: `1,745`
+- missing high assignment: `1,745`
 
-Potential capacity fields:
+The output row count matches `public.parcels_enriched`.
+
+## QA Interpretation
+
+Assignment confidence values:
+
+- `high`: all three levels assigned with strong overlap and no reference QA
+  warning.
+- `medium`: all three levels assigned but not fully high-confidence.
+- `review`: assignment exists, but one or more QA warnings should be reviewed.
+- `low`: no attendance zone assignment was available.
+
+Review flags include:
+
+- `missing_elementary_zone`
+- `missing_middle_zone`
+- `missing_high_zone`
+- `multiple_elementary_zone_overlap`
+- `multiple_middle_zone_overlap`
+- `multiple_high_zone_overlap`
+- `unmatched_or_non_exact_school_reference`
+
+Large review counts are expected while zone names such as `West Cabarrus HS`,
+`Roberta Road MS`, and `Hickory Ridge ES` need school-reference dictionary QA.
+
+## Capacity Placeholder
+
+`public.school_capacity` is intentionally empty in Phase 8A. It defines the
+future shape for enrollment and capacity data:
 
 - `enrollment`
-- `capacity`
-- `utilization_pct`
+- `program_capacity`
+- `utilization_percent`
 - `available_seats`
 - `capacity_status`
-- `source_school_year`
-- `capacity_source_date`
+- `school_year`
+- source metadata
 
-Initial capacity severity examples:
+No capacity score is produced until real capacity/enrollment data exists.
 
-| Capacity Status | Severity |
-| --- | --- |
-| below 85 percent utilization | `low` |
-| 85 to 95 percent utilization | `moderate` |
-| 95 to 105 percent utilization | `high` |
-| above 105 percent utilization | `severe` |
-| capacity data unavailable | `unknown` |
+## Parcel School Summary
 
-These are planning placeholders only and must be reviewed by school planning
-stakeholders.
+`public.parcel_school_summary` combines attendance-zone assignment with the
+capacity placeholder. It contains one row per parcel and keeps school capacity
+fields as `not_available` or `NULL`.
 
-## Growth Pressure From Permit Activity
+Current summary result:
 
-School constraints should eventually combine district assignment with permit
-activity context, not predictive enrollment modeling.
+- parcel school summary rows: `110,017`
+- non-null school constraint scores: `0`
+- school constraint class: `not_scored`
+- recommended action when capacity is missing: `capacity_data_needed`
 
-Initial deterministic signals:
+## Generated Outputs
 
-- permit count within school boundary
-- residential permit count if permit type/domain supports it
-- recent 1-year and 3-year permit activity near the parcel
-- high-activity parcels inside a school boundary
-- development hotspots by school district
+Phase 8A writes:
 
-Growth pressure should be represented as a context flag until school capacity
-data is approved.
+- `outputs/school_reference_validation.json`
+- `outputs/school_reference_included_excluded_summary.csv`
+- `outputs/school_zones_validation.json`
+- `outputs/school_zone_match_qa.csv`
+- `outputs/school_zone_unmatched_names.csv`
+- `outputs/parcel_school_assignment_validation.json`
+- `outputs/parcel_school_assignment_warnings.csv`
+- `outputs/parcel_school_summary_validation.json`
+- `outputs/phase8a_school_constraint_ingestion_summary.json`
 
-## Suggested Parcel Flags
+## Future API and UI Path
 
-- `school_assignment_available`
-- `school_assignment_review_required`
-- `multiple_school_boundary_overlap`
-- `missing_school_boundary_match`
-- `school_capacity_review_required`
-- `school_growth_pressure_context`
-- `school_capacity_data_unavailable`
+Recommended next steps:
 
-## Dashboard / Map Support
+1. Review unmatched school reference names and decide whether to adjust the
+   reference dictionary.
+2. Define the school constraint API contract.
+3. Add read-only FastAPI endpoints for selected parcel school assignment and
+   countywide school assignment summaries.
+4. Add frontend selected parcel school summary only after backend endpoints are
+   stable.
+5. Add capacity/enrollment scoring only after a vetted capacity source exists.
 
-Recommended rollout:
-
-1. Selected parcel school assignment summary.
-2. School district layer toggles for elementary, middle, and high.
-3. School facility points.
-4. District-level permit activity summaries.
-5. Capacity context only when data ownership and dashboard-safe rules are
-   approved.
-
-## Future API Support
-
-Potential endpoints after ingestion:
-
-- `GET /constraints/school-summary`
-- `GET /constraints/parcels/{official_parcel_id}/schools`
-- `GET /constraints/schools/{school_id}/development-context`
-- `GET /constraints/filter?constraint_category=school`
+Forecasting should wait until attendance-zone assignment, capacity source
+ownership, and school planning interpretation rules are stable.

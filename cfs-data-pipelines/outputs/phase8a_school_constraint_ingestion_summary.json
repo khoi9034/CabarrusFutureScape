@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-06-10T21:21:57.704885",
+  "phase": "Phase 8A School Constraint Ingestion and Parcel Attendance-Zone Assignment",
+  "postgis_tables": {
+    "school_reference_raw": "public.school_reference_raw",
+    "school_reference": "public.school_reference",
+    "school_zones_elementary_raw": "public.school_zones_elementary_raw",
+    "school_zones_middle_raw": "public.school_zones_middle_raw",
+    "school_zones_high_raw": "public.school_zones_high_raw",
+    "school_zones": "public.school_zones",
+    "parcel_school_assignment": "public.parcel_school_assignment",
+    "school_capacity": "public.school_capacity",
+    "parcel_school_summary": "public.parcel_school_summary"
+  },
+  "source_counts": {
+    "school_reference_raw_rows": 53,
+    "school_reference_clean_rows": 53,
+    "school_reference_included_cfs_v1_rows": 41,
+    "school_zones_clean_rows": 44,
+    "school_zones_included_cfs_v1_rows": 44
+  },
+  "assignment_summary": {
+    "elementary_assigned": 108279,
+    "middle_assigned": 108272,
+    "high_assigned": 108272,
+    "assignment_review_required": 64192,
+    "capacity_data_available_parcels": 0
+  },
+  "capacity_summary": {
+    "capacity_table_rows": 0,
+    "capacity_data_available_rows": 0,
+    "school_constraint_score_non_null_rows": 0,
+    "capacity_scoring_status": "not_scored_until_real_capacity_data_exists"
+  },
+  "row_count_validation": {
+    "parcel_row_count": 110017,
+    "parcel_school_summary_row_count": 110017,
+    "row_counts_match": true
+  },
+  "school_point_policy": {
+    "school_points_used_for_assignment": false,
+    "assignment_method": "attendance-zone polygon overlap by largest intersection area"
+  },
+  "cfs_v1_scope": {
+    "included": "Public elementary, middle, and high attendance-zone assignments.",
+    "excluded": "Private, magnet, and Other records are preserved in raw/QA outputs but not included in CFS V1 assignments."
+  },
+  "capacity_policy": {
+    "capacity_score_created": false,
+    "reason": "No vetted real capacity/enrollment source has been ingested."
+  },
+  "source_availability": {
+    "school_reference": {
+      "source_status": "downloaded",
+      "source_error": null
+    },
+    "school_zones": {
+      "elementary": {
+        "source_status": "downloaded",
+        "source_error": null,
+        "feature_count": 25,
+        "metadata": {
+          "name": "Elementary School Districts",
+          "geometry_type": "esriGeometryPolygon",
+          "max_record_count": 1000
+        }
+      },
+      "middle": {
+        "source_status": "downloaded",
+        "source_error": null,
+        "feature_count": 10,
+        "metadata": {
+          "name": "Middle School Districts",
+          "geometry_type": "esriGeometryPolygon",
+          "max_record_count": 1000
+        }
+      },
+      "high": {
+        "source_status": "downloaded",
+        "source_error": null,
+        "feature_count": 9,
+        "metadata": {
+          "name": "High School Districts",
+          "geometry_type": "esriGeometryPolygon",
+          "max_record_count": 1000
+        }
+      }
+    }
+  },
+  "qa_pass": {
+    "row_count_equals_parcels": true,
+    "no_null_official_parcel_id": true,
+    "no_invalid_geometries": true,
+    "capacity_score_not_fabricated": true
+  },
+  "readiness": {
+    "ready_for_school_constraint_api_planning": true,
+    "blocked_for_real_school_assignment_if_sources_unavailable": false,
+    "capacity_scoring_blocker": "Real enrollment/capacity data source required."
+  }
+}

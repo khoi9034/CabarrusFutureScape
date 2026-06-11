@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-06-10T21:19:17.131632",
+  "table": "public.school_capacity",
+  "row_count": 0,
+  "capacity_data_available_count": 0,
+  "indexes": [
+    {
+      "indexname": "school_capacity_name_level_idx",
+      "indexdef": "CREATE INDEX school_capacity_name_level_idx ON public.school_capacity USING btree (school_name_normalized, school_level, school_system)"
+    },
+    {
+      "indexname": "school_capacity_pkey",
+      "indexdef": "CREATE UNIQUE INDEX school_capacity_pkey ON public.school_capacity USING btree (school_capacity_id)"
+    },
+    {
+      "indexname": "school_capacity_reference_idx",
+      "indexdef": "CREATE INDEX school_capacity_reference_idx ON public.school_capacity USING btree (school_reference_id)"
+    },
+    {
+      "indexname": "school_capacity_status_idx",
+      "indexdef": "CREATE INDEX school_capacity_status_idx ON public.school_capacity USING btree (capacity_status)"
+    }
+  ],
+  "policy": {
+    "placeholder_only": true,
+    "no_capacity_score_until_real_data_exists": true,
+    "no_fabricated_capacity_or_enrollment": true
+  },
+  "elapsed_seconds": 0.32,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_school_capacity_placeholder_20260610_211916.log"
+}

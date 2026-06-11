@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-06-10T21:21:56.717459",
+  "summary_table": "public.parcel_school_summary",
+  "source_tables": {
+    "parcels": "public.parcels_enriched",
+    "school_reference": "public.school_reference",
+    "school_zones": "public.school_zones",
+    "parcel_school_assignment": "public.parcel_school_assignment",
+    "school_capacity": "public.school_capacity"
+  },
+  "parcel_row_count": 110017,
+  "summary_row_count": 110017,
+  "row_count_delta": 0,
+  "row_counts_match": true,
+  "capacity_table_row_count": 0,
+  "capacity_data_available_count": 0,
+  "school_constraint_score_non_null_count": 0,
+  "capacity_scoring_status": "not_scored_until_real_capacity_data_exists",
+  "summary_status_distribution": [
+    {
+      "school_summary_status": "assignment_available_capacity_pending",
+      "parcel_count": 108272
+    },
+    {
+      "school_summary_status": "assignment_incomplete",
+      "parcel_count": 1745
+    }
+  ],
+  "constraint_class_distribution": [
+    {
+      "school_constraint_class": "not_scored",
+      "parcel_count": 110017
+    }
+  ],
+  "assignment_counts": {
+    "elementary_assigned": 108279,
+    "middle_assigned": 108272,
+    "high_assigned": 108272,
+    "assignment_review_required": 64192,
+    "capacity_data_available_parcels": 0
+  },
+  "capacity_status_distribution": {
+    "elementary": [
+      {
+        "capacity_status": "not_available",
+        "parcel_count": 110017
+      }
+    ],
+    "middle": [
+      {
+        "capacity_status": "not_available",
+        "parcel_count": 110017
+      }
+    ],
+    "high": [
+      {
+        "capacity_status": "not_available",
+        "parcel_count": 110017
+      }
+    ]
+  },
+  "geometry_validation": {
+    "invalid_geometry_count": 0,
+    "null_geometry_count": 0,
+    "srid_counts": [
+      {
+        "srid": 4326,
+        "parcel_count": 110017
+      }
+    ]
+  },
+  "qa_pass": {
+    "row_count_equals_parcels": true,
+    "no_null_official_parcel_id": true,
+    "no_invalid_geometries": true,
+    "capacity_score_not_fabricated": true
+  },
+  "elapsed_seconds": 4.99,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcel_school_summary_20260610_212151.log"
+}

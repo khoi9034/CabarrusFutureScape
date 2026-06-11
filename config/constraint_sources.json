@@ -151,6 +151,82 @@
         "Use later for modeled/static reference, raster comparison, or future prediction inputs after regulatory flood overlays are stable.",
         "This config does not connect to Google Cloud or enumerate bucket contents."
       ]
-    }
+    },
+    {
+      "source_key": "elementary_school_attendance_zones",
+      "source_name": "Elementary School Attendance Zones",
+      "constraint_category": "school",
+      "role": "attendance_zone_geometry",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/140",
+      "layer_id": 140,
+      "layer_name": "Elementary School Districts",
+      "service_type": "ArcGIS MapServer Feature Layer",
+      "geometry_type": "polygon",
+      "school_level": "elementary",
+      "authoritative": true,
+      "refresh_notes": "Refresh from Cabarrus County Open Data when school attendance zone boundaries are published or updated.",
+      "review_status": "registered_not_ingested",
+      "notes": [
+        "Use attendance-zone polygon overlap for parcel elementary school assignment.",
+        "Do not assign parcels by distance to school point locations."
+      ]
+    },
+    {
+      "source_key": "middle_school_attendance_zones",
+      "source_name": "Middle School Attendance Zones",
+      "constraint_category": "school",
+      "role": "attendance_zone_geometry",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/141",
+      "layer_id": 141,
+      "layer_name": "Middle School Districts",
+      "service_type": "ArcGIS MapServer Feature Layer",
+      "geometry_type": "polygon",
+      "school_level": "middle",
+      "authoritative": true,
+      "refresh_notes": "Refresh from Cabarrus County Open Data when school attendance zone boundaries are published or updated.",
+      "review_status": "registered_not_ingested",
+      "notes": [
+        "Use attendance-zone polygon overlap for parcel middle school assignment.",
+        "Do not assign parcels by distance to school point locations."
+      ]
+    },
+    {
+      "source_key": "high_school_attendance_zones",
+      "source_name": "High School Attendance Zones",
+      "constraint_category": "school",
+      "role": "attendance_zone_geometry",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/142",
+      "layer_id": 142,
+      "layer_name": "High School Districts",
+      "service_type": "ArcGIS MapServer Feature Layer",
+      "geometry_type": "polygon",
+      "school_level": "high",
+      "authoritative": true,
+      "refresh_notes": "Refresh from Cabarrus County Open Data when school attendance zone boundaries are published or updated.",
+      "review_status": "registered_not_ingested",
+      "notes": [
+        "Use attendance-zone polygon overlap for parcel high school assignment.",
+        "Do not assign parcels by distance to school point locations."
+      ]
+    },
+    {
+      "source_key": "school_reference_points",
+      "source_name": "School Reference Points",
+      "constraint_category": "school",
+      "role": "school_reference_dictionary",
+      "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/144",
+      "layer_id": 144,
+      "layer_name": "Schools",
+      "service_type": "ArcGIS MapServer Feature Layer",
+      "geometry_type": "point",
+      "authoritative": true,
+      "refresh_notes": "Refresh as a school reference/dictionary layer; do not use point distance for parcel assignment.",
+      "review_status": "registered_not_ingested",
+            "notes": [
+                "Use only as a school reference table and name matching dictionary.",
+                "CFS V1 includes public elementary, middle, and high schools only; private, magnet, and Other school records are preserved for QA/future work.",
+                "Preserve private, magnet, and Other records for QA/future work."
+            ]
+        }
   ]
 }
