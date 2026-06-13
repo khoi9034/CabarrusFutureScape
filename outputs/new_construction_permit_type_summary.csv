@@ -1,0 +1,4 @@
+permit_type_class,permit_type_raw,permit_count
+residential_new_construction,Building Residential New,19047
+commercial_new_construction,Building Commercial New,1566
+review_required,,1

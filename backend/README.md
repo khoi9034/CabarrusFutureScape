@@ -1424,6 +1424,94 @@ The zones endpoint is intended for map-safe FEMA source visualization. It is
 separate from the parcel-based Flood Constraints marker workflow and does not
 select parcels by itself.
 
+## School Constraint Endpoints
+
+```text
+GET /constraints/schools/statistics
+GET /constraints/schools/{official_parcel_id}
+GET /constraints/schools/filter
+GET /constraints/schools/district-summary
+GET /constraints/schools/qa-summary
+```
+
+These endpoints expose read-only school assignment and QA intelligence from
+`public.parcel_school_assignment`, `public.parcel_school_summary`,
+`public.school_reference`, and `public.school_zones`.
+
+Examples:
+
+```text
+GET http://127.0.0.1:8000/constraints/schools/statistics
+GET http://127.0.0.1:8000/constraints/schools/CFS-PARCEL-0149726579
+GET http://127.0.0.1:8000/constraints/schools/filter?school_assignment_review_required=true&limit=10
+GET http://127.0.0.1:8000/constraints/schools/district-summary?school_level=elementary
+GET http://127.0.0.1:8000/constraints/schools/qa-summary
+```
+
+Important caveats:
+
+- Parcel assignment uses attendance-zone polygon overlap only.
+- School point records are used only as a reference/name dictionary.
+- CFS V1 includes public CCS elementary, middle, and high schools only.
+- KCS, private, magnet, Other, and non-level records are preserved for QA but
+  excluded from V1 outputs.
+- `public.school_capacity` is intentionally empty until vetted
+  enrollment/capacity data is approved.
+- `capacity_status` is `not_available`, school scores are `null`, and
+  `school_constraint_class` is `not_scored`.
+
+Current global metrics:
+
+- Total parcels: `110,017`
+- Elementary assigned parcels: `91,161`
+- Middle assigned parcels: `86,221`
+- High assigned parcels: `91,161`
+- Assignment review required parcels: `75,143`
+- Capacity data available parcels: `0`
+
+## New Construction Permit Endpoints
+
+```text
+GET /development/new-construction/statistics
+GET /development/new-construction/trends
+GET /development/new-construction/parcel/{official_parcel_id}
+GET /development/new-construction/labels/summary
+GET /development/prediction/features/summary
+```
+
+These endpoints expose Phase 10A staff-provided new construction permit
+intelligence from:
+
+- `public.new_construction_permits_clean`
+- `public.new_construction_permit_parcel_relationship`
+- `public.parcel_new_construction_summary`
+- `public.parcel_development_prediction_labels`
+
+Examples:
+
+```text
+GET http://127.0.0.1:8000/development/new-construction/statistics
+GET http://127.0.0.1:8000/development/new-construction/trends
+GET http://127.0.0.1:8000/development/new-construction/parcel/CFS-PARCEL-0149782119
+GET http://127.0.0.1:8000/development/new-construction/labels/summary
+GET http://127.0.0.1:8000/development/prediction/features/summary
+```
+
+Important caveats:
+
+- These are historical permit metrics and future target-label summaries only.
+- No production model is trained in Phase 10A.
+- No prediction probability or development score is exposed.
+- Null, short, placeholder, unmatched, and ambiguous parcel numbers are not
+  force-matched.
+- The prediction feature summary endpoint reports Phase 10B feature matrix
+  readiness only. `model_active=false` and no probability is returned.
+- Current-context feature caveats are documented in
+  `docs/modeling/development_prediction_feature_registry.md`.
+- Phase 10C may add internal baseline experiment metadata to
+  `/development/prediction/features/summary`, but it still does not expose a
+  parcel prediction endpoint or frontend probability. `production_ready=false`.
+
 ## Tests
 
 ```powershell

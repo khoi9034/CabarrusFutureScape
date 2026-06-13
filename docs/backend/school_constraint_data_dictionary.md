@@ -26,8 +26,8 @@ Raw Cabarrus school reference point features from `MapServer/144`.
 
 ### `public.school_reference`
 
-Clean school reference dictionary. Includes public CFS V1 records and excluded
-QA records.
+Clean school reference dictionary. Includes public CCS CFS V1 records and
+excluded QA records.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -39,7 +39,7 @@ QA records.
 | `school_type` | text | `public` or `non_cfs_v1`. |
 | `school_system` | text | Source-inferred system such as `CCS` or `KCS`. |
 | `address` | text | Reference address. |
-| `include_in_cfs_v1` | boolean | True for public elementary/middle/high school references. |
+| `include_in_cfs_v1` | boolean | True for public CCS elementary/middle/high school references. |
 | `exclusion_reason` | text | Reason excluded from CFS V1, when applicable. |
 | `source_layer` | text | Source layer label. |
 | `source_objectid` | text | Source object ID. |
@@ -63,7 +63,7 @@ Clean merged zone table:
 | `school_name_raw` | text | Source zone school name. |
 | `school_name_normalized` | text | Normalized name for reference matching. |
 | `school_level` | text | `elementary`, `middle`, or `high`. |
-| `school_system` | text | Matched reference school system when available. |
+| `school_system` | text | Inferred or matched school system, such as `CCS` or `KCS`. |
 | `matched_school_reference_id` | text | Matching `public.school_reference` ID when available. |
 | `match_confidence` | text | `normalized_exact`, `fuzzy_review`, or unmatched QA value. |
 | `include_in_cfs_v1` | boolean | True when zone is eligible for CFS V1 assignment. |
@@ -162,23 +162,48 @@ Combines `public.parcel_school_assignment` with `public.school_capacity`.
 
 - school reference raw rows: `53`
 - school reference clean rows: `53`
-- CFS V1 included school references: `41`
+- CFS V1 included public CCS school references: `34`
+- excluded/preserved school references: `19`
 - clean school zones: `44`
+- CFS V1 included school zones: `35`
+- excluded/preserved school zones: `9`
 - parcel school assignment rows: `110,017`
+- assignment review required parcels: `75,143`
 - parcel school summary rows: `110,017`
 - school capacity rows: `0`
 - non-null school constraint scores: `0`
 
-## API Readiness Notes
+Excluded reference rows remain available for QA and future policy expansion:
+`level_not_v1` = `11`, `non_ccs_not_v1` = `7`, and `magnet_not_v1` = `1`.
+KCS attendance zones are preserved in source/QA tables but are not used for CFS
+V1 parcel assignment.
 
-Recommended future endpoints:
+## Phase 8B API Readiness Notes
+
+Implemented read-only endpoints:
 
 - `GET /constraints/schools/{official_parcel_id}`
 - `GET /constraints/schools/statistics`
 - `GET /constraints/schools/filter`
+- `GET /constraints/schools/district-summary`
+- `GET /constraints/schools/qa-summary`
+
+These endpoints expose assignment, capacity-readiness, and QA status. They do
+not expose a final school capacity score because `public.school_capacity` is
+empty and no vetted enrollment/capacity source has been ingested.
+
+Core response caveats:
+
+- `capacity_status` remains `not_available`.
+- `school_capacity_score` remains `NULL`.
+- `school_constraint_score` remains `NULL`.
+- `school_constraint_class` remains `not_scored`.
+- `recommended_action` remains `capacity_data_needed` while capacity is absent.
+
+Future endpoints may add:
+
 - `GET /constraints/schools/zones`
 - `GET /constraints/schools/summary`
 
-Future endpoints should expose assignment and QA status before capacity scores.
-Capacity scoring should remain unavailable until real enrollment/capacity data
-is ingested and reviewed.
+Capacity scoring should remain unavailable until real enrollment/capacity data is
+ingested and reviewed.

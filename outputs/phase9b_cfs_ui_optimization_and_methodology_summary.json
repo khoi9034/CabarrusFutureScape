@@ -1,0 +1,119 @@
+{
+  "phase": "Phase 9B",
+  "status": "implemented",
+  "generated_at": "2026-06-12",
+  "scope": "CFS UI optimization, dashboard cleanup, fullscreen map behavior, SceneView performance tuning, and methodology transparency",
+  "branch": "main",
+  "sceneview_optimization_changes": [
+    "Configured SceneView as a Cabarrus-focused local scene instead of an unconstrained global scene.",
+    "Added a Cabarrus study extent in src/lib/gis/gisConfig.ts.",
+    "Applied SceneView clippingArea from the Cabarrus study extent.",
+    "Constrained SceneView altitude and tilt to reduce excessive global rendering behavior.",
+    "Reduced expensive visual effects by disabling atmosphere, stars, and direct shadows.",
+    "Reduced SceneView qualityProfile from high to medium for prototype responsiveness.",
+    "Preserved selected parcel focus, parcel cage, development hotspots, flood constraints, and FEMA flood zones."
+  ],
+  "data_request_optimization_changes": [
+    "Closed Due Diligence collapsed sections now lazy-render their contents, reducing hidden panel API calls.",
+    "Overview no longer renders full countywide parcel/development/flood metric panels.",
+    "Developer-only temporal, diagnostics, scenario, and report-preview surfaces remain hidden unless NEXT_PUBLIC_CFS_DEVELOPER_MODE=true.",
+    "FEMA Flood Zones default limit changed from 500 polygons to 100 polygons.",
+    "Visible-extent FEMA flood zone fallback also uses 100 polygons when no extent is available.",
+    "No backend API contracts or PostGIS schemas were changed."
+  ],
+  "left_panel_layer_control_cleanup": [
+    "Left map layer rail default desktop width increased to 336px.",
+    "Added desktop drag handle so the map layer rail can be resized between 292px and 430px.",
+    "Map Layers remains collapsed by default to reduce initial visual noise.",
+    "Layer status chips were redesigned as wrapping readable badges instead of tiny truncated uppercase labels.",
+    "Development Hotspots, Flood Constraints, FEMA Flood Zones, placeholder layers, and existing toggles were preserved."
+  ],
+  "fullscreen_map_behavior_changes": [
+    "Fullscreen map mode keeps the left layer rail available.",
+    "Fullscreen map mode hides the right intelligence panel.",
+    "Fullscreen map mode hides the bottom county KPI strip.",
+    "Escape still exits fullscreen map focus mode.",
+    "Panel state is preserved when returning from fullscreen."
+  ],
+  "right_overview_intelligence_cleanup": [
+    "Overview mode now focuses on selected parcel snapshot and next action.",
+    "Removed the heavy county pulse insight block from the right Overview rail.",
+    "Detailed parcel, development, flood, and school panels remain in Due Diligence or supporting collapsed sections.",
+    "Selected parcel Overview summary remains concise with parcel ID, owner/account, neighborhood/subdivision, zoning, FEMA review status, latest permit activity, and links to Due Diligence/Executive Print."
+  ],
+  "bottom_kpi_cleanup": [
+    "Bottom KPI row remains limited to four compact county pulse indicators.",
+    "Reduced footer padding, icon size, card padding, and value text size.",
+    "KPI strip is hidden in fullscreen map mode and Executive Print mode."
+  ],
+  "methodology_model_data_section_added": {
+    "location": "Top navigation product mode: Methodology",
+    "mode_id": "methodology",
+    "contents": [
+      "Data Used",
+      "Methodology",
+      "Assumptions",
+      "Limitations",
+      "Current Decision Boundary",
+      "Parcel-based planning intelligence foundation"
+    ],
+    "documents": [
+      "Parcels, zoning, permit/development activity, FEMA NFHL flood constraints, school attendance-zone assignment, and presentation-derived school utilization seed.",
+      "Flood constraints are regulatory FEMA polygon-to-parcel overlays.",
+      "School assignment uses attendance-zone polygon overlap, not school point distance.",
+      "Permit segmentation and hotspot concentration are descriptive signals.",
+      "Prediction, official school capacity scoring, and final infrastructure readiness scoring are not active."
+    ]
+  },
+  "removed_or_reworked_redundant_ui": [
+    "Overview no longer duplicates full countywide metric panels already represented by the bottom KPI row or detailed sections.",
+    "Map layer status text no longer appears as unreadable one-letter/tiny chips.",
+    "Full detail panels are tucked into Due Diligence collapsed sections rather than appearing in the default Overview."
+  ],
+  "files_changed_for_phase9b": [
+    "README.md",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/MetricsBar.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/components/layout/TopNav.tsx",
+    "src/hooks/useFloodZoneLayer.ts",
+    "src/lib/gis/gisConfig.ts",
+    "src/lib/gis/sceneViewFactory.ts",
+    "src/types/index.ts",
+    "src/types/map/floodZones.ts"
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not run; backend files were not changed for this task",
+    "local_runtime_check": {
+      "localhost_3000": "not reachable during final check; dev server was not running",
+      "fastapi_health": "not reachable during final check; backend dev server was not running",
+      "dev_cfs_launcher": "not run because launcher scripts were not changed"
+    }
+  },
+  "preserved_workflows": [
+    "top parcel search",
+    "selected parcel workflow",
+    "selected parcel cage/highlight",
+    "Due Diligence",
+    "Executive Print",
+    "development hotspots",
+    "flood constraints",
+    "FEMA flood zones",
+    "school read-only frontend integration",
+    "API/static fallback behavior"
+  ],
+  "remaining_known_limitations": [
+    "ArcGIS performance still depends on browser GPU, local machine resources, and ArcGIS asset loading.",
+    "FEMA polygon rendering remains capped/extent-filtered for prototype safety.",
+    "Some placeholder readiness layers remain intentionally mock/static.",
+    "Official school capacity scoring is not active until verified enrollment/capacity data is ingested.",
+    "Predictive modeling is not implemented.",
+    "A live browser smoke test was not completed because the local dev stack was not running during final validation."
+  ],
+  "recommended_next_step": "Start the local dev stack with npm run dev:cfs and visually smoke test Overview, Methodology, fullscreen map mode, selected parcel flow, Development Hotspots, Flood Constraints, FEMA Flood Zones, and Due Diligence."
+}

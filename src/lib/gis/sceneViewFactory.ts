@@ -16,6 +16,15 @@ export function createCabarrusSceneView(
     basemap: cabarrusSceneConfig.basemap,
     ground: cabarrusSceneConfig.ground,
   });
+  const clippingArea = new runtime.Extent({
+    spatialReference: {
+      wkid: cabarrusSceneConfig.studyExtent.wkid,
+    },
+    xmax: cabarrusSceneConfig.studyExtent.xmax,
+    xmin: cabarrusSceneConfig.studyExtent.xmin,
+    ymax: cabarrusSceneConfig.studyExtent.ymax,
+    ymin: cabarrusSceneConfig.studyExtent.ymin,
+  });
 
   const view = new runtime.SceneView({
     camera: {
@@ -28,24 +37,35 @@ export function createCabarrusSceneView(
       tilt: cabarrusSceneConfig.camera.tilt,
     },
     container,
+    constraints: {
+      altitude: {
+        max: 30000,
+        min: 250,
+      },
+      tilt: {
+        max: 76,
+      },
+    },
     environment: {
-      atmosphereEnabled: true,
+      atmosphereEnabled: false,
       background: {
         color: [4, 8, 14, 1],
         type: "color",
       },
       lighting: {
         date: new Date(cabarrusSceneConfig.mockLightingDate),
-        directShadowsEnabled: true,
+        directShadowsEnabled: false,
       },
-      starsEnabled: true,
+      starsEnabled: false,
     },
     map,
-    qualityProfile: "high",
+    qualityProfile: "medium",
     ui: {
       components: [],
     },
+    viewingMode: "local",
   });
+  view.clippingArea = clippingArea;
 
   return { map, view };
 }

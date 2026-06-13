@@ -1,0 +1,106 @@
+{
+  "phase": "9E",
+  "title": "Fast Responsive Left Panel Resize and Futuristic Enterprise UI Polish",
+  "status": "implemented",
+  "branch": "main",
+  "files_changed": [
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/styles/cfs-theme.css"
+  ],
+  "resize_collapse_implementation": {
+    "edge_handle": {
+      "added": true,
+      "location": "middle-right edge of the map layer rail",
+      "accessible_label": "Resize or collapse map layers panel",
+      "keyboard_support": "Enter and Space toggle collapse or expand",
+      "old_header_collapse_button": "removed from the Map Layers header"
+    },
+    "drag_behavior": {
+      "pointer_events": true,
+      "request_animation_frame": true,
+      "react_state_updates_on_pointermove": false,
+      "css_variable_updated_during_drag": "--cfs-layer-rail-width",
+      "final_width_committed_on_pointerup": true,
+      "text_selection_disabled_during_drag": true,
+      "col_resize_cursor_during_drag": true,
+      "grid_column_animation_removed": true
+    },
+    "width_rules": {
+      "default_expanded_width_px": 360,
+      "minimum_expanded_width_px": 300,
+      "maximum_expanded_width": "min(640px, 40vw)",
+      "collapse_threshold_px": 220,
+      "collapsed_width_px": 64
+    },
+    "local_storage": {
+      "key": "cfs.layerRailWidth",
+      "stores_previous_expanded_width": true,
+      "restores_after_mount_to_avoid_hydration_mismatch": true
+    }
+  },
+  "futuristic_styling_changes": [
+    "Added a slim luminous glass edge handle for the layer rail.",
+    "Moved layer rail scrolling into an inner container so the outside handle is not clipped.",
+    "Added subtle enterprise panel depth, gradient border accents, and lower-cost glass styling.",
+    "Reduced global backdrop blur from 18px to 12px.",
+    "Replaced orb-like radial body accents with restrained linear dark executive gradients.",
+    "Improved layer card text wrapping so essential descriptions and legends are readable without hover.",
+    "Expanded hotspot concentration legend from cramped four-column chips into readable two-column rows.",
+    "Preserved the existing dark CFS product structure and map layer workflows."
+  ],
+  "performance_safeguards": [
+    "No backend, PostGIS, data model, API, TopNav, parcel search, or SceneView data layer changes.",
+    "No new dependencies added.",
+    "No heavy animations, video backgrounds, particles, or WebGL overlays added.",
+    "Resize uses pointer events and requestAnimationFrame with CSS variable updates instead of React state per pixel.",
+    "Grid-template-column transition removed so collapse/resize responds immediately.",
+    "Stored rail width is restored after mount to avoid SSR/client hydration mismatch."
+  ],
+  "fullscreen_mode": {
+    "right_panel_hidden": "existing behavior preserved",
+    "bottom_kpi_hidden": "existing behavior preserved",
+    "left_panel_available": true,
+    "edge_handle_available_in_fullscreen": true
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "frontend_health": "http://localhost:3000 returned 200",
+    "backend_health": "http://127.0.0.1:8000/health returned 200",
+    "backend_database_health": "http://127.0.0.1:8000/health/database returned 200",
+    "critical_api_checks": {
+      "parcels_search": 200,
+      "parcel_detail_include_geometry": 200,
+      "development_hotspots": 200,
+      "flood_high_review": 200,
+      "flood_summary": 200,
+      "fema_flood_zones": 200,
+      "school_statistics": 200,
+      "school_parcel_detail": 200,
+      "school_qa_summary": 200
+    },
+    "next_dev_log_api_errors": "none found after final restart",
+    "hydration_mismatch": "fixed; no hydration mismatch found after final restart"
+  },
+  "smoke_test_results": {
+    "frontend_loads": "passed via dev:cfs and direct HTTP 200",
+    "left_panel_default_width": "360px by default, saved width restored after mount",
+    "edge_handle_present": "verified in initial browser DOM check before browser navigation became unavailable",
+    "old_header_collapse_button_removed": "verified by source and build",
+    "click_collapse_expand": "implemented; initial browser check confirmed aria state changed, final visual retest was limited by in-app browser navigation timeouts",
+    "drag_resize": "implemented with pointer events and requestAnimationFrame; final visual retest was limited by in-app browser navigation timeouts",
+    "fullscreen_behavior": "source preserved existing right-panel and KPI hiding; edge handle remains part of layer rail",
+    "text_readability": "layer labels and legends changed from truncated cramped rows to wrapping readable rows",
+    "selected_parcel_school_flood_fema_development_workflows": "API checks passed; feature code paths were not modified",
+    "browser_tool_limitation": "The in-app browser CDP navigation timed out during final visual smoke testing, but the local app and APIs were healthy and logs showed no API failures."
+  },
+  "remaining_ui_limitations": [
+    "Manual visual confirmation in a normal browser is still recommended for the exact tactile feel of drag resizing.",
+    "ArcGIS label placement warnings may still appear for draped graphics; they are unrelated to this resize/UI polish pass.",
+    "Further premium polish could target individual cards, but this pass intentionally avoided broad layout redesign."
+  ]
+}

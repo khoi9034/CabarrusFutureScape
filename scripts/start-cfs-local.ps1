@@ -22,7 +22,10 @@ $ApiChecks = @(
   "/development/hotspots?limit=1",
   "/constraints/flood/high-review?limit=1",
   "/constraints/flood/summary",
-  "/constraints/flood/zones?limit=1"
+  "/constraints/flood/zones?limit=1",
+  "/constraints/schools/statistics",
+  "/constraints/schools/CFS-PARCEL-0149726579",
+  "/constraints/schools/qa-summary"
 )
 
 function Write-Step {

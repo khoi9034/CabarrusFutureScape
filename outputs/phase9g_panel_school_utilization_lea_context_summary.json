@@ -1,0 +1,122 @@
+{
+  "phase": "9G",
+  "status": "complete",
+  "branch": "main",
+  "panel_collapse": {
+    "old_collapse_threshold_px": 116,
+    "new_collapse_threshold_px": 78,
+    "collapsed_rail_width_px": 64,
+    "expanded_min_width_px": 300,
+    "default_expanded_width_px": 360,
+    "instant_collapse_fix": "Dragging below the threshold now applies the collapsed visual state immediately and uses the collapsed rail width so expanded words do not remain squished before pointer release.",
+    "performance_safeguards": [
+      "Expanded content is hidden while the live drag preview is collapsed.",
+      "Transitions remain disabled during active drag.",
+      "Collapsed rail keeps the Layers label visible.",
+      "Previous expanded width is preserved for re-expansion."
+    ]
+  },
+  "school_utilization_layer": {
+    "default_level": "all",
+    "default_limit": 500,
+    "layer_default_state": "off",
+    "api_endpoint": "GET /constraints/schools/utilization-zones",
+    "query_used_for_smoke_test": "/constraints/schools/utilization-zones?level=all&limit=500",
+    "total_joinable_zone_count_returned": 31,
+    "polygons_returned": 31,
+    "display_changes": [
+      "All levels option added.",
+      "All current seed zones limit option added.",
+      "Layer status reports all-level zone counts.",
+      "Legend keeps presentation-derived utilization caveat visible."
+    ],
+    "caveat": "Presentation-derived SY 2024-2025 utilization seed. Needs verification and does not imply official capacity scoring."
+  },
+  "lea_pupil_context": {
+    "source_copy": "data/schools/raw/lea_pupil_info_2025.csv",
+    "source_confidence": "uploaded_lea_pupil_file",
+    "district_level_only": true,
+    "sql_created": "cfs-data-pipelines/sql/create_school_lea_pupil_context.sql",
+    "ingestion_script": "cfs-data-pipelines/ingest/ingest_lea_pupil_context.py",
+    "postgis_table": "public.school_lea_pupil_context",
+    "input_measure_rows": 4,
+    "long_rows_loaded": 60,
+    "measure_types": [
+      "ADA",
+      "ADM",
+      "Enrollment",
+      "MLD"
+    ],
+    "grade_levels": [
+      "kindergarten",
+      "grade_1",
+      "grade_2",
+      "grade_3",
+      "grade_4",
+      "grade_5",
+      "grade_6",
+      "grade_7",
+      "grade_8",
+      "grade_9",
+      "grade_10",
+      "grade_11",
+      "grade_12",
+      "grade_13",
+      "total"
+    ],
+    "districtwide_enrollment_total": 36287,
+    "public_school_capacity_untouched": true,
+    "school_capacity_scores_calculated": false,
+    "ingestion_summary": "outputs/lea_pupil_context_ingestion_summary.json"
+  },
+  "backend_endpoints_added": [
+    "GET /constraints/schools/lea-pupil-context",
+    "GET /constraints/schools/lea-pupil-context/summary"
+  ],
+  "frontend_display": {
+    "methodology_workspace_updated": true,
+    "api_helpers_added": [
+      "getSchoolLeaPupilContext",
+      "getSchoolLeaPupilContextSummary"
+    ],
+    "display_scope": "Methodology/data transparency only; not selected parcel-specific."
+  },
+  "documentation_updated": [
+    "README.md",
+    "docs/constraints/school_capacity_ingestion_plan.md",
+    "docs/backend/school_capacity_data_dictionary.md",
+    "docs/constraints/school_presentation_utilization_seed.md"
+  ],
+  "tests_added": [
+    "backend/tests/test_school_lea_pupil_context.py"
+  ],
+  "validation_results": {
+    "lea_importer_dry_run": "passed; 4 input rows, 60 long rows, Enrollment total 36287",
+    "lea_importer_truncate_and_load": "passed; 60 rows loaded",
+    "python_compileall_ingest": "passed",
+    "python_compileall_backend_app": "passed",
+    "focused_school_tests": "18 passed, 1 warning",
+    "full_backend_pytest": "174 passed, 3 warnings",
+    "npm_typecheck": "passed",
+    "npm_lint": "passed",
+    "npm_build_webpack": "passed",
+    "npm_dev_cfs_no_restart": "passed; existing FastAPI and Next.js services healthy",
+    "git_diff_check": "passed; line-ending warnings only"
+  },
+  "runtime_smoke_tests": {
+    "frontend": "http://localhost:3000 returned 200",
+    "backend_root": "http://127.0.0.1:8000/ returned 200",
+    "backend_health": "http://127.0.0.1:8000/health returned 200",
+    "cors_preflight": "OPTIONS from http://localhost:3000 returned Access-Control-Allow-Origin",
+    "lea_context_summary": "GET /constraints/schools/lea-pupil-context/summary returned 200",
+    "lea_context_rows": "GET /constraints/schools/lea-pupil-context?measure_type=Enrollment&limit=20 returned 200",
+    "school_utilization_zones_all": "GET /constraints/schools/utilization-zones?level=all&limit=500 returned 200 with 31 zones",
+    "browser_smoke": "Cabarrus FutureScape loaded; no captured console errors; Methodology text present"
+  },
+  "remaining_limitations": [
+    "LEA pupil context is district-level only and cannot support school-level capacity scoring.",
+    "Official school-level enrollment, functional capacity, available seats, and grade-level capacity files are still needed.",
+    "Only matched presentation-derived utilization seed zones render in the school utilization layer; current all-level count is 31, not all 37 seed rows.",
+    "School capacity remains Capacity Data Needed / Not Scored."
+  ]
+}

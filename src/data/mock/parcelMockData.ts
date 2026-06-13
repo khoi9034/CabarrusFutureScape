@@ -3,7 +3,7 @@ import type { ParcelSummary } from "@/types";
 export const mockParcels: ParcelSummary[] = [
   {
     parcelId: "CAB-151-4823",
-    address: "Concord Parkway Growth Node",
+    address: "Legacy Mock Parcel A",
     ownerType: "Commercial",
     zoning: "MX-2 Mixed Use",
     acreage: 18.6,
@@ -31,7 +31,7 @@ export const mockParcels: ParcelSummary[] = [
   },
   {
     parcelId: "CAB-209-7741",
-    address: "Kannapolis Mobility Corridor",
+    address: "Legacy Mock Parcel B",
     ownerType: "Private",
     zoning: "C-2 Commercial",
     acreage: 11.4,
@@ -59,7 +59,7 @@ export const mockParcels: ParcelSummary[] = [
   },
   {
     parcelId: "CAB-033-9185",
-    address: "Harrisburg Service Edge",
+    address: "Legacy Mock Parcel C",
     ownerType: "Municipal",
     zoning: "O-I Office Institutional",
     acreage: 25.2,
@@ -87,7 +87,7 @@ export const mockParcels: ParcelSummary[] = [
   },
   {
     parcelId: "CAB-712-2042",
-    address: "Midland Industrial Reserve",
+    address: "Legacy Mock Parcel D",
     ownerType: "Institutional",
     zoning: "LI Light Industrial",
     acreage: 43.7,
@@ -115,7 +115,7 @@ export const mockParcels: ParcelSummary[] = [
   },
   {
     parcelId: "CAB-448-6670",
-    address: "Mount Pleasant Town Center",
+    address: "Legacy Mock Parcel E",
     ownerType: "Private",
     zoning: "TC Town Center",
     acreage: 8.9,

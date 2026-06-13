@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-06-13T00:14:10.356052",
+  "dataset": "lea_pupil_context",
+  "source_file": "C:\\CabarrusFutureScape\\data\\schools\\raw\\lea_pupil_info_2025.csv",
+  "dry_run": false,
+  "input_measure_rows": 4,
+  "long_row_count": 60,
+  "inserted_rows": 60,
+  "measure_types": [
+    "ADA",
+    "ADM",
+    "Enrollment",
+    "MLD"
+  ],
+  "grade_levels": [
+    "kindergarten",
+    "grade_1",
+    "grade_2",
+    "grade_3",
+    "grade_4",
+    "grade_5",
+    "grade_6",
+    "grade_7",
+    "grade_8",
+    "grade_9",
+    "grade_10",
+    "grade_11",
+    "grade_12",
+    "grade_13",
+    "total"
+  ],
+  "districtwide_enrollment_total": 36287,
+  "source_confidence": "uploaded_lea_pupil_file",
+  "public_school_capacity_untouched": true,
+  "school_capacity_scores_calculated": false,
+  "notes": "District-level LEA pupil context only; not school-level capacity or utilization."
+}

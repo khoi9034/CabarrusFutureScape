@@ -1,0 +1,2 @@
+2026-06-11 06:28:48,310 INFO Executing parcel school summary SQL: C:\CabarrusFutureScape\cfs-data-pipelines\sql\create_parcel_school_summary.sql
+2026-06-11 06:29:04,088 INFO Parcel school summary row count: 110017

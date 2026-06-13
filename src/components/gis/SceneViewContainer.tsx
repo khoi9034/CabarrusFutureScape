@@ -57,6 +57,10 @@ import type {
   FloodZoneExtent,
   FloodZoneMapPolygon,
 } from "@/types/map/floodZones";
+import type {
+  SchoolUtilizationZoneMapPolygon,
+  SelectedSchoolUtilizationZone,
+} from "@/types/map/schoolUtilizationZones";
 
 type ArcGISHandle = {
   remove: () => void;
@@ -112,9 +116,16 @@ interface FloodZoneInfoCard {
   sourceObjectid: number | null;
 }
 
+type SchoolUtilizationZoneInfoCard = SelectedSchoolUtilizationZone;
+
 interface OverlayCardPosition {
   x: number;
   y: number;
+}
+
+interface SchoolUtilizationHoverCallout {
+  info: SchoolUtilizationZoneInfoCard;
+  position: OverlayCardPosition;
 }
 
 export function SceneViewContainer() {
@@ -129,10 +140,16 @@ export function SceneViewContainer() {
   const hotspotLayerRef = useRef<GraphicsLayer | null>(null);
   const floodConstraintLayerRef = useRef<GraphicsLayer | null>(null);
   const floodZoneLayerRef = useRef<GraphicsLayer | null>(null);
+  const schoolUtilizationZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const lastFocusedParcelIdRef = useRef<string | null>(null);
   const latestFocusRequestParcelIdRef = useRef<string | null>(null);
   const runtimeRef = useRef<ArcGISRuntime | null>(null);
   const activeLayerIdsRef = useRef<string[]>([]);
+  const hoveredSchoolZoneIdRef = useRef<string | null>(null);
+  const selectedSchoolZoneIdRef = useRef<string | null>(null);
+  const schoolHoverFrameRef = useRef<number | null>(null);
+  const schoolUtilizationHoverRef =
+    useRef<SchoolUtilizationHoverCallout | null>(null);
   const focusBeaconTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -159,6 +176,8 @@ export function SceneViewContainer() {
   const [focusBeacon, setFocusBeacon] = useState<ParcelFocusBeacon | null>(
     null,
   );
+  const [lastParcelFocusSummary, setLastParcelFocusSummary] =
+    useState<ParcelFocusBeacon | null>(null);
   const [focusBeaconCollapsed, setFocusBeaconCollapsed] = useState(false);
   const [focusBeaconPosition, setFocusBeaconPosition] =
     useState<OverlayCardPosition | null>(null);
@@ -174,8 +193,11 @@ export function SceneViewContainer() {
     useState<FloodZoneInfoCard | null>(null);
   const [floodZoneInfoPosition, setFloodZoneInfoPosition] =
     useState<OverlayCardPosition | null>(null);
+  const [schoolUtilizationHover, setSchoolUtilizationHover] =
+    useState<SchoolUtilizationHoverCallout | null>(null);
   const {
     activeLayerIds,
+    clearSelectedSchoolUtilizationZone,
     clearMapError,
     clearSelectedParcel,
     developmentHotspotControls,
@@ -190,11 +212,17 @@ export function SceneViewContainer() {
     mapError,
     selectedParcel,
     selectedParcelId,
+    selectedParcelIntelligence,
+    selectedParcelIntelligenceSource,
     selectParcel,
+    schoolUtilizationZoneLayer,
+    schoolUtilizationZonesEnabled,
+    selectedSchoolUtilizationZone,
     setFloodZoneViewExtent,
     setMapFocusMode,
     setMapError,
     setMapStatus,
+    setSelectedSchoolUtilizationZone,
     toggleMapFocusMode,
   } = useDashboardState();
   const selectedParcelIdRef = useRef(selectedParcelId);
@@ -206,6 +234,16 @@ export function SceneViewContainer() {
   useEffect(() => {
     selectedParcelIdRef.current = selectedParcelId;
   }, [selectedParcelId]);
+
+  useEffect(() => {
+    selectedSchoolZoneIdRef.current =
+      selectedSchoolUtilizationZone?.zoneId ?? null;
+    updateSchoolUtilizationZoneInteractionSymbols(
+      schoolUtilizationZoneLayerRef.current,
+      selectedSchoolZoneIdRef.current,
+      hoveredSchoolZoneIdRef.current,
+    );
+  }, [selectedSchoolUtilizationZone?.zoneId]);
 
   useEffect(() => {
     const view = viewRef.current;
@@ -234,6 +272,64 @@ export function SceneViewContainer() {
   const closeFloodZoneInfo = useCallback(() => {
     setFloodZoneInfo(null);
     setFloodZoneInfoPosition(null);
+  }, []);
+
+  const closeSchoolUtilizationInfo = useCallback(() => {
+    clearSelectedSchoolUtilizationZone();
+  }, [clearSelectedSchoolUtilizationZone]);
+
+  const updateSchoolUtilizationHover = useCallback(
+    (
+      info: SchoolUtilizationZoneInfoCard,
+      position: OverlayCardPosition,
+    ) => {
+      const current = schoolUtilizationHoverRef.current;
+      const nextHoveredZoneId = info.zoneId;
+
+      if (
+        current?.info.zoneId === nextHoveredZoneId &&
+        Math.abs(current.position.x - position.x) < 10 &&
+        Math.abs(current.position.y - position.y) < 10
+      ) {
+        return;
+      }
+
+      const nextHover = {
+        info,
+        position,
+      };
+
+      schoolUtilizationHoverRef.current = nextHover;
+      setSchoolUtilizationHover(nextHover);
+
+      if (hoveredSchoolZoneIdRef.current !== nextHoveredZoneId) {
+        hoveredSchoolZoneIdRef.current = nextHoveredZoneId;
+        updateSchoolUtilizationZoneInteractionSymbols(
+          schoolUtilizationZoneLayerRef.current,
+          selectedSchoolZoneIdRef.current,
+          nextHoveredZoneId,
+        );
+      }
+    },
+    [],
+  );
+
+  const clearSchoolUtilizationHover = useCallback(() => {
+    if (!schoolUtilizationHoverRef.current) {
+      return;
+    }
+
+    schoolUtilizationHoverRef.current = null;
+    setSchoolUtilizationHover(null);
+
+    if (hoveredSchoolZoneIdRef.current) {
+      hoveredSchoolZoneIdRef.current = null;
+      updateSchoolUtilizationZoneInteractionSymbols(
+        schoolUtilizationZoneLayerRef.current,
+        selectedSchoolZoneIdRef.current,
+        null,
+      );
+    }
   }, []);
 
   const closeFocusBeacon = useCallback(() => {
@@ -664,12 +760,14 @@ export function SceneViewContainer() {
         const focusStatusMessage = boundaryGraphic
           ? "Parcel boundary highlighted."
           : "Focused on map - boundary unavailable.";
-        setFocusBeacon({
+        const nextFocusSummary = {
           boundaryHighlighted: Boolean(boundaryGraphic),
           officialParcelId: focus.officialParcelId,
           pin14: focus.pin14,
           statusMessage: focusStatusMessage,
-        });
+        };
+        setLastParcelFocusSummary(nextFocusSummary);
+        setFocusBeacon(nextFocusSummary);
         setFocusBeaconCollapsed(false);
         if (focusBeaconTimeoutRef.current) {
           clearTimeout(focusBeaconTimeoutRef.current);
@@ -683,7 +781,7 @@ export function SceneViewContainer() {
           focusStatus: "focused",
           message: boundaryGraphic
             ? "Parcel boundary highlighted."
-            : "Focused on map — boundary unavailable.",
+            : "Focused on map - boundary unavailable.",
           officialParcelId: focus.officialParcelId,
         });
       } catch (focusError) {
@@ -707,6 +805,12 @@ export function SceneViewContainer() {
           "SceneView goTo failed",
           goToFailureDiagnostic,
         );
+        setLastParcelFocusSummary({
+          boundaryHighlighted: false,
+          officialParcelId: focus.officialParcelId,
+          pin14: focus.pin14,
+          statusMessage: "Map focus failed.",
+        });
         dispatchParcelMapFocusResult({
           focusStatus: "failed",
           message:
@@ -752,6 +856,9 @@ export function SceneViewContainer() {
         map.add(floodConstraintLayerRef.current);
         floodZoneLayerRef.current = createFemaFloodZoneLayer(runtime);
         map.add(floodZoneLayerRef.current);
+        schoolUtilizationZoneLayerRef.current =
+          createSchoolUtilizationZoneLayer(runtime);
+        map.add(schoolUtilizationZoneLayerRef.current);
         focusLayerRef.current = createParcelFocusLayer(runtime);
         map.add(focusLayerRef.current);
         layerRefs.current = layers;
@@ -790,6 +897,7 @@ export function SceneViewContainer() {
           ).then((handledHotspotClick) => {
             if (handledHotspotClick) {
               closeFloodZoneInfo();
+              closeSchoolUtilizationInfo();
               return;
             }
 
@@ -802,6 +910,7 @@ export function SceneViewContainer() {
             ).then((handledFloodClick) => {
               if (handledFloodClick) {
                 closeFloodZoneInfo();
+                closeSchoolUtilizationInfo();
                 return;
               }
 
@@ -813,14 +922,44 @@ export function SceneViewContainer() {
                 closeHotspotInfo,
                 closeFloodInfo,
               ).then((handledFloodZoneClick) => {
-                if (!handledFloodZoneClick) {
-                  void interactionController.handleClick(event);
+                if (handledFloodZoneClick) {
+                  closeSchoolUtilizationInfo();
+                  return;
                 }
+
+                void handleSchoolUtilizationZoneClick(
+                  view,
+                  event,
+                  schoolUtilizationZoneLayerRef.current,
+                  setSelectedSchoolUtilizationZone,
+                  closeHotspotInfo,
+                  closeFloodInfo,
+                  closeFloodZoneInfo,
+                ).then((handledSchoolClick) => {
+                  if (!handledSchoolClick) {
+                    void interactionController.handleClick(event);
+                  }
+                });
               });
             });
           });
         });
         hoverHandle = view.on("pointer-move", (event) => {
+          if (schoolHoverFrameRef.current !== null) {
+            return;
+          }
+
+          schoolHoverFrameRef.current = window.requestAnimationFrame(() => {
+            schoolHoverFrameRef.current = null;
+            void handleSchoolUtilizationZoneHover(
+              view,
+              event,
+              schoolUtilizationZoneLayerRef.current,
+              containerRef.current,
+              updateSchoolUtilizationHover,
+              clearSchoolUtilizationHover,
+            );
+          });
           interactionController.handleHover(event);
         });
         focusEventHandler = (event: Event) => {
@@ -894,6 +1033,11 @@ export function SceneViewContainer() {
         clearTimeout(focusBeaconTimeoutRef.current);
         focusBeaconTimeoutRef.current = null;
       }
+      if (schoolHoverFrameRef.current !== null) {
+        window.cancelAnimationFrame(schoolHoverFrameRef.current);
+        schoolHoverFrameRef.current = null;
+      }
+      clearSchoolUtilizationHover();
       focusLayerRef.current?.removeAll();
       focusLayerRef.current = null;
       hotspotLayerRef.current?.removeAll();
@@ -902,6 +1046,8 @@ export function SceneViewContainer() {
       floodConstraintLayerRef.current = null;
       floodZoneLayerRef.current?.removeAll();
       floodZoneLayerRef.current = null;
+      schoolUtilizationZoneLayerRef.current?.removeAll();
+      schoolUtilizationZoneLayerRef.current = null;
       layerRefs.current = {};
       runtimeRef.current = null;
       viewRef.current = null;
@@ -915,11 +1061,15 @@ export function SceneViewContainer() {
     closeFloodInfo,
     closeFloodZoneInfo,
     closeHotspotInfo,
+    closeSchoolUtilizationInfo,
     clearSelectedParcel,
+    clearSchoolUtilizationHover,
     selectParcel,
     setFloodZoneViewExtent,
     setMapError,
     setMapStatus,
+    setSelectedSchoolUtilizationZone,
+    updateSchoolUtilizationHover,
   ]);
 
   useEffect(() => {
@@ -1036,6 +1186,60 @@ export function SceneViewContainer() {
   ]);
 
   useEffect(() => {
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+
+    if (!runtime || !view || view.destroyed) {
+      return;
+    }
+
+    const schoolLayer = ensureSchoolUtilizationZoneLayer(runtime, view);
+    schoolUtilizationZoneLayerRef.current = schoolLayer;
+    schoolLayer.removeAll();
+
+    if (
+      !schoolUtilizationZonesEnabled ||
+      schoolUtilizationZoneLayer.status !== "ready"
+    ) {
+      clearSchoolUtilizationHover();
+      if (selectedSchoolUtilizationZone) {
+        clearSelectedSchoolUtilizationZone();
+      }
+      return;
+    }
+
+    schoolLayer.addMany(
+      schoolUtilizationZoneLayer.polygons
+        .map((polygon) =>
+          createSchoolUtilizationZoneGraphic(
+            runtime,
+            polygon,
+            selectedSchoolUtilizationZone?.zoneId ?? null,
+          ),
+        )
+        .filter((graphic): graphic is Graphic => Boolean(graphic)),
+    );
+
+    console.debug(
+      "[CFS school utilization zones]",
+      "rendered presentation-derived zones",
+      {
+        polygonCount: schoolUtilizationZoneLayer.polygons.length,
+        totalCount: schoolUtilizationZoneLayer.totalCount,
+      },
+    );
+  }, [
+    mapStatus,
+    clearSchoolUtilizationHover,
+    clearSelectedSchoolUtilizationZone,
+    schoolUtilizationZoneLayer.polygons,
+    schoolUtilizationZoneLayer.status,
+    schoolUtilizationZoneLayer.totalCount,
+    schoolUtilizationZonesEnabled,
+    selectedSchoolUtilizationZone,
+  ]);
+
+  useEffect(() => {
     updateSelectedParcelSymbols(
       getMockGraphicsLayerSubset(layerRefs.current, operationalLayerRegistry),
       selectedParcelId,
@@ -1063,18 +1267,38 @@ export function SceneViewContainer() {
     floodZoneInfo && floodZonesEnabled && floodZoneLayer.status === "ready"
       ? floodZoneInfo
       : null;
+  const visibleSchoolUtilizationInfo =
+    selectedSchoolUtilizationZone &&
+    schoolUtilizationZonesEnabled &&
+    schoolUtilizationZoneLayer.status === "ready"
+      ? selectedSchoolUtilizationZone
+      : null;
+  const visibleSchoolUtilizationOverlay =
+    visibleSchoolUtilizationInfo && isMapFocusMode
+      ? visibleSchoolUtilizationInfo
+      : null;
+  const visibleSchoolUtilizationHover =
+    schoolUtilizationHover &&
+    schoolUtilizationZonesEnabled &&
+    schoolUtilizationZoneLayer.status === "ready"
+      ? schoolUtilizationHover
+      : null;
 
   return (
     <MapViewportPlaceholder
       mapStatus={mapStatus}
+      parcelFocusSummary={lastParcelFocusSummary}
       sceneError={mapError}
       selectedParcel={selectedParcel}
+      selectedParcelId={selectedParcelId}
+      selectedParcelIntelligence={selectedParcelIntelligence}
+      selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
     >
       <div
         aria-label="Cabarrus County ArcGIS SceneView"
         className="absolute inset-0"
         ref={containerRef}
-        title="Interactive ArcGIS SceneView with mock Cabarrus County operational layers"
+        title="Interactive ArcGIS SceneView with Cabarrus County operational layers"
       />
       <button
         aria-label={isMapFocusMode ? "Exit map focus" : "Expand map"}
@@ -1506,6 +1730,156 @@ export function SceneViewContainer() {
           </div>
         </div>
       )}
+      {visibleSchoolUtilizationHover && (
+        <div
+          aria-label="School utilization hover details"
+          className="pointer-events-none fixed z-[81] w-[min(280px,calc(100vw-24px))] rounded-lg border border-[#9ff0bd]/30 bg-[#06101a]/94 px-3 py-3 text-left shadow-[0_16px_42px_rgba(0,0,0,0.34)] backdrop-blur-xl"
+          style={{
+            left: visibleSchoolUtilizationHover.position.x,
+            top: visibleSchoolUtilizationHover.position.y,
+          }}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#b9ffd1]">
+            School Utilization Zone
+          </p>
+          <p className="mt-1 truncate text-sm font-semibold text-white">
+            {visibleSchoolUtilizationHover.info.schoolName ?? "School zone"}
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+            <FloodInfoMetric
+              label="Level"
+              value={formatFloodPopupLabel(
+                visibleSchoolUtilizationHover.info.schoolLevel,
+              )}
+            />
+            <FloodInfoMetric
+              label="Utilization"
+              value={formatFloodPercent(
+                visibleSchoolUtilizationHover.info.utilizationPct,
+              )}
+            />
+            <FloodInfoMetric
+              label="Class"
+              value={formatSchoolUtilizationClassLabel(
+                visibleSchoolUtilizationHover.info.utilizationClass,
+              )}
+            />
+            <FloodInfoMetric
+              label="Year"
+              value={
+                visibleSchoolUtilizationHover.info.schoolYear
+                  ? `SY ${visibleSchoolUtilizationHover.info.schoolYear}`
+                  : null
+              }
+            />
+          </div>
+          <p className="mt-2 text-[11px] leading-5 text-slate-400">
+            Presentation-derived · Needs verification
+          </p>
+        </div>
+      )}
+      {visibleSchoolUtilizationOverlay && (
+        <div
+          aria-label="School utilization seed information"
+          className="fixed bottom-6 right-6 z-[82] w-[min(330px,calc(100vw-24px))] rounded-lg border border-[#5cd38f]/35 bg-[#06101a]/95 text-left shadow-[0_0_42px_rgba(92,211,143,0.2)] backdrop-blur-xl"
+        >
+          <div className="flex items-start justify-between gap-3 border-b border-white/10 px-3 py-2">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b9ffd1]">
+                Preliminary Utilization Snapshot
+              </p>
+              <p className="mt-1 truncate text-xs font-semibold text-white">
+                {formatSchoolUtilizationTitle(visibleSchoolUtilizationOverlay)}
+              </p>
+            </div>
+            <button
+              aria-label="Close school utilization seed information"
+              className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              onClick={closeSchoolUtilizationInfo}
+              title="Close school utilization info"
+              type="button"
+            >
+              Close
+            </button>
+          </div>
+          <div className="space-y-2 px-3 py-3 text-xs">
+            <div className="grid grid-cols-2 gap-2">
+              <FloodInfoMetric
+                label="Level"
+                value={formatFloodPopupLabel(
+                  visibleSchoolUtilizationOverlay.schoolLevel,
+                )}
+              />
+              <FloodInfoMetric
+                label="Utilization"
+                value={formatFloodPercent(
+                  visibleSchoolUtilizationOverlay.utilizationPct,
+                )}
+              />
+              <FloodInfoMetric
+                label="Class"
+                value={formatSchoolUtilizationClassLabel(
+                  visibleSchoolUtilizationOverlay.utilizationClass,
+                )}
+              />
+              <FloodInfoMetric
+                label="Year"
+                value={
+                  visibleSchoolUtilizationOverlay.schoolYear
+                    ? `SY ${visibleSchoolUtilizationOverlay.schoolYear}`
+                    : null
+                }
+              />
+              <FloodInfoMetric
+                label="Source confidence"
+                value={formatSchoolUtilizationSourceLabel(
+                  visibleSchoolUtilizationOverlay.sourceConfidence,
+                )}
+              />
+              <FloodInfoMetric
+                label="Reference"
+                value={
+                  visibleSchoolUtilizationOverlay.matchedSchoolReferenceId
+                    ? "Matched"
+                    : "Review needed"
+                }
+              />
+              <FloodInfoMetric
+                label="Seed match"
+                value={formatFloodPopupLabel(
+                  visibleSchoolUtilizationOverlay.matchConfidence,
+                )}
+              />
+              <FloodInfoMetric
+                label="Zone match"
+                value={formatFloodPopupLabel(
+                  visibleSchoolUtilizationOverlay.zoneMatchConfidence,
+                )}
+              />
+              <FloodInfoMetric
+                label="Verification"
+                value={
+                  visibleSchoolUtilizationOverlay.needsVerification
+                    ? "Needs verification"
+                    : "Verified"
+                }
+              />
+            </div>
+            <div className="rounded border border-white/10 bg-black/20 px-2 py-2">
+              <p className="text-[10px] uppercase text-slate-500">Zone</p>
+              <p className="mt-1 truncate font-mono text-xs font-semibold text-slate-100">
+                {visibleSchoolUtilizationOverlay.zoneId ?? "Zone unavailable"}
+              </p>
+            </div>
+            <p className="text-[11px] leading-5 text-slate-500">
+              Presentation-derived SY 2024-2025 utilization seed. Needs
+              verification against official enrollment and capacity data. This
+              is not official capacity scoring and is not a final school
+              capacity score.
+            </p>
+          </div>
+        </div>
+      )}
     </MapViewportPlaceholder>
   );
 }
@@ -1663,6 +2037,17 @@ function createFemaFloodZoneLayer(runtime: ArcGISRuntime) {
   });
 }
 
+function createSchoolUtilizationZoneLayer(runtime: ArcGISRuntime) {
+  return new runtime.GraphicsLayer({
+    elevationInfo: {
+      mode: "on-the-ground",
+    },
+    id: "cfs-school-utilization-zones-layer",
+    listMode: "hide",
+    title: "School Utilization Seed Zones",
+  });
+}
+
 function ensureParcelFocusLayer(runtime: ArcGISRuntime, view: SceneView) {
   const map = view.map;
 
@@ -1736,6 +2121,29 @@ function ensureFemaFloodZoneLayer(runtime: ArcGISRuntime, view: SceneView) {
   const floodZoneLayer = createFemaFloodZoneLayer(runtime);
   map.add(floodZoneLayer);
   return floodZoneLayer;
+}
+
+function ensureSchoolUtilizationZoneLayer(
+  runtime: ArcGISRuntime,
+  view: SceneView,
+) {
+  const map = view.map;
+
+  if (!map) {
+    throw new Error("SceneView map is unavailable for school utilization zones.");
+  }
+
+  const existingLayer = map.findLayerById(
+    "cfs-school-utilization-zones-layer",
+  );
+
+  if (existingLayer) {
+    return existingLayer as GraphicsLayer;
+  }
+
+  const schoolLayer = createSchoolUtilizationZoneLayer(runtime);
+  map.add(schoolLayer);
+  return schoolLayer;
 }
 
 function createDevelopmentHotspotGraphic(
@@ -1933,6 +2341,59 @@ function createFemaFloodZoneGraphic(
   });
 }
 
+function createSchoolUtilizationZoneGraphic(
+  runtime: ArcGISRuntime,
+  polygon: SchoolUtilizationZoneMapPolygon,
+  selectedZoneId: string | null = null,
+) {
+  const rings = convertGeoJsonPolygonCoordinatesToArcGisRings(
+    polygon.geometry,
+  );
+
+  if (!rings.length) {
+    console.warn("School utilization zone geometry could not be converted", {
+      schoolName: polygon.schoolName,
+      type: polygon.geometry.type,
+      zoneId: polygon.zoneId,
+    });
+    return null;
+  }
+
+  const profile = getSchoolUtilizationZoneSymbolProfile(
+    polygon,
+    polygon.zoneId === selectedZoneId ? "selected" : "default",
+  );
+
+  return new runtime.Graphic({
+    attributes: {
+      graphicRole: "school-utilization-zone",
+      matchConfidence: polygon.matchConfidence,
+      matchedSchoolReferenceId: polygon.matchedSchoolReferenceId,
+      needsVerification: polygon.needsVerification,
+      schoolLevel: polygon.schoolLevel,
+      schoolName: polygon.schoolName,
+      schoolYear: polygon.schoolYear,
+      sourceConfidence: polygon.sourceConfidence,
+      utilizationClass: polygon.utilizationClass,
+      utilizationPct: polygon.utilizationPct,
+      zoneId: polygon.zoneId,
+      zoneMatchConfidence: polygon.zoneMatchConfidence,
+    },
+    geometry: new runtime.Polygon({
+      rings,
+      spatialReference: {
+        wkid: polygon.geometry.spatialReference.wkid,
+      },
+    }),
+    popupTemplate: {
+      content:
+        "Presentation-derived SY 2024-2025 utilization seed. Needs verification against official enrollment and capacity data. Not official capacity scoring.",
+      title: getSchoolUtilizationPopupTitle(polygon),
+    },
+    symbol: createSchoolUtilizationZoneSymbol(profile),
+  });
+}
+
 function getFemaFloodZoneSymbolProfile(polygon: FloodZoneMapPolygon) {
   if (
     polygon.floodSeverityClass === "severe" ||
@@ -1969,6 +2430,197 @@ function getFemaFloodZoneSymbolProfile(polygon: FloodZoneMapPolygon) {
     outlineColor: [158, 182, 199, 0.42],
     outlineSize: 0.8,
   };
+}
+
+type SchoolUtilizationZoneInteractionState = "default" | "hover" | "selected";
+
+function createSchoolUtilizationZoneSymbol(profile: {
+  fillColor: number[];
+  outlineColor: number[];
+  outlineSize: number;
+}): Graphic["symbol"] {
+  return {
+    symbolLayers: [
+      {
+        material: {
+          color: profile.fillColor,
+        },
+        outline: {
+          color: profile.outlineColor,
+          size: profile.outlineSize,
+        },
+        type: "fill",
+      },
+    ],
+    type: "polygon-3d",
+  } as unknown as Graphic["symbol"];
+}
+
+function getSchoolUtilizationZoneSymbolProfile(
+  polygon: SchoolUtilizationZoneMapPolygon,
+  state: SchoolUtilizationZoneInteractionState = "default",
+) {
+  return getSchoolUtilizationZoneSymbolProfileForValues(
+    {
+      matchedSchoolReferenceId: polygon.matchedSchoolReferenceId,
+      utilizationClass: polygon.utilizationClass,
+      utilizationPct: polygon.utilizationPct,
+    },
+    state,
+  );
+}
+
+function getSchoolUtilizationZoneSymbolProfileForValues(
+  values: {
+    matchedSchoolReferenceId: string | null;
+    utilizationClass: string | null;
+    utilizationPct: number | null;
+  },
+  state: SchoolUtilizationZoneInteractionState = "default",
+) {
+  let profile: {
+    fillColor: number[];
+    outlineColor: number[];
+    outlineSize: number;
+  };
+
+  if (
+    !values.matchedSchoolReferenceId ||
+    values.utilizationPct === null ||
+    values.utilizationClass === null
+  ) {
+    profile = {
+      fillColor: [148, 163, 184, 0.09],
+      outlineColor: [168, 85, 247, 0.72],
+      outlineSize: 1.35,
+    };
+  } else {
+    switch (values.utilizationClass) {
+      case "under_capacity":
+        profile = {
+          fillColor: [56, 189, 248, 0.12],
+          outlineColor: [125, 211, 252, 0.92],
+          outlineSize: 1.4,
+        };
+        break;
+      case "approaching_capacity":
+      case "near_capacity":
+        profile = {
+          fillColor: [250, 204, 21, 0.15],
+          outlineColor: [250, 204, 21, 0.96],
+          outlineSize: 1.7,
+        };
+        break;
+      case "over_capacity":
+        profile = {
+          fillColor: [249, 115, 22, 0.18],
+          outlineColor: [251, 146, 60, 0.98],
+          outlineSize: 2,
+        };
+        break;
+      case "severely_over_capacity":
+        profile = {
+          fillColor: [236, 72, 153, 0.2],
+          outlineColor: [244, 63, 94, 1],
+          outlineSize: 2.35,
+        };
+        break;
+      default:
+        profile = {
+          fillColor: [148, 163, 184, 0.08],
+          outlineColor: [148, 163, 184, 0.58],
+          outlineSize: 1,
+        };
+    }
+  }
+
+  return enhanceSchoolUtilizationZoneSymbolProfile(profile, state);
+}
+
+function enhanceSchoolUtilizationZoneSymbolProfile(
+  profile: {
+    fillColor: number[];
+    outlineColor: number[];
+    outlineSize: number;
+  },
+  state: SchoolUtilizationZoneInteractionState,
+) {
+  if (state === "selected") {
+    return {
+      fillColor: [
+        profile.fillColor[0] ?? 148,
+        profile.fillColor[1] ?? 163,
+        profile.fillColor[2] ?? 184,
+        Math.min((profile.fillColor[3] ?? 0.12) + 0.08, 0.32),
+      ],
+      outlineColor: [
+        profile.outlineColor[0] ?? 255,
+        profile.outlineColor[1] ?? 255,
+        profile.outlineColor[2] ?? 255,
+        1,
+      ],
+      outlineSize: profile.outlineSize + 1.25,
+    };
+  }
+
+  if (state === "hover") {
+    return {
+      fillColor: [
+        profile.fillColor[0] ?? 148,
+        profile.fillColor[1] ?? 163,
+        profile.fillColor[2] ?? 184,
+        Math.min((profile.fillColor[3] ?? 0.12) + 0.04, 0.26),
+      ],
+      outlineColor: [
+        profile.outlineColor[0] ?? 255,
+        profile.outlineColor[1] ?? 255,
+        profile.outlineColor[2] ?? 255,
+        Math.min((profile.outlineColor[3] ?? 0.85) + 0.12, 1),
+      ],
+      outlineSize: profile.outlineSize + 0.65,
+    };
+  }
+
+  return profile;
+}
+
+function updateSchoolUtilizationZoneInteractionSymbols(
+  schoolLayer: GraphicsLayer | null,
+  selectedZoneId: string | null,
+  hoveredZoneId: string | null,
+) {
+  if (!schoolLayer) {
+    return;
+  }
+
+  schoolLayer.graphics.toArray().forEach((graphic) => {
+    const attributes = graphic.attributes ?? {};
+
+    if (attributes.graphicRole !== "school-utilization-zone") {
+      return;
+    }
+
+    const zoneId = stringAttribute(attributes.zoneId);
+    const state: SchoolUtilizationZoneInteractionState =
+      selectedZoneId && zoneId === selectedZoneId
+        ? "selected"
+        : hoveredZoneId && zoneId === hoveredZoneId
+          ? "hover"
+          : "default";
+
+    graphic.symbol = createSchoolUtilizationZoneSymbol(
+      getSchoolUtilizationZoneSymbolProfileForValues(
+        {
+          matchedSchoolReferenceId: stringAttribute(
+            attributes.matchedSchoolReferenceId,
+          ),
+          utilizationClass: stringAttribute(attributes.utilizationClass),
+          utilizationPct: numberAttribute(attributes.utilizationPct),
+        },
+        state,
+      ),
+    );
+  });
 }
 
 function getDevelopmentHotspotMarkerProfile(
@@ -2238,6 +2890,51 @@ function formatFloodPopupLabel(value: string | null | undefined) {
   return formatHotspotPopupLabel(value);
 }
 
+function formatSchoolUtilizationClassLabel(value: string | null | undefined) {
+  switch (value) {
+    case "under_capacity":
+      return "Under capacity";
+    case "approaching_capacity":
+    case "near_capacity":
+      return "Approaching capacity";
+    case "over_capacity":
+      return "Over capacity";
+    case "severely_over_capacity":
+      return "Severely over capacity";
+    default:
+      return "Review needed";
+  }
+}
+
+function formatSchoolUtilizationSourceLabel(
+  value: string | null | undefined,
+) {
+  return value === "presentation_derived"
+    ? "Presentation-derived"
+    : formatFloodPopupLabel(value);
+}
+
+function formatSchoolUtilizationTitle(
+  info: SchoolUtilizationZoneInfoCard,
+) {
+  const schoolName = info.schoolName ?? "School zone";
+  const utilization = formatFloodPercent(info.utilizationPct);
+
+  return utilization ? `${schoolName} · ${utilization}` : schoolName;
+}
+
+function getSchoolUtilizationPopupTitle(
+  polygon: SchoolUtilizationZoneMapPolygon,
+) {
+  const schoolName = polygon.schoolName ?? "School utilization zone";
+
+  if (typeof polygon.utilizationPct === "number") {
+    return `${schoolName} · ${polygon.utilizationPct.toFixed(0)}%`;
+  }
+
+  return schoolName;
+}
+
 async function handleDevelopmentHotspotClick(
   view: SceneView,
   event: Parameters<SceneView["hitTest"]>[0],
@@ -2389,6 +3086,94 @@ async function handleFemaFloodZoneClick(
   }
 }
 
+async function handleSchoolUtilizationZoneClick(
+  view: SceneView,
+  event: Parameters<SceneView["hitTest"]>[0],
+  schoolLayer: GraphicsLayer | null,
+  onSchoolInfo: (schoolInfo: SchoolUtilizationZoneInfoCard) => void,
+  onHotspotInfoClose: () => void,
+  onFloodInfoClose: () => void,
+  onFloodZoneInfoClose: () => void,
+) {
+  if (!schoolLayer || !schoolLayer.visible) {
+    return false;
+  }
+
+  try {
+    const response = await view.hitTest(event, {
+      include: [schoolLayer],
+    });
+    const results = response.results as Array<{ graphic?: Graphic }>;
+    const schoolGraphic = results.find(
+      (result) =>
+        result.graphic?.attributes?.graphicRole === "school-utilization-zone",
+    )?.graphic;
+
+    if (!schoolGraphic) {
+      return false;
+    }
+
+    closeSceneViewPopup(view);
+    onHotspotInfoClose();
+    onFloodInfoClose();
+    onFloodZoneInfoClose();
+    onSchoolInfo(createSchoolUtilizationZoneInfoCard(schoolGraphic));
+
+    console.debug("[CFS school utilization zones]", "zone selected", {
+      schoolName: schoolGraphic?.attributes?.schoolName,
+      utilizationClass: schoolGraphic?.attributes?.utilizationClass,
+      utilizationPct: schoolGraphic?.attributes?.utilizationPct,
+      zoneId: schoolGraphic?.attributes?.zoneId,
+    });
+
+    return true;
+  } catch (error) {
+    console.warn("School utilization zone hit test failed", error);
+    return false;
+  }
+}
+
+async function handleSchoolUtilizationZoneHover(
+  view: SceneView,
+  event: Parameters<SceneView["hitTest"]>[0],
+  schoolLayer: GraphicsLayer | null,
+  container: HTMLDivElement | null,
+  onSchoolHover: (
+    schoolInfo: SchoolUtilizationZoneInfoCard,
+    position: OverlayCardPosition,
+  ) => void,
+  onSchoolHoverClear: () => void,
+) {
+  if (!schoolLayer || !schoolLayer.visible) {
+    onSchoolHoverClear();
+    return;
+  }
+
+  try {
+    const response = await view.hitTest(event, {
+      include: [schoolLayer],
+    });
+    const results = response.results as Array<{ graphic?: Graphic }>;
+    const schoolGraphic = results.find(
+      (result) =>
+        result.graphic?.attributes?.graphicRole === "school-utilization-zone",
+    )?.graphic;
+
+    if (!schoolGraphic) {
+      onSchoolHoverClear();
+      return;
+    }
+
+    onSchoolHover(
+      createSchoolUtilizationZoneInfoCard(schoolGraphic),
+      getSchoolUtilizationHoverPosition(container, event),
+    );
+  } catch (error) {
+    onSchoolHoverClear();
+    console.warn("School utilization hover hit test failed", error);
+  }
+}
+
 function createDevelopmentHotspotInfoCard(
   graphic: Graphic,
 ): DevelopmentHotspotInfoCard {
@@ -2439,6 +3224,28 @@ function createFloodZoneInfoCard(graphic: Graphic): FloodZoneInfoCard {
   };
 }
 
+function createSchoolUtilizationZoneInfoCard(
+  graphic: Graphic,
+): SchoolUtilizationZoneInfoCard {
+  const attributes = graphic.attributes ?? {};
+
+  return {
+    matchConfidence: stringAttribute(attributes.matchConfidence),
+    matchedSchoolReferenceId: stringAttribute(
+      attributes.matchedSchoolReferenceId,
+    ),
+    needsVerification: Boolean(attributes.needsVerification),
+    schoolLevel: stringAttribute(attributes.schoolLevel),
+    schoolName: stringAttribute(attributes.schoolName),
+    schoolYear: stringAttribute(attributes.schoolYear),
+    sourceConfidence: stringAttribute(attributes.sourceConfidence),
+    utilizationClass: stringAttribute(attributes.utilizationClass),
+    utilizationPct: numberAttribute(attributes.utilizationPct),
+    zoneId: stringAttribute(attributes.zoneId),
+    zoneMatchConfidence: stringAttribute(attributes.zoneMatchConfidence),
+  };
+}
+
 function createFloodConstraintInfoCard(graphic: Graphic): FloodConstraintInfoCard {
   const attributes = graphic.attributes ?? {};
 
@@ -2484,6 +3291,31 @@ function stringAttribute(value: unknown) {
 
 function numberAttribute(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function getSchoolUtilizationHoverPosition(
+  container: HTMLDivElement | null,
+  event: Parameters<SceneView["hitTest"]>[0],
+): OverlayCardPosition {
+  const pointerEvent = event as { x?: number; y?: number };
+  const rect = container?.getBoundingClientRect();
+  const rawX =
+    (rect?.left ?? 0) +
+    (typeof pointerEvent.x === "number" ? pointerEvent.x : 0) +
+    16;
+  const rawY =
+    (rect?.top ?? 0) +
+    (typeof pointerEvent.y === "number" ? pointerEvent.y : 0) +
+    16;
+  const cardWidth = 280;
+  const cardHeight = 150;
+  const maxX = Math.max(12, window.innerWidth - cardWidth - 12);
+  const maxY = Math.max(12, window.innerHeight - cardHeight - 12);
+
+  return {
+    x: Math.min(Math.max(12, rawX), maxX),
+    y: Math.min(Math.max(12, rawY), maxY),
+  };
 }
 
 function createParcelFocusGraphics(
@@ -2710,13 +3542,13 @@ function createParcelCageHighlightSymbol() {
       {
         edges: {
           color: [255, 218, 120, 0.98],
-          size: 1.8,
+          size: 2.6,
           type: "solid",
         },
         material: {
-          color: [104, 216, 255, 0.13],
+          color: [104, 216, 255, 0.18],
         },
-        size: 7,
+        size: 10,
         type: "extrude",
       },
     ],

@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-06-12T21:33:46",
+  "source_file": "C:\\CabarrusFutureScape\\data\\development\\raw\\BuildingPermits_NewConstruction.csv",
+  "source_confidence": "staff_provided_extract",
+  "row_count": 20614,
+  "columns": [
+    "B1_ALT_ID",
+    "B1_APP_TYPE_ALIAS",
+    "B1_FILE_DD",
+    "address",
+    "parcelNum",
+    "CO_Issued",
+    "CO_Date"
+  ],
+  "permit_file_date": {
+    "parsed_count": 20122,
+    "missing_or_invalid_count": 492,
+    "min": "2015-01-05",
+    "max": "2026-06-11"
+  },
+  "co_date": {
+    "parsed_count": 18353,
+    "missing_or_invalid_count": 2261,
+    "min": "2015-03-19",
+    "max": "2026-06-11"
+  },
+  "permit_type_counts": {
+    "Building Residential New": 19047,
+    "Building Commercial New": 1566,
+    "blank": 1
+  },
+  "co_issued_counts": {
+    "1": 18353,
+    "0": 2261
+  },
+  "parcel_quality": {
+    "null_or_blank_parcel_count": 14,
+    "invalid_or_placeholder_parcel_count": 815,
+    "normalized_length_counts": {
+      "14": 19799,
+      "6": 722,
+      "10": 34,
+      "8": 25,
+      "0": 14,
+      "13": 13,
+      "7": 6,
+      "11": 1
+    }
+  }
+}

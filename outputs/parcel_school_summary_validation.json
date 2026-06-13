@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-10T21:21:56.717459",
+  "generated_at": "2026-06-11T06:29:01.833456",
   "summary_table": "public.parcel_school_summary",
   "source_tables": {
     "parcels": "public.parcels_enriched",
@@ -19,11 +19,11 @@
   "summary_status_distribution": [
     {
       "school_summary_status": "assignment_available_capacity_pending",
-      "parcel_count": 108272
+      "parcel_count": 86221
     },
     {
       "school_summary_status": "assignment_incomplete",
-      "parcel_count": 1745
+      "parcel_count": 23796
     }
   ],
   "constraint_class_distribution": [
@@ -33,10 +33,10 @@
     }
   ],
   "assignment_counts": {
-    "elementary_assigned": 108279,
-    "middle_assigned": 108272,
-    "high_assigned": 108272,
-    "assignment_review_required": 64192,
+    "elementary_assigned": 91161,
+    "middle_assigned": 86221,
+    "high_assigned": 91161,
+    "assignment_review_required": 75143,
     "capacity_data_available_parcels": 0
   },
   "capacity_status_distribution": {
@@ -75,6 +75,6 @@
     "no_invalid_geometries": true,
     "capacity_score_not_fabricated": true
   },
-  "elapsed_seconds": 4.99,
-  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcel_school_summary_20260610_212151.log"
+  "elapsed_seconds": 13.6,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcel_school_summary_20260611_062847.log"
 }

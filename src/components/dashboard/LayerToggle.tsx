@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Layers3 } from "lucide-react";
 import { USE_BACKEND_API } from "@/lib/api/client";
 import {
@@ -25,10 +26,16 @@ import type {
   FloodZoneLimitMode,
   FloodZoneSeverityFilter,
 } from "@/types/map/floodZones";
+import type {
+  SchoolUtilizationClassFilter,
+  SchoolUtilizationLevel,
+  SchoolUtilizationZoneControls,
+} from "@/types/map/schoolUtilizationZones";
 
 const DEVELOPMENT_HOTSPOT_LAYER_ID = "permit-activity";
 const FLOOD_CONSTRAINT_LAYER_ID = "flood-risk";
 const FEMA_FLOOD_ZONE_LAYER_ID = "fema-flood-zones";
+const SCHOOL_UTILIZATION_LAYER_ID = "school-utilization-seed";
 
 const activityClassOptions: Array<{
   label: string;
@@ -185,7 +192,55 @@ const floodZoneLegendItems = [
   },
 ];
 
+const schoolLevelOptions: Array<{
+  label: string;
+  value: SchoolUtilizationLevel;
+}> = [
+  { label: "All levels", value: "all" },
+  { label: "Elementary", value: "elementary" },
+  { label: "Middle", value: "middle" },
+  { label: "High", value: "high" },
+];
+
+const schoolUtilizationClassOptions: Array<{
+  label: string;
+  value: SchoolUtilizationClassFilter;
+}> = [
+  { label: "All classes", value: "all" },
+  { label: "Under capacity seed", value: "under_capacity" },
+  { label: "Approaching capacity seed", value: "approaching_capacity" },
+  { label: "Over capacity seed", value: "over_capacity" },
+  {
+    label: "Severely over capacity seed",
+    value: "severely_over_capacity",
+  },
+];
+
+const schoolUtilizationLegendItems = [
+  {
+    color: "#38bdf8",
+    label: "Under capacity",
+    range: "<80%",
+  },
+  {
+    color: "#facc15",
+    label: "Approaching capacity",
+    range: "80-99%",
+  },
+  {
+    color: "#f97316",
+    label: "Over capacity",
+    range: "100-110%",
+  },
+  {
+    color: "#ec4899",
+    label: "Severely over capacity",
+    range: ">110%",
+  },
+];
+
 export function LayerToggle() {
+  const [isLayerRegistryOpen, setIsLayerRegistryOpen] = useState(false);
   const {
     developmentHotspotControls,
     developmentHotspotLayer,
@@ -196,12 +251,17 @@ export function LayerToggle() {
     floodZoneLayer,
     floodZonesEnabled,
     isLayerActive,
+    schoolUtilizationZoneControls,
+    schoolUtilizationZoneLayer,
+    schoolUtilizationZonesEnabled,
     setDevelopmentHotspotControls,
     setDevelopmentHotspotsEnabled,
     setFloodConstraintsEnabled,
     setFloodZoneControls,
     setFloodZonesEnabled,
     setLayerVisibility,
+    setSchoolUtilizationZoneControls,
+    setSchoolUtilizationZonesEnabled,
   } = useDashboardState();
 
   const hotspotTemporalContext =
@@ -231,7 +291,7 @@ export function LayerToggle() {
               ? "No hotspots match temporal filters"
               : "No hotspots match filters"
             : "Hotspots unavailable";
-  const hotspotSourceStatus = USE_BACKEND_API ? "api" : "unavailable";
+  const hotspotSourceStatus = USE_BACKEND_API ? "API" : "Unavailable";
   const floodStatus =
     !floodConstraintsEnabled
       ? "Flood constraints off"
@@ -242,7 +302,7 @@ export function LayerToggle() {
           : floodConstraintLayer.status === "empty"
             ? "No high-review parcels"
             : "Flood constraints unavailable";
-  const floodSourceStatus = USE_BACKEND_API ? "api" : "unavailable";
+  const floodSourceStatus = USE_BACKEND_API ? "API" : "Unavailable";
   const floodSeverityCounts = floodConstraintLayer.severityCounts;
   const showFloodSeverityCounts =
     floodConstraintsEnabled && floodConstraintLayer.status === "ready";
@@ -258,9 +318,27 @@ export function LayerToggle() {
           : floodZoneLayer.status === "empty"
             ? "No FEMA zones match filters"
             : "FEMA zones unavailable";
-  const floodZoneSourceStatus = USE_BACKEND_API ? "api" : "unavailable";
+  const floodZoneSourceStatus = USE_BACKEND_API ? "API" : "Unavailable";
   const showFloodZoneSeverityCounts =
     floodZonesEnabled && floodZoneLayer.status === "ready";
+  const schoolUtilizationStatus =
+    !schoolUtilizationZonesEnabled
+      ? "School utilization off"
+      : schoolUtilizationZoneLayer.isLoading
+        ? "Loading school zones"
+        : schoolUtilizationZoneLayer.status === "ready"
+          ? schoolUtilizationZoneControls.level === "all"
+            ? `Showing ${schoolUtilizationZoneLayer.polygons.length} utilization zones`
+            : `Showing ${schoolUtilizationZoneLayer.polygons.length} ${formatSchoolLevelLabel(
+                schoolUtilizationZoneControls.level,
+              )} zones`
+          : schoolUtilizationZoneLayer.status === "empty"
+            ? "No utilization zones match filters"
+            : "School zones unavailable";
+  const schoolUtilizationSourceStatus = USE_BACKEND_API ? "API" : "Unavailable";
+  const showSchoolUtilizationCounts =
+    schoolUtilizationZonesEnabled &&
+    schoolUtilizationZoneLayer.status === "ready";
 
   function updateHotspotControls<K extends keyof DevelopmentHotspotControls>(
     key: K,
@@ -282,9 +360,33 @@ export function LayerToggle() {
     });
   }
 
+  function updateSchoolUtilizationControls<
+    K extends keyof SchoolUtilizationZoneControls,
+  >(key: K, value: SchoolUtilizationZoneControls[K]) {
+    setSchoolUtilizationZoneControls({
+      ...schoolUtilizationZoneControls,
+      [key]: value,
+    });
+  }
+
+  function toggleSchoolUtilizationZones() {
+    if (!schoolUtilizationZonesEnabled) {
+      setSchoolUtilizationZoneControls({
+        ...schoolUtilizationZoneControls,
+        limit: 500,
+      });
+    }
+
+    setSchoolUtilizationZonesEnabled(!schoolUtilizationZonesEnabled);
+  }
+
   return (
     <section>
-      <details className="group rounded-lg border border-white/10 bg-black/20 p-3">
+      <details
+        className="group rounded-lg border border-white/10 bg-black/20 p-3"
+        onToggle={(event) => setIsLayerRegistryOpen(event.currentTarget.open)}
+        open={isLayerRegistryOpen}
+      >
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase text-slate-500">
@@ -307,6 +409,7 @@ export function LayerToggle() {
           </div>
         </summary>
 
+      {isLayerRegistryOpen ? (
       <div className="mt-3 space-y-3 border-t border-white/10 pt-3">
         {layerCategories.map((category) => {
           const layers = operationalLayerRegistry.filter(
@@ -330,6 +433,8 @@ export function LayerToggle() {
                     layer.id === FLOOD_CONSTRAINT_LAYER_ID;
                   const isFemaFloodZoneLayer =
                     layer.id === FEMA_FLOOD_ZONE_LAYER_ID;
+                  const isSchoolUtilizationLayer =
+                    layer.id === SCHOOL_UTILIZATION_LAYER_ID;
 
                   if (isFloodConstraintLayer) {
                     const unavailable = !USE_BACKEND_API;
@@ -375,26 +480,22 @@ export function LayerToggle() {
                               }}
                             />
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-sm font-medium text-slate-100">
+                              <span className="block text-sm font-medium leading-5 text-slate-100">
                                 Flood Constraints
                               </span>
-                              <span className="mt-1 block truncate text-xs text-slate-500">
+                              <span className="mt-1 block text-xs leading-4 text-slate-500">
                                 FEMA NFHL high-review parcel constraints
                               </span>
                               <span className="mt-2 flex flex-wrap items-center gap-1.5">
-                                <span
-                                  className={cn(
-                                    "rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase",
-                                    floodConstraintsEnabled
-                                      ? "border-[#ff8d7a]/30 bg-[#ff8d7a]/10 text-[#ffc2b6]"
-                                      : "border-white/10 bg-white/[0.025] text-slate-500",
-                                  )}
+                                <LayerStatusBadge
+                                  active={floodConstraintsEnabled}
+                                  tone="red"
                                 >
                                   {floodStatus}
-                                </span>
-                                <span className="rounded border border-white/10 bg-white/[0.025] px-1.5 py-0.5 text-[10px] font-medium uppercase text-slate-500">
+                                </LayerStatusBadge>
+                                <LayerStatusBadge>
                                   {floodSourceStatus}
-                                </span>
+                                </LayerStatusBadge>
                               </span>
                             </span>
                           </button>
@@ -465,10 +566,10 @@ export function LayerToggle() {
                                 High-review only
                               </p>
                             </div>
-                            <div className="mt-2 grid grid-cols-3 gap-1.5">
+                            <div className="mt-2 grid gap-1.5">
                               {floodLegendItems.map((item) => (
                                 <div
-                                  className="flex min-w-0 items-center gap-1.5 rounded border border-white/10 bg-white/[0.025] px-1.5 py-1"
+                                  className="flex min-w-0 items-center gap-2 rounded border border-white/10 bg-white/[0.025] px-2 py-1.5"
                                   key={item.label}
                                 >
                                   <LayerLegendMarker
@@ -476,7 +577,7 @@ export function LayerToggle() {
                                     shape={item.shape}
                                     size={item.size}
                                   />
-                                  <span className="truncate text-[10px] text-slate-300">
+                                  <span className="text-[11px] leading-4 text-slate-300">
                                     {item.label}
                                   </span>
                                 </div>
@@ -547,30 +648,26 @@ export function LayerToggle() {
                               }}
                             />
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-sm font-medium text-slate-100">
+                              <span className="block text-sm font-medium leading-5 text-slate-100">
                                 Development Hotspots
                               </span>
-                              <span className="mt-1 block truncate text-xs text-slate-500">
+                              <span className="mt-1 block text-xs leading-4 text-slate-500">
                                 Real permit activity hotspot markers from
                                 FastAPI
                               </span>
                               <span className="mt-2 flex flex-wrap items-center gap-1.5">
-                                <span
-                                  className={cn(
-                                    "rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase",
-                                    developmentHotspotsEnabled
-                                      ? "border-[#d8b86a]/30 bg-[#d8b86a]/10 text-[#f0cd79]"
-                                      : "border-white/10 bg-white/[0.025] text-slate-500",
-                                  )}
+                                <LayerStatusBadge
+                                  active={developmentHotspotsEnabled}
+                                  tone="gold"
                                 >
                                   {hotspotStatus}
-                                </span>
-                                <span className="rounded border border-white/10 bg-white/[0.025] px-1.5 py-0.5 text-[10px] font-medium uppercase text-slate-500">
+                                </LayerStatusBadge>
+                                <LayerStatusBadge>
                                   {hotspotSourceStatus}
-                                </span>
+                                </LayerStatusBadge>
                                 {developmentHotspotsEnabled &&
                                 hotspotTemporalContext ? (
-                                  <span className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-1.5 py-0.5 text-[10px] font-medium uppercase text-[#8fe7ff]">
+                                  <span className="max-w-full rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-1 text-[10px] font-medium leading-4 text-[#8fe7ff]">
                                     {hotspotTemporalContext}
                                   </span>
                                 ) : null}
@@ -651,11 +748,11 @@ export function LayerToggle() {
                                     Size = concentration
                                   </p>
                                 </div>
-                                <div className="mt-2 grid grid-cols-4 gap-1.5">
+                                <div className="mt-2 grid grid-cols-2 gap-1.5">
                                   {hotspotConcentrationLegendItems.map(
                                     (item) => (
                                       <div
-                                        className="flex min-w-0 items-center gap-1.5 rounded border border-white/10 bg-white/[0.025] px-1.5 py-1"
+                                        className="flex min-w-0 items-center gap-2 rounded border border-white/10 bg-white/[0.025] px-2 py-1.5"
                                         key={item.label}
                                       >
                                         <LayerLegendMarker
@@ -665,7 +762,7 @@ export function LayerToggle() {
                                           )}
                                           size={item.size}
                                         />
-                                        <span className="truncate text-[10px] text-slate-300">
+                                        <span className="text-[10px] leading-4 text-slate-300">
                                           {item.label}
                                         </span>
                                       </div>
@@ -681,106 +778,10 @@ export function LayerToggle() {
                                 </p>
                               </div>
                             )}
-                            <details className="col-span-2 rounded-md border border-white/10 bg-black/15 p-2">
-                              <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                                Advanced filters
-                              </summary>
-                              <div className="mt-2 grid grid-cols-2 gap-2 border-t border-white/10 pt-2">
-                                <HotspotSelect
-                                  label="Activity"
-                                  onChange={(value) =>
-                                    updateHotspotControls(
-                                      "activityClass",
-                                      value as DevelopmentHotspotActivityClassFilter,
-                                    )
-                                  }
-                                  options={activityClassOptions}
-                                  value={developmentHotspotControls.activityClass}
-                                />
-                                <HotspotSelect
-                                  label="Window"
-                                  onChange={(value) =>
-                                    updateHotspotControls(
-                                      "recentWindow",
-                                      value as DevelopmentHotspotRecentWindowFilter,
-                                    )
-                                  }
-                                  options={recentWindowOptions}
-                                  value={developmentHotspotControls.recentWindow}
-                                />
-                                <HotspotSelect
-                                  label="Growth Signal"
-                                  onChange={(value) =>
-                                    updateHotspotControls(
-                                      "growthSignal",
-                                      value as DevelopmentHotspotGrowthSignalFilter,
-                                    )
-                                  }
-                                  options={growthSignalOptions}
-                                  value={developmentHotspotControls.growthSignal}
-                                />
-                                <HotspotSelect
-                                  label="Status Stage"
-                                  onChange={(value) =>
-                                    updateHotspotControls(
-                                      "statusStage",
-                                      value as DevelopmentHotspotStatusStageFilter,
-                                    )
-                                  }
-                                  options={statusStageOptions}
-                                  value={developmentHotspotControls.statusStage}
-                                />
-                                <HotspotSelect
-                                  label="Value Class"
-                                  onChange={(value) =>
-                                    updateHotspotControls(
-                                      "valueClass",
-                                      value as DevelopmentHotspotValueClassFilter,
-                                    )
-                                  }
-                                  options={valueClassOptions}
-                                  value={developmentHotspotControls.valueClass}
-                                />
-                                <HotspotSelect
-                                  label="Jurisdiction"
-                                  onChange={(value) =>
-                                    updateHotspotControls(
-                                      "zoningJurisdiction",
-                                      value,
-                                    )
-                                  }
-                                  options={zoningJurisdictionOptions}
-                                  value={
-                                    developmentHotspotControls.zoningJurisdiction
-                                  }
-                                />
-                                <HotspotSelect
-                                  label="Sort"
-                                  onChange={(value) =>
-                                    updateHotspotControls(
-                                      "sortBy",
-                                      value as DevelopmentHotspotSortBy,
-                                    )
-                                  }
-                                  options={sortOptions}
-                                  value={developmentHotspotControls.sortBy}
-                                />
-                                <HotspotSelect
-                                  label="Limit"
-                                  onChange={(value) =>
-                                    updateHotspotControls(
-                                      "limit",
-                                      Number(value) as DevelopmentHotspotLimit,
-                                    )
-                                  }
-                                  options={limitOptions.map((value) => ({
-                                    label: String(value),
-                                    value: String(value),
-                                  }))}
-                                  value={String(developmentHotspotControls.limit)}
-                                />
-                              </div>
-                            </details>
+                            <HotspotAdvancedFilters
+                              controls={developmentHotspotControls}
+                              onChange={updateHotspotControls}
+                            />
                           </div>
                         ) : null}
 
@@ -836,26 +837,22 @@ export function LayerToggle() {
                               }}
                             />
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-sm font-medium text-slate-100">
+                              <span className="block text-sm font-medium leading-5 text-slate-100">
                                 FEMA Flood Zones
                               </span>
-                              <span className="mt-1 block truncate text-xs text-slate-500">
+                              <span className="mt-1 block text-xs leading-4 text-slate-500">
                                 Official FEMA NFHL Layer 28 polygons
                               </span>
                               <span className="mt-2 flex flex-wrap items-center gap-1.5">
-                                <span
-                                  className={cn(
-                                    "rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase",
-                                    floodZonesEnabled
-                                      ? "border-[#ffb454]/30 bg-[#ffb454]/10 text-[#ffd49d]"
-                                      : "border-white/10 bg-white/[0.025] text-slate-500",
-                                  )}
+                                <LayerStatusBadge
+                                  active={floodZonesEnabled}
+                                  tone="orange"
                                 >
                                   {floodZoneStatus}
-                                </span>
-                                <span className="rounded border border-white/10 bg-white/[0.025] px-1.5 py-0.5 text-[10px] font-medium uppercase text-slate-500">
+                                </LayerStatusBadge>
+                                <LayerStatusBadge>
                                   {floodZoneSourceStatus}
-                                </span>
+                                </LayerStatusBadge>
                               </span>
                             </span>
                           </button>
@@ -951,10 +948,10 @@ export function LayerToggle() {
                                   Source polygons
                                 </p>
                               </div>
-                              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                              <div className="mt-2 grid gap-1.5">
                                 {floodZoneLegendItems.map((item) => (
                                   <div
-                                    className="flex min-w-0 items-center gap-1.5 rounded border border-white/10 bg-white/[0.025] px-1.5 py-1"
+                                    className="flex min-w-0 items-center gap-2 rounded border border-white/10 bg-white/[0.025] px-2 py-1.5"
                                     key={item.label}
                                   >
                                     <span
@@ -964,7 +961,7 @@ export function LayerToggle() {
                                         boxShadow: `0 0 12px ${item.color}`,
                                       }}
                                     />
-                                    <span className="truncate text-[10px] text-slate-300">
+                                    <span className="text-[11px] leading-4 text-slate-300">
                                       {item.label}
                                     </span>
                                   </div>
@@ -983,6 +980,236 @@ export function LayerToggle() {
                         {floodZonesEnabled && floodZoneLayer.errorMessage ? (
                           <p className="mt-2 rounded border border-amber-300/15 bg-amber-300/[0.045] px-2 py-1.5 text-[11px] leading-5 text-amber-100/75">
                             {floodZoneLayer.errorMessage}
+                          </p>
+                        ) : null}
+                      </article>
+                    );
+                  }
+
+                  if (isSchoolUtilizationLayer) {
+                    const unavailable = !USE_BACKEND_API;
+
+                    return (
+                      <article
+                        className={cn(
+                          "rounded-lg border p-3 transition",
+                          unavailable && "opacity-55",
+                          schoolUtilizationZonesEnabled
+                            ? "border-white/15 bg-white/[0.065]"
+                            : "border-white/[0.08] bg-black/10 hover:border-white/[0.12] hover:bg-white/[0.04]",
+                        )}
+                        key={layer.id}
+                        title={
+                          unavailable
+                            ? "School utilization zones require NEXT_PUBLIC_USE_BACKEND_API=true."
+                            : "Presentation-derived school utilization seed joined to attendance-zone polygons."
+                        }
+                      >
+                        <div className="flex items-center gap-3">
+                          <button
+                            aria-label={
+                              schoolUtilizationZonesEnabled
+                                ? "Hide school utilization seed"
+                                : "Show school utilization seed"
+                            }
+                            aria-pressed={schoolUtilizationZonesEnabled}
+                            className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-not-allowed"
+                            disabled={unavailable}
+                            onClick={toggleSchoolUtilizationZones}
+                            type="button"
+                          >
+                            <span
+                              className="h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_18px_currentColor]"
+                              style={{
+                                background: layer.accent,
+                                color: layer.accent,
+                              }}
+                            />
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-medium leading-5 text-slate-100">
+                                School Utilization Seed
+                              </span>
+                              <span className="mt-1 block text-xs leading-4 text-slate-500">
+                                Preliminary utilization by attendance zone
+                              </span>
+                              <span className="mt-2 flex flex-wrap items-center gap-1.5">
+                                <LayerStatusBadge
+                                  active={schoolUtilizationZonesEnabled}
+                                  tone="green"
+                                >
+                                  {schoolUtilizationStatus}
+                                </LayerStatusBadge>
+                                <LayerStatusBadge>
+                                  {schoolUtilizationSourceStatus}
+                                </LayerStatusBadge>
+                              </span>
+                            </span>
+                          </button>
+                          <button
+                            aria-label={
+                              schoolUtilizationZonesEnabled
+                                ? "Hide school utilization seed"
+                                : "Show school utilization seed"
+                            }
+                            aria-pressed={schoolUtilizationZonesEnabled}
+                            className={cn(
+                              "relative h-5 w-9 shrink-0 rounded-full border transition disabled:cursor-not-allowed",
+                              schoolUtilizationZonesEnabled
+                                ? "border-[#5cd38f]/40 bg-[#5cd38f]/25"
+                                : "border-white/10 bg-white/5",
+                            )}
+                            disabled={unavailable}
+                            onClick={toggleSchoolUtilizationZones}
+                            title={
+                              schoolUtilizationZonesEnabled
+                                ? "Hide school utilization seed"
+                                : "Show school utilization seed"
+                            }
+                            type="button"
+                          >
+                            <span
+                              className={cn(
+                                "absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full transition",
+                                schoolUtilizationZonesEnabled
+                                  ? "left-[18px] bg-[#9ff0bd]"
+                                  : "left-1 bg-slate-500",
+                              )}
+                            />
+                          </button>
+                        </div>
+
+                        {USE_BACKEND_API ? (
+                          <div className="mt-3 grid grid-cols-2 gap-2">
+                            <SchoolUtilizationSelect
+                              label="School level"
+                              onChange={(value) =>
+                                updateSchoolUtilizationControls(
+                                  "level",
+                                  value as SchoolUtilizationLevel,
+                                )
+                              }
+                              options={schoolLevelOptions}
+                              value={schoolUtilizationZoneControls.level}
+                            />
+                            <SchoolUtilizationSelect
+                              label="Utilization class"
+                              onChange={(value) =>
+                                updateSchoolUtilizationControls(
+                                  "utilizationClass",
+                                  value as SchoolUtilizationClassFilter,
+                                )
+                              }
+                              options={schoolUtilizationClassOptions}
+                              value={
+                                schoolUtilizationZoneControls.utilizationClass
+                              }
+                            />
+                            {showSchoolUtilizationCounts ? (
+                              <div className="col-span-2 rounded-md border border-[#5cd38f]/15 bg-[#5cd38f]/[0.045] px-2 py-1.5">
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#b9ffd1]">
+                                  {schoolUtilizationZoneLayer.polygons.length} of{" "}
+                                  {schoolUtilizationZoneLayer.totalCount} available
+                                  utilization zones loaded
+                                </p>
+                                <p className="mt-0.5 text-[11px] leading-4 text-slate-400">
+                                  Displaying all renderable presentation-derived
+                                  seed zones for the selected level and class.
+                                </p>
+                              </div>
+                            ) : null}
+                            {showSchoolUtilizationCounts ? (
+                              <div className="col-span-2 flex flex-wrap gap-1.5">
+                                <FloodCountBadge
+                                  color="#38bdf8"
+                                  label="Under"
+                                  value={
+                                    schoolUtilizationZoneLayer.classCounts
+                                      .under_capacity
+                                  }
+                                />
+                                <FloodCountBadge
+                                  color="#facc15"
+                                  label="Approaching"
+                                  value={
+                                    schoolUtilizationZoneLayer.classCounts
+                                      .approaching_capacity +
+                                    schoolUtilizationZoneLayer.classCounts.near_capacity
+                                  }
+                                />
+                                <FloodCountBadge
+                                  color="#f97316"
+                                  label="Over"
+                                  value={
+                                    schoolUtilizationZoneLayer.classCounts
+                                      .over_capacity
+                                  }
+                                />
+                                <FloodCountBadge
+                                  color="#ec4899"
+                                  label="Severe"
+                                  value={
+                                    schoolUtilizationZoneLayer.classCounts
+                                      .severely_over_capacity
+                                  }
+                                />
+                              </div>
+                            ) : null}
+                            <div className="col-span-2 rounded-md border border-white/10 bg-black/20 p-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-[10px] font-medium uppercase text-slate-500">
+                                  Legend
+                                </p>
+                                <p className="text-[10px] text-slate-500">
+                                  Attendance zones
+                                </p>
+                              </div>
+                              <div className="mt-2 grid gap-1.5">
+                                {schoolUtilizationLegendItems.map((item) => (
+                                  <div
+                                    className="flex min-w-0 items-center gap-2 rounded border border-white/10 bg-white/[0.025] px-2 py-1.5"
+                                    key={item.label}
+                                  >
+                                    <span
+                                      className="h-3 w-3 shrink-0 rounded-sm border border-white/50"
+                                      style={{
+                                        background: item.color,
+                                        boxShadow: `0 0 12px ${item.color}`,
+                                      }}
+                                    />
+                                    <span className="min-w-0 flex-1 text-[11px] leading-4 text-slate-300">
+                                      <span className="block font-semibold text-slate-200">
+                                        {item.label}
+                                      </span>
+                                      <span className="block text-slate-500">
+                                        {item.range}
+                                      </span>
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                              <p className="mt-2 rounded border border-amber-300/15 bg-amber-300/[0.045] px-2 py-1.5 text-[11px] leading-5 text-amber-100/75">
+                                SY 2024-2025 utilization values are
+                                presentation-derived from planning maps and
+                                require verification against official
+                                enrollment/capacity data.
+                              </p>
+                              <p className="mt-2 rounded border border-[#8fe7ff]/15 bg-[#8fe7ff]/[0.045] px-2 py-1.5 text-[11px] leading-5 text-[#bfefff]/80">
+                                Hover zones for utilization. Click a zone for
+                                details without changing the selected parcel.
+                              </p>
+                              <p className="mt-2 text-[11px] leading-5 text-slate-500">
+                                Attendance zones are polygon overlays, not
+                                nearest-school distance. This layer is not
+                                official capacity scoring.
+                              </p>
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {schoolUtilizationZonesEnabled &&
+                        schoolUtilizationZoneLayer.errorMessage ? (
+                          <p className="mt-2 rounded border border-amber-300/15 bg-amber-300/[0.045] px-2 py-1.5 text-[11px] leading-5 text-amber-100/75">
+                            {schoolUtilizationZoneLayer.errorMessage}
                           </p>
                         ) : null}
                       </article>
@@ -1024,16 +1251,16 @@ export function LayerToggle() {
                         style={{ color: layer.accent, background: layer.accent }}
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-slate-100">
+                        <span className="block text-sm font-medium leading-5 text-slate-100">
                           {layer.title}
                         </span>
-                        <span className="mt-1 block truncate text-xs text-slate-500">
+                        <span className="mt-1 block text-xs leading-4 text-slate-500">
                           {layer.description}
                         </span>
                         <span className="mt-2 flex flex-wrap items-center gap-1.5">
                           <span
                             className={cn(
-                              "rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase",
+                              "max-w-full rounded border px-2 py-1 text-[10px] font-medium leading-4",
                               active
                                 ? "border-[#d8b86a]/30 bg-[#d8b86a]/10 text-[#f0cd79]"
                                 : "border-white/10 bg-white/[0.025] text-slate-500",
@@ -1041,7 +1268,7 @@ export function LayerToggle() {
                           >
                             {active ? "Active" : "Hidden"}
                           </span>
-                          <span className="rounded border border-white/10 bg-white/[0.025] px-1.5 py-0.5 text-[10px] font-medium uppercase text-slate-500">
+                          <span className="max-w-full rounded border border-white/10 bg-white/[0.025] px-2 py-1 text-[10px] font-medium leading-4 text-slate-500">
                             {layer.sourceStatus}
                           </span>
                         </span>
@@ -1071,8 +1298,132 @@ export function LayerToggle() {
           );
         })}
       </div>
+      ) : null}
       </details>
     </section>
+  );
+}
+
+function LayerStatusBadge({
+  active = false,
+  children,
+  tone = "neutral",
+}: {
+  active?: boolean;
+  children: string;
+  tone?: "gold" | "green" | "neutral" | "orange" | "red";
+}) {
+  const activeTone = {
+    gold: "border-[#d8b86a]/30 bg-[#d8b86a]/10 text-[#f0cd79]",
+    green: "border-[#5cd38f]/30 bg-[#5cd38f]/10 text-[#b9ffd1]",
+    neutral: "border-white/10 bg-white/[0.025] text-slate-500",
+    orange: "border-[#ffb454]/30 bg-[#ffb454]/10 text-[#ffd49d]",
+    red: "border-[#ff8d7a]/30 bg-[#ff8d7a]/10 text-[#ffc2b6]",
+  };
+
+  return (
+    <span
+      className={cn(
+        "max-w-full rounded border px-2 py-1 text-[10px] font-medium leading-4",
+        active ? activeTone[tone] : activeTone.neutral,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+function HotspotAdvancedFilters({
+  controls,
+  onChange,
+}: {
+  controls: DevelopmentHotspotControls;
+  onChange: <K extends keyof DevelopmentHotspotControls>(
+    key: K,
+    value: DevelopmentHotspotControls[K],
+  ) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <details
+      className="col-span-2 rounded-md border border-white/10 bg-black/15 p-2"
+      onToggle={(event) => setIsOpen(event.currentTarget.open)}
+      open={isOpen}
+    >
+      <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+        Advanced filters
+      </summary>
+      {isOpen ? (
+        <div className="mt-2 grid grid-cols-2 gap-2 border-t border-white/10 pt-2">
+          <HotspotSelect
+            label="Activity"
+            onChange={(value) =>
+              onChange("activityClass", value as DevelopmentHotspotActivityClassFilter)
+            }
+            options={activityClassOptions}
+            value={controls.activityClass}
+          />
+          <HotspotSelect
+            label="Window"
+            onChange={(value) =>
+              onChange("recentWindow", value as DevelopmentHotspotRecentWindowFilter)
+            }
+            options={recentWindowOptions}
+            value={controls.recentWindow}
+          />
+          <HotspotSelect
+            label="Growth Signal"
+            onChange={(value) =>
+              onChange("growthSignal", value as DevelopmentHotspotGrowthSignalFilter)
+            }
+            options={growthSignalOptions}
+            value={controls.growthSignal}
+          />
+          <HotspotSelect
+            label="Status Stage"
+            onChange={(value) =>
+              onChange("statusStage", value as DevelopmentHotspotStatusStageFilter)
+            }
+            options={statusStageOptions}
+            value={controls.statusStage}
+          />
+          <HotspotSelect
+            label="Value Class"
+            onChange={(value) =>
+              onChange("valueClass", value as DevelopmentHotspotValueClassFilter)
+            }
+            options={valueClassOptions}
+            value={controls.valueClass}
+          />
+          <HotspotSelect
+            label="Jurisdiction"
+            onChange={(value) => onChange("zoningJurisdiction", value)}
+            options={zoningJurisdictionOptions}
+            value={controls.zoningJurisdiction}
+          />
+          <HotspotSelect
+            label="Sort"
+            onChange={(value) =>
+              onChange("sortBy", value as DevelopmentHotspotSortBy)
+            }
+            options={sortOptions}
+            value={controls.sortBy}
+          />
+          <HotspotSelect
+            label="Limit"
+            onChange={(value) =>
+              onChange("limit", Number(value) as DevelopmentHotspotLimit)
+            }
+            options={limitOptions.map((value) => ({
+              label: String(value),
+              value: String(value),
+            }))}
+            value={String(controls.limit)}
+          />
+        </div>
+      ) : null}
+    </details>
   );
 }
 
@@ -1142,6 +1493,53 @@ function FloodZoneSelect({
       </select>
     </label>
   );
+}
+
+function SchoolUtilizationSelect({
+  className,
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  className?: string;
+  label: string;
+  onChange: (value: string) => void;
+  options: Array<{ label: string; value: string }>;
+  value: string;
+}) {
+  return (
+    <label className={cn("min-w-0", className)}>
+      <span className="mb-1 block text-[10px] font-medium uppercase text-slate-500">
+        {label}
+      </span>
+      <select
+        aria-label={`School utilization ${label.toLowerCase()} control`}
+        className="h-8 w-full rounded-md border border-white/10 bg-[#08111d] px-2 text-xs text-slate-100 outline-none transition hover:border-white/20 focus:border-[#5cd38f]/55 focus:ring-2 focus:ring-[#5cd38f]/15"
+        onChange={(event) => onChange(event.target.value)}
+        value={value}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function formatSchoolLevelLabel(value: SchoolUtilizationLevel) {
+  switch (value) {
+    case "all":
+      return "all-level";
+    case "elementary":
+      return "elementary";
+    case "middle":
+      return "middle";
+    case "high":
+      return "high";
+  }
 }
 
 function getPermitSegmentLabel(

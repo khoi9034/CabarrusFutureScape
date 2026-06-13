@@ -1,0 +1,6 @@
+match_confidence,match_method,permit_count
+exact,exact,17020
+unmatched,unmatched,2283
+invalid_placeholder,invalid_placeholder,815
+ambiguous,ambiguous,495
+normalized_exact,normalized_exact,1

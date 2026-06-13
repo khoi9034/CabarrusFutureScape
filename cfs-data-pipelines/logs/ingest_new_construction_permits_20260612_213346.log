@@ -1,0 +1,4 @@
+2026-06-12 21:33:46,952 INFO Read 20614 rows from C:\CabarrusFutureScape\data\development\raw\BuildingPermits_NewConstruction.csv. Permit date range: 2015-01-05 to 2026-06-11
+2026-06-12 21:33:47,287 INFO Loading raw new construction permits into PostGIS.
+2026-06-12 21:34:03,658 INFO Executing Phase 10A new construction transform SQL.
+2026-06-12 21:35:02,380 INFO Phase 10A complete. Matched permits: 17021. Labels: 1430221.

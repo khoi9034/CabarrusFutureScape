@@ -20,6 +20,7 @@ import { useLayerVisibility } from "@/hooks/useLayerVisibility";
 import { useMapInteractionState } from "@/hooks/useMapInteractionState";
 import { useRoleState } from "@/hooks/useRoleState";
 import { useScenarioState } from "@/hooks/useScenarioState";
+import { useSchoolUtilizationZoneLayer } from "@/hooks/useSchoolUtilizationZoneLayer";
 import {
   useSelectedParcel,
   type SelectedParcelIntelligenceSource,
@@ -91,6 +92,12 @@ import {
   type FloodZoneExtent,
   type FloodZoneLayerState,
 } from "@/types/map/floodZones";
+import {
+  defaultSchoolUtilizationZoneControls,
+  type SelectedSchoolUtilizationZone,
+  type SchoolUtilizationZoneControls,
+  type SchoolUtilizationZoneLayerState,
+} from "@/types/map/schoolUtilizationZones";
 
 interface DashboardContextValue {
   activeLayerIds: string[];
@@ -117,6 +124,10 @@ interface DashboardContextValue {
   floodZoneControls: FloodZoneControls;
   floodZoneLayer: FloodZoneLayerState;
   floodZonesEnabled: boolean;
+  schoolUtilizationZoneControls: SchoolUtilizationZoneControls;
+  schoolUtilizationZoneLayer: SchoolUtilizationZoneLayerState;
+  schoolUtilizationZonesEnabled: boolean;
+  selectedSchoolUtilizationZone: SelectedSchoolUtilizationZone | null;
   executiveBriefing: ExecutiveBriefing;
   exportHistory: MockExportHistoryItem[];
   exportJobState: ExportJobState;
@@ -146,6 +157,7 @@ interface DashboardContextValue {
   applyWorkspacePreset: (viewMode: DashboardViewMode) => void;
   clearMapError: () => void;
   clearSelectedParcel: () => void;
+  clearSelectedSchoolUtilizationZone: () => void;
   isLayerActive: (layerId: string) => boolean;
   selectExecutiveNarrative: (narrativeId: string | null) => void;
   setActiveLayerIds: (layerIds: string[]) => void;
@@ -187,6 +199,13 @@ interface DashboardContextValue {
   setFloodZoneControls: (controls: FloodZoneControls) => void;
   setFloodZonesEnabled: (enabled: boolean) => void;
   setFloodZoneViewExtent: (extent: FloodZoneExtent | null) => void;
+  setSchoolUtilizationZoneControls: (
+    controls: SchoolUtilizationZoneControls,
+  ) => void;
+  setSchoolUtilizationZonesEnabled: (enabled: boolean) => void;
+  setSelectedSchoolUtilizationZone: (
+    zone: SelectedSchoolUtilizationZone | null,
+  ) => void;
   setMapFocusMode: (enabled: boolean) => void;
   setMapStatus: (status: DashboardStatus) => void;
   restoreDefaultWorkspace: () => void;
@@ -222,6 +241,20 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [floodZonesEnabled, setFloodZonesEnabled] = useState(false);
   const [floodZoneViewExtent, setFloodZoneViewExtent] =
     useState<FloodZoneExtent | null>(null);
+  const [
+    schoolUtilizationZoneControls,
+    setSchoolUtilizationZoneControls,
+  ] = useState<SchoolUtilizationZoneControls>(
+    defaultSchoolUtilizationZoneControls,
+  );
+  const [
+    schoolUtilizationZonesEnabled,
+    setSchoolUtilizationZonesEnabled,
+  ] = useState(false);
+  const [
+    selectedSchoolUtilizationZone,
+    setSelectedSchoolUtilizationZone,
+  ] = useState<SelectedSchoolUtilizationZone | null>(null);
   const [productMode, setProductMode] = useState<ProductMode>("overview");
   const [isMapFocusMode, setMapFocusMode] = useState(false);
   const temporalAnalysisState = useTemporalAnalysisState();
@@ -252,6 +285,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     extent: floodZoneViewExtent,
     limitMode: floodZoneControls.limitMode,
     severity: floodZoneControls.severity,
+  });
+  const schoolUtilizationZoneLayer = useSchoolUtilizationZoneLayer({
+    enabled: schoolUtilizationZonesEnabled,
+    level: schoolUtilizationZoneControls.level,
+    limit: schoolUtilizationZoneControls.limit,
+    utilizationClass: schoolUtilizationZoneControls.utilizationClass,
   });
   const {
     activeScenario,
@@ -389,6 +428,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setMapFocusMode((enabled) => !enabled);
   }, []);
 
+  const clearSelectedSchoolUtilizationZone = useCallback(() => {
+    setSelectedSchoolUtilizationZone(null);
+  }, []);
+
   const dashboardUrlState = useMemo(
     () =>
       createDashboardUrlState({
@@ -441,6 +484,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       briefingSections,
       clearMapError,
       clearSelectedParcel,
+      clearSelectedSchoolUtilizationZone,
       comparisonMetrics,
       comparisonPair,
       dashboardUrlState,
@@ -453,6 +497,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       floodZoneControls,
       floodZoneLayer,
       floodZonesEnabled,
+      schoolUtilizationZoneControls,
+      schoolUtilizationZoneLayer,
+      schoolUtilizationZonesEnabled,
+      selectedSchoolUtilizationZone,
       exportHistory,
       exportJobState,
       exportProgress,
@@ -495,6 +543,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setFloodZoneControls,
       setFloodZonesEnabled,
       setFloodZoneViewExtent,
+      setSchoolUtilizationZoneControls,
+      setSchoolUtilizationZonesEnabled,
+      setSelectedSchoolUtilizationZone,
       setLayerVisibility,
       setMapError,
       setMapFocusMode,
@@ -531,6 +582,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       briefingSections,
       clearMapError,
       clearSelectedParcel,
+      clearSelectedSchoolUtilizationZone,
       comparisonMetrics,
       comparisonPair,
       dashboardUrlState,
@@ -543,6 +595,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       floodZoneControls,
       floodZoneLayer,
       floodZonesEnabled,
+      schoolUtilizationZoneControls,
+      schoolUtilizationZoneLayer,
+      schoolUtilizationZonesEnabled,
+      selectedSchoolUtilizationZone,
       exportHistory,
       exportJobState,
       exportProgress,
@@ -585,6 +641,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setFloodZoneControls,
       setFloodZonesEnabled,
       setFloodZoneViewExtent,
+      setSchoolUtilizationZoneControls,
+      setSchoolUtilizationZonesEnabled,
+      setSelectedSchoolUtilizationZone,
       setLayerVisibility,
       setMapError,
       setMapFocusMode,

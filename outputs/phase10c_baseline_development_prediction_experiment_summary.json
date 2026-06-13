@@ -1,0 +1,248 @@
+{
+  "phase": "10C",
+  "generated_at": "2026-06-12T23:55:13.117643",
+  "experiment_id": "phase10c_new_construction_next_3yr_strict_time_safe_baseline_20260612_235209",
+  "target_used": "new_construction_next_3yr",
+  "feature_set_used": "strict_time_safe_baseline",
+  "mature_snapshot_years_used": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022
+  ],
+  "excluded_snapshot_years": [
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "temporal_split": {
+    "train_years": [
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "validation_years": [
+      2020,
+      2021
+    ],
+    "test_years": [
+      2022
+    ]
+  },
+  "rows_used": {
+    "train": {
+      "row_count": 660102,
+      "positive_count": 26695,
+      "positive_rate": 0.040441
+    },
+    "validation": {
+      "row_count": 220034,
+      "positive_count": 8611,
+      "positive_rate": 0.039135
+    },
+    "test": {
+      "row_count": 110017,
+      "positive_count": 4216,
+      "positive_rate": 0.038321
+    }
+  },
+  "model_types_trained": [
+    "logistic_regression",
+    "hist_gradient_boosting"
+  ],
+  "best_model_name": "hist_gradient_boosting",
+  "metrics": {
+    "validation": {
+      "row_count": 220034,
+      "positive_count": 8611,
+      "positive_rate": 0.039135,
+      "roc_auc": 0.638043,
+      "average_precision_pr_auc": 0.054323,
+      "precision_at_top_1_pct": 0.03771,
+      "precision_at_top_5_pct": 0.076441,
+      "recall_at_top_5_pct": 0.097666,
+      "lift_at_top_5_pct": 1.953262,
+      "brier_score": 0.216887,
+      "confusion_matrix_threshold_0_5": {
+        "true_negative": 63993,
+        "false_positive": 147430,
+        "false_negative": 245,
+        "true_positive": 8366
+      }
+    },
+    "test": {
+      "row_count": 110017,
+      "positive_count": 4216,
+      "positive_rate": 0.038321,
+      "roc_auc": 0.651077,
+      "average_precision_pr_auc": 0.054985,
+      "precision_at_top_1_pct": 0.024523,
+      "precision_at_top_5_pct": 0.078713,
+      "recall_at_top_5_pct": 0.102704,
+      "lift_at_top_5_pct": 2.054024,
+      "brier_score": 0.208022,
+      "confusion_matrix_threshold_0_5": {
+        "true_negative": 35361,
+        "false_positive": 70440,
+        "false_negative": 131,
+        "true_positive": 4085
+      }
+    }
+  },
+  "top_important_features": [
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "new_construction_permits_prior_5yr",
+      "coefficient": -0.94143868,
+      "absolute_coefficient": 0.94143868,
+      "feature_group": "model_feature",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "permits_prior_5yr",
+      "coefficient": -0.60844088,
+      "absolute_coefficient": 0.60844088,
+      "feature_group": "model_feature",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "years_since_last_permit",
+      "coefficient": -0.55138637,
+      "absolute_coefficient": 0.55138637,
+      "feature_group": "model_feature",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "residential_growth_permits_prior_3yr",
+      "coefficient": -0.4082771,
+      "absolute_coefficient": 0.4082771,
+      "feature_group": "permit_history_features",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "commercial_new_construction_prior_3yr",
+      "coefficient": 0.34027401,
+      "absolute_coefficient": 0.34027401,
+      "feature_group": "model_feature",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "commercial_activity_permits_prior_3yr",
+      "coefficient": 0.30994131,
+      "absolute_coefficient": 0.30994131,
+      "feature_group": "permit_history_features",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "major_permits_prior_3yr",
+      "coefficient": 0.30973344,
+      "absolute_coefficient": 0.30973344,
+      "feature_group": "model_feature",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "new_construction_permits_prior_3yr",
+      "coefficient": 0.27488898,
+      "absolute_coefficient": 0.27488898,
+      "feature_group": "new_construction_history_features",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "completed_new_construction_prior_3yr",
+      "coefficient": 0.25378928,
+      "absolute_coefficient": 0.25378928,
+      "feature_group": "new_construction_history_features",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "strict_time_safe_baseline",
+      "feature_name": "active_uncompleted_new_construction_prior_3yr",
+      "coefficient": 0.17685022,
+      "absolute_coefficient": 0.17685022,
+      "feature_group": "model_feature",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low"
+    }
+  ],
+  "positive_rate": 0.038321,
+  "experiment_score_table_created": true,
+  "experiment_score_table": "public.development_prediction_model_experiment_scores",
+  "experiment_score_rows": 110017,
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "limitations": [
+    "Internal experiment only; no frontend exposure.",
+    "Uses mature labels only; incomplete future windows are excluded.",
+    "Strict baseline excludes current-context zoning, school, flood, valuation, and activity features.",
+    "No official school capacity score is active.",
+    "No external validation or governance approval has been completed."
+  ],
+  "recommended_next_step": "Review strict baseline PR-AUC, lift, and top-k precision before any broader exploratory model.",
+  "score_table_validation": [
+    {
+      "model_experiment_id": "phase10c_new_construction_next_3yr_strict_time_safe_baseline_20260612_235209",
+      "score_rows": 110017,
+      "any_production_ready": false
+    }
+  ],
+  "validation_results": {
+    "modeling_compile": "passed: python -m compileall cfs-data-pipelines\\modeling",
+    "backend_compile": "passed: python -m compileall backend\\app",
+    "focused_phase10c_tests": "passed: python -m pytest backend\\tests\\test_development_baseline_model.py backend\\tests\\test_development_prediction_features.py -q (15 passed)",
+    "backend_test_suite": "passed: cd backend; python -m pytest (200 passed, 3 warnings)",
+    "dev_cfs_launcher": "ran via npm run dev:cfs launcher process; frontend/backend listeners restarted"
+  },
+  "live_runtime_checks": {
+    "frontend": "http://localhost:3000 returned 200",
+    "backend_health": "GET /health returned 200",
+    "database_health": "GET /health/database returned 200",
+    "prediction_features_summary": "GET /development/prediction/features/summary returned 200",
+    "new_construction_labels": "GET /development/new-construction/labels/summary returned 200",
+    "parcel_search": "GET /parcels/search?q=CFS-PARCEL-0149726579&limit=1 returned 200",
+    "development_hotspots": "GET /development/hotspots?limit=1 returned 200",
+    "flood_summary": "GET /constraints/flood/summary returned 200",
+    "school_statistics": "GET /constraints/schools/statistics returned 200"
+  },
+  "frontend_exposure": {
+    "prediction_cards_added": false,
+    "public_prediction_endpoint_added": false,
+    "frontend_probability_exposed": false
+  }
+}

@@ -1,0 +1,41 @@
+﻿{
+    "phase":  "9I",
+    "task":  "Enterprise School Utilization Zone Hover and Detail Interaction",
+    "branch":  "main",
+    "files_changed":  [
+                          "src/types/map/schoolUtilizationZones.ts",
+                          "src/hooks/useDashboardState.tsx",
+                          "src/components/gis/SceneViewContainer.tsx",
+                          "src/components/dashboard/IntelligencePanel.tsx",
+                          "src/components/dashboard/LayerToggle.tsx"
+                      ],
+    "school_zone_interaction":  {
+                                    "hover_tooltip":  "Added pointer hover hit testing for school utilization polygons with compact tooltip showing school, level, utilization, class, year, source, and verification caveat.",
+                                    "click_detail":  "School zone clicks now store selectedSchoolUtilizationZone in dashboard state without replacing selected parcel state.",
+                                    "selected_zone_card":  "Right Intelligence panel shows a Selected School Zone card in Overview and Due Diligence; fullscreen map mode keeps the compact map overlay.",
+                                    "parcel_selection_preserved":  true
+                                },
+    "visual_behavior":  {
+                            "hover_style":  "Hovered school zones receive a brighter outline and slightly stronger transparent fill.",
+                            "selected_style":  "Selected school zones receive thicker outline and subtle fill emphasis.",
+                            "labels":  "No always-on zone labels were added.",
+                            "official_capacity_score":  "Not displayed or calculated."
+                        },
+    "caveats":  [
+                    "Presentation-derived utilization remains clearly labeled as needs verification.",
+                    "Official school capacity scoring remains disabled.",
+                    "No PostGIS schema or backend API changes were made."
+                ],
+    "validation":  {
+                       "typecheck":  "passed: npm run typecheck",
+                       "lint":  "passed: npm run lint",
+                       "build":  "passed: npm run build -- --webpack",
+                       "dev_cfs":  "passed: npm run dev:cfs; FastAPI and Next.js health checks returned 200",
+                       "browser_smoke":  "passed: http://localhost:3000 loaded with title Cabarrus FutureScape and no captured console errors"
+                   },
+    "smoke_test_notes":  [
+                             "Frontend loaded after dev:cfs restart.",
+                             "Built-in dev:cfs endpoint checks passed for parcel, development, flood, FEMA zones, and school APIs.",
+                             "Manual polygon hover/click visual verification still benefits from an in-browser user pass because selecting a 3D polygon by automation is imprecise."
+                         ]
+}

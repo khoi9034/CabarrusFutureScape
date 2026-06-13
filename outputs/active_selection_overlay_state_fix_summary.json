@@ -1,0 +1,57 @@
+{
+  "task": "Fix stale Active Selection map overlay after branch/runtime consolidation",
+  "branch": "main",
+  "root_cause": "The map overlay only read the legacy mock selectedParcel object. Live top-search selections hydrate selectedParcelIntelligence, so real parcels that are not in mockParcels left the overlay in its no-selection state.",
+  "state_source_fixed": {
+    "previous": "MapViewportPlaceholder selectedParcel prop from mockParcels",
+    "current": "MapViewportPlaceholder prefers selectedParcelIntelligence, selectedParcelId, and latest parcel focus summary, with mock selectedParcel as fallback"
+  },
+  "files_changed": [
+    "src/components/gis/MapViewportPlaceholder.tsx",
+    "src/components/gis/SceneViewContainer.tsx"
+  ],
+  "cage_visibility_status": {
+    "highlight_geometry_verified": true,
+    "focus_summary_persisted_for_overlay": true,
+    "scene_overlay_status_after_selection": "Parcel boundary highlighted",
+    "visual_adjustment": "Selected parcel cage extrusion edge size increased from 1.8 to 2.6, translucent fill opacity increased from 0.13 to 0.18, and extrusion height increased from 7 to 10 for better SceneView readability."
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed on rerun after initial timeout",
+    "initial_build_timeout_seconds": 184,
+    "successful_build_duration_seconds": 167
+  },
+  "runtime_smoke_test": {
+    "frontend_url": "http://localhost:3000",
+    "backend_url": "http://127.0.0.1:8000",
+    "backend_health": 200,
+    "database_health": 200,
+    "parcel_search_endpoint": 200,
+    "parcel_detail_with_geometry_endpoint": 200,
+    "development_hotspots_endpoint": 200,
+    "flood_high_review_endpoint": 200,
+    "flood_summary_endpoint": 200,
+    "fema_flood_zones_endpoint": 200,
+    "selected_test_parcel": "CFS-PARCEL-0149726579",
+    "overlay_no_longer_says_no_parcel_selected": true,
+    "overlay_shows_selected_parcel_id": true,
+    "overlay_shows_owner": "MALL AT CONCORD MILLS LP",
+    "overlay_shows_source": "API",
+    "overlay_shows_focus_status": "PARCEL BOUNDARY HIGHLIGHTED",
+    "browser_console_errors_or_warnings": 0
+  },
+  "preserved": [
+    "top search",
+    "parcel detail hydration",
+    "selected parcel card",
+    "Due Diligence mode",
+    "permit events",
+    "flood constraints",
+    "development hotspots",
+    "FEMA flood zones",
+    "backend APIs",
+    "PostGIS schema"
+  ]
+}

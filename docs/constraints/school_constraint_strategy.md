@@ -24,16 +24,19 @@ as a reference dictionary for school name normalization and QA.
 
 ## CFS V1 Inclusion Policy
 
-CFS V1 includes public elementary, middle, and high schools. Private, magnet,
-and Other/non elementary-middle-high records are preserved in raw/QA outputs
-but excluded from CFS V1 assignment outputs.
+CFS V1 includes public Cabarrus County Schools (CCS) elementary, middle, and
+high schools only. Kannapolis City Schools (KCS), private, magnet, and
+Other/non elementary-middle-high records are preserved in raw/QA outputs but
+excluded from CFS V1 assignment outputs.
 
 The current school reference ingest produced:
 
 - raw school reference rows: `53`
 - clean school reference rows: `53`
-- CFS V1 included public elementary/middle/high reference rows: `41`
-- excluded QA/reference rows: `12`
+- CFS V1 included public CCS elementary/middle/high reference rows: `34`
+- excluded QA/reference rows: `19`
+- exclusion reasons: `level_not_v1` = `11`, `non_ccs_not_v1` = `7`,
+  `magnet_not_v1` = `1`
 
 ## Attendance Zone Ingestion
 
@@ -50,12 +53,16 @@ Current clean attendance zone results:
 - middle zones: `10`
 - high zones: `9`
 - merged clean zones: `44`
-- included CFS V1 zones: `44`
-- zone names needing school-reference QA: `6`
+- included CFS V1 zones: `35`
+- excluded/preserved QA zones: `9`
+- zone names needing school-reference QA: `5`
 
 Unmatched reference names are preserved in
 `outputs/school_zone_unmatched_names.csv` and do not block attendance-zone
 assignment, because the polygon boundary is the authoritative assignment input.
+Included CCS zone names needing reference QA are `Hickory Ridge ES`,
+`West Cabarrus HS`, and `Roberta Road MS`. Excluded non-CCS unmatched names
+include `GW Carver ES` and `North Kannapolis ES`.
 
 ## Parcel Assignment Method
 
@@ -71,14 +78,19 @@ middle, and one high attendance zone by polygon overlap:
 Current parcel assignment result:
 
 - parcel assignment rows: `110,017`
-- elementary assigned parcels: `108,279`
-- middle assigned parcels: `108,272`
-- high assigned parcels: `108,272`
-- missing elementary assignment: `1,738`
-- missing middle assignment: `1,745`
-- missing high assignment: `1,745`
+- elementary assigned parcels: `91,161`
+- middle assigned parcels: `86,221`
+- high assigned parcels: `91,161`
+- missing elementary assignment: `18,856`
+- missing middle assignment: `23,796`
+- missing high assignment: `18,856`
+- assignment review required: `75,143`
+- parcels assigned to unmatched/non-exact reference zones: `51,714`
 
 The output row count matches `public.parcels_enriched`.
+Higher missing-assignment counts are expected under the CCS-only V1 policy
+because KCS attendance areas are preserved for QA but excluded from the CFS V1
+parcel assignment output.
 
 ## QA Interpretation
 
@@ -102,6 +114,13 @@ Review flags include:
 
 Large review counts are expected while zone names such as `West Cabarrus HS`,
 `Roberta Road MS`, and `Hickory Ridge ES` need school-reference dictionary QA.
+
+Current confidence distribution:
+
+- `high`: `34,200`
+- `medium`: `1,988`
+- `review`: `54,973`
+- `low`: `18,856`
 
 ## Capacity Placeholder
 
@@ -130,6 +149,7 @@ Current summary result:
 - non-null school constraint scores: `0`
 - school constraint class: `not_scored`
 - recommended action when capacity is missing: `capacity_data_needed`
+- capacity data available rows: `0`
 
 ## Generated Outputs
 
@@ -144,19 +164,120 @@ Phase 8A writes:
 - `outputs/parcel_school_assignment_warnings.csv`
 - `outputs/parcel_school_summary_validation.json`
 - `outputs/phase8a_school_constraint_ingestion_summary.json`
+- `outputs/phase8a_school_constraint_verification_or_ingestion_summary.json`
+
+Phase 8B writes:
+
+- `outputs/phase8b_school_constraint_qa_review.json`
+- `outputs/phase8b_school_constraint_qa_issues.csv`
+- `outputs/phase8b_school_constraint_qa_and_api_readiness_summary.json`
+
+## Phase 8B QA and API Readiness
+
+Phase 8B reviewed the Phase 8A outputs and classified the unresolved school
+zone names. `Hickory Ridge ES`, `West Cabarrus HS`, and `Roberta Road MS` are
+included CCS attendance zones that do not have same-level `school_reference`
+records. They are treated as missing reference records and remain
+review-required. They were not force-matched.
+
+Excluded unmatched/non-CCS names such as `GW Carver ES` and
+`North Kannapolis ES` remain preserved for QA/future use and are outside the
+CFS V1 scope.
+
+Read-only school assignment/QA API exposure is considered safe with caveats:
+
+- assignments are based on attendance-zone polygon overlap;
+- school point distance is not used;
+- CFS V1 remains public CCS elementary/middle/high only;
+- capacity/enrollment data is unavailable;
+- school capacity and constraint scores remain `NULL` / `not_scored`.
+
+Implemented Phase 8B endpoints:
+
+- `GET /constraints/schools/statistics`
+- `GET /constraints/schools/{official_parcel_id}`
+- `GET /constraints/schools/filter`
+- `GET /constraints/schools/district-summary`
+- `GET /constraints/schools/qa-summary`
+
+## Phase 8C Read-Only Frontend Integration
+
+Phase 8C surfaces school assignment intelligence in the frontend while keeping
+capacity/enrollment scoring inactive. The selected parcel Due Diligence area
+uses `GET /constraints/schools/{official_parcel_id}` to show elementary,
+middle, and high attendance-zone assignments from polygon overlap.
+
+Frontend wording is intentionally constrained:
+
+- null school constraint scores display as `Not scored`;
+- `not_available` capacity status displays as `Capacity Data Needed`;
+- missing assignments display as CCS V1 scope or assignment review caveats;
+- capacity/enrollment data is not fabricated;
+- private, magnet, KCS, Other, and non-level records remain excluded from CFS
+  V1 display.
+
+The countywide School Assignment Summary combines
+`GET /constraints/schools/statistics` and `GET /constraints/schools/qa-summary`
+to show assignment coverage, confidence distribution, capacity data status, and
+known QA review zones.
+
+## Phase 8D Capacity Ingestion Readiness
+
+Phase 8D prepares the project for future school capacity and enrollment files.
+It does not ingest real data, fabricate enrollment/capacity values, calculate
+capacity scores, modify frontend UI, or change attendance-zone assignment.
+
+Created readiness inputs:
+
+- `data_templates/schools/school_capacity_template.csv`
+- `data_templates/schools/school_enrollment_history_template.csv`
+- `data_templates/schools/school_grade_enrollment_history_template.csv`
+- `data_templates/schools/school_capacity_projection_template.csv`
+- `data_templates/schools/school_planned_capacity_changes_template.csv`
+
+Created readiness folders:
+
+- `data/schools/raw/`
+- `data/schools/staging/`
+- `data/schools/processed/`
+- `data/schools/qa/`
+
+Created future capacity tables:
+
+- `public.school_enrollment_history`
+- `public.school_grade_enrollment_history`
+- `public.school_capacity_history`
+- `public.school_capacity_projection`
+- `public.school_planned_capacity_changes`
+- `public.school_capacity_ingestion_qa`
+
+`public.school_capacity` remains the current snapshot table. It is still empty
+until vetted capacity history rows exist.
+
+Capacity status classes are prepared but not used for parcel scoring yet:
+
+- `not_available`
+- `under_capacity`
+- `near_capacity`
+- `over_capacity`
+- `severely_over_capacity`
+
+Future files should be dry-run validated with
+`cfs-data-pipelines/ingest/ingest_school_capacity_data.py` before any PostGIS
+write. `cfs-data-pipelines/transform/create_current_school_capacity_snapshot.py`
+builds the current snapshot only after real capacity history rows exist.
 
 ## Future API and UI Path
 
 Recommended next steps:
 
-1. Review unmatched school reference names and decide whether to adjust the
-   reference dictionary.
-2. Define the school constraint API contract.
-3. Add read-only FastAPI endpoints for selected parcel school assignment and
-   countywide school assignment summaries.
-4. Add frontend selected parcel school summary only after backend endpoints are
-   stable.
-5. Add capacity/enrollment scoring only after a vetted capacity source exists.
+1. Review included unmatched school reference names and decide whether a
+   governed school reference alias/source update is appropriate.
+2. Dry-run validate future school capacity/enrollment files when received.
+3. Build current school capacity snapshot only after vetted rows exist.
+4. Add capacity/enrollment scoring only after a vetted capacity source exists.
+5. Consider a future school map layer only after display policy and source
+   governance are approved.
 
 Forecasting should wait until attendance-zone assignment, capacity source
 ownership, and school planning interpretation rules are stable.

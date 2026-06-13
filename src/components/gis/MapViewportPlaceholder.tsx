@@ -6,23 +6,58 @@ import {
   Satellite,
   Sparkles,
 } from "lucide-react";
+import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
+import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
 import type { DashboardStatus, ParcelSummary } from "@/types";
+
+interface ActiveParcelFocusSummary {
+  boundaryHighlighted: boolean;
+  officialParcelId: string;
+  statusMessage: string;
+}
+
+type ActiveSelectionStat = {
+  label: string;
+  value: number | string | null;
+};
+
+interface ActiveSelectionDisplay {
+  focusStatus: string | null;
+  stats: [ActiveSelectionStat, ActiveSelectionStat, ActiveSelectionStat];
+  subtitle: string;
+  title: string;
+}
 
 interface MapViewportPlaceholderProps {
   children: React.ReactNode;
   mapStatus: DashboardStatus;
+  parcelFocusSummary?: ActiveParcelFocusSummary | null;
   sceneError?: string | null;
   selectedParcel: ParcelSummary | null;
+  selectedParcelId?: string | null;
+  selectedParcelIntelligence?: ParcelSearchRecord | null;
+  selectedParcelIntelligenceSource?: SelectedParcelIntelligenceSource | null;
 }
 
 export function MapViewportPlaceholder({
   children,
   mapStatus,
+  parcelFocusSummary,
   sceneError,
   selectedParcel,
+  selectedParcelId,
+  selectedParcelIntelligence,
+  selectedParcelIntelligenceSource,
 }: MapViewportPlaceholderProps) {
   const isLoading = mapStatus === "idle" || mapStatus === "loading";
   const hasError = mapStatus === "degraded";
+  const activeSelection = getActiveSelectionDisplay({
+    parcelFocusSummary,
+    selectedParcel,
+    selectedParcelId,
+    selectedParcelIntelligence,
+    selectedParcelIntelligenceSource,
+  });
 
   return (
     <section
@@ -72,10 +107,10 @@ export function MapViewportPlaceholder({
             {mapStatus === "online" ? "Live Scene" : "Scene Standby"}
           </span>
           <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1">
-            Concord origin
+            County extent
           </span>
           <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1">
-            Mock parcels
+            Live overlays
           </span>
         </div>
       </div>
@@ -87,25 +122,30 @@ export function MapViewportPlaceholder({
             Active Selection
           </div>
           <p className="mt-1 truncate text-lg font-semibold text-white">
-            {selectedParcel?.parcelId ?? "No parcel selected"}
+            {activeSelection.title}
           </p>
           <p className="truncate text-xs text-slate-400">
-            {selectedParcel?.address ?? "Awaiting map or dashboard selection"}
+            {activeSelection.subtitle}
           </p>
+          {activeSelection.focusStatus ? (
+            <p className="mt-2 inline-flex max-w-full truncate rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[#9ee8ff]">
+              {activeSelection.focusStatus}
+            </p>
+          ) : null}
         </div>
 
         <div className="grid w-full grid-cols-3 overflow-hidden rounded-lg border border-white/10 bg-[#060b12]/74 text-center backdrop-blur-xl md:w-auto">
           <SceneStat
-            label="Opportunity"
-            value={selectedParcel?.opportunityScore ?? null}
+            label={activeSelection.stats[0].label}
+            value={activeSelection.stats[0].value}
           />
           <SceneStat
-            label="Pressure"
-            value={selectedParcel?.developmentPressure ?? null}
+            label={activeSelection.stats[1].label}
+            value={activeSelection.stats[1].value}
           />
           <SceneStat
-            label="Readiness"
-            value={selectedParcel?.infrastructureReadiness ?? null}
+            label={activeSelection.stats[2].label}
+            value={activeSelection.stats[2].value}
           />
         </div>
       </div>
@@ -119,7 +159,13 @@ export function MapViewportPlaceholder({
   );
 }
 
-function SceneStat({ label, value }: { label: string; value: number | null }) {
+function SceneStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | string | null;
+}) {
   return (
     <div className="min-w-0 border-r border-white/10 px-2 py-2 last:border-r-0 sm:min-w-[92px] sm:px-3">
       <p className="text-[10px] uppercase text-slate-500">{label}</p>
@@ -128,4 +174,133 @@ function SceneStat({ label, value }: { label: string; value: number | null }) {
       </p>
     </div>
   );
+}
+
+function getActiveSelectionDisplay({
+  parcelFocusSummary,
+  selectedParcel,
+  selectedParcelId,
+  selectedParcelIntelligence,
+  selectedParcelIntelligenceSource,
+}: {
+  parcelFocusSummary?: ActiveParcelFocusSummary | null;
+  selectedParcel: ParcelSummary | null;
+  selectedParcelId?: string | null;
+  selectedParcelIntelligence?: ParcelSearchRecord | null;
+  selectedParcelIntelligenceSource?: SelectedParcelIntelligenceSource | null;
+}): ActiveSelectionDisplay {
+  if (selectedParcelIntelligence) {
+    const location = [
+      selectedParcelIntelligence.neighborhood,
+      selectedParcelIntelligence.subdivision,
+    ]
+      .filter(Boolean)
+      .join(" / ");
+    const focusStatus =
+      parcelFocusSummary?.officialParcelId ===
+      selectedParcelIntelligence.officialParcelId
+        ? normalizeStatusMessage(parcelFocusSummary.statusMessage)
+        : "Selected parcel loaded";
+
+    return {
+      focusStatus,
+      stats: [
+        {
+          label: "Zoning",
+          value:
+            selectedParcelIntelligence.zoningCode ??
+            formatLabel(selectedParcelIntelligence.zoningCategory),
+        },
+        {
+          label: "Quality",
+          value: formatLabel(selectedParcelIntelligence.parcelQualityStatus),
+        },
+        {
+          label: "Source",
+          value: formatSource(selectedParcelIntelligenceSource),
+        },
+      ],
+      subtitle:
+        selectedParcelIntelligence.ownerName ??
+        (location || "Live parcel intelligence selected"),
+      title: selectedParcelIntelligence.officialParcelId,
+    };
+  }
+
+  if (selectedParcel) {
+    return {
+      focusStatus: selectedParcelId ? "Mock parcel selected" : null,
+      stats: [
+        { label: "Opportunity", value: selectedParcel.opportunityScore },
+        { label: "Pressure", value: selectedParcel.developmentPressure },
+        { label: "Readiness", value: selectedParcel.infrastructureReadiness },
+      ],
+      subtitle: selectedParcel.address,
+      title: selectedParcel.parcelId,
+    };
+  }
+
+  if (selectedParcelId) {
+    const focusStatus =
+      parcelFocusSummary?.officialParcelId === selectedParcelId
+        ? normalizeStatusMessage(parcelFocusSummary.statusMessage)
+        : "Selection pending detail";
+
+    return {
+      focusStatus,
+      stats: [
+        { label: "Zoning", value: null },
+        { label: "Quality", value: null },
+        { label: "Source", value: "Pending" },
+      ],
+      subtitle: "Loading parcel intelligence",
+      title: selectedParcelId,
+    };
+  }
+
+  return {
+    focusStatus: null,
+    stats: [
+      { label: "Zoning", value: null },
+      { label: "Quality", value: null },
+      { label: "Source", value: null },
+    ],
+    subtitle: "Awaiting map or dashboard selection",
+    title: "No parcel selected",
+  };
+}
+
+function formatLabel(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  return value
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function formatSource(
+  source: SelectedParcelIntelligenceSource | null | undefined,
+) {
+  if (source === "api") {
+    return "API";
+  }
+
+  if (source === "fallback") {
+    return "Fallback";
+  }
+
+  if (source === "static") {
+    return "Static";
+  }
+
+  return "Selected";
+}
+
+function normalizeStatusMessage(message: string) {
+  return message.replace(/[.]+$/, "");
 }

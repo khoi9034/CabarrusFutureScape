@@ -1,7 +1,6 @@
 school_level,school_name_raw,school_name_normalized,match_confidence,include_in_cfs_v1,exclusion_reason,source_layer_id,source_objectid
-elementary,GW Carver ES,gw_carver_elementary,unmatched_reference_review,True,,140,53
+elementary,GW Carver ES,gw_carver_elementary,unmatched_reference_review,False,non_ccs_not_v1,140,53
 elementary,Hickory Ridge ES,hickory_ridge_elementary,unmatched_reference_review,True,,140,61
-elementary,North Kannapolis ES,north_kannapolis_elementary,unmatched_reference_review,True,,140,46
+elementary,North Kannapolis ES,north_kannapolis_elementary,unmatched_reference_review,False,non_ccs_not_v1,140,46
 high,West Cabarrus HS,west_cabarrus_high,unmatched_reference_review,True,,142,17
-middle,J N Fries MS,j_n_fries_middle,unmatched_reference_review,True,,141,16
 middle,Roberta Road MS,roberta_road_middle,unmatched_reference_review,True,,141,19

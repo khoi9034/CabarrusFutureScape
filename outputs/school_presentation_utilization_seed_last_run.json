@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-06-13T00:14:13.405865",
+  "dataset": "presentation_utilization_seed",
+  "source_file": "C:\\CabarrusFutureScape\\data\\schools\\raw\\presentation_utilization_seed_sy2024_2025.csv",
+  "dry_run": true,
+  "truncate_and_load": false,
+  "summary": {
+    "row_count": 37,
+    "elementary_row_count": 20,
+    "middle_row_count": 9,
+    "high_row_count": 8,
+    "matched_school_reference_count": 0,
+    "unmatched_or_review_count": 0,
+    "utilization_class_distribution": {
+      "approaching_capacity": 15,
+      "over_capacity": 7,
+      "severely_over_capacity": 7,
+      "under_capacity": 8
+    },
+    "issue_count": 0,
+    "error_count": 0,
+    "review_count": 0,
+    "issues_by_type": {}
+  },
+  "inserted_rows": 0,
+  "qa_rows_written": 0,
+  "no_fake_values_generated": true,
+  "public_school_capacity_untouched": true,
+  "warning": "Presentation-derived utilization seed only; not official enrollment, functional capacity, available seats, or capacity score data.",
+  "no_fake_values_note": "This seed contains utilization percentages only. It does not generate current_enrollment, functional_capacity, available_seats, or official scores."
+}

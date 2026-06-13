@@ -1,0 +1,80 @@
+{
+  "experiment_id": "phase10c_new_construction_next_3yr_strict_time_safe_baseline_20260612_235209",
+  "target": "new_construction_next_3yr",
+  "feature_set": "strict_time_safe_baseline",
+  "feature_columns": [
+    "permits_prior_1yr",
+    "permits_prior_3yr",
+    "permits_prior_5yr",
+    "major_permits_prior_3yr",
+    "residential_growth_permits_prior_3yr",
+    "commercial_activity_permits_prior_3yr",
+    "redevelopment_permits_prior_3yr",
+    "demolition_permits_prior_3yr",
+    "new_construction_permits_prior_1yr",
+    "new_construction_permits_prior_3yr",
+    "new_construction_permits_prior_5yr",
+    "residential_new_construction_prior_3yr",
+    "commercial_new_construction_prior_3yr",
+    "completed_new_construction_prior_3yr",
+    "active_uncompleted_new_construction_prior_3yr",
+    "years_since_last_permit",
+    "years_since_last_new_construction",
+    "had_prior_major_development_flag"
+  ],
+  "mature_snapshot_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022
+  ],
+  "excluded_snapshot_years": [
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "temporal_split": {
+    "train_years": [
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "validation_years": [
+      2020,
+      2021
+    ],
+    "test_years": [
+      2022
+    ]
+  },
+  "max_observed_new_construction_permit_date": "2026-06-11",
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "rows": {
+    "train": {
+      "row_count": 660102,
+      "positive_count": 26695,
+      "positive_rate": 0.040441
+    },
+    "validation": {
+      "row_count": 220034,
+      "positive_count": 8611,
+      "positive_rate": 0.039135
+    },
+    "test": {
+      "row_count": 110017,
+      "positive_count": 4216,
+      "positive_rate": 0.038321
+    }
+  }
+}

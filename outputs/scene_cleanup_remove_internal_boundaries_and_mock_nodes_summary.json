@@ -1,0 +1,69 @@
+﻿{
+    "generated_at":  "2026-06-12T22:23:43",
+    "task":  "Clean default SceneView by removing internal mock boundaries and node labels",
+    "branch":  "main",
+    "weird_blue_boundary_root_cause":  "Legacy scenario-envelope mock polygon in src/lib/gis/mockSceneLayers.ts and src/data/mock/layersMockData.ts. It rendered as a cyan internal growth influence boundary because it was default-visible through layer/workspace/role defaults.",
+    "mock_node_label_root_cause":  "Legacy mock parcel and map chrome labels used planning-node language such as Concord Parkway Growth Node, Harrisburg Service Edge, Concord origin, and Mock parcels.",
+    "files_changed":  [
+                          "src/data/mock/layersMockData.ts",
+                          "src/data/mock/parcelMockData.ts",
+                          "src/data/mock/eventsMockData.ts",
+                          "src/lib/gis/mockSceneLayers.ts",
+                          "src/lib/dashboard/workspacePresets.ts",
+                          "src/lib/dashboard/roleRegistry.ts",
+                          "src/components/gis/MapViewportPlaceholder.tsx",
+                          "src/components/gis/SceneViewContainer.tsx"
+                      ],
+    "removed_or_disabled_graphics":  [
+                                         "Removed scenario-envelope geometry creation from mockSceneLayers",
+                                         "Removed old mock permit-activity sphere graphics creation from mockSceneLayers",
+                                         "Disabled scenario-envelope layer definition",
+                                         "Changed permit-activity layer definition to live custom Development Hotspots instead of mock GraphicsLayer",
+                                         "Set legacy mock parcel, opportunity, development-pressure, and infrastructure layers off by default"
+                                     ],
+    "default_scene_behavior":  {
+                                   "default_layer_ids":  [
+                                                             "county-boundary"
+                                                         ],
+                                   "county_boundary_preserved":  true,
+                                   "internal_blue_scenario_envelope_default_visible":  false,
+                                   "legacy_mock_node_labels_visible":  false,
+                                   "real_overlays_remain_toggle_driven":  [
+                                                                              "Development Hotspots",
+                                                                              "Flood Constraints",
+                                                                              "FEMA Flood Zones",
+                                                                              "School Utilization Seed"
+                                                                          ]
+                               },
+    "mock_or_dev_flag_behavior":  "Legacy scenario envelope is disabled in the layer registry. Other legacy mock layers remain available as off-by-default dev/reference layers, while live custom layers continue through their dedicated toggle state.",
+    "validation_results":  {
+                               "typecheck":  "passed: npm run typecheck",
+                               "lint":  "passed: npm run lint",
+                               "build":  "passed: npm run build -- --webpack",
+                               "dev_cfs":  "passed: npm run dev:cfs; frontend and FastAPI health returned 200; built-in parcel/development/flood/school endpoint checks returned 200"
+                           },
+    "browser_smoke_check":  {
+                                "frontend_url":  "http://localhost:3000",
+                                "forbidden_label_matches":  [
+
+                                                            ],
+                                "clean_badges_present":  [
+                                                             "County extent",
+                                                             "Live overlays"
+                                                         ],
+                                "current_page_error_count_after_fresh_timestamp":  0,
+                                "top_search_result_for_parcel":  "CFS-PARCEL-0149726579 appeared",
+                                "top_search_selection":  "selected parcel visible; No parcel selected no longer visible; no CFS API error",
+                                "note":  "ArcGIS emitted existing labelPlacement warnings for draped graphics, but no new page errors were recorded after the fresh timestamp."
+                            },
+    "preserved_workflows":  [
+                                "top search",
+                                "selected parcel map focus state",
+                                "parcel cage/highlight flow",
+                                "development hotspots toggle path",
+                                "flood constraints toggle path",
+                                "FEMA flood zones toggle path",
+                                "school utilization zones toggle path",
+                                "due diligence and executive modes"
+                            ]
+}

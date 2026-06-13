@@ -1,0 +1,55 @@
+﻿{
+    "status":  "complete",
+    "branch":  "main",
+    "task":  "Fix left panel drag-to-collapse logic",
+    "old_incorrect_behavior":  {
+                                   "description":  "Collapse used a tiny absolute width threshold of 39px, effectively requiring the pointer/panel calculation to reach the far left edge before collapsing.",
+                                   "old_threshold_px":  39,
+                                   "issue":  "Collapse was not based on the intended minimum expanded panel width plus continued left-drag intent."
+                               },
+    "new_width_based_collapse_logic":  {
+                                           "minExpandedWidth":  300,
+                                           "collapseIntentDistance":  18,
+                                           "collapseTriggerWidth":  282,
+                                           "collapsedWidth":  64,
+                                           "defaultExpandedWidth":  360,
+                                           "maxExpandedWidth":  "min(640px, 40vw)",
+                                           "pointermove_behavior":  [
+                                                                        "proposedWidth = startWidth + deltaX",
+                                                                        "If proposedWidth \u003e 300, show expanded panel at clamped proposedWidth.",
+                                                                        "If proposedWidth is between 282 and 300, keep expanded panel visually at 300px.",
+                                                                        "If proposedWidth \u003c= 282 while moving left, immediately preview collapsed rail at 64px.",
+                                                                        "If the user drags right again before pointerup and proposedWidth reaches 300px, restore expanded preview.",
+                                                                        "On pointerup, commit the previewed state and persist expanded width only when expanded."
+                                                                    ],
+                                           "viewport_left_dependency_removed":  true
+                                       },
+    "preserved_behavior":  [
+                               "Full-height 12px resize edge remains intact.",
+                               "Arrow collapse button still collapses/expands immediately.",
+                               "Collapsed rail still shows Layers.",
+                               "Expanded content is unmounted during collapsed preview, preventing squished text.",
+                               "No map layer, school utilization, parcel search, TopNav, backend, or data pipeline code changed."
+                           ],
+    "files_changed":  [
+                          "src/components/layout/AppShell.tsx",
+                          "outputs/left_panel_width_based_collapse_fix_summary.json"
+                      ],
+    "validation_results":  {
+                               "npm_typecheck":  "passed",
+                               "npm_lint":  "passed",
+                               "npm_build_webpack":  "passed",
+                               "npm_dev_cfs":  "passed; FastAPI and Next.js restarted and built-in API checks returned 200"
+                           },
+    "smoke_test_results":  {
+                               "frontend":  "http://localhost:3000 returned 200",
+                               "backend":  "http://127.0.0.1:8000 health returned 200 via npm run dev:cfs",
+                               "arrow_collapse":  "Browser check: arrow collapsed rail to 64px and rail text showed Layers with no console errors.",
+                               "drag_logic":  "Code path now uses proposed panel width and collapseIntentDistance. Browser CUA drag automation was not reliable enough for tactile drag verification in this session, so final drag feel should be checked manually in the running app.",
+                               "no_console_errors":  "No browser console errors observed during arrow/layer-rail checks."
+                           },
+    "remaining_known_issues":  [
+                                   "Manual tactile verification of the resize-edge drag is recommended because the in-app browser drag simulation widened the rail unexpectedly and did not provide reliable pointer-move evidence.",
+                                   "The implementation no longer uses viewport-left collapse logic."
+                               ]
+}

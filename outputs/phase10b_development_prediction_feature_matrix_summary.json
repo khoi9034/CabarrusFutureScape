@@ -1,0 +1,79 @@
+﻿{
+    "phase":  "10B",
+    "generated_at":  "2026-06-12T23:19:21.897161",
+    "dry_run":  false,
+    "feature_table":  "public.parcel_development_prediction_features",
+    "label_table":  "public.parcel_development_prediction_labels",
+    "outputs":  {
+                    "profile":  "C:\\CabarrusFutureScape\\outputs\\development_prediction_feature_matrix_profile.json",
+                    "missingness":  "C:\\CabarrusFutureScape\\outputs\\development_prediction_feature_missingness.csv",
+                    "leakage_review":  "C:\\CabarrusFutureScape\\outputs\\development_prediction_feature_leakage_review.csv",
+                    "label_balance":  "C:\\CabarrusFutureScape\\outputs\\development_prediction_feature_label_balance.csv",
+                    "snapshot_summary":  "C:\\CabarrusFutureScape\\outputs\\development_prediction_feature_snapshot_year_summary.csv"
+                },
+    "profile":  {
+                    "row_count":  1430221,
+                    "unique_parcel_count":  110017,
+                    "min_snapshot_year":  2014,
+                    "max_snapshot_year":  2026,
+                    "snapshot_year_count":  13,
+                    "feature_set_version":  "phase10b_v1",
+                    "mixed_temporal_status_rows":  1430221,
+                    "non_placeholder_school_capacity_rows":  0,
+                    "non_null_school_score_rows":  0,
+                    "label_row_count":  1430221,
+                    "row_count_matches_labels":  true,
+                    "model_active":  false,
+                    "prediction_probability_available":  false
+                },
+    "feature_groups":  [
+                           "development_pressure_features",
+                           "flood_constraint_features",
+                           "future_placeholder_features",
+                           "jurisdiction_features",
+                           "new_construction_history_features",
+                           "parcel_static_features",
+                           "permit_history_features",
+                           "school_assignment_features",
+                           "zoning_features"
+                       ],
+    "model_active":  false,
+    "prediction_probability_available":  false,
+    "readiness":  {
+                      "feature_matrix_created":  true,
+                      "labels_preserved":  true,
+                      "time_safe_prior_windows":  true,
+                      "current_context_caveats_documented":  true,
+                      "ready_for_internal_baseline_experiment":  true,
+                      "ready_for_frontend_prediction_display":  false
+                  },
+    "validation_results":  {
+                               "transform_compile":  "passed: python -m compileall cfs-data-pipelines\\\\transform",
+                               "backend_compile":  "passed: python -m compileall backend\\\\app",
+                               "focused_prediction_tests":  "passed: python -m pytest backend\\\\tests\\\\test_development_prediction_features.py -q (6 passed)",
+                               "focused_phase10a_tests":  "passed: python -m pytest backend\\\\tests\\\\test_new_construction_permits.py -q (10 passed)",
+                               "backend_test_suite":  "passed: cd backend; python -m pytest (191 passed, 3 warnings)"
+                           },
+    "live_runtime_checks":  {
+                                "frontend":  "http://localhost:3000 returned 200",
+                                "backend_root":  "GET / returned 200",
+                                "backend_health":  "GET /health returned 200",
+                                "database_health":  "GET /health/database returned 200",
+                                "phase10a_labels":  "GET /development/new-construction/labels/summary returned 200",
+                                "phase10b_summary":  "GET /development/prediction/features/summary returned 200",
+                                "parcel_search":  "GET /parcels/search?q=CFS-PARCEL-0149726579 returned 200",
+                                "development_hotspots":  "GET /development/hotspots?limit=1 returned 200",
+                                "flood_summary":  "GET /constraints/flood/summary returned 200",
+                                "school_statistics":  "GET /constraints/schools/statistics returned 200"
+                            },
+    "endpoint_example":  {
+                             "feature_matrix_available":  true,
+                             "row_count":  1430221,
+                             "unique_parcel_count":  110017,
+                             "min_snapshot_year":  2014,
+                             "max_snapshot_year":  2026,
+                             "feature_set_version":  "phase10b_v1",
+                             "model_active":  false,
+                             "prediction_probability_available":  false
+                         }
+}

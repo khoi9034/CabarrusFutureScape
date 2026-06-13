@@ -1,0 +1,147 @@
+{
+  "generated_at": "2026-06-11T15:53:57.526129",
+  "phase": "8E school utilization seed matching QA cleanup",
+  "source": "presentation-derived CCS SY 2024-2025 utilization seed",
+  "original_unmatched_count": 11,
+  "final_unmatched_count": 5,
+  "seed_row_count": 37,
+  "public_school_capacity_row_count": 0,
+  "match_confidence_counts": [
+    {
+      "match_confidence": "normalized_exact",
+      "count": 26
+    },
+    {
+      "match_confidence": "safe_alias_normalized",
+      "count": 6
+    },
+    {
+      "match_confidence": "unmatched_reference_review",
+      "count": 5
+    }
+  ],
+  "rows_safely_matched": [
+    {
+      "school_name": "Mount Pleasant Elementary School",
+      "school_level": "elementary",
+      "school_name_normalized": "mount_pleasant_elementary",
+      "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-MT_PLEASANT_ELEMENTARY-53"
+    },
+    {
+      "school_name": "Pitts School Road Elementary School",
+      "school_level": "elementary",
+      "school_name_normalized": "pitts_school_road_elementary",
+      "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-PITTS_ROAD_ELEMENTARY-73"
+    },
+    {
+      "school_name": "Royal Oaks School of the Arts",
+      "school_level": "elementary",
+      "school_name_normalized": "royal_oaks_of_the_arts",
+      "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-ROYAL_OAKS_ELEMENTARY-44"
+    },
+    {
+      "school_name": "Mount Pleasant High School",
+      "school_level": "high",
+      "school_name_normalized": "mount_pleasant_high",
+      "matched_school_reference_id": "SCHOOLREF-HIGH-MT_PLEASANT_HIGH-59"
+    },
+    {
+      "school_name": "Harris Road Middle School",
+      "school_level": "middle",
+      "school_name_normalized": "harris_road_middle",
+      "matched_school_reference_id": "SCHOOLREF-MIDDLE-HARRIS_RD_MIDDLE-70"
+    },
+    {
+      "school_name": "Mount Pleasant Middle School",
+      "school_level": "middle",
+      "school_name_normalized": "mount_pleasant_middle",
+      "matched_school_reference_id": "SCHOOLREF-MIDDLE-MT_PLEASANT_MIDDLE-58"
+    }
+  ],
+  "rows_still_unmatched": [
+    {
+      "school_name": "Hickory Ridge Elementary School",
+      "school_level": "elementary",
+      "school_name_normalized": "hickory_ridge_elementary",
+      "utilization_pct": 100.0,
+      "utilization_class": "over_capacity",
+      "match_confidence": "unmatched_reference_review",
+      "matched_school_reference_id": null,
+      "reason": "No included CCS V1 elementary school_reference record exists; only Hickory Ridge middle and high references were found."
+    },
+    {
+      "school_name": "W.R. Odell Primary School",
+      "school_level": "elementary",
+      "school_name_normalized": "w_r_odell_primary",
+      "utilization_pct": 133.0,
+      "utilization_class": "severely_over_capacity",
+      "match_confidence": "unmatched_reference_review",
+      "matched_school_reference_id": null,
+      "reason": "A primary reference exists but has no V1 school_level and is excluded as level_not_v1; not safely collapsed into the separate W.R. Odell Elementary reference."
+    },
+    {
+      "school_name": "West Cabarrus High School",
+      "school_level": "high",
+      "school_name_normalized": "west_cabarrus_high",
+      "utilization_pct": 88.0,
+      "utilization_class": "near_capacity",
+      "match_confidence": "unmatched_reference_review",
+      "matched_school_reference_id": null,
+      "reason": "No West Cabarrus High school_reference record was found in the current V1 reference table."
+    },
+    {
+      "school_name": "J.N. Fries Middle School",
+      "school_level": "middle",
+      "school_name_normalized": "j_n_fries_middle",
+      "utilization_pct": 95.0,
+      "utilization_class": "near_capacity",
+      "match_confidence": "unmatched_reference_review",
+      "matched_school_reference_id": null,
+      "reason": "Reference record exists but is excluded from CFS V1 as magnet_not_v1, so it remains review-only."
+    },
+    {
+      "school_name": "Roberta Road Middle School",
+      "school_level": "middle",
+      "school_name_normalized": "roberta_road_middle",
+      "utilization_pct": 72.0,
+      "utilization_class": "under_capacity",
+      "match_confidence": "unmatched_reference_review",
+      "matched_school_reference_id": null,
+      "reason": "No Roberta Road Middle school_reference record was found in the current V1 reference table."
+    }
+  ],
+  "matching_policy": {
+    "safe_aliases_added": [
+      "Pitts School Road Elementary -> Pitts Road Elementary",
+      "Mount Pleasant Elementary/Middle/High -> Mt Pleasant Elementary/Middle/High",
+      "Royal Oaks School of the Arts -> Royal Oaks Elementary",
+      "Harris Road Middle -> Harris Rd Middle"
+    ],
+    "not_force_matched": [
+      "W.R. Odell Primary remains separate from W.R. Odell Elementary",
+      "Excluded magnet/non-V1 references remain excluded",
+      "Rows missing from school_reference remain review-required"
+    ]
+  },
+  "source_caveats": [
+    {
+      "source_confidence": "presentation_derived",
+      "needs_verification": true,
+      "count": 37
+    }
+  ],
+  "files_changed": [
+    "cfs-data-pipelines/ingest/ingest_school_presentation_utilization_seed.py",
+    "backend/tests/test_school_presentation_utilization_seed.py",
+    "outputs/school_presentation_utilization_seed_last_run.json",
+    "outputs/phase8e_school_utilization_seed_matching_qa_summary.json"
+  ],
+  "validation_results": {
+    "reload_command": "python cfs-data-pipelines/ingest/ingest_school_presentation_utilization_seed.py --truncate-and-load",
+    "reload_status": "passed",
+    "compile_ingest": "passed",
+    "compile_backend_app": "passed",
+    "pytest": "166 passed, 3 warnings"
+  },
+  "official_capacity_warning": "This remains presentation-derived and needs verification. No enrollment, functional capacity, available seats, official school capacity score, or public.school_capacity rows were created."
+}

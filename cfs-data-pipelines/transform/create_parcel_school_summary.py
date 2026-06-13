@@ -336,8 +336,8 @@ def build_phase_summary(engine: Engine, validation: dict[str, Any]) -> dict[str,
             "assignment_method": "attendance-zone polygon overlap by largest intersection area",
         },
         "cfs_v1_scope": {
-            "included": "Public elementary, middle, and high attendance-zone assignments.",
-            "excluded": "Private, magnet, and Other records are preserved in raw/QA outputs but not included in CFS V1 assignments.",
+            "included": "Public CCS elementary, middle, and high attendance-zone assignments.",
+            "excluded": "KCS, private, magnet, and Other records are preserved in raw/QA outputs but not included in CFS V1 assignments.",
         },
         "capacity_policy": {
             "capacity_score_created": False,

@@ -5,6 +5,16 @@ import type {
   FloodConstraintStatisticsResponse,
   FloodConstraintSummaryResponse,
   FloodZonePageResponse,
+  SchoolConstraintDetailResponse,
+  SchoolConstraintFilterResponse,
+  SchoolConstraintStatisticsResponse,
+  SchoolDistrictSummaryResponse,
+  SchoolLeaPupilContextResponse,
+  SchoolLeaPupilContextSummaryResponse,
+  SchoolQaSummaryResponse,
+  SchoolUtilizationSeedPageResponse,
+  SchoolUtilizationZonePageResponse,
+  ParcelSchoolUtilizationSeedResponse,
 } from "@/types/api";
 
 export interface FloodConstraintFilterParams extends ApiQueryParams {
@@ -33,6 +43,63 @@ export interface FloodZoneParams extends ApiQueryParams {
   flood_severity_class?: string;
   limit?: number;
   offset?: number;
+}
+
+export interface SchoolConstraintFilterParams extends ApiQueryParams {
+  capacity_data_available?: boolean;
+  elementary_school_name?: string;
+  has_elementary_assignment?: boolean;
+  has_high_assignment?: boolean;
+  has_middle_assignment?: boolean;
+  high_school_name?: string;
+  limit?: number;
+  middle_school_name?: string;
+  offset?: number;
+  recommended_action?: string;
+  school_assignment_confidence?: string;
+  school_assignment_review_required?: boolean;
+  school_summary_status?: string;
+}
+
+export type SchoolConstraintStatisticsParams = Omit<
+  SchoolConstraintFilterParams,
+  "limit" | "offset"
+>;
+
+export interface SchoolDistrictSummaryParams extends ApiQueryParams {
+  school_level?: "elementary" | "high" | "middle";
+  school_name?: string;
+}
+
+export interface SchoolUtilizationSeedParams extends ApiQueryParams {
+  limit?: number;
+  offset?: number;
+  school_level?: "elementary" | "high" | "middle";
+  utilization_class?:
+    | "approaching_capacity"
+    | "near_capacity"
+    | "over_capacity"
+    | "severely_over_capacity"
+    | "under_capacity";
+}
+
+export interface SchoolUtilizationZoneParams extends ApiQueryParams {
+  level?: "all" | "elementary" | "high" | "middle";
+  limit?: number;
+  offset?: number;
+  utilization_class?:
+    | "approaching_capacity"
+    | "near_capacity"
+    | "over_capacity"
+    | "severely_over_capacity"
+    | "under_capacity";
+}
+
+export interface SchoolLeaPupilContextParams extends ApiQueryParams {
+  limit?: number;
+  measure_type?: "ADA" | "ADM" | "Enrollment" | "MLD";
+  offset?: number;
+  school_year?: number;
 }
 
 export function getFloodStatistics(
@@ -96,6 +163,113 @@ export function getFloodZones(
 ) {
   return apiGet<FloodZonePageResponse>(
     "/constraints/flood/zones",
+    params,
+    options,
+  );
+}
+
+export function getSchoolConstraintStatistics(
+  params: SchoolConstraintStatisticsParams = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<SchoolConstraintStatisticsResponse>(
+    "/constraints/schools/statistics",
+    params,
+    options,
+  );
+}
+
+export function getSchoolConstraintForParcel(
+  officialParcelId: string,
+  options?: ApiRequestOptions,
+) {
+  return apiGet<SchoolConstraintDetailResponse>(
+    `/constraints/schools/${encodeURIComponent(officialParcelId)}`,
+    undefined,
+    options,
+  );
+}
+
+export function filterSchoolConstraints(
+  params: SchoolConstraintFilterParams = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<SchoolConstraintFilterResponse>(
+    "/constraints/schools/filter",
+    params,
+    options,
+  );
+}
+
+export function getSchoolDistrictSummary(
+  params: SchoolDistrictSummaryParams = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<SchoolDistrictSummaryResponse>(
+    "/constraints/schools/district-summary",
+    params,
+    options,
+  );
+}
+
+export function getSchoolConstraintQaSummary(options?: ApiRequestOptions) {
+  return apiGet<SchoolQaSummaryResponse>(
+    "/constraints/schools/qa-summary",
+    undefined,
+    options,
+  );
+}
+
+export function getSchoolLeaPupilContext(
+  params: SchoolLeaPupilContextParams = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<SchoolLeaPupilContextResponse>(
+    "/constraints/schools/lea-pupil-context",
+    params,
+    options,
+  );
+}
+
+export function getSchoolLeaPupilContextSummary(
+  params: Pick<SchoolLeaPupilContextParams, "school_year"> = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<SchoolLeaPupilContextSummaryResponse>(
+    "/constraints/schools/lea-pupil-context/summary",
+    params,
+    options,
+  );
+}
+
+export function getSchoolUtilizationSeed(
+  params: SchoolUtilizationSeedParams = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<SchoolUtilizationSeedPageResponse>(
+    "/constraints/schools/utilization-seed",
+    params,
+    options,
+  );
+}
+
+export function getSchoolUtilizationSeedForParcel(
+  officialParcelId: string,
+  options?: ApiRequestOptions,
+) {
+  return apiGet<ParcelSchoolUtilizationSeedResponse>(
+    `/constraints/schools/utilization-seed/${encodeURIComponent(officialParcelId)}`,
+    undefined,
+    options,
+  );
+}
+
+export function getSchoolUtilizationZones(
+  params: SchoolUtilizationZoneParams = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<SchoolUtilizationZonePageResponse>(
+    "/constraints/schools/utilization-zones",
     params,
     options,
   );

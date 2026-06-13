@@ -48,7 +48,7 @@ export const mockOperationalEvents: OperationalEvent[] = [
     severity: "warning",
     source: "infrastructure_model",
     timestamp: "2026-05-24T16:05:00-04:00",
-    title: "Readiness flag on Harrisburg service edge",
+    title: "Readiness flag on legacy mock infrastructure layer",
     type: "infrastructure_flag",
   },
   {

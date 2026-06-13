@@ -1,0 +1,97 @@
+{
+  "generated_at": "2026-06-11T16:39:33.186539",
+  "phase": "8F read-only school assignment and presentation-derived utilization frontend integration",
+  "files_changed": [
+    "README.md",
+    "src/lib/api/constraints.ts",
+    "src/types/api/schoolConstraints.ts",
+    "src/hooks/useSelectedParcelSchoolConstraint.ts",
+    "src/hooks/useSchoolConstraintSummary.ts",
+    "src/lib/adapters/selectedParcelSchoolConstraintAdapter.ts",
+    "src/lib/adapters/schoolConstraintSummaryAdapter.ts",
+    "src/components/dashboard/SelectedParcelSchoolAssignmentPanel.tsx",
+    "src/components/dashboard/SchoolConstraintSummaryPanel.tsx",
+    "outputs/phase8f_school_frontend_integration_summary.json"
+  ],
+  "frontend_api_functions_added": [
+    "getSchoolUtilizationSeed(params)",
+    "getSchoolUtilizationSeedForParcel(officialParcelId)"
+  ],
+  "frontend_api_functions_confirmed_existing": [
+    "getSchoolConstraintStatistics(params)",
+    "getSchoolConstraintForParcel(officialParcelId)",
+    "getSchoolConstraintQaSummary()",
+    "getSchoolDistrictSummary(params)",
+    "filterSchoolConstraints(params)"
+  ],
+  "ui_components_updated": [
+    "SelectedParcelSchoolAssignmentPanel shows assignment plus presentation-derived utilization for each assigned level.",
+    "SchoolConstraintSummaryPanel shows assignment summary plus utilization seed count, provisional distribution, and seed reference-review rows."
+  ],
+  "selected_parcel_school_assignment_behavior": {
+    "assignment_endpoint": "GET /constraints/schools/{official_parcel_id}",
+    "utilization_endpoint": "GET /constraints/schools/utilization-seed/{official_parcel_id}",
+    "sample_parcel": "CFS-PARCEL-0149726579",
+    "sample_result": {
+      "elementary": "Carl A Furr ES, 95% utilization, presentation-derived, needs verification",
+      "middle": "Roberta Road MS, 72% utilization, presentation-derived, needs verification, unmatched reference review",
+      "high": "Jay M Robinson HS, 81% utilization, presentation-derived, needs verification"
+    },
+    "missing_assignment_behavior": "Displayed as Outside CCS V1 scope or assignment review needed, not as an app error."
+  },
+  "presentation_utilization_display_behavior": {
+    "source_label": "Presentation-derived, needs verification",
+    "score_policy": "school_constraint_score null displays as Not scored and is never rendered as 0.",
+    "capacity_policy": "Official capacity remains Capacity Data Needed; presentation utilization is not labeled official capacity.",
+    "final_capacity_scoring_enabled": false
+  },
+  "countywide_school_summary_behavior": {
+    "endpoints": [
+      "GET /constraints/schools/statistics",
+      "GET /constraints/schools/qa-summary",
+      "GET /constraints/schools/utilization-seed"
+    ],
+    "fields_displayed": [
+      "total parcels",
+      "elementary/middle/high assignment counts",
+      "assignment confidence distribution",
+      "official capacity data status",
+      "presentation utilization seed count",
+      "preliminary utilization class distribution",
+      "known QA review zones",
+      "remaining unmatched presentation seed rows"
+    ]
+  },
+  "capacity_caveat_wording": [
+    "Capacity/enrollment data has not been added yet. This parcel is not scored for school capacity pressure.",
+    "Utilization values shown here are presentation-derived from SY 2024-2025 planning maps and require verification.",
+    "Official school capacity scoring is not active because verified enrollment/capacity data has not been added."
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed after next build regenerated .next/types; initial pre-build run failed because .next/types/app files were missing",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not run; backend files were not modified"
+  },
+  "smoke_test_results": {
+    "npm_run_dev_cfs": "passed; FastAPI and Next.js started and launcher API checks returned 200",
+    "frontend_url": "http://localhost:3000 returned 200",
+    "utilization_seed_endpoint": "GET /constraints/schools/utilization-seed?limit=5 returned 200",
+    "selected_parcel_utilization_endpoint": "GET /constraints/schools/utilization-seed/CFS-PARCEL-0149726579 returned 200",
+    "browser_check": "Selected sample parcel from top search, opened Due Diligence, school card displayed assignments, Capacity Data Needed, Not scored, and presentation-derived utilization with no browser console errors observed."
+  },
+  "remaining_blockers_before_official_capacity_scoring": [
+    "Verified official enrollment data is still needed.",
+    "Verified functional capacity data is still needed.",
+    "Grade-level enrollment and projection data remain future inputs.",
+    "Remaining unmatched presentation seed rows need source/reference review before official use.",
+    "public.school_capacity remains empty by design."
+  ],
+  "scope_preserved": [
+    "No school ingestion logic changed.",
+    "No PostGIS schema changes made.",
+    "No TopNav, parcel search, or SceneView changes made.",
+    "No enrollment/capacity values or school capacity scores were fabricated.",
+    "No school point distance assignment was introduced."
+  ]
+}

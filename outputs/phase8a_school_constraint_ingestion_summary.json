@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-10T21:21:57.704885",
+  "generated_at": "2026-06-11T06:29:04.020703",
   "phase": "Phase 8A School Constraint Ingestion and Parcel Attendance-Zone Assignment",
   "postgis_tables": {
     "school_reference_raw": "public.school_reference_raw",
@@ -15,15 +15,15 @@
   "source_counts": {
     "school_reference_raw_rows": 53,
     "school_reference_clean_rows": 53,
-    "school_reference_included_cfs_v1_rows": 41,
+    "school_reference_included_cfs_v1_rows": 34,
     "school_zones_clean_rows": 44,
-    "school_zones_included_cfs_v1_rows": 44
+    "school_zones_included_cfs_v1_rows": 35
   },
   "assignment_summary": {
-    "elementary_assigned": 108279,
-    "middle_assigned": 108272,
-    "high_assigned": 108272,
-    "assignment_review_required": 64192,
+    "elementary_assigned": 91161,
+    "middle_assigned": 86221,
+    "high_assigned": 91161,
+    "assignment_review_required": 75143,
     "capacity_data_available_parcels": 0
   },
   "capacity_summary": {
@@ -42,8 +42,8 @@
     "assignment_method": "attendance-zone polygon overlap by largest intersection area"
   },
   "cfs_v1_scope": {
-    "included": "Public elementary, middle, and high attendance-zone assignments.",
-    "excluded": "Private, magnet, and Other records are preserved in raw/QA outputs but not included in CFS V1 assignments."
+    "included": "Public CCS elementary, middle, and high attendance-zone assignments.",
+    "excluded": "KCS, private, magnet, and Other records are preserved in raw/QA outputs but not included in CFS V1 assignments."
   },
   "capacity_policy": {
     "capacity_score_created": false,

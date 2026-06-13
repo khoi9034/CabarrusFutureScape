@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-06-11T09:16:12.207202",
+  "table": "public.school_capacity",
+  "snapshot": {
+    "history_row_count": 0,
+    "snapshot_row_count": 0,
+    "snapshot_rebuilt": false,
+    "message": "No school_capacity_history rows exist; no current capacity snapshot is available."
+  },
+  "capacity_score_created": false,
+  "parcel_school_summary_recalculated": false,
+  "elapsed_seconds": 0.97
+}

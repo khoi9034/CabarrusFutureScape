@@ -1,0 +1,126 @@
+{
+  "phase": "9F",
+  "status": "implemented",
+  "collapse_threshold_change": {
+    "previous_threshold_px": 220,
+    "new_threshold_px": 116,
+    "collapsed_width_px": 64,
+    "expanded_min_width_px": 300,
+    "default_expanded_width_px": 360,
+    "max_width_rule": "min(640px, 40vw)",
+    "behavior": "Live collapsed rail preview remains active, but collapse now only occurs when dragged close to the collapsed rail."
+  },
+  "methodology_workspace_changes": {
+    "sceneview_rendered_in_methodology": false,
+    "bottom_kpi_rendered_in_methodology": false,
+    "workspace": "Dedicated full-width Methodology workspace",
+    "sections": [
+      "CFS Model Foundation",
+      "Active Data Inputs",
+      "Method Logic",
+      "Assumptions",
+      "Limitations / Drawbacks",
+      "Future Model Roadmap"
+    ],
+    "honest_caveats": [
+      "CFS is descriptive, not predictive, in the current prototype.",
+      "Presentation-derived school utilization is not official capacity data.",
+      "School capacity scoring is not active.",
+      "Mock infrastructure/readiness layers remain placeholders."
+    ]
+  },
+  "nav_visual_styling_changes": {
+    "pattern": "Dark glass workspace-mode selector with stable border, luminous active accent lines, and no hover layout shift",
+    "modes": [
+      "Overview",
+      "Due Diligence",
+      "Methodology",
+      "Executive Print"
+    ],
+    "performance_notes": "CSS-only visual treatment; no heavy animation or particles."
+  },
+  "school_utilization_layer": {
+    "visible_in_map_layers": true,
+    "off_by_default": true,
+    "layer_group": "Schools",
+    "layer_name": "School Utilization Seed",
+    "assignment_zone_context_visible": true,
+    "controls": [
+      "school level",
+      "utilization class",
+      "limit"
+    ],
+    "legend_classes": [
+      "Under capacity seed",
+      "Near capacity seed",
+      "Over capacity seed",
+      "Severely over capacity seed"
+    ],
+    "caveat": "Presentation-derived utilization from SY 2024-2025 planning maps. Needs verification against official enrollment/capacity data.",
+    "map_rendering": "Dedicated cfs-school-utilization-zones-layer with transparent attendance-zone polygons colored by utilization_class.",
+    "popup_behavior": "Clicking a school utilization zone opens an informational card; it does not select a parcel.",
+    "official_capacity_scoring": "not_enabled"
+  },
+  "backend_endpoint_added": {
+    "endpoint": "GET /constraints/schools/utilization-zones",
+    "source_tables": [
+      "public.school_zones",
+      "public.school_utilization_seed_current"
+    ],
+    "join": "school_name_normalized + school_level",
+    "geometry": "Simplified GeoJSON Polygon/MultiPolygon",
+    "default_level": "elementary",
+    "limit_max": 500,
+    "does_not_touch": [
+      "public.school_capacity",
+      "official enrollment",
+      "functional capacity",
+      "school_constraint_score"
+    ],
+    "live_check": {
+      "url": "http://127.0.0.1:8000/constraints/schools/utilization-zones?level=elementary&limit=3",
+      "status": 200,
+      "total_count": 16,
+      "returned": 3,
+      "source_confidence": "presentation_derived",
+      "needs_verification": true,
+      "first_geometry_type": "Polygon"
+    }
+  },
+  "performance_safeguards": [
+    "Methodology mode does not mount SceneView.",
+    "School utilization zones are not fetched unless the layer is enabled.",
+    "School utilization layer uses a dedicated graphics layer and clears only that layer on filter changes.",
+    "Geometry is simplified server-side before return.",
+    "No map labels are rendered for school zones; details are click-only.",
+    "Layer controls do not refetch APIs while off."
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "passed: 168 tests, 3 warnings",
+    "npm_run_dev_cfs": "passed"
+  },
+  "smoke_test_results": {
+    "frontend_loads": true,
+    "overview_shows_map": true,
+    "methodology_hides_sceneview": true,
+    "methodology_hides_bottom_kpis": true,
+    "methodology_workspace_visible": true,
+    "school_layer_visible_in_map_layers": true,
+    "school_layer_off_by_default": true,
+    "school_layer_toggle_fetches_zones": true,
+    "school_utilization_caveat_visible": true,
+    "no_fake_school_capacity_score": true,
+    "selected_parcel_school_card_still_works": true,
+    "selected_parcel_search_still_works": true,
+    "browser_console_errors": []
+  },
+  "remaining_known_issues": [
+    "School utilization seed remains preliminary until verified official enrollment and capacity data arrive.",
+    "School utilization zones are source-context polygons and do not perform parcel selection.",
+    "Official school capacity scoring remains disabled by design."
+  ]
+}

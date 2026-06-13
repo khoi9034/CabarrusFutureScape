@@ -1,0 +1,101 @@
+source_permit_id,permit_type_class,permit_file_date,address_raw,parcel_num_raw,parcel_num_normalized,match_confidence,match_warning
+BU2026-01817,residential_new_construction,2026-06-08,"552 RAFFERTY HILL DRIVE NW DR NW CONCORD, NC 28027",46818217130000,46818217130000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2026-01797,commercial_new_construction,2026-06-05,"174 PATTERSON AVE SE, AC# CONCORD, NC 28025",56300971870000,56300971870000,unmatched,no matching parcels_enriched.pin14
+BU2026-01798,commercial_new_construction,2026-06-05,"205 SHANNON DR SW, LT# A CONCORD, NC 28025",56208319080000,56208319080000,unmatched,no matching parcels_enriched.pin14
+BU2026-01800,residential_new_construction,2026-06-05,"550 S HALIFAX ST, AC# MT PLEASANT, NC 28124",56700432430000,56700432430000,unmatched,no matching parcels_enriched.pin14
+BU2026-01805,commercial_new_construction,2026-06-05,"182 PATTERSON AVE SE, AC# CONCORD, NC 28025",56300971870000,56300971870000,unmatched,no matching parcels_enriched.pin14
+BU2026-01747,residential_new_construction,2026-06-03,"10231 RAINIER TRAIL DR NW HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-01748,residential_new_construction,2026-06-03,"10229 RAINIER TRAIL DR NW HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-01749,residential_new_construction,2026-06-03,"10233 RAINIER TRAIL DR NW HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-01657,residential_new_construction,2026-05-28,"469 FAITH DR SW, AC# CONCORD, NC 28027",55294740630000,55294740630000,unmatched,no matching parcels_enriched.pin14
+BU2026-01630,commercial_new_construction,2026-05-26,"9530 WHIPPET WAY CONCORD, NC 28027",45894378080000,45894378080000,unmatched,no matching parcels_enriched.pin14
+BU2026-01556,residential_new_construction,2026-05-19,"9970 US HWY 601 S, AC# MIDLAND, NC 28107",55551909910000,55551909910000,unmatched,no matching parcels_enriched.pin14
+BU2026-01564,residential_new_construction,2026-05-19,"121 OAKDALE AVE SW, LT# CONCORD, NC 28027",55292594970000,55292594970000,unmatched,no matching parcels_enriched.pin14
+BU2026-01504,residential_new_construction,2026-05-13,"1165 ROSEWOOD AVE KANNAPOLIS, NC 28081",56133257910000,56133257910000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2026-01476,residential_new_construction,2026-05-12,"1347 ODELL SCHOOL RD CONCORD, NC 28027",46815685720000,46815685720000,unmatched,no matching parcels_enriched.pin14
+BU2026-01403,residential_new_construction,2026-05-06,"103 SWINK ST SW CONCORD, NC 28027",56204164500000,56204164500000,unmatched,no matching parcels_enriched.pin14
+BU2026-01211,residential_new_construction,2026-04-23,"3145 EVA DR NW, AC# CONCORD, NC 28027",56114027580000,56114027580000,unmatched,no matching parcels_enriched.pin14
+BU2026-01196,residential_new_construction,2026-04-22,"803 SKYLAND ST, LT# A KANNAPOLIS, NC 28083",56231718240000,56231718240000,unmatched,no matching parcels_enriched.pin14
+BU2026-01197,residential_new_construction,2026-04-22,"803 SKYLAND ST, LT# B KANNAPOLIS, NC 28083",56231718240000,56231718240000,unmatched,no matching parcels_enriched.pin14
+BU2026-01164,residential_new_construction,2026-04-21,"105 SWINK ST SW CONCORD, NC 28027",56204153240000,56204153240000,unmatched,no matching parcels_enriched.pin14
+BU2026-01165,residential_new_construction,2026-04-21,"880 OLD CHARLOTTE RD SW, LT# CONCORD, NC 28027",55293861170000,55293861170000,unmatched,no matching parcels_enriched.pin14
+BU2026-01167,residential_new_construction,2026-04-21,"12521 CULP RD GOLD HILL, NC 28071",56922995870000,56922995870000,unmatched,no matching parcels_enriched.pin14
+BU2026-01172,residential_new_construction,2026-04-21,"310 GURLEY DR NW CONCORD, NC 28027",56210065920000,56210065920000,unmatched,no matching parcels_enriched.pin14
+BU2026-01173,residential_new_construction,2026-04-21,"664 JACKSON TER SW, LT# CONCORD, NC 28027",55292594970000,55292594970000,unmatched,no matching parcels_enriched.pin14
+BU2026-01175,residential_new_construction,2026-04-21,"668 JACKSON TER SW, LT# CONCORD, NC 28027",55292594810000,55292594810000,unmatched,no matching parcels_enriched.pin14
+BU2026-01183,commercial_new_construction,2026-04-21,"4927 DOGWOOD BLVD KANNAPOLIS, NC 28081",56023946640000,56023946640000,unmatched,no matching parcels_enriched.pin14
+BU2026-01092,residential_new_construction,2026-04-15,"5798 MCCLENNY DR KANNAPOLIS, NC 28027",56010597240000,56010597240000,unmatched,no matching parcels_enriched.pin14
+BU2026-00997,commercial_new_construction,2026-04-07,"2438 COLD WATER RIDGE DR KANNAPOLIS, NC 28083",56224856520000,56224856520000,unmatched,no matching parcels_enriched.pin14
+BU2026-00983,residential_new_construction,2026-04-06,"1900 MONTEROSA RD, AC# CONCORD, NC 28025",55250866370000,55250866370000,unmatched,no matching parcels_enriched.pin14
+BU2026-00946,residential_new_construction,2026-04-01,"117 TRIECE ST KANNAPOLIS, NC 28081",56135192190000,56135192190000,unmatched,no matching parcels_enriched.pin14
+BU2026-00877,residential_new_construction,2026-03-25,"10446 AMBERCREST CT NW HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00867,residential_new_construction,2026-03-24,"10450 AMBERCREST CT NW HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00873,residential_new_construction,2026-03-24,"10448 AMBERCREST CT NW HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00832,residential_new_construction,2026-03-19,"1218 FOSTER HOLLY AVE NW, AC# HUNTERSVILLE, NC 28078",46717324260000,46717324260000,unmatched,no matching parcels_enriched.pin14
+BU2026-00770,commercial_new_construction,2026-03-13,"6054 GLEN AFTON BLVD KANNAPOLIS, NC 28027",46919262440000,46919262440000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2026-00700,residential_new_construction,2026-03-10,"10445 AMBERCREST CT NW, AC# HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00687,residential_new_construction,2026-03-09,"1218 WHITE BIRCH AVE NW, AC# HUNTERSVILLE, NC 28078",46716392230000,46716392230000,unmatched,no matching parcels_enriched.pin14
+BU2026-00688,residential_new_construction,2026-03-09,"10439 AMBERCREST CT NW, AC# HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00689,residential_new_construction,2026-03-09,"1216 WHITE BIRCH AVE NW, AC# HUNTERSVILLE, NC 28078",46716392230000,46716392230000,unmatched,no matching parcels_enriched.pin14
+BU2026-00690,residential_new_construction,2026-03-09,"10441 AMBERCREST CT NW, AC# HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00696,residential_new_construction,2026-03-09,"10443 AMBERCREST CT NW HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00686,residential_new_construction,2026-03-06,"1220 WHITE BIRCH AVE NW, AC# HUNTERSVILLE, NC 28078",46716392230000,46716392230000,unmatched,no matching parcels_enriched.pin14
+BU2026-00646,residential_new_construction,2026-03-04,"257 COLTON PL NE CONCORD, NC 28025",56311551210000,56311551210000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2026-00637,residential_new_construction,2026-03-03,"591 CENTRAL DR NW, AC# CONCORD, NC 28027",56210076780000,56210076780000,unmatched,no matching parcels_enriched.pin14
+BU2026-00601,residential_new_construction,2026-03-02,"355 CAMDEN CT NW CONCORD, NC 28027",56119179290000,56119179290000,unmatched,no matching parcels_enriched.pin14
+BU2026-00495,residential_new_construction,2026-02-23,"53 YOUNG AVE SW, LT# CONCORD, NC 28025",56209634150000,56209634150000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2026-00451,residential_new_construction,2026-02-19,"1221 WHITE BIRCH AVE NW, AC# HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00420,residential_new_construction,2026-02-17,"10215 RAINIER TRAIL DR NW, AC# HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-00428,residential_new_construction,2026-02-17,"1215 WHITE BIRCH AVE NW HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00410,residential_new_construction,2026-02-16,"10223 RAINIER TRAIL DR NW, AC# HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-00411,residential_new_construction,2026-02-16,"10221 RAINIER TRAIL DR NW, AC# HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-00412,residential_new_construction,2026-02-16,"10219 RAINIER TRAIL DR NW, AC# HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-00395,residential_new_construction,2026-02-13,"10225 RAINIER TRAIL DR NW, AC# HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-00390,residential_new_construction,2026-02-12,"10213 RAINIER TRAIL DR NW, AC# HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-00391,residential_new_construction,2026-02-12,"10211 RAINIER TRAIL DR NW, AC# HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-00393,residential_new_construction,2026-02-12,"10209 RAINIER TRAIL DR NW, AC# HUNTERSVILLE, NC 28078",46718083630000,46718083630000,unmatched,no matching parcels_enriched.pin14
+BU2026-00371,residential_new_construction,2026-02-11,"323 WINDY RUSH RD, AC# KANNAPOLIS, NC 28081",56124995990000,56124995990000,unmatched,no matching parcels_enriched.pin14
+BU2026-00346,residential_new_construction,2026-02-09,"1231 WHITE BIRCH AVE NW, AC# HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00349,residential_new_construction,2026-02-09,"1233 WHITE BIRCH AVE NW, AC# HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00351,residential_new_construction,2026-02-09,"1235 WHITE BIRCH AVE NW HUNTERSVILLE, NC 28078",46717301970000,46717301970000,unmatched,no matching parcels_enriched.pin14
+BU2026-00225,residential_new_construction,2026-01-28,"302 SYCAMORE AVE SW CONCORD, NC 28025",56207405110000,56207405110000,unmatched,no matching parcels_enriched.pin14
+BU2026-00227,residential_new_construction,2026-01-28,"160 BROOKWOOD AVE NE, AC# CONCORD, NC 28025",56217335130000,56217335130000,unmatched,no matching parcels_enriched.pin14
+BU2026-00201,commercial_new_construction,2026-01-23,"2341 COLDWATER RIDGE DR, AC# KANNAPOLIS, NC 28083",56225889290000,56225889290000,unmatched,no matching parcels_enriched.pin14
+BU2026-00182,residential_new_construction,2026-01-22,"13526 STERLING CIR MIDLAND, NC 28107",55444391690000,55444391690000,unmatched,no matching parcels_enriched.pin14
+BU2026-00174,residential_new_construction,2026-01-21,"214 ARIZONA PL NW, LT# CONCORD, NC 28027",56012172600000,56012172600000,unmatched,no matching parcels_enriched.pin14
+BU2026-00119,residential_new_construction,2026-01-14,"1836 HUNTLEY RIDGE CONCORD, NC 28025",55158486630000,55158486630000,unmatched,no matching parcels_enriched.pin14
+BU2026-00065,residential_new_construction,2026-01-08,"2573 RED HILL ST NW, AC# CONCORD, NC 28027",56115291260000,56115291260000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03724,residential_new_construction,2025-12-16,"8167 THORNTON ST, AC# LOCUST, NC 28097",55762699720000,55762699720000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03727,residential_new_construction,2025-12-16,"220 LINCOLN ST SW, LT# CONCORD, NC 28025",56209530020000,56209530020000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03711,residential_new_construction,2025-12-12,"1250 S SKYLAND DR, AC# MT PLEASANT, NC 28124",56608362250000,56608362250000,unmatched,no matching parcels_enriched.pin14
+BU2025-03684,residential_new_construction,2025-12-11,"9101 ROBINSON CHURCH RD, AC# HARRISBURG, NC 28075",55068379170000,55068379170000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03685,residential_new_construction,2025-12-11,"587 CENTRAL DR NW CONCORD, NC 28027",56210076780000,56210076780000,unmatched,no matching parcels_enriched.pin14
+BU2025-03665,residential_new_construction,2025-12-10,"2306 KANNAPOLIS HWY, SUITE# B CONCORD, NC 28027",56129051040000,56129051040000,unmatched,no matching parcels_enriched.pin14
+BU2025-03667,residential_new_construction,2025-12-10,"2306 KANNAPOLIS HWY, UNIT# C CONCORD, NC 28027",56129051040000,56129051040000,unmatched,no matching parcels_enriched.pin14
+BU2025-03661,residential_new_construction,2025-12-09,"2306 KANNAPOLIS HWY A CONCORD, NC 28027",56129051040000,56129051040000,unmatched,no matching parcels_enriched.pin14
+BU2025-03638,residential_new_construction,2025-12-05,"1001 RHODE ISLAND AVE A KANNAPOLIS, NC 28083",56231065420000,56231065420000,unmatched,no matching parcels_enriched.pin14
+BU2025-03524,commercial_new_construction,2025-11-21,"505 MILTON L TAYLOR ST, AC# KANNAPOLIS, NC 28083",56138856170000,56138856170000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03343,residential_new_construction,2025-11-04,"262 CORRIE ANN Dr DR SW CONCORD, NC 28027",55095151460000,55095151460000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03324,residential_new_construction,2025-11-03,"1175 ROSEWOOD AVE, AC# KANNAPOLIS, NC 28081",56133267820000,56133267820000,unmatched,no matching parcels_enriched.pin14
+BU2025-03193,residential_new_construction,2025-10-22,"2801 PENNSYLVANIA AVE, LT# KANNAPOLIS, NC 28083",56221552760000,56221552760000,unmatched,no matching parcels_enriched.pin14
+BU2025-03196,residential_new_construction,2025-10-22,"9715 FLOWES STORE RD, AC# MIDLAND, NC 28107",55360153390000,55360153390000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03156,residential_new_construction,2025-10-17,"1219 OAKWOOD AVE KANNAPOLIS, NC 28081",56132260090000,56132260090000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03123,commercial_new_construction,2025-10-14,"1015 VINEHAVEN DR NE CONCORD, NC 28025",56228617750000,56228617750000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03061,commercial_new_construction,2025-10-09,"355 CLIFFWOOD ST NW B CONCORD, NC 28027",56108845030000,56108845030000,unmatched,no matching parcels_enriched.pin14
+BU2025-03064,commercial_new_construction,2025-10-09,"355 CLIFFWOOD ST NW C CONCORD, NC 28027",56108845030000,56108845030000,unmatched,no matching parcels_enriched.pin14
+BU2025-03084,residential_new_construction,2025-10-09,"248 CORRIE ANN Dr DR SW CONCORD, NC 28027",55095154640000,55095154640000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-03086,residential_new_construction,2025-10-09,"355 CLIFFWOOD ST NW, UT# D CONCORD, NC 28027",56108845030000,56108845030000,unmatched,no matching parcels_enriched.pin14
+BU2025-03058,commercial_new_construction,2025-10-08,"4290 PAPA JOE HENDRICK BLVD CHARLOTTE, NC 28262",45981987420000,45981987420000,unmatched,no matching parcels_enriched.pin14
+BU2025-03030,residential_new_construction,2025-10-06,"723 IRENE AVE KANNAPOLIS, NC 28083",56230477610000,56230477610000,unmatched,no matching parcels_enriched.pin14
+BU2025-03027,residential_new_construction,2025-10-03,"7200 COUNTY LINE RD MT PLEASANT, NC 28124",55775486710000,55775486710000,unmatched,no matching parcels_enriched.pin14
+BU2025-02988,residential_new_construction,2025-10-01,"277 CROWELL DR SW, LT# CONCORD, NC 28025",56207299380000,56207299380000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-02991,residential_new_construction,2025-10-01,"8159 THORNTON ST, AC# LOCUST, NC 28097",55763609970000,55763609970000,ambiguous,ambiguous pin14 matched multiple parcels
+BU2025-02965,residential_new_construction,2025-09-30,"4224 PINE ST KANNAPOLIS, NC 28081",56048072250000,56048072250000,unmatched,no matching parcels_enriched.pin14
+BU2025-02949,residential_new_construction,2025-09-29,"437 KINGFIELD DR SW, LT# CONCORD, NC 28027",55291466340000,55291466340000,unmatched,no matching parcels_enriched.pin14
+BU2025-02936,residential_new_construction,2025-09-26,"325 LINCOLN ST SW A CONCORD, NC 28025",56209341120000,56209341120000,unmatched,no matching parcels_enriched.pin14
+BU2025-02938,residential_new_construction,2025-09-26,"325 LINCOLN ST SW, LT# C CONCORD, NC 28025",56209340170000,56209340170000,unmatched,no matching parcels_enriched.pin14
+BU2025-02886,residential_new_construction,2025-09-24,"2330 MONTFORD AVE NW, AC# CONCORD, NC 28027",56108751770000,56108751770000,unmatched,no matching parcels_enriched.pin14
+BU2025-02851,commercial_new_construction,2025-09-22,"7455 VALOR PL NW CONCORD, NC 28027",45983900820000,45983900820000,unmatched,no matching parcels_enriched.pin14
+BU2025-02852,commercial_new_construction,2025-09-22,"7455 VALOR PL NW CONCORD, NC 28027",45983900820000,45983900820000,unmatched,no matching parcels_enriched.pin14
+BU2025-02856,residential_new_construction,2025-09-22,"161 SHAMROCK ST NE CONCORD, NC 28025",56219113570000,56219113570000,unmatched,no matching parcels_enriched.pin14
+BU2025-02831,residential_new_construction,2025-09-19,"5051 MACON ST KANNAPOLIS, NC 28081",56035728560000,56035728560000,unmatched,no matching parcels_enriched.pin14

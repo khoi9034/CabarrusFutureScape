@@ -1,0 +1,140 @@
+{
+  "phase": "Phase 9D",
+  "status": "implemented",
+  "generated_at": "2026-06-12",
+  "branch": "main",
+  "why_school_section_was_not_visible": [
+    "The full Selected Parcel School Assignment card was mounted only inside Due Diligence after a parcel was selected.",
+    "The default Overview panel did not mount the selected-parcel school hook, so school assignment and utilization were not visible from the primary map/search workflow.",
+    "Countywide school assignment summary existed as a supporting context panel, but it was tucked behind collapsed due-diligence context rather than placed in a clear model/data area."
+  ],
+  "where_school_card_now_appears": [
+    "Overview selected-parcel summary includes a compact School Assignment snapshot with elementary, middle, and high assignment labels.",
+    "Due Diligence selected parcel details keep the full School Assignment card.",
+    "Methodology includes a countywide School Assignment Summary under the School Constraint Summary section."
+  ],
+  "school_api_calls_verified": {
+    "browser_selection_smoke_test": [
+      "Searched and selected CFS-PARCEL-0149771666 from the top parcel search.",
+      "Searched and selected CFS-PARCEL-0149726579 from the top parcel search.",
+      "Both selections updated selected parcel state, map active selection, parcel cage/focus, and school assignment display."
+    ],
+    "post_restart_endpoint_checks": [
+      {
+        "endpoint": "/constraints/schools/CFS-PARCEL-0149771666",
+        "status": 200
+      },
+      {
+        "endpoint": "/constraints/schools/utilization-seed/CFS-PARCEL-0149771666",
+        "status": 200
+      },
+      {
+        "endpoint": "/constraints/schools/CFS-PARCEL-0149726579",
+        "status": 200
+      },
+      {
+        "endpoint": "/constraints/schools/utilization-seed/CFS-PARCEL-0149726579",
+        "status": 200
+      }
+    ],
+    "launcher_checks": [
+      "/constraints/schools/statistics returned 200",
+      "/constraints/schools/CFS-PARCEL-0149726579 returned 200",
+      "/constraints/schools/qa-summary returned 200"
+    ]
+  },
+  "selected_parcel_school_display_behavior": [
+    "Shows elementary, middle, and high attendance-zone assignment.",
+    "Shows Capacity Data Needed instead of implying official school capacity is available.",
+    "Shows Not scored when school_constraint_score is null.",
+    "Shows presentation-derived utilization values when matched.",
+    "Shows needs-verification/source caveats for utilization seed values.",
+    "Shows CCS V1 scope / QA review caveat when a level is missing or unmatched.",
+    "Does not hide the school section when capacity, score, utilization, or one assignment is unavailable."
+  ],
+  "sidebar_content_moved": {
+    "removed_from_map_layer_rail": [
+      "GIS Onboarding",
+      "Service Contract Readiness",
+      "Data Registry",
+      "Dataset Inventory",
+      "Scenario Controls",
+      "Composite mock scoring context",
+      "Long registry/readiness narratives"
+    ],
+    "new_location": "Methodology mode > Model Data Registry",
+    "kept_in_map_layer_rail": [
+      "County Boundary",
+      "Parcel Intelligence",
+      "Development Hotspots",
+      "Flood Constraints",
+      "FEMA Flood Zones",
+      "Infrastructure Readiness placeholder",
+      "Opportunity/pressure/envelope placeholder map toggles"
+    ]
+  },
+  "layer_rail_cleanup": [
+    "Default desktop rail width increased to 360px.",
+    "Resize range changed to 300px minimum and 520px maximum.",
+    "Added slim collapsed rail with clear expand button.",
+    "Added clear collapse button in expanded state.",
+    "Map Layers disclosure is closed by default.",
+    "Closed Map Layers disclosure now unmounts its control contents until opened.",
+    "Development Hotspot advanced filters are collapsed by default and unmount their controls until opened.",
+    "Resize drag updates the CSS grid variable directly and commits React state on pointer release."
+  ],
+  "text_overflow_and_legend_fixes": [
+    "Flood Constraints legend uses vertical rows with full labels: Severe / floodway, High / SFHA, Moderate.",
+    "FEMA Flood Zones legend uses vertical rows with full labels: Floodway, SFHA, Moderate, Minimal.",
+    "Layer status labels use readable wrapping badges rather than tiny one-letter/truncated chips.",
+    "School assignment names and summary terms wrap instead of truncating important capacity/score labels."
+  ],
+  "map_performance_changes": [
+    "Closed Map Layers does not mount hidden layer controls.",
+    "Closed Development Hotspot advanced filters do not mount hidden filter selects.",
+    "Sidebar resize avoids repeated full React layout state updates during pointer movement.",
+    "Existing Phase 9B Cabarrus local SceneView constraints, medium quality, disabled stars/atmosphere/shadows, and FEMA default limit of 100 remain preserved."
+  ],
+  "fullscreen_map_behavior": [
+    "Fullscreen map mode hides the right intelligence panel.",
+    "Fullscreen map mode hides the bottom KPI bar.",
+    "Left layer rail remains available in fullscreen mode.",
+    "Left layer rail can collapse/expand in fullscreen mode.",
+    "Selected parcel active selection and focus card remain visible."
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "backend_tests": "not run; backend code was not changed"
+  },
+  "smoke_test_results": [
+    "Frontend loaded at http://localhost:3000.",
+    "FastAPI health returned 200 at http://127.0.0.1:8000/health.",
+    "Selected CFS-PARCEL-0149771666 from top search; Overview and Due Diligence showed school assignment, Capacity Data Needed, Not scored, presentation-derived utilization where matched, and CCS/QA caveat for missing middle assignment.",
+    "Selected CFS-PARCEL-0149726579 from top search; Due Diligence showed Carl A Furr ES, Roberta Road MS, Jay M Robinson HS, Capacity Data Needed, Not scored, and presentation-derived utilization caveats.",
+    "Layer rail collapsed to a slim rail and expanded cleanly.",
+    "Map Layers rail stayed focused on operational controls.",
+    "Methodology displayed School Assignment Summary and moved Model Data Registry content.",
+    "Fullscreen map mode hid the right intelligence panel and bottom KPI strip while retaining the left layer rail.",
+    "Selected parcel cage/focus remained visible during smoke testing."
+  ],
+  "remaining_known_issues": [
+    "Some placeholder map layers remain intentionally mock/readiness toggles until authoritative data is connected.",
+    "Official school capacity/enrollment data is still absent, so capacity scoring remains disabled.",
+    "Presentation-derived school utilization remains preliminary and needs verification.",
+    "ArcGIS console continues to emit existing label-placement warnings for some draped graphics; this task did not change SceneView label behavior."
+  ],
+  "files_changed": [
+    "README.md",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/dashboard/SelectedParcelSchoolAssignmentPanel.tsx",
+    "src/components/dashboard/SchoolConstraintSummaryPanel.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/lib/adapters/selectedParcelSchoolConstraintAdapter.ts",
+    "outputs/phase9d_school_visibility_sidebar_cleanup_summary.json"
+  ]
+}

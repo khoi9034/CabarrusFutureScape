@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -245,6 +246,134 @@ class DevelopmentActivitySummaryResponse(BaseModel):
         default_factory=list,
     )
     recent_activity: DevelopmentActivityRecentSummary
+
+
+class NewConstructionBucket(BaseModel):
+    value: str
+    count: int
+
+
+class NewConstructionDateRange(BaseModel):
+    permit_date_min: date | None = None
+    permit_date_max: date | None = None
+    co_date_min: date | None = None
+    co_date_max: date | None = None
+
+
+class NewConstructionStatisticsResponse(BaseModel):
+    total_permits: int
+    matched_permit_count: int
+    unmatched_permit_count: int
+    ambiguous_permit_count: int
+    invalid_placeholder_count: int
+    unique_matched_parcel_count: int
+    co_issued_count: int
+    co_not_issued_count: int
+    date_range: NewConstructionDateRange
+    by_permit_type_class: list[NewConstructionBucket] = Field(default_factory=list)
+    by_construction_status: list[NewConstructionBucket] = Field(default_factory=list)
+    by_match_confidence: list[NewConstructionBucket] = Field(default_factory=list)
+    prediction_model_active: bool = False
+    prediction_probability_available: bool = False
+
+
+class NewConstructionTrendPoint(BaseModel):
+    year: int | None = None
+    month: int | None = None
+    permit_count: int
+    residential_count: int
+    commercial_count: int
+    completed_count: int
+    active_uncompleted_count: int
+
+
+class NewConstructionTrendsResponse(BaseModel):
+    annual_trends: list[NewConstructionTrendPoint] = Field(default_factory=list)
+    monthly_trends: list[NewConstructionTrendPoint] = Field(default_factory=list)
+    prediction_model_active: bool = False
+
+
+class ParcelNewConstructionSummaryResponse(BaseModel):
+    official_parcel_id: str
+    pin14: str | None = None
+    total_new_construction_permits: int = 0
+    residential_new_construction_permits: int = 0
+    commercial_new_construction_permits: int = 0
+    first_new_construction_permit_date: date | None = None
+    latest_new_construction_permit_date: date | None = None
+    latest_co_date: date | None = None
+    completed_new_construction_count: int = 0
+    active_uncompleted_new_construction_count: int = 0
+    average_days_to_co: float | None = None
+    new_construction_years_active: int = 0
+    recent_1yr_new_construction_count: int = 0
+    recent_3yr_new_construction_count: int = 0
+    recent_5yr_new_construction_count: int = 0
+    development_stage: str = "no_matched_new_construction_activity"
+    source: str = "staff_provided_new_construction_extract"
+    prediction_model_active: bool = False
+    prediction_probability_available: bool = False
+
+
+class NewConstructionLabelPositiveRate(BaseModel):
+    snapshot_year: int
+    parcel_count: int
+    positive_next_1yr_count: int
+    positive_next_1yr_pct: float
+    positive_next_3yr_count: int
+    positive_next_3yr_pct: float
+
+
+class NewConstructionLabelsSummaryResponse(BaseModel):
+    label_table_row_count: int
+    min_snapshot_year: int | None = None
+    max_snapshot_year: int | None = None
+    snapshot_year_count: int
+    positive_rate_by_snapshot_year: list[NewConstructionLabelPositiveRate] = Field(
+        default_factory=list,
+    )
+    label_source: str = "staff_provided_new_construction_extract"
+    labels_are_targets_only: bool = True
+    prediction_model_active: bool = False
+    prediction_probability_available: bool = False
+
+
+class DevelopmentPredictionFeatureMissingness(BaseModel):
+    feature_name: str
+    missing_count: int
+    missing_pct: float
+
+
+class DevelopmentPredictionFeatureLabelRate(BaseModel):
+    label_name: str
+    row_count: int
+    positive_count: int
+    positive_rate_pct: float
+
+
+class DevelopmentPredictionFeaturesSummaryResponse(BaseModel):
+    feature_matrix_available: bool
+    feature_table: str = "public.parcel_development_prediction_features"
+    row_count: int = 0
+    unique_parcel_count: int = 0
+    min_snapshot_year: int | None = None
+    max_snapshot_year: int | None = None
+    snapshot_year_count: int = 0
+    feature_set_version: str | None = None
+    feature_groups: list[str] = Field(default_factory=list)
+    missingness_highlights: list[DevelopmentPredictionFeatureMissingness] = Field(
+        default_factory=list,
+    )
+    label_positive_rates: list[DevelopmentPredictionFeatureLabelRate] = Field(
+        default_factory=list,
+    )
+    leakage_caveats: list[str] = Field(default_factory=list)
+    baseline_model_experiment_available: bool = False
+    latest_experiment_id: str | None = None
+    metrics_summary: dict[str, Any] = Field(default_factory=dict)
+    production_ready: bool = False
+    model_active: bool = False
+    prediction_probability_available: bool = False
 
 
 class DevelopmentTemporalQueryResult(BaseModel):

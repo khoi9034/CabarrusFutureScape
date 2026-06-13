@@ -102,7 +102,7 @@ export function MetricsBar() {
   ];
 
   return (
-    <footer className="glass-panel z-20 mx-3 mb-3 rounded-lg px-3 py-2 lg:mx-3">
+    <footer className="glass-panel z-20 mx-3 mb-3 rounded-lg px-2.5 py-1.5 lg:mx-3">
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map((metric) => (
           <CompactMetricCell metric={metric} key={metric.id} />
@@ -118,20 +118,20 @@ function CompactMetricCell({ metric }: { metric: CompactMetric }) {
   return (
     <article
       className={cn(
-        "flex min-w-0 items-center gap-3 rounded-md border px-3 py-2",
+        "flex min-w-0 items-center gap-2 rounded-md border px-2.5 py-1.5",
         toneStyles[metric.tone],
       )}
       title={`${metric.label}: ${metric.value}, ${metric.context}`}
     >
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-black/20">
-        <Icon className="h-4 w-4" style={{ color: metric.accent }} />
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/10 bg-black/20">
+        <Icon className="h-3.5 w-3.5" style={{ color: metric.accent }} />
       </div>
       <div className="min-w-0">
         <p className="truncate text-[10px] font-semibold uppercase text-slate-500">
           {metric.label}
         </p>
         <div className="mt-0.5 flex min-w-0 items-baseline gap-2">
-          <p className="truncate text-base font-semibold leading-5 text-white">
+          <p className="truncate text-sm font-semibold leading-5 text-white">
             {metric.value}
           </p>
           <p className="truncate text-[11px] text-slate-500">

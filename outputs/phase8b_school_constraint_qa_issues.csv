@@ -1,0 +1,11 @@
+issue_type,severity,school_level,school_name,detail,parcel_count,recommended_action
+unmatched_zone_reference,review,elementary,Hickory Ridge ES,missing_school_reference_record,,Keep attendance-zone assignment but review school reference dictionary before frontend display.
+unmatched_zone_reference,review,high,West Cabarrus HS,missing_school_reference_record,,Keep attendance-zone assignment but review school reference dictionary before frontend display.
+unmatched_zone_reference,review,middle,Roberta Road MS,missing_school_reference_record,,Keep attendance-zone assignment but review school reference dictionary before frontend display.
+unmatched_zone_reference,info,elementary,GW Carver ES,excluded_by_ccs_only_scope,,No CFS V1 fix required unless school scope expands beyond CCS.
+unmatched_zone_reference,info,elementary,North Kannapolis ES,excluded_by_ccs_only_scope,,No CFS V1 fix required unless school scope expands beyond CCS.
+duplicate_normalized_school_name,review,middle,kannapolis_middle,Duplicate normalized reference appears 2 times.,,Review duplicate school reference records before production UI exposure.
+missing_elementary_assignment,review,elementary,,Parcel has no included CFS V1 elementary attendance-zone assignment.,18856,Expected under CCS-only V1 scope; review before frontend map display.
+missing_middle_assignment,review,middle,,Parcel has no included CFS V1 middle attendance-zone assignment.,23796,Expected under CCS-only V1 scope; review before frontend map display.
+missing_high_assignment,review,high,,Parcel has no included CFS V1 high attendance-zone assignment.,18856,Expected under CCS-only V1 scope; review before frontend map display.
+capacity_not_available,blocking_for_capacity_score,,,No vetted capacity/enrollment rows exist in public.school_capacity.,110017,Do not calculate school constraint score until real capacity/enrollment source is approved.

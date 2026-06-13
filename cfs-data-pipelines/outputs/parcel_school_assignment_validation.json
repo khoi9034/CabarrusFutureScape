@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-10T21:21:47.081006",
+  "generated_at": "2026-06-11T06:20:43.177690",
   "parcel_table": "public.parcels_enriched",
   "zone_table": "public.school_zones",
   "assignment_table": "public.parcel_school_assignment",
@@ -7,43 +7,47 @@
   "assignment_row_count": 110017,
   "row_count_delta": 0,
   "row_counts_match": true,
-  "included_school_zone_count": 44,
+  "included_school_zone_count": 35,
   "null_official_parcel_id_count": 0,
   "assignment_counts": {
-    "elementary_assigned": 108279,
-    "middle_assigned": 108272,
-    "high_assigned": 108272,
-    "missing_elementary": 1738,
-    "missing_middle": 1745,
-    "missing_high": 1745,
-    "review_required": 64192,
-    "unmatched_reference": 60444
+    "elementary_assigned": 91161,
+    "middle_assigned": 86221,
+    "high_assigned": 91161,
+    "missing_elementary": 18856,
+    "missing_middle": 23796,
+    "missing_high": 18856,
+    "review_required": 75143,
+    "unmatched_reference": 51714
   },
   "multiple_zone_overlap_counts": {
-    "multiple_elementary": 1548,
-    "multiple_middle": 797,
-    "multiple_high": 765
+    "multiple_elementary": 1119,
+    "multiple_middle": 498,
+    "multiple_high": 560
   },
   "assignment_confidence_distribution": [
     {
       "school_assignment_confidence": "review",
-      "parcel_count": 61164
+      "parcel_count": 54973
     },
     {
       "school_assignment_confidence": "high",
-      "parcel_count": 45088
-    },
-    {
-      "school_assignment_confidence": "medium",
-      "parcel_count": 2027
+      "parcel_count": 34200
     },
     {
       "school_assignment_confidence": "low",
-      "parcel_count": 1738
+      "parcel_count": 18856
+    },
+    {
+      "school_assignment_confidence": "medium",
+      "parcel_count": 1988
     }
   ],
   "school_name_distribution": {
     "elementary": [
+      {
+        "school_name": "UNASSIGNED",
+        "parcel_count": 18856
+      },
       {
         "school_name": "W R Odell ES",
         "parcel_count": 8493
@@ -54,7 +58,7 @@
       },
       {
         "school_name": "Charles E Boger ES",
-        "parcel_count": 7295
+        "parcel_count": 7321
       },
       {
         "school_name": "Bethel ES",
@@ -81,10 +85,6 @@
         "parcel_count": 4591
       },
       {
-        "school_name": "GW Carver ES",
-        "parcel_count": 4235
-      },
-      {
         "school_name": "Hickory Ridge ES",
         "parcel_count": 4194
       },
@@ -94,11 +94,7 @@
       },
       {
         "school_name": "Winecoff ES",
-        "parcel_count": 3752
-      },
-      {
-        "school_name": "Forest Park ES",
-        "parcel_count": 3748
+        "parcel_count": 3805
       },
       {
         "school_name": "Carl A Furr ES",
@@ -113,58 +109,38 @@
         "parcel_count": 3434
       },
       {
-        "school_name": "Jackson Park ES",
-        "parcel_count": 3351
-      },
-      {
         "school_name": "Rocky River ES",
         "parcel_count": 3087
       },
       {
         "school_name": "Royal Oaks ES",
-        "parcel_count": 2848
+        "parcel_count": 2862
       },
       {
         "school_name": "Patriots ES",
         "parcel_count": 2405
       },
       {
-        "school_name": "Fred L Wilson ES",
-        "parcel_count": 2205
-      },
-      {
-        "school_name": "Shady Brook ES",
-        "parcel_count": 2095
-      },
-      {
         "school_name": "Coltrane Webb ES",
         "parcel_count": 1853
-      },
-      {
-        "school_name": "UNASSIGNED",
-        "parcel_count": 1738
-      },
-      {
-        "school_name": "North Kannapolis ES",
-        "parcel_count": 1577
       }
     ],
     "middle": [
       {
-        "school_name": "Kannapolis MS",
-        "parcel_count": 17205
+        "school_name": "UNASSIGNED",
+        "parcel_count": 23796
       },
       {
         "school_name": "Concord MS",
-        "parcel_count": 13972
+        "parcel_count": 13994
       },
       {
         "school_name": "Harold Winkler MS",
-        "parcel_count": 12472
+        "parcel_count": 12473
       },
       {
         "school_name": "Northwest Cabarrus MS",
-        "parcel_count": 11331
+        "parcel_count": 11409
       },
       {
         "school_name": "Mount Pleasant MS",
@@ -172,11 +148,11 @@
       },
       {
         "school_name": "C C Griffin MS",
-        "parcel_count": 10680
+        "parcel_count": 10705
       },
       {
         "school_name": "Roberta Road MS",
-        "parcel_count": 8972
+        "parcel_count": 9004
       },
       {
         "school_name": "Hickory Ridge MS",
@@ -185,20 +161,12 @@
       {
         "school_name": "Harris Road MS",
         "parcel_count": 8473
-      },
-      {
-        "school_name": "J N Fries MS",
-        "parcel_count": 5004
-      },
-      {
-        "school_name": "UNASSIGNED",
-        "parcel_count": 1745
       }
     ],
     "high": [
       {
-        "school_name": "A.L. Brown HS",
-        "parcel_count": 17205
+        "school_name": "UNASSIGNED",
+        "parcel_count": 18856
       },
       {
         "school_name": "West Cabarrus HS",
@@ -206,7 +174,7 @@
       },
       {
         "school_name": "Concord HS",
-        "parcel_count": 13973
+        "parcel_count": 13989
       },
       {
         "school_name": "Central Cabarrus HS",
@@ -214,7 +182,7 @@
       },
       {
         "school_name": "Northwest Cabarrus HS",
-        "parcel_count": 11331
+        "parcel_count": 11409
       },
       {
         "school_name": "Mount Pleasant HS",
@@ -231,10 +199,6 @@
       {
         "school_name": "Cox Mill HS",
         "parcel_count": 8473
-      },
-      {
-        "school_name": "UNASSIGNED",
-        "parcel_count": 1745
       }
     ]
   },
@@ -258,7 +222,7 @@
     "no_null_official_parcel_id": true,
     "no_invalid_geometries": true
   },
-  "elapsed_seconds": 149.06,
-  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcel_school_assignment_20260610_211917.log",
-  "warning_row_count": 64192
+  "elapsed_seconds": 260.28,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_parcel_school_assignment_20260611_061622.log",
+  "warning_row_count": 75143
 }

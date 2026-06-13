@@ -1,0 +1,163 @@
+{
+  "generated_at": "2026-06-11T08:13:12",
+  "phase": "Phase 8B School Constraint QA Review and API Readiness",
+  "source_outputs_reviewed": [
+    "outputs/phase8a_school_constraint_verification_or_ingestion_summary.json",
+    "outputs/school_zone_unmatched_names.csv",
+    "outputs/school_zone_match_qa.csv",
+    "outputs/parcel_school_assignment_validation.json",
+    "outputs/parcel_school_assignment_warnings.csv",
+    "outputs/parcel_school_summary_validation.json"
+  ],
+  "school_reference_count": 53,
+  "included_public_ccs_count": 34,
+  "excluded_count_by_reason": [
+    {
+      "reason": "level_not_v1",
+      "count": 11
+    },
+    {
+      "reason": "non_ccs_not_v1",
+      "count": 7
+    },
+    {
+      "reason": "magnet_not_v1",
+      "count": 1
+    }
+  ],
+  "school_zones_count_by_level": [
+    {
+      "school_level": "elementary",
+      "total_count": 25,
+      "included_count": 19,
+      "excluded_count": 6
+    },
+    {
+      "school_level": "high",
+      "total_count": 9,
+      "included_count": 8,
+      "excluded_count": 1
+    },
+    {
+      "school_level": "middle",
+      "total_count": 10,
+      "included_count": 8,
+      "excluded_count": 2
+    }
+  ],
+  "unmatched_zone_names": [
+    {
+      "issue_type": "unmatched_zone_reference",
+      "severity": "review",
+      "school_level": "elementary",
+      "school_name": "Hickory Ridge ES",
+      "school_name_normalized": "hickory_ridge_elementary",
+      "classification": "missing_school_reference_record",
+      "include_in_cfs_v1": true,
+      "exclusion_reason": null,
+      "recommended_action": "Keep attendance-zone assignment but review school reference dictionary before frontend display."
+    },
+    {
+      "issue_type": "unmatched_zone_reference",
+      "severity": "review",
+      "school_level": "high",
+      "school_name": "West Cabarrus HS",
+      "school_name_normalized": "west_cabarrus_high",
+      "classification": "missing_school_reference_record",
+      "include_in_cfs_v1": true,
+      "exclusion_reason": null,
+      "recommended_action": "Keep attendance-zone assignment but review school reference dictionary before frontend display."
+    },
+    {
+      "issue_type": "unmatched_zone_reference",
+      "severity": "review",
+      "school_level": "middle",
+      "school_name": "Roberta Road MS",
+      "school_name_normalized": "roberta_road_middle",
+      "classification": "missing_school_reference_record",
+      "include_in_cfs_v1": true,
+      "exclusion_reason": null,
+      "recommended_action": "Keep attendance-zone assignment but review school reference dictionary before frontend display."
+    },
+    {
+      "issue_type": "unmatched_zone_reference",
+      "severity": "info",
+      "school_level": "elementary",
+      "school_name": "GW Carver ES",
+      "school_name_normalized": "gw_carver_elementary",
+      "classification": "excluded_by_ccs_only_scope",
+      "include_in_cfs_v1": false,
+      "exclusion_reason": "non_ccs_not_v1",
+      "recommended_action": "No CFS V1 fix required unless school scope expands beyond CCS."
+    },
+    {
+      "issue_type": "unmatched_zone_reference",
+      "severity": "info",
+      "school_level": "elementary",
+      "school_name": "North Kannapolis ES",
+      "school_name_normalized": "north_kannapolis_elementary",
+      "classification": "excluded_by_ccs_only_scope",
+      "include_in_cfs_v1": false,
+      "exclusion_reason": "non_ccs_not_v1",
+      "recommended_action": "No CFS V1 fix required unless school scope expands beyond CCS."
+    }
+  ],
+  "duplicate_normalized_names": [
+    {
+      "school_level": "middle",
+      "school_name_normalized": "kannapolis_middle",
+      "duplicate_count": 2
+    }
+  ],
+  "parcel_assignment_count": 110017,
+  "missing_assignment_counts": {
+    "elementary": 18856,
+    "middle": 23796,
+    "high": 18856
+  },
+  "multi_zone_overlap_counts": {
+    "elementary": 1119,
+    "middle": 498,
+    "high": 560,
+    "any_level": 1340
+  },
+  "parcels_assigned_to_unmatched_school_zones": 51714,
+  "assignment_review_required_count": 75143,
+  "assignment_confidence_distribution": [
+    {
+      "school_assignment_confidence": "review",
+      "parcel_count": 54973
+    },
+    {
+      "school_assignment_confidence": "high",
+      "parcel_count": 34200
+    },
+    {
+      "school_assignment_confidence": "low",
+      "parcel_count": 18856
+    },
+    {
+      "school_assignment_confidence": "medium",
+      "parcel_count": 1988
+    }
+  ],
+  "capacity_availability_status": {
+    "school_capacity_rows": 0,
+    "capacity_available_parcels": 0,
+    "school_constraint_score_non_null_count": 0,
+    "not_scored_count": 110017,
+    "status": "capacity_not_available_not_scored"
+  },
+  "safe_for_api_exposure": true,
+  "safe_for_api_exposure_scope": "read_only_assignment_and_qa_only_not_capacity_scoring",
+  "qa_decision": {
+    "safe_name_matching_fixes_applied": false,
+    "reason": "Hickory Ridge ES, West Cabarrus HS, and Roberta Road MS do not have same-level school_reference rows; they are missing reference records, not suffix-only normalization defects.",
+    "ambiguous_records_force_matched": false
+  },
+  "recommended_next_steps": [
+    "Expose read-only assignment, district summary, and QA endpoints with capacity caveats.",
+    "Review included unmatched CCS zones before frontend school panel release.",
+    "Identify a vetted capacity/enrollment source before calculating school constraint scores."
+  ]
+}

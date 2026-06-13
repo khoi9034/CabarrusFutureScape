@@ -1,0 +1,87 @@
+{
+  "experiment_id": "phase10c_new_construction_next_3yr_strict_time_safe_baseline_20260612_235209",
+  "target": "new_construction_next_3yr",
+  "feature_set": "strict_time_safe_baseline",
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "best_model_name": "hist_gradient_boosting",
+  "models": {
+    "logistic_regression": {
+      "validation": {
+        "row_count": 220034,
+        "positive_count": 8611,
+        "positive_rate": 0.039135,
+        "roc_auc": 0.607809,
+        "average_precision_pr_auc": 0.051234,
+        "precision_at_top_1_pct": 0.010904,
+        "precision_at_top_5_pct": 0.017542,
+        "recall_at_top_5_pct": 0.022413,
+        "lift_at_top_5_pct": 0.448252,
+        "brier_score": 0.234494,
+        "confusion_matrix_threshold_0_5": {
+          "true_negative": 56612,
+          "false_positive": 154811,
+          "false_negative": 202,
+          "true_positive": 8409
+        }
+      },
+      "test": {
+        "row_count": 110017,
+        "positive_count": 4216,
+        "positive_rate": 0.038321,
+        "roc_auc": 0.605749,
+        "average_precision_pr_auc": 0.051172,
+        "precision_at_top_1_pct": 0.009083,
+        "precision_at_top_5_pct": 0.008726,
+        "recall_at_top_5_pct": 0.011385,
+        "lift_at_top_5_pct": 0.227698,
+        "brier_score": 0.241427,
+        "confusion_matrix_threshold_0_5": {
+          "true_negative": 29899,
+          "false_positive": 75902,
+          "false_negative": 103,
+          "true_positive": 4113
+        }
+      }
+    },
+    "hist_gradient_boosting": {
+      "validation": {
+        "row_count": 220034,
+        "positive_count": 8611,
+        "positive_rate": 0.039135,
+        "roc_auc": 0.638043,
+        "average_precision_pr_auc": 0.054323,
+        "precision_at_top_1_pct": 0.03771,
+        "precision_at_top_5_pct": 0.076441,
+        "recall_at_top_5_pct": 0.097666,
+        "lift_at_top_5_pct": 1.953262,
+        "brier_score": 0.216887,
+        "confusion_matrix_threshold_0_5": {
+          "true_negative": 63993,
+          "false_positive": 147430,
+          "false_negative": 245,
+          "true_positive": 8366
+        }
+      },
+      "test": {
+        "row_count": 110017,
+        "positive_count": 4216,
+        "positive_rate": 0.038321,
+        "roc_auc": 0.651077,
+        "average_precision_pr_auc": 0.054985,
+        "precision_at_top_1_pct": 0.024523,
+        "precision_at_top_5_pct": 0.078713,
+        "recall_at_top_5_pct": 0.102704,
+        "lift_at_top_5_pct": 2.054024,
+        "brier_score": 0.208022,
+        "confusion_matrix_threshold_0_5": {
+          "true_negative": 35361,
+          "false_positive": 70440,
+          "false_negative": 131,
+          "true_positive": 4085
+        }
+      }
+    }
+  }
+}

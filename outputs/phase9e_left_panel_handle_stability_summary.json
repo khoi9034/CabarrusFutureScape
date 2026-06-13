@@ -1,0 +1,100 @@
+{
+  "phase": "9E follow-up",
+  "title": "Left Panel Resize Handle Stability and Live Collapse Behavior",
+  "status": "implemented",
+  "branch": "main",
+  "files_changed": [
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/styles/cfs-theme.css"
+  ],
+  "hover_jump_fix": {
+    "status": "fixed",
+    "changes": [
+      "Removed hover translateX behavior from the layer rail handle.",
+      "Removed collapsed-state right-offset variation so the handle keeps the same anchor position.",
+      "Kept handle width, height, padding, border width, and transform stable on hover.",
+      "Hover/focus now only changes opacity, border color, background/shadow, and icon color."
+    ],
+    "verified": {
+      "handle_rect_before_hover": {
+        "width_px": 18.39583396911621,
+        "height_px": 76,
+        "x_px": 302.53125,
+        "y_px": 316.16668701171875
+      },
+      "handle_rect_after_hover": {
+        "width_px": 18.39583396911621,
+        "height_px": 76,
+        "x_px": 302.53125,
+        "y_px": 316.16668701171875
+      },
+      "transition_properties": "opacity, border-color, background, box-shadow"
+    }
+  },
+  "live_collapse_preview": {
+    "status": "implemented",
+    "approach": [
+      "Added transient drag preview state for expanded/collapsed rail rendering.",
+      "Crossing below the collapse threshold switches the rendered rail to the slim collapsed version during drag.",
+      "Dragging back above the threshold restores the expanded rail preview before pointer release.",
+      "Only threshold crossings update React state; per-pixel width changes continue through the CSS variable.",
+      "Final collapsed or expanded state is committed on pointerup."
+    ],
+    "collapse_threshold_px": 220,
+    "collapsed_width_px": 64,
+    "minimum_expanded_width_px": 300,
+    "previous_expanded_width_behavior": "Preserved via cfs.layerRailWidth localStorage and restored on expand."
+  },
+  "collapsed_rail": {
+    "layers_label_preserved": true,
+    "layers_icon_preserved": true,
+    "full_layer_content_hidden_when_collapsed": true,
+    "handle_usable_when_collapsed": true
+  },
+  "performance_safeguards": [
+    "No backend, PostGIS, API, data pipeline, parcel search, or SceneView data layer changes.",
+    "No new dependencies added.",
+    "No heavy animations added.",
+    "Drag width still updates with requestAnimationFrame and direct CSS variable writes.",
+    "React state updates are limited to drag start, drag end, and expanded/collapsed preview threshold changes.",
+    "A dragging class disables rail transition durations during active drag."
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "frontend_health": "http://localhost:3000 returned 200",
+    "backend_health": "http://127.0.0.1:8000/health returned 200",
+    "backend_database_health": "http://127.0.0.1:8000/health/database returned 200",
+    "critical_api_checks": {
+      "parcels_search": 200,
+      "parcel_detail_include_geometry": 200,
+      "development_hotspots": 200,
+      "flood_high_review": 200,
+      "flood_summary": 200,
+      "fema_flood_zones": 200,
+      "school_statistics": 200,
+      "school_parcel_detail": 200,
+      "school_qa_summary": 200
+    },
+    "next_dev_log_new_errors": "none found",
+    "backend_dev_log_new_errors": "none found beyond launcher redirection noise"
+  },
+  "smoke_test_results": {
+    "frontend_loads": "passed",
+    "hover_over_resize_handle_no_jump": "passed",
+    "click_handle_collapses": "passed; rail became 64px and aria-pressed=true",
+    "click_handle_expands": "passed; rail returned to expanded state",
+    "drag_left_collapses": "passed; rail became 64px and retained Layers label",
+    "drag_right_expands": "passed; rail expanded to 512px in browser smoke test",
+    "fullscreen_map_mode": "passed; right intelligence panel and footer hidden, left rail and handle remained available",
+    "sceneview_present": "passed",
+    "selected_parcel_school_flood_development_workflows": "API health checks passed and related code paths were not modified"
+  },
+  "remaining_limitations": [
+    "The in-app browser API cannot pause in the middle of a drag gesture, so live collapse preview was verified by source behavior and final drag states rather than a mid-drag screenshot.",
+    "ArcGIS draped label placement warnings may still appear from existing map graphics and are unrelated to this resize follow-up."
+  ]
+}

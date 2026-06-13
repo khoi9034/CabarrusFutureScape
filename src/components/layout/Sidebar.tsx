@@ -1,113 +1,160 @@
 "use client";
 
-import {
-  BrainCircuit,
-  ChevronDown,
-  SlidersHorizontal,
-} from "lucide-react";
-import { DataRegistryPanel } from "@/components/dashboard/DataRegistryPanel";
-import { GISIntegrationReadinessPanel } from "@/components/dashboard/GISIntegrationReadinessPanel";
+import type {
+  KeyboardEvent as ReactKeyboardEvent,
+  PointerEvent as ReactPointerEvent,
+} from "react";
+import { ChevronLeft, ChevronRight, Layers3, SlidersHorizontal } from "lucide-react";
 import { LayerToggle } from "@/components/dashboard/LayerToggle";
-import { ScenarioControls } from "@/components/dashboard/ScenarioControls";
-import { ScoreCard } from "@/components/ui/ScoreCard";
-import { scoreSignals } from "@/data/mock/dashboardMockData";
-import { useDashboardState } from "@/hooks/useDashboardState";
+import { cn } from "@/lib/utils";
 
-export function Sidebar() {
-  const { selectedParcel } = useDashboardState();
+interface SidebarProps {
+  collapsed?: boolean;
+  dragging?: boolean;
+  onResizeStart?: (event: ReactPointerEvent) => void;
+  onToggleCollapsed?: () => void;
+}
+
+export function Sidebar({
+  collapsed = false,
+  dragging = false,
+  onResizeStart,
+  onToggleCollapsed,
+}: SidebarProps) {
+  if (collapsed) {
+    return (
+      <aside
+        aria-label="Collapsed map layer controls"
+        className={cn(
+          "app-chrome glass-panel cfs-layer-rail cfs-layer-rail--collapsed relative order-2 flex min-h-0 flex-col items-center gap-3 overflow-visible rounded-lg p-2 md:max-h-[72vh] lg:order-1 lg:max-h-none",
+          dragging && "cfs-layer-rail--dragging",
+        )}
+      >
+        <LayerRailEdgeHandle
+          collapsed
+          onPointerDown={onResizeStart}
+          onToggleCollapsed={onToggleCollapsed}
+        />
+        <div
+          aria-hidden="true"
+          className="mt-2 flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#9eeeff]"
+        >
+          <Layers3 className="h-4 w-4" />
+        </div>
+        <p className="mt-1 [writing-mode:vertical-rl] rotate-180 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+          Layers
+        </p>
+      </aside>
+    );
+  }
 
   return (
     <aside
       aria-label="Explore and map layer control panel"
-      className="app-chrome glass-panel no-scrollbar order-2 min-h-0 overflow-auto rounded-lg p-3 md:max-h-[72vh] lg:order-1 lg:max-h-none"
+      className={cn(
+        "app-chrome glass-panel cfs-layer-rail relative order-2 flex min-h-0 flex-col overflow-visible rounded-lg md:max-h-[72vh] lg:order-1 lg:max-h-none",
+        dragging && "cfs-layer-rail--dragging",
+      )}
     >
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase text-slate-500">
-            Explore
+      <LayerRailEdgeHandle
+        onPointerDown={onResizeStart}
+        onToggleCollapsed={onToggleCollapsed}
+      />
+      <div className="no-scrollbar min-h-0 flex-1 overflow-auto rounded-lg p-3">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase text-slate-500">
+              Explore
+            </p>
+            <h2 className="mt-1 text-lg font-semibold leading-6 text-white">
+              Map Layers
+            </h2>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <div
+              aria-hidden="true"
+              className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-[#d8b86a]"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3 pr-0 lg:pr-2">
+          <LayerToggle />
+          <p
+            className={cn(
+              "rounded-md border border-white/10 bg-white/[0.025] px-3 py-2 text-[11px] leading-5 text-slate-500",
+            )}
+          >
+            Registry, onboarding, scenario, and methodology notes now live in the
+            Methodology workspace so this rail stays focused on map operations.
           </p>
-          <h2 className="mt-1 text-lg font-semibold leading-6 text-white">
-            Map Layers
-          </h2>
         </div>
-        <div
-          aria-hidden="true"
-          className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-[#d8b86a]"
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <LayerToggle />
-
-        <details className="group rounded-lg border border-white/10 bg-black/20 p-3">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-            <span>
-              <span className="block text-sm font-semibold text-white">
-                Planning tools
-              </span>
-              <span className="mt-1 block text-xs leading-5 text-slate-500">
-                Scenario and data-readiness controls
-              </span>
-            </span>
-            <ChevronDown className="h-4 w-4 text-slate-400 transition group-open:rotate-180" />
-          </summary>
-          <div className="mt-4 space-y-4 border-t border-white/10 pt-4">
-            <ScenarioControls />
-            <GISIntegrationReadinessPanel />
-            <DataRegistryPanel />
-          </div>
-        </details>
-
-        <details className="group rounded-lg border border-white/10 bg-black/20 p-3">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-            <span>
-              <span className="block text-sm font-semibold text-white">
-                Composite signals
-              </span>
-              <span className="mt-1 block text-xs leading-5 text-slate-500">
-                Legacy mock scoring context
-              </span>
-            </span>
-            <div className="flex items-center gap-2">
-              <BrainCircuit className="h-4 w-4 text-[#68d8ff]" />
-              <ChevronDown className="h-4 w-4 text-slate-400 transition group-open:rotate-180" />
-            </div>
-          </summary>
-
-          <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
-            <ScoreCard
-              accent="#d8b86a"
-              caption="Weighted mock score across parcel potential, development pressure, and infrastructure fit."
-              label="Opportunity Score"
-              score={selectedParcel?.opportunityScore ?? 0}
-            />
-
-            <div className="grid grid-cols-2 gap-2">
-              {scoreSignals.map((signal) => (
-                <div
-                  className="rounded-lg border border-white/10 bg-black/20 p-3"
-                  key={signal.label}
-                >
-                  <p className="text-[11px] text-slate-500">{signal.label}</p>
-                  <div className="mt-2 flex items-end justify-between gap-2">
-                    <span className="text-lg font-semibold text-white">
-                      {signal.value}
-                    </span>
-                    <span
-                      className="h-1.5 flex-1 rounded-full"
-                      style={{
-                        background: `linear-gradient(90deg, ${signal.accent} ${signal.value}%, rgba(255,255,255,0.1) 0)`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </details>
       </div>
     </aside>
+  );
+}
+
+function LayerRailEdgeHandle({
+  collapsed = false,
+  onPointerDown,
+  onToggleCollapsed,
+}: {
+  collapsed?: boolean;
+  onPointerDown?: (event: ReactPointerEvent) => void;
+  onToggleCollapsed?: () => void;
+}) {
+  function handleKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    onToggleCollapsed?.();
+  }
+
+  return (
+    <>
+      <div
+        aria-hidden="true"
+        className="cfs-layer-rail-resize-zone absolute -right-1.5 top-2 bottom-2 z-20 hidden touch-none cursor-col-resize lg:block"
+        onPointerDown={onPointerDown}
+        title={
+          collapsed
+            ? "Drag right to expand map layers"
+            : "Drag to resize map layers"
+        }
+      />
+      <button
+        aria-label={
+          collapsed
+            ? "Expand map layers panel"
+            : "Collapse map layers panel"
+        }
+        aria-pressed={collapsed}
+        className={cn(
+          "cfs-layer-rail-arrow group absolute right-[-0.85rem] top-[44%] z-30 hidden -translate-y-1/2 touch-none items-center justify-center lg:flex",
+        )}
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggleCollapsed?.();
+        }}
+        onKeyDown={handleKeyDown}
+        onPointerDown={(event) => event.stopPropagation()}
+        title={
+          collapsed
+            ? "Expand map layers panel"
+            : "Collapse map layers panel"
+        }
+        type="button"
+      >
+        {collapsed ? (
+          <ChevronRight className="relative h-4 w-4 text-slate-200 transition group-hover:text-[#f0cd79] group-focus-visible:text-[#f0cd79]" />
+        ) : (
+          <ChevronLeft className="relative h-4 w-4 text-slate-200 transition group-hover:text-[#f0cd79] group-focus-visible:text-[#f0cd79]" />
+        )}
+      </button>
+    </>
   );
 }

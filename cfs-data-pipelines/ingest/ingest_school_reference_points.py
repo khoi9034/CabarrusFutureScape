@@ -266,6 +266,8 @@ def get_exclusion_reason(level: str | None, school_type: str, school_system: str
         return "level_not_v1"
     if "other" in blob:
         return "other_not_v1"
+    if school_system != "ccs":
+        return "non_ccs_not_v1"
     if school_type != "public":
         if "magnet" in blob:
             return "magnet_not_v1"
@@ -619,8 +621,9 @@ def build_validation(
             ],
         },
         "cfs_v1_policy": {
-            "included": "Public elementary, middle, and high schools only.",
+            "included": "Public CCS elementary, middle, and high schools only.",
             "excluded_preserved_for_qa": [
+                "non-CCS systems",
                 "private",
                 "magnet",
                 "Other / non elementary-middle-high",

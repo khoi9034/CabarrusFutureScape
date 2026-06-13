@@ -54,7 +54,7 @@ export function useFloodZoneLayer({
   const extentParam =
     limitMode === "visible_extent" && extent ? formatExtent(extent) : undefined;
   const requestLimit =
-    limitMode === "visible_extent" ? (extentParam ? 0 : 500) : Number(limitMode);
+    limitMode === "visible_extent" ? (extentParam ? 0 : 100) : Number(limitMode);
   const requestKey = useMemo(
     () =>
       JSON.stringify({

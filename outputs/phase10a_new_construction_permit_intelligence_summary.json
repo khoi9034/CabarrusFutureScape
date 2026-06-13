@@ -1,0 +1,305 @@
+﻿{
+    "generated_at":  "2026-06-12T21:35:02",
+    "duration_seconds":  75.69,
+    "log_path":  "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_new_construction_permits_20260612_213346.log",
+    "source_file_path":  "C:\\CabarrusFutureScape\\data\\development\\raw\\BuildingPermits_NewConstruction.csv",
+    "source_profile":  {
+                           "generated_at":  "2026-06-12T21:33:46",
+                           "source_file":  "C:\\CabarrusFutureScape\\data\\development\\raw\\BuildingPermits_NewConstruction.csv",
+                           "source_confidence":  "staff_provided_extract",
+                           "row_count":  20614,
+                           "columns":  [
+                                           "B1_ALT_ID",
+                                           "B1_APP_TYPE_ALIAS",
+                                           "B1_FILE_DD",
+                                           "address",
+                                           "parcelNum",
+                                           "CO_Issued",
+                                           "CO_Date"
+                                       ],
+                           "permit_file_date":  {
+                                                    "parsed_count":  20122,
+                                                    "missing_or_invalid_count":  492,
+                                                    "min":  "2015-01-05",
+                                                    "max":  "2026-06-11"
+                                                },
+                           "co_date":  {
+                                           "parsed_count":  18353,
+                                           "missing_or_invalid_count":  2261,
+                                           "min":  "2015-03-19",
+                                           "max":  "2026-06-11"
+                                       },
+                           "permit_type_counts":  {
+                                                      "Building Residential New":  19047,
+                                                      "Building Commercial New":  1566,
+                                                      "blank":  1
+                                                  },
+                           "co_issued_counts":  {
+                                                    "1":  18353,
+                                                    "0":  2261
+                                                },
+                           "parcel_quality":  {
+                                                  "null_or_blank_parcel_count":  14,
+                                                  "invalid_or_placeholder_parcel_count":  815,
+                                                  "normalized_length_counts":  {
+                                                                                   "14":  19799,
+                                                                                   "6":  722,
+                                                                                   "10":  34,
+                                                                                   "8":  25,
+                                                                                   "0":  14,
+                                                                                   "13":  13,
+                                                                                   "7":  6,
+                                                                                   "11":  1
+                                                                               }
+                                              }
+                       },
+    "database_tables":  {
+                            "raw":  "public.new_construction_permits_raw",
+                            "clean":  "public.new_construction_permits_clean",
+                            "relationship":  "public.new_construction_permit_parcel_relationship",
+                            "parcel_summary":  "public.parcel_new_construction_summary",
+                            "label_factory":  "public.parcel_development_prediction_labels"
+                        },
+    "high_level_qa":  {
+                          "source_row_count":  20614,
+                          "permit_date_min":  "2015-01-05",
+                          "permit_date_max":  "2026-06-11",
+                          "co_issued_count":  18353,
+                          "co_not_issued_count":  2261,
+                          "co_date_min":  "2015-03-19",
+                          "co_date_max":  "2026-06-11",
+                          "null_parcel_count":  14,
+                          "invalid_placeholder_parcel_count":  815,
+                          "matched_permit_count":  17021,
+                          "unmatched_permit_count":  2283,
+                          "ambiguous_permit_count":  495,
+                          "unique_matched_parcel_count":  16200
+                      },
+    "permit_type_distribution":  [
+                                     {
+                                         "permit_type_class":  "residential_new_construction",
+                                         "permit_type_raw":  "Building Residential New",
+                                         "permit_count":  19047
+                                     },
+                                     {
+                                         "permit_type_class":  "commercial_new_construction",
+                                         "permit_type_raw":  "Building Commercial New",
+                                         "permit_count":  1566
+                                     },
+                                     {
+                                         "permit_type_class":  "review_required",
+                                         "permit_type_raw":  null,
+                                         "permit_count":  1
+                                     }
+                                 ],
+    "parcel_match_status":  [
+                                {
+                                    "match_confidence":  "exact",
+                                    "match_method":  "exact",
+                                    "permit_count":  17020
+                                },
+                                {
+                                    "match_confidence":  "unmatched",
+                                    "match_method":  "unmatched",
+                                    "permit_count":  2283
+                                },
+                                {
+                                    "match_confidence":  "invalid_placeholder",
+                                    "match_method":  "invalid_placeholder",
+                                    "permit_count":  815
+                                },
+                                {
+                                    "match_confidence":  "ambiguous",
+                                    "match_method":  "ambiguous",
+                                    "permit_count":  495
+                                },
+                                {
+                                    "match_confidence":  "normalized_exact",
+                                    "match_method":  "normalized_exact",
+                                    "permit_count":  1
+                                }
+                            ],
+    "parcel_summary_validation":  {
+                                      "parcel_summary_row_count":  16200,
+                                      "completed_recent_count":  4049,
+                                      "active_permitted_count":  1377,
+                                      "historical_completed_count":  10692,
+                                      "repeated_activity_count":  82,
+                                      "review_required_count":  0,
+                                      "first_permit_date_min":  "2015-01-07",
+                                      "latest_permit_date_max":  "2026-06-11",
+                                      "summarized_permit_count":  17021
+                                  },
+    "label_validation":  {
+                             "label_table_row_count":  1430221,
+                             "min_snapshot_year":  2014,
+                             "max_snapshot_year":  2026,
+                             "snapshot_year_count":  13,
+                             "positive_rate_by_snapshot_year":  [
+                                                                    {
+                                                                        "snapshot_year":  2014,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1345,
+                                                                        "positive_next_1yr_pct":  "1.2225",
+                                                                        "positive_next_3yr_count":  3872,
+                                                                        "positive_next_3yr_pct":  "3.5195"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2015,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1247,
+                                                                        "positive_next_1yr_pct":  "1.1335",
+                                                                        "positive_next_3yr_count":  4045,
+                                                                        "positive_next_3yr_pct":  "3.6767"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2016,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1324,
+                                                                        "positive_next_1yr_pct":  "1.2035",
+                                                                        "positive_next_3yr_count":  4419,
+                                                                        "positive_next_3yr_pct":  "4.0167"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2017,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1525,
+                                                                        "positive_next_1yr_pct":  "1.3861",
+                                                                        "positive_next_3yr_count":  4869,
+                                                                        "positive_next_3yr_pct":  "4.4257"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2018,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1600,
+                                                                        "positive_next_1yr_pct":  "1.4543",
+                                                                        "positive_next_3yr_count":  4964,
+                                                                        "positive_next_3yr_pct":  "4.5120"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2019,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1765,
+                                                                        "positive_next_1yr_pct":  "1.6043",
+                                                                        "positive_next_3yr_count":  4526,
+                                                                        "positive_next_3yr_pct":  "4.1139"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2020,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1613,
+                                                                        "positive_next_1yr_pct":  "1.4661",
+                                                                        "positive_next_3yr_count":  4352,
+                                                                        "positive_next_3yr_pct":  "3.9558"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2021,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1164,
+                                                                        "positive_next_1yr_pct":  "1.0580",
+                                                                        "positive_next_3yr_count":  4259,
+                                                                        "positive_next_3yr_pct":  "3.8712"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2022,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1595,
+                                                                        "positive_next_1yr_pct":  "1.4498",
+                                                                        "positive_next_3yr_count":  4216,
+                                                                        "positive_next_3yr_pct":  "3.8321"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2023,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1518,
+                                                                        "positive_next_1yr_pct":  "1.3798",
+                                                                        "positive_next_3yr_count":  3226,
+                                                                        "positive_next_3yr_pct":  "2.9323"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2024,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  1130,
+                                                                        "positive_next_1yr_pct":  "1.0271",
+                                                                        "positive_next_3yr_count":  1721,
+                                                                        "positive_next_3yr_pct":  "1.5643"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2025,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  599,
+                                                                        "positive_next_1yr_pct":  "0.5445",
+                                                                        "positive_next_3yr_count":  599,
+                                                                        "positive_next_3yr_pct":  "0.5445"
+                                                                    },
+                                                                    {
+                                                                        "snapshot_year":  2026,
+                                                                        "parcel_count":  110017,
+                                                                        "positive_next_1yr_count":  0,
+                                                                        "positive_next_1yr_pct":  "0.0000",
+                                                                        "positive_next_3yr_count":  0,
+                                                                        "positive_next_3yr_pct":  "0.0000"
+                                                                    }
+                                                                ]
+                         },
+    "backend_endpoints":  [
+                              "GET /development/new-construction/statistics",
+                              "GET /development/new-construction/trends",
+                              "GET /development/new-construction/parcel/{official_parcel_id}",
+                              "GET /development/new-construction/labels/summary"
+                          ],
+    "modeling_boundary":  {
+                              "prediction_model_trained":  false,
+                              "prediction_probability_exposed":  false,
+                              "labels_are_targets_only":  true,
+                              "temporal_leakage_warning":  "Snapshot labels only look after Dec 31 of each snapshot_year."
+                          },
+    "frontend_changes":  {
+                             "frontend_files_changed_for_phase10a":  false,
+                             "frontend_validation_required":  false,
+                             "note":  "No frontend integration was added in Phase 10A; this phase stayed backend/data-only."
+                         },
+    "validation_results":  {
+                               "compileall_ingest":  "passed: python -m compileall cfs-data-pipelines/ingest",
+                               "compileall_transform":  "passed: python -m compileall cfs-data-pipelines/transform",
+                               "compileall_backend_app":  "passed: python -m compileall app",
+                               "focused_backend_tests":  "passed: python -m pytest backend/tests/test_new_construction_permits.py -q (10 passed, 1 warning)",
+                               "full_backend_tests":  "passed: python -m pytest from backend (185 passed, 3 warnings)",
+                               "dev_cfs":  "passed: npm run dev:cfs; FastAPI and Next.js health 200; built-in parcel/development/flood/school checks 200",
+                               "npm_frontend_checks":  "not run for this request: no Phase 10A frontend files changed in this verification pass"
+                           },
+    "live_endpoint_checks":  {
+                                 "checked_at":  "2026-06-12T22:40:47",
+                                 "new_construction_statistics":  {
+                                                                     "unique_matched_parcel_count":  16200,
+                                                                     "url":  "http://127.0.0.1:8000/development/new-construction/statistics",
+                                                                     "matched_permit_count":  17021,
+                                                                     "status_code":  200,
+                                                                     "total_permits":  20614
+                                                                 },
+                                 "new_construction_trends":  {
+                                                                 "url":  "http://127.0.0.1:8000/development/new-construction/trends",
+                                                                 "status_code":  200
+                                                             },
+                                 "new_construction_parcel_example":  {
+                                                                         "url":  "http://127.0.0.1:8000/development/new-construction/parcel/CFS-PARCEL-0149782119",
+                                                                         "status_code":  200,
+                                                                         "total_new_construction_permits":  87
+                                                                     },
+                                 "new_construction_labels_summary":  {
+                                                                         "label_table_row_count":  1430221,
+                                                                         "status_code":  200,
+                                                                         "labels_are_targets_only":  true,
+                                                                         "prediction_probability_available":  false,
+                                                                         "url":  "http://127.0.0.1:8000/development/new-construction/labels/summary",
+                                                                         "prediction_model_active":  false
+                                                                     }
+                             },
+    "remaining_issues_before_phase10b":  {
+                                             "unmatched_or_invalid_source_parcels":  3098,
+                                             "ambiguous_source_permits":  495,
+                                             "recommendation":  "Review unmatched, invalid-placeholder, and ambiguous permit parcel numbers before any baseline modeling work.",
+                                             "model_status":  "No model trained; labels are target labels only."
+                                         },
+    "reverified_at":  "2026-06-12T22:40:47"
+}

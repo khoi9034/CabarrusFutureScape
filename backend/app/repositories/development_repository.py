@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 
-from sqlalchemy import and_, case, func, literal, literal_column, select
+from sqlalchemy import and_, case, func, literal, literal_column, select, text
 from sqlalchemy.orm import Session
 
 from app.models import (
@@ -2091,6 +2091,327 @@ class DevelopmentRepository:
                 PermitIntelligenceSegment.permit_value_class,
             ),
         )
+
+    def get_new_construction_statistics(self) -> dict[str, object]:
+        summary = self._fetch_one(
+            """
+            SELECT
+              (SELECT COUNT(*) FROM public.new_construction_permits_clean) AS total_permits,
+              MIN(c.permit_file_date) AS permit_date_min,
+              MAX(c.permit_file_date) AS permit_date_max,
+              COUNT(*) FILTER (WHERE c.co_issued = true) AS co_issued_count,
+              COUNT(*) FILTER (WHERE c.co_issued = false) AS co_not_issued_count,
+              MIN(c.co_date) AS co_date_min,
+              MAX(c.co_date) AS co_date_max,
+              COUNT(*) FILTER (WHERE r.match_confidence IN ('exact', 'normalized_exact')) AS matched_permit_count,
+              COUNT(*) FILTER (WHERE r.match_confidence = 'unmatched') AS unmatched_permit_count,
+              COUNT(*) FILTER (WHERE r.match_confidence = 'ambiguous') AS ambiguous_permit_count,
+              COUNT(*) FILTER (WHERE r.match_confidence = 'invalid_placeholder') AS invalid_placeholder_count,
+              COUNT(DISTINCT r.official_parcel_id) FILTER (WHERE r.official_parcel_id IS NOT NULL) AS unique_matched_parcel_count
+            FROM public.new_construction_permit_parcel_relationship r
+            JOIN public.new_construction_permits_clean c
+              ON c.new_construction_permit_id = r.new_construction_permit_id
+            """,
+        )
+        return {
+            **summary,
+            "by_permit_type_class": self._fetch_all(
+                """
+                SELECT
+                  COALESCE(permit_type_class, 'unknown') AS value,
+                  COUNT(*) AS count
+                FROM public.new_construction_permits_clean
+                GROUP BY permit_type_class
+                ORDER BY count DESC, value
+                """,
+            ),
+            "by_construction_status": self._fetch_all(
+                """
+                SELECT
+                  COALESCE(construction_status, 'unknown') AS value,
+                  COUNT(*) AS count
+                FROM public.new_construction_permits_clean
+                GROUP BY construction_status
+                ORDER BY count DESC, value
+                """,
+            ),
+            "by_match_confidence": self._fetch_all(
+                """
+                SELECT
+                  COALESCE(match_confidence, 'unknown') AS value,
+                  COUNT(*) AS count
+                FROM public.new_construction_permit_parcel_relationship
+                GROUP BY match_confidence
+                ORDER BY count DESC, value
+                """,
+            ),
+        }
+
+    def get_new_construction_trends(self) -> dict[str, object]:
+        return {
+            "annual_trends": self._fetch_all(
+                """
+                SELECT
+                  permit_year AS year,
+                  COUNT(*) AS permit_count,
+                  COUNT(*) FILTER (WHERE permit_type_class = 'residential_new_construction') AS residential_count,
+                  COUNT(*) FILTER (WHERE permit_type_class = 'commercial_new_construction') AS commercial_count,
+                  COUNT(*) FILTER (WHERE construction_status = 'completed') AS completed_count,
+                  COUNT(*) FILTER (WHERE construction_status = 'permitted_not_completed') AS active_uncompleted_count
+                FROM public.new_construction_permits_clean
+                GROUP BY permit_year
+                ORDER BY permit_year
+                """,
+            ),
+            "monthly_trends": self._fetch_all(
+                """
+                SELECT
+                  permit_year AS year,
+                  permit_month AS month,
+                  COUNT(*) AS permit_count,
+                  COUNT(*) FILTER (WHERE permit_type_class = 'residential_new_construction') AS residential_count,
+                  COUNT(*) FILTER (WHERE permit_type_class = 'commercial_new_construction') AS commercial_count,
+                  COUNT(*) FILTER (WHERE construction_status = 'completed') AS completed_count,
+                  COUNT(*) FILTER (WHERE construction_status = 'permitted_not_completed') AS active_uncompleted_count
+                FROM public.new_construction_permits_clean
+                WHERE permit_year IS NOT NULL
+                  AND permit_month IS NOT NULL
+                GROUP BY permit_year, permit_month
+                ORDER BY permit_year, permit_month
+                """,
+            ),
+        }
+
+    def get_new_construction_parcel_summary(
+        self,
+        official_parcel_id: str,
+    ) -> dict[str, object] | None:
+        return self._fetch_one_or_none(
+            """
+            SELECT
+              official_parcel_id,
+              pin14,
+              total_new_construction_permits,
+              residential_new_construction_permits,
+              commercial_new_construction_permits,
+              first_new_construction_permit_date,
+              latest_new_construction_permit_date,
+              latest_co_date,
+              completed_new_construction_count,
+              active_uncompleted_new_construction_count,
+              average_days_to_co,
+              new_construction_years_active,
+              recent_1yr_new_construction_count,
+              recent_3yr_new_construction_count,
+              recent_5yr_new_construction_count,
+              development_stage
+            FROM public.parcel_new_construction_summary
+            WHERE lower(official_parcel_id) = lower(:official_parcel_id)
+            """,
+            {"official_parcel_id": official_parcel_id},
+        )
+
+    def get_new_construction_labels_summary(self) -> dict[str, object]:
+        return {
+            **self._fetch_one(
+                """
+                SELECT
+                  COUNT(*) AS label_table_row_count,
+                  MIN(snapshot_year) AS min_snapshot_year,
+                  MAX(snapshot_year) AS max_snapshot_year,
+                  COUNT(DISTINCT snapshot_year) AS snapshot_year_count
+                FROM public.parcel_development_prediction_labels
+                """,
+            ),
+            "positive_rate_by_snapshot_year": self._fetch_all(
+                """
+                SELECT
+                  snapshot_year,
+                  COUNT(*) AS parcel_count,
+                  COUNT(*) FILTER (WHERE new_construction_next_1yr) AS positive_next_1yr_count,
+                  ROUND(
+                    COUNT(*) FILTER (WHERE new_construction_next_1yr) * 100.0 / NULLIF(COUNT(*), 0),
+                    4
+                  ) AS positive_next_1yr_pct,
+                  COUNT(*) FILTER (WHERE new_construction_next_3yr) AS positive_next_3yr_count,
+                  ROUND(
+                    COUNT(*) FILTER (WHERE new_construction_next_3yr) * 100.0 / NULLIF(COUNT(*), 0),
+                    4
+                  ) AS positive_next_3yr_pct
+                FROM public.parcel_development_prediction_labels
+                GROUP BY snapshot_year
+                ORDER BY snapshot_year
+                """,
+            ),
+        }
+
+    def get_prediction_features_summary(self) -> dict[str, object]:
+        table_status = self._fetch_one(
+            """
+            SELECT to_regclass('public.parcel_development_prediction_features') IS NOT NULL
+              AS feature_matrix_available
+            """,
+        )
+        if not table_status["feature_matrix_available"]:
+            return {
+                "feature_matrix_available": False,
+                "row_count": 0,
+                "unique_parcel_count": 0,
+                "min_snapshot_year": None,
+                "max_snapshot_year": None,
+                "snapshot_year_count": 0,
+                "feature_set_version": None,
+                "missingness_highlights": [],
+                "label_positive_rates": [],
+                "baseline_model_experiment_available": False,
+                "latest_experiment_id": None,
+                "production_ready": False,
+            }
+
+        score_table_status = self._fetch_one(
+            """
+            SELECT to_regclass('public.development_prediction_model_experiment_scores') IS NOT NULL
+              AS score_table_available
+            """,
+        )
+        experiment_metadata = {
+            "baseline_model_experiment_available": False,
+            "latest_experiment_id": None,
+            "production_ready": False,
+        }
+        if score_table_status["score_table_available"]:
+            latest = self._fetch_one_or_none(
+                """
+                SELECT
+                  model_experiment_id,
+                  COUNT(*) AS score_row_count,
+                  MAX(score_created_at) AS latest_score_created_at,
+                  BOOL_OR(production_ready) AS any_production_ready
+                FROM public.development_prediction_model_experiment_scores
+                GROUP BY model_experiment_id
+                ORDER BY MAX(score_created_at) DESC
+                LIMIT 1
+                """,
+            )
+            if latest:
+                experiment_metadata = {
+                    "baseline_model_experiment_available": True,
+                    "latest_experiment_id": latest["model_experiment_id"],
+                    "latest_experiment_score_rows": latest["score_row_count"],
+                    "latest_experiment_created_at": latest["latest_score_created_at"],
+                    "production_ready": bool(latest["any_production_ready"]),
+                }
+
+        return {
+            **self._fetch_one(
+                """
+                SELECT
+                  true AS feature_matrix_available,
+                  COUNT(*) AS row_count,
+                  COUNT(DISTINCT official_parcel_id) AS unique_parcel_count,
+                  MIN(snapshot_year) AS min_snapshot_year,
+                  MAX(snapshot_year) AS max_snapshot_year,
+                  COUNT(DISTINCT snapshot_year) AS snapshot_year_count,
+                  MIN(feature_set_version) AS feature_set_version
+                FROM public.parcel_development_prediction_features
+                """,
+            ),
+            "missingness_highlights": self._fetch_all(
+                """
+                WITH stats AS (
+                  SELECT
+                    COUNT(*) AS total_rows,
+                    COUNT(*) FILTER (WHERE parcel_area_acres IS NULL) AS parcel_area_acres,
+                    COUNT(*) FILTER (WHERE zoning_code IS NULL) AS zoning_code,
+                    COUNT(*) FILTER (WHERE flood_constraint_score IS NULL) AS flood_constraint_score,
+                    COUNT(*) FILTER (WHERE elementary_school_name IS NULL) AS elementary_school_name,
+                    COUNT(*) FILTER (WHERE permits_prior_3yr IS NULL) AS permits_prior_3yr,
+                    COUNT(*) FILTER (WHERE new_construction_permits_prior_3yr IS NULL)
+                      AS new_construction_permits_prior_3yr,
+                    COUNT(*) FILTER (WHERE nearby_permit_activity_prior_3yr IS NULL)
+                      AS nearby_permit_activity_prior_3yr,
+                    COUNT(*) FILTER (WHERE school_constraint_score IS NULL)
+                      AS school_constraint_score
+                  FROM public.parcel_development_prediction_features
+                )
+                SELECT
+                  feature_name,
+                  missing_count,
+                  ROUND(missing_count * 100.0 / NULLIF(total_rows, 0), 4) AS missing_pct
+                FROM stats,
+                LATERAL (
+                  VALUES
+                    ('parcel_area_acres', parcel_area_acres),
+                    ('zoning_code', zoning_code),
+                    ('flood_constraint_score', flood_constraint_score),
+                    ('elementary_school_name', elementary_school_name),
+                    ('permits_prior_3yr', permits_prior_3yr),
+                    ('new_construction_permits_prior_3yr', new_construction_permits_prior_3yr),
+                    ('nearby_permit_activity_prior_3yr', nearby_permit_activity_prior_3yr),
+                    ('school_constraint_score', school_constraint_score)
+                ) AS v(feature_name, missing_count)
+                ORDER BY missing_pct DESC, feature_name
+                """,
+            ),
+            "label_positive_rates": self._fetch_all(
+                """
+                WITH stats AS (
+                  SELECT
+                    COUNT(*) AS row_count,
+                    COUNT(*) FILTER (WHERE new_construction_next_1yr) AS new_construction_next_1yr,
+                    COUNT(*) FILTER (WHERE new_construction_next_3yr) AS new_construction_next_3yr,
+                    COUNT(*) FILTER (WHERE residential_new_construction_next_3yr)
+                      AS residential_new_construction_next_3yr,
+                    COUNT(*) FILTER (WHERE commercial_new_construction_next_3yr)
+                      AS commercial_new_construction_next_3yr,
+                    COUNT(*) FILTER (WHERE co_issued_next_3yr) AS co_issued_next_3yr
+                  FROM public.parcel_development_prediction_features
+                )
+                SELECT
+                  label_name,
+                  row_count,
+                  positive_count,
+                  ROUND(
+                    positive_count * 100.0 / NULLIF(row_count, 0),
+                    4
+                  ) AS positive_rate_pct
+                FROM stats,
+                LATERAL (
+                  VALUES
+                    ('new_construction_next_1yr', new_construction_next_1yr),
+                    ('new_construction_next_3yr', new_construction_next_3yr),
+                    ('residential_new_construction_next_3yr', residential_new_construction_next_3yr),
+                    ('commercial_new_construction_next_3yr', commercial_new_construction_next_3yr),
+                    ('co_issued_next_3yr', co_issued_next_3yr)
+                ) AS labels(label_name, positive_count)
+                ORDER BY label_name
+                """,
+            ),
+            **experiment_metadata,
+        }
+
+    def _fetch_all(
+        self,
+        sql: str,
+        params: dict[str, object] | None = None,
+    ) -> list[dict[str, object]]:
+        return [dict(row) for row in self.db.execute(text(sql), params or {}).mappings()]
+
+    def _fetch_one(
+        self,
+        sql: str,
+        params: dict[str, object] | None = None,
+    ) -> dict[str, object]:
+        row = self.db.execute(text(sql), params or {}).mappings().one()
+        return dict(row)
+
+    def _fetch_one_or_none(
+        self,
+        sql: str,
+        params: dict[str, object] | None = None,
+    ) -> dict[str, object] | None:
+        row = self.db.execute(text(sql), params or {}).mappings().first()
+        return dict(row) if row else None
 
     def _relationship_lookup(self, column) -> list[DevelopmentLookupRecord]:
         value_label = func.btrim(column).label("value")

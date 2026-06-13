@@ -1,0 +1,256 @@
+{
+  "feature_set_version": "phase10b_v1",
+  "model_active": false,
+  "prediction_probability_available": false,
+  "target_source_table": "public.parcel_development_prediction_labels",
+  "feature_matrix_table": "public.parcel_development_prediction_features",
+  "temporal_policy": {
+    "snapshot_rule": "Features must use information known on or before December 31 of snapshot_year unless explicitly marked current_context.",
+    "label_rule": "Phase 10A labels represent future new-construction targets and must not be used as features.",
+    "current_context_caveat": "Current zoning, flood overlays, school assignment, and parcel valuation are included for baseline readiness review, but are not historical snapshots."
+  },
+  "feature_groups": [
+    "parcel_static_features",
+    "zoning_features",
+    "flood_constraint_features",
+    "school_assignment_features",
+    "permit_history_features",
+    "new_construction_history_features",
+    "development_pressure_features",
+    "jurisdiction_features",
+    "future_placeholder_features"
+  ],
+  "features": [
+    {
+      "feature_name": "parcel_area_acres",
+      "feature_group": "parcel_static_features",
+      "source_table": "public.parcels_enriched",
+      "description": "Calculated parcel acreage from current parcel geometry.",
+      "temporal_status": "current_context_static",
+      "leakage_risk": "low_for_static_geometry_unless_parcel_boundaries_change",
+      "include_in_baseline_model": true,
+      "include_in_future_model": true,
+      "notes": "Use as a baseline parcel characteristic. Historical parcel split/merge chronology is not yet modeled."
+    },
+    {
+      "feature_name": "land_value",
+      "feature_group": "parcel_static_features",
+      "source_table": "public.parcels_enriched",
+      "description": "Current land value field.",
+      "temporal_status": "current_context",
+      "leakage_risk": "medium",
+      "include_in_baseline_model": true,
+      "include_in_future_model": false,
+      "notes": "Not time-safe until historical assessment snapshots are available."
+    },
+    {
+      "feature_name": "improvement_value",
+      "feature_group": "parcel_static_features",
+      "source_table": "public.parcels_enriched",
+      "description": "Current building/improvement value field.",
+      "temporal_status": "current_context",
+      "leakage_risk": "high_for_future_construction_targets",
+      "include_in_baseline_model": false,
+      "include_in_future_model": false,
+      "notes": "May reflect improvements created after older snapshot years."
+    },
+    {
+      "feature_name": "total_value",
+      "feature_group": "parcel_static_features",
+      "source_table": "public.parcels_enriched",
+      "description": "Current assessed or market value proxy.",
+      "temporal_status": "current_context",
+      "leakage_risk": "medium",
+      "include_in_baseline_model": true,
+      "include_in_future_model": false,
+      "notes": "Use only for current-context baseline until historical values exist."
+    },
+    {
+      "feature_name": "value_per_acre",
+      "feature_group": "parcel_static_features",
+      "source_table": "public.parcels_enriched",
+      "description": "Current value per acre.",
+      "temporal_status": "current_context",
+      "leakage_risk": "medium",
+      "include_in_baseline_model": true,
+      "include_in_future_model": false,
+      "notes": "Derived from current valuation and acreage."
+    },
+    {
+      "feature_name": "vacant_or_underbuilt_flag",
+      "feature_group": "parcel_static_features",
+      "source_table": "public.parcels_enriched",
+      "description": "Current heuristic flag for parcels with land value but little or no improvement value.",
+      "temporal_status": "current_context",
+      "leakage_risk": "high_for_historical_snapshots",
+      "include_in_baseline_model": false,
+      "include_in_future_model": false,
+      "notes": "Useful for due-diligence review but not time-safe for backtesting."
+    },
+    {
+      "feature_name": "zoning_code",
+      "feature_group": "zoning_features",
+      "source_table": "public.parcel_zoning_overlay_v2",
+      "description": "Current dominant parcel zoning code.",
+      "temporal_status": "current_context",
+      "leakage_risk": "medium",
+      "include_in_baseline_model": true,
+      "include_in_future_model": false,
+      "notes": "No historical zoning change series exists yet."
+    },
+    {
+      "feature_name": "zoning_jurisdiction",
+      "feature_group": "zoning_features",
+      "source_table": "public.parcel_zoning_overlay_v2",
+      "description": "Current zoning jurisdiction.",
+      "temporal_status": "current_context",
+      "leakage_risk": "medium",
+      "include_in_baseline_model": true,
+      "include_in_future_model": false,
+      "notes": "Current jurisdiction context, not a historical snapshot."
+    },
+    {
+      "feature_name": "zoning_assignment_quality",
+      "feature_group": "zoning_features",
+      "source_table": "public.parcel_zoning_overlay_v2",
+      "description": "Confidence/quality of current zoning overlay assignment.",
+      "temporal_status": "current_context_quality",
+      "leakage_risk": "low",
+      "include_in_baseline_model": true,
+      "include_in_future_model": true,
+      "notes": "Quality signal for feature reliability."
+    },
+    {
+      "feature_name": "flood_constraint_score",
+      "feature_group": "flood_constraint_features",
+      "source_table": "public.parcel_flood_constraint_overlay",
+      "description": "Current FEMA NFHL-derived parcel flood constraint score.",
+      "temporal_status": "current_regulatory_context",
+      "leakage_risk": "low_to_medium",
+      "include_in_baseline_model": true,
+      "include_in_future_model": true,
+      "notes": "Flood zones are regulatory constraints, but historical effective map changes are not tracked yet."
+    },
+    {
+      "feature_name": "flood_review_required",
+      "feature_group": "flood_constraint_features",
+      "source_table": "public.parcel_flood_constraint_overlay",
+      "description": "Whether FEMA flood overlay indicates review is recommended.",
+      "temporal_status": "current_regulatory_context",
+      "leakage_risk": "low_to_medium",
+      "include_in_baseline_model": true,
+      "include_in_future_model": true,
+      "notes": "Regulatory-context constraint, not a modeled flood prediction."
+    },
+    {
+      "feature_name": "school_assignment_confidence",
+      "feature_group": "school_assignment_features",
+      "source_table": "public.parcel_school_summary",
+      "description": "Attendance-zone assignment confidence from polygon overlap.",
+      "temporal_status": "current_context",
+      "leakage_risk": "medium",
+      "include_in_baseline_model": true,
+      "include_in_future_model": false,
+      "notes": "Attendance-zone boundaries are current; historical boundary changes are not modeled."
+    },
+    {
+      "feature_name": "school_capacity_status",
+      "feature_group": "school_assignment_features",
+      "source_table": "public.parcel_school_summary",
+      "description": "Official school capacity status placeholder.",
+      "temporal_status": "not_available",
+      "leakage_risk": "none",
+      "include_in_baseline_model": false,
+      "include_in_future_model": false,
+      "notes": "Always not_available until official enrollment/capacity data is ingested."
+    },
+    {
+      "feature_name": "permits_prior_1yr",
+      "feature_group": "permit_history_features",
+      "source_table": "public.real_property_permit_parcel_relationship",
+      "description": "Count of matched permits on or before snapshot year-end and within one prior year.",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low",
+      "include_in_baseline_model": true,
+      "include_in_future_model": true,
+      "notes": "Filtered by activity_date <= snapshot_year end."
+    },
+    {
+      "feature_name": "residential_growth_permits_prior_3yr",
+      "feature_group": "permit_history_features",
+      "source_table": "public.permit_intelligence_segments",
+      "description": "Prior three-year count of event-level permits classified as residential growth.",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low",
+      "include_in_baseline_model": true,
+      "include_in_future_model": true,
+      "notes": "Uses event-level segment flags joined to permit-parcel relationships."
+    },
+    {
+      "feature_name": "commercial_activity_permits_prior_3yr",
+      "feature_group": "permit_history_features",
+      "source_table": "public.permit_intelligence_segments",
+      "description": "Prior three-year count of event-level permits classified as commercial activity.",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low",
+      "include_in_baseline_model": true,
+      "include_in_future_model": true,
+      "notes": "Uses event-level segment flags joined to permit-parcel relationships."
+    },
+    {
+      "feature_name": "new_construction_permits_prior_3yr",
+      "feature_group": "new_construction_history_features",
+      "source_table": "public.new_construction_permit_parcel_relationship",
+      "description": "Prior three-year count of staff-provided new-construction permit events.",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low",
+      "include_in_baseline_model": true,
+      "include_in_future_model": true,
+      "notes": "Filtered by permit_file_date <= snapshot_year end."
+    },
+    {
+      "feature_name": "completed_new_construction_prior_3yr",
+      "feature_group": "new_construction_history_features",
+      "source_table": "public.new_construction_permits_clean",
+      "description": "Prior three-year count of completed new-construction events.",
+      "temporal_status": "time_safe",
+      "leakage_risk": "low",
+      "include_in_baseline_model": true,
+      "include_in_future_model": true,
+      "notes": "This is prior completion status only and is not a future label."
+    },
+    {
+      "feature_name": "development_activity_score_current_context",
+      "feature_group": "development_pressure_features",
+      "source_table": "public.development_activity_parcel_summary",
+      "description": "Existing current-context parcel development activity score.",
+      "temporal_status": "current_context",
+      "leakage_risk": "high_for_historical_backtests",
+      "include_in_baseline_model": false,
+      "include_in_future_model": false,
+      "notes": "All-time/current dashboard metric; included only for readiness review."
+    },
+    {
+      "feature_name": "nearby_permit_activity_prior_3yr",
+      "feature_group": "future_placeholder_features",
+      "source_table": "not_available",
+      "description": "Future neighborhood/nearby permit activity feature.",
+      "temporal_status": "not_available",
+      "leakage_risk": "not_applicable",
+      "include_in_baseline_model": false,
+      "include_in_future_model": true,
+      "notes": "Requires spatial neighborhood aggregation design; remains null in Phase 10B."
+    },
+    {
+      "feature_name": "zoning_change_history",
+      "feature_group": "future_placeholder_features",
+      "source_table": "not_available",
+      "description": "Future historical zoning change signals.",
+      "temporal_status": "not_available",
+      "leakage_risk": "not_applicable",
+      "include_in_baseline_model": false,
+      "include_in_future_model": true,
+      "notes": "Do not fake zoning changes. Add only after vetted historical zoning data exists."
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+feature_name,feature_group,source_table,temporal_status,leakage_risk,include_in_baseline_model,include_in_future_model,notes
+parcel_area_acres,parcel_static_features,public.parcels_enriched,current_context_static,low_for_static_geometry_unless_parcel_boundaries_change,True,True,Use as a baseline parcel characteristic. Historical parcel split/merge chronology is not yet modeled.
+land_value,parcel_static_features,public.parcels_enriched,current_context,medium,True,False,Not time-safe until historical assessment snapshots are available.
+improvement_value,parcel_static_features,public.parcels_enriched,current_context,high_for_future_construction_targets,False,False,May reflect improvements created after older snapshot years.
+total_value,parcel_static_features,public.parcels_enriched,current_context,medium,True,False,Use only for current-context baseline until historical values exist.
+value_per_acre,parcel_static_features,public.parcels_enriched,current_context,medium,True,False,Derived from current valuation and acreage.
+vacant_or_underbuilt_flag,parcel_static_features,public.parcels_enriched,current_context,high_for_historical_snapshots,False,False,Useful for due-diligence review but not time-safe for backtesting.
+zoning_code,zoning_features,public.parcel_zoning_overlay_v2,current_context,medium,True,False,No historical zoning change series exists yet.
+zoning_jurisdiction,zoning_features,public.parcel_zoning_overlay_v2,current_context,medium,True,False,"Current jurisdiction context, not a historical snapshot."
+zoning_assignment_quality,zoning_features,public.parcel_zoning_overlay_v2,current_context_quality,low,True,True,Quality signal for feature reliability.
+flood_constraint_score,flood_constraint_features,public.parcel_flood_constraint_overlay,current_regulatory_context,low_to_medium,True,True,"Flood zones are regulatory constraints, but historical effective map changes are not tracked yet."
+flood_review_required,flood_constraint_features,public.parcel_flood_constraint_overlay,current_regulatory_context,low_to_medium,True,True,"Regulatory-context constraint, not a modeled flood prediction."
+school_assignment_confidence,school_assignment_features,public.parcel_school_summary,current_context,medium,True,False,Attendance-zone boundaries are current; historical boundary changes are not modeled.
+school_capacity_status,school_assignment_features,public.parcel_school_summary,not_available,none,False,False,Always not_available until official enrollment/capacity data is ingested.
+permits_prior_1yr,permit_history_features,public.real_property_permit_parcel_relationship,time_safe,low,True,True,Filtered by activity_date <= snapshot_year end.
+residential_growth_permits_prior_3yr,permit_history_features,public.permit_intelligence_segments,time_safe,low,True,True,Uses event-level segment flags joined to permit-parcel relationships.
+commercial_activity_permits_prior_3yr,permit_history_features,public.permit_intelligence_segments,time_safe,low,True,True,Uses event-level segment flags joined to permit-parcel relationships.
+new_construction_permits_prior_3yr,new_construction_history_features,public.new_construction_permit_parcel_relationship,time_safe,low,True,True,Filtered by permit_file_date <= snapshot_year end.
+completed_new_construction_prior_3yr,new_construction_history_features,public.new_construction_permits_clean,time_safe,low,True,True,This is prior completion status only and is not a future label.
+development_activity_score_current_context,development_pressure_features,public.development_activity_parcel_summary,current_context,high_for_historical_backtests,False,False,All-time/current dashboard metric; included only for readiness review.
+nearby_permit_activity_prior_3yr,future_placeholder_features,not_available,not_available,not_applicable,False,True,Requires spatial neighborhood aggregation design; remains null in Phase 10B.
+zoning_change_history,future_placeholder_features,not_available,not_available,not_applicable,False,True,Do not fake zoning changes. Add only after vetted historical zoning data exists.

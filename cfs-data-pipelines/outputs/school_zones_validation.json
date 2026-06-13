@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-10T21:19:15.859479",
+  "generated_at": "2026-06-11T06:15:51.649438",
   "clean_table": "public.school_zones",
   "raw_tables": {
     "elementary": "public.school_zones_elementary_raw",
@@ -44,12 +44,12 @@
     "high": 9
   },
   "clean_zone_count": 44,
-  "included_cfs_v1_zone_count": 44,
-  "unmatched_zone_name_count": 6,
+  "included_cfs_v1_zone_count": 35,
+  "unmatched_zone_name_count": 5,
   "match_confidence_distribution": [
     {
       "match_confidence": "normalized_exact",
-      "zone_count": 32
+      "zone_count": 33
     },
     {
       "match_confidence": "fuzzy_review",
@@ -57,7 +57,7 @@
     },
     {
       "match_confidence": "unmatched_reference_review",
-      "zone_count": 6
+      "zone_count": 5
     }
   ],
   "zone_count_by_level": [
@@ -91,6 +91,6 @@
     ]
   },
   "assignment_policy": "Attendance-zone polygons will be used for parcel assignment. School reference points are used only for name matching and QA.",
-  "elapsed_seconds": 5.13,
-  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_school_attendance_zones_20260610_211910.log"
+  "elapsed_seconds": 5.54,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_school_attendance_zones_20260611_061546.log"
 }

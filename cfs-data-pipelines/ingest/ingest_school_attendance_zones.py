@@ -70,6 +70,21 @@ VALIDATION_FILENAME = "school_zones_validation.json"
 MATCH_QA_FILENAME = "school_zone_match_qa.csv"
 UNMATCHED_FILENAME = "school_zone_unmatched_names.csv"
 
+KCS_ZONE_NAMES = {
+    "a_l_brown_high",
+    "forest_park_elementary",
+    "fred_l_wilson_elementary",
+    "gw_carver_elementary",
+    "jackson_park_elementary",
+    "kannapolis_middle",
+    "north_kannapolis_elementary",
+    "shady_brook_elementary",
+}
+
+EXCLUDED_ZONE_NAME_REASONS = {
+    "j_n_fries_middle": "magnet_not_v1",
+}
+
 
 class ArcGISSourceUnavailable(RuntimeError):
     """Raised when a school attendance-zone ArcGIS layer is not queryable."""
@@ -219,6 +234,12 @@ def normalize_school_name(value: Any) -> str | None:
     name = re.sub(r"[^a-z0-9]+", "_", name)
     name = re.sub(r"_+", "_", name).strip("_")
     return name or None
+
+
+def strip_level_suffix(value: str | None) -> str | None:
+    if not value:
+        return None
+    return re.sub(r"_(elementary|middle|high)$", "", value)
 
 
 def safe_text(value: Any) -> str | None:
@@ -395,10 +416,15 @@ def load_reference_names(engine: Engine) -> list[dict[str, str]]:
     return fetch_rows(
         engine,
         """
-        SELECT school_reference_id, school_name_normalized, school_level, school_system
+        SELECT
+          school_reference_id,
+          school_name_normalized,
+          school_level,
+          school_system,
+          include_in_cfs_v1,
+          exclusion_reason
         FROM public.school_reference
-        WHERE include_in_cfs_v1
-          AND school_name_normalized IS NOT NULL
+        WHERE school_name_normalized IS NOT NULL
           AND school_level IN ('elementary', 'middle', 'high')
         """,
     )
@@ -408,49 +434,98 @@ def match_reference(
     normalized_name: str | None,
     school_level: str,
     reference_rows: list[dict[str, str]],
-) -> tuple[str | None, str, str | None]:
+) -> tuple[str | None, str, str | None, bool | None, str | None]:
     if not normalized_name:
-        return None, "unmatched_missing_name", None
+        return None, "unmatched_missing_name", None, None, None
     same_level = [row for row in reference_rows if row["school_level"] == school_level]
+    normalized_name_base = strip_level_suffix(normalized_name)
     for row in same_level:
-        if row["school_name_normalized"] == normalized_name:
-            return row["school_reference_id"], "normalized_exact", row.get("school_system")
+        reference_name = row["school_name_normalized"]
+        if reference_name == normalized_name:
+            return (
+                row["school_reference_id"],
+                "normalized_exact",
+                row.get("school_system"),
+                bool(row.get("include_in_cfs_v1")),
+                row.get("exclusion_reason"),
+            )
+        if strip_level_suffix(reference_name) == normalized_name_base:
+            return (
+                row["school_reference_id"],
+                "normalized_exact",
+                row.get("school_system"),
+                bool(row.get("include_in_cfs_v1")),
+                row.get("exclusion_reason"),
+            )
     best_score = 0.0
     best_id: str | None = None
+    best_row: dict[str, Any] | None = None
     for row in same_level:
+        reference_name = row["school_name_normalized"] or ""
         score = difflib.SequenceMatcher(
             None,
             normalized_name,
-            row["school_name_normalized"] or "",
+            reference_name,
         ).ratio()
+        base_score = difflib.SequenceMatcher(
+            None,
+            normalized_name_base or normalized_name,
+            strip_level_suffix(reference_name) or reference_name,
+        ).ratio()
+        score = max(score, base_score)
         if score > best_score:
             best_score = score
             best_id = row["school_reference_id"]
+            best_row = row
     if best_score >= 0.88:
-        best_system = next(
-            (
-                row.get("school_system")
-                for row in same_level
-                if row["school_reference_id"] == best_id
-            ),
-            None,
+        return (
+            best_id,
+            "fuzzy_review",
+            best_row.get("school_system") if best_row else None,
+            bool(best_row.get("include_in_cfs_v1")) if best_row else None,
+            best_row.get("exclusion_reason") if best_row else None,
         )
-        return best_id, "fuzzy_review", best_system
-    return None, "unmatched_reference_review", None
+    return None, "unmatched_reference_review", None, None, None
 
 
-def get_zone_exclusion_reason(row: pd.Series, normalized_name: str | None, school_level: str) -> str | None:
+def infer_zone_school_system(
+    row: pd.Series,
+    normalized_name: str | None,
+    matched_school_system: str | None,
+) -> str:
+    if matched_school_system:
+        return matched_school_system.upper()
+    blob = text_blob(row)
+    if normalized_name in KCS_ZONE_NAMES or "kannapolis" in blob:
+        return "KCS"
+    return "CCS"
+
+
+def get_zone_exclusion_reason(
+    row: pd.Series,
+    normalized_name: str | None,
+    school_level: str,
+    school_system: str,
+    matched_reference_include: bool | None,
+    matched_reference_exclusion_reason: str | None,
+) -> str | None:
     blob = text_blob(row)
     if school_level not in {"elementary", "middle", "high"}:
         return "level_not_v1"
     if not normalized_name:
         return "missing_required_fields"
+    if normalized_name in EXCLUDED_ZONE_NAME_REASONS:
+        return EXCLUDED_ZONE_NAME_REASONS[normalized_name]
     if "private" in blob:
         return "private_not_v1"
     if "magnet" in blob:
         return "magnet_not_v1"
     if "other" in blob:
         return "other_not_v1"
+    if matched_reference_include is False and matched_reference_exclusion_reason:
+        return matched_reference_exclusion_reason
+    if school_system.upper() != "CCS":
+        return "non_ccs_not_v1"
     return None
 
 
@@ -466,12 +541,30 @@ def build_clean_geodataframe(
         for _, row in raw_gdf.iterrows():
             school_name_raw = safe_text(first_present(row, ["school_nam", "school_name", "name"]))
             normalized_name = normalize_school_name(school_name_raw)
-            matched_id, match_confidence, matched_school_system = match_reference(
+            (
+                matched_id,
+                match_confidence,
+                matched_school_system,
+                matched_reference_include,
+                matched_reference_exclusion_reason,
+            ) = match_reference(
                 normalized_name,
                 school_level,
                 reference_rows,
             )
-            exclusion_reason = get_zone_exclusion_reason(row, normalized_name, school_level)
+            school_system = infer_zone_school_system(
+                row,
+                normalized_name,
+                matched_school_system,
+            )
+            exclusion_reason = get_zone_exclusion_reason(
+                row,
+                normalized_name,
+                school_level,
+                school_system,
+                matched_reference_include,
+                matched_reference_exclusion_reason,
+            )
             include_in_cfs_v1 = exclusion_reason is None
             source_objectid = safe_text(first_present(row, ["objectid", "fid", "source_objectid"]))
             zone_id = (
@@ -485,7 +578,7 @@ def build_clean_geodataframe(
                     "school_name_raw": school_name_raw,
                     "school_name_normalized": normalized_name,
                     "school_level": school_level,
-                    "school_system": matched_school_system or "UNKNOWN",
+                    "school_system": school_system,
                     "matched_school_reference_id": matched_id,
                     "match_confidence": match_confidence,
                     "include_in_cfs_v1": include_in_cfs_v1,

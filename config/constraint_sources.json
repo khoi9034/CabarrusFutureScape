@@ -165,10 +165,11 @@
       "school_level": "elementary",
       "authoritative": true,
       "refresh_notes": "Refresh from Cabarrus County Open Data when school attendance zone boundaries are published or updated.",
-      "review_status": "registered_not_ingested",
+      "review_status": "ingested_phase8a",
       "notes": [
         "Use attendance-zone polygon overlap for parcel elementary school assignment.",
-        "Do not assign parcels by distance to school point locations."
+        "Do not assign parcels by distance to school point locations.",
+        "CFS V1 assignment includes public CCS attendance-zone records only."
       ]
     },
     {
@@ -184,10 +185,11 @@
       "school_level": "middle",
       "authoritative": true,
       "refresh_notes": "Refresh from Cabarrus County Open Data when school attendance zone boundaries are published or updated.",
-      "review_status": "registered_not_ingested",
+      "review_status": "ingested_phase8a",
       "notes": [
         "Use attendance-zone polygon overlap for parcel middle school assignment.",
-        "Do not assign parcels by distance to school point locations."
+        "Do not assign parcels by distance to school point locations.",
+        "CFS V1 assignment includes public CCS attendance-zone records only."
       ]
     },
     {
@@ -203,10 +205,11 @@
       "school_level": "high",
       "authoritative": true,
       "refresh_notes": "Refresh from Cabarrus County Open Data when school attendance zone boundaries are published or updated.",
-      "review_status": "registered_not_ingested",
+      "review_status": "ingested_phase8a",
       "notes": [
         "Use attendance-zone polygon overlap for parcel high school assignment.",
-        "Do not assign parcels by distance to school point locations."
+        "Do not assign parcels by distance to school point locations.",
+        "CFS V1 assignment includes public CCS attendance-zone records only."
       ]
     },
     {
@@ -221,10 +224,10 @@
       "geometry_type": "point",
       "authoritative": true,
       "refresh_notes": "Refresh as a school reference/dictionary layer; do not use point distance for parcel assignment.",
-      "review_status": "registered_not_ingested",
+      "review_status": "ingested_phase8a",
             "notes": [
                 "Use only as a school reference table and name matching dictionary.",
-                "CFS V1 includes public elementary, middle, and high schools only; private, magnet, and Other school records are preserved for QA/future work.",
+                "CFS V1 includes public CCS elementary, middle, and high schools only; KCS, private, magnet, and Other school records are preserved for QA/future work.",
                 "Preserve private, magnet, and Other records for QA/future work."
             ]
         }

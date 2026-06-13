@@ -1,0 +1,4 @@
+2026-06-11 06:15:46,477 INFO Fetching elementary school zone metadata: https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/140
+2026-06-11 06:15:48,887 INFO Fetching middle school zone metadata: https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/141
+2026-06-11 06:15:49,855 INFO Fetching high school zone metadata: https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/142
+2026-06-11 06:15:51,687 INFO Wrote school zone validation: C:\CabarrusFutureScape\outputs\school_zones_validation.json

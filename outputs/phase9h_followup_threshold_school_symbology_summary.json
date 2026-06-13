@@ -1,0 +1,124 @@
+﻿{
+    "phase":  "9H follow-up",
+    "status":  "complete",
+    "branch":  "main",
+    "collapse_threshold":  {
+                               "previous_px":  78,
+                               "new_px":  39,
+                               "change":  "halved current collapse threshold",
+                               "collapsed_rail_width_px":  64,
+                               "expanded_min_width_px":  300,
+                               "default_expanded_width_px":  360,
+                               "max_width_rule":  "min(640px, 40vw)",
+                               "behavior":  [
+                                                "Panel no longer collapses at the 300px minimum width.",
+                                                "Dragging left keeps the expanded rail at its minimum width until the pointer reaches the 39px collapse threshold.",
+                                                "Arrow click still collapses or expands immediately.",
+                                                "Collapsed rail still shows Layers and uses the full-height 12px resize edge."
+                                            ]
+                           },
+    "school_utilization_symbology":  {
+                                         "source":  "presentation_derived",
+                                         "needs_verification":  true,
+                                         "official_capacity_scoring":  "disabled",
+                                         "public_school_capacity_rows":  0,
+                                         "class_rules":  {
+                                                             "under_capacity":  "\u003c80%",
+                                                             "approaching_capacity":  "80-99%",
+                                                             "over_capacity":  "100-110%",
+                                                             "severely_over_capacity":  "\u003e110%"
+                                                         },
+                                         "frontend_labels":  {
+                                                                 "under_capacity":  "Under capacity",
+                                                                 "approaching_capacity":  "Approaching capacity",
+                                                                 "over_capacity":  "Over capacity",
+                                                                 "severely_over_capacity":  "Severely over capacity"
+                                                             },
+                                         "polygon_styles":  {
+                                                                "under_capacity":  "transparent cool blue fill with readable blue outline",
+                                                                "approaching_capacity":  "transparent amber/yellow fill with stronger yellow outline",
+                                                                "over_capacity":  "transparent orange fill with orange outline",
+                                                                "severely_over_capacity":  "transparent red/magenta fill with strongest outline",
+                                                                "unmatched_or_unavailable":  "neutral review styling with gray/purple outline"
+                                                            }
+                                     },
+    "layer_controls":  {
+                           "toggle":  "School Utilization Seed",
+                           "level_selector":  [
+                                                  "All levels",
+                                                  "Elementary",
+                                                  "Middle",
+                                                  "High"
+                                              ],
+                           "utilization_class_selector":  [
+                                                              "All classes",
+                                                              "Under capacity seed",
+                                                              "Approaching capacity seed",
+                                                              "Over capacity seed",
+                                                              "Severely over capacity seed"
+                                                          ],
+                           "limit_behavior":  "Visible limit selector removed; layer forces all available seed zones with limit=500 when toggled on.",
+                           "loaded_count":  "31 of 31 available utilization zones loaded for level=all, class=all",
+                           "caveat":  "SY 2024-2025 utilization values are presentation-derived from planning maps and require verification against official enrollment/capacity data."
+                       },
+    "popup_fields":  [
+                         "school name with utilization percent in title",
+                         "school level",
+                         "school year",
+                         "utilization percentage",
+                         "utilization class label",
+                         "source confidence: Presentation-derived",
+                         "verification status: Needs verification",
+                         "seed match confidence",
+                         "zone match confidence",
+                         "matched/review-needed state",
+                         "not official capacity scoring caveat"
+                     ],
+    "utilization_zone_checks":  {
+                                    "all_level_endpoint":  "GET /constraints/schools/utilization-zones?level=all\u0026limit=500",
+                                    "total_count":  31,
+                                    "rendered_zones":  31,
+                                    "sample":  {
+                                                   "school_name":  "Coltrane Webb ES",
+                                                   "utilization_pct":  152,
+                                                   "utilization_class":  "severely_over_capacity"
+                                               },
+                                    "approaching_seed_endpoint":  "GET /constraints/schools/utilization-seed?utilization_class=approaching_capacity\u0026limit=20",
+                                    "approaching_seed_total":  15
+                                },
+    "validation_results":  {
+                               "npm_typecheck":  "passed",
+                               "npm_lint":  "passed",
+                               "npm_build_webpack":  "passed",
+                               "npm_dev_cfs":  "passed; frontend and FastAPI restarted and health checks returned 200",
+                               "backend_pipeline_validation":  "not rerun; no backend or pipeline files were changed in this follow-up"
+                           },
+    "smoke_test_results":  {
+                               "frontend_loads":  "http://localhost:3000 returned 200",
+                               "backend_health":  "http://127.0.0.1:8000/health returned 200 through dev:cfs launcher",
+                               "layer_registry":  "Map Layers registry opened in browser check with no console errors",
+                               "school_layer_toggle":  "School Utilization Seed toggled on and reported Showing 31 utilization zones",
+                               "legend_thresholds":  [
+                                                         "\u003c80%",
+                                                         "80-99%",
+                                                         "100-110%",
+                                                         "\u003e110%"
+                                                     ],
+                               "caveat_visible":  true,
+                               "no_official_capacity_score_language":  true,
+                               "resize_control":  "Browser DOM check found stable 32px arrow and 12px resize edge; tactile drag should be visually reviewed by user."
+                           },
+    "files_changed":  [
+                          "src/components/layout/AppShell.tsx",
+                          "src/components/dashboard/LayerToggle.tsx",
+                          "src/components/gis/SceneViewContainer.tsx",
+                          "src/lib/adapters/schoolUtilizationZoneMapAdapter.ts",
+                          "src/types/map/schoolUtilizationZones.ts"
+                      ],
+    "remaining_known_issues":  [
+                                   "Presentation-derived utilization remains preliminary until official enrollment and capacity files arrive.",
+                                   "The seed table has 37 rows; the map layer renders the 31 rows with available attendance-zone geometry from the API.",
+                                   "Seed rows that remain unmatched, review-required, or lack a joined attendance-zone geometry do not render as polygons.",
+                                   "School capacity scores remain disabled by design."
+                               ]
+}

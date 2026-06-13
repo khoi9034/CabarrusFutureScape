@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-06-13T00:13:58.812794",
+  "dataset": "capacity",
+  "source_file": "C:\\Users\\khoia\\AppData\\Local\\Temp\\pytest-of-khoia\\pytest-16\\test_dry_run_importer_validate0\\capacity.csv",
+  "dry_run": true,
+  "validation_summary": {
+    "row_count": 1,
+    "issue_count": 0,
+    "error_count": 0,
+    "review_count": 0,
+    "info_count": 0,
+    "issues_by_type": {}
+  },
+  "inserted_rows": 0,
+  "qa_rows_written": 0,
+  "no_fake_values_generated": true
+}

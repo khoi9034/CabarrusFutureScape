@@ -1,10 +1,10 @@
 school_level,school_system,school_type,include_in_cfs_v1,exclusion_reason,school_count
 elementary,CCS,public,True,included,19
-elementary,KCS,public,True,included,4
-high,KCS,public,True,included,1
 high,CCS,public,True,included,8
 middle,CCS,public,True,included,7
-middle,KCS,public,True,included,2
+elementary,KCS,public,False,non_ccs_not_v1,4
+high,KCS,public,False,non_ccs_not_v1,1
 middle,CCS,non_cfs_v1,False,magnet_not_v1,1
-unknown,CCS,non_cfs_v1,False,level_not_v1,3
+middle,KCS,public,False,non_ccs_not_v1,2
 unknown,CCS,public,False,level_not_v1,8
+unknown,CCS,non_cfs_v1,False,level_not_v1,3

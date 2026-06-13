@@ -1,0 +1,113 @@
+{
+  "phase": "8C",
+  "name": "Read-Only School Constraint Frontend Integration",
+  "status": "complete",
+  "scope_guardrails": {
+    "backend_modified": false,
+    "postgis_modified": false,
+    "sceneview_modified": false,
+    "topnav_modified": false,
+    "school_ingestion_modified": false,
+    "capacity_or_enrollment_added": false,
+    "school_capacity_scores_calculated": false,
+    "school_point_distance_used": false
+  },
+  "files_changed": [
+    "README.md",
+    "docs/constraints/school_constraint_strategy.md",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/SchoolConstraintSummaryPanel.tsx",
+    "src/components/dashboard/SelectedParcelSchoolAssignmentPanel.tsx",
+    "src/hooks/useSchoolConstraintSummary.ts",
+    "src/hooks/useSelectedParcelSchoolConstraint.ts",
+    "src/lib/adapters/schoolConstraintSummaryAdapter.ts",
+    "src/lib/adapters/selectedParcelSchoolConstraintAdapter.ts",
+    "src/lib/api/constraints.ts",
+    "src/types/api/index.ts",
+    "src/types/api/schoolConstraints.ts"
+  ],
+  "frontend_api_functions_added": [
+    "getSchoolConstraintStatistics",
+    "getSchoolConstraintForParcel",
+    "getSchoolConstraintQaSummary",
+    "getSchoolDistrictSummary",
+    "filterSchoolConstraints"
+  ],
+  "ui_components_added": [
+    "SelectedParcelSchoolAssignmentPanel",
+    "SchoolConstraintSummaryPanel"
+  ],
+  "selected_parcel_school_assignment_behavior": {
+    "endpoint": "GET /constraints/schools/{official_parcel_id}",
+    "calls_without_selected_parcel": false,
+    "displayed_fields": [
+      "elementary school assignment",
+      "middle school assignment",
+      "high school assignment",
+      "assignment confidence",
+      "assignment review status",
+      "data quality flags",
+      "capacity status",
+      "recommended action",
+      "school constraint score display"
+    ],
+    "required_wording_present": [
+      "School assignment is based on attendance-zone polygon overlap.",
+      "Capacity/enrollment data has not been added yet. This parcel is not scored for school capacity pressure.",
+      "Assignment unavailable for one or more levels due to CCS-only V1 scope or QA review."
+    ]
+  },
+  "countywide_school_summary_behavior": {
+    "endpoints": [
+      "GET /constraints/schools/statistics",
+      "GET /constraints/schools/qa-summary"
+    ],
+    "displayed_fields": [
+      "total parcels",
+      "elementary assigned parcels",
+      "middle assigned parcels",
+      "high assigned parcels",
+      "assignment review parcels",
+      "assignment confidence distribution",
+      "capacity data status",
+      "known QA review zones"
+    ],
+    "section_location": "Due Diligence Supporting Context",
+    "overview_clutter_added": false
+  },
+  "capacity_caveat_wording": {
+    "null_score_display": "Not scored",
+    "not_available_capacity_display": "Capacity Data Needed",
+    "capacity_summary_caveat": "School capacity scoring is not active because enrollment/capacity data has not been added.",
+    "missing_assignment_display": "Outside CCS V1 scope or assignment review needed"
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not_run_backend_files_not_changed"
+  },
+  "smoke_test_results": {
+    "local_frontend": "http://localhost:3000 returned 200",
+    "local_backend": "http://127.0.0.1:8000/health returned 200",
+    "test_parcel": "CFS-PARCEL-0149726579",
+    "selected_parcel_school_card": "loaded live assignments",
+    "observed_school_assignments": [
+      "Carl A Furr ES",
+      "Roberta Road MS",
+      "Jay M Robinson HS"
+    ],
+    "capacity_display": "Capacity Data Needed",
+    "score_display": "Not scored",
+    "countywide_school_summary": "loaded FastAPI metrics and QA review zones",
+    "browser_console_errors": 0,
+    "existing_selected_parcel_flow": "top search selected parcel, active selection overlay updated, parcel boundary remained highlighted"
+  },
+  "remaining_blockers_before_capacity_scoring": [
+    "vetted school enrollment data",
+    "vetted functional capacity data",
+    "capacity source ownership and update cadence",
+    "approved policy rules for interpreting utilization",
+    "QA decision for included unmatched reference zones"
+  ]
+}

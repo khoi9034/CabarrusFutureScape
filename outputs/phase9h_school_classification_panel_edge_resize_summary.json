@@ -1,0 +1,103 @@
+{
+  "phase": "9H",
+  "status": "complete",
+  "branch": "main",
+  "school_utilization_classification": {
+    "old_logic": {
+      "under_capacity": "utilization_pct < 80",
+      "near_capacity": "utilization_pct >= 80 and utilization_pct < 100",
+      "over_capacity": "utilization_pct >= 100 and utilization_pct <= 110",
+      "severely_over_capacity": "utilization_pct > 110"
+    },
+    "new_logic": {
+      "under_capacity": "utilization_pct < 80",
+      "approaching_capacity": "utilization_pct >= 80 and utilization_pct < 100",
+      "over_capacity": "utilization_pct >= 100 and utilization_pct <= 110",
+      "severely_over_capacity": "utilization_pct > 110"
+    },
+    "backward_compatibility": "Legacy near_capacity values are tolerated in frontend rendering and backend filters, but backend filters map near_capacity requests to approaching_capacity.",
+    "seed_rows_reloaded": 37,
+    "utilization_class_distribution": {
+      "approaching_capacity": 15,
+      "over_capacity": 7,
+      "severely_over_capacity": 7,
+      "under_capacity": 8
+    },
+    "edge_case_verification": {
+      "78": "under_capacity",
+      "100": "over_capacity",
+      "111": "severely_over_capacity",
+      "119": "severely_over_capacity",
+      "120": "severely_over_capacity",
+      "125": "severely_over_capacity",
+      "133": "severely_over_capacity",
+      "152": "severely_over_capacity",
+      "80_99": "covered by unit tests as approaching_capacity"
+    },
+    "school_capacity_untouched": true,
+    "public_school_capacity_row_count": 0,
+    "source_confidence": "presentation_derived",
+    "needs_verification": true,
+    "official_school_capacity_scoring": "disabled"
+  },
+  "left_panel_edge_resize": {
+    "collapse_threshold_px": 78,
+    "minimum_expanded_width_px": 300,
+    "collapsed_width_px": 64,
+    "right_edge_resize_zone_width_px": 12,
+    "implementation": [
+      "The right edge of the left map layer panel now has a full-height invisible resize zone.",
+      "Dragging left collapses immediately when the raw width reaches the minimum expanded width and pointer movement continues left.",
+      "Expanded panel content is removed immediately during collapsed preview to prevent squished text.",
+      "Dragging back right restores expanded preview only after the raw width reaches the minimum expanded width.",
+      "Resize state uses requestAnimationFrame and CSS variable updates; React state/localStorage are committed at pointerup."
+    ],
+    "arrow_collapse_behavior": {
+      "expanded_state_label": "Collapse map layers panel",
+      "collapsed_state_label": "Expand map layers panel",
+      "expanded_icon": "left arrow",
+      "collapsed_icon": "right arrow",
+      "hover_behavior": "Hover changes opacity, color, border, and shadow only; no hover transform, scale, size, margin, or border-width changes.",
+      "collapsed_rail_label": "Layers"
+    },
+    "old_controls": "The old grip-only collapse/resize control was replaced by the full edge resize zone plus arrow-only collapse control."
+  },
+  "frontend_display_updates": [
+    "School utilization filters and legend now display Approaching capacity seed.",
+    "School utilization map styling treats approaching_capacity and legacy near_capacity the same color profile.",
+    "Selected parcel school utilization copy now says preliminary approaching-capacity utilization."
+  ],
+  "documentation_updated": [
+    "README.md",
+    "docs/constraints/school_presentation_utilization_seed.md",
+    "docs/constraints/school_capacity_ingestion_plan.md",
+    "docs/backend/school_capacity_data_dictionary.md"
+  ],
+  "validation_results": {
+    "seed_reload": "passed; 37 rows loaded with approaching_capacity distribution",
+    "python_compileall_ingest": "passed",
+    "python_compileall_backend_app": "passed",
+    "focused_school_tests": "19 passed, 1 warning",
+    "full_backend_pytest": "175 passed, 3 warnings",
+    "npm_typecheck": "passed",
+    "npm_lint": "passed",
+    "npm_build_webpack": "passed",
+    "npm_dev_cfs": "passed after restarting local FastAPI and Next.js services",
+    "git_diff_check": "passed; line-ending warnings only"
+  },
+  "smoke_test_results": {
+    "frontend": "http://localhost:3000 returned 200",
+    "backend_health": "http://127.0.0.1:8000/health returned 200",
+    "school_utilization_seed_approaching": "GET /constraints/schools/utilization-seed?utilization_class=approaching_capacity&limit=20 returned 15 rows",
+    "school_utilization_zones_approaching": "GET /constraints/schools/utilization-zones?level=all&utilization_class=approaching_capacity&limit=500 returned 12 renderable zones",
+    "selected_parcel_school_seed": "GET /constraints/schools/utilization-seed/CFS-PARCEL-0149726579 returned 200",
+    "browser_console": "No captured console errors after loading localhost:3000",
+    "arrow_control": "Browser check found 32x32 arrow control, correct collapse/expand labels, and no console errors after toggling",
+    "collapsed_rail": "Scoped browser DOM check confirmed collapsed rail text is Layers"
+  },
+  "remaining_known_issues": [
+    "Presentation-derived school utilization remains preliminary and needs official verification.",
+    "Official school-level enrollment, functional capacity, and available-seat data are still required before capacity scoring.",
+    "The full edge drag behavior was implemented and code/browser-presence verified, but tactile drag feel should still be visually reviewed by the user."
+  ]
+}

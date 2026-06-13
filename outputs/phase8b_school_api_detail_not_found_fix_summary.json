@@ -1,0 +1,105 @@
+{
+  "generated_at": "2026-06-11T07:35:00",
+  "phase": "Phase 8B School Constraint API Detail Not Found Fix",
+  "status": "fixed",
+  "root_cause": "The live FastAPI process on port 8000 was stale and did not include the newly added /constraints/schools routes in OpenAPI. Restarting through npm run dev:cfs loaded the current backend code and resolved manual school detail not-found responses.",
+  "secondary_hardening": [
+    "School detail repository now bases detail lookups on public.parcels_enriched and left-joins public.parcel_school_summary and public.parcel_school_assignment.",
+    "A real parcel now returns 200 even if a future summary row is missing; only a parcel absent from both parcels_enriched and school summary returns 404.",
+    "scripts/start-cfs-local.ps1 now verifies school statistics, school detail, and school QA endpoints during local startup."
+  ],
+  "route_order_status": {
+    "correct": true,
+    "order": [
+      "/constraints/schools/statistics",
+      "/constraints/schools/filter",
+      "/constraints/schools/district-summary",
+      "/constraints/schools/qa-summary",
+      "/constraints/schools/{official_parcel_id}"
+    ],
+    "static_routes_captured_by_dynamic_detail_route": false
+  },
+  "database_table_verification": {
+    "public.parcels_enriched": 110017,
+    "public.parcel_school_assignment": 110017,
+    "public.parcel_school_summary": 110017,
+    "known_parcel": {
+      "official_parcel_id": "CFS-PARCEL-0149726579",
+      "found_in_parcels_enriched": true,
+      "found_in_parcel_school_assignment": true,
+      "found_in_parcel_school_summary": true,
+      "elementary_school_name": "Carl A Furr ES",
+      "middle_school_name": "Roberta Road MS",
+      "high_school_name": "Jay M Robinson HS",
+      "school_constraint_class": "not_scored",
+      "school_constraint_score": null
+    }
+  },
+  "parcel_ids_tested": [
+    {
+      "official_parcel_id": "CFS-PARCEL-0149726579",
+      "expected": 200,
+      "result": 200,
+      "notes": "Known parcel with school assignments and capacity_not_available."
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149720360",
+      "expected": 200,
+      "result": 200,
+      "notes": "Parcel with missing elementary/middle/high assignment still returns not_scored detail response."
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149720361",
+      "expected": 200,
+      "result": 200,
+      "notes": "Sample parcel from parcel_school_summary."
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-0149720362",
+      "expected": 200,
+      "result": 200,
+      "notes": "Sample parcel from parcel_school_summary."
+    },
+    {
+      "official_parcel_id": "CFS-PARCEL-DOES-NOT-EXIST",
+      "expected": 404,
+      "result": 404,
+      "notes": "True missing parcel returns School constraint record not found."
+    }
+  ],
+  "openapi_verification": {
+    "/constraints/schools/statistics": true,
+    "/constraints/schools/{official_parcel_id}": true,
+    "/constraints/schools/filter": true,
+    "/constraints/schools/district-summary": true,
+    "/constraints/schools/qa-summary": true
+  },
+  "manual_api_smoke_test_results": {
+    "/constraints/schools/statistics": 200,
+    "/constraints/schools/qa-summary": 200,
+    "/constraints/schools/district-summary": 200,
+    "/constraints/schools/filter?limit=5": 200,
+    "/constraints/schools/CFS-PARCEL-0149726579": 200,
+    "/constraints/schools/CFS-PARCEL-0149720360": 200,
+    "/constraints/schools/CFS-PARCEL-DOES-NOT-EXIST": 404
+  },
+  "files_changed": [
+    "backend/app/repositories/school_constraints_repository.py",
+    "backend/tests/test_school_constraints.py",
+    "scripts/start-cfs-local.ps1",
+    "outputs/phase8b_school_api_detail_not_found_fix_summary.json"
+  ],
+  "validation": {
+    "npm_run_dev_cfs": "passed; FastAPI and Next.js started and school endpoint checks returned 200",
+    "python_m_compileall_app": "passed",
+    "python_m_pytest": "149 passed, 3 warnings",
+    "targeted_school_tests": "11 passed"
+  },
+  "remaining_caveats": [
+    "Capacity remains not_available.",
+    "school_constraint_score remains null.",
+    "school_constraint_class remains not_scored.",
+    "No frontend school UI was built.",
+    "No enrollment/capacity values were faked."
+  ]
+}

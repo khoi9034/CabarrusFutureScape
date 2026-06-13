@@ -1,0 +1,119 @@
+{
+  "generated_at": "2026-06-11T09:25:00",
+  "phase": "Phase 8D School Capacity and Enrollment Data Ingestion Readiness",
+  "status": "complete",
+  "real_capacity_or_enrollment_data_ingested": false,
+  "fake_values_created": false,
+  "parcel_school_constraint_scores_calculated": false,
+  "frontend_modified": false,
+  "sceneview_modified": false,
+  "assignment_logic_modified": false,
+  "templates_created": [
+    "data_templates/schools/school_capacity_template.csv",
+    "data_templates/schools/school_enrollment_history_template.csv",
+    "data_templates/schools/school_grade_enrollment_history_template.csv",
+    "data_templates/schools/school_capacity_projection_template.csv",
+    "data_templates/schools/school_planned_capacity_changes_template.csv"
+  ],
+  "data_folders_created": [
+    "data/schools/raw/README.md",
+    "data/schools/staging/README.md",
+    "data/schools/processed/README.md",
+    "data/schools/qa/README.md"
+  ],
+  "sql_created": [
+    "cfs-data-pipelines/sql/create_school_capacity_readiness_tables.sql"
+  ],
+  "postgis_tables_prepared": {
+    "public.school_enrollment_history": 0,
+    "public.school_grade_enrollment_history": 0,
+    "public.school_capacity_history": 0,
+    "public.school_capacity_projection": 0,
+    "public.school_planned_capacity_changes": 0,
+    "public.school_capacity_ingestion_qa": 0,
+    "public.school_capacity": 0
+  },
+  "scripts_created": [
+    "cfs-data-pipelines/ingest/ingest_school_capacity_data.py",
+    "cfs-data-pipelines/transform/validate_school_capacity_data.py",
+    "cfs-data-pipelines/transform/create_current_school_capacity_snapshot.py"
+  ],
+  "validation_rules_added": [
+    "required columns present",
+    "school_year/projection_year integer validation",
+    "numeric enrollment/capacity values must be non-negative when supplied",
+    "utilization percent checked against enrollment/capacity when both exist",
+    "school_level limited to elementary, middle, high, or review_required",
+    "school_system preserves non-CCS rows for future use while CCS remains CFS V1 scope",
+    "school_name_normalized generated when missing",
+    "future DB validation can match school_reference by normalized name, level, and system",
+    "unmatched schools are written to school_capacity_ingestion_qa on non-dry-run ingestion",
+    "duplicate school/year and school/year/grade rows flagged",
+    "capacity lower than enrollment flagged as over_capacity review, not an ingestion error",
+    "missing capacity/enrollment allowed but flagged",
+    "no fake values generated"
+  ],
+  "dry_run_support": {
+    "supported": true,
+    "csv_supported": true,
+    "xlsx_supported_if_openpyxl_available": true,
+    "validation_only_mode": true,
+    "example_commands": [
+      "python cfs-data-pipelines/ingest/ingest_school_capacity_data.py --file data/schools/raw/example.csv --dataset capacity --dry-run",
+      "python cfs-data-pipelines/ingest/ingest_school_capacity_data.py --file data/schools/raw/example.csv --dataset enrollment_history --dry-run",
+      "python cfs-data-pipelines/ingest/ingest_school_capacity_data.py --file data/schools/raw/example.csv --dataset grade_enrollment --dry-run",
+      "python cfs-data-pipelines/ingest/ingest_school_capacity_data.py --file data/schools/raw/example.csv --dataset projection --dry-run",
+      "python cfs-data-pipelines/ingest/ingest_school_capacity_data.py --file data/schools/raw/example.csv --dataset planned_capacity --dry-run"
+    ]
+  },
+  "current_snapshot_behavior": {
+    "script": "cfs-data-pipelines/transform/create_current_school_capacity_snapshot.py",
+    "source_table": "public.school_capacity_history",
+    "target_table": "public.school_capacity",
+    "empty_history_behavior": "Exits successfully, leaves snapshot empty, and reports that no current school capacity snapshot is available.",
+    "last_run": {
+      "history_row_count": 0,
+      "snapshot_row_count": 0,
+      "snapshot_rebuilt": false
+    },
+    "parcel_school_summary_recalculated": false,
+    "capacity_score_created": false
+  },
+  "capacity_status_classification_rules": {
+    "not_available": "enrollment or capacity missing",
+    "under_capacity": "utilization_pct < 85",
+    "near_capacity": "utilization_pct >= 85 and < 100",
+    "over_capacity": "utilization_pct >= 100 and < 115",
+    "severely_over_capacity": "utilization_pct >= 115"
+  },
+  "documentation_files_created_or_updated": [
+    "docs/constraints/school_capacity_ingestion_plan.md",
+    "docs/backend/school_capacity_data_dictionary.md",
+    "docs/constraints/school_constraint_strategy.md",
+    "README.md"
+  ],
+  "tests_added": [
+    "backend/tests/test_school_capacity_readiness.py"
+  ],
+  "validation_results": {
+    "python_m_compileall_cfs_data_pipelines_ingest": "passed",
+    "python_m_compileall_cfs_data_pipelines_transform": "passed",
+    "python_m_pytest_backend": "156 passed, 3 warnings",
+    "targeted_school_capacity_readiness_tests": "7 passed"
+  },
+  "what_to_do_when_real_files_arrive": [
+    "Place original received files in data/schools/raw/ without editing them.",
+    "Copy or standardize reviewed versions into data/schools/staging/ or data/schools/processed/.",
+    "Run ingest_school_capacity_data.py with --dry-run for the appropriate dataset.",
+    "Review validation issues and resolve source-owner questions.",
+    "Run non-dry-run ingestion only after data is vetted.",
+    "Run create_current_school_capacity_snapshot.py to build public.school_capacity from latest history rows.",
+    "Do not calculate parcel school_constraint_score until capacity/enrollment governance rules are approved."
+  ],
+  "remaining_caveats": [
+    "No real school capacity/enrollment source has been received.",
+    "public.school_capacity remains empty.",
+    "school assignment APIs continue to report capacity_status=not_available and school_constraint_class=not_scored.",
+    "Future scoring requires stakeholder approval of capacity source, utilization thresholds, and parcel-level interpretation."
+  ]
+}

@@ -4,24 +4,26 @@ Cabarrus FutureScape (CFS) is the frontend foundation for a Cabarrus County, NC 
 
 ## Current Phase
 
-V1 Product Layout Redesign plus Phase 8A school constraint data foundation,
-building on completed GIS Map Intelligence, Parcel Intelligence, Zoning
-Intelligence, Development Activity, FEMA flood constraint intelligence, permit
-intelligence segmentation, and FastAPI integration.
+V1 Product Layout Redesign plus Phase 8 school constraint readiness, building
+on completed GIS Map Intelligence, Parcel Intelligence, Zoning Intelligence,
+Development Activity, FEMA flood constraint intelligence, permit intelligence
+segmentation, and FastAPI integration.
 
 This cleanup turns the working technical prototype into a cleaner product
 experience for portfolio demonstrations, interviews, and stakeholder
-presentations. Phase 8A adds backend/data-only school attendance-zone ingestion
-and parcel assignment; it does not add school frontend UI, SceneView school
-layers, APIs, forecasting, transportation constraints, or prediction models.
-The goal remains less control clutter and more planning intelligence.
+presentations. Phase 8 now includes attendance-zone parcel assignment,
+read-only school constraint APIs, and read-only frontend school assignment
+display. It does not add school SceneView layers, capacity scoring,
+forecasting, transportation constraints, or prediction models. The goal remains
+less control clutter and more planning intelligence.
 
 Current product modes:
 
 - `Overview`: default map exploration workspace for parcel search, 3D SceneView,
   active map layers, selected parcel status, and concise headline metrics.
 - `Due Diligence`: selected parcel deep-dive with parcel summary, development
-  activity, permit timeline, FEMA flood constraints, and map context.
+  activity, permit timeline, FEMA flood constraints, school attendance-zone
+  assignment, and map context.
 - `Executive Print`: report-style selected parcel summary with a print button,
   selected parcel summary, development summary, constraint summary, latest
   permits, map snapshot placeholder, and executive notes.
@@ -56,7 +58,8 @@ The bottom KPI bar is reduced to four executive cards:
 
 All existing FastAPI/static fallback behavior, parcel search, parcel focus, 3D
 parcel cage highlight, Development Hotspots, Flood Constraints, FEMA Flood
-Zones, selected parcel flood panel, and permit events remain preserved.
+Zones, selected parcel flood panel, selected parcel school assignment panel,
+and permit events remain preserved.
 
 Executive Print uses `window.print()` and print CSS that hides app chrome and
 formats the report on a light/white print surface for readability while keeping
@@ -1344,10 +1347,13 @@ Current Phase 8A results:
 
 - school reference raw rows: `53`
 - clean school reference rows: `53`
-- public elementary/middle/high school references included in CFS V1: `41`
+- public CCS elementary/middle/high school references included in CFS V1: `34`
+- school reference rows preserved for QA/exclusion review: `19`
 - clean school attendance zones: `44`
-- school zone names needing reference QA: `6`
+- CFS V1 included school attendance zones: `35`
+- school zone names needing reference QA: `5`
 - parcel school assignment rows: `110,017`
+- assignment review required parcels: `75,143`
 - parcel school summary rows: `110,017`
 - school capacity rows: `0`
 - non-null school constraint scores: `0`
@@ -1358,8 +1364,11 @@ Assignment rules:
 - Parcel assignments use attendance-zone polygon overlap.
 - For each parcel and school level, the largest overlap area wins.
 - Missing, ambiguous, and non-exact reference matches are preserved as QA flags.
-- Private, magnet, and Other/non elementary-middle-high school records are
+- KCS, private, magnet, and Other/non elementary-middle-high school records are
   preserved in raw/QA outputs but excluded from CFS V1 assignment outputs.
+- Included CCS zone names needing reference QA are `Hickory Ridge ES`,
+  `West Cabarrus HS`, and `Roberta Road MS`. Excluded non-CCS unmatched names
+  include `GW Carver ES` and `North Kannapolis ES`.
 
 Capacity status:
 
@@ -1380,11 +1389,478 @@ Generated outputs:
 - `outputs/parcel_school_assignment_warnings.csv`
 - `outputs/parcel_school_summary_validation.json`
 - `outputs/phase8a_school_constraint_ingestion_summary.json`
+- `outputs/phase8a_school_constraint_verification_or_ingestion_summary.json`
 
 Planning docs:
 
 - `docs/constraints/school_constraint_strategy.md`
 - `docs/backend/school_constraint_data_dictionary.md`
+- `docs/backend/school_constraint_api_contract.md`
+- `docs/backend/school_constraint_response_examples.md`
+
+## Phase 8B School Constraint QA and API Readiness
+
+Phase 8B reviews the Phase 8A assignment quality and exposes read-only school
+constraint endpoints. It does not build frontend school UI, SceneView school
+layers, capacity scoring, or forecasting.
+
+QA decision:
+
+- `Hickory Ridge ES`, `West Cabarrus HS`, and `Roberta Road MS` are included
+  CCS attendance zones missing same-level school reference records. They remain
+  review-required and were not force-matched.
+- `GW Carver ES` and `North Kannapolis ES` are preserved as excluded/non-CCS
+  QA records under the CFS V1 CCS-only scope.
+- School assignment data is safe for read-only API exposure with caveats.
+- School capacity/enrollment is not available, so scores remain `NULL` and
+  `school_constraint_class` remains `not_scored`.
+
+Implemented school endpoints:
+
+- `GET /constraints/schools/statistics`
+- `GET /constraints/schools/{official_parcel_id}`
+- `GET /constraints/schools/filter`
+- `GET /constraints/schools/district-summary`
+- `GET /constraints/schools/qa-summary`
+
+Generated Phase 8B outputs:
+
+- `outputs/phase8b_school_constraint_qa_review.json`
+- `outputs/phase8b_school_constraint_qa_issues.csv`
+- `outputs/phase8b_school_constraint_qa_and_api_readiness_summary.json`
+
+## Phase 8C Read-Only School Frontend Integration
+
+Phase 8C adds frontend school assignment visibility without activating capacity
+or enrollment scoring. The selected parcel Due Diligence workflow now calls
+`GET /constraints/schools/{official_parcel_id}` and displays elementary,
+middle, and high attendance-zone assignment from polygon overlap.
+
+Frontend additions:
+
+- `src/lib/api/constraints.ts` school API functions
+- `src/types/api/schoolConstraints.ts`
+- `src/hooks/useSelectedParcelSchoolConstraint.ts`
+- `src/hooks/useSchoolConstraintSummary.ts`
+- `src/components/dashboard/SelectedParcelSchoolAssignmentPanel.tsx`
+- `src/components/dashboard/SchoolConstraintSummaryPanel.tsx`
+
+Display rules:
+
+- `school_constraint_score = null` displays as `Not scored`.
+- `capacity_status = not_available` displays as `Capacity Data Needed`.
+- missing assignments display as CCS V1 scope or QA review caveats, not API
+  failures.
+- capacity/enrollment data is not fabricated and school capacity scoring is not
+  active.
+
+The countywide School Assignment Summary lives with constraint context, not the
+Executive Summary, and combines `GET /constraints/schools/statistics` with
+`GET /constraints/schools/qa-summary`.
+
+## Phase 8D School Capacity Ingestion Readiness
+
+Phase 8D prepares CFS for future school enrollment, capacity, utilization,
+grade-level enrollment, projection, and planned expansion files. It does not
+ingest real data, fake values, calculate school capacity scores, build frontend
+school UI, or modify SceneView.
+
+Created templates:
+
+- `data_templates/schools/school_capacity_template.csv`
+- `data_templates/schools/school_enrollment_history_template.csv`
+- `data_templates/schools/school_grade_enrollment_history_template.csv`
+- `data_templates/schools/school_capacity_projection_template.csv`
+- `data_templates/schools/school_planned_capacity_changes_template.csv`
+
+Created school data folders:
+
+- `data/schools/raw/`
+- `data/schools/staging/`
+- `data/schools/processed/`
+- `data/schools/qa/`
+
+Created readiness SQL and scripts:
+
+- `cfs-data-pipelines/sql/create_school_capacity_readiness_tables.sql`
+- `cfs-data-pipelines/ingest/ingest_school_capacity_data.py`
+- `cfs-data-pipelines/transform/validate_school_capacity_data.py`
+- `cfs-data-pipelines/transform/create_current_school_capacity_snapshot.py`
+
+Prepared empty future tables:
+
+- `public.school_enrollment_history`
+- `public.school_grade_enrollment_history`
+- `public.school_capacity_history`
+- `public.school_capacity_projection`
+- `public.school_planned_capacity_changes`
+- `public.school_capacity_ingestion_qa`
+
+`public.school_capacity` remains the current snapshot table and currently has
+`0` rows. If no `school_capacity_history` rows exist, the snapshot script exits
+successfully and reports that no current school capacity snapshot is available.
+
+Capacity status classes are prepared for future data:
+
+- `not_available`
+- `under_capacity`
+- `near_capacity`
+- `over_capacity`
+- `severely_over_capacity`
+
+Generated Phase 8D output:
+
+- `outputs/phase8d_school_capacity_ingestion_readiness_summary.json`
+
+## Phase 8E Presentation-Derived School Utilization Seed
+
+Phase 8E adds a temporary utilization seed from CCS capital planning
+presentation maps for SY 2024-2025. This is not official enrollment/capacity
+ingestion. Values were manually read from map labels and require verification
+against official data.
+
+Seed file:
+
+- `data/schools/raw/presentation_utilization_seed_sy2024_2025.csv`
+
+Created SQL/script:
+
+- `cfs-data-pipelines/sql/create_school_presentation_utilization_seed.sql`
+- `cfs-data-pipelines/ingest/ingest_school_presentation_utilization_seed.py`
+
+Created PostGIS objects:
+
+- `public.school_presentation_utilization_seed`
+- `public.school_utilization_seed_current`
+
+Presentation-derived utilization classes are calculated directly from the map
+percentage:
+
+- `under_capacity`: below 80%
+- `approaching_capacity`: 80% to below 100%
+- `over_capacity`: 100% through 110%
+- `severely_over_capacity`: above 110%
+
+These classes remain preliminary visualization/testing labels only. They do
+not populate `public.school_capacity` and do not enable official school
+capacity scoring.
+
+Read-only endpoints:
+
+- `GET /constraints/schools/utilization-seed`
+- `GET /constraints/schools/utilization-seed/{official_parcel_id}`
+
+Important caveats:
+
+- no enrollment counts are added;
+- no functional capacity values are added;
+- no available seats are calculated;
+- `public.school_capacity` is not populated from this seed;
+- `school_constraint_score` remains `NULL`;
+- final school capacity scoring remains disabled.
+
+Generated Phase 8E output:
+
+- `outputs/phase8e_school_presentation_utilization_seed_summary.json`
+
+## Phase 8F School Frontend Read-Only Integration
+
+Phase 8F connects the read-only school assignment APIs and the
+presentation-derived utilization seed to the frontend due diligence and
+constraints panels. It does not add school map layers, enrollment data,
+functional capacity, available seats, official capacity scoring, or prediction.
+
+Frontend behavior:
+
+- selected parcels call `GET /constraints/schools/{official_parcel_id}`;
+- selected parcels also call
+  `GET /constraints/schools/utilization-seed/{official_parcel_id}`;
+- the School Assignment card shows elementary, middle, and high attendance-zone
+  assignment from polygon overlap;
+- capacity remains labeled `Capacity Data Needed`;
+- `NULL` school constraint scores display as `Not scored`;
+- presentation utilization displays as preliminary, presentation-derived, and
+  needing verification;
+- missing assignments are described as CCS-only V1 scope or QA review, not API
+  failures.
+
+Countywide school summary behavior:
+
+- loads `GET /constraints/schools/statistics`;
+- loads `GET /constraints/schools/qa-summary`;
+- loads `GET /constraints/schools/utilization-seed`;
+- shows assignment counts, confidence distribution, capacity caveat, seed row
+  count, preliminary utilization distribution, and seed reference-review rows.
+
+Important caveat:
+
+Official school capacity scoring is not active because verified
+enrollment/capacity data has not been added. The SY 2024-2025 utilization seed
+is useful for provisional display/testing only and must be replaced or verified
+when official data arrives.
+
+Generated Phase 8F output:
+
+- `outputs/phase8f_school_frontend_integration_summary.json`
+
+## Phase 9B UI Optimization and Methodology Cleanup
+
+Phase 9B tightens the CFS V1 prototype around faster map exploration and a
+cleaner executive workflow. The default workspace now emphasizes the top parcel
+search, map exploration, compact selected-parcel context, and collapsed map
+layers. Heavier due-diligence panels lazy-render only when opened so hidden
+sections do not keep making unnecessary selected-parcel, parcel summary, school,
+flood, or development requests.
+
+Navigation now separates:
+
+- `Overview` for map exploration and concise selected-parcel context;
+- `Due Diligence` for parcel details, FEMA flood status, school assignment,
+  development activity, and permit events;
+- `Executive Print` for report-oriented output;
+- `Methodology` for data sources, assumptions, limitations, and model
+  foundation.
+
+Map and layout behavior:
+
+- SceneView is configured for a Cabarrus-focused local scene with constrained
+  altitude/tilt, lower global visual effects, and a Cabarrus study extent.
+- Fullscreen map mode hides the right intelligence rail and bottom KPI strip
+  while keeping the left map layer controls available.
+- The left map layer rail is wider by default and can be resized on desktop.
+- Map layer status badges wrap into readable labels instead of tiny truncated
+  chips.
+- FEMA Flood Zones default to a safer 100-polygon request unless visible-extent
+  or larger limits are explicitly selected.
+- The bottom county KPI row is reduced to a compact four-card county pulse.
+
+The Methodology section documents:
+
+- active data inputs, including parcels, zoning, permit/development activity,
+  FEMA NFHL flood constraints, school attendance-zone assignment, and the
+  presentation-derived school utilization seed;
+- descriptive logic for parcel intelligence, FEMA overlays, permit segmentation,
+  hotspot concentration, and school assignment;
+- assumptions and caveats, including that official school capacity scoring and
+  predictive modeling are not active;
+- limitations such as placeholder readiness layers, local runtime performance
+  constraints, and capped/extent-filtered prototype map layers.
+
+Generated Phase 9B output:
+
+- `outputs/phase9b_cfs_ui_optimization_and_methodology_summary.json`
+
+## Phase 9D School Visibility and Sidebar Cleanup
+
+Phase 9D makes read-only school assignment and presentation-derived
+utilization visible in the primary selected-parcel workflow and keeps the left
+rail focused on map operations.
+
+School visibility changes:
+
+- Overview selected-parcel summary now includes a compact School Assignment
+  snapshot.
+- The snapshot calls the same selected-parcel school hooks as Due Diligence,
+  so selecting a parcel triggers:
+  - `GET /constraints/schools/{official_parcel_id}`
+  - `GET /constraints/schools/utilization-seed/{official_parcel_id}`
+- Due Diligence keeps the full School Assignment card with elementary, middle,
+  and high attendance-zone assignments.
+- Missing assignments are shown as CCS-only V1 scope or QA review caveats.
+- Capacity remains labeled `Capacity Data Needed`.
+- `NULL` school scores remain labeled `Not scored`.
+- Presentation utilization remains labeled as presentation-derived and needing
+  verification.
+
+Sidebar and methodology changes:
+
+- The left map layer rail now contains only operational map controls.
+- GIS onboarding, service-contract readiness, data registry, scenario controls,
+  and mock composite scoring context moved to the Methodology workspace under
+  `Model Data Registry`.
+- The Methodology workspace also includes the countywide School Assignment
+  Summary with assignment coverage, QA review zones, capacity caveat, and
+  preliminary utilization seed distribution.
+- The layer rail defaults to `360px`, can resize from `300px` to `520px`, and
+  supports a slim collapsed state.
+- Closed Map Layers and Development Hotspot advanced filters now unmount their
+  heavy controls until expanded.
+- Flood Constraints and FEMA Flood Zones legends use vertical full-label rows.
+
+Generated Phase 9D output:
+
+- `outputs/phase9d_school_visibility_sidebar_cleanup_summary.json`
+
+## Phase 9G Panel Collapse, School Utilization Layer, and LEA Context
+
+Phase 9G refines the map layer rail and adds district-level LEA pupil context
+without changing school capacity scoring.
+
+UX refinements:
+
+- The left layer rail collapse threshold is reduced to `78px`, so the rail only
+  collapses when dragged close to the slim `Layers` state.
+- During drag, crossing the collapse threshold immediately hides expanded layer
+  content and shows only the collapsed rail, preventing squished text.
+- The School Utilization Seed layer defaults to all levels and a `500` record
+  cap so all currently available presentation-derived seed zones can render
+  when the layer is toggled on.
+- The utilization layer remains off by default and keeps the visible caveat that
+  SY 2024-2025 values are presentation-derived and need verification.
+
+District-level LEA pupil context:
+
+- Uploaded source copied to `data/schools/raw/lea_pupil_info_2025.csv`.
+- SQL table: `public.school_lea_pupil_context`.
+- Importer: `cfs-data-pipelines/ingest/ingest_lea_pupil_context.py`.
+- Read-only endpoints:
+  - `GET /constraints/schools/lea-pupil-context`
+  - `GET /constraints/schools/lea-pupil-context/summary`
+- The 2025 file parses to 4 source measure rows and 60 long-form rows
+  covering `Enrollment`, `ADM`, `ADA`, and `MLD` by grade plus total.
+- Districtwide Enrollment total is `36,287`.
+
+Important caveat:
+
+The LEA pupil file is district-level context only. It is not school-level
+capacity, does not include functional capacity or available seats, does not
+populate `public.school_capacity`, and does not activate school capacity scores.
+
+Generated Phase 9G outputs:
+
+- `outputs/lea_pupil_context_ingestion_summary.json`
+- `outputs/phase9g_panel_school_utilization_lea_context_summary.json`
+
+## Phase 10A New Construction Permit Intelligence
+
+Phase 10A adds a staff-provided new construction permit extract as a separate
+development intelligence workflow. It does not overwrite existing permit
+segmentation tables, train a model, or expose prediction probabilities.
+
+Source and tables:
+
+- Source file: `data/development/raw/BuildingPermits_NewConstruction.csv`
+- Raw table: `public.new_construction_permits_raw`
+- Clean table: `public.new_construction_permits_clean`
+- Parcel match table: `public.new_construction_permit_parcel_relationship`
+- Parcel summary: `public.parcel_new_construction_summary`
+- Label factory: `public.parcel_development_prediction_labels`
+
+Validated source facts:
+
+- 20,614 source rows.
+- Permit file dates run from `2015-01-05` through `2026-06-11`.
+- Permit types are primarily `Building Residential New` and
+  `Building Commercial New`.
+- Parcel matching is cautious; null, short, placeholder, unmatched, and
+  ambiguous parcel numbers are not force-matched.
+
+Read-only backend endpoints:
+
+- `GET /development/new-construction/statistics`
+- `GET /development/new-construction/trends`
+- `GET /development/new-construction/parcel/{official_parcel_id}`
+- `GET /development/new-construction/labels/summary`
+
+Modeling boundary:
+
+The label table supports future baseline modeling for whether a parcel receives
+new construction in the next 1 or 3 years after a historical snapshot. Labels
+are targets only. Future model features must avoid temporal leakage and should
+include zoning, parcel characteristics, flood/school constraints,
+infrastructure readiness, road access, nearby activity, and future land-use
+context before any production probability is exposed.
+
+Generated Phase 10A outputs:
+
+- `outputs/new_construction_permit_source_profile.json`
+- `outputs/new_construction_permit_type_summary.csv`
+- `outputs/new_construction_permit_year_summary.csv`
+- `outputs/new_construction_permit_parcel_match_qa.csv`
+- `outputs/new_construction_permit_unmatched_samples.csv`
+- `outputs/new_construction_permit_placeholder_parcels.csv`
+- `outputs/parcel_new_construction_summary_validation.json`
+- `outputs/parcel_development_prediction_labels_validation.json`
+- `outputs/phase10a_new_construction_permit_intelligence_summary.json`
+
+## Phase 10B Development Prediction Feature Matrix
+
+Phase 10B creates a parcel-year feature matrix for future development
+prediction experiments. It does not train a production model, expose
+probabilities, or change the frontend.
+
+Tables and artifacts:
+
+- Feature matrix table: `public.parcel_development_prediction_features`
+- Feature registry: `config/development_prediction_features.json`
+- SQL builder: `cfs-data-pipelines/sql/create_development_prediction_feature_matrix.sql`
+- Transform script: `cfs-data-pipelines/transform/create_development_prediction_feature_matrix.py`
+- Readiness docs:
+  - `docs/modeling/development_prediction_feature_registry.md`
+  - `docs/modeling/development_prediction_model_readiness.md`
+
+The matrix uses `public.parcel_development_prediction_labels` as the driver and
+adds parcel, zoning, flood, school assignment, prior permit, prior new
+construction, and jurisdiction context features. Prior permit and new
+construction windows are filtered to records on or before December 31 of each
+`snapshot_year`.
+
+Important caveats:
+
+- Labels remain targets only and are not overwritten.
+- No prediction model is active.
+- No prediction probability is available.
+- Current zoning, current parcel valuation, current school assignment, and
+  current flood context are marked as current-context features unless historical
+  source snapshots are added later.
+- Official school capacity scoring remains inactive.
+
+Read-only backend readiness endpoint:
+
+- `GET /development/prediction/features/summary`
+
+Generated Phase 10B outputs:
+
+- `outputs/development_prediction_feature_matrix_profile.json`
+- `outputs/development_prediction_feature_missingness.csv`
+- `outputs/development_prediction_feature_leakage_review.csv`
+- `outputs/development_prediction_feature_label_balance.csv`
+- `outputs/development_prediction_feature_snapshot_year_summary.csv`
+- `outputs/phase10b_development_prediction_feature_matrix_summary.json`
+
+## Phase 10C Internal Baseline Development Prediction Experiment
+
+Phase 10C trains internal baseline experiments from the Phase 10B feature
+matrix. It is not production-ready, does not expose parcel probabilities in the
+frontend, and does not add a public prediction endpoint.
+
+Default experiment:
+
+- Target: `new_construction_next_3yr`
+- Feature set: `strict_time_safe_baseline`
+- Mature label years: `2014-2022`
+- Excluded incomplete future windows: `2023-2026`
+- Temporal split: train `2014-2019`, validation `2020-2021`, test `2022`
+- Models trained: logistic regression and histogram gradient boosting
+- Internal score table: `public.development_prediction_model_experiment_scores`
+- Score caveat: `internal_experiment_not_for_public_decision`
+
+Generated Phase 10C artifacts:
+
+- `outputs/modeling/development_prediction/phase10c_model_metrics.json`
+- `outputs/modeling/development_prediction/phase10c_feature_importance.csv`
+- `outputs/modeling/development_prediction/phase10c_predictions_sample.csv`
+- `outputs/modeling/development_prediction/phase10c_temporal_split_summary.json`
+- `outputs/modeling/development_prediction/phase10c_label_distribution.csv`
+- `outputs/modeling/development_prediction/phase10c_model_caveats.md`
+- `outputs/phase10c_baseline_development_prediction_experiment_summary.json`
+- `docs/modeling/development_prediction_baseline_model_card.md`
+
+The existing readiness endpoint,
+`GET /development/prediction/features/summary`, reports experiment metadata and
+summary metrics only. `model_active=false`,
+`prediction_probability_available=false`, and `production_ready=false` remain
+hard requirements.
 
 ## Dashboard State Architecture
 

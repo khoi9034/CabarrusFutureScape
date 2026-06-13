@@ -1,0 +1,15 @@
+{
+  "row_count": 1430221,
+  "unique_parcel_count": 110017,
+  "min_snapshot_year": 2014,
+  "max_snapshot_year": 2026,
+  "snapshot_year_count": 13,
+  "feature_set_version": "phase10b_v1",
+  "mixed_temporal_status_rows": 1430221,
+  "non_placeholder_school_capacity_rows": 0,
+  "non_null_school_score_rows": 0,
+  "label_row_count": 1430221,
+  "row_count_matches_labels": true,
+  "model_active": false,
+  "prediction_probability_available": false
+}

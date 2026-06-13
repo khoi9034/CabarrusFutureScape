@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-10T21:19:08.760646",
+  "generated_at": "2026-06-11T06:15:19.841541",
   "source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/144",
   "source_status": "downloaded",
   "source_error": null,
@@ -7,8 +7,8 @@
   "clean_table": "public.school_reference",
   "raw_row_count": 53,
   "clean_row_count": 53,
-  "included_cfs_v1_count": 41,
-  "excluded_or_preserved_qa_count": 12,
+  "included_cfs_v1_count": 34,
+  "excluded_or_preserved_qa_count": 19,
   "level_distribution": [
     {
       "school_level": "elementary",
@@ -37,22 +37,6 @@
       "school_count": 19
     },
     {
-      "school_level": "elementary",
-      "school_system": "KCS",
-      "school_type": "public",
-      "include_in_cfs_v1": true,
-      "exclusion_reason": "included",
-      "school_count": 4
-    },
-    {
-      "school_level": "high",
-      "school_system": "KCS",
-      "school_type": "public",
-      "include_in_cfs_v1": true,
-      "exclusion_reason": "included",
-      "school_count": 1
-    },
-    {
       "school_level": "high",
       "school_system": "CCS",
       "school_type": "public",
@@ -69,12 +53,20 @@
       "school_count": 7
     },
     {
-      "school_level": "middle",
+      "school_level": "elementary",
       "school_system": "KCS",
       "school_type": "public",
-      "include_in_cfs_v1": true,
-      "exclusion_reason": "included",
-      "school_count": 2
+      "include_in_cfs_v1": false,
+      "exclusion_reason": "non_ccs_not_v1",
+      "school_count": 4
+    },
+    {
+      "school_level": "high",
+      "school_system": "KCS",
+      "school_type": "public",
+      "include_in_cfs_v1": false,
+      "exclusion_reason": "non_ccs_not_v1",
+      "school_count": 1
     },
     {
       "school_level": "middle",
@@ -85,12 +77,12 @@
       "school_count": 1
     },
     {
-      "school_level": "unknown",
-      "school_system": "CCS",
-      "school_type": "non_cfs_v1",
+      "school_level": "middle",
+      "school_system": "KCS",
+      "school_type": "public",
       "include_in_cfs_v1": false,
-      "exclusion_reason": "level_not_v1",
-      "school_count": 3
+      "exclusion_reason": "non_ccs_not_v1",
+      "school_count": 2
     },
     {
       "school_level": "unknown",
@@ -99,6 +91,14 @@
       "include_in_cfs_v1": false,
       "exclusion_reason": "level_not_v1",
       "school_count": 8
+    },
+    {
+      "school_level": "unknown",
+      "school_system": "CCS",
+      "school_type": "non_cfs_v1",
+      "include_in_cfs_v1": false,
+      "exclusion_reason": "level_not_v1",
+      "school_count": 3
     }
   ],
   "geometry_validation": {
@@ -163,14 +163,15 @@
     ]
   },
   "cfs_v1_policy": {
-    "included": "Public elementary, middle, and high schools only.",
+    "included": "Public CCS elementary, middle, and high schools only.",
     "excluded_preserved_for_qa": [
+      "non-CCS systems",
       "private",
       "magnet",
       "Other / non elementary-middle-high"
     ],
     "parcel_assignment_policy": "Do not use school point distance for parcel assignment."
   },
-  "elapsed_seconds": 2.62,
-  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_school_reference_points_20260610_211906.log"
+  "elapsed_seconds": 5.15,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_school_reference_points_20260611_061514.log"
 }

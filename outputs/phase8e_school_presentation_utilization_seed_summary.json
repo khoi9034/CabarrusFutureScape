@@ -1,0 +1,110 @@
+{
+  "phase": "8E",
+  "name": "Presentation-Derived School Utilization Seed Snapshot",
+  "status": "complete",
+  "warning": "This is a temporary presentation-derived utilization seed, not official enrollment/capacity data.",
+  "seed_csv_path": "data/schools/raw/presentation_utilization_seed_sy2024_2025.csv",
+  "rows_created": 37,
+  "elementary_row_count": 20,
+  "middle_row_count": 9,
+  "high_row_count": 8,
+  "matched_school_reference_count": 26,
+  "unmatched_or_review_count": 11,
+  "utilization_class_distribution": {
+    "near_capacity": 15,
+    "over_capacity": 7,
+    "severely_over_capacity": 7,
+    "under_capacity": 8
+  },
+  "unmatched_or_review_rows": [
+    "Hickory Ridge Elementary School",
+    "Mount Pleasant Elementary School",
+    "Pitts School Road Elementary School",
+    "Royal Oaks School of the Arts",
+    "W.R. Odell Primary School",
+    "Mount Pleasant High School",
+    "West Cabarrus High School",
+    "Harris Road Middle School",
+    "J.N. Fries Middle School",
+    "Mount Pleasant Middle School",
+    "Roberta Road Middle School"
+  ],
+  "tables_and_views_created": [
+    "public.school_presentation_utilization_seed",
+    "public.school_utilization_seed_current"
+  ],
+  "public_school_capacity_status": {
+    "row_count": 0,
+    "populated_from_seed": false,
+    "untouched": true
+  },
+  "backend_endpoints_added": [
+    "GET /constraints/schools/utilization-seed",
+    "GET /constraints/schools/utilization-seed/{official_parcel_id}"
+  ],
+  "backend_endpoint_behavior": {
+    "source_confidence": "presentation_derived",
+    "needs_verification": true,
+    "school_constraint_score": null,
+    "school_constraint_class": "not_scored",
+    "final_capacity_scoring_enabled": false,
+    "official_capacity_table_written": false
+  },
+  "validation_results": {
+    "dry_run": "passed",
+    "truncate_and_load": "passed",
+    "python_compileall_cfs_data_pipelines_ingest": "passed",
+    "python_compileall_cfs_data_pipelines_transform": "passed",
+    "python_compileall_backend_app": "passed",
+    "python_pytest": "164 passed, 3 warnings"
+  },
+  "live_endpoint_checks": {
+    "backend_restarted_after_code_change": true,
+    "GET /health": 200,
+    "GET /constraints/schools/utilization-seed?limit=2": 200,
+    "GET /constraints/schools/utilization-seed/CFS-PARCEL-0149726579": 200
+  },
+  "example_parcel_seed_response": {
+    "official_parcel_id": "CFS-PARCEL-0149726579",
+    "elementary": {
+      "school_name": "Carl A Furr ES",
+      "utilization_pct": 95.0,
+      "utilization_class": "near_capacity",
+      "source_confidence": "presentation_derived",
+      "needs_verification": true
+    },
+    "middle": {
+      "school_name": "Roberta Road MS",
+      "utilization_pct": 72.0,
+      "utilization_class": "under_capacity",
+      "source_confidence": "presentation_derived",
+      "needs_verification": true
+    },
+    "high": {
+      "school_name": "Jay M Robinson HS",
+      "utilization_pct": 81.0,
+      "utilization_class": "near_capacity",
+      "source_confidence": "presentation_derived",
+      "needs_verification": true
+    }
+  },
+  "not_created_or_not_modified": [
+    "official enrollment rows",
+    "functional capacity rows",
+    "available seats",
+    "grade-level enrollment",
+    "projections",
+    "official school_constraint_score",
+    "public.school_capacity",
+    "frontend UI",
+    "SceneView",
+    "parcel/development/flood workflows"
+  ],
+  "next_step_when_official_data_arrives": [
+    "Preserve this seed for provenance and comparison.",
+    "Dry-run validate official capacity/enrollment files with the Phase 8D importer.",
+    "Load vetted official rows into capacity/enrollment history tables.",
+    "Build the official current school_capacity snapshot.",
+    "Design parcel capacity scoring only after source-owner review."
+  ]
+}

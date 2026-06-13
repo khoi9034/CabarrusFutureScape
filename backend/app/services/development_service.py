@@ -1,4 +1,6 @@
+import json
 from datetime import date
+from pathlib import Path
 
 from app.core.contracts import DEVELOPMENT_ACTIVITY_CONTRACT
 from app.repositories import DevelopmentRepository
@@ -18,6 +20,11 @@ from app.schemas import (
     DevelopmentTemporalQueryResponse,
     DevelopmentTrendsResponse,
     DevelopmentZoningSummaryResponse,
+    DevelopmentPredictionFeaturesSummaryResponse,
+    NewConstructionLabelsSummaryResponse,
+    NewConstructionStatisticsResponse,
+    NewConstructionTrendsResponse,
+    ParcelNewConstructionSummaryResponse,
     ParcelPermitSegmentSummaryResponse,
     PermitSegmentOptionsResponse,
     PermitSegmentStatisticsResponse,
@@ -34,6 +41,10 @@ from app.schemas.development import (
     DevelopmentHotspotMapCentroid,
     DevelopmentHotspotMapFocus,
     DevelopmentHotspotSpatialReference,
+    NewConstructionBucket,
+    NewConstructionDateRange,
+    NewConstructionLabelPositiveRate,
+    NewConstructionTrendPoint,
     DevelopmentParcelPermitEvent,
     DevelopmentTemporalBBoxSupport,
     DevelopmentTemporalContext,
@@ -41,6 +52,8 @@ from app.schemas.development import (
     DevelopmentTemporalQuerySummary,
     DevelopmentHotspotResult,
     DevelopmentRollingSummary,
+    DevelopmentPredictionFeatureLabelRate,
+    DevelopmentPredictionFeatureMissingness,
     DevelopmentStatisticsBucket,
     DevelopmentTrendDateRange,
     DevelopmentTrendPoint,
@@ -67,6 +80,31 @@ ALLOWED_HOTSPOT_SORT_BY = {
 MAX_DEVELOPMENT_PAGE_LIMIT = 100
 MAX_SELECTED_PARCEL_PERMIT_LIMIT = 50
 ALLOWED_SELECTED_PARCEL_PERMIT_SORT = {"latest_first", "oldest_first"}
+DEVELOPMENT_PREDICTION_FEATURE_GROUPS = [
+    "parcel_static_features",
+    "zoning_features",
+    "flood_constraint_features",
+    "school_assignment_features",
+    "permit_history_features",
+    "new_construction_history_features",
+    "development_pressure_features",
+    "jurisdiction_features",
+    "future_placeholder_features",
+]
+DEVELOPMENT_PREDICTION_LEAKAGE_CAVEATS = [
+    "No production prediction model is active.",
+    "No prediction probabilities are exposed.",
+    "Prior permit and new-construction windows are filtered to snapshot-year end.",
+    "Current zoning, flood, school, valuation, and dashboard activity fields are current-context features unless historical snapshots are added.",
+    "Official school capacity scoring is not active.",
+]
+DEVELOPMENT_MODEL_METRICS_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "outputs"
+    / "modeling"
+    / "development_prediction"
+    / "phase10c_model_metrics.json"
+)
 
 
 class DevelopmentService:
@@ -656,6 +694,235 @@ class DevelopmentService:
             permits=[parcel_permit_event(row) for row in page.permits],
         )
 
+    def get_new_construction_statistics(self) -> NewConstructionStatisticsResponse:
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for new construction statistics.",
+            )
+
+        record = self.repository.get_new_construction_statistics()
+        return NewConstructionStatisticsResponse(
+            total_permits=int(record.get("total_permits") or 0),
+            matched_permit_count=int(record.get("matched_permit_count") or 0),
+            unmatched_permit_count=int(record.get("unmatched_permit_count") or 0),
+            ambiguous_permit_count=int(record.get("ambiguous_permit_count") or 0),
+            invalid_placeholder_count=int(record.get("invalid_placeholder_count") or 0),
+            unique_matched_parcel_count=int(
+                record.get("unique_matched_parcel_count") or 0,
+            ),
+            co_issued_count=int(record.get("co_issued_count") or 0),
+            co_not_issued_count=int(record.get("co_not_issued_count") or 0),
+            date_range=NewConstructionDateRange(
+                co_date_max=record.get("co_date_max"),
+                co_date_min=record.get("co_date_min"),
+                permit_date_max=record.get("permit_date_max"),
+                permit_date_min=record.get("permit_date_min"),
+            ),
+            by_permit_type_class=new_construction_buckets(
+                record.get("by_permit_type_class"),
+            ),
+            by_construction_status=new_construction_buckets(
+                record.get("by_construction_status"),
+            ),
+            by_match_confidence=new_construction_buckets(
+                record.get("by_match_confidence"),
+            ),
+        )
+
+    def get_new_construction_trends(self) -> NewConstructionTrendsResponse:
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for new construction trends.",
+            )
+
+        record = self.repository.get_new_construction_trends()
+        return NewConstructionTrendsResponse(
+            annual_trends=new_construction_trend_points(record.get("annual_trends")),
+            monthly_trends=new_construction_trend_points(record.get("monthly_trends")),
+        )
+
+    def get_new_construction_parcel_summary(
+        self,
+        official_parcel_id: str,
+    ) -> ParcelNewConstructionSummaryResponse:
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for new construction parcel summary.",
+            )
+
+        normalized_parcel_id = normalize_filter_value(official_parcel_id)
+        if normalized_parcel_id is None:
+            raise ValueError("official_parcel_id is required")
+
+        record = self.repository.get_new_construction_parcel_summary(
+            normalized_parcel_id,
+        )
+        if record is None:
+            return ParcelNewConstructionSummaryResponse(
+                official_parcel_id=normalized_parcel_id,
+            )
+
+        return ParcelNewConstructionSummaryResponse(
+            official_parcel_id=str(record["official_parcel_id"]),
+            pin14=record.get("pin14"),
+            total_new_construction_permits=int(
+                record.get("total_new_construction_permits") or 0,
+            ),
+            residential_new_construction_permits=int(
+                record.get("residential_new_construction_permits") or 0,
+            ),
+            commercial_new_construction_permits=int(
+                record.get("commercial_new_construction_permits") or 0,
+            ),
+            first_new_construction_permit_date=record.get(
+                "first_new_construction_permit_date",
+            ),
+            latest_new_construction_permit_date=record.get(
+                "latest_new_construction_permit_date",
+            ),
+            latest_co_date=record.get("latest_co_date"),
+            completed_new_construction_count=int(
+                record.get("completed_new_construction_count") or 0,
+            ),
+            active_uncompleted_new_construction_count=int(
+                record.get("active_uncompleted_new_construction_count") or 0,
+            ),
+            average_days_to_co=float(record["average_days_to_co"])
+            if record.get("average_days_to_co") is not None
+            else None,
+            new_construction_years_active=int(
+                record.get("new_construction_years_active") or 0,
+            ),
+            recent_1yr_new_construction_count=int(
+                record.get("recent_1yr_new_construction_count") or 0,
+            ),
+            recent_3yr_new_construction_count=int(
+                record.get("recent_3yr_new_construction_count") or 0,
+            ),
+            recent_5yr_new_construction_count=int(
+                record.get("recent_5yr_new_construction_count") or 0,
+            ),
+            development_stage=str(
+                record.get("development_stage")
+                or "no_matched_new_construction_activity",
+            ),
+        )
+
+    def get_new_construction_labels_summary(
+        self,
+    ) -> NewConstructionLabelsSummaryResponse:
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for new construction labels summary.",
+            )
+
+        record = self.repository.get_new_construction_labels_summary()
+        rates = [
+            NewConstructionLabelPositiveRate(
+                snapshot_year=int(row.get("snapshot_year") or 0),
+                parcel_count=int(row.get("parcel_count") or 0),
+                positive_next_1yr_count=int(
+                    row.get("positive_next_1yr_count") or 0,
+                ),
+                positive_next_1yr_pct=float(row.get("positive_next_1yr_pct") or 0),
+                positive_next_3yr_count=int(
+                    row.get("positive_next_3yr_count") or 0,
+                ),
+                positive_next_3yr_pct=float(row.get("positive_next_3yr_pct") or 0),
+            )
+            for row in (record.get("positive_rate_by_snapshot_year") or [])
+        ]
+
+        return NewConstructionLabelsSummaryResponse(
+            label_table_row_count=int(record.get("label_table_row_count") or 0),
+            min_snapshot_year=record.get("min_snapshot_year"),
+            max_snapshot_year=record.get("max_snapshot_year"),
+            snapshot_year_count=int(record.get("snapshot_year_count") or 0),
+            positive_rate_by_snapshot_year=rates,
+        )
+
+    def get_prediction_features_summary(
+        self,
+    ) -> DevelopmentPredictionFeaturesSummaryResponse:
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for prediction features summary.",
+            )
+
+        record = self.repository.get_prediction_features_summary()
+        missingness = [
+            DevelopmentPredictionFeatureMissingness(
+                feature_name=row["feature_name"],
+                missing_count=int(row.get("missing_count") or 0),
+                missing_pct=float(row.get("missing_pct") or 0),
+            )
+            for row in (record.get("missingness_highlights") or [])
+        ]
+        label_rates = [
+            DevelopmentPredictionFeatureLabelRate(
+                label_name=row["label_name"],
+                row_count=int(row.get("row_count") or 0),
+                positive_count=int(row.get("positive_count") or 0),
+                positive_rate_pct=float(row.get("positive_rate_pct") or 0),
+            )
+            for row in (record.get("label_positive_rates") or [])
+        ]
+
+        return DevelopmentPredictionFeaturesSummaryResponse(
+            feature_matrix_available=bool(record.get("feature_matrix_available")),
+            row_count=int(record.get("row_count") or 0),
+            unique_parcel_count=int(record.get("unique_parcel_count") or 0),
+            min_snapshot_year=record.get("min_snapshot_year"),
+            max_snapshot_year=record.get("max_snapshot_year"),
+            snapshot_year_count=int(record.get("snapshot_year_count") or 0),
+            feature_set_version=record.get("feature_set_version"),
+            feature_groups=DEVELOPMENT_PREDICTION_FEATURE_GROUPS,
+            missingness_highlights=missingness,
+            label_positive_rates=label_rates,
+            leakage_caveats=DEVELOPMENT_PREDICTION_LEAKAGE_CAVEATS,
+            baseline_model_experiment_available=bool(
+                record.get("baseline_model_experiment_available"),
+            ),
+            latest_experiment_id=record.get("latest_experiment_id"),
+            metrics_summary=development_model_metrics_summary(
+                record.get("latest_experiment_id"),
+            ),
+            production_ready=bool(record.get("production_ready")),
+            model_active=False,
+            prediction_probability_available=False,
+        )
+
+
+def development_model_metrics_summary(
+    latest_experiment_id: object,
+) -> dict[str, object]:
+    if not latest_experiment_id or not DEVELOPMENT_MODEL_METRICS_PATH.exists():
+        return {}
+
+    try:
+        payload = json.loads(DEVELOPMENT_MODEL_METRICS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+    if payload.get("experiment_id") != latest_experiment_id:
+        return {}
+
+    best_model_name = payload.get("best_model_name")
+    best_metrics = (payload.get("models") or {}).get(best_model_name, {})
+    return {
+        "experiment_id": payload.get("experiment_id"),
+        "target": payload.get("target"),
+        "feature_set": payload.get("feature_set"),
+        "best_model_name": best_model_name,
+        "validation": best_metrics.get("validation", {}),
+        "test": best_metrics.get("test", {}),
+        "production_ready": bool(payload.get("production_ready")),
+        "model_active": bool(payload.get("model_active")),
+        "prediction_probability_available": bool(
+            payload.get("prediction_probability_available"),
+        ),
+    }
+
 
 def normalize_filter_value(value: str | None) -> str | None:
     if value is None:
@@ -691,6 +958,35 @@ def lookup_response(lookup_type: str, records) -> DevelopmentLookupResponse:
         total_options=len(options),
         options=options,
     )
+
+
+def new_construction_buckets(value: object) -> list[NewConstructionBucket]:
+    rows = value if isinstance(value, list) else []
+    return [
+        NewConstructionBucket(
+            count=int(row.get("count") or 0),
+            value=str(row.get("value") or "unknown"),
+        )
+        for row in rows
+        if isinstance(row, dict)
+    ]
+
+
+def new_construction_trend_points(value: object) -> list[NewConstructionTrendPoint]:
+    rows = value if isinstance(value, list) else []
+    return [
+        NewConstructionTrendPoint(
+            active_uncompleted_count=int(row.get("active_uncompleted_count") or 0),
+            commercial_count=int(row.get("commercial_count") or 0),
+            completed_count=int(row.get("completed_count") or 0),
+            month=row.get("month"),
+            permit_count=int(row.get("permit_count") or 0),
+            residential_count=int(row.get("residential_count") or 0),
+            year=row.get("year"),
+        )
+        for row in rows
+        if isinstance(row, dict)
+    ]
 
 
 def lookup_items(records) -> list[DevelopmentLookupItem]:

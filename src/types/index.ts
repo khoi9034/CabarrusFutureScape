@@ -5,6 +5,7 @@ export type LayerCategory =
   | "Planning"
   | "Infrastructure"
   | "Risk"
+  | "Schools"
   | "Intelligence";
 
 export type OperationalLayerKind =
@@ -61,7 +62,11 @@ export type DashboardStatus = "idle" | "loading" | "online" | "degraded";
 
 export type MapStatus = DashboardStatus;
 
-export type ProductMode = "overview" | "due_diligence" | "executive_print";
+export type ProductMode =
+  | "due_diligence"
+  | "executive_print"
+  | "methodology"
+  | "overview";
 
 export type ParcelSelectionSource = "dashboard" | "map" | "url";
 

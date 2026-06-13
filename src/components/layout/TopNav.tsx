@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Activity,
+  BookOpen,
   ChevronDown,
   Command,
   FileSearch,
@@ -59,6 +60,13 @@ const productModes: Array<{
     label: "Due Diligence",
     shortLabel: "Diligence",
     title: "Selected parcel due diligence assessment",
+  },
+  {
+    icon: BookOpen,
+    id: "methodology",
+    label: "Methodology",
+    shortLabel: "Method",
+    title: "Data sources, assumptions, limitations, and model foundation",
   },
   {
     icon: Printer,
@@ -335,7 +343,7 @@ export function TopNav() {
 
         <nav
           aria-label="CFS product mode"
-          className="flex h-9 shrink-0 items-center rounded-lg border border-white/10 bg-white/[0.035] p-0.5"
+          className="flex h-10 shrink-0 items-center gap-1 rounded-xl border border-white/10 bg-[#020812]/72 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.055),0_0_34px_rgba(104,216,255,0.055)]"
         >
           {productModes.map((mode) => {
             const Icon = mode.icon;
@@ -345,16 +353,30 @@ export function TopNav() {
               <button
                 aria-pressed={active}
                 className={cn(
-                  "inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-semibold transition",
+                  "group relative inline-flex h-8 items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg border px-2.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/70",
                   active
-                    ? "bg-[#d8b86a] text-[#08111d] shadow-[0_0_22px_rgba(216,184,106,0.24)]"
-                    : "text-slate-400 hover:bg-white/[0.055] hover:text-white",
+                    ? "border-[#68d8ff]/38 bg-[#102235] text-[#e7fbff] shadow-[0_0_26px_rgba(104,216,255,0.16)]"
+                    : "border-transparent bg-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.045] hover:text-white",
                 )}
                 key={mode.id}
                 onClick={() => setProductMode(mode.id)}
                 title={mode.title}
                 type="button"
               >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "absolute inset-x-2 top-0 h-px bg-[#68d8ff] opacity-0 transition-opacity",
+                    active && "opacity-90",
+                  )}
+                />
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "absolute bottom-0 left-1/2 h-px w-5 -translate-x-1/2 bg-[#d8b86a] opacity-0 transition-opacity",
+                    active && "opacity-85",
+                  )}
+                />
                 <Icon className="h-3.5 w-3.5" />
                 <span className="hidden xl:inline">{mode.label}</span>
                 <span className="hidden md:inline xl:hidden">{mode.shortLabel}</span>

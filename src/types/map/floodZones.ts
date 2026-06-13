@@ -29,7 +29,7 @@ export interface FloodZoneControls {
 }
 
 export const defaultFloodZoneControls: FloodZoneControls = {
-  limitMode: "500",
+  limitMode: "100",
   severity: "all",
 };
 

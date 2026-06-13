@@ -1,0 +1,201 @@
+{
+  "generated_at": "2026-06-11T06:29:30",
+  "phase": "Phase 8A School Constraint Ingestion and Parcel Attendance-Zone Overlay",
+  "status": "verified_and_repaired",
+  "work_performed": "Existing Phase 8A pipeline was present. Repaired CFS V1 inclusion policy to public CCS elementary/middle/high only, preserved KCS/magnet/non-level records for QA, reran ingestion and parcel assignment transforms, and regenerated validation outputs.",
+  "branch": "main",
+  "frontend_modified": false,
+  "backend_api_modified": false,
+  "sceneview_modified": false,
+  "postgis_schema_modified_outside_phase8a": false,
+  "source_layers": {
+    "elementary_attendance_zones": {
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/140",
+      "geometry_type": "polygon",
+      "role": "elementary attendance-zone assignment"
+    },
+    "middle_attendance_zones": {
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/141",
+      "geometry_type": "polygon",
+      "role": "middle attendance-zone assignment"
+    },
+    "high_attendance_zones": {
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/142",
+      "geometry_type": "polygon",
+      "role": "high attendance-zone assignment"
+    },
+    "school_reference_points": {
+      "url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/144",
+      "geometry_type": "point",
+      "role": "school name dictionary and QA reference only"
+    }
+  },
+  "postgis_tables": {
+    "school_reference_raw": "public.school_reference_raw",
+    "school_reference": "public.school_reference",
+    "school_zones_elementary_raw": "public.school_zones_elementary_raw",
+    "school_zones_middle_raw": "public.school_zones_middle_raw",
+    "school_zones_high_raw": "public.school_zones_high_raw",
+    "school_zones": "public.school_zones",
+    "parcel_school_assignment": "public.parcel_school_assignment",
+    "school_capacity": "public.school_capacity",
+    "parcel_school_summary": "public.parcel_school_summary"
+  },
+  "school_reference": {
+    "raw_rows": 53,
+    "clean_rows": 53,
+    "included_public_ccs_v1_rows": 34,
+    "included_by_level": {
+      "elementary": 19,
+      "middle": 7,
+      "high": 8
+    },
+    "excluded_or_preserved_qa_rows": 19,
+    "excluded_by_reason": {
+      "level_not_v1": 11,
+      "non_ccs_not_v1": 7,
+      "magnet_not_v1": 1
+    },
+    "geometry": {
+      "invalid_geometry_count": 0,
+      "srid": 4326
+    }
+  },
+  "school_zones": {
+    "clean_rows": 44,
+    "included_cfs_v1_rows": 35,
+    "excluded_or_preserved_qa_rows": 9,
+    "counts_by_level": {
+      "elementary": {
+        "total": 25,
+        "included": 19,
+        "excluded": 6
+      },
+      "middle": {
+        "total": 10,
+        "included": 8,
+        "excluded": 2
+      },
+      "high": {
+        "total": 9,
+        "included": 8,
+        "excluded": 1
+      }
+    },
+    "match_confidence_distribution": {
+      "normalized_exact": 33,
+      "fuzzy_review": 6,
+      "unmatched_reference_review": 5
+    },
+    "included_unmatched_reference_review_names": [
+      "Hickory Ridge ES",
+      "West Cabarrus HS",
+      "Roberta Road MS"
+    ],
+    "excluded_unmatched_or_non_ccs_names": [
+      "GW Carver ES",
+      "North Kannapolis ES"
+    ],
+    "geometry": {
+      "invalid_geometry_count": 0,
+      "null_geometry_count": 0,
+      "srid": 4326,
+      "geometry_type": "ST_MultiPolygon"
+    }
+  },
+  "parcel_school_assignment": {
+    "parcel_row_count": 110017,
+    "assignment_row_count": 110017,
+    "row_counts_match": true,
+    "assignment_method": "attendance_zone_largest_overlap",
+    "school_point_distance_used": false,
+    "elementary_assigned": 91161,
+    "middle_assigned": 86221,
+    "high_assigned": 91161,
+    "missing_elementary_assignment": 18856,
+    "missing_middle_assignment": 23796,
+    "missing_high_assignment": 18856,
+    "multiple_zone_overlap_counts": {
+      "elementary": 1119,
+      "middle": 498,
+      "high": 560,
+      "any_level": 1340
+    },
+    "assigned_to_unmatched_or_non_exact_reference": 51714,
+    "assignment_review_required": 75143,
+    "assignment_confidence_distribution": {
+      "high": 34200,
+      "medium": 1988,
+      "review": 54973,
+      "low": 18856
+    },
+    "geometry": {
+      "invalid_geometry_count": 0,
+      "null_geometry_count": 0,
+      "srid": 4326
+    }
+  },
+  "school_capacity": {
+    "table_exists": true,
+    "row_count": 0,
+    "capacity_data_available": false,
+    "capacity_scoring_status": "placeholder_only_not_scored",
+    "why_no_capacity_score": "No vetted real school capacity/enrollment data source has been ingested. Phase 8A intentionally avoids fabricated school pressure scores."
+  },
+  "parcel_school_summary": {
+    "summary_row_count": 110017,
+    "row_counts_match_parcels": true,
+    "capacity_data_available_rows": 0,
+    "school_constraint_score_non_null_rows": 0,
+    "school_constraint_class_distribution": {
+      "not_scored": 110017
+    },
+    "summary_status_distribution": {
+      "assignment_available_capacity_pending": 86221,
+      "assignment_incomplete": 23796
+    },
+    "geometry": {
+      "invalid_geometry_count": 0,
+      "null_geometry_count": 0,
+      "srid": 4326
+    }
+  },
+  "validation_outputs": [
+    "outputs/school_reference_validation.json",
+    "outputs/school_reference_included_excluded_summary.csv",
+    "outputs/school_zones_validation.json",
+    "outputs/school_zone_match_qa.csv",
+    "outputs/school_zone_unmatched_names.csv",
+    "outputs/parcel_school_assignment_validation.json",
+    "outputs/parcel_school_assignment_warnings.csv",
+    "outputs/school_capacity_placeholder_validation.json",
+    "outputs/parcel_school_summary_validation.json",
+    "outputs/phase8a_school_constraint_ingestion_summary.json"
+  ],
+  "qa_notes": [
+    "KCS, magnet, and non elementary/middle/high records remain preserved for QA and future policy expansion, but are excluded from CFS V1 assignment.",
+    "Missing assignment counts are expected under the CCS-only policy because KCS zones are not assigned in V1.",
+    "Included CCS unmatched-reference zone names should be reviewed before school API/frontend exposure.",
+    "Capacity and enrollment scoring must wait for an authoritative vetted source."
+  ],
+  "readiness": {
+    "ready_for_phase8b_school_constraint_api_contract": true,
+    "ready_for_frontend_school_constraint_ui": false,
+    "capacity_scoring_ready": false,
+    "recommended_next_step": "Phase 8B school constraint API contract and QA review, including resolution of included unmatched zone names and identification of a vetted capacity/enrollment source."
+  },
+  "validation": {
+    "pipeline_rerun_completed": true,
+    "compileall_ingest": "passed",
+    "compileall_transform": "passed",
+    "json_parse_validation": "passed",
+    "postgis_table_count_validation": {
+      "public.parcels_enriched": 110017,
+      "public.school_reference": 53,
+      "public.school_zones": 44,
+      "public.parcel_school_assignment": 110017,
+      "public.school_capacity": 0,
+      "public.parcel_school_summary": 110017
+    }
+  }
+}

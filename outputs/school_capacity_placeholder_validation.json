@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-10T21:19:17.131632",
+  "generated_at": "2026-06-11T06:16:07.330042",
   "table": "public.school_capacity",
   "row_count": 0,
   "capacity_data_available_count": 0,
@@ -26,6 +26,6 @@
     "no_capacity_score_until_real_data_exists": true,
     "no_fabricated_capacity_or_enrollment": true
   },
-  "elapsed_seconds": 0.32,
-  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_school_capacity_placeholder_20260610_211916.log"
+  "elapsed_seconds": 0.52,
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\create_school_capacity_placeholder_20260611_061606.log"
 }

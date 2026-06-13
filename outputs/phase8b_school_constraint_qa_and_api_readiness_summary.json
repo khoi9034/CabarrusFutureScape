@@ -1,0 +1,126 @@
+{
+  "generated_at": "2026-06-11T07:05:30",
+  "phase": "Phase 8B School Constraint QA Review and API Readiness",
+  "status": "complete",
+  "qa_status": "safe_for_read_only_assignment_and_qa_api_exposure_with_capacity_caveats",
+  "safe_for_api_exposure": true,
+  "safe_for_capacity_scoring": false,
+  "data_scope": {
+    "cfs_v1_inclusion": "Public CCS elementary, middle, and high schools only.",
+    "excluded_preserved_for_qa": [
+      "KCS",
+      "private",
+      "magnet",
+      "Other",
+      "non-level records"
+    ],
+    "assignment_method": "attendance-zone polygon overlap by largest intersection area",
+    "school_point_distance_used": false
+  },
+  "qa_review_outputs": {
+    "qa_review_json": "outputs/phase8b_school_constraint_qa_review.json",
+    "qa_issues_csv": "outputs/phase8b_school_constraint_qa_issues.csv"
+  },
+  "qa_metrics": {
+    "school_reference_count": 53,
+    "included_public_ccs_count": 34,
+    "excluded_count_by_reason": {
+      "level_not_v1": 11,
+      "non_ccs_not_v1": 7,
+      "magnet_not_v1": 1
+    },
+    "school_zones_count_by_level": {
+      "elementary": {
+        "total": 25,
+        "included": 19,
+        "excluded": 6
+      },
+      "middle": {
+        "total": 10,
+        "included": 8,
+        "excluded": 2
+      },
+      "high": {
+        "total": 9,
+        "included": 8,
+        "excluded": 1
+      }
+    },
+    "unmatched_zone_names": {
+      "included_ccs_review_required": [
+        "Hickory Ridge ES",
+        "West Cabarrus HS",
+        "Roberta Road MS"
+      ],
+      "excluded_non_ccs_or_preserved_qa": [
+        "GW Carver ES",
+        "North Kannapolis ES"
+      ]
+    },
+    "unmatched_zone_classification": {
+      "Hickory Ridge ES": "missing_school_reference_record",
+      "West Cabarrus HS": "missing_school_reference_record",
+      "Roberta Road MS": "missing_school_reference_record"
+    },
+    "safe_name_matching_fixes_applied": false,
+    "ambiguous_records_force_matched": false,
+    "parcel_assignment_count": 110017,
+    "missing_assignment_counts": {
+      "elementary": 18856,
+      "middle": 23796,
+      "high": 18856
+    },
+    "multi_zone_overlap_counts": {
+      "elementary": 1119,
+      "middle": 498,
+      "high": 560,
+      "any_level": 1340
+    },
+    "parcels_assigned_to_unmatched_school_zones": 51714,
+    "assignment_review_required_count": 75143,
+    "capacity_status": {
+      "school_capacity_rows": 0,
+      "capacity_available_parcels": 0,
+      "school_constraint_score_non_null_count": 0,
+      "school_constraint_class": "not_scored"
+    }
+  },
+  "api_contract_docs": [
+    "docs/backend/school_constraint_api_contract.md",
+    "docs/backend/school_constraint_data_dictionary.md",
+    "docs/backend/school_constraint_response_examples.md"
+  ],
+  "implemented_backend_files": [
+    "backend/app/routers/school_constraints_router.py",
+    "backend/app/repositories/school_constraints_repository.py",
+    "backend/app/services/school_constraints_service.py",
+    "backend/app/schemas/school_constraints.py",
+    "backend/tests/test_school_constraints.py"
+  ],
+  "implemented_endpoints": [
+    "GET /constraints/schools/statistics",
+    "GET /constraints/schools/{official_parcel_id}",
+    "GET /constraints/schools/filter",
+    "GET /constraints/schools/district-summary",
+    "GET /constraints/schools/qa-summary"
+  ],
+  "response_caveats": [
+    "capacity_status remains not_available",
+    "school_capacity_score remains null",
+    "school_constraint_score remains null",
+    "school_constraint_class remains not_scored",
+    "recommended_action remains capacity_data_needed while capacity is absent"
+  ],
+  "validation": {
+    "python_compileall_backend_app": "passed",
+    "python_compileall_cfs_data_pipelines_ingest": "passed",
+    "python_compileall_cfs_data_pipelines_transform": "passed",
+    "python_pytest_backend": "147 passed, 3 warnings"
+  },
+  "readiness": {
+    "ready_for_frontend_school_constraint_display": true,
+    "ready_for_school_capacity_scoring": false,
+    "ready_for_prediction_or_forecasting": false,
+    "recommended_next_step": "Plan frontend selected parcel school display or resolve included unmatched CCS reference names before map/UI exposure."
+  }
+}

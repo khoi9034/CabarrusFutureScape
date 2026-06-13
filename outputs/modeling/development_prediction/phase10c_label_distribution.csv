@@ -1,0 +1,14 @@
+snapshot_year,split,row_count,positive_next_1yr,positive_next_3yr,residential_positive_next_3yr,commercial_positive_next_3yr
+2014,train,110017,1345,3872,3734,140
+2015,train,110017,1247,4045,3904,144
+2016,train,110017,1324,4419,4291,128
+2017,train,110017,1525,4869,4749,121
+2018,train,110017,1600,4964,4857,108
+2019,train,110017,1765,4526,4409,118
+2020,validation,110017,1613,4352,4221,131
+2021,validation,110017,1164,4259,4126,134
+2022,test,110017,1595,4216,4074,144
+2023,excluded_incomplete_future_window,110017,1518,3226,3113,115
+2024,excluded_incomplete_future_window,110017,1130,1721,1650,72
+2025,excluded_incomplete_future_window,110017,599,599,578,21
+2026,excluded_incomplete_future_window,110017,0,0,0,0

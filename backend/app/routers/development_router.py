@@ -21,10 +21,15 @@ from app.schemas import (
     PermitSegmentOptionsResponse,
     PermitSegmentStatisticsResponse,
     DevelopmentParcelPermitEventsResponse,
+    DevelopmentPredictionFeaturesSummaryResponse,
     DevelopmentStatisticsResponse,
     DevelopmentTemporalQueryResponse,
     DevelopmentTrendsResponse,
     DevelopmentZoningSummaryResponse,
+    NewConstructionLabelsSummaryResponse,
+    NewConstructionStatisticsResponse,
+    NewConstructionTrendsResponse,
+    ParcelNewConstructionSummaryResponse,
 )
 from app.services import DevelopmentService
 
@@ -57,6 +62,62 @@ def get_development_statistics(
             zoning_jurisdiction=zoning_jurisdiction,
         ),
     )
+
+
+@router.get(
+    "/new-construction/statistics",
+    response_model=NewConstructionStatisticsResponse,
+)
+def get_new_construction_statistics(
+    db: Session = Depends(get_read_only_db),
+) -> NewConstructionStatisticsResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_new_construction_statistics()
+
+
+@router.get("/new-construction/trends", response_model=NewConstructionTrendsResponse)
+def get_new_construction_trends(
+    db: Session = Depends(get_read_only_db),
+) -> NewConstructionTrendsResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_new_construction_trends()
+
+
+@router.get(
+    "/new-construction/parcel/{official_parcel_id}",
+    response_model=ParcelNewConstructionSummaryResponse,
+)
+def get_new_construction_parcel_summary(
+    official_parcel_id: str,
+    db: Session = Depends(get_read_only_db),
+) -> ParcelNewConstructionSummaryResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    try:
+        return service.get_new_construction_parcel_summary(official_parcel_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get(
+    "/new-construction/labels/summary",
+    response_model=NewConstructionLabelsSummaryResponse,
+)
+def get_new_construction_labels_summary(
+    db: Session = Depends(get_read_only_db),
+) -> NewConstructionLabelsSummaryResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_new_construction_labels_summary()
+
+
+@router.get(
+    "/prediction/features/summary",
+    response_model=DevelopmentPredictionFeaturesSummaryResponse,
+)
+def get_prediction_features_summary(
+    db: Session = Depends(get_read_only_db),
+) -> DevelopmentPredictionFeaturesSummaryResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_prediction_features_summary()
 
 
 @router.get("/trends", response_model=DevelopmentTrendsResponse)

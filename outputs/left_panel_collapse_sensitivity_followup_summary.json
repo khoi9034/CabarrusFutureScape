@@ -1,0 +1,23 @@
+﻿{
+    "status":  "complete",
+    "branch":  "main",
+    "task":  "Left panel collapse sensitivity follow-up",
+    "file_changed":  "src/components/layout/AppShell.tsx",
+    "previous_collapse_intent_distance_px":  18,
+    "new_collapse_intent_distance_px":  14,
+    "reduction":  "approximately 25%",
+    "min_expanded_width_px":  300,
+    "previous_collapse_trigger_width_px":  282,
+    "new_collapse_trigger_width_px":  286,
+    "behavior":  [
+                     "Collapse remains based on proposed panel width, not viewport mouse position.",
+                     "Expanded panel still holds at the 300px minimum before collapse intent is met.",
+                     "Collapsed rail width remains 64px.",
+                     "Arrow collapse/expand behavior is unchanged."
+                 ],
+    "validation_results":  {
+                               "npm_typecheck":  "passed",
+                               "npm_lint":  "passed",
+                               "npm_build_webpack":  "passed"
+                           }
+}
