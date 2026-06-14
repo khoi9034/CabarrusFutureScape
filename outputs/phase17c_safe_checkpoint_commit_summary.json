@@ -1,0 +1,107 @@
+{
+  "phase": "17C",
+  "title": "Safe Repository Cleanup, Runtime Log Guardrail, and Checkpoint Commit Preparation",
+  "generated_at": "2026-06-14",
+  "branch": "main",
+  "scope_guardrails": {
+    "new_features_added": false,
+    "models_trained": false,
+    "postgis_schemas_modified": false,
+    "pipelines_rebuilt": false,
+    "predictions_exposed": false,
+    "completed_artifacts_deleted": false,
+    "reset_hard_used": false,
+    "force_push_used": false,
+    "stash_used": false
+  },
+  "inventory": {
+    "inventory_csv": "outputs/phase17c_worktree_cleanup_inventory.csv",
+    "cleanup_summary": "outputs/phase17c_worktree_cleanup_summary.json",
+    "total_dirty_files_at_inventory": 125,
+    "category_counts": {
+      "backend_code": 3,
+      "config": 3,
+      "data": 14,
+      "docs": 22,
+      "frontend_code": 16,
+      "outputs": 44,
+      "pipeline_code": 16,
+      "runtime_logs": 2,
+      "tests": 5
+    },
+    "unknown_review_count": 0,
+    "cache_temp_count": 0
+  },
+  "runtime_log_handling": {
+    "tracked_logs_found": [
+      "logs/backend-dev.log",
+      "logs/next-dev.log"
+    ],
+    "action": "git rm --cached was used to stop tracking runtime logs while preserving local files",
+    "local_files_preserved": true,
+    "post_commit_status": "logs are ignored local files",
+    "ignored_local_files": [
+      "logs/backend-dev.log",
+      "logs/next-dev.log"
+    ]
+  },
+  ".gitignore_updates": [
+    "logs/*.log",
+    "logs/backend-dev.log",
+    "logs/next-dev.log"
+  ],
+  "staging": {
+    "staged_path_count": 128,
+    "included": [
+      "README.md",
+      "backend/",
+      "cfs-data-pipelines/",
+      "config/",
+      "data/",
+      "data_templates/",
+      "docs/",
+      "outputs/",
+      "src/",
+      ".gitignore"
+    ],
+    "requirements_txt_present": false,
+    "runtime_log_content_staged": false,
+    "runtime_log_untracking_staged": true
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "passed: 277 passed, 3 warnings"
+  },
+  "checkpoint_commit": {
+    "message": "Checkpoint CFS release candidate and model governance",
+    "hash": "c8ff41da9e5b4a6f92c3ecc90c5173a2dd9beed7",
+    "short_hash": "c8ff41d",
+    "files_changed": 128,
+    "insertions": 18455,
+    "deletions": 184,
+    "push_status": "pushed",
+    "remote": "origin",
+    "branch": "main",
+    "push_note": "git push origin main succeeded; Git printed a credential-manager-core warning but completed the push."
+  },
+  "post_checkpoint_status_before_summary_artifact": {
+    "working_tree_clean_except_ignored_logs": true,
+    "ignored_files": [
+      "logs/backend-dev.log",
+      "logs/next-dev.log"
+    ],
+    "latest_log": "c8ff41d Checkpoint CFS release candidate and model governance"
+  },
+  "remaining_dirty_files_after_checkpoint": [
+    "outputs/phase17c_safe_checkpoint_commit_summary.json"
+  ],
+  "phase18a_can_start_safely_after_summary_artifact_commit": true,
+  "notes": [
+    "The final summary artifact is generated after the checkpoint commit so it can record the real commit hash and push result.",
+    "No local log file was deleted.",
+    "The repository should remain clean for Phase 18A after committing this summary artifact."
+  ]
+}
