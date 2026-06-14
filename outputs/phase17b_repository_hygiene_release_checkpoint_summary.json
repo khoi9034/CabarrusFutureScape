@@ -1,0 +1,278 @@
+{
+  "phase": "17B",
+  "title": "Repository Hygiene, Release Checkpoint, and Demo Freeze Verification",
+  "generated_at": "2026-06-14",
+  "branch": "main",
+  "scope_guardrails": {
+    "new_datasets_added": false,
+    "models_trained": false,
+    "predictions_exposed": false,
+    "public_prediction_endpoints_added": false,
+    "postgis_schemas_modified": false,
+    "ingestion_pipelines_rebuilt": false,
+    "dashboard_redesigned": false,
+    "runtime_logs_intentionally_modified": false,
+    "completed_phase_artifacts_deleted": false
+  },
+  "worktree_inventory": {
+    "inventory_csv": "outputs/phase17b_git_worktree_inventory.csv",
+    "inventory_summary_json": "outputs/phase17b_git_worktree_inventory_summary.json",
+    "total_files": 125,
+    "category_counts": {
+      "source code": 35,
+      "docs": 29,
+      "config": 3,
+      "data/raw": 7,
+      "data/templates": 0,
+      "outputs/artifacts": 44,
+      "tests": 5,
+      "runtime logs": 2,
+      "cache/temp": 0,
+      "unknown/review": 0
+    },
+    "staged_files": [],
+    "notes": [
+      "Inventory was generated from git status --short --untracked-files=all.",
+      "No files were deleted, restored, staged, stashed, or committed.",
+      "The Phase 17B summary artifact existed before the final inventory pass, so it is included in the inventory."
+    ]
+  },
+  "files_that_should_not_be_committed": [
+    "logs/backend-dev.log",
+    "logs/next-dev.log"
+  ],
+  "runtime_log_safety": {
+    "tracked_runtime_logs_modified": [
+      "logs/backend-dev.log",
+      "logs/next-dev.log"
+    ],
+    "staged": false,
+    "recommendation": "Do not include runtime logs in the release commit. Because they are tracked, use explicit git add pathspecs that exclude logs. Restoring or removing them from version control should be a separate explicit hygiene decision."
+  },
+  "artifact_sanity_check": {
+    "checked": [
+      {
+        "area": "flood",
+        "path": "outputs/phase7b_parcel_flood_overlay_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "fema_flood_zones",
+        "path": "outputs/phase7f_fema_flood_zone_visualization_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "school",
+        "path": "outputs/phase8b_school_constraint_qa_and_api_readiness_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "school_frontend",
+        "path": "outputs/phase8f_school_frontend_integration_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "zoning",
+        "path": "outputs/phase10d1_historical_zoning_foundation_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "prediction_model_qa",
+        "path": "outputs/phase10f_development_prediction_model_qa_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "internal_ranking",
+        "path": "outputs/phase10g_internal_development_ranking_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "transportation",
+        "path": "outputs/phase12b_transportation_accessibility_feature_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "transportation_model",
+        "path": "outputs/phase13c_transportation_enhanced_model_comparison_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "planning_pipeline_utility",
+        "path": "outputs/phase16c_feature_ablation_governance_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "current_best_model_governance",
+        "path": "outputs/phase16d_current_best_internal_model_governance_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      },
+      {
+        "area": "enterprise_hardening",
+        "path": "outputs/phase17a_enterprise_hardening_demo_safety_summary.json",
+        "exists": true,
+        "parse_status": "valid_json"
+      }
+    ],
+    "missing_or_invalid_count": 0
+  },
+  "model_safety_verification": {
+    "features_summary": {
+      "endpoint": "/development/prediction/features/summary",
+      "status": 200,
+      "model_active": false,
+      "prediction_probability_available": false,
+      "production_ready": false,
+      "current_best_internal_model_variant": "transportation_plus_tax_value_only",
+      "current_best_internal_model_production_ready": false,
+      "current_best_internal_model_public_exposure_allowed": false
+    },
+    "ranking_summary": {
+      "endpoint": "/development/prediction/ranking/summary",
+      "status": 200,
+      "ranking_available": true,
+      "prediction_probability_available": false,
+      "production_ready": false,
+      "public_exposure_allowed": false,
+      "experiment_id": "phase10e_zoning_enhanced_v1"
+    },
+    "openapi_prediction_paths": [
+      "/development/prediction/features/summary",
+      "/development/prediction/ranking/summary",
+      "/development/prediction/transportation-accessibility/summary",
+      "/development/prediction/transportation-plan-traffic/summary"
+    ],
+    "parcel_level_prediction_endpoint_exists": false,
+    "frontend_parcel_level_prediction_display_found": false,
+    "note": "No parcel-level prediction endpoints were found. Two existing aggregate transportation feature-readiness endpoints remain under /development/prediction and expose no parcel-level prediction probabilities or ranking classes."
+  },
+  "release_candidate_smoke_test": {
+    "runtime_stack": {
+      "dev_cfs_state": "already_running_verified",
+      "frontend_port": 3000,
+      "backend_port": 8000,
+      "restart_performed": false,
+      "restart_note": "The active dev:cfs stack was verified instead of restarted to avoid unnecessary runtime log changes during the release-freeze task."
+    },
+    "http_checks": [
+      {
+        "name": "frontend",
+        "url": "http://localhost:3000",
+        "status": 200
+      },
+      {
+        "name": "backend_root",
+        "url": "http://127.0.0.1:8000",
+        "status": 200
+      },
+      {
+        "name": "health",
+        "url": "http://127.0.0.1:8000/health",
+        "status": 200
+      },
+      {
+        "name": "database_health",
+        "url": "http://127.0.0.1:8000/health/database",
+        "status": 200
+      },
+      {
+        "name": "parcel_search",
+        "url": "http://127.0.0.1:8000/parcels/search?q=CFS-PARCEL-0149726579",
+        "status": 200
+      },
+      {
+        "name": "selected_parcel_detail",
+        "url": "http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579?include_geometry=true",
+        "status": 200
+      },
+      {
+        "name": "development_hotspots",
+        "url": "http://127.0.0.1:8000/development/hotspots?limit=1",
+        "status": 200
+      },
+      {
+        "name": "flood_summary",
+        "url": "http://127.0.0.1:8000/constraints/flood/summary",
+        "status": 200
+      },
+      {
+        "name": "school_statistics",
+        "url": "http://127.0.0.1:8000/constraints/schools/statistics",
+        "status": 200
+      },
+      {
+        "name": "prediction_feature_summary",
+        "url": "http://127.0.0.1:8000/development/prediction/features/summary",
+        "status": 200
+      },
+      {
+        "name": "prediction_ranking_summary",
+        "url": "http://127.0.0.1:8000/development/prediction/ranking/summary",
+        "status": 200
+      }
+    ],
+    "ui_modes": {
+      "overview": {
+        "loads": true,
+        "blank": false,
+        "api_failure_text": false
+      },
+      "due_diligence": {
+        "loads": true,
+        "blank": false,
+        "api_failure_text": false
+      },
+      "methodology": {
+        "loads": true,
+        "blank": false,
+        "sceneview_visible": false,
+        "risky_prediction_text": false
+      },
+      "executive_print": {
+        "loads": true,
+        "blank": false,
+        "api_failure_text": false
+      }
+    },
+    "browser_console_errors": []
+  },
+  "documentation_checkpoint": {
+    "created": [
+      "docs/demo/cfs_release_freeze_notes.md"
+    ],
+    "coverage": [
+      "current CFS capabilities",
+      "known limitations",
+      "model safety status",
+      "data still needed",
+      "demo startup steps",
+      "what not to claim",
+      "next recommended work after freeze"
+    ]
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "passed: 277 passed, 3 warnings"
+  },
+  "release_freeze_status": "demo_ready_with_log_exclusion_caveat",
+  "remaining_blockers": [
+    "The worktree is intentionally dirty because it contains many completed phase changes that have not been committed yet.",
+    "Tracked runtime logs are modified and should be excluded from the release commit.",
+    "If the Phase 17B endpoint policy is interpreted as exactly two /development/prediction routes, the two existing aggregate transportation readiness routes should be reviewed or relocated in a future API cleanup. They do not expose predictions."
+  ],
+  "recommended_commit_command": "git add README.md backend/app backend/tests cfs-data-pipelines config data docs outputs src; git restore --staged logs/backend-dev.log logs/next-dev.log 2>$null; git status --short; git commit -m \"Create CFS release checkpoint\"",
+  "recommended_next_step": "Create the release checkpoint commit with explicit pathspecs that exclude logs, then run the demo flow from docs/demo/cfs_release_freeze_notes.md."
+}

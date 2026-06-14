@@ -31,7 +31,7 @@ import {
 import { normalizeBackendParcelSearchResponse } from "@/lib/adapters/parcelSearchAdapter";
 import { dashboardRoleRegistry } from "@/lib/dashboard/roleRegistry";
 import { workspaceLayoutPresets } from "@/lib/dashboard/workspacePresets";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { getApiErrorDisplayMessage, USE_BACKEND_API } from "@/lib/api/client";
 import { getParcelDetail, searchParcels } from "@/lib/api/parcels";
 import { dispatchParcelMapFocusRequest } from "@/lib/map/parcelMapFocus";
 import { cn } from "@/lib/utils";
@@ -208,9 +208,10 @@ export function TopNav() {
           }
 
           const fallbackMessage =
-            error instanceof Error
-              ? `${error.message}; showing static fallback results.`
-              : "Parcel search API is unavailable; showing static fallback results.";
+            `${getApiErrorDisplayMessage(
+              error,
+              "Parcel search API is unavailable.",
+            )} Showing static fallback results.`;
 
           runStaticFallback(fallbackMessage).catch((fallbackError: unknown) => {
             if (controller.signal.aborted) {
@@ -279,9 +280,10 @@ export function TopNav() {
 
           setSelectedParcelIntelligence(record, "fallback");
           setQuickSearchError(
-            error instanceof Error
-              ? `${error.message}; showing selected search result fallback.`
-              : "Parcel detail API is unavailable; showing selected search result fallback.",
+            `${getApiErrorDisplayMessage(
+              error,
+              "Parcel detail API is unavailable.",
+            )} Showing selected search result fallback.`,
           );
           setQuickSearchStatus("fallback");
         });

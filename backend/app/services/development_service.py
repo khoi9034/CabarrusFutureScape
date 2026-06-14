@@ -99,6 +99,7 @@ DEVELOPMENT_PREDICTION_FEATURE_GROUPS = [
     "development_pressure_features",
     "transportation_accessibility_features",
     "transportation_plan_traffic_features",
+    "planning_pipeline_utility_features",
     "jurisdiction_features",
     "future_placeholder_features",
 ]
@@ -109,6 +110,7 @@ DEVELOPMENT_PREDICTION_LEAKAGE_CAVEATS = [
     "Current zoning, flood, school, valuation, and dashboard activity fields are current-context features unless historical snapshots are added.",
     "Official school capacity scoring is not active.",
     "Transportation/accessibility features are current-context until historical roads or dated project records exist.",
+    "Planning/pipeline/utility features are current-context; Phase 16C ablation does not recommend the full Phase 16B feature set.",
 ]
 DEVELOPMENT_MODEL_METRICS_PATH = (
     Path(__file__).resolve().parents[3]
@@ -142,6 +144,18 @@ DEVELOPMENT_MODEL_CALIBRATION_REVIEW_PATH = (
     / "modeling"
     / "development_prediction"
     / "phase10f_calibration_review.json"
+)
+DEVELOPMENT_FEATURE_ABLATION_SUMMARY_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "outputs"
+    / "phase16c_feature_ablation_governance_summary.json"
+)
+DEVELOPMENT_CURRENT_BEST_MODEL_REGISTRY_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "outputs"
+    / "modeling"
+    / "development_prediction"
+    / "current_best_internal_model_registry.json"
 )
 
 
@@ -888,6 +902,12 @@ class DevelopmentService:
             )
 
         record = self.repository.get_prediction_features_summary()
+        feature_ablation_summary = development_feature_ablation_summary()
+        feature_ablation_decision = feature_ablation_summary.get(
+            "recommended_current_best_internal_model",
+            {},
+        )
+        current_best_registry = development_current_best_model_registry()
         missingness = [
             DevelopmentPredictionFeatureMissingness(
                 feature_name=row["feature_name"],
@@ -955,6 +975,52 @@ class DevelopmentService:
             transportation_experiment_current_context_only=bool(
                 record.get("transportation_experiment_current_context_only", True),
             ),
+            planning_pipeline_utility_feature_matrix_available=bool(
+                record.get("planning_pipeline_utility_feature_matrix_available"),
+            ),
+            planning_pipeline_utility_row_count=int(
+                record.get("planning_pipeline_utility_row_count") or 0,
+            ),
+            planning_pipeline_utility_model_experiment_available=bool(
+                record.get("planning_pipeline_utility_model_experiment_available"),
+            ),
+            latest_planning_pipeline_utility_experiment_id=record.get(
+                "latest_planning_pipeline_utility_experiment_id",
+            ),
+            planning_pipeline_utility_current_context_only=bool(
+                record.get("planning_pipeline_utility_current_context_only", True),
+            ),
+            concord_only_features_present=bool(
+                record.get("concord_only_features_present"),
+            ),
+            utility_proxy_only_features_present=bool(
+                record.get("utility_proxy_only_features_present"),
+            ),
+            latest_feature_ablation_available=bool(feature_ablation_summary),
+            recommended_internal_model_experiment_id=(
+                feature_ablation_decision.get("recommended_internal_model_experiment_id")
+            ),
+            recommended_internal_model_variant=(
+                feature_ablation_decision.get("recommended_variant")
+            ),
+            phase16b_full_feature_set_recommended=bool(
+                feature_ablation_decision.get("phase16b_full_feature_set_recommended", False),
+            ),
+            current_best_internal_model_available=bool(current_best_registry),
+            current_best_internal_model_variant=(
+                current_best_registry.get("recommended_feature_set")
+                or current_best_registry.get("recommended_internal_model_name")
+            ),
+            current_best_internal_model_public_exposure_allowed=bool(
+                current_best_registry.get("public_exposure_allowed", False),
+            ),
+            current_best_internal_model_production_ready=bool(
+                current_best_registry.get("production_ready", False),
+            ),
+            excluded_feature_groups_current_best=[
+                str(group)
+                for group in current_best_registry.get("excluded_feature_groups", [])
+            ],
             latest_model_qa_available=DEVELOPMENT_MODEL_QA_SUMMARY_PATH.exists(),
             latest_model_qa_id=development_model_qa_id(),
             standardized_metrics_available=DEVELOPMENT_MODEL_STANDARDIZED_METRICS_PATH.exists(),
@@ -1223,6 +1289,34 @@ def development_model_calibration_status() -> str | None:
         return None
 
     return payload.get("calibration_assessment")
+
+
+def development_feature_ablation_summary() -> dict[str, object]:
+    if not DEVELOPMENT_FEATURE_ABLATION_SUMMARY_PATH.exists():
+        return {}
+
+    try:
+        payload = json.loads(
+            DEVELOPMENT_FEATURE_ABLATION_SUMMARY_PATH.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+    return payload if isinstance(payload, dict) else {}
+
+
+def development_current_best_model_registry() -> dict[str, object]:
+    if not DEVELOPMENT_CURRENT_BEST_MODEL_REGISTRY_PATH.exists():
+        return {}
+
+    try:
+        payload = json.loads(
+            DEVELOPMENT_CURRENT_BEST_MODEL_REGISTRY_PATH.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+    return payload if isinstance(payload, dict) else {}
 
 
 def normalize_filter_value(value: str | None) -> str | None:

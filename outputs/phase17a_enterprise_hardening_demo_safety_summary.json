@@ -1,0 +1,246 @@
+{
+  "phase": "17A",
+  "title": "Enterprise Hardening, Stability QA, and Demo-Safe Cleanup",
+  "generated_at": "2026-06-14",
+  "branch": "main",
+  "scope_guardrails": {
+    "new_datasets_added": false,
+    "models_trained_or_retrained": false,
+    "parcel_level_prediction_probabilities_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "public_prediction_endpoints_added": false,
+    "model_marked_production_ready": false,
+    "postgis_schema_modified": false,
+    "ingestion_pipelines_rebuilt": false,
+    "fake_data_added": false,
+    "dashboard_redesigned": false
+  },
+  "files_changed_for_phase17a": [
+    "src/components/layout/TopNav.tsx",
+    "src/hooks/useDevelopmentHotspotLayer.ts",
+    "src/components/dashboard/CommandPalette.tsx",
+    "docs/engineering/runtime_recovery.md",
+    "docs/engineering/prediction_exposure_guardrails.md",
+    "docs/engineering/release_candidate_checklist.md",
+    "backend/tests/test_phase17a_enterprise_hardening.py",
+    "README.md",
+    "outputs/phase17a_enterprise_hardening_demo_safety_summary.json"
+  ],
+  "repo_safety_notes": {
+    "starting_branch_confirmed": "main",
+    "dirty_tree_preexisted": true,
+    "logs_intentionally_modified": false,
+    "logs_warning": "logs/backend-dev.log and logs/next-dev.log are local runtime files and were not intentionally edited for Phase 17A."
+  },
+  "route_mode_stability_fixes": [
+    {
+      "area": "Command palette",
+      "change": "Disabled command results now return early on click and keyboard Enter, preventing placeholder or unsupported commands from switching into invalid views."
+    },
+    {
+      "area": "Methodology",
+      "change": "Added automated guardrail coverage that the Methodology branch does not mount SceneView."
+    },
+    {
+      "area": "Mode smoke checks",
+      "result": "Overview, Due Diligence, Methodology, and Executive Print loaded without blank-page behavior in browser smoke testing."
+    }
+  ],
+  "api_error_handling_improvements": [
+    {
+      "area": "Top parcel search",
+      "change": "Backend search/detail fallback text now routes through the friendly API error display helper instead of showing raw exception strings."
+    },
+    {
+      "area": "Development hotspots",
+      "change": "Layer hook now ignores late responses after abort, reducing stale state updates when toggles or filters change quickly."
+    },
+    {
+      "area": "Optional layer failures",
+      "status": "Existing layer hooks preserve unavailable/fallback states without fabricating values."
+    }
+  ],
+  "prediction_exposure_guardrails": {
+    "allowed_aggregate_routes": [
+      "/development/prediction/features/summary",
+      "/development/prediction/ranking/summary",
+      "/development/prediction/transportation-accessibility/summary",
+      "/development/prediction/transportation-plan-traffic/summary"
+    ],
+    "forbidden_parcel_scoped_route_examples": [
+      "/development/prediction/{official_parcel_id}",
+      "/development/prediction/ranking/{official_parcel_id}",
+      "/development/prediction/scores/{official_parcel_id}",
+      "/development/prediction/probability/{official_parcel_id}"
+    ],
+    "openapi_prediction_routes_checked": [
+      "/development/prediction/features/summary",
+      "/development/prediction/ranking/summary",
+      "/development/prediction/transportation-accessibility/summary",
+      "/development/prediction/transportation-plan-traffic/summary"
+    ],
+    "model_flags_checked": {
+      "model_active": false,
+      "prediction_probability_available": false,
+      "production_ready": false,
+      "public_exposure_allowed": false
+    },
+    "current_best_internal_model_variant": "transportation_plus_tax_value_only",
+    "frontend_risky_wording_check": "Browser Methodology smoke found no experimental_probability text, parcel-will-develop wording, official growth score wording, or production prediction wording."
+  },
+  "layer_rail_qa": {
+    "browser_checked": true,
+    "layers_visible_in_rail": [
+      "County Boundary",
+      "Parcel Intelligence",
+      "Development Hotspots",
+      "Flood Constraints",
+      "FEMA Flood Zones",
+      "School Utilization Seed",
+      "Model Research Status"
+    ],
+    "school_utilization_caveat_visible": true,
+    "prediction_layer_caveat_visible": true,
+    "one_letter_badges_detected": false,
+    "api_failure_text_detected": false,
+    "notes": "Layer rail content was opened and inspected in the browser. Production layers and caveats were readable; no clipped one-letter badge pattern was detected."
+  },
+  "selected_parcel_qa": {
+    "parcel_id_tested": "CFS-PARCEL-0149726579",
+    "browser_search_result_found": true,
+    "selection_flow_completed": true,
+    "active_selection_overlay_updated": true,
+    "selected_parcel_card_updated": true,
+    "owner_visible": "MALL AT CONCORD MILLS LP",
+    "zoning_visible": "Concord / C-2",
+    "flood_context_visible": true,
+    "permit_or_development_context_visible": true,
+    "school_assignment_visible": true,
+    "school_utilization_caveat_visible": true,
+    "valid_parcel_not_found_message_detected": false,
+    "notes": "The selected parcel overlay showed parcel ID, owner, selected-parcel loaded status, zoning, quality, and API source after top-search selection."
+  },
+  "methodology_safety_wording": {
+    "section_present": true,
+    "sceneview_rendered_in_methodology": false,
+    "language_present": [
+      "Internal only",
+      "not production-ready",
+      "calibration review required",
+      "no public prediction exposure"
+    ],
+    "unsafe_language_detected": false
+  },
+  "runtime_docs_added": [
+    {
+      "file": "docs/engineering/runtime_recovery.md",
+      "coverage": [
+        "standard npm run dev:cfs startup",
+        "emergency stale cleanup with warning that taskkill stops all Node/Python processes",
+        "ports and expected URLs",
+        "backend and database health checks",
+        "Cabarrus REST source relocation guidance"
+      ]
+    },
+    {
+      "file": "docs/engineering/prediction_exposure_guardrails.md",
+      "coverage": [
+        "allowed aggregate prediction endpoints",
+        "forbidden parcel-scoped prediction endpoint examples",
+        "false model safety flags",
+        "frontend wording restrictions"
+      ]
+    },
+    {
+      "file": "docs/engineering/release_candidate_checklist.md",
+      "coverage": [
+        "pre-demo runtime checks",
+        "mode checks",
+        "selected parcel workflow",
+        "layer rail checks",
+        "prediction exposure checklist"
+      ]
+    }
+  ],
+  "runtime_checks": {
+    "frontend": {
+      "url": "http://localhost:3000",
+      "status": 200
+    },
+    "backend_root": {
+      "url": "http://127.0.0.1:8000",
+      "status": 200
+    },
+    "backend_health": {
+      "url": "http://127.0.0.1:8000/health",
+      "status": 200
+    },
+    "database_health": {
+      "url": "http://127.0.0.1:8000/health/database",
+      "status": 200
+    }
+  },
+  "api_smoke_results": [
+    {
+      "url": "http://127.0.0.1:8000/parcels/search?q=CFS-PARCEL-0149726579",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/parcels/CFS-PARCEL-0149726579?include_geometry=true",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/development/hotspots?limit=1",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/constraints/flood/summary",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/constraints/flood/zones?limit=1",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/constraints/schools/statistics",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/constraints/schools/utilization-seed",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/development/prediction/features/summary",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/development/prediction/ranking/summary",
+      "status": 200
+    }
+  ],
+  "browser_smoke_results": {
+    "overview_loads": true,
+    "due_diligence_loads": true,
+    "methodology_loads": true,
+    "executive_print_loads": true,
+    "methodology_sceneview_absent": true,
+    "parcel_search_works_at_wide_desktop_viewport": true,
+    "console_errors_detected": false,
+    "notes": "At the default 1280px viewport the top search input is responsive-hidden behind the compact controls; at a 1600px desktop viewport the Search parcels combobox is visible and the parcel selection workflow passes."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "passed: 277 passed, 3 warnings",
+    "npm_run_dev_cfs": "running and responding after restart"
+  },
+  "remaining_known_issues": [
+    "The repository has many pre-existing uncommitted files from prior phases; Phase 17A did not attempt branch cleanup or commits.",
+    "Runtime logs are modified by local servers and should remain uncommitted.",
+    "The top parcel search is hidden in the compact 1280px browser viewport and appears at wider desktop widths; compact-mode search behavior may warrant a future UX pass.",
+    "Layer toggle browser checks were limited to rail visibility/readability and API endpoint health; full click-by-click map rendering verification remains a manual demo step."
+  ],
+  "recommended_next_step": "Run a short manual demo walkthrough using docs/engineering/release_candidate_checklist.md, then decide whether to polish compact-width top search visibility before portfolio recording."
+}

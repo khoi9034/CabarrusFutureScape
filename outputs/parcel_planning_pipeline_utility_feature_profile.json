@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-06-14T07:35:47.896066+00:00",
+  "feature_table": "parcel_planning_pipeline_utility_features",
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "model_active": false,
+  "prediction_probability_available": false,
+  "expected_parcel_count": 110017,
+  "row_count": 110017,
+  "unique_parcels": 110017,
+  "row_count_matches_parcels": true,
+  "inside_central_area_plan_count": 14555,
+  "parcels_with_plan_review_signal": 12663,
+  "parcels_with_utility_proxy_context": 110017,
+  "true_utility_capacity_available_count": 0,
+  "tax_parcel_full_match_count": 109994,
+  "current_context_only_count": 110017,
+  "not_time_safe_count": 110017,
+  "excluded_from_strict_baseline_count": 110017,
+  "future_model_candidate_count": 110017
+}

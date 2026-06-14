@@ -1,0 +1,66 @@
+{
+  "generated_at": "2026-06-14T07:17:50.099431+00:00",
+  "dry_run": false,
+  "source_count": 6,
+  "concord_only": true,
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "sources": [
+    {
+      "source_key": "concord_central_area_plan_boundary",
+      "source_name": "Concord Central Area Plan Boundary",
+      "layer_id": 50,
+      "total_count": 1,
+      "downloaded_count": 1,
+      "raw_rows": 1,
+      "clean_rows": 1
+    },
+    {
+      "source_key": "concord_primary_activity_areas",
+      "source_name": "Concord Central Area Primary Activity Areas",
+      "layer_id": 51,
+      "total_count": 3,
+      "downloaded_count": 3,
+      "raw_rows": 3,
+      "clean_rows": 3
+    },
+    {
+      "source_key": "concord_service_nodes",
+      "source_name": "Concord Central Area Service Nodes",
+      "layer_id": 52,
+      "total_count": 1,
+      "downloaded_count": 1,
+      "raw_rows": 1,
+      "clean_rows": 1
+    },
+    {
+      "source_key": "concord_special_corridors",
+      "source_name": "Concord Central Area Special Corridors",
+      "layer_id": 53,
+      "total_count": 1,
+      "downloaded_count": 1,
+      "raw_rows": 1,
+      "clean_rows": 1
+    },
+    {
+      "source_key": "concord_special_use_areas",
+      "source_name": "Concord Central Area Special Use Areas",
+      "layer_id": 54,
+      "total_count": 1,
+      "downloaded_count": 1,
+      "raw_rows": 1,
+      "clean_rows": 1
+    },
+    {
+      "source_key": "concord_central_area_future_land_use",
+      "source_name": "Concord Central Area Future Land Use",
+      "layer_id": 55,
+      "total_count": 30,
+      "downloaded_count": 30,
+      "raw_rows": 30,
+      "clean_rows": 30
+    }
+  ],
+  "raw_rows_loaded": 37,
+  "clean_rows_loaded": 37
+}

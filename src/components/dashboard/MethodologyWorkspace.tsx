@@ -19,7 +19,23 @@ import {
   standardizedDevelopmentPredictionMetrics,
   useDevelopmentPredictionResearchStatus,
 } from "@/hooks/useDevelopmentPredictionResearchStatus";
+import {
+  useEnterpriseDiagnostics,
+  type EnterpriseDiagnosticCheck,
+  type EnterpriseDiagnosticStatus,
+} from "@/hooks/useEnterpriseDiagnostics";
 import type { DevelopmentPredictionRankingClassBucket } from "@/types/api";
+
+const currentBestModelFallback = {
+  excludedGroups: [
+    "Accela plan reviews",
+    "Central Area Plan",
+    "utility proxy",
+    "metadata/current-context flags",
+  ],
+  variantLabel: "Zoning + Transportation + Tax/Value",
+  variantValue: "transportation_plus_tax_value_only",
+};
 
 const dataInputs = [
   {
@@ -45,7 +61,7 @@ const dataInputs = [
   {
     label: "Development Ranking Research",
     status: "Internal only",
-    text: "Zoning-enhanced ranking experiment and aggregate class distribution for QA. Exact probabilities and parcel-level classes are not exposed.",
+    text: "Current best internal variant is zoning plus transportation plus tax/value context. Parcel-level prediction outputs and parcel-level classes are not exposed.",
   },
   {
     label: "FEMA Flood Constraints",
@@ -76,7 +92,7 @@ const logicItems = [
   "School assignment uses attendance-zone polygon overlap for CCS V1 elementary, middle, and high zones. It does not assign by nearest school point.",
   "Presentation-derived school utilization is a temporary seed for visualization and workflow testing until verified enrollment and capacity files arrive.",
   "LEA pupil totals provide districtwide grade context only and are not joined to parcels or used as school-level capacity.",
-  "Development prediction work is internal ranking research only. Exact parcel probabilities are not shown because calibration remains weak.",
+  "Development prediction work is internal ranking research only. Parcel-level probability values are unavailable because calibration remains weak.",
 ];
 
 const assumptionItems = [
@@ -177,6 +193,10 @@ export function MethodologyWorkspace() {
             <DevelopmentPredictionResearchStatusCard />
           </div>
 
+          <div className="mt-4">
+            <PlatformDiagnosticsCard />
+          </div>
+
           <div className="mt-4 grid gap-4 xl:grid-cols-3">
             <MethodCard icon={Database} kicker="Inputs" title="Active Data Inputs" className="xl:col-span-2">
               <div className="grid gap-2 md:grid-cols-2">
@@ -223,8 +243,67 @@ export function MethodologyWorkspace() {
   );
 }
 
+function PlatformDiagnosticsCard() {
+  const { checks, isLoading, lastCheckedAt } = useEnterpriseDiagnostics();
+
+  return (
+    <MethodCard
+      className="border-[#5cd38f]/15 bg-[#071c18]/78"
+      icon={ShieldCheck}
+      kicker="Runtime diagnostics"
+      title="Local Platform Readiness"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <p className="max-w-3xl text-sm leading-6 text-slate-400">
+          A compact live check for local demo readiness. It verifies service
+          health, database connectivity, core aggregate APIs, and model-safety
+          flags without requesting parcel-level predictions or rendering the 3D
+          map.
+        </p>
+        <span className="shrink-0 rounded border border-white/10 bg-white/[0.035] px-2 py-1 text-[10px] font-semibold uppercase leading-4 text-slate-400">
+          {isLoading
+            ? "Checking"
+            : lastCheckedAt
+              ? `Checked ${formatDiagnosticsTime(lastCheckedAt)}`
+              : "Not checked"}
+        </span>
+      </div>
+      <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+        {checks.map((check) => (
+          <DiagnosticCheckTile check={check} key={check.id} />
+        ))}
+      </div>
+      <p className="mt-3 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-slate-400">
+        Prediction guardrail: CFS exposes aggregate model research status only.
+        Parcel-level probabilities and ranking classes remain unavailable in the
+        frontend and public API.
+      </p>
+    </MethodCard>
+  );
+}
+
+function DiagnosticCheckTile({ check }: { check: EnterpriseDiagnosticCheck }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+          {check.label}
+        </p>
+        <span
+          className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-4 ${getDiagnosticStatusClass(
+            check.status,
+          )}`}
+        >
+          {formatDiagnosticStatus(check.status)}
+        </span>
+      </div>
+      <p className="mt-2 text-xs leading-5 text-slate-300">{check.detail}</p>
+    </div>
+  );
+}
+
 function DevelopmentPredictionResearchStatusCard() {
-  const { errorMessage, isLoading, rankingSummary, source } =
+  const { errorMessage, featuresSummary, isLoading, rankingSummary, source } =
     useDevelopmentPredictionResearchStatus();
   const orderedDistribution = orderRankingDistribution(
     rankingSummary.class_distribution,
@@ -232,6 +311,13 @@ function DevelopmentPredictionResearchStatusCard() {
   const totalRows =
     rankingSummary.ranking_row_count ||
     orderedDistribution.reduce((sum, item) => sum + item.row_count, 0);
+  const currentBestVariant =
+    featuresSummary?.current_best_internal_model_variant ??
+    currentBestModelFallback.variantValue;
+  const excludedGroups =
+    featuresSummary?.excluded_feature_groups_current_best?.length
+      ? featuresSummary.excluded_feature_groups_current_best
+      : currentBestModelFallback.excludedGroups;
 
   return (
     <MethodCard
@@ -265,7 +351,11 @@ function DevelopmentPredictionResearchStatusCard() {
             />
             <ResearchStatusItem
               label="Best experiment"
-              value={rankingSummary.experiment_id ?? "zoning-enhanced ranking"}
+              value={
+                featuresSummary?.recommended_internal_model_experiment_id ??
+                rankingSummary.experiment_id ??
+                "phase16c ablation"
+              }
             />
             <ResearchStatusItem
               label="Calibration"
@@ -280,13 +370,56 @@ function DevelopmentPredictionResearchStatusCard() {
             />
           </div>
 
+          <section className="rounded-lg border border-[#f0cd79]/20 bg-[#1d1607]/36 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f0cd79]">
+              Current best internal model
+            </p>
+            <h4 className="mt-1 text-sm font-semibold text-white">
+              {currentBestModelFallback.variantLabel}
+            </h4>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <ResearchStatusItem
+                label="Variant"
+                value={formatStatusLabel(currentBestVariant)}
+              />
+              <ResearchStatusItem
+                label="Production ready"
+                tone="rose"
+                value={
+                  featuresSummary?.current_best_internal_model_production_ready
+                    ? "Yes"
+                    : "No"
+                }
+              />
+              <ResearchStatusItem
+                label="Public exposure"
+                tone="rose"
+                value={
+                  featuresSummary?.current_best_internal_model_public_exposure_allowed
+                    ? "Allowed"
+                    : "Not allowed"
+                }
+              />
+              <ResearchStatusItem
+                label="Model status"
+                tone="amber"
+                value="Internal research only"
+              />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-400">
+              Selected after Phase 16C ablation because it produced the strongest
+              internal ranking performance while excluding noisy planning,
+              pipeline, and proxy-only feature groups.
+            </p>
+          </section>
+
           <div className="rounded-lg border border-white/10 bg-black/20 p-3">
             <div className="flex items-start gap-2">
               <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
               <p className="text-xs leading-5 text-slate-400">
                 This section intentionally shows aggregate research status only.
-                It does not display parcel IDs, parcel ranking classes, or exact
-                model probabilities.
+                It does not display parcel IDs, parcel ranking classes, or
+                model probability values.
               </p>
             </div>
             <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-slate-500">
@@ -355,14 +488,47 @@ function DevelopmentPredictionResearchStatusCard() {
               />
             </div>
             <p className="mt-3 text-xs leading-5 text-slate-400">
-              Zoning-enhanced features improved internal ranking metrics, but
-              weak calibration means exact probabilities are not shown.
+              The current best internal variant improved PR-AUC and top-5%
+              lift in Phase 16C, but weak calibration means parcel-level
+              probability values remain unavailable.
             </p>
           </section>
         </div>
       </div>
 
       <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        <section className="rounded-lg border border-white/10 bg-black/20 p-3 lg:col-span-2">
+          <h4 className="text-sm font-semibold text-white">
+            Feature Group Governance
+          </h4>
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <ResearchListCard
+              accent="cyan"
+              items={[
+                "New construction labels and permit history.",
+                "Historical zoning snapshots and map-change context.",
+                "Transportation accessibility, STIP, and AADT context.",
+                "Tax/value enrichment after Phase 16C ablation.",
+              ]}
+              title="Helped Current Variant"
+            />
+            <ResearchListCard
+              accent="rose"
+              items={excludedGroups.map((group) => formatStatusLabel(group))}
+              title="Excluded For Now"
+            />
+            <ResearchListCard
+              accent="rose"
+              items={[
+                "Current-context only or jurisdiction-limited coverage.",
+                "Proxy-only utility context, not true capacity.",
+                "Noisy top-k ranking behavior in ablation.",
+                "Not time-safe enough for public model claims.",
+              ]}
+              title="Why Excluded"
+            />
+          </div>
+        </section>
         <ResearchListCard
           accent="rose"
           items={developmentPredictionPublicBlockers}
@@ -377,6 +543,39 @@ function DevelopmentPredictionResearchStatusCard() {
       </div>
     </MethodCard>
   );
+}
+
+function getDiagnosticStatusClass(status: EnterpriseDiagnosticStatus) {
+  switch (status) {
+    case "ok":
+      return "border-[#5cd38f]/25 bg-[#5cd38f]/10 text-[#c7ffd8]";
+    case "checking":
+      return "border-[#68d8ff]/25 bg-[#68d8ff]/10 text-[#bfefff]";
+    case "degraded":
+      return "border-[#d8b86a]/25 bg-[#d8b86a]/10 text-[#f0cd79]";
+    case "unavailable":
+      return "border-[#ff8d7a]/25 bg-[#ff8d7a]/10 text-[#ffc2b6]";
+  }
+}
+
+function formatDiagnosticStatus(status: EnterpriseDiagnosticStatus) {
+  switch (status) {
+    case "ok":
+      return "OK";
+    case "checking":
+      return "Checking";
+    case "degraded":
+      return "Review";
+    case "unavailable":
+      return "Offline";
+  }
+}
+
+function formatDiagnosticsTime(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
 }
 
 function MethodCard({

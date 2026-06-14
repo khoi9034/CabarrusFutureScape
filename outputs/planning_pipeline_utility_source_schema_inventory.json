@@ -1,0 +1,2603 @@
+{
+  "generated_at": "2026-06-14T07:12:07.840012+00:00",
+  "source_count": 19,
+  "active_rest_source_count": 11,
+  "document_inventory_source_count": 8,
+  "policy": {
+    "inventory_and_feature_engineering_only": true,
+    "model_training_allowed": false,
+    "prediction_exposure_allowed": false,
+    "production_ready": false,
+    "rest_relocation_note": "Cabarrus and municipal REST services may move during ongoing service reorganization. If a URL fails, inspect the service root, layer ID, fallback URLs, and source registry before marking unavailable.",
+    "concord_scope_note": "Concord Central Area Plan sources are Concord/Central Area only and must not be treated as countywide future land use.",
+    "utility_proxy_note": "WSACC/RevalMap sewer/manhole/district layers are proximity/service-context proxies only. They do not provide true capacity, allocation, remaining capacity, or buildability guarantees."
+  },
+  "sources": [
+    {
+      "source_key": "concord_central_area_plan_boundary",
+      "source_name": "Concord Central Area Plan Boundary",
+      "service_root_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer",
+      "layer_id": 50,
+      "full_layer_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/50",
+      "source_group": "central_area_plan",
+      "source_type": "planning_boundary",
+      "jurisdiction": "Concord",
+      "geography_scope": "Concord Central Area only",
+      "prediction_feature_role": "inside_central_area_plan",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:11:22.320733+00:00",
+      "source_status": "active",
+      "layer_name": "CentralAreaPlan_Boundary",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 103122,
+        "latestWkid": 6543
+      },
+      "record_count": 1,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "land_use_field_candidates": [],
+      "plan_node_field_candidates": [
+        "Shape.STArea()"
+      ],
+      "parcel_link_field_candidates": [],
+      "status_field_candidates": [],
+      "date_field_candidates": [],
+      "value_field_candidates": [],
+      "utility_field_candidates": [],
+      "sample_features": [
+        {
+          "OBJECTID": 1,
+          "Shape.STArea()": 1696913423.1841767,
+          "Shape.STLength()": 287983.4644582855
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_concord_only_current_context_features",
+      "concord_only": true,
+      "utility_proxy_not_capacity": false,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "concord_primary_activity_areas",
+      "source_name": "Concord Central Area Primary Activity Areas",
+      "service_root_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer",
+      "layer_id": 51,
+      "full_layer_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/51",
+      "source_group": "central_area_plan",
+      "source_type": "activity_area",
+      "jurisdiction": "Concord",
+      "geography_scope": "Concord Central Area only",
+      "prediction_feature_role": "inside_primary_activity_area",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:11:23.159430+00:00",
+      "source_status": "active",
+      "layer_name": "CentralAreaPlan_PrimaryActivity",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 103122,
+        "latestWkid": 6543
+      },
+      "record_count": 3,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "land_use_field_candidates": [],
+      "plan_node_field_candidates": [
+        "Shape.STArea()"
+      ],
+      "parcel_link_field_candidates": [],
+      "status_field_candidates": [],
+      "date_field_candidates": [],
+      "value_field_candidates": [],
+      "utility_field_candidates": [],
+      "sample_features": [
+        {
+          "OBJECTID": 1,
+          "Shape.STArea()": 19631524.30201679,
+          "Shape.STLength()": 15707.27783045707
+        },
+        {
+          "OBJECTID": 2,
+          "Shape.STArea()": 19631520.11924575,
+          "Shape.STLength()": 15707.27615713277
+        },
+        {
+          "OBJECTID": 3,
+          "Shape.STArea()": 19631525.215936996,
+          "Shape.STLength()": 15707.278196076488
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_concord_only_current_context_features",
+      "concord_only": true,
+      "utility_proxy_not_capacity": false,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "concord_service_nodes",
+      "source_name": "Concord Central Area Service Nodes",
+      "service_root_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer",
+      "layer_id": 52,
+      "full_layer_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/52",
+      "source_group": "central_area_plan",
+      "source_type": "service_node",
+      "jurisdiction": "Concord",
+      "geography_scope": "Concord Central Area only",
+      "prediction_feature_role": "distance_to_nearest_service_node",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:11:23.289553+00:00",
+      "source_status": "active",
+      "layer_name": "CentralAreaPlan_ServiceNode",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 103122,
+        "latestWkid": 6543
+      },
+      "record_count": 1,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "land_use_field_candidates": [],
+      "plan_node_field_candidates": [
+        "Shape.STArea()"
+      ],
+      "parcel_link_field_candidates": [],
+      "status_field_candidates": [],
+      "date_field_candidates": [],
+      "value_field_candidates": [],
+      "utility_field_candidates": [],
+      "sample_features": [
+        {
+          "OBJECTID": 1,
+          "Shape.STArea()": 263820.87690903276,
+          "Shape.STLength()": 1821.456210930271
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_concord_only_current_context_features",
+      "concord_only": true,
+      "utility_proxy_not_capacity": false,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "concord_special_corridors",
+      "source_name": "Concord Central Area Special Corridors",
+      "service_root_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer",
+      "layer_id": 53,
+      "full_layer_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/53",
+      "source_group": "central_area_plan",
+      "source_type": "special_corridor",
+      "jurisdiction": "Concord",
+      "geography_scope": "Concord Central Area only",
+      "prediction_feature_role": "inside_or_near_special_corridor",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:11:23.413341+00:00",
+      "source_status": "active",
+      "layer_name": "CentralAreaPlan_SpecialCorridor",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 103122,
+        "latestWkid": 6543
+      },
+      "record_count": 1,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "LandUse",
+          "type": "esriFieldTypeString",
+          "alias": "LandUse",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Acres",
+          "type": "esriFieldTypeDouble",
+          "alias": "Acres",
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "LandUse",
+        "Acres",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "land_use_field_candidates": [
+        "LandUse"
+      ],
+      "plan_node_field_candidates": [
+        "Shape.STArea()"
+      ],
+      "parcel_link_field_candidates": [],
+      "status_field_candidates": [],
+      "date_field_candidates": [],
+      "value_field_candidates": [
+        "LandUse"
+      ],
+      "utility_field_candidates": [],
+      "sample_features": [
+        {
+          "OBJECTID": 1,
+          "LandUse": "Special Corridor",
+          "Acres": 206.22904601,
+          "Shape.STArea()": 8983301.604672154,
+          "Shape.STLength()": 24703.280423695265
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_concord_only_current_context_features",
+      "concord_only": true,
+      "utility_proxy_not_capacity": false,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "concord_special_use_areas",
+      "source_name": "Concord Central Area Special Use Areas",
+      "service_root_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer",
+      "layer_id": 54,
+      "full_layer_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/54",
+      "source_group": "central_area_plan",
+      "source_type": "special_use_area",
+      "jurisdiction": "Concord",
+      "geography_scope": "Concord Central Area only",
+      "prediction_feature_role": "inside_special_use_area",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:11:23.538198+00:00",
+      "source_status": "active",
+      "layer_name": "CentralAreaPlan_SpecialUse",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 103122,
+        "latestWkid": 6543
+      },
+      "record_count": 1,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "land_use_field_candidates": [],
+      "plan_node_field_candidates": [
+        "Shape.STArea()"
+      ],
+      "parcel_link_field_candidates": [],
+      "status_field_candidates": [],
+      "date_field_candidates": [],
+      "value_field_candidates": [],
+      "utility_field_candidates": [],
+      "sample_features": [
+        {
+          "OBJECTID": 1,
+          "Shape.STArea()": 1569462.492927876,
+          "Shape.STLength()": 6281.851682545508
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_concord_only_current_context_features",
+      "concord_only": true,
+      "utility_proxy_not_capacity": false,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "concord_central_area_future_land_use",
+      "source_name": "Concord Central Area Future Land Use",
+      "service_root_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer",
+      "layer_id": 55,
+      "full_layer_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/55",
+      "source_group": "central_area_plan",
+      "source_type": "future_land_use",
+      "jurisdiction": "Concord",
+      "geography_scope": "Concord Central Area only",
+      "prediction_feature_role": "central_area_future_land_use",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:11:23.667495+00:00",
+      "source_status": "active",
+      "layer_name": "CentralAreaPlan_LandUse",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 103122,
+        "latestWkid": 6543
+      },
+      "record_count": 30,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "land_use_field_candidates": [],
+      "plan_node_field_candidates": [
+        "Shape.STArea()"
+      ],
+      "parcel_link_field_candidates": [],
+      "status_field_candidates": [],
+      "date_field_candidates": [],
+      "value_field_candidates": [],
+      "utility_field_candidates": [],
+      "sample_features": [
+        {
+          "OBJECTID": 1,
+          "Shape.STArea()": 343058711.6516311,
+          "Shape.STLength()": 175447.24641266617
+        },
+        {
+          "OBJECTID": 2,
+          "Shape.STArea()": 10884179.831304211,
+          "Shape.STLength()": 21149.46650722291
+        },
+        {
+          "OBJECTID": 3,
+          "Shape.STArea()": 23016581.511014313,
+          "Shape.STLength()": 29715.436351079035
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_concord_only_current_context_features",
+      "concord_only": true,
+      "utility_proxy_not_capacity": false,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "cabarrus_accela_plan_reviews",
+      "source_name": "Cabarrus Accela Plan Reviews",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/Current_Accela_Permits/Plan_Reviews/MapServer",
+      "layer_id": 0,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/Current_Accela_Permits/Plan_Reviews/MapServer/0",
+      "source_group": "accela_plan_reviews",
+      "source_type": "plan_review",
+      "jurisdiction": "Cabarrus County",
+      "geography_scope": "countywide current Accela plan review feed where parcel links are available",
+      "prediction_feature_role": "active_plan_review_pipeline_signal",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:11:23.795688+00:00",
+      "source_status": "active",
+      "layer_name": "AccelaQuery",
+      "geometry_type": "esriGeometryPoint",
+      "spatial_reference": null,
+      "record_count": 128619,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "B1_ALT_ID",
+          "type": "esriFieldTypeString",
+          "alias": "B1_ALT_ID",
+          "length": 30,
+          "domain": null
+        },
+        {
+          "name": "B1_PER_ID1",
+          "type": "esriFieldTypeString",
+          "alias": "B1_PER_ID1",
+          "length": 5,
+          "domain": null
+        },
+        {
+          "name": "B1_PER_ID2",
+          "type": "esriFieldTypeString",
+          "alias": "B1_PER_ID2",
+          "length": 5,
+          "domain": null
+        },
+        {
+          "name": "B1_PER_ID3",
+          "type": "esriFieldTypeString",
+          "alias": "B1_PER_ID3",
+          "length": 5,
+          "domain": null
+        },
+        {
+          "name": "B1_PER_SUB_TYPE",
+          "type": "esriFieldTypeString",
+          "alias": "B1_PER_SUB_TYPE",
+          "length": 30,
+          "domain": null
+        },
+        {
+          "name": "ParcelNum",
+          "type": "esriFieldTypeString",
+          "alias": "ParcelNum",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "StreetAddress",
+          "type": "esriFieldTypeString",
+          "alias": "StreetAddress",
+          "length": 8000,
+          "domain": null
+        },
+        {
+          "name": "B1_APPL_STATUS",
+          "type": "esriFieldTypeString",
+          "alias": "B1_APPL_STATUS",
+          "length": 30,
+          "domain": null
+        },
+        {
+          "name": "B1_FILE_DD",
+          "type": "esriFieldTypeDate",
+          "alias": "B1_FILE_DD",
+          "length": 8,
+          "domain": null
+        },
+        {
+          "name": "B1_APPL_STATUS_DATE",
+          "type": "esriFieldTypeDate",
+          "alias": "B1_APPL_STATUS_DATE",
+          "length": 8,
+          "domain": null
+        },
+        {
+          "name": "DaysUntilLastStatus",
+          "type": "esriFieldTypeInteger",
+          "alias": "DaysUntilLastStatus",
+          "domain": null
+        },
+        {
+          "name": "DaysOpen",
+          "type": "esriFieldTypeInteger",
+          "alias": "DaysOpen",
+          "domain": null
+        },
+        {
+          "name": "B6_ADDR_TYPE",
+          "type": "esriFieldTypeString",
+          "alias": "B6_ADDR_TYPE",
+          "length": 30,
+          "domain": null
+        },
+        {
+          "name": "ReviewType",
+          "type": "esriFieldTypeString",
+          "alias": "ReviewType",
+          "length": 4000,
+          "domain": null
+        },
+        {
+          "name": "IsResubmittal",
+          "type": "esriFieldTypeSmallInteger",
+          "alias": "IsResubmittal",
+          "domain": null
+        },
+        {
+          "name": "LastUpdateDate",
+          "type": "esriFieldTypeDate",
+          "alias": "LastUpdateDate",
+          "length": 8,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "PermitDist",
+          "type": "esriFieldTypeString",
+          "alias": "PermitDist",
+          "length": 25,
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "B1_ALT_ID",
+        "B1_PER_ID1",
+        "B1_PER_ID2",
+        "B1_PER_ID3",
+        "B1_PER_SUB_TYPE",
+        "ParcelNum",
+        "StreetAddress",
+        "B1_APPL_STATUS",
+        "B1_FILE_DD",
+        "B1_APPL_STATUS_DATE",
+        "DaysUntilLastStatus",
+        "DaysOpen",
+        "B6_ADDR_TYPE",
+        "ReviewType",
+        "IsResubmittal",
+        "LastUpdateDate",
+        "Shape",
+        "PermitDist"
+      ],
+      "land_use_field_candidates": [],
+      "plan_node_field_candidates": [
+        "B1_PER_SUB_TYPE",
+        "B6_ADDR_TYPE",
+        "ReviewType"
+      ],
+      "parcel_link_field_candidates": [
+        "ParcelNum"
+      ],
+      "status_field_candidates": [
+        "B1_APPL_STATUS",
+        "B1_APPL_STATUS_DATE",
+        "DaysUntilLastStatus",
+        "DaysOpen",
+        "ReviewType"
+      ],
+      "date_field_candidates": [
+        "B1_FILE_DD",
+        "B1_APPL_STATUS_DATE",
+        "DaysOpen",
+        "IsResubmittal",
+        "LastUpdateDate"
+      ],
+      "value_field_candidates": [],
+      "utility_field_candidates": [],
+      "sample_features": [
+        {
+          "OBJECTID": 189300043,
+          "B1_ALT_ID": "PRB2019-02510",
+          "B1_PER_ID1": "19CAP",
+          "B1_PER_ID2": "00000",
+          "B1_PER_ID3": "006H8",
+          "B1_PER_SUB_TYPE": "Building",
+          "ParcelNum": "",
+          "StreetAddress": "500 NEISLER RD CONCORD NC 28025",
+          "B1_APPL_STATUS": "Approved for Permitting",
+          "B1_FILE_DD": 1569456000000,
+          "B1_APPL_STATUS_DATE": 1590105600000,
+          "DaysUntilLastStatus": 239,
+          "DaysOpen": 2017,
+          "B6_ADDR_TYPE": "Cabarrus County",
+          "ReviewType": "Commercial Upfit",
+          "IsResubmittal": 1,
+          "LastUpdateDate": 1743735600000,
+          "PermitDist": ""
+        },
+        {
+          "OBJECTID": 189300043,
+          "B1_ALT_ID": "PRB2019-02569",
+          "B1_PER_ID1": "19CAP",
+          "B1_PER_ID2": "00000",
+          "B1_PER_ID3": "006MZ",
+          "B1_PER_SUB_TYPE": "Building",
+          "ParcelNum": "",
+          "StreetAddress": "12728 BANKS RD MT PLEASANT NC 28124",
+          "B1_APPL_STATUS": "Approved for Permitting",
+          "B1_FILE_DD": 1569974400000,
+          "B1_APPL_STATUS_DATE": 1613606400000,
+          "DaysUntilLastStatus": 505,
+          "DaysOpen": 2011,
+          "B6_ADDR_TYPE": "Cabarrus County",
+          "ReviewType": "Residential",
+          "IsResubmittal": 0,
+          "LastUpdateDate": 1743735600000,
+          "PermitDist": ""
+        },
+        {
+          "OBJECTID": 189300043,
+          "B1_ALT_ID": "PRCP-2017-01628",
+          "B1_PER_ID1": "17CAP",
+          "B1_PER_ID2": "00000",
+          "B1_PER_ID3": "005KE",
+          "B1_PER_SUB_TYPE": "NA",
+          "ParcelNum": "",
+          "StreetAddress": "283 HOUSTON ST CONCORD NC 28025",
+          "B1_APPL_STATUS": "In Process",
+          "B1_FILE_DD": 1503014400000,
+          "B1_APPL_STATUS_DATE": 1504742400000,
+          "DaysUntilLastStatus": 20,
+          "DaysOpen": 2786,
+          "B6_ADDR_TYPE": "Concord",
+          "ReviewType": "Residential",
+          "IsResubmittal": 0,
+          "LastUpdateDate": 1743735600000,
+          "PermitDist": ""
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_current_pipeline_signal_if_parcel_key_found",
+      "concord_only": false,
+      "utility_proxy_not_capacity": false,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "wsacc_manholes_revalmap",
+      "source_name": "RevalMap WSACC Manholes",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/RevalMap/MapServer",
+      "layer_id": 43,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/RevalMap/MapServer/43",
+      "source_group": "utility_proxy",
+      "source_type": "sewer_manhole_proxy",
+      "jurisdiction": "WSACC/RevalMap",
+      "geography_scope": "utility infrastructure reference proxy",
+      "prediction_feature_role": "distance_to_nearest_sewer_manhole_proxy",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "true_capacity_available": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:11:31.151360+00:00",
+      "source_status": "active",
+      "layer_name": "WSACC Manhole",
+      "geometry_type": "esriGeometryPoint",
+      "spatial_reference": null,
+      "record_count": 1642,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "CID",
+          "type": "esriFieldTypeString",
+          "alias": "CID",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "WSACC_ID",
+          "type": "esriFieldTypeString",
+          "alias": "WSACC_ID",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "X_COORD",
+          "type": "esriFieldTypeDouble",
+          "alias": "X_COORD",
+          "domain": null
+        },
+        {
+          "name": "Y_COORD",
+          "type": "esriFieldTypeDouble",
+          "alias": "Y_COORD",
+          "domain": null
+        },
+        {
+          "name": "INVERTOUT",
+          "type": "esriFieldTypeDouble",
+          "alias": "INVERTOUT",
+          "domain": null
+        },
+        {
+          "name": "INVERTIN",
+          "type": "esriFieldTypeDouble",
+          "alias": "INVERTIN",
+          "domain": null
+        },
+        {
+          "name": "INVERTIN2",
+          "type": "esriFieldTypeDouble",
+          "alias": "INVERTIN2",
+          "domain": null
+        },
+        {
+          "name": "INVERTIN3",
+          "type": "esriFieldTypeDouble",
+          "alias": "INVERTIN3",
+          "domain": null
+        },
+        {
+          "name": "RIM_ELEV",
+          "type": "esriFieldTypeDouble",
+          "alias": "RIM_ELEV",
+          "domain": null
+        },
+        {
+          "name": "FAL",
+          "type": "esriFieldTypeString",
+          "alias": "FAL",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "OWNER",
+          "type": "esriFieldTypeString",
+          "alias": "OWNER",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "INCLUDE",
+          "type": "esriFieldTypeString",
+          "alias": "INCLUDE",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "FACILITY_I",
+          "type": "esriFieldTypeString",
+          "alias": "FACILITY_I",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "FEATURE_ID",
+          "type": "esriFieldTypeString",
+          "alias": "FEATURE_ID",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "PWTYPE",
+          "type": "esriFieldTypeString",
+          "alias": "PWTYPE",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "GND_ELEV",
+          "type": "esriFieldTypeDouble",
+          "alias": "GND_ELEV",
+          "domain": null
+        },
+        {
+          "name": "GPS",
+          "type": "esriFieldTypeString",
+          "alias": "GPS",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "RNSNODE",
+          "type": "esriFieldTypeString",
+          "alias": "RNSNODE",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "SHAPE",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "CID",
+        "WSACC_ID",
+        "X_COORD",
+        "Y_COORD",
+        "INVERTOUT",
+        "INVERTIN",
+        "INVERTIN2",
+        "INVERTIN3",
+        "RIM_ELEV",
+        "FAL",
+        "OWNER",
+        "INCLUDE",
+        "FACILITY_I",
+        "FEATURE_ID",
+        "PWTYPE",
+        "GND_ELEV",
+        "GPS",
+        "RNSNODE",
+        "SHAPE"
+      ],
+      "land_use_field_candidates": [],
+      "plan_node_field_candidates": [
+        "PWTYPE",
+        "RNSNODE"
+      ],
+      "parcel_link_field_candidates": [],
+      "status_field_candidates": [],
+      "date_field_candidates": [],
+      "value_field_candidates": [],
+      "utility_field_candidates": [
+        "WSACC_ID"
+      ],
+      "sample_features": [
+        {
+          "OBJECTID": 1,
+          "CID": " ",
+          "WSACC_ID": "011788",
+          "X_COORD": 1482815.6534,
+          "Y_COORD": 611240.69013,
+          "INVERTOUT": 595.0,
+          "INVERTIN": 595.06,
+          "INVERTIN2": 0.0,
+          "INVERTIN3": 0.0,
+          "RIM_ELEV": 613.68,
+          "FAL": " ",
+          "OWNER": "SWSACC",
+          "INCLUDE": "Y",
+          "FACILITY_I": "011788",
+          "FEATURE_ID": " ",
+          "PWTYPE": "SMANHOLE",
+          "GND_ELEV": 610.68,
+          "GPS": "Y",
+          "RNSNODE": "011788"
+        },
+        {
+          "OBJECTID": 2,
+          "CID": " ",
+          "WSACC_ID": "011789",
+          "X_COORD": 1482488.62178,
+          "Y_COORD": 611676.91963,
+          "INVERTOUT": 595.81,
+          "INVERTIN": 595.91,
+          "INVERTIN2": 0.0,
+          "INVERTIN3": 0.0,
+          "RIM_ELEV": 614.51,
+          "FAL": " ",
+          "OWNER": "SWSACC",
+          "INCLUDE": "Y",
+          "FACILITY_I": "011789",
+          "FEATURE_ID": " ",
+          "PWTYPE": "SMANHOLE",
+          "GND_ELEV": 612.11,
+          "GPS": "Y",
+          "RNSNODE": "011789"
+        },
+        {
+          "OBJECTID": 3,
+          "CID": " ",
+          "WSACC_ID": "011781",
+          "X_COORD": 1484356.0639,
+          "Y_COORD": 608094.23393,
+          "INVERTOUT": 590.92,
+          "INVERTIN": 590.9,
+          "INVERTIN2": 0.0,
+          "INVERTIN3": 0.0,
+          "RIM_ELEV": 610.97,
+          "FAL": " ",
+          "OWNER": "SWSACC",
+          "INCLUDE": "Y",
+          "FACILITY_I": "011781",
+          "FEATURE_ID": " ",
+          "PWTYPE": "SMANHOLE",
+          "GND_ELEV": 607.37,
+          "GPS": "Y",
+          "RNSNODE": "011781"
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_current_utility_proxy_features_not_capacity",
+      "concord_only": false,
+      "utility_proxy_not_capacity": true,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "wsacc_sewer_lines_revalmap",
+      "source_name": "RevalMap WSACC Sewer Lines",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/RevalMap/MapServer",
+      "layer_id": 44,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/RevalMap/MapServer/44",
+      "source_group": "utility_proxy",
+      "source_type": "sewer_line_proxy",
+      "jurisdiction": "WSACC/RevalMap",
+      "geography_scope": "utility infrastructure reference proxy",
+      "prediction_feature_role": "distance_to_nearest_sewer_line_proxy",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "true_capacity_available": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:12:02.026392+00:00",
+      "source_status": "active",
+      "layer_name": "WSACC Line",
+      "geometry_type": "esriGeometryPolyline",
+      "spatial_reference": null,
+      "record_count": 1686,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "WSACC_ID",
+          "type": "esriFieldTypeString",
+          "alias": "WSACC_ID",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "LENGTH",
+          "type": "esriFieldTypeDouble",
+          "alias": "LENGTH",
+          "domain": null
+        },
+        {
+          "name": "SZ",
+          "type": "esriFieldTypeDouble",
+          "alias": "SZ",
+          "domain": null
+        },
+        {
+          "name": "MA",
+          "type": "esriFieldTypeString",
+          "alias": "MA",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "INCLUDE",
+          "type": "esriFieldTypeString",
+          "alias": "INCLUDE",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "U_S_NODE",
+          "type": "esriFieldTypeString",
+          "alias": "U_S_NODE",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "D_S_NODE",
+          "type": "esriFieldTypeString",
+          "alias": "D_S_NODE",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "OWNER",
+          "type": "esriFieldTypeString",
+          "alias": "OWNER",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "SI",
+          "type": "esriFieldTypeString",
+          "alias": "SI",
+          "length": 30,
+          "domain": null
+        },
+        {
+          "name": "YR",
+          "type": "esriFieldTypeDouble",
+          "alias": "YR",
+          "domain": null
+        },
+        {
+          "name": "FAL",
+          "type": "esriFieldTypeString",
+          "alias": "FAL",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "MAPKEY",
+          "type": "esriFieldTypeString",
+          "alias": "MAPKEY",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "LAYER",
+          "type": "esriFieldTypeString",
+          "alias": "LAYER",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "PIPENO",
+          "type": "esriFieldTypeDouble",
+          "alias": "PIPENO",
+          "domain": null
+        },
+        {
+          "name": "LR",
+          "type": "esriFieldTypeDouble",
+          "alias": "LR",
+          "domain": null
+        },
+        {
+          "name": "LI",
+          "type": "esriFieldTypeDouble",
+          "alias": "LI",
+          "domain": null
+        },
+        {
+          "name": "LN",
+          "type": "esriFieldTypeDouble",
+          "alias": "LN",
+          "domain": null
+        },
+        {
+          "name": "INFLZONE",
+          "type": "esriFieldTypeDouble",
+          "alias": "INFLZONE",
+          "domain": null
+        },
+        {
+          "name": "REGION",
+          "type": "esriFieldTypeString",
+          "alias": "REGION",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "INVERTOUT",
+          "type": "esriFieldTypeDouble",
+          "alias": "INVERTOUT",
+          "domain": null
+        },
+        {
+          "name": "INVERTIN",
+          "type": "esriFieldTypeDouble",
+          "alias": "INVERTIN",
+          "domain": null
+        },
+        {
+          "name": "ADJLEN",
+          "type": "esriFieldTypeDouble",
+          "alias": "ADJLEN",
+          "domain": null
+        },
+        {
+          "name": "TIF_FILE",
+          "type": "esriFieldTypeString",
+          "alias": "TIF_FILE",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "TIF_REC",
+          "type": "esriFieldTypeString",
+          "alias": "TIF_REC",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "DATACK",
+          "type": "esriFieldTypeString",
+          "alias": "DATACK",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "VIEWED",
+          "type": "esriFieldTypeString",
+          "alias": "VIEWED",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "FACILITY_I",
+          "type": "esriFieldTypeString",
+          "alias": "FACILITY_I",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "PWTYPE",
+          "type": "esriFieldTypeString",
+          "alias": "PWTYPE",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "PWFNODE",
+          "type": "esriFieldTypeString",
+          "alias": "PWFNODE",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "PWTNODE",
+          "type": "esriFieldTypeString",
+          "alias": "PWTNODE",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "PWFSID",
+          "type": "esriFieldTypeString",
+          "alias": "PWFSID",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "PWTSID",
+          "type": "esriFieldTypeString",
+          "alias": "PWTSID",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "PWFUID",
+          "type": "esriFieldTypeString",
+          "alias": "PWFUID",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "PWTUID",
+          "type": "esriFieldTypeString",
+          "alias": "PWTUID",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "PW_ID",
+          "type": "esriFieldTypeString",
+          "alias": "PW_ID",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "FEATURE_ID",
+          "type": "esriFieldTypeString",
+          "alias": "FEATURE_ID",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "BUILT_1",
+          "type": "esriFieldTypeString",
+          "alias": "BUILT_1",
+          "length": 12,
+          "domain": null
+        },
+        {
+          "name": "GPS",
+          "type": "esriFieldTypeString",
+          "alias": "GPS",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "PIPE_TYPE",
+          "type": "esriFieldTypeString",
+          "alias": "PIPE_TYPE",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "SHAPE",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "SHAPE.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "SHAPE.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "WSACC_ID",
+        "LENGTH",
+        "SZ",
+        "MA",
+        "INCLUDE",
+        "U_S_NODE",
+        "D_S_NODE",
+        "OWNER",
+        "SI",
+        "YR",
+        "FAL",
+        "MAPKEY",
+        "LAYER",
+        "PIPENO",
+        "LR",
+        "LI",
+        "LN",
+        "INFLZONE",
+        "REGION",
+        "INVERTOUT",
+        "INVERTIN",
+        "ADJLEN",
+        "TIF_FILE",
+        "TIF_REC",
+        "DATACK",
+        "VIEWED",
+        "FACILITY_I",
+        "PWTYPE",
+        "PWFNODE",
+        "PWTNODE",
+        "PWFSID",
+        "PWTSID",
+        "PWFUID",
+        "PWTUID",
+        "PW_ID",
+        "FEATURE_ID",
+        "BUILT_1",
+        "GPS",
+        "PIPE_TYPE",
+        "SHAPE",
+        "SHAPE.STLength()"
+      ],
+      "land_use_field_candidates": [],
+      "plan_node_field_candidates": [
+        "U_S_NODE",
+        "D_S_NODE",
+        "PWTYPE",
+        "PWFNODE",
+        "PWTNODE",
+        "PIPE_TYPE"
+      ],
+      "parcel_link_field_candidates": [],
+      "status_field_candidates": [],
+      "date_field_candidates": [
+        "TIF_FILE"
+      ],
+      "value_field_candidates": [],
+      "utility_field_candidates": [
+        "WSACC_ID",
+        "PIPENO",
+        "PIPE_TYPE"
+      ],
+      "sample_features": [
+        {
+          "OBJECTID": 1,
+          "WSACC_ID": "011766-011765",
+          "LENGTH": 382.941,
+          "SZ": 36.0,
+          "MA": "PVC",
+          "INCLUDE": "Y",
+          "U_S_NODE": "011766",
+          "D_S_NODE": "011765",
+          "OWNER": "SWSACC",
+          "SI": "Rocky River Interceptor",
+          "YR": 1998.0,
+          "FAL": " ",
+          "MAPKEY": "116E8",
+          "LAYER": "SS_PIPES",
+          "PIPENO": 2092.0,
+          "LR": 0.0009,
+          "LI": 0.013,
+          "LN": 328.51,
+          "INFLZONE": 1.0,
+          "REGION": "WEST",
+          "INVERTOUT": 582.21,
+          "INVERTIN": 583.85,
+          "ADJLEN": 200.0,
+          "TIF_FILE": " ",
+          "TIF_REC": " ",
+          "DATACK": "R",
+          "VIEWED": "YES",
+          "FACILITY_I": "011766-011765",
+          "PWTYPE": "SGMAIN",
+          "PWFNODE": "SMANHOLE",
+          "PWTNODE": "SMANHOLE",
+          "PWFSID": " ",
+          "PWTSID": " ",
+          "PWFUID": "011766",
+          "PWTUID": "011765",
+          "PW_ID": " ",
+          "FEATURE_ID": " ",
+          "BUILT_1": "Current",
+          "GPS": "Y",
+          "PIPE_TYPE": " ",
+          "SHAPE.STLength()": 382.9407067977207
+        },
+        {
+          "OBJECTID": 2,
+          "WSACC_ID": "011767-011766",
+          "LENGTH": 694.595,
+          "SZ": 36.0,
+          "MA": "PVC",
+          "INCLUDE": "Y",
+          "U_S_NODE": "011767",
+          "D_S_NODE": "011766",
+          "OWNER": "SWSACC",
+          "SI": "Rocky River Interceptor",
+          "YR": 1998.0,
+          "FAL": " ",
+          "MAPKEY": "11796",
+          "LAYER": "SS_PIPES",
+          "PIPENO": 2062.0,
+          "LR": 0.0009,
+          "LI": 0.013,
+          "LN": 706.3,
+          "INFLZONE": 4.0,
+          "REGION": "CC2",
+          "INVERTOUT": 583.92,
+          "INVERTIN": 584.56,
+          "ADJLEN": 706.3,
+          "TIF_FILE": " ",
+          "TIF_REC": " ",
+          "DATACK": " ",
+          "VIEWED": "YES",
+          "FACILITY_I": "011767-011766",
+          "PWTYPE": "SGMAIN",
+          "PWFNODE": "SMANHOLE",
+          "PWTNODE": "SMANHOLE",
+          "PWFSID": " ",
+          "PWTSID": " ",
+          "PWFUID": "011767",
+          "PWTUID": "011766",
+          "PW_ID": " ",
+          "FEATURE_ID": " ",
+          "BUILT_1": "Current",
+          "GPS": "Y",
+          "PIPE_TYPE": " ",
+          "SHAPE.STLength()": 694.5950596409797
+        },
+        {
+          "OBJECTID": 3,
+          "WSACC_ID": "011769-011768",
+          "LENGTH": 486.06,
+          "SZ": 36.0,
+          "MA": "PVC",
+          "INCLUDE": "Y",
+          "U_S_NODE": "011769",
+          "D_S_NODE": "011768",
+          "OWNER": "SWSACC",
+          "SI": "Rocky River Interceptor",
+          "YR": 1998.0,
+          "FAL": " ",
+          "MAPKEY": "118AD",
+          "LAYER": "SS_PIPES",
+          "PIPENO": 2060.0,
+          "LR": 0.0009,
+          "LI": 0.013,
+          "LN": 303.41149,
+          "INFLZONE": 4.0,
+          "REGION": "CC2",
+          "INVERTOUT": 585.09,
+          "INVERTIN": 585.68,
+          "ADJLEN": 303.41149,
+          "TIF_FILE": " ",
+          "TIF_REC": " ",
+          "DATACK": " ",
+          "VIEWED": "YES",
+          "FACILITY_I": "011769-011768",
+          "PWTYPE": "SGMAIN",
+          "PWFNODE": "SMANHOLE",
+          "PWTNODE": "SMANHOLE",
+          "PWFSID": " ",
+          "PWTSID": " ",
+          "PWFUID": "011769",
+          "PWTUID": "011768",
+          "PW_ID": " ",
+          "FEATURE_ID": " ",
+          "BUILT_1": "Current",
+          "GPS": "Y",
+          "PIPE_TYPE": " ",
+          "SHAPE.STLength()": 486.05975991213177
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_current_utility_proxy_features_not_capacity",
+      "concord_only": false,
+      "utility_proxy_not_capacity": true,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "wsacc_districts_revalmap",
+      "source_name": "RevalMap WSACC Districts",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/RevalMap/MapServer",
+      "layer_id": 45,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/RevalMap/MapServer/45",
+      "source_group": "utility_proxy",
+      "source_type": "sewer_service_district_proxy",
+      "jurisdiction": "WSACC/RevalMap",
+      "geography_scope": "utility service district reference proxy",
+      "prediction_feature_role": "inside_wsacc_district_proxy",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "true_capacity_available": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:12:02.328904+00:00",
+      "source_status": "active",
+      "layer_name": "ws_districts",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": null,
+      "record_count": 9,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "DISTRICT",
+          "type": "esriFieldTypeString",
+          "alias": "DISTRICT",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "AREA_NUMBER",
+          "type": "esriFieldTypeString",
+          "alias": "AREA_NUMBER",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "SHAPE",
+          "type": "esriFieldTypeGeometry",
+          "alias": "SHAPE",
+          "domain": null
+        },
+        {
+          "name": "SHAPE.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "SHAPE.STArea()",
+          "domain": null
+        },
+        {
+          "name": "SHAPE.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "SHAPE.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "DISTRICT",
+        "AREA_NUMBER",
+        "SHAPE",
+        "SHAPE.STArea()",
+        "SHAPE.STLength()"
+      ],
+      "land_use_field_candidates": [],
+      "plan_node_field_candidates": [
+        "DISTRICT",
+        "AREA_NUMBER",
+        "SHAPE.STArea()"
+      ],
+      "parcel_link_field_candidates": [],
+      "status_field_candidates": [],
+      "date_field_candidates": [],
+      "value_field_candidates": [],
+      "utility_field_candidates": [
+        "DISTRICT"
+      ],
+      "sample_features": [
+        {
+          "OBJECTID": 1,
+          "DISTRICT": null,
+          "AREA_NUMBER": "Area 2",
+          "SHAPE.STArea()": 271945241.78144217,
+          "SHAPE.STLength()": 92979.02294156601
+        },
+        {
+          "OBJECTID": 2,
+          "DISTRICT": null,
+          "AREA_NUMBER": "Area 2",
+          "SHAPE.STArea()": 46254742.63295317,
+          "SHAPE.STLength()": 92338.60974813288
+        },
+        {
+          "OBJECTID": 3,
+          "DISTRICT": null,
+          "AREA_NUMBER": "Area 1",
+          "SHAPE.STArea()": 1243235753.6556084,
+          "SHAPE.STLength()": 304053.74182323116
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_current_utility_proxy_features_not_capacity",
+      "concord_only": false,
+      "utility_proxy_not_capacity": true,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "tax_parcels_full",
+      "source_name": "Cabarrus Tax Parcels Full",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/Tax_Parcels_Full/MapServer",
+      "layer_id": 0,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/Tax_Parcels_Full/MapServer/0",
+      "source_group": "tax_parcel_full",
+      "source_type": "parcel_value_enrichment_reference",
+      "jurisdiction": "Cabarrus County",
+      "geography_scope": "countywide parcel enrichment reference",
+      "prediction_feature_role": "parcel_value_field_gap_review",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "include_in_future_model": true,
+      "include_in_strict_baseline": false,
+      "do_not_overwrite_table": "public.parcels_enriched",
+      "fallback_urls": [],
+      "inspected_at": "2026-06-14T07:12:02.633724+00:00",
+      "source_status": "active",
+      "layer_name": "Tax Parcels",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": null,
+      "record_count": 110215,
+      "count_error": null,
+      "query_supported": true,
+      "supported_query_formats": [
+        "JSON",
+        "geoJSON",
+        "PBF"
+      ],
+      "fields": [
+        {
+          "name": "Shape_Length",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape_Length",
+          "domain": null
+        },
+        {
+          "name": "Shape_Area",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape_Area",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID_1",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID_1",
+          "domain": null
+        },
+        {
+          "name": "PIN14",
+          "type": "esriFieldTypeString",
+          "alias": "PIN14",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeInteger",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "SHEET",
+          "type": "esriFieldTypeSmallInteger",
+          "alias": "SHEET",
+          "domain": null
+        },
+        {
+          "name": "BLOCK",
+          "type": "esriFieldTypeSmallInteger",
+          "alias": "BLOCK",
+          "domain": null
+        },
+        {
+          "name": "ParcelNum",
+          "type": "esriFieldTypeSmallInteger",
+          "alias": "ParcelNum",
+          "domain": null
+        },
+        {
+          "name": "CODE",
+          "type": "esriFieldTypeString",
+          "alias": "CODE",
+          "length": 2,
+          "domain": null
+        },
+        {
+          "name": "PIN",
+          "type": "esriFieldTypeString",
+          "alias": "PIN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "OLDPIN",
+          "type": "esriFieldTypeString",
+          "alias": "OLDPIN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "YEAR_",
+          "type": "esriFieldTypeString",
+          "alias": "YEAR_",
+          "length": 4,
+          "domain": null
+        },
+        {
+          "name": "SUBDIV_NAME",
+          "type": "esriFieldTypeString",
+          "alias": "SUBDIV_NAME",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "LOT_NUM",
+          "type": "esriFieldTypeString",
+          "alias": "LOT_NUM",
+          "length": 15,
+          "domain": null
+        },
+        {
+          "name": "NBH_NAME",
+          "type": "esriFieldTypeString",
+          "alias": "NBH_NAME",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "NBH_NUM",
+          "type": "esriFieldTypeString",
+          "alias": "NBH_NUM",
+          "length": 5,
+          "domain": null
+        },
+        {
+          "name": "CALCULATED_ACREAGE",
+          "type": "esriFieldTypeDouble",
+          "alias": "CALCULATED_ACREAGE",
+          "domain": null
+        },
+        {
+          "name": "PropertyReal_ID",
+          "type": "esriFieldTypeString",
+          "alias": "PropertyReal_ID",
+          "length": 15,
+          "domain": null
+        },
+        {
+          "name": "PARCEL",
+          "type": "esriFieldTypeString",
+          "alias": "PARCEL",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "LegalDesc",
+          "type": "esriFieldTypeString",
+          "alias": "LegalDesc",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "LandUnits",
+          "type": "esriFieldTypeDouble",
+          "alias": "LandUnits",
+          "domain": null
+        },
+        {
+          "name": "MarketValue",
+          "type": "esriFieldTypeString",
+          "alias": "MarketValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "AssessedValue",
+          "type": "esriFieldTypeString",
+          "alias": "AssessedValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "PriorLandValue",
+          "type": "esriFieldTypeString",
+          "alias": "PriorLandValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "PriorSpecialLandValue",
+          "type": "esriFieldTypeString",
+          "alias": "PriorSpecialLandValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "PriorDeferredValue",
+          "type": "esriFieldTypeString",
+          "alias": "PriorDeferredValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "PriorBuildingValue",
+          "type": "esriFieldTypeString",
+          "alias": "PriorBuildingValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "PriorObxfValue",
+          "type": "esriFieldTypeString",
+          "alias": "PriorObxfValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "PriorTotalValue",
+          "type": "esriFieldTypeString",
+          "alias": "PriorTotalValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "LandValue",
+          "type": "esriFieldTypeString",
+          "alias": "LandValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "SpecialLandValue",
+          "type": "esriFieldTypeString",
+          "alias": "SpecialLandValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "DeferredValue",
+          "type": "esriFieldTypeString",
+          "alias": "DeferredValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "BuildingValue",
+          "type": "esriFieldTypeString",
+          "alias": "BuildingValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "ObxfValue",
+          "type": "esriFieldTypeString",
+          "alias": "ObxfValue",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "PlatBook",
+          "type": "esriFieldTypeString",
+          "alias": "PlatBook",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "PlatPage",
+          "type": "esriFieldTypeString",
+          "alias": "PlatPage",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "UnitsType",
+          "type": "esriFieldTypeString",
+          "alias": "UnitsType",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "AcctNumber",
+          "type": "esriFieldTypeString",
+          "alias": "AcctNumber",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "AcctName1",
+          "type": "esriFieldTypeString",
+          "alias": "AcctName1",
+          "length": 100,
+          "domain": null
+        },
+        {
+          "name": "AcctName2",
+          "type": "esriFieldTypeString",
+          "alias": "AcctName2",
+          "length": 100,
+          "domain": null
+        },
+        {
+          "name": "MailAddr1",
+          "type": "esriFieldTypeString",
+          "alias": "MailAddr1",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "MailAddr2",
+          "type": "esriFieldTypeString",
+          "alias": "MailAddr2",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "MailAddr3",
+          "type": "esriFieldTypeString",
+          "alias": "MailAddr3",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "MailCity",
+          "type": "esriFieldTypeString",
+          "alias": "MailCity",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "MailState",
+          "type": "esriFieldTypeString",
+          "alias": "MailState",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "MailZipCode",
+          "type": "esriFieldTypeString",
+          "alias": "MailZipCode",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "SaleYear",
+          "type": "esriFieldTypeInteger",
+          "alias": "SaleYear",
+          "domain": null
+        },
+        {
+          "name": "SaleMonth",
+          "type": "esriFieldTypeInteger",
+          "alias": "SaleMonth",
+          "domain": null
+        },
+        {
+          "name": "SalePrice",
+          "type": "esriFieldTypeDouble",
+          "alias": "SalePrice",
+          "domain": null
+        },
+        {
+          "name": "DeedBook",
+          "type": "esriFieldTypeString",
+          "alias": "DeedBook",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "DeedPage",
+          "type": "esriFieldTypeString",
+          "alias": "DeedPage",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "InstrumentType",
+          "type": "esriFieldTypeString",
+          "alias": "InstrumentType",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "QualifiedCode",
+          "type": "esriFieldTypeString",
+          "alias": "QualifiedCode",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "TransferOrSplit",
+          "type": "esriFieldTypeString",
+          "alias": "TransferOrSplit",
+          "length": 1,
+          "domain": null
+        },
+        {
+          "name": "VacantOrImproved",
+          "type": "esriFieldTypeString",
+          "alias": "VacantOrImproved",
+          "length": 1,
+          "domain": null
+        },
+        {
+          "name": "DateQuestionnairePrinted",
+          "type": "esriFieldTypeDate",
+          "alias": "DateQuestionnairePrinted",
+          "length": 8,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "Shape_Length",
+        "Shape_Area",
+        "OBJECTID_1",
+        "PIN14",
+        "OBJECTID",
+        "SHEET",
+        "BLOCK",
+        "ParcelNum",
+        "CODE",
+        "PIN",
+        "OLDPIN",
+        "YEAR_",
+        "SUBDIV_NAME",
+        "LOT_NUM",
+        "NBH_NAME",
+        "NBH_NUM",
+        "CALCULATED_ACREAGE",
+        "PropertyReal_ID",
+        "PARCEL",
+        "LegalDesc",
+        "LandUnits",
+        "MarketValue",
+        "AssessedValue",
+        "PriorLandValue",
+        "PriorSpecialLandValue",
+        "PriorDeferredValue",
+        "PriorBuildingValue",
+        "PriorObxfValue",
+        "PriorTotalValue",
+        "LandValue",
+        "SpecialLandValue",
+        "DeferredValue",
+        "BuildingValue",
+        "ObxfValue",
+        "PlatBook",
+        "PlatPage",
+        "UnitsType",
+        "AcctNumber",
+        "AcctName1",
+        "AcctName2",
+        "MailAddr1",
+        "MailAddr2",
+        "MailAddr3",
+        "MailCity",
+        "MailState",
+        "MailZipCode",
+        "SaleYear",
+        "SaleMonth",
+        "SalePrice",
+        "DeedBook",
+        "DeedPage",
+        "InstrumentType",
+        "QualifiedCode",
+        "TransferOrSplit",
+        "VacantOrImproved",
+        "DateQuestionnairePrinted",
+        "Shape"
+      ],
+      "land_use_field_candidates": [
+        "LandUnits",
+        "PriorLandValue",
+        "PriorSpecialLandValue",
+        "LandValue",
+        "SpecialLandValue"
+      ],
+      "plan_node_field_candidates": [
+        "Shape_Area",
+        "SUBDIV_NAME",
+        "NBH_NAME",
+        "UnitsType",
+        "AcctName1",
+        "AcctName2",
+        "InstrumentType"
+      ],
+      "parcel_link_field_candidates": [
+        "PIN14",
+        "ParcelNum",
+        "PIN",
+        "OLDPIN",
+        "PARCEL"
+      ],
+      "status_field_candidates": [],
+      "date_field_candidates": [
+        "DateQuestionnairePrinted"
+      ],
+      "value_field_candidates": [
+        "LandUnits",
+        "MarketValue",
+        "AssessedValue",
+        "PriorLandValue",
+        "PriorSpecialLandValue",
+        "PriorDeferredValue",
+        "PriorBuildingValue",
+        "PriorObxfValue",
+        "PriorTotalValue",
+        "LandValue",
+        "SpecialLandValue",
+        "DeferredValue",
+        "BuildingValue",
+        "ObxfValue",
+        "VacantOrImproved"
+      ],
+      "utility_field_candidates": [],
+      "sample_features": [
+        {
+          "Shape_Length": 2046.6069011593622,
+          "Shape_Area": 126445.1339094904,
+          "OBJECTID_1": 193462955,
+          "PIN14": "46746287340000",
+          "OBJECTID": 1,
+          "SHEET": 4674,
+          "BLOCK": 62,
+          "ParcelNum": 8734,
+          "CODE": "CO",
+          "PIN": "4674628734.00000000",
+          "OLDPIN": "4674628734.00000000",
+          "YEAR_": " ",
+          "SUBDIV_NAME": " ",
+          "LOT_NUM": null,
+          "NBH_NAME": "DEWEESE",
+          "NBH_NUM": "13001",
+          "CALCULATED_ACREAGE": 2.90279246,
+          "PropertyReal_ID": "03-001 -0020.00",
+          "PARCEL": "46746287340000",
+          "LegalDesc": "P/O LT 3 W P ROGERS ESTATES",
+          "LandUnits": 2.96,
+          "MarketValue": "130360",
+          "AssessedValue": "130360",
+          "PriorLandValue": "73370",
+          "PriorSpecialLandValue": "0",
+          "PriorDeferredValue": "0",
+          "PriorBuildingValue": "33920",
+          "PriorObxfValue": "3170",
+          "PriorTotalValue": "110460",
+          "LandValue": "90630",
+          "SpecialLandValue": "0",
+          "DeferredValue": "0",
+          "BuildingValue": "36300",
+          "ObxfValue": "3430",
+          "PlatBook": "",
+          "PlatPage": "",
+          "UnitsType": "AC",
+          "AcctNumber": "4823425",
+          "AcctName1": "MESIMER DEWEY LEE",
+          "AcctName2": "MESIMER JESSIE R PENNIX WF",
+          "MailAddr1": "9880 ARCHER RD",
+          "MailAddr2": "",
+          "MailAddr3": "",
+          "MailCity": "DAVIDSON",
+          "MailState": "NC",
+          "MailZipCode": "28036",
+          "SaleYear": 2008,
+          "SaleMonth": 8,
+          "SalePrice": 288000,
+          "DeedBook": "08371",
+          "DeedPage": "0140",
+          "InstrumentType": "GW",
+          "QualifiedCode": "A",
+          "TransferOrSplit": "T",
+          "VacantOrImproved": "I",
+          "DateQuestionnairePrinted": null
+        },
+        {
+          "Shape_Length": 517.9401200357664,
+          "Shape_Area": 16130.969499071523,
+          "OBJECTID_1": 193462956,
+          "PIN14": "56142122170000",
+          "OBJECTID": 9,
+          "SHEET": 5614,
+          "BLOCK": 21,
+          "ParcelNum": 2217,
+          "CODE": "KA",
+          "PIN": "5614212217.00000000",
+          "OLDPIN": "5614212217.00000000",
+          "YEAR_": " ",
+          "SUBDIV_NAME": " ",
+          "LOT_NUM": null,
+          "NBH_NAME": "WEST C ST",
+          "NBH_NUM": "10002",
+          "CALCULATED_ACREAGE": 0.33044663,
+          "PropertyReal_ID": "04-012 -0150.20",
+          "PARCEL": "56142122170000",
+          "LegalDesc": "WEST SIDE DALE AVE",
+          "LandUnits": 1,
+          "MarketValue": "130450",
+          "AssessedValue": "130450",
+          "PriorLandValue": "11880",
+          "PriorSpecialLandValue": "0",
+          "PriorDeferredValue": "0",
+          "PriorBuildingValue": "95480",
+          "PriorObxfValue": "660",
+          "PriorTotalValue": "108020",
+          "LandValue": "15360",
+          "SpecialLandValue": "0",
+          "DeferredValue": "0",
+          "BuildingValue": "114280",
+          "ObxfValue": "810",
+          "PlatBook": "00006",
+          "PlatPage": "00007",
+          "UnitsType": "LT",
+          "AcctNumber": "134478",
+          "AcctName1": "ALEXANDER BENNY LEE",
+          "AcctName2": "",
+          "MailAddr1": "200 DALE AVE",
+          "MailAddr2": "",
+          "MailAddr3": "",
+          "MailCity": "KANNAPOLIS",
+          "MailState": "NC",
+          "MailZipCode": "28081",
+          "SaleYear": 2019,
+          "SaleMonth": 12,
+          "SalePrice": 0,
+          "DeedBook": "13876",
+          "DeedPage": "0057",
+          "InstrumentType": "GW",
+          "QualifiedCode": "E",
+          "TransferOrSplit": "T",
+          "VacantOrImproved": "I",
+          "DateQuestionnairePrinted": null
+        },
+        {
+          "Shape_Length": 1023.704023760483,
+          "Shape_Area": 59527.39604343089,
+          "OBJECTID_1": 193462957,
+          "PIN14": "56039548930000",
+          "OBJECTID": 29,
+          "SHEET": 5603,
+          "BLOCK": 95,
+          "ParcelNum": 4893,
+          "CODE": "KA",
+          "PIN": "5603954893.00000000",
+          "OLDPIN": "5603954893.00000000",
+          "YEAR_": " ",
+          "SUBDIV_NAME": " ",
+          "LOT_NUM": null,
+          "NBH_NAME": "BETHPAGE RD AREA",
+          "NBH_NUM": "10003",
+          "CALCULATED_ACREAGE": 1.42307643,
+          "PropertyReal_ID": "04-047 -0067.00",
+          "PARCEL": "56039548930000",
+          "LegalDesc": "LOT 2 W W WILKINSON ESTATE",
+          "LandUnits": 1.46,
+          "MarketValue": "125510",
+          "AssessedValue": "125510",
+          "PriorLandValue": "50020",
+          "PriorSpecialLandValue": "0",
+          "PriorDeferredValue": "0",
+          "PriorBuildingValue": "62990",
+          "PriorObxfValue": "1510",
+          "PriorTotalValue": "114520",
+          "LandValue": "50020",
+          "SpecialLandValue": "0",
+          "DeferredValue": "0",
+          "BuildingValue": "74270",
+          "ObxfValue": "1220",
+          "PlatBook": "",
+          "PlatPage": "",
+          "UnitsType": "AC",
+          "AcctNumber": "7664050",
+          "AcctName1": "YOST BENNETT A",
+          "AcctName2": "YOST DELORES D/WIFE",
+          "MailAddr1": "1304 BETHPAGE ROAD",
+          "MailAddr2": " ",
+          "MailAddr3": " ",
+          "MailCity": "KANNAPOLIS",
+          "MailState": "NC",
+          "MailZipCode": "28081",
+          "SaleYear": 1993,
+          "SaleMonth": 6,
+          "SalePrice": 54000,
+          "DeedBook": "01268",
+          "DeedPage": "0241",
+          "InstrumentType": "WD",
+          "QualifiedCode": "Q",
+          "TransferOrSplit": null,
+          "VacantOrImproved": "I",
+          "DateQuestionnairePrinted": null
+        }
+      ],
+      "sample_error": null,
+      "readiness": "ready_for_gap_check_do_not_overwrite_base_parcels",
+      "concord_only": false,
+      "utility_proxy_not_capacity": false,
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "concord_sewer_allocation_policy_pdf",
+      "source_name": "Concord Sewer Allocation Policy PDF",
+      "source_group": "sewer_allocation_document_inventory",
+      "source_type": "pdf_reference",
+      "jurisdiction": "Concord",
+      "geography_scope": "Concord only",
+      "prediction_feature_role": "future_manual_structured_ingestion_candidate",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "source_status": "inventory_only_url_needed",
+      "notes": "Do not parse into production tables until source PDF/table is structured and QA-safe.",
+      "inspected_at": "2026-06-14T07:12:07.839886+00:00",
+      "metadata_error": null,
+      "record_count": null,
+      "fields": [],
+      "readiness": "document_inventory_only",
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "concord_sewer_allocation_project_summary_pdf",
+      "source_name": "Concord Sewer Allocation Project Summary PDF",
+      "source_group": "sewer_allocation_document_inventory",
+      "source_type": "pdf_reference",
+      "jurisdiction": "Concord",
+      "geography_scope": "Concord only",
+      "prediction_feature_role": "future_manual_structured_ingestion_candidate",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "source_status": "inventory_only_url_needed",
+      "notes": "Potentially high value, but not loaded until structured extraction and QA are defined.",
+      "inspected_at": "2026-06-14T07:12:07.839923+00:00",
+      "metadata_error": null,
+      "record_count": null,
+      "fields": [],
+      "readiness": "document_inventory_only",
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "kannapolis_wastewater_allocation_policy_pdf",
+      "source_name": "Kannapolis Wastewater Allocation Policy PDF",
+      "source_group": "sewer_allocation_document_inventory",
+      "source_type": "pdf_reference",
+      "jurisdiction": "Kannapolis",
+      "geography_scope": "Kannapolis only",
+      "prediction_feature_role": "future_manual_structured_ingestion_candidate",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "source_status": "inventory_only_url_needed",
+      "notes": "Do not infer allocation status from policy text without structured project records.",
+      "inspected_at": "2026-06-14T07:12:07.839934+00:00",
+      "metadata_error": null,
+      "record_count": null,
+      "fields": [],
+      "readiness": "document_inventory_only",
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "kannapolis_wastewater_allocation_exhibit_a",
+      "source_name": "Kannapolis Wastewater Allocation Exhibit A",
+      "source_group": "sewer_allocation_document_inventory",
+      "source_type": "pdf_or_table_reference",
+      "jurisdiction": "Kannapolis",
+      "geography_scope": "Kannapolis only",
+      "prediction_feature_role": "future_manual_structured_ingestion_candidate",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "source_status": "inventory_only_url_needed",
+      "notes": "Potential structured allocation list; keep inventory-only until source file is provided and validated.",
+      "inspected_at": "2026-06-14T07:12:07.839942+00:00",
+      "metadata_error": null,
+      "record_count": null,
+      "fields": [],
+      "readiness": "document_inventory_only",
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "harrisburg_current_projects_web",
+      "source_name": "Harrisburg Current Projects Web Reference",
+      "source_group": "development_pipeline_document_inventory",
+      "source_type": "web_reference",
+      "jurisdiction": "Harrisburg",
+      "geography_scope": "Harrisburg only",
+      "prediction_feature_role": "future_development_pipeline_context",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "source_status": "inventory_only_url_needed",
+      "notes": "Inventory only. Do not scrape into production without stable structure and QA.",
+      "inspected_at": "2026-06-14T07:12:07.839949+00:00",
+      "metadata_error": null,
+      "record_count": null,
+      "fields": [],
+      "readiness": "document_inventory_only",
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "harrisburg_residential_summary_pdf",
+      "source_name": "Harrisburg Residential Summary PDF",
+      "source_group": "development_pipeline_document_inventory",
+      "source_type": "pdf_reference",
+      "jurisdiction": "Harrisburg",
+      "geography_scope": "Harrisburg only",
+      "prediction_feature_role": "future_development_pipeline_context",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "source_status": "inventory_only_url_needed",
+      "notes": "Inventory only until a structured, stable table can be extracted and reviewed.",
+      "inspected_at": "2026-06-14T07:12:07.839957+00:00",
+      "metadata_error": null,
+      "record_count": null,
+      "fields": [],
+      "readiness": "document_inventory_only",
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "crmpo_mobility_web",
+      "source_name": "CRMPO Mobility / Transportation Planning Reference",
+      "source_group": "transportation_planning_document_inventory",
+      "source_type": "web_reference",
+      "jurisdiction": "Regional",
+      "geography_scope": "CRMPO planning area",
+      "prediction_feature_role": "future_planned_transportation_context",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "source_status": "inventory_only_url_needed",
+      "notes": "Use for future project/date/geometry inventory if structured data is available.",
+      "inspected_at": "2026-06-14T07:12:07.839965+00:00",
+      "metadata_error": null,
+      "record_count": null,
+      "fields": [],
+      "readiness": "document_inventory_only",
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    },
+    {
+      "source_key": "ncdot_cabarrus_rowan_ctp_web",
+      "source_name": "NCDOT Cabarrus-Rowan CTP Reference",
+      "source_group": "transportation_planning_document_inventory",
+      "source_type": "web_reference",
+      "jurisdiction": "Regional",
+      "geography_scope": "Cabarrus-Rowan CTP",
+      "prediction_feature_role": "future_planned_transportation_context",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "source_status": "inventory_only_url_needed",
+      "notes": "Inventory only until dated project geometry and status are available.",
+      "inspected_at": "2026-06-14T07:12:07.839999+00:00",
+      "metadata_error": null,
+      "record_count": null,
+      "fields": [],
+      "readiness": "document_inventory_only",
+      "relocation_warning": "Cabarrus and municipal REST services may move during service reorganization. If a URL fails, inspect service roots, layer IDs, fallback URLs, and the source registry before marking unavailable."
+    }
+  ]
+}

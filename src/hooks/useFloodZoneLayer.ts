@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { mapFloodZoneToPolygon } from "@/lib/adapters/floodZoneMapAdapter";
-import { CFS_API_BASE_URL, USE_BACKEND_API } from "@/lib/api/client";
+import {
+  CFS_API_BASE_URL,
+  getApiErrorDisplayMessage,
+  USE_BACKEND_API,
+} from "@/lib/api/client";
 import { getFloodZones } from "@/lib/api/constraints";
 import type {
   FloodZoneControls,
@@ -113,10 +117,10 @@ export function useFloodZoneLayer({
         }
 
         setState({
-          errorMessage:
-            error instanceof Error
-              ? error.message
-              : "FEMA flood zone polygons are unavailable.",
+          errorMessage: getApiErrorDisplayMessage(
+            error,
+            "FEMA flood zone polygons are unavailable.",
+          ),
           isLoading: false,
           polygons: [],
           requestKey,

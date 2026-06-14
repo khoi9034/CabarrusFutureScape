@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-06-14T07:34:41.301577+00:00",
+  "feature_table": "parcel_central_area_plan_features",
+  "concord_only_context": true,
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "expected_parcel_count": 110017,
+  "row_count": 110017,
+  "unique_parcels": 110017,
+  "row_count_matches_parcels": true,
+  "inside_central_area_plan_count": 14555,
+  "inside_primary_activity_area_count": 427,
+  "inside_service_node_count": 8,
+  "inside_special_corridor_count": 104,
+  "inside_special_use_area_count": 11,
+  "future_land_use_assigned_count": 14554,
+  "current_context_only_count": 110017,
+  "not_time_safe_count": 110017
+}

@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-06-14T07:34:55.144654+00:00",
+  "feature_table": "parcel_utility_proxy_features",
+  "utility_proxy_only": true,
+  "true_capacity_available": false,
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "expected_parcel_count": 110017,
+  "row_count": 110017,
+  "unique_parcels": 110017,
+  "row_count_matches_parcels": true,
+  "parcels_with_manhole_distance": 110017,
+  "parcels_with_sewer_line_distance": 110017,
+  "parcels_inside_wsacc_district_proxy": 26255,
+  "parcels_with_utility_proxy_context": 110017,
+  "true_capacity_available_count": 0,
+  "current_context_only_count": 110017,
+  "not_time_safe_count": 110017,
+  "nearest_sewer_line_min_ft": 0.723349079449649,
+  "nearest_sewer_line_avg_ft": 5443.216818394397,
+  "nearest_sewer_line_max_ft": 50457.20727902765
+}

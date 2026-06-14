@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { getApiErrorDisplayMessage, USE_BACKEND_API } from "@/lib/api/client";
 import {
   getDevelopmentPredictionFeaturesSummary,
   getDevelopmentPredictionRankingSummary,
@@ -55,15 +55,20 @@ const documentedRankingSummary: DevelopmentPredictionRankingSummaryResponse = {
 export const standardizedDevelopmentPredictionMetrics = {
   baselineLiftAtTop5: 1.265508,
   baselinePrAuc: 0.054665,
+  currentBestLiftAtTop5: 4.051123,
+  currentBestPrAuc: 0.137928,
   target: "new construction permit within next 3 years",
+  transportationBaseLiftAtTop5: 3.889837,
+  transportationBasePrAuc: 0.082744,
   zoningEnhancedLiftAtTop5: 1.774988,
   zoningEnhancedPrAuc: 0.071174,
 };
 
 export const developmentPredictionRoadmap = [
   "Add official rezoning case dates if available.",
-  "Add adopted future land use context.",
-  "Add road/accessibility and utility service features.",
+  "Add countywide adopted future land use with effective dates.",
+  "Replace utility proxies with true service capacity and allocation data.",
+  "Add official development pipeline and subdivision approval outcomes.",
   "Add verified school capacity and enrollment data.",
   "Improve calibration and temporal validation.",
   "Decide whether ranked classes can be shown as an experimental planning signal.",
@@ -72,7 +77,7 @@ export const developmentPredictionRoadmap = [
 export const developmentPredictionPublicBlockers = [
   "Weak probability calibration.",
   "Missing official rezoning case dates.",
-  "Missing future land use, utility, and road accessibility features.",
+  "Missing countywide future land use, true utility capacity, and official development pipeline data.",
   "Official school capacity has not been added.",
   "Economic and market controls are not yet included.",
   "Governance and validation review is still required.",
@@ -101,10 +106,14 @@ export function useDevelopmentPredictionResearchStatus() {
     }
 
     const controller = new AbortController();
+    const modelStatusRequestOptions = {
+      signal: controller.signal,
+      timeoutMs: 45000,
+    };
 
     Promise.all([
-      getDevelopmentPredictionFeaturesSummary({ signal: controller.signal }),
-      getDevelopmentPredictionRankingSummary({ signal: controller.signal }),
+      getDevelopmentPredictionFeaturesSummary(modelStatusRequestOptions),
+      getDevelopmentPredictionRankingSummary(modelStatusRequestOptions),
     ])
       .then(([featuresSummary, rankingSummary]) => {
         setStatus({
@@ -128,10 +137,10 @@ export function useDevelopmentPredictionResearchStatus() {
         }
 
         setStatus({
-          errorMessage:
-            error instanceof Error
-              ? error.message
-              : "Development prediction research status is unavailable.",
+          errorMessage: getApiErrorDisplayMessage(
+            error,
+            "Development prediction research status is unavailable.",
+          ),
           featuresSummary: null,
           isLoading: false,
           rankingSummary: documentedRankingSummary,

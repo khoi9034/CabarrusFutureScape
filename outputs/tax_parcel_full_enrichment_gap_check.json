@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-06-14T07:28:39.043079+00:00",
+  "dry_run": false,
+  "source_count": 1,
+  "base_parcels_overwrite_allowed": false,
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "sources": [
+    {
+      "source_key": "tax_parcels_full",
+      "total_count": 110215,
+      "downloaded_count": 110215,
+      "raw_rows": 110215,
+      "clean_rows": 110215
+    }
+  ],
+  "raw_rows_loaded": 110215,
+  "clean_rows_loaded": 110215,
+  "parcels_enriched_count": 110017,
+  "tax_full_rows": 110215,
+  "rows_with_candidate_parcel_key": 110207,
+  "rows_with_land_value": 104418,
+  "rows_with_improvement_value": 104418,
+  "rows_with_total_value": 104415,
+  "rows_with_assessed_value": 104327,
+  "overwrite_allowed_rows": 0
+}

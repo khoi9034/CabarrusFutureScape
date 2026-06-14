@@ -1,0 +1,119 @@
+{
+  "phase": "16D_current_best_internal_model_governance",
+  "generated_at": "2026-06-14T00:00:00-04:00",
+  "recommended_variant": "transportation_plus_tax_value_only",
+  "recommended_label": "Zoning + Transportation + Tax/Value",
+  "recommended_experiment_id": "phase16c_planning_pipeline_utility_ablation_v1",
+  "target": "new_construction_next_3yr",
+  "model_status": {
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false,
+    "public_exposure_allowed": false,
+    "frontend_prediction_exposure": false,
+    "parcel_level_ranking_exposure": false
+  },
+  "included_feature_groups": [
+    "permits/new construction labels",
+    "parcel base/value context",
+    "historical zoning",
+    "transportation accessibility",
+    "STIP/AADT",
+    "tax/value enrichment"
+  ],
+  "excluded_feature_groups": [
+    "Accela plan reviews",
+    "Central Area Plan",
+    "utility proxy",
+    "metadata/current-context flags"
+  ],
+  "why_phase16b_full_not_recommended": [
+    "The full Phase 16B feature bundle reduced PR-AUC relative to the transportation-enhanced base.",
+    "The full Phase 16B feature bundle collapsed lift@top 5%, which is the higher-priority rare-event ranking metric.",
+    "Accela, Central Area Plan, and utility proxy fields remain current-context, jurisdiction-limited, or proxy-only without enough governance for public model claims."
+  ],
+  "why_current_variant_selected": [
+    "Phase 16C tax/value-only ablation improved PR-AUC from 0.082744 to 0.137928 versus the transportation-enhanced base.",
+    "Phase 16C tax/value-only ablation improved lift@top 5% from 3.889837 to 4.051123 versus the transportation-enhanced base.",
+    "The selected variant keeps stronger zoning and transportation context while excluding noisy planning/pipeline/utility feature groups."
+  ],
+  "methodology_updates": {
+    "current_best_internal_model_section_added": true,
+    "aggregate_governance_only": true,
+    "shows_variant": "Zoning + Transportation + Tax/Value",
+    "shows_public_exposure_not_allowed": true,
+    "shows_prediction_probabilities_not_available": true,
+    "shows_feature_group_governance": true,
+    "parcel_level_predictions_exposed": false
+  },
+  "backend_summary_updates": {
+    "endpoint": "/development/prediction/features/summary",
+    "current_best_internal_model_available": true,
+    "current_best_internal_model_variant": "transportation_plus_tax_value_only",
+    "current_best_internal_model_public_exposure_allowed": false,
+    "current_best_internal_model_production_ready": false,
+    "excluded_feature_groups_current_best": [
+      "Accela plan reviews",
+      "Central Area Plan",
+      "utility proxy",
+      "metadata/current-context flags"
+    ]
+  },
+  "artifacts_created": [
+    "outputs/modeling/development_prediction/current_best_internal_model_registry.json",
+    "outputs/modeling/development_prediction/feature_group_governance_matrix.csv",
+    "outputs/phase16d_current_best_internal_model_governance_summary.json"
+  ],
+  "docs_updated": [
+    "docs/modeling/development_prediction_model_readiness.md",
+    "docs/modeling/development_prediction_model_qa_report.md",
+    "docs/modeling/development_prediction_feature_registry.md",
+    "README.md"
+  ],
+  "tests_added": [
+    "backend/tests/test_phase16d_current_best_model_governance.py"
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest_full": "passed: 269 tests, 3 warnings before final frontend-only timeout tweak",
+    "python_pytest_phase16d": "passed: 5 tests, 1 warning",
+    "npm_run_dev_cfs": "passed: restarted local stack",
+    "smoke_frontend": "200",
+    "smoke_backend_health": "200",
+    "smoke_database_health": "200",
+    "smoke_prediction_features_summary": "200",
+    "smoke_model_flags": {
+      "model_active": false,
+      "prediction_probability_available": false,
+      "production_ready": false,
+      "public_exposure_allowed": false
+    },
+    "smoke_existing_apis": {
+      "parcel_search": "200",
+      "development_hotspots": "200",
+      "flood_summary": "200",
+      "school_statistics": "200",
+      "prediction_ranking_summary": "200"
+    },
+    "browser_methodology_smoke": {
+      "methodology_loaded": true,
+      "current_best_variant_visible": true,
+      "parcel_level_prediction_field_names_visible": false,
+      "console_errors": 0,
+      "note": "Initial browser run showed documented aggregate fallback while local API calls were busy; frontend timeout was extended for the model status hook and direct live API smoke passed."
+    }
+  },
+  "remaining_data_needed": [
+    "official rezoning case dates and decisions",
+    "countywide future land use with adoption/effective dates",
+    "true utility capacity and allocation data",
+    "official development pipeline/subdivision approval outcomes",
+    "historical parcel valuation snapshots",
+    "verified school capacity/enrollment data",
+    "economic and market controls"
+  ],
+  "recommended_next_phase": "Phase 16E should focus on reducing the feature-summary payload/query cost or adding a lightweight model-governance summary endpoint before adding any new model features."
+}

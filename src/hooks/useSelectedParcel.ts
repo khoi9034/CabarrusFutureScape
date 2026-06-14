@@ -33,12 +33,19 @@ export function useSelectedParcel() {
 
   const selectParcel = useCallback(
     (parcelId: string, options: SelectParcelOptions = {}) => {
+      if (selectedParcelId === parcelId) {
+        setSelectedParcelSource(
+          options.source ?? selectedParcelSource ?? "dashboard",
+        );
+        return;
+      }
+
       setSelectedParcelId(parcelId);
       setSelectedParcelSource(options.source ?? "dashboard");
       setSelectedParcelIntelligenceState(null);
       setSelectedParcelIntelligenceSource(null);
     },
-    [],
+    [selectedParcelId, selectedParcelSource],
   );
 
   const setSelectedParcelIntelligence = useCallback(

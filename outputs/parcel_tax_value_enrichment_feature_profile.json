@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-06-14T07:35:33.014861+00:00",
+  "feature_table": "parcel_tax_value_enrichment_features",
+  "base_parcels_overwritten": false,
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "expected_parcel_count": 110017,
+  "row_count": 110017,
+  "unique_parcels": 110017,
+  "row_count_matches_parcels": true,
+  "matched_tax_full_count": 109994,
+  "rows_with_land_value": 103666,
+  "rows_with_improvement_value": 103666,
+  "rows_with_total_value": 103662,
+  "rows_with_assessed_value": 103531,
+  "base_parcels_overwritten_count": 0,
+  "current_context_only_count": 110017,
+  "not_time_safe_count": 110017
+}

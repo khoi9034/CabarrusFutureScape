@@ -1,0 +1,630 @@
+{
+  "experiment_id": "phase16b_planning_pipeline_utility_enhanced_v1",
+  "target": "new_construction_next_3yr",
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "concord_only_features_present": true,
+  "utility_proxy_only_features_present": true,
+  "transportation_enhanced": {
+    "best_model_name": "hist_gradient_boosting",
+    "models": {
+      "logistic_regression": {
+        "validation": {
+          "row_count": 220034,
+          "positive_count": 8611,
+          "positive_rate": 0.039135,
+          "roc_auc": 0.621607,
+          "average_precision_pr_auc": 0.059851,
+          "precision_at_top_1_pct": 0.004089,
+          "precision_at_top_5_pct": 0.052899,
+          "recall_at_top_5_pct": 0.067588,
+          "lift_at_top_1_pct": 0.104486,
+          "lift_at_top_5_pct": 1.351723,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 2201,
+            "precision": 0.004089,
+            "recall": 0.001045,
+            "lift": 0.104486,
+            "cutoff_score": 0.9988713291,
+            "above_cutoff_count": 2200,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 11002,
+            "precision": 0.052899,
+            "recall": 0.067588,
+            "lift": 1.351723,
+            "cutoff_score": 0.795291583,
+            "above_cutoff_count": 11001,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "brier_score": 0.233435,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 134241,
+            "false_positive": 77182,
+            "false_negative": 3785,
+            "true_positive": 4826
+          }
+        },
+        "test": {
+          "row_count": 110017,
+          "positive_count": 4216,
+          "positive_rate": 0.038321,
+          "roc_auc": 0.545152,
+          "average_precision_pr_auc": 0.044958,
+          "precision_at_top_1_pct": 0.001817,
+          "precision_at_top_5_pct": 0.016179,
+          "recall_at_top_5_pct": 0.02111,
+          "lift_at_top_1_pct": 0.047403,
+          "lift_at_top_5_pct": 0.42219,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 1101,
+            "precision": 0.001817,
+            "recall": 0.000474,
+            "lift": 0.047403,
+            "cutoff_score": 0.9998723042,
+            "above_cutoff_count": 1100,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 5501,
+            "precision": 0.016179,
+            "recall": 0.02111,
+            "lift": 0.42219,
+            "cutoff_score": 0.8799204401,
+            "above_cutoff_count": 5500,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "brier_score": 0.276104,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 58414,
+            "false_positive": 47387,
+            "false_negative": 2051,
+            "true_positive": 2165
+          }
+        }
+      },
+      "hist_gradient_boosting": {
+        "validation": {
+          "row_count": 220034,
+          "positive_count": 8611,
+          "positive_rate": 0.039135,
+          "roc_auc": 0.807207,
+          "average_precision_pr_auc": 0.229912,
+          "precision_at_top_1_pct": 0.458428,
+          "precision_at_top_5_pct": 0.30249,
+          "recall_at_top_5_pct": 0.386482,
+          "lift_at_top_1_pct": 11.714057,
+          "lift_at_top_5_pct": 7.729437,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 2201,
+            "precision": 0.458428,
+            "recall": 0.117176,
+            "lift": 11.714057,
+            "cutoff_score": 0.8696480869,
+            "above_cutoff_count": 2199,
+            "tie_count_at_cutoff": 2,
+            "remaining_slots_from_tie_bucket": 2,
+            "tie_positive_count": 2,
+            "tie_positive_rate": 1.0,
+            "tie_adjusted": false
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 11002,
+            "precision": 0.30249,
+            "recall": 0.386482,
+            "lift": 7.729437,
+            "cutoff_score": 0.5881744576,
+            "above_cutoff_count": 10986,
+            "tie_count_at_cutoff": 16,
+            "remaining_slots_from_tie_bucket": 16,
+            "tie_positive_count": 16,
+            "tie_positive_rate": 1.0,
+            "tie_adjusted": false
+          },
+          "brier_score": 0.101607,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 197631,
+            "false_positive": 13792,
+            "false_negative": 4811,
+            "true_positive": 3800
+          }
+        },
+        "test": {
+          "row_count": 110017,
+          "positive_count": 4216,
+          "positive_rate": 0.038321,
+          "roc_auc": 0.715771,
+          "average_precision_pr_auc": 0.083925,
+          "precision_at_top_1_pct": 0.108084,
+          "precision_at_top_5_pct": 0.136157,
+          "recall_at_top_5_pct": 0.177657,
+          "lift_at_top_1_pct": 2.820453,
+          "lift_at_top_5_pct": 3.553034,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 1101,
+            "precision": 0.108084,
+            "recall": 0.028226,
+            "lift": 2.820453,
+            "cutoff_score": 0.8129799366,
+            "above_cutoff_count": 1097,
+            "tie_count_at_cutoff": 4,
+            "remaining_slots_from_tie_bucket": 4,
+            "tie_positive_count": 4,
+            "tie_positive_rate": 1.0,
+            "tie_adjusted": false
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 5501,
+            "precision": 0.136157,
+            "recall": 0.177657,
+            "lift": 3.553034,
+            "cutoff_score": 0.546485248,
+            "above_cutoff_count": 5500,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 1,
+            "tie_positive_rate": 1.0,
+            "tie_adjusted": false
+          },
+          "brier_score": 0.102484,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 99288,
+            "false_positive": 6513,
+            "false_negative": 3319,
+            "true_positive": 897
+          }
+        }
+      }
+    }
+  },
+  "planning_pipeline_utility_enhanced": {
+    "best_model_name": "hist_gradient_boosting",
+    "models": {
+      "logistic_regression": {
+        "validation": {
+          "row_count": 220034,
+          "positive_count": 8611,
+          "positive_rate": 0.039135,
+          "roc_auc": 0.794113,
+          "average_precision_pr_auc": 0.128888,
+          "precision_at_top_1_pct": 0.004543,
+          "precision_at_top_5_pct": 0.19751,
+          "recall_at_top_5_pct": 0.252352,
+          "lift_at_top_1_pct": 0.116096,
+          "lift_at_top_5_pct": 5.046895,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 2201,
+            "precision": 0.004543,
+            "recall": 0.001161,
+            "lift": 0.116096,
+            "cutoff_score": 0.9999080877,
+            "above_cutoff_count": 2200,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 11002,
+            "precision": 0.19751,
+            "recall": 0.252352,
+            "lift": 5.046895,
+            "cutoff_score": 0.7833193262,
+            "above_cutoff_count": 11001,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "brier_score": 0.101335,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 186101,
+            "false_positive": 25322,
+            "false_negative": 4293,
+            "true_positive": 4318
+          }
+        },
+        "test": {
+          "row_count": 110017,
+          "positive_count": 4216,
+          "positive_rate": 0.038321,
+          "roc_auc": 0.631857,
+          "average_precision_pr_auc": 0.055109,
+          "precision_at_top_1_pct": 0.003633,
+          "precision_at_top_5_pct": 0.008544,
+          "recall_at_top_5_pct": 0.011148,
+          "lift_at_top_1_pct": 0.094805,
+          "lift_at_top_5_pct": 0.222954,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 1101,
+            "precision": 0.003633,
+            "recall": 0.000949,
+            "lift": 0.094805,
+            "cutoff_score": 0.9999978328,
+            "above_cutoff_count": 1100,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 5501,
+            "precision": 0.008544,
+            "recall": 0.011148,
+            "lift": 0.222954,
+            "cutoff_score": 0.8790152785,
+            "above_cutoff_count": 5500,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "brier_score": 0.125449,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 91250,
+            "false_positive": 14551,
+            "false_negative": 3391,
+            "true_positive": 825
+          }
+        }
+      },
+      "hist_gradient_boosting": {
+        "validation": {
+          "row_count": 220034,
+          "positive_count": 8611,
+          "positive_rate": 0.039135,
+          "roc_auc": 0.89045,
+          "average_precision_pr_auc": 0.465795,
+          "precision_at_top_1_pct": 0.904589,
+          "precision_at_top_5_pct": 0.363479,
+          "recall_at_top_5_pct": 0.464406,
+          "lift_at_top_1_pct": 23.114655,
+          "lift_at_top_5_pct": 9.287867,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 2201,
+            "precision": 0.904589,
+            "recall": 0.231216,
+            "lift": 23.114655,
+            "cutoff_score": 0.9697704891,
+            "above_cutoff_count": 2195,
+            "tie_count_at_cutoff": 20,
+            "remaining_slots_from_tie_bucket": 6,
+            "tie_positive_count": 20,
+            "tie_positive_rate": 1.0,
+            "tie_adjusted": true
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 11002,
+            "precision": 0.363479,
+            "recall": 0.464406,
+            "lift": 9.287867,
+            "cutoff_score": 0.5858996016,
+            "above_cutoff_count": 11001,
+            "tie_count_at_cutoff": 2,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 2,
+            "tie_positive_rate": 1.0,
+            "tie_adjusted": true
+          },
+          "brier_score": 0.04528,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 202063,
+            "false_positive": 9360,
+            "false_negative": 4458,
+            "true_positive": 4153
+          }
+        },
+        "test": {
+          "row_count": 110017,
+          "positive_count": 4216,
+          "positive_rate": 0.038321,
+          "roc_auc": 0.770504,
+          "average_precision_pr_auc": 0.073322,
+          "precision_at_top_1_pct": 0.025431,
+          "precision_at_top_5_pct": 0.022541,
+          "recall_at_top_5_pct": 0.029412,
+          "lift_at_top_1_pct": 0.663636,
+          "lift_at_top_5_pct": 0.588219,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 1101,
+            "precision": 0.025431,
+            "recall": 0.006641,
+            "lift": 0.663636,
+            "cutoff_score": 0.8995080252,
+            "above_cutoff_count": 1100,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 5501,
+            "precision": 0.022541,
+            "recall": 0.029412,
+            "lift": 0.588219,
+            "cutoff_score": 0.6298352469,
+            "above_cutoff_count": 5492,
+            "tie_count_at_cutoff": 10,
+            "remaining_slots_from_tie_bucket": 9,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": true
+          },
+          "brier_score": 0.07457,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 98754,
+            "false_positive": 7047,
+            "false_negative": 3906,
+            "true_positive": 310
+          }
+        }
+      }
+    }
+  },
+  "comparison_on_selected_best_models": {
+    "roc_auc": {
+      "transportation_enhanced": 0.715771,
+      "planning_pipeline_utility_enhanced": 0.770504,
+      "absolute_improvement": 0.054733,
+      "percent_improvement": 7.6467
+    },
+    "average_precision_pr_auc": {
+      "transportation_enhanced": 0.083925,
+      "planning_pipeline_utility_enhanced": 0.073322,
+      "absolute_improvement": -0.010603,
+      "percent_improvement": -12.6339
+    },
+    "precision_at_top_1_pct": {
+      "transportation_enhanced": 0.108084,
+      "planning_pipeline_utility_enhanced": 0.025431,
+      "absolute_improvement": -0.082653,
+      "percent_improvement": -76.4711
+    },
+    "precision_at_top_5_pct": {
+      "transportation_enhanced": 0.136157,
+      "planning_pipeline_utility_enhanced": 0.022541,
+      "absolute_improvement": -0.113616,
+      "percent_improvement": -83.4448
+    },
+    "recall_at_top_5_pct": {
+      "transportation_enhanced": 0.177657,
+      "planning_pipeline_utility_enhanced": 0.029412,
+      "absolute_improvement": -0.148245,
+      "percent_improvement": -83.4445
+    },
+    "lift_at_top_1_pct": {
+      "transportation_enhanced": 2.820453,
+      "planning_pipeline_utility_enhanced": 0.663636,
+      "absolute_improvement": -2.156817,
+      "percent_improvement": -76.4706
+    },
+    "lift_at_top_5_pct": {
+      "transportation_enhanced": 3.553034,
+      "planning_pipeline_utility_enhanced": 0.588219,
+      "absolute_improvement": -2.964815,
+      "percent_improvement": -83.4446
+    },
+    "brier_score": {
+      "transportation_enhanced": 0.102484,
+      "planning_pipeline_utility_enhanced": 0.07457,
+      "absolute_improvement": -0.027914,
+      "percent_improvement": -27.2374
+    },
+    "positive_rate": {
+      "transportation_enhanced": 0.038321,
+      "planning_pipeline_utility_enhanced": 0.038321,
+      "absolute_improvement": 0.0,
+      "percent_improvement": 0.0
+    }
+  },
+  "planning_pipeline_utility_helped": false,
+  "top_planning_pipeline_utility_features": [
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_City - Not Applicable",
+      "coefficient": -2.52109196,
+      "absolute_coefficient": 2.52109196,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_Notification Sent",
+      "coefficient": -2.47237575,
+      "absolute_coefficient": 2.47237575,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_type_infrequent_sklearn",
+      "coefficient": 2.10160681,
+      "absolute_coefficient": 2.10160681,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_82529537.52941819",
+      "coefficient": -2.06797162,
+      "absolute_coefficient": 2.06797162,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_Approved with Conditions",
+      "coefficient": 1.90015197,
+      "absolute_coefficient": 1.90015197,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_23016581.511014313",
+      "coefficient": 1.81574363,
+      "absolute_coefficient": 1.81574363,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_infrequent_sklearn",
+      "coefficient": 1.80987795,
+      "absolute_coefficient": 1.80987795,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_27917143.5334064",
+      "coefficient": -1.80060012,
+      "absolute_coefficient": 1.80060012,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_County - Not Applicable",
+      "coefficient": -1.75736969,
+      "absolute_coefficient": 1.75736969,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_infrequent_sklearn",
+      "coefficient": 1.71864594,
+      "absolute_coefficient": 1.71864594,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_Approved for Permitting",
+      "coefficient": 1.58838584,
+      "absolute_coefficient": 1.58838584,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_City Review Complete",
+      "coefficient": -1.56399799,
+      "absolute_coefficient": 1.56399799,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_growth_alignment_plan_context_review",
+      "coefficient": -1.4797944,
+      "absolute_coefficient": 1.4797944,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "value_enrichment_quality_separate_tax_enrichment_match_available",
+      "coefficient": -1.45675998,
+      "absolute_coefficient": 1.45675998,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_157139543.27738935",
+      "coefficient": 1.35974885,
+      "absolute_coefficient": 1.35974885,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    }
+  ],
+  "no_frontend_exposure": true
+}

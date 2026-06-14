@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { mapFloodConstraintToMarker } from "@/lib/adapters/floodConstraintMapAdapter";
-import { CFS_API_BASE_URL, USE_BACKEND_API } from "@/lib/api/client";
+import {
+  CFS_API_BASE_URL,
+  getApiErrorDisplayMessage,
+  USE_BACKEND_API,
+} from "@/lib/api/client";
 import { getFloodHighReview } from "@/lib/api/constraints";
 import { getParcelDetail } from "@/lib/api/parcels";
 import type {
@@ -129,10 +133,10 @@ export function useFloodConstraintLayer({
         }
 
         setState({
-          errorMessage:
-            error instanceof Error
-              ? error.message
-              : "Flood constraint map markers are unavailable.",
+          errorMessage: getApiErrorDisplayMessage(
+            error,
+            "Flood constraint map markers are unavailable.",
+          ),
           isLoading: false,
           markers: [],
           requestKey,

@@ -2274,6 +2274,13 @@ class DevelopmentRepository:
                 "transportation_enhanced_model_experiment_available": False,
                 "latest_transportation_experiment_id": None,
                 "transportation_experiment_current_context_only": True,
+                "planning_pipeline_utility_feature_matrix_available": False,
+                "planning_pipeline_utility_row_count": 0,
+                "planning_pipeline_utility_model_experiment_available": False,
+                "latest_planning_pipeline_utility_experiment_id": None,
+                "planning_pipeline_utility_current_context_only": True,
+                "concord_only_features_present": False,
+                "utility_proxy_only_features_present": False,
                 "production_ready": False,
             }
 
@@ -2290,6 +2297,8 @@ class DevelopmentRepository:
             "latest_zoning_enhanced_experiment_id": None,
             "transportation_enhanced_model_experiment_available": False,
             "latest_transportation_experiment_id": None,
+            "planning_pipeline_utility_model_experiment_available": False,
+            "latest_planning_pipeline_utility_experiment_id": None,
             "production_ready": False,
         }
         if score_table_status["score_table_available"]:
@@ -2372,6 +2381,35 @@ class DevelopmentRepository:
                         or bool(transportation_latest["any_production_ready"]),
                     },
                 )
+            planning_pipeline_utility_latest = self._fetch_one_or_none(
+                """
+                SELECT
+                  model_experiment_id,
+                  COUNT(*) AS score_row_count,
+                  MAX(score_created_at) AS latest_score_created_at,
+                  BOOL_OR(production_ready) AS any_production_ready
+                FROM public.development_prediction_model_experiment_scores
+                WHERE model_experiment_id = 'phase16b_planning_pipeline_utility_enhanced_v1'
+                GROUP BY model_experiment_id
+                """,
+            )
+            if planning_pipeline_utility_latest:
+                experiment_metadata.update(
+                    {
+                        "planning_pipeline_utility_model_experiment_available": True,
+                        "latest_planning_pipeline_utility_experiment_id": planning_pipeline_utility_latest[
+                            "model_experiment_id"
+                        ],
+                        "planning_pipeline_utility_experiment_score_rows": planning_pipeline_utility_latest[
+                            "score_row_count"
+                        ],
+                        "planning_pipeline_utility_experiment_created_at": planning_pipeline_utility_latest[
+                            "latest_score_created_at"
+                        ],
+                        "production_ready": bool(experiment_metadata["production_ready"])
+                        or bool(planning_pipeline_utility_latest["any_production_ready"]),
+                    },
+                )
 
         zoning_table_status = self._fetch_one(
             """
@@ -2420,6 +2458,42 @@ class DevelopmentRepository:
                       BOOL_AND(transportation_current_context_only_flag)
                         AS transportation_experiment_current_context_only
                     FROM public.parcel_development_prediction_features_transportation_enhanced
+                    """,
+                ),
+            }
+
+        planning_pipeline_utility_table_status = self._fetch_one(
+            """
+            SELECT
+              to_regclass(
+                'public.parcel_development_prediction_features_planning_pipeline_utility_enhanced'
+              ) IS NOT NULL AS planning_pipeline_utility_feature_matrix_available
+            """,
+        )
+        planning_pipeline_utility_feature_metadata: dict[str, object] = {
+            "planning_pipeline_utility_feature_matrix_available": False,
+            "planning_pipeline_utility_row_count": 0,
+            "planning_pipeline_utility_current_context_only": True,
+            "concord_only_features_present": False,
+            "utility_proxy_only_features_present": False,
+        }
+        if planning_pipeline_utility_table_status[
+            "planning_pipeline_utility_feature_matrix_available"
+        ]:
+            planning_pipeline_utility_feature_metadata = {
+                **planning_pipeline_utility_feature_metadata,
+                **planning_pipeline_utility_table_status,
+                **self._fetch_one(
+                    """
+                    SELECT
+                      COUNT(*) AS planning_pipeline_utility_row_count,
+                      BOOL_AND(planning_pipeline_utility_current_context_only_flag)
+                        AS planning_pipeline_utility_current_context_only,
+                      BOOL_OR(concord_only_feature_flag)
+                        AS concord_only_features_present,
+                      BOOL_OR(utility_proxy_only_flag)
+                        AS utility_proxy_only_features_present
+                    FROM public.parcel_development_prediction_features_planning_pipeline_utility_enhanced
                     """,
                 ),
             }
@@ -2512,6 +2586,7 @@ class DevelopmentRepository:
             **experiment_metadata,
             **zoning_feature_metadata,
             **transportation_feature_metadata,
+            **planning_pipeline_utility_feature_metadata,
         }
 
     def get_prediction_ranking_summary(self) -> dict[str, object]:

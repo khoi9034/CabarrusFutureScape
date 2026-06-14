@@ -234,3 +234,205 @@ Future time-safe transportation modeling requires historical road network
 snapshots, dated STIP or local project records, construction/completion dates,
 historical AADT by year, and clear source-availability rules for each
 `snapshot_year`.
+
+## Phase 14A Missing Feature Groups
+
+Phase 14A does not add active features. It registers the next high-value
+feature groups that should be requested before public-facing prediction is
+considered.
+
+Missing feature groups and future feature examples:
+
+- utilities and infrastructure readiness:
+  `water_service_area_flag`, `sewer_service_area_flag`,
+  `utility_capacity_status`, `wastewater_basin`,
+  `capacity_limited_area_flag`, `planned_utility_extension_within_1_mile`,
+  `utility_project_year`, `service_readiness_score`;
+- future land use and small-area plans:
+  `future_land_use_category`, `growth_area_flag`, `activity_center_flag`,
+  `employment_area_flag`, `mixed_use_node_flag`, `preservation_area_flag`,
+  `plan_policy_alignment`;
+- local transportation projects:
+  `local_project_within_half_mile`, `local_project_within_1_mile`,
+  `project_type`, `project_status`, `funded_project_flag`, `expected_year`,
+  `future_access_improvement_flag`;
+- official rezoning case records:
+  `official_rezoning_prior_1yr`, `official_rezoning_prior_3yr`,
+  `official_rezoning_prior_5yr`, `approval_date`, `old_zoning`,
+  `new_zoning`, `decision_status`, `years_since_official_rezoning`;
+- development pipeline and subdivision approvals:
+  `approved_subdivision_flag`, `in_review_development_flag`,
+  `approved_units_nearby`, `multifamily_pipeline_flag`, `project_status`,
+  `approval_date`, `expected_buildout_year`;
+- suitability and land supply:
+  `vacant_land_flag`, `underbuilt_flag`, `developable_land_score`,
+  `septic_suitability`, `constraint_weighted_land_supply`,
+  `residential_suitability_score`, `commercial_suitability_score`,
+  `industrial_suitability_score`;
+- parks, greenways, and bike-ped amenities:
+  `planned_greenway_proximity`, `park_access_score`,
+  `trail_corridor_proximity`, `bike_ped_access_context`,
+  `open_space_priority_flag`.
+
+Guardrails:
+
+- these features are not in the current feature matrix;
+- no fake values should be created;
+- current-context sources must not be treated as historical sources;
+- each received source must pass schema, geometry, sensitivity, and temporal
+  safety review before ingestion;
+- no public prediction endpoint or frontend prediction display should be added
+  from these planned feature groups.
+
+## Phase 16A Planning Pipeline Utility Features
+
+Phase 16A creates a current-context planning and infrastructure-readiness
+foundation from REST-ready sources that were discovered after the Phase 14A
+missing-data package:
+
+- Concord Central Area Plan layers:
+  boundary, primary activity areas, service nodes, special corridors, special
+  use areas, and future land use;
+- Cabarrus Accela Plan Reviews;
+- RevalMap WSACC utility proxy layers:
+  manholes, sewer lines, and districts;
+- Tax Parcels Full, loaded only as a separate enrichment/gap-check source.
+
+The combined parcel table is:
+
+- `public.parcel_planning_pipeline_utility_features`
+
+Feature examples:
+
+- `inside_central_area_plan`
+- `central_area_future_land_use`
+- `inside_primary_activity_area`
+- `inside_special_corridor`
+- `active_plan_review_count`
+- `early_pipeline_signal_flag`
+- `distance_to_nearest_wsacc_manhole_ft`
+- `distance_to_nearest_wsacc_sewer_line_ft`
+- `inside_wsacc_district_proxy`
+- `true_utility_capacity_available`
+- `tax_parcel_full_match_found`
+- `tax_full_total_value`
+
+Guardrails:
+
+- Concord Central Area Plan layers are Concord/Central Area only, not a
+  countywide future land-use layer.
+- Accela plan reviews are early pipeline signals, not development approvals or
+  completed development.
+- RevalMap WSACC layers are utility proximity/service-context proxies only; they
+  do not report capacity, allocation, or remaining seats/flow.
+- Tax Parcels Full is kept separate and does not overwrite
+  `public.parcels_enriched`.
+- Every Phase 16A feature is marked `current_context_only=true`,
+  `time_safe=false`, `include_in_future_model=true`, and
+  `include_in_strict_baseline=false`.
+
+Phase 16A prepares future exploratory model comparison only. It does not train a
+model, expose prediction probabilities, expose ranking classes, or mark any
+model production-ready.
+
+## Phase 16B Planning Pipeline Utility Enhanced Feature Matrix
+
+Phase 16B creates a separate exploratory model-comparison matrix:
+
+- `public.parcel_development_prediction_features_planning_pipeline_utility_enhanced`
+
+The table preserves the Phase 13C transportation-enhanced parcel-year
+cardinality (`1,430,221` rows) and adds planning, development-pipeline,
+utility-proxy, and tax-enrichment fields from Phase 16A.
+
+Additional model-comparison fields include:
+
+- planning context:
+  `future_land_use_category`, `future_land_use_growth_alignment`,
+  `inside_primary_activity_area`, `inside_service_node`,
+  `inside_special_corridor`, `distance_to_service_node_ft`;
+- Accela pipeline context:
+  `active_plan_review_on_parcel`, `total_plan_review_count`,
+  `recent_plan_review_count_12mo`, `latest_plan_review_status`,
+  `latest_plan_review_type`, `max_days_open`;
+- utility proxy context:
+  `distance_to_wsacc_sewer_line_ft`,
+  `distance_to_nearest_manhole_ft`, `utility_access_proxy_score`;
+- tax enrichment:
+  `building_value`, `land_to_building_value_ratio`,
+  `tax_enriched_land_value`, `tax_enriched_total_value`;
+- guardrails:
+  `planning_pipeline_utility_current_context_only_flag`,
+  `concord_only_feature_flag`, `utility_proxy_only_flag`,
+  `planning_pipeline_utility_time_safe_for_training_flag`.
+
+Feature policy:
+
+- all Phase 16B fields are `current_context_only=true`;
+- all Phase 16B fields are excluded from the strict baseline;
+- Concord Central Area Plan fields must not be treated as countywide future
+  land-use coverage;
+- WSACC utility proxy fields must not be treated as true sewer capacity or
+  allocation;
+- Tax Parcels Full enrichment must not be treated as historical valuation
+  snapshots.
+
+## Phase 16C Ablation Governance
+
+Phase 16C tested the Phase 16B feature families separately against the Phase 13C
+transportation-enhanced base.
+
+Recommendation by feature group:
+
+- Tax parcel value enrichment: keep as an internal follow-up candidate because
+  the tax/value-only ablation improved PR-AUC and lift@top 5%. It still needs
+  historical assessment snapshots before any production use.
+- Accela plan review activity: exclude from the current best model. It improved
+  PR-AUC but sharply reduced lift@top 5%; it needs temporal filtering, status
+  semantics, and jurisdiction QA.
+- Central Area Plan / future land use: exclude from the current best model. It
+  remains Concord-only and reduced lift@top 5%; it needs countywide coverage and
+  adoption/effective dates.
+- Utility proxy: exclude from the current best model. It remains a proximity
+  proxy, not true utility capacity, and reduced lift@top 5%.
+- Metadata/current-context flags: keep as governance metadata only, not model
+  drivers.
+
+The full Phase 16B feature bundle is not recommended for the current internal
+ranking model.
+
+## Phase 16D Current Best Feature Governance
+
+Phase 16D adds a registry-level current-best decision:
+
+- current best internal feature set: `transportation_plus_tax_value_only`;
+- experiment id: `phase16c_planning_pipeline_utility_ablation_v1`;
+- model status: internal research only;
+- production ready: `false`;
+- prediction probability available: `false`;
+- public exposure allowed: `false`.
+
+The feature governance matrix is stored at:
+
+- `outputs/modeling/development_prediction/feature_group_governance_matrix.csv`
+
+Current-best feature groups:
+
+- permits/new construction labels;
+- parcel base and value context;
+- historical zoning;
+- transportation accessibility;
+- STIP/AADT;
+- tax/value enrichment.
+
+Feature groups excluded from the current best model:
+
+- Accela plan reviews;
+- Central Area Plan / Concord-only future land use context;
+- utility proxy;
+- metadata/current-context flags.
+
+Excluded groups may remain useful for dashboards, QA, data-readiness planning,
+or future model comparison, but they should not be treated as production model
+drivers without better temporal coverage, countywide scope, and authoritative
+source data.

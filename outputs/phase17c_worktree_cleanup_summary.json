@@ -1,0 +1,60 @@
+{
+    "phase":  "17C",
+    "generated_at":  "2026-06-14T09:46:36-04:00",
+    "branch":  "main",
+    "total_dirty_files_at_inventory":  125,
+    "category_counts":  [
+                            {
+                                "category":  "backend_code",
+                                "count":  3
+                            },
+                            {
+                                "category":  "config",
+                                "count":  3
+                            },
+                            {
+                                "category":  "data",
+                                "count":  14
+                            },
+                            {
+                                "category":  "docs",
+                                "count":  22
+                            },
+                            {
+                                "category":  "frontend_code",
+                                "count":  16
+                            },
+                            {
+                                "category":  "outputs",
+                                "count":  44
+                            },
+                            {
+                                "category":  "pipeline_code",
+                                "count":  16
+                            },
+                            {
+                                "category":  "runtime_logs",
+                                "count":  2
+                            },
+                            {
+                                "category":  "tests",
+                                "count":  5
+                            }
+                        ],
+    "runtime_logs":  [
+                         "logs/backend-dev.log",
+                         "logs/next-dev.log"
+                     ],
+    "cache_temp":  [
+
+                   ],
+    "unknown_review":  [
+
+                       ],
+    "inventory_csv":  "outputs/phase17c_worktree_cleanup_inventory.csv",
+    "notes":  [
+                  "Inventory captured dirty files before runtime log tracking cleanup.",
+                  "No files were deleted or restored during inventory.",
+                  "Runtime logs should be removed from Git tracking while keeping local files."
+              ]
+}

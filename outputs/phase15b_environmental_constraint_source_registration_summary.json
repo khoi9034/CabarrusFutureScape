@@ -1,0 +1,53 @@
+{
+    "phase":  "15B_environmental_constraint_source_registration",
+    "generated_at":  "2026-06-14T02:10:53.7096868-04:00",
+    "config_created":  "config/environmental_constraint_sources.json",
+    "docs_created":  [
+                         "docs/constraints/environmental_constraint_source_strategy.md"
+                     ],
+    "outputs_created":  [
+                            "outputs/environmental_constraint_source_schema_inventory.json",
+                            "outputs/environmental_constraint_source_schema_inventory.csv",
+                            "outputs/phase15b_environmental_constraint_source_registration_summary.json"
+                        ],
+    "source_priority":  {
+                            "primary_hydrology":  "primary_hydrology_open_data",
+                            "primary_local_flood_reference":  [
+                                                                  "primary_local_floodway_open_data",
+                                                                  "primary_local_floodplain_500yr_open_data",
+                                                                  "primary_local_floodplain_100yr_open_data"
+                                                              ],
+                            "fallback_reference":  [
+                                                       "legacy_hydro_fallback",
+                                                       "legacy_yadkin_hydrology_fallback",
+                                                       "legacy_floodway_fallback",
+                                                       "legacy_floodplain_100yr_fallback",
+                                                       "legacy_floodplain_500yr_fallback"
+                                                   ],
+                            "legacy_needs_review":  [
+                                                        "soils_legacy_opendata",
+                                                        "water_supply_watershed_legacy_opendata"
+                                                    ]
+                        },
+    "live_metadata_results":  {
+                                  "source_count":  11,
+                                  "reachable_count":  11,
+                                  "primary_count":  4,
+                                  "fallback_count":  7,
+                                  "primary_hydrology_record_count":  4943,
+                                  "floodway_record_count":  249,
+                                  "floodplain_500yr_record_count":  310,
+                                  "floodplain_100yr_record_count":  336,
+                                  "legacy_hydro_layer_note":  "Legacy opendata/MapServer/25 responded as a group layer, not the preferred feature geometry source."
+                              },
+    "authority_decision":  "FEMA NFHL remains the authoritative regulatory flood source; Cabarrus local flood layers are supplemental QA/reference only.",
+    "source_reorganization_note":  "Cabarrus County OpenData layers may move between service folders. If a URL fails, inspect newer service roots, legacy opendata service roots, layer IDs, and this registry before marking a source missing.",
+    "validation":  {
+                       "json_config_parses":  true,
+                       "no_postgis_schema_changes":  true,
+                       "no_frontend_changes":  true,
+                       "no_ingestion_performed":  true,
+                       "no_prediction_exposure":  true
+                   },
+    "recommended_next_step":  "Phase 15C can profile environmental overlay readiness and decide whether to ingest hydrology/soils/watershed geometries for parcel environmental context, preserving FEMA NFHL as regulatory flood authority."
+}

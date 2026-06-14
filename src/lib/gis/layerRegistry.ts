@@ -57,7 +57,12 @@ export function getOperationalLayerDefinitions(
 
 export function getDefaultLayerIds() {
   return operationalLayerRegistry
-    .filter((layer) => layer.defaultVisible && layer.visibility)
+    .filter(
+      (layer) =>
+        layer.defaultVisible &&
+        layer.visibility &&
+        isLayerVisibilityControllable(layer),
+    )
     .map((layer) => layer.id);
 }
 

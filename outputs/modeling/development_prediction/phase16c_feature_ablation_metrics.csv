@@ -1,0 +1,7 @@
+variant_name,feature_groups_added,best_model_name,row_count,positive_count,positive_rate,roc_auc,average_precision_pr_auc,precision_at_top_1_pct,precision_at_top_5_pct,lift_at_top_1_pct,lift_at_top_5_pct,brier_score,delta_pr_auc_vs_base,delta_lift_top5_vs_base,production_ready,model_active,prediction_probability_available
+transportation_enhanced_base,none,hist_gradient_boosting,110017,4216,0.038321,0.702909,0.082744,0.132607,0.149064,3.460387,3.889837,0.101458,0.0,0.0,False,False,False
+transportation_plus_tax_value_only,tax_value_enrichment,hist_gradient_boosting,110017,4216,0.038321,0.864048,0.137928,0.022707,0.155245,0.592532,4.051123,0.084395,0.055184,0.161286,False,False,False
+transportation_plus_accela_only,accela_plan_review,hist_gradient_boosting,110017,4216,0.038321,0.776194,0.092404,0.044505,0.070533,1.161363,1.840557,0.055995,0.00966,-2.04928,False,False,False
+transportation_plus_central_area_only,central_area_plan,hist_gradient_boosting,110017,4216,0.038321,0.742048,0.090397,0.139873,0.137066,3.649998,3.576753,0.101748,0.007653,-0.313084,False,False,False
+transportation_plus_utility_proxy_only,utility_proxy,hist_gradient_boosting,110017,4216,0.038321,0.732134,0.089515,0.107175,0.137611,2.796752,3.590984,0.101303,0.006771,-0.298853,False,False,False
+transportation_plus_all_phase16b,"tax_value_enrichment,accela_plan_review,central_area_plan,utility_proxy,metadata_guardrails",hist_gradient_boosting,110017,4216,0.038321,0.761476,0.071244,0.017257,0.027268,0.450324,0.711556,0.077067,-0.0115,-3.178281,False,False,False

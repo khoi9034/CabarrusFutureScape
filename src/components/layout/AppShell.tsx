@@ -17,6 +17,7 @@ import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
 import { MetricsBar } from "@/components/layout/MetricsBar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
+import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary";
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +38,12 @@ export function AppShell() {
 }
 
 function ProductShell() {
-  const { isMapFocusMode, productMode, setMapFocusMode } = useDashboardState();
+  const {
+    isMapFocusMode,
+    productMode,
+    selectedParcelId,
+    setMapFocusMode,
+  } = useDashboardState();
   const gridRef = useRef<HTMLDivElement | null>(null);
   const layerRailWidthRef = useRef(LAYER_RAIL_DEFAULT_WIDTH);
   const layerRailDragPreviewRef = useRef<LayerRailDragPreview>(null);
@@ -296,10 +302,17 @@ function ProductShell() {
 
       {executivePrintMode ? (
         <main className="relative z-10 min-h-0 flex-1 overflow-auto p-3 lg:p-4">
-          <ExecutivePrintView />
+          <EnterpriseErrorBoundary
+            moduleName="Executive Print"
+            resetKey={productMode}
+          >
+            <ExecutivePrintView />
+          </EnterpriseErrorBoundary>
         </main>
       ) : methodologyMode ? (
-        <MethodologyWorkspace />
+        <EnterpriseErrorBoundary moduleName="Methodology" resetKey={productMode}>
+          <MethodologyWorkspace />
+        </EnterpriseErrorBoundary>
       ) : (
         <div
           ref={gridRef}
@@ -314,12 +327,17 @@ function ProductShell() {
           style={showLayerRail ? shellGridStyle : undefined}
         >
           {showLayerRail ? (
-            <Sidebar
-              collapsed={previewLayerRailCollapsed}
-              dragging={layerRailDragging}
-              onResizeStart={beginLayerRailResize}
-              onToggleCollapsed={toggleLayerRailCollapsed}
-            />
+            <EnterpriseErrorBoundary
+              moduleName="Map Layers"
+              resetKey={`${productMode}-${previewLayerRailCollapsed}`}
+            >
+              <Sidebar
+                collapsed={previewLayerRailCollapsed}
+                dragging={layerRailDragging}
+                onResizeStart={beginLayerRailResize}
+                onToggleCollapsed={toggleLayerRailCollapsed}
+              />
+            </EnterpriseErrorBoundary>
           ) : null}
           <main
             className={cn(
@@ -328,15 +346,29 @@ function ProductShell() {
               isMapFocusMode && "min-h-[calc(100vh-7.25rem)] md:min-h-[calc(100vh-7.25rem)]",
             )}
           >
-            <SceneViewContainer />
+            <EnterpriseErrorBoundary
+              moduleName="3D SceneView"
+              resetKey={selectedParcelId}
+            >
+              <SceneViewContainer />
+            </EnterpriseErrorBoundary>
           </main>
-          {showIntelligencePanel ? <IntelligencePanel /> : null}
+          {showIntelligencePanel ? (
+            <EnterpriseErrorBoundary
+              moduleName="Intelligence Panel"
+              resetKey={`${productMode}-${selectedParcelId ?? "none"}`}
+            >
+              <IntelligencePanel />
+            </EnterpriseErrorBoundary>
+          ) : null}
         </div>
       )}
 
       {!executivePrintMode && !isMapFocusMode && !methodologyMode ? (
         <div className="app-chrome">
-          <MetricsBar />
+          <EnterpriseErrorBoundary moduleName="County Metrics">
+            <MetricsBar />
+          </EnterpriseErrorBoundary>
         </div>
       ) : null}
     </div>

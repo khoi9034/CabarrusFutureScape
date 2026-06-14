@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-06-14T07:26:12.315099+00:00",
+  "dry_run": false,
+  "source_count": 1,
+  "early_pipeline_signal_only": true,
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "sources": [
+    {
+      "source_key": "cabarrus_accela_plan_reviews",
+      "total_count": 26336,
+      "downloaded_count": 110381,
+      "raw_rows": 110381,
+      "clean_rows": 110381
+    }
+  ],
+  "raw_rows_loaded": 110381,
+  "clean_rows_loaded": 110381
+}

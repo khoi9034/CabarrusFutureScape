@@ -1,0 +1,110 @@
+{
+  "phase": "14A_missing_high_value_planning_data_acquisition_package",
+  "generated_at": "2026-06-14T00:00:00-04:00",
+  "scope": {
+    "work_on_main_only": true,
+    "trained_model": false,
+    "exposed_predictions": false,
+    "modified_postgis_schema": false,
+    "ingested_fake_data": false,
+    "modified_frontend_ui": false,
+    "altered_existing_workflows": false
+  },
+  "docs_created_or_updated": [
+    "docs/data_requests/cfs_missing_data_tracker.md",
+    "docs/data_requests/wsacc_utility_capacity_request.md",
+    "docs/data_requests/future_land_use_small_area_plan_request.md",
+    "docs/data_requests/local_transportation_projects_request.md",
+    "docs/data_requests/rezoning_case_records_request.md",
+    "docs/data_requests/development_pipeline_subdivision_request.md",
+    "docs/data_requests/plan_based_suitability_land_supply_request.md",
+    "docs/data_requests/parks_greenways_bike_ped_amenity_request.md",
+    "docs/data_requests/cfs_new_source_intake_checklist.md",
+    "docs/data_requests/cfs_next_data_request_action_plan.md",
+    "docs/modeling/missing_feature_groups_roadmap.md",
+    "docs/modeling/development_prediction_model_readiness.md",
+    "docs/modeling/development_prediction_feature_registry.md",
+    "README.md"
+  ],
+  "folders_created": [
+    "data/future_land_use/raw",
+    "data/future_land_use/processed",
+    "data/utilities/raw",
+    "data/utilities/processed",
+    "data/transportation_projects/raw",
+    "data/transportation_projects/processed",
+    "data/rezoning_cases/raw",
+    "data/rezoning_cases/processed",
+    "data/development_pipeline/raw",
+    "data/development_pipeline/processed",
+    "data/suitability_land_supply/raw",
+    "data/suitability_land_supply/processed",
+    "data/parks_greenways/raw",
+    "data/parks_greenways/processed"
+  ],
+  "folder_readmes_created": 14,
+  "missing_datasets_prioritized": {
+    "very_high": [
+      "WSACC / utility capacity and utility project GIS",
+      "Countywide small-area plan / future land use GIS",
+      "Local planned road projects / future transportation network"
+    ],
+    "high": [
+      "Countywide / municipal official rezoning case records",
+      "Development pipeline / subdivision approval GIS"
+    ],
+    "medium_high": [
+      "Plan-based suitability / land supply layers"
+    ],
+    "medium": [
+      "Parks / greenways / bike-ped future amenity GIS"
+    ]
+  },
+  "already_incorporated_not_requested_again": [
+    "New construction permit data",
+    "Historical zoning layers and zoning map-change detections",
+    "Current road / rail accessibility",
+    "NCDOT 2026-2035 STIP projects",
+    "NCDOT AADT traffic count stations",
+    "School zones, assignment, utilization seed, and capacity ingestion infrastructure",
+    "Flood / FEMA data",
+    "Current parcel intelligence",
+    "Internal model research, ranking classes, and methodology transparency"
+  ],
+  "found_but_limited_sources": [
+    {
+      "name": "City of Concord Land Use Plan 2030 GIS layer",
+      "url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/48",
+      "caveat": "Concord only, not countywide future land use"
+    },
+    {
+      "name": "Concord Planning Cases layer",
+      "url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/9",
+      "caveat": "Concord only, not countywide official rezoning history"
+    }
+  ],
+  "request_templates_created": [
+    "WSACC utility capacity",
+    "Future land use / small-area plans",
+    "Local transportation projects",
+    "Official rezoning case records",
+    "Development pipeline / subdivision approvals",
+    "Plan-based suitability / land supply",
+    "Parks / greenways / bike-ped amenities"
+  ],
+  "feature_roadmap_created": true,
+  "source_intake_checklist_created": true,
+  "model_readiness_docs_updated": true,
+  "next_recommended_data_request": "WSACC utility capacity and service-area GIS",
+  "next_recommended_ingestion_phase": "Phase 14B: Utility capacity/service readiness source intake and schema inventory",
+  "validation": {
+    "backend_tests_required": false,
+    "frontend_tests_required": false,
+    "markdown_file_existence_check": "passed",
+    "required_file_count_checked": 12,
+    "folder_existence_check": "passed",
+    "required_folder_count_checked": 14,
+    "folder_readme_check": "passed",
+    "folder_readme_count_checked": 14
+  }
+}

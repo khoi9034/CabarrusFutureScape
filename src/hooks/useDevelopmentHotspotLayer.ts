@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { getApiErrorDisplayMessage, USE_BACKEND_API } from "@/lib/api/client";
 import type { DevelopmentTemporalFilters } from "@/data/intelligence/developmentTemporalIndex";
 import {
   getDevelopmentHotspots,
@@ -142,6 +142,10 @@ export function useDevelopmentHotspotLayer({
       { signal: controller.signal },
     )
       .then((response) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+
         const { markers, totalCount } =
           normalizeDevelopmentHotspotMapMarkers(response);
 
@@ -168,10 +172,10 @@ export function useDevelopmentHotspotLayer({
         }
 
         setState({
-          errorMessage:
-            error instanceof Error
-              ? error.message
-              : "Development hotspot map markers are unavailable.",
+          errorMessage: getApiErrorDisplayMessage(
+            error,
+            "Development hotspot map markers are unavailable.",
+          ),
           isLoading: false,
           markers: [],
           requestKey,

@@ -349,6 +349,211 @@ Generated Phase 13C artifacts:
 - `outputs/modeling/development_prediction/phase13c_transportation_model_caveats.md`
 - `outputs/phase13c_transportation_enhanced_model_comparison_summary.json`
 
+## Phase 14A Missing High-Value Planning Data
+
+Phase 14A pauses model expansion and creates a missing-data acquisition package
+for the strongest planning datasets not yet available in CFS. It does not
+modify PostGIS schemas, train a model, change existing feature matrices, expose
+predictions, or alter frontend/backend workflows.
+
+Current included feature groups:
+
+- parcel characteristics and current parcel intelligence;
+- current and historical zoning map snapshots;
+- zoning map-change detections;
+- permit history and permit segmentation;
+- staff-provided new construction permit labels;
+- FEMA flood constraints;
+- school attendance-zone assignment and presentation-derived utilization seed;
+- road/rail accessibility;
+- NCDOT STIP and AADT current/planned transportation context.
+
+Strongest missing feature groups:
+
+- WSACC utility capacity and utility project GIS;
+- countywide small-area plan and future land use GIS;
+- local planned road projects and future transportation network;
+- official countywide/municipal rezoning case records;
+- development pipeline and subdivision approvals;
+- plan-based suitability and land supply;
+- parks, greenways, and bike-ped future amenity GIS.
+
+Why better planning data is needed before public prediction:
+
+- current utility capacity is not represented;
+- future land use is incomplete outside Concord;
+- local transportation projects are missing beyond NCDOT STIP;
+- official rezoning approval records are missing, so current zoning-change
+  signals remain map-change detections;
+- development pipeline records are missing before the permit stage;
+- suitability and land supply layers are not yet available;
+- model calibration remains weak and exact probabilities should not be shown.
+
+Recommended next ingestion sequence:
+
+1. WSACC / utilities.
+2. Future land use / small-area plans.
+3. Local transportation projects.
+4. Official rezoning case records.
+5. Development pipeline / subdivision approvals.
+6. Suitability / land supply.
+7. Parks / greenways / bike-ped amenities.
+
+Phase 14A docs:
+
+- `docs/data_requests/cfs_missing_data_tracker.md`
+- `docs/data_requests/cfs_new_source_intake_checklist.md`
+- `docs/data_requests/cfs_next_data_request_action_plan.md`
+- `docs/modeling/missing_feature_groups_roadmap.md`
+
+## Phase 16A Planning Pipeline Utility Readiness
+
+Phase 16A starts converting a subset of newly found planning and infrastructure
+sources into parcel-level readiness features without training a new model.
+
+Created source registry:
+
+- `config/planning_pipeline_utility_sources.json`
+
+Created source inventory:
+
+- `outputs/planning_pipeline_utility_source_schema_inventory.json`
+- `outputs/planning_pipeline_utility_source_schema_inventory.csv`
+
+Created feature tables:
+
+- `public.parcel_central_area_plan_features`
+- `public.parcel_accela_plan_review_features`
+- `public.parcel_utility_proxy_features`
+- `public.parcel_tax_value_enrichment_features`
+- `public.parcel_planning_pipeline_utility_features`
+
+Model-readiness interpretation:
+
+- Concord Central Area Plan features are current-context and Concord-only.
+- Accela plan reviews are early pipeline signals only, not approvals.
+- RevalMap WSACC layers are utility proximity proxies, not true capacity data.
+- Tax Parcels Full is separate enrichment and does not overwrite the base parcel
+  table.
+- Every Phase 16A feature is excluded from strict baseline training until
+  source availability dates and historical snapshots exist.
+
+Current required model flags remain unchanged:
+
+- `model_active=false`
+- `prediction_probability_available=false`
+- `production_ready=false`
+
+Phase 16A makes the project more ready for a future Phase 16B exploratory model
+comparison, but it is not itself a model comparison and should not be presented
+as forecast output.
+
+## Phase 16B Planning Pipeline Utility Comparison
+
+Phase 16B builds:
+
+- `public.parcel_development_prediction_features_planning_pipeline_utility_enhanced`
+- internal experiment `phase16b_planning_pipeline_utility_enhanced_v1`
+
+The matrix preserves the Phase 13C row count of `1,430,221` parcel-year rows and
+adds current-context planning intent, Accela pipeline signal, WSACC utility
+proxy, and Tax Parcels Full enrichment fields.
+
+Standardized 2022 test comparison:
+
+- transportation-enhanced PR-AUC: `0.083925`
+- planning/pipeline/utility-enhanced PR-AUC: `0.073322`
+- transportation-enhanced lift@top 5%: `3.553034`
+- planning/pipeline/utility-enhanced lift@top 5%: `0.588219`
+- transportation-enhanced precision@top 5%: `0.136157`
+- planning/pipeline/utility-enhanced precision@top 5%: `0.022541`
+
+Interpretation:
+
+- Phase 16B improved ROC-AUC but degraded PR-AUC and high-priority top-k
+  ranking metrics.
+- The added fields are not ready to improve the internal ranking layer without
+  more source governance and feature cleanup.
+- Current model safety flags remain unchanged:
+  `model_active=false`, `prediction_probability_available=false`, and
+  `production_ready=false`.
+
+Important caveats:
+
+- Central Area Plan fields are Concord-only and current-context.
+- Accela plan reviews are early pipeline signals, not approvals.
+- WSACC fields are utility proximity proxies only, not capacity/allocation.
+- Tax enrichment is current-context and not a historical assessment series.
+- No parcel-level probabilities, ranking classes, or public prediction endpoint
+  are exposed from this experiment.
+
+## Phase 16C Feature Ablation Governance
+
+Phase 16C audited why the full Phase 16B bundle weakened the ranking objective.
+It tested:
+
+1. transportation-enhanced base;
+2. transportation plus tax/value enrichment only;
+3. transportation plus Accela plan review only;
+4. transportation plus Central Area Plan only;
+5. transportation plus utility proxy only;
+6. transportation plus all Phase 16B fields.
+
+Results on the 2022 test split:
+
+- base PR-AUC: `0.082744`, lift@top 5%: `3.889837`;
+- tax/value-only PR-AUC: `0.137928`, lift@top 5%: `4.051123`;
+- Accela-only PR-AUC: `0.092404`, lift@top 5%: `1.840557`;
+- Central Area-only PR-AUC: `0.090397`, lift@top 5%: `3.576753`;
+- utility-only PR-AUC: `0.089515`, lift@top 5%: `3.590984`;
+- full Phase 16B PR-AUC: `0.071244`, lift@top 5%: `0.711556`.
+
+Governance decision:
+
+- current best internal ablation variant:
+  `transportation_plus_tax_value_only`;
+- experiment id: `phase16c_planning_pipeline_utility_ablation_v1`;
+- full Phase 16B feature set recommended: `false`;
+- model remains inactive and internal-only.
+
+The tax/value-only improvement is not a production decision. It needs
+historical value snapshots, calibration review, and governance review before any
+public or operational use.
+
+## Phase 16D Current Best Internal Model Registry
+
+Phase 16D freezes the current governance decision into an explicit registry and
+dashboard-facing aggregate status. The current best internal model variant is:
+
+- model name: `Zoning + Transportation + Tax/Value Internal Ranking Variant`;
+- experiment id: `phase16c_planning_pipeline_utility_ablation_v1`;
+- feature set: `transportation_plus_tax_value_only`;
+- target: `new_construction_next_3yr`;
+- status: internal research only.
+
+This variant is selected because the Phase 16C tax/value-only ablation produced
+the strongest internal ranking performance after feature-group review:
+
+- transportation base PR-AUC: `0.082744`;
+- transportation plus tax/value PR-AUC: `0.137928`;
+- transportation base lift@top 5%: `3.889837`;
+- transportation plus tax/value lift@top 5%: `4.051123`.
+
+The full Phase 16B feature set is not recommended because it reduced PR-AUC and
+collapsed lift@top 5% relative to the transportation base. Accela plan review,
+Central Area Plan, utility proxy, and metadata/current-context flags remain
+planning-context or QA features only until better source governance is available.
+
+Current required model flags remain:
+
+- `model_active=false`;
+- `prediction_probability_available=false`;
+- `production_ready=false`;
+- `public_exposure_allowed=false`.
+
+No parcel-level probabilities, parcel-level ranking classes, public prediction
+endpoint, or frontend prediction surface should be added from Phase 16D.
+
 ## Recommended Modeling Sequence
 
 1. Freeze feature registry and leakage policy.

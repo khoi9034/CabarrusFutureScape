@@ -1,0 +1,51 @@
+{
+    "generated_at":  "2026-06-14T09:23:03-04:00",
+    "branch":  "main",
+    "total_files":  125,
+    "category_counts":  [
+                            {
+                                "category":  "config",
+                                "count":  3
+                            },
+                            {
+                                "category":  "data/raw",
+                                "count":  7
+                            },
+                            {
+                                "category":  "docs",
+                                "count":  29
+                            },
+                            {
+                                "category":  "outputs/artifacts",
+                                "count":  44
+                            },
+                            {
+                                "category":  "runtime logs",
+                                "count":  2
+                            },
+                            {
+                                "category":  "source code",
+                                "count":  35
+                            },
+                            {
+                                "category":  "tests",
+                                "count":  5
+                            }
+                        ],
+    "do_not_commit":  [
+                          "logs/backend-dev.log",
+                          "logs/next-dev.log"
+                      ],
+    "review_before_commit":  [
+
+                             ],
+    "staged_files":  [
+
+                     ],
+    "notes":  [
+                  "Inventory was generated from git status --short --untracked-files=all.",
+                  "No files were deleted, restored, staged, or committed by this inventory step.",
+                  "Tracked runtime logs are modified and should be excluded from release commits.",
+                  "The Phase 17B summary artifact existed before this final inventory pass so it is included in the inventory."
+              ]
+}

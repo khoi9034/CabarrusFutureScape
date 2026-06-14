@@ -1,0 +1,511 @@
+{
+  "phase": "16B_planning_pipeline_utility_enhanced_feature_matrix",
+  "created_at": "2026-06-14T08:22:34.005049+00:00",
+  "table": "public.parcel_development_prediction_features_planning_pipeline_utility_enhanced",
+  "profile": {
+    "row_count": 1430221,
+    "unique_parcel_count": 110017,
+    "min_snapshot_year": 2014,
+    "max_snapshot_year": 2026,
+    "snapshot_year_count": 13,
+    "inside_central_area_plan_count": 189215,
+    "inside_primary_activity_area_count": 5551,
+    "inside_service_node_count": 104,
+    "inside_special_corridor_count": 1352,
+    "active_plan_review_count": 164619,
+    "recent_plan_review_12mo_count": 0,
+    "recent_plan_review_36mo_count": 0,
+    "inside_wsacc_district_count": 341315,
+    "utility_proxy_score_count": 1430221,
+    "true_utility_capacity_available_count": 0,
+    "tax_enriched_land_value_count": 1347658,
+    "current_context_only_count": 1430221,
+    "time_safe_for_training_count": 0,
+    "concord_only_feature_count": 1430221,
+    "utility_proxy_only_count": 1430221,
+    "base_transportation_enhanced_row_count": 1430221,
+    "row_count_matches_transportation_enhanced_matrix": true,
+    "duplicate_parcel_year_groups": 0,
+    "snapshot_year_summary": [
+      {
+        "snapshot_year": 2014,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2015,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2016,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2017,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2018,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2019,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2020,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2021,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2022,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2023,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2024,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2025,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      },
+      {
+        "snapshot_year": 2026,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "central_area_plan_rows": 14555,
+        "plan_review_rows": 12663,
+        "wsacc_district_rows": 26255,
+        "true_capacity_rows": 0
+      }
+    ],
+    "current_context_only": true,
+    "concord_only_features_present": true,
+    "utility_proxy_only_features_present": true,
+    "time_safe_for_training": false,
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false
+  },
+  "planning_pipeline_utility_feature_columns": [
+    "inside_central_area_plan",
+    "central_area_future_land_use",
+    "future_land_use_category",
+    "future_land_use_growth_alignment",
+    "inside_primary_activity_area",
+    "inside_service_node",
+    "inside_special_corridor",
+    "inside_special_use_area",
+    "distance_to_primary_activity_area_ft",
+    "distance_to_service_node_ft",
+    "distance_to_special_corridor_ft",
+    "concord_only_flag",
+    "active_plan_review_on_parcel",
+    "total_plan_review_count",
+    "recent_plan_review_count_12mo",
+    "recent_plan_review_count_36mo",
+    "plan_review_count_nearby_half_mile",
+    "latest_plan_review_file_date",
+    "latest_plan_review_status",
+    "latest_plan_review_type",
+    "max_days_open",
+    "review_type_major_flag",
+    "inside_wsacc_district",
+    "wsacc_district_name",
+    "distance_to_wsacc_sewer_line_ft",
+    "distance_to_nearest_manhole_ft",
+    "nearest_utility_owner",
+    "nearest_pipe_size",
+    "nearest_pipe_year",
+    "utility_access_proxy_score",
+    "true_utility_capacity_available",
+    "building_value",
+    "land_to_building_value_ratio",
+    "sale_price",
+    "sale_year",
+    "sale_recency_years",
+    "deferred_value_flag",
+    "vacant_or_underbuilt_proxy",
+    "value_enrichment_quality",
+    "tax_enriched_land_value",
+    "tax_enriched_total_value",
+    "planning_pipeline_utility_current_context_only_flag",
+    "concord_only_feature_flag",
+    "utility_proxy_only_flag",
+    "planning_pipeline_utility_time_safe_for_training_flag",
+    "planning_pipeline_utility_feature_set_version"
+  ],
+  "missingness": [
+    {
+      "feature_name": "inside_central_area_plan",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "central_area_future_land_use",
+      "missing_count": 1241019,
+      "missing_pct": 86.7711
+    },
+    {
+      "feature_name": "future_land_use_category",
+      "missing_count": 1241019,
+      "missing_pct": 86.7711
+    },
+    {
+      "feature_name": "future_land_use_growth_alignment",
+      "missing_count": 1241019,
+      "missing_pct": 86.7711
+    },
+    {
+      "feature_name": "inside_primary_activity_area",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "inside_service_node",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "inside_special_corridor",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "inside_special_use_area",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "distance_to_primary_activity_area_ft",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "distance_to_service_node_ft",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "distance_to_special_corridor_ft",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "concord_only_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "active_plan_review_on_parcel",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "total_plan_review_count",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "recent_plan_review_count_12mo",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "recent_plan_review_count_36mo",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "plan_review_count_nearby_half_mile",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "latest_plan_review_file_date",
+      "missing_count": 1265602,
+      "missing_pct": 88.49
+    },
+    {
+      "feature_name": "latest_plan_review_status",
+      "missing_count": 1265602,
+      "missing_pct": 88.49
+    },
+    {
+      "feature_name": "latest_plan_review_type",
+      "missing_count": 1265602,
+      "missing_pct": 88.49
+    },
+    {
+      "feature_name": "max_days_open",
+      "missing_count": 1265602,
+      "missing_pct": 88.49
+    },
+    {
+      "feature_name": "review_type_major_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "inside_wsacc_district",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "wsacc_district_name",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "distance_to_wsacc_sewer_line_ft",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "distance_to_nearest_manhole_ft",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "nearest_utility_owner",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "nearest_pipe_size",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "nearest_pipe_year",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "utility_access_proxy_score",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "true_utility_capacity_available",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "building_value",
+      "missing_count": 82563,
+      "missing_pct": 5.7727
+    },
+    {
+      "feature_name": "land_to_building_value_ratio",
+      "missing_count": 480233,
+      "missing_pct": 33.5775
+    },
+    {
+      "feature_name": "sale_price",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "sale_year",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "sale_recency_years",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "deferred_value_flag",
+      "missing_count": 1430221,
+      "missing_pct": 100.0
+    },
+    {
+      "feature_name": "vacant_or_underbuilt_proxy",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "value_enrichment_quality",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "tax_enriched_land_value",
+      "missing_count": 82563,
+      "missing_pct": 5.7727
+    },
+    {
+      "feature_name": "tax_enriched_total_value",
+      "missing_count": 82615,
+      "missing_pct": 5.7764
+    },
+    {
+      "feature_name": "planning_pipeline_utility_current_context_only_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "concord_only_feature_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "utility_proxy_only_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "planning_pipeline_utility_time_safe_for_training_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "planning_pipeline_utility_feature_set_version",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    }
+  ],
+  "leakage_checks": [
+    {
+      "check_name": "row_count_matches_transportation_enhanced_matrix",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "Phase 16B must preserve Phase 13C parcel-year cardinality."
+    },
+    {
+      "check_name": "no_duplicate_parcel_year_rows",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "Planning/pipeline/utility joins must not duplicate parcel-year rows."
+    },
+    {
+      "check_name": "current_context_flag_true",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "All Phase 16B rows must be marked current-context only."
+    },
+    {
+      "check_name": "time_safe_flag_false",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "Current-context planning, utility, and tax fields are not strict historical training features."
+    },
+    {
+      "check_name": "true_utility_capacity_not_inferred",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "WSACC proxy geometry must not be converted into true capacity availability."
+    },
+    {
+      "check_name": "concord_only_flag_preserved",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "Central Area Plan fields are Concord-only/current-context planning inputs."
+    },
+    {
+      "check_name": "utility_proxy_only_flag_preserved",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "Utility fields are proximity/service-context proxies, not capacity or allocation."
+    }
+  ],
+  "current_context_caveats": [
+    "Central Area Plan features are Concord-only and current-context.",
+    "Accela plan reviews are early pipeline signals, not approvals or completed development.",
+    "WSACC RevalMap layers are utility proximity proxies and do not report capacity or allocation.",
+    "Tax Parcels Full enriches value context without overwriting the base parcel table.",
+    "The feature set is excluded from strict production claims until datable/historical sources are available."
+  ],
+  "ready_for_exploratory_model_comparison": true,
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "outputs": {
+    "profile": "C:\\CabarrusFutureScape\\outputs\\development_prediction_planning_pipeline_utility_enhanced_feature_profile.json",
+    "missingness": "C:\\CabarrusFutureScape\\outputs\\development_prediction_planning_pipeline_utility_enhanced_missingness.csv",
+    "leakage_review": "C:\\CabarrusFutureScape\\outputs\\development_prediction_planning_pipeline_utility_enhanced_leakage_review.csv",
+    "snapshot_year_summary": "C:\\CabarrusFutureScape\\outputs\\development_prediction_planning_pipeline_utility_enhanced_snapshot_year_summary.csv",
+    "phase_summary": "C:\\CabarrusFutureScape\\outputs\\phase16b_planning_pipeline_utility_enhanced_feature_summary.json"
+  }
+}

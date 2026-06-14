@@ -284,6 +284,10 @@ export function CommandPalette({
 
   const executeResult = useCallback(
     (result: SearchResult) => {
+      if (result.disabled) {
+        return;
+      }
+
       executeAction(result.action);
       setQuery("");
       onOpenChange(false);
@@ -367,7 +371,11 @@ export function CommandPalette({
 
     if (event.key === "Enter" && results[selectedIndex]) {
       event.preventDefault();
-      executeResult(results[selectedIndex]);
+      const selectedResult = results[selectedIndex];
+
+      if (!selectedResult.disabled) {
+        executeResult(selectedResult);
+      }
     }
   }
 

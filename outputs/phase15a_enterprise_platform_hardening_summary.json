@@ -1,0 +1,151 @@
+{
+  "phase": "15A_enterprise_platform_hardening",
+  "generated_at": "2026-06-14T00:00:00-04:00",
+  "branch": "main",
+  "scope": {
+    "new_data_sources_added": false,
+    "models_trained": false,
+    "parcel_level_predictions_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "public_prediction_endpoints_added": false,
+    "postgis_schema_modified": false,
+    "dashboard_redesigned": false
+  },
+  "frontend_hardening": {
+    "api_client": {
+      "file": "src/lib/api/client.ts",
+      "changes": [
+        "Added typed ApiClientError kinds for http, timeout, network, malformed, cancelled, and unknown failures.",
+        "Added friendly display messages while preserving URL/status diagnostics.",
+        "Added malformed JSON and non-JSON response handling.",
+        "Exported buildApiUrl for diagnostics."
+      ]
+    },
+    "friendly_layer_errors": {
+      "files": [
+        "src/hooks/useDevelopmentHotspotLayer.ts",
+        "src/hooks/useFloodConstraintLayer.ts",
+        "src/hooks/useFloodZoneLayer.ts",
+        "src/hooks/useSchoolUtilizationZoneLayer.ts",
+        "src/hooks/useDevelopmentPredictionResearchStatus.ts"
+      ],
+      "behavior": "Layer and Methodology model-status failures now use classified, user-readable API error messages."
+    },
+    "error_boundaries": {
+      "new_file": "src/components/ui/EnterpriseErrorBoundary.tsx",
+      "wrapped_regions": [
+        "3D SceneView",
+        "Map Layers rail",
+        "Intelligence Panel",
+        "Methodology",
+        "Executive Print",
+        "County Metrics"
+      ],
+      "behavior": "Render failures are contained to a local module recovery card instead of blanking the entire app."
+    },
+    "selected_parcel_optimization": {
+      "file": "src/hooks/useSelectedParcel.ts",
+      "behavior": "Repeated selection of the already-selected parcel preserves hydrated parcel intelligence instead of clearing and refetching it."
+    },
+    "layer_guardrail": {
+      "file": "src/lib/gis/layerRegistry.ts",
+      "behavior": "Default layer IDs now honor layer visibility controllability so disabled/internal placeholders cannot become default-active later."
+    }
+  },
+  "methodology_diagnostics": {
+    "new_files": [
+      "src/hooks/useEnterpriseDiagnostics.ts",
+      "src/lib/api/health.ts"
+    ],
+    "ui_file": "src/components/dashboard/MethodologyWorkspace.tsx",
+    "checks": [
+      "backend API mode/base URL",
+      "FastAPI root",
+      "service health",
+      "PostGIS health",
+      "development aggregate endpoint",
+      "flood aggregate endpoint",
+      "school aggregate endpoint",
+      "development model aggregate endpoint and prediction safety flags"
+    ],
+    "parcel_level_prediction_requests": false,
+    "sceneview_rendered_in_methodology": false
+  },
+  "prediction_guardrails": {
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false,
+    "public_exposure_allowed": false,
+    "frontend_prediction_layer_added": false,
+    "allowed_frontend_prediction_usage": "Aggregate Methodology research status only"
+  },
+  "documentation": {
+    "created": [
+      "docs/engineering/enterprise_hardening_notes.md",
+      "docs/engineering/runtime_recovery.md",
+      "docs/engineering/prediction_exposure_guardrails.md"
+    ],
+    "updated": [
+      "README.md"
+    ]
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": {
+      "status": "passed",
+      "tests": 243,
+      "warnings": 3,
+      "note": "Initial pytest run found an unrelated UTF-8 BOM in outputs/phase13c_transportation_enhanced_model_comparison_summary.json. The BOM was removed without changing JSON content; full suite then passed."
+    },
+    "npm_run_dev_cfs": {
+      "status": "passed",
+      "frontend": "HTTP 200 at http://localhost:3000",
+      "backend": "HTTP 200 at http://127.0.0.1:8000/health",
+      "database": "HTTP 200 at http://127.0.0.1:8000/health/database",
+      "checked_endpoints": [
+        "/health",
+        "/health/database",
+        "/parcels/search?q=CFS-PARCEL-0149726579&limit=1",
+        "/parcels/CFS-PARCEL-0149726579?include_geometry=true",
+        "/development/hotspots?limit=1",
+        "/constraints/flood/high-review?limit=1",
+        "/constraints/flood/summary",
+        "/constraints/flood/zones?limit=1",
+        "/constraints/schools/statistics",
+        "/constraints/schools/CFS-PARCEL-0149726579",
+        "/constraints/schools/qa-summary"
+      ]
+    },
+    "browser_smoke": {
+      "status": "passed_with_note",
+      "frontend_title": "Cabarrus FutureScape",
+      "overview_present": true,
+      "methodology_nav_present": true,
+      "map_layers_present": true,
+      "console_errors": 0,
+      "note": "In-app browser render check passed. A follow-up automation click on the very narrow Methodology nav button did not switch modes, but TopNav handler wiring was verified in code and no browser console errors were reported."
+    }
+  },
+  "runtime_artifacts": {
+    "logs_generated_by_dev_launcher": [
+      "logs/backend-dev.log",
+      "logs/next-dev.log"
+    ],
+    "commit_guidance": "Do not commit runtime logs. They were generated by npm run dev:cfs and left uncommitted.",
+    "other_generated_outputs_modified_by_validation": [
+      "outputs/lea_pupil_context_ingestion_summary.json",
+      "outputs/school_capacity_ingestion_last_run.json",
+      "outputs/school_presentation_utilization_seed_last_run.json"
+    ]
+  },
+  "remaining_limitations": [
+    "No frontend unit test runner is configured in package.json; frontend safety was validated by typecheck, lint, build, and browser render smoke.",
+    "Development prediction remains internal aggregate research only.",
+    "School capacity scoring remains inactive until verified official capacity/enrollment data is ingested.",
+    "Some Phase 14A data request artifacts were already uncommitted before this task and were preserved."
+  ],
+  "recommended_next_step": "Perform a clean commit that includes Phase 15A source/docs/summary changes while excluding runtime logs and unrelated generated last-run artifacts."
+}

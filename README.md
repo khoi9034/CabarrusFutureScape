@@ -4,11 +4,11 @@ Cabarrus FutureScape (CFS) is the frontend foundation for a Cabarrus County, NC 
 
 ## Current Phase
 
-V1 Product Layout Redesign plus constraint, transportation, and internal model
-research readiness, building on completed GIS Map Intelligence, Parcel
-Intelligence, Zoning Intelligence, Development Activity, FEMA flood constraint
-intelligence, permit intelligence segmentation, school assignment, and FastAPI
-integration.
+V1 Product Layout Redesign plus constraint, transportation, internal model
+research, and missing high-value planning data readiness, building on completed
+GIS Map Intelligence, Parcel Intelligence, Zoning Intelligence, Development
+Activity, FEMA flood constraint intelligence, permit intelligence segmentation,
+school assignment, and FastAPI integration.
 
 This cleanup turns the working technical prototype into a cleaner product
 experience for portfolio demonstrations, interviews, and stakeholder
@@ -17,7 +17,25 @@ read-only school constraint APIs, and read-only frontend school assignment
 display. Later modeling phases add internal-only development signal research
 and current-context transportation features, but no production model,
 parcel-level prediction probability, or public prediction endpoint is active.
+Phase 14A now pauses model expansion around a structured data acquisition
+package for utilities, future land use, local transportation projects, official
+rezoning records, development pipeline, land supply, and future amenity data.
 The goal remains less control clutter and more planning intelligence.
+
+Release-candidate hardening notes now live under `docs/engineering/`:
+
+- `enterprise_hardening_notes.md` summarizes runtime, UI, data-status, and
+  performance guardrails.
+- `runtime_recovery.md` documents local Next/FastAPI recovery steps and health
+  checks.
+- `prediction_exposure_guardrails.md` records the aggregate-only prediction
+  research boundary.
+
+Phase 15B registers environmental source priorities in
+`config/environmental_constraint_sources.json`: use the newer
+`OpenData/Hydrology` and `OpenData/Flood_Hazard_Areas` services first, retain
+legacy `opendata/MapServer` hydrology/flood layers as fallback/reference, and
+keep FEMA NFHL as the authoritative regulatory flood source.
 
 Current product modes:
 
@@ -2321,6 +2339,236 @@ transportation-enhanced matrix and internal experiment availability, while
 `production_ready=false` remain required. No frontend prediction UI, parcel
 prediction endpoint, or public ranking surface is added.
 
+## Phase 14A Missing Planning Data Acquisition Package
+
+Phase 14A pauses model expansion and organizes the next high-value planning
+data requests. It does not modify PostGIS schemas, train a model, ingest fake
+data, expose predictions, modify frontend UI, or alter existing parcel, school,
+flood, zoning, transportation, permit, or model workflows.
+
+Already incorporated sources are not re-requested right now: new construction
+permits, historical zoning map snapshots, zoning map-change detections, current
+road/rail accessibility, NCDOT STIP, NCDOT AADT, school assignment/utilization
+seed/capacity readiness, FEMA flood data, current parcel intelligence, and
+internal model research.
+
+Found but limited sources are tracked separately:
+
+- City of Concord Land Use Plan 2030 GIS layer, Concord only:
+  `https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/48`
+- Concord Planning Cases layer, Concord only:
+  `https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/9`
+
+Missing high-value datasets are prioritized as:
+
+1. WSACC / utilities.
+2. Countywide future land use / small-area plans.
+3. Local transportation projects.
+4. Official rezoning case records.
+5. Development pipeline / subdivision approvals.
+6. Suitability / land supply.
+7. Parks / greenways / bike-ped future amenities.
+
+Phase 14A files:
+
+- `docs/data_requests/cfs_missing_data_tracker.md`
+- `docs/data_requests/cfs_new_source_intake_checklist.md`
+- `docs/data_requests/cfs_next_data_request_action_plan.md`
+- `docs/data_requests/wsacc_utility_capacity_request.md`
+- `docs/data_requests/future_land_use_small_area_plan_request.md`
+- `docs/data_requests/local_transportation_projects_request.md`
+- `docs/data_requests/rezoning_case_records_request.md`
+- `docs/data_requests/development_pipeline_subdivision_request.md`
+- `docs/data_requests/plan_based_suitability_land_supply_request.md`
+- `docs/data_requests/parks_greenways_bike_ped_amenity_request.md`
+- `docs/modeling/missing_feature_groups_roadmap.md`
+
+Future source intake folders were created under `data/future_land_use`,
+`data/utilities`, `data/transportation_projects`, `data/rezoning_cases`,
+`data/development_pipeline`, `data/suitability_land_supply`, and
+`data/parks_greenways`, each with `raw` and `processed` lanes and README
+guardrails.
+
+## Phase 16A Planning Pipeline Utility Integration
+
+Phase 16A registers and prepares newly found REST-ready planning, pipeline, and
+utility proxy sources without training a model or exposing predictions.
+
+Source registry:
+
+- `config/planning_pipeline_utility_sources.json`
+
+REST-ready source families:
+
+- Concord Central Area Plan layers: boundary, primary activity areas, service
+  nodes, special corridors, special use areas, and future land use.
+- Cabarrus Accela Plan Reviews.
+- RevalMap WSACC manholes, sewer lines, and districts as utility proxy layers.
+- Tax Parcels Full as a separate parcel enrichment/gap-check source.
+
+Feature tables:
+
+- `public.parcel_central_area_plan_features`
+- `public.parcel_accela_plan_review_features`
+- `public.parcel_utility_proxy_features`
+- `public.parcel_tax_value_enrichment_features`
+- `public.parcel_planning_pipeline_utility_features`
+
+Guardrails:
+
+- Concord Central Area Plan layers are Concord/Central Area only, not
+  countywide future land use.
+- Accela plan reviews are early pipeline signals only, not development
+  approvals.
+- RevalMap WSACC utility layers are proximity/service-context proxies only and
+  do not provide true sewer capacity or allocation.
+- Tax Parcels Full does not overwrite `public.parcels_enriched`.
+- All Phase 16A features are `current_context_only=true`,
+  `time_safe_for_training=false`, and excluded from strict baseline modeling.
+
+Document/PDF references for sewer allocation and project pipeline sources are
+tracked in:
+
+- `docs/data_sources/sewer_allocation_and_development_pipeline_source_notes.md`
+
+## Phase 16B Planning Pipeline Utility Model Comparison
+
+Phase 16B creates an internal-only exploratory feature matrix:
+
+- `public.parcel_development_prediction_features_planning_pipeline_utility_enhanced`
+
+The table preserves the Phase 13C row count of `1,430,221` parcel-year rows and
+adds current-context planning, Accela plan-review, WSACC utility proxy, and Tax
+Parcels Full enrichment fields. It does not expose predictions and does not
+change frontend behavior.
+
+Internal experiment:
+
+- `phase16b_planning_pipeline_utility_enhanced_v1`
+
+2022 test comparison against the Phase 13C transportation-enhanced model:
+
+- transportation PR-AUC: `0.083925`
+- Phase 16B PR-AUC: `0.073322`
+- transportation lift@top 5%: `3.553034`
+- Phase 16B lift@top 5%: `0.588219`
+- Phase 16B ROC-AUC improved, but the high-priority ranking bands declined.
+
+Interpretation: the Phase 16B fields are useful for data-readiness research but
+did not improve the internal development ranking objective in this experiment.
+They remain current-context only, Concord-only where applicable, and utility
+proxy only. Required flags remain:
+
+- `model_active=false`
+- `prediction_probability_available=false`
+- `production_ready=false`
+- no public parcel prediction endpoint
+- no frontend prediction display
+
+## Phase 16C Feature Ablation Governance
+
+Phase 16C audits the Phase 16B feature bundle rather than activating it. Six
+internal variants were tested with the same target and split:
+
+- transportation-enhanced base;
+- transportation plus tax/value enrichment only;
+- transportation plus Accela plan review only;
+- transportation plus Central Area Plan only;
+- transportation plus utility proxy only;
+- transportation plus all Phase 16B fields.
+
+Result:
+
+- tax/value enrichment only improved PR-AUC and lift@top 5%;
+- Accela, Central Area Plan, and utility proxy variants improved broad
+  discrimination but reduced top-k ranking lift;
+- the full Phase 16B bundle remained worse than the transportation base for
+  PR-AUC and lift@top 5%.
+
+Current governance decision:
+
+- recommended internal variant: `transportation_plus_tax_value_only`;
+- experiment id: `phase16c_planning_pipeline_utility_ablation_v1`;
+- full Phase 16B feature set recommended: `false`;
+- still internal-only, not production-ready, and not exposed in the frontend.
+
+Output:
+
+- `outputs/phase16c_feature_ablation_governance_summary.json`
+
+## Phase 16D Current Best Internal Model Governance
+
+Phase 16D turns the Phase 16C ablation decision into an explicit current-best
+registry and aggregate Methodology/dashboard status.
+
+Current best internal variant:
+
+- readable name: Zoning + Transportation + Tax/Value;
+- feature set: `transportation_plus_tax_value_only`;
+- experiment id: `phase16c_planning_pipeline_utility_ablation_v1`;
+- target: `new_construction_next_3yr`;
+- status: internal research only.
+
+Why this variant:
+
+- tax/value enrichment improved PR-AUC from `0.082744` to `0.137928` over the
+  transportation-enhanced base;
+- tax/value enrichment improved lift@top 5% from `3.889837` to `4.051123`;
+- the full Phase 16B feature bundle reduced top-k ranking quality and is not
+  recommended.
+
+Excluded for now:
+
+- Accela plan reviews;
+- Central Area Plan / Concord-only plan context;
+- utility proxy;
+- metadata/current-context flags.
+
+These excluded groups remain useful as planning context and QA inputs, but they
+are not part of the current best internal ranking variant.
+
+Safety flags remain:
+
+- `model_active=false`;
+- `prediction_probability_available=false`;
+- `production_ready=false`;
+- `public_exposure_allowed=false`;
+- no public parcel prediction endpoint;
+- no frontend parcel-level prediction or ranking display.
+
+Outputs:
+
+- `outputs/modeling/development_prediction/current_best_internal_model_registry.json`
+- `outputs/modeling/development_prediction/feature_group_governance_matrix.csv`
+
+## Phase 17A Enterprise Hardening and Demo Safety
+
+Phase 17A adds demo-safe operating docs, small runtime guardrails, and tests
+without adding data, training models, changing schemas, or exposing predictions.
+
+Hardening updates:
+
+- disabled command-palette results cannot execute through keyboard Enter;
+- top parcel search uses friendly API error display text before falling back;
+- development hotspot layer ignores late responses after abort;
+- Methodology remains the only place for aggregate model status;
+- prediction guardrail tests confirm public prediction routes remain aggregate
+  only.
+
+Engineering docs:
+
+- `docs/engineering/runtime_recovery.md`
+- `docs/engineering/prediction_exposure_guardrails.md`
+- `docs/engineering/release_candidate_checklist.md`
+
+Safety flags remain:
+
+- `model_active=false`;
+- `prediction_probability_available=false`;
+- `production_ready=false`;
+- no parcel-level prediction endpoint;
+- no frontend parcel-level prediction or ranking display.
+
 ## Dashboard State Architecture
 
 Dashboard interaction state is exposed through `useDashboardState`, but the implementation is split into smaller hooks:
@@ -2343,7 +2591,6 @@ The public dashboard API remains simple for UI components, while the internals a
 
 ## Next Step
 
-Next recommended task: Phase 13D should gather dated transportation project
-history, historical AADT by year, local transportation project GIS, and
-construction/completion dates so transportation features can be evaluated as
-time-safe historical inputs rather than current-context exploratory signals.
+Next recommended task: Phase 14B should request WSACC utility capacity and
+service-area GIS first, accepting generalized planning polygons if exact
+infrastructure locations are sensitive.

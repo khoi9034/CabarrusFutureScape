@@ -380,6 +380,11 @@ export interface DevelopmentPredictionFeaturesSummaryResponse {
     zoning_features_appear_important?: boolean;
   };
   calibration_review_available: boolean;
+  current_best_internal_model_available?: boolean;
+  current_best_internal_model_production_ready?: boolean;
+  current_best_internal_model_public_exposure_allowed?: boolean;
+  current_best_internal_model_variant?: string | null;
+  excluded_feature_groups_current_best?: string[];
   feature_groups: string[];
   feature_matrix_available: boolean;
   feature_set_version: string | null;
@@ -397,6 +402,8 @@ export interface DevelopmentPredictionFeaturesSummaryResponse {
   model_active: boolean;
   prediction_probability_available: boolean;
   production_ready: boolean;
+  recommended_internal_model_experiment_id?: string | null;
+  recommended_internal_model_variant?: string | null;
   row_count: number;
   snapshot_year_count: number;
   standardized_metrics_available: boolean;

@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { mapSchoolUtilizationZoneToPolygon } from "@/lib/adapters/schoolUtilizationZoneMapAdapter";
-import { CFS_API_BASE_URL, USE_BACKEND_API } from "@/lib/api/client";
+import {
+  CFS_API_BASE_URL,
+  getApiErrorDisplayMessage,
+  USE_BACKEND_API,
+} from "@/lib/api/client";
 import { getSchoolUtilizationZones } from "@/lib/api/constraints";
 import type {
   SchoolUtilizationClassCounts,
@@ -123,10 +127,10 @@ export function useSchoolUtilizationZoneLayer({
         setState({
           caveats: [],
           classCounts: emptyClassCounts,
-          errorMessage:
-            error instanceof Error
-              ? error.message
-              : "School utilization zones are unavailable.",
+          errorMessage: getApiErrorDisplayMessage(
+            error,
+            "School utilization zones are unavailable.",
+          ),
           isLoading: false,
           polygons: [],
           requestKey,

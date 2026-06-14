@@ -381,6 +381,22 @@ class DevelopmentPredictionFeaturesSummaryResponse(BaseModel):
     transportation_enhanced_model_experiment_available: bool = False
     latest_transportation_experiment_id: str | None = None
     transportation_experiment_current_context_only: bool = True
+    planning_pipeline_utility_feature_matrix_available: bool = False
+    planning_pipeline_utility_row_count: int = 0
+    planning_pipeline_utility_model_experiment_available: bool = False
+    latest_planning_pipeline_utility_experiment_id: str | None = None
+    planning_pipeline_utility_current_context_only: bool = True
+    concord_only_features_present: bool = False
+    utility_proxy_only_features_present: bool = False
+    latest_feature_ablation_available: bool = False
+    recommended_internal_model_experiment_id: str | None = None
+    recommended_internal_model_variant: str | None = None
+    phase16b_full_feature_set_recommended: bool = False
+    current_best_internal_model_available: bool = False
+    current_best_internal_model_variant: str | None = None
+    current_best_internal_model_public_exposure_allowed: bool = False
+    current_best_internal_model_production_ready: bool = False
+    excluded_feature_groups_current_best: list[str] = Field(default_factory=list)
     latest_model_qa_available: bool = False
     latest_model_qa_id: str | None = None
     standardized_metrics_available: bool = False

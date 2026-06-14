@@ -1,0 +1,416 @@
+{
+  "phase": "16B_planning_pipeline_utility_model_comparison",
+  "generated_at": "2026-06-14T04:29:09.952321",
+  "experiment_id": "phase16b_planning_pipeline_utility_enhanced_v1",
+  "target_used": "new_construction_next_3yr",
+  "feature_table": "public.parcel_development_prediction_features_planning_pipeline_utility_enhanced",
+  "train_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019
+  ],
+  "validation_years": [
+    2020,
+    2021
+  ],
+  "test_years": [
+    2022
+  ],
+  "excluded_snapshot_years": [
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "transportation_enhanced_metrics": {
+    "row_count": 110017,
+    "positive_count": 4216,
+    "positive_rate": 0.038321,
+    "roc_auc": 0.715771,
+    "average_precision_pr_auc": 0.083925,
+    "precision_at_top_1_pct": 0.108084,
+    "precision_at_top_5_pct": 0.136157,
+    "recall_at_top_5_pct": 0.177657,
+    "lift_at_top_1_pct": 2.820453,
+    "lift_at_top_5_pct": 3.553034,
+    "top_1_pct_details": {
+      "fraction": 0.01,
+      "k": 1101,
+      "precision": 0.108084,
+      "recall": 0.028226,
+      "lift": 2.820453,
+      "cutoff_score": 0.8129799366,
+      "above_cutoff_count": 1097,
+      "tie_count_at_cutoff": 4,
+      "remaining_slots_from_tie_bucket": 4,
+      "tie_positive_count": 4,
+      "tie_positive_rate": 1.0,
+      "tie_adjusted": false
+    },
+    "top_5_pct_details": {
+      "fraction": 0.05,
+      "k": 5501,
+      "precision": 0.136157,
+      "recall": 0.177657,
+      "lift": 3.553034,
+      "cutoff_score": 0.546485248,
+      "above_cutoff_count": 5500,
+      "tie_count_at_cutoff": 1,
+      "remaining_slots_from_tie_bucket": 1,
+      "tie_positive_count": 1,
+      "tie_positive_rate": 1.0,
+      "tie_adjusted": false
+    },
+    "brier_score": 0.102484,
+    "confusion_matrix_threshold_0_5": {
+      "true_negative": 99288,
+      "false_positive": 6513,
+      "false_negative": 3319,
+      "true_positive": 897
+    }
+  },
+  "planning_pipeline_utility_enhanced_metrics": {
+    "row_count": 110017,
+    "positive_count": 4216,
+    "positive_rate": 0.038321,
+    "roc_auc": 0.770504,
+    "average_precision_pr_auc": 0.073322,
+    "precision_at_top_1_pct": 0.025431,
+    "precision_at_top_5_pct": 0.022541,
+    "recall_at_top_5_pct": 0.029412,
+    "lift_at_top_1_pct": 0.663636,
+    "lift_at_top_5_pct": 0.588219,
+    "top_1_pct_details": {
+      "fraction": 0.01,
+      "k": 1101,
+      "precision": 0.025431,
+      "recall": 0.006641,
+      "lift": 0.663636,
+      "cutoff_score": 0.8995080252,
+      "above_cutoff_count": 1100,
+      "tie_count_at_cutoff": 1,
+      "remaining_slots_from_tie_bucket": 1,
+      "tie_positive_count": 0,
+      "tie_positive_rate": 0.0,
+      "tie_adjusted": false
+    },
+    "top_5_pct_details": {
+      "fraction": 0.05,
+      "k": 5501,
+      "precision": 0.022541,
+      "recall": 0.029412,
+      "lift": 0.588219,
+      "cutoff_score": 0.6298352469,
+      "above_cutoff_count": 5492,
+      "tie_count_at_cutoff": 10,
+      "remaining_slots_from_tie_bucket": 9,
+      "tie_positive_count": 0,
+      "tie_positive_rate": 0.0,
+      "tie_adjusted": true
+    },
+    "brier_score": 0.07457,
+    "confusion_matrix_threshold_0_5": {
+      "true_negative": 98754,
+      "false_positive": 7047,
+      "false_negative": 3906,
+      "true_positive": 310
+    }
+  },
+  "metric_comparison": {
+    "roc_auc": {
+      "transportation_enhanced": 0.715771,
+      "planning_pipeline_utility_enhanced": 0.770504,
+      "absolute_improvement": 0.054733,
+      "percent_improvement": 7.6467
+    },
+    "average_precision_pr_auc": {
+      "transportation_enhanced": 0.083925,
+      "planning_pipeline_utility_enhanced": 0.073322,
+      "absolute_improvement": -0.010603,
+      "percent_improvement": -12.6339
+    },
+    "precision_at_top_1_pct": {
+      "transportation_enhanced": 0.108084,
+      "planning_pipeline_utility_enhanced": 0.025431,
+      "absolute_improvement": -0.082653,
+      "percent_improvement": -76.4711
+    },
+    "precision_at_top_5_pct": {
+      "transportation_enhanced": 0.136157,
+      "planning_pipeline_utility_enhanced": 0.022541,
+      "absolute_improvement": -0.113616,
+      "percent_improvement": -83.4448
+    },
+    "recall_at_top_5_pct": {
+      "transportation_enhanced": 0.177657,
+      "planning_pipeline_utility_enhanced": 0.029412,
+      "absolute_improvement": -0.148245,
+      "percent_improvement": -83.4445
+    },
+    "lift_at_top_1_pct": {
+      "transportation_enhanced": 2.820453,
+      "planning_pipeline_utility_enhanced": 0.663636,
+      "absolute_improvement": -2.156817,
+      "percent_improvement": -76.4706
+    },
+    "lift_at_top_5_pct": {
+      "transportation_enhanced": 3.553034,
+      "planning_pipeline_utility_enhanced": 0.588219,
+      "absolute_improvement": -2.964815,
+      "percent_improvement": -83.4446
+    },
+    "brier_score": {
+      "transportation_enhanced": 0.102484,
+      "planning_pipeline_utility_enhanced": 0.07457,
+      "absolute_improvement": -0.027914,
+      "percent_improvement": -27.2374
+    },
+    "positive_rate": {
+      "transportation_enhanced": 0.038321,
+      "planning_pipeline_utility_enhanced": 0.038321,
+      "absolute_improvement": 0.0,
+      "percent_improvement": 0.0
+    }
+  },
+  "planning_pipeline_utility_helped": false,
+  "top_planning_pipeline_utility_features": [
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_City - Not Applicable",
+      "coefficient": -2.52109196,
+      "absolute_coefficient": 2.52109196,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_Notification Sent",
+      "coefficient": -2.47237575,
+      "absolute_coefficient": 2.47237575,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_type_infrequent_sklearn",
+      "coefficient": 2.10160681,
+      "absolute_coefficient": 2.10160681,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_82529537.52941819",
+      "coefficient": -2.06797162,
+      "absolute_coefficient": 2.06797162,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_Approved with Conditions",
+      "coefficient": 1.90015197,
+      "absolute_coefficient": 1.90015197,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_23016581.511014313",
+      "coefficient": 1.81574363,
+      "absolute_coefficient": 1.81574363,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_infrequent_sklearn",
+      "coefficient": 1.80987795,
+      "absolute_coefficient": 1.80987795,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_27917143.5334064",
+      "coefficient": -1.80060012,
+      "absolute_coefficient": 1.80060012,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_County - Not Applicable",
+      "coefficient": -1.75736969,
+      "absolute_coefficient": 1.75736969,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_infrequent_sklearn",
+      "coefficient": 1.71864594,
+      "absolute_coefficient": 1.71864594,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_Approved for Permitting",
+      "coefficient": 1.58838584,
+      "absolute_coefficient": 1.58838584,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "latest_plan_review_status_City Review Complete",
+      "coefficient": -1.56399799,
+      "absolute_coefficient": 1.56399799,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_growth_alignment_plan_context_review",
+      "coefficient": -1.4797944,
+      "absolute_coefficient": 1.4797944,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "value_enrichment_quality_separate_tax_enrichment_match_available",
+      "coefficient": -1.45675998,
+      "absolute_coefficient": 1.45675998,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "planning_pipeline_utility_current_context",
+      "feature_name": "future_land_use_category_157139543.27738935",
+      "coefficient": 1.35974885,
+      "absolute_coefficient": 1.35974885,
+      "feature_group": "planning_pipeline_utility_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "high_for_historical_backtesting_without_source_dates",
+      "is_planning_pipeline_utility_feature": true
+    }
+  ],
+  "experiment_score_table_created": true,
+  "experiment_score_rows": 110017,
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "concord_only_features_present": true,
+  "utility_proxy_only_features_present": true,
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "no_frontend_exposure": true,
+  "caveats": [
+    "Internal exploratory experiment only; no frontend exposure.",
+    "Central Area Plan features are Concord-only/current-context and not countywide future land-use coverage.",
+    "Accela plan reviews are early pipeline signals, not approvals.",
+    "WSACC features are utility proximity proxies only and do not represent capacity or allocation.",
+    "Tax Parcels Full fields are current enrichment context and not historical value snapshots."
+  ],
+  "recommended_next_step": "Phase 16C should acquire dated official development pipeline, utility capacity/allocation, and countywide future land-use records before any production modeling claim.",
+  "outputs": {
+    "metrics": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase16b_planning_pipeline_utility_model_comparison_metrics.json",
+    "feature_importance": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase16b_planning_pipeline_utility_feature_importance.csv",
+    "prediction_sample": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase16b_planning_pipeline_utility_predictions_sample.csv",
+    "temporal_split": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase16b_planning_pipeline_utility_temporal_split_summary.json",
+    "caveats": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase16b_planning_pipeline_utility_model_caveats.md",
+    "summary": "C:\\CabarrusFutureScape\\outputs\\phase16b_planning_pipeline_utility_model_comparison_summary.json"
+  },
+  "validation_results": {
+    "python_compileall_transform": "passed",
+    "python_compileall_modeling": "passed",
+    "python_compileall_backend_app": "passed",
+    "python_pytest_backend": "passed: 258 tests",
+    "npm_run_dev_cfs": "passed: restarted FastAPI and Next.js, launcher checks all green"
+  },
+  "smoke_test_results": {
+    "backend_health": "200",
+    "development_prediction_features_summary": "200",
+    "transportation_accessibility_summary": "200",
+    "transportation_plan_traffic_summary": "200",
+    "parcel_search": "200",
+    "development_hotspots": "200",
+    "flood_summary": "200",
+    "school_statistics": "200",
+    "planning_pipeline_utility_feature_matrix_available": true,
+    "planning_pipeline_utility_row_count": 1430221,
+    "planning_pipeline_utility_model_experiment_available": true,
+    "latest_planning_pipeline_utility_experiment_id": "phase16b_planning_pipeline_utility_enhanced_v1",
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false
+  },
+  "feature_matrix_status": {
+    "table": "public.parcel_development_prediction_features_planning_pipeline_utility_enhanced",
+    "row_count": 1430221,
+    "unique_parcels": 110017,
+    "snapshot_years": "2014-2026",
+    "duplicate_parcel_year_groups": 0,
+    "current_context_only": true,
+    "time_safe_for_training": false,
+    "concord_only_features_present": true,
+    "utility_proxy_only_features_present": true,
+    "true_utility_capacity_available": false
+  },
+  "production_safety_confirmation": {
+    "public_prediction_endpoint_added": false,
+    "frontend_prediction_exposure_added": false,
+    "parcel_level_ranking_exposure_added": false,
+    "production_ready": false,
+    "model_active": false,
+    "prediction_probability_available": false
+  }
+}

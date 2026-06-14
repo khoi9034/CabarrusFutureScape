@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-06-14T07:34:28.776687+00:00",
+  "feature_table": "parcel_accela_plan_review_features",
+  "early_pipeline_signal_only": true,
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "expected_parcel_count": 110017,
+  "row_count": 110017,
+  "unique_parcels": 110017,
+  "row_count_matches_parcels": true,
+  "parcels_with_plan_review_signal": 12663,
+  "linked_plan_review_count": 75837,
+  "open_plan_review_count": 70328,
+  "recent_plan_review_count": 0,
+  "current_context_only_count": 110017,
+  "not_time_safe_count": 110017
+}

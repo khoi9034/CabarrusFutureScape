@@ -1,0 +1,8 @@
+check_name,status,failing_rows,notes
+row_count_matches_transportation_enhanced_matrix,pass,0,Phase 16B must preserve Phase 13C parcel-year cardinality.
+no_duplicate_parcel_year_rows,pass,0,Planning/pipeline/utility joins must not duplicate parcel-year rows.
+current_context_flag_true,pass,0,All Phase 16B rows must be marked current-context only.
+time_safe_flag_false,pass,0,"Current-context planning, utility, and tax fields are not strict historical training features."
+true_utility_capacity_not_inferred,pass,0,WSACC proxy geometry must not be converted into true capacity availability.
+concord_only_flag_preserved,pass,0,Central Area Plan fields are Concord-only/current-context planning inputs.
+utility_proxy_only_flag_preserved,pass,0,"Utility fields are proximity/service-context proxies, not capacity or allocation."

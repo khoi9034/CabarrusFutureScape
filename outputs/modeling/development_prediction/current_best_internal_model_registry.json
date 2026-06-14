@@ -1,0 +1,86 @@
+{
+  "phase": "16D_current_best_internal_model_registry",
+  "generated_at": "2026-06-14T00:00:00-04:00",
+  "recommended_internal_model_name": "Zoning + Transportation + Tax/Value Internal Ranking Variant",
+  "recommended_experiment_id": "phase16c_planning_pipeline_utility_ablation_v1",
+  "recommended_feature_set": "transportation_plus_tax_value_only",
+  "target": "new_construction_next_3yr",
+  "model_status": "internal_research_only",
+  "production_ready": false,
+  "public_exposure_allowed": false,
+  "prediction_probability_available": false,
+  "model_active": false,
+  "calibration_status": "weak_probability_calibration_under_review",
+  "recommended_use": [
+    "internal_ranking_research",
+    "feature_qa",
+    "methodology_demo",
+    "model_development_planning"
+  ],
+  "not_recommended_use": [
+    "public_decision_making",
+    "parcel_level_probability_display",
+    "entitlement_decisions",
+    "public_scoring",
+    "automated_planning_decisions"
+  ],
+  "last_review_phase": "16C_planning_pipeline_utility_feature_ablation_governance",
+  "reasons_for_selection": [
+    "Phase 16C ablation found the tax/value-only addition improved PR-AUC from 0.082744 to 0.137928 versus the transportation-enhanced base.",
+    "The tax/value-only addition improved lift@top 5% from 3.889837 to 4.051123 versus the transportation-enhanced base.",
+    "The full Phase 16B feature bundle reduced PR-AUC and lift@top 5%, so it is not recommended as the current internal ranking variant.",
+    "The selected variant preserves zoning and transportation context while excluding noisy or proxy-only Phase 16B feature groups."
+  ],
+  "comparison_metrics": {
+    "transportation_enhanced_base": {
+      "pr_auc": 0.082744,
+      "lift_at_top_5_pct": 3.889837,
+      "precision_at_top_5_pct": 0.149064
+    },
+    "transportation_plus_tax_value_only": {
+      "pr_auc": 0.137928,
+      "lift_at_top_5_pct": 4.051123,
+      "precision_at_top_5_pct": 0.155245
+    },
+    "transportation_plus_all_phase16b": {
+      "pr_auc": 0.071244,
+      "lift_at_top_5_pct": 0.711556,
+      "precision_at_top_5_pct": 0.027268
+    }
+  },
+  "included_feature_groups": [
+    "new_construction_permit_labels",
+    "parcel_base_and_value_context",
+    "historical_zoning",
+    "transportation_accessibility",
+    "stip_aadt",
+    "tax_value_enrichment"
+  ],
+  "excluded_feature_groups": [
+    "Accela plan reviews",
+    "Central Area Plan",
+    "utility proxy",
+    "metadata/current-context flags"
+  ],
+  "excluded_feature_group_reasons": {
+    "Accela plan reviews": "Current-context and pipeline/status semantics need temporal and jurisdiction QA; ablation improved PR-AUC slightly but hurt top-k lift substantially.",
+    "Central Area Plan": "Concord-only current-context plan coverage is useful context but not countywide enough for the current best model.",
+    "utility proxy": "Proxy-only service context is not true water/sewer capacity and did not improve top-k ranking enough to include.",
+    "metadata/current-context flags": "Governance flags document caveats and should not act as predictive drivers."
+  },
+  "next_data_needed": [
+    "official rezoning case dates and old/new zoning decisions",
+    "countywide adopted future land use with effective dates",
+    "true utility capacity and allocation data",
+    "official development pipeline/subdivision approvals with dates and outcomes",
+    "historical parcel valuation snapshots",
+    "verified school capacity and enrollment data",
+    "economic and market controls"
+  ],
+  "safety_confirmation": {
+    "frontend_prediction_exposure_allowed": false,
+    "parcel_level_ranking_exposure_allowed": false,
+    "public_prediction_endpoint_allowed": false,
+    "production_activation_allowed": false
+  }
+}
