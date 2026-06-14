@@ -3,10 +3,15 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   getDefaultLayerIds,
+  isLayerVisibilityControllable,
   operationalLayerRegistry,
 } from "@/lib/gis/layerRegistry";
 
-const validLayerIds = new Set(operationalLayerRegistry.map((layer) => layer.id));
+const validLayerIds = new Set(
+  operationalLayerRegistry
+    .filter(isLayerVisibilityControllable)
+    .map((layer) => layer.id),
+);
 
 export function useLayerVisibility() {
   const [activeLayerIds, setActiveLayerIdsState] =

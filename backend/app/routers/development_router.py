@@ -22,6 +22,9 @@ from app.schemas import (
     PermitSegmentStatisticsResponse,
     DevelopmentParcelPermitEventsResponse,
     DevelopmentPredictionFeaturesSummaryResponse,
+    DevelopmentPredictionRankingSummaryResponse,
+    DevelopmentPredictionTransportationAccessibilitySummaryResponse,
+    DevelopmentPredictionTransportationPlanTrafficSummaryResponse,
     DevelopmentStatisticsResponse,
     DevelopmentTemporalQueryResponse,
     DevelopmentTrendsResponse,
@@ -118,6 +121,39 @@ def get_prediction_features_summary(
 ) -> DevelopmentPredictionFeaturesSummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_prediction_features_summary()
+
+
+@router.get(
+    "/prediction/ranking/summary",
+    response_model=DevelopmentPredictionRankingSummaryResponse,
+)
+def get_prediction_ranking_summary(
+    db: Session = Depends(get_read_only_db),
+) -> DevelopmentPredictionRankingSummaryResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_prediction_ranking_summary()
+
+
+@router.get(
+    "/prediction/transportation-accessibility/summary",
+    response_model=DevelopmentPredictionTransportationAccessibilitySummaryResponse,
+)
+def get_transportation_accessibility_summary(
+    db: Session = Depends(get_read_only_db),
+) -> DevelopmentPredictionTransportationAccessibilitySummaryResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_transportation_accessibility_summary()
+
+
+@router.get(
+    "/prediction/transportation-plan-traffic/summary",
+    response_model=DevelopmentPredictionTransportationPlanTrafficSummaryResponse,
+)
+def get_transportation_plan_traffic_summary(
+    db: Session = Depends(get_read_only_db),
+) -> DevelopmentPredictionTransportationPlanTrafficSummaryResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_transportation_plan_traffic_summary()
 
 
 @router.get("/trends", response_model=DevelopmentTrendsResponse)

@@ -1,0 +1,353 @@
+{
+  "phase": "13B_stip_aadt_feature_engineering",
+  "generated_at": "2026-06-14T02:40:19.825064+00:00",
+  "dry_run": false,
+  "feature_table": "public.parcel_transportation_plan_traffic_features",
+  "parcel_feature_table_status": "available",
+  "parcel_feature_row_count": 110017,
+  "expected_parcel_count": 110017,
+  "row_count_matches_parcels": true,
+  "sources_ingested": [
+    "ncdot_stip_2026_2035",
+    "ncdot_aadt_traffic_counts"
+  ],
+  "stip_rows": {
+    "raw": 18,
+    "clean": 18
+  },
+  "aadt_rows": {
+    "raw": 642,
+    "clean": 642
+  },
+  "features_created": [
+    "nearest_stip_project_distance_ft",
+    "nearest_stip_project_name",
+    "nearest_stip_project_type",
+    "nearest_stip_project_year",
+    "stip_project_within_half_mile",
+    "stip_project_within_1_mile",
+    "stip_project_count_within_1_mile",
+    "stip_project_count_within_3_miles",
+    "planned_transportation_investment_flag",
+    "nearest_aadt_station_distance_ft",
+    "nearest_aadt_station_route",
+    "nearest_aadt_value",
+    "nearest_aadt_count_year",
+    "max_aadt_within_half_mile",
+    "max_aadt_within_1_mile",
+    "avg_aadt_within_1_mile",
+    "aadt_station_count_within_1_mile"
+  ],
+  "missingness": [
+    {
+      "feature_name": "nearest_stip_project_year",
+      "missing_count": 68280,
+      "missing_pct": "62.0631"
+    },
+    {
+      "feature_name": "max_aadt_within_half_mile",
+      "missing_count": 39127,
+      "missing_pct": "35.5645"
+    },
+    {
+      "feature_name": "avg_aadt_within_1_mile",
+      "missing_count": 6935,
+      "missing_pct": "6.3036"
+    },
+    {
+      "feature_name": "max_aadt_within_1_mile",
+      "missing_count": 6935,
+      "missing_pct": "6.3036"
+    },
+    {
+      "feature_name": "nearest_aadt_count_year",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "nearest_aadt_station_distance_ft",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "nearest_aadt_station_route",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "nearest_aadt_value",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "nearest_stip_project_distance_ft",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "nearest_stip_project_name",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "nearest_stip_project_type",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    }
+  ],
+  "distance_and_value_distribution": [
+    {
+      "metric_name": "avg_aadt_within_1_mile",
+      "metric_unit": "vehicles_per_day",
+      "non_null_count": 103082,
+      "min_value": 90.0,
+      "p25_value": 5250.0,
+      "median_value": 7650.0,
+      "p75_value": 11500.0,
+      "p90_value": 15433.333333333332,
+      "max_value": 111000.0,
+      "avg_value": 8654.950095908001
+    },
+    {
+      "metric_name": "max_aadt_within_1_mile",
+      "metric_unit": "vehicles_per_day",
+      "non_null_count": 103082,
+      "min_value": 90.0,
+      "p25_value": 9500.0,
+      "median_value": 16500.0,
+      "p75_value": 24500.0,
+      "p90_value": 38000.0,
+      "max_value": 123000.0,
+      "avg_value": 21404.560544032905
+    },
+    {
+      "metric_name": "nearest_aadt_station_distance_ft",
+      "metric_unit": "feet",
+      "non_null_count": 110017,
+      "min_value": 28.989985076495053,
+      "p25_value": 1154.3874614115377,
+      "median_value": 2031.3283639389094,
+      "p75_value": 3241.829385070887,
+      "p90_value": 4630.719885814088,
+      "max_value": 17901.58964483566,
+      "avg_value": 2420.639843755605
+    },
+    {
+      "metric_name": "nearest_aadt_value",
+      "metric_unit": "vehicles_per_day",
+      "non_null_count": 110017,
+      "min_value": 90.0,
+      "p25_value": 2400.0,
+      "median_value": 6500.0,
+      "p75_value": 11500.0,
+      "p90_value": 16000.0,
+      "max_value": 123000.0,
+      "avg_value": 8182.462437623277
+    },
+    {
+      "metric_name": "nearest_stip_project_distance_ft",
+      "metric_unit": "feet",
+      "non_null_count": 110017,
+      "min_value": 30.676236417036506,
+      "p25_value": 3622.4875767053873,
+      "median_value": 7176.507308259888,
+      "p75_value": 14529.238548681233,
+      "p90_value": 33097.03377096059,
+      "max_value": 66271.02282561446,
+      "avg_value": 12183.497254094067
+    }
+  ],
+  "quality_distribution": {
+    "planned_transportation_context_quality": [
+      {
+        "quality": "complete_current_context",
+        "row_count": 110017
+      }
+    ],
+    "traffic_demand_context_quality": [
+      {
+        "quality": "complete_current_context",
+        "row_count": 110017
+      }
+    ]
+  },
+  "stip_proximity_counts": {
+    "within_half_mile": 19322,
+    "within_1_mile": 41239,
+    "planned_transportation_investment_flag": 41239
+  },
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "current_context_caveats": [
+    "STIP and AADT features are current/planned context only in Phase 13B.",
+    "Do not use these features in strict historical training until temporal availability is reviewed.",
+    "STIP is a funded/planned project layer and does not cover every local concept road or small intersection project.",
+    "AADT station proximity is a traffic-demand proxy, not parcel-specific driveway traffic."
+  ],
+  "model_active": false,
+  "prediction_probability_available": false,
+  "phase13c_model_comparison_ready": true,
+  "ingest_summaries": {
+    "stip": {
+      "phase": "13B_stip_project_ingest",
+      "generated_at": "2026-06-14T02:39:40.336175+00:00",
+      "dry_run": false,
+      "truncate_and_load": true,
+      "source_key": "ncdot_stip_2026_2035",
+      "source_url": "https://gis11.services.ncdot.gov/arcgis/rest/services/NCDOT_STIP/MapServer/1",
+      "where": "UPPER(Counties) LIKE '%CABARRUS%'",
+      "total_source_record_count": 1245,
+      "filtered_record_count": 18,
+      "downloaded_features": 18,
+      "inserted_raw_rows": 18,
+      "inserted_clean_rows": 18,
+      "field_mapping_used": {
+        "source_objectid": [
+          "OBJECTID"
+        ],
+        "project_name": [
+          "TIP"
+        ],
+        "project_description": [
+          "Description"
+        ],
+        "project_type": [
+          "Category",
+          "Mode"
+        ],
+        "route_name": [
+          "Route"
+        ],
+        "county": [
+          "Counties"
+        ],
+        "jurisdiction": [
+          "MPOsRPOs",
+          "Divisions"
+        ],
+        "construction_year": [
+          "ConstructionYear"
+        ],
+        "start_year": [
+          "RightOfWayYear",
+          "ConstructionYear"
+        ],
+        "end_year": [
+          "ConstructionYear",
+          "RightOfWayYear"
+        ]
+      },
+      "missing_fields_kept_null": [
+        "project_status",
+        "funding_status",
+        "fiscal_year"
+      ],
+      "source_confidence": "source_reported_current_context",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "model_active": false,
+      "prediction_probability_available": false,
+      "database_summary": {
+        "raw_rows": 18,
+        "clean_rows": 18,
+        "missing_construction_year_count": 8,
+        "missing_project_status_count": 18,
+        "missing_funding_status_count": 18,
+        "invalid_geometry_count": 0
+      },
+      "rest_source_relocation_warning": "Source may have moved due to Cabarrus/NCDOT REST service reorganization; check registry/fallback URL before marking unavailable."
+    },
+    "aadt": {
+      "phase": "13B_aadt_traffic_count_ingest",
+      "generated_at": "2026-06-14T02:39:49.364883+00:00",
+      "dry_run": false,
+      "truncate_and_load": true,
+      "source_key": "ncdot_aadt_traffic_counts",
+      "source_url": "https://services.arcgis.com/NuWFvHYDMVmmxMeM/ArcGIS/rest/services/NCDOT_AADT_Stations/FeatureServer/0",
+      "where": "UPPER(COUNTY) = 'CABARRUS'",
+      "total_source_record_count": 48938,
+      "filtered_record_count": 642,
+      "downloaded_features": 642,
+      "inserted_raw_rows": 642,
+      "inserted_clean_rows": 642,
+      "field_mapping_used": {
+        "source_objectid": [
+          "FID",
+          "OBJECTID"
+        ],
+        "station_id": [
+          "LocationID"
+        ],
+        "route_name": [
+          "ROUTE"
+        ],
+        "road_name": [
+          "LOCATION"
+        ],
+        "vehicle_classification": [
+          "RTE_CLS"
+        ],
+        "county": [
+          "COUNTY"
+        ],
+        "aadt_value": [
+          "latest non-null AADT_YYYY field"
+        ]
+      },
+      "source_confidence": "source_reported_current_context",
+      "current_context_only": true,
+      "time_safe_for_training": false,
+      "model_active": false,
+      "prediction_probability_available": false,
+      "database_summary": {
+        "raw_rows": 642,
+        "clean_rows": 642,
+        "missing_aadt_value_count": 0,
+        "missing_count_year_count": 0,
+        "min_aadt_value": 90,
+        "max_aadt_value": 123000,
+        "min_count_year": 2012,
+        "max_count_year": 2022,
+        "invalid_geometry_count": 0
+      },
+      "rest_source_relocation_warning": "Source may have moved due to Cabarrus/NCDOT REST service reorganization; check registry/fallback URL before marking unavailable."
+    }
+  },
+  "outputs": {
+    "stip_ingest_summary": "C:\\CabarrusFutureScape\\outputs\\stip_project_ingest_summary.json",
+    "aadt_ingest_summary": "C:\\CabarrusFutureScape\\outputs\\aadt_traffic_count_ingest_summary.json",
+    "profile": "C:\\CabarrusFutureScape\\outputs\\parcel_transportation_plan_traffic_feature_profile.json",
+    "missingness": "C:\\CabarrusFutureScape\\outputs\\parcel_transportation_plan_traffic_missingness.csv",
+    "distance_distribution": "C:\\CabarrusFutureScape\\outputs\\parcel_transportation_plan_traffic_distance_distribution.csv",
+    "phase_summary": "C:\\CabarrusFutureScape\\outputs\\phase13b_stip_aadt_feature_engineering_summary.json"
+  },
+  "backend_endpoint": {
+    "path": "/development/prediction/transportation-plan-traffic/summary",
+    "status": "implemented",
+    "aggregate_only": true,
+    "parcel_level_predictions_exposed": false,
+    "model_active": false,
+    "prediction_probability_available": false
+  },
+  "validation_results": {
+    "python_compileall_cfs_data_pipelines_ingest": "passed",
+    "python_compileall_cfs_data_pipelines_transform": "passed",
+    "python_compileall_backend_app": "passed",
+    "python_pytest_backend": "235 passed, 3 warnings",
+    "focused_phase13b_tests": "7 passed",
+    "json_feature_registry_parse": "passed"
+  },
+  "runtime_smoke_test_results": {
+    "npm_run_dev_cfs": "started",
+    "frontend_http_3000": 200,
+    "backend_health": 200,
+    "backend_database_health": 200,
+    "development_prediction_features_summary": 200,
+    "transportation_accessibility_summary": 200,
+    "transportation_plan_traffic_summary": 200,
+    "parcel_search": 200,
+    "development_hotspots": 200,
+    "flood_summary": 200,
+    "school_statistics": 200
+  }
+}

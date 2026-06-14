@@ -7,6 +7,8 @@ import type {
   PermitSegmentOptionsResponse,
   PermitSegmentStatisticsResponse,
   DevelopmentParcelPermitEventsResponse,
+  DevelopmentPredictionFeaturesSummaryResponse,
+  DevelopmentPredictionRankingSummaryResponse,
   DevelopmentStatisticsResponse,
   DevelopmentTemporalQueryResponse,
   DevelopmentTrendsResponse,
@@ -218,6 +220,26 @@ export function getJurisdictions(options?: ApiRequestOptions) {
 export function getActivityClasses(options?: ApiRequestOptions) {
   return apiGet<DevelopmentLookupResponse>(
     "/development/activity-classes",
+    undefined,
+    options,
+  );
+}
+
+export function getDevelopmentPredictionFeaturesSummary(
+  options?: ApiRequestOptions,
+) {
+  return apiGet<DevelopmentPredictionFeaturesSummaryResponse>(
+    "/development/prediction/features/summary",
+    undefined,
+    options,
+  );
+}
+
+export function getDevelopmentPredictionRankingSummary(
+  options?: ApiRequestOptions,
+) {
+  return apiGet<DevelopmentPredictionRankingSummaryResponse>(
+    "/development/prediction/ranking/summary",
     undefined,
     options,
   );

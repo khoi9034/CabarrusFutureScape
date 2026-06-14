@@ -1,0 +1,5 @@
+qa_id,model_label,model_name,feature_set_name,top_fraction,top_label,fraction,k,precision,recall,lift,cutoff_score,above_cutoff_count,tie_count_at_cutoff,remaining_slots_from_tie_bucket,tie_positive_count,tie_positive_rate,tie_adjusted
+phase10f_model_qa_v1,baseline,hist_gradient_boosting,strict_time_safe_baseline,0.01,top_1pct,0.01,1101,0.022707,0.00593,0.592532,0.5789640058,1097,9,4,0,0.0,True
+phase10f_model_qa_v1,baseline,hist_gradient_boosting,strict_time_safe_baseline,0.05,top_5pct,0.05,5501,0.048496,0.063277,1.265508,0.5517793591,1145,73379,4356,4056,0.055275,True
+phase10f_model_qa_v1,zoning_enhanced,hist_gradient_boosting,zoning_enhanced_history,0.01,top_1pct,0.01,1101,0.144414,0.037713,3.768504,0.8277089068,1093,15,8,0,0.0,True
+phase10f_model_qa_v1,zoning_enhanced,hist_gradient_boosting,zoning_enhanced_history,0.05,top_5pct,0.05,5501,0.06802,0.088752,1.774988,0.7189545555,2743,5650,2758,238,0.042124,True

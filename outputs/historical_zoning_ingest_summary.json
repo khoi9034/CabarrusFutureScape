@@ -1,0 +1,1096 @@
+{
+  "phase": "10D-1",
+  "created_at": "2026-06-13T08:58:15.999280+00:00",
+  "dry_run": false,
+  "truncate_and_load": true,
+  "source_count_requested": 47,
+  "source_layers_successful": 47,
+  "source_layers_failed": [],
+  "downloaded_feature_count": 21567,
+  "inserted_raw_rows": 21567,
+  "inserted_clean_rows": 21567,
+  "layer_results": [
+    {
+      "source_key": "harrisburg_zoning_2015",
+      "source_year": 2015,
+      "jurisdiction": "Harrisburg",
+      "layer_id": 147,
+      "status": "ok",
+      "record_count": 141,
+      "downloaded_features": 141,
+      "inserted_raw_rows": 141,
+      "inserted_clean_rows": 141,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONINGDIST",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [
+        "CASE_NUMBE"
+      ],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2015",
+      "source_year": 2015,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 148,
+      "status": "ok",
+      "record_count": 1655,
+      "downloaded_features": 1655,
+      "inserted_raw_rows": 1655,
+      "inserted_clean_rows": 1655,
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [
+        "CASE_NUMBE",
+        "CU_CASE_"
+      ],
+      "date_field_candidates": [
+        "EFFECTIVE_",
+        "MAP_EDIT_D"
+      ],
+      "error": null
+    },
+    {
+      "source_key": "locust_zoning_2015",
+      "source_year": 2015,
+      "jurisdiction": "Locust",
+      "layer_id": 149,
+      "status": "ok",
+      "record_count": 7,
+      "downloaded_features": 7,
+      "inserted_raw_rows": 7,
+      "inserted_clean_rows": 7,
+      "zoning_code_field_candidates": [
+        "ZONING"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2015",
+      "source_year": 2015,
+      "jurisdiction": "Concord",
+      "layer_id": 153,
+      "status": "ok",
+      "record_count": 654,
+      "downloaded_features": 654,
+      "inserted_raw_rows": 654,
+      "inserted_clean_rows": 654,
+      "zoning_code_field_candidates": [
+        "COC_Zoning_AREA",
+        "ZONINGCODE",
+        "OLDZONING"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_county_zoning_2015",
+      "source_year": 2015,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 156,
+      "status": "ok",
+      "record_count": 207,
+      "downloaded_features": 207,
+      "inserted_raw_rows": 207,
+      "inserted_clean_rows": 207,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONINGDIST",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [
+        "CASE_NUMBE"
+      ],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "mt_pleasant_zoning_2015",
+      "source_year": 2015,
+      "jurisdiction": "Mt. Pleasant",
+      "layer_id": 157,
+      "status": "ok",
+      "record_count": 130,
+      "downloaded_features": 130,
+      "inserted_raw_rows": 130,
+      "inserted_clean_rows": 130,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "midland_zoning_2015",
+      "source_year": 2015,
+      "jurisdiction": "Midland",
+      "layer_id": 159,
+      "status": "ok",
+      "record_count": 115,
+      "downloaded_features": 115,
+      "inserted_raw_rows": 115,
+      "inserted_clean_rows": 115,
+      "zoning_code_field_candidates": [
+        "Zoning_Typ",
+        "Zone_ID"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2014",
+      "source_year": 2014,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 52,
+      "status": "ok",
+      "record_count": 2009,
+      "downloaded_features": 2009,
+      "inserted_raw_rows": 2009,
+      "inserted_clean_rows": 2009,
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [
+        "CU_CASE_"
+      ],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "locust_zoning_2014",
+      "source_year": 2014,
+      "jurisdiction": "Locust",
+      "layer_id": 53,
+      "status": "ok",
+      "record_count": 7,
+      "downloaded_features": 7,
+      "inserted_raw_rows": 7,
+      "inserted_clean_rows": 7,
+      "zoning_code_field_candidates": [
+        "ZONING"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "harrisburg_zoning_2014",
+      "source_year": 2014,
+      "jurisdiction": "Harrisburg",
+      "layer_id": 54,
+      "status": "ok",
+      "record_count": 122,
+      "downloaded_features": 122,
+      "inserted_raw_rows": 122,
+      "inserted_clean_rows": 122,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "mt_pleasant_zoning_2014",
+      "source_year": 2014,
+      "jurisdiction": "Mt. Pleasant",
+      "layer_id": 56,
+      "status": "ok",
+      "record_count": 130,
+      "downloaded_features": 130,
+      "inserted_raw_rows": 130,
+      "inserted_clean_rows": 130,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "midland_zoning_2014",
+      "source_year": 2014,
+      "jurisdiction": "Midland",
+      "layer_id": 57,
+      "status": "ok",
+      "record_count": 115,
+      "downloaded_features": 115,
+      "inserted_raw_rows": 115,
+      "inserted_clean_rows": 115,
+      "zoning_code_field_candidates": [
+        "Zoning_Typ"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_county_zoning_2014",
+      "source_year": 2014,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 58,
+      "status": "ok",
+      "record_count": 200,
+      "downloaded_features": 200,
+      "inserted_raw_rows": 200,
+      "inserted_clean_rows": 200,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2014",
+      "source_year": 2014,
+      "jurisdiction": "Concord",
+      "layer_id": 59,
+      "status": "ok",
+      "record_count": 654,
+      "downloaded_features": 654,
+      "inserted_raw_rows": 654,
+      "inserted_clean_rows": 654,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "harrisburg_zoning_2013",
+      "source_year": 2013,
+      "jurisdiction": "Harrisburg",
+      "layer_id": 68,
+      "status": "ok",
+      "record_count": 120,
+      "downloaded_features": 120,
+      "inserted_raw_rows": 120,
+      "inserted_clean_rows": 120,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2013",
+      "source_year": 2013,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 69,
+      "status": "ok",
+      "record_count": 1643,
+      "downloaded_features": 1643,
+      "inserted_raw_rows": 1643,
+      "inserted_clean_rows": 1643,
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2013",
+      "source_year": 2013,
+      "jurisdiction": "Concord",
+      "layer_id": 70,
+      "status": "ok",
+      "record_count": 651,
+      "downloaded_features": 651,
+      "inserted_raw_rows": 651,
+      "inserted_clean_rows": 651,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_county_zoning_2012",
+      "source_year": 2012,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 77,
+      "status": "ok",
+      "record_count": 205,
+      "downloaded_features": 205,
+      "inserted_raw_rows": 205,
+      "inserted_clean_rows": 205,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2012",
+      "source_year": 2012,
+      "jurisdiction": "Concord",
+      "layer_id": 78,
+      "status": "ok",
+      "record_count": 651,
+      "downloaded_features": 651,
+      "inserted_raw_rows": 651,
+      "inserted_clean_rows": 651,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "harrisburg_zoning_2012",
+      "source_year": 2012,
+      "jurisdiction": "Harrisburg",
+      "layer_id": 79,
+      "status": "ok",
+      "record_count": 108,
+      "downloaded_features": 108,
+      "inserted_raw_rows": 108,
+      "inserted_clean_rows": 108,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2012",
+      "source_year": 2012,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 80,
+      "status": "ok",
+      "record_count": 1643,
+      "downloaded_features": 1643,
+      "inserted_raw_rows": 1643,
+      "inserted_clean_rows": 1643,
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "locust_zoning_2012",
+      "source_year": 2012,
+      "jurisdiction": "Locust",
+      "layer_id": 81,
+      "status": "ok",
+      "record_count": 8,
+      "downloaded_features": 8,
+      "inserted_raw_rows": 8,
+      "inserted_clean_rows": 8,
+      "zoning_code_field_candidates": [
+        "ZONING"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "midland_zoning_2012",
+      "source_year": 2012,
+      "jurisdiction": "Midland",
+      "layer_id": 82,
+      "status": "ok",
+      "record_count": 110,
+      "downloaded_features": 110,
+      "inserted_raw_rows": 110,
+      "inserted_clean_rows": 110,
+      "zoning_code_field_candidates": [
+        "Zoning_Typ"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "mt_pleasant_zoning_2012",
+      "source_year": 2012,
+      "jurisdiction": "Mt. Pleasant",
+      "layer_id": 83,
+      "status": "ok",
+      "record_count": 126,
+      "downloaded_features": 126,
+      "inserted_raw_rows": 126,
+      "inserted_clean_rows": 126,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_county_zoning_2011",
+      "source_year": 2011,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 93,
+      "status": "ok",
+      "record_count": 460,
+      "downloaded_features": 460,
+      "inserted_raw_rows": 460,
+      "inserted_clean_rows": 460,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2011",
+      "source_year": 2011,
+      "jurisdiction": "Concord",
+      "layer_id": 94,
+      "status": "ok",
+      "record_count": 641,
+      "downloaded_features": 641,
+      "inserted_raw_rows": 641,
+      "inserted_clean_rows": 641,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "harrisburg_zoning_2011",
+      "source_year": 2011,
+      "jurisdiction": "Harrisburg",
+      "layer_id": 95,
+      "status": "ok",
+      "record_count": 175,
+      "downloaded_features": 175,
+      "inserted_raw_rows": 175,
+      "inserted_clean_rows": 175,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2011",
+      "source_year": 2011,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 96,
+      "status": "ok",
+      "record_count": 1643,
+      "downloaded_features": 1643,
+      "inserted_raw_rows": 1643,
+      "inserted_clean_rows": 1643,
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "locust_zoning_2011",
+      "source_year": 2011,
+      "jurisdiction": "Locust",
+      "layer_id": 97,
+      "status": "ok",
+      "record_count": 8,
+      "downloaded_features": 8,
+      "inserted_raw_rows": 8,
+      "inserted_clean_rows": 8,
+      "zoning_code_field_candidates": [
+        "ZONING"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "midland_zoning_2011",
+      "source_year": 2011,
+      "jurisdiction": "Midland",
+      "layer_id": 98,
+      "status": "ok",
+      "record_count": 108,
+      "downloaded_features": 108,
+      "inserted_raw_rows": 108,
+      "inserted_clean_rows": 108,
+      "zoning_code_field_candidates": [
+        "Zoning_Typ"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "mt_pleasant_zoning_2011",
+      "source_year": 2011,
+      "jurisdiction": "Mt. Pleasant",
+      "layer_id": 99,
+      "status": "ok",
+      "record_count": 126,
+      "downloaded_features": 126,
+      "inserted_raw_rows": 126,
+      "inserted_clean_rows": 126,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "county_zoning_2010",
+      "source_year": 2010,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 105,
+      "status": "ok",
+      "record_count": 353,
+      "downloaded_features": 353,
+      "inserted_raw_rows": 353,
+      "inserted_clean_rows": 353,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2010",
+      "source_year": 2010,
+      "jurisdiction": "Concord",
+      "layer_id": 107,
+      "status": "ok",
+      "record_count": 640,
+      "downloaded_features": 640,
+      "inserted_raw_rows": 640,
+      "inserted_clean_rows": 640,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2010",
+      "source_year": 2010,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 108,
+      "status": "ok",
+      "record_count": 382,
+      "downloaded_features": 382,
+      "inserted_raw_rows": 382,
+      "inserted_clean_rows": 382,
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2009",
+      "source_year": 2009,
+      "jurisdiction": "Concord",
+      "layer_id": 134,
+      "status": "ok",
+      "record_count": 609,
+      "downloaded_features": 609,
+      "inserted_raw_rows": 609,
+      "inserted_clean_rows": 609,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "county_zoning_2009",
+      "source_year": 2009,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 135,
+      "status": "ok",
+      "record_count": 348,
+      "downloaded_features": 348,
+      "inserted_raw_rows": 348,
+      "inserted_clean_rows": 348,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2009",
+      "source_year": 2009,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 136,
+      "status": "ok",
+      "record_count": 347,
+      "downloaded_features": 347,
+      "inserted_raw_rows": 347,
+      "inserted_clean_rows": 347,
+      "zoning_code_field_candidates": [],
+      "case_number_field_candidates": [
+        "CASE_NUMBE"
+      ],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_zoning_2008",
+      "source_year": 2008,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 129,
+      "status": "ok",
+      "record_count": 397,
+      "downloaded_features": 397,
+      "inserted_raw_rows": 397,
+      "inserted_clean_rows": 397,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2007",
+      "source_year": 2007,
+      "jurisdiction": "Concord",
+      "layer_id": 125,
+      "status": "ok",
+      "record_count": 587,
+      "downloaded_features": 587,
+      "inserted_raw_rows": 587,
+      "inserted_clean_rows": 587,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_zoning_2007",
+      "source_year": 2007,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 126,
+      "status": "ok",
+      "record_count": 393,
+      "downloaded_features": 393,
+      "inserted_raw_rows": 393,
+      "inserted_clean_rows": 393,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2007",
+      "source_year": 2007,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 127,
+      "status": "ok",
+      "record_count": 347,
+      "downloaded_features": 347,
+      "inserted_raw_rows": 347,
+      "inserted_clean_rows": 347,
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2006",
+      "source_year": 2006,
+      "jurisdiction": "Concord",
+      "layer_id": 120,
+      "status": "ok",
+      "record_count": 587,
+      "downloaded_features": 587,
+      "inserted_raw_rows": 587,
+      "inserted_clean_rows": 587,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_zoning_2006",
+      "source_year": 2006,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 121,
+      "status": "ok",
+      "record_count": 386,
+      "downloaded_features": 386,
+      "inserted_raw_rows": 386,
+      "inserted_clean_rows": 386,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2006",
+      "source_year": 2006,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 122,
+      "status": "ok",
+      "record_count": 347,
+      "downloaded_features": 347,
+      "inserted_raw_rows": 347,
+      "inserted_clean_rows": 347,
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2005",
+      "source_year": 2005,
+      "jurisdiction": "Concord",
+      "layer_id": 115,
+      "status": "ok",
+      "record_count": 576,
+      "downloaded_features": 576,
+      "inserted_raw_rows": 576,
+      "inserted_clean_rows": 576,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2005",
+      "source_year": 2005,
+      "jurisdiction": "Kannapolis",
+      "layer_id": 116,
+      "status": "ok",
+      "record_count": 318,
+      "downloaded_features": 318,
+      "inserted_raw_rows": 318,
+      "inserted_clean_rows": 318,
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_zoning_2005",
+      "source_year": 2005,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "layer_id": 117,
+      "status": "ok",
+      "record_count": 378,
+      "downloaded_features": 378,
+      "inserted_raw_rows": 378,
+      "inserted_clean_rows": 378,
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "error": null
+    }
+  ],
+  "database_summary": {
+    "clean_rows_by_year_jurisdiction": [
+      {
+        "source_year": 2005,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 378
+      },
+      {
+        "source_year": 2005,
+        "jurisdiction": "Concord",
+        "clean_rows": 576
+      },
+      {
+        "source_year": 2005,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 318
+      },
+      {
+        "source_year": 2006,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 386
+      },
+      {
+        "source_year": 2006,
+        "jurisdiction": "Concord",
+        "clean_rows": 587
+      },
+      {
+        "source_year": 2006,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 347
+      },
+      {
+        "source_year": 2007,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 393
+      },
+      {
+        "source_year": 2007,
+        "jurisdiction": "Concord",
+        "clean_rows": 587
+      },
+      {
+        "source_year": 2007,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 347
+      },
+      {
+        "source_year": 2008,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 397
+      },
+      {
+        "source_year": 2009,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 348
+      },
+      {
+        "source_year": 2009,
+        "jurisdiction": "Concord",
+        "clean_rows": 609
+      },
+      {
+        "source_year": 2009,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 347
+      },
+      {
+        "source_year": 2010,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 353
+      },
+      {
+        "source_year": 2010,
+        "jurisdiction": "Concord",
+        "clean_rows": 640
+      },
+      {
+        "source_year": 2010,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 382
+      },
+      {
+        "source_year": 2011,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 460
+      },
+      {
+        "source_year": 2011,
+        "jurisdiction": "Concord",
+        "clean_rows": 641
+      },
+      {
+        "source_year": 2011,
+        "jurisdiction": "Harrisburg",
+        "clean_rows": 175
+      },
+      {
+        "source_year": 2011,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 1643
+      },
+      {
+        "source_year": 2011,
+        "jurisdiction": "Locust",
+        "clean_rows": 8
+      },
+      {
+        "source_year": 2011,
+        "jurisdiction": "Midland",
+        "clean_rows": 108
+      },
+      {
+        "source_year": 2011,
+        "jurisdiction": "Mt. Pleasant",
+        "clean_rows": 126
+      },
+      {
+        "source_year": 2012,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 205
+      },
+      {
+        "source_year": 2012,
+        "jurisdiction": "Concord",
+        "clean_rows": 651
+      },
+      {
+        "source_year": 2012,
+        "jurisdiction": "Harrisburg",
+        "clean_rows": 108
+      },
+      {
+        "source_year": 2012,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 1643
+      },
+      {
+        "source_year": 2012,
+        "jurisdiction": "Locust",
+        "clean_rows": 8
+      },
+      {
+        "source_year": 2012,
+        "jurisdiction": "Midland",
+        "clean_rows": 110
+      },
+      {
+        "source_year": 2012,
+        "jurisdiction": "Mt. Pleasant",
+        "clean_rows": 126
+      },
+      {
+        "source_year": 2013,
+        "jurisdiction": "Concord",
+        "clean_rows": 651
+      },
+      {
+        "source_year": 2013,
+        "jurisdiction": "Harrisburg",
+        "clean_rows": 120
+      },
+      {
+        "source_year": 2013,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 1643
+      },
+      {
+        "source_year": 2014,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 200
+      },
+      {
+        "source_year": 2014,
+        "jurisdiction": "Concord",
+        "clean_rows": 654
+      },
+      {
+        "source_year": 2014,
+        "jurisdiction": "Harrisburg",
+        "clean_rows": 122
+      },
+      {
+        "source_year": 2014,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 2009
+      },
+      {
+        "source_year": 2014,
+        "jurisdiction": "Locust",
+        "clean_rows": 7
+      },
+      {
+        "source_year": 2014,
+        "jurisdiction": "Midland",
+        "clean_rows": 115
+      },
+      {
+        "source_year": 2014,
+        "jurisdiction": "Mt. Pleasant",
+        "clean_rows": 130
+      },
+      {
+        "source_year": 2015,
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "clean_rows": 207
+      },
+      {
+        "source_year": 2015,
+        "jurisdiction": "Concord",
+        "clean_rows": 654
+      },
+      {
+        "source_year": 2015,
+        "jurisdiction": "Harrisburg",
+        "clean_rows": 141
+      },
+      {
+        "source_year": 2015,
+        "jurisdiction": "Kannapolis",
+        "clean_rows": 1655
+      },
+      {
+        "source_year": 2015,
+        "jurisdiction": "Locust",
+        "clean_rows": 7
+      },
+      {
+        "source_year": 2015,
+        "jurisdiction": "Midland",
+        "clean_rows": 115
+      },
+      {
+        "source_year": 2015,
+        "jurisdiction": "Mt. Pleasant",
+        "clean_rows": 130
+      }
+    ],
+    "schema_quality_distribution": [
+      {
+        "schema_quality": "usable",
+        "clean_rows": 21131
+      },
+      {
+        "schema_quality": "review_required",
+        "clean_rows": 436
+      }
+    ],
+    "invalid_clean_geometry_count": 0
+  },
+  "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_historical_zoning_layers_20260613_045525.log"
+}

@@ -1,0 +1,192 @@
+{
+  "current_context_caveats": [
+    "Concord-only sources must not be treated as countywide.",
+    "No source is marked time-safe for historical training in Phase 13A.",
+    "Countywide small-area plan/future land use GIS outside Concord is still missing.",
+    "WSACC utility capacity/service-area GIS is still missing.",
+    "Local planned road projects beyond STIP are still missing."
+  ],
+  "feature_readiness_classifications": {
+    "concord_land_use_plan_2030": "ready_but_current_context_only",
+    "concord_planning_cases": "ready_but_current_context_only",
+    "ncdot_aadt_traffic_counts": "ready_but_current_context_only",
+    "ncdot_stip_2026_2035": "ready_but_current_context_only"
+  },
+  "fields_found": {
+    "concord_land_use_plan_2030": [
+      "OBJECTID",
+      "Code",
+      "Category",
+      "ApplicableZoning",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "concord_planning_cases": [
+      "OBJECTID",
+      "CaseNumber",
+      "Code",
+      "CaseType",
+      "CaseName",
+      "AssignedTo",
+      "Location",
+      "Description",
+      "DateCreated",
+      "Status",
+      "MostRecentUpdate",
+      "httpLocation",
+      "X",
+      "Y",
+      "ID",
+      "Year",
+      "DescriptionAbbr",
+      "Shape"
+    ],
+    "ncdot_aadt_traffic_counts": [
+      "FID",
+      "LocationID",
+      "COUNTY",
+      "RTE_CLS",
+      "ROUTE",
+      "LOCATION",
+      "AADT_2002",
+      "AADT_2003",
+      "AADT_2004",
+      "AADT_2005",
+      "AADT_2006",
+      "AADT_2007",
+      "AADT_2008",
+      "AADT_2009",
+      "AADT_2010",
+      "AADT_2011",
+      "AADT_2012",
+      "AADT_2013",
+      "AADT_2014",
+      "AADT_2015",
+      "AADT_2016",
+      "AADT_2017",
+      "AADT_2018",
+      "AADT_2019",
+      "AADT_2020",
+      "AADT_2021",
+      "AADT_2022"
+    ],
+    "ncdot_stip_2026_2035": [
+      "OBJECTID",
+      "TIP",
+      "SPOTID",
+      "Route",
+      "Description",
+      "Category",
+      "Mode",
+      "RightOfWayYear",
+      "ConstructionYear",
+      "COMMENT",
+      "ProjectCost",
+      "Symbology",
+      "Counties",
+      "Divisions",
+      "MPOsRPOs",
+      "SHAPE",
+      "SHAPE.STLength()"
+    ]
+  },
+  "generated_at": "2026-06-14T01:56:38.817183+00:00",
+  "guardrails": {
+    "feature_matrix_modified": false,
+    "frontend_modified": false,
+    "full_geometry_ingested": false,
+    "model_trained": false,
+    "optional_source_inventory_sql_prepared_only": true,
+    "postgis_schema_applied": false,
+    "prediction_exposed": false
+  },
+  "missing_data_tracker_created": "docs/data_requests/cfs_missing_data_tracker.md",
+  "outputs": [
+    "outputs/found_source_schema_inventory.json",
+    "outputs/found_source_schema_inventory.csv",
+    "outputs/found_source_feature_readiness_assessment.json",
+    "outputs/phase13a_found_source_registration_summary.json"
+  ],
+  "phase": "13A_found_planning_transportation_source_registration",
+  "recommended_next_ingestion_phase": "Phase 13B should ingest one bounded source at a time, starting with Concord future land use overlay or STIP project proximity, while preserving jurisdiction/current-context caveats.",
+  "record_counts": {
+    "concord_land_use_plan_2030": 307,
+    "concord_planning_cases": 116,
+    "ncdot_aadt_traffic_counts": 48938,
+    "ncdot_stip_2026_2035": 1245
+  },
+  "schemas_inspected": [
+    {
+      "geometry_type": "esriGeometryPolygon",
+      "layer_name": "Land Use Plan 2030",
+      "query_supported": true,
+      "record_count": 307,
+      "source_key": "concord_land_use_plan_2030",
+      "source_status": "available"
+    },
+    {
+      "geometry_type": "esriGeometryPolyline",
+      "layer_name": "2026-2035 STIP Lines",
+      "query_supported": true,
+      "record_count": 1245,
+      "source_key": "ncdot_stip_2026_2035",
+      "source_status": "available"
+    },
+    {
+      "geometry_type": "esriGeometryPoint",
+      "layer_name": "NCDOT_AADT_Stations",
+      "query_supported": true,
+      "record_count": 48938,
+      "source_key": "ncdot_aadt_traffic_counts",
+      "source_status": "available"
+    },
+    {
+      "geometry_type": "esriGeometryPoint",
+      "layer_name": "Planning Cases",
+      "query_supported": true,
+      "record_count": 116,
+      "source_key": "concord_planning_cases",
+      "source_status": "available"
+    }
+  ],
+  "sources_registered": [
+    {
+      "feature_group": "planning_policy_context_features",
+      "geography_scope": "concord_only",
+      "source_key": "concord_land_use_plan_2030",
+      "source_name": "City of Concord Land Use Plan 2030",
+      "source_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/48"
+    },
+    {
+      "feature_group": "transportation_accessibility_features",
+      "geography_scope": "statewide_filter_to_cabarrus_later",
+      "source_key": "ncdot_stip_2026_2035",
+      "source_name": "NCDOT 2026-2035 STIP Projects",
+      "source_url": "https://gis11.services.ncdot.gov/arcgis/rest/services/NCDOT_STIP/MapServer/1"
+    },
+    {
+      "feature_group": "transportation_accessibility_features",
+      "geography_scope": "statewide_filter_to_cabarrus_later",
+      "source_key": "ncdot_aadt_traffic_counts",
+      "source_name": "NCDOT AADT Traffic Count Stations",
+      "source_url": "https://services.arcgis.com/NuWFvHYDMVmmxMeM/ArcGIS/rest/services/NCDOT_AADT_Stations/FeatureServer/0"
+    },
+    {
+      "feature_group": "planning_case_activity_features",
+      "geography_scope": "concord_only",
+      "source_key": "concord_planning_cases",
+      "source_name": "Concord Planning Cases",
+      "source_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/9"
+    }
+  ],
+  "validation_results": {
+    "json_config_parses": "passed",
+    "json_outputs_parse": "passed",
+    "python_compileall_cfs_data_pipelines_inspect": "passed",
+    "python_compileall_cfs_data_pipelines_transform": "passed",
+    "python_compileall_backend_app": "passed",
+    "pytest_run": false,
+    "pytest_reason": "No runtime code path or tests were changed for Phase 13A; this was metadata inventory, documentation, and optional SQL preparation only."
+  }
+}

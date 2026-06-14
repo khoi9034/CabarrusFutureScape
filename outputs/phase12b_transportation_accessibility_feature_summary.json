@@ -1,0 +1,334 @@
+{
+  "phase": "12B_transportation_accessibility_feature_engineering",
+  "generated_at": "2026-06-13T15:51:51.801033+00:00",
+  "dry_run": false,
+  "feature_table": "public.parcel_transportation_accessibility_features",
+  "parcel_feature_table_status": "available",
+  "parcel_feature_row_count": 110017,
+  "expected_parcel_count": 110017,
+  "row_count_matches_parcels": true,
+  "sources": {
+    "road_clean_rows": 14455,
+    "rail_clean_rows": 64,
+    "major_road_clean_rows": 5
+  },
+  "quality_guardrails": {
+    "major_road_clean_rows": 5,
+    "major_road_minimum_required_segments": 100,
+    "major_road_features_enabled": false,
+    "actions": [
+      "major road distance fields set to null because source major-road classification is too sparse for countywide use"
+    ]
+  },
+  "accessibility_features_created": [
+    "distance_to_nearest_road_ft",
+    "nearest_road_name",
+    "nearest_road_type",
+    "distance_to_nearest_major_road_ft",
+    "nearest_major_road_name",
+    "road_length_within_500ft",
+    "road_length_within_1000ft",
+    "road_length_within_half_mile",
+    "road_density_1000ft",
+    "road_density_half_mile",
+    "intersection_count_within_1000ft",
+    "distance_to_nearest_rail_ft",
+    "rail_corridor_within_half_mile"
+  ],
+  "missingness": [
+    {
+      "feature_name": "distance_to_nearest_major_road_ft",
+      "missing_count": 110017,
+      "missing_pct": "100.0000"
+    },
+    {
+      "feature_name": "intersection_count_within_1000ft",
+      "missing_count": 110017,
+      "missing_pct": "100.0000"
+    },
+    {
+      "feature_name": "nearest_major_road_name",
+      "missing_count": 110017,
+      "missing_pct": "100.0000"
+    },
+    {
+      "feature_name": "nearest_road_type",
+      "missing_count": 1575,
+      "missing_pct": "1.4316"
+    },
+    {
+      "feature_name": "distance_to_nearest_rail_ft",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "distance_to_nearest_road_ft",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "nearest_road_name",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "rail_corridor_within_half_mile",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "road_density_1000ft",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "road_density_half_mile",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "road_length_within_1000ft",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "road_length_within_500ft",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    },
+    {
+      "feature_name": "road_length_within_half_mile",
+      "missing_count": 0,
+      "missing_pct": "0.0000"
+    }
+  ],
+  "distance_distribution": [
+    {
+      "metric_name": "distance_to_nearest_major_road_ft",
+      "non_null_count": 0,
+      "min_ft": null,
+      "p25_ft": null,
+      "median_ft": null,
+      "p75_ft": null,
+      "p90_ft": null,
+      "max_ft": null,
+      "avg_ft": null
+    },
+    {
+      "metric_name": "distance_to_nearest_rail_ft",
+      "non_null_count": 110017,
+      "min_ft": 0.17149427062025022,
+      "p25_ft": 4155.766652952232,
+      "median_ft": 9540.908665825194,
+      "p75_ft": 27177.69351552143,
+      "p90_ft": 40787.918059134696,
+      "max_ft": 93976.95516655919,
+      "avg_ft": 16203.094200395726
+    },
+    {
+      "metric_name": "distance_to_nearest_road_ft",
+      "non_null_count": 110017,
+      "min_ft": 0.012292787100131682,
+      "p25_ft": 83.71385055014005,
+      "median_ft": 102.89933971294906,
+      "p75_ft": 150.69177830102015,
+      "p90_ft": 291.1024937323004,
+      "max_ft": 3404.0397779992486,
+      "avg_ft": 161.38375391992622
+    }
+  ],
+  "data_quality_distribution": [
+    {
+      "transportation_accessibility_data_quality": "basic_accessibility_no_major_road_classification",
+      "row_count": 110017
+    }
+  ],
+  "rail_corridor_within_half_mile_count": 15862,
+  "missing_major_road_classification_count": 110017,
+  "current_context_only": true,
+  "current_context_caveat": "Road and rail layers are current-context. Do not use these features as time-safe historical model inputs until historical roads or dated transportation project records are available.",
+  "fields_unavailable": [
+    "planned transportation project status/year/funding/geometry",
+    "reliable intersection density derived from cleaned network topology",
+    "countywide major-road/highway/interchange classification beyond sparse source road class keywords"
+  ],
+  "ingest_summary": {
+    "phase": "12B_transportation_accessibility_geometry_ingest",
+    "created_at": "2026-06-13T15:37:09.095374+00:00",
+    "dry_run": false,
+    "truncate_and_load": true,
+    "include_legacy_road_comparison": false,
+    "rest_source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry/fallback URLs before marking unavailable.",
+    "sources_requested": 4,
+    "sources_ingested": [
+      {
+        "source_key": "cabarrus_county_centerlines_dedicated",
+        "source_name": "Cabarrus County Centerlines",
+        "source_type": "road_centerline",
+        "role": "primary_road_source",
+        "layer_id": 1,
+        "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+        "status": "ok",
+        "record_count": 14455,
+        "downloaded_features": 14455,
+        "inserted_raw_rows": 14455,
+        "inserted_clean_rows": 14455,
+        "geometry_type": "esriGeometryPolyline",
+        "error": null
+      },
+      {
+        "source_key": "opendata_nc_railroad_centerline_legacy",
+        "source_name": "NC Railroad Centerline",
+        "source_type": "rail_centerline",
+        "role": "rail_source",
+        "layer_id": 43,
+        "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/43",
+        "status": "ok",
+        "record_count": 63,
+        "downloaded_features": 63,
+        "inserted_raw_rows": 63,
+        "inserted_clean_rows": 63,
+        "geometry_type": "esriGeometryPolyline",
+        "error": null
+      },
+      {
+        "source_key": "opendata_nc_railroad_corridor_legacy",
+        "source_name": "NC Railroad Corridor",
+        "source_type": "rail_corridor",
+        "role": "rail_source",
+        "layer_id": 44,
+        "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/44",
+        "status": "ok",
+        "record_count": 1,
+        "downloaded_features": 1,
+        "inserted_raw_rows": 1,
+        "inserted_clean_rows": 1,
+        "geometry_type": "esriGeometryPolygon",
+        "error": null
+      }
+    ],
+    "sources_failed": [],
+    "sources_skipped": [
+      {
+        "source_key": "opendata_streets_centerline_legacy",
+        "source_name": "Legacy Opendata Streets Centerline",
+        "source_type": "road_centerline",
+        "role": "fallback_not_needed",
+        "layer_id": 45,
+        "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/45",
+        "status": "skipped",
+        "record_count": null,
+        "downloaded_features": 0,
+        "inserted_raw_rows": 0,
+        "inserted_clean_rows": 0,
+        "geometry_type": null,
+        "error": null
+      }
+    ],
+    "road_records_ingested": 14455,
+    "rail_records_ingested": 64,
+    "layer_results": [
+      {
+        "source_key": "cabarrus_county_centerlines_dedicated",
+        "source_name": "Cabarrus County Centerlines",
+        "source_type": "road_centerline",
+        "role": "primary_road_source",
+        "layer_id": 1,
+        "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+        "status": "ok",
+        "record_count": 14455,
+        "downloaded_features": 14455,
+        "inserted_raw_rows": 14455,
+        "inserted_clean_rows": 14455,
+        "geometry_type": "esriGeometryPolyline",
+        "error": null
+      },
+      {
+        "source_key": "opendata_streets_centerline_legacy",
+        "source_name": "Legacy Opendata Streets Centerline",
+        "source_type": "road_centerline",
+        "role": "fallback_not_needed",
+        "layer_id": 45,
+        "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/45",
+        "status": "skipped",
+        "record_count": null,
+        "downloaded_features": 0,
+        "inserted_raw_rows": 0,
+        "inserted_clean_rows": 0,
+        "geometry_type": null,
+        "error": null
+      },
+      {
+        "source_key": "opendata_nc_railroad_centerline_legacy",
+        "source_name": "NC Railroad Centerline",
+        "source_type": "rail_centerline",
+        "role": "rail_source",
+        "layer_id": 43,
+        "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/43",
+        "status": "ok",
+        "record_count": 63,
+        "downloaded_features": 63,
+        "inserted_raw_rows": 63,
+        "inserted_clean_rows": 63,
+        "geometry_type": "esriGeometryPolyline",
+        "error": null
+      },
+      {
+        "source_key": "opendata_nc_railroad_corridor_legacy",
+        "source_name": "NC Railroad Corridor",
+        "source_type": "rail_corridor",
+        "role": "rail_source",
+        "layer_id": 44,
+        "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/44",
+        "status": "ok",
+        "record_count": 1,
+        "downloaded_features": 1,
+        "inserted_raw_rows": 1,
+        "inserted_clean_rows": 1,
+        "geometry_type": "esriGeometryPolygon",
+        "error": null
+      }
+    ],
+    "database_summary": {
+      "road_raw_rows": 14455,
+      "road_clean_rows": 14455,
+      "rail_raw_rows": 64,
+      "rail_clean_rows": 64,
+      "invalid_road_geometry_count": 0,
+      "invalid_rail_geometry_count": 0,
+      "major_road_clean_rows": 5
+    },
+    "log_path": "C:\\CabarrusFutureScape\\cfs-data-pipelines\\logs\\ingest_transportation_accessibility_layers_20260613_113651.log",
+    "current_context_only": true,
+    "model_active": false,
+    "prediction_probability_available": false
+  },
+  "model_active": false,
+  "prediction_probability_available": false,
+  "ready_for_phase12c_transportation_enhanced_model_comparison": true,
+  "validation_results": {
+    "python_compileall_cfs_data_pipelines_ingest": "passed",
+    "python_compileall_cfs_data_pipelines_transform": "passed",
+    "python_compileall_backend_app": "passed",
+    "python_pytest_backend": "passed_228_tests",
+    "npm_run_devcfs": "passed"
+  },
+  "smoke_test_results": {
+    "frontend_localhost_3000": 200,
+    "backend_health": 200,
+    "backend_database_health": 200,
+    "development_prediction_features_summary": 200,
+    "development_prediction_transportation_accessibility_summary": 200,
+    "development_hotspots_limit_1": 200,
+    "flood_summary": 200,
+    "schools_statistics": 200,
+    "model_active": false,
+    "prediction_probability_available": false
+  },
+  "outputs": {
+    "profile": "C:\\CabarrusFutureScape\\outputs\\transportation_accessibility_feature_profile.json",
+    "missingness": "C:\\CabarrusFutureScape\\outputs\\transportation_accessibility_missingness.csv",
+    "distance_distribution": "C:\\CabarrusFutureScape\\outputs\\transportation_accessibility_distance_distribution.csv",
+    "phase_summary": "C:\\CabarrusFutureScape\\outputs\\phase12b_transportation_accessibility_feature_summary.json"
+  }
+}

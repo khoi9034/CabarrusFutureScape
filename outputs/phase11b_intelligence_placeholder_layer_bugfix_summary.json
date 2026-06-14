@@ -1,0 +1,88 @@
+{
+  "phase": "11B",
+  "task": "Fix Intelligence placeholder layer click bug and clarify model visibility",
+  "branch": "main",
+  "root_cause": "Legacy Intelligence rows for Opportunity Extrusions, Development Pressure, and Scenario Envelope were still present in the generic operational layer registry path. Two were still marked as mock graphics with visibility enabled, so the left rail could treat model placeholders as map actions even though the current product exposes development ranking research only through Methodology.",
+  "fix_summary": {
+    "map_layers_operational_only": true,
+    "legacy_placeholder_layer_ids_blocked_from_visibility_state": [
+      "opportunity-extrusions",
+      "development-pressure",
+      "scenario-envelope"
+    ],
+    "placeholder_items_removed_from_visible_map_actions": [
+      "Opportunity Extrusions",
+      "Development Pressure",
+      "Scenario Envelope"
+    ],
+    "model_research_replacement": {
+      "title": "Model Research Status",
+      "status": "Internal Only",
+      "action": "Open Methodology",
+      "map_overlay_toggle": false,
+      "copy": "Development ranking research is available in Methodology. Parcel-level predictions are not public or production-ready."
+    },
+    "methodology_visibility_clarification": [
+      "Development Prediction Research Status remains in Methodology.",
+      "Current safety flags are displayed as model_active=false, prediction_probability_available=false, production_ready=false, public_exposure_allowed=false.",
+      "Only aggregate ranking class distribution is shown.",
+      "No parcel IDs, parcel-level ranking classes, or exact model probabilities are displayed."
+    ]
+  },
+  "files_changed_for_this_fix": [
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/data/mock/layersMockData.ts",
+    "src/hooks/useLayerVisibility.ts",
+    "src/lib/gis/layerRegistry.ts",
+    "outputs/phase11b_intelligence_placeholder_layer_bugfix_summary.json"
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not run; backend was not modified"
+  },
+  "runtime_smoke_test": {
+    "npm_run_dev_cfs": "passed after restarting stale local listeners on ports 3000 and 8000 without clearing .next",
+    "frontend": "http://localhost:3000 returned 200 after fresh dev:cfs start",
+    "backend_health": "http://127.0.0.1:8000/health returned 200",
+    "database_health": "http://127.0.0.1:8000/health/database returned 200",
+    "prediction_features_summary": "http://127.0.0.1:8000/development/prediction/features/summary returned 200",
+    "prediction_ranking_summary": "http://127.0.0.1:8000/development/prediction/ranking/summary returned 200",
+    "browser_checks": {
+      "map_layers_opened": true,
+      "opportunity_extrusions_visible": false,
+      "development_pressure_visible": false,
+      "scenario_envelope_visible": false,
+      "model_research_status_visible": true,
+      "open_methodology_button_visible": true,
+      "open_methodology_button_switches_to_methodology": true,
+      "methodology_development_prediction_status_visible": true,
+      "aggregate_ranking_distribution_visible": true,
+      "overview_not_blank": true,
+      "due_diligence_loads": true,
+      "executive_print_loads": true,
+      "browser_console_errors": 0
+    }
+  },
+  "preserved_working_layers": [
+    "Development Hotspots",
+    "Flood Constraints",
+    "FEMA Flood Zones",
+    "School Utilization Seed",
+    "County Boundary",
+    "Parcel Intelligence"
+  ],
+  "prediction_safety_confirmation": {
+    "parcel_level_prediction_probabilities_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "model_marked_production_ready": false,
+    "prediction_map_layer_added": false
+  },
+  "remaining_notes": [
+    "Infrastructure Readiness remains a separate placeholder layer outside the Intelligence placeholder fix scope.",
+    "There is an existing dirty worktree from previous phases; this task did not revert or overwrite those files."
+  ]
+}

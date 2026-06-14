@@ -1,0 +1,628 @@
+{
+  "experiment_id": "phase13c_transportation_enhanced_v1",
+  "target": "new_construction_next_3yr",
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "current_context_only": true,
+  "transportation_time_safe_for_training": false,
+  "zoning_enhanced": {
+    "best_model_name": "hist_gradient_boosting",
+    "models": {
+      "logistic_regression": {
+        "validation": {
+          "row_count": 220034,
+          "positive_count": 8611,
+          "positive_rate": 0.039135,
+          "roc_auc": 0.605347,
+          "average_precision_pr_auc": 0.056819,
+          "precision_at_top_1_pct": 0.006088,
+          "precision_at_top_5_pct": 0.063898,
+          "recall_at_top_5_pct": 0.08164,
+          "lift_at_top_1_pct": 0.155568,
+          "lift_at_top_5_pct": 1.632759,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 2201,
+            "precision": 0.006088,
+            "recall": 0.001556,
+            "lift": 0.155568,
+            "cutoff_score": 0.9976310312,
+            "above_cutoff_count": 2194,
+            "tie_count_at_cutoff": 10,
+            "remaining_slots_from_tie_bucket": 7,
+            "tie_positive_count": 2,
+            "tie_positive_rate": 0.2,
+            "tie_adjusted": true
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 11002,
+            "precision": 0.063898,
+            "recall": 0.08164,
+            "lift": 1.632759,
+            "cutoff_score": 0.7776749195,
+            "above_cutoff_count": 10986,
+            "tie_count_at_cutoff": 277,
+            "remaining_slots_from_tie_bucket": 16,
+            "tie_positive_count": 52,
+            "tie_positive_rate": 0.187726,
+            "tie_adjusted": true
+          },
+          "brier_score": 0.239856,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 132532,
+            "false_positive": 78891,
+            "false_negative": 3840,
+            "true_positive": 4771
+          }
+        },
+        "test": {
+          "row_count": 110017,
+          "positive_count": 4216,
+          "positive_rate": 0.038321,
+          "roc_auc": 0.542955,
+          "average_precision_pr_auc": 0.04535,
+          "precision_at_top_1_pct": 0.002725,
+          "precision_at_top_5_pct": 0.026778,
+          "recall_at_top_5_pct": 0.034939,
+          "lift_at_top_1_pct": 0.071104,
+          "lift_at_top_5_pct": 0.698766,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 1101,
+            "precision": 0.002725,
+            "recall": 0.000712,
+            "lift": 0.071104,
+            "cutoff_score": 0.9996734876,
+            "above_cutoff_count": 1099,
+            "tie_count_at_cutoff": 3,
+            "remaining_slots_from_tie_bucket": 2,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": true
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 5501,
+            "precision": 0.026778,
+            "recall": 0.034939,
+            "lift": 0.698766,
+            "cutoff_score": 0.8690314921,
+            "above_cutoff_count": 5432,
+            "tie_count_at_cutoff": 227,
+            "remaining_slots_from_tie_bucket": 69,
+            "tie_positive_count": 1,
+            "tie_positive_rate": 0.004405,
+            "tie_adjusted": true
+          },
+          "brier_score": 0.281834,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 55688,
+            "false_positive": 50113,
+            "false_negative": 2115,
+            "true_positive": 2101
+          }
+        }
+      },
+      "hist_gradient_boosting": {
+        "validation": {
+          "row_count": 220034,
+          "positive_count": 8611,
+          "positive_rate": 0.039135,
+          "roc_auc": 0.74412,
+          "average_precision_pr_auc": 0.118972,
+          "precision_at_top_1_pct": 0.26426,
+          "precision_at_top_5_pct": 0.142643,
+          "recall_at_top_5_pct": 0.18225,
+          "lift_at_top_1_pct": 6.752544,
+          "lift_at_top_5_pct": 3.644909,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 2201,
+            "precision": 0.26426,
+            "recall": 0.067546,
+            "lift": 6.752544,
+            "cutoff_score": 0.8709679424,
+            "above_cutoff_count": 1980,
+            "tie_count_at_cutoff": 261,
+            "remaining_slots_from_tie_bucket": 221,
+            "tie_positive_count": 35,
+            "tie_positive_rate": 0.1341,
+            "tie_adjusted": true
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 11002,
+            "precision": 0.142643,
+            "recall": 0.18225,
+            "lift": 3.644909,
+            "cutoff_score": 0.7189545555,
+            "above_cutoff_count": 6597,
+            "tie_count_at_cutoff": 12243,
+            "remaining_slots_from_tie_bucket": 4405,
+            "tie_positive_count": 996,
+            "tie_positive_rate": 0.081353,
+            "tie_adjusted": true
+          },
+          "brier_score": 0.14532,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 169312,
+            "false_positive": 42111,
+            "false_negative": 4406,
+            "true_positive": 4205
+          }
+        },
+        "test": {
+          "row_count": 110017,
+          "positive_count": 4216,
+          "positive_rate": 0.038321,
+          "roc_auc": 0.684217,
+          "average_precision_pr_auc": 0.071174,
+          "precision_at_top_1_pct": 0.144414,
+          "precision_at_top_5_pct": 0.06802,
+          "recall_at_top_5_pct": 0.088752,
+          "lift_at_top_1_pct": 3.768504,
+          "lift_at_top_5_pct": 1.774988,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 1101,
+            "precision": 0.144414,
+            "recall": 0.037713,
+            "lift": 3.768504,
+            "cutoff_score": 0.8277089068,
+            "above_cutoff_count": 1093,
+            "tie_count_at_cutoff": 15,
+            "remaining_slots_from_tie_bucket": 8,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": true
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 5501,
+            "precision": 0.06802,
+            "recall": 0.088752,
+            "lift": 1.774988,
+            "cutoff_score": 0.7189545555,
+            "above_cutoff_count": 2743,
+            "tie_count_at_cutoff": 5650,
+            "remaining_slots_from_tie_bucket": 2758,
+            "tie_positive_count": 238,
+            "tie_positive_rate": 0.042124,
+            "tie_adjusted": true
+          },
+          "brier_score": 0.142259,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 85829,
+            "false_positive": 19972,
+            "false_negative": 2800,
+            "true_positive": 1416
+          }
+        }
+      }
+    }
+  },
+  "transportation_enhanced": {
+    "best_model_name": "hist_gradient_boosting",
+    "models": {
+      "logistic_regression": {
+        "validation": {
+          "row_count": 220034,
+          "positive_count": 8611,
+          "positive_rate": 0.039135,
+          "roc_auc": 0.621698,
+          "average_precision_pr_auc": 0.060089,
+          "precision_at_top_1_pct": 0.004089,
+          "precision_at_top_5_pct": 0.050627,
+          "recall_at_top_5_pct": 0.064685,
+          "lift_at_top_1_pct": 0.104486,
+          "lift_at_top_5_pct": 1.293659,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 2201,
+            "precision": 0.004089,
+            "recall": 0.001045,
+            "lift": 0.104486,
+            "cutoff_score": 0.998783263,
+            "above_cutoff_count": 2200,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 11002,
+            "precision": 0.050627,
+            "recall": 0.064685,
+            "lift": 1.293659,
+            "cutoff_score": 0.7945799882,
+            "above_cutoff_count": 11001,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "brier_score": 0.232934,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 134479,
+            "false_positive": 76944,
+            "false_negative": 3790,
+            "true_positive": 4821
+          }
+        },
+        "test": {
+          "row_count": 110017,
+          "positive_count": 4216,
+          "positive_rate": 0.038321,
+          "roc_auc": 0.545111,
+          "average_precision_pr_auc": 0.04509,
+          "precision_at_top_1_pct": 0.001817,
+          "precision_at_top_5_pct": 0.015997,
+          "recall_at_top_5_pct": 0.020873,
+          "lift_at_top_1_pct": 0.047403,
+          "lift_at_top_5_pct": 0.417446,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 1101,
+            "precision": 0.001817,
+            "recall": 0.000474,
+            "lift": 0.047403,
+            "cutoff_score": 0.9998576918,
+            "above_cutoff_count": 1099,
+            "tie_count_at_cutoff": 2,
+            "remaining_slots_from_tie_bucket": 2,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 5501,
+            "precision": 0.015997,
+            "recall": 0.020873,
+            "lift": 0.417446,
+            "cutoff_score": 0.8792667295,
+            "above_cutoff_count": 5500,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "brier_score": 0.275299,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 58684,
+            "false_positive": 47117,
+            "false_negative": 2061,
+            "true_positive": 2155
+          }
+        }
+      },
+      "hist_gradient_boosting": {
+        "validation": {
+          "row_count": 220034,
+          "positive_count": 8611,
+          "positive_rate": 0.039135,
+          "roc_auc": 0.798217,
+          "average_precision_pr_auc": 0.239595,
+          "precision_at_top_1_pct": 0.480691,
+          "precision_at_top_5_pct": 0.305035,
+          "recall_at_top_5_pct": 0.389734,
+          "lift_at_top_1_pct": 12.282926,
+          "lift_at_top_5_pct": 7.794469,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 2201,
+            "precision": 0.480691,
+            "recall": 0.122866,
+            "lift": 12.282926,
+            "cutoff_score": 0.8752684322,
+            "above_cutoff_count": 2191,
+            "tie_count_at_cutoff": 16,
+            "remaining_slots_from_tie_bucket": 10,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": true
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 11002,
+            "precision": 0.305035,
+            "recall": 0.389734,
+            "lift": 7.794469,
+            "cutoff_score": 0.5874588419,
+            "above_cutoff_count": 10999,
+            "tie_count_at_cutoff": 4,
+            "remaining_slots_from_tie_bucket": 3,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": true
+          },
+          "brier_score": 0.099025,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 198518,
+            "false_positive": 12905,
+            "false_negative": 4826,
+            "true_positive": 3785
+          }
+        },
+        "test": {
+          "row_count": 110017,
+          "positive_count": 4216,
+          "positive_rate": 0.038321,
+          "roc_auc": 0.702248,
+          "average_precision_pr_auc": 0.087668,
+          "precision_at_top_1_pct": 0.133515,
+          "precision_at_top_5_pct": 0.157426,
+          "recall_at_top_5_pct": 0.205408,
+          "lift_at_top_1_pct": 3.484089,
+          "lift_at_top_5_pct": 4.108047,
+          "top_1_pct_details": {
+            "fraction": 0.01,
+            "k": 1101,
+            "precision": 0.133515,
+            "recall": 0.034867,
+            "lift": 3.484089,
+            "cutoff_score": 0.8106374606,
+            "above_cutoff_count": 1099,
+            "tie_count_at_cutoff": 4,
+            "remaining_slots_from_tie_bucket": 2,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": true
+          },
+          "top_5_pct_details": {
+            "fraction": 0.05,
+            "k": 5501,
+            "precision": 0.157426,
+            "recall": 0.205408,
+            "lift": 4.108047,
+            "cutoff_score": 0.5420172495,
+            "above_cutoff_count": 5500,
+            "tie_count_at_cutoff": 1,
+            "remaining_slots_from_tie_bucket": 1,
+            "tie_positive_count": 0,
+            "tie_positive_rate": 0.0,
+            "tie_adjusted": false
+          },
+          "brier_score": 0.100041,
+          "confusion_matrix_threshold_0_5": {
+            "true_negative": 99752,
+            "false_positive": 6049,
+            "false_negative": 3253,
+            "true_positive": 963
+          }
+        }
+      }
+    }
+  },
+  "comparison_on_selected_best_models": {
+    "roc_auc": {
+      "zoning_enhanced": 0.684217,
+      "transportation_enhanced": 0.702248,
+      "absolute_improvement": 0.018031,
+      "percent_improvement": 2.6353
+    },
+    "average_precision_pr_auc": {
+      "zoning_enhanced": 0.071174,
+      "transportation_enhanced": 0.087668,
+      "absolute_improvement": 0.016494,
+      "percent_improvement": 23.1742
+    },
+    "precision_at_top_1_pct": {
+      "zoning_enhanced": 0.144414,
+      "transportation_enhanced": 0.133515,
+      "absolute_improvement": -0.010899,
+      "percent_improvement": -7.5471
+    },
+    "precision_at_top_5_pct": {
+      "zoning_enhanced": 0.06802,
+      "transportation_enhanced": 0.157426,
+      "absolute_improvement": 0.089406,
+      "percent_improvement": 131.4408
+    },
+    "recall_at_top_5_pct": {
+      "zoning_enhanced": 0.088752,
+      "transportation_enhanced": 0.205408,
+      "absolute_improvement": 0.116656,
+      "percent_improvement": 131.4404
+    },
+    "lift_at_top_1_pct": {
+      "zoning_enhanced": 3.768504,
+      "transportation_enhanced": 3.484089,
+      "absolute_improvement": -0.284415,
+      "percent_improvement": -7.5472
+    },
+    "lift_at_top_5_pct": {
+      "zoning_enhanced": 1.774988,
+      "transportation_enhanced": 4.108047,
+      "absolute_improvement": 2.333059,
+      "percent_improvement": 131.4408
+    },
+    "brier_score": {
+      "zoning_enhanced": 0.142259,
+      "transportation_enhanced": 0.100041,
+      "absolute_improvement": -0.042218,
+      "percent_improvement": -29.6769
+    },
+    "positive_rate": {
+      "zoning_enhanced": 0.038321,
+      "transportation_enhanced": 0.038321,
+      "absolute_improvement": 0.0,
+      "percent_improvement": 0.0
+    }
+  },
+  "transportation_helped": true,
+  "top_transportation_features": [
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "distance_to_nearest_rail_ft",
+      "coefficient": 0.44406247,
+      "absolute_coefficient": 0.44406247,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "distance_to_nearest_road_ft",
+      "coefficient": -0.30397603,
+      "absolute_coefficient": 0.30397603,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "stip_project_count_within_1_mile",
+      "coefficient": -0.21466492,
+      "absolute_coefficient": 0.21466492,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "max_aadt_within_half_mile",
+      "coefficient": -0.15171316,
+      "absolute_coefficient": 0.15171316,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "stip_project_within_1_mile",
+      "coefficient": 0.13739851,
+      "absolute_coefficient": 0.13739851,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "planned_transportation_investment_flag",
+      "coefficient": 0.13739851,
+      "absolute_coefficient": 0.13739851,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "nearest_aadt_value",
+      "coefficient": 0.13687002,
+      "absolute_coefficient": 0.13687002,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "max_aadt_within_1_mile",
+      "coefficient": -0.10119794,
+      "absolute_coefficient": 0.10119794,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "avg_aadt_within_1_mile",
+      "coefficient": -0.07810255,
+      "absolute_coefficient": 0.07810255,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "rail_corridor_within_half_mile",
+      "coefficient": -0.07380328,
+      "absolute_coefficient": 0.07380328,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "nearest_stip_project_distance_ft",
+      "coefficient": 0.06142126,
+      "absolute_coefficient": 0.06142126,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "stip_project_count_within_3_miles",
+      "coefficient": -0.05955877,
+      "absolute_coefficient": 0.05955877,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "nearest_aadt_station_distance_ft",
+      "coefficient": -0.05280127,
+      "absolute_coefficient": 0.05280127,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "aadt_station_count_within_1_mile",
+      "coefficient": 0.05065597,
+      "absolute_coefficient": 0.05065597,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_transportation_current_context",
+      "feature_name": "stip_project_within_half_mile",
+      "coefficient": -0.02841485,
+      "absolute_coefficient": 0.02841485,
+      "feature_group": "transportation_current_context_features",
+      "temporal_status": "current_context_only",
+      "leakage_risk": "medium_for_historical_backtesting",
+      "is_transportation_feature": true
+    }
+  ],
+  "no_frontend_exposure": true
+}

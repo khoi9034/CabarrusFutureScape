@@ -1,0 +1,5 @@
+check_name,status,failing_rows,notes
+row_count_matches_base_feature_matrix,pass,0,Enhanced table must preserve Phase 10B row cardinality.
+zoning_source_year_lte_snapshot_year,pass,0,Historical zoning source year must not be after snapshot year.
+zoning_change_year_lte_snapshot_year,pass,0,Latest detected zoning change must not be after snapshot year.
+no_current_zoning_as_historical,pass,0,Enhanced fields join only public.parcel_zoning_snapshot_year and public.parcel_zoning_change_events.

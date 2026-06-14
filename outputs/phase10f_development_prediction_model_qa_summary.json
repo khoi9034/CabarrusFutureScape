@@ -1,0 +1,530 @@
+{
+  "phase": "10F",
+  "qa_id": "phase10f_model_qa_v1",
+  "generated_at": "2026-06-13T07:25:56.527254",
+  "target": "new_construction_next_3yr",
+  "feature_table": "public.parcel_development_prediction_features_zoning_enhanced",
+  "mature_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022
+  ],
+  "train_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019
+  ],
+  "validation_years": [
+    2020,
+    2021
+  ],
+  "test_years": [
+    2022
+  ],
+  "metric_discrepancy_explanation": "Phase 10C and Phase 10E used the same target, same test snapshot year, same test row count, same positive count, and the same lift formula. The top-5 lift discrepancy is driven by retraining/ranking instability in the histogram gradient boosting model and large equal-probability buckets near ranking cutoffs. Naive top-k metrics can split tied scores according to row order, so top-k lift is more volatile than ROC-AUC or PR-AUC.",
+  "standardized_baseline_metrics": {
+    "row_count": 110017,
+    "positive_count": 4216,
+    "positive_rate": 0.038321,
+    "roc_auc": 0.650408,
+    "average_precision_pr_auc": 0.054665,
+    "precision_at_top_1_pct": 0.022707,
+    "precision_at_top_5_pct": 0.048496,
+    "recall_at_top_5_pct": 0.063277,
+    "lift_at_top_1_pct": 0.592532,
+    "lift_at_top_5_pct": 1.265508,
+    "top_1_pct_details": {
+      "fraction": 0.01,
+      "k": 1101,
+      "precision": 0.022707,
+      "recall": 0.00593,
+      "lift": 0.592532,
+      "cutoff_score": 0.5789640058,
+      "above_cutoff_count": 1097,
+      "tie_count_at_cutoff": 9,
+      "remaining_slots_from_tie_bucket": 4,
+      "tie_positive_count": 0,
+      "tie_positive_rate": 0.0,
+      "tie_adjusted": true
+    },
+    "top_5_pct_details": {
+      "fraction": 0.05,
+      "k": 5501,
+      "precision": 0.048496,
+      "recall": 0.063277,
+      "lift": 1.265508,
+      "cutoff_score": 0.5517793591,
+      "above_cutoff_count": 1145,
+      "tie_count_at_cutoff": 73379,
+      "remaining_slots_from_tie_bucket": 4356,
+      "tie_positive_count": 4056,
+      "tie_positive_rate": 0.055275,
+      "tie_adjusted": true
+    },
+    "brier_score": 0.208555,
+    "confusion_matrix_threshold_0_5": {
+      "true_negative": 35276,
+      "false_positive": 70525,
+      "false_negative": 132,
+      "true_positive": 4084
+    }
+  },
+  "standardized_zoning_enhanced_metrics": {
+    "row_count": 110017,
+    "positive_count": 4216,
+    "positive_rate": 0.038321,
+    "roc_auc": 0.684217,
+    "average_precision_pr_auc": 0.071174,
+    "precision_at_top_1_pct": 0.144414,
+    "precision_at_top_5_pct": 0.06802,
+    "recall_at_top_5_pct": 0.088752,
+    "lift_at_top_1_pct": 3.768504,
+    "lift_at_top_5_pct": 1.774988,
+    "top_1_pct_details": {
+      "fraction": 0.01,
+      "k": 1101,
+      "precision": 0.144414,
+      "recall": 0.037713,
+      "lift": 3.768504,
+      "cutoff_score": 0.8277089068,
+      "above_cutoff_count": 1093,
+      "tie_count_at_cutoff": 15,
+      "remaining_slots_from_tie_bucket": 8,
+      "tie_positive_count": 0,
+      "tie_positive_rate": 0.0,
+      "tie_adjusted": true
+    },
+    "top_5_pct_details": {
+      "fraction": 0.05,
+      "k": 5501,
+      "precision": 0.06802,
+      "recall": 0.088752,
+      "lift": 1.774988,
+      "cutoff_score": 0.7189545555,
+      "above_cutoff_count": 2743,
+      "tie_count_at_cutoff": 5650,
+      "remaining_slots_from_tie_bucket": 2758,
+      "tie_positive_count": 238,
+      "tie_positive_rate": 0.042124,
+      "tie_adjusted": true
+    },
+    "brier_score": 0.142259,
+    "confusion_matrix_threshold_0_5": {
+      "true_negative": 85829,
+      "false_positive": 19972,
+      "false_negative": 2800,
+      "true_positive": 1416
+    }
+  },
+  "metric_comparison": {
+    "roc_auc": {
+      "baseline": 0.650408,
+      "zoning_enhanced": 0.684217,
+      "absolute_improvement": 0.033809,
+      "percent_improvement": 5.1981
+    },
+    "average_precision_pr_auc": {
+      "baseline": 0.054665,
+      "zoning_enhanced": 0.071174,
+      "absolute_improvement": 0.016509,
+      "percent_improvement": 30.2003
+    },
+    "precision_at_top_1_pct": {
+      "baseline": 0.022707,
+      "zoning_enhanced": 0.144414,
+      "absolute_improvement": 0.121707,
+      "percent_improvement": 535.9889
+    },
+    "precision_at_top_5_pct": {
+      "baseline": 0.048496,
+      "zoning_enhanced": 0.06802,
+      "absolute_improvement": 0.019524,
+      "percent_improvement": 40.259
+    },
+    "recall_at_top_5_pct": {
+      "baseline": 0.063277,
+      "zoning_enhanced": 0.088752,
+      "absolute_improvement": 0.025475,
+      "percent_improvement": 40.2595
+    },
+    "lift_at_top_1_pct": {
+      "baseline": 0.592532,
+      "zoning_enhanced": 3.768504,
+      "absolute_improvement": 3.175972,
+      "percent_improvement": 536.0001
+    },
+    "lift_at_top_5_pct": {
+      "baseline": 1.265508,
+      "zoning_enhanced": 1.774988,
+      "absolute_improvement": 0.50948,
+      "percent_improvement": 40.2589
+    },
+    "brier_score": {
+      "baseline": 0.208555,
+      "zoning_enhanced": 0.142259,
+      "absolute_improvement": -0.066296,
+      "percent_improvement": -31.7883
+    }
+  },
+  "zoning_improved_performance": {
+    "pr_auc": true,
+    "lift_top_5": true
+  },
+  "calibration_findings": {
+    "qa_id": "phase10f_model_qa_v1",
+    "model_label": "zoning_enhanced",
+    "model_name": "hist_gradient_boosting",
+    "brier_score": 0.142259,
+    "weighted_mean_absolute_calibration_error": 0.265605,
+    "calibration_bins": [
+      {
+        "decile": 1,
+        "rank_band": "0-10%",
+        "row_count": 11001,
+        "positive_count": 691,
+        "observed_event_rate": 0.062812,
+        "average_predicted_probability": 0.731573,
+        "min_predicted_probability": 0.585172,
+        "max_predicted_probability": 0.959806
+      },
+      {
+        "decile": 2,
+        "rank_band": "10-20%",
+        "row_count": 11002,
+        "positive_count": 791,
+        "observed_event_rate": 0.071896,
+        "average_predicted_probability": 0.552996,
+        "min_predicted_probability": 0.458572,
+        "max_predicted_probability": 0.585172
+      },
+      {
+        "decile": 3,
+        "rank_band": "20-30%",
+        "row_count": 11002,
+        "positive_count": 729,
+        "observed_event_rate": 0.066261,
+        "average_predicted_probability": 0.400526,
+        "min_predicted_probability": 0.360651,
+        "max_predicted_probability": 0.458572
+      },
+      {
+        "decile": 4,
+        "rank_band": "30-40%",
+        "row_count": 11001,
+        "positive_count": 783,
+        "observed_event_rate": 0.071175,
+        "average_predicted_probability": 0.341312,
+        "min_predicted_probability": 0.319681,
+        "max_predicted_probability": 0.360651
+      },
+      {
+        "decile": 5,
+        "rank_band": "40-50%",
+        "row_count": 11002,
+        "positive_count": 387,
+        "observed_event_rate": 0.035175,
+        "average_predicted_probability": 0.308613,
+        "min_predicted_probability": 0.289343,
+        "max_predicted_probability": 0.319681
+      },
+      {
+        "decile": 6,
+        "rank_band": "50-60%",
+        "row_count": 11002,
+        "positive_count": 177,
+        "observed_event_rate": 0.016088,
+        "average_predicted_probability": 0.273846,
+        "min_predicted_probability": 0.264575,
+        "max_predicted_probability": 0.289343
+      },
+      {
+        "decile": 7,
+        "rank_band": "60-70%",
+        "row_count": 11001,
+        "positive_count": 296,
+        "observed_event_rate": 0.026907,
+        "average_predicted_probability": 0.218501,
+        "min_predicted_probability": 0.159559,
+        "max_predicted_probability": 0.264575
+      },
+      {
+        "decile": 8,
+        "rank_band": "70-80%",
+        "row_count": 11002,
+        "positive_count": 324,
+        "observed_event_rate": 0.029449,
+        "average_predicted_probability": 0.115154,
+        "min_predicted_probability": 0.081589,
+        "max_predicted_probability": 0.159559
+      },
+      {
+        "decile": 9,
+        "rank_band": "80-90%",
+        "row_count": 11002,
+        "positive_count": 31,
+        "observed_event_rate": 0.002818,
+        "average_predicted_probability": 0.061874,
+        "min_predicted_probability": 0.049319,
+        "max_predicted_probability": 0.081589
+      },
+      {
+        "decile": 10,
+        "rank_band": "90-100%",
+        "row_count": 11002,
+        "positive_count": 7,
+        "observed_event_rate": 0.000636,
+        "average_predicted_probability": 0.034906,
+        "min_predicted_probability": 0.008046,
+        "max_predicted_probability": 0.049319
+      }
+    ],
+    "calibration_assessment": "weak_probability_calibration",
+    "recommendation": "Keep outputs as internal rank/risk scores only; do not show exact probabilities.",
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false,
+    "no_frontend_exposure": true
+  },
+  "top_ranked_parcel_qa_summary": {
+    "path": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_top_ranked_parcel_review.csv",
+    "review_row_count": 200,
+    "positive_count": 74,
+    "top_200_positive_rate": 0.37,
+    "duplicate_parcel_count": 0,
+    "max_probability": 0.959806,
+    "min_probability": 0.943505
+  },
+  "top_important_features": [
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_HC",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": -6.10277615,
+      "absolute_coefficient": 6.10277615,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_MX-CC1",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": -3.39185623,
+      "absolute_coefficient": 3.39185623,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_NOT-YET-ZONED",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": -2.78598248,
+      "absolute_coefficient": 2.78598248,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_jurisdiction_Midland",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": -2.69187177,
+      "absolute_coefficient": 2.69187177,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "latest_zoning_change_type_code_and_category_changed",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": 2.64325468,
+      "absolute_coefficient": 2.64325468,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_PID",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": -2.53684304,
+      "absolute_coefficient": 2.53684304,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_TND",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": 2.32791897,
+      "absolute_coefficient": 2.32791897,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "zoning_map_change_only_flag",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": 2.26115712,
+      "absolute_coefficient": 2.26115712,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "latest_zoning_intensity_change_decreased",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": -2.14783688,
+      "absolute_coefficient": 2.14783688,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_O-I",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": 2.05478953,
+      "absolute_coefficient": 2.05478953,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_jurisdiction_Locust",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": 1.9988818,
+      "absolute_coefficient": 1.9988818,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "importance_type": "logistic_coefficient_screen",
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_CURM-2",
+      "importance_mean": null,
+      "importance_std": null,
+      "coefficient": -1.89427911,
+      "absolute_coefficient": 1.89427911,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    }
+  ],
+  "suspicious_or_leakage_prone_features": [],
+  "year_by_year_stability": {
+    "rows_written": 18,
+    "note": "Train years are in-sample; validation and test years are temporal holdouts."
+  },
+  "production_readiness_decision": "not_production_ready",
+  "recommended_phase10g_next_step": "Add official rezoning case dates/future land use/accessibility controls and run calibrated temporal validation before any user-facing risk class.",
+  "outputs": {
+    "metric_audit": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_metric_audit.json",
+    "metric_discrepancy_review": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_metric_discrepancy_review.md",
+    "standardized_metrics": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_standardized_model_comparison_metrics.json",
+    "topk_summary": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_standardized_topk_summary.csv",
+    "calibration_bins": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_calibration_bins.csv",
+    "calibration_review": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_calibration_review.json",
+    "top_ranked_review": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_top_ranked_parcel_review.csv",
+    "feature_importance": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_feature_importance_review.csv",
+    "zoning_feature_summary": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_zoning_feature_importance_summary.json",
+    "year_by_year": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10f_year_by_year_performance.csv",
+    "qa_report": "C:\\CabarrusFutureScape\\docs\\modeling\\development_prediction_model_qa_report.md",
+    "root_summary": "C:\\CabarrusFutureScape\\outputs\\phase10f_development_prediction_model_qa_summary.json"
+  },
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "no_frontend_exposure": true,
+  "validation_results": {
+    "compile_modeling": "passed: python -m compileall cfs-data-pipelines/modeling",
+    "compile_backend_app": "passed: python -m compileall app",
+    "focused_model_tests": "passed: 24 tests",
+    "backend_pytest": "passed: 217 tests",
+    "dev_cfs": "passed: FastAPI 200, frontend 200, built-in API checks 200",
+    "prediction_features_summary": {
+      "status": 200,
+      "latest_model_qa_available": true,
+      "latest_model_qa_id": "phase10f_model_qa_v1",
+      "standardized_metrics_available": true,
+      "calibration_review_available": true,
+      "model_active": false,
+      "prediction_probability_available": false,
+      "production_ready": false
+    },
+    "openapi_prediction_paths": [
+      "/development/prediction/features/summary"
+    ],
+    "existing_api_smoke": {
+      "/health": 200,
+      "/development/new-construction/statistics": 200,
+      "/development/hotspots?limit=1": 200,
+      "/constraints/flood/summary": 200,
+      "/constraints/schools/statistics": 200,
+      "/parcels/search?q=CFS-PARCEL-0149726579&limit=1": 200,
+      "frontend_http://localhost:3000": 200
+    }
+  }
+}

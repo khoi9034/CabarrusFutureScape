@@ -1,0 +1,355 @@
+{
+  "phase": "10E",
+  "generated_at": "2026-06-13T06:47:40.769100",
+  "experiment_id": "phase10e_zoning_enhanced_v1",
+  "target_used": "new_construction_next_3yr",
+  "feature_table": "public.parcel_development_prediction_features_zoning_enhanced",
+  "train_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019
+  ],
+  "validation_years": [
+    2020,
+    2021
+  ],
+  "test_years": [
+    2022
+  ],
+  "excluded_snapshot_years": [
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "baseline_metrics": {
+    "row_count": 110017,
+    "positive_count": 4216,
+    "positive_rate": 0.038321,
+    "roc_auc": 0.650408,
+    "average_precision_pr_auc": 0.054665,
+    "precision_at_top_1_pct": 0.022707,
+    "precision_at_top_5_pct": 0.027086,
+    "recall_at_top_5_pct": 0.035342,
+    "lift_at_top_5_pct": 0.706812,
+    "brier_score": 0.208555,
+    "confusion_matrix_threshold_0_5": {
+      "true_negative": 35276,
+      "false_positive": 70525,
+      "false_negative": 132,
+      "true_positive": 4084
+    }
+  },
+  "zoning_enhanced_metrics": {
+    "row_count": 110017,
+    "positive_count": 4216,
+    "positive_rate": 0.038321,
+    "roc_auc": 0.684217,
+    "average_precision_pr_auc": 0.071174,
+    "precision_at_top_1_pct": 0.144414,
+    "precision_at_top_5_pct": 0.065443,
+    "recall_at_top_5_pct": 0.085389,
+    "lift_at_top_5_pct": 1.707733,
+    "brier_score": 0.142259,
+    "confusion_matrix_threshold_0_5": {
+      "true_negative": 85829,
+      "false_positive": 19972,
+      "false_negative": 2800,
+      "true_positive": 1416
+    }
+  },
+  "metric_comparison": {
+    "roc_auc": {
+      "baseline": 0.650408,
+      "zoning_enhanced": 0.684217,
+      "absolute_improvement": 0.033809,
+      "percent_improvement": 5.1981
+    },
+    "average_precision_pr_auc": {
+      "baseline": 0.054665,
+      "zoning_enhanced": 0.071174,
+      "absolute_improvement": 0.016509,
+      "percent_improvement": 30.2003
+    },
+    "precision_at_top_1_pct": {
+      "baseline": 0.022707,
+      "zoning_enhanced": 0.144414,
+      "absolute_improvement": 0.121707,
+      "percent_improvement": 535.9889
+    },
+    "precision_at_top_5_pct": {
+      "baseline": 0.027086,
+      "zoning_enhanced": 0.065443,
+      "absolute_improvement": 0.038357,
+      "percent_improvement": 141.6119
+    },
+    "recall_at_top_5_pct": {
+      "baseline": 0.035342,
+      "zoning_enhanced": 0.085389,
+      "absolute_improvement": 0.050047,
+      "percent_improvement": 141.6077
+    },
+    "lift_at_top_5_pct": {
+      "baseline": 0.706812,
+      "zoning_enhanced": 1.707733,
+      "absolute_improvement": 1.000921,
+      "percent_improvement": 141.6106
+    },
+    "brier_score": {
+      "baseline": 0.208555,
+      "zoning_enhanced": 0.142259,
+      "absolute_improvement": -0.066296,
+      "percent_improvement": -31.7883
+    }
+  },
+  "improvement_meaningful": true,
+  "top_zoning_features": [
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_HC",
+      "coefficient": -6.10277615,
+      "absolute_coefficient": 6.10277615,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_MX-CC1",
+      "coefficient": -3.39185623,
+      "absolute_coefficient": 3.39185623,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_NOT-YET-ZONED",
+      "coefficient": -2.78598248,
+      "absolute_coefficient": 2.78598248,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_jurisdiction_Midland",
+      "coefficient": -2.69187177,
+      "absolute_coefficient": 2.69187177,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "latest_zoning_change_type_code_and_category_changed",
+      "coefficient": 2.64325468,
+      "absolute_coefficient": 2.64325468,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_PID",
+      "coefficient": -2.53684304,
+      "absolute_coefficient": 2.53684304,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_TND",
+      "coefficient": 2.32791897,
+      "absolute_coefficient": 2.32791897,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "zoning_map_change_only_flag",
+      "coefficient": 2.26115712,
+      "absolute_coefficient": 2.26115712,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "latest_zoning_intensity_change_decreased",
+      "coefficient": -2.14783688,
+      "absolute_coefficient": 2.14783688,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_O-I",
+      "coefficient": 2.05478953,
+      "absolute_coefficient": 2.05478953,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_jurisdiction_Locust",
+      "coefficient": 1.9988818,
+      "absolute_coefficient": 1.9988818,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_CURM-2",
+      "coefficient": -1.89427911,
+      "absolute_coefficient": 1.89427911,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "historical_zoning_code_PUD",
+      "coefficient": 1.87043422,
+      "absolute_coefficient": 1.87043422,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "latest_zoning_intensity_change_lateral_or_code_only",
+      "coefficient": 1.81658228,
+      "absolute_coefficient": 1.81658228,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    },
+    {
+      "model_name": "logistic_regression",
+      "feature_set_name": "zoning_enhanced_history",
+      "feature_name": "latest_zoning_change_type_zoning_code_changed",
+      "coefficient": -1.7955403,
+      "absolute_coefficient": 1.7955403,
+      "feature_group": "historical_zoning_features",
+      "temporal_status": "historical_snapshot_time_safe",
+      "leakage_risk": "low_to_medium_staleness_review",
+      "is_zoning_feature": true
+    }
+  ],
+  "experiment_score_table_created": true,
+  "experiment_score_table": "public.development_prediction_model_experiment_scores",
+  "experiment_score_rows": 110017,
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "no_frontend_exposure": true,
+  "caveats": [
+    "Internal experiment only; no frontend exposure.",
+    "Zoning changes are map-change detections, not official rezoning case approvals.",
+    "Post-2015 zoning snapshots are time-safe but stale.",
+    "Current zoning was not used as historical zoning."
+  ],
+  "recommended_phase10f_next_step": "Review zoning-enhanced gains and add official rezoning case/future land-use/accessibility controls before any production discussion.",
+  "outputs": {
+    "metrics": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10e_model_comparison_metrics.json",
+    "feature_importance": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10e_zoning_enhanced_feature_importance.csv",
+    "prediction_sample": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10e_zoning_enhanced_predictions_sample.csv",
+    "temporal_split": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10e_temporal_split_summary.json",
+    "caveats": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10e_model_caveats.md",
+    "summary": "C:\\CabarrusFutureScape\\outputs\\phase10e_zoning_enhanced_model_comparison_summary.json"
+  },
+  "zoning_enhanced_feature_matrix_status": {
+    "row_count": 1430221,
+    "parcel_count": 110017,
+    "snapshot_years": [
+      2014,
+      2026
+    ],
+    "zoning_history_available_count": 1429234,
+    "exact_year_count": 219883,
+    "prior_available_year_count": 1209351,
+    "unavailable_count": 987,
+    "changed_prior_5yr_count": 50331,
+    "row_count_matches_base_feature_matrix": true
+  },
+  "source_year_leakage_checks": {
+    "source_year_leakage_rows": 0,
+    "change_year_leakage_rows": 0,
+    "aggregate_change_leakage_rows": 0
+  },
+  "validation_results": {
+    "compile_transform": "passed: python -m compileall cfs-data-pipelines/transform",
+    "compile_modeling": "passed: python -m compileall cfs-data-pipelines/modeling",
+    "compile_backend_app": "passed: python -m compileall app",
+    "backend_pytest": "passed: 213 tests",
+    "dev_cfs": "passed: FastAPI 200, frontend 200, built-in API checks 200",
+    "prediction_features_summary": "passed: enhanced matrix available, row_count=1430221, model flags false",
+    "openapi_prediction_paths": [
+      "/development/prediction/features/summary"
+    ],
+    "existing_api_smoke": {
+      "/health": 200,
+      "/development/new-construction/statistics": 200,
+      "/development/new-construction/labels/summary": 200,
+      "/development/hotspots?limit=1": 200,
+      "/constraints/flood/summary": 200,
+      "/constraints/schools/statistics": 200,
+      "/parcels/search?q=CFS-PARCEL-0149726579&limit=1": 200
+    }
+  },
+  "backend_readiness_endpoint_update": {
+    "endpoint": "GET /development/prediction/features/summary",
+    "zoning_enhanced_feature_matrix_available": true,
+    "zoning_enhanced_row_count": 1430221,
+    "zoning_enhanced_model_experiment_available": true,
+    "latest_zoning_enhanced_experiment_id": "phase10e_zoning_enhanced_v1",
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false,
+    "public_prediction_endpoint_added": false
+  },
+  "phase10f_recommended_next_step": "Review zoning-enhanced gains and add official rezoning case/future land-use/accessibility controls before any production discussion.",
+  "metrics_artifact_flags": {
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false,
+    "improvement_meaningful": true
+  }
+}

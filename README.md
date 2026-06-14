@@ -4,18 +4,20 @@ Cabarrus FutureScape (CFS) is the frontend foundation for a Cabarrus County, NC 
 
 ## Current Phase
 
-V1 Product Layout Redesign plus Phase 8 school constraint readiness, building
-on completed GIS Map Intelligence, Parcel Intelligence, Zoning Intelligence,
-Development Activity, FEMA flood constraint intelligence, permit intelligence
-segmentation, and FastAPI integration.
+V1 Product Layout Redesign plus constraint, transportation, and internal model
+research readiness, building on completed GIS Map Intelligence, Parcel
+Intelligence, Zoning Intelligence, Development Activity, FEMA flood constraint
+intelligence, permit intelligence segmentation, school assignment, and FastAPI
+integration.
 
 This cleanup turns the working technical prototype into a cleaner product
 experience for portfolio demonstrations, interviews, and stakeholder
 presentations. Phase 8 now includes attendance-zone parcel assignment,
 read-only school constraint APIs, and read-only frontend school assignment
-display. It does not add school SceneView layers, capacity scoring,
-forecasting, transportation constraints, or prediction models. The goal remains
-less control clutter and more planning intelligence.
+display. Later modeling phases add internal-only development signal research
+and current-context transportation features, but no production model,
+parcel-level prediction probability, or public prediction endpoint is active.
+The goal remains less control clutter and more planning intelligence.
 
 Current product modes:
 
@@ -1862,6 +1864,463 @@ summary metrics only. `model_active=false`,
 `prediction_probability_available=false`, and `production_ready=false` remain
 hard requirements.
 
+## Phase 10D-0 Current Zoning Source Inventory
+
+Phase 10D-0 registers the latest Cabarrus County and municipal current zoning
+REST sources for current-context review only. It does not create zoning-change
+events, update the parcel-zoning overlay, train a model, or assume current
+zoning existed in prior snapshot years.
+
+Registered current zoning source config:
+
+- `config/current_zoning_sources.json`
+
+Generated readiness artifacts:
+
+- `outputs/current_zoning_source_schema_inventory.json`
+- `outputs/current_zoning_source_schema_inventory.csv`
+- `outputs/zoning_change_readiness_assessment.json`
+- `outputs/phase10d0_current_zoning_source_inventory_summary.json`
+
+The inventory found useful current zoning fields and possible future case-link
+fields in some sources, but not a complete dated old-zoning/new-zoning event
+series. Zoning-change feature engineering remains blocked until rezoning or map
+amendment records include approval/effective date, old zoning, new zoning,
+decision/status, jurisdiction, and parcel or case geometry.
+
+## Phase 10D-1 Historical Zoning Foundation
+
+Phase 10D-1 inventories and ingests historical zoning layers from the separate
+lowercase historical service:
+
+- `https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer`
+
+Only zoning layers are registered; group headers and non-zoning layers such as
+parcels, permits, streets, schools, school districts, recreation facilities, and
+annotation layers are ignored.
+
+Historical zoning staging tables:
+
+- `public.historical_zoning_raw`
+- `public.historical_zoning_clean`
+
+Parcel-ready foundation tables:
+
+- `public.parcel_zoning_snapshot_year`
+- `public.parcel_zoning_change_events`
+
+Generated Phase 10D-1 artifacts:
+
+- `outputs/historical_zoning_source_inventory.json`
+- `outputs/historical_zoning_source_inventory.csv`
+- `outputs/historical_zoning_ingest_summary.json`
+- `outputs/parcel_zoning_snapshot_year_validation.json`
+- `outputs/parcel_zoning_change_events_validation.json`
+- `outputs/phase10d1_historical_zoning_foundation_summary.json`
+- `docs/modeling/zoning_change_features.md`
+
+Snapshot rule: for snapshot year `Y`, use only historical zoning source years
+`<= Y`. Current zoning is never used as historical zoning. After 2015, the 2015
+source can be reused as `prior_available_year`; it is time-safe but stale and
+carries `zoning_source_age_years`.
+
+The change-event table detects historical zoning map assignment changes. It is
+not official rezoning case history until dated case records with old/new zoning
+are linked. Phase 10D-1 does not retrain the model and does not expose
+predictions.
+
+## Phase 10E Zoning-Enhanced Development Prediction Comparison
+
+Phase 10E adds an internal-only zoning-enhanced model comparison. It preserves
+the Phase 10B feature matrix and creates a separate enhanced table:
+
+- `public.parcel_development_prediction_features_zoning_enhanced`
+
+The enhanced table appends historical zoning snapshot and map-change fields
+from:
+
+- `public.parcel_zoning_snapshot_year`
+- `public.parcel_zoning_change_events`
+
+Readiness checks:
+
+- Enhanced feature rows: `1,430,221`
+- Base feature row count match: `true`
+- Source-year leakage rows: `0`
+- Change-year leakage rows: `0`
+- Current zoning fallback used as historical zoning: `false`
+- Post-2015 zoning status: `prior_available_year`, time-safe but stale
+
+Internal comparison:
+
+- Target: `new_construction_next_3yr`
+- Train years: `2014-2019`
+- Validation years: `2020-2021`
+- Test year: `2022`
+- Incomplete future-window years excluded: `2023-2026`
+- Best model: histogram gradient boosting
+- Baseline test PR-AUC: `0.054665`
+- Zoning-enhanced test PR-AUC: `0.071174`
+- Baseline lift at top 5%: `0.706812`
+- Zoning-enhanced lift at top 5%: `1.707733`
+
+This is not production-ready. The zoning features are historical zoning map
+snapshots and map-change detections, not official rezoning approvals. No
+prediction probabilities are exposed in the frontend, no public prediction
+endpoint is added, and `model_active=false`,
+`prediction_probability_available=false`, and `production_ready=false` remain
+hard requirements.
+
+Generated Phase 10E artifacts:
+
+- `cfs-data-pipelines/sql/create_development_prediction_zoning_enhanced_features.sql`
+- `cfs-data-pipelines/transform/create_development_prediction_zoning_enhanced_features.py`
+- `cfs-data-pipelines/modeling/train_development_zoning_enhanced_model.py`
+- `outputs/development_prediction_zoning_enhanced_feature_profile.json`
+- `outputs/development_prediction_zoning_enhanced_missingness.csv`
+- `outputs/development_prediction_zoning_enhanced_leakage_review.csv`
+- `outputs/development_prediction_zoning_enhanced_snapshot_year_summary.csv`
+- `outputs/modeling/development_prediction/phase10e_model_comparison_metrics.json`
+- `outputs/modeling/development_prediction/phase10e_zoning_enhanced_feature_importance.csv`
+- `outputs/modeling/development_prediction/phase10e_zoning_enhanced_predictions_sample.csv`
+- `outputs/modeling/development_prediction/phase10e_temporal_split_summary.json`
+- `outputs/modeling/development_prediction/phase10e_model_caveats.md`
+- `outputs/phase10e_zoning_enhanced_model_comparison_summary.json`
+- `docs/modeling/development_prediction_zoning_enhanced_model_card.md`
+
+## Phase 10F Development Prediction Model QA
+
+Phase 10F audits the internal Phase 10C/10E model comparison. It does not
+activate a model, expose frontend probabilities, or add a public prediction
+endpoint.
+
+Standardized metric utility:
+
+- `cfs-data-pipelines/modeling/development_model_metrics.py`
+
+Metric audit result:
+
+- Phase 10C and Phase 10E used the same target, same 2022 test row count,
+  same positive count, and same lift formula.
+- The old lift discrepancy came from separate histogram-gradient-boosting fits
+  and large equal-probability buckets near the top-5% cutoff.
+- Phase 10F standardizes top-k metrics with tie-aware expected positives at
+  the cutoff bucket.
+
+CFS metric definition:
+
+- `lift@top_k = precision@top_k / overall_positive_rate`
+
+Standardized Phase 10F internal test metrics:
+
+- Baseline PR-AUC: `0.054665`
+- Zoning-enhanced PR-AUC: `0.071174`
+- Baseline tie-aware lift at top 5%: `1.265508`
+- Zoning-enhanced tie-aware lift at top 5%: `1.774988`
+
+Calibration review found weak probability calibration, so model outputs remain
+internal rank/risk research only. Exact probabilities should not be shown in
+the frontend.
+
+Generated Phase 10F artifacts:
+
+- `outputs/modeling/development_prediction/phase10f_metric_audit.json`
+- `outputs/modeling/development_prediction/phase10f_metric_discrepancy_review.md`
+- `outputs/modeling/development_prediction/phase10f_standardized_model_comparison_metrics.json`
+- `outputs/modeling/development_prediction/phase10f_standardized_topk_summary.csv`
+- `outputs/modeling/development_prediction/phase10f_calibration_bins.csv`
+- `outputs/modeling/development_prediction/phase10f_calibration_review.json`
+- `outputs/modeling/development_prediction/phase10f_top_ranked_parcel_review.csv`
+- `outputs/modeling/development_prediction/phase10f_feature_importance_review.csv`
+- `outputs/modeling/development_prediction/phase10f_zoning_feature_importance_summary.json`
+- `outputs/modeling/development_prediction/phase10f_year_by_year_performance.csv`
+- `outputs/phase10f_development_prediction_model_qa_summary.json`
+- `docs/modeling/development_prediction_model_qa_report.md`
+
+The readiness endpoint reports QA availability through
+`GET /development/prediction/features/summary`, but
+`model_active=false`, `prediction_probability_available=false`, and
+`production_ready=false` remain hard requirements.
+
+## Phase 10G Internal Development Ranking Class Prototype
+
+Phase 10G converts the internal `phase10e_zoning_enhanced_v1` score order into
+rank classes for review. It does not expose exact probabilities, does not add a
+parcel-level prediction endpoint, and does not display ranking classes in the
+frontend.
+
+Internal tables:
+
+- `public.development_prediction_ranking_classes`
+- `public.development_prediction_ranking_explanations`
+
+Class rules:
+
+- top 1%: `very_high_development_signal`
+- top 5%: `high_development_signal`
+- top 15%: `moderate_development_signal`
+- remaining: `low_development_signal`
+
+Current distribution:
+
+- `very_high_development_signal`: `1,101`
+- `high_development_signal`: `4,400`
+- `moderate_development_signal`: `11,002`
+- `low_development_signal`: `93,514`
+
+The explainability layer is intentionally lightweight. It summarizes available
+feature context such as historical zoning map-change signal, permit history,
+parcel characteristics, flood context, and school attendance-zone context. It is
+not SHAP, does not claim causal drivers, and does not invent missing official
+rezoning, future land-use, utilities, school capacity, or economic factors.
+
+Aggregate-only backend readiness endpoint:
+
+- `GET /development/prediction/ranking/summary`
+
+This endpoint returns class distribution and guardrail flags only. It does not
+return parcel-level classes or exact probabilities. `production_ready=false`,
+`public_exposure_allowed=false`, and `prediction_probability_available=false`
+remain hard requirements.
+
+Generated Phase 10G artifacts:
+
+- `cfs-data-pipelines/modeling/create_development_ranking_classes.py`
+- `outputs/modeling/development_prediction/phase10g_ranking_class_distribution.csv`
+- `outputs/modeling/development_prediction/phase10g_top_ranked_internal_review.csv`
+- `outputs/modeling/development_prediction/phase10g_driver_summary_counts.csv`
+- `outputs/modeling/development_prediction/phase10g_ranking_class_validation.json`
+- `outputs/phase10g_internal_development_ranking_summary.json`
+
+## Phase 10H Model Transparency Dashboard Update
+
+The Methodology workspace now includes a `Development Prediction Research
+Status` section for internal model transparency. It uses only aggregate
+readiness endpoints:
+
+- `GET /development/prediction/features/summary`
+- `GET /development/prediction/ranking/summary`
+
+The dashboard explains:
+
+- target: new construction permit within the next 3 years;
+- model status: internal research only;
+- current best experiment: zoning-enhanced ranking;
+- production-ready status: no;
+- prediction probabilities available: no;
+- public exposure allowed: no;
+- calibration status: weak probability calibration;
+- recommended use: internal ranking research and model QA only.
+
+Only aggregate ranking-class distribution is shown:
+
+- `very_high_development_signal`: `1,101`
+- `high_development_signal`: `4,400`
+- `moderate_development_signal`: `11,002`
+- `low_development_signal`: `93,514`
+
+No parcel IDs, parcel-level ranking classes, exact probabilities, map ranking
+markers, or public parcel prediction endpoints are exposed. The Methodology
+workspace also documents why the model is not public yet: weak calibration,
+missing official rezoning dates, missing future land-use/accessibility/utility
+features, missing verified school capacity, missing economic controls, and the
+need for governance review.
+
+Generated Phase 10H artifact:
+
+- `outputs/phase10h_model_transparency_dashboard_summary.json`
+
+## Phase 12A Transportation and Accessibility Source Inventory
+
+Phase 12A registers and inspects transportation/accessibility source candidates
+for future development prediction features. It does not ingest road geometries,
+alter the feature matrix, train a model, expose predictions, or change the
+dashboard.
+
+Registered sources include the dedicated Cabarrus County Centerlines layer, the
+legacy opendata Streets Centerline layer, NC Railroad Centerline, NC Railroad
+Corridor, and context-only municipal/county boundary layers. The inventory is
+stored in `config/transportation_accessibility_sources.json`, with generated
+schema/readiness outputs in:
+
+- `outputs/transportation_source_schema_inventory.json`
+- `outputs/transportation_source_schema_inventory.csv`
+- `outputs/transportation_accessibility_readiness_assessment.json`
+- `outputs/phase12a_transportation_accessibility_source_inventory_summary.json`
+
+Future candidate features include distance to nearest road, distance to major
+road or highway corridor, rail corridor proximity, road density, intersection
+density, corridor access score, and planned transportation project flags. These
+remain future/current-context candidates until historical centerlines or dated
+transportation project records are available.
+
+Cabarrus REST services may move during ongoing layer organization. If a URL
+fails, inspect service roots and update the registry before marking a source
+unavailable.
+
+## Phase 12B Transportation Accessibility Feature Engineering
+
+Phase 12B ingests current road and rail geometries and creates parcel-level
+transportation/accessibility features for future internal model comparison. It
+does not train a model, expose predictions, change the frontend, or alter
+school/flood/zoning/permit workflows.
+
+Tables created:
+
+- `public.transportation_centerlines_raw`
+- `public.transportation_centerlines_clean`
+- `public.transportation_rail_raw`
+- `public.transportation_rail_clean`
+- `public.parcel_transportation_accessibility_features`
+
+Current load:
+
+- road centerlines: `14,455`
+- rail/corridor records: `64`
+- parcel accessibility feature rows: `110,017`
+
+Created features include nearest-road distance, road length/density within
+500 feet, 1,000 feet, and half mile, nearest-rail distance, and rail corridor
+within half mile. Major-road distance and intersection count are intentionally
+null until better road hierarchy and network-topology data are available.
+
+Aggregate readiness endpoint:
+
+- `GET /development/prediction/transportation-accessibility/summary`
+
+This endpoint returns row counts, missingness, distance summaries, and
+current-context caveats only. It does not return parcel-level predictions or
+ranking classes. `model_active=false` and
+`prediction_probability_available=false` remain required.
+
+## Phase 13A Found Planning and Transportation Source Registration
+
+Phase 13A registers and inspects already-found planning and transportation
+sources. It does not ingest full geometries, modify the feature matrix, train a
+model, expose predictions, or change the dashboard.
+
+Registered sources:
+
+- City of Concord Land Use Plan 2030
+- NCDOT 2026-2035 STIP Projects
+- NCDOT AADT Traffic Count Stations
+- Concord Planning Cases
+
+Generated outputs:
+
+- `outputs/found_source_schema_inventory.json`
+- `outputs/found_source_schema_inventory.csv`
+- `outputs/found_source_feature_readiness_assessment.json`
+- `outputs/phase13a_found_source_registration_summary.json`
+
+The Concord sources are explicitly Concord-only. STIP and AADT are statewide
+transportation context sources that should be filtered to Cabarrus County during
+future ingestion. No Phase 13A source is marked time-safe for strict historical
+training.
+
+The missing-data tracker is maintained at
+`docs/data_requests/cfs_missing_data_tracker.md` and still lists WSACC utility
+capacity/service-area GIS, countywide small-area plan/future land use GIS,
+local planned road projects, official rezoning case records, development
+pipeline/subdivision approvals, plan-based suitability/land supply GIS, and
+future amenity layers as needed.
+
+## Phase 13B STIP and AADT Transportation Feature Engineering
+
+Phase 13B ingests Cabarrus-filtered STIP and AADT records and creates
+parcel-level transportation planning/traffic context features. It does not train
+a model, expose predictions, modify the frontend, or overwrite the Phase 12B
+road/rail accessibility features.
+
+Tables created:
+
+- `public.transportation_stip_projects_raw`
+- `public.transportation_stip_projects_clean`
+- `public.transportation_aadt_stations_raw`
+- `public.transportation_aadt_stations_clean`
+- `public.parcel_transportation_plan_traffic_features`
+
+Current load:
+
+- STIP clean rows: `18`
+- AADT clean rows: `642`
+- parcel feature rows: `110,017`
+- parcels within a half mile of a STIP project: `19,322`
+- parcels within one mile of a STIP project: `41,239`
+
+Created feature groups include nearest STIP project distance/type/year,
+STIP proximity flags/counts, planned transportation investment flag, nearest
+AADT station/value/year, and one-mile AADT summaries.
+
+Aggregate readiness endpoint:
+
+- `GET /development/prediction/transportation-plan-traffic/summary`
+
+These fields remain current/planned-context candidates. They are marked
+`current_context_only=true`, `time_safe_for_training=false`,
+`include_in_future_model=true`, and `include_in_strict_baseline=false` until
+historical availability and leakage controls are reviewed.
+
+## Phase 13C Transportation-Enhanced Model Comparison
+
+Phase 13C creates an exploratory transportation-enhanced model comparison. It
+preserves the Phase 10B base matrix and Phase 10E zoning-enhanced matrix by
+writing a separate table:
+
+- `public.parcel_development_prediction_features_transportation_enhanced`
+
+The table has `1,430,221` rows, matching the zoning-enhanced parcel-year
+matrix, with one row per `official_parcel_id` and `snapshot_year`. It joins
+Phase 12B road/rail accessibility features and Phase 13B STIP/AADT context
+features.
+
+Transportation fields include road proximity/density, rail proximity, nearest
+STIP distance and project-count flags, planned transportation investment flag,
+nearest AADT station/value, and one-mile AADT summaries. Every row is marked:
+
+- `transportation_current_context_only_flag=true`
+- `transportation_time_safe_for_training_flag=false`
+
+Internal comparison:
+
+- target: `new_construction_next_3yr`
+- train: `2014-2019`
+- validation: `2020-2021`
+- test: `2022`
+- experiment id: `phase13c_transportation_enhanced_v1`
+
+Selected test metrics:
+
+- zoning-enhanced PR-AUC: `0.071174`
+- transportation-enhanced PR-AUC: `0.087668`
+- zoning-enhanced tie-aware lift at top 5%: `1.774988`
+- transportation-enhanced tie-aware lift at top 5%: `4.108047`
+
+Transportation improved PR-AUC and top-5% ranking lift in this exploratory run,
+but top-1% precision declined. The result is useful for internal research only
+because STIP/AADT/accessibility fields are current/planned context, not
+time-safe historical features.
+
+Generated Phase 13C artifacts:
+
+- `cfs-data-pipelines/sql/create_development_prediction_transportation_enhanced_features.sql`
+- `cfs-data-pipelines/transform/create_development_prediction_transportation_enhanced_features.py`
+- `cfs-data-pipelines/modeling/train_development_transportation_enhanced_model.py`
+- `outputs/development_prediction_transportation_enhanced_feature_profile.json`
+- `outputs/development_prediction_transportation_enhanced_missingness.csv`
+- `outputs/development_prediction_transportation_enhanced_feature_leakage_review.csv`
+- `outputs/modeling/development_prediction/phase13c_transportation_model_comparison_metrics.json`
+- `outputs/modeling/development_prediction/phase13c_transportation_feature_importance.csv`
+- `outputs/modeling/development_prediction/phase13c_transportation_predictions_sample.csv`
+- `outputs/modeling/development_prediction/phase13c_transportation_model_caveats.md`
+- `outputs/phase13c_transportation_enhanced_model_comparison_summary.json`
+
+The readiness endpoint `GET /development/prediction/features/summary` reports
+transportation-enhanced matrix and internal experiment availability, while
+`model_active=false`, `prediction_probability_available=false`, and
+`production_ready=false` remain required. No frontend prediction UI, parcel
+prediction endpoint, or public ranking surface is added.
+
 ## Dashboard State Architecture
 
 Dashboard interaction state is exposed through `useDashboardState`, but the implementation is split into smaller hooks:
@@ -1884,6 +2343,7 @@ The public dashboard API remains simple for UI components, while the internals a
 
 ## Next Step
 
-Next planned task: Phase 6 Temporal Map Filter Readiness.
-
-That task should prepare SceneView-safe time-filtered map requests and layer-state boundaries while keeping animated playback separate.
+Next recommended task: Phase 13D should gather dated transportation project
+history, historical AADT by year, local transportation project GIS, and
+construction/completion dates so transportation features can be evaluated as
+time-safe historical inputs rather than current-context exploratory signals.

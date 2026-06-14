@@ -1,0 +1,126 @@
+{
+  "phase": "11C",
+  "task": "Final Demo Walkthrough, Screenshot Checklist, and Portfolio Proof Package",
+  "branch": "main",
+  "docs_created": [
+    "docs/demo/cfs_screenshot_checklist.md",
+    "docs/demo/cfs_talking_points.md",
+    "docs/demo/cfs_portfolio_summary.md",
+    "docs/demo/cfs_supervisor_demo_script.md",
+    "docs/demo/cfs_manual_demo_qa_checklist.md"
+  ],
+  "demo_flow_summary": [
+    "Start in Overview.",
+    "Search and select parcel CFS-PARCEL-0149726579.",
+    "Show selected parcel focus, active overlay, and parcel cage.",
+    "Open Due Diligence for parcel, development, permit, flood, and school context.",
+    "Toggle Development Hotspots with a permit segment filter.",
+    "Toggle Flood Constraints.",
+    "Toggle FEMA Flood Zones.",
+    "Toggle School Utilization Seed and show presentation-derived caveats.",
+    "Open Methodology and explain aggregate-only model research status.",
+    "Open Executive Print for report-style demo close."
+  ],
+  "screenshot_checklist_summary": {
+    "parcel_id": "CFS-PARCEL-0149726579",
+    "targets": [
+      "Overview default dashboard",
+      "Top parcel search with selected parcel",
+      "Selected parcel active overlay and parcel cage",
+      "Due Diligence parcel summary",
+      "Flood Constraints layer",
+      "FEMA Flood Zones layer",
+      "School Utilization Seed layer with hover/click detail",
+      "Methodology model transparency page",
+      "Development Prediction Research Status section",
+      "Executive Print mode",
+      "Map fullscreen mode",
+      "Layer rail collapsed state"
+    ],
+    "each_target_includes": [
+      "what to show",
+      "what to avoid",
+      "expected visible labels",
+      "caveats to mention"
+    ]
+  },
+  "safety_wording_review": {
+    "prediction_language": "Methodology and demo docs use internal research, model QA, aggregate-only, not production-ready, and prediction probabilities not available language.",
+    "ranking_language": "Parcel-level ranking classes are explicitly described as not exposed.",
+    "school_capacity_language": "School capacity is described as Capacity Data Needed / Not Scored unless verified official data is added later.",
+    "school_utilization_language": "School utilization is described as presentation-derived and needing verification.",
+    "mock_placeholder_language": "Legacy Intelligence placeholder layer actions are not part of the operational layer rail; model research is surfaced through Methodology.",
+    "prohibited_claims_avoided": [
+      "public prediction",
+      "exact probability",
+      "final school capacity score",
+      "official overcrowding",
+      "production-ready model"
+    ]
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not run; backend files were not modified"
+  },
+  "runtime_checks": {
+    "npm_run_dev_cfs": "started fresh after stopping existing local listeners on ports 3000 and 8000",
+    "frontend_http_200": true,
+    "backend_health_200": true,
+    "database_health_200": true,
+    "api_checks": {
+      "/health": 200,
+      "/health/database": 200,
+      "/parcels/search?q=CFS-PARCEL-0149726579": 200,
+      "/parcels/CFS-PARCEL-0149726579?include_geometry=true": 200,
+      "/development/hotspots?limit=1": 200,
+      "/development/new-construction/statistics": 200,
+      "/development/prediction/features/summary": 200,
+      "/development/prediction/ranking/summary": 200,
+      "/constraints/flood/summary": 200,
+      "/constraints/flood/zones?limit=1": 200,
+      "/constraints/schools/statistics": 200,
+      "/constraints/schools/utilization-seed": 200
+    }
+  },
+  "browser_smoke_test": {
+    "overview_loads": true,
+    "top_parcel_search_works": true,
+    "selected_parcel_card_updates": true,
+    "active_selection_overlay_updates": true,
+    "parcel_focus_card_boundary_status_visible": true,
+    "due_diligence_loads": true,
+    "methodology_loads": true,
+    "executive_print_loads": true,
+    "development_hotspots_toggle": "passed; Residential Growth concentration displayed",
+    "flood_constraints_toggle": "passed",
+    "fema_flood_zones_toggle": "passed",
+    "school_utilization_seed_toggle": "passed; 31 utilization zones loaded",
+    "school_utilization_click_detail": "passed; Roberta Road MS presentation-derived utilization detail opened in map focus mode",
+    "fullscreen_map_mode": "passed; Exit Map Focus control visible",
+    "collapsed_layer_rail": "passed; LAYERS rail label visible",
+    "no_public_prediction_scores": true,
+    "no_cfs_api_failure_banner": true,
+    "browser_console": {
+      "application_errors": 0,
+      "api_errors": 0,
+      "external_arcgis_terrain_tile_decode_errors_observed": 8,
+      "note": "ArcGIS TerrainSurface tile decode errors were observed from external terrain tiles during 3D map interaction. They did not coincide with CFS API failures or app exceptions."
+    }
+  },
+  "remaining_demo_caveats": [
+    "School utilization remains presentation-derived and needs verification against official enrollment/capacity data.",
+    "Official school capacity scoring is not active.",
+    "Development ranking research remains internal, aggregate-only, and not production-ready.",
+    "Executive Print remains a report-preview workflow rather than final automated PDF packaging.",
+    "External ArcGIS terrain tile decode errors may appear in browser console during 3D map navigation."
+  ],
+  "prediction_safety_confirmation": {
+    "parcel_level_prediction_probabilities_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "model_marked_production_ready": false,
+    "new_model_trained": false
+  }
+}

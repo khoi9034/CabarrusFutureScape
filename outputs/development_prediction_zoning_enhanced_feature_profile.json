@@ -1,0 +1,105 @@
+{
+  "row_count": 1430221,
+  "parcel_count": 110017,
+  "min_snapshot_year": 2014,
+  "max_snapshot_year": 2026,
+  "snapshot_year_count": 13,
+  "zoning_history_available_count": 1429234,
+  "exact_year_count": 219883,
+  "prior_available_year_count": 1209351,
+  "unavailable_count": 987,
+  "changed_prior_1yr_count": 4570,
+  "changed_prior_3yr_count": 14453,
+  "changed_prior_5yr_count": 50331,
+  "change_event_feature_coverage_count": 50331,
+  "source_year_leakage_rows": 0,
+  "change_year_leakage_rows": 0,
+  "aggregate_change_leakage_rows": 0,
+  "base_feature_row_count": 1430221,
+  "row_count_matches_base_feature_matrix": true,
+  "zoning_source_age_years_distribution": [
+    {
+      "zoning_source_age_years": 0,
+      "row_count": 219883
+    },
+    {
+      "zoning_source_age_years": 1,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 2,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 3,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 4,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 5,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 6,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 7,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 8,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 9,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 10,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 11,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": null,
+      "row_count": 987
+    }
+  ],
+  "zoning_temporal_status_distribution": [
+    {
+      "zoning_temporal_status": "prior_available_year",
+      "row_count": 1209351
+    },
+    {
+      "zoning_temporal_status": "exact_year",
+      "row_count": 219883
+    },
+    {
+      "zoning_temporal_status": "unavailable",
+      "row_count": 987
+    }
+  ],
+  "zoning_change_confidence_distribution": [
+    {
+      "zoning_change_confidence": null,
+      "row_count": 1063663
+    },
+    {
+      "zoning_change_confidence": "high",
+      "row_count": 281773
+    },
+    {
+      "zoning_change_confidence": "medium",
+      "row_count": 84785
+    }
+  ],
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false
+}

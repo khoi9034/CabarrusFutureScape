@@ -1,0 +1,985 @@
+{
+  "created_at": "2026-06-13T09:51:05.743755+00:00",
+  "phase": "10D-1",
+  "historical_service_root": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+  "historical_zoning_sources_used": [
+    "harrisburg_zoning_2015",
+    "kannapolis_zoning_2015",
+    "locust_zoning_2015",
+    "concord_zoning_2015",
+    "cabarrus_county_zoning_2015",
+    "mt_pleasant_zoning_2015",
+    "midland_zoning_2015",
+    "kannapolis_zoning_2014",
+    "locust_zoning_2014",
+    "harrisburg_zoning_2014",
+    "mt_pleasant_zoning_2014",
+    "midland_zoning_2014",
+    "cabarrus_county_zoning_2014",
+    "concord_zoning_2014",
+    "harrisburg_zoning_2013",
+    "kannapolis_zoning_2013",
+    "concord_zoning_2013",
+    "cabarrus_county_zoning_2012",
+    "concord_zoning_2012",
+    "harrisburg_zoning_2012",
+    "kannapolis_zoning_2012",
+    "locust_zoning_2012",
+    "midland_zoning_2012",
+    "mt_pleasant_zoning_2012",
+    "cabarrus_county_zoning_2011",
+    "concord_zoning_2011",
+    "harrisburg_zoning_2011",
+    "kannapolis_zoning_2011",
+    "locust_zoning_2011",
+    "midland_zoning_2011",
+    "mt_pleasant_zoning_2011",
+    "county_zoning_2010",
+    "concord_zoning_2010",
+    "kannapolis_zoning_2010",
+    "concord_zoning_2009",
+    "county_zoning_2009",
+    "kannapolis_zoning_2009",
+    "cabarrus_zoning_2008",
+    "concord_zoning_2007",
+    "cabarrus_zoning_2007",
+    "kannapolis_zoning_2007",
+    "concord_zoning_2006",
+    "cabarrus_zoning_2006",
+    "kannapolis_zoning_2006",
+    "concord_zoning_2005",
+    "kannapolis_zoning_2005",
+    "cabarrus_zoning_2005"
+  ],
+  "exact_rest_layer_urls_constructed": [
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/147",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/148",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/149",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/153",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/156",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/157",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/159",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/52",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/53",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/54",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/56",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/57",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/58",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/59",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/68",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/69",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/70",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/77",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/78",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/79",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/80",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/81",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/82",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/83",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/93",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/94",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/95",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/96",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/97",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/98",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/99",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/105",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/107",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/108",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/134",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/135",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/136",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/129",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/125",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/126",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/127",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/120",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/121",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/122",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/115",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/116",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/117"
+  ],
+  "years_covered": [
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015
+  ],
+  "jurisdictions_covered_by_year": {
+    "2005": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2006": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2007": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2008": [
+      "Cabarrus County / Unincorporated"
+    ],
+    "2009": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2010": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2011": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ],
+    "2012": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ],
+    "2013": [
+      "Concord",
+      "Harrisburg",
+      "Kannapolis"
+    ],
+    "2014": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ],
+    "2015": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ]
+  },
+  "source_layers_successfully_queried": 47,
+  "source_layers_failed": [],
+  "rows_ingested": {
+    "raw": 21567,
+    "clean": 21567
+  },
+  "clean_rows_by_year_jurisdiction": [
+    {
+      "source_year": 2005,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 378
+    },
+    {
+      "source_year": 2005,
+      "jurisdiction": "Concord",
+      "clean_rows": 576
+    },
+    {
+      "source_year": 2005,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 318
+    },
+    {
+      "source_year": 2006,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 386
+    },
+    {
+      "source_year": 2006,
+      "jurisdiction": "Concord",
+      "clean_rows": 587
+    },
+    {
+      "source_year": 2006,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 347
+    },
+    {
+      "source_year": 2007,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 393
+    },
+    {
+      "source_year": 2007,
+      "jurisdiction": "Concord",
+      "clean_rows": 587
+    },
+    {
+      "source_year": 2007,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 347
+    },
+    {
+      "source_year": 2008,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 397
+    },
+    {
+      "source_year": 2009,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 348
+    },
+    {
+      "source_year": 2009,
+      "jurisdiction": "Concord",
+      "clean_rows": 609
+    },
+    {
+      "source_year": 2009,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 347
+    },
+    {
+      "source_year": 2010,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 353
+    },
+    {
+      "source_year": 2010,
+      "jurisdiction": "Concord",
+      "clean_rows": 640
+    },
+    {
+      "source_year": 2010,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 382
+    },
+    {
+      "source_year": 2011,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 460
+    },
+    {
+      "source_year": 2011,
+      "jurisdiction": "Concord",
+      "clean_rows": 641
+    },
+    {
+      "source_year": 2011,
+      "jurisdiction": "Harrisburg",
+      "clean_rows": 175
+    },
+    {
+      "source_year": 2011,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 1643
+    },
+    {
+      "source_year": 2011,
+      "jurisdiction": "Locust",
+      "clean_rows": 8
+    },
+    {
+      "source_year": 2011,
+      "jurisdiction": "Midland",
+      "clean_rows": 108
+    },
+    {
+      "source_year": 2011,
+      "jurisdiction": "Mt. Pleasant",
+      "clean_rows": 126
+    },
+    {
+      "source_year": 2012,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 205
+    },
+    {
+      "source_year": 2012,
+      "jurisdiction": "Concord",
+      "clean_rows": 651
+    },
+    {
+      "source_year": 2012,
+      "jurisdiction": "Harrisburg",
+      "clean_rows": 108
+    },
+    {
+      "source_year": 2012,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 1643
+    },
+    {
+      "source_year": 2012,
+      "jurisdiction": "Locust",
+      "clean_rows": 8
+    },
+    {
+      "source_year": 2012,
+      "jurisdiction": "Midland",
+      "clean_rows": 110
+    },
+    {
+      "source_year": 2012,
+      "jurisdiction": "Mt. Pleasant",
+      "clean_rows": 126
+    },
+    {
+      "source_year": 2013,
+      "jurisdiction": "Concord",
+      "clean_rows": 651
+    },
+    {
+      "source_year": 2013,
+      "jurisdiction": "Harrisburg",
+      "clean_rows": 120
+    },
+    {
+      "source_year": 2013,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 1643
+    },
+    {
+      "source_year": 2014,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 200
+    },
+    {
+      "source_year": 2014,
+      "jurisdiction": "Concord",
+      "clean_rows": 654
+    },
+    {
+      "source_year": 2014,
+      "jurisdiction": "Harrisburg",
+      "clean_rows": 122
+    },
+    {
+      "source_year": 2014,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 2009
+    },
+    {
+      "source_year": 2014,
+      "jurisdiction": "Locust",
+      "clean_rows": 7
+    },
+    {
+      "source_year": 2014,
+      "jurisdiction": "Midland",
+      "clean_rows": 115
+    },
+    {
+      "source_year": 2014,
+      "jurisdiction": "Mt. Pleasant",
+      "clean_rows": 130
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "clean_rows": 207
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Concord",
+      "clean_rows": 654
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Harrisburg",
+      "clean_rows": 141
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Kannapolis",
+      "clean_rows": 1655
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Locust",
+      "clean_rows": 7
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Midland",
+      "clean_rows": 115
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Mt. Pleasant",
+      "clean_rows": 130
+    }
+  ],
+  "zoning_code_fields_found": {
+    "harrisburg_zoning_2015": [
+      "ZONINGCODE",
+      "ZONINGDIST",
+      "ZONING_GEN"
+    ],
+    "kannapolis_zoning_2015": [
+      "BASE_DISTR"
+    ],
+    "locust_zoning_2015": [
+      "ZONING"
+    ],
+    "concord_zoning_2015": [
+      "COC_Zoning_AREA",
+      "ZONINGCODE",
+      "OLDZONING"
+    ],
+    "cabarrus_county_zoning_2015": [
+      "ZONINGCODE",
+      "ZONINGDIST",
+      "ZONING_GEN"
+    ],
+    "mt_pleasant_zoning_2015": [
+      "ZONINGCODE"
+    ],
+    "midland_zoning_2015": [
+      "Zoning_Typ",
+      "Zone_ID"
+    ],
+    "kannapolis_zoning_2014": [
+      "BASE_DISTR"
+    ],
+    "locust_zoning_2014": [
+      "ZONING"
+    ],
+    "harrisburg_zoning_2014": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "mt_pleasant_zoning_2014": [
+      "ZONINGCODE"
+    ],
+    "midland_zoning_2014": [
+      "Zoning_Typ"
+    ],
+    "cabarrus_county_zoning_2014": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "concord_zoning_2014": [
+      "ZONINGCODE"
+    ],
+    "harrisburg_zoning_2013": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "kannapolis_zoning_2013": [
+      "BASE_DISTR"
+    ],
+    "concord_zoning_2013": [
+      "ZONINGCODE"
+    ],
+    "cabarrus_county_zoning_2012": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "concord_zoning_2012": [
+      "ZONINGCODE"
+    ],
+    "harrisburg_zoning_2012": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "kannapolis_zoning_2012": [
+      "BASE_DISTR"
+    ],
+    "locust_zoning_2012": [
+      "ZONING"
+    ],
+    "midland_zoning_2012": [
+      "Zoning_Typ"
+    ],
+    "mt_pleasant_zoning_2012": [
+      "ZONINGCODE"
+    ],
+    "cabarrus_county_zoning_2011": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "concord_zoning_2011": [
+      "ZONINGCODE"
+    ],
+    "harrisburg_zoning_2011": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "kannapolis_zoning_2011": [
+      "BASE_DISTR"
+    ],
+    "locust_zoning_2011": [
+      "ZONING"
+    ],
+    "midland_zoning_2011": [
+      "Zoning_Typ"
+    ],
+    "mt_pleasant_zoning_2011": [
+      "ZONINGCODE"
+    ],
+    "county_zoning_2010": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "concord_zoning_2010": [
+      "ZONINGCODE"
+    ],
+    "kannapolis_zoning_2010": [
+      "BASE_DISTR"
+    ],
+    "concord_zoning_2009": [
+      "ZONINGCODE"
+    ],
+    "county_zoning_2009": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "kannapolis_zoning_2009": [],
+    "cabarrus_zoning_2008": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "concord_zoning_2007": [
+      "ZONINGCODE"
+    ],
+    "cabarrus_zoning_2007": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "kannapolis_zoning_2007": [
+      "BASE_DISTR"
+    ],
+    "concord_zoning_2006": [
+      "ZONINGCODE"
+    ],
+    "cabarrus_zoning_2006": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ],
+    "kannapolis_zoning_2006": [
+      "BASE_DISTR"
+    ],
+    "concord_zoning_2005": [
+      "ZONINGCODE"
+    ],
+    "kannapolis_zoning_2005": [
+      "BASE_DISTR"
+    ],
+    "cabarrus_zoning_2005": [
+      "ZONINGCODE",
+      "ZONING_GEN"
+    ]
+  },
+  "case_number_fields_found": {
+    "harrisburg_zoning_2015": [
+      "CASE_NUMBE"
+    ],
+    "kannapolis_zoning_2015": [
+      "CASE_NUMBE",
+      "CU_CASE_"
+    ],
+    "cabarrus_county_zoning_2015": [
+      "CASE_NUMBE"
+    ],
+    "kannapolis_zoning_2014": [
+      "CU_CASE_"
+    ],
+    "kannapolis_zoning_2009": [
+      "CASE_NUMBE"
+    ]
+  },
+  "date_fields_found": {
+    "kannapolis_zoning_2015": [
+      "EFFECTIVE_",
+      "MAP_EDIT_D"
+    ]
+  },
+  "snapshot_table_status": {
+    "table": "public.parcel_zoning_snapshot_year",
+    "row_count": 2420374,
+    "row_count_matches_expected": true,
+    "start_year": 2005,
+    "end_year": 2026,
+    "temporal_distribution": [
+      {
+        "temporal_status": "prior_available_year",
+        "row_count": 1332138
+      },
+      {
+        "temporal_status": "exact_year",
+        "row_count": 1080088
+      },
+      {
+        "temporal_status": "unavailable",
+        "row_count": 8148
+      }
+    ],
+    "zoning_source_age_years_distribution": [
+      {
+        "zoning_source_age_years": 0,
+        "row_count": 1080088
+      },
+      {
+        "zoning_source_age_years": 1,
+        "row_count": 207073
+      },
+      {
+        "zoning_source_age_years": 2,
+        "row_count": 135596
+      },
+      {
+        "zoning_source_age_years": 3,
+        "row_count": 109941
+      },
+      {
+        "zoning_source_age_years": 4,
+        "row_count": 109941
+      },
+      {
+        "zoning_source_age_years": 5,
+        "row_count": 109941
+      },
+      {
+        "zoning_source_age_years": 6,
+        "row_count": 109941
+      },
+      {
+        "zoning_source_age_years": 7,
+        "row_count": 109941
+      },
+      {
+        "zoning_source_age_years": 8,
+        "row_count": 109941
+      },
+      {
+        "zoning_source_age_years": 9,
+        "row_count": 109941
+      },
+      {
+        "zoning_source_age_years": 10,
+        "row_count": 109941
+      },
+      {
+        "zoning_source_age_years": 11,
+        "row_count": 109941
+      },
+      {
+        "zoning_source_age_years": null,
+        "row_count": 8148
+      }
+    ],
+    "coverage_by_year": [
+      {
+        "snapshot_year": 2005,
+        "row_count": 110017,
+        "zoning_known_count": 109807,
+        "zoning_unknown_count": 210,
+        "exact_year_count": 109807,
+        "prior_available_year_count": 0,
+        "unavailable_count": 210,
+        "review_required_count": 1502
+      },
+      {
+        "snapshot_year": 2006,
+        "row_count": 110017,
+        "zoning_known_count": 109807,
+        "zoning_unknown_count": 210,
+        "exact_year_count": 109807,
+        "prior_available_year_count": 0,
+        "unavailable_count": 210,
+        "review_required_count": 1541
+      },
+      {
+        "snapshot_year": 2007,
+        "row_count": 110017,
+        "zoning_known_count": 107652,
+        "zoning_unknown_count": 2365,
+        "exact_year_count": 107652,
+        "prior_available_year_count": 0,
+        "unavailable_count": 2365,
+        "review_required_count": 3785
+      },
+      {
+        "snapshot_year": 2008,
+        "row_count": 110017,
+        "zoning_known_count": 106955,
+        "zoning_unknown_count": 3062,
+        "exact_year_count": 43613,
+        "prior_available_year_count": 63342,
+        "unavailable_count": 3062,
+        "review_required_count": 4525
+      },
+      {
+        "snapshot_year": 2009,
+        "row_count": 110017,
+        "zoning_known_count": 108974,
+        "zoning_unknown_count": 1043,
+        "exact_year_count": 83319,
+        "prior_available_year_count": 25655,
+        "unavailable_count": 1043,
+        "review_required_count": 2357
+      },
+      {
+        "snapshot_year": 2010,
+        "row_count": 110017,
+        "zoning_known_count": 109954,
+        "zoning_unknown_count": 63,
+        "exact_year_count": 109954,
+        "prior_available_year_count": 0,
+        "unavailable_count": 63,
+        "review_required_count": 1208
+      },
+      {
+        "snapshot_year": 2011,
+        "row_count": 110017,
+        "zoning_known_count": 109947,
+        "zoning_unknown_count": 70,
+        "exact_year_count": 109947,
+        "prior_available_year_count": 0,
+        "unavailable_count": 70,
+        "review_required_count": 1137
+      },
+      {
+        "snapshot_year": 2012,
+        "row_count": 110017,
+        "zoning_known_count": 109948,
+        "zoning_unknown_count": 69,
+        "exact_year_count": 109948,
+        "prior_available_year_count": 0,
+        "unavailable_count": 69,
+        "review_required_count": 1103
+      },
+      {
+        "snapshot_year": 2013,
+        "row_count": 110017,
+        "zoning_known_count": 109948,
+        "zoning_unknown_count": 69,
+        "exact_year_count": 76158,
+        "prior_available_year_count": 33790,
+        "unavailable_count": 69,
+        "review_required_count": 1106
+      },
+      {
+        "snapshot_year": 2014,
+        "row_count": 110017,
+        "zoning_known_count": 109942,
+        "zoning_unknown_count": 75,
+        "exact_year_count": 109942,
+        "prior_available_year_count": 0,
+        "unavailable_count": 75,
+        "review_required_count": 1088
+      },
+      {
+        "snapshot_year": 2015,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 109941,
+        "prior_available_year_count": 0,
+        "unavailable_count": 76,
+        "review_required_count": 1089
+      },
+      {
+        "snapshot_year": 2016,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 1089
+      },
+      {
+        "snapshot_year": 2017,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 1089
+      },
+      {
+        "snapshot_year": 2018,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 1089
+      },
+      {
+        "snapshot_year": 2019,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 1089
+      },
+      {
+        "snapshot_year": 2020,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 1089
+      },
+      {
+        "snapshot_year": 2021,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 110017
+      },
+      {
+        "snapshot_year": 2022,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 110017
+      },
+      {
+        "snapshot_year": 2023,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 110017
+      },
+      {
+        "snapshot_year": 2024,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 110017
+      },
+      {
+        "snapshot_year": 2025,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 110017
+      },
+      {
+        "snapshot_year": 2026,
+        "row_count": 110017,
+        "zoning_known_count": 109941,
+        "zoning_unknown_count": 76,
+        "exact_year_count": 0,
+        "prior_available_year_count": 109941,
+        "unavailable_count": 76,
+        "review_required_count": 110017
+      }
+    ]
+  },
+  "change_event_table_status": {
+    "table": "public.parcel_zoning_change_events",
+    "event_count": 32988,
+    "change_types_detected": [
+      {
+        "zoning_change_type": "code_and_category_changed",
+        "event_count": 13144
+      },
+      {
+        "zoning_change_type": "jurisdiction_context_changed",
+        "event_count": 9167
+      },
+      {
+        "zoning_change_type": "zoning_code_changed",
+        "event_count": 9058
+      },
+      {
+        "zoning_change_type": "category_changed",
+        "event_count": 1619
+      }
+    ],
+    "confidence_distribution": [
+      {
+        "confidence": "high",
+        "event_count": 25149
+      },
+      {
+        "confidence": "medium",
+        "event_count": 7839
+      }
+    ],
+    "review_required_count": 9365
+  },
+  "time_safe_status": "candidate_features_are_time_safe_only_when source_year/change_year <= snapshot_year",
+  "staleness_caveats": [
+    "No current zoning was used as historical zoning.",
+    "2016-2026 snapshots use 2015 historical zoning as prior_available_year where available.",
+    "Rows with source_age_years greater than the stale threshold are flagged for review."
+  ],
+  "ready_for_phase10e_zoning_enhanced_model_comparison": true,
+  "model_training_performed": false,
+  "prediction_probability_exposed": false,
+  "outputs": {
+    "historical_inventory_json": "outputs\\historical_zoning_source_inventory.json",
+    "historical_inventory_csv": "outputs\\historical_zoning_source_inventory.csv",
+    "ingest_summary": "outputs\\historical_zoning_ingest_summary.json",
+    "snapshot_validation": "outputs\\parcel_zoning_snapshot_year_validation.json",
+    "change_events_validation": "outputs\\parcel_zoning_change_events_validation.json",
+    "readiness_assessment": "outputs\\zoning_change_readiness_assessment.json",
+    "phase_summary": "outputs\\phase10d1_historical_zoning_foundation_summary.json"
+  },
+  "validation_results": {
+    "python_compile_cfs_data_pipelines_ingest": "passed",
+    "python_compile_cfs_data_pipelines_transform": "passed",
+    "python_compile_cfs_data_pipelines_inspect": "passed",
+    "python_compile_backend_app": "passed",
+    "python_pytest_backend": "passed_208_tests",
+    "npm_run_dev_cfs": "ports_already_listening_full_stack_available",
+    "backend_root": 200,
+    "backend_health": 200,
+    "backend_database_health": 200,
+    "development_prediction_features_summary": {
+      "status_code": 200,
+      "model_active": false,
+      "prediction_probability_available": false,
+      "prediction_probability_field_present": false
+    },
+    "parcel_search": 200,
+    "development_hotspots": 200,
+    "flood_summary": 200,
+    "school_statistics": 200,
+    "frontend_root": 200
+  }
+}

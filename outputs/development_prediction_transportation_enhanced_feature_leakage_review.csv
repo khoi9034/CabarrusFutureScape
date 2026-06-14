@@ -1,0 +1,5 @@
+check_name,status,failing_rows,notes
+row_count_matches_zoning_enhanced_matrix,pass,0,Transportation-enhanced table must preserve Phase 10E row cardinality.
+no_duplicate_parcel_year_rows,pass,0,Transportation joins must not duplicate official_parcel_id/snapshot_year rows.
+transportation_current_context_flag_true,pass,0,All Phase 13C transportation features must be marked current-context only.
+transportation_time_safe_flag_false,pass,0,Current-context transportation features are not strict historical training features.

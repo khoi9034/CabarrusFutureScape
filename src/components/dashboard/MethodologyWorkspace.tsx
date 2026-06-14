@@ -1,13 +1,25 @@
+"use client";
+
 import {
   AlertTriangle,
+  BarChart3,
+  BrainCircuit,
   Database,
   GitBranch,
   Layers3,
+  LockKeyhole,
   Radar,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import {
+  developmentPredictionPublicBlockers,
+  developmentPredictionRoadmap,
+  standardizedDevelopmentPredictionMetrics,
+  useDevelopmentPredictionResearchStatus,
+} from "@/hooks/useDevelopmentPredictionResearchStatus";
+import type { DevelopmentPredictionRankingClassBucket } from "@/types/api";
 
 const dataInputs = [
   {
@@ -29,6 +41,11 @@ const dataInputs = [
     label: "Permit Segmentation",
     status: "Descriptive",
     text: "Rule-based permit segment labels for residential growth, commercial activity, redevelopment, demolition, maintenance, institutional, and industrial activity.",
+  },
+  {
+    label: "Development Ranking Research",
+    status: "Internal only",
+    text: "Zoning-enhanced ranking experiment and aggregate class distribution for QA. Exact probabilities and parcel-level classes are not exposed.",
   },
   {
     label: "FEMA Flood Constraints",
@@ -59,12 +76,14 @@ const logicItems = [
   "School assignment uses attendance-zone polygon overlap for CCS V1 elementary, middle, and high zones. It does not assign by nearest school point.",
   "Presentation-derived school utilization is a temporary seed for visualization and workflow testing until verified enrollment and capacity files arrive.",
   "LEA pupil totals provide districtwide grade context only and are not joined to parcels or used as school-level capacity.",
+  "Development prediction work is internal ranking research only. Exact parcel probabilities are not shown because calibration remains weak.",
 ];
 
 const assumptionItems = [
   "Parcels are the primary unit of analysis for CFS V1.",
   "Zoning and flood assignments are overlay-derived and retain confidence/QA signals where available.",
   "Permit segmentation is rule-based and descriptive, not predictive or causal.",
+  "Ranking classes are percentile bands for internal model QA, not final parcel development forecasts.",
   "FEMA NFHL is treated as the authoritative regulatory flood source; modeled flood TIFFs remain reference/future modeling inputs.",
   "School capacity scoring waits for official enrollment, functional capacity, grade-level history, and vetted capacity-change records.",
   "Infrastructure readiness and opportunity extrusions remain mock/readiness candidates until authoritative layers are connected.",
@@ -75,7 +94,7 @@ const limitationItems = [
   "Presentation-derived school utilization must be verified against official CCS or county source files before use as decision evidence.",
   "Districtwide LEA pupil context does not replace school-level enrollment, functional capacity, available seats, or utilization.",
   "Transportation, water/sewer, fire/EMS, heat/runoff, and environmental sensitivity constraints are planned but not complete.",
-  "Forecasting and development probability modeling are not implemented yet.",
+  "Development ranking research is not production-ready and is not exposed as parcel-level predictions.",
   "Some operational map layers are mock placeholders used to demonstrate future integration paths.",
   "Local runtime performance depends on browser GPU, network latency to FastAPI, and selected map layer limits.",
 ];
@@ -85,7 +104,7 @@ const roadmapItems = [
   "Add school capacity/utilization scoring only after official data QA passes.",
   "Implement transportation access, water/sewer readiness, fire/EMS coverage, heat/runoff, and environmental sensitivity overlays.",
   "Introduce scenario testing and model calibration once descriptive intelligence is stable.",
-  "Build predictive development probability only after enough validated historical features exist.",
+  "Review internal ranking classes only after calibration, governance, and missing feature gaps are addressed.",
   "Package executive reporting around transparent inputs, caveats, and parcel-level due diligence evidence.",
 ];
 
@@ -109,13 +128,14 @@ export function MethodologyWorkspace() {
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-400">
                 Cabarrus FutureScape is currently a parcel-centric descriptive
-                intelligence prototype. It explains what is known, how records
-                are joined, where constraints are located, and which inputs
-                remain preliminary before predictive modeling begins.
+                intelligence prototype with internal model research. It explains
+                what is known, how records are joined, where constraints are
+                located, and why ranking experiments remain internal before any
+                predictive signal is considered for public use.
               </p>
             </div>
             <div className="grid min-w-[15rem] grid-cols-2 gap-2 text-xs">
-              <StatusPill label="Prediction" value="Not built" tone="amber" />
+              <StatusPill label="Prediction" value="Internal only" tone="amber" />
               <StatusPill label="School score" value="Not scored" tone="cyan" />
               <StatusPill label="Flood source" value="FEMA NFHL" tone="green" />
               <StatusPill label="Utilization" value="Seed only" tone="rose" />
@@ -133,24 +153,28 @@ export function MethodologyWorkspace() {
                 zoning, development activity, flood constraints, school
                 assignment, and due-diligence context onto that parcel. The
                 current platform is designed to be explainable before it becomes
-                predictive.
+                predictive or public-facing.
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 <MethodMini label="Constraint overlay" value="Spatial joins" />
                 <MethodMini label="Development signal" value="Permit history" />
                 <MethodMini label="Readiness concept" value="Evidence-led" />
-                <MethodMini label="Predictive path" value="Future phase" />
+                <MethodMini label="Ranking research" value="Internal only" />
               </div>
             </MethodCard>
 
             <MethodCard icon={ShieldCheck} kicker="Decision boundary" title="What CFS Does Not Claim Yet">
               <ul className="space-y-2 text-sm leading-6 text-slate-400">
                 <li>No official school capacity score is active.</li>
-                <li>No development probability model is active.</li>
+                <li>No development prediction output is active or public.</li>
                 <li>No presentation-derived utilization value is treated as official.</li>
                 <li>Mock infrastructure/readiness layers remain placeholders.</li>
               </ul>
             </MethodCard>
+          </div>
+
+          <div className="mt-4">
+            <DevelopmentPredictionResearchStatusCard />
           </div>
 
           <div className="mt-4 grid gap-4 xl:grid-cols-3">
@@ -199,6 +223,162 @@ export function MethodologyWorkspace() {
   );
 }
 
+function DevelopmentPredictionResearchStatusCard() {
+  const { errorMessage, isLoading, rankingSummary, source } =
+    useDevelopmentPredictionResearchStatus();
+  const orderedDistribution = orderRankingDistribution(
+    rankingSummary.class_distribution,
+  );
+  const totalRows =
+    rankingSummary.ranking_row_count ||
+    orderedDistribution.reduce((sum, item) => sum + item.row_count, 0);
+
+  return (
+    <MethodCard
+      className="border-[#68d8ff]/15 bg-[#071827]/86"
+      icon={BrainCircuit}
+      kicker="Model transparency"
+      title="Development Prediction Research Status"
+    >
+      <div className="grid gap-3 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="space-y-3">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <ResearchStatusItem
+              label="Target"
+              value={standardizedDevelopmentPredictionMetrics.target}
+            />
+            <ResearchStatusItem
+              label="Model status"
+              tone="amber"
+              value="Internal research only"
+            />
+            <ResearchStatusItem label="Production ready" tone="rose" value="No" />
+            <ResearchStatusItem
+              label="Prediction probabilities"
+              tone="rose"
+              value="Not available"
+            />
+            <ResearchStatusItem
+              label="Public exposure"
+              tone="rose"
+              value="Not allowed"
+            />
+            <ResearchStatusItem
+              label="Best experiment"
+              value={rankingSummary.experiment_id ?? "zoning-enhanced ranking"}
+            />
+            <ResearchStatusItem
+              label="Calibration"
+              tone="amber"
+              value={formatStatusLabel(
+                rankingSummary.calibration_status ?? "weak_probability_calibration",
+              )}
+            />
+            <ResearchStatusItem
+              label="Recommended use"
+              value="Internal ranking research and model QA"
+            />
+          </div>
+
+          <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+            <div className="flex items-start gap-2">
+              <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
+              <p className="text-xs leading-5 text-slate-400">
+                This section intentionally shows aggregate research status only.
+                It does not display parcel IDs, parcel ranking classes, or exact
+                model probabilities.
+              </p>
+            </div>
+            <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-slate-500">
+              Source: {source === "api" ? "Live FastAPI aggregate summaries" : "Documented Phase 10G aggregate summary"}
+              {isLoading ? " (loading)" : ""}
+            </p>
+            <p className="mt-2 rounded-md border border-white/10 bg-white/[0.025] px-2 py-1.5 text-[11px] leading-5 text-slate-400">
+              Current safety flags: model_active=false,
+              prediction_probability_available=false, production_ready=false,
+              public_exposure_allowed=false.
+            </p>
+            {errorMessage ? (
+              <p className="mt-2 text-xs leading-5 text-[#f0cd79]">
+                API status unavailable; showing documented aggregate summary.
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Aggregate ranking classes
+                </p>
+                <h4 className="mt-1 text-sm font-semibold text-white">
+                  Distribution only
+                </h4>
+              </div>
+              <BarChart3 className="h-4 w-4 text-[#68d8ff]" />
+            </div>
+            <div className="mt-3 space-y-2">
+              {orderedDistribution.map((bucket) => (
+                <RankingDistributionRow
+                  bucket={bucket}
+                  key={bucket.development_signal_class}
+                  totalRows={totalRows}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Internal model comparison
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <ResearchMetric
+                label="Baseline PR-AUC"
+                value={standardizedDevelopmentPredictionMetrics.baselinePrAuc}
+              />
+              <ResearchMetric
+                label="Zoning-enhanced PR-AUC"
+                value={standardizedDevelopmentPredictionMetrics.zoningEnhancedPrAuc}
+              />
+              <ResearchMetric
+                label="Baseline tie-aware lift@top 5%"
+                value={standardizedDevelopmentPredictionMetrics.baselineLiftAtTop5}
+              />
+              <ResearchMetric
+                label="Zoning-enhanced tie-aware lift@top 5%"
+                value={
+                  standardizedDevelopmentPredictionMetrics.zoningEnhancedLiftAtTop5
+                }
+              />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-400">
+              Zoning-enhanced features improved internal ranking metrics, but
+              weak calibration means exact probabilities are not shown.
+            </p>
+          </section>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        <ResearchListCard
+          accent="rose"
+          items={developmentPredictionPublicBlockers}
+          title="Why Not Public Yet?"
+        />
+        <ResearchListCard
+          accent="cyan"
+          items={developmentPredictionRoadmap}
+          ordered
+          title="Research Roadmap"
+        />
+      </div>
+    </MethodCard>
+  );
+}
+
 function MethodCard({
   children,
   className,
@@ -229,6 +409,113 @@ function MethodCard({
       </div>
       <div className="mt-4 text-sm leading-6 text-slate-400">{children}</div>
     </article>
+  );
+}
+
+function RankingDistributionRow({
+  bucket,
+  totalRows,
+}: {
+  bucket: DevelopmentPredictionRankingClassBucket;
+  totalRows: number;
+}) {
+  const pct =
+    bucket.pct_of_rows ||
+    (totalRows > 0 ? Number(((bucket.row_count / totalRows) * 100).toFixed(4)) : 0);
+
+  return (
+    <div className="rounded-md border border-white/10 bg-white/[0.035] p-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs font-semibold text-slate-200">
+          {formatRankingClass(bucket.development_signal_class)}
+        </span>
+        <span className="text-xs font-semibold text-white">
+          {formatInteger(bucket.row_count)}
+        </span>
+      </div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full bg-[#68d8ff]"
+          style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+        />
+      </div>
+      <p className="mt-1 text-[11px] text-slate-500">
+        {pct.toFixed(2)}% of internal research rows
+      </p>
+    </div>
+  );
+}
+
+function ResearchListCard({
+  accent,
+  items,
+  ordered = false,
+  title,
+}: {
+  accent: "cyan" | "rose";
+  items: string[];
+  ordered?: boolean;
+  title: string;
+}) {
+  const dotClass = accent === "cyan" ? "bg-[#68d8ff]" : "bg-[#ff8d7a]";
+  const ListTag = ordered ? "ol" : "ul";
+
+  return (
+    <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+      <h4 className="text-sm font-semibold text-white">{title}</h4>
+      <ListTag className="mt-3 space-y-2">
+        {items.map((item, index) => (
+          <li className="flex gap-2 text-xs leading-5 text-slate-400" key={item}>
+            {ordered ? (
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-[10px] font-semibold text-slate-300">
+                {index + 1}
+              </span>
+            ) : (
+              <span className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`} />
+            )}
+            <span>{item}</span>
+          </li>
+        ))}
+      </ListTag>
+    </section>
+  );
+}
+
+function ResearchMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-md border border-white/10 bg-white/[0.035] p-2">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-semibold text-white">{value.toFixed(6)}</p>
+    </div>
+  );
+}
+
+function ResearchStatusItem({
+  label,
+  tone = "cyan",
+  value,
+}: {
+  label: string;
+  tone?: "amber" | "cyan" | "rose";
+  value: string;
+}) {
+  const toneClass = {
+    amber: "border-[#d8b86a]/20 bg-[#d8b86a]/[0.06]",
+    cyan: "border-[#68d8ff]/16 bg-[#68d8ff]/[0.055]",
+    rose: "border-[#ff8d7a]/20 bg-[#ff8d7a]/[0.055]",
+  };
+
+  return (
+    <div className={`rounded-lg border p-3 ${toneClass[tone]}`}>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-semibold leading-5 text-slate-100">
+        {value}
+      </p>
+    </div>
   );
 }
 
@@ -280,4 +567,47 @@ function StatusPill({
       <p className="mt-1 text-xs font-semibold">{value}</p>
     </div>
   );
+}
+
+function orderRankingDistribution(
+  distribution: DevelopmentPredictionRankingClassBucket[],
+) {
+  const order = [
+    "very_high_development_signal",
+    "high_development_signal",
+    "moderate_development_signal",
+    "low_development_signal",
+  ];
+
+  return [...distribution].sort((a, b) => {
+    const aIndex = order.indexOf(a.development_signal_class);
+    const bIndex = order.indexOf(b.development_signal_class);
+
+    return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex);
+  });
+}
+
+function formatInteger(value: number) {
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(
+    value,
+  );
+}
+
+function formatRankingClass(value: string) {
+  const labels: Record<string, string> = {
+    high_development_signal: "High development signal",
+    low_development_signal: "Low development signal",
+    moderate_development_signal: "Moderate development signal",
+    very_high_development_signal: "Very high development signal",
+  };
+
+  return labels[value] ?? formatStatusLabel(value);
+}
+
+function formatStatusLabel(value: string) {
+  return value
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }

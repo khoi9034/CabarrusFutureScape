@@ -1,0 +1,103 @@
+{
+  "phase": "10G",
+  "generated_at": "2026-06-13T08:18:27.484445",
+  "experiment_id": "phase10e_zoning_enhanced_v1",
+  "ranking_class_table_status": {
+    "table": "public.development_prediction_ranking_classes",
+    "row_count": 110017,
+    "unique_parcels": 110017
+  },
+  "class_distribution": {
+    "high_development_signal": 4400,
+    "low_development_signal": 93514,
+    "moderate_development_signal": 11002,
+    "very_high_development_signal": 1101
+  },
+  "top_1_percent_count": 1101,
+  "top_5_percent_count": 5501,
+  "top_15_percent_count": 16503,
+  "explanation_table_status": {
+    "table": "public.development_prediction_ranking_explanations",
+    "row_count": 110017,
+    "missing_explanation_count": 0
+  },
+  "driver_summary_counts": [
+    {
+      "driver_category": "zoning",
+      "row_count": 110017,
+      "pct_of_explanations": 100.0
+    },
+    {
+      "driver_category": "permit_history",
+      "row_count": 4902,
+      "pct_of_explanations": 4.4557
+    },
+    {
+      "driver_category": "parcel_characteristics",
+      "row_count": 101494,
+      "pct_of_explanations": 92.253
+    },
+    {
+      "driver_category": "flood_constraint",
+      "row_count": 7686,
+      "pct_of_explanations": 6.9862
+    },
+    {
+      "driver_category": "school_context",
+      "row_count": 80193,
+      "pct_of_explanations": 72.8915
+    }
+  ],
+  "aggregate_endpoint_status": "implemented: GET /development/prediction/ranking/summary",
+  "exact_probabilities_exposed": false,
+  "frontend_exposure": false,
+  "production_ready": false,
+  "public_exposure_allowed": false,
+  "validation_results": {
+    "python_compile_modeling": "passed",
+    "python_compile_backend_app": "passed",
+    "focused_prediction_tests": "20 passed",
+    "backend_pytest": "222 passed, 3 warnings",
+    "dev_cfs_startup": "passed",
+    "live_endpoint_checks": {
+      "health": 200,
+      "development_prediction_features_summary": 200,
+      "development_prediction_ranking_summary": 200,
+      "development_new_construction_statistics": 200,
+      "development_hotspots_limit_1": 200,
+      "flood_summary": 200,
+      "school_statistics": 200,
+      "parcel_search": 200,
+      "frontend_localhost_3000": 200
+    },
+    "openapi_prediction_paths": [
+      "/development/prediction/features/summary",
+      "/development/prediction/ranking/summary"
+    ],
+    "ranking_summary_endpoint": {
+      "ranking_available": true,
+      "experiment_id": "phase10e_zoning_enhanced_v1",
+      "ranking_row_count": 110017,
+      "production_ready": false,
+      "public_exposure_allowed": false,
+      "prediction_probability_available": false,
+      "exact_probabilities_exposed": false,
+      "no_parcel_level_scores": true,
+      "calibration_status": "weak_probability_calibration"
+    }
+  },
+  "limitations": [
+    "Internal ranking research only.",
+    "Classes are percentile/rank bands, not calibrated probabilities.",
+    "Explanations are lightweight rule-based summaries, not SHAP.",
+    "Official rezoning case dates, future land use, accessibility/utilities, school capacity, and economic controls remain missing."
+  ],
+  "recommended_phase10h_next_step": "Conduct human review of top-ranked parcels and add official rezoning/future land-use/accessibility controls before any user-facing class display.",
+  "outputs": {
+    "class_distribution": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10g_ranking_class_distribution.csv",
+    "top_ranked_review": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10g_top_ranked_internal_review.csv",
+    "driver_counts": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10g_driver_summary_counts.csv",
+    "validation": "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase10g_ranking_class_validation.json",
+    "summary": "C:\\CabarrusFutureScape\\outputs\\phase10g_internal_development_ranking_summary.json"
+  }
+}

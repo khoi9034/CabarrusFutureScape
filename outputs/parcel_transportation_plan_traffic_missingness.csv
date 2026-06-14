@@ -1,0 +1,12 @@
+feature_name,missing_count,missing_pct
+nearest_stip_project_year,68280,62.0631
+max_aadt_within_half_mile,39127,35.5645
+avg_aadt_within_1_mile,6935,6.3036
+max_aadt_within_1_mile,6935,6.3036
+nearest_aadt_count_year,0,0.0000
+nearest_aadt_station_distance_ft,0,0.0000
+nearest_aadt_station_route,0,0.0000
+nearest_aadt_value,0,0.0000
+nearest_stip_project_distance_ft,0,0.0000
+nearest_stip_project_name,0,0.0000
+nearest_stip_project_type,0,0.0000

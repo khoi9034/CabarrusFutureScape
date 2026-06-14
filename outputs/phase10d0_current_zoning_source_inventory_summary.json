@@ -1,0 +1,225 @@
+{
+  "phase": "10D-0",
+  "created_at": "2026-06-13T08:25:25.052521+00:00",
+  "county_zoning_source_inspected": "cabarrus_county_zoning_current",
+  "municipal_layers_inspected": [
+    "concord_zoning_current",
+    "harrisburg_zoning_current",
+    "kannapolis_zoning_current",
+    "locust_zoning_current",
+    "midland_zoning_current",
+    "mt_pleasant_zoning_current"
+  ],
+  "exact_layer_urls_inspected": [
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Zoning/MapServer/0",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/0",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/2",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/3",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/4",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/5",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/6"
+  ],
+  "fields_found": {
+    "cabarrus_county_zoning_current": [
+      "OBJECTID",
+      "ZONINGCODE",
+      "SHAPE_LENG",
+      "CASE_NUMBE",
+      "ZONINGDIST",
+      "ZONING_GEN",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "concord_zoning_current": [
+      "OBJECTID",
+      "COC_Zoning_AREA",
+      "PERIMETER",
+      "UDO_",
+      "UDO_ID",
+      "ZONINGCODE",
+      "ETJ",
+      "CITYCODE",
+      "TEMP_",
+      "TEMP2",
+      "OLDZONING",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "harrisburg_zoning_current": [
+      "OBJECTID",
+      "FID_harris",
+      "ZONINGCODE",
+      "CASE_NUMBE",
+      "ZONINGDIST",
+      "ZONING_GEN",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "kannapolis_zoning_current": [
+      "OBJECTID",
+      "CASE_NUMBE",
+      "BASE_DISTR",
+      "CU_CASE_",
+      "CONDITIONA",
+      "DRAFTING_N",
+      "EFFECTIVE_",
+      "MAP_EDIT_D",
+      "AREA_FEET",
+      "PERIMETER_",
+      "ACRES",
+      "AREA_FEE_1",
+      "PERIMETER1",
+      "AREA_FEE_2",
+      "PERIMETER2",
+      "AREA_FEE_3",
+      "PERIMETER3",
+      "ZONINGCODE",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "locust_zoning_current": [
+      "OBJECTID_1",
+      "OBJECTID",
+      "ZONING",
+      "PENDINGZON",
+      "JURISDICTI",
+      "SymbolCode",
+      "ZONINGCODE",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "midland_zoning_current": [
+      "OBJECTID",
+      "Id",
+      "Zoning_Typ",
+      "Zone_ID",
+      "Note_",
+      "Overlay",
+      "Transparen",
+      "ZONINGCODE",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "mt_pleasant_zoning_current": [
+      "OBJECTID",
+      "ZONINGCODE",
+      "Acres",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ]
+  },
+  "case_number_fields_found": {
+    "cabarrus_county_zoning_current": [
+      "CASE_NUMBE"
+    ],
+    "concord_zoning_current": [],
+    "harrisburg_zoning_current": [
+      "CASE_NUMBE"
+    ],
+    "kannapolis_zoning_current": [
+      "CASE_NUMBE",
+      "CU_CASE_"
+    ],
+    "locust_zoning_current": [],
+    "midland_zoning_current": [],
+    "mt_pleasant_zoning_current": []
+  },
+  "date_or_history_fields_found": {
+    "cabarrus_county_zoning_current": {
+      "date_year_field_candidates": [],
+      "old_zoning_field_candidates": [],
+      "new_zoning_field_candidates": []
+    },
+    "concord_zoning_current": {
+      "date_year_field_candidates": [],
+      "old_zoning_field_candidates": [
+        "OLDZONING"
+      ],
+      "new_zoning_field_candidates": []
+    },
+    "harrisburg_zoning_current": {
+      "date_year_field_candidates": [],
+      "old_zoning_field_candidates": [],
+      "new_zoning_field_candidates": []
+    },
+    "kannapolis_zoning_current": {
+      "date_year_field_candidates": [
+        "EFFECTIVE_"
+      ],
+      "old_zoning_field_candidates": [],
+      "new_zoning_field_candidates": []
+    },
+    "locust_zoning_current": {
+      "date_year_field_candidates": [],
+      "old_zoning_field_candidates": [],
+      "new_zoning_field_candidates": []
+    },
+    "midland_zoning_current": {
+      "date_year_field_candidates": [],
+      "old_zoning_field_candidates": [],
+      "new_zoning_field_candidates": []
+    },
+    "mt_pleasant_zoning_current": {
+      "date_year_field_candidates": [],
+      "old_zoning_field_candidates": [],
+      "new_zoning_field_candidates": []
+    }
+  },
+  "current_context_usability": {
+    "cabarrus_county_zoning_current": true,
+    "concord_zoning_current": true,
+    "harrisburg_zoning_current": true,
+    "kannapolis_zoning_current": true,
+    "locust_zoning_current": true,
+    "midland_zoning_current": true,
+    "mt_pleasant_zoning_current": true
+  },
+  "zoning_change_readiness_status": "current_context_only_not_ready_for_zoning_change_features",
+  "phase10d_zoning_change_feature_engineering_ready": false,
+  "data_still_needed": [
+    "Dated rezoning or zoning map amendment case table",
+    "Approval/effective date",
+    "Old zoning classification",
+    "New zoning classification",
+    "Parcel or case geometry",
+    "Jurisdiction and decision/status fields"
+  ],
+  "postgis_source_profile_table": {
+    "loaded": true,
+    "row_count": 7
+  },
+  "outputs": {
+    "schema_inventory_json": "C:\\CabarrusFutureScape\\outputs\\current_zoning_source_schema_inventory.json",
+    "schema_inventory_csv": "C:\\CabarrusFutureScape\\outputs\\current_zoning_source_schema_inventory.csv",
+    "readiness_assessment_json": "C:\\CabarrusFutureScape\\outputs\\zoning_change_readiness_assessment.json",
+    "summary_json": "C:\\CabarrusFutureScape\\outputs\\phase10d0_current_zoning_source_inventory_summary.json"
+  },
+  "files_created_or_updated": [
+    "config/current_zoning_sources.json",
+    "config/development_prediction_features.json",
+    "cfs-data-pipelines/inspect/inspect_current_zoning_sources.py",
+    "cfs-data-pipelines/sql/create_zoning_source_inventory.sql",
+    "docs/modeling/current_zoning_context_and_zoning_change_readiness.md",
+    "docs/modeling/development_prediction_feature_registry.md",
+    "docs/modeling/development_prediction_model_readiness.md",
+    "README.md",
+    "outputs/current_zoning_source_schema_inventory.json",
+    "outputs/current_zoning_source_schema_inventory.csv",
+    "outputs/zoning_change_readiness_assessment.json",
+    "outputs/phase10d0_current_zoning_source_inventory_summary.json"
+  ],
+  "validation_results": {
+    "json_parse": "passed",
+    "python_compile_cfs_data_pipelines_inspect": "passed",
+    "python_compile_cfs_data_pipelines_transform": "passed",
+    "python_compile_backend_app": "passed",
+    "postgis_zoning_source_inventory_row_count": 7
+  }
+}

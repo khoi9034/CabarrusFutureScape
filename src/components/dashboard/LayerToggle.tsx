@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Layers3 } from "lucide-react";
+import { ArrowUpRight, BrainCircuit, Layers3 } from "lucide-react";
 import { USE_BACKEND_API } from "@/lib/api/client";
 import {
+  isLayerVisibilityControllable,
   isLayerPlaceholder,
   layerCategories,
   operationalLayerRegistry,
@@ -31,6 +32,7 @@ import type {
   SchoolUtilizationLevel,
   SchoolUtilizationZoneControls,
 } from "@/types/map/schoolUtilizationZones";
+import type { OperationalLayer } from "@/types";
 
 const DEVELOPMENT_HOTSPOT_LAYER_ID = "permit-activity";
 const FLOOD_CONSTRAINT_LAYER_ID = "flood-risk";
@@ -260,6 +262,7 @@ export function LayerToggle() {
     setFloodZoneControls,
     setFloodZonesEnabled,
     setLayerVisibility,
+    setProductMode,
     setSchoolUtilizationZoneControls,
     setSchoolUtilizationZonesEnabled,
   } = useDashboardState();
@@ -412,11 +415,14 @@ export function LayerToggle() {
       {isLayerRegistryOpen ? (
       <div className="mt-3 space-y-3 border-t border-white/10 pt-3">
         {layerCategories.map((category) => {
+          const showModelResearchStatus = category === "Intelligence";
           const layers = operationalLayerRegistry.filter(
-            (layer) => layer.category === category,
+            (layer) =>
+              layer.category === category &&
+              isLayerVisibilityControllable(layer),
           );
 
-          if (!layers.length) {
+          if (!layers.length && !showModelResearchStatus) {
             return null;
           }
 
@@ -426,6 +432,11 @@ export function LayerToggle() {
                 {category}
               </p>
               <div className="space-y-2">
+                {showModelResearchStatus ? (
+                  <ModelResearchStatusCard
+                    onOpenMethodology={() => setProductMode("methodology")}
+                  />
+                ) : null}
                 {layers.map((layer) => {
                   const isDevelopmentHotspotLayer =
                     layer.id === DEVELOPMENT_HOTSPOT_LAYER_ID;
@@ -1219,6 +1230,7 @@ export function LayerToggle() {
                   const active = isLayerActive(layer.id);
                   const unavailable =
                     isLayerPlaceholder(layer) || !layer.visibility;
+                  const sourceStatusLabel = getLayerSourceStatusLabel(layer);
 
                   return (
                     <label
@@ -1269,7 +1281,7 @@ export function LayerToggle() {
                             {active ? "Active" : "Hidden"}
                           </span>
                           <span className="max-w-full rounded border border-white/10 bg-white/[0.025] px-2 py-1 text-[10px] font-medium leading-4 text-slate-500">
-                            {layer.sourceStatus}
+                            {sourceStatusLabel}
                           </span>
                         </span>
                       </span>
@@ -1302,6 +1314,64 @@ export function LayerToggle() {
       </details>
     </section>
   );
+}
+
+function ModelResearchStatusCard({
+  onOpenMethodology,
+}: {
+  onOpenMethodology: () => void;
+}) {
+  return (
+    <article className="rounded-lg border border-[#68d8ff]/15 bg-[#071827]/70 p-3">
+      <div className="flex items-start gap-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#8fe7ff]">
+          <BrainCircuit className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-semibold leading-5 text-slate-100">
+              Model Research Status
+            </h3>
+            <span className="rounded border border-amber-300/20 bg-amber-300/10 px-2 py-0.5 text-[10px] font-semibold uppercase leading-4 text-amber-100">
+              Internal Only
+            </span>
+          </div>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Development ranking research is available in Methodology.
+            Parcel-level predictions are not public or production-ready.
+          </p>
+        </div>
+      </div>
+      <button
+        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#bfefff] transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/15 focus:outline-none focus:ring-2 focus:ring-[#68d8ff]/25"
+        onClick={onOpenMethodology}
+        type="button"
+      >
+        Open Methodology
+        <ArrowUpRight className="h-3.5 w-3.5" />
+      </button>
+    </article>
+  );
+}
+
+function getLayerSourceStatusLabel(layer: OperationalLayer) {
+  if (layer.sourceStatus === "live") {
+    return "API";
+  }
+
+  if (layer.sourceStatus === "disabled") {
+    return "Disabled";
+  }
+
+  if (layer.sourceStatus === "placeholder") {
+    return "Placeholder";
+  }
+
+  if (layer.id === "county-boundary" || layer.id === "parcel-intelligence") {
+    return "Reference";
+  }
+
+  return "Placeholder";
 }
 
 function LayerStatusBadge({

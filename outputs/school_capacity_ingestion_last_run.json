@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-13T00:13:58.812794",
+  "generated_at": "2026-06-13T23:23:19.194046",
   "dataset": "capacity",
-  "source_file": "C:\\Users\\khoia\\AppData\\Local\\Temp\\pytest-of-khoia\\pytest-16\\test_dry_run_importer_validate0\\capacity.csv",
+  "source_file": "C:\\Users\\khoia\\AppData\\Local\\Temp\\pytest-of-khoia\\pytest-28\\test_dry_run_importer_validate0\\capacity.csv",
   "dry_run": true,
   "validation_summary": {
     "row_count": 1,

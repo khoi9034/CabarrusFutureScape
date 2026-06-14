@@ -1,0 +1,69 @@
+{
+  "phase": "13B_stip_project_ingest",
+  "generated_at": "2026-06-14T02:39:40.336175+00:00",
+  "dry_run": false,
+  "truncate_and_load": true,
+  "source_key": "ncdot_stip_2026_2035",
+  "source_url": "https://gis11.services.ncdot.gov/arcgis/rest/services/NCDOT_STIP/MapServer/1",
+  "where": "UPPER(Counties) LIKE '%CABARRUS%'",
+  "total_source_record_count": 1245,
+  "filtered_record_count": 18,
+  "downloaded_features": 18,
+  "inserted_raw_rows": 18,
+  "inserted_clean_rows": 18,
+  "field_mapping_used": {
+    "source_objectid": [
+      "OBJECTID"
+    ],
+    "project_name": [
+      "TIP"
+    ],
+    "project_description": [
+      "Description"
+    ],
+    "project_type": [
+      "Category",
+      "Mode"
+    ],
+    "route_name": [
+      "Route"
+    ],
+    "county": [
+      "Counties"
+    ],
+    "jurisdiction": [
+      "MPOsRPOs",
+      "Divisions"
+    ],
+    "construction_year": [
+      "ConstructionYear"
+    ],
+    "start_year": [
+      "RightOfWayYear",
+      "ConstructionYear"
+    ],
+    "end_year": [
+      "ConstructionYear",
+      "RightOfWayYear"
+    ]
+  },
+  "missing_fields_kept_null": [
+    "project_status",
+    "funding_status",
+    "fiscal_year"
+  ],
+  "source_confidence": "source_reported_current_context",
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "model_active": false,
+  "prediction_probability_available": false,
+  "database_summary": {
+    "raw_rows": 18,
+    "clean_rows": 18,
+    "missing_construction_year_count": 8,
+    "missing_project_status_count": 18,
+    "missing_funding_status_count": 18,
+    "invalid_geometry_count": 0
+  },
+  "rest_source_relocation_warning": "Source may have moved due to Cabarrus/NCDOT REST service reorganization; check registry/fallback URL before marking unavailable."
+}

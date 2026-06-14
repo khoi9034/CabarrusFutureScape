@@ -371,7 +371,142 @@ class DevelopmentPredictionFeaturesSummaryResponse(BaseModel):
     baseline_model_experiment_available: bool = False
     latest_experiment_id: str | None = None
     metrics_summary: dict[str, Any] = Field(default_factory=dict)
+    zoning_enhanced_feature_matrix_available: bool = False
+    zoning_enhanced_row_count: int = 0
+    zoning_enhanced_model_experiment_available: bool = False
+    latest_zoning_enhanced_experiment_id: str | None = None
+    baseline_vs_zoning_metrics_summary: dict[str, Any] = Field(default_factory=dict)
+    transportation_enhanced_feature_matrix_available: bool = False
+    transportation_enhanced_row_count: int = 0
+    transportation_enhanced_model_experiment_available: bool = False
+    latest_transportation_experiment_id: str | None = None
+    transportation_experiment_current_context_only: bool = True
+    latest_model_qa_available: bool = False
+    latest_model_qa_id: str | None = None
+    standardized_metrics_available: bool = False
+    calibration_review_available: bool = False
     production_ready: bool = False
+    model_active: bool = False
+    prediction_probability_available: bool = False
+
+
+class DevelopmentPredictionRankingClassBucket(BaseModel):
+    development_signal_class: str
+    row_count: int
+    pct_of_rows: float
+
+
+class DevelopmentPredictionRankingSummaryResponse(BaseModel):
+    ranking_available: bool
+    experiment_id: str | None = None
+    ranking_row_count: int = 0
+    unique_parcel_count: int = 0
+    class_distribution: list[DevelopmentPredictionRankingClassBucket] = Field(
+        default_factory=list,
+    )
+    explanation_available: bool = False
+    explanation_row_count: int = 0
+    calibration_status: str | None = None
+    production_ready: bool = False
+    public_exposure_allowed: bool = False
+    prediction_probability_available: bool = False
+    exact_probabilities_exposed: bool = False
+    caveat: str = "internal_ranking_research_not_for_public_decision"
+    no_parcel_level_scores: bool = True
+
+
+class TransportationAccessibilityMissingness(BaseModel):
+    feature_name: str
+    missing_count: int
+    missing_pct: float
+
+
+class TransportationAccessibilityDistanceSummary(BaseModel):
+    metric_name: str
+    non_null_count: int
+    min_ft: float | None = None
+    p25_ft: float | None = None
+    median_ft: float | None = None
+    p75_ft: float | None = None
+    p90_ft: float | None = None
+    max_ft: float | None = None
+    avg_ft: float | None = None
+
+
+class TransportationAccessibilityQualityBucket(BaseModel):
+    transportation_accessibility_data_quality: str
+    row_count: int
+
+
+class DevelopmentPredictionTransportationAccessibilitySummaryResponse(BaseModel):
+    feature_table_available: bool
+    feature_table: str = "public.parcel_transportation_accessibility_features"
+    row_count: int = 0
+    unique_parcel_count: int = 0
+    expected_parcel_count: int = 0
+    row_count_matches_parcels: bool = False
+    road_clean_rows: int = 0
+    rail_clean_rows: int = 0
+    rail_corridor_within_half_mile_count: int = 0
+    missing_major_road_classification_count: int = 0
+    distance_summary: list[TransportationAccessibilityDistanceSummary] = Field(
+        default_factory=list,
+    )
+    missingness_summary: list[TransportationAccessibilityMissingness] = Field(
+        default_factory=list,
+    )
+    data_quality_distribution: list[TransportationAccessibilityQualityBucket] = Field(
+        default_factory=list,
+    )
+    current_context_only: bool = True
+    model_active: bool = False
+    prediction_probability_available: bool = False
+
+
+class TransportationPlanTrafficDistributionMetric(BaseModel):
+    metric_name: str
+    metric_unit: str
+    non_null_count: int
+    min_value: float | None = None
+    p25_value: float | None = None
+    median_value: float | None = None
+    p75_value: float | None = None
+    p90_value: float | None = None
+    max_value: float | None = None
+    avg_value: float | None = None
+
+
+class TransportationPlanTrafficQualityBucket(BaseModel):
+    quality_type: str
+    quality: str
+    row_count: int
+
+
+class DevelopmentPredictionTransportationPlanTrafficSummaryResponse(BaseModel):
+    feature_table_available: bool
+    feature_table: str = "public.parcel_transportation_plan_traffic_features"
+    row_count: int = 0
+    unique_parcel_count: int = 0
+    expected_parcel_count: int = 0
+    row_count_matches_parcels: bool = False
+    stip_clean_rows: int = 0
+    aadt_clean_rows: int = 0
+    stip_project_within_half_mile_count: int = 0
+    stip_project_within_1_mile_count: int = 0
+    planned_transportation_investment_count: int = 0
+    current_context_only_count: int = 0
+    time_safe_for_training_count: int = 0
+    distribution_summary: list[TransportationPlanTrafficDistributionMetric] = Field(
+        default_factory=list,
+    )
+    missingness_summary: list[TransportationAccessibilityMissingness] = Field(
+        default_factory=list,
+    )
+    quality_distribution: list[TransportationPlanTrafficQualityBucket] = Field(
+        default_factory=list,
+    )
+    current_context_only: bool = True
+    time_safe_for_training: bool = False
     model_active: bool = False
     prediction_probability_available: bool = False
 

@@ -1,0 +1,1303 @@
+[
+  {
+    "current_or_historical": "current_context",
+    "extent": {
+      "spatialReference": {
+        "falseM": -100000,
+        "falseX": -121841900,
+        "falseY": -93659000,
+        "falseZ": -100000,
+        "latestWkid": 2264,
+        "mTolerance": 0.001,
+        "mUnits": 10000,
+        "wkid": 102719,
+        "xyTolerance": 0.003280833333333333,
+        "xyUnits": 3048.0060960121928,
+        "zTolerance": 0.001,
+        "zUnits": 10000
+      },
+      "xmax": 1612267.3861188889,
+      "xmin": 1467497.8902253807,
+      "ymax": 661842.5570845604,
+      "ymin": 526613.3373860568
+    },
+    "fallback_urls": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/45",
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "field_names": [
+      "OBJECTID",
+      "SEGID",
+      "fromleft",
+      "toleft",
+      "fromright",
+      "toright",
+      "street",
+      "direction",
+      "plainst",
+      "streettype",
+      "postdirect",
+      "CityLeft",
+      "CityRight",
+      "StateLeft",
+      "StateRight",
+      "ZipLeft",
+      "ZipRight",
+      "ParityLeft",
+      "ParityRight",
+      "Category",
+      "Comments",
+      "key_",
+      "NameID",
+      "Speed",
+      "Oneway",
+      "FT_Cost",
+      "TF_Cost",
+      "F_Elev",
+      "T_Elev",
+      "CreateDate",
+      "CreateUser",
+      "ModifyDate",
+      "ModifyUser",
+      "Shape",
+      "ANOMALY",
+      "L_PARITY",
+      "R_PARITY",
+      "Shape.STLength()"
+    ],
+    "fields": [
+      {
+        "alias": "OBJECTID",
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "Segment ID",
+        "name": "SEGID",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "From Left",
+        "name": "fromleft",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "To Left",
+        "name": "toleft",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "From Right",
+        "name": "fromright",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "To Right",
+        "name": "toright",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Full Street Name",
+        "name": "street",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Prefix Direction",
+        "name": "direction",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Street Name",
+        "name": "plainst",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Street Type",
+        "name": "streettype",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Suffix Direction",
+        "name": "postdirect",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "City Left",
+        "name": "CityLeft",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "City Right",
+        "name": "CityRight",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "State Left",
+        "name": "StateLeft",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "State Right",
+        "name": "StateRight",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Zip Left",
+        "name": "ZipLeft",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Zip Right",
+        "name": "ZipRight",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Parity Left",
+        "name": "ParityLeft",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Parity Right",
+        "name": "ParityRight",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Category",
+        "name": "Category",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Comments",
+        "name": "Comments",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Key",
+        "name": "key_",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Name ID",
+        "name": "NameID",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Speed Limit",
+        "name": "Speed",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Oneway",
+        "name": "Oneway",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "From-To Cost",
+        "name": "FT_Cost",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "To-From Cost",
+        "name": "TF_Cost",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "From Elevation",
+        "name": "F_Elev",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "To Elevation",
+        "name": "T_Elev",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Create Date",
+        "name": "CreateDate",
+        "type": "esriFieldTypeDate"
+      },
+      {
+        "alias": "Create User",
+        "name": "CreateUser",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Modify Date",
+        "name": "ModifyDate",
+        "type": "esriFieldTypeDate"
+      },
+      {
+        "alias": "Modify User",
+        "name": "ModifyUser",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Shape",
+        "name": "Shape",
+        "type": "esriFieldTypeGeometry"
+      },
+      {
+        "alias": "ANOMALY",
+        "name": "ANOMALY",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "L_PARITY",
+        "name": "L_PARITY",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "R_PARITY",
+        "name": "R_PARITY",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Shape.STLength()",
+        "name": "Shape.STLength()",
+        "type": "esriFieldTypeDouble"
+      }
+    ],
+    "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPolyline",
+    "inspected_at": "2026-06-13T15:17:59.532067+00:00",
+    "jurisdiction_or_maintenance_field_candidates": [
+      "StateLeft",
+      "StateRight"
+    ],
+    "layer_id": 1,
+    "layer_name": "Cabarrus County Centerlines",
+    "limitations": [],
+    "prediction_feature_role": "primary_current_road_accessibility_candidate",
+    "query_supported": true,
+    "readiness_classification": "ready_for_basic_accessibility_features",
+    "record_count": 14455,
+    "road_name_field_candidates": [
+      "street",
+      "streettype",
+      "NameID"
+    ],
+    "route_or_road_class_field_candidates": [
+      "streettype",
+      "Category"
+    ],
+    "sample_features": [
+      {
+        "ANOMALY": null,
+        "Category": null,
+        "CityLeft": "KANNAPOLIS",
+        "CityRight": "KANNAPOLIS",
+        "Comments": null,
+        "CreateDate": null,
+        "CreateUser": null,
+        "FT_Cost": 0.11872575,
+        "F_Elev": 0,
+        "L_PARITY": null,
+        "ModifyDate": 1617889892000,
+        "ModifyUser": "ASWEATT",
+        "NameID": 3825,
+        "OBJECTID": 2,
+        "Oneway": "B",
+        "ParityLeft": "O",
+        "ParityRight": "E",
+        "R_PARITY": null,
+        "SEGID": 14979,
+        "Shape.STLength()": 365.67456678424765,
+        "Speed": 35,
+        "StateLeft": "NC",
+        "StateRight": "NC",
+        "TF_Cost": 0.11872575,
+        "T_Elev": 0,
+        "ZipLeft": 28083,
+        "ZipRight": 28083,
+        "direction": null,
+        "fromleft": 851,
+        "fromright": 850,
+        "key_": null,
+        "plainst": "SEARS",
+        "postdirect": null,
+        "street": "SEARS ST",
+        "streettype": "ST",
+        "toleft": 879,
+        "toright": 878
+      },
+      {
+        "ANOMALY": null,
+        "Category": null,
+        "CityLeft": "CONCORD",
+        "CityRight": "CONCORD",
+        "Comments": null,
+        "CreateDate": null,
+        "CreateUser": null,
+        "FT_Cost": 0.16947991,
+        "F_Elev": 0,
+        "L_PARITY": null,
+        "ModifyDate": 1621592640000,
+        "ModifyUser": "DANIELSG",
+        "NameID": 1528,
+        "OBJECTID": 4,
+        "Oneway": "B",
+        "ParityLeft": "O",
+        "ParityRight": "E",
+        "R_PARITY": null,
+        "SEGID": 7825,
+        "Shape.STLength()": 521.9970853934067,
+        "Speed": 35,
+        "StateLeft": "NC",
+        "StateRight": "NC",
+        "TF_Cost": 0.16947991,
+        "T_Elev": 0,
+        "ZipLeft": 28027,
+        "ZipRight": 28027,
+        "direction": null,
+        "fromleft": 1,
+        "fromright": 0,
+        "key_": 1391,
+        "plainst": "ERWIN",
+        "postdirect": "SW",
+        "street": "ERWIN ST SW",
+        "streettype": "ST",
+        "toleft": 99,
+        "toright": 100
+      },
+      {
+        "ANOMALY": "",
+        "Category": "",
+        "CityLeft": "CHARLOTTE",
+        "CityRight": "CHARLOTTE",
+        "Comments": "",
+        "CreateDate": null,
+        "CreateUser": null,
+        "FT_Cost": 0.24333493,
+        "F_Elev": 0,
+        "L_PARITY": null,
+        "ModifyDate": 1570097061000,
+        "ModifyUser": "SDAVIS",
+        "NameID": 2541,
+        "OBJECTID": 5,
+        "Oneway": "B",
+        "ParityLeft": "O",
+        "ParityRight": "E",
+        "R_PARITY": null,
+        "SEGID": 13560,
+        "Shape.STLength()": 535.3357731588659,
+        "Speed": 25,
+        "StateLeft": "NC",
+        "StateRight": "NC",
+        "TF_Cost": 0.24333493,
+        "T_Elev": 0,
+        "ZipLeft": 28269,
+        "ZipRight": 28269,
+        "direction": "",
+        "fromleft": 1815,
+        "fromright": 1814,
+        "key_": 2861,
+        "plainst": "LAVETA",
+        "postdirect": "",
+        "street": "LAVETA RD",
+        "streettype": "RD",
+        "toleft": 1837,
+        "toright": 1838
+      }
+    ],
+    "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer",
+    "source_key": "cabarrus_county_centerlines_dedicated",
+    "source_name": "Cabarrus County Centerlines",
+    "source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_status": "available",
+    "source_type": "road_centerline",
+    "spatial_reference": null,
+    "speed_or_route_type_field_candidates": [
+      "streettype",
+      "Speed",
+      "CreateUser",
+      "ModifyUser"
+    ],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "useful_for_accessibility_modeling": true
+  },
+  {
+    "current_or_historical": "current_context",
+    "extent": {
+      "spatialReference": {
+        "falseM": -100000,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "falseZ": 0,
+        "latestWkid": 2264,
+        "mTolerance": 2,
+        "mUnits": 10000,
+        "wkid": 102719,
+        "xyTolerance": 0.0029802322429328676,
+        "xyUnits": 33059835.262158718,
+        "zTolerance": 2,
+        "zUnits": 1
+      },
+      "xmax": 1612267.3861188889,
+      "xmin": 1467497.8902253807,
+      "ymax": 661842.5570845604,
+      "ymin": 526613.3373860568
+    },
+    "fallback_urls": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer"
+    ],
+    "field_names": [
+      "Shape",
+      "OBJECTID",
+      "SEGID",
+      "fromleft",
+      "toleft",
+      "fromright",
+      "toright",
+      "street",
+      "direction",
+      "plainst",
+      "streettype",
+      "postdirect",
+      "CityLeft",
+      "CityRight",
+      "StateLeft",
+      "StateRight",
+      "ZipLeft",
+      "ZipRight",
+      "ParityLeft",
+      "ParityRight",
+      "NameID",
+      "Speed",
+      "Oneway",
+      "FT_Cost",
+      "TF_Cost",
+      "Shape.STLength()",
+      "ANOMALY",
+      "L_PARITY",
+      "R_PARITY"
+    ],
+    "fields": [
+      {
+        "alias": "Shape",
+        "name": "Shape",
+        "type": "esriFieldTypeGeometry"
+      },
+      {
+        "alias": "OBJECTID",
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "Segment ID",
+        "name": "SEGID",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "From Left",
+        "name": "fromleft",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "To Left",
+        "name": "toleft",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "From Right",
+        "name": "fromright",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "To Right",
+        "name": "toright",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Full Street Name",
+        "name": "street",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Prefix Direction",
+        "name": "direction",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Street Name",
+        "name": "plainst",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Street Type",
+        "name": "streettype",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Suffix Direction",
+        "name": "postdirect",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "City Left",
+        "name": "CityLeft",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "City Right",
+        "name": "CityRight",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "State Left",
+        "name": "StateLeft",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "State Right",
+        "name": "StateRight",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Zip Left",
+        "name": "ZipLeft",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Zip Right",
+        "name": "ZipRight",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Parity Left",
+        "name": "ParityLeft",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Parity Right",
+        "name": "ParityRight",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Name ID",
+        "name": "NameID",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Speed Limit",
+        "name": "Speed",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Oneway",
+        "name": "Oneway",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "From-To Cost",
+        "name": "FT_Cost",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "To-From Cost",
+        "name": "TF_Cost",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "Shape.STLength()",
+        "name": "Shape.STLength()",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "ANOMALY",
+        "name": "ANOMALY",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "L_PARITY",
+        "name": "L_PARITY",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "R_PARITY",
+        "name": "R_PARITY",
+        "type": "esriFieldTypeString"
+      }
+    ],
+    "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/45",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPolyline",
+    "inspected_at": "2026-06-13T15:17:59.934042+00:00",
+    "jurisdiction_or_maintenance_field_candidates": [
+      "StateLeft",
+      "StateRight"
+    ],
+    "layer_id": 45,
+    "layer_name": "Streets Centerline",
+    "limitations": [],
+    "prediction_feature_role": "fallback_or_comparison_road_accessibility_candidate",
+    "query_supported": true,
+    "readiness_classification": "ready_for_basic_accessibility_features",
+    "record_count": 14455,
+    "road_name_field_candidates": [
+      "street",
+      "streettype",
+      "NameID"
+    ],
+    "route_or_road_class_field_candidates": [
+      "streettype"
+    ],
+    "sample_features": [
+      {
+        "ANOMALY": null,
+        "CityLeft": "KANNAPOLIS",
+        "CityRight": "KANNAPOLIS",
+        "FT_Cost": 0.11872575,
+        "L_PARITY": null,
+        "NameID": 3825,
+        "OBJECTID": 2,
+        "Oneway": "B",
+        "ParityLeft": "O",
+        "ParityRight": "E",
+        "R_PARITY": null,
+        "SEGID": 14979,
+        "Shape.STLength()": 365.67456678424765,
+        "Speed": 35,
+        "StateLeft": "NC",
+        "StateRight": "NC",
+        "TF_Cost": 0.11872575,
+        "ZipLeft": 28083,
+        "ZipRight": 28083,
+        "direction": null,
+        "fromleft": 851,
+        "fromright": 850,
+        "plainst": "SEARS",
+        "postdirect": null,
+        "street": "SEARS ST",
+        "streettype": "ST",
+        "toleft": 879,
+        "toright": 878
+      },
+      {
+        "ANOMALY": null,
+        "CityLeft": "CONCORD",
+        "CityRight": "CONCORD",
+        "FT_Cost": 0.16947991,
+        "L_PARITY": null,
+        "NameID": 1528,
+        "OBJECTID": 4,
+        "Oneway": "B",
+        "ParityLeft": "O",
+        "ParityRight": "E",
+        "R_PARITY": null,
+        "SEGID": 7825,
+        "Shape.STLength()": 521.9970853934067,
+        "Speed": 35,
+        "StateLeft": "NC",
+        "StateRight": "NC",
+        "TF_Cost": 0.16947991,
+        "ZipLeft": 28027,
+        "ZipRight": 28027,
+        "direction": null,
+        "fromleft": 1,
+        "fromright": 0,
+        "plainst": "ERWIN",
+        "postdirect": "SW",
+        "street": "ERWIN ST SW",
+        "streettype": "ST",
+        "toleft": 99,
+        "toright": 100
+      },
+      {
+        "ANOMALY": "",
+        "CityLeft": "CHARLOTTE",
+        "CityRight": "CHARLOTTE",
+        "FT_Cost": 0.24333493,
+        "L_PARITY": null,
+        "NameID": 2541,
+        "OBJECTID": 5,
+        "Oneway": "B",
+        "ParityLeft": "O",
+        "ParityRight": "E",
+        "R_PARITY": null,
+        "SEGID": 13560,
+        "Shape.STLength()": 535.3357731588659,
+        "Speed": 25,
+        "StateLeft": "NC",
+        "StateRight": "NC",
+        "TF_Cost": 0.24333493,
+        "ZipLeft": 28269,
+        "ZipRight": 28269,
+        "direction": "",
+        "fromleft": 1815,
+        "fromright": 1814,
+        "plainst": "LAVETA",
+        "postdirect": "",
+        "street": "LAVETA RD",
+        "streettype": "RD",
+        "toleft": 1837,
+        "toright": 1838
+      }
+    ],
+    "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+    "source_key": "opendata_streets_centerline_legacy",
+    "source_name": "Legacy Opendata Streets Centerline",
+    "source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_status": "available",
+    "source_type": "road_centerline",
+    "spatial_reference": null,
+    "speed_or_route_type_field_candidates": [
+      "streettype",
+      "Speed"
+    ],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "useful_for_accessibility_modeling": true
+  },
+  {
+    "current_or_historical": "current_context",
+    "extent": {
+      "spatialReference": {
+        "falseM": -100000,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "falseZ": 0,
+        "latestWkid": 2264,
+        "mTolerance": 2,
+        "mUnits": 10000,
+        "wkid": 102719,
+        "xyTolerance": 0.0029802322429328676,
+        "xyUnits": 33059835.262158718,
+        "zTolerance": 2,
+        "zUnits": 1
+      },
+      "xmax": 1526834.6472552568,
+      "xmin": 1497172.7030777931,
+      "ymax": 645930.0351970941,
+      "ymin": 573186.9761457592
+    },
+    "fallback_urls": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "field_names": [
+      "OBJECTID_1",
+      "OBJECTID",
+      "Trk_Type",
+      "Rail_Line",
+      "Trk_SubTyp",
+      "Orig_CL",
+      "Shape",
+      "Shape.STLength()"
+    ],
+    "fields": [
+      {
+        "alias": "OBJECTID_1",
+        "name": "OBJECTID_1",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "OBJECTID",
+        "name": "OBJECTID",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "Trk_Type",
+        "name": "Trk_Type",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Rail_Line",
+        "name": "Rail_Line",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Trk_SubTyp",
+        "name": "Trk_SubTyp",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Orig_CL",
+        "name": "Orig_CL",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Shape",
+        "name": "Shape",
+        "type": "esriFieldTypeGeometry"
+      },
+      {
+        "alias": "Shape.STLength()",
+        "name": "Shape.STLength()",
+        "type": "esriFieldTypeDouble"
+      }
+    ],
+    "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/43",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPolyline",
+    "inspected_at": "2026-06-13T15:18:00.283846+00:00",
+    "jurisdiction_or_maintenance_field_candidates": [],
+    "layer_id": 43,
+    "layer_name": "NC Railroad Centerline",
+    "limitations": [],
+    "prediction_feature_role": "rail_proximity_candidate",
+    "query_supported": true,
+    "readiness_classification": "ready_for_basic_accessibility_features",
+    "record_count": 63,
+    "road_name_field_candidates": [],
+    "route_or_road_class_field_candidates": [
+      "Trk_Type"
+    ],
+    "sample_features": [
+      {
+        "OBJECTID": 4362.0,
+        "OBJECTID_1": 1,
+        "Orig_CL": " ",
+        "Rail_Line": "m",
+        "Shape.STLength()": 506.94422616409355,
+        "Trk_SubTyp": "Industry",
+        "Trk_Type": "Spur"
+      },
+      {
+        "OBJECTID": 4363.0,
+        "OBJECTID_1": 2,
+        "Orig_CL": " ",
+        "Rail_Line": "m",
+        "Shape.STLength()": 1205.7528109538232,
+        "Trk_SubTyp": "Industry",
+        "Trk_Type": "Spur"
+      },
+      {
+        "OBJECTID": 4521.0,
+        "OBJECTID_1": 3,
+        "Orig_CL": " ",
+        "Rail_Line": "m",
+        "Shape.STLength()": 801.7640849999684,
+        "Trk_SubTyp": "Industry",
+        "Trk_Type": "Spur"
+      }
+    ],
+    "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+    "source_key": "opendata_nc_railroad_centerline_legacy",
+    "source_name": "NC Railroad Centerline",
+    "source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_status": "available",
+    "source_type": "rail_centerline",
+    "spatial_reference": null,
+    "speed_or_route_type_field_candidates": [
+      "Trk_Type"
+    ],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "useful_for_accessibility_modeling": true
+  },
+  {
+    "current_or_historical": "current_context",
+    "extent": {
+      "spatialReference": {
+        "falseM": -100000,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "falseZ": 0,
+        "latestWkid": 2264,
+        "mTolerance": 2,
+        "mUnits": 10000,
+        "wkid": 102719,
+        "xyTolerance": 0.0029802322429328676,
+        "xyUnits": 33059835.262158718,
+        "zTolerance": 2,
+        "zUnits": 1
+      },
+      "xmax": 1526934.3546502441,
+      "xmin": 1497234.3346531093,
+      "ymax": 643450.1496750712,
+      "ymin": 573001.9387412071
+    },
+    "fallback_urls": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "field_names": [
+      "OBJECTID",
+      "Name",
+      "Address",
+      "City",
+      "State",
+      "ZIP",
+      "Website",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "fields": [
+      {
+        "alias": "OBJECTID",
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "Name",
+        "name": "Name",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Address",
+        "name": "Address",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "City",
+        "name": "City",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "State",
+        "name": "State",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "ZIP",
+        "name": "ZIP",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Website",
+        "name": "Website",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Shape",
+        "name": "Shape",
+        "type": "esriFieldTypeGeometry"
+      },
+      {
+        "alias": "Shape.STArea()",
+        "name": "Shape.STArea()",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "Shape.STLength()",
+        "name": "Shape.STLength()",
+        "type": "esriFieldTypeDouble"
+      }
+    ],
+    "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/44",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPolygon",
+    "inspected_at": "2026-06-13T15:18:00.542426+00:00",
+    "jurisdiction_or_maintenance_field_candidates": [
+      "State"
+    ],
+    "layer_id": 44,
+    "layer_name": "NC Railroad Corridor",
+    "limitations": [],
+    "prediction_feature_role": "rail_corridor_proximity_candidate",
+    "query_supported": true,
+    "readiness_classification": "ready_for_basic_accessibility_features",
+    "record_count": 1,
+    "road_name_field_candidates": [
+      "Name"
+    ],
+    "route_or_road_class_field_candidates": [],
+    "sample_features": [
+      {
+        "Address": "2809 Highwoods Blvd., Suite 100",
+        "City": "Raleigh",
+        "Name": "NCRR Corridor Line",
+        "OBJECTID": 1,
+        "Shape.STArea()": 20148396.146522056,
+        "Shape.STLength()": 188892.90940540726,
+        "State": "NC",
+        "Website": "www.ncrr.com",
+        "ZIP": "27529"
+      }
+    ],
+    "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+    "source_key": "opendata_nc_railroad_corridor_legacy",
+    "source_name": "NC Railroad Corridor",
+    "source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_status": "available",
+    "source_type": "rail_corridor",
+    "spatial_reference": null,
+    "speed_or_route_type_field_candidates": [],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "useful_for_accessibility_modeling": true
+  },
+  {
+    "current_or_historical": "current_context",
+    "extent": {
+      "spatialReference": {
+        "falseM": -100000,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "falseZ": 0,
+        "latestWkid": 2264,
+        "mTolerance": 2,
+        "mUnits": 10000,
+        "wkid": 102719,
+        "xyTolerance": 0.0029802322429328676,
+        "xyUnits": 33059835.262158718,
+        "zTolerance": 2,
+        "zUnits": 1
+      },
+      "xmax": 1579714.416684184,
+      "xmin": 1471323.4713366118,
+      "ymax": 658884.2609788537,
+      "ymin": 527990.4387816654
+    },
+    "fallback_urls": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "field_names": [
+      "SHAPE",
+      "OBJECTID",
+      "DISTRICT",
+      "LASTEDITORNAME",
+      "LASTEDITORDATE",
+      "SHAPE.STArea()",
+      "SHAPE.STLength()"
+    ],
+    "fields": [
+      {
+        "alias": "Shape",
+        "name": "SHAPE",
+        "type": "esriFieldTypeGeometry"
+      },
+      {
+        "alias": "OBJECTID",
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "DISTRICT",
+        "name": "DISTRICT",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "LASTEDITORNAME",
+        "name": "LASTEDITORNAME",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "LASTEDITORDATE",
+        "name": "LASTEDITORDATE",
+        "type": "esriFieldTypeDate"
+      },
+      {
+        "alias": "SHAPE.STArea()",
+        "name": "SHAPE.STArea()",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "SHAPE.STLength()",
+        "name": "SHAPE.STLength()",
+        "type": "esriFieldTypeDouble"
+      }
+    ],
+    "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/0",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPolygon",
+    "inspected_at": "2026-06-13T15:18:00.878601+00:00",
+    "jurisdiction_or_maintenance_field_candidates": [],
+    "layer_id": 0,
+    "layer_name": "Municipal District",
+    "limitations": [
+      "context layer only; not a transportation feature source"
+    ],
+    "prediction_feature_role": "context_inventory_only",
+    "query_supported": true,
+    "readiness_classification": "inventory_only_not_ready",
+    "record_count": 147,
+    "road_name_field_candidates": [
+      "LASTEDITORNAME"
+    ],
+    "route_or_road_class_field_candidates": [],
+    "sample_features": [
+      {
+        "DISTRICT": "CITY OF CONCORD",
+        "LASTEDITORDATE": 1706647683000,
+        "LASTEDITORNAME": "HDPELFREY",
+        "OBJECTID": 203046,
+        "SHAPE.STArea()": 38592.12515013895,
+        "SHAPE.STLength()": 796.348514708016
+      },
+      {
+        "DISTRICT": "CITY OF CONCORD",
+        "LASTEDITORDATE": 1706647683000,
+        "LASTEDITORNAME": "HDPELFREY",
+        "OBJECTID": 203047,
+        "SHAPE.STArea()": 35467.64004964369,
+        "SHAPE.STLength()": 761.6369191927578
+      },
+      {
+        "DISTRICT": "CITY OF CONCORD",
+        "LASTEDITORDATE": 1706647683000,
+        "LASTEDITORNAME": "HDPELFREY",
+        "OBJECTID": 203048,
+        "SHAPE.STArea()": 51712.71347485996,
+        "SHAPE.STLength()": 1051.1312634584222
+      }
+    ],
+    "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+    "source_key": "opendata_municipal_district_context",
+    "source_name": "Municipal District",
+    "source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_status": "available",
+    "source_type": "context_boundary",
+    "spatial_reference": null,
+    "speed_or_route_type_field_candidates": [],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "useful_for_accessibility_modeling": false
+  },
+  {
+    "current_or_historical": "current_context",
+    "extent": {
+      "spatialReference": {
+        "falseM": -100000,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "falseZ": 0,
+        "latestWkid": 2264,
+        "mTolerance": 2,
+        "mUnits": 10000,
+        "wkid": 102719,
+        "xyTolerance": 0.0029802322429328676,
+        "xyUnits": 33059835.262158718,
+        "zTolerance": 2,
+        "zUnits": 1
+      },
+      "xmax": 1614463.6504554148,
+      "xmin": 1468082.5000648608,
+      "ymax": 644129.670566129,
+      "ymin": 525664.1574096831
+    },
+    "fallback_urls": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "field_names": [
+      "SHAPE",
+      "OBJECTID",
+      "NAME",
+      "LASTEDITORNAME",
+      "LASTEDITDATE",
+      "SHAPE.STArea()",
+      "SHAPE.STLength()"
+    ],
+    "fields": [
+      {
+        "alias": "Shape",
+        "name": "SHAPE",
+        "type": "esriFieldTypeGeometry"
+      },
+      {
+        "alias": "OBJECTID",
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "NAME",
+        "name": "NAME",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "LASTEDITORNAME",
+        "name": "LASTEDITORNAME",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "LASTEDITDATE",
+        "name": "LASTEDITDATE",
+        "type": "esriFieldTypeDate"
+      },
+      {
+        "alias": "SHAPE.STArea()",
+        "name": "SHAPE.STArea()",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "SHAPE.STLength()",
+        "name": "SHAPE.STLength()",
+        "type": "esriFieldTypeDouble"
+      }
+    ],
+    "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/1",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPolygon",
+    "inspected_at": "2026-06-13T15:18:01.129620+00:00",
+    "jurisdiction_or_maintenance_field_candidates": [],
+    "layer_id": 1,
+    "layer_name": "Cabarrus County",
+    "limitations": [
+      "context layer only; not a transportation feature source"
+    ],
+    "prediction_feature_role": "study_area_context_inventory_only",
+    "query_supported": true,
+    "readiness_classification": "inventory_only_not_ready",
+    "record_count": 1,
+    "road_name_field_candidates": [
+      "NAME",
+      "LASTEDITORNAME"
+    ],
+    "route_or_road_class_field_candidates": [],
+    "sample_features": [
+      {
+        "LASTEDITDATE": null,
+        "LASTEDITORNAME": null,
+        "NAME": "Cabarrus",
+        "OBJECTID": 4142,
+        "SHAPE.STArea()": 10153001992.342304,
+        "SHAPE.STLength()": 442440.64327639935
+      }
+    ],
+    "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+    "source_key": "opendata_cabarrus_county_boundary_context",
+    "source_name": "Cabarrus County Boundary",
+    "source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+    "source_status": "available",
+    "source_type": "context_boundary",
+    "spatial_reference": null,
+    "speed_or_route_type_field_candidates": [],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "useful_for_accessibility_modeling": false
+  }
+]

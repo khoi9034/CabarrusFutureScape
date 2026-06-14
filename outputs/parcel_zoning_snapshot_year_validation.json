@@ -1,0 +1,972 @@
+{
+  "created_at": "2026-06-13T09:46:01.548650+00:00",
+  "start_year": 2005,
+  "end_year": 2026,
+  "parcel_count": 110017,
+  "snapshot_year_count": 22,
+  "expected_row_count": 2420374,
+  "row_count": 2420374,
+  "row_count_matches_expected": true,
+  "coverage_by_year": [
+    {
+      "snapshot_year": 2005,
+      "row_count": 110017,
+      "zoning_known_count": 109807,
+      "zoning_unknown_count": 210,
+      "exact_year_count": 109807,
+      "prior_available_year_count": 0,
+      "unavailable_count": 210,
+      "review_required_count": 1502
+    },
+    {
+      "snapshot_year": 2006,
+      "row_count": 110017,
+      "zoning_known_count": 109807,
+      "zoning_unknown_count": 210,
+      "exact_year_count": 109807,
+      "prior_available_year_count": 0,
+      "unavailable_count": 210,
+      "review_required_count": 1541
+    },
+    {
+      "snapshot_year": 2007,
+      "row_count": 110017,
+      "zoning_known_count": 107652,
+      "zoning_unknown_count": 2365,
+      "exact_year_count": 107652,
+      "prior_available_year_count": 0,
+      "unavailable_count": 2365,
+      "review_required_count": 3785
+    },
+    {
+      "snapshot_year": 2008,
+      "row_count": 110017,
+      "zoning_known_count": 106955,
+      "zoning_unknown_count": 3062,
+      "exact_year_count": 43613,
+      "prior_available_year_count": 63342,
+      "unavailable_count": 3062,
+      "review_required_count": 4525
+    },
+    {
+      "snapshot_year": 2009,
+      "row_count": 110017,
+      "zoning_known_count": 108974,
+      "zoning_unknown_count": 1043,
+      "exact_year_count": 83319,
+      "prior_available_year_count": 25655,
+      "unavailable_count": 1043,
+      "review_required_count": 2357
+    },
+    {
+      "snapshot_year": 2010,
+      "row_count": 110017,
+      "zoning_known_count": 109954,
+      "zoning_unknown_count": 63,
+      "exact_year_count": 109954,
+      "prior_available_year_count": 0,
+      "unavailable_count": 63,
+      "review_required_count": 1208
+    },
+    {
+      "snapshot_year": 2011,
+      "row_count": 110017,
+      "zoning_known_count": 109947,
+      "zoning_unknown_count": 70,
+      "exact_year_count": 109947,
+      "prior_available_year_count": 0,
+      "unavailable_count": 70,
+      "review_required_count": 1137
+    },
+    {
+      "snapshot_year": 2012,
+      "row_count": 110017,
+      "zoning_known_count": 109948,
+      "zoning_unknown_count": 69,
+      "exact_year_count": 109948,
+      "prior_available_year_count": 0,
+      "unavailable_count": 69,
+      "review_required_count": 1103
+    },
+    {
+      "snapshot_year": 2013,
+      "row_count": 110017,
+      "zoning_known_count": 109948,
+      "zoning_unknown_count": 69,
+      "exact_year_count": 76158,
+      "prior_available_year_count": 33790,
+      "unavailable_count": 69,
+      "review_required_count": 1106
+    },
+    {
+      "snapshot_year": 2014,
+      "row_count": 110017,
+      "zoning_known_count": 109942,
+      "zoning_unknown_count": 75,
+      "exact_year_count": 109942,
+      "prior_available_year_count": 0,
+      "unavailable_count": 75,
+      "review_required_count": 1088
+    },
+    {
+      "snapshot_year": 2015,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 109941,
+      "prior_available_year_count": 0,
+      "unavailable_count": 76,
+      "review_required_count": 1089
+    },
+    {
+      "snapshot_year": 2016,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 1089
+    },
+    {
+      "snapshot_year": 2017,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 1089
+    },
+    {
+      "snapshot_year": 2018,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 1089
+    },
+    {
+      "snapshot_year": 2019,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 1089
+    },
+    {
+      "snapshot_year": 2020,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 1089
+    },
+    {
+      "snapshot_year": 2021,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 110017
+    },
+    {
+      "snapshot_year": 2022,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 110017
+    },
+    {
+      "snapshot_year": 2023,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 110017
+    },
+    {
+      "snapshot_year": 2024,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 110017
+    },
+    {
+      "snapshot_year": 2025,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 110017
+    },
+    {
+      "snapshot_year": 2026,
+      "row_count": 110017,
+      "zoning_known_count": 109941,
+      "zoning_unknown_count": 76,
+      "exact_year_count": 0,
+      "prior_available_year_count": 109941,
+      "unavailable_count": 76,
+      "review_required_count": 110017
+    }
+  ],
+  "temporal_distribution": [
+    {
+      "temporal_status": "prior_available_year",
+      "row_count": 1332138
+    },
+    {
+      "temporal_status": "exact_year",
+      "row_count": 1080088
+    },
+    {
+      "temporal_status": "unavailable",
+      "row_count": 8148
+    }
+  ],
+  "zoning_source_age_years_distribution": [
+    {
+      "zoning_source_age_years": 0,
+      "row_count": 1080088
+    },
+    {
+      "zoning_source_age_years": 1,
+      "row_count": 207073
+    },
+    {
+      "zoning_source_age_years": 2,
+      "row_count": 135596
+    },
+    {
+      "zoning_source_age_years": 3,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 4,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 5,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 6,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 7,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 8,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 9,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 10,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": 11,
+      "row_count": 109941
+    },
+    {
+      "zoning_source_age_years": null,
+      "row_count": 8148
+    }
+  ],
+  "zoning_assignment_quality_distribution": [
+    {
+      "zoning_assignment_quality": "high",
+      "row_count": 2326071
+    },
+    {
+      "zoning_assignment_quality": "medium",
+      "row_count": 61883
+    },
+    {
+      "zoning_assignment_quality": "low",
+      "row_count": 24272
+    },
+    {
+      "zoning_assignment_quality": "no_match",
+      "row_count": 8148
+    }
+  ],
+  "snapshot_by_jurisdiction": [
+    {
+      "snapshot_year": 2005,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 48403
+    },
+    {
+      "snapshot_year": 2005,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 36123
+    },
+    {
+      "snapshot_year": 2005,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 25281
+    },
+    {
+      "snapshot_year": 2006,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 46525
+    },
+    {
+      "snapshot_year": 2006,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 37628
+    },
+    {
+      "snapshot_year": 2006,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 25654
+    },
+    {
+      "snapshot_year": 2007,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 44310
+    },
+    {
+      "snapshot_year": 2007,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 37687
+    },
+    {
+      "snapshot_year": 2007,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 25655
+    },
+    {
+      "snapshot_year": 2008,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 43613
+    },
+    {
+      "snapshot_year": 2008,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 37687
+    },
+    {
+      "snapshot_year": 2008,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 25655
+    },
+    {
+      "snapshot_year": 2009,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 43203
+    },
+    {
+      "snapshot_year": 2009,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 40116
+    },
+    {
+      "snapshot_year": 2009,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 25655
+    },
+    {
+      "snapshot_year": 2010,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 42852
+    },
+    {
+      "snapshot_year": 2010,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 40767
+    },
+    {
+      "snapshot_year": 2010,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26335
+    },
+    {
+      "snapshot_year": 2011,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 40768
+    },
+    {
+      "snapshot_year": 2011,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 30126
+    },
+    {
+      "snapshot_year": 2011,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26332
+    },
+    {
+      "snapshot_year": 2011,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 7490
+    },
+    {
+      "snapshot_year": 2011,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2986
+    },
+    {
+      "snapshot_year": 2011,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2011,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 580
+    },
+    {
+      "snapshot_year": 2012,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 40843
+    },
+    {
+      "snapshot_year": 2012,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 29125
+    },
+    {
+      "snapshot_year": 2012,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26331
+    },
+    {
+      "snapshot_year": 2012,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 8411
+    },
+    {
+      "snapshot_year": 2012,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2992
+    },
+    {
+      "snapshot_year": 2012,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1666
+    },
+    {
+      "snapshot_year": 2012,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 580
+    },
+    {
+      "snapshot_year": 2013,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41414
+    },
+    {
+      "snapshot_year": 2013,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 28552
+    },
+    {
+      "snapshot_year": 2013,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26332
+    },
+    {
+      "snapshot_year": 2013,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 8412
+    },
+    {
+      "snapshot_year": 2013,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2992
+    },
+    {
+      "snapshot_year": 2013,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1666
+    },
+    {
+      "snapshot_year": 2013,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 580
+    },
+    {
+      "snapshot_year": 2014,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41485
+    },
+    {
+      "snapshot_year": 2014,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27711
+    },
+    {
+      "snapshot_year": 2014,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26412
+    },
+    {
+      "snapshot_year": 2014,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9095
+    },
+    {
+      "snapshot_year": 2014,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2996
+    },
+    {
+      "snapshot_year": 2014,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2014,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2015,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2015,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2015,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2015,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2015,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2015,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2015,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2016,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2016,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2016,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2016,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2016,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2016,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2016,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2017,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2017,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2017,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2017,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2017,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2017,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2017,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2018,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2018,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2018,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2018,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2018,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2018,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2018,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2019,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2019,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2019,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2019,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2019,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2019,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2019,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2020,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2020,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2020,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2020,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2020,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2020,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2020,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2021,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2021,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2021,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2021,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2021,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2021,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2021,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2022,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2022,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2022,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2022,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2022,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2022,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2022,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2023,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2023,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2023,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2023,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2023,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2023,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2023,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2024,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2024,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2024,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2024,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2024,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2024,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2024,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2025,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2025,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2025,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2025,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2025,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2025,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2025,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    },
+    {
+      "snapshot_year": 2026,
+      "zoning_jurisdiction": "Concord",
+      "parcel_count": 41494
+    },
+    {
+      "snapshot_year": 2026,
+      "zoning_jurisdiction": "Cabarrus County / Unincorporated",
+      "parcel_count": 27628
+    },
+    {
+      "snapshot_year": 2026,
+      "zoning_jurisdiction": "Kannapolis",
+      "parcel_count": 26413
+    },
+    {
+      "snapshot_year": 2026,
+      "zoning_jurisdiction": "Harrisburg",
+      "parcel_count": 9165
+    },
+    {
+      "snapshot_year": 2026,
+      "zoning_jurisdiction": "Midland",
+      "parcel_count": 2998
+    },
+    {
+      "snapshot_year": 2026,
+      "zoning_jurisdiction": "Mt. Pleasant",
+      "parcel_count": 1665
+    },
+    {
+      "snapshot_year": 2026,
+      "zoning_jurisdiction": "Locust",
+      "parcel_count": 578
+    }
+  ],
+  "current_context_used": false,
+  "summary_csv": "C:\\CabarrusFutureScape\\outputs\\parcel_zoning_snapshot_year_summary.csv"
+}

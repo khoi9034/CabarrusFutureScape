@@ -16,6 +16,9 @@ from app.schemas import (
     DevelopmentActivitySummaryResponse,
     DevelopmentHotspotsResponse,
     DevelopmentParcelPermitEventsResponse,
+    DevelopmentPredictionRankingSummaryResponse,
+    DevelopmentPredictionTransportationAccessibilitySummaryResponse,
+    DevelopmentPredictionTransportationPlanTrafficSummaryResponse,
     DevelopmentStatisticsResponse,
     DevelopmentTemporalQueryResponse,
     DevelopmentTrendsResponse,
@@ -54,6 +57,12 @@ from app.schemas.development import (
     DevelopmentRollingSummary,
     DevelopmentPredictionFeatureLabelRate,
     DevelopmentPredictionFeatureMissingness,
+    DevelopmentPredictionRankingClassBucket,
+    TransportationAccessibilityDistanceSummary,
+    TransportationAccessibilityMissingness,
+    TransportationAccessibilityQualityBucket,
+    TransportationPlanTrafficDistributionMetric,
+    TransportationPlanTrafficQualityBucket,
     DevelopmentStatisticsBucket,
     DevelopmentTrendDateRange,
     DevelopmentTrendPoint,
@@ -88,6 +97,8 @@ DEVELOPMENT_PREDICTION_FEATURE_GROUPS = [
     "permit_history_features",
     "new_construction_history_features",
     "development_pressure_features",
+    "transportation_accessibility_features",
+    "transportation_plan_traffic_features",
     "jurisdiction_features",
     "future_placeholder_features",
 ]
@@ -97,6 +108,7 @@ DEVELOPMENT_PREDICTION_LEAKAGE_CAVEATS = [
     "Prior permit and new-construction windows are filtered to snapshot-year end.",
     "Current zoning, flood, school, valuation, and dashboard activity fields are current-context features unless historical snapshots are added.",
     "Official school capacity scoring is not active.",
+    "Transportation/accessibility features are current-context until historical roads or dated project records exist.",
 ]
 DEVELOPMENT_MODEL_METRICS_PATH = (
     Path(__file__).resolve().parents[3]
@@ -104,6 +116,32 @@ DEVELOPMENT_MODEL_METRICS_PATH = (
     / "modeling"
     / "development_prediction"
     / "phase10c_model_metrics.json"
+)
+DEVELOPMENT_ZONING_MODEL_METRICS_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "outputs"
+    / "modeling"
+    / "development_prediction"
+    / "phase10e_model_comparison_metrics.json"
+)
+DEVELOPMENT_MODEL_QA_SUMMARY_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "outputs"
+    / "phase10f_development_prediction_model_qa_summary.json"
+)
+DEVELOPMENT_MODEL_STANDARDIZED_METRICS_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "outputs"
+    / "modeling"
+    / "development_prediction"
+    / "phase10f_standardized_model_comparison_metrics.json"
+)
+DEVELOPMENT_MODEL_CALIBRATION_REVIEW_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "outputs"
+    / "modeling"
+    / "development_prediction"
+    / "phase10f_calibration_review.json"
 )
 
 
@@ -887,7 +925,200 @@ class DevelopmentService:
             metrics_summary=development_model_metrics_summary(
                 record.get("latest_experiment_id"),
             ),
+            zoning_enhanced_feature_matrix_available=bool(
+                record.get("zoning_enhanced_feature_matrix_available"),
+            ),
+            zoning_enhanced_row_count=int(
+                record.get("zoning_enhanced_row_count") or 0,
+            ),
+            zoning_enhanced_model_experiment_available=bool(
+                record.get("zoning_enhanced_model_experiment_available"),
+            ),
+            latest_zoning_enhanced_experiment_id=record.get(
+                "latest_zoning_enhanced_experiment_id",
+            ),
+            baseline_vs_zoning_metrics_summary=development_zoning_metrics_summary(
+                record.get("latest_zoning_enhanced_experiment_id"),
+            ),
+            transportation_enhanced_feature_matrix_available=bool(
+                record.get("transportation_enhanced_feature_matrix_available"),
+            ),
+            transportation_enhanced_row_count=int(
+                record.get("transportation_enhanced_row_count") or 0,
+            ),
+            transportation_enhanced_model_experiment_available=bool(
+                record.get("transportation_enhanced_model_experiment_available"),
+            ),
+            latest_transportation_experiment_id=record.get(
+                "latest_transportation_experiment_id",
+            ),
+            transportation_experiment_current_context_only=bool(
+                record.get("transportation_experiment_current_context_only", True),
+            ),
+            latest_model_qa_available=DEVELOPMENT_MODEL_QA_SUMMARY_PATH.exists(),
+            latest_model_qa_id=development_model_qa_id(),
+            standardized_metrics_available=DEVELOPMENT_MODEL_STANDARDIZED_METRICS_PATH.exists(),
+            calibration_review_available=DEVELOPMENT_MODEL_CALIBRATION_REVIEW_PATH.exists(),
             production_ready=bool(record.get("production_ready")),
+            model_active=False,
+            prediction_probability_available=False,
+        )
+
+    def get_prediction_ranking_summary(
+        self,
+    ) -> DevelopmentPredictionRankingSummaryResponse:
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for prediction ranking summary.",
+            )
+
+        record = self.repository.get_prediction_ranking_summary()
+        return DevelopmentPredictionRankingSummaryResponse(
+            ranking_available=bool(record.get("ranking_available")),
+            experiment_id=record.get("experiment_id"),
+            ranking_row_count=int(record.get("ranking_row_count") or 0),
+            unique_parcel_count=int(record.get("unique_parcel_count") or 0),
+            class_distribution=[
+                DevelopmentPredictionRankingClassBucket(
+                    development_signal_class=str(row["development_signal_class"]),
+                    row_count=int(row.get("row_count") or 0),
+                    pct_of_rows=float(row.get("pct_of_rows") or 0),
+                )
+                for row in (record.get("class_distribution") or [])
+            ],
+            explanation_available=bool(record.get("explanation_available")),
+            explanation_row_count=int(record.get("explanation_row_count") or 0),
+            calibration_status=development_model_calibration_status(),
+            production_ready=False,
+            public_exposure_allowed=False,
+            prediction_probability_available=False,
+            exact_probabilities_exposed=False,
+            caveat="internal_ranking_research_not_for_public_decision",
+            no_parcel_level_scores=True,
+        )
+
+    def get_transportation_accessibility_summary(
+        self,
+    ) -> DevelopmentPredictionTransportationAccessibilitySummaryResponse:
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for transportation accessibility summary.",
+            )
+
+        record = self.repository.get_transportation_accessibility_summary()
+        return DevelopmentPredictionTransportationAccessibilitySummaryResponse(
+            feature_table_available=bool(record.get("feature_table_available")),
+            row_count=int(record.get("row_count") or 0),
+            unique_parcel_count=int(record.get("unique_parcel_count") or 0),
+            expected_parcel_count=int(record.get("expected_parcel_count") or 0),
+            row_count_matches_parcels=bool(record.get("row_count_matches_parcels")),
+            road_clean_rows=int(record.get("road_clean_rows") or 0),
+            rail_clean_rows=int(record.get("rail_clean_rows") or 0),
+            rail_corridor_within_half_mile_count=int(
+                record.get("rail_corridor_within_half_mile_count") or 0,
+            ),
+            missing_major_road_classification_count=int(
+                record.get("missing_major_road_classification_count") or 0,
+            ),
+            distance_summary=[
+                TransportationAccessibilityDistanceSummary(
+                    metric_name=str(row["metric_name"]),
+                    non_null_count=int(row.get("non_null_count") or 0),
+                    min_ft=float(row["min_ft"]) if row.get("min_ft") is not None else None,
+                    p25_ft=float(row["p25_ft"]) if row.get("p25_ft") is not None else None,
+                    median_ft=float(row["median_ft"]) if row.get("median_ft") is not None else None,
+                    p75_ft=float(row["p75_ft"]) if row.get("p75_ft") is not None else None,
+                    p90_ft=float(row["p90_ft"]) if row.get("p90_ft") is not None else None,
+                    max_ft=float(row["max_ft"]) if row.get("max_ft") is not None else None,
+                    avg_ft=float(row["avg_ft"]) if row.get("avg_ft") is not None else None,
+                )
+                for row in (record.get("distance_summary") or [])
+            ],
+            missingness_summary=[
+                TransportationAccessibilityMissingness(
+                    feature_name=str(row["feature_name"]),
+                    missing_count=int(row.get("missing_count") or 0),
+                    missing_pct=float(row.get("missing_pct") or 0),
+                )
+                for row in (record.get("missingness_summary") or [])
+            ],
+            data_quality_distribution=[
+                TransportationAccessibilityQualityBucket(
+                    transportation_accessibility_data_quality=str(
+                        row["transportation_accessibility_data_quality"],
+                    ),
+                    row_count=int(row.get("row_count") or 0),
+                )
+                for row in (record.get("data_quality_distribution") or [])
+            ],
+            current_context_only=True,
+            model_active=False,
+            prediction_probability_available=False,
+        )
+
+    def get_transportation_plan_traffic_summary(
+        self,
+    ) -> DevelopmentPredictionTransportationPlanTrafficSummaryResponse:
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for transportation plan/traffic summary.",
+            )
+
+        record = self.repository.get_transportation_plan_traffic_summary()
+        return DevelopmentPredictionTransportationPlanTrafficSummaryResponse(
+            feature_table_available=bool(record.get("feature_table_available")),
+            row_count=int(record.get("row_count") or 0),
+            unique_parcel_count=int(record.get("unique_parcel_count") or 0),
+            expected_parcel_count=int(record.get("expected_parcel_count") or 0),
+            row_count_matches_parcels=bool(record.get("row_count_matches_parcels")),
+            stip_clean_rows=int(record.get("stip_clean_rows") or 0),
+            aadt_clean_rows=int(record.get("aadt_clean_rows") or 0),
+            stip_project_within_half_mile_count=int(
+                record.get("stip_project_within_half_mile_count") or 0,
+            ),
+            stip_project_within_1_mile_count=int(
+                record.get("stip_project_within_1_mile_count") or 0,
+            ),
+            planned_transportation_investment_count=int(
+                record.get("planned_transportation_investment_count") or 0,
+            ),
+            current_context_only_count=int(record.get("current_context_only_count") or 0),
+            time_safe_for_training_count=int(
+                record.get("time_safe_for_training_count") or 0,
+            ),
+            distribution_summary=[
+                TransportationPlanTrafficDistributionMetric(
+                    metric_name=str(row["metric_name"]),
+                    metric_unit=str(row["metric_unit"]),
+                    non_null_count=int(row.get("non_null_count") or 0),
+                    min_value=float(row["min_value"]) if row.get("min_value") is not None else None,
+                    p25_value=float(row["p25_value"]) if row.get("p25_value") is not None else None,
+                    median_value=float(row["median_value"]) if row.get("median_value") is not None else None,
+                    p75_value=float(row["p75_value"]) if row.get("p75_value") is not None else None,
+                    p90_value=float(row["p90_value"]) if row.get("p90_value") is not None else None,
+                    max_value=float(row["max_value"]) if row.get("max_value") is not None else None,
+                    avg_value=float(row["avg_value"]) if row.get("avg_value") is not None else None,
+                )
+                for row in (record.get("distribution_summary") or [])
+            ],
+            missingness_summary=[
+                TransportationAccessibilityMissingness(
+                    feature_name=str(row["feature_name"]),
+                    missing_count=int(row.get("missing_count") or 0),
+                    missing_pct=float(row.get("missing_pct") or 0),
+                )
+                for row in (record.get("missingness_summary") or [])
+            ],
+            quality_distribution=[
+                TransportationPlanTrafficQualityBucket(
+                    quality_type=str(row["quality_type"]),
+                    quality=str(row["quality"]),
+                    row_count=int(row.get("row_count") or 0),
+                )
+                for row in (record.get("quality_distribution") or [])
+            ],
+            current_context_only=True,
+            time_safe_for_training=False,
             model_active=False,
             prediction_probability_available=False,
         )
@@ -922,6 +1153,76 @@ def development_model_metrics_summary(
             payload.get("prediction_probability_available"),
         ),
     }
+
+
+def development_zoning_metrics_summary(
+    latest_zoning_experiment_id: object,
+) -> dict[str, object]:
+    if (
+        latest_zoning_experiment_id != "phase10e_zoning_enhanced_v1"
+        or not DEVELOPMENT_ZONING_MODEL_METRICS_PATH.exists()
+    ):
+        return {}
+
+    try:
+        payload = json.loads(
+            DEVELOPMENT_ZONING_MODEL_METRICS_PATH.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+    if payload.get("experiment_id") != latest_zoning_experiment_id:
+        return {}
+
+    retrained_baseline = payload.get("retrained_baseline") or {}
+    zoning_enhanced = payload.get("zoning_enhanced") or {}
+    return {
+        "experiment_id": payload.get("experiment_id"),
+        "target": payload.get("target"),
+        "baseline_best_model_name": retrained_baseline.get("best_model_name"),
+        "zoning_enhanced_best_model_name": zoning_enhanced.get("best_model_name"),
+        "comparison_on_selected_best_models": payload.get(
+            "comparison_on_selected_best_models",
+            {},
+        ),
+        "improvement_meaningful": bool(payload.get("improvement_meaningful")),
+        "zoning_features_appear_important": bool(
+            payload.get("zoning_features_appear_important"),
+        ),
+        "top_zoning_features": payload.get("top_zoning_features", [])[:10],
+        "production_ready": bool(payload.get("production_ready")),
+        "model_active": bool(payload.get("model_active")),
+        "prediction_probability_available": bool(
+            payload.get("prediction_probability_available"),
+        ),
+        "internal_only": True,
+    }
+
+
+def development_model_qa_id() -> str | None:
+    if not DEVELOPMENT_MODEL_QA_SUMMARY_PATH.exists():
+        return None
+
+    try:
+        payload = json.loads(DEVELOPMENT_MODEL_QA_SUMMARY_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    return payload.get("qa_id")
+
+
+def development_model_calibration_status() -> str | None:
+    if not DEVELOPMENT_MODEL_CALIBRATION_REVIEW_PATH.exists():
+        return None
+
+    try:
+        payload = json.loads(
+            DEVELOPMENT_MODEL_CALIBRATION_REVIEW_PATH.read_text(encoding="utf-8"),
+        )
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    return payload.get("calibration_assessment")
 
 
 def normalize_filter_value(value: str | None) -> str | None:

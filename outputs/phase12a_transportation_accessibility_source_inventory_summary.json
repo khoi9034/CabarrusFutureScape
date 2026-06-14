@@ -1,0 +1,228 @@
+{
+  "best_candidate_source": "cabarrus_county_centerlines_dedicated",
+  "best_candidate_source_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+  "current_context_usability": "usable for current-context distance/proximity features after field mapping and geometry QA",
+  "exact_layer_urls_inspected": [
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/45",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/43",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/44",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/0",
+    "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/1"
+  ],
+  "fallback_source_urls": {
+    "cabarrus_county_centerlines_dedicated": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/45",
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "opendata_cabarrus_county_boundary_context": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "opendata_municipal_district_context": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "opendata_nc_railroad_centerline_legacy": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "opendata_nc_railroad_corridor_legacy": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+    ],
+    "opendata_streets_centerline_legacy": [
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+      "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer"
+    ]
+  },
+  "fields_found": {
+    "cabarrus_county_centerlines_dedicated": [
+      "OBJECTID",
+      "SEGID",
+      "fromleft",
+      "toleft",
+      "fromright",
+      "toright",
+      "street",
+      "direction",
+      "plainst",
+      "streettype",
+      "postdirect",
+      "CityLeft",
+      "CityRight",
+      "StateLeft",
+      "StateRight",
+      "ZipLeft",
+      "ZipRight",
+      "ParityLeft",
+      "ParityRight",
+      "Category",
+      "Comments",
+      "key_",
+      "NameID",
+      "Speed",
+      "Oneway",
+      "FT_Cost",
+      "TF_Cost",
+      "F_Elev",
+      "T_Elev",
+      "CreateDate",
+      "CreateUser",
+      "ModifyDate",
+      "ModifyUser",
+      "Shape",
+      "ANOMALY",
+      "L_PARITY",
+      "R_PARITY",
+      "Shape.STLength()"
+    ],
+    "opendata_cabarrus_county_boundary_context": [
+      "SHAPE",
+      "OBJECTID",
+      "NAME",
+      "LASTEDITORNAME",
+      "LASTEDITDATE",
+      "SHAPE.STArea()",
+      "SHAPE.STLength()"
+    ],
+    "opendata_municipal_district_context": [
+      "SHAPE",
+      "OBJECTID",
+      "DISTRICT",
+      "LASTEDITORNAME",
+      "LASTEDITORDATE",
+      "SHAPE.STArea()",
+      "SHAPE.STLength()"
+    ],
+    "opendata_nc_railroad_centerline_legacy": [
+      "OBJECTID_1",
+      "OBJECTID",
+      "Trk_Type",
+      "Rail_Line",
+      "Trk_SubTyp",
+      "Orig_CL",
+      "Shape",
+      "Shape.STLength()"
+    ],
+    "opendata_nc_railroad_corridor_legacy": [
+      "OBJECTID",
+      "Name",
+      "Address",
+      "City",
+      "State",
+      "ZIP",
+      "Website",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "opendata_streets_centerline_legacy": [
+      "Shape",
+      "OBJECTID",
+      "SEGID",
+      "fromleft",
+      "toleft",
+      "fromright",
+      "toright",
+      "street",
+      "direction",
+      "plainst",
+      "streettype",
+      "postdirect",
+      "CityLeft",
+      "CityRight",
+      "StateLeft",
+      "StateRight",
+      "ZipLeft",
+      "ZipRight",
+      "ParityLeft",
+      "ParityRight",
+      "NameID",
+      "Speed",
+      "Oneway",
+      "FT_Cost",
+      "TF_Cost",
+      "Shape.STLength()",
+      "ANOMALY",
+      "L_PARITY",
+      "R_PARITY"
+    ]
+  },
+  "generated_at": "2026-06-13T15:18:01.354921+00:00",
+  "missing_fields": [
+    "historical or dated road/project records for time-safe prediction",
+    "planned transportation project status, expected year, funding status, and geometry",
+    "confirmed highway/interchange indicator field"
+  ],
+  "outputs": [
+    "outputs/transportation_source_schema_inventory.json",
+    "outputs/transportation_source_schema_inventory.csv",
+    "outputs/transportation_accessibility_readiness_assessment.json",
+    "outputs/phase12a_transportation_accessibility_source_inventory_summary.json"
+  ],
+  "phase": "12A_transportation_accessibility_source_inventory",
+  "prediction_feature_readiness": "ready_for_basic_accessibility_features",
+  "recommended_next_phase": "Phase 12B should ingest the selected road/rail geometries into staging tables and create parcel distance/proximity features with explicit current-context and time-safety flags.",
+  "rest_source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+  "sources_inspected": [
+    {
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+      "readiness_classification": "ready_for_basic_accessibility_features",
+      "record_count": 14455,
+      "source_key": "cabarrus_county_centerlines_dedicated",
+      "source_name": "Cabarrus County Centerlines",
+      "source_status": "available"
+    },
+    {
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/45",
+      "readiness_classification": "ready_for_basic_accessibility_features",
+      "record_count": 14455,
+      "source_key": "opendata_streets_centerline_legacy",
+      "source_name": "Legacy Opendata Streets Centerline",
+      "source_status": "available"
+    },
+    {
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/43",
+      "readiness_classification": "ready_for_basic_accessibility_features",
+      "record_count": 63,
+      "source_key": "opendata_nc_railroad_centerline_legacy",
+      "source_name": "NC Railroad Centerline",
+      "source_status": "available"
+    },
+    {
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/44",
+      "readiness_classification": "ready_for_basic_accessibility_features",
+      "record_count": 1,
+      "source_key": "opendata_nc_railroad_corridor_legacy",
+      "source_name": "NC Railroad Corridor",
+      "source_status": "available"
+    },
+    {
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/0",
+      "readiness_classification": "inventory_only_not_ready",
+      "record_count": 147,
+      "source_key": "opendata_municipal_district_context",
+      "source_name": "Municipal District",
+      "source_status": "available"
+    },
+    {
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/1",
+      "readiness_classification": "inventory_only_not_ready",
+      "record_count": 1,
+      "source_key": "opendata_cabarrus_county_boundary_context",
+      "source_name": "Cabarrus County Boundary",
+      "source_status": "available"
+    }
+  ],
+  "validation_results": {
+    "python_compileall_app": "passed",
+    "python_compileall_cfs_data_pipelines_inspect": "passed",
+    "python_compileall_cfs_data_pipelines_transform": "passed"
+  },
+  "validation_scope": "inventory-only; no full geometry ingestion, no feature matrix alteration, no model training",
+  "guardrails": {
+    "feature_matrix_altered": false,
+    "frontend_modified": false,
+    "full_transportation_geometry_ingested": false,
+    "model_trained": false,
+    "postgis_schema_applied": false,
+    "source_inventory_table_sql_prepared_only": true
+  }
+}

@@ -1,0 +1,289 @@
+{
+  "phase": "13C_transportation_enhanced_feature_matrix",
+  "created_at": "2026-06-14T03:07:56.234636+00:00",
+  "table": "public.parcel_development_prediction_features_transportation_enhanced",
+  "profile": {
+    "row_count": 1430221,
+    "unique_parcel_count": 110017,
+    "min_snapshot_year": 2014,
+    "max_snapshot_year": 2026,
+    "snapshot_year_count": 13,
+    "transportation_accessibility_joined_count": 1430221,
+    "transportation_plan_traffic_joined_count": 1430221,
+    "transportation_current_context_only_count": 1430221,
+    "transportation_time_safe_for_training_count": 0,
+    "planned_transportation_investment_count": 536107,
+    "stip_project_within_half_mile_count": 251186,
+    "stip_project_within_1_mile_count": 536107,
+    "base_zoning_enhanced_row_count": 1430221,
+    "row_count_matches_zoning_enhanced_matrix": true,
+    "duplicate_parcel_year_groups": 0,
+    "snapshot_year_summary": [
+      {
+        "snapshot_year": 2014,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2015,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2016,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2017,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2018,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2019,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2020,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2021,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2022,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2023,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2024,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2025,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      },
+      {
+        "snapshot_year": 2026,
+        "row_count": 110017,
+        "current_context_rows": 110017,
+        "time_safe_rows": 0,
+        "planned_transportation_investment_rows": 41239
+      }
+    ],
+    "current_context_only": true,
+    "time_safe_for_training": false,
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false
+  },
+  "transportation_feature_columns": [
+    "distance_to_nearest_road_ft",
+    "road_density_1000ft",
+    "road_density_half_mile",
+    "distance_to_nearest_rail_ft",
+    "rail_corridor_within_half_mile",
+    "nearest_stip_project_distance_ft",
+    "stip_project_within_half_mile",
+    "stip_project_within_1_mile",
+    "stip_project_count_within_1_mile",
+    "stip_project_count_within_3_miles",
+    "planned_transportation_investment_flag",
+    "nearest_aadt_station_distance_ft",
+    "nearest_aadt_value",
+    "max_aadt_within_half_mile",
+    "max_aadt_within_1_mile",
+    "avg_aadt_within_1_mile",
+    "aadt_station_count_within_1_mile",
+    "transportation_current_context_only_flag",
+    "transportation_time_safe_for_training_flag",
+    "transportation_accessibility_joined_flag",
+    "transportation_plan_traffic_joined_flag"
+  ],
+  "missingness": [
+    {
+      "feature_name": "distance_to_nearest_road_ft",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "road_density_1000ft",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "road_density_half_mile",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "distance_to_nearest_rail_ft",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "rail_corridor_within_half_mile",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "nearest_stip_project_distance_ft",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "stip_project_within_half_mile",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "stip_project_within_1_mile",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "stip_project_count_within_1_mile",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "stip_project_count_within_3_miles",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "planned_transportation_investment_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "nearest_aadt_station_distance_ft",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "nearest_aadt_value",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "max_aadt_within_half_mile",
+      "missing_count": 508651,
+      "missing_pct": 35.5645
+    },
+    {
+      "feature_name": "max_aadt_within_1_mile",
+      "missing_count": 90155,
+      "missing_pct": 6.3036
+    },
+    {
+      "feature_name": "avg_aadt_within_1_mile",
+      "missing_count": 90155,
+      "missing_pct": 6.3036
+    },
+    {
+      "feature_name": "aadt_station_count_within_1_mile",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "transportation_current_context_only_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "transportation_time_safe_for_training_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "transportation_accessibility_joined_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    },
+    {
+      "feature_name": "transportation_plan_traffic_joined_flag",
+      "missing_count": 0,
+      "missing_pct": 0.0
+    }
+  ],
+  "leakage_checks": [
+    {
+      "check_name": "row_count_matches_zoning_enhanced_matrix",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "Transportation-enhanced table must preserve Phase 10E row cardinality."
+    },
+    {
+      "check_name": "no_duplicate_parcel_year_rows",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "Transportation joins must not duplicate official_parcel_id/snapshot_year rows."
+    },
+    {
+      "check_name": "transportation_current_context_flag_true",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "All Phase 13C transportation features must be marked current-context only."
+    },
+    {
+      "check_name": "transportation_time_safe_flag_false",
+      "status": "pass",
+      "failing_rows": 0,
+      "notes": "Current-context transportation features are not strict historical training features."
+    }
+  ],
+  "current_context_caveats": [
+    "Transportation accessibility, STIP, and AADT features are current-context only.",
+    "Do not use these fields for strict historical production claims.",
+    "STIP is a 2026-2035 planned/funded program context, not a complete local road-plan history.",
+    "AADT station proximity is traffic-demand context, not parcel-specific trip generation."
+  ],
+  "ready_for_exploratory_model_comparison": true,
+  "outputs": {
+    "profile": "C:\\CabarrusFutureScape\\outputs\\development_prediction_transportation_enhanced_feature_profile.json",
+    "missingness": "C:\\CabarrusFutureScape\\outputs\\development_prediction_transportation_enhanced_missingness.csv",
+    "leakage_review": "C:\\CabarrusFutureScape\\outputs\\development_prediction_transportation_enhanced_feature_leakage_review.csv",
+    "phase_summary": "C:\\CabarrusFutureScape\\outputs\\phase13c_transportation_enhanced_feature_summary.json"
+  }
+}

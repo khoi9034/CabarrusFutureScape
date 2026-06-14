@@ -1,0 +1,93 @@
+{
+  "registry_version": "phase13a_found_planning_transportation_sources",
+  "purpose": "Register already-found planning and transportation sources for CFS feature readiness review.",
+  "policy": {
+    "inventory_only": true,
+    "do_not_ingest_full_geometries": true,
+    "do_not_train_model": true,
+    "do_not_expose_predictions": true,
+    "do_not_treat_concord_only_as_countywide": true,
+    "rest_source_relocation_warning": "Cabarrus and partner REST services may move during ongoing layer organization. If a URL fails, inspect service roots, layer IDs, and fallback notes before marking unavailable."
+  },
+  "sources": [
+    {
+      "source_key": "concord_land_use_plan_2030",
+      "source_name": "City of Concord Land Use Plan 2030",
+      "source_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/48",
+      "service_type": "arcgis_mapserver_layer",
+      "layer_id": 48,
+      "jurisdiction": "Concord",
+      "geography_scope": "concord_only",
+      "source_role": "future_land_use_context_and_planning_policy_alignment",
+      "feature_group": "planning_policy_context_features",
+      "current_or_future_context": "current_context_adopted_plan",
+      "time_safe_for_historical_training": false,
+      "model_use_status": "future_candidate_current_context_only",
+      "caveats": [
+        "Concord only.",
+        "Does not replace countywide small-area plan or countywide future land use GIS.",
+        "Do not treat as countywide land-use context."
+      ],
+      "fallback_notes": "If this layer moves, inspect the Concord Planning_Webmap_Public_MIL1 service root before marking unavailable."
+    },
+    {
+      "source_key": "ncdot_stip_2026_2035",
+      "source_name": "NCDOT 2026-2035 STIP Projects",
+      "source_url": "https://gis11.services.ncdot.gov/arcgis/rest/services/NCDOT_STIP/MapServer/1",
+      "service_type": "arcgis_mapserver_layer",
+      "layer_id": 1,
+      "jurisdiction": "North Carolina DOT",
+      "geography_scope": "statewide_filter_to_cabarrus_later",
+      "source_role": "planned_funded_transportation_project_context",
+      "feature_group": "transportation_accessibility_features",
+      "current_or_future_context": "planned_funded_project_context",
+      "time_safe_for_historical_training": false,
+      "model_use_status": "future_candidate_current_future_context",
+      "caveats": [
+        "Does not include every local concept road, small intersection improvement, or plan-only local project.",
+        "Should be spatially filtered to Cabarrus County during future ingestion.",
+        "Not time-safe for historical model training unless project availability/adoption dates are aligned to snapshot years."
+      ],
+      "fallback_notes": "If this layer moves, inspect NCDOT STIP service roots and published item metadata before marking unavailable."
+    },
+    {
+      "source_key": "ncdot_aadt_traffic_counts",
+      "source_name": "NCDOT AADT Traffic Count Stations",
+      "source_url": "https://services.arcgis.com/NuWFvHYDMVmmxMeM/ArcGIS/rest/services/NCDOT_AADT_Stations/FeatureServer/0",
+      "service_type": "arcgis_featureserver_layer",
+      "layer_id": 0,
+      "jurisdiction": "North Carolina DOT",
+      "geography_scope": "statewide_filter_to_cabarrus_later",
+      "source_role": "traffic_demand_context_and_nearest_station_proxy",
+      "feature_group": "transportation_accessibility_features",
+      "current_or_future_context": "current_traffic_demand_context",
+      "time_safe_for_historical_training": false,
+      "model_use_status": "future_candidate_current_context_only",
+      "caveats": [
+        "Current station context unless historical AADT by year is available later.",
+        "Station proximity is a traffic-intensity proxy, not parcel-specific driveway traffic."
+      ],
+      "fallback_notes": "If this layer moves, inspect NCDOT ArcGIS Online AADT station services before marking unavailable."
+    },
+    {
+      "source_key": "concord_planning_cases",
+      "source_name": "Concord Planning Cases",
+      "source_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/9",
+      "service_type": "arcgis_mapserver_layer",
+      "layer_id": 9,
+      "jurisdiction": "Concord",
+      "geography_scope": "concord_only",
+      "source_role": "planning_case_activity_signal_and_concord_development_review_proxy",
+      "feature_group": "planning_case_activity_features",
+      "current_or_future_context": "current_context_with_possible_case_dates",
+      "time_safe_for_historical_training": false,
+      "model_use_status": "future_candidate_jurisdiction_limited",
+      "caveats": [
+        "Concord only.",
+        "Does not replace countywide official rezoning approval history.",
+        "Case records should not be interpreted as final approvals without status/date field review."
+      ],
+      "fallback_notes": "If this layer moves, inspect the Concord Planning_Webmap_Public_MIL1 service root before marking unavailable."
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+﻿{
+    "phase":  "10H",
+    "generated_at":  "2026-06-13T08:58:46.1209260-04:00",
+    "files_changed":  [
+                          "README.md",
+                          "src/components/dashboard/MethodologyWorkspace.tsx",
+                          "src/hooks/useDevelopmentPredictionResearchStatus.ts",
+                          "src/lib/api/development.ts",
+                          "src/types/api/development.ts",
+                          "outputs/phase10h_model_transparency_dashboard_summary.json"
+                      ],
+    "methodology_sections_added":  [
+                                       "Development Prediction Research Status",
+                                       "Aggregate ranking class distribution",
+                                       "Internal model comparison",
+                                       "Why Not Public Yet?",
+                                       "Research Roadmap"
+                                   ],
+    "apis_used":  [
+                      "GET /development/prediction/features/summary",
+                      "GET /development/prediction/ranking/summary"
+                  ],
+    "aggregate_ranking_distribution_shown":  {
+                                                 "shown":  true,
+                                                 "source":  "Live API when available; documented Phase 10G aggregate fallback otherwise",
+                                                 "classes":  {
+                                                                 "very_high_development_signal":  1101,
+                                                                 "high_development_signal":  4400,
+                                                                 "moderate_development_signal":  11002,
+                                                                 "low_development_signal":  93514
+                                                             },
+                                                 "parcel_ids_shown":  false,
+                                                 "parcel_level_classes_shown":  false,
+                                                 "exact_probabilities_shown":  false
+                                             },
+    "model_status_wording_added":  {
+                                       "target":  "new construction permit within next 3 years",
+                                       "model_status":  "Internal research only",
+                                       "production_ready":  false,
+                                       "prediction_probabilities_available":  false,
+                                       "public_exposure_allowed":  false,
+                                       "current_best_experiment":  "zoning-enhanced ranking",
+                                       "calibration_status":  "weak probability calibration",
+                                       "recommended_use":  "internal ranking research and model QA only"
+                                   },
+    "model_comparison_summary":  {
+                                     "baseline_pr_auc":  0.054665,
+                                     "zoning_enhanced_pr_auc":  0.071174,
+                                     "baseline_tie_aware_lift_at_top_5_pct":  1.265508,
+                                     "zoning_enhanced_tie_aware_lift_at_top_5_pct":  1.774988,
+                                     "display_note":  "Zoning-enhanced features improved internal ranking metrics, but weak calibration means exact probabilities are not shown."
+                                 },
+    "safety_wording_added":  [
+                                 "Internal research only",
+                                 "Not production-ready",
+                                 "Prediction probabilities not available",
+                                 "Public exposure not allowed",
+                                 "Aggregate research status only",
+                                 "No parcel IDs, parcel ranking classes, or exact model probabilities are displayed"
+                             ],
+    "why_not_public_yet":  [
+                               "Weak probability calibration",
+                               "Missing official rezoning case dates",
+                               "Missing future land use, utility, and road accessibility features",
+                               "Official school capacity has not been added",
+                               "Economic and market controls are not yet included",
+                               "Governance and validation review is still required"
+                           ],
+    "roadmap":  [
+                    "Add official rezoning case dates if available",
+                    "Add adopted future land use context",
+                    "Add road/accessibility and utility service features",
+                    "Add verified school capacity and enrollment data",
+                    "Improve calibration and temporal validation",
+                    "Decide whether ranked classes can be shown as an experimental planning signal"
+                ],
+    "performance_notes":  {
+                              "sceneview_rendered_in_methodology_mode":  false,
+                              "heavy_animations_added":  false,
+                              "api_calls":  "Two aggregate calls only when Methodology workspace mounts in API mode",
+                              "fallback_behavior":  "Documented aggregate Phase 10G summary is shown if API mode is off or unavailable"
+                          },
+    "validation_results":  {
+                               "npm_run_typecheck":  "passed",
+                               "npm_run_lint":  "passed",
+                               "npm_run_build_webpack":  "passed",
+                               "npm_run_dev_cfs":  "passed",
+                               "backend_changed_in_this_phase":  false,
+                               "backend_tests_run":  "not run for this frontend-only phase"
+                           },
+    "smoke_test_results":  {
+                               "methodology_mode_loads":  true,
+                               "sceneview_visible_in_methodology_mode":  false,
+                               "development_prediction_research_status_visible":  true,
+                               "ranking_class_distribution_visible_as_aggregate":  true,
+                               "parcel_level_predictions_visible":  false,
+                               "exact_probabilities_visible":  false,
+                               "internal_only_not_production_ready_wording_visible":  true,
+                               "browser_console_error_count":  0,
+                               "dev_cfs_core_api_checks":  "passed"
+                           },
+    "confirmation_no_parcel_level_predictions_exposed":  true,
+    "confirmation_no_public_prediction_endpoint_added":  true,
+    "confirmation_no_map_ranking_layer_added":  true,
+    "confirmation_model_not_marked_production_ready":  true
+}

@@ -1,0 +1,103 @@
+{
+  "registry_version": "phase10d0_current_zoning_context",
+  "purpose": "Register current zoning sources for current-context parcel intelligence and future zoning-change research readiness.",
+  "policy": {
+    "current_context_only": true,
+    "not_confirmed_historical_zoning": true,
+    "zoning_change_support_requires_dated_case_records": true,
+    "do_not_assume_current_zoning_existed_in_prior_years": true
+  },
+  "sources": [
+    {
+      "source_key": "cabarrus_county_zoning_current",
+      "source_name": "Cabarrus County Zoning",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "role": "current_zoning_context",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Zoning/MapServer",
+      "layer_id": 0,
+      "layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Zoning/MapServer/0",
+      "current_or_historical": "current_context",
+      "current_context_usable": true,
+      "time_safe_for_prediction": false,
+      "possible_future_zoning_change_support": "Only if CASE_NUMBE or related fields can be linked to dated rezoning/planning records with old and new zoning."
+    },
+    {
+      "source_key": "concord_zoning_current",
+      "source_name": "Concord Zoning",
+      "jurisdiction": "Concord",
+      "role": "current_zoning_context",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer",
+      "layer_id": 0,
+      "layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/0",
+      "current_or_historical": "current_context",
+      "current_context_usable": true,
+      "time_safe_for_prediction": false,
+      "possible_future_zoning_change_support": "Only if case/date records can be linked."
+    },
+    {
+      "source_key": "harrisburg_zoning_current",
+      "source_name": "Harrisburg Zoning",
+      "jurisdiction": "Harrisburg",
+      "role": "current_zoning_context",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer",
+      "layer_id": 2,
+      "layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/2",
+      "current_or_historical": "current_context",
+      "current_context_usable": true,
+      "time_safe_for_prediction": false,
+      "possible_future_zoning_change_support": "Only if case/date records can be linked."
+    },
+    {
+      "source_key": "kannapolis_zoning_current",
+      "source_name": "Kannapolis Zoning",
+      "jurisdiction": "Kannapolis",
+      "role": "current_zoning_context",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer",
+      "layer_id": 3,
+      "layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/3",
+      "current_or_historical": "current_context",
+      "current_context_usable": true,
+      "time_safe_for_prediction": false,
+      "possible_future_zoning_change_support": "Only if case/date records can be linked."
+    },
+    {
+      "source_key": "locust_zoning_current",
+      "source_name": "Locust Zoning",
+      "jurisdiction": "Locust",
+      "role": "current_zoning_context",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer",
+      "layer_id": 4,
+      "layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/4",
+      "current_or_historical": "current_context",
+      "current_context_usable": true,
+      "time_safe_for_prediction": false,
+      "possible_future_zoning_change_support": "Only if case/date records can be linked."
+    },
+    {
+      "source_key": "midland_zoning_current",
+      "source_name": "Midland Zoning",
+      "jurisdiction": "Midland",
+      "role": "current_zoning_context",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer",
+      "layer_id": 5,
+      "layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/5",
+      "current_or_historical": "current_context",
+      "current_context_usable": true,
+      "time_safe_for_prediction": false,
+      "possible_future_zoning_change_support": "Only if case/date records can be linked."
+    },
+    {
+      "source_key": "mt_pleasant_zoning_current",
+      "source_name": "MtPleasant Zoning",
+      "jurisdiction": "Mt. Pleasant",
+      "role": "current_zoning_context",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer",
+      "layer_id": 6,
+      "layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Zoning_By_Municipalities/MapServer/6",
+      "current_or_historical": "current_context",
+      "current_context_usable": true,
+      "time_safe_for_prediction": false,
+      "possible_future_zoning_change_support": "Only if case/date records can be linked."
+    }
+  ]
+}

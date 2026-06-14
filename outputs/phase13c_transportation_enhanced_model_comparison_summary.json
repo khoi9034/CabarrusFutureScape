@@ -1,0 +1,411 @@
+﻿{
+    "phase":  "13C_transportation_enhanced_model_comparison",
+    "generated_at":  "2026-06-13T23:14:14.567486",
+    "experiment_id":  "phase13c_transportation_enhanced_v1",
+    "target_used":  "new_construction_next_3yr",
+    "feature_table":  "public.parcel_development_prediction_features_transportation_enhanced",
+    "train_years":  [
+                        2014,
+                        2015,
+                        2016,
+                        2017,
+                        2018,
+                        2019
+                    ],
+    "validation_years":  [
+                             2020,
+                             2021
+                         ],
+    "test_years":  [
+                       2022
+                   ],
+    "excluded_snapshot_years":  [
+                                    2023,
+                                    2024,
+                                    2025,
+                                    2026
+                                ],
+    "zoning_enhanced_metrics":  {
+                                    "row_count":  110017,
+                                    "positive_count":  4216,
+                                    "positive_rate":  0.038321,
+                                    "roc_auc":  0.684217,
+                                    "average_precision_pr_auc":  0.071174,
+                                    "precision_at_top_1_pct":  0.144414,
+                                    "precision_at_top_5_pct":  0.06802,
+                                    "recall_at_top_5_pct":  0.088752,
+                                    "lift_at_top_1_pct":  3.768504,
+                                    "lift_at_top_5_pct":  1.774988,
+                                    "top_1_pct_details":  {
+                                                              "fraction":  0.01,
+                                                              "k":  1101,
+                                                              "precision":  0.144414,
+                                                              "recall":  0.037713,
+                                                              "lift":  3.768504,
+                                                              "cutoff_score":  0.8277089068,
+                                                              "above_cutoff_count":  1093,
+                                                              "tie_count_at_cutoff":  15,
+                                                              "remaining_slots_from_tie_bucket":  8,
+                                                              "tie_positive_count":  0,
+                                                              "tie_positive_rate":  0.0,
+                                                              "tie_adjusted":  true
+                                                          },
+                                    "top_5_pct_details":  {
+                                                              "fraction":  0.05,
+                                                              "k":  5501,
+                                                              "precision":  0.06802,
+                                                              "recall":  0.088752,
+                                                              "lift":  1.774988,
+                                                              "cutoff_score":  0.7189545555,
+                                                              "above_cutoff_count":  2743,
+                                                              "tie_count_at_cutoff":  5650,
+                                                              "remaining_slots_from_tie_bucket":  2758,
+                                                              "tie_positive_count":  238,
+                                                              "tie_positive_rate":  0.042124,
+                                                              "tie_adjusted":  true
+                                                          },
+                                    "brier_score":  0.142259,
+                                    "confusion_matrix_threshold_0_5":  {
+                                                                           "true_negative":  85829,
+                                                                           "false_positive":  19972,
+                                                                           "false_negative":  2800,
+                                                                           "true_positive":  1416
+                                                                       }
+                                },
+    "transportation_enhanced_metrics":  {
+                                            "row_count":  110017,
+                                            "positive_count":  4216,
+                                            "positive_rate":  0.038321,
+                                            "roc_auc":  0.702248,
+                                            "average_precision_pr_auc":  0.087668,
+                                            "precision_at_top_1_pct":  0.133515,
+                                            "precision_at_top_5_pct":  0.157426,
+                                            "recall_at_top_5_pct":  0.205408,
+                                            "lift_at_top_1_pct":  3.484089,
+                                            "lift_at_top_5_pct":  4.108047,
+                                            "top_1_pct_details":  {
+                                                                      "fraction":  0.01,
+                                                                      "k":  1101,
+                                                                      "precision":  0.133515,
+                                                                      "recall":  0.034867,
+                                                                      "lift":  3.484089,
+                                                                      "cutoff_score":  0.8106374606,
+                                                                      "above_cutoff_count":  1099,
+                                                                      "tie_count_at_cutoff":  4,
+                                                                      "remaining_slots_from_tie_bucket":  2,
+                                                                      "tie_positive_count":  0,
+                                                                      "tie_positive_rate":  0.0,
+                                                                      "tie_adjusted":  true
+                                                                  },
+                                            "top_5_pct_details":  {
+                                                                      "fraction":  0.05,
+                                                                      "k":  5501,
+                                                                      "precision":  0.157426,
+                                                                      "recall":  0.205408,
+                                                                      "lift":  4.108047,
+                                                                      "cutoff_score":  0.5420172495,
+                                                                      "above_cutoff_count":  5500,
+                                                                      "tie_count_at_cutoff":  1,
+                                                                      "remaining_slots_from_tie_bucket":  1,
+                                                                      "tie_positive_count":  0,
+                                                                      "tie_positive_rate":  0.0,
+                                                                      "tie_adjusted":  false
+                                                                  },
+                                            "brier_score":  0.100041,
+                                            "confusion_matrix_threshold_0_5":  {
+                                                                                   "true_negative":  99752,
+                                                                                   "false_positive":  6049,
+                                                                                   "false_negative":  3253,
+                                                                                   "true_positive":  963
+                                                                               }
+                                        },
+    "metric_comparison":  {
+                              "roc_auc":  {
+                                              "zoning_enhanced":  0.684217,
+                                              "transportation_enhanced":  0.702248,
+                                              "absolute_improvement":  0.018031,
+                                              "percent_improvement":  2.6353
+                                          },
+                              "average_precision_pr_auc":  {
+                                                               "zoning_enhanced":  0.071174,
+                                                               "transportation_enhanced":  0.087668,
+                                                               "absolute_improvement":  0.016494,
+                                                               "percent_improvement":  23.1742
+                                                           },
+                              "precision_at_top_1_pct":  {
+                                                             "zoning_enhanced":  0.144414,
+                                                             "transportation_enhanced":  0.133515,
+                                                             "absolute_improvement":  -0.010899,
+                                                             "percent_improvement":  -7.5471
+                                                         },
+                              "precision_at_top_5_pct":  {
+                                                             "zoning_enhanced":  0.06802,
+                                                             "transportation_enhanced":  0.157426,
+                                                             "absolute_improvement":  0.089406,
+                                                             "percent_improvement":  131.4408
+                                                         },
+                              "recall_at_top_5_pct":  {
+                                                          "zoning_enhanced":  0.088752,
+                                                          "transportation_enhanced":  0.205408,
+                                                          "absolute_improvement":  0.116656,
+                                                          "percent_improvement":  131.4404
+                                                      },
+                              "lift_at_top_1_pct":  {
+                                                        "zoning_enhanced":  3.768504,
+                                                        "transportation_enhanced":  3.484089,
+                                                        "absolute_improvement":  -0.284415,
+                                                        "percent_improvement":  -7.5472
+                                                    },
+                              "lift_at_top_5_pct":  {
+                                                        "zoning_enhanced":  1.774988,
+                                                        "transportation_enhanced":  4.108047,
+                                                        "absolute_improvement":  2.333059,
+                                                        "percent_improvement":  131.4408
+                                                    },
+                              "brier_score":  {
+                                                  "zoning_enhanced":  0.142259,
+                                                  "transportation_enhanced":  0.100041,
+                                                  "absolute_improvement":  -0.042218,
+                                                  "percent_improvement":  -29.6769
+                                              },
+                              "positive_rate":  {
+                                                    "zoning_enhanced":  0.038321,
+                                                    "transportation_enhanced":  0.038321,
+                                                    "absolute_improvement":  0.0,
+                                                    "percent_improvement":  0.0
+                                                }
+                          },
+    "transportation_helped":  true,
+    "top_transportation_features":  [
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "distance_to_nearest_rail_ft",
+                                            "coefficient":  0.44406247,
+                                            "absolute_coefficient":  0.44406247,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "distance_to_nearest_road_ft",
+                                            "coefficient":  -0.30397603,
+                                            "absolute_coefficient":  0.30397603,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "stip_project_count_within_1_mile",
+                                            "coefficient":  -0.21466492,
+                                            "absolute_coefficient":  0.21466492,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "max_aadt_within_half_mile",
+                                            "coefficient":  -0.15171316,
+                                            "absolute_coefficient":  0.15171316,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "stip_project_within_1_mile",
+                                            "coefficient":  0.13739851,
+                                            "absolute_coefficient":  0.13739851,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "planned_transportation_investment_flag",
+                                            "coefficient":  0.13739851,
+                                            "absolute_coefficient":  0.13739851,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "nearest_aadt_value",
+                                            "coefficient":  0.13687002,
+                                            "absolute_coefficient":  0.13687002,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "max_aadt_within_1_mile",
+                                            "coefficient":  -0.10119794,
+                                            "absolute_coefficient":  0.10119794,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "avg_aadt_within_1_mile",
+                                            "coefficient":  -0.07810255,
+                                            "absolute_coefficient":  0.07810255,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "rail_corridor_within_half_mile",
+                                            "coefficient":  -0.07380328,
+                                            "absolute_coefficient":  0.07380328,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "nearest_stip_project_distance_ft",
+                                            "coefficient":  0.06142126,
+                                            "absolute_coefficient":  0.06142126,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "stip_project_count_within_3_miles",
+                                            "coefficient":  -0.05955877,
+                                            "absolute_coefficient":  0.05955877,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "nearest_aadt_station_distance_ft",
+                                            "coefficient":  -0.05280127,
+                                            "absolute_coefficient":  0.05280127,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "aadt_station_count_within_1_mile",
+                                            "coefficient":  0.05065597,
+                                            "absolute_coefficient":  0.05065597,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        },
+                                        {
+                                            "model_name":  "logistic_regression",
+                                            "feature_set_name":  "zoning_transportation_current_context",
+                                            "feature_name":  "stip_project_within_half_mile",
+                                            "coefficient":  -0.02841485,
+                                            "absolute_coefficient":  0.02841485,
+                                            "feature_group":  "transportation_current_context_features",
+                                            "temporal_status":  "current_context_only",
+                                            "leakage_risk":  "medium_for_historical_backtesting",
+                                            "is_transportation_feature":  true
+                                        }
+                                    ],
+    "experiment_score_table_created":  true,
+    "experiment_score_rows":  110017,
+    "current_context_only":  true,
+    "transportation_time_safe_for_training":  false,
+    "model_active":  false,
+    "prediction_probability_available":  false,
+    "production_ready":  false,
+    "no_frontend_exposure":  true,
+    "caveats":  [
+                    "Internal exploratory experiment only; no frontend exposure.",
+                    "Transportation features are current-context only and not strict historical training features.",
+                    "Do not interpret this as a production-ready model comparison.",
+                    "Future time-safe transportation modeling needs historical roads, dated project records, and historical AADT by year."
+                ],
+    "recommended_next_step":  "Phase 13D should add official historical/datable transportation project sources or run a governance review before any public-facing transportation signal.",
+    "outputs":  {
+                    "metrics":  "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase13c_transportation_model_comparison_metrics.json",
+                    "feature_importance":  "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase13c_transportation_feature_importance.csv",
+                    "prediction_sample":  "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase13c_transportation_predictions_sample.csv",
+                    "temporal_split":  "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase13c_transportation_temporal_split_summary.json",
+                    "caveats":  "C:\\CabarrusFutureScape\\outputs\\modeling\\development_prediction\\phase13c_transportation_model_caveats.md",
+                    "summary":  "C:\\CabarrusFutureScape\\outputs\\phase13c_transportation_enhanced_model_comparison_summary.json"
+                },
+    "validation_results":  {
+                               "compileall_transform":  "passed",
+                               "compileall_modeling":  "passed",
+                               "compileall_backend_app":  "passed",
+                               "backend_pytest":  "243 passed, 3 warnings",
+                               "dev_cfs_runtime":  "restarted via npm run dev:cfs after live backend was stale; frontend and backend ready"
+                           },
+    "smoke_test_results":  {
+                               "frontend_localhost_3000":  200,
+                               "backend_health":  200,
+                               "prediction_features_summary":  200,
+                               "transportation_accessibility_summary":  200,
+                               "transportation_plan_traffic_summary":  200,
+                               "parcel_search":  200,
+                               "parcel_detail_include_geometry":  200,
+                               "development_hotspots":  200,
+                               "flood_summary":  200,
+                               "school_statistics":  200,
+                               "model_active":  false,
+                               "prediction_probability_available":  false,
+                               "production_ready":  false,
+                               "transportation_enhanced_feature_matrix_available":  true,
+                               "transportation_enhanced_row_count":  1430221,
+                               "transportation_enhanced_model_experiment_available":  true,
+                               "latest_transportation_experiment_id":  "phase13c_transportation_enhanced_v1",
+                               "transportation_experiment_current_context_only":  true,
+                               "public_prediction_paths":  [
+                                                               "/development/prediction/features/summary",
+                                                               "/development/prediction/ranking/summary",
+                                                               "/development/prediction/transportation-accessibility/summary",
+                                                               "/development/prediction/transportation-plan-traffic/summary"
+                                                           ],
+                               "no_public_parcel_prediction_endpoint":  true,
+                               "no_frontend_exposure":  true
+                           },
+    "docs_updated":  [
+                         "README.md",
+                         "docs/modeling/development_prediction_model_readiness.md",
+                         "docs/modeling/development_prediction_feature_registry.md",
+                         "docs/modeling/development_prediction_model_qa_report.md",
+                         "docs/modeling/transportation_accessibility_features.md"
+                     ]
+}

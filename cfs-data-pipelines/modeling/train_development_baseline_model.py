@@ -10,7 +10,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import math
 import os
 import sys
 from dataclasses import dataclass
@@ -22,6 +21,12 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import URL, create_engine, text
 from sqlalchemy.engine import Engine
+
+MODELING_DIR = Path(__file__).resolve().parent
+if str(MODELING_DIR) not in sys.path:
+    sys.path.append(str(MODELING_DIR))
+
+import development_model_metrics
 
 try:
     from sklearn.compose import ColumnTransformer
@@ -467,60 +472,16 @@ def precision_recall_lift_at_fraction(
     y_true: pd.Series | np.ndarray,
     y_probability: np.ndarray,
     fraction: float,
-) -> dict[str, float]:
-    y_array = np.asarray(y_true, dtype=int)
-    n = len(y_array)
-    if n == 0:
-        return {"precision": 0.0, "recall": 0.0, "lift": 0.0}
-    k = max(1, math.ceil(n * fraction))
-    order = np.argsort(-y_probability)
-    top = y_array[order[:k]]
-    positives = int(y_array.sum())
-    precision = float(top.mean()) if k else 0.0
-    recall = float(top.sum() / positives) if positives else 0.0
-    base_rate = float(y_array.mean()) if n else 0.0
-    lift = precision / base_rate if base_rate else 0.0
-    return {
-        "precision": round(precision, 6),
-        "recall": round(recall, 6),
-        "lift": round(lift, 6),
-    }
+) -> dict[str, Any]:
+    return development_model_metrics.precision_recall_lift_at_fraction(
+        y_true,
+        y_probability,
+        fraction,
+    )
 
 
 def metrics_for_predictions(y_true: pd.Series, y_probability: np.ndarray) -> dict[str, Any]:
-    y_array = np.asarray(y_true, dtype=int)
-    has_both_classes = len(set(y_array.tolist())) == 2
-    top_1 = precision_recall_lift_at_fraction(y_array, y_probability, 0.01)
-    top_5 = precision_recall_lift_at_fraction(y_array, y_probability, 0.05)
-    threshold_predictions = (y_probability >= 0.5).astype(int)
-    confusion = confusion_matrix(y_array, threshold_predictions, labels=[0, 1])
-    return {
-        "row_count": int(len(y_array)),
-        "positive_count": int(y_array.sum()),
-        "positive_rate": round(float(y_array.mean()), 6) if len(y_array) else 0.0,
-        "roc_auc": round(float(roc_auc_score(y_array, y_probability)), 6)
-        if has_both_classes
-        else None,
-        "average_precision_pr_auc": round(
-            float(average_precision_score(y_array, y_probability)),
-            6,
-        )
-        if has_both_classes
-        else None,
-        "precision_at_top_1_pct": top_1["precision"],
-        "precision_at_top_5_pct": top_5["precision"],
-        "recall_at_top_5_pct": top_5["recall"],
-        "lift_at_top_5_pct": top_5["lift"],
-        "brier_score": round(float(brier_score_loss(y_array, y_probability)), 6)
-        if has_both_classes
-        else None,
-        "confusion_matrix_threshold_0_5": {
-            "true_negative": int(confusion[0, 0]),
-            "false_positive": int(confusion[0, 1]),
-            "false_negative": int(confusion[1, 0]),
-            "true_positive": int(confusion[1, 1]),
-        },
-    }
+    return development_model_metrics.metrics_for_predictions(y_true, y_probability)
 
 
 def fit_models(

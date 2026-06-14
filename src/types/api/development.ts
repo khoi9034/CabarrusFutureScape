@@ -343,3 +343,88 @@ export interface PermitSegmentOptionsResponse {
   value_classes: DevelopmentLookupItem[];
   development_domains: DevelopmentLookupItem[];
 }
+
+export interface DevelopmentPredictionFeatureMissingness {
+  feature_name: string;
+  missing_count: number;
+  missing_pct: number;
+}
+
+export interface DevelopmentPredictionFeatureLabelRate {
+  label_name: string;
+  positive_count: number;
+  positive_rate_pct: number;
+  row_count: number;
+}
+
+export interface DevelopmentPredictionMetricComparison {
+  absolute_improvement: number;
+  baseline: number;
+  percent_improvement: number;
+  zoning_enhanced: number;
+}
+
+export interface DevelopmentPredictionFeaturesSummaryResponse {
+  baseline_model_experiment_available: boolean;
+  baseline_vs_zoning_metrics_summary?: {
+    comparison_on_selected_best_models?: Record<
+      string,
+      DevelopmentPredictionMetricComparison
+    >;
+    experiment_id?: string;
+    internal_only?: boolean;
+    model_active?: boolean;
+    prediction_probability_available?: boolean;
+    production_ready?: boolean;
+    target?: string;
+    zoning_features_appear_important?: boolean;
+  };
+  calibration_review_available: boolean;
+  feature_groups: string[];
+  feature_matrix_available: boolean;
+  feature_set_version: string | null;
+  feature_table: string;
+  label_positive_rates: DevelopmentPredictionFeatureLabelRate[];
+  latest_experiment_id: string | null;
+  latest_model_qa_available: boolean;
+  latest_model_qa_id: string | null;
+  latest_zoning_enhanced_experiment_id: string | null;
+  leakage_caveats: string[];
+  max_snapshot_year: number | null;
+  metrics_summary: Record<string, unknown>;
+  min_snapshot_year: number | null;
+  missingness_highlights: DevelopmentPredictionFeatureMissingness[];
+  model_active: boolean;
+  prediction_probability_available: boolean;
+  production_ready: boolean;
+  row_count: number;
+  snapshot_year_count: number;
+  standardized_metrics_available: boolean;
+  unique_parcel_count: number;
+  zoning_enhanced_feature_matrix_available: boolean;
+  zoning_enhanced_model_experiment_available: boolean;
+  zoning_enhanced_row_count: number;
+}
+
+export interface DevelopmentPredictionRankingClassBucket {
+  development_signal_class: string;
+  pct_of_rows: number;
+  row_count: number;
+}
+
+export interface DevelopmentPredictionRankingSummaryResponse {
+  calibration_status: string | null;
+  caveat: string;
+  class_distribution: DevelopmentPredictionRankingClassBucket[];
+  exact_probabilities_exposed: boolean;
+  experiment_id: string | null;
+  explanation_available: boolean;
+  explanation_row_count: number;
+  no_parcel_level_scores: boolean;
+  prediction_probability_available: boolean;
+  production_ready: boolean;
+  public_exposure_allowed: boolean;
+  ranking_available: boolean;
+  ranking_row_count: number;
+  unique_parcel_count: number;
+}

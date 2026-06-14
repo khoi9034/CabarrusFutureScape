@@ -1,0 +1,14 @@
+feature_name,missing_count,missing_pct
+distance_to_nearest_major_road_ft,110017,100.0000
+intersection_count_within_1000ft,110017,100.0000
+nearest_major_road_name,110017,100.0000
+nearest_road_type,1575,1.4316
+distance_to_nearest_rail_ft,0,0.0000
+distance_to_nearest_road_ft,0,0.0000
+nearest_road_name,0,0.0000
+rail_corridor_within_half_mile,0,0.0000
+road_density_1000ft,0,0.0000
+road_density_half_mile,0,0.0000
+road_length_within_1000ft,0,0.0000
+road_length_within_500ft,0,0.0000
+road_length_within_half_mile,0,0.0000

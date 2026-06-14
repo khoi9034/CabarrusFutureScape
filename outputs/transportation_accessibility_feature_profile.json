@@ -1,0 +1,17 @@
+{
+  "expected_parcel_count": 110017,
+  "row_count": 110017,
+  "unique_parcel_count": 110017,
+  "row_count_matches_parcels": true,
+  "missing_nearest_road_count": 0,
+  "missing_major_road_classification_count": 110017,
+  "missing_nearest_rail_count": 0,
+  "rail_corridor_within_half_mile_count": 15862,
+  "current_context_only_count": 110017,
+  "nearest_road_min_ft": 0.012292787100131682,
+  "nearest_road_avg_ft": 161.38375391992804,
+  "nearest_road_max_ft": 3404.0397779992486,
+  "nearest_rail_min_ft": 0.17149427062025022,
+  "nearest_rail_avg_ft": 16203.094200395659,
+  "nearest_rail_max_ft": 93976.95516655919
+}

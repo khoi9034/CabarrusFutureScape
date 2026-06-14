@@ -1,0 +1,55 @@
+{
+  "phase": "13B_aadt_traffic_count_ingest",
+  "generated_at": "2026-06-14T02:39:49.364883+00:00",
+  "dry_run": false,
+  "truncate_and_load": true,
+  "source_key": "ncdot_aadt_traffic_counts",
+  "source_url": "https://services.arcgis.com/NuWFvHYDMVmmxMeM/ArcGIS/rest/services/NCDOT_AADT_Stations/FeatureServer/0",
+  "where": "UPPER(COUNTY) = 'CABARRUS'",
+  "total_source_record_count": 48938,
+  "filtered_record_count": 642,
+  "downloaded_features": 642,
+  "inserted_raw_rows": 642,
+  "inserted_clean_rows": 642,
+  "field_mapping_used": {
+    "source_objectid": [
+      "FID",
+      "OBJECTID"
+    ],
+    "station_id": [
+      "LocationID"
+    ],
+    "route_name": [
+      "ROUTE"
+    ],
+    "road_name": [
+      "LOCATION"
+    ],
+    "vehicle_classification": [
+      "RTE_CLS"
+    ],
+    "county": [
+      "COUNTY"
+    ],
+    "aadt_value": [
+      "latest non-null AADT_YYYY field"
+    ]
+  },
+  "source_confidence": "source_reported_current_context",
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "model_active": false,
+  "prediction_probability_available": false,
+  "database_summary": {
+    "raw_rows": 642,
+    "clean_rows": 642,
+    "missing_aadt_value_count": 0,
+    "missing_count_year_count": 0,
+    "min_aadt_value": 90,
+    "max_aadt_value": 123000,
+    "min_count_year": 2012,
+    "max_count_year": 2022,
+    "invalid_geometry_count": 0
+  },
+  "rest_source_relocation_warning": "Source may have moved due to Cabarrus/NCDOT REST service reorganization; check registry/fallback URL before marking unavailable."
+}

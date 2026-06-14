@@ -1,0 +1,150 @@
+{
+  "created_at": "2026-06-13T09:51:05.742977+00:00",
+  "phase": "10D-1",
+  "assessment": "historical_zoning_snapshot_and_map_change_foundation_ready_for_phase10e_comparison",
+  "official_rezoning_case_history_available": false,
+  "historical_zoning_layers_available": true,
+  "historical_zoning_years_available": [
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015
+  ],
+  "jurisdictions_by_year": {
+    "2005": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2006": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2007": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2008": [
+      "Cabarrus County / Unincorporated"
+    ],
+    "2009": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2010": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2011": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ],
+    "2012": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ],
+    "2013": [
+      "Concord",
+      "Harrisburg",
+      "Kannapolis"
+    ],
+    "2014": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ],
+    "2015": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ]
+  },
+  "source_layers_successfully_queried": 47,
+  "source_layers_failed": [],
+  "raw_rows_ingested": 21567,
+  "clean_rows_ingested": 21567,
+  "schema_review_clean_rows": 436,
+  "case_number_rows_by_year_jurisdiction": [
+    {
+      "source_year": 2009,
+      "jurisdiction": "Kannapolis",
+      "rows_with_case_number": 99
+    },
+    {
+      "source_year": 2014,
+      "jurisdiction": "Kannapolis",
+      "rows_with_case_number": 6
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "rows_with_case_number": 14
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Harrisburg",
+      "rows_with_case_number": 32
+    },
+    {
+      "source_year": 2015,
+      "jurisdiction": "Kannapolis",
+      "rows_with_case_number": 172
+    }
+  ],
+  "date_field_rows_by_year_jurisdiction": [
+    {
+      "source_year": 2015,
+      "jurisdiction": "Kannapolis",
+      "rows_with_date_field": 1655
+    }
+  ],
+  "time_safe_snapshot_rule": "Use only historical zoning source_year <= snapshot_year; never current zoning as historical fallback.",
+  "post_2015_staleness_rule": "2015 is reused only as prior_available_year for later snapshots, with zoning_source_age_years recorded.",
+  "can_train_model_now": false,
+  "ready_for_phase10e_zoning_enhanced_model_comparison": true,
+  "limitations": [
+    "Detected changes are zoning map assignment changes, not official rezoning case events.",
+    "No exact approval date is inferred unless a source field explicitly provides one.",
+    "Earlier years have uneven jurisdiction coverage.",
+    "Kannapolis 2009 has no clear zoning code field and remains schema-review data.",
+    "Post-2015 snapshots are time-safe but stale if no newer historical zoning source exists."
+  ],
+  "additional_data_needed_for_official_rezoning_history": [
+    "Rezoning or zoning map amendment case table",
+    "Approval/effective date",
+    "Old zoning",
+    "New zoning",
+    "Jurisdiction",
+    "Decision/status",
+    "Parcel or case geometry"
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "qa_id": "phase10f_model_qa_v1",
+  "model_label": "zoning_enhanced",
+  "model_name": "hist_gradient_boosting",
+  "brier_score": 0.142259,
+  "weighted_mean_absolute_calibration_error": 0.265605,
+  "calibration_bins": [
+    {
+      "decile": 1,
+      "rank_band": "0-10%",
+      "row_count": 11001,
+      "positive_count": 691,
+      "observed_event_rate": 0.062812,
+      "average_predicted_probability": 0.731573,
+      "min_predicted_probability": 0.585172,
+      "max_predicted_probability": 0.959806
+    },
+    {
+      "decile": 2,
+      "rank_band": "10-20%",
+      "row_count": 11002,
+      "positive_count": 791,
+      "observed_event_rate": 0.071896,
+      "average_predicted_probability": 0.552996,
+      "min_predicted_probability": 0.458572,
+      "max_predicted_probability": 0.585172
+    },
+    {
+      "decile": 3,
+      "rank_band": "20-30%",
+      "row_count": 11002,
+      "positive_count": 729,
+      "observed_event_rate": 0.066261,
+      "average_predicted_probability": 0.400526,
+      "min_predicted_probability": 0.360651,
+      "max_predicted_probability": 0.458572
+    },
+    {
+      "decile": 4,
+      "rank_band": "30-40%",
+      "row_count": 11001,
+      "positive_count": 783,
+      "observed_event_rate": 0.071175,
+      "average_predicted_probability": 0.341312,
+      "min_predicted_probability": 0.319681,
+      "max_predicted_probability": 0.360651
+    },
+    {
+      "decile": 5,
+      "rank_band": "40-50%",
+      "row_count": 11002,
+      "positive_count": 387,
+      "observed_event_rate": 0.035175,
+      "average_predicted_probability": 0.308613,
+      "min_predicted_probability": 0.289343,
+      "max_predicted_probability": 0.319681
+    },
+    {
+      "decile": 6,
+      "rank_band": "50-60%",
+      "row_count": 11002,
+      "positive_count": 177,
+      "observed_event_rate": 0.016088,
+      "average_predicted_probability": 0.273846,
+      "min_predicted_probability": 0.264575,
+      "max_predicted_probability": 0.289343
+    },
+    {
+      "decile": 7,
+      "rank_band": "60-70%",
+      "row_count": 11001,
+      "positive_count": 296,
+      "observed_event_rate": 0.026907,
+      "average_predicted_probability": 0.218501,
+      "min_predicted_probability": 0.159559,
+      "max_predicted_probability": 0.264575
+    },
+    {
+      "decile": 8,
+      "rank_band": "70-80%",
+      "row_count": 11002,
+      "positive_count": 324,
+      "observed_event_rate": 0.029449,
+      "average_predicted_probability": 0.115154,
+      "min_predicted_probability": 0.081589,
+      "max_predicted_probability": 0.159559
+    },
+    {
+      "decile": 9,
+      "rank_band": "80-90%",
+      "row_count": 11002,
+      "positive_count": 31,
+      "observed_event_rate": 0.002818,
+      "average_predicted_probability": 0.061874,
+      "min_predicted_probability": 0.049319,
+      "max_predicted_probability": 0.081589
+    },
+    {
+      "decile": 10,
+      "rank_band": "90-100%",
+      "row_count": 11002,
+      "positive_count": 7,
+      "observed_event_rate": 0.000636,
+      "average_predicted_probability": 0.034906,
+      "min_predicted_probability": 0.008046,
+      "max_predicted_probability": 0.049319
+    }
+  ],
+  "calibration_assessment": "weak_probability_calibration",
+  "recommendation": "Keep outputs as internal rank/risk scores only; do not show exact probabilities.",
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "no_frontend_exposure": true
+}

@@ -1,0 +1,177 @@
+{
+  "qa_id": "phase10f_model_qa_v1",
+  "target": "new_construction_next_3yr",
+  "feature_table": "public.parcel_development_prediction_features_zoning_enhanced",
+  "metric_definitions": {
+    "lift": "lift@top_k = precision@top_k / overall_positive_rate",
+    "top_k": "ceil(test_row_count * fraction)",
+    "tie_policy": "tie-aware expected precision when the cutoff score has equal probabilities"
+  },
+  "train_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019
+  ],
+  "validation_years": [
+    2020,
+    2021
+  ],
+  "test_years": [
+    2022
+  ],
+  "baseline_best_model_name": "hist_gradient_boosting",
+  "zoning_enhanced_best_model_name": "hist_gradient_boosting",
+  "baseline_metrics": {
+    "row_count": 110017,
+    "positive_count": 4216,
+    "positive_rate": 0.038321,
+    "roc_auc": 0.650408,
+    "average_precision_pr_auc": 0.054665,
+    "precision_at_top_1_pct": 0.022707,
+    "precision_at_top_5_pct": 0.048496,
+    "recall_at_top_5_pct": 0.063277,
+    "lift_at_top_1_pct": 0.592532,
+    "lift_at_top_5_pct": 1.265508,
+    "top_1_pct_details": {
+      "fraction": 0.01,
+      "k": 1101,
+      "precision": 0.022707,
+      "recall": 0.00593,
+      "lift": 0.592532,
+      "cutoff_score": 0.5789640058,
+      "above_cutoff_count": 1097,
+      "tie_count_at_cutoff": 9,
+      "remaining_slots_from_tie_bucket": 4,
+      "tie_positive_count": 0,
+      "tie_positive_rate": 0.0,
+      "tie_adjusted": true
+    },
+    "top_5_pct_details": {
+      "fraction": 0.05,
+      "k": 5501,
+      "precision": 0.048496,
+      "recall": 0.063277,
+      "lift": 1.265508,
+      "cutoff_score": 0.5517793591,
+      "above_cutoff_count": 1145,
+      "tie_count_at_cutoff": 73379,
+      "remaining_slots_from_tie_bucket": 4356,
+      "tie_positive_count": 4056,
+      "tie_positive_rate": 0.055275,
+      "tie_adjusted": true
+    },
+    "brier_score": 0.208555,
+    "confusion_matrix_threshold_0_5": {
+      "true_negative": 35276,
+      "false_positive": 70525,
+      "false_negative": 132,
+      "true_positive": 4084
+    }
+  },
+  "zoning_enhanced_metrics": {
+    "row_count": 110017,
+    "positive_count": 4216,
+    "positive_rate": 0.038321,
+    "roc_auc": 0.684217,
+    "average_precision_pr_auc": 0.071174,
+    "precision_at_top_1_pct": 0.144414,
+    "precision_at_top_5_pct": 0.06802,
+    "recall_at_top_5_pct": 0.088752,
+    "lift_at_top_1_pct": 3.768504,
+    "lift_at_top_5_pct": 1.774988,
+    "top_1_pct_details": {
+      "fraction": 0.01,
+      "k": 1101,
+      "precision": 0.144414,
+      "recall": 0.037713,
+      "lift": 3.768504,
+      "cutoff_score": 0.8277089068,
+      "above_cutoff_count": 1093,
+      "tie_count_at_cutoff": 15,
+      "remaining_slots_from_tie_bucket": 8,
+      "tie_positive_count": 0,
+      "tie_positive_rate": 0.0,
+      "tie_adjusted": true
+    },
+    "top_5_pct_details": {
+      "fraction": 0.05,
+      "k": 5501,
+      "precision": 0.06802,
+      "recall": 0.088752,
+      "lift": 1.774988,
+      "cutoff_score": 0.7189545555,
+      "above_cutoff_count": 2743,
+      "tie_count_at_cutoff": 5650,
+      "remaining_slots_from_tie_bucket": 2758,
+      "tie_positive_count": 238,
+      "tie_positive_rate": 0.042124,
+      "tie_adjusted": true
+    },
+    "brier_score": 0.142259,
+    "confusion_matrix_threshold_0_5": {
+      "true_negative": 85829,
+      "false_positive": 19972,
+      "false_negative": 2800,
+      "true_positive": 1416
+    }
+  },
+  "metric_comparison": {
+    "roc_auc": {
+      "baseline": 0.650408,
+      "zoning_enhanced": 0.684217,
+      "absolute_improvement": 0.033809,
+      "percent_improvement": 5.1981
+    },
+    "average_precision_pr_auc": {
+      "baseline": 0.054665,
+      "zoning_enhanced": 0.071174,
+      "absolute_improvement": 0.016509,
+      "percent_improvement": 30.2003
+    },
+    "precision_at_top_1_pct": {
+      "baseline": 0.022707,
+      "zoning_enhanced": 0.144414,
+      "absolute_improvement": 0.121707,
+      "percent_improvement": 535.9889
+    },
+    "precision_at_top_5_pct": {
+      "baseline": 0.048496,
+      "zoning_enhanced": 0.06802,
+      "absolute_improvement": 0.019524,
+      "percent_improvement": 40.259
+    },
+    "recall_at_top_5_pct": {
+      "baseline": 0.063277,
+      "zoning_enhanced": 0.088752,
+      "absolute_improvement": 0.025475,
+      "percent_improvement": 40.2595
+    },
+    "lift_at_top_1_pct": {
+      "baseline": 0.592532,
+      "zoning_enhanced": 3.768504,
+      "absolute_improvement": 3.175972,
+      "percent_improvement": 536.0001
+    },
+    "lift_at_top_5_pct": {
+      "baseline": 1.265508,
+      "zoning_enhanced": 1.774988,
+      "absolute_improvement": 0.50948,
+      "percent_improvement": 40.2589
+    },
+    "brier_score": {
+      "baseline": 0.208555,
+      "zoning_enhanced": 0.142259,
+      "absolute_improvement": -0.066296,
+      "percent_improvement": -31.7883
+    }
+  },
+  "zoning_improved_pr_auc": true,
+  "zoning_improved_lift_top_5": true,
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "no_frontend_exposure": true
+}

@@ -1,0 +1,4423 @@
+{
+  "created_at": "2026-06-13T08:51:41.222529+00:00",
+  "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+  "source_count": 47,
+  "ignored_non_zoning_layers": [
+    "Historical Data group headers",
+    "ParcelAnno",
+    "EasementAnno",
+    "Streets",
+    "Addresses",
+    "Cities",
+    "Parcels",
+    "ParcelTaxView",
+    "Permits",
+    "School Districts",
+    "Water Supply Watershed",
+    "Schools",
+    "Recreation Facilities"
+  ],
+  "layers": [
+    {
+      "source_key": "harrisburg_zoning_2015",
+      "source_name": "Harrisburg_Zoning_2015",
+      "jurisdiction": "Harrisburg",
+      "source_year": 2015,
+      "layer_id": 147,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/147",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 141,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "FID_harris",
+          "type": "esriFieldTypeInteger",
+          "alias": "FID_harris",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "CASE_NUMBE",
+          "type": "esriFieldTypeString",
+          "alias": "CASE_NUMBE",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "ZONINGDIST",
+          "type": "esriFieldTypeSmallInteger",
+          "alias": "ZONINGDIST",
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "FID_harris",
+        "ZONINGCODE",
+        "CASE_NUMBE",
+        "ZONINGDIST",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONINGDIST",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONINGDIST",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [
+        "CASE_NUMBE"
+      ],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2015",
+      "source_name": "Kannapolis_Zoning_2015",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2015,
+      "layer_id": 148,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/148",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 1655,
+      "fields": [
+        {
+          "name": "EFFECTIVE_",
+          "type": "esriFieldTypeDouble",
+          "alias": "EFFECTIVE_",
+          "domain": null
+        },
+        {
+          "name": "AREA_FEET",
+          "type": "esriFieldTypeDouble",
+          "alias": "AREA_FEET",
+          "domain": null
+        },
+        {
+          "name": "PERIMETER_",
+          "type": "esriFieldTypeDouble",
+          "alias": "PERIMETER_",
+          "domain": null
+        },
+        {
+          "name": "ACRES",
+          "type": "esriFieldTypeDouble",
+          "alias": "ACRES",
+          "domain": null
+        },
+        {
+          "name": "AREA_FEE_1",
+          "type": "esriFieldTypeDouble",
+          "alias": "AREA_FEE_1",
+          "domain": null
+        },
+        {
+          "name": "PERIMETER1",
+          "type": "esriFieldTypeDouble",
+          "alias": "PERIMETER1",
+          "domain": null
+        },
+        {
+          "name": "AREA_FEE_2",
+          "type": "esriFieldTypeDouble",
+          "alias": "AREA_FEE_2",
+          "domain": null
+        },
+        {
+          "name": "PERIMETER2",
+          "type": "esriFieldTypeDouble",
+          "alias": "PERIMETER2",
+          "domain": null
+        },
+        {
+          "name": "AREA_FEE_3",
+          "type": "esriFieldTypeDouble",
+          "alias": "AREA_FEE_3",
+          "domain": null
+        },
+        {
+          "name": "PERIMETER3",
+          "type": "esriFieldTypeDouble",
+          "alias": "PERIMETER3",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "CASE_NUMBE",
+          "type": "esriFieldTypeString",
+          "alias": "CASE_NUMBE",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CU_CASE_",
+          "type": "esriFieldTypeString",
+          "alias": "CU_CASE_",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CONDITIONA",
+          "type": "esriFieldTypeString",
+          "alias": "CONDITIONA",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "DRAFTING_N",
+          "type": "esriFieldTypeString",
+          "alias": "DRAFTING_N",
+          "length": 30,
+          "domain": null
+        },
+        {
+          "name": "MAP_EDIT_D",
+          "type": "esriFieldTypeString",
+          "alias": "MAP_EDIT_D",
+          "length": 30,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "EFFECTIVE_",
+        "AREA_FEET",
+        "PERIMETER_",
+        "ACRES",
+        "AREA_FEE_1",
+        "PERIMETER1",
+        "AREA_FEE_2",
+        "PERIMETER2",
+        "AREA_FEE_3",
+        "PERIMETER3",
+        "OBJECTID",
+        "CASE_NUMBE",
+        "BASE_DISTR",
+        "CU_CASE_",
+        "CONDITIONA",
+        "DRAFTING_N",
+        "MAP_EDIT_D",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "zoning_district_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [
+        "CASE_NUMBE",
+        "CU_CASE_"
+      ],
+      "date_field_candidates": [
+        "EFFECTIVE_",
+        "MAP_EDIT_D"
+      ],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "locust_zoning_2015",
+      "source_name": "Locust_Zoning_2015",
+      "jurisdiction": "Locust",
+      "source_year": 2015,
+      "layer_id": 149,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/149",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 7,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeDouble",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID_1",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID_1",
+          "domain": null
+        },
+        {
+          "name": "ZONING",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "PENDINGZON",
+          "type": "esriFieldTypeString",
+          "alias": "PENDINGZON",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "JURISDICTI",
+          "type": "esriFieldTypeString",
+          "alias": "JURISDICTI",
+          "length": 3,
+          "domain": null
+        },
+        {
+          "name": "SymbolCode",
+          "type": "esriFieldTypeString",
+          "alias": "SymbolCode",
+          "length": 15,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "OBJECTID_1",
+        "ZONING",
+        "PENDINGZON",
+        "JURISDICTI",
+        "SymbolCode",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONING"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2015",
+      "source_name": "Concord_Zoning_2015",
+      "jurisdiction": "Concord",
+      "source_year": 2015,
+      "layer_id": 153,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/153",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 654,
+      "fields": [
+        {
+          "name": "COC_Zoning_AREA",
+          "type": "esriFieldTypeDouble",
+          "alias": "AREA",
+          "domain": null
+        },
+        {
+          "name": "PERIMETER",
+          "type": "esriFieldTypeDouble",
+          "alias": "PERIMETER",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "UDO_",
+          "type": "esriFieldTypeInteger",
+          "alias": "UDO_",
+          "domain": null
+        },
+        {
+          "name": "UDO_ID",
+          "type": "esriFieldTypeInteger",
+          "alias": "UDO_ID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ETJ",
+          "type": "esriFieldTypeString",
+          "alias": "ETJ",
+          "length": 3,
+          "domain": null
+        },
+        {
+          "name": "CITYCODE",
+          "type": "esriFieldTypeString",
+          "alias": "CITYCODE",
+          "length": 30,
+          "domain": null
+        },
+        {
+          "name": "TEMP_",
+          "type": "esriFieldTypeString",
+          "alias": "TEMP_",
+          "length": 3,
+          "domain": null
+        },
+        {
+          "name": "TEMP2",
+          "type": "esriFieldTypeString",
+          "alias": "TEMP2",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "OLDZONING",
+          "type": "esriFieldTypeString",
+          "alias": "OLDZONING",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "COC_Zoning_AREA",
+        "PERIMETER",
+        "OBJECTID",
+        "UDO_",
+        "UDO_ID",
+        "ZONINGCODE",
+        "ETJ",
+        "CITYCODE",
+        "TEMP_",
+        "TEMP2",
+        "OLDZONING",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "COC_Zoning_AREA",
+        "ZONINGCODE",
+        "OLDZONING"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_county_zoning_2015",
+      "source_name": "CabarrusCounty_Zoning_2015",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2015,
+      "layer_id": 156,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/156",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 207,
+      "fields": [
+        {
+          "name": "SHAPE_LENG",
+          "type": "esriFieldTypeDouble",
+          "alias": "SHAPE_LENG",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "CASE_NUMBE",
+          "type": "esriFieldTypeString",
+          "alias": "CASE_NUMBE",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "ZONINGDIST",
+          "type": "esriFieldTypeSmallInteger",
+          "alias": "ZONINGDIST",
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "SHAPE_LENG",
+        "OBJECTID",
+        "ZONINGCODE",
+        "CASE_NUMBE",
+        "ZONINGDIST",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONINGDIST",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONINGDIST",
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [
+        "CASE_NUMBE"
+      ],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "mt_pleasant_zoning_2015",
+      "source_name": "MtPleasant_Zoning_2015",
+      "jurisdiction": "Mt. Pleasant",
+      "source_year": 2015,
+      "layer_id": 157,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/157",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 130,
+      "fields": [
+        {
+          "name": "Acres",
+          "type": "esriFieldTypeDouble",
+          "alias": "Acres",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "Acres",
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "midland_zoning_2015",
+      "source_name": "Midland_Zoning_2015",
+      "jurisdiction": "Midland",
+      "source_year": 2015,
+      "layer_id": 159,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/159",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 115,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "Id",
+          "type": "esriFieldTypeInteger",
+          "alias": "Id",
+          "domain": null
+        },
+        {
+          "name": "Zoning_Typ",
+          "type": "esriFieldTypeString",
+          "alias": "Zoning_Typ",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Zone_ID",
+          "type": "esriFieldTypeString",
+          "alias": "Zone_ID",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Note_",
+          "type": "esriFieldTypeSmallInteger",
+          "alias": "Note_",
+          "domain": null
+        },
+        {
+          "name": "Overlay",
+          "type": "esriFieldTypeString",
+          "alias": "Overlay",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Transparen",
+          "type": "esriFieldTypeSmallInteger",
+          "alias": "Transparen",
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "Id",
+        "Zoning_Typ",
+        "Zone_ID",
+        "Note_",
+        "Overlay",
+        "Transparen",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "Zoning_Typ",
+        "Zone_ID"
+      ],
+      "zoning_district_field_candidates": [
+        "Zoning_Typ",
+        "Zone_ID"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2014",
+      "source_name": "Kannapolis_Zoning_2014",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2014,
+      "layer_id": 52,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/52",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 2009,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CU_CASE_",
+          "type": "esriFieldTypeString",
+          "alias": "CU_CASE_",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "BASE_DISTR",
+        "CU_CASE_",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "zoning_district_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [
+        "CU_CASE_"
+      ],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "locust_zoning_2014",
+      "source_name": "Locust_Zoning_2014",
+      "jurisdiction": "Locust",
+      "source_year": 2014,
+      "layer_id": 53,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/53",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 7,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeDouble",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID_1",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID_1",
+          "domain": null
+        },
+        {
+          "name": "ZONING",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "OBJECTID_1",
+        "ZONING",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONING"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "harrisburg_zoning_2014",
+      "source_name": "Harrisburg_Zoning_2014",
+      "jurisdiction": "Harrisburg",
+      "source_year": 2014,
+      "layer_id": 54,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/54",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 122,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "mt_pleasant_zoning_2014",
+      "source_name": "MtPleasant_Zoning_2014",
+      "jurisdiction": "Mt. Pleasant",
+      "source_year": 2014,
+      "layer_id": 56,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/56",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 130,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "midland_zoning_2014",
+      "source_name": "Midland_Zoning_2014",
+      "jurisdiction": "Midland",
+      "source_year": 2014,
+      "layer_id": 57,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/57",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 115,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "Zoning_Typ",
+          "type": "esriFieldTypeString",
+          "alias": "Zoning_Typ",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "Zoning_Typ",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "Zoning_Typ"
+      ],
+      "zoning_district_field_candidates": [
+        "Zoning_Typ"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_county_zoning_2014",
+      "source_name": "CabarrusCounty_Zoning_2014",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2014,
+      "layer_id": 58,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/58",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 200,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2014",
+      "source_name": "Concord_Zoning_2014",
+      "jurisdiction": "Concord",
+      "source_year": 2014,
+      "layer_id": 59,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/59",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 654,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "harrisburg_zoning_2013",
+      "source_name": "HarrisburgZoning_2013",
+      "jurisdiction": "Harrisburg",
+      "source_year": 2013,
+      "layer_id": 68,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/68",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 120,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2013",
+      "source_name": "KannapolisZoning_2013",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2013,
+      "layer_id": 69,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/69",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 1643,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CONDITIONA",
+          "type": "esriFieldTypeString",
+          "alias": "CONDITIONA",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "BASE_DISTR",
+        "CONDITIONA",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "zoning_district_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2013",
+      "source_name": "ConcordZoning_2013",
+      "jurisdiction": "Concord",
+      "source_year": 2013,
+      "layer_id": 70,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/70",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 651,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_county_zoning_2012",
+      "source_name": "CabarrusCountyZoning_2012",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2012,
+      "layer_id": 77,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/77",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 205,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2012",
+      "source_name": "ConcordZoning_2012",
+      "jurisdiction": "Concord",
+      "source_year": 2012,
+      "layer_id": 78,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/78",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 651,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "harrisburg_zoning_2012",
+      "source_name": "HarrisburgZoning_2012",
+      "jurisdiction": "Harrisburg",
+      "source_year": 2012,
+      "layer_id": 79,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/79",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 108,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2012",
+      "source_name": "KannapolisZoning_2012",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2012,
+      "layer_id": 80,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/80",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 1643,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CONDITIONA",
+          "type": "esriFieldTypeString",
+          "alias": "CONDITIONA",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "BASE_DISTR",
+        "CONDITIONA",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "zoning_district_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "locust_zoning_2012",
+      "source_name": "LocustZoning_2012",
+      "jurisdiction": "Locust",
+      "source_year": 2012,
+      "layer_id": 81,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/81",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 8,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeDouble",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID_1",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID_1",
+          "domain": null
+        },
+        {
+          "name": "ZONING",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "OBJECTID_1",
+        "ZONING",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONING"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "midland_zoning_2012",
+      "source_name": "MidlandZoning_2012",
+      "jurisdiction": "Midland",
+      "source_year": 2012,
+      "layer_id": 82,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/82",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 110,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "Zoning_Typ",
+          "type": "esriFieldTypeString",
+          "alias": "Zoning_Typ",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "Zoning_Typ",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "Zoning_Typ"
+      ],
+      "zoning_district_field_candidates": [
+        "Zoning_Typ"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "mt_pleasant_zoning_2012",
+      "source_name": "MtPleasantZoning_2012",
+      "jurisdiction": "Mt. Pleasant",
+      "source_year": 2012,
+      "layer_id": 83,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/83",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 126,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_county_zoning_2011",
+      "source_name": "CabarrusCountyZoning_2011",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2011,
+      "layer_id": 93,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/93",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 460,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2011",
+      "source_name": "ConcordZoning_2011",
+      "jurisdiction": "Concord",
+      "source_year": 2011,
+      "layer_id": 94,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/94",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 641,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "harrisburg_zoning_2011",
+      "source_name": "HarrisburgZoning_2011",
+      "jurisdiction": "Harrisburg",
+      "source_year": 2011,
+      "layer_id": 95,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/95",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 175,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2011",
+      "source_name": "KannapolisZoning_2011",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2011,
+      "layer_id": 96,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/96",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 1643,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CONDITIONA",
+          "type": "esriFieldTypeString",
+          "alias": "CONDITIONA",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "BASE_DISTR",
+        "CONDITIONA",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "zoning_district_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "locust_zoning_2011",
+      "source_name": "LocustZoning_2011",
+      "jurisdiction": "Locust",
+      "source_year": 2011,
+      "layer_id": 97,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/97",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 8,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeDouble",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID_1",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID_1",
+          "domain": null
+        },
+        {
+          "name": "ZONING",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING",
+          "length": 10,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "OBJECTID_1",
+        "ZONING",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONING"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "midland_zoning_2011",
+      "source_name": "MidlandZoning_2011",
+      "jurisdiction": "Midland",
+      "source_year": 2011,
+      "layer_id": 98,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/98",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 108,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "Zoning_Typ",
+          "type": "esriFieldTypeString",
+          "alias": "Zoning_Typ",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "Zoning_Typ",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "Zoning_Typ"
+      ],
+      "zoning_district_field_candidates": [
+        "Zoning_Typ"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "mt_pleasant_zoning_2011",
+      "source_name": "MtPleasantZoning_2011",
+      "jurisdiction": "Mt. Pleasant",
+      "source_year": 2011,
+      "layer_id": 99,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/99",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 126,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "county_zoning_2010",
+      "source_name": "CountyZoning_2010",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2010,
+      "layer_id": 105,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/105",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 353,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2010",
+      "source_name": "ConcordZoning_2010",
+      "jurisdiction": "Concord",
+      "source_year": 2010,
+      "layer_id": 107,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/107",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 640,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2010",
+      "source_name": "KannapolisZoning_2010",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2010,
+      "layer_id": 108,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/108",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 382,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CONDITIONA",
+          "type": "esriFieldTypeString",
+          "alias": "CONDITIONA",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "BASE_DISTR",
+        "CONDITIONA",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "zoning_district_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2009",
+      "source_name": "ConcordZoning2009",
+      "jurisdiction": "Concord",
+      "source_year": 2009,
+      "layer_id": 134,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/134",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 609,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "county_zoning_2009",
+      "source_name": "CountyZoning2009",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2009,
+      "layer_id": 135,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/135",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 348,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2009",
+      "source_name": "KannapolisZoning2009",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2009,
+      "layer_id": 136,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/136",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 347,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "CASE_NUMBE",
+          "type": "esriFieldTypeString",
+          "alias": "CASE_NUMBE",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "CASE_NUMBE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [
+        "CASE_NUMBE"
+      ],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": false,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_but_schema_review_required",
+      "notes": "Polygon layer has records but no clear zoning code field.",
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_zoning_2008",
+      "source_name": "CabarrusZoning2008",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2008,
+      "layer_id": 129,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/129",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 397,
+      "fields": [
+        {
+          "name": "SHAPE",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "SHAPE.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "SHAPE.STArea()",
+          "domain": null
+        },
+        {
+          "name": "SHAPE.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "SHAPE.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "SHAPE",
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "SHAPE.STArea()",
+        "SHAPE.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2007",
+      "source_name": "ConcordZoning2007",
+      "jurisdiction": "Concord",
+      "source_year": 2007,
+      "layer_id": 125,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/125",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 587,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_zoning_2007",
+      "source_name": "CabarrusZoning2007",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2007,
+      "layer_id": 126,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/126",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 393,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2007",
+      "source_name": "KannapolisZoning2007",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2007,
+      "layer_id": 127,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/127",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 347,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CONDITIONA",
+          "type": "esriFieldTypeString",
+          "alias": "CONDITIONA",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "BASE_DISTR",
+        "CONDITIONA",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "zoning_district_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2006",
+      "source_name": "ConcordZoning2006",
+      "jurisdiction": "Concord",
+      "source_year": 2006,
+      "layer_id": 120,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/120",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 587,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_zoning_2006",
+      "source_name": "CabarrusZoning2006",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2006,
+      "layer_id": 121,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/121",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 386,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2006",
+      "source_name": "KannapolisZoning2006",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2006,
+      "layer_id": 122,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/122",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 347,
+      "fields": [
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CONDITIONA",
+          "type": "esriFieldTypeString",
+          "alias": "CONDITIONA",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID",
+        "BASE_DISTR",
+        "CONDITIONA",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "zoning_district_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "concord_zoning_2005",
+      "source_name": "ConcordZoning2005",
+      "jurisdiction": "Concord",
+      "source_year": 2005,
+      "layer_id": 115,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/115",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 576,
+      "fields": [
+        {
+          "name": "OBJECTID_1",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID_1",
+          "domain": null
+        },
+        {
+          "name": "OBJECTID",
+          "type": "esriFieldTypeDouble",
+          "alias": "OBJECTID",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID_1",
+        "OBJECTID",
+        "ZONINGCODE",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE"
+      ],
+      "zoning_district_field_candidates": [],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "kannapolis_zoning_2005",
+      "source_name": "KannapolisZoning2005",
+      "jurisdiction": "Kannapolis",
+      "source_year": 2005,
+      "layer_id": 116,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/116",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 318,
+      "fields": [
+        {
+          "name": "OBJECTID_1",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID_1",
+          "domain": null
+        },
+        {
+          "name": "BASE_DISTR",
+          "type": "esriFieldTypeString",
+          "alias": "BASE_DISTR",
+          "length": 6,
+          "domain": null
+        },
+        {
+          "name": "CONDITIONA",
+          "type": "esriFieldTypeString",
+          "alias": "CONDITIONA",
+          "length": 16,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID_1",
+        "BASE_DISTR",
+        "CONDITIONA",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "zoning_district_field_candidates": [
+        "BASE_DISTR"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    },
+    {
+      "source_key": "cabarrus_zoning_2005",
+      "source_name": "CabarrusZoning2005",
+      "jurisdiction": "Cabarrus County / Unincorporated",
+      "source_year": 2005,
+      "layer_id": 117,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/117",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "geometry_type": "esriGeometryPolygon",
+      "spatial_reference": {
+        "wkid": 102719,
+        "latestWkid": 2264,
+        "xyTolerance": 0.0029802322429328676,
+        "zTolerance": 2,
+        "mTolerance": 2,
+        "falseX": -134225712.9102801,
+        "falseY": -101337230.93752107,
+        "xyUnits": 33059835.262158718,
+        "falseZ": 0,
+        "zUnits": 1,
+        "falseM": -100000,
+        "mUnits": 10000
+      },
+      "record_count": 378,
+      "fields": [
+        {
+          "name": "OBJECTID_1",
+          "type": "esriFieldTypeOID",
+          "alias": "OBJECTID_1",
+          "domain": null
+        },
+        {
+          "name": "ZONINGCODE",
+          "type": "esriFieldTypeString",
+          "alias": "ZONINGCODE",
+          "length": 20,
+          "domain": null
+        },
+        {
+          "name": "ZONING_GEN",
+          "type": "esriFieldTypeString",
+          "alias": "ZONING_GEN",
+          "length": 50,
+          "domain": null
+        },
+        {
+          "name": "Shape",
+          "type": "esriFieldTypeGeometry",
+          "alias": "Shape",
+          "domain": null
+        },
+        {
+          "name": "Shape.STArea()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STArea()",
+          "domain": null
+        },
+        {
+          "name": "Shape.STLength()",
+          "type": "esriFieldTypeDouble",
+          "alias": "Shape.STLength()",
+          "domain": null
+        }
+      ],
+      "field_names": [
+        "OBJECTID_1",
+        "ZONINGCODE",
+        "ZONING_GEN",
+        "Shape",
+        "Shape.STArea()",
+        "Shape.STLength()"
+      ],
+      "zoning_code_field_candidates": [
+        "ZONINGCODE",
+        "ZONING_GEN"
+      ],
+      "zoning_district_field_candidates": [
+        "ZONING_GEN"
+      ],
+      "case_number_field_candidates": [],
+      "date_field_candidates": [],
+      "query_supported": true,
+      "geometry_available": true,
+      "usable_for_historical_overlay": true,
+      "usable_for_change_detection": true,
+      "temporal_confidence": "source_year_layer_candidate",
+      "classification": "historical_time_safe_candidate",
+      "notes": "Historical polygon layer with a zoning field candidate.",
+      "error": null
+    }
+  ],
+  "classification_counts": {
+    "historical_but_schema_review_required": 1,
+    "historical_time_safe_candidate": 46
+  },
+  "years_available": [
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015
+  ],
+  "jurisdictions_by_year": {
+    "2005": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2006": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2007": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2008": [
+      "Cabarrus County / Unincorporated"
+    ],
+    "2009": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2010": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Kannapolis"
+    ],
+    "2011": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ],
+    "2012": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ],
+    "2013": [
+      "Concord",
+      "Harrisburg",
+      "Kannapolis"
+    ],
+    "2014": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ],
+    "2015": [
+      "Cabarrus County / Unincorporated",
+      "Concord",
+      "Harrisburg",
+      "Kannapolis",
+      "Locust",
+      "Midland",
+      "Mt. Pleasant"
+    ]
+  }
+}

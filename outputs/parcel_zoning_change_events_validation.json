@@ -1,0 +1,95 @@
+{
+  "created_at": "2026-06-13T09:47:46.092131+00:00",
+  "zoning_change_event_count": 32988,
+  "change_events_by_year": [
+    {
+      "change_year": 2006,
+      "event_count": 3282
+    },
+    {
+      "change_year": 2007,
+      "event_count": 789
+    },
+    {
+      "change_year": 2008,
+      "event_count": 19
+    },
+    {
+      "change_year": 2009,
+      "event_count": 7117
+    },
+    {
+      "change_year": 2010,
+      "event_count": 2415
+    },
+    {
+      "change_year": 2011,
+      "event_count": 12817
+    },
+    {
+      "change_year": 2012,
+      "event_count": 1035
+    },
+    {
+      "change_year": 2013,
+      "event_count": 944
+    },
+    {
+      "change_year": 2014,
+      "event_count": 1571
+    },
+    {
+      "change_year": 2015,
+      "event_count": 2999
+    }
+  ],
+  "change_types_detected": [
+    {
+      "zoning_change_type": "code_and_category_changed",
+      "event_count": 13144
+    },
+    {
+      "zoning_change_type": "jurisdiction_context_changed",
+      "event_count": 9167
+    },
+    {
+      "zoning_change_type": "zoning_code_changed",
+      "event_count": 9058
+    },
+    {
+      "zoning_change_type": "category_changed",
+      "event_count": 1619
+    }
+  ],
+  "zoning_intensity_change_distribution": [
+    {
+      "zoning_intensity_change": "lateral_or_code_only",
+      "event_count": 17055
+    },
+    {
+      "zoning_intensity_change": "review_required",
+      "event_count": 9365
+    },
+    {
+      "zoning_intensity_change": "increased",
+      "event_count": 3431
+    },
+    {
+      "zoning_intensity_change": "decreased",
+      "event_count": 3137
+    }
+  ],
+  "confidence_distribution": [
+    {
+      "confidence": "high",
+      "event_count": 25149
+    },
+    {
+      "confidence": "medium",
+      "event_count": 7839
+    }
+  ],
+  "review_required_count": 9365,
+  "temporal_status": "historical_map_change_detected_not_official_rezoning_case_history",
+  "sample_csv": "C:\\CabarrusFutureScape\\outputs\\parcel_zoning_change_events_sample.csv"
+}

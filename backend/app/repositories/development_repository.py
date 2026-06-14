@@ -2265,6 +2265,15 @@ class DevelopmentRepository:
                 "label_positive_rates": [],
                 "baseline_model_experiment_available": False,
                 "latest_experiment_id": None,
+                "zoning_enhanced_feature_matrix_available": False,
+                "zoning_enhanced_row_count": 0,
+                "zoning_enhanced_model_experiment_available": False,
+                "latest_zoning_enhanced_experiment_id": None,
+                "transportation_enhanced_feature_matrix_available": False,
+                "transportation_enhanced_row_count": 0,
+                "transportation_enhanced_model_experiment_available": False,
+                "latest_transportation_experiment_id": None,
+                "transportation_experiment_current_context_only": True,
                 "production_ready": False,
             }
 
@@ -2277,6 +2286,10 @@ class DevelopmentRepository:
         experiment_metadata = {
             "baseline_model_experiment_available": False,
             "latest_experiment_id": None,
+            "zoning_enhanced_model_experiment_available": False,
+            "latest_zoning_enhanced_experiment_id": None,
+            "transportation_enhanced_model_experiment_available": False,
+            "latest_transportation_experiment_id": None,
             "production_ready": False,
         }
         if score_table_status["score_table_available"]:
@@ -2301,6 +2314,115 @@ class DevelopmentRepository:
                     "latest_experiment_created_at": latest["latest_score_created_at"],
                     "production_ready": bool(latest["any_production_ready"]),
                 }
+            zoning_latest = self._fetch_one_or_none(
+                """
+                SELECT
+                  model_experiment_id,
+                  COUNT(*) AS score_row_count,
+                  MAX(score_created_at) AS latest_score_created_at,
+                  BOOL_OR(production_ready) AS any_production_ready
+                FROM public.development_prediction_model_experiment_scores
+                WHERE model_experiment_id = 'phase10e_zoning_enhanced_v1'
+                GROUP BY model_experiment_id
+                """,
+            )
+            if zoning_latest:
+                experiment_metadata.update(
+                    {
+                        "zoning_enhanced_model_experiment_available": True,
+                        "latest_zoning_enhanced_experiment_id": zoning_latest[
+                            "model_experiment_id"
+                        ],
+                        "zoning_enhanced_experiment_score_rows": zoning_latest[
+                            "score_row_count"
+                        ],
+                        "zoning_enhanced_experiment_created_at": zoning_latest[
+                            "latest_score_created_at"
+                        ],
+                        "production_ready": bool(experiment_metadata["production_ready"])
+                        or bool(zoning_latest["any_production_ready"]),
+                    },
+                )
+            transportation_latest = self._fetch_one_or_none(
+                """
+                SELECT
+                  model_experiment_id,
+                  COUNT(*) AS score_row_count,
+                  MAX(score_created_at) AS latest_score_created_at,
+                  BOOL_OR(production_ready) AS any_production_ready
+                FROM public.development_prediction_model_experiment_scores
+                WHERE model_experiment_id = 'phase13c_transportation_enhanced_v1'
+                GROUP BY model_experiment_id
+                """,
+            )
+            if transportation_latest:
+                experiment_metadata.update(
+                    {
+                        "transportation_enhanced_model_experiment_available": True,
+                        "latest_transportation_experiment_id": transportation_latest[
+                            "model_experiment_id"
+                        ],
+                        "transportation_enhanced_experiment_score_rows": transportation_latest[
+                            "score_row_count"
+                        ],
+                        "transportation_enhanced_experiment_created_at": transportation_latest[
+                            "latest_score_created_at"
+                        ],
+                        "production_ready": bool(experiment_metadata["production_ready"])
+                        or bool(transportation_latest["any_production_ready"]),
+                    },
+                )
+
+        zoning_table_status = self._fetch_one(
+            """
+            SELECT
+              to_regclass(
+                'public.parcel_development_prediction_features_zoning_enhanced'
+              ) IS NOT NULL AS zoning_enhanced_feature_matrix_available
+            """,
+        )
+        zoning_feature_metadata: dict[str, object] = {
+            "zoning_enhanced_feature_matrix_available": False,
+            "zoning_enhanced_row_count": 0,
+        }
+        if zoning_table_status["zoning_enhanced_feature_matrix_available"]:
+            zoning_feature_metadata = {
+                **zoning_table_status,
+                **self._fetch_one(
+                    """
+                    SELECT COUNT(*) AS zoning_enhanced_row_count
+                    FROM public.parcel_development_prediction_features_zoning_enhanced
+                    """,
+                ),
+            }
+
+        transportation_table_status = self._fetch_one(
+            """
+            SELECT
+              to_regclass(
+                'public.parcel_development_prediction_features_transportation_enhanced'
+              ) IS NOT NULL AS transportation_enhanced_feature_matrix_available
+            """,
+        )
+        transportation_feature_metadata: dict[str, object] = {
+            "transportation_enhanced_feature_matrix_available": False,
+            "transportation_enhanced_row_count": 0,
+            "transportation_experiment_current_context_only": True,
+        }
+        if transportation_table_status["transportation_enhanced_feature_matrix_available"]:
+            transportation_feature_metadata = {
+                **transportation_feature_metadata,
+                **transportation_table_status,
+                **self._fetch_one(
+                    """
+                    SELECT
+                      COUNT(*) AS transportation_enhanced_row_count,
+                      BOOL_AND(transportation_current_context_only_flag)
+                        AS transportation_experiment_current_context_only
+                    FROM public.parcel_development_prediction_features_transportation_enhanced
+                    """,
+                ),
+            }
 
         return {
             **self._fetch_one(
@@ -2388,6 +2510,423 @@ class DevelopmentRepository:
                 """,
             ),
             **experiment_metadata,
+            **zoning_feature_metadata,
+            **transportation_feature_metadata,
+        }
+
+    def get_prediction_ranking_summary(self) -> dict[str, object]:
+        ranking_table_status = self._fetch_one(
+            """
+            SELECT to_regclass('public.development_prediction_ranking_classes') IS NOT NULL
+              AS ranking_table_available
+            """,
+        )
+        explanation_table_status = self._fetch_one(
+            """
+            SELECT to_regclass('public.development_prediction_ranking_explanations') IS NOT NULL
+              AS explanation_table_available
+            """,
+        )
+        if not ranking_table_status["ranking_table_available"]:
+            return {
+                "ranking_available": False,
+                "experiment_id": None,
+                "ranking_row_count": 0,
+                "unique_parcel_count": 0,
+                "class_distribution": [],
+                "explanation_available": bool(
+                    explanation_table_status["explanation_table_available"],
+                ),
+                "explanation_row_count": 0,
+                "production_ready": False,
+                "public_exposure_allowed": False,
+                "prediction_probability_available": False,
+                "exact_probabilities_exposed": False,
+            }
+
+        latest = self._fetch_one_or_none(
+            """
+            SELECT
+              model_experiment_id,
+              COUNT(*) AS ranking_row_count,
+              COUNT(DISTINCT official_parcel_id) AS unique_parcel_count,
+              BOOL_OR(production_ready) AS any_production_ready,
+              BOOL_OR(public_exposure_allowed) AS any_public_exposure_allowed
+            FROM public.development_prediction_ranking_classes
+            GROUP BY model_experiment_id
+            ORDER BY MAX(created_at) DESC
+            LIMIT 1
+            """,
+        )
+        if latest is None:
+            return {
+                "ranking_available": False,
+                "experiment_id": None,
+                "ranking_row_count": 0,
+                "unique_parcel_count": 0,
+                "class_distribution": [],
+                "explanation_available": bool(
+                    explanation_table_status["explanation_table_available"],
+                ),
+                "explanation_row_count": 0,
+                "production_ready": False,
+                "public_exposure_allowed": False,
+                "prediction_probability_available": False,
+                "exact_probabilities_exposed": False,
+            }
+
+        class_distribution = self._fetch_all(
+            """
+            WITH total AS (
+              SELECT COUNT(*) AS total_rows
+              FROM public.development_prediction_ranking_classes
+              WHERE model_experiment_id = :experiment_id
+            )
+            SELECT
+              development_signal_class,
+              COUNT(*) AS row_count,
+              ROUND(COUNT(*) * 100.0 / NULLIF(total.total_rows, 0), 4)
+                AS pct_of_rows
+            FROM public.development_prediction_ranking_classes, total
+            WHERE model_experiment_id = :experiment_id
+            GROUP BY development_signal_class, total.total_rows
+            ORDER BY
+              CASE development_signal_class
+                WHEN 'very_high_development_signal' THEN 1
+                WHEN 'high_development_signal' THEN 2
+                WHEN 'moderate_development_signal' THEN 3
+                WHEN 'low_development_signal' THEN 4
+                ELSE 5
+              END
+            """,
+            {"experiment_id": latest["model_experiment_id"]},
+        )
+        explanation_count = 0
+        if explanation_table_status["explanation_table_available"]:
+            explanation_record = self._fetch_one(
+                """
+                SELECT COUNT(*) AS explanation_row_count
+                FROM public.development_prediction_ranking_explanations
+                WHERE model_experiment_id = :experiment_id
+                """,
+                {"experiment_id": latest["model_experiment_id"]},
+            )
+            explanation_count = int(explanation_record["explanation_row_count"] or 0)
+
+        return {
+            "ranking_available": True,
+            "experiment_id": latest["model_experiment_id"],
+            "ranking_row_count": latest["ranking_row_count"],
+            "unique_parcel_count": latest["unique_parcel_count"],
+            "class_distribution": class_distribution,
+            "explanation_available": explanation_count > 0,
+            "explanation_row_count": explanation_count,
+            "production_ready": bool(latest["any_production_ready"]),
+            "public_exposure_allowed": bool(latest["any_public_exposure_allowed"]),
+            "prediction_probability_available": False,
+            "exact_probabilities_exposed": False,
+        }
+
+    def get_transportation_accessibility_summary(self) -> dict[str, object]:
+        table_status = self._fetch_one(
+            """
+            SELECT
+              to_regclass('public.parcel_transportation_accessibility_features')
+                IS NOT NULL AS feature_table_available,
+              to_regclass('public.transportation_centerlines_clean')
+                IS NOT NULL AS road_table_available,
+              to_regclass('public.transportation_rail_clean')
+                IS NOT NULL AS rail_table_available
+            """,
+        )
+        if not table_status["feature_table_available"]:
+            return {
+                "feature_table_available": False,
+                "row_count": 0,
+                "unique_parcel_count": 0,
+                "expected_parcel_count": 0,
+                "row_count_matches_parcels": False,
+                "road_clean_rows": 0,
+                "rail_clean_rows": 0,
+                "rail_corridor_within_half_mile_count": 0,
+                "missing_major_road_classification_count": 0,
+                "distance_summary": [],
+                "missingness_summary": [],
+                "data_quality_distribution": [],
+            }
+
+        counts = self._fetch_one(
+            """
+            SELECT
+              COUNT(*) AS row_count,
+              COUNT(DISTINCT official_parcel_id) AS unique_parcel_count,
+              (SELECT COUNT(*) FROM public.parcels_enriched) AS expected_parcel_count,
+              COUNT(*) = (SELECT COUNT(*) FROM public.parcels_enriched)
+                AS row_count_matches_parcels,
+              COUNT(*) FILTER (WHERE rail_corridor_within_half_mile IS TRUE)
+                AS rail_corridor_within_half_mile_count,
+              COUNT(*) FILTER (WHERE distance_to_nearest_major_road_ft IS NULL)
+                AS missing_major_road_classification_count
+            FROM public.parcel_transportation_accessibility_features
+            """,
+        )
+        source_counts = {
+            "road_clean_rows": 0,
+            "rail_clean_rows": 0,
+        }
+        if table_status["road_table_available"]:
+            source_counts["road_clean_rows"] = self._fetch_one(
+                "SELECT COUNT(*) AS row_count FROM public.transportation_centerlines_clean",
+            )["row_count"]
+        if table_status["rail_table_available"]:
+            source_counts["rail_clean_rows"] = self._fetch_one(
+                "SELECT COUNT(*) AS row_count FROM public.transportation_rail_clean",
+            )["row_count"]
+
+        distance_summary = self._fetch_all(
+            """
+            SELECT
+              metric_name,
+              COUNT(value) AS non_null_count,
+              MIN(value) AS min_ft,
+              percentile_cont(0.25) WITHIN GROUP (ORDER BY value) AS p25_ft,
+              percentile_cont(0.5) WITHIN GROUP (ORDER BY value) AS median_ft,
+              percentile_cont(0.75) WITHIN GROUP (ORDER BY value) AS p75_ft,
+              percentile_cont(0.9) WITHIN GROUP (ORDER BY value) AS p90_ft,
+              MAX(value) AS max_ft,
+              AVG(value) AS avg_ft
+            FROM (
+              SELECT 'distance_to_nearest_road_ft' AS metric_name,
+                     distance_to_nearest_road_ft AS value
+              FROM public.parcel_transportation_accessibility_features
+              UNION ALL
+              SELECT 'distance_to_nearest_major_road_ft',
+                     distance_to_nearest_major_road_ft
+              FROM public.parcel_transportation_accessibility_features
+              UNION ALL
+              SELECT 'distance_to_nearest_rail_ft',
+                     distance_to_nearest_rail_ft
+              FROM public.parcel_transportation_accessibility_features
+            ) metrics
+            GROUP BY metric_name
+            ORDER BY metric_name
+            """,
+        )
+        missingness_summary = self._fetch_all(
+            """
+            WITH stats AS (
+              SELECT
+                COUNT(*) AS total_rows,
+                COUNT(*) FILTER (WHERE distance_to_nearest_road_ft IS NULL)
+                  AS distance_to_nearest_road_ft,
+                COUNT(*) FILTER (WHERE distance_to_nearest_major_road_ft IS NULL)
+                  AS distance_to_nearest_major_road_ft,
+                COUNT(*) FILTER (WHERE road_density_1000ft IS NULL) AS road_density_1000ft,
+                COUNT(*) FILTER (WHERE road_density_half_mile IS NULL) AS road_density_half_mile,
+                COUNT(*) FILTER (WHERE intersection_count_within_1000ft IS NULL)
+                  AS intersection_count_within_1000ft,
+                COUNT(*) FILTER (WHERE distance_to_nearest_rail_ft IS NULL)
+                  AS distance_to_nearest_rail_ft,
+                COUNT(*) FILTER (WHERE rail_corridor_within_half_mile IS NULL)
+                  AS rail_corridor_within_half_mile
+              FROM public.parcel_transportation_accessibility_features
+            )
+            SELECT
+              feature_name,
+              missing_count,
+              ROUND(missing_count * 100.0 / NULLIF(total_rows, 0), 4) AS missing_pct
+            FROM stats,
+            LATERAL (
+              VALUES
+                ('distance_to_nearest_road_ft', distance_to_nearest_road_ft),
+                ('distance_to_nearest_major_road_ft', distance_to_nearest_major_road_ft),
+                ('road_density_1000ft', road_density_1000ft),
+                ('road_density_half_mile', road_density_half_mile),
+                ('intersection_count_within_1000ft', intersection_count_within_1000ft),
+                ('distance_to_nearest_rail_ft', distance_to_nearest_rail_ft),
+                ('rail_corridor_within_half_mile', rail_corridor_within_half_mile)
+            ) AS v(feature_name, missing_count)
+            ORDER BY missing_pct DESC, feature_name
+            """,
+        )
+        data_quality_distribution = self._fetch_all(
+            """
+            SELECT transportation_accessibility_data_quality, COUNT(*) AS row_count
+            FROM public.parcel_transportation_accessibility_features
+            GROUP BY transportation_accessibility_data_quality
+            ORDER BY row_count DESC
+            """,
+        )
+        return {
+            "feature_table_available": True,
+            **counts,
+            **source_counts,
+            "distance_summary": distance_summary,
+            "missingness_summary": missingness_summary,
+            "data_quality_distribution": data_quality_distribution,
+        }
+
+    def get_transportation_plan_traffic_summary(self) -> dict[str, object]:
+        table_status = self._fetch_one(
+            """
+            SELECT
+              to_regclass('public.parcel_transportation_plan_traffic_features')
+                IS NOT NULL AS feature_table_available,
+              to_regclass('public.transportation_stip_projects_clean')
+                IS NOT NULL AS stip_table_available,
+              to_regclass('public.transportation_aadt_stations_clean')
+                IS NOT NULL AS aadt_table_available
+            """,
+        )
+        if not table_status["feature_table_available"]:
+            return {
+                "feature_table_available": False,
+                "row_count": 0,
+                "unique_parcel_count": 0,
+                "expected_parcel_count": 0,
+                "row_count_matches_parcels": False,
+                "stip_clean_rows": 0,
+                "aadt_clean_rows": 0,
+                "stip_project_within_half_mile_count": 0,
+                "stip_project_within_1_mile_count": 0,
+                "planned_transportation_investment_count": 0,
+                "current_context_only_count": 0,
+                "time_safe_for_training_count": 0,
+                "distribution_summary": [],
+                "missingness_summary": [],
+                "quality_distribution": [],
+            }
+
+        counts = self._fetch_one(
+            """
+            SELECT
+              COUNT(*) AS row_count,
+              COUNT(DISTINCT official_parcel_id) AS unique_parcel_count,
+              (SELECT COUNT(*) FROM public.parcels_enriched) AS expected_parcel_count,
+              COUNT(*) = (SELECT COUNT(*) FROM public.parcels_enriched)
+                AS row_count_matches_parcels,
+              COUNT(*) FILTER (WHERE stip_project_within_half_mile IS TRUE)
+                AS stip_project_within_half_mile_count,
+              COUNT(*) FILTER (WHERE stip_project_within_1_mile IS TRUE)
+                AS stip_project_within_1_mile_count,
+              COUNT(*) FILTER (WHERE planned_transportation_investment_flag IS TRUE)
+                AS planned_transportation_investment_count,
+              COUNT(*) FILTER (WHERE current_context_only IS TRUE)
+                AS current_context_only_count,
+              COUNT(*) FILTER (WHERE time_safe_for_training IS TRUE)
+                AS time_safe_for_training_count
+            FROM public.parcel_transportation_plan_traffic_features
+            """,
+        )
+        source_counts = {
+            "stip_clean_rows": 0,
+            "aadt_clean_rows": 0,
+        }
+        if table_status["stip_table_available"]:
+            source_counts["stip_clean_rows"] = self._fetch_one(
+                "SELECT COUNT(*) AS row_count FROM public.transportation_stip_projects_clean",
+            )["row_count"]
+        if table_status["aadt_table_available"]:
+            source_counts["aadt_clean_rows"] = self._fetch_one(
+                "SELECT COUNT(*) AS row_count FROM public.transportation_aadt_stations_clean",
+            )["row_count"]
+
+        distribution_summary = self._fetch_all(
+            """
+            SELECT
+              metric_name,
+              metric_unit,
+              COUNT(value) AS non_null_count,
+              MIN(value) AS min_value,
+              percentile_cont(0.25) WITHIN GROUP (ORDER BY value) AS p25_value,
+              percentile_cont(0.5) WITHIN GROUP (ORDER BY value) AS median_value,
+              percentile_cont(0.75) WITHIN GROUP (ORDER BY value) AS p75_value,
+              percentile_cont(0.9) WITHIN GROUP (ORDER BY value) AS p90_value,
+              MAX(value) AS max_value,
+              AVG(value) AS avg_value
+            FROM (
+              SELECT 'nearest_stip_project_distance_ft' AS metric_name,
+                     'feet' AS metric_unit,
+                     nearest_stip_project_distance_ft AS value
+              FROM public.parcel_transportation_plan_traffic_features
+              UNION ALL
+              SELECT 'nearest_aadt_station_distance_ft', 'feet',
+                     nearest_aadt_station_distance_ft
+              FROM public.parcel_transportation_plan_traffic_features
+              UNION ALL
+              SELECT 'nearest_aadt_value', 'vehicles_per_day',
+                     nearest_aadt_value::double precision
+              FROM public.parcel_transportation_plan_traffic_features
+              UNION ALL
+              SELECT 'max_aadt_within_1_mile', 'vehicles_per_day',
+                     max_aadt_within_1_mile::double precision
+              FROM public.parcel_transportation_plan_traffic_features
+            ) metrics
+            GROUP BY metric_name, metric_unit
+            ORDER BY metric_name
+            """,
+        )
+        missingness_summary = self._fetch_all(
+            """
+            WITH stats AS (
+              SELECT
+                COUNT(*) AS total_rows,
+                COUNT(*) FILTER (WHERE nearest_stip_project_distance_ft IS NULL)
+                  AS nearest_stip_project_distance_ft,
+                COUNT(*) FILTER (WHERE nearest_stip_project_year IS NULL)
+                  AS nearest_stip_project_year,
+                COUNT(*) FILTER (WHERE nearest_aadt_station_distance_ft IS NULL)
+                  AS nearest_aadt_station_distance_ft,
+                COUNT(*) FILTER (WHERE nearest_aadt_value IS NULL)
+                  AS nearest_aadt_value,
+                COUNT(*) FILTER (WHERE max_aadt_within_1_mile IS NULL)
+                  AS max_aadt_within_1_mile,
+                COUNT(*) FILTER (WHERE avg_aadt_within_1_mile IS NULL)
+                  AS avg_aadt_within_1_mile
+              FROM public.parcel_transportation_plan_traffic_features
+            )
+            SELECT
+              feature_name,
+              missing_count,
+              ROUND(missing_count * 100.0 / NULLIF(total_rows, 0), 4) AS missing_pct
+            FROM stats,
+            LATERAL (
+              VALUES
+                ('nearest_stip_project_distance_ft', nearest_stip_project_distance_ft),
+                ('nearest_stip_project_year', nearest_stip_project_year),
+                ('nearest_aadt_station_distance_ft', nearest_aadt_station_distance_ft),
+                ('nearest_aadt_value', nearest_aadt_value),
+                ('max_aadt_within_1_mile', max_aadt_within_1_mile),
+                ('avg_aadt_within_1_mile', avg_aadt_within_1_mile)
+            ) AS v(feature_name, missing_count)
+            ORDER BY missing_pct DESC, feature_name
+            """,
+        )
+        quality_distribution = self._fetch_all(
+            """
+            SELECT
+              'planned_transportation_context_quality' AS quality_type,
+              planned_transportation_context_quality AS quality,
+              COUNT(*) AS row_count
+            FROM public.parcel_transportation_plan_traffic_features
+            GROUP BY planned_transportation_context_quality
+            UNION ALL
+            SELECT
+              'traffic_demand_context_quality' AS quality_type,
+              traffic_demand_context_quality AS quality,
+              COUNT(*) AS row_count
+            FROM public.parcel_transportation_plan_traffic_features
+            GROUP BY traffic_demand_context_quality
+            ORDER BY quality_type, row_count DESC
+            """,
+        )
+        return {
+            "feature_table_available": True,
+            **counts,
+            **source_counts,
+            "distribution_summary": distribution_summary,
+            "missingness_summary": missingness_summary,
+            "quality_distribution": quality_distribution,
         }
 
     def _fetch_all(

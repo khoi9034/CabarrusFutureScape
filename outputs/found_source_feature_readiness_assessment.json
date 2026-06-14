@@ -1,0 +1,119 @@
+{
+  "generated_at": "2026-06-14T01:56:38.814112+00:00",
+  "model_active": false,
+  "overall_caveats": [
+    "Concord-only sources must not be treated as countywide.",
+    "No source is marked time-safe for historical training in Phase 13A.",
+    "Countywide small-area plan/future land use GIS outside Concord is still missing.",
+    "WSACC utility capacity/service-area GIS is still missing.",
+    "Local planned road projects beyond STIP are still missing."
+  ],
+  "phase": "13A_found_source_feature_readiness",
+  "prediction_probability_available": false,
+  "recommended_next_ingestion_phase": "Phase 13B should ingest one bounded source at a time, starting with Concord future land use overlay or STIP project proximity, while preserving jurisdiction/current-context caveats.",
+  "registry_version": "phase13a_found_planning_transportation_sources",
+  "source_count": 4,
+  "sources": [
+    {
+      "can_support_distance_proximity_features": true,
+      "can_support_parcel_overlay": true,
+      "can_support_temporal_features": false,
+      "caveats": [
+        "Concord only.",
+        "Does not replace countywide small-area plan or countywide future land use GIS.",
+        "Do not treat as countywide land-use context.",
+        "Jurisdiction-limited: Concord only."
+      ],
+      "current_context_only": true,
+      "feature_readiness_classification": "ready_but_current_context_only",
+      "fields_missing_for_modeling": [],
+      "fields_needed_for_modeling": [
+        "land use category",
+        "policy/growth category",
+        "polygon geometry",
+        "plan adoption/effective date if available"
+      ],
+      "jurisdiction_limited": true,
+      "recommended_ingestion_phase": "Phase 13B Concord future land-use overlay prototype",
+      "source_key": "concord_land_use_plan_2030",
+      "source_name": "City of Concord Land Use Plan 2030",
+      "time_safe_for_historical_model_training": false
+    },
+    {
+      "can_support_distance_proximity_features": true,
+      "can_support_parcel_overlay": false,
+      "can_support_temporal_features": true,
+      "caveats": [
+        "Does not include every local concept road, small intersection improvement, or plan-only local project.",
+        "Should be spatially filtered to Cabarrus County during future ingestion.",
+        "Not time-safe for historical model training unless project availability/adoption dates are aligned to snapshot years."
+      ],
+      "current_context_only": true,
+      "feature_readiness_classification": "ready_but_current_context_only",
+      "fields_missing_for_modeling": [
+        "status/funding/program field"
+      ],
+      "fields_needed_for_modeling": [
+        "project type",
+        "project status",
+        "funding/program year",
+        "geometry",
+        "route/project name"
+      ],
+      "jurisdiction_limited": false,
+      "recommended_ingestion_phase": "Phase 13C STIP transportation-project proximity features",
+      "source_key": "ncdot_stip_2026_2035",
+      "source_name": "NCDOT 2026-2035 STIP Projects",
+      "time_safe_for_historical_model_training": false
+    },
+    {
+      "can_support_distance_proximity_features": true,
+      "can_support_parcel_overlay": false,
+      "can_support_temporal_features": false,
+      "caveats": [
+        "Current station context unless historical AADT by year is available later.",
+        "Station proximity is a traffic-intensity proxy, not parcel-specific driveway traffic."
+      ],
+      "current_context_only": true,
+      "feature_readiness_classification": "ready_but_current_context_only",
+      "fields_missing_for_modeling": [],
+      "fields_needed_for_modeling": [
+        "AADT traffic count value",
+        "traffic count year",
+        "station geometry",
+        "route/station identifier"
+      ],
+      "jurisdiction_limited": false,
+      "recommended_ingestion_phase": "Phase 13D AADT station proximity and traffic-intensity features",
+      "source_key": "ncdot_aadt_traffic_counts",
+      "source_name": "NCDOT AADT Traffic Count Stations",
+      "time_safe_for_historical_model_training": false
+    },
+    {
+      "can_support_distance_proximity_features": true,
+      "can_support_parcel_overlay": false,
+      "can_support_temporal_features": true,
+      "caveats": [
+        "Concord only.",
+        "Does not replace countywide official rezoning approval history.",
+        "Case records should not be interpreted as final approvals without status/date field review.",
+        "Jurisdiction-limited: Concord only."
+      ],
+      "current_context_only": true,
+      "feature_readiness_classification": "ready_but_current_context_only",
+      "fields_missing_for_modeling": [],
+      "fields_needed_for_modeling": [
+        "case type",
+        "case status",
+        "case date/year",
+        "geometry",
+        "case identifier"
+      ],
+      "jurisdiction_limited": true,
+      "recommended_ingestion_phase": "Phase 13E Concord planning-case proximity and activity features",
+      "source_key": "concord_planning_cases",
+      "source_name": "Concord Planning Cases",
+      "time_safe_for_historical_model_training": false
+    }
+  ]
+}

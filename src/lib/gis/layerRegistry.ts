@@ -30,6 +30,12 @@ export const operationalLayerRegistry = mockOperationalLayers;
 
 export const futureServiceLayerRegistry = futureOperationalLayerPlaceholders;
 
+const legacyIntelligencePlaceholderLayerIds = new Set([
+  "opportunity-extrusions",
+  "development-pressure",
+  "scenario-envelope",
+]);
+
 export const completeOperationalLayerRegistry = [
   ...operationalLayerRegistry,
   ...futureServiceLayerRegistry,
@@ -84,6 +90,10 @@ export function isServiceBackedLayer(
 
 export function isLayerPlaceholder(layer: OperationalLayer) {
   return layer.sourceStatus === "placeholder" || layer.sourceStatus === "disabled";
+}
+
+export function isLayerVisibilityControllable(layer: OperationalLayer) {
+  return !legacyIntelligencePlaceholderLayerIds.has(layer.id);
 }
 
 export function hasValidServiceUrl(

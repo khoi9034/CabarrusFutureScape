@@ -1,0 +1,105 @@
+{
+  "registry_version": "phase12a_transportation_accessibility_source_inventory",
+  "purpose": "Inventory Cabarrus County transportation and accessibility sources for future development prediction feature planning.",
+  "policy": {
+    "inventory_only": true,
+    "do_not_ingest_full_geometries": true,
+    "do_not_build_prediction_features_yet": true,
+    "current_context_only_until_historical_or_project_dates_exist": true,
+    "rest_source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable."
+  },
+  "sources": [
+    {
+      "source_key": "cabarrus_county_centerlines_dedicated",
+      "source_name": "Cabarrus County Centerlines",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer",
+      "layer_id": 1,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+      "fallback_urls": [
+        "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/45",
+        "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+      ],
+      "source_type": "road_centerline",
+      "geometry_type": "polyline_expected",
+      "current_or_historical": "current_context",
+      "prediction_feature_role": "primary_current_road_accessibility_candidate",
+      "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable."
+    },
+    {
+      "source_key": "opendata_streets_centerline_legacy",
+      "source_name": "Legacy Opendata Streets Centerline",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "layer_id": 45,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/45",
+      "fallback_urls": [
+        "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+        "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer"
+      ],
+      "source_type": "road_centerline",
+      "geometry_type": "polyline_expected",
+      "current_or_historical": "current_context",
+      "prediction_feature_role": "fallback_or_comparison_road_accessibility_candidate",
+      "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable."
+    },
+    {
+      "source_key": "opendata_nc_railroad_centerline_legacy",
+      "source_name": "NC Railroad Centerline",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "layer_id": 43,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/43",
+      "fallback_urls": [
+        "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+      ],
+      "source_type": "rail_centerline",
+      "geometry_type": "polyline_expected",
+      "current_or_historical": "current_context",
+      "prediction_feature_role": "rail_proximity_candidate",
+      "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable."
+    },
+    {
+      "source_key": "opendata_nc_railroad_corridor_legacy",
+      "source_name": "NC Railroad Corridor",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "layer_id": 44,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/44",
+      "fallback_urls": [
+        "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+      ],
+      "source_type": "rail_corridor",
+      "geometry_type": "polygon_or_polyline_expected",
+      "current_or_historical": "current_context",
+      "prediction_feature_role": "rail_corridor_proximity_candidate",
+      "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable."
+    },
+    {
+      "source_key": "opendata_municipal_district_context",
+      "source_name": "Municipal District",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "layer_id": 0,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/0",
+      "fallback_urls": [
+        "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+      ],
+      "source_type": "context_boundary",
+      "geometry_type": "polygon_expected",
+      "current_or_historical": "current_context",
+      "prediction_feature_role": "context_inventory_only",
+      "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable."
+    },
+    {
+      "source_key": "opendata_cabarrus_county_boundary_context",
+      "source_name": "Cabarrus County Boundary",
+      "service_root_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer",
+      "layer_id": 1,
+      "full_layer_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer/1",
+      "fallback_urls": [
+        "https://location.cabarruscounty.us/arcgisservices/rest/services/opendata/MapServer"
+      ],
+      "source_type": "context_boundary",
+      "geometry_type": "polygon_expected",
+      "current_or_historical": "current_context",
+      "prediction_feature_role": "study_area_context_inventory_only",
+      "source_stability_note": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable."
+    }
+  ]
+}

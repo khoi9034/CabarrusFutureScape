@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import date
@@ -161,5 +162,18 @@ def test_phase10c_no_frontend_prediction_exposure() -> None:
     ]
     joined = "\n".join(path.read_text(encoding="utf-8", errors="ignore") for path in frontend_files)
 
+    allowed_aggregate_paths = {
+        "/development/prediction/features/summary",
+        "/development/prediction/ranking/summary",
+        "/development/prediction/transportation-accessibility/summary",
+        "/development/prediction/transportation-plan-traffic/summary",
+    }
+    referenced_prediction_paths = set(
+        re.findall(r'["`](/development/prediction[^"`?]*)', joined),
+    )
+
     assert "experimental_probability" not in joined
-    assert "/development/prediction" not in joined
+    joined_without_guardrail_flags = joined.replace("prediction_probability_available", "")
+    assert "prediction_probability" not in joined_without_guardrail_flags
+    assert referenced_prediction_paths <= allowed_aggregate_paths
+    assert "{official_parcel_id}" not in "\n".join(referenced_prediction_paths)

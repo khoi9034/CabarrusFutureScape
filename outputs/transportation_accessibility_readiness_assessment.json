@@ -1,0 +1,84 @@
+{
+  "best_candidate_road_centerline_source": "cabarrus_county_centerlines_dedicated",
+  "best_candidate_road_centerline_url": "https://location.cabarruscounty.us/arcgisservices/rest/services/OpenData/Cabarrus_County_Centerlines/MapServer/1",
+  "current_context_usability": "usable for current-context distance/proximity features after field mapping and geometry QA",
+  "generated_at": "2026-06-13T15:18:01.352331+00:00",
+  "overall_readiness_classification": "ready_for_basic_accessibility_features",
+  "rail_layers_reviewed": [
+    {
+      "limitations": [],
+      "readiness_classification": "ready_for_basic_accessibility_features",
+      "record_count": 63,
+      "source_key": "opendata_nc_railroad_centerline_legacy",
+      "source_name": "NC Railroad Centerline"
+    },
+    {
+      "limitations": [],
+      "readiness_classification": "ready_for_basic_accessibility_features",
+      "record_count": 1,
+      "source_key": "opendata_nc_railroad_corridor_legacy",
+      "source_name": "NC Railroad Corridor"
+    }
+  ],
+  "readiness_answers": {
+    "does_layer_include_highway_or_interchange_indicators": false,
+    "does_layer_include_road_class_function_type": true,
+    "does_layer_include_road_name": true,
+    "fields_missing_or_needing_mapping": [
+      "historical or dated road/project records for time-safe prediction",
+      "planned transportation project status, expected year, funding status, and geometry",
+      "confirmed highway/interchange indicator field"
+    ],
+    "geometry_good_enough_for_distance_calculations": true,
+    "internal_or_organizational_data_to_request_later": [
+      "adopted transportation plan project list",
+      "roadway widening project geometries and expected year",
+      "planned road extension geometries and expected year",
+      "intersection improvement project geometries and status",
+      "funding status and project phase",
+      "future land use and utility/service expansion plans where transportation-related"
+    ],
+    "supports_corridor_proximity_features": true,
+    "supports_parcel_to_road_distance_features": true,
+    "supports_rail_proximity_features": true,
+    "which_road_centerline_layer_is_most_authoritative": "Dedicated Cabarrus County Centerlines layer if available; legacy opendata Streets Centerline remains fallback/comparison."
+  },
+  "recommended_next_phase": "Phase 12B should ingest the selected road/rail geometries into staging tables and create parcel distance/proximity features with explicit current-context and time-safety flags.",
+  "registry_version": "phase12a_transportation_accessibility_source_inventory",
+  "rest_source_relocation_warning": "Cabarrus REST services may move during ongoing layer organization. If a URL fails, inspect service roots and update registry before marking unavailable.",
+  "road_centerline_layers_reviewed": [
+    {
+      "limitations": [],
+      "readiness_classification": "ready_for_basic_accessibility_features",
+      "record_count": 14455,
+      "road_name_field_candidates": [
+        "street",
+        "streettype",
+        "NameID"
+      ],
+      "route_or_road_class_field_candidates": [
+        "streettype",
+        "Category"
+      ],
+      "source_key": "cabarrus_county_centerlines_dedicated",
+      "source_name": "Cabarrus County Centerlines"
+    },
+    {
+      "limitations": [],
+      "readiness_classification": "ready_for_basic_accessibility_features",
+      "record_count": 14455,
+      "road_name_field_candidates": [
+        "street",
+        "streettype",
+        "NameID"
+      ],
+      "route_or_road_class_field_candidates": [
+        "streettype"
+      ],
+      "source_key": "opendata_streets_centerline_legacy",
+      "source_name": "Legacy Opendata Streets Centerline"
+    }
+  ],
+  "time_safe_caveat": "Road and rail layers are current-context unless historical centerlines or dated transportation project records are available.",
+  "time_safe_for_prediction": false
+}

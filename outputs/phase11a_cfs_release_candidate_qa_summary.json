@@ -1,0 +1,161 @@
+{
+  "phase": "11A",
+  "generated_at": "2026-06-13T09:20:00-04:00",
+  "branch": "main",
+  "files_changed": [
+    "docs/demo/cfs_release_candidate_notes.md",
+    "docs/demo/cfs_demo_script.md",
+    "docs/demo/cfs_known_limitations.md",
+    "outputs/phase11a_cfs_release_candidate_qa_summary.json",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/data/mock/layersMockData.ts"
+  ],
+  "runtime_checks": {
+    "npm_run_dev_cfs": "passed",
+    "frontend_url": {
+      "url": "http://localhost:3000",
+      "status": 200
+    },
+    "backend_url": {
+      "url": "http://127.0.0.1:8000",
+      "status": 200
+    },
+    "health": {
+      "endpoint": "/health",
+      "status": 200
+    },
+    "database_health": {
+      "endpoint": "/health/database",
+      "status": 200
+    }
+  },
+  "apis_checked": {
+    "/parcels/search?q=CFS-PARCEL-0149726579": 200,
+    "/parcels/CFS-PARCEL-0149726579?include_geometry=true": 200,
+    "/development/statistics": 200,
+    "/development/hotspots?limit=1": 200,
+    "/development/new-construction/statistics": 200,
+    "/development/prediction/features/summary": 200,
+    "/development/prediction/ranking/summary": 200,
+    "/constraints/flood/summary": 200,
+    "/constraints/flood/zones?limit=1": 200,
+    "/constraints/schools/statistics": 200,
+    "/constraints/schools/utilization-seed": 200
+  },
+  "modes_checked": {
+    "overview": {
+      "status": "passed",
+      "notes": [
+        "Overview loaded with selected parcel after top search selection.",
+        "Active selection overlay updated and no longer showed No parcel selected.",
+        "No API failure text or prediction probability wording was visible."
+      ]
+    },
+    "due_diligence": {
+      "status": "passed",
+      "notes": [
+        "Selected parcel deep dive loaded live parcel data.",
+        "Development activity and permit events loaded.",
+        "Flood context loaded.",
+        "School assignment loaded with presentation-derived utilization caveat.",
+        "No not-found panel appeared for the valid parcel."
+      ]
+    },
+    "methodology": {
+      "status": "passed",
+      "notes": [
+        "Methodology workspace loaded without SceneView visible.",
+        "Development Prediction Research Status appeared.",
+        "Aggregate ranking distribution appeared only as aggregate counts.",
+        "Internal-only, not-production-ready, no-probability wording was visible."
+      ]
+    },
+    "executive_print": {
+      "status": "passed",
+      "notes": [
+        "Executive Print loaded selected parcel report content.",
+        "Parcel, development, constraint, and latest permit sections appeared.",
+        "No prediction probabilities or production-ready model wording appeared."
+      ]
+    }
+  },
+  "selected_parcel_workflow_status": {
+    "parcel_tested": "CFS-PARCEL-0149726579",
+    "top_search_status": "passed",
+    "result_source": "API Search",
+    "selected_parcel_card_loads": true,
+    "active_selection_overlay_updates": true,
+    "parcel_cage_or_boundary_status_visible": true,
+    "zoning_context_visible": true,
+    "flood_context_visible": true,
+    "permit_development_context_visible": true,
+    "school_assignment_visible": true,
+    "presentation_utilization_caveated": true,
+    "valid_parcel_not_found_panel_visible": false,
+    "new_construction_context_note": "New construction statistics endpoint is live. The selected parcel workflow currently surfaces permit events and permit segmentation rather than a separate selected-parcel new-construction label panel."
+  },
+  "map_layer_qa_status": {
+    "layer_registry_visible": true,
+    "controls_visible": [
+      "Development Hotspots",
+      "Flood Constraints",
+      "FEMA Flood Zones",
+      "School Utilization Seed",
+      "Parcel Intelligence",
+      "County Boundary"
+    ],
+    "api_layer_endpoints_healthy": true,
+    "development_hotspots": "Control visible; endpoint healthy; requires permit segment selection before rendering concentration markers.",
+    "flood_constraints": "Control visible; endpoint healthy; legend explains severe/high/moderate markers.",
+    "fema_flood_zones": "Control visible; endpoint healthy; legend and severity/limit controls visible.",
+    "school_utilization_seed": "Control visible; endpoint healthy; legend and caveat wording visible.",
+    "county_boundary": "Visible by default as the operating extent reference.",
+    "parcel_intelligence": "Available as a reference layer, off by default.",
+    "mock_scenario_nodes_visible": false,
+    "internal_blue_boundary_visible": false,
+    "visual_cleanup_applied": [
+      "Visible layer source badges now display API, Reference, Placeholder, or Disabled instead of raw mock status.",
+      "Legacy layer descriptions were softened to reference or placeholder language for demo clarity."
+    ],
+    "remaining_manual_check": "A click-by-click automated layer toggle pass was partially limited by in-app browser navigation timeouts after the main mode checks. API health and visible controls were verified; do a final human visual toggle pass immediately before a live demo."
+  },
+  "model_safety_status": {
+    "prediction_openapi_paths": [
+      "/development/prediction/features/summary",
+      "/development/prediction/ranking/summary"
+    ],
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false,
+    "public_exposure_allowed": false,
+    "exact_probabilities_exposed": false,
+    "no_parcel_level_scores": true,
+    "frontend_parcel_level_predictions_visible": false,
+    "frontend_parcel_level_ranking_classes_visible": false,
+    "methodology_aggregate_only_status_visible": true,
+    "approved_wording_visible": [
+      "Internal research only",
+      "Internal ranking research and model QA",
+      "Weak Probability Calibration",
+      "Not available",
+      "Not allowed"
+    ]
+  },
+  "documentation_added": [
+    "docs/demo/cfs_release_candidate_notes.md",
+    "docs/demo/cfs_demo_script.md",
+    "docs/demo/cfs_known_limitations.md"
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not run because Phase 11A did not change backend code"
+  },
+  "remaining_blockers": [
+    "Run a final human visual toggle pass for Development Hotspots, Flood Constraints, FEMA Flood Zones, and School Utilization Seed immediately before a live stakeholder demo.",
+    "Selected parcel new-construction context is available through existing permit events/statistics, but not yet as a dedicated selected-parcel new-construction label card.",
+    "Placeholder readiness layers remain conceptual and should be presented carefully."
+  ],
+  "recommended_next_phase": "Phase 11B: release-candidate polish pass focused on final manual visual QA, optional screenshot capture, and commit packaging for the demo branch/main."
+}

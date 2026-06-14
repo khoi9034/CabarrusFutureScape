@@ -1,0 +1,24 @@
+{
+  "experiment_id": "phase10e_zoning_enhanced_v1",
+  "ranking_table": "public.development_prediction_ranking_classes",
+  "explanation_table": "public.development_prediction_ranking_explanations",
+  "ranking_row_count": 110017,
+  "unique_parcels": 110017,
+  "explanation_row_count": 110017,
+  "class_distribution": {
+    "high_development_signal": 4400,
+    "low_development_signal": 93514,
+    "moderate_development_signal": 11002,
+    "very_high_development_signal": 1101
+  },
+  "top_1_percent_count": 1101,
+  "top_5_percent_count": 5501,
+  "top_15_percent_count": 16503,
+  "production_ready_rows": 0,
+  "public_exposure_allowed_rows": 0,
+  "missing_explanation_count": 0,
+  "exact_probabilities_exposed": false,
+  "production_ready": false,
+  "public_exposure_allowed": false,
+  "caveat": "internal_ranking_research_not_for_public_decision"
+}

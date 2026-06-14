@@ -1,0 +1,115 @@
+{
+  "row_count": 1430221,
+  "unique_parcel_count": 110017,
+  "min_snapshot_year": 2014,
+  "max_snapshot_year": 2026,
+  "snapshot_year_count": 13,
+  "transportation_accessibility_joined_count": 1430221,
+  "transportation_plan_traffic_joined_count": 1430221,
+  "transportation_current_context_only_count": 1430221,
+  "transportation_time_safe_for_training_count": 0,
+  "planned_transportation_investment_count": 536107,
+  "stip_project_within_half_mile_count": 251186,
+  "stip_project_within_1_mile_count": 536107,
+  "base_zoning_enhanced_row_count": 1430221,
+  "row_count_matches_zoning_enhanced_matrix": true,
+  "duplicate_parcel_year_groups": 0,
+  "snapshot_year_summary": [
+    {
+      "snapshot_year": 2014,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2015,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2016,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2017,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2018,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2019,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2020,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2021,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2022,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2023,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2024,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2025,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    },
+    {
+      "snapshot_year": 2026,
+      "row_count": 110017,
+      "current_context_rows": 110017,
+      "time_safe_rows": 0,
+      "planned_transportation_investment_rows": 41239
+    }
+  ],
+  "current_context_only": true,
+  "time_safe_for_training": false,
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false
+}

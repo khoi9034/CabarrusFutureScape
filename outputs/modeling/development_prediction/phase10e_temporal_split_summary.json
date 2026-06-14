@@ -1,0 +1,140 @@
+{
+  "experiment_id": "phase10e_zoning_enhanced_v1",
+  "target": "new_construction_next_3yr",
+  "mature_snapshot_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022
+  ],
+  "excluded_snapshot_years": [
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "temporal_split": {
+    "train_years": [
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019
+    ],
+    "validation_years": [
+      2020,
+      2021
+    ],
+    "test_years": [
+      2022
+    ]
+  },
+  "feature_sets": {
+    "baseline": [
+      "permits_prior_1yr",
+      "permits_prior_3yr",
+      "permits_prior_5yr",
+      "major_permits_prior_3yr",
+      "residential_growth_permits_prior_3yr",
+      "commercial_activity_permits_prior_3yr",
+      "redevelopment_permits_prior_3yr",
+      "demolition_permits_prior_3yr",
+      "new_construction_permits_prior_1yr",
+      "new_construction_permits_prior_3yr",
+      "new_construction_permits_prior_5yr",
+      "residential_new_construction_prior_3yr",
+      "commercial_new_construction_prior_3yr",
+      "completed_new_construction_prior_3yr",
+      "active_uncompleted_new_construction_prior_3yr",
+      "years_since_last_permit",
+      "years_since_last_new_construction",
+      "had_prior_major_development_flag"
+    ],
+    "zoning_enhanced": [
+      "permits_prior_1yr",
+      "permits_prior_3yr",
+      "permits_prior_5yr",
+      "major_permits_prior_3yr",
+      "residential_growth_permits_prior_3yr",
+      "commercial_activity_permits_prior_3yr",
+      "redevelopment_permits_prior_3yr",
+      "demolition_permits_prior_3yr",
+      "new_construction_permits_prior_1yr",
+      "new_construction_permits_prior_3yr",
+      "new_construction_permits_prior_5yr",
+      "residential_new_construction_prior_3yr",
+      "commercial_new_construction_prior_3yr",
+      "completed_new_construction_prior_3yr",
+      "active_uncompleted_new_construction_prior_3yr",
+      "years_since_last_permit",
+      "years_since_last_new_construction",
+      "zoning_source_age_years",
+      "zoning_change_count_prior_5yr",
+      "years_since_last_zoning_change",
+      "had_prior_major_development_flag",
+      "zoning_exact_year_flag",
+      "zoning_prior_available_year_flag",
+      "zoning_history_available_flag",
+      "zoning_changed_prior_1yr",
+      "zoning_changed_prior_3yr",
+      "zoning_changed_prior_5yr",
+      "zoning_intensity_increased_prior_5yr",
+      "zoning_intensity_decreased_prior_5yr",
+      "rezoned_to_growth_supportive_prior_5yr",
+      "zoning_map_change_only_flag",
+      "historical_zoning_code",
+      "historical_zoning_general_category",
+      "historical_zoning_jurisdiction",
+      "zoning_temporal_status",
+      "latest_zoning_change_type",
+      "latest_zoning_intensity_change",
+      "zoning_change_confidence"
+    ]
+  },
+  "model_active": false,
+  "prediction_probability_available": false,
+  "production_ready": false,
+  "rows": {
+    "baseline": {
+      "train": {
+        "row_count": 660102,
+        "positive_count": 26695,
+        "positive_rate": 0.040441
+      },
+      "validation": {
+        "row_count": 220034,
+        "positive_count": 8611,
+        "positive_rate": 0.039135
+      },
+      "test": {
+        "row_count": 110017,
+        "positive_count": 4216,
+        "positive_rate": 0.038321
+      }
+    },
+    "zoning_enhanced": {
+      "train": {
+        "row_count": 660102,
+        "positive_count": 26695,
+        "positive_rate": 0.040441
+      },
+      "validation": {
+        "row_count": 220034,
+        "positive_count": 8611,
+        "positive_rate": 0.039135
+      },
+      "test": {
+        "row_count": 110017,
+        "positive_count": 4216,
+        "positive_rate": 0.038321
+      }
+    }
+  },
+  "max_observed_new_construction_permit_date": "2026-06-11"
+}

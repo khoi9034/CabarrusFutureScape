@@ -1,0 +1,1055 @@
+[
+  {
+    "can_support_distance_proximity_features": true,
+    "can_support_parcel_overlay": true,
+    "can_support_temporal_features": false,
+    "caveats": [
+      "Concord only.",
+      "Does not replace countywide small-area plan or countywide future land use GIS.",
+      "Do not treat as countywide land-use context."
+    ],
+    "current_context_only": true,
+    "current_or_future_context": "current_context_adopted_plan",
+    "date_year_fields": [],
+    "extent": {
+      "spatialReference": {
+        "falseM": 0,
+        "falseX": -121841900,
+        "falseY": -93659000,
+        "falseZ": 0,
+        "latestWkid": 6543,
+        "mTolerance": 0.001,
+        "mUnits": 1,
+        "wkid": 103122,
+        "xyTolerance": 0.003280833333333333,
+        "xyUnits": 3048.0060960121928,
+        "zTolerance": 0.001,
+        "zUnits": 1
+      },
+      "xmax": 1560689.6214924753,
+      "xmin": 1473645.9966955483,
+      "ymax": 634487.0619269013,
+      "ymin": 564697.1207983941
+    },
+    "fallback_notes": "If this layer moves, inspect the Concord Planning_Webmap_Public_MIL1 service root before marking unavailable.",
+    "feature_group": "planning_policy_context_features",
+    "feature_readiness_classification": "ready_but_current_context_only",
+    "field_names": [
+      "OBJECTID",
+      "Code",
+      "Category",
+      "ApplicableZoning",
+      "Shape",
+      "Shape.STArea()",
+      "Shape.STLength()"
+    ],
+    "fields": [
+      {
+        "alias": "OBJECTID",
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "Code",
+        "name": "Code",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Category",
+        "name": "Category",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "ApplicableZoning",
+        "name": "ApplicableZoning",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Shape",
+        "name": "Shape",
+        "type": "esriFieldTypeGeometry"
+      },
+      {
+        "alias": "Shape.STArea()",
+        "name": "Shape.STArea()",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "Shape.STLength()",
+        "name": "Shape.STLength()",
+        "type": "esriFieldTypeDouble"
+      }
+    ],
+    "fields_missing_for_modeling": [],
+    "fields_needed_for_modeling": [
+      "land use category",
+      "policy/growth category",
+      "polygon geometry",
+      "plan adoption/effective date if available"
+    ],
+    "geography_scope": "concord_only",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPolygon",
+    "inspected_at": "2026-06-14T01:56:37.348830+00:00",
+    "jurisdiction": "Concord",
+    "jurisdiction_limited": true,
+    "jurisdiction_municipality_fields": [],
+    "land_use_category_fields": [
+      "Category"
+    ],
+    "layer_id": 48,
+    "layer_name": "Land Use Plan 2030",
+    "limitations": [
+      "Concord only.",
+      "Does not replace countywide small-area plan or countywide future land use GIS.",
+      "Do not treat as countywide land-use context.",
+      "Jurisdiction-limited: Concord only."
+    ],
+    "model_use_status": "future_candidate_current_context_only",
+    "project_case_type_fields": [
+      "Category"
+    ],
+    "query_supported": true,
+    "recommended_ingestion_phase": "Phase 13B Concord future land-use overlay prototype",
+    "record_count": 307,
+    "sample_features": [
+      {
+        "ApplicableZoning": "AG; RE; RL; RM-1; RM-2; RV; RC; O-I; B-1; CC; C-2; I-1; I-2",
+        "Category": "Civic-Institutional",
+        "Code": "CI",
+        "OBJECTID": 5351,
+        "Shape.STArea()": 3561647.8999615074,
+        "Shape.STLength()": 7587.038639584178
+      },
+      {
+        "ApplicableZoning": "RV; O-I; TND; MX-NC; MX-CC1; PRD; C-1; C-2; PUD; TOD",
+        "Category": "Village Center",
+        "Code": "VC",
+        "OBJECTID": 5352,
+        "Shape.STArea()": 3174017.7618527873,
+        "Shape.STLength()": 11948.62723433928
+      },
+      {
+        "ApplicableZoning": "RV; O-I; TND; MX-NC; MX-CC1; PRD; C-1; C-2; PUD; TOD",
+        "Category": "Village Center",
+        "Code": "VC",
+        "OBJECTID": 5353,
+        "Shape.STArea()": 8056503.274226216,
+        "Shape.STLength()": 23047.20911386864
+      }
+    ],
+    "service_type": "arcgis_mapserver_layer",
+    "source_key": "concord_land_use_plan_2030",
+    "source_name": "City of Concord Land Use Plan 2030",
+    "source_relocation_warning": "Cabarrus and partner REST services may move during ongoing layer organization. If a URL fails, inspect service roots, layer IDs, and fallback notes before marking unavailable.",
+    "source_role": "future_land_use_context_and_planning_policy_alignment",
+    "source_status": "available",
+    "source_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/48",
+    "spatial_reference": {
+      "latestWkid": 6543,
+      "wkid": 103122
+    },
+    "status_fields": [],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "time_safe_for_historical_model_training": false,
+    "time_safe_for_historical_training": false,
+    "traffic_count_fields": []
+  },
+  {
+    "can_support_distance_proximity_features": true,
+    "can_support_parcel_overlay": false,
+    "can_support_temporal_features": true,
+    "caveats": [
+      "Does not include every local concept road, small intersection improvement, or plan-only local project.",
+      "Should be spatially filtered to Cabarrus County during future ingestion.",
+      "Not time-safe for historical model training unless project availability/adoption dates are aligned to snapshot years."
+    ],
+    "current_context_only": true,
+    "current_or_future_context": "planned_funded_project_context",
+    "date_year_fields": [
+      "ConstructionYear",
+      "RightOfWayYear"
+    ],
+    "extent": {
+      "spatialReference": {
+        "falseM": -100000,
+        "falseX": -121841900,
+        "falseY": -93659000,
+        "falseZ": -100000,
+        "latestWkid": 2264,
+        "mTolerance": 0.001,
+        "mUnits": 10000,
+        "wkid": 102719,
+        "xyTolerance": 0.003280833333333333,
+        "xyUnits": 3048.0060960121928,
+        "zTolerance": 0.001,
+        "zUnits": 10000
+      },
+      "xmax": 3006261.270041555,
+      "xmin": 473667.7400943935,
+      "ymax": 1029610.1037002206,
+      "ymin": 48841.36871930957
+    },
+    "fallback_notes": "If this layer moves, inspect NCDOT STIP service roots and published item metadata before marking unavailable.",
+    "feature_group": "transportation_accessibility_features",
+    "feature_readiness_classification": "ready_but_current_context_only",
+    "field_names": [
+      "OBJECTID",
+      "TIP",
+      "SPOTID",
+      "Route",
+      "Description",
+      "Category",
+      "Mode",
+      "RightOfWayYear",
+      "ConstructionYear",
+      "COMMENT",
+      "ProjectCost",
+      "Symbology",
+      "Counties",
+      "Divisions",
+      "MPOsRPOs",
+      "SHAPE",
+      "SHAPE.STLength()"
+    ],
+    "fields": [
+      {
+        "alias": "OBJECTID",
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "TIP",
+        "name": "TIP",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "SPOTID",
+        "name": "SPOTID",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Route",
+        "name": "Route",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Description",
+        "name": "Description",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Category",
+        "name": "Category",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Mode",
+        "name": "Mode",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Right Of Way Year",
+        "name": "RightOfWayYear",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "ConstructionYear",
+        "name": "ConstructionYear",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "COMMENT",
+        "name": "COMMENT",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Project Cost",
+        "name": "ProjectCost",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "Symbology",
+        "name": "Symbology",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Counties",
+        "name": "Counties",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Divisions",
+        "name": "Divisions",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "MPOsRPOs",
+        "name": "MPOsRPOs",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "SHAPE",
+        "name": "SHAPE",
+        "type": "esriFieldTypeGeometry"
+      },
+      {
+        "alias": "SHAPE.STLength()",
+        "name": "SHAPE.STLength()",
+        "type": "esriFieldTypeDouble"
+      }
+    ],
+    "fields_missing_for_modeling": [
+      "status/funding/program field"
+    ],
+    "fields_needed_for_modeling": [
+      "project type",
+      "project status",
+      "funding/program year",
+      "geometry",
+      "route/project name"
+    ],
+    "geography_scope": "statewide_filter_to_cabarrus_later",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPolyline",
+    "inspected_at": "2026-06-14T01:56:37.854360+00:00",
+    "jurisdiction": "North Carolina DOT",
+    "jurisdiction_limited": false,
+    "jurisdiction_municipality_fields": [
+      "Divisions"
+    ],
+    "land_use_category_fields": [
+      "Category"
+    ],
+    "layer_id": 1,
+    "layer_name": "2026-2035 STIP Lines",
+    "limitations": [
+      "Does not include every local concept road, small intersection improvement, or plan-only local project.",
+      "Should be spatially filtered to Cabarrus County during future ingestion.",
+      "Not time-safe for historical model training unless project availability/adoption dates are aligned to snapshot years."
+    ],
+    "model_use_status": "future_candidate_current_future_context",
+    "project_case_type_fields": [
+      "Route",
+      "Description",
+      "Category",
+      "ProjectCost"
+    ],
+    "query_supported": true,
+    "recommended_ingestion_phase": "Phase 13C STIP transportation-project proximity features",
+    "record_count": 1245,
+    "sample_features": [
+      {
+        "COMMENT": "UNDER CONSTRUCTION.",
+        "Category": "EX",
+        "ConstructionYear": "2022",
+        "Counties": "Graham",
+        "Description": "South of SR 1275 (Five Point Road) to NC 143; US 129 to SR 1223 (Beech Creek Road). Upgrade roadway.",
+        "Divisions": "14",
+        "MPOsRPOs": "Southwestern RPO",
+        "Mode": "HIGHWAY",
+        "OBJECTID": 1,
+        "ProjectCost": 57052.0,
+        "RightOfWayYear": "2021",
+        "Route": "US 129; NC 143",
+        "SHAPE.STLength()": 21866.116425158267,
+        "SPOTID": "",
+        "Symbology": "Ex Highway",
+        "TIP": "A-0009CA"
+      },
+      {
+        "COMMENT": "UNDER CONSTRUCTION.",
+        "Category": "EX",
+        "ConstructionYear": "2022",
+        "Counties": "Graham",
+        "Description": "SR 1223 (Beech Creek Road) to north of Appalachian Trail. Upgrade roadway.",
+        "Divisions": "14",
+        "MPOsRPOs": "Southwestern RPO",
+        "Mode": "HIGHWAY",
+        "OBJECTID": 2,
+        "ProjectCost": 138471.0,
+        "RightOfWayYear": "2021",
+        "Route": "NC 143",
+        "SHAPE.STLength()": 20669.139097796833,
+        "SPOTID": "",
+        "Symbology": "Ex Highway",
+        "TIP": "A-0009CB"
+      },
+      {
+        "COMMENT": "UNDER CONSTRUCTION.",
+        "Category": "EX",
+        "ConstructionYear": "2023",
+        "Counties": "Graham",
+        "Description": "North of Appalachian Trail to NC 28; NC 143 to west of SR 1228 (Stecoah Road). Upgrade roadway.",
+        "Divisions": "14",
+        "MPOsRPOs": "Southwestern RPO",
+        "Mode": "HIGHWAY",
+        "OBJECTID": 3,
+        "ProjectCost": 80350.0,
+        "RightOfWayYear": "2021",
+        "Route": "NC 143; NC 28",
+        "SHAPE.STLength()": 12661.199072496283,
+        "SPOTID": "",
+        "Symbology": "Ex Highway",
+        "TIP": "A-0009CC"
+      }
+    ],
+    "service_type": "arcgis_mapserver_layer",
+    "source_key": "ncdot_stip_2026_2035",
+    "source_name": "NCDOT 2026-2035 STIP Projects",
+    "source_relocation_warning": "Cabarrus and partner REST services may move during ongoing layer organization. If a URL fails, inspect service roots, layer IDs, and fallback notes before marking unavailable.",
+    "source_role": "planned_funded_transportation_project_context",
+    "source_status": "available",
+    "source_url": "https://gis11.services.ncdot.gov/arcgis/rest/services/NCDOT_STIP/MapServer/1",
+    "spatial_reference": null,
+    "status_fields": [],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "time_safe_for_historical_model_training": false,
+    "time_safe_for_historical_training": false,
+    "traffic_count_fields": []
+  },
+  {
+    "can_support_distance_proximity_features": true,
+    "can_support_parcel_overlay": false,
+    "can_support_temporal_features": false,
+    "caveats": [
+      "Current station context unless historical AADT by year is available later.",
+      "Station proximity is a traffic-intensity proxy, not parcel-specific driveway traffic."
+    ],
+    "current_context_only": true,
+    "current_or_future_context": "current_traffic_demand_context",
+    "date_year_fields": [],
+    "extent": {
+      "spatialReference": {
+        "latestVcsWkid": 6360,
+        "latestWkid": 2264,
+        "vcsWkid": 105703,
+        "wkid": 102719
+      },
+      "xmax": 3072229.4060712936,
+      "xmin": 385391.60780676093,
+      "ymax": 1071035.861664825,
+      "ymin": 43329.68956124851
+    },
+    "fallback_notes": "If this layer moves, inspect NCDOT ArcGIS Online AADT station services before marking unavailable.",
+    "feature_group": "transportation_accessibility_features",
+    "feature_readiness_classification": "ready_but_current_context_only",
+    "field_names": [
+      "FID",
+      "LocationID",
+      "COUNTY",
+      "RTE_CLS",
+      "ROUTE",
+      "LOCATION",
+      "AADT_2002",
+      "AADT_2003",
+      "AADT_2004",
+      "AADT_2005",
+      "AADT_2006",
+      "AADT_2007",
+      "AADT_2008",
+      "AADT_2009",
+      "AADT_2010",
+      "AADT_2011",
+      "AADT_2012",
+      "AADT_2013",
+      "AADT_2014",
+      "AADT_2015",
+      "AADT_2016",
+      "AADT_2017",
+      "AADT_2018",
+      "AADT_2019",
+      "AADT_2020",
+      "AADT_2021",
+      "AADT_2022"
+    ],
+    "fields": [
+      {
+        "alias": "FID",
+        "name": "FID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "LocationID",
+        "name": "LocationID",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "COUNTY",
+        "name": "COUNTY",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "RTE_CLS",
+        "name": "RTE_CLS",
+        "type": "esriFieldTypeDouble"
+      },
+      {
+        "alias": "ROUTE",
+        "name": "ROUTE",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "LOCATION",
+        "name": "LOCATION",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2002",
+        "name": "AADT_2002",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2003",
+        "name": "AADT_2003",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2004",
+        "name": "AADT_2004",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2005",
+        "name": "AADT_2005",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2006",
+        "name": "AADT_2006",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2007",
+        "name": "AADT_2007",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2008",
+        "name": "AADT_2008",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2009",
+        "name": "AADT_2009",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2010",
+        "name": "AADT_2010",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2011",
+        "name": "AADT_2011",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2012",
+        "name": "AADT_2012",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2013",
+        "name": "AADT_2013",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2014",
+        "name": "AADT_2014",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2015",
+        "name": "AADT_2015",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2016",
+        "name": "AADT_2016",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2017",
+        "name": "AADT_2017",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2018",
+        "name": "AADT_2018",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2019",
+        "name": "AADT_2019",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2020",
+        "name": "AADT_2020",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2021",
+        "name": "AADT_2021",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "AADT_2022",
+        "name": "AADT_2022",
+        "type": "esriFieldTypeString"
+      }
+    ],
+    "fields_missing_for_modeling": [],
+    "fields_needed_for_modeling": [
+      "AADT traffic count value",
+      "traffic count year",
+      "station geometry",
+      "route/station identifier"
+    ],
+    "geography_scope": "statewide_filter_to_cabarrus_later",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPoint",
+    "inspected_at": "2026-06-14T01:56:38.426673+00:00",
+    "jurisdiction": "North Carolina DOT",
+    "jurisdiction_limited": false,
+    "jurisdiction_municipality_fields": [
+      "COUNTY"
+    ],
+    "land_use_category_fields": [],
+    "layer_id": 0,
+    "layer_name": "NCDOT_AADT_Stations",
+    "limitations": [
+      "Current station context unless historical AADT by year is available later.",
+      "Station proximity is a traffic-intensity proxy, not parcel-specific driveway traffic."
+    ],
+    "model_use_status": "future_candidate_current_context_only",
+    "project_case_type_fields": [
+      "ROUTE"
+    ],
+    "query_supported": true,
+    "recommended_ingestion_phase": "Phase 13D AADT station proximity and traffic-intensity features",
+    "record_count": 48938,
+    "sample_features": [
+      {
+        "AADT_2002": " ",
+        "AADT_2003": "220",
+        "AADT_2004": " ",
+        "AADT_2005": "260",
+        "AADT_2006": " ",
+        "AADT_2007": "210",
+        "AADT_2008": " ",
+        "AADT_2009": "230",
+        "AADT_2010": " ",
+        "AADT_2011": "220",
+        "AADT_2012": " ",
+        "AADT_2013": "220",
+        "AADT_2014": " ",
+        "AADT_2015": "250",
+        "AADT_2016": " ",
+        "AADT_2017": "180",
+        "AADT_2018": " ",
+        "AADT_2019": "200",
+        "AADT_2020": " ",
+        "AADT_2021": "200",
+        "AADT_2022": " ",
+        "COUNTY": "ALAMANCE",
+        "FID": 1,
+        "LOCATION": "WEST OF NC 49",
+        "LocationID": "0010000002",
+        "ROUTE": "SR 1103",
+        "RTE_CLS": 4
+      },
+      {
+        "AADT_2002": "3200",
+        "AADT_2003": "3200",
+        "AADT_2004": "3400",
+        "AADT_2005": "2800",
+        "AADT_2006": "2800",
+        "AADT_2007": "2700",
+        "AADT_2008": "3100",
+        "AADT_2009": "2800",
+        "AADT_2010": "2800",
+        "AADT_2011": "2500",
+        "AADT_2012": "2600",
+        "AADT_2013": "2600",
+        "AADT_2014": " ",
+        "AADT_2015": "2900",
+        "AADT_2016": "2800",
+        "AADT_2017": "2900",
+        "AADT_2018": "2900",
+        "AADT_2019": "2900",
+        "AADT_2020": " ",
+        "AADT_2021": "3200",
+        "AADT_2022": " ",
+        "COUNTY": "ALAMANCE",
+        "FID": 2,
+        "LOCATION": "EAST OF SR 1001",
+        "LocationID": "0010000003",
+        "ROUTE": "NC 62",
+        "RTE_CLS": 3
+      },
+      {
+        "AADT_2002": "4100",
+        "AADT_2003": "4500",
+        "AADT_2004": "4400",
+        "AADT_2005": "4500",
+        "AADT_2006": "4300",
+        "AADT_2007": "4100",
+        "AADT_2008": "4600",
+        "AADT_2009": "3500",
+        "AADT_2010": "4600",
+        "AADT_2011": "3800",
+        "AADT_2012": "4100",
+        "AADT_2013": "4600",
+        "AADT_2014": " ",
+        "AADT_2015": "4200",
+        "AADT_2016": "5000",
+        "AADT_2017": "4400",
+        "AADT_2018": "4500",
+        "AADT_2019": "4800",
+        "AADT_2020": " ",
+        "AADT_2021": "4200",
+        "AADT_2022": " ",
+        "COUNTY": "ALAMANCE",
+        "FID": 3,
+        "LOCATION": "WEST OF SR 2172",
+        "LocationID": "0010000004",
+        "ROUTE": "NC 87",
+        "RTE_CLS": 3
+      }
+    ],
+    "service_type": "arcgis_featureserver_layer",
+    "source_key": "ncdot_aadt_traffic_counts",
+    "source_name": "NCDOT AADT Traffic Count Stations",
+    "source_relocation_warning": "Cabarrus and partner REST services may move during ongoing layer organization. If a URL fails, inspect service roots, layer IDs, and fallback notes before marking unavailable.",
+    "source_role": "traffic_demand_context_and_nearest_station_proxy",
+    "source_status": "available",
+    "source_url": "https://services.arcgis.com/NuWFvHYDMVmmxMeM/ArcGIS/rest/services/NCDOT_AADT_Stations/FeatureServer/0",
+    "spatial_reference": {
+      "latestVcsWkid": 6360,
+      "latestWkid": 2264,
+      "vcsWkid": 105703,
+      "wkid": 102719
+    },
+    "status_fields": [],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "time_safe_for_historical_model_training": false,
+    "time_safe_for_historical_training": false,
+    "traffic_count_fields": [
+      "AADT_2002",
+      "AADT_2003",
+      "AADT_2004",
+      "AADT_2005",
+      "AADT_2006",
+      "AADT_2007",
+      "AADT_2008",
+      "AADT_2009",
+      "AADT_2010",
+      "AADT_2011",
+      "AADT_2012",
+      "AADT_2013",
+      "AADT_2014",
+      "AADT_2015",
+      "AADT_2016",
+      "AADT_2017",
+      "AADT_2018",
+      "AADT_2019",
+      "AADT_2020",
+      "AADT_2021",
+      "AADT_2022"
+    ]
+  },
+  {
+    "can_support_distance_proximity_features": true,
+    "can_support_parcel_overlay": false,
+    "can_support_temporal_features": true,
+    "caveats": [
+      "Concord only.",
+      "Does not replace countywide official rezoning approval history.",
+      "Case records should not be interpreted as final approvals without status/date field review."
+    ],
+    "current_context_only": true,
+    "current_or_future_context": "current_context_with_possible_case_dates",
+    "date_year_fields": [
+      "DateCreated",
+      "MostRecentUpdate",
+      "Year"
+    ],
+    "extent": {
+      "spatialReference": {
+        "falseM": 0,
+        "falseX": -121841900,
+        "falseY": -93659000,
+        "falseZ": 0,
+        "latestWkid": 6543,
+        "mTolerance": 0.001,
+        "mUnits": 1,
+        "wkid": 103122,
+        "xyTolerance": 0.003280833333333333,
+        "xyUnits": 3048.0060960121928,
+        "zTolerance": 0.001,
+        "zUnits": 1
+      },
+      "xmax": 1546090.0001012236,
+      "xmin": 1476510.0001538843,
+      "ymax": 622169.9999468923,
+      "ymin": 576579.9999197274
+    },
+    "fallback_notes": "If this layer moves, inspect the Concord Planning_Webmap_Public_MIL1 service root before marking unavailable.",
+    "feature_group": "planning_case_activity_features",
+    "feature_readiness_classification": "ready_but_current_context_only",
+    "field_names": [
+      "OBJECTID",
+      "CaseNumber",
+      "Code",
+      "CaseType",
+      "CaseName",
+      "AssignedTo",
+      "Location",
+      "Description",
+      "DateCreated",
+      "Status",
+      "MostRecentUpdate",
+      "httpLocation",
+      "X",
+      "Y",
+      "ID",
+      "Year",
+      "DescriptionAbbr",
+      "Shape"
+    ],
+    "fields": [
+      {
+        "alias": "OBJECTID",
+        "name": "OBJECTID",
+        "type": "esriFieldTypeOID"
+      },
+      {
+        "alias": "Case Number",
+        "name": "CaseNumber",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Code",
+        "name": "Code",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Case Type",
+        "name": "CaseType",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Case Name",
+        "name": "CaseName",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Assigned To",
+        "name": "AssignedTo",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Location",
+        "name": "Location",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Description",
+        "name": "Description",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Date Created",
+        "name": "DateCreated",
+        "type": "esriFieldTypeDate"
+      },
+      {
+        "alias": "Status",
+        "name": "Status",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Most Recent Update",
+        "name": "MostRecentUpdate",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Details",
+        "name": "httpLocation",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "X",
+        "name": "X",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Y",
+        "name": "Y",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "ID",
+        "name": "ID",
+        "type": "esriFieldTypeInteger"
+      },
+      {
+        "alias": "Year",
+        "name": "Year",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Description Summary",
+        "name": "DescriptionAbbr",
+        "type": "esriFieldTypeString"
+      },
+      {
+        "alias": "Shape",
+        "name": "Shape",
+        "type": "esriFieldTypeGeometry"
+      }
+    ],
+    "fields_missing_for_modeling": [],
+    "fields_needed_for_modeling": [
+      "case type",
+      "case status",
+      "case date/year",
+      "geometry",
+      "case identifier"
+    ],
+    "geography_scope": "concord_only",
+    "geojson_pbf_support": [
+      "geoJSON",
+      "PBF"
+    ],
+    "geometry_type": "esriGeometryPoint",
+    "inspected_at": "2026-06-14T01:56:38.741639+00:00",
+    "jurisdiction": "Concord",
+    "jurisdiction_limited": true,
+    "jurisdiction_municipality_fields": [],
+    "land_use_category_fields": [],
+    "layer_id": 9,
+    "layer_name": "Planning Cases",
+    "limitations": [
+      "Concord only.",
+      "Does not replace countywide official rezoning approval history.",
+      "Case records should not be interpreted as final approvals without status/date field review.",
+      "Jurisdiction-limited: Concord only."
+    ],
+    "model_use_status": "future_candidate_jurisdiction_limited",
+    "project_case_type_fields": [
+      "CaseNumber",
+      "CaseType",
+      "CaseName",
+      "Description",
+      "DescriptionAbbr"
+    ],
+    "query_supported": true,
+    "recommended_ingestion_phase": "Phase 13E Concord planning-case proximity and activity features",
+    "record_count": 116,
+    "sample_features": [
+      {
+        "AssignedTo": "Kristen Sullivan",
+        "CaseName": "2821 Davidson Hwy",
+        "CaseNumber": "Z(CD)-14-21",
+        "CaseType": "Zoning Map Amendment",
+        "Code": "Z(CD)",
+        "DateCreated": 1623801600000,
+        "Description": "Eddie Moore, with McAdams has submitted a Zoning Map Amendment Application for property located at 347, 2745, 2801, 2821 Davidson Hwy and 1000 Pine Circle Dr. NW, from RM-2 (Residential Medium Density) and RC (Residential Compact) to RV-CD (Residential Village Conditional District) in order to develop an age targeted single story multifamily development.  PINs 5611-44-7981, 5611-55-7793, 5611-55-4639, 5611-66-0107 and 5611-56-9073.",
+        "DescriptionAbbr": null,
+        "ID": 593,
+        "Location": "South side of Davidson Hwy and Winecoff School Rd.",
+        "MostRecentUpdate": "2022-01-18:  Approved with additional conditions, SUP still pending",
+        "OBJECTID": 1,
+        "Status": "Complete",
+        "X": 1514780,
+        "Y": 614910,
+        "Year": "2022",
+        "httpLocation": "https://apps.concordnc.gov/legacy/planningweb/CaseManager/Cases/Z(CD)-14-21/CaseDetails.html"
+      },
+      {
+        "AssignedTo": "Kristen Sullivan",
+        "CaseName": "4525 Fortune Ave NW",
+        "CaseNumber": "Z-31-21",
+        "CaseType": "Zoning Map Amendment",
+        "Code": "Z",
+        "DateCreated": 1642032000000,
+        "Description": "Mark Hermans, Fortune Ave, LLC, has submitted a Zoning Map Amendment application for +/- 2.056 acres of property located at 4525 Fortune Ave NW from I-2 (Heavy Industrial) to I-1 (Light Industrial).  PIN 5601-74-6913.",
+        "DescriptionAbbr": null,
+        "ID": 650,
+        "Location": "4525 Fortune Ave",
+        "MostRecentUpdate": "2022-01-18:  Approved",
+        "OBJECTID": 2,
+        "Status": "Complete",
+        "X": 1507610,
+        "Y": 614930,
+        "Year": "2022",
+        "httpLocation": "https://apps.concordnc.gov/legacy/planningweb/CaseManager/Cases/Z-31-21/CaseDetails.html"
+      },
+      {
+        "AssignedTo": "Starla Rogers",
+        "CaseName": "848 Old Charlotte Rd.",
+        "CaseNumber": "Z(CD)-28-21",
+        "CaseType": "Zoning Map Amendment",
+        "Code": "Z(CD)",
+        "DateCreated": 1642118400000,
+        "Description": "Dr. Aimy Steele has submitted a Zoning Map Amendment Application for +/- 1.27 acres of property located at 848 Old Charlotte Rd. from C-2 (General Commercial) to RC-CD (Residential Compact Conditional District) in order to construct a multi-family development with a maximum of 13 dwelling units.  PIN 5529-48-0610.",
+        "DescriptionAbbr": null,
+        "ID": 651,
+        "Location": "848 Old Charlotte Rd",
+        "MostRecentUpdate": "2022-02-10:  Land Use Plan amendment is approved and zoning case is approved.  See Ordinance 22-13.",
+        "OBJECTID": 3,
+        "Status": "Complete",
+        "X": 1524010,
+        "Y": 598600,
+        "Year": "2022",
+        "httpLocation": "https://apps.concordnc.gov/legacy/planningweb/CaseManager/Cases/Z(CD)-28-21/CaseDetails.html"
+      }
+    ],
+    "service_type": "arcgis_mapserver_layer",
+    "source_key": "concord_planning_cases",
+    "source_name": "Concord Planning Cases",
+    "source_relocation_warning": "Cabarrus and partner REST services may move during ongoing layer organization. If a URL fails, inspect service roots, layer IDs, and fallback notes before marking unavailable.",
+    "source_role": "planning_case_activity_signal_and_concord_development_review_proxy",
+    "source_status": "available",
+    "source_url": "https://maps2.concordnc.gov/server/rest/services/Planning_Webmap_Public_MIL1/MapServer/9",
+    "spatial_reference": {
+      "latestWkid": 6543,
+      "wkid": 103122
+    },
+    "status_fields": [
+      "Status"
+    ],
+    "supported_query_formats": [
+      "JSON",
+      "geoJSON",
+      "PBF"
+    ],
+    "time_safe_for_historical_model_training": false,
+    "time_safe_for_historical_training": false,
+    "traffic_count_fields": []
+  }
+]
