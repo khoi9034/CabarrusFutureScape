@@ -1,0 +1,74 @@
+{
+  "phase": "20A-QA2",
+  "task": "Methodology navigation rail continuous motion fix",
+  "completed_at": "2026-06-15",
+  "files_changed": [
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/styles/cfs-theme.css",
+    "outputs/phase20a_qa2_methodology_navigation_continuous_motion_summary.json"
+  ],
+  "root_cause": {
+    "summary": "The prior rail implementation could remain paused after interaction because hover, focus, manual scroll, and a delayed resume timeout all fed the same paused state. The scroll handler could re-pause the rail after hover ended, making the movement resume briefly and then stop.",
+    "affected_behavior": "Methodology rail auto-scroll paused on hover but did not keep moving continuously after unhover."
+  },
+  "implementation": {
+    "auto_scroll_loop": "Uses one mounted animation loop that keeps scheduling frames while the component is mounted. The loop does not exit when paused.",
+    "fallback_loop": "Uses a recursive window.setTimeout loop only when requestAnimationFrame is unavailable.",
+    "pause_resume_behavior": "Pauses only while the pointer is over the methodology rail. Pointer leave clears the hover pause immediately and resets frame timing so movement resumes without a jump.",
+    "removed_pause_sources": [
+      "focus-based permanent pause",
+      "manual-scroll long pause timeout",
+      "shared pausedRef state that could remain true after hover"
+    ],
+    "speed_px_per_second": 36,
+    "boundary_behavior": "At the right edge the rail reverses left; at the left edge it reverses right. It does not reset or stop at the edges.",
+    "reduced_motion": "prefers-reduced-motion is observed. When enabled, the loop stays mounted but does not auto-scroll; manual scrolling remains available.",
+    "scrollbar_behavior": "Native scrollbar remains hidden with scrollbar-width: none and hidden WebKit scrollbar. Rail scroll-behavior is auto so per-frame scrollLeft updates are not interrupted by smooth-scroll interpolation."
+  },
+  "validation": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "dev_cfs_notes": [
+      "Frontend health returned HTTP 200 at http://localhost:3000.",
+      "FastAPI health returned HTTP 200 at http://127.0.0.1:8000.",
+      "Built-in dev:cfs endpoint checks passed for parcels, development, flood, and school endpoints."
+    ]
+  },
+  "browser_smoke": {
+    "url": "http://localhost:3000",
+    "cfs_loaded": true,
+    "methodology_loaded": true,
+    "rail_tab_count": 10,
+    "rail_max_scroll": 1255,
+    "continuous_motion_check": {
+      "before_scroll_left": 332.6666564941406,
+      "after_scroll_left": 405.3333435058594,
+      "elapsed_ms": 2500,
+      "delta_scroll_left": 72.66668701171875,
+      "status": "passed"
+    },
+    "hover_pause_check": {
+      "status": "limited_by_browser_automation",
+      "note": "The in-app browser coordinate move/click did not produce a browser :hover chain for the rail, so pointer hover could not be faithfully simulated. Code now pauses exclusively from onPointerEnter and resumes from onPointerLeave."
+    },
+    "scrollbar_check": {
+      "scrollbar_width": "none",
+      "scroll_behavior": "auto",
+      "status": "passed"
+    },
+    "mode_checks": {
+      "overview": "active nav loaded",
+      "due_diligence": "active nav loaded",
+      "executive_print": "active nav loaded",
+      "methodology": "active nav loaded"
+    },
+    "console_errors": 0,
+    "prediction_safety_terms_visible": []
+  },
+  "remaining_known_issues": [
+    "Browser automation could not simulate actual pointer hover on the rail, but live motion, hidden scrollbar, mode switching, and prediction-safety checks passed.",
+    "No unrelated dashboard areas were modified."
+  ]
+}

@@ -68,6 +68,87 @@ export type ProductMode =
   | "methodology"
   | "overview";
 
+export type ParcelReviewView = "actions" | "report" | "review";
+
+export type PlanningSnapshotView =
+  | "actions"
+  | "explain"
+  | "overview"
+  | "summary";
+
+export type PlanningReviewFocusMode =
+  | "constraints_risk"
+  | "development_activity"
+  | "infrastructure_readiness"
+  | "parcel_lookup"
+  | "planning_snapshot_report"
+  | "school_community";
+
+export type PlanningSnapshotSectionKey =
+  | "data_needed_caveats"
+  | "development_permits"
+  | "fema_flood"
+  | "map_view"
+  | "model_governance"
+  | "new_construction"
+  | "parcel_facts"
+  | "recommended_actions"
+  | "schools"
+  | "transportation"
+  | "utility_proxy"
+  | "zoning_planning";
+
+export interface PlanningSnapshotMetric {
+  caveat: string;
+  label: string;
+  meaning: string;
+  method: string;
+  recommendedAction?: string;
+  source: string;
+  value: string;
+}
+
+export interface PlanningSnapshotParcelSummary {
+  acreageOrSize: string;
+  address: string;
+  assessedValue: string;
+  marketValue: string;
+  officialParcelId: string;
+  ownerOrAccount: string;
+  parcelQualityStatus: string;
+  pin14: string;
+  planningJurisdiction: string;
+  zoning: string;
+}
+
+export interface PlanningSnapshot {
+  activeLayers: string[];
+  activeLayerIds?: string[];
+  caveats: string[];
+  createdAt: string;
+  explainableMetrics: PlanningSnapshotMetric[];
+  focusMode?: PlanningReviewFocusMode;
+  focusModeLabel?: string;
+  includedSections: Record<PlanningSnapshotSectionKey, boolean>;
+  keyFacts: Array<{ label: string; value: string }>;
+  knownReviewFlags: Array<{ label: string; reason: string; status: string }>;
+  mapContext: {
+    cameraSummary?: string;
+    description: string;
+    extentCaptured: boolean;
+    extentSummary?: string;
+  };
+  mapScreenshotCapturedAt?: string | null;
+  mapScreenshotDataUrl?: string | null;
+  mapScreenshotFailureReason?: string | null;
+  mapScreenshotStatus?: "captured" | "failed" | "unavailable";
+  overviewKpis: Array<{ caveat?: string; label: string; value: string }>;
+  selectedParcelId: string | null;
+  selectedParcelSummary: PlanningSnapshotParcelSummary | null;
+  snapshotId: string;
+  snapshotVersion: "phase22a_v1" | "phase22b_v1" | "phase22e_v1";
+}
+
 export type ParcelSelectionSource = "dashboard" | "map" | "url";
 
 export interface OperationalLayer {

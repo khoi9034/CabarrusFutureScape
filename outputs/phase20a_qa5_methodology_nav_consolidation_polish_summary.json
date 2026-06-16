@@ -1,0 +1,158 @@
+{
+  "phase": "20A-QA5",
+  "title": "Methodology Navigation Consolidation and Enterprise Information Design Polish",
+  "completed_at": "2026-06-15T08:22:17-04:00",
+  "branch": "main",
+  "scope": {
+    "modified_areas": [
+      "Methodology workspace",
+      "Methodology navigation rail styling"
+    ],
+    "backend_changed": false,
+    "postgis_changed": false,
+    "pipelines_changed": false,
+    "sceneview_rendered_in_methodology": false,
+    "predictions_exposed": false
+  },
+  "files_changed": [
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/styles/cfs-theme.css",
+    "outputs/phase20a_qa5_methodology_nav_consolidation_polish_summary.json"
+  ],
+  "nav_consolidation_summary": {
+    "previous_issue": "The Methodology nav had too many top-level items and felt busy for executive review.",
+    "new_top_level_sections": [
+      "Overview",
+      "Capabilities",
+      "Data Inventory",
+      "Model",
+      "Data Needed",
+      "Roadmap"
+    ],
+    "section_count": 6,
+    "moved_content": {
+      "how_cfs_works": "Moved into Overview",
+      "what_cfs_has": "Moved into Data Inventory",
+      "what_cfs_can_do": "Moved into Capabilities",
+      "in_progress": "Moved into Roadmap & Guardrails",
+      "guardrails": "Moved into Roadmap & Guardrails",
+      "faq": "Moved into Roadmap & Guardrails"
+    }
+  },
+  "fade_scroll_removal_summary": {
+    "auto_scroll_animation": "Removed before this QA5 final state; no requestAnimationFrame or auto-scroll state remains in MethodologyWorkspace.",
+    "gradient_fade_overlays": "Removed strong Methodology nav edge fade pseudo-elements so first and last tabs are not covered.",
+    "native_scrollbar": "Hidden; nav is a responsive segmented grid with no visible native horizontal scrollbar.",
+    "desktop_behavior": "Six sections fit as a clean segmented control; narrow screens wrap instead of relying on moving navigation."
+  },
+  "new_section_structure": {
+    "overview": "CFS at a Glance plus How CFS Works, model foundation, safe claims, and local readiness.",
+    "capabilities": "Current Capabilities grouped by Parcel Review, Planning Context, Constraints, and Governance.",
+    "data_inventory": "Grouped data-domain cards for parcel/tax, zoning/planning, permits, flood, schools, transportation, utility, model governance, and reporting.",
+    "model_research": "Internal Development Prediction Model Research with plain-English flow and hidden-output boundaries.",
+    "data_needed": "Priority 1 and Priority 2 official data request cards plus format guidance.",
+    "roadmap_guardrails": "Roadmap, in-progress items, What Not To Claim, safe demo wording, and Common Questions."
+  },
+  "model_research_visibility_improvements": {
+    "current_best_internal_model": "Zoning + Transportation + Tax/Value",
+    "status_language": [
+      "Internal research only",
+      "Production ready: No",
+      "Public exposure: Not allowed",
+      "Parcel-level probabilities: Not shown",
+      "Parcel-level ranking classes: Not shown",
+      "Calibration: Weak / under review"
+    ],
+    "plain_english_flow_added": [
+      "Permits show what happened.",
+      "Parcel features describe context before development.",
+      "The model tests which conditions are associated with future new construction.",
+      "CFS reviews results at an aggregate level.",
+      "Parcel-level predictions stay hidden until data and calibration improve."
+    ],
+    "hidden_outputs": [
+      "Exact parcel probabilities",
+      "Parcel-level ranking classes",
+      "Raw internal development_signal_class labels"
+    ]
+  },
+  "data_needed_improvements": {
+    "priority_1": [
+      "WSACC true utility capacity / service areas / capacity constraints",
+      "official school enrollment and capacity by school",
+      "countywide future land use / small-area plan GIS",
+      "official rezoning case records"
+    ],
+    "priority_2": [
+      "countywide development pipeline / subdivision approvals",
+      "planned local road projects with dates/status",
+      "planned utility extensions",
+      "parks/greenways/bike-ped plans"
+    ],
+    "format_guidance": "REST/GIS/table preferred. PDF-only is useful for reference but weaker for automated CFS integration."
+  },
+  "visual_polish_changes": [
+    "Reduced Methodology nav to six executive-friendly sections.",
+    "Changed nav from scroll-strip behavior to a stable responsive segmented grid.",
+    "Improved active-tab readability with subtle selected styling and accessible focus handling.",
+    "Reworked capability cards into grouped workflow sections with expandable details.",
+    "Renamed key headings to Current Capabilities, What Not To Claim, and Common Questions for clearer scanning.",
+    "Kept dark/glass enterprise styling while reducing nav clutter."
+  ],
+  "safety_verification": {
+    "searched_terms": [
+      "experimental_probability",
+      "prediction_probability",
+      "development_signal_class",
+      "very_high_development_signal",
+      "high_development_signal"
+    ],
+    "raw_terms_visible_in_methodology": false,
+    "parcel_level_prediction_probability_visible": false,
+    "parcel_level_ranking_class_visible": false,
+    "public_prediction_endpoint_added": false,
+    "methodology_backend_fallback": "If live model summary is unavailable, Methodology shows documented aggregate summary text instead of crashing or rendering blank."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": {
+      "status": "passed",
+      "frontend": "http://localhost:3000 returned HTTP 200",
+      "backend": "http://127.0.0.1:8000 health returned HTTP 200",
+      "database": "/health/database returned HTTP 200",
+      "endpoint_checks": "launcher endpoint checks passed"
+    },
+    "backend_validation": "not run; backend files were not changed"
+  },
+  "smoke_test_results": {
+    "methodology_loads": true,
+    "nav_section_count": 6,
+    "nav_auto_scroll_animation": false,
+    "nav_fade_covers_first_or_last_item": false,
+    "native_white_scrollbar_visible": false,
+    "sceneview_in_methodology": false,
+    "sections_verified": [
+      "Overview",
+      "Capabilities",
+      "Data Inventory",
+      "Model",
+      "Data Needed",
+      "Roadmap"
+    ],
+    "other_modes_mounted": [
+      "Overview",
+      "Due Diligence",
+      "Executive Print"
+    ],
+    "browser_console": {
+      "methodology_errors": "none observed",
+      "map_mode_caveat": "ArcGIS terrain tile decode errors appeared while switching map-backed modes; this is external SceneView tile noise and not caused by the Methodology change."
+    }
+  },
+  "remaining_known_issues": [
+    "ArcGIS external terrain/basemap console noise can still appear when map-backed modes render.",
+    "Methodology content is now static and executive-friendly; future polish could add print/share anchors if requested."
+  ]
+}

@@ -2,6 +2,24 @@
 
 Use parcel `CFS-PARCEL-0149726579` for all selected-parcel screenshots.
 
+## Phase 18B Minimum Capture Set
+
+Capture these screenshots for the leadership or portfolio package:
+
+- Overview landing state.
+- Parcel search result for `CFS-PARCEL-0149726579`.
+- Active selected parcel map focus with parcel cage/boundary visible.
+- Due Diligence parcel snapshot.
+- High-Priority Review Flags.
+- Flood, School, and Transportation cards.
+- Executive Print header.
+- Executive Print key findings.
+- Methodology current best internal model section.
+- Methodology feature governance and model safety section.
+
+Do not include browser dev tools, console panels, exact model probabilities, or
+parcel-level ranking classes in screenshots.
+
 ## 1. Overview Default Dashboard
 
 What to show:

@@ -1,0 +1,167 @@
+{
+  "phase": "22E",
+  "title": "Clean Command Center UI, Collapsed Layers Default, Parcel Intelligence Flow, and Snapshot Library",
+  "created_at": "2026-06-16T04:12:00-04:00",
+  "scope": "Frontend UX/product organization pass for Overview, layer rail behavior, selected parcel intelligence, and Planning Snapshot local library.",
+  "files_changed": [
+    "README.md",
+    "docs/demo/cfs_2_minute_demo_script.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "docs/demo/cfs_higher_up_speaking_notes.md",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "src/types/index.ts",
+    "outputs/phase22e_clean_command_center_snapshot_library_summary.json"
+  ],
+  "command_center_redesign": {
+    "old_issue": "The Phase 22D command cards still behaved like cramped cards and could overflow under the right intelligence panel at desktop width.",
+    "new_design": "Replaced the card layout with a compact command action bar under the CFS Command Center heading.",
+    "primary_actions": [
+      "Search Parcel",
+      "Countywide Intelligence",
+      "Save Snapshot",
+      "Open Snapshots"
+    ],
+    "readability_changes": [
+      "Removed long paragraphs from action buttons.",
+      "Kept helper text below the command bar instead of inside squeezed cards.",
+      "Used a contained two-column action grid until very wide screens to prevent overlap with the right panel.",
+      "Browser smoke found and fixed a real overlap bug where command buttons were visually underneath the Intelligence panel."
+    ]
+  },
+  "collapsed_layer_rail_behavior": {
+    "default_state": "Overview starts with the left Layers rail collapsed/slim.",
+    "countywide_intelligence_action": "Dispatches a layer-rail open event so the advanced map controls expand on demand.",
+    "preserved_capabilities": [
+      "Base / Parcel",
+      "Development Activity",
+      "Flood / Constraints",
+      "Schools",
+      "Transportation",
+      "Utility / Infrastructure",
+      "Planning Context",
+      "Internal Research / Governance"
+    ]
+  },
+  "parcel_search_showcase_flow": {
+    "search_action": "Search Parcel focuses the top parcel search input.",
+    "selected_parcel_brief": "When a parcel is selected, the right panel uses the title Selected Parcel Intelligence.",
+    "selected_parcel_fields": [
+      "parcel ID",
+      "owner/account",
+      "zoning",
+      "source/quality",
+      "flood review status",
+      "school assignment/status",
+      "development activity summary",
+      "transportation context",
+      "utility proxy caveat",
+      "model status: internal only"
+    ],
+    "actions": [
+      "Save Snapshot",
+      "Open Snapshots",
+      "Focus Map",
+      "Copy Parcel ID"
+    ]
+  },
+  "countywide_intelligence_behavior": {
+    "right_panel": "If no parcel is selected, the right panel shows Intelligence Brief with countywide headline stats and safe model status.",
+    "selected_parcel_override": "If a parcel is selected and Countywide Intelligence is clicked, the right panel temporarily shows countywide stats without dropping the selected parcel.",
+    "return_action": "A Show Selected Parcel Intelligence action returns the right panel to the selected parcel brief."
+  },
+  "snapshot_object_storage_design": {
+    "storage": "Frontend localStorage/state only; no backend or PostGIS persistence.",
+    "snapshot_version": "phase22e_v1",
+    "storage_keys": [
+      "cfs.planningSnapshots.phase22e.library",
+      "cfs.planningSnapshot.phase22a.latest"
+    ],
+    "library_shape": {
+      "savedSnapshots": "Stored as a bounded local snapshot array.",
+      "activeSnapshotId": "Tracks which snapshot drives the report builder.",
+      "maxStoredSnapshots": 8
+    },
+    "backward_compatibility": "Legacy phase22a_v1 and phase22b_v1 snapshots still load and migrate into the library path when available.",
+    "excluded_fields": [
+      "prediction_probability",
+      "experimental_probability",
+      "development_signal_class",
+      "parcel-level ranking class",
+      "hidden model scores"
+    ]
+  },
+  "multiple_snapshot_library_behavior": {
+    "location": "Planning Snapshot page, above the Snapshot workflow tabs.",
+    "visible_fields": [
+      "thumbnail or map-unavailable placeholder",
+      "timestamp",
+      "selected parcel ID or map/context only",
+      "snapshot title/context",
+      "active layers count",
+      "map screenshot status"
+    ],
+    "actions": [
+      "Use / Open",
+      "Delete"
+    ],
+    "empty_state": "Shows No planning snapshots saved yet and directs users back to Overview to click Save Snapshot."
+  },
+  "map_screenshot_report_behavior": {
+    "capture_method": "Existing ArcGIS SceneView screenshot helper is called when Save Snapshot runs.",
+    "success_behavior": "Saved snapshot stores mapScreenshotDataUrl and shows thumbnail/library/report image.",
+    "failure_behavior": "Snapshot still saves with failed/unavailable status and report shows a clean placeholder; no fake screenshots or broken image icons.",
+    "browser_result": "Smoke test saved snapshots with captured map thumbnails and verified Executive Summary map section."
+  },
+  "documentation_updates": [
+    "README demo/product mode section now describes compact Command Center actions, collapsed layers, and snapshot library.",
+    "Demo walkthrough now includes Save Snapshot, Planning Snapshot Library, Use / Open, and Delete.",
+    "Final demo checklist now verifies collapsed Layers rail and snapshot library.",
+    "Two-minute script and higher-up speaking notes now describe multiple saved snapshots and advanced layer controls."
+  ],
+  "safety_verification": {
+    "frontend_forbidden_terms_checked": [
+      "experimental_probability",
+      "prediction_probability",
+      "development_signal_class",
+      "very_high_development_signal",
+      "high_development_signal"
+    ],
+    "browser_ui_result": "No forbidden parcel-level model terms appeared in Overview, Planning Snapshot, Executive Summary, or Methodology smoke checks.",
+    "model_wording": "Overview and report wording uses internal model research / aggregate governance / internal only, and does not expose parcel probabilities or ranking classes."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed after clearing stale generated .next/dev cache caused by a prior interrupted dev run",
+    "backend_health": "passed",
+    "frontend_health": "passed",
+    "api_checks": "passed via npm run dev:cfs launcher"
+  },
+  "smoke_test_results": {
+    "overview_loads": "passed",
+    "layer_rail_collapsed_default": "passed",
+    "command_actions_readable_not_cramped": "passed",
+    "old_review_focus_strip_absent": "passed",
+    "search_parcel_action_focuses_search": "passed",
+    "selected_parcel_intelligence": "passed in browser before final layout-only fix; final dev:cfs API parcel search/detail checks also passed",
+    "countywide_intelligence_expands_layers": "passed",
+    "save_snapshot_creates_snapshots": "passed",
+    "multiple_snapshots_show_in_library": "passed, library showed 3 saved snapshots before delete",
+    "snapshot_delete": "passed, library dropped to 2 saved snapshots",
+    "executive_summary_report_map_section": "passed",
+    "methodology_loads": "passed",
+    "browser_console_errors": "none observed after final checks"
+  },
+  "remaining_known_issues": [
+    "Browser plugin text entry hit a virtual clipboard limitation during the final post-fix parcel search retry, so the final selected-parcel search was validated through the dev:cfs API checks and an earlier same-session browser parcel-selection smoke before the layout-only command bar fix.",
+    "Snapshot library is intentionally localStorage/frontend state only; database persistence is not included in Phase 22E.",
+    "Map screenshot capture depends on the browser/ArcGIS SceneView runtime and can still fall back to a clean unavailable placeholder."
+  ],
+  "recommended_next_step": "Run one manual demo pass in the visible browser at localhost:3000 to confirm the subjective command-center feel at the exact presentation viewport."
+}

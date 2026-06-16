@@ -1,0 +1,88 @@
+{
+  "phase": "18A_QA_due_diligence_executive_print_visual_polish",
+  "branch": "main",
+  "scope": "frontend_visual_polish_only",
+  "backend_changed": false,
+  "postgis_changed": false,
+  "datasets_added": false,
+  "models_trained": false,
+  "prediction_exposure_changed": false,
+  "visual_qa_issues_found": [
+    "Due Diligence sections were too equal-weight after the parcel header.",
+    "The review flow needed a concise high-priority triage layer before detailed domain sections.",
+    "Two-column fact grids in the side panel risked cramped long labels and values.",
+    "Some empty values used less polished unavailable wording.",
+    "Executive Print needed the same priority-review readout on the first report page.",
+    "Print CSS needed stronger overflow guards and coverage for the new card background classes."
+  ],
+  "files_changed": [
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/ExecutivePrintView.tsx",
+    "src/styles/cfs-theme.css",
+    "outputs/phase18a_qa_due_diligence_executive_print_polish_summary.json"
+  ],
+  "due_diligence_polish_changes": [
+    "Added 2. High-Priority Review Flags after Parcel Snapshot.",
+    "Renumbered the detailed review flow through 11. Review Notes / Recommended Next Steps.",
+    "Converted selected-parcel fact grids to single-column side-panel layout for better scanability.",
+    "Improved card hierarchy with slightly stronger card backgrounds, icon wells, and section shadows.",
+    "Updated status badges to wrap safely instead of clipping.",
+    "Standardized empty values toward Not Available, Official Data Needed, Capacity Data Needed, Proxy Only, Current Context, and Internal Research Only language.",
+    "Kept all required flood, school, transportation, utility, zoning, permit, and model caveats."
+  ],
+  "executive_print_polish_changes": [
+    "Added High-Priority Review Flags to the printable report before detailed domain sections.",
+    "Improved report section hierarchy with stronger section cards and safer badge wrapping.",
+    "Kept report structure as a planning memo rather than a dashboard screenshot.",
+    "Preserved report header, generated timestamp, selected parcel ID, key findings, limitations, and recommended actions."
+  ],
+  "print_css_changes": [
+    "Added print overflow guards to prevent clipped long labels or values.",
+    "Added print background overrides for the new Due Diligence and Executive Print card classes.",
+    "Kept interactive controls, map UI, sidebars, and buttons hidden in print.",
+    "Preserved light/white print theme and page-break helpers."
+  ],
+  "prediction_safety_verification": {
+    "due_diligence_or_executive_print_contains_blocked_strings": false,
+    "blocked_strings_checked": [
+      "experimental_probability",
+      "prediction_probability",
+      "development_signal_class",
+      "very_high_development_signal",
+      "high_development_signal"
+    ],
+    "parcel_level_prediction_probability_exposed": false,
+    "parcel_level_ranking_class_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "model_status_language": "Internal research only; parcel-level model outputs are not exposed."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "backend_validation": "not_run_backend_not_changed"
+  },
+  "browser_smoke_results": {
+    "test_url": "http://localhost:3000",
+    "overview_loads": true,
+    "parcel_search": "passed using direct keypress input because browser fill helper reported a virtual clipboard issue",
+    "selected_parcel": "CFS-PARCEL-0149726579",
+    "due_diligence_loads": true,
+    "due_diligence_priority_flags_visible": true,
+    "due_diligence_final_review_actions_visible": true,
+    "due_diligence_required_caveats_visible": true,
+    "executive_print_loads": true,
+    "executive_print_priority_flags_visible": true,
+    "executive_print_known_limitations_visible": true,
+    "executive_print_recommended_actions_visible": true,
+    "methodology_loads": true,
+    "overview_still_loads_after_mode_switching": true,
+    "browser_console_errors": "none_observed"
+  },
+  "remaining_known_issues": [
+    "Actual browser print preview was not programmatically inspected; CSS was hardened for print and report DOM was smoke-tested.",
+    "Existing ArcGIS non-fatal warnings may still appear for draped label placement or placeholder layer definitions.",
+    "Transportation and utility sections remain current-context/proxy summaries only until parcel-level authoritative capacity/access data is added."
+  ]
+}

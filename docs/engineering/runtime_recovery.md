@@ -7,6 +7,17 @@ Use this checklist when the local app appears disconnected or stale.
 - Frontend: `http://localhost:3000`
 - Backend: `http://127.0.0.1:8000`
 - FastAPI docs: `http://127.0.0.1:8000/docs`
+- PostGIS: `localhost:5433`
+- Database: `cfs_dev`
+
+CFS reserves frontend port `3000` and backend port `8000` for local
+development. Do not silently move CFS to another frontend port. If another
+project such as AutoMap is using port `3000`, stop that project or run the CFS
+launcher so it can report the owning process and reclaim the reserved CFS port.
+
+Use `http://localhost:3000` for UI testing. Do not use
+`http://127.0.0.1:3000`; local Next dev HMR origin behavior can make the page
+appear loaded while leaving it less interactive.
 
 ## Environment
 
@@ -32,6 +43,10 @@ Use this first. It starts:
 
 - FastAPI at `http://127.0.0.1:8000`
 - Next.js at `http://localhost:3000`
+
+Before startup, the launcher reports any process listening on ports `3000` or
+`8000`, including the owning PID, process name, and command line when Windows
+exposes it. The launcher does not fall back to another port.
 
 ## Emergency Stale Cleanup
 

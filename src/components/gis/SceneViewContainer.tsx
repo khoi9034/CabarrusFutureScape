@@ -128,6 +128,21 @@ interface SchoolUtilizationHoverCallout {
   position: OverlayCardPosition;
 }
 
+interface CfsMapSnapshotCaptureResult {
+  cameraSummary?: string;
+  capturedAt?: string | null;
+  dataUrl?: string | null;
+  extentSummary?: string;
+  failureReason?: string | null;
+  status: "captured" | "failed" | "unavailable";
+}
+
+declare global {
+  interface Window {
+    __cfsCaptureMapSnapshot?: () => Promise<CfsMapSnapshotCaptureResult>;
+  }
+}
+
 export function SceneViewContainer() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const parcelFocusCardRef = useRef<HTMLDivElement | null>(null);
@@ -837,6 +852,7 @@ export function SceneViewContainer() {
         const { map, view } = createCabarrusSceneView(runtime, container);
         localView = view;
         viewRef.current = view;
+        registerSceneViewSnapshotCapture(runtime, view);
 
         await view.when();
 
@@ -1051,6 +1067,9 @@ export function SceneViewContainer() {
       layerRefs.current = {};
       runtimeRef.current = null;
       viewRef.current = null;
+      if (window.__cfsCaptureMapSnapshot) {
+        delete window.__cfsCaptureMapSnapshot;
+      }
 
       if (localView && !localView.destroyed) {
         localView.destroy();
@@ -1892,6 +1911,79 @@ function getSceneErrorMessage(error: unknown) {
   return "ArcGIS modules could not initialize in the browser.";
 }
 
+function registerSceneViewSnapshotCapture(
+  runtime: ArcGISRuntime,
+  view: SceneView,
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.__cfsCaptureMapSnapshot = async () => {
+    if (!view || view.destroyed) {
+      return {
+        failureReason: "SceneView is not ready.",
+        status: "unavailable",
+      };
+    }
+
+    const capturedAt = new Date().toISOString();
+    const extentSummary = formatSceneViewExtent(
+      getSceneViewWgs84Extent(runtime, view),
+    );
+    const cameraSummary = formatSceneViewCamera(view);
+
+    try {
+      const screenshotView = view as SceneView & {
+        takeScreenshot?: (options?: {
+          format?: "jpg" | "png";
+        }) => Promise<{ dataUrl?: string | null }>;
+      };
+
+      if (!screenshotView.takeScreenshot) {
+        return {
+          cameraSummary,
+          capturedAt,
+          extentSummary,
+          failureReason: "SceneView screenshot API is not available.",
+          status: "unavailable",
+        };
+      }
+
+      const screenshot = await screenshotView.takeScreenshot({ format: "png" });
+
+      if (!screenshot?.dataUrl) {
+        return {
+          cameraSummary,
+          capturedAt,
+          extentSummary,
+          failureReason: "SceneView returned no screenshot image.",
+          status: "failed",
+        };
+      }
+
+      return {
+        cameraSummary,
+        capturedAt,
+        dataUrl: screenshot.dataUrl,
+        extentSummary,
+        status: "captured",
+      };
+    } catch (error) {
+      return {
+        cameraSummary,
+        capturedAt,
+        extentSummary,
+        failureReason:
+          error instanceof Error
+            ? error.message
+            : "SceneView screenshot capture failed.",
+        status: "failed",
+      };
+    }
+  };
+}
+
 function getSceneViewWgs84Extent(
   runtime: ArcGISRuntime,
   view: SceneView,
@@ -1927,6 +2019,16 @@ function getSceneViewWgs84Extent(
     ymax,
     ymin,
   };
+}
+
+function formatSceneViewExtent(extent: FloodZoneExtent | null) {
+  if (!extent) {
+    return undefined;
+  }
+
+  return `W ${extent.xmin.toFixed(5)}, S ${extent.ymin.toFixed(
+    5,
+  )}, E ${extent.xmax.toFixed(5)}, N ${extent.ymax.toFixed(5)}`;
 }
 
 function HotspotInfoMetric({
@@ -3696,6 +3798,29 @@ function describeSceneViewCenter(view: SceneView) {
     x: center.x,
     y: center.y,
   };
+}
+
+function formatSceneViewCamera(view: SceneView) {
+  const center = describeSceneViewCenter(view);
+  const zoom =
+    typeof view.zoom === "number" && Number.isFinite(view.zoom)
+      ? view.zoom.toFixed(1)
+      : "unknown";
+
+  if (!center) {
+    return `Scene camera center unavailable; zoom ${zoom}`;
+  }
+
+  const latitude =
+    typeof center.latitude === "number" && Number.isFinite(center.latitude)
+      ? center.latitude.toFixed(5)
+      : "unknown";
+  const longitude =
+    typeof center.longitude === "number" && Number.isFinite(center.longitude)
+      ? center.longitude.toFixed(5)
+      : "unknown";
+
+  return `Center ${latitude}, ${longitude}; zoom ${zoom}`;
 }
 
 function recordSceneViewFocusDebug(

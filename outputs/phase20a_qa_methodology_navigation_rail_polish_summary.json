@@ -1,0 +1,106 @@
+{
+  "phase": "20A-QA",
+  "name": "Enterprise Methodology Navigation Rail Polish",
+  "branch": "main",
+  "scope": "Methodology navigation rail and styling only",
+  "files_changed": [
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/styles/cfs-theme.css",
+    "outputs/phase20a_qa_methodology_navigation_rail_polish_summary.json"
+  ],
+  "scrollbar_removal_details": {
+    "native_horizontal_scrollbar_hidden": true,
+    "manual_horizontal_scroll_preserved": true,
+    "css_rules": [
+      "scrollbar-width: none",
+      "-ms-overflow-style: none via existing no-scrollbar utility",
+      "::-webkit-scrollbar { display: none; }"
+    ],
+    "rail_overflow_behavior": "The rail remains horizontally scrollable while the visible native white scrollbar is hidden."
+  },
+  "premium_rail_styling": {
+    "glass_dark_container": true,
+    "soft_edge_gradient_fades": true,
+    "subtle_border_and_shadow": true,
+    "active_tab_remains_clear": true,
+    "focus_outline_visible": true,
+    "fixed_segment_widths_to_avoid_clipped_labels": true
+  },
+  "auto_scroll_behavior": {
+    "implemented": true,
+    "method": "requestAnimationFrame when available, with recursive setTimeout fallback for runtimes without requestAnimationFrame",
+    "motion": "Slow left-to-right scroll that reverses near the end and repeats",
+    "speed_pixels_per_second": 9,
+    "fractional_scroll_accumulator": true,
+    "cleanup_on_unmount": true
+  },
+  "pause_behavior": {
+    "pause_on_rail_hover": true,
+    "pause_on_tab_hover": true,
+    "pause_on_keyboard_focus": true,
+    "pause_on_manual_scroll_or_trackpad_interaction": true,
+    "resume_after_manual_interaction_ms": 1500
+  },
+  "reduced_motion_handling": {
+    "prefers_reduced_motion_checked": true,
+    "auto_scroll_disabled_when_reduce_is_enabled": true,
+    "manual_scroll_still_available": true,
+    "gradient_fades_and_hidden_scrollbar_still_apply": true
+  },
+  "accessibility_notes": {
+    "tablist_role_added": true,
+    "tab_role_added": true,
+    "aria_selected_added": true,
+    "tabpanel_target_added": true,
+    "keyboard_activation": "Native button behavior supports Tab focus and Enter/Space activation.",
+    "focus_state": "Visible focus ring uses gold highlight with dark offset."
+  },
+  "visual_qa_result": {
+    "methodology_loaded_in_browser_before_final_timer_patch": true,
+    "rail_css_verified_before_final_timer_patch": {
+      "rail_found": true,
+      "rail_overflowed": true,
+      "scrollbar_width": "none",
+      "tab_count": 10,
+      "sceneview_absent": true,
+      "parcel_prediction_terms_absent": true
+    },
+    "auto_scroll_verified_in_browser": false,
+    "auto_scroll_verification_note": "Browser automation became unstable after repeated local dev restarts. Code was updated after diagnostics showed this browser runtime lacked requestAnimationFrame and window.setInterval; the final implementation now includes a setTimeout fallback, but browser-level motion verification could not be completed before the Browser MCP timed out.",
+    "dev_runtime_note": "After npm run build -- --webpack, npm run dev:cfs started backend successfully but Next dev served / as 404 from the generated dev cache. The generated .next cache was not cleared because this phase did not explicitly request runtime cache cleanup."
+  },
+  "model_safety_verification": {
+    "parcel_level_prediction_probabilities_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "sceneview_rendered_in_methodology": false,
+    "raw_model_terms_in_source": "Only aggregate ranking distribution keys and safety status text remain in Methodology code; they are not parcel-level outputs."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not run; backend files were not changed"
+  },
+  "runtime_results": {
+    "npm_run_dev_cfs": "started",
+    "backend_health_status": 200,
+    "database_health_status": 200,
+    "frontend_status": "404 after webpack build when served by Next dev/Turbopack",
+    "frontend_status_note": "Source and production build are valid; local dev smoke is blocked by generated Next dev cache state. Cache cleanup was intentionally not performed in this phase."
+  },
+  "smoke_test_results": {
+    "localhost_3000_loads": false,
+    "methodology_loads": "verified before final timer fallback; final browser recheck blocked by dev/browser runtime instability",
+    "rail_no_white_scrollbar": "verified before final timer fallback",
+    "rail_auto_scrolls_gently": "implemented but final browser verification blocked",
+    "rail_pauses_on_hover_focus": "implemented but final browser verification blocked",
+    "overview_due_diligence_executive_print": "not rechecked after final timer fallback because frontend dev runtime returned 404",
+    "no_parcel_level_predictions": true
+  },
+  "remaining_known_limitations": [
+    "Final browser motion verification is pending a clean local Next dev cache/session.",
+    "The post-build Turbopack dev server served the not-found route for /; clearing generated .next cache may be required as a separate explicit runtime cleanup task.",
+    "No backend files, schemas, datasets, model artifacts, or public prediction endpoints were changed."
+  ]
+}

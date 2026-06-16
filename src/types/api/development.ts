@@ -289,6 +289,141 @@ export interface DevelopmentParcelPermitEventsResponse {
   total_count: number;
 }
 
+export interface NewConstructionDateRange {
+  co_date_max: string | null;
+  co_date_min: string | null;
+  permit_date_max: string | null;
+  permit_date_min: string | null;
+}
+
+export interface NewConstructionBucket {
+  count: number;
+  value: string;
+}
+
+export interface NewConstructionStatisticsResponse {
+  ambiguous_permit_count: number;
+  by_construction_status: NewConstructionBucket[];
+  by_match_confidence: NewConstructionBucket[];
+  by_permit_type_class: NewConstructionBucket[];
+  co_issued_count: number;
+  co_not_issued_count: number;
+  date_range: NewConstructionDateRange;
+  invalid_placeholder_count: number;
+  matched_permit_count: number;
+  prediction_model_active: boolean;
+  prediction_probability_available: boolean;
+  total_permits: number;
+  unique_matched_parcel_count: number;
+  unmatched_permit_count: number;
+}
+
+export interface ParcelNewConstructionSummaryResponse {
+  active_uncompleted_new_construction_count: number;
+  average_days_to_co: number | null;
+  commercial_new_construction_permits: number;
+  completed_new_construction_count: number;
+  development_stage: string;
+  first_new_construction_permit_date: string | null;
+  latest_co_date: string | null;
+  latest_new_construction_permit_date: string | null;
+  new_construction_years_active: number;
+  official_parcel_id: string;
+  pin14: string | null;
+  prediction_model_active: boolean;
+  prediction_probability_available: boolean;
+  recent_1yr_new_construction_count: number;
+  recent_3yr_new_construction_count: number;
+  recent_5yr_new_construction_count: number;
+  residential_new_construction_permits: number;
+  source: string;
+  total_new_construction_permits: number;
+}
+
+export interface TransportationAccessibilityMissingness {
+  feature_name: string;
+  missing_count: number;
+  missing_pct: number;
+}
+
+export interface TransportationAccessibilityDistanceSummary {
+  avg_ft: number | null;
+  max_ft: number | null;
+  median_ft: number | null;
+  metric_name: string;
+  min_ft: number | null;
+  non_null_count: number;
+  p25_ft: number | null;
+  p75_ft: number | null;
+  p90_ft: number | null;
+}
+
+export interface TransportationAccessibilityQualityBucket {
+  row_count: number;
+  transportation_accessibility_data_quality: string;
+}
+
+export interface DevelopmentPredictionTransportationAccessibilitySummaryResponse {
+  current_context_only: boolean;
+  data_quality_distribution: TransportationAccessibilityQualityBucket[];
+  distance_summary: TransportationAccessibilityDistanceSummary[];
+  expected_parcel_count: number;
+  feature_table: string;
+  feature_table_available: boolean;
+  missing_major_road_classification_count: number;
+  missingness_summary: TransportationAccessibilityMissingness[];
+  model_active: boolean;
+  prediction_probability_available: boolean;
+  rail_clean_rows: number;
+  rail_corridor_within_half_mile_count: number;
+  road_clean_rows: number;
+  row_count: number;
+  row_count_matches_parcels: boolean;
+  unique_parcel_count: number;
+}
+
+export interface TransportationPlanTrafficDistributionMetric {
+  avg_value: number | null;
+  max_value: number | null;
+  median_value: number | null;
+  metric_name: string;
+  metric_unit: string;
+  min_value: number | null;
+  non_null_count: number;
+  p25_value: number | null;
+  p75_value: number | null;
+  p90_value: number | null;
+}
+
+export interface TransportationPlanTrafficQualityBucket {
+  quality: string;
+  quality_type: string;
+  row_count: number;
+}
+
+export interface DevelopmentPredictionTransportationPlanTrafficSummaryResponse {
+  aadt_clean_rows: number;
+  current_context_only: boolean;
+  current_context_only_count: number;
+  distribution_summary: TransportationPlanTrafficDistributionMetric[];
+  expected_parcel_count: number;
+  feature_table: string;
+  feature_table_available: boolean;
+  missingness_summary: TransportationAccessibilityMissingness[];
+  model_active: boolean;
+  planned_transportation_investment_count: number;
+  prediction_probability_available: boolean;
+  quality_distribution: TransportationPlanTrafficQualityBucket[];
+  row_count: number;
+  row_count_matches_parcels: boolean;
+  stip_clean_rows: number;
+  stip_project_within_1_mile_count: number;
+  stip_project_within_half_mile_count: number;
+  time_safe_for_training: boolean;
+  time_safe_for_training_count: number;
+  unique_parcel_count: number;
+}
+
 export interface DevelopmentLookupItem {
   count: number;
   label: string;

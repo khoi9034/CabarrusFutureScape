@@ -1,0 +1,154 @@
+{
+  "phase": "18B",
+  "title": "Demo Package, Leadership Brief, and Portfolio-Ready Project Narrative",
+  "status": "complete",
+  "generated_at": "2026-06-15",
+  "files_created": [
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_leadership_brief.md",
+    "docs/demo/cfs_capability_matrix.md",
+    "docs/demo/cfs_model_explanation_for_nontechnical_audience.md",
+    "docs/demo/cfs_what_not_to_claim.md"
+  ],
+  "files_updated": [
+    "README.md",
+    "docs/demo/cfs_screenshot_checklist.md",
+    "src/components/dashboard/CommandPalette.tsx"
+  ],
+  "readme_updates": {
+    "section_added": "Demo / Release Candidate Package",
+    "included_startup_command": "npm run dev:cfs",
+    "included_urls": [
+      "http://localhost:3000",
+      "http://127.0.0.1:8000",
+      "http://127.0.0.1:8000/docs"
+    ],
+    "included_demo_parcel": "CFS-PARCEL-0149726579",
+    "included_model_safety_status": true,
+    "included_demo_doc_index": true
+  },
+  "demo_walkthrough_summary": {
+    "startup_steps_documented": true,
+    "localhost_3000_warning_documented": true,
+    "recommended_demo_sequence_steps": 13,
+    "spoken_talking_points_included": true,
+    "demo_safety_checklist_included": true
+  },
+  "leadership_brief_summary": {
+    "audience": "directors, managers, planning staff, GIS staff, and portfolio reviewers",
+    "tone": "confident and caveated",
+    "covers_current_capabilities": true,
+    "covers_model_boundaries": true,
+    "covers_next_data_requests": true
+  },
+  "capability_matrix_summary": {
+    "sections": [
+      "Parcel Intelligence",
+      "Zoning / Planning",
+      "Development Activity",
+      "Flood / Environmental Constraints",
+      "Schools",
+      "Transportation",
+      "Utility / Infrastructure",
+      "Model Research",
+      "Reporting / Executive Print"
+    ],
+    "fields_per_section": [
+      "current capability",
+      "data source basis",
+      "current limitation",
+      "next improvement"
+    ]
+  },
+  "model_explanation_summary": {
+    "audience": "nontechnical",
+    "explains_permits_as_historical_outcome": true,
+    "explains_features_as_parcel_context": true,
+    "current_best_internal_model": "Zoning + Transportation + Tax/Value",
+    "probabilities_not_exposed_reason": "weak calibration and governance review required",
+    "public_decision_use": false
+  },
+  "limitations_sheet_summary": {
+    "what_not_to_claim_created": true,
+    "approved_wording_included": true,
+    "school_caveats_included": true,
+    "utility_caveats_included": true,
+    "model_safety_wording_included": true
+  },
+  "screenshot_checklist_updates": {
+    "minimum_capture_set_added": true,
+    "required_screenshots_documented": [
+      "Overview landing state",
+      "Parcel search result",
+      "Active selected parcel map focus",
+      "Due Diligence parcel snapshot",
+      "High-Priority Review Flags",
+      "Flood / School / Transportation cards",
+      "Executive Print header",
+      "Executive Print key findings",
+      "Methodology current best internal model",
+      "Methodology feature governance"
+    ]
+  },
+  "optional_ui_wiring_cleanup": {
+    "performed": true,
+    "file": "src/components/dashboard/CommandPalette.tsx",
+    "reason": "Browser smoke found the top parcel search result appeared but did not commit selected parcel state because the inspect event listener was no longer mounted in the simplified layout.",
+    "fix": "Command-palette parcel selection now sets selected parcel intelligence directly, hydrates parcel detail with geometry through the existing API client, and preserves the legacy inspect event for compatibility.",
+    "api_paths_used": [
+      "GET /parcels/search",
+      "GET /parcels/{official_parcel_id}?include_geometry=true"
+    ]
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not_run_backend_files_not_changed"
+  },
+  "dev_runtime_results": {
+    "npm_run_dev_cfs": "passed",
+    "frontend": {
+      "url": "http://localhost:3000",
+      "status": 200
+    },
+    "backend": {
+      "url": "http://127.0.0.1:8000",
+      "health_status": 200
+    },
+    "launcher_api_checks": "passed"
+  },
+  "smoke_test_results": {
+    "frontend_loaded": true,
+    "parcel_search_result_appeared": true,
+    "parcel_search_selected_demo_parcel": true,
+    "active_selection_overlay_updated": true,
+    "due_diligence_loaded": true,
+    "due_diligence_selected_parcel_loaded": true,
+    "executive_print_loaded": true,
+    "executive_print_selected_parcel_loaded": true,
+    "methodology_loaded": true,
+    "methodology_model_safety_loaded": true,
+    "no_parcel_level_prediction_probabilities": true,
+    "no_parcel_level_ranking_classes": true,
+    "browser_console_errors": 0,
+    "browser_console_warnings": [
+      "Known placeholder scenario-envelope warning",
+      "Known ArcGIS draped label placement warnings"
+    ]
+  },
+  "model_safety_confirmation": {
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false,
+    "public_exposure_allowed": false,
+    "parcel_level_prediction_display": false,
+    "public_parcel_prediction_endpoint": false
+  },
+  "remaining_recommended_next_steps": [
+    "Capture manual screenshots using docs/demo/cfs_screenshot_checklist.md.",
+    "Use docs/demo/cfs_demo_walkthrough.md for stakeholder or portfolio walkthroughs.",
+    "Keep model discussion in Methodology and leadership docs until calibration and governance are complete.",
+    "Continue with official school capacity, rezoning case history, utility capacity, and transportation project data requests before any production prediction claims."
+  ]
+}

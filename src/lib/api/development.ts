@@ -9,10 +9,14 @@ import type {
   DevelopmentParcelPermitEventsResponse,
   DevelopmentPredictionFeaturesSummaryResponse,
   DevelopmentPredictionRankingSummaryResponse,
+  DevelopmentPredictionTransportationAccessibilitySummaryResponse,
+  DevelopmentPredictionTransportationPlanTrafficSummaryResponse,
   DevelopmentStatisticsResponse,
   DevelopmentTemporalQueryResponse,
   DevelopmentTrendsResponse,
   DevelopmentZoningSummaryResponse,
+  NewConstructionStatisticsResponse,
+  ParcelNewConstructionSummaryResponse,
 } from "@/types/api";
 
 export interface DevelopmentStatisticsParams extends ApiQueryParams {
@@ -166,6 +170,27 @@ export function getDevelopmentParcelPermits(
   );
 }
 
+export function getNewConstructionStatistics(options?: ApiRequestOptions) {
+  return apiGet<NewConstructionStatisticsResponse>(
+    "/development/new-construction/statistics",
+    undefined,
+    options,
+  );
+}
+
+export function getParcelNewConstructionSummary(
+  officialParcelId: string,
+  options?: ApiRequestOptions,
+) {
+  return apiGet<ParcelNewConstructionSummaryResponse>(
+    `/development/new-construction/parcel/${encodeURIComponent(
+      officialParcelId,
+    )}`,
+    undefined,
+    options,
+  );
+}
+
 export function getPermitSegmentStatistics(options?: ApiRequestOptions) {
   return apiGet<PermitSegmentStatisticsResponse>(
     "/development/permit-segments/statistics",
@@ -240,6 +265,26 @@ export function getDevelopmentPredictionRankingSummary(
 ) {
   return apiGet<DevelopmentPredictionRankingSummaryResponse>(
     "/development/prediction/ranking/summary",
+    undefined,
+    options,
+  );
+}
+
+export function getTransportationAccessibilitySummary(
+  options?: ApiRequestOptions,
+) {
+  return apiGet<DevelopmentPredictionTransportationAccessibilitySummaryResponse>(
+    "/development/prediction/transportation-accessibility/summary",
+    undefined,
+    options,
+  );
+}
+
+export function getTransportationPlanTrafficSummary(
+  options?: ApiRequestOptions,
+) {
+  return apiGet<DevelopmentPredictionTransportationPlanTrafficSummaryResponse>(
+    "/development/prediction/transportation-plan-traffic/summary",
     undefined,
     options,
   );

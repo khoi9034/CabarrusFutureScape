@@ -1,0 +1,128 @@
+{
+  "phase": "18C",
+  "artifact": "demo_dry_run_results",
+  "status": "passed_with_known_warnings",
+  "generated_at": "2026-06-15",
+  "demo_url_used": "http://localhost:3000",
+  "demo_url_not_used": "http://127.0.0.1:3000",
+  "demo_parcel": "CFS-PARCEL-0149726579",
+  "runtime": {
+    "npm_run_dev_cfs": "passed",
+    "frontend_url": "http://localhost:3000",
+    "frontend_status": 200,
+    "backend_url": "http://127.0.0.1:8000",
+    "backend_health_status": 200,
+    "database_health_status": 200,
+    "launcher_core_api_checks": "passed"
+  },
+  "demo_sequence_results": [
+    {
+      "step": 1,
+      "name": "Overview loads",
+      "status": "passed"
+    },
+    {
+      "step": 2,
+      "name": "Search demo parcel",
+      "status": "passed",
+      "evidence": "Command palette returned CFS-PARCEL-0149726579 with owner/account context."
+    },
+    {
+      "step": 3,
+      "name": "Select parcel",
+      "status": "passed",
+      "evidence": "Selected parcel state updated with CFS-PARCEL-0149726579 and MALL AT CONCORD MILLS LP."
+    },
+    {
+      "step": 4,
+      "name": "Active Selection updates",
+      "status": "passed",
+      "evidence": "Active Selection overlay showed parcel ID, owner/account, selected parcel loaded, zoning C-2, quality Review, and source API."
+    },
+    {
+      "step": 5,
+      "name": "Map focuses / parcel cage appears",
+      "status": "passed",
+      "evidence": "Map focus/selected parcel workflow was exercised after parcel detail hydration with geometry."
+    },
+    {
+      "step": 6,
+      "name": "Open Due Diligence",
+      "status": "passed"
+    },
+    {
+      "step": 7,
+      "name": "High-Priority Review Flags appear",
+      "status": "passed"
+    },
+    {
+      "step": 8,
+      "name": "Due Diligence domains and caveats appear",
+      "status": "passed",
+      "domains": {
+        "zoning": true,
+        "development": true,
+        "flood": true,
+        "school": true,
+        "transportation": true,
+        "utility": true,
+        "model_caveats": true
+      }
+    },
+    {
+      "step": 9,
+      "name": "Open Executive Print",
+      "status": "passed"
+    },
+    {
+      "step": 10,
+      "name": "Report structure appears",
+      "status": "passed",
+      "evidence": "Executive Print showed selected parcel report, key findings, and High-Priority Review Flags."
+    },
+    {
+      "step": 11,
+      "name": "Open Methodology",
+      "status": "passed"
+    },
+    {
+      "step": 12,
+      "name": "Model safety and current-best governance appear",
+      "status": "passed",
+      "evidence": "Methodology showed internal-only model status, CFS model foundation, and aggregate safety flags."
+    }
+  ],
+  "screenshot_capture": {
+    "status": "captured",
+    "directory": "docs/demo/screenshots",
+    "files": [
+      "01_overview_landing.png",
+      "02_parcel_search_selected.png",
+      "03_active_selection_map_focus.png",
+      "04_due_diligence_snapshot.png",
+      "05_due_diligence_priority_flags.png",
+      "06_due_diligence_constraints.png",
+      "07_executive_print_header.png",
+      "08_executive_print_key_findings.png",
+      "09_methodology_model_governance.png"
+    ],
+    "note": "Screenshots were captured from the live local app through the in-app browser. Some section-specific screenshots may show the current viewport position rather than full-page capture."
+  },
+  "prediction_safety": {
+    "no_parcel_level_prediction_probability_in_ui": true,
+    "no_parcel_level_ranking_class_in_ui": true,
+    "methodology_aggregate_only": true,
+    "public_parcel_prediction_endpoint_exists": false,
+    "allowed_aggregate_endpoints": [
+      "/development/prediction/features/summary",
+      "/development/prediction/ranking/summary"
+    ]
+  },
+  "browser_console": {
+    "error_count": 0,
+    "known_warnings": [
+      "ArcGIS draped graphics label placement warning",
+      "Placeholder or disabled layer definition warnings for mock/internal layers"
+    ]
+  }
+}

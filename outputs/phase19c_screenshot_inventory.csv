@@ -1,0 +1,10 @@
+file_name,relative_path,file_exists,likely_demo_section,notes
+01_overview_landing.png,docs/demo/screenshots/01_overview_landing.png,true,Overview landing state,Viewport screenshot captured during Phase 18C demo evidence package.
+02_parcel_search_selected.png,docs/demo/screenshots/02_parcel_search_selected.png,true,Parcel search result,Shows demo parcel search/selection flow.
+03_active_selection_map_focus.png,docs/demo/screenshots/03_active_selection_map_focus.png,true,Active Selection map focus,Shows selected parcel context and map focus state.
+04_due_diligence_snapshot.png,docs/demo/screenshots/04_due_diligence_snapshot.png,true,Due Diligence parcel snapshot,Shows selected parcel due diligence header/snapshot.
+05_due_diligence_priority_flags.png,docs/demo/screenshots/05_due_diligence_priority_flags.png,true,High-Priority Review Flags,Shows review triage / priority flags section.
+06_due_diligence_constraints.png,docs/demo/screenshots/06_due_diligence_constraints.png,true,Due Diligence constraints,Shows constraint/context cards from due diligence.
+07_executive_print_header.png,docs/demo/screenshots/07_executive_print_header.png,true,Executive Print header,Shows report header and selected parcel report framing.
+08_executive_print_key_findings.png,docs/demo/screenshots/08_executive_print_key_findings.png,true,Executive Print key findings,Shows memo-style findings / report context.
+09_methodology_model_governance.png,docs/demo/screenshots/09_methodology_model_governance.png,true,Methodology model governance,Shows aggregate-only model safety and governance context.

@@ -32,9 +32,20 @@ import {
   commandCategoryOrder,
 } from "@/lib/dashboard/commandRegistry";
 import { PARCEL_SEARCH_INSPECT_EVENT } from "@/components/dashboard/ParcelSearchState";
-import { searchParcelIndex } from "@/data/intelligence/parcelSearchData";
+import {
+  searchParcelIndex,
+  type ParcelSearchRecord,
+} from "@/data/intelligence/parcelSearchData";
+import {
+  normalizeBackendParcelDetailResponse,
+  normalizeBackendParcelMapFocusResponse,
+} from "@/lib/adapters/parcelDetailAdapter";
+import { normalizeBackendParcelSearchResponse } from "@/lib/adapters/parcelSearchAdapter";
+import { USE_BACKEND_API } from "@/lib/api/client";
+import { getParcelDetail, searchParcels } from "@/lib/api/parcels";
 import { mockDashboardSearchServiceAdapter } from "@/lib/dashboard/searchServiceAdapter";
 import { useDashboardState } from "@/hooks/useDashboardState";
+import { useParcelMapFocus } from "@/hooks/useParcelMapFocus";
 import { cn } from "@/lib/utils";
 import type { CommandAction, CommandCategory, SearchResult } from "@/types/search";
 
@@ -67,6 +78,9 @@ export function CommandPalette({
   open,
 }: CommandPaletteProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [generatedParcelRecordsById, setGeneratedParcelRecordsById] = useState<
+    Record<string, ParcelSearchRecord>
+  >({});
   const [generatedParcelResults, setGeneratedParcelResults] = useState<
     SearchResult[]
   >([]);
@@ -82,6 +96,7 @@ export function CommandPalette({
     exportScenarioComparison,
     roleId,
     selectParcel,
+    setSelectedParcelIntelligence,
     setLayerVisibility,
     setBriefingMode,
     setComparisonPair,
@@ -95,6 +110,7 @@ export function CommandPalette({
     setSimulationYear,
     toggleLayer,
   } = useDashboardState();
+  const { setParcelFocus, setParcelFocusFromRecord } = useParcelMapFocus();
 
   const commandResults = useMemo(
     () =>
@@ -115,15 +131,28 @@ export function CommandPalette({
 
     let cancelled = false;
 
-    searchParcelIndex({
-      limit: 6,
-      query: trimmedQuery,
-    })
+    const searchPromise = USE_BACKEND_API
+      ? searchParcels({
+          limit: 6,
+          offset: 0,
+          q: trimmedQuery,
+        }).then(normalizeBackendParcelSearchResponse)
+      : searchParcelIndex({
+          limit: 6,
+          query: trimmedQuery,
+        });
+
+    searchPromise
       .then((parcelResults) => {
         if (cancelled) {
           return;
         }
 
+        setGeneratedParcelRecordsById(
+          Object.fromEntries(
+            parcelResults.map((parcel) => [parcel.officialParcelId, parcel]),
+          ),
+        );
         setGeneratedParcelResults(
           parcelResults.map((parcel, index) => ({
             accent: "#68d8ff",
@@ -166,6 +195,7 @@ export function CommandPalette({
       })
       .catch(() => {
         if (!cancelled) {
+          setGeneratedParcelRecordsById({});
           setGeneratedParcelResults([]);
         }
       });
@@ -236,6 +266,93 @@ export function CommandPalette({
           selectParcel(action.parcelId, { source: "dashboard" });
           break;
         case "inspect-intelligence-parcel":
+          {
+            const parcelRecord =
+              generatedParcelRecordsById[action.officialParcelId];
+
+            if (parcelRecord) {
+              setSelectedParcelIntelligence(
+                parcelRecord,
+                USE_BACKEND_API ? "api" : "static",
+              );
+              setParcelFocusFromRecord(
+                {
+                  officialParcelId: parcelRecord.officialParcelId,
+                  pin14: parcelRecord.pin14,
+                },
+                "command",
+              );
+            } else {
+              selectParcel(action.officialParcelId, { source: "dashboard" });
+            }
+
+            if (USE_BACKEND_API) {
+              void getParcelDetail(action.officialParcelId, {
+                include_geometry: true,
+              })
+                .then((response) => {
+                  const fallbackRecord =
+                    parcelRecord ??
+                    ({
+                      assessedValue: null,
+                      governanceWarningCount: 0,
+                      governanceWarnings: [],
+                      mailingAddress: null,
+                      mailingCity: null,
+                      mailingState: null,
+                      marketValue: null,
+                      needsGovernanceReview: false,
+                      neighborhood: null,
+                      objectId1: null,
+                      officialParcelId: action.officialParcelId,
+                      ownerName: null,
+                      ownerSecondaryName: null,
+                      parcelQualityStatus: null,
+                      parcelSizeCategory: null,
+                      pin14: null,
+                      planningBoundaryType: null,
+                      planningJurisdiction: null,
+                      primaryGovernanceWarning: null,
+                      safeForDashboard: false,
+                      searchText: action.officialParcelId.toLowerCase(),
+                      subdivision: null,
+                      valuationBand: null,
+                      zoningCategory: null,
+                      zoningCode: null,
+                      zoningConfidence: null,
+                      zoningJurisdiction: null,
+                    } satisfies ParcelSearchRecord);
+                  const hydratedRecord = normalizeBackendParcelDetailResponse(
+                    response,
+                    fallbackRecord,
+                  );
+                  const backendMapFocus =
+                    normalizeBackendParcelMapFocusResponse(
+                      response,
+                      hydratedRecord,
+                    );
+
+                  setSelectedParcelIntelligence(hydratedRecord, "api");
+
+                  if (backendMapFocus) {
+                    setParcelFocus(backendMapFocus);
+                    return;
+                  }
+
+                  setParcelFocusFromRecord(
+                    {
+                      officialParcelId: hydratedRecord.officialParcelId,
+                      pin14: hydratedRecord.pin14,
+                    },
+                    "command",
+                  );
+                })
+                .catch(() => {
+                  // Keep the search-result selection visible if detail hydration
+                  // fails; existing API diagnostics surface failures elsewhere.
+                });
+            }
+          }
           window.dispatchEvent(
             new CustomEvent(PARCEL_SEARCH_INSPECT_EVENT, {
               detail: {
@@ -266,7 +383,11 @@ export function CommandPalette({
       applyWorkspacePreset,
       clearSelectedParcel,
       exportScenarioComparison,
+      generatedParcelRecordsById,
       selectParcel,
+      setParcelFocus,
+      setParcelFocusFromRecord,
+      setSelectedParcelIntelligence,
       setBriefingMode,
       setComparisonPair,
       generateBoardBrief,
@@ -341,6 +462,7 @@ export function CommandPalette({
 
   function closePalette() {
     setActiveIndex(0);
+    setGeneratedParcelRecordsById({});
     setGeneratedParcelResults([]);
     setQuery("");
     onOpenChange(false);
@@ -420,6 +542,7 @@ export function CommandPalette({
               setActiveIndex(0);
               setQuery(nextQuery);
               if (nextQuery.trim().length < 3) {
+                setGeneratedParcelRecordsById({});
                 setGeneratedParcelResults([]);
               }
             }}

@@ -11,8 +11,14 @@ $FrontendEnv = Join-Path $Root ".env.local"
 $BackendLog = Join-Path $Logs "backend-dev.log"
 $FrontendLog = Join-Path $Logs "next-dev.log"
 
-$FrontendUrl = "http://localhost:3000"
-$ApiBaseUrl = "http://127.0.0.1:8000"
+$FrontendPort = 3000
+$BackendPort = 8000
+$PostgresHost = "localhost"
+$PostgresPort = 5433
+$PostgresDb = "cfs_dev"
+
+$FrontendUrl = "http://localhost:$FrontendPort"
+$ApiBaseUrl = "http://127.0.0.1:$BackendPort"
 
 $ApiChecks = @(
   "/health",
@@ -89,6 +95,38 @@ function Get-DescendantProcessIds {
   return $ids
 }
 
+function Get-ProcessCommandLine {
+  param([int]$ProcessId)
+
+  try {
+    $processInfo = Get-CimInstance Win32_Process -Filter "ProcessId = $ProcessId" -ErrorAction Stop
+    return $processInfo.CommandLine
+  } catch {
+    return $null
+  }
+}
+
+function Write-PortOwnership {
+  param([int]$Port)
+
+  $listeners = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
+  if ($listeners.Count -eq 0) {
+    Write-Step "Port $Port is available."
+    return
+  }
+
+  foreach ($listener in $listeners) {
+    $ownerPid = [int]$listener.OwningProcess
+    $process = Get-Process -Id $ownerPid -ErrorAction SilentlyContinue
+    $processName = if ($process) { $process.ProcessName } else { "unknown" }
+    $commandLine = Get-ProcessCommandLine -ProcessId $ownerPid
+    Write-Step "Port $Port is occupied by PID $ownerPid ($processName)."
+    if ($commandLine) {
+      Write-Step "Port $Port command line: $commandLine"
+    }
+  }
+}
+
 function Stop-ListenersOnPort {
   param([int]$Port)
 
@@ -107,7 +145,11 @@ function Stop-ListenersOnPort {
     foreach ($id in $ids) {
       $process = Get-Process -Id $id -ErrorAction SilentlyContinue
       if ($process) {
+        $commandLine = Get-ProcessCommandLine -ProcessId $id
         Write-Step "Stopping process $id on port $Port ($($process.ProcessName))"
+        if ($commandLine) {
+          Write-Step "Stopped process command line: $commandLine"
+        }
         Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
       }
     }
@@ -123,7 +165,7 @@ function Start-Backend {
       "-ExecutionPolicy",
       "Bypass",
       "-Command",
-      "Set-Location -LiteralPath '$Backend'; python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 *> '$BackendLog'"
+      "Set-Location -LiteralPath '$Backend'; `$env:POSTGRES_HOST='$PostgresHost'; `$env:POSTGRES_PORT='$PostgresPort'; `$env:POSTGRES_DB='$PostgresDb'; python -m uvicorn app.main:app --host 127.0.0.1 --port $BackendPort *> '$BackendLog'"
     ) `
     -WindowStyle Hidden
 }
@@ -189,19 +231,25 @@ Ensure-Directory -Path $Logs
 Ensure-FrontendEnv
 
 if (!$NoRestart) {
-  Stop-ListenersOnPort -Port 3000
-  Stop-ListenersOnPort -Port 8000
+  Write-Step "Reserved CFS local ports: frontend $FrontendPort, backend $BackendPort."
+  Write-PortOwnership -Port $FrontendPort
+  Write-PortOwnership -Port $BackendPort
+  Stop-ListenersOnPort -Port $FrontendPort
+  Stop-ListenersOnPort -Port $BackendPort
   Start-Sleep -Seconds 2
   Start-Backend
   Start-Frontend
 } else {
   Write-Step "NoRestart supplied; checking existing local services."
+  Write-Step "Reserved CFS local ports: frontend $FrontendPort, backend $BackendPort."
+  Write-PortOwnership -Port $FrontendPort
+  Write-PortOwnership -Port $BackendPort
 }
 
 $health = Wait-Http -Url "$ApiBaseUrl/health" -TimeoutSeconds 90
 Write-Step "FastAPI health: HTTP $($health.StatusCode)"
 
-$frontend = Wait-Http -Url $FrontendUrl -TimeoutSeconds 120
+$frontend = Wait-Http -Url $FrontendUrl -TimeoutSeconds 240
 Write-Step "Frontend health: HTTP $($frontend.StatusCode)"
 
 $apiResults = foreach ($path in $ApiChecks) {

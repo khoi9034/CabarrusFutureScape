@@ -1,0 +1,155 @@
+{
+  "phase": "22B-QA",
+  "title": "Overview Focus Mode Layout Rescue and Enterprise Information Architecture Cleanup",
+  "created_at": "2026-06-15T14:35:00-04:00",
+  "scope": {
+    "frontend_only": true,
+    "backend_changed": false,
+    "postgis_changed": false,
+    "datasets_added": false,
+    "models_trained": false,
+    "prediction_outputs_exposed": false
+  },
+  "files_changed": [
+    "src/components/dashboard/OverviewFocusStrip.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/layout/AppShell.tsx",
+    "outputs/phase22b_qa_overview_focus_layout_rescue_summary.json"
+  ],
+  "root_cause_of_messy_layout": [
+    "The full six-card focus-mode chooser was rendered inside the narrow right intelligence rail.",
+    "Long focus descriptions, snapshot actions, selected parcel context, and stats competed at equal visual weight in a sidebar-width area.",
+    "The map column felt squeezed because the primary focus-selection workflow was visually buried in a narrow secondary panel."
+  ],
+  "focus_chooser_relocation": {
+    "implemented": true,
+    "summary": "Moved the review-focus chooser into a compact command strip above the SceneView in the main map column.",
+    "focus_modes": [
+      "Development Activity",
+      "Constraints & Risk",
+      "Infrastructure Readiness",
+      "School / Community",
+      "Parcel Lookup",
+      "Snapshot / Report"
+    ],
+    "ui_behavior": [
+      "Compact horizontal/grid buttons with icon, short title, one-line purpose, and active state.",
+      "No long descriptions in the right sidebar.",
+      "No auto-scroll or horizontal scrollbar behavior added.",
+      "Stable data-testid attributes added for focus-mode smoke verification."
+    ]
+  },
+  "right_panel_redesign": {
+    "implemented": true,
+    "summary": "Reworked Overview intelligence rail into a current-focus summary instead of a full focus chooser.",
+    "right_panel_sections": [
+      "Current Focus",
+      "Recommended Layers",
+      "Key Stats / Signals",
+      "Snapshot Actions",
+      "More Details"
+    ],
+    "clutter_reduction": [
+      "Right panel now shows only the selected focus mode and relevant actions.",
+      "Recommended layers are shown as compact chips.",
+      "Stats are limited to concise, focus-specific signals.",
+      "Advanced context is collapsed under More Details.",
+      "Redundant Next Action block and duplicate snapshot action in the selected parcel card were removed."
+    ]
+  },
+  "layer_organization_changes": {
+    "implemented": true,
+    "summary": "Focus modes recommend and safely enable relevant existing layers without removing advanced layer access.",
+    "examples": {
+      "Development Activity": [
+        "Development Hotspots",
+        "Permit Activity",
+        "Parcel Intelligence",
+        "Zoning context"
+      ],
+      "Constraints & Risk": [
+        "FEMA Flood Zones",
+        "Flood Constraints",
+        "School Utilization Seed",
+        "Parcel Intelligence"
+      ],
+      "Infrastructure Readiness": [
+        "Transportation context",
+        "STIP / AADT context",
+        "Utility Proxy",
+        "Parcel Intelligence"
+      ]
+    },
+    "advanced_layers_preserved": true
+  },
+  "snapshot_report_map_screenshot_verification": {
+    "overview_action_visible": true,
+    "save_snapshot_behavior": "Browser smoke clicked Save Snapshot for Report from the visible DOM. SceneView screenshot capture timed out in the browser session and the snapshot was still saved safely.",
+    "report_behavior_verified": true,
+    "map_capture_result_in_smoke": "unavailable_placeholder",
+    "placeholder_text_verified": "Map snapshot unavailable",
+    "broken_image_detected": false,
+    "notes": [
+      "The report correctly keeps the snapshot/report workflow usable when ArcGIS screenshot capture is unavailable.",
+      "No fake map image was generated."
+    ]
+  },
+  "model_wording_safety_changes": {
+    "implemented": true,
+    "summary": "Overview focus language separates observed development activity from aggregate-only internal model governance.",
+    "safe_wording_used": [
+      "Internal model research is not a live prediction layer.",
+      "Model outputs remain hidden and internal-only.",
+      "Focus mode recommends layers and report context. It does not create model predictions, parcel scores, or official capacity findings."
+    ],
+    "forbidden_visible_outputs": {
+      "experimental_probability": false,
+      "prediction_probability": false,
+      "development_signal_class": false,
+      "very_high_development_signal": false,
+      "high_development_signal": false
+    },
+    "safety_grep_note": "Existing aggregate research-status hook still contains internal class labels for non-parcel aggregate governance; they were not surfaced as parcel-level Overview or Planning Snapshot outputs."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "dev_cfs_health_checks": {
+      "frontend_http_localhost_3000": 200,
+      "backend_health": 200,
+      "backend_database_health": 200,
+      "parcel_search": 200,
+      "parcel_detail": 200,
+      "development_hotspots": 200,
+      "flood_high_review": 200,
+      "flood_summary": 200,
+      "flood_zones": 200,
+      "school_statistics": 200,
+      "selected_parcel_school_constraint": 200,
+      "school_qa_summary": 200
+    }
+  },
+  "browser_smoke_results": {
+    "http_localhost_3000_loaded": true,
+    "overview_focus_strip_visible": true,
+    "focus_button_count": 6,
+    "right_panel_current_focus_visible": true,
+    "right_panel_recommended_layers_visible": true,
+    "save_snapshot_action_visible": true,
+    "focus_switch_tested": true,
+    "focus_switch_result": "Constraints & Risk became active and the right panel showed FEMA Flood Zones, Flood Constraints, School Utilization Seed, and snapshot actions.",
+    "planning_snapshot_empty_state_verified": true,
+    "snapshot_report_placeholder_verified": true,
+    "methodology_loads": true,
+    "methodology_sceneview_rendered": false,
+    "browser_console_errors": "No new app errors observed during targeted DOM/text smoke. Known ArcGIS/browser automation timing around screenshot capture produced a handled map snapshot unavailable placeholder."
+  },
+  "remaining_known_issues": [
+    "ArcGIS SceneView screenshot capture may time out in local/browser automation; the report handles this with a clean unavailable placeholder.",
+    "Focus modes recommend and enable relevant layers but do not hide every advanced layer control; advanced layer access remains preserved by design.",
+    "The right panel can sit below the first browser viewport at some desktop sizes because the map remains primary; the layout no longer places the full focus chooser in that narrow rail."
+  ],
+  "recommended_next_step": "Continue with targeted visual QA on a full desktop viewport and, if desired, add a lightweight automated UI test for the Overview focus strip and Planning Snapshot placeholder path."
+}

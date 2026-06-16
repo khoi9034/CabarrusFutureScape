@@ -1,0 +1,118 @@
+{
+  "phase": "18C",
+  "title": "Final Demo Dry Run, Screenshot Checklist, and Presentation Evidence Pack",
+  "status": "complete",
+  "generated_at": "2026-06-15",
+  "dry_run_result": {
+    "overall_status": "passed_with_known_warnings",
+    "results_file": "outputs/phase18c_demo_dry_run_results.json",
+    "frontend_loaded": true,
+    "parcel_search_worked": true,
+    "selected_parcel_flow_worked": true,
+    "active_selection_updated": true,
+    "due_diligence_loaded": true,
+    "executive_print_loaded": true,
+    "methodology_loaded": true,
+    "browser_console_errors": 0
+  },
+  "files_created": [
+    "docs/demo/cfs_final_screenshot_plan.md",
+    "docs/demo/cfs_2_minute_demo_script.md",
+    "docs/demo/cfs_7_minute_technical_demo_script.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "outputs/phase18c_demo_dry_run_results.json",
+    "outputs/phase18c_final_demo_evidence_package_summary.json"
+  ],
+  "screenshots_captured": {
+    "captured": true,
+    "directory": "docs/demo/screenshots",
+    "files": [
+      "docs/demo/screenshots/01_overview_landing.png",
+      "docs/demo/screenshots/02_parcel_search_selected.png",
+      "docs/demo/screenshots/03_active_selection_map_focus.png",
+      "docs/demo/screenshots/04_due_diligence_snapshot.png",
+      "docs/demo/screenshots/05_due_diligence_priority_flags.png",
+      "docs/demo/screenshots/06_due_diligence_constraints.png",
+      "docs/demo/screenshots/07_executive_print_header.png",
+      "docs/demo/screenshots/08_executive_print_key_findings.png",
+      "docs/demo/screenshots/09_methodology_model_governance.png"
+    ]
+  },
+  "screenshot_plan_summary": {
+    "file": "docs/demo/cfs_final_screenshot_plan.md",
+    "recommended_screenshot_count": 16,
+    "includes_file_names": true,
+    "includes_what_to_show": true,
+    "includes_talking_points": true,
+    "includes_caveats": true,
+    "warns_not_to_claim_uncaptured_screenshots": true
+  },
+  "demo_scripts_created": {
+    "two_minute_script": "docs/demo/cfs_2_minute_demo_script.md",
+    "technical_script": "docs/demo/cfs_7_minute_technical_demo_script.md",
+    "tone": "confident, honest, manager-friendly, no overclaiming"
+  },
+  "final_checklist_created": {
+    "file": "docs/demo/cfs_final_demo_checklist.md",
+    "covers_before_demo": true,
+    "covers_during_demo": true,
+    "covers_what_not_to_say": true,
+    "covers_prediction_safety": true
+  },
+  "readme_updates": {
+    "updated": true,
+    "links_added": [
+      "docs/demo/cfs_final_demo_checklist.md",
+      "docs/demo/cfs_2_minute_demo_script.md",
+      "docs/demo/cfs_7_minute_technical_demo_script.md",
+      "docs/demo/cfs_final_screenshot_plan.md"
+    ],
+    "existing_links_preserved": [
+      "docs/demo/cfs_demo_walkthrough.md",
+      "docs/demo/cfs_leadership_brief.md",
+      "docs/demo/cfs_capability_matrix.md",
+      "docs/demo/cfs_model_explanation_for_nontechnical_audience.md",
+      "docs/demo/cfs_what_not_to_claim.md"
+    ]
+  },
+  "safety_verification": {
+    "searched_terms": [
+      "experimental_probability",
+      "prediction_probability",
+      "development_signal_class",
+      "very_high_development_signal",
+      "high_development_signal"
+    ],
+    "no_parcel_level_probability_in_ui": true,
+    "no_parcel_level_ranking_class_in_ui": true,
+    "methodology_remains_aggregate_only": true,
+    "public_parcel_prediction_endpoint_exists": false,
+    "notes": "Raw enum strings remain in backend/modeling/tests/docs and Methodology aggregate-status code paths, which is expected. No parcel-level prediction UI or endpoint was added."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "backend_tests": "not_run_backend_files_not_changed"
+  },
+  "smoke_test_results": {
+    "http_localhost_3000_loads": true,
+    "parcel_search_works_for_demo_parcel": true,
+    "due_diligence_loads": true,
+    "executive_print_loads": true,
+    "methodology_loads": true,
+    "no_browser_console_errors": true,
+    "known_browser_warnings_only": true,
+    "no_parcel_level_probabilities_or_ranking_classes": true
+  },
+  "remaining_known_limitations": [
+    "Screenshots are viewport captures, not full production presentation slides.",
+    "Known ArcGIS draped graphics label placement warnings remain in the browser console.",
+    "Known placeholder/disabled layer warnings remain for mock/internal layers.",
+    "School utilization remains presentation-derived and needs verification.",
+    "Utility context remains proxy-only and does not confirm capacity.",
+    "Model research remains internal-only and not production-ready."
+  ],
+  "recommended_next_phase": "Package selected screenshots into a slide deck or portfolio case study after final stakeholder narrative review."
+}

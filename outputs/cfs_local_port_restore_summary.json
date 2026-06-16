@@ -1,0 +1,120 @@
+{
+  "phase": "local-port-restore",
+  "name": "CFS Local Port Restore and Lock",
+  "branch": "main",
+  "reserved_runtime": {
+    "frontend": "http://localhost:3000",
+    "backend": "http://127.0.0.1:8000",
+    "postgis": "localhost:5433",
+    "database": "cfs_dev"
+  },
+  "files_changed": [
+    "package.json",
+    ".env.example",
+    "scripts/start-cfs-local.ps1",
+    "README.md",
+    "docs/engineering/runtime_recovery.md",
+    "outputs/cfs_local_port_restore_summary.json"
+  ],
+  "frontend_port_confirmed": {
+    "port": 3000,
+    "url": "http://localhost:3000",
+    "status": 200,
+    "title": "Cabarrus FutureScape",
+    "automap_detected": false,
+    "command": "next dev -p 3000"
+  },
+  "backend_port_confirmed": {
+    "host": "127.0.0.1",
+    "port": 8000,
+    "health_status": 200,
+    "database_health_status": 200,
+    "command": "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000"
+  },
+  "database_connection_confirmed": {
+    "database_health_response": {
+      "database": "connected"
+    },
+    "postgis_host": "localhost",
+    "postgis_port": 5433,
+    "database": "cfs_dev"
+  },
+  "configuration_confirmed": {
+    "env_local": {
+      "NEXT_PUBLIC_USE_BACKEND_API": "true",
+      "NEXT_PUBLIC_CFS_API_BASE_URL": "http://127.0.0.1:8000"
+    },
+    "env_example": {
+      "NEXT_PUBLIC_USE_BACKEND_API": "true",
+      "NEXT_PUBLIC_CFS_API_BASE_URL": "http://127.0.0.1:8000"
+    },
+    "frontend_api_default": "http://127.0.0.1:8000",
+    "browser_url_guidance": "Use http://localhost:3000; do not use http://127.0.0.1:3000 for UI testing."
+  },
+  "port_conflicts_found": [
+    {
+      "run": "first npm run dev:cfs",
+      "port": 8000,
+      "process": "python",
+      "command_line": "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+      "action": "stopped and restarted by CFS launcher"
+    },
+    {
+      "run": "second npm run dev:cfs",
+      "port": 3000,
+      "process": "node",
+      "command_line": "C:\\CabarrusFutureScape\\node_modules\\next\\dist\\server\\lib\\start-server.js",
+      "action": "stopped and restarted by CFS launcher"
+    },
+    {
+      "run": "second npm run dev:cfs",
+      "port": 8000,
+      "process": "python",
+      "command_line": "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+      "action": "stopped and restarted by CFS launcher"
+    }
+  ],
+  "process_using_port_3000_after_restore": {
+    "process": "node",
+    "command_line": "C:\\CabarrusFutureScape\\node_modules\\next\\dist\\server\\lib\\start-server.js",
+    "ownership": "CFS Next.js dev server"
+  },
+  "cfs_reclaimed_localhost_3000": true,
+  "launcher_changes": {
+    "explicit_frontend_port": true,
+    "explicit_backend_port": true,
+    "explicit_backend_database_env": true,
+    "port_ownership_diagnostics": true,
+    "frontend_wait_timeout_seconds": 240,
+    "silent_port_fallback": false
+  },
+  "stale_cache_recovery": {
+    "next_cache_removed": true,
+    "reason": "Initial typecheck failed on stale .next route validator output and local Next dev had previously served / as 404. Removed only generated .next cache, then validation passed."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed after generated .next cleanup",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed after extending frontend cold-start wait to 240 seconds",
+    "launcher_api_checks": "passed",
+    "backend_tests": "not run; backend application code was not changed"
+  },
+  "smoke_test_results": {
+    "localhost_3000_returns_cfs_not_automap": true,
+    "backend_health_200": true,
+    "database_health_200": true,
+    "parcel_search_api_200": true,
+    "parcel_detail_with_geometry_api_200": true,
+    "due_diligence_loads": true,
+    "executive_print_loads": true,
+    "methodology_loads": true,
+    "parcel_level_prediction_terms_absent": true,
+    "top_search_ui_note": "The parcel search API works, but the visible browser smoke found the top search input at zero width in the current viewport. This appears unrelated to port ownership and should be handled as a separate UI layout task if needed."
+  },
+  "remaining_notes": [
+    "CFS should remain on localhost:3000 and 127.0.0.1:8000; do not move it to another port to avoid AutoMap conflicts.",
+    "The launcher now reports occupying processes and command lines before reclaiming ports.",
+    "The documented emergency cleanup kills all local node.exe and python.exe processes and should be used only when stale runtime/cache state blocks local development."
+  ]
+}

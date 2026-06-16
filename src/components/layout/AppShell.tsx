@@ -10,9 +10,13 @@ import {
 } from "react";
 import { flushSync } from "react-dom";
 import { DashboardUrlSync } from "@/components/dashboard/DashboardUrlSync";
-import { ExecutivePrintView } from "@/components/dashboard/ExecutivePrintView";
+import { DueDiligenceReview } from "@/components/dashboard/DueDiligenceReview";
 import { IntelligencePanel } from "@/components/dashboard/IntelligencePanel";
 import { MethodologyWorkspace } from "@/components/dashboard/MethodologyWorkspace";
+import {
+  CFS_OPEN_LAYER_RAIL_EVENT,
+  OverviewCommandCenter,
+} from "@/components/dashboard/OverviewCommandCenter";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
 import { MetricsBar } from "@/components/layout/MetricsBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -39,10 +43,19 @@ export function AppShell() {
 
 function ProductShell() {
   const {
+    developmentHotspotsEnabled,
+    floodConstraintsEnabled,
+    floodZonesEnabled,
     isMapFocusMode,
+    parcelReviewView,
     productMode,
     selectedParcelId,
+    selectedParcelIntelligence,
+    selectedParcelIntelligenceSource,
     setMapFocusMode,
+    setParcelReviewView,
+    setPlanningSnapshotView,
+    setProductMode,
   } = useDashboardState();
   const gridRef = useRef<HTMLDivElement | null>(null);
   const layerRailWidthRef = useRef(LAYER_RAIL_DEFAULT_WIDTH);
@@ -51,7 +64,7 @@ function ProductShell() {
   const [layerRailWidth, setLayerRailWidth] = useState(
     LAYER_RAIL_DEFAULT_WIDTH,
   );
-  const [layerRailCollapsed, setLayerRailCollapsed] = useState(false);
+  const [layerRailCollapsed, setLayerRailCollapsed] = useState(true);
   const [layerRailDragPreview, setLayerRailDragPreview] =
     useState<LayerRailDragPreview>(null);
   const [layerRailPreviewWidth, setLayerRailPreviewWidth] = useState<
@@ -59,6 +72,11 @@ function ProductShell() {
   >(null);
   const [layerRailDragging, setLayerRailDragging] = useState(false);
   const executivePrintMode = productMode === "executive_print";
+  const parcelReviewMode =
+    productMode === "due_diligence" || executivePrintMode;
+  const effectiveParcelReviewView = executivePrintMode
+    ? "report"
+    : parcelReviewView;
   const methodologyMode = productMode === "methodology";
   const showLayerRail = productMode === "overview" || isMapFocusMode;
   const showIntelligencePanel = !isMapFocusMode && !methodologyMode;
@@ -89,6 +107,19 @@ function ProductShell() {
   }, []);
 
   useEffect(() => {
+    if (productMode === "executive_print") {
+      setParcelReviewView("report");
+      setPlanningSnapshotView("summary");
+      setProductMode("due_diligence");
+    }
+  }, [
+    productMode,
+    setParcelReviewView,
+    setPlanningSnapshotView,
+    setProductMode,
+  ]);
+
+  useEffect(() => {
     if (!isMapFocusMode) {
       return;
     }
@@ -102,6 +133,20 @@ function ProductShell() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMapFocusMode, setMapFocusMode]);
+
+  useEffect(() => {
+    function handleOpenLayerRail() {
+      setLayerRailCollapsed(false);
+    }
+
+    window.addEventListener(CFS_OPEN_LAYER_RAIL_EVENT, handleOpenLayerRail);
+    return () => {
+      window.removeEventListener(
+        CFS_OPEN_LAYER_RAIL_EVENT,
+        handleOpenLayerRail,
+      );
+    };
+  }, []);
 
   const beginLayerRailResize = useCallback(
     (event: ReactPointerEvent) => {
@@ -300,13 +345,24 @@ function ProductShell() {
         <TopNav />
       </div>
 
-      {executivePrintMode ? (
+      {parcelReviewMode ? (
         <main className="relative z-10 min-h-0 flex-1 overflow-auto p-3 lg:p-4">
           <EnterpriseErrorBoundary
-            moduleName="Executive Print"
-            resetKey={productMode}
+            moduleName="Planning Snapshot"
+            resetKey={`${productMode}-${selectedParcelId ?? "none"}`}
           >
-            <ExecutivePrintView />
+            <DueDiligenceReview
+              developmentHotspotsEnabled={developmentHotspotsEnabled}
+              floodConstraintsEnabled={floodConstraintsEnabled}
+              floodZonesEnabled={floodZonesEnabled}
+              parcelReviewView={effectiveParcelReviewView}
+              selectedParcelId={selectedParcelId}
+              selectedParcelIntelligence={selectedParcelIntelligence}
+              selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
+              setMapFocusMode={setMapFocusMode}
+              setParcelReviewView={setParcelReviewView}
+              setProductMode={setProductMode}
+            />
           </EnterpriseErrorBoundary>
         </main>
       ) : methodologyMode ? (
@@ -341,16 +397,23 @@ function ProductShell() {
           ) : null}
           <main
             className={cn(
-              "order-1 min-h-[58vh] md:col-span-2 md:min-h-[62vh] lg:col-span-1 lg:min-h-0",
+              "order-1 flex min-h-[58vh] flex-col gap-3 md:col-span-2 md:min-h-[62vh] lg:col-span-1 lg:min-h-0",
               showLayerRail ? "lg:order-2" : "lg:order-1",
               isMapFocusMode && "min-h-[calc(100vh-7.25rem)] md:min-h-[calc(100vh-7.25rem)]",
             )}
           >
+            {productMode === "overview" && !isMapFocusMode ? (
+              <EnterpriseErrorBoundary moduleName="Command Center">
+                <OverviewCommandCenter />
+              </EnterpriseErrorBoundary>
+            ) : null}
             <EnterpriseErrorBoundary
               moduleName="3D SceneView"
               resetKey={selectedParcelId}
             >
-              <SceneViewContainer />
+              <div className="min-h-0 flex-1">
+                <SceneViewContainer />
+              </div>
             </EnterpriseErrorBoundary>
           </main>
           {showIntelligencePanel ? (
@@ -364,7 +427,7 @@ function ProductShell() {
         </div>
       )}
 
-      {!executivePrintMode && !isMapFocusMode && !methodologyMode ? (
+      {!parcelReviewMode && !isMapFocusMode && !methodologyMode ? (
         <div className="app-chrome">
           <EnterpriseErrorBoundary moduleName="County Metrics">
             <MetricsBar />

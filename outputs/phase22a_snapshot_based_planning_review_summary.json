@@ -1,0 +1,203 @@
+{
+  "phase": "22A",
+  "name": "Snapshot-Based Planning Review and Executive Summary Workflow",
+  "completed_at": "2026-06-15",
+  "scope": {
+    "backend_changed": false,
+    "postgis_changed": false,
+    "datasets_added": false,
+    "models_trained": false,
+    "public_prediction_endpoint_added": false,
+    "frontend_workflow_changed": true
+  },
+  "files_changed_for_phase22a": [
+    "README.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "docs/demo/cfs_2_minute_demo_script.md",
+    "docs/demo/cfs_higher_up_speaking_notes.md",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/ExecutivePrintView.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/TopNav.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "src/types/index.ts",
+    "outputs/phase22a_snapshot_based_planning_review_summary.json"
+  ],
+  "top_nav_changes": {
+    "previous_visible_nav": [
+      "Overview",
+      "Parcel Review",
+      "Methodology"
+    ],
+    "new_visible_nav": [
+      "Overview",
+      "Planning Snapshot",
+      "Methodology"
+    ],
+    "legacy_internal_modes_preserved": [
+      "due_diligence",
+      "executive_print"
+    ],
+    "legacy_executive_print_behavior": "Internal executive_print mode redirects to Planning Snapshot > Executive Summary for compatibility."
+  },
+  "snapshot_object_design": {
+    "storage": "frontend localStorage plus dashboard provider state",
+    "storage_key": "cfs.planningSnapshot.phase22a.latest",
+    "snapshot_version": "phase22a_v1",
+    "captured_fields": [
+      "timestamp",
+      "selected parcel id",
+      "selected parcel summary",
+      "active map layer labels",
+      "overview KPI/fact summaries",
+      "high-priority review flags",
+      "explainable metrics",
+      "known caveats",
+      "report inclusion section toggles",
+      "map context description"
+    ],
+    "not_captured": [
+      "parcel-level prediction probability",
+      "parcel-level ranking class",
+      "hidden model scores"
+    ],
+    "phase22a_limitation": "Snapshot creation is selected-parcel focused in this phase; map/camera extent is described but not persisted as a formal GIS bookmark."
+  },
+  "overview_snapshot_button": {
+    "button_label": "Save Snapshot for Report",
+    "visible_when": "A parcel is selected in Overview",
+    "confirmation": "Planning snapshot saved for report.",
+    "followup_action": "Open Planning Snapshot",
+    "empty_guidance": "When no parcel is selected, Overview instructs users to search/click a parcel and then save a Planning Snapshot."
+  },
+  "planning_snapshot_workflow": {
+    "empty_state": {
+      "title": "Create a Planning Snapshot",
+      "message": "Use Overview to choose a parcel, map context, and layers, then save a snapshot for review and reporting.",
+      "process_steps": [
+        "Explore Overview",
+        "Select Context",
+        "Save Snapshot",
+        "Explain Numbers",
+        "Print Summary"
+      ],
+      "disabled_clutter_removed": true
+    },
+    "tabs": [
+      "Snapshot Overview",
+      "Explain the Numbers",
+      "Executive Summary",
+      "Review Actions"
+    ],
+    "report_inclusion_controls": [
+      "Parcel facts",
+      "Zoning / Planning",
+      "Development / Permits",
+      "New Construction",
+      "FEMA Flood",
+      "Schools",
+      "Transportation",
+      "Utility Proxy",
+      "Model Governance",
+      "Data Needed / Caveats"
+    ]
+  },
+  "explainable_metric_cards": {
+    "fields": [
+      "metric label",
+      "value",
+      "plain-English meaning",
+      "data source",
+      "method/rationale",
+      "caveat",
+      "recommended action"
+    ],
+    "metrics_added": [
+      "Flood Review Status",
+      "School Assignment",
+      "Development Activity",
+      "Utility Proxy",
+      "Transportation Context",
+      "Internal Model Research Status"
+    ]
+  },
+  "executive_summary_generation": {
+    "source": "saved Planning Snapshot",
+    "title": "Planning Snapshot Executive Summary",
+    "includes": [
+      "report title",
+      "generated timestamp",
+      "snapshot timestamp",
+      "selected parcel summary",
+      "active context labels",
+      "included sections",
+      "key findings",
+      "explainable metrics",
+      "recommended actions",
+      "limitations and caveats"
+    ],
+    "print_button": "Print Executive Summary",
+    "print_behavior": "window.print() after switching to the Executive Summary view",
+    "print_css": "Existing print-report/no-print styles are reused for light/white report output and hidden app chrome."
+  },
+  "documentation_updates": [
+    "README current product modes updated to Overview / Planning Snapshot / Methodology",
+    "demo walkthrough updated to save a Planning Snapshot before opening Executive Summary",
+    "final demo checklist updated for Save Snapshot for Report and Planning Snapshot",
+    "2-minute demo script updated to explain saved snapshots and explainable metrics",
+    "higher-up speaking notes updated to use Planning Snapshot and Executive Summary wording"
+  ],
+  "safety_verification": {
+    "ui_search_terms_checked": [
+      "experimental_probability",
+      "prediction_probability",
+      "development_signal_class",
+      "very_high_development_signal",
+      "high_development_signal"
+    ],
+    "ui_result": "No parcel-level prediction probability or ranking-class terms were found in src/components.",
+    "readme_note": "README still documents internal ranking class names as historical/model governance artifacts; these are not exposed in the UI workflow.",
+    "model_caveats_preserved": true,
+    "snapshot_stores_hidden_model_outputs": false
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed on rerun; first attempt hit command timeout, second completed successfully",
+    "backend_compile_or_pytest": "not run; backend files were not changed"
+  },
+  "runtime_smoke_results": {
+    "dev_server_action": "Existing CFS dev listeners on ports 3000 and 8000 were stale; restarted only CFS-owned node/uvicorn listeners and ran npm run dev:cfs.",
+    "frontend_localhost_3000": 200,
+    "backend_health": 200,
+    "backend_database_health": 200,
+    "parcel_search_api": {
+      "url": "/parcels/search?q=CFS-PARCEL-0149726579",
+      "status": 200,
+      "total_count": 1
+    },
+    "parcel_detail_api": {
+      "url": "/parcels/CFS-PARCEL-0149726579?include_geometry=true",
+      "status": 200
+    },
+    "browser_smoke": {
+      "overview_loaded": true,
+      "top_nav_old_labels_absent": true,
+      "planning_snapshot_empty_state_loaded": true,
+      "planning_snapshot_process_steps_visible": true,
+      "methodology_loaded": true,
+      "browser_error_logs": [],
+      "prediction_terms_visible": false,
+      "caveat": "The in-app browser remained in compact-width layout, hiding the top parcel search. Browser verification covered navigation, empty state, Methodology, and safety terms; parcel search/detail availability was verified through backend APIs."
+    }
+  },
+  "remaining_known_issues": [
+    "Phase 22A snapshot storage is local/browser-only; multi-user persistence would require a future backend design.",
+    "Map extent/camera capture is described but not serialized as a formal GIS bookmark in this phase.",
+    "The in-app browser compact viewport prevented full click-through testing of top-search parcel selection and Save Snapshot for Report, though typecheck/lint/build and backend API smoke passed."
+  ],
+  "recommended_next_step": "Phase 22B should add a small snapshot manager/history and formal map-view bookmark capture if the localStorage workflow feels right in demo."
+}

@@ -202,6 +202,34 @@ select:focus-visible {
   display: none;
 }
 
+.cfs-methodology-rail-shell {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.026)),
+    rgba(5, 10, 18, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 1rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 48px rgba(0, 0, 0, 0.22);
+  overflow: visible;
+  position: relative;
+}
+
+.cfs-methodology-rail-scroll {
+  -ms-overflow-style: none;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  scroll-behavior: auto;
+  scroll-padding-inline: 1rem;
+  touch-action: pan-x;
+  width: 100%;
+}
+
+.cfs-methodology-rail-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 .esri-view {
   --calcite-ui-brand: var(--gold);
   --calcite-ui-brand-hover: #f0cd79;
@@ -223,6 +251,7 @@ select:focus-visible {
     background: #ffffff !important;
     color: #111827 !important;
     min-height: auto;
+    overflow: visible !important;
   }
 
   body * {
@@ -231,6 +260,9 @@ select:focus-visible {
   }
 
   .app-chrome,
+  .no-print,
+  .cfs-layer-rail,
+  .esri-view,
   .esri-ui,
   .esri-popup,
   .esri-attribution {
@@ -246,14 +278,38 @@ select:focus-visible {
     border: 0 !important;
     box-shadow: none !important;
     color: #111827 !important;
+    font-size: 10.5pt !important;
+    line-height: 1.45 !important;
     max-width: none !important;
     padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .print-report * {
+    max-width: 100% !important;
+    overflow: visible !important;
+    overflow-wrap: anywhere;
   }
 
   .print-report section,
   .print-report article,
   .print-report div {
     break-inside: avoid;
+  }
+
+  .print-report .print-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-report .print-page-break {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .print-report button,
+  .print-report summary {
+    display: none !important;
   }
 
   .print-report h1,
@@ -274,13 +330,38 @@ select:focus-visible {
   }
 
   .print-report .bg-black\/20,
+  .print-report .bg-\[\#07111f\]\/70,
+  .print-report .bg-\[\#07111f\]\/72,
+  .print-report .bg-\[\#07111f\]\/78,
+  .print-report .bg-\[\#07111f\]\/88,
+  .print-report .bg-\[\#0d1320\]\/90,
+  .print-report .bg-\[\#0a111c\]\/92,
+  .print-report .bg-\[\#0a111c\]\/94,
   .print-report .bg-white\/\[0\.035\],
-  .print-report .bg-white\/\[0\.025\] {
+  .print-report .bg-white\/\[0\.025\],
+  .print-report .bg-white\/\[0\.04\],
+  .print-report .bg-white\/\[0\.045\],
+  .print-report .bg-\[\#68d8ff\]\/10,
+  .print-report .bg-\[\#d8b86a\]\/10,
+  .print-report .bg-\[\#d8b86a\]\/\[0\.055\],
+  .print-report .bg-\[\#55d38f\]\/10,
+  .print-report .bg-\[\#ff8d7a\]\/10 {
     background: #f8fafc !important;
   }
 
   .print-report .border-white\/10,
-  .print-report .border-white\/15 {
+  .print-report .border-white\/15,
+  .print-report .border-\[\#68d8ff\]\/18,
+  .print-report .border-\[\#68d8ff\]\/25,
+  .print-report .border-\[\#d8b86a\]\/20,
+  .print-report .border-\[\#d8b86a\]\/28,
+  .print-report .border-\[\#d8b86a\]\/35,
+  .print-report .border-\[\#55d38f\]\/25,
+  .print-report .border-\[\#ff8d7a\]\/28 {
     border-color: #d1d5db !important;
+  }
+
+  .print-report [class*="shadow-"] {
+    box-shadow: none !important;
   }
 }

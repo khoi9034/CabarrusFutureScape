@@ -50,7 +50,7 @@ export function Sidebar({
 
   return (
     <aside
-      aria-label="Explore and map layer control panel"
+      aria-label="Advanced map layer control panel"
       className={cn(
         "app-chrome glass-panel cfs-layer-rail relative order-2 flex min-h-0 flex-col overflow-visible rounded-lg md:max-h-[72vh] lg:order-1 lg:max-h-none",
         dragging && "cfs-layer-rail--dragging",
@@ -64,10 +64,10 @@ export function Sidebar({
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase text-slate-500">
-              Explore
+              Advanced
             </p>
             <h2 className="mt-1 text-lg font-semibold leading-6 text-white">
-              Map Layers
+              Map Controls
             </h2>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -81,15 +81,7 @@ export function Sidebar({
         </div>
 
         <div className="space-y-3 pr-0 lg:pr-2">
-          <LayerToggle />
-          <p
-            className={cn(
-              "rounded-md border border-white/10 bg-white/[0.025] px-3 py-2 text-[11px] leading-5 text-slate-500",
-            )}
-          >
-            Registry, onboarding, scenario, and methodology notes now live in the
-            Methodology workspace so this rail stays focused on map operations.
-          </p>
+          <LayerToggle onCollapseDrawer={onToggleCollapsed} />
         </div>
       </div>
     </aside>

@@ -1,0 +1,215 @@
+{
+  "phase": "22D",
+  "title": "Full Overview Navigation Redesign and Planning Snapshot Report Builder Cleanup",
+  "created_at": "2026-06-15T16:05:00-04:00",
+  "scope": {
+    "frontend_only": true,
+    "backend_changed": false,
+    "postgis_changed": false,
+    "datasets_added": false,
+    "models_trained": false,
+    "prediction_outputs_exposed": false,
+    "public_prediction_endpoints_added": false
+  },
+  "files_changed": [
+    "README.md",
+    "docs/demo/cfs_2_minute_demo_script.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "docs/demo/cfs_higher_up_speaking_notes.md",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "outputs/phase22d_overview_command_center_ui_redesign_summary.json"
+  ],
+  "old_ui_issue_summary": [
+    "The previous Overview front door started with six focus buttons that behaved like another set of layer categories.",
+    "The full focus chooser appeared above the map while the right panel repeated focus/layer information.",
+    "The left map layers rail defaulted to a large expanded control panel, making the first screen feel like a GIS admin console.",
+    "Users had too many equal-weight choices before understanding the primary workflow: search, explore, save snapshot, open methodology."
+  ],
+  "command_center_redesign": {
+    "implemented": true,
+    "old_review_focus_strip_removed": true,
+    "new_title": "CFS Command Center",
+    "new_subtitle": "Search, explore, and capture report-ready context.",
+    "primary_workflows": [
+      {
+        "title": "Find a Parcel",
+        "purpose": "Search or select a parcel and focus the live map.",
+        "action": "Use search bar"
+      },
+      {
+        "title": "Explore Countywide Intelligence",
+        "purpose": "Scan growth, flood, parcel coverage, and active overlays.",
+        "action": "View indicators"
+      },
+      {
+        "title": "Build Planning Snapshot",
+        "purpose": "Capture map context, layers, caveats, and explanations.",
+        "action": "Save Snapshot for Report"
+      }
+    ],
+    "notes": [
+      "The command cards are workflow actions, not map-layer categories.",
+      "The Save Snapshot action dispatches to the existing snapshot builder so map capture and caveat behavior stay centralized."
+    ]
+  },
+  "layer_drawer_behavior": {
+    "implemented": true,
+    "default_state": "collapsed slim Layers rail",
+    "expanded_label": "Advanced Map Controls",
+    "capabilities_preserved": true,
+    "layer_groups": [
+      "Base / Parcel",
+      "Development Activity",
+      "Flood / Constraints",
+      "Schools",
+      "Utility / Infrastructure",
+      "Planning Context",
+      "Internal Research / Governance"
+    ],
+    "notes": [
+      "Existing layer toggles and live overlay controls remain available.",
+      "The layer rail is secondary by default so the map and Command Center become the dominant first-screen workflow."
+    ]
+  },
+  "intelligence_brief_redesign": {
+    "implemented": true,
+    "no_parcel_state": {
+      "title": "Intelligence Brief",
+      "contents": [
+        "countywide permit records",
+        "active development parcels",
+        "FEMA flood review count/status",
+        "parcel coverage",
+        "model status: internal only",
+        "active map context",
+        "snapshot actions"
+      ],
+      "helper": "Search a parcel to add parcel-specific facts."
+    },
+    "selected_parcel_state": {
+      "title": "Selected Parcel Brief",
+      "contents": [
+        "parcel ID",
+        "owner/account",
+        "zoning",
+        "source",
+        "flood review status",
+        "school assignment status",
+        "observed permit activity summary",
+        "utility proxy caveat",
+        "Focus Map",
+        "Copy Parcel ID",
+        "Save Snapshot for Report",
+        "Open Planning Snapshot"
+      ]
+    },
+    "removed_from_right_panel": [
+      "all focus-mode category cards",
+      "duplicated focus/layer descriptions",
+      "extra selected-parcel card below the brief"
+    ]
+  },
+  "snapshot_report_map_screenshot_implementation": {
+    "existing_sceneview_capture_reused": true,
+    "save_from_command_center": true,
+    "map_screenshot_in_report_verified": true,
+    "browser_smoke_capture_result": "captured",
+    "caption_verified": "Map snapshot captured from CFS Overview at [timestamp].",
+    "fallback_behavior": "If capture fails or times out, Planning Snapshot shows a clean Map snapshot unavailable placeholder and keeps the report usable.",
+    "fake_screenshot_used": false,
+    "broken_image_detected": false
+  },
+  "explainable_metrics_report_improvements": {
+    "implemented": true,
+    "wording_cleanup": [
+      "Replaced user-facing Review Focus/focus mode language with Snapshot Context and Overview Command Center.",
+      "Updated Planning Snapshot empty state to start from Overview, search/map context, save snapshot, explain numbers, print summary.",
+      "Kept major metric cards with value, meaning, source, method, caveat, and recommended action."
+    ],
+    "metrics_explained": [
+      "Map Snapshot",
+      "Flood Review Status",
+      "School Assignment",
+      "Development Activity",
+      "Utility Proxy",
+      "Transportation Context",
+      "Internal Model Research Status"
+    ]
+  },
+  "model_wording_safety_verification": {
+    "observed_activity_separated_from_model_research": true,
+    "overview_model_status_wording": "Current best internal model research remains aggregate-only. No parcel probability or ranking class is shown in Overview.",
+    "forbidden_visible_outputs": {
+      "experimental_probability": false,
+      "prediction_probability": false,
+      "development_signal_class": false,
+      "very_high_development_signal": false,
+      "high_development_signal": false,
+      "parcel_model_score": false
+    },
+    "source_code_note": "Internal aggregate hooks still contain backend field names and documented ranking buckets, but browser smoke confirmed they are not displayed as parcel-level outputs in Overview, Planning Snapshot, or Methodology."
+  },
+  "documentation_updates": [
+    "README Overview/Planning Snapshot descriptions updated for Command Center workflow.",
+    "Demo walkthrough updated to remove review-focus instructions.",
+    "Final demo checklist updated to verify CFS Command Center.",
+    "Two-minute demo script updated for Command Center language.",
+    "Higher-up speaking notes updated for Command Center and saved command context."
+  ],
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "backend_compile_or_pytest_run": "not_run_backend_not_changed",
+    "dev_cfs_health_checks": {
+      "frontend_http_localhost_3000": 200,
+      "backend_health": 200,
+      "backend_database_health": 200,
+      "parcel_search": 200,
+      "parcel_detail": 200,
+      "development_hotspots": 200,
+      "flood_high_review": 200,
+      "flood_summary": 200,
+      "flood_zones": 200,
+      "school_statistics": 200,
+      "selected_parcel_school_constraint": 200,
+      "school_qa_summary": 200
+    }
+  },
+  "smoke_test_results": {
+    "http_localhost_3000_loaded": true,
+    "overview_shows_cfs_command_center": true,
+    "old_review_focus_strip_gone": true,
+    "primary_command_workflow_count": 3,
+    "primary_command_workflows_seen": [
+      "Use search bar",
+      "View indicators",
+      "Save Snapshot for Report"
+    ],
+    "map_visually_dominant": "verified by collapsed default layer rail and command strip above SceneView",
+    "left_layer_panel_secondary": true,
+    "right_panel_intelligence_brief": true,
+    "selected_parcel_brief_verified": true,
+    "selected_parcel_test_id": "CFS-PARCEL-0149726579",
+    "save_snapshot_for_report_works": true,
+    "planning_snapshot_opens": true,
+    "map_screenshot_or_placeholder": "captured screenshot appeared in report during smoke",
+    "methodology_loads": true,
+    "methodology_sceneview_visible": false,
+    "browser_console_errors": [],
+    "parcel_level_prediction_outputs_visible": false
+  },
+  "remaining_known_issues": [
+    "The layer rail remains expandable/resizable by design; if a user opens it, the map will share space with advanced controls.",
+    "A legacy unused Overview selected-parcel helper remains temporarily in IntelligencePanel with a scoped lint suppression for rollback safety during this dirty phase history.",
+    "Map screenshot capture depends on ArcGIS SceneView readiness and browser/GPU state; report fallback remains necessary."
+  ],
+  "recommended_next_step": "Run one visual demo pass at the target presentation screen size and decide whether to remove the retained legacy Overview selected-parcel helper after the new Command Center is accepted."
+}

@@ -1,0 +1,186 @@
+{
+  "phase": "19C",
+  "title": "Final Release Lock, Handoff QA, and Demo-Ready Repository Freeze",
+  "status": "complete_with_smoke_test_caveat",
+  "generated_at": "2026-06-15",
+  "branch": "main",
+  "repo_status": {
+    "branch_confirmed_main": true,
+    "dirty_worktree": true,
+    "modified_file_count": 8,
+    "untracked_file_count": 43,
+    "deleted_file_count": 0,
+    "runtime_or_cache_paths_not_to_commit": [
+      "logs/backend-dev.log",
+      "logs/next-dev.log",
+      ".next/",
+      "node_modules/",
+      "Python __pycache__/"
+    ],
+    "runtime_logs_tracked": false,
+    "next_cache_tracked": false,
+    "node_modules_tracked": false
+  },
+  "docs_checked": {
+    "readme_checked": true,
+    "final_package_index_checked": true,
+    "required_docs_exist": true,
+    "required_docs_linked_from_readme": true,
+    "required_docs_linked_from_final_package_index": true,
+    "checked_docs": [
+      "docs/demo/cfs_demo_walkthrough.md",
+      "docs/demo/cfs_leadership_brief.md",
+      "docs/demo/cfs_capability_matrix.md",
+      "docs/demo/cfs_model_explanation_for_nontechnical_audience.md",
+      "docs/demo/cfs_what_not_to_claim.md",
+      "docs/demo/cfs_final_screenshot_plan.md",
+      "docs/demo/cfs_2_minute_demo_script.md",
+      "docs/demo/cfs_7_minute_technical_demo_script.md",
+      "docs/demo/cfs_final_demo_checklist.md",
+      "docs/demo/cfs_higher_up_presentation_outline.md",
+      "docs/demo/cfs_supervisor_handoff_memo.md",
+      "docs/data_requests/cfs_next_data_request_packet.md",
+      "docs/roadmap/cfs_next_phase_roadmap.md",
+      "docs/engineering/cfs_technical_architecture_summary.md",
+      "docs/demo/cfs_project_accomplishment_summary.md",
+      "docs/demo/cfs_executive_one_pager.md",
+      "docs/portfolio/cfs_portfolio_case_study.md",
+      "docs/portfolio/cfs_resume_bullets.md",
+      "docs/portfolio/cfs_public_project_summary.md",
+      "docs/demo/cfs_expected_questions_and_answers.md",
+      "docs/demo/cfs_final_release_notes.md"
+    ]
+  },
+  "broken_links_fixed": {
+    "broken_required_links_found": false,
+    "fixes_made": [
+      "Added release-lock reference block to docs/demo/cfs_final_package_index.md.",
+      "Added docs/demo/cfs_final_release_notes.md to README.md final package links.",
+      "Added docs/demo/cfs_final_release_notes.md to docs/demo/cfs_final_package_index.md."
+    ]
+  },
+  "safety_language_audit": {
+    "searched_terms": [
+      "production-ready prediction",
+      "exact probability",
+      "predicts development",
+      "official utility capacity",
+      "official school capacity score",
+      "development score",
+      "parcel prediction class",
+      "guaranteed growth",
+      "AI decides"
+    ],
+    "unsafe_overclaims_found": false,
+    "notes": "Search hits were in guardrail contexts such as what-not-to-claim sheets, not-available wording, and aggregate safety/status language.",
+    "safety_language_fixes": []
+  },
+  "demo_package_consistency": {
+    "localhost_3000_documented": true,
+    "backend_127_8000_documented": true,
+    "demo_parcel_documented": true,
+    "avoid_127_3000_warning_documented": true,
+    "model_not_public_facing_documented": true,
+    "exact_probabilities_not_exposed_documented": true
+  },
+  "screenshot_inventory_status": {
+    "inventory_file": "outputs/phase19c_screenshot_inventory.csv",
+    "screenshots_expected": 9,
+    "screenshots_found": 9,
+    "all_files_exist": true,
+    "all_files_non_empty": true,
+    "screenshots": [
+      "docs/demo/screenshots/01_overview_landing.png",
+      "docs/demo/screenshots/02_parcel_search_selected.png",
+      "docs/demo/screenshots/03_active_selection_map_focus.png",
+      "docs/demo/screenshots/04_due_diligence_snapshot.png",
+      "docs/demo/screenshots/05_due_diligence_priority_flags.png",
+      "docs/demo/screenshots/06_due_diligence_constraints.png",
+      "docs/demo/screenshots/07_executive_print_header.png",
+      "docs/demo/screenshots/08_executive_print_key_findings.png",
+      "docs/demo/screenshots/09_methodology_model_governance.png"
+    ]
+  },
+  "prediction_exposure_audit": {
+    "searched_terms": [
+      "experimental_probability",
+      "prediction_probability",
+      "development_signal_class",
+      "very_high_development_signal",
+      "high_development_signal"
+    ],
+    "no_parcel_level_prediction_probability_in_ui": true,
+    "no_parcel_level_ranking_class_in_ui": true,
+    "no_public_parcel_prediction_endpoint_exists": true,
+    "methodology_aggregate_only": true,
+    "model_active": false,
+    "prediction_probability_available": false,
+    "production_ready": false,
+    "public_exposure_allowed": false,
+    "notes": "Raw enum/field names remain in backend schemas, tests, model scripts, and aggregate Methodology/status paths. No exact parcel-level probability or parcel-level ranking class is exposed in the UI."
+  },
+  "runtime_status": {
+    "npm_run_dev_cfs": "already_running_full_stack_reused",
+    "frontend_url": "http://localhost:3000",
+    "frontend_status": 200,
+    "backend_root_url": "http://127.0.0.1:8000",
+    "backend_root_status": 200,
+    "health_status": 200,
+    "database_health_status": 200,
+    "parcel_search_api_status": 200,
+    "parcel_detail_api_status": 200,
+    "prediction_features_summary_status": 200,
+    "prediction_ranking_summary_status": 200
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not_run_backend_files_not_changed"
+  },
+  "smoke_test_results": {
+    "frontend_loaded": true,
+    "overview_loaded": true,
+    "due_diligence_loaded": true,
+    "executive_print_loaded": true,
+    "methodology_loaded": true,
+    "browser_console_error_count": 0,
+    "known_warnings_only": true,
+    "parcel_search_api_returns_demo_parcel": true,
+    "parcel_detail_api_returns_demo_parcel": true,
+    "ui_search_select_result": "caveat_browser_automation_text_entry_did_not_complete_final_selection",
+    "ui_search_select_notes": "The in-app browser virtual clipboard was unavailable, and keypress fallback issued partial /parcels/search calls but did not reliably deliver final React input state. The API search/detail path returned 200 and previous Phase 19B browser smoke confirmed selected parcel flow. No app console errors were observed."
+  },
+  "remaining_known_warnings": [
+    "ArcGIS SceneView warning: requested label placement 'above-center' is unsupported for draped graphics.",
+    "Placeholder/disabled layer warnings remain for opportunity-extrusions, development-pressure, and scenario-envelope until approved service URLs are configured."
+  ],
+  "final_release_notes": {
+    "file": "docs/demo/cfs_final_release_notes.md",
+    "created": true,
+    "includes_release_candidate_name_date": true,
+    "includes_capabilities": true,
+    "includes_demo_flow": true,
+    "includes_safety_status": true,
+    "includes_known_limitations": true,
+    "includes_missing_data_needed": true,
+    "includes_validation_status": true,
+    "includes_startup_steps": true,
+    "includes_what_not_to_claim": true,
+    "includes_recommended_next_step": true
+  },
+  "tag_recommendation": {
+    "tag_created": false,
+    "reason_not_created": "User requested optional recommendation only; worktree remains dirty with release artifacts not yet committed.",
+    "manual_command_when_ready": [
+      "git tag cfs-demo-ready-v1",
+      "git push origin cfs-demo-ready-v1"
+    ]
+  },
+  "recommended_final_commit_command": [
+    "git add README.md docs outputs src",
+    "git commit -m \"Finalize CFS demo-ready release package\"",
+    "git push origin main"
+  ],
+  "recommended_next_step": "Review the smoke-test caveat, optionally run one manual browser search/select check, then commit and push the release-candidate package."
+}

@@ -2,17 +2,26 @@
 
 import {
   AlertTriangle,
-  BarChart3,
+  BookOpen,
   BrainCircuit,
+  ChevronDown,
+  ChevronRight,
   Database,
+  FileText,
+  Filter,
   GitBranch,
-  Layers3,
+  HelpCircle,
+  Lightbulb,
   LockKeyhole,
-  Radar,
+  MapPinned,
+  Route,
+  Search,
   ShieldCheck,
   Sparkles,
+  Workflow,
+  type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   developmentPredictionPublicBlockers,
   developmentPredictionRoadmap,
@@ -24,7 +33,40 @@ import {
   type EnterpriseDiagnosticCheck,
   type EnterpriseDiagnosticStatus,
 } from "@/hooks/useEnterpriseDiagnostics";
-import type { DevelopmentPredictionRankingClassBucket } from "@/types/api";
+
+type ExplorerSection =
+  | "overview"
+  | "capabilities"
+  | "data"
+  | "model"
+  | "needs"
+  | "roadmap";
+
+type CapabilityGroup =
+  | "Planning Snapshot"
+  | "Planning Context"
+  | "Constraints"
+  | "Governance";
+
+type CapabilityStatus =
+  | "Context Only"
+  | "Internal Research Only"
+  | "Live in App"
+  | "Model Related"
+  | "Needs Official Data"
+  | "Not Public-Facing"
+  | "Presentation-Derived"
+  | "Proxy Only"
+  | "Reporting Related"
+  | "Verified Source";
+
+type DataDomainStatus =
+  | "Available"
+  | "Current Context"
+  | "Internal Research"
+  | "Needs Official Data"
+  | "Presentation-Derived"
+  | "Proxy Only";
 
 const currentBestModelFallback = {
   excludedGroups: [
@@ -37,94 +79,686 @@ const currentBestModelFallback = {
   variantValue: "transportation_plus_tax_value_only",
 };
 
-const dataInputs = [
+const explorerSections: {
+  id: ExplorerSection;
+  label: string;
+  shortLabel: string;
+  helper: string;
+}[] = [
   {
-    label: "Parcels",
-    status: "Active",
-    text: "Assessor parcel identity, parcel quality, ownership display, valuation bands, zoning joins, and selected-parcel map focus.",
+    helper: "What CFS is and what it is not.",
+    id: "overview",
+    label: "CFS Overview",
+    shortLabel: "Overview",
   },
   {
-    label: "Zoning",
-    status: "Active",
-    text: "Overlay-derived jurisdiction, zoning code, generalized category, confidence, and governance warning context.",
+    helper: "What staff can use today.",
+    id: "capabilities",
+    label: "Capabilities",
+    shortLabel: "Capabilities",
   },
   {
-    label: "Development Activity",
-    status: "Active",
-    text: "Permit-to-parcel relationships, parcel activity summaries, hotspot concentration, trends, zoning activity, and permit events.",
+    helper: "What data is already included.",
+    id: "data",
+    label: "Data Inventory",
+    shortLabel: "Data Inventory",
   },
   {
-    label: "Permit Segmentation",
-    status: "Descriptive",
-    text: "Rule-based permit segment labels for residential growth, commercial activity, redevelopment, demolition, maintenance, institutional, and industrial activity.",
+    helper: "What the model does and does not do.",
+    id: "model",
+    label: "Model Research",
+    shortLabel: "Model",
   },
   {
-    label: "Development Ranking Research",
-    status: "Internal only",
-    text: "Current best internal variant is zoning plus transportation plus tax/value context. Parcel-level prediction outputs and parcel-level classes are not exposed.",
+    helper: "What should be requested next.",
+    id: "needs",
+    label: "Data Still Needed",
+    shortLabel: "Data Needed",
   },
   {
-    label: "FEMA Flood Constraints",
-    status: "Regulatory",
-    text: "FEMA NFHL Layer 28 flood zone polygons and parcel-level flood overlay flags, scores, and high-review markers.",
-  },
-  {
-    label: "School Assignment",
-    status: "Read-only",
-    text: "CCS attendance-zone polygon overlap for elementary, middle, and high assignments. School point distance is not used.",
-  },
-  {
-    label: "School Utilization Seed",
-    status: "Needs verification",
-    text: "Presentation-derived SY 2024-2025 utilization percentages for preliminary visualization only. Not official capacity scoring.",
-  },
-  {
-    label: "LEA Pupil Context",
-    status: "Districtwide",
-    text: "Uploaded 2025 CCS LEA-wide Enrollment, ADM, ADA, and MLD grade totals, including district Enrollment total 36,287. Not school-level capacity.",
+    helper: "Next phases, caveats, and FAQ.",
+    id: "roadmap",
+    label: "Roadmap & Guardrails",
+    shortLabel: "Roadmap",
   },
 ];
 
-const logicItems = [
-  "Parcel intelligence begins with a stable official parcel id and joins zoning, quality, valuation, governance, and map focus fields into one selected-parcel record.",
-  "Development activity is descriptive: permits are related to parcels, summarized by activity class, segmented by permit signal, and rendered as optional concentration hotspots.",
-  "Flood constraints use FEMA NFHL regulatory polygons, then parcel overlay metrics identify floodway, SFHA, constrained acres, percent constrained, and review recommendations.",
-  "School assignment uses attendance-zone polygon overlap for CCS V1 elementary, middle, and high zones. It does not assign by nearest school point.",
-  "Presentation-derived school utilization is a temporary seed for visualization and workflow testing until verified enrollment and capacity files arrive.",
-  "LEA pupil totals provide districtwide grade context only and are not joined to parcels or used as school-level capacity.",
-  "Development prediction work is internal ranking research only. Parcel-level probability values are unavailable because calibration remains weak.",
+const overviewBadges = [
+  "Parcel Intelligence",
+  "Planning Snapshot",
+  "Executive Summary",
+  "FEMA Flood Context",
+  "School Assignment",
+  "Transportation Context",
+  "Internal Model Research",
+  "Not Production Prediction",
 ];
 
-const assumptionItems = [
-  "Parcels are the primary unit of analysis for CFS V1.",
-  "Zoning and flood assignments are overlay-derived and retain confidence/QA signals where available.",
-  "Permit segmentation is rule-based and descriptive, not predictive or causal.",
-  "Ranking classes are percentile bands for internal model QA, not final parcel development forecasts.",
-  "FEMA NFHL is treated as the authoritative regulatory flood source; modeled flood TIFFs remain reference/future modeling inputs.",
-  "School capacity scoring waits for official enrollment, functional capacity, grade-level history, and vetted capacity-change records.",
-  "Infrastructure readiness and opportunity extrusions remain mock/readiness candidates until authoritative layers are connected.",
+const cfsAtAGlanceCards = [
+  {
+    items: [
+      "Parcel-based planning intelligence prototype.",
+      "Supports due diligence, constraints review, and executive reporting.",
+    ],
+    title: "What CFS Is",
+  },
+  {
+    items: [
+      "Parcels, zoning/current + historical, permits/new construction.",
+      "FEMA flood, schools, transportation, utility proxy, and model governance.",
+    ],
+    title: "What CFS Has",
+  },
+  {
+    items: [
+      "Search and select a parcel, save a Planning Snapshot, and generate an Executive Summary.",
+      "Inspect methodology, capability status, and aggregate model governance.",
+    ],
+    title: "What CFS Can Do Today",
+  },
+  {
+    items: [
+      "Internal development prediction model research pipeline.",
+      "Current best internal variant: Zoning + Transportation + Tax/Value.",
+      "No parcel-level prediction scores are published.",
+    ],
+    title: "Internal Model Research",
+  },
+  {
+    items: [
+      "WSACC true utility capacity and official school capacity/enrollment.",
+      "Countywide future land use, rezoning records, and development pipeline approvals.",
+    ],
+    title: "What Is Still Needed",
+  },
 ];
 
-const limitationItems = [
-  "No official school enrollment/capacity data has been added, and school capacity scores remain null/not scored.",
-  "Presentation-derived school utilization must be verified against official CCS or county source files before use as decision evidence.",
-  "Districtwide LEA pupil context does not replace school-level enrollment, functional capacity, available seats, or utilization.",
-  "Transportation, water/sewer, fire/EMS, heat/runoff, and environmental sensitivity constraints are planned but not complete.",
-  "Development ranking research is not production-ready and is not exposed as parcel-level predictions.",
-  "Some operational map layers are mock placeholders used to demonstrate future integration paths.",
-  "Local runtime performance depends on browser GPU, network latency to FastAPI, and selected map layer limits.",
+const systemFlow = [
+  {
+    detail: "Collect parcel, zoning, permit, flood, school, transportation, and planning-context sources.",
+    label: "Ingest data",
+  },
+  {
+    detail: "Normalize identifiers, repair spatial layers where needed, and write QA outputs.",
+    label: "Clean and normalize",
+  },
+  {
+    detail: "Use the official parcel id as the common review unit across domains.",
+    label: "Join to parcels",
+  },
+  {
+    detail: "Create selected-parcel summaries, context cards, and constraint flags.",
+    label: "Build parcel intelligence",
+  },
+  {
+    detail: "Show saved snapshot context, map overlays, and report-ready caveats.",
+    label: "Display review context",
+  },
+  {
+    detail: "Run internal experiments only; do not publish parcel predictions.",
+    label: "Run internal model research",
+  },
+  {
+    detail: "Explain readiness, limitations, missing data, and what not to claim.",
+    label: "Report governance",
+  },
 ];
 
-const roadmapItems = [
-  "Ingest verified school capacity, enrollment history, grade-level enrollment, projections, and planned capacity changes.",
-  "Add school capacity/utilization scoring only after official data QA passes.",
-  "Implement transportation access, water/sewer readiness, fire/EMS coverage, heat/runoff, and environmental sensitivity overlays.",
-  "Introduce scenario testing and model calibration once descriptive intelligence is stable.",
-  "Review internal ranking classes only after calibration, governance, and missing feature gaps are addressed.",
-  "Package executive reporting around transparent inputs, caveats, and parcel-level due diligence evidence.",
+const plainEnglishLogic = [
+  "Parcels are the main unit. CFS organizes evidence around an official parcel id.",
+  "Permits show what happened historically. They describe past development activity.",
+  "Features describe parcel context: zoning, transportation, flood exposure, value, and related evidence.",
+  "The model studies patterns for internal research, but it does not publish parcel predictions.",
+  "Planning Snapshot and Executive Summary are descriptive review tools, not automated decision tools.",
+];
+
+const modelResearchFlow = [
+  "Permits show what happened.",
+  "Parcel features describe context before development.",
+  "The model tests which conditions are associated with future new construction.",
+  "CFS reviews results at an aggregate level.",
+  "Parcel-level predictions stay hidden until data and calibration improve.",
+];
+
+const capabilityCards: {
+  caveat: string;
+  dataBehindIt: string;
+  group: CapabilityGroup;
+  id: string;
+  status: CapabilityStatus[];
+  title: string;
+  whatItDoes: string;
+  whereToSeeIt: string;
+}[] = [
+  {
+    caveat: "Parcel quality flags still require source review when records are unusual.",
+    dataBehindIt: "Parcels, assessor/tax enrichment, parcel quality, zoning joins, geometry.",
+    group: "Planning Snapshot",
+    id: "parcel-search",
+    status: ["Live in App", "Verified Source"],
+    title: "Parcel Search and Active Selection",
+    whatItDoes: "Search by parcel ID, PIN, owner, address, subdivision, or neighborhood, then focus the map and selected parcel context.",
+    whereToSeeIt: "Top search bar, Active Selection overlay, Overview.",
+  },
+  {
+    caveat: "Planning Snapshot supports review; it does not replace official staff determinations.",
+    dataBehindIt: "Selected parcel detail, zoning, permits, flood, schools, transportation, utility proxy, and caveats.",
+    group: "Planning Snapshot",
+    id: "due-diligence",
+    status: ["Live in App"],
+    title: "Planning Snapshot Review",
+    whatItDoes: "Captures selected parcel facts, active context, caveats, explainable metrics, and recommended review actions.",
+    whereToSeeIt: "Planning Snapshot mode.",
+  },
+  {
+    caveat: "Report preview is a planning memo format, not a final legal finding.",
+    dataBehindIt: "Saved Planning Snapshot context, explainable metrics, caveats, model safety text.",
+    group: "Planning Snapshot",
+    id: "executive-print",
+    status: ["Live in App", "Reporting Related"],
+    title: "Executive Summary Report",
+    whatItDoes: "Creates a print-friendly memo-style summary from the saved Planning Snapshot for stakeholder discussion and portfolio demos.",
+    whereToSeeIt: "Planning Snapshot Executive Summary tab.",
+  },
+  {
+    caveat: "Official rezoning case approvals still require separate dated case records.",
+    dataBehindIt: "Current zoning, historical zoning snapshots, zoning map-change foundation.",
+    group: "Planning Context",
+    id: "zoning",
+    status: ["Live in App", "Context Only"],
+    title: "Zoning and Historical Zoning",
+    whatItDoes: "Shows zoning jurisdiction, code, category, assignment quality, historical zoning context, and map-change caveats.",
+    whereToSeeIt: "Planning Snapshot, Executive Summary, and model documentation.",
+  },
+  {
+    caveat: "Permit segmentation is descriptive. It does not prove causality.",
+    dataBehindIt: "Real Property permits, permit-to-parcel joins, permit segmentation outputs.",
+    group: "Planning Context",
+    id: "development-activity",
+    status: ["Live in App", "Verified Source"],
+    title: "Development / Permit Activity",
+    whatItDoes: "Summarizes permit activity, recent events, development context, and hotspot concentration.",
+    whereToSeeIt: "Overview, Planning Snapshot, Development Hotspots layer.",
+  },
+  {
+    caveat: "Used as historical outcome evidence for research; not a live prediction.",
+    dataBehindIt: "New construction permit labels and selected parcel permit history.",
+    group: "Planning Context",
+    id: "new-construction",
+    status: ["Live in App", "Model Related"],
+    title: "New Construction Permit History",
+    whatItDoes: "Shows matched new construction permit history and supports internal label research.",
+    whereToSeeIt: "Planning Snapshot and model documentation.",
+  },
+  {
+    caveat: "FEMA NFHL remains authoritative for regulatory flood context.",
+    dataBehindIt: "FEMA NFHL flood zones and parcel flood overlay outputs.",
+    group: "Constraints",
+    id: "flood",
+    status: ["Live in App", "Verified Source"],
+    title: "Flood Constraint Review",
+    whatItDoes: "Review FEMA flood constraints, high-review parcels, FEMA polygons, and selected parcel flood caveats.",
+    whereToSeeIt: "Flood Constraints layer, FEMA Flood Zones layer, Planning Snapshot.",
+  },
+  {
+    caveat: "Utilization seed is presentation-derived and needs official verification.",
+    dataBehindIt: "CCS attendance-zone polygon overlap and SY 2024-2025 utilization seed.",
+    group: "Constraints",
+    id: "schools",
+    status: [
+      "Live in App",
+      "Presentation-Derived",
+      "Needs Official Data",
+    ],
+    title: "School Assignment Review",
+    whatItDoes: "Review attendance-zone assignment and preliminary utilization context without implying official capacity scoring.",
+    whereToSeeIt: "Planning Snapshot and School Utilization Seed layer.",
+  },
+  {
+    caveat: "Transportation features are current-context and not historical production features yet.",
+    dataBehindIt: "Centerlines, STIP, AADT, accessibility features, traffic context.",
+    group: "Constraints",
+    id: "transportation",
+    status: ["Live in App", "Context Only", "Model Related"],
+    title: "Transportation Context Review",
+    whatItDoes: "Review road, rail, STIP, AADT, and accessibility context as current planning evidence.",
+    whereToSeeIt: "Planning Snapshot, Methodology, model documentation.",
+  },
+  {
+    caveat: "Proxy only. It does not confirm available utility capacity.",
+    dataBehindIt: "WSACC/RevalMap utility proxy context and planning/utility feature outputs.",
+    group: "Constraints",
+    id: "utility",
+    status: ["Context Only", "Proxy Only", "Needs Official Data"],
+    title: "Utility / Infrastructure Proxy",
+    whatItDoes: "Provides service-context clues and highlights where true capacity data is still needed.",
+    whereToSeeIt: "Planning Snapshot and data request packet.",
+  },
+  {
+    caveat: "Methodology explains capabilities and governance; it does not activate predictions.",
+    dataBehindIt: "Source registries, QA outputs, demo documentation, model governance docs, and live aggregate status APIs.",
+    group: "Governance",
+    id: "methodology-explorer",
+    status: ["Live in App", "Reporting Related"],
+    title: "Methodology / Capability Explorer",
+    whatItDoes: "Explains data sources, capability status, model safety, guardrails, and what official data is still needed.",
+    whereToSeeIt: "Methodology mode.",
+  },
+  {
+    caveat: "No parcel-level probability or ranking class is exposed.",
+    dataBehindIt: "Feature matrices, model QA outputs, ranking summaries, governance flags.",
+    group: "Governance",
+    id: "model-governance",
+    status: [
+      "Internal Research Only",
+      "Model Related",
+      "Not Public-Facing",
+    ],
+    title: "Internal Development Prediction Model Research",
+    whatItDoes: "Documents the internal model pipeline, current best internal variant, calibration caveats, and why parcel-level outputs remain hidden.",
+    whereToSeeIt: "Methodology model research section and backend aggregate summaries.",
+  },
+];
+
+const capabilityGroups: CapabilityGroup[] = [
+  "Planning Snapshot",
+  "Planning Context",
+  "Constraints",
+  "Governance",
+];
+
+const capabilityFilterOptions: ("All" | CapabilityStatus)[] = [
+  "All",
+  "Live in App",
+  "Internal Research Only",
+  "Needs Official Data",
+  "Context Only",
+  "Model Related",
+  "Reporting Related",
+];
+
+const dataInventory: {
+  available: boolean;
+  domain: string;
+  items: string[];
+  limitation: string;
+  nextNeededData: string;
+  status: DataDomainStatus;
+  usedFor: string;
+  usedInDueDiligence: boolean;
+  usedInModelResearch: boolean;
+}[] = [
+  {
+    available: true,
+    domain: "Parcel / Tax",
+    items: ["parcels", "Tax Parcels Full enrichment"],
+    limitation: "Some parcel quality and semantic edge cases still require source review.",
+    nextNeededData: "Ongoing assessor refresh cadence and governance review.",
+    status: "Available",
+    usedFor: "Parcel identity, selected parcel hydration, parcel search, ownership/value context, and report headers.",
+    usedInDueDiligence: true,
+    usedInModelResearch: true,
+  },
+  {
+    available: true,
+    domain: "Zoning / Planning",
+    items: [
+      "current zoning",
+      "historical zoning",
+      "Central Area Plan / future land use context",
+    ],
+    limitation: "Current-context and plan layers should not be treated as dated rezoning approvals.",
+    nextNeededData: "Official rezoning case table and countywide future land use GIS with dates.",
+    status: "Current Context",
+    usedFor: "Zoning jurisdiction/code, historical map-change context, planning caveats, and model feature governance.",
+    usedInDueDiligence: true,
+    usedInModelResearch: true,
+  },
+  {
+    available: true,
+    domain: "Development / Permits",
+    items: ["Real Property permits", "new construction permits", "Accela plan reviews"],
+    limitation: "Accela activity needs stronger temporal and jurisdiction QA before production modeling.",
+    nextNeededData: "Countywide development pipeline and subdivision approvals.",
+    status: "Available",
+    usedFor: "Development activity summaries, new construction history, permit timeline, and hotspot concentration.",
+    usedInDueDiligence: true,
+    usedInModelResearch: true,
+  },
+  {
+    available: true,
+    domain: "Flood / Environmental",
+    items: ["FEMA NFHL flood zones", "FEMA parcel flood overlay"],
+    limitation: "FEMA is authoritative for regulatory flood context; additional environmental suitability remains incomplete.",
+    nextNeededData: "Detailed environmental suitability layers and local QA references.",
+    status: "Available",
+    usedFor: "Parcel flood review flags, FEMA polygon reference, constrained-area caveats, and map overlays.",
+    usedInDueDiligence: true,
+    usedInModelResearch: false,
+  },
+  {
+    available: true,
+    domain: "Schools",
+    items: ["school attendance zones", "school utilization seed"],
+    limitation: "School utilization seed is presentation-derived and capacity scoring is not active.",
+    nextNeededData: "Official school enrollment, functional capacity, grade-level history, projections.",
+    status: "Presentation-Derived",
+    usedFor: "Attendance-zone assignment review and preliminary utilization caveats for selected parcels.",
+    usedInDueDiligence: true,
+    usedInModelResearch: false,
+  },
+  {
+    available: true,
+    domain: "Transportation",
+    items: ["transportation centerlines", "STIP", "AADT"],
+    limitation: "Transportation features are current-context unless historical/project dates are available.",
+    nextNeededData: "Dated local transportation project GIS and historical traffic/project records.",
+    status: "Current Context",
+    usedFor: "Accessibility context, STIP/AADT proximity, road/rail context, and internal model experiments.",
+    usedInDueDiligence: true,
+    usedInModelResearch: true,
+  },
+  {
+    available: true,
+    domain: "Utility / Infrastructure",
+    items: ["WSACC/RevalMap utility proxy"],
+    limitation: "Proxy only; it does not confirm available utility capacity.",
+    nextNeededData: "True capacity, service readiness, constraints, and planned extension data.",
+    status: "Proxy Only",
+    usedFor: "Infrastructure context and caveat language that identifies where official utility data is needed.",
+    usedInDueDiligence: true,
+    usedInModelResearch: false,
+  },
+  {
+    available: true,
+    domain: "Model Governance / Feature Matrices",
+    items: [
+      "parcel-year features",
+      "labels",
+      "model QA outputs",
+      "feature governance outputs",
+    ],
+    limitation: "Internal research only; exact probabilities and parcel ranking classes are not exposed.",
+    nextNeededData: "Better calibration, more official dated features, and governance approval.",
+    status: "Internal Research",
+    usedFor: "Aggregate model transparency, feature readiness, safety flags, and non-public research documentation.",
+    usedInDueDiligence: false,
+    usedInModelResearch: true,
+  },
+  {
+    available: true,
+    domain: "Reporting",
+    items: ["Planning Snapshot review", "Executive Summary report", "demo and leadership documentation"],
+    limitation: "Reports are planning-support summaries, not official determinations.",
+    nextNeededData: "Staff-reviewed report templates and approved distribution language.",
+    status: "Available",
+    usedFor: "Stakeholder-ready selected parcel summaries, caveat communication, and portfolio/demo presentation.",
+    usedInDueDiligence: true,
+    usedInModelResearch: false,
+  },
+];
+
+const progressItems = [
+  {
+    detail: "Tables and templates are ready; scoring waits for vetted source files.",
+    title: "Official school capacity/enrollment ingestion when data is received",
+  },
+  {
+    detail: "Current UI uses proxy context only; true service readiness requires official WSACC data.",
+    title: "WSACC true utility capacity/service readiness",
+  },
+  {
+    detail: "Planning sources are inventoried; countywide GIS with effective dates would improve due diligence and model readiness.",
+    title: "Countywide future land use / small-area plan integration",
+  },
+  {
+    detail: "Historical zoning map changes exist, but official case records are still needed.",
+    title: "Official rezoning records",
+  },
+  {
+    detail: "Permit history is available; approved pipeline/subdivision status would improve forward-looking context.",
+    title: "Countywide development pipeline/subdivision approvals",
+  },
+  {
+    detail: "STIP/AADT context exists; local project geometry and dates would make features stronger.",
+    title: "Local planned transportation projects",
+  },
+  {
+    detail: "Model research remains internal until better features and calibration are validated.",
+    title: "Refined model validation after better data",
+  },
+  {
+    detail: "Executive Summary exists; scenario reporting can expand after core data confidence improves.",
+    title: "Potential scenario planning/reporting improvements",
+  },
+];
+
+const dataNeeds = [
+  {
+    datasets: [
+      "WSACC true utility capacity / service areas / capacity constraints",
+      "official school enrollment and capacity by school",
+      "countywide future land use / small-area plan GIS",
+      "official rezoning case records",
+    ],
+    level: "Priority 1 - Needed For Stronger Planning Decisions",
+    value: "Directly improves due diligence confidence and reduces the largest caveats.",
+  },
+  {
+    datasets: [
+      "countywide development pipeline / subdivision approvals",
+      "planned local road projects with dates/status",
+      "planned utility extensions",
+      "parks/greenways/bike-ped plans",
+    ],
+    level: "Priority 2 - Needed For Stronger Model And Scenario Work",
+    value: "Adds stronger planning intent, infrastructure timing, and near-term context.",
+  },
+];
+
+const dataNeedDetails = [
+  {
+    dataset: "WSACC true utility capacity / service areas / capacity constraints",
+    format: "REST/GIS/table preferred. PDF-only is useful for reference but weaker for automated CFS integration.",
+    improvement: "Replaces utility proxy wording with verified service-readiness context.",
+    pdfLimit: "PDF maps are hard to join reliably to parcels.",
+    why: "Utility capacity is one of the biggest readiness questions for development review.",
+  },
+  {
+    dataset: "Official school enrollment and capacity by school",
+    format: "CSV/XLSX/table with school year and school identifiers. PDF-only is useful for reference but weaker for automated CFS integration.",
+    improvement: "Enables verified capacity status after QA.",
+    pdfLimit: "Presentation maps cannot replace source enrollment/capacity records.",
+    why: "CFS currently shows assignment and presentation-derived utilization only.",
+  },
+  {
+    dataset: "Countywide future land use / small-area plan GIS",
+    format: "GIS polygons with plan name, category, adoption/effective date. PDF-only is useful for reference but weaker for automated CFS integration.",
+    improvement: "Adds planning intent context and better model feature governance.",
+    pdfLimit: "PDF-only plans are not parcel-joinable without manual digitizing.",
+    why: "Future land use helps staff interpret whether parcel context aligns with adopted plans.",
+  },
+  {
+    dataset: "Official rezoning case records",
+    format: "Table/GIS with case id, decision date, status, old zoning, new zoning. PDF-only is useful for reference but weaker for automated CFS integration.",
+    improvement: "Distinguishes official rezoning events from map-change detections.",
+    pdfLimit: "Case PDFs are useful for review but weak for automated feature engineering.",
+    why: "Dated rezoning records are essential for time-safe model features.",
+  },
+  {
+    dataset: "Countywide development pipeline / subdivision approvals",
+    format: "GIS/table with project status, units/sqft, dates, jurisdiction, geometry. PDF-only is useful for reference but weaker for automated CFS integration.",
+    improvement: "Adds forward-looking but official development context.",
+    pdfLimit: "Narrative-only lists are difficult to validate or spatially join.",
+    why: "Pipeline data helps explain near-term pressure beyond permit history.",
+  },
+  {
+    dataset: "Planned local road projects with dates/status",
+    format: "GIS lines/points plus project table. PDF-only is useful for reference but weaker for automated CFS integration.",
+    improvement: "Makes transportation context more time-aware.",
+    pdfLimit: "Plan diagrams lack consistent geometry and dates.",
+    why: "Access and transportation investment can shape development feasibility.",
+  },
+  {
+    dataset: "Planned utility extensions",
+    format: "GIS lines/polygons plus project table with status, expected year, and service area. PDF-only is useful for reference but weaker for automated CFS integration.",
+    improvement: "Separates existing utility proxy context from documented planned service changes.",
+    pdfLimit: "Static maps rarely include enough attribution for parcel-level readiness.",
+    why: "Planned service extensions can change near-term development feasibility.",
+  },
+  {
+    dataset: "Parks/greenways/bike-ped plans",
+    format: "GIS lines/polygons plus project table with plan status, project type, and expected timing. PDF-only is useful for reference but weaker for automated CFS integration.",
+    improvement: "Adds quality-of-place and access context for parcel and corridor review.",
+    pdfLimit: "PDF plan maps are harder to connect to parcels and future update cycles.",
+    why: "Public realm and mobility plans help explain planning intent and contextual suitability.",
+  },
+];
+
+const roadmapSteps = [
+  {
+    horizon: "Current",
+    items: ["Demo-ready internal planning intelligence prototype"],
+    status: "Now",
+  },
+  {
+    horizon: "Next",
+    items: [
+      "official missing data ingestion",
+      "validated staff review of Planning Snapshot and Executive Summary",
+      "stronger internal model validation after better source data",
+    ],
+    status: "Near term",
+  },
+  {
+    horizon: "Later",
+    items: [
+      "refined suitability scoring after verified data",
+      "validated internal model with improved calibration",
+    ],
+    status: "Future",
+  },
+  {
+    horizon: "Future",
+    items: [
+      "scenario planning and executive reporting",
+      "possible simplified public viewer after governance review",
+    ],
+    status: "Longer term",
+  },
+];
+
+const guardrails = [
+  "CFS does not predict exact parcel probability.",
+  "CFS does not make entitlement decisions.",
+  "CFS does not confirm utility capacity.",
+  "CFS does not provide official school capacity scoring yet.",
+  "CFS does not replace FEMA as the authoritative flood source.",
+  "CFS does not replace official rezoning case records.",
+  "CFS does not expose parcel-level model outputs.",
+];
+
+const approvedLanguage = [
+  "internal planning intelligence prototype",
+  "internal model research",
+  "due diligence support",
+  "context and constraints",
+  "aggregate model transparency",
+];
+
+const faqItems = [
+  {
+    answer: "CFS is a parcel-based planning intelligence prototype that organizes evidence for due diligence, constraints, reporting, and internal model governance.",
+    question: "What is CFS?",
+  },
+  {
+    answer: "No. It is demo-ready as an internal prototype, but it still needs production deployment, security, governance, and support review.",
+    question: "Is this production-ready?",
+  },
+  {
+    answer: "No. The current experience is intended for internal review, demo, and portfolio discussion.",
+    question: "Is this public-facing?",
+  },
+  {
+    answer: "It studies development patterns internally, but it does not publish parcel predictions or exact probabilities.",
+    question: "Does it predict development?",
+  },
+  {
+    answer: "Calibration is weak and still under review. Showing exact probabilities would overstate model readiness.",
+    question: "Why are probabilities hidden?",
+  },
+  {
+    answer: "Official school capacity, true utility capacity, future land use GIS, official rezoning cases, development pipeline, and dated local transportation projects.",
+    question: "What data is missing?",
+  },
+  {
+    answer: "It reduces the time needed to assemble parcel context and makes caveats easier to communicate.",
+    question: "How does this help planning staff?",
+  },
+  {
+    answer: "It turns GIS layers into API-backed summaries, map overlays, QA outputs, and reusable planning evidence.",
+    question: "How does this help GIS staff?",
+  },
+  {
+    answer: "Validate the due diligence workflow with staff, then prioritize the official data request packet.",
+    question: "What is the next practical step?",
+  },
+  {
+    answer: "Yes, potentially, after production hardening, user testing, security review, and data governance decisions.",
+    question: "Could this become an official county tool later?",
+  },
 ];
 
 export function MethodologyWorkspace() {
+  const [activeSection, setActiveSection] =
+    useState<ExplorerSection>("overview");
+  const [capabilityFilter, setCapabilityFilter] = useState<
+    "All" | CapabilityStatus
+  >("All");
+  const [capabilityQuery, setCapabilityQuery] = useState("");
+  const [openCapabilityId, setOpenCapabilityId] = useState(
+    capabilityCards[0]?.id ?? "",
+  );
+  const [openDataDomain, setOpenDataDomain] = useState(
+    dataInventory[0]?.domain ?? "",
+  );
+  const [openNeedDataset, setOpenNeedDataset] = useState(
+    dataNeedDetails[0]?.dataset ?? "",
+  );
+  const [openFaqQuestion, setOpenFaqQuestion] = useState(
+    faqItems[0]?.question ?? "",
+  );
+
+  const filteredCapabilities = useMemo(() => {
+    const normalizedQuery = capabilityQuery.trim().toLowerCase();
+
+    return capabilityCards.filter((card) => {
+      const matchesFilter =
+        capabilityFilter === "All" || card.status.includes(capabilityFilter);
+
+      if (!matchesFilter) {
+        return false;
+      }
+
+      if (!normalizedQuery) {
+        return true;
+      }
+
+      return [
+        card.title,
+        card.whatItDoes,
+        card.dataBehindIt,
+        card.caveat,
+        card.group,
+        card.whereToSeeIt,
+        ...card.status,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedQuery);
+    });
+  }, [capabilityFilter, capabilityQuery]);
+
   return (
     <main className="relative z-10 min-h-0 flex-1 overflow-auto p-3 lg:p-4">
       <section className="methodology-workspace relative overflow-hidden rounded-xl border border-white/10 bg-[#07111d]/92 p-4 shadow-[0_24px_90px_rgba(0,0,0,0.32)]">
@@ -134,112 +768,879 @@ export function MethodologyWorkspace() {
         </div>
 
         <div className="relative">
-          <div className="flex flex-col gap-4 border-b border-white/10 pb-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#68d8ff]">
-                Methodology
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-                CFS Model Foundation and Data Transparency
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-400">
-                Cabarrus FutureScape is currently a parcel-centric descriptive
-                intelligence prototype with internal model research. It explains
-                what is known, how records are joined, where constraints are
-                located, and why ranking experiments remain internal before any
-                predictive signal is considered for public use.
-              </p>
-            </div>
-            <div className="grid min-w-[15rem] grid-cols-2 gap-2 text-xs">
-              <StatusPill label="Prediction" value="Internal only" tone="amber" />
-              <StatusPill label="School score" value="Not scored" tone="cyan" />
-              <StatusPill label="Flood source" value="FEMA NFHL" tone="green" />
-              <StatusPill label="Utilization" value="Seed only" tone="rose" />
-            </div>
-          </div>
+          <ExplorerHero />
+          <SectionTabs
+            activeSection={activeSection}
+            onChange={setActiveSection}
+          />
 
-          <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_0.82fr]">
-            <MethodCard
-              icon={Sparkles}
-              kicker="Model foundation"
-              title="Parcel-Based Planning Intelligence"
-            >
-              <p>
-                CFS uses parcels as the common planning object, then layers
-                zoning, development activity, flood constraints, school
-                assignment, and due-diligence context onto that parcel. The
-                current platform is designed to be explainable before it becomes
-                predictive or public-facing.
-              </p>
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <MethodMini label="Constraint overlay" value="Spatial joins" />
-                <MethodMini label="Development signal" value="Permit history" />
-                <MethodMini label="Readiness concept" value="Evidence-led" />
-                <MethodMini label="Ranking research" value="Internal only" />
-              </div>
-            </MethodCard>
-
-            <MethodCard icon={ShieldCheck} kicker="Decision boundary" title="What CFS Does Not Claim Yet">
-              <ul className="space-y-2 text-sm leading-6 text-slate-400">
-                <li>No official school capacity score is active.</li>
-                <li>No development prediction output is active or public.</li>
-                <li>No presentation-derived utilization value is treated as official.</li>
-                <li>Mock infrastructure/readiness layers remain placeholders.</li>
-              </ul>
-            </MethodCard>
-          </div>
-
-          <div className="mt-4">
-            <DevelopmentPredictionResearchStatusCard />
-          </div>
-
-          <div className="mt-4">
-            <PlatformDiagnosticsCard />
-          </div>
-
-          <div className="mt-4 grid gap-4 xl:grid-cols-3">
-            <MethodCard icon={Database} kicker="Inputs" title="Active Data Inputs" className="xl:col-span-2">
-              <div className="grid gap-2 md:grid-cols-2">
-                {dataInputs.map((item) => (
-                  <div
-                    className="rounded-lg border border-white/10 bg-black/18 p-3"
-                    key={item.label}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-sm font-semibold text-slate-100">
-                        {item.label}
-                      </h3>
-                      <span className="shrink-0 rounded border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-400">
-                        {item.status}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-xs leading-5 text-slate-500">
-                      {item.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </MethodCard>
-
-            <MethodCard icon={GitBranch} kicker="Logic" title="Method Logic">
-              <MethodList items={logicItems} />
-            </MethodCard>
-          </div>
-
-          <div className="mt-4 grid gap-4 xl:grid-cols-3">
-            <MethodCard icon={Layers3} kicker="Assumptions" title="Current Assumptions">
-              <MethodList items={assumptionItems} />
-            </MethodCard>
-            <MethodCard icon={AlertTriangle} kicker="Limitations" title="Known Drawbacks">
-              <MethodList items={limitationItems} />
-            </MethodCard>
-            <MethodCard icon={Radar} kicker="Roadmap" title="Future Model Path">
-              <MethodList items={roadmapItems} />
-            </MethodCard>
+          <div
+            aria-labelledby={`methodology-tab-${activeSection}`}
+            className="mt-5"
+            id={`methodology-section-${activeSection}`}
+            role="tabpanel"
+          >
+            {activeSection === "overview" ? <OverviewSection /> : null}
+            {activeSection === "capabilities" ? (
+              <CapabilitiesSection
+                capabilityFilter={capabilityFilter}
+                capabilityQuery={capabilityQuery}
+                filteredCapabilities={filteredCapabilities}
+                onFilterChange={setCapabilityFilter}
+                onOpenCapabilityChange={setOpenCapabilityId}
+                onQueryChange={setCapabilityQuery}
+                openCapabilityId={openCapabilityId}
+              />
+            ) : null}
+            {activeSection === "data" ? (
+              <DataInventorySection
+                onOpenDomainChange={setOpenDataDomain}
+                openDataDomain={openDataDomain}
+              />
+            ) : null}
+            {activeSection === "model" ? <ModelSection /> : null}
+            {activeSection === "needs" ? (
+              <DataNeedsSection
+                onOpenDatasetChange={setOpenNeedDataset}
+                openNeedDataset={openNeedDataset}
+              />
+            ) : null}
+            {activeSection === "roadmap" ? (
+              <RoadmapGuardrailsSection
+                onOpenQuestionChange={setOpenFaqQuestion}
+                openQuestion={openFaqQuestion}
+              />
+            ) : null}
           </div>
         </div>
       </section>
     </main>
+  );
+}
+
+function ExplorerHero() {
+  return (
+    <div className="flex flex-col gap-4 border-b border-white/10 pb-5 lg:flex-row lg:items-end lg:justify-between">
+      <div className="max-w-4xl">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#68d8ff]">
+          Methodology
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
+          CFS Capability Explorer
+        </h2>
+        <p className="mt-3 text-sm leading-6 text-slate-400">
+          A plain-English in-app guide to what Cabarrus FutureScape includes,
+          what it can do today, what remains internal research, and which
+          official datasets would make the platform stronger.
+        </p>
+      </div>
+      <div className="grid min-w-[15rem] grid-cols-2 gap-2 text-xs">
+        <StatusPill label="Prediction" value="Internal only" tone="amber" />
+        <StatusPill label="School score" value="Not scored" tone="cyan" />
+        <StatusPill label="Flood source" value="FEMA NFHL" tone="green" />
+        <StatusPill label="Utilization" value="Seed only" tone="rose" />
+      </div>
+    </div>
+  );
+}
+
+function SectionTabs({
+  activeSection,
+  onChange,
+}: {
+  activeSection: ExplorerSection;
+  onChange: (section: ExplorerSection) => void;
+}) {
+  return (
+    <div className="mt-4">
+      <div className="cfs-methodology-rail-shell">
+        <div
+          aria-label="Methodology capability explorer sections"
+          className="cfs-methodology-rail-scroll no-scrollbar"
+          role="tablist"
+        >
+          <div className="grid gap-2 p-2.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+            {explorerSections.map((section) => {
+              const active = section.id === activeSection;
+
+              return (
+                <button
+                  aria-controls={`methodology-section-${section.id}`}
+                  aria-selected={active}
+                  className={`min-h-[4rem] rounded-xl border px-3 py-2 text-left outline-none transition focus-visible:ring-2 focus-visible:ring-[#f0cd79]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060b12] ${
+                    active
+                      ? "border-[#68d8ff]/45 bg-[#68d8ff]/11 text-white shadow-[0_0_18px_rgba(104,216,255,0.12)]"
+                      : "border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/18 hover:bg-white/[0.055] hover:text-slate-100"
+                  }`}
+                  id={`methodology-tab-${section.id}`}
+                  key={section.id}
+                  onClick={() => onChange(section.id)}
+                  role="tab"
+                  type="button"
+                >
+                  <span className="block text-xs font-semibold">
+                    {section.shortLabel}
+                  </span>
+                  <span className="mt-1 block text-[10px] leading-4 text-slate-500">
+                    {section.helper}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OverviewSection() {
+  return (
+    <div className="space-y-4">
+      <MethodCard
+        icon={Sparkles}
+        kicker="CFS at a glance"
+        title="CFS at a Glance"
+      >
+        <p className="max-w-4xl text-sm leading-6 text-slate-400">
+          CFS is a parcel-centered planning intelligence prototype. It brings
+          together real local data, documented caveats, and aggregate-only model
+          governance so staff can explain parcel context without overclaiming.
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {cfsAtAGlanceCards.map((card) => (
+            <section
+              className="rounded-xl border border-white/10 bg-black/20 p-3"
+              key={card.title}
+            >
+              <h3 className="text-sm font-semibold text-white">
+                {card.title}
+              </h3>
+              <MethodList items={card.items} />
+            </section>
+          ))}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {overviewBadges.map((badge) => (
+            <StatusTag key={badge} label={badge} tone="cyan" />
+          ))}
+        </div>
+      </MethodCard>
+
+      <SystemSection />
+
+      <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        <MethodCard
+          icon={ShieldCheck}
+          kicker="Decision boundary"
+          title="What CFS Is Safe To Claim"
+        >
+          <div className="space-y-3">
+            <BoundaryRow
+              label="Use it for"
+              text="Parcel due diligence support, context review, map-based explanation, and demo-ready executive reporting."
+              tone="green"
+            />
+            <BoundaryRow
+              label="Keep internal"
+              text="Development model research, aggregate ranking summaries, feature governance, and calibration review."
+              tone="amber"
+            />
+            <BoundaryRow
+              label="Do not claim"
+              text="Exact parcel probability, production-ready prediction, official school capacity scoring, or confirmed utility capacity."
+              tone="rose"
+            />
+          </div>
+        </MethodCard>
+
+        <PlatformDiagnosticsCard />
+      </div>
+    </div>
+  );
+}
+
+function SystemSection() {
+  return (
+    <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+      <MethodCard icon={Workflow} kicker="Process flow" title="How CFS Works">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
+          {systemFlow.map((step, index) => (
+            <div
+              className="rounded-lg border border-white/10 bg-black/18 p-3"
+              key={step.label}
+            >
+              <div className="flex gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#68d8ff]/25 bg-[#68d8ff]/10 text-xs font-semibold text-[#bfefff]">
+                  {index + 1}
+                </span>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">
+                    {step.label}
+                  </h3>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    {step.detail}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </MethodCard>
+
+      <MethodCard
+        icon={BookOpen}
+        kicker="Plain English"
+        title="Model Foundation Without The Jargon"
+      >
+        <MethodList items={plainEnglishLogic} />
+        <div className="mt-4 rounded-lg border border-[#f0cd79]/20 bg-[#1d1607]/36 p-3">
+          <p className="text-sm font-semibold text-white">
+            Core principle
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            CFS should explain what is known before it suggests what might
+            happen. The current model work stays internal because probabilities
+            are not calibrated well enough for public or parcel-level use.
+          </p>
+        </div>
+      </MethodCard>
+    </div>
+  );
+}
+
+function CapabilitiesSection({
+  capabilityFilter,
+  capabilityQuery,
+  filteredCapabilities,
+  onFilterChange,
+  onOpenCapabilityChange,
+  onQueryChange,
+  openCapabilityId,
+}: {
+  capabilityFilter: "All" | CapabilityStatus;
+  capabilityQuery: string;
+  filteredCapabilities: typeof capabilityCards;
+  onFilterChange: (filter: "All" | CapabilityStatus) => void;
+  onOpenCapabilityChange: (id: string) => void;
+  onQueryChange: (query: string) => void;
+  openCapabilityId: string;
+}) {
+  return (
+    <div className="space-y-4">
+      <MethodCard
+        icon={Filter}
+        kicker="What CFS can do"
+        title="Current Capabilities"
+      >
+        <p className="mb-4 max-w-4xl text-sm leading-6 text-slate-400">
+          These cards describe what a staff viewer can actually do in the
+          prototype today, where to find it, and the caveat that should travel
+          with the workflow.
+        </p>
+        <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
+          <label className="block">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Search workflows
+            </span>
+            <span className="mt-2 flex items-center gap-2 rounded-lg border border-white/10 bg-black/24 px-3 py-2">
+              <Search className="h-4 w-4 text-slate-500" />
+              <input
+                className="w-full bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-600"
+                onChange={(event) => onQueryChange(event.target.value)}
+                placeholder="Search parcel, flood, school, model, print..."
+                type="search"
+                value={capabilityQuery}
+              />
+            </span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {capabilityFilterOptions.map((filter) => (
+              <button
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  filter === capabilityFilter
+                    ? "border-[#68d8ff]/45 bg-[#68d8ff]/12 text-white"
+                    : "border-white/10 bg-white/[0.035] text-slate-400 hover:border-white/20 hover:text-slate-100"
+                }`}
+                key={filter}
+                onClick={() => onFilterChange(filter)}
+                type="button"
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+      </MethodCard>
+
+      {filteredCapabilities.length > 0 ? (
+        <div className="space-y-4">
+          {capabilityGroups.map((group) => {
+            const cards = filteredCapabilities.filter(
+              (card) => card.group === group,
+            );
+
+            if (cards.length === 0) {
+              return null;
+            }
+
+            return (
+              <section
+                className="rounded-xl border border-white/10 bg-black/14 p-3"
+                key={group}
+              >
+                <div className="flex flex-col gap-1 border-b border-white/10 pb-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Capability group
+                    </p>
+                    <h3 className="mt-1 text-base font-semibold text-white">
+                      {group}
+                    </h3>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-500">
+                    {cards.length} workflow{cards.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <div className="mt-3 grid gap-3 xl:grid-cols-2">
+                  {cards.map((card) => (
+                    <CapabilityCard
+                      card={card}
+                      isOpen={openCapabilityId === card.id}
+                      key={card.id}
+                      onToggle={() =>
+                        onOpenCapabilityChange(
+                          openCapabilityId === card.id ? "" : card.id,
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      ) : (
+        <MethodCard
+          icon={Search}
+          kicker="No results"
+          title="No capability matched that filter"
+        >
+          <p>
+            Try another status filter or search term. The explorer is static,
+            so no backend data is required to display these explanations.
+          </p>
+        </MethodCard>
+      )}
+    </div>
+  );
+}
+
+function CapabilityCard({
+  card,
+  isOpen,
+  onToggle,
+}: {
+  card: (typeof capabilityCards)[number];
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <article className="rounded-xl border border-white/10 bg-[#081522]/78 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+      <button
+        aria-expanded={isOpen}
+        className="flex w-full items-start justify-between gap-3 text-left"
+        onClick={onToggle}
+        type="button"
+      >
+        <div className="min-w-0">
+          <h3 className="text-base font-semibold text-white">{card.title}</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            {card.whatItDoes}
+          </p>
+        </div>
+        <ChevronDown
+          className={`mt-1 h-4 w-4 shrink-0 text-slate-500 transition ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {card.status.map((status) => (
+          <StatusTag key={status} label={status} tone={getStatusTone(status)} />
+        ))}
+      </div>
+      {isOpen ? (
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <InfoTile label="Data behind it" text={card.dataBehindIt} />
+          <InfoTile label="Caveat" text={card.caveat} tone="amber" />
+          <InfoTile label="Where to see it" text={card.whereToSeeIt} />
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function DataInventorySection({
+  onOpenDomainChange,
+  openDataDomain,
+}: {
+  onOpenDomainChange: (domain: string) => void;
+  openDataDomain: string;
+}) {
+  return (
+    <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+      <MethodCard
+        icon={Database}
+        kicker="What CFS has"
+        title="Data Domains Already Included"
+      >
+        <p className="mb-4 text-sm leading-6 text-slate-400">
+          CFS organizes evidence by domain so a selected parcel can be reviewed
+          consistently across planning, constraints, activity, reporting, and
+          model-governance context.
+        </p>
+        <div className="space-y-2">
+          {dataInventory.map((domain) => (
+            <AccordionRow
+              isOpen={openDataDomain === domain.domain}
+              key={domain.domain}
+              onToggle={() =>
+                onOpenDomainChange(
+                  openDataDomain === domain.domain ? "" : domain.domain,
+                )
+              }
+              title={domain.domain}
+            >
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  <StatusTag
+                    label={domain.status}
+                    tone={getDataStatusTone(domain.status)}
+                  />
+                  <StatusTag
+                    label={
+                      domain.usedInDueDiligence
+                        ? "Used in Planning Snapshot"
+                        : "Not in Planning Snapshot"
+                    }
+                    tone={domain.usedInDueDiligence ? "green" : "slate"}
+                  />
+                  <StatusTag
+                    label={
+                      domain.usedInModelResearch
+                        ? "Used in Model Research"
+                        : "Not Model Research"
+                    }
+                    tone={domain.usedInModelResearch ? "cyan" : "slate"}
+                  />
+                </div>
+                <InfoTile
+                  label="Available inputs"
+                  text={domain.items.join("; ")}
+                />
+                <InfoTile label="How CFS uses it" text={domain.usedFor} />
+                <InfoTile
+                  label="Limitation"
+                  text={domain.limitation}
+                  tone="amber"
+                />
+                <InfoTile
+                  label="Next needed data"
+                  text={domain.nextNeededData}
+                />
+              </div>
+            </AccordionRow>
+          ))}
+        </div>
+      </MethodCard>
+
+      <MethodCard
+        icon={MapPinned}
+        kicker="How to read this"
+        title="Evidence, Context, And Caveats"
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <MethodMini label="Available domains" value="9 major groups" />
+          <MethodMini label="Planning Snapshot" value="Most domains feed saved review context" />
+          <MethodMini label="Model research" value="Limited to governed features" />
+          <MethodMini label="Capacity data" value="Still official-data needed" />
+        </div>
+        <p className="mt-4 text-sm leading-6 text-slate-400">
+          This is not a raw table dump. Each domain explains whether the data is
+          available, how CFS uses it, what limitation should be named during a
+          demo, and what source would make the platform stronger.
+        </p>
+        <div className="mt-4 space-y-2">
+          <BoundaryRow
+            label="Verified evidence"
+            text="Use directly for parcel review when source quality and joins are documented."
+            tone="green"
+          />
+          <BoundaryRow
+            label="Current context"
+            text="Useful for explanation, but not automatically time-safe for historical model claims."
+            tone="amber"
+          />
+          <BoundaryRow
+            label="Proxy or seed"
+            text="Helpful for planning conversation, but must stay caveated until official data arrives."
+            tone="rose"
+          />
+        </div>
+      </MethodCard>
+    </div>
+  );
+}
+
+function ModelSection() {
+  return (
+    <div className="space-y-4">
+      <MethodCard
+        icon={BrainCircuit}
+        kicker="Internal research only"
+        title="Internal Development Prediction Model Research"
+      >
+        <div className="grid gap-3 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <ResearchStatusItem
+              label="Target"
+              value="New construction permit within next 3 years"
+            />
+            <ResearchStatusItem label="Unit" value="Parcel-year" />
+            <ResearchStatusItem
+              label="Feature rows"
+              value="1,430,221 parcel-year records"
+            />
+            <ResearchStatusItem
+              label="Historical outcome"
+              value="New construction permits"
+            />
+            <ResearchStatusItem
+              label="Current best internal model"
+              value={currentBestModelFallback.variantLabel}
+            />
+            <ResearchStatusItem
+              label="Calibration"
+              tone="amber"
+              value="Weak / under review"
+            />
+            <ResearchStatusItem
+              label="Production ready"
+              tone="rose"
+              value="No"
+            />
+            <ResearchStatusItem
+              label="Public exposure"
+              tone="rose"
+              value="Not allowed"
+            />
+            <ResearchStatusItem
+              label="Parcel-level probabilities"
+              tone="rose"
+              value="Not shown"
+            />
+            <ResearchStatusItem
+              label="Parcel-level ranking classes"
+              tone="rose"
+              value="Not shown"
+            />
+          </div>
+          <div className="grid gap-3">
+            <ResearchListCard
+              accent="cyan"
+              items={[
+                "historical zoning",
+                "transportation",
+                "tax/value",
+              ]}
+              title="Strong Feature Groups"
+            />
+            <ResearchListCard
+              accent="rose"
+              items={[
+                "Accela plan reviews",
+                "Central Area Plan",
+                "utility proxy",
+                "current-context metadata flags",
+              ]}
+              title="Excluded For Now"
+            />
+          </div>
+        </div>
+        <section className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3">
+          <h4 className="text-sm font-semibold text-white">
+            Plain-English Flow
+          </h4>
+          <MethodList items={modelResearchFlow} />
+        </section>
+      </MethodCard>
+      <DevelopmentPredictionResearchStatusCard />
+      <div className="grid gap-4 lg:grid-cols-3">
+        <MethodCard
+          icon={LockKeyhole}
+          kicker="Why hidden"
+          title="Why Parcel-Level Outputs Stay Hidden"
+        >
+          <MethodList
+            items={[
+              "Calibration remains weak, so exact probabilities could mislead users.",
+              "Some important official datasets are still missing.",
+              "The model is intended for internal QA and feature governance only.",
+              "Parcel-level scores and ranking classes are not shown in the app.",
+            ]}
+          />
+        </MethodCard>
+        <MethodCard
+          icon={Lightbulb}
+          kicker="Phase 16C finding"
+          title="What Helped And What Did Not"
+        >
+          <MethodList
+            items={[
+              "Tax/value features helped the current best internal variant.",
+              "Accela, Central Area Plan, utility proxy, and current-context metadata remain useful as context.",
+              "Those excluded feature groups were not recommended for the current best model because they hurt top-k ranking or need better source coverage.",
+            ]}
+          />
+        </MethodCard>
+        <MethodCard
+          icon={ShieldCheck}
+          kicker="Governance"
+          title="Feature Governance Matters"
+        >
+          <MethodList
+            items={[
+              "Features need dates, coverage, and clear source definitions.",
+              "Current context cannot be treated as historical fact.",
+              "Proxy data should not be renamed as capacity or readiness.",
+              "A better model still needs human governance before any public signal.",
+            ]}
+          />
+        </MethodCard>
+      </div>
+    </div>
+  );
+}
+
+function ProgressSection() {
+  return (
+    <MethodCard
+      icon={Route}
+      kicker="Roadmap context"
+      title="What Is In The Works"
+    >
+      <div className="grid gap-3 md:grid-cols-2">
+        {progressItems.map((item) => (
+          <div
+            className="rounded-lg border border-white/10 bg-black/18 p-3"
+            key={item.title}
+          >
+            <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              {item.detail}
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-4 rounded-lg border border-[#68d8ff]/20 bg-[#68d8ff]/[0.055] px-3 py-2 text-sm leading-6 text-slate-300">
+        These are roadmap items, not failures. The prototype is strongest when
+        it clearly separates what is live, what is context, and what official
+        data would make the next phase stronger.
+      </p>
+    </MethodCard>
+  );
+}
+
+function DataNeedsSection({
+  onOpenDatasetChange,
+  openNeedDataset,
+}: {
+  onOpenDatasetChange: (dataset: string) => void;
+  openNeedDataset: string;
+}) {
+  return (
+    <div className="space-y-4">
+      <MethodCard
+        icon={Database}
+        kicker="Priority requests"
+        title="Data Still Needed"
+      >
+        <p>
+          These are the official datasets that would most improve verified due
+          diligence, internal model validation, and future scenario planning.
+          REST, GIS, or structured tables are preferred. PDF-only sources are
+          useful for reference but weaker for automated CFS integration.
+        </p>
+      </MethodCard>
+      <div className="grid gap-3 lg:grid-cols-2">
+        {dataNeeds.map((need) => (
+          <MethodCard
+            icon={Database}
+            key={need.level}
+            kicker="Data request"
+            title={need.level}
+          >
+            <p className="text-sm leading-6 text-slate-400">{need.value}</p>
+            <MethodList items={need.datasets} />
+          </MethodCard>
+        ))}
+      </div>
+      <MethodCard
+        icon={FileText}
+        kicker="Request format"
+        title="What To Ask For And Why It Matters"
+      >
+        <div className="grid gap-2 lg:grid-cols-2">
+          {dataNeedDetails.map((need) => (
+            <AccordionRow
+              isOpen={openNeedDataset === need.dataset}
+              key={need.dataset}
+              onToggle={() =>
+                onOpenDatasetChange(
+                  openNeedDataset === need.dataset ? "" : need.dataset,
+                )
+              }
+              title={need.dataset}
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                <InfoTile label="Why it matters" text={need.why} />
+                <InfoTile label="Best format" text={need.format} />
+                <InfoTile
+                  label="PDF-only limitation"
+                  text={need.pdfLimit}
+                  tone="amber"
+                />
+                <InfoTile label="How it improves CFS" text={need.improvement} />
+              </div>
+            </AccordionRow>
+          ))}
+        </div>
+      </MethodCard>
+    </div>
+  );
+}
+
+function RoadmapGuardrailsSection({
+  onOpenQuestionChange,
+  openQuestion,
+}: {
+  onOpenQuestionChange: (question: string) => void;
+  openQuestion: string;
+}) {
+  return (
+    <div className="space-y-4">
+      <MethodCard
+        icon={GitBranch}
+        kicker="Next phases"
+        title="Roadmap & Guardrails"
+      >
+        <p className="mb-4 text-sm leading-6 text-slate-400">
+          This section combines what is next, what is already in progress, what
+          not to claim, and the plain-English answers most useful in a demo or
+          manager review.
+        </p>
+        <div className="grid gap-3 lg:grid-cols-4">
+          {roadmapSteps.map((step) => (
+            <div
+              className="rounded-xl border border-white/10 bg-black/20 p-4"
+              key={step.horizon}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-base font-semibold text-white">
+                  {step.horizon}
+                </h3>
+                <StatusTag label={step.status} tone="cyan" />
+              </div>
+              <MethodList items={step.items} />
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 rounded-lg border border-[#ff8d7a]/20 bg-[#2a100c]/34 p-3">
+          <p className="text-sm font-semibold text-white">
+            Public model exposure remains locked down.
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Any future simplified public viewer should show descriptive context
+            only unless validation, calibration, governance, and legal review
+            explicitly approve a different scope.
+          </p>
+        </div>
+      </MethodCard>
+
+      <ProgressSection />
+      <GuardrailsSection />
+      <FaqSection
+        onOpenQuestionChange={onOpenQuestionChange}
+        openQuestion={openQuestion}
+      />
+    </div>
+  );
+}
+
+function GuardrailsSection() {
+  return (
+    <div className="grid gap-4 xl:grid-cols-[1fr_0.85fr]">
+      <MethodCard
+        icon={AlertTriangle}
+        kicker="What CFS does not claim"
+        title="What Not To Claim"
+      >
+        <p className="mb-3 text-sm font-semibold text-white">
+          What CFS Does Not Claim
+        </p>
+        <MethodList items={guardrails} />
+      </MethodCard>
+      <MethodCard
+        icon={ShieldCheck}
+        kicker="Approved language"
+        title="Safe Demo Wording"
+      >
+        <div className="flex flex-wrap gap-2">
+          {approvedLanguage.map((phrase) => (
+            <StatusTag key={phrase} label={phrase} tone="green" />
+          ))}
+        </div>
+        <p className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3 text-sm leading-6 text-slate-400">
+          Use: CFS is a demo-ready internal planning intelligence prototype with
+          parcel-based due diligence, constraint review, executive reporting,
+          and aggregate-only model governance.
+        </p>
+      </MethodCard>
+    </div>
+  );
+}
+
+function FaqSection({
+  onOpenQuestionChange,
+  openQuestion,
+}: {
+  onOpenQuestionChange: (question: string) => void;
+  openQuestion: string;
+}) {
+  return (
+    <MethodCard
+      icon={HelpCircle}
+      kicker="Plain-English Q&A"
+      title="Common Questions"
+    >
+      <div className="grid gap-2 lg:grid-cols-2">
+        {faqItems.map((item) => (
+          <AccordionRow
+            isOpen={openQuestion === item.question}
+            key={item.question}
+            onToggle={() =>
+              onOpenQuestionChange(
+                openQuestion === item.question ? "" : item.question,
+              )
+            }
+            title={item.question}
+          >
+            <p className="text-sm leading-6 text-slate-400">{item.answer}</p>
+          </AccordionRow>
+        ))}
+      </div>
+    </MethodCard>
   );
 }
 
@@ -305,12 +1706,6 @@ function DiagnosticCheckTile({ check }: { check: EnterpriseDiagnosticCheck }) {
 function DevelopmentPredictionResearchStatusCard() {
   const { errorMessage, featuresSummary, isLoading, rankingSummary, source } =
     useDevelopmentPredictionResearchStatus();
-  const orderedDistribution = orderRankingDistribution(
-    rankingSummary.class_distribution,
-  );
-  const totalRows =
-    rankingSummary.ranking_row_count ||
-    orderedDistribution.reduce((sum, item) => sum + item.row_count, 0);
   const currentBestVariant =
     featuresSummary?.current_best_internal_model_variant ??
     currentBestModelFallback.variantValue;
@@ -361,7 +1756,8 @@ function DevelopmentPredictionResearchStatusCard() {
               label="Calibration"
               tone="amber"
               value={formatStatusLabel(
-                rankingSummary.calibration_status ?? "weak_probability_calibration",
+                rankingSummary.calibration_status ??
+                  "weak_probability_calibration",
               )}
             />
             <ResearchStatusItem
@@ -372,7 +1768,7 @@ function DevelopmentPredictionResearchStatusCard() {
 
           <section className="rounded-lg border border-[#f0cd79]/20 bg-[#1d1607]/36 p-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f0cd79]">
-              Current best internal model
+              Current Best Internal Model
             </p>
             <h4 className="mt-1 text-sm font-semibold text-white">
               {currentBestModelFallback.variantLabel}
@@ -407,9 +1803,9 @@ function DevelopmentPredictionResearchStatusCard() {
               />
             </div>
             <p className="mt-3 text-xs leading-5 text-slate-400">
-              Selected after Phase 16C ablation because it produced the strongest
-              internal ranking performance while excluding noisy planning,
-              pipeline, and proxy-only feature groups.
+              Selected after Phase 16C ablation because it produced the
+              strongest internal ranking performance while excluding noisy
+              planning, pipeline, and proxy-only feature groups.
             </p>
           </section>
 
@@ -418,22 +1814,25 @@ function DevelopmentPredictionResearchStatusCard() {
               <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
               <p className="text-xs leading-5 text-slate-400">
                 This section intentionally shows aggregate research status only.
-                It does not display parcel IDs, parcel ranking classes, or
-                model probability values.
+                It does not display parcel IDs, parcel ranking classes, or model
+                probability values.
               </p>
             </div>
             <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-slate-500">
-              Source: {source === "api" ? "Live FastAPI aggregate summaries" : "Documented Phase 10G aggregate summary"}
+              Source:{" "}
+              {source === "api"
+                ? "Live FastAPI aggregate summaries"
+                : "Documented aggregate summary"}
               {isLoading ? " (loading)" : ""}
             </p>
             <p className="mt-2 rounded-md border border-white/10 bg-white/[0.025] px-2 py-1.5 text-[11px] leading-5 text-slate-400">
-              Current safety flags: model_active=false,
-              prediction_probability_available=false, production_ready=false,
-              public_exposure_allowed=false.
+              Current safety flags: model inactive, probability output
+              unavailable, production readiness false, and public exposure not
+              allowed.
             </p>
             {errorMessage ? (
               <p className="mt-2 text-xs leading-5 text-[#f0cd79]">
-                API status unavailable; showing documented aggregate summary.
+                Live summary unavailable; showing documented aggregate summary.
               </p>
             ) : null}
           </div>
@@ -444,23 +1843,45 @@ function DevelopmentPredictionResearchStatusCard() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  Aggregate ranking classes
+                  Research output boundary
                 </p>
                 <h4 className="mt-1 text-sm font-semibold text-white">
-                  Distribution only
+                  Aggregate status only
                 </h4>
               </div>
-              <BarChart3 className="h-4 w-4 text-[#68d8ff]" />
+              <LockKeyhole className="h-4 w-4 text-[#f0cd79]" />
             </div>
-            <div className="mt-3 space-y-2">
-              {orderedDistribution.map((bucket) => (
-                <RankingDistributionRow
-                  bucket={bucket}
-                  key={bucket.development_signal_class}
-                  totalRows={totalRows}
-                />
-              ))}
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <ResearchStatusItem
+                label="Ranking rows"
+                value={
+                  rankingSummary.ranking_row_count
+                    ? "Internal rows available"
+                    : "Summary only"
+                }
+              />
+              <ResearchStatusItem
+                label="Parcel-level classes"
+                tone="rose"
+                value="Hidden"
+              />
+              <ResearchStatusItem
+                label="Exact probabilities"
+                tone="rose"
+                value="Hidden"
+              />
+              <ResearchStatusItem
+                label="Decision use"
+                tone="amber"
+                value="Not public-facing"
+              />
             </div>
+            <p className="mt-3 text-xs leading-5 text-slate-400">
+              Methodology intentionally avoids listing model class names or
+              parcel-level rows. It explains the research boundary without
+              turning internal ranking outputs into a public-facing product
+              signal.
+            </p>
           </section>
 
           <section className="rounded-lg border border-white/10 bg-black/20 p-3">
@@ -488,9 +1909,9 @@ function DevelopmentPredictionResearchStatusCard() {
               />
             </div>
             <p className="mt-3 text-xs leading-5 text-slate-400">
-              The current best internal variant improved PR-AUC and top-5%
-              lift in Phase 16C, but weak calibration means parcel-level
-              probability values remain unavailable.
+              The current best internal variant improved PR-AUC and top-5% lift
+              in Phase 16C, but weak calibration means parcel-level probability
+              values remain unavailable.
             </p>
           </section>
         </div>
@@ -545,6 +1966,103 @@ function DevelopmentPredictionResearchStatusCard() {
   );
 }
 
+function AccordionRow({
+  children,
+  isOpen,
+  onToggle,
+  title,
+}: {
+  children: ReactNode;
+  isOpen: boolean;
+  onToggle: () => void;
+  title: string;
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/18">
+      <button
+        aria-expanded={isOpen}
+        className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left"
+        onClick={onToggle}
+        type="button"
+      >
+        <span className="text-sm font-semibold text-slate-100">{title}</span>
+        {isOpen ? (
+          <ChevronDown className="h-4 w-4 shrink-0 text-slate-500" />
+        ) : (
+          <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" />
+        )}
+      </button>
+      {isOpen ? <div className="border-t border-white/10 p-3">{children}</div> : null}
+    </div>
+  );
+}
+
+function BoundaryRow({
+  label,
+  text,
+  tone,
+}: {
+  label: string;
+  text: string;
+  tone: "amber" | "green" | "rose";
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/18 p-3">
+      <StatusTag label={label} tone={tone} />
+      <p className="mt-2 text-sm leading-6 text-slate-400">{text}</p>
+    </div>
+  );
+}
+
+function InfoTile({
+  label,
+  text,
+  tone = "cyan",
+}: {
+  label: string;
+  text: string;
+  tone?: "amber" | "cyan";
+}) {
+  return (
+    <div
+      className={`rounded-lg border p-3 ${
+        tone === "amber"
+          ? "border-[#d8b86a]/18 bg-[#d8b86a]/[0.055]"
+          : "border-white/10 bg-white/[0.035]"
+      }`}
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-xs leading-5 text-slate-300">{text}</p>
+    </div>
+  );
+}
+
+function StatusTag({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "amber" | "cyan" | "green" | "rose" | "slate";
+}) {
+  const toneClass = {
+    amber: "border-[#d8b86a]/25 bg-[#d8b86a]/10 text-[#f0cd79]",
+    cyan: "border-[#68d8ff]/25 bg-[#68d8ff]/10 text-[#bfefff]",
+    green: "border-[#5cd38f]/25 bg-[#5cd38f]/10 text-[#c7ffd8]",
+    rose: "border-[#ff8d7a]/25 bg-[#ff8d7a]/10 text-[#ffc2b6]",
+    slate: "border-white/10 bg-white/[0.04] text-slate-400",
+  };
+
+  return (
+    <span
+      className={`inline-flex max-w-full items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase leading-4 tracking-[0.08em] ${toneClass[tone]}`}
+    >
+      {label}
+    </span>
+  );
+}
+
 function getDiagnosticStatusClass(status: EnterpriseDiagnosticStatus) {
   switch (status) {
     case "ok":
@@ -587,7 +2105,7 @@ function MethodCard({
 }: {
   children: ReactNode;
   className?: string;
-  icon: typeof Database;
+  icon: LucideIcon;
   kicker: string;
   title: string;
 }) {
@@ -608,40 +2126,6 @@ function MethodCard({
       </div>
       <div className="mt-4 text-sm leading-6 text-slate-400">{children}</div>
     </article>
-  );
-}
-
-function RankingDistributionRow({
-  bucket,
-  totalRows,
-}: {
-  bucket: DevelopmentPredictionRankingClassBucket;
-  totalRows: number;
-}) {
-  const pct =
-    bucket.pct_of_rows ||
-    (totalRows > 0 ? Number(((bucket.row_count / totalRows) * 100).toFixed(4)) : 0);
-
-  return (
-    <div className="rounded-md border border-white/10 bg-white/[0.035] p-2">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-xs font-semibold text-slate-200">
-          {formatRankingClass(bucket.development_signal_class)}
-        </span>
-        <span className="text-xs font-semibold text-white">
-          {formatInteger(bucket.row_count)}
-        </span>
-      </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
-        <div
-          className="h-full rounded-full bg-[#68d8ff]"
-          style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
-        />
-      </div>
-      <p className="mt-1 text-[11px] text-slate-500">
-        {pct.toFixed(2)}% of internal research rows
-      </p>
-    </div>
   );
 }
 
@@ -670,7 +2154,9 @@ function ResearchListCard({
                 {index + 1}
               </span>
             ) : (
-              <span className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`} />
+              <span
+                className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`}
+              />
             )}
             <span>{item}</span>
           </li>
@@ -686,7 +2172,9 @@ function ResearchMetric({ label, value }: { label: string; value: number }) {
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
         {label}
       </p>
-      <p className="mt-1 text-sm font-semibold text-white">{value.toFixed(6)}</p>
+      <p className="mt-1 text-sm font-semibold text-white">
+        {value.toFixed(6)}
+      </p>
     </div>
   );
 }
@@ -720,7 +2208,7 @@ function ResearchStatusItem({
 
 function MethodList({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-2">
+    <ul className="mt-3 space-y-2">
       {items.map((item) => (
         <li className="flex gap-2 text-sm leading-6 text-slate-400" key={item}>
           <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#d8b86a]" />
@@ -768,39 +2256,36 @@ function StatusPill({
   );
 }
 
-function orderRankingDistribution(
-  distribution: DevelopmentPredictionRankingClassBucket[],
-) {
-  const order = [
-    "very_high_development_signal",
-    "high_development_signal",
-    "moderate_development_signal",
-    "low_development_signal",
-  ];
-
-  return [...distribution].sort((a, b) => {
-    const aIndex = order.indexOf(a.development_signal_class);
-    const bIndex = order.indexOf(b.development_signal_class);
-
-    return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex);
-  });
+function getStatusTone(status: CapabilityStatus) {
+  switch (status) {
+    case "Live in App":
+    case "Verified Source":
+      return "green";
+    case "Internal Research Only":
+    case "Not Public-Facing":
+    case "Needs Official Data":
+    case "Presentation-Derived":
+    case "Proxy Only":
+      return "amber";
+    case "Model Related":
+    case "Reporting Related":
+    case "Context Only":
+      return "cyan";
+  }
 }
 
-function formatInteger(value: number) {
-  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(
-    value,
-  );
-}
-
-function formatRankingClass(value: string) {
-  const labels: Record<string, string> = {
-    high_development_signal: "High development signal",
-    low_development_signal: "Low development signal",
-    moderate_development_signal: "Moderate development signal",
-    very_high_development_signal: "Very high development signal",
-  };
-
-  return labels[value] ?? formatStatusLabel(value);
+function getDataStatusTone(status: DataDomainStatus) {
+  switch (status) {
+    case "Available":
+      return "green";
+    case "Internal Research":
+    case "Current Context":
+      return "cyan";
+    case "Needs Official Data":
+    case "Presentation-Derived":
+    case "Proxy Only":
+      return "amber";
+  }
 }
 
 function formatStatusLabel(value: string) {

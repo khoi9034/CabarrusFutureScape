@@ -1,0 +1,153 @@
+{
+  "phase": "20A-QA3",
+  "task": "Static enterprise Methodology navigation and information architecture polish",
+  "completed_at": "2026-06-15",
+  "files_changed": [
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/styles/cfs-theme.css",
+    "outputs/phase20a_qa3_static_methodology_information_architecture_summary.json"
+  ],
+  "animation_removal_summary": {
+    "removed": [
+      "requestAnimationFrame auto-scroll loop",
+      "setTimeout fallback auto-scroll loop",
+      "scroll direction refs",
+      "scroll position refs",
+      "hover pause/resume state",
+      "reduced-motion listener used only for animation",
+      "data-paused styling"
+    ],
+    "result": "The Methodology navigation rail is now static. It no longer moves automatically and has no hover-driven animation behavior."
+  },
+  "static_nav_behavior": {
+    "tablist_preserved": true,
+    "tabs_clickable": true,
+    "active_tab_clear": true,
+    "keyboard_focus_visible": true,
+    "native_scrollbar_hidden": true,
+    "manual_horizontal_scroll_allowed_if_overflowing": true,
+    "soft_edge_fade_preserved": true,
+    "auto_scroll_animation": false
+  },
+  "methodology_organization_changes": {
+    "section_order": [
+      "Overview",
+      "How CFS Works",
+      "What CFS Has",
+      "What CFS Can Do",
+      "Model Research",
+      "In Progress",
+      "Data Still Needed",
+      "Roadmap",
+      "Guardrails",
+      "FAQ"
+    ],
+    "section_label_polish": "Renamed similar labels into a clearer learning flow where each tab answers one obvious question."
+  },
+  "cfs_at_a_glance_changes": {
+    "summary_cards_added": [
+      "What CFS Is",
+      "What CFS Has",
+      "What CFS Can Do Today",
+      "What Is Still Needed"
+    ],
+    "purpose": "Make the Methodology opening section easier for a higher-up or demo viewer to understand in under a minute."
+  },
+  "data_domain_improvements": {
+    "section": "What CFS Has",
+    "domains": [
+      "Parcel / Tax",
+      "Zoning / Planning",
+      "Development / Permits",
+      "Flood / Environmental",
+      "Schools",
+      "Transportation",
+      "Utility / Infrastructure",
+      "Model Governance",
+      "Reporting"
+    ],
+    "fields_shown_per_domain": [
+      "available inputs",
+      "how CFS uses it",
+      "limitation",
+      "next needed data"
+    ]
+  },
+  "capability_improvements": {
+    "section": "What CFS Can Do",
+    "workflow_cards": [
+      "Parcel Search and Active Selection",
+      "Due Diligence Review",
+      "Executive Print Report",
+      "Flood Constraint Review",
+      "School Assignment Review",
+      "Development Activity Review",
+      "Transportation Context Review",
+      "Methodology / Governance Explorer"
+    ],
+    "notes": "Capability cards now describe actual user-facing workflows, where to see them, and the caveat for each."
+  },
+  "model_section_improvements": {
+    "current_best_internal_model": "Zoning + Transportation + Tax/Value",
+    "status_language": [
+      "Internal research only",
+      "Production ready: No",
+      "Public exposure: Not allowed",
+      "Prediction probabilities: Not available",
+      "Calibration under review / weak"
+    ],
+    "safety": "The section continues to show aggregate model governance only and does not show parcel-level prediction scores or parcel-level ranking classes."
+  },
+  "data_needed_improvements": {
+    "priority_1": [
+      "WSACC true utility capacity / service readiness",
+      "official school enrollment and capacity",
+      "countywide future land use / small-area plan GIS",
+      "official rezoning case records"
+    ],
+    "priority_2": [
+      "development pipeline / subdivision approvals",
+      "planned local road projects",
+      "planned utility extensions",
+      "parks/greenways/bike-ped plans"
+    ],
+    "format_guidance": "REST/GIS/table preferred. PDF-only is useful for reference but weaker for automated CFS integration."
+  },
+  "safety_verification": {
+    "sceneview_in_methodology": false,
+    "parcel_level_prediction_probability_exposed": false,
+    "parcel_level_ranking_class_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "notes": "The string prediction_probability_available=false remains only as an aggregate model safety flag, which is allowed by the task. No parcel-level probability or ranking class appears in Methodology."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev": "attempted; refused to start a duplicate server because CFS already owned localhost:3000 with next dev -p 3000",
+    "backend_validation": "not run; backend files were not changed"
+  },
+  "smoke_test_results": {
+    "frontend_url": "http://localhost:3000",
+    "cfs_loaded": true,
+    "methodology_loaded": true,
+    "nav_rail_static": true,
+    "rail_scroll_delta_over_2500ms": 0,
+    "native_scrollbar_hidden": true,
+    "overview_section_appears": true,
+    "what_cfs_has_section_appears": true,
+    "what_cfs_can_do_section_appears": true,
+    "data_still_needed_section_appears": true,
+    "model_research_section_appears": true,
+    "guardrails_section_appears": true,
+    "faq_section_appears": true,
+    "overview_mode_loads": true,
+    "due_diligence_mode_loads": true,
+    "executive_print_mode_loads": true,
+    "browser_console_errors": 0
+  },
+  "remaining_known_issues": [
+    "The existing top mode labels render compact duplicate accessible text in the small viewport, but this task did not modify the app-wide top navigation.",
+    "The Methodology aggregate model section still includes allowed safety-flag wording, not parcel-level model output."
+  ]
+}

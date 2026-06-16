@@ -1,0 +1,159 @@
+{
+  "phase": "22F",
+  "title": "Layer Drawer Simplification, Snapshot Meaning Clarification, and Report Context Polish",
+  "completed_at": "2026-06-16T04:55:00-04:00",
+  "files_changed": [
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "outputs/phase22f_layer_drawer_snapshot_context_polish_summary.json"
+  ],
+  "layer_drawer_simplification": {
+    "status": "completed",
+    "summary": "Reworked the expanded layer drawer into a compact map-control panel instead of a documentation surface.",
+    "changes": [
+      "Added compact Map Layers header copy with active layer count, reset layers, and collapse drawer controls.",
+      "Grouped layers under Base / Parcel, Development Activity, Flood / Constraints, Schools, Transportation, Utility / Infrastructure, Planning Context, and Internal Research / Governance.",
+      "Kept Base / Parcel open by default and collapsed other groups by default.",
+      "Converted live layer controls to compact rows with layer name, Active/Hidden status, source/status chips, More Info, Configure, Legend, and toggle controls.",
+      "Kept live API layers toggleable even when their registry visibility flag is false because their render state is controlled by runtime hooks.",
+      "Moved Infrastructure Readiness out of equal-weight layer treatment and into a Methodology/proxy-only row."
+    ]
+  },
+  "more_info_behavior": {
+    "status": "completed",
+    "summary": "Long source notes and caveats now live behind More Info instead of occupying the main layer list.",
+    "fields_shown": [
+      "What this layer shows",
+      "Source",
+      "How to interpret it",
+      "Caveat",
+      "Where it appears in reports",
+      "Open Methodology action"
+    ],
+    "examples_added": [
+      "Development Hotspots: observed permit/development activity only; not a prediction.",
+      "FEMA Flood Zones: FEMA NFHL remains authoritative.",
+      "School Utilization Seed: presentation-derived values require official verification.",
+      "Utility / Infrastructure: proxy/context only; does not confirm capacity.",
+      "Internal Model Research: aggregate governance only; no parcel-level prediction is shown."
+    ]
+  },
+  "legend_and_configure_behavior": {
+    "status": "completed",
+    "summary": "Legends and filters are collapsed by default and opened intentionally from each compact row.",
+    "legend_layers": [
+      "Development Hotspots",
+      "Flood Constraints",
+      "FEMA Flood Zones",
+      "School Utilization Seed"
+    ],
+    "configure_layers": [
+      "Development Hotspots",
+      "FEMA Flood Zones",
+      "School Utilization Seed"
+    ],
+    "off_state_helper": "Turn layer on to configure display."
+  },
+  "placeholder_layer_handling": {
+    "status": "completed",
+    "summary": "Infrastructure readiness is no longer presented like a confirmed live layer.",
+    "wording": "Infrastructure readiness is tracked in Methodology and will become stronger after official utility capacity and planned infrastructure data are available."
+  },
+  "snapshot_meaning_clarification": {
+    "status": "completed",
+    "summary": "Updated snapshot language so users understand that a Planning Snapshot captures map and intelligence context for reporting, not hidden model output.",
+    "captured_context_copy": [
+      "Map view",
+      "Selected parcel, if available",
+      "Active layers",
+      "Intelligence Brief",
+      "Key stats and caveats",
+      "Explanation cards"
+    ],
+    "safety_boundary": "Snapshots do not store parcel-level prediction probabilities, ranking classes, or hidden model scores."
+  },
+  "snapshot_library_behavior": {
+    "status": "completed",
+    "summary": "Improved the Planning Snapshot Library as a multi-snapshot localStorage report workspace.",
+    "changes": [
+      "Library cards show map thumbnail or clean unavailable placeholder.",
+      "Library cards show timestamp, parcel/map context, active layers count, and Intelligence Brief title.",
+      "Open action label is simplified to Open.",
+      "Delete now asks for confirmation before removing a local snapshot."
+    ],
+    "context_labels": [
+      "Parcel snapshot",
+      "Countywide snapshot",
+      "Layer/context snapshot"
+    ]
+  },
+  "map_screenshot_and_report_behavior": {
+    "status": "verified",
+    "summary": "Saved snapshots continue to include map screenshot data URLs when ArcGIS SceneView capture succeeds; report view includes a clean map-unavailable placeholder if capture fails.",
+    "browser_result": "A new Planning Snapshot was saved during smoke testing and showed a map thumbnail in the snapshot library."
+  },
+  "executive_summary_context": {
+    "status": "completed",
+    "summary": "Executive Summary now includes a dedicated Intelligence Brief section before key findings and metric explanations.",
+    "sections_verified": [
+      "Report Header",
+      "Map View",
+      "Intelligence Brief",
+      "Key Findings",
+      "Explainable Metrics",
+      "Recommended Actions",
+      "Limitations and Caveats"
+    ]
+  },
+  "intelligence_panel_preservation": {
+    "status": "preserved",
+    "summary": "Adaptive Intelligence Brief and Selected Parcel Intelligence behavior was retained. Snapshot save copy was clarified without changing the panel's core behavior."
+  },
+  "safety_verification": {
+    "source_search": {
+      "command": "rg \"experimental_probability|prediction_probability|development_signal_class|very_high_development_signal|high_development_signal\" src/components",
+      "result": "no matches"
+    },
+    "browser_check": {
+      "result": "No parcel-level prediction probabilities, ranking classes, or hidden model-score field names appeared in the tested Overview, Planning Snapshot, Executive Summary, or Methodology screens."
+    },
+    "model_status": {
+      "production_ready": false,
+      "prediction_probability_available": false,
+      "public_exposure_allowed": false
+    }
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "backend_health": "passed via npm run dev:cfs",
+    "frontend_health": "passed via npm run dev:cfs"
+  },
+  "browser_smoke_results": {
+    "localhost_3000_loaded": true,
+    "layer_rail_starts_collapsed": true,
+    "expanded_layer_drawer_compact": true,
+    "base_parcel_group_readable": true,
+    "development_activity_group_compact": true,
+    "long_explanations_only_more_info": true,
+    "legends_collapsed_until_clicked": true,
+    "filters_collapsed_until_configure_clicked": true,
+    "snapshot_saved": true,
+    "snapshot_library_multiple_snapshots_visible": true,
+    "snapshot_delete_confirmation_present": true,
+    "executive_summary_has_map_or_placeholder": true,
+    "executive_summary_has_intelligence_brief": true,
+    "methodology_loads": true,
+    "sceneview_not_rendered_in_methodology": true,
+    "browser_console_errors": 0
+  },
+  "remaining_known_issues": [
+    "Map screenshot capture still depends on the ArcGIS SceneView screenshot helper being available; when it is unavailable, CFS saves the snapshot and shows a clean map-unavailable placeholder.",
+    "Snapshot persistence remains frontend/localStorage only by design for this phase."
+  ]
+}

@@ -39,14 +39,19 @@ keep FEMA NFHL as the authoritative regulatory flood source.
 
 Current product modes:
 
-- `Overview`: default map exploration workspace for parcel search, 3D SceneView,
-  active map layers, selected parcel status, and concise headline metrics.
-- `Due Diligence`: selected parcel deep-dive with parcel summary, development
-  activity, permit timeline, FEMA flood constraints, school attendance-zone
-  assignment, and map context.
-- `Executive Print`: report-style selected parcel summary with a print button,
-  selected parcel summary, development summary, constraint summary, latest
-  permits, map snapshot placeholder, and executive notes.
+- `Overview`: CFS Command Center for parcel search, 3D SceneView exploration,
+  countywide headline intelligence, secondary/advanced map layers, selected
+  parcel status, and compact `Search Parcel`, `Countywide Intelligence`,
+  `Save Snapshot`, and `Open Snapshots` actions. The `Layers` rail starts
+  collapsed so advanced map controls stay secondary until opened.
+- `Planning Snapshot`: local saved-snapshot library and report builder captured from Overview, with
+  Snapshot Overview, Explain the Numbers, Executive Summary, and Review Actions
+  views for the saved command context, map screenshot when available, parcel facts,
+  active layers, development activity, FEMA flood constraints, school
+  attendance-zone assignment, transportation, utility proxy, recommended
+  actions, and model governance caveats.
+- `Methodology`: source, capability, assumption, limitation, and model
+  governance transparency.
 
 Developer-only surfaces:
 
@@ -57,8 +62,9 @@ Developer-only surfaces:
 These remain collapsed or hidden unless `NEXT_PUBLIC_CFS_DEVELOPER_MODE=true`
 is configured.
 
-The left rail is now an `Explore / Layers` panel. Map layer controls are
-collapsed by default under `Map Layers`, preserving:
+The left rail is now a compact `Layers` rail by default. The `Countywide
+Intelligence` action opens it for broader indicators and advanced map controls
+while preserving:
 
 - Development Hotspots
 - Flood Constraints
@@ -81,9 +87,13 @@ parcel cage highlight, Development Hotspots, Flood Constraints, FEMA Flood
 Zones, selected parcel flood panel, selected parcel school assignment panel,
 and permit events remain preserved.
 
-Executive Print uses `window.print()` and print CSS that hides app chrome and
-formats the report on a light/white print surface for readability while keeping
-the on-screen CFS interface dark.
+Planning Snapshot's Executive Summary uses the active saved snapshot from the
+local Planning Snapshot Library, including the captured map image when ArcGIS
+SceneView provides one. Users can save multiple snapshots, open a snapshot for
+review, delete snapshots that are no longer needed, and print the active
+summary. Printing uses `window.print()` and print CSS that hides app chrome and
+formats the snapshot summary on a light/white print surface for readability
+while keeping the on-screen CFS interface dark.
 
 ## Permit Intelligence Segmentation
 
@@ -539,6 +549,17 @@ API endpoints before reporting the app ready:
 npm run dev:cfs
 ```
 
+CFS reserves these local development endpoints:
+
+- Frontend: `http://localhost:3000`
+- Backend: `http://127.0.0.1:8000`
+- PostGIS: `localhost:5433`
+- Database: `cfs_dev`
+
+Do not move the CFS frontend to another local port to avoid a conflict. If
+another local project such as AutoMap is using port `3000`, stop that project
+or let `npm run dev:cfs` report and reclaim the reserved CFS port.
+
 Then open:
 
 ```text
@@ -547,6 +568,10 @@ http://localhost:3000
 
 This keeps the frontend from appearing healthy while the FastAPI process is
 stale or unavailable.
+
+Use `http://localhost:3000` for UI testing. Do not use
+`http://127.0.0.1:3000`; local Next dev HMR origin behavior can make the page
+appear loaded while leaving it less interactive.
 
 Frontend-only static mode is still available:
 
@@ -1452,7 +1477,7 @@ Generated Phase 8B outputs:
 ## Phase 8C Read-Only School Frontend Integration
 
 Phase 8C adds frontend school assignment visibility without activating capacity
-or enrollment scoring. The selected parcel Due Diligence workflow now calls
+or enrollment scoring. The selected parcel Planning Snapshot workflow now calls
 `GET /constraints/schools/{official_parcel_id}` and displays elementary,
 middle, and high attendance-zone assignment from polygon overlap.
 
@@ -1635,9 +1660,9 @@ flood, or development requests.
 Navigation now separates:
 
 - `Overview` for map exploration and concise selected-parcel context;
-- `Due Diligence` for parcel details, FEMA flood status, school assignment,
-  development activity, and permit events;
-- `Executive Print` for report-oriented output;
+- `Planning Snapshot` for saved parcel facts, review flags, FEMA flood status,
+  school assignment, development activity, permit events, recommended actions,
+  and Executive Summary generation;
 - `Methodology` for data sources, assumptions, limitations, and model
   foundation.
 
@@ -1680,12 +1705,12 @@ School visibility changes:
 
 - Overview selected-parcel summary now includes a compact School Assignment
   snapshot.
-- The snapshot calls the same selected-parcel school hooks as Due Diligence,
+- The snapshot calls the same selected-parcel school hooks as Planning Snapshot,
   so selecting a parcel triggers:
   - `GET /constraints/schools/{official_parcel_id}`
   - `GET /constraints/schools/utilization-seed/{official_parcel_id}`
-- Due Diligence keeps the full School Assignment card with elementary, middle,
-  and high attendance-zone assignments.
+- Planning Snapshot keeps the full School Assignment card with elementary,
+  middle, and high attendance-zone assignments.
 - Missing assignments are shown as CCS-only V1 scope or QA review caveats.
 - Capacity remains labeled `Capacity Data Needed`.
 - `NULL` school scores remain labeled `Not scored`.
@@ -2568,6 +2593,78 @@ Safety flags remain:
 - `production_ready=false`;
 - no parcel-level prediction endpoint;
 - no frontend parcel-level prediction or ranking display.
+
+## Demo / Release Candidate Package
+
+CFS is ready for local demo and portfolio review as an internal planning
+intelligence prototype. Start the full local stack with:
+
+```powershell
+npm run dev:cfs
+```
+
+Demo URLs:
+
+- Frontend: `http://localhost:3000`
+- Backend root: `http://127.0.0.1:8000`
+- FastAPI docs: `http://127.0.0.1:8000/docs`
+
+Use `http://localhost:3000` for UI testing. Do not use
+`http://127.0.0.1:3000` for the frontend because local Next dev HMR origin
+protection can make the page appear loaded while leaving it less interactive.
+
+Recommended demo parcel:
+
+- `CFS-PARCEL-0149726579`
+
+Demo package:
+
+- `docs/demo/cfs_final_demo_checklist.md`
+- `docs/demo/cfs_2_minute_demo_script.md`
+- `docs/demo/cfs_7_minute_technical_demo_script.md`
+- `docs/demo/cfs_final_screenshot_plan.md`
+- `docs/demo/cfs_demo_walkthrough.md`
+- `docs/demo/cfs_leadership_brief.md`
+- `docs/demo/cfs_capability_matrix.md`
+- `docs/demo/cfs_model_explanation_for_nontechnical_audience.md`
+- `docs/demo/cfs_what_not_to_claim.md`
+- `docs/demo/cfs_screenshot_checklist.md`
+
+Handoff and next-phase package:
+
+- `docs/demo/cfs_higher_up_presentation_outline.md`
+- `docs/demo/cfs_supervisor_handoff_memo.md`
+- `docs/data_requests/cfs_next_data_request_packet.md`
+- `docs/roadmap/cfs_next_phase_roadmap.md`
+- `docs/engineering/cfs_technical_architecture_summary.md`
+- `docs/demo/cfs_project_accomplishment_summary.md`
+
+Final demo / portfolio package:
+
+- `docs/demo/cfs_final_package_index.md`
+- `docs/demo/cfs_final_release_notes.md`
+- `docs/demo/cfs_executive_one_pager.md`
+- `docs/demo/cfs_higher_up_speaking_notes.md`
+- `docs/demo/cfs_expected_questions_and_answers.md`
+- `docs/portfolio/cfs_portfolio_case_study.md`
+- `docs/portfolio/cfs_resume_bullets.md`
+- `docs/portfolio/cfs_public_project_summary.md`
+
+Current model safety status:
+
+- current best internal model research: Zoning + Transportation + Tax/Value;
+- `model_active=false`;
+- `prediction_probability_available=false`;
+- `production_ready=false`;
+- `public_exposure_allowed=false`;
+- no parcel-level prediction probabilities are shown;
+- no parcel-level ranking classes are shown;
+- no public parcel-level prediction endpoint exists.
+
+The model work should be described as internal research and governance only.
+CFS is suitable for demonstrating parcel due diligence, constraint review,
+methodology transparency, and report-preview workflow, not automated parcel
+development prediction.
 
 ## Dashboard State Architecture
 

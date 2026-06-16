@@ -1,0 +1,148 @@
+{
+  "phase": "18A_enterprise_due_diligence_and_executive_print_redesign",
+  "branch": "main",
+  "backend_changed": false,
+  "postgis_changed": false,
+  "model_training_changed": false,
+  "prediction_exposure_changed": false,
+  "files_changed": [
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/ExecutivePrintView.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/hooks/useSelectedParcelNewConstruction.ts",
+    "src/hooks/useTransportationContextSummary.ts",
+    "src/lib/api/development.ts",
+    "src/types/api/development.ts",
+    "src/styles/cfs-theme.css",
+    "outputs/phase18a_due_diligence_executive_print_redesign_summary.json"
+  ],
+  "due_diligence_layout_changes": {
+    "empty_state": "Search for a parcel to begin due diligence.",
+    "header_added": true,
+    "header_actions": [
+      "Back to Overview",
+      "Focus Map",
+      "Executive Print",
+      "Copy Parcel ID"
+    ],
+    "review_sequence": [
+      "Parcel Snapshot",
+      "Planning and Zoning Context",
+      "Development Activity",
+      "New Construction / Permit History",
+      "Flood and Environmental Constraints",
+      "School Assignment and Utilization Context",
+      "Transportation and Accessibility Context",
+      "Utility / Infrastructure Context",
+      "Model Research Status",
+      "Review Notes / Recommended Next Steps"
+    ],
+    "section_pattern": "Each section has a title, summary, key facts, status badge, and caveat where needed.",
+    "no_raw_null_or_zero_score_display": true
+  },
+  "executive_print_layout_changes": {
+    "empty_state": "No parcel selected. Select a parcel before generating a report.",
+    "report_title": "Parcel Due Diligence Report",
+    "memo_sections": [
+      "Parcel Snapshot",
+      "Key Findings",
+      "Planning Context",
+      "Development Activity",
+      "New Construction / Permit History",
+      "Flood and Environmental Constraints",
+      "School Assignment and Utilization",
+      "Transportation and Accessibility",
+      "Utility / Infrastructure Context",
+      "Model Transparency",
+      "Known Limitations",
+      "Recommended Review Actions"
+    ],
+    "print_button_preserved": true
+  },
+  "api_client_additions": {
+    "new_construction_parcel_summary": "GET /development/new-construction/parcel/{official_parcel_id}",
+    "new_construction_statistics": "GET /development/new-construction/statistics",
+    "transportation_accessibility_summary": "GET /development/prediction/transportation-accessibility/summary",
+    "transportation_plan_traffic_summary": "GET /development/prediction/transportation-plan-traffic/summary"
+  },
+  "required_caveats_added": [
+    "Historical zoning changes are map-change detections, not official rezoning approval records.",
+    "Permit activity is observed historical/operational signal, not prediction.",
+    "New construction permit history is used as historical outcome data for internal model research.",
+    "FEMA NFHL remains the authoritative regulatory flood source.",
+    "School assignment is based on attendance-zone polygon overlap.",
+    "Presentation-derived utilization values require verification.",
+    "Official school capacity/enrollment data has not been added yet.",
+    "School capacity score is not active.",
+    "Transportation accessibility features are current-context indicators unless dated historical transportation/project data is available.",
+    "Utility proxy layers indicate proximity/service context only. They do not confirm available capacity.",
+    "Model research is shown for transparency only. Parcel-level model outputs are not exposed."
+  ],
+  "print_css_changes": {
+    "light_print_theme": true,
+    "hide_interactive_controls": true,
+    "hide_map_and_layer_chrome": true,
+    "page_break_helpers": true,
+    "avoid_section_clipping": true
+  },
+  "model_safety_checks": {
+    "parcel_level_prediction_probabilities_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "production_ready_wording_added": false,
+    "blocked_strings_absent_from_due_diligence_and_executive_print": [
+      "experimental_probability",
+      "prediction_probability",
+      "development_signal_class",
+      "very_high_development_signal",
+      "high_development_signal"
+    ]
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "backend_validation": "not_run_backend_not_changed"
+  },
+  "dev_cfs_runtime_checks": {
+    "frontend_url": "http://localhost:3000",
+    "backend_url": "http://127.0.0.1:8000",
+    "launcher_api_checks": "all_passed",
+    "health": 200,
+    "database_health": 200,
+    "parcel_search": 200,
+    "parcel_detail_include_geometry": 200,
+    "development_hotspots": 200,
+    "flood_high_review": 200,
+    "flood_summary": 200,
+    "flood_zones": 200,
+    "school_statistics": 200,
+    "school_parcel_detail": 200,
+    "school_qa_summary": 200
+  },
+  "smoke_test_results": {
+    "overview_loaded": true,
+    "selected_parcel_search": "passed_using_http_localhost_3000",
+    "selected_parcel_id": "CFS-PARCEL-0149726579",
+    "due_diligence_selected_parcel_flow": "passed",
+    "due_diligence_required_sections_visible": true,
+    "due_diligence_school_caveats_visible": true,
+    "due_diligence_utility_caveat_visible": true,
+    "due_diligence_model_safety_caveat_visible": true,
+    "executive_print_report_structure_visible": true,
+    "executive_print_model_safety_caveat_visible": true,
+    "console_errors": "none_observed",
+    "console_warnings": [
+      "Existing ArcGIS draped graphics labelPlacement warnings.",
+      "Existing placeholder layer warnings for disabled/mock layer definitions."
+    ],
+    "origin_note": "Use http://localhost:3000 for dev smoke tests. http://127.0.0.1:3000 caused Next dev HMR origin blocking and a non-interactive page."
+  },
+  "remaining_limitations": [
+    "Transportation and utility sections use existing aggregate/readiness context only; no new parcel-level transportation or utility API was added.",
+    "Utility information remains proxy-only and does not confirm service capacity.",
+    "School utilization remains presentation-derived and needs official verification.",
+    "Model research remains internal-only with no parcel-level output exposed."
+  ]
+}

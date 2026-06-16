@@ -1,0 +1,186 @@
+{
+  "phase": "21C",
+  "title": "Fully Combined Parcel Review and Executive Summary Workflow",
+  "branch": "main",
+  "files_changed": [
+    "README.md",
+    "docs/demo/cfs_2_minute_demo_script.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/ExecutivePrintView.tsx",
+    "src/components/layout/TopNav.tsx"
+  ],
+  "top_nav_simplification": {
+    "visible_top_nav_items": [
+      "Overview",
+      "Parcel Review",
+      "Methodology"
+    ],
+    "removed_visible_top_nav_items": [
+      "Executive Report",
+      "Executive Print"
+    ],
+    "renamed": {
+      "old": "Due Diligence",
+      "new": "Parcel Review"
+    },
+    "backwards_compatibility": "The internal executive_print mode remains supported through AppShell compatibility redirect into Parcel Review > Executive Summary, but it is no longer shown as a separate top-level nav button."
+  },
+  "empty_state_redesign": {
+    "title": "Select a parcel to begin review",
+    "message": "Use the top search bar or click a live map marker. After selection, CFS will show parcel facts, zoning, development activity, flood context, school assignment, transportation context, utility proxy context, and executive summary options.",
+    "three_step_preview": [
+      "Select Parcel",
+      "Review Parcel Context",
+      "Generate Executive Summary"
+    ],
+    "demo_hint": "CFS-PARCEL-0149726579",
+    "removed_elements": [
+      "Report Preview disabled",
+      "Executive Summary disabled",
+      "Print Report disabled",
+      "separate report-specific empty page"
+    ]
+  },
+  "selected_parcel_workflow": {
+    "header": "Parcel Review Workspace",
+    "subtext": "Review selected parcel context, constraints, activity, and generate a printable executive summary.",
+    "selected_parcel_header_fields": [
+      "Parcel ID",
+      "Owner / Account",
+      "PIN",
+      "Address",
+      "Municipality / Jurisdiction",
+      "Zoning",
+      "Acreage / Size",
+      "Parcel Quality",
+      "Neighborhood"
+    ],
+    "primary_actions": [
+      "Review Parcel",
+      "Executive Summary",
+      "Print Report",
+      "Focus Map",
+      "Copy Parcel ID"
+    ],
+    "internal_tabs": [
+      "Review",
+      "Executive Summary",
+      "Review Actions"
+    ]
+  },
+  "review_tab": {
+    "purpose": "Working parcel review and due diligence evidence.",
+    "section_order": [
+      "Parcel Snapshot",
+      "Priority Review Flags",
+      "Planning & Zoning",
+      "Development & New Construction",
+      "Constraints & Services",
+      "Internal Model Research Status",
+      "Recommended Review Actions"
+    ],
+    "cleanup": [
+      "Development and new construction content stays combined in one section.",
+      "Flood, school, transportation, and utility proxy content stays grouped under Constraints & Services.",
+      "No disabled report controls are shown inside the Review content."
+    ]
+  },
+  "executive_summary_integration": {
+    "purpose": "Report preview generated from the selected parcel review context.",
+    "component_reuse": "ExecutivePrintView remains reused as the report body.",
+    "header": "Executive Summary Preview",
+    "subtext": "This summary is generated from the selected parcel review context and formatted for stakeholder discussion or printing.",
+    "visible_report_content": [
+      "report header",
+      "key findings",
+      "parcel snapshot",
+      "planning context",
+      "development activity",
+      "constraints",
+      "model transparency",
+      "limitations",
+      "recommended actions"
+    ]
+  },
+  "print_behavior": {
+    "print_button": "Print Report is an action in the Parcel Review command header and workflow action bar.",
+    "selected_parcel_behavior": "Switches to Executive Summary and calls window.print().",
+    "report_preview_button": "Print Executive Summary remains visible in the Executive Summary preview.",
+    "print_css": "Existing print CSS continues to hide app chrome, navigation, sidebars, and interactive controls."
+  },
+  "documentation_updates": [
+    {
+      "file": "README.md",
+      "summary": "Replaced the Due Diligence / Executive Report product-mode split with Overview, Parcel Review, and Methodology."
+    },
+    {
+      "file": "docs/demo/cfs_demo_walkthrough.md",
+      "summary": "Updated demo flow to open Parcel Review, then Executive Summary inside Parcel Review."
+    },
+    {
+      "file": "docs/demo/cfs_final_demo_checklist.md",
+      "summary": "Removed instructions to open a separate Executive Report top-nav mode."
+    },
+    {
+      "file": "docs/demo/cfs_2_minute_demo_script.md",
+      "summary": "Updated spoken demo language to describe Parcel Review and its internal Executive Summary."
+    }
+  ],
+  "safety_verification": {
+    "parcel_level_prediction_probabilities_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "model_caveats_removed": false,
+    "visible_ui_raw_term_check": {
+      "tested_terms": [
+        "experimental_probability",
+        "prediction_probability",
+        "development_signal_class",
+        "very_high_development_signal",
+        "high_development_signal"
+      ],
+      "visible_workflow_terms_found": []
+    },
+    "source_grep_note": "Prediction-related names remain only in internal research/diagnostic hooks; they are not exposed in the Parcel Review UI."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not_run_backend_not_changed",
+    "npm_run_dev_cfs": "passed"
+  },
+  "smoke_test_results": {
+    "frontend_url": "http://localhost:3000",
+    "backend_url": "http://127.0.0.1:8000",
+    "top_nav_items": [
+      "Overview",
+      "Parcel Review",
+      "Methodology"
+    ],
+    "separate_executive_report_top_nav_absent": true,
+    "empty_state": "passed",
+    "disabled_report_wording_absent": true,
+    "parcel_search": "passed using top search with keypress input",
+    "demo_parcel": "CFS-PARCEL-0149726579",
+    "active_selection_updated": true,
+    "review_tab": "passed",
+    "executive_summary_tab": "passed",
+    "print_executive_summary_visible": true,
+    "review_actions_tab": "passed",
+    "overview_still_loads": true,
+    "methodology_still_loads": true,
+    "console_errors": 0,
+    "known_warnings": [
+      "ArcGIS draped graphics label-placement warnings remain."
+    ],
+    "browser_note": "The Browser plugin virtual clipboard is unavailable, so top search was automated with keypress events. Case-insensitive checks were used for uppercase-rendered labels."
+  },
+  "remaining_known_issues": [
+    "Known ArcGIS label-placement warnings continue and are unrelated to Parcel Review consolidation.",
+    "The legacy ExecutivePrintView component name remains in code for compatibility, but the visible workflow is Parcel Review > Executive Summary."
+  ],
+  "ready_for_next_phase": true
+}

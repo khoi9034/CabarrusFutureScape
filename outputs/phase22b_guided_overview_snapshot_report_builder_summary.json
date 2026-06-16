@@ -1,0 +1,160 @@
+{
+  "phase": "22B",
+  "title": "Guided Overview Focus Modes, Map Snapshot Capture, and Cleaner Planning Snapshot Report Builder",
+  "generated_at": "2026-06-15T00:00:00-04:00",
+  "files_changed": [
+    "README.md",
+    "docs/demo/cfs_2_minute_demo_script.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "docs/demo/cfs_higher_up_speaking_notes.md",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "src/types/index.ts",
+    "outputs/phase22b_guided_overview_snapshot_report_builder_summary.json"
+  ],
+  "focus_mode_design": {
+    "overview_entry_point": "Added a Choose Review Focus workspace to Overview.",
+    "focus_modes": [
+      "Development Activity",
+      "Constraints & Risk",
+      "Infrastructure Readiness",
+      "School / Community",
+      "Parcel Lookup",
+      "Planning Snapshot / Report"
+    ],
+    "behavior": [
+      "Selected focus mode is highlighted visually.",
+      "Focus panel shows concise focus-specific stats and caveats.",
+      "Recommended layer IDs are enabled conservatively when a focus mode is selected.",
+      "More layers / advanced options keeps full layer access available without making every tool equal-weight."
+    ]
+  },
+  "overview_clutter_reduction": {
+    "summary": "Overview now starts with the review question and focused stats before selected-parcel detail.",
+    "development_activity_distinction": "Development Activity is described as observed permit/new-construction/hotspot context, not prediction.",
+    "model_research_distinction": "Internal model research remains aggregate-only and is framed as governance/readiness context, not a live prediction map."
+  },
+  "snapshot_object_design": {
+    "snapshot_version": "phase22b_v1",
+    "storage": "Frontend dashboard state and localStorage using the existing planning snapshot key.",
+    "new_fields": [
+      "focusMode",
+      "focusModeLabel",
+      "activeLayerIds",
+      "mapScreenshotDataUrl",
+      "mapScreenshotCapturedAt",
+      "mapScreenshotStatus",
+      "mapScreenshotFailureReason",
+      "mapContext.cameraSummary",
+      "mapContext.extentSummary"
+    ],
+    "context_only_snapshots": "Snapshot creation now works with no selected parcel; those snapshots are explicitly labeled as map/layer context only.",
+    "excluded_sensitive_model_outputs": [
+      "parcel-level prediction probability",
+      "parcel-level ranking class",
+      "hidden model score",
+      "development_signal_class",
+      "experimental_probability",
+      "prediction_probability"
+    ]
+  },
+  "map_screenshot_capture_behavior": {
+    "implementation": "SceneView registers window.__cfsCaptureMapSnapshot while mounted and removes it on cleanup.",
+    "capture_api": "Uses ArcGIS SceneView takeScreenshot when available.",
+    "timeout_guard": "Overview snapshot save wraps screenshot capture with a 4500 ms timeout.",
+    "failure_behavior": "If capture is unavailable, fails, or times out, the snapshot is still saved with mapScreenshotStatus and failure reason; no fake screenshot is generated."
+  },
+  "planning_snapshot_changes": {
+    "empty_state": "Updated to direct users to choose a review focus in Overview, select parcel/layers, save snapshot, explain numbers, and print summary.",
+    "snapshot_overview": "Shows focus mode, active layers, map screenshot preview or unavailable placeholder, camera summary, and extent summary.",
+    "report_sections": [
+      "Map View",
+      "Parcel Facts",
+      "Zoning / Planning",
+      "Development / Permits",
+      "New Construction",
+      "FEMA Flood",
+      "Schools",
+      "Transportation",
+      "Utility Proxy",
+      "Model Governance",
+      "Data Needed / Caveats",
+      "Recommended Actions"
+    ]
+  },
+  "explainable_metric_cards": {
+    "added_or_extended_metrics": [
+      "Review Focus",
+      "Map Snapshot",
+      "Flood Review Status",
+      "School Assignment",
+      "Development Activity",
+      "Utility Proxy",
+      "Transportation Context",
+      "Internal Model Research Status"
+    ],
+    "fields": [
+      "metric label",
+      "value",
+      "plain-English meaning",
+      "data source",
+      "method/rationale",
+      "caveat",
+      "recommended action"
+    ]
+  },
+  "report_map_section": {
+    "captured_state": "Executive Summary includes the captured map image with a timestamp caption when available.",
+    "unavailable_state": "Executive Summary shows a clean Map snapshot unavailable placeholder and failure reason when capture does not complete."
+  },
+  "documentation_updates": [
+    "README demo/product-mode description updated for guided focus modes and map snapshots.",
+    "Demo walkthrough updated for Choose Review Focus and map snapshot status.",
+    "Final demo checklist updated for focus-mode and map snapshot checks.",
+    "Two-minute script updated to describe focus modes and map image capture.",
+    "Higher-up speaking notes updated for guided focus and Planning Snapshot map context."
+  ],
+  "safety_verification": {
+    "frontend_prediction_probability_exposed": false,
+    "frontend_parcel_ranking_class_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "model_training_performed": false,
+    "postgis_schema_modified": false,
+    "notes": "Search found prediction terms only in aggregate model status/diagnostic hooks, not as parcel-level UI outputs."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "npm_run_dev_cfs": "passed",
+    "dev_cfs_checks": [
+      "frontend http://localhost:3000 returned 200",
+      "backend /health returned 200",
+      "backend /health/database returned 200",
+      "parcel search returned 200",
+      "parcel detail returned 200",
+      "development hotspots returned 200",
+      "flood endpoints returned 200",
+      "school statistics/detail/qa endpoints returned 200"
+    ]
+  },
+  "smoke_test_results": {
+    "frontend_http": "passed",
+    "backend_health": "passed",
+    "browser_overview_presence": "passed",
+    "browser_focus_ui_presence": "passed",
+    "browser_focus_interaction": "partially_verified",
+    "browser_snapshot_save": "partially_verified",
+    "browser_limitation": "The in-app browser runtime intermittently timed out on right-panel clicks and screenshots. It verified the focus UI was present; the dev launcher and HTTP/API checks verified the app was serving correctly. A screenshot timeout guard was added after smoke testing showed ArcGIS screenshot capture could hang.",
+    "map_screenshot_capture": "implemented_with_timeout_and_unavailable_fallback"
+  },
+  "remaining_known_limitations": [
+    "ArcGIS SceneView screenshot capture may fail or time out depending on browser/GPU/runtime state; the report now handles this safely with a placeholder and caveat.",
+    "Focus modes enable recommended layers but do not yet hide every unrelated advanced tool outside the right-panel guidance.",
+    "Planning Snapshot remains frontend/localStorage persistence only.",
+    "No automated screenshot capture dependency was added."
+  ]
+}

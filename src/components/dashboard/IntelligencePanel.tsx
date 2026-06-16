@@ -5,55 +5,62 @@ import {
   BookOpen,
   BrainCircuit,
   ChevronDown,
+  Copy,
+  Crosshair,
   Database,
   FileSearch,
   MapPin,
   Monitor,
-  ShieldCheck,
+  Save,
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { DataRegistryPanel } from "@/components/dashboard/DataRegistryPanel";
-import { DevelopmentActivityPanel } from "@/components/dashboard/DevelopmentActivityPanel";
-import { DevelopmentHotspotsPanel } from "@/components/dashboard/DevelopmentHotspotsPanel";
-import { DevelopmentTrendPanel } from "@/components/dashboard/DevelopmentTrendPanel";
-import { DevelopmentZoningPanel } from "@/components/dashboard/DevelopmentZoningPanel";
+import { DueDiligenceReview } from "@/components/dashboard/DueDiligenceReview";
 import { EventStreamPanel } from "@/components/dashboard/EventStreamPanel";
 import { ExecutiveBriefingPanel } from "@/components/dashboard/ExecutiveBriefingPanel";
 import { ExecutiveReportPanel } from "@/components/dashboard/ExecutiveReportPanel";
-import { FloodConstraintSummaryPanel } from "@/components/dashboard/FloodConstraintSummaryPanel";
 import { GISIntegrationReadinessPanel } from "@/components/dashboard/GISIntegrationReadinessPanel";
-import { GovernanceWarningsPanel } from "@/components/dashboard/GovernanceWarningsPanel";
-import { ParcelIntelligencePanel } from "@/components/dashboard/ParcelIntelligencePanel";
-import { ParcelQualityPanel } from "@/components/dashboard/ParcelQualityPanel";
-import { ParcelSearchPanel } from "@/components/dashboard/ParcelSearchPanel";
 import { ParcelSummaryPanel } from "@/components/dashboard/ParcelSummaryPanel";
-import { PermitIntelligenceSegmentsPanel } from "@/components/dashboard/PermitIntelligenceSegmentsPanel";
 import { PrintLayoutPreview } from "@/components/dashboard/PrintLayoutPreview";
 import { RoleIntelligencePanel } from "@/components/dashboard/RoleIntelligencePanel";
 import { ScenarioControls } from "@/components/dashboard/ScenarioControls";
 import { ScenarioComparisonPanel } from "@/components/dashboard/ScenarioComparisonPanel";
-import { SelectedParcelDevelopmentActivityPanel } from "@/components/dashboard/SelectedParcelDevelopmentActivityPanel";
-import { SelectedParcelFloodConstraintPanel } from "@/components/dashboard/SelectedParcelFloodConstraintPanel";
-import { SelectedParcelPermitEventsPanel } from "@/components/dashboard/SelectedParcelPermitEventsPanel";
-import { SelectedParcelSchoolAssignmentPanel } from "@/components/dashboard/SelectedParcelSchoolAssignmentPanel";
 import { SchoolConstraintSummaryPanel } from "@/components/dashboard/SchoolConstraintSummaryPanel";
 import { TemporalAnalysisPanel } from "@/components/dashboard/TemporalAnalysisPanel";
-import { ZoningDistributionPanel } from "@/components/dashboard/ZoningDistributionPanel";
 import {
+  CFS_OPEN_LAYER_RAIL_EVENT,
+  CFS_PLANNING_SNAPSHOT_SAVED_EVENT,
+  CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
+} from "@/components/dashboard/OverviewCommandCenter";
+import {
+  formatDevelopmentCount,
   formatDevelopmentDate,
   formatDevelopmentLabel,
 } from "@/data/intelligence/developmentActivityMetrics";
+import {
+  formatIntelligenceCount,
+  formatIntelligencePercentage,
+} from "@/data/intelligence/parcelDashboardMetrics";
 import { scoreSignals } from "@/data/mock/dashboardMockData";
 import { useDashboardState } from "@/hooks/useDashboardState";
+import { useDevelopmentStatistics } from "@/hooks/useDevelopmentStatistics";
+import { useFloodConstraintSummary } from "@/hooks/useFloodConstraintSummary";
+import { useParcelDashboardMetrics } from "@/hooks/useParcelDashboardMetrics";
 import { useSelectedParcelDevelopmentActivity } from "@/hooks/useSelectedParcelDevelopmentActivity";
 import { useSelectedParcelFloodConstraint } from "@/hooks/useSelectedParcelFloodConstraint";
 import { useSelectedParcelSchoolConstraint } from "@/hooks/useSelectedParcelSchoolConstraint";
+import { useTransportationContextSummary } from "@/hooks/useTransportationContextSummary";
 import { CFS_API_BASE_URL, USE_BACKEND_API } from "@/lib/api/client";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { ScoreCard } from "@/components/ui/ScoreCard";
-import type { ProductMode } from "@/types";
+import type {
+  PlanningSnapshot,
+  PlanningReviewFocusMode,
+  PlanningSnapshotSectionKey,
+  ProductMode,
+} from "@/types";
 import type { SelectedSchoolUtilizationZone } from "@/types/map/schoolUtilizationZones";
 
 const showDeveloperSections =
@@ -68,14 +75,14 @@ const modeMetadata: Record<
   }
 > = {
   due_diligence: {
-    description: "Selected parcel assessment, constraints, permits, and map context.",
+    description: "Saved planning context, explanations, and executive summary.",
     icon: FileSearch,
-    label: "Due Diligence",
+    label: "Planning Snapshot",
   },
   executive_print: {
-    description: "Report mode is displayed in the main workspace.",
+    description: "Report preview is generated from the selected parcel review.",
     icon: Monitor,
-    label: "Executive Print",
+    label: "Planning Snapshot",
   },
   methodology: {
     description: "Data sources, assumptions, limitations, and model foundation.",
@@ -91,16 +98,25 @@ const modeMetadata: Record<
 
 export function IntelligencePanel() {
   const {
+    activeLayerIds,
+    activeLayers,
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
     floodZonesEnabled,
     productMode,
+    parcelReviewView,
     selectedParcelId,
     selectedParcelIntelligence,
     selectedParcelIntelligenceSource,
     selectedSchoolUtilizationZone,
+    planningSnapshot,
+    savedPlanningSnapshots,
     clearSelectedSchoolUtilizationZone,
+    savePlanningSnapshot,
     schoolUtilizationZonesEnabled,
+    setMapFocusMode,
+    setParcelReviewView,
+    setPlanningSnapshotView,
     setProductMode,
     temporalAnalysisState,
   } = useDashboardState();
@@ -147,22 +163,33 @@ export function IntelligencePanel() {
           selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
           selectedSchoolUtilizationZone={selectedSchoolUtilizationZone}
           clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
+          activeLayerIds={activeLayerIds}
+          activeLayers={activeLayers}
+          developmentHotspotsEnabled={developmentHotspotsEnabled}
+          floodConstraintsEnabled={floodConstraintsEnabled}
+          floodZonesEnabled={floodZonesEnabled}
           schoolUtilizationZonesEnabled={schoolUtilizationZonesEnabled}
+          planningSnapshot={planningSnapshot}
+          savedPlanningSnapshots={savedPlanningSnapshots}
+          savePlanningSnapshot={savePlanningSnapshot}
+          setMapFocusMode={setMapFocusMode}
           setProductMode={setProductMode}
+          setPlanningSnapshotView={setPlanningSnapshotView}
         />
       ) : productMode === "methodology" ? (
         <MethodologyModeContent />
       ) : (
-        <DueDiligenceModeContent
+        <DueDiligenceReview
           developmentHotspotsEnabled={developmentHotspotsEnabled}
           floodConstraintsEnabled={floodConstraintsEnabled}
           floodZonesEnabled={floodZonesEnabled}
-          selectedSchoolUtilizationZone={selectedSchoolUtilizationZone}
-          clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
-          schoolUtilizationZonesEnabled={schoolUtilizationZonesEnabled}
           selectedParcelId={selectedParcelId}
           selectedParcelIntelligence={selectedParcelIntelligence}
           selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
+          setMapFocusMode={setMapFocusMode}
+          parcelReviewView={parcelReviewView}
+          setParcelReviewView={setParcelReviewView}
+          setProductMode={setProductMode}
         />
       )}
 
@@ -174,29 +201,199 @@ export function IntelligencePanel() {
 }
 
 function OverviewModeContent({
+  activeLayerIds,
+  activeLayers,
   clearSelectedSchoolUtilizationZone,
+  developmentHotspotsEnabled,
+  floodConstraintsEnabled,
+  floodZonesEnabled,
+  planningSnapshot,
+  savedPlanningSnapshots,
+  savePlanningSnapshot,
   schoolUtilizationZonesEnabled,
   selectedParcelId,
   selectedParcelIntelligence,
   selectedParcelIntelligenceSource,
   selectedSchoolUtilizationZone,
+  setMapFocusMode,
   setProductMode,
+  setPlanningSnapshotView,
 }: {
+  activeLayerIds: string[];
+  activeLayers: ReturnType<typeof useDashboardState>["activeLayers"];
   clearSelectedSchoolUtilizationZone: () => void;
+  developmentHotspotsEnabled: boolean;
+  floodConstraintsEnabled: boolean;
+  floodZonesEnabled: boolean;
+  planningSnapshot: PlanningSnapshot | null;
+  savedPlanningSnapshots: PlanningSnapshot[];
+  savePlanningSnapshot: (snapshot: PlanningSnapshot) => void;
   schoolUtilizationZonesEnabled: boolean;
   selectedParcelId: string | null;
   selectedParcelIntelligence: Parameters<typeof ParcelSummaryPanel>[0]["parcel"];
   selectedParcelIntelligenceSource: Parameters<typeof ParcelSummaryPanel>[0]["source"];
   selectedSchoolUtilizationZone: SelectedSchoolUtilizationZone | null;
+  setMapFocusMode: ReturnType<typeof useDashboardState>["setMapFocusMode"];
   setProductMode: (mode: ProductMode) => void;
+  setPlanningSnapshotView: ReturnType<typeof useDashboardState>["setPlanningSnapshotView"];
 }) {
+  const [snapshotSaved, setSnapshotSaved] = useState(false);
+  const [snapshotSaving, setSnapshotSaving] = useState(false);
+  const [parcelIdCopied, setParcelIdCopied] = useState(false);
+  const [countywideBriefOverride, setCountywideBriefOverride] = useState<{
+    parcelId: string | null;
+  } | null>(null);
+  const parcelDashboardMetrics = useParcelDashboardMetrics();
+  const developmentStatistics = useDevelopmentStatistics();
+  const floodSummary = useFloodConstraintSummary();
+  const selectedParcelForSnapshot = selectedParcelIntelligence ?? null;
+  const selectedParcelOfficialId =
+    selectedParcelForSnapshot?.officialParcelId ?? selectedParcelId;
+  const developmentActivity = useSelectedParcelDevelopmentActivity(
+    selectedParcelOfficialId,
+  );
+  const floodConstraint = useSelectedParcelFloodConstraint(
+    selectedParcelOfficialId,
+  );
+  const schoolConstraint = useSelectedParcelSchoolConstraint(
+    selectedParcelOfficialId,
+  );
+  const transportationContext = useTransportationContextSummary();
+  const activeLayerLabels = Array.from(
+    new Set(
+      [
+        ...activeLayers.map((layer) => layer.title),
+        developmentHotspotsEnabled ? "Development Hotspots" : null,
+        floodConstraintsEnabled ? "Flood Constraints" : null,
+        floodZonesEnabled ? "FEMA Flood Zones" : null,
+        schoolUtilizationZonesEnabled ? "School Utilization Seed" : null,
+      ].filter((label): label is string => Boolean(label)),
+    ),
+  );
+
+  const handleSaveOverviewSnapshot = useCallback(async () => {
+    if (snapshotSaving) {
+      return;
+    }
+
+    setSnapshotSaving(true);
+
+    try {
+      const mapSnapshot = await captureMapSnapshotForPlanning();
+      const snapshotFocusMode: PlanningReviewFocusMode =
+        selectedParcelForSnapshot ? "parcel_lookup" : "planning_snapshot_report";
+      const snapshotFocusLabel = selectedParcelForSnapshot
+        ? "Selected Parcel Snapshot"
+        : "Overview Command Center";
+      const nextSnapshot = buildPlanningSnapshot({
+        activeLayerIds,
+        activeLayerLabels,
+        developmentActivity,
+        floodConstraint,
+        focusMode: snapshotFocusMode,
+        focusModeLabel: snapshotFocusLabel,
+        mapSnapshot,
+        parcel: selectedParcelForSnapshot,
+        schoolConstraint,
+      });
+      savePlanningSnapshot(nextSnapshot);
+      setPlanningSnapshotView("overview");
+      setSnapshotSaved(true);
+      window.dispatchEvent(
+        new CustomEvent(CFS_PLANNING_SNAPSHOT_SAVED_EVENT),
+      );
+      window.setTimeout(() => setSnapshotSaved(false), 3000);
+    } finally {
+      setSnapshotSaving(false);
+    }
+  }, [
+    activeLayerIds,
+    activeLayerLabels,
+    developmentActivity,
+    floodConstraint,
+    savePlanningSnapshot,
+    schoolConstraint,
+    selectedParcelForSnapshot,
+    setPlanningSnapshotView,
+    snapshotSaving,
+  ]);
+
+  useEffect(() => {
+    function handleCommandCenterSave() {
+      void handleSaveOverviewSnapshot();
+    }
+    function handleCountywideIntelligence() {
+      setCountywideBriefOverride({
+        parcelId: selectedParcelOfficialId ?? null,
+      });
+    }
+
+    window.addEventListener(
+      CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
+      handleCommandCenterSave,
+    );
+    window.addEventListener(
+      CFS_OPEN_LAYER_RAIL_EVENT,
+      handleCountywideIntelligence,
+    );
+
+    return () => {
+      window.removeEventListener(
+        CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
+        handleCommandCenterSave,
+      );
+      window.removeEventListener(
+        CFS_OPEN_LAYER_RAIL_EVENT,
+        handleCountywideIntelligence,
+      );
+    };
+  }, [handleSaveOverviewSnapshot, selectedParcelOfficialId]);
+
+  const countywideBriefVisible =
+    countywideBriefOverride?.parcelId === (selectedParcelOfficialId ?? null);
+
+  async function handleCopyParcelId() {
+    if (!selectedParcelOfficialId) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(selectedParcelOfficialId);
+      setParcelIdCopied(true);
+      window.setTimeout(() => setParcelIdCopied(false), 1800);
+    } catch {
+      setParcelIdCopied(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
-      <OverviewSelectedParcelCard
-        onOpenDueDiligence={() => setProductMode("due_diligence")}
-        onOpenExecutivePrint={() => setProductMode("executive_print")}
+      <IntelligenceBriefPanel
+        activeLayerLabels={activeLayerLabels}
+        developmentActivity={developmentActivity}
+        developmentStatistics={developmentStatistics}
+        floodConstraint={floodConstraint}
+        floodSummary={floodSummary}
+        onOpenPlanningSnapshot={() => {
+          setPlanningSnapshotView("overview");
+          setProductMode("due_diligence");
+        }}
+        onCopyParcelId={handleCopyParcelId}
+        onFocusMap={() => setMapFocusMode(true)}
+        onSaveSnapshot={handleSaveOverviewSnapshot}
+        onShowSelectedParcel={() => setCountywideBriefOverride(null)}
         parcel={selectedParcelIntelligence}
+        parcelDashboardMetrics={parcelDashboardMetrics}
+        parcelIdCopied={parcelIdCopied}
+        planningSnapshot={planningSnapshot}
+        savedPlanningSnapshots={savedPlanningSnapshots}
+        schoolConstraint={schoolConstraint}
+        selectedParcelId={selectedParcelOfficialId}
         source={selectedParcelIntelligenceSource}
+        snapshotSaved={snapshotSaved}
+        snapshotSaving={snapshotSaving}
+        showCountywideBrief={countywideBriefVisible}
+        transportationContext={transportationContext}
       />
 
       <SelectedSchoolUtilizationZoneCard
@@ -204,22 +401,443 @@ function OverviewModeContent({
         onClear={clearSelectedSchoolUtilizationZone}
         zone={selectedSchoolUtilizationZone}
       />
+    </div>
+  );
+}
 
-      <section className="rounded-lg border border-white/10 bg-black/20 p-4">
-        <div className="flex items-start gap-3">
-          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#55d38f]" />
-          <div>
-            <p className="text-xs font-medium uppercase text-slate-500">
-              Next Action
+function IntelligenceBriefPanel({
+  activeLayerLabels,
+  developmentActivity,
+  developmentStatistics,
+  floodConstraint,
+  floodSummary,
+  onCopyParcelId,
+  onFocusMap,
+  onOpenPlanningSnapshot,
+  onSaveSnapshot,
+  onShowSelectedParcel,
+  parcel,
+  parcelDashboardMetrics,
+  parcelIdCopied,
+  planningSnapshot,
+  savedPlanningSnapshots,
+  schoolConstraint,
+  selectedParcelId,
+  snapshotSaved,
+  snapshotSaving,
+  showCountywideBrief,
+  source,
+  transportationContext,
+}: {
+  activeLayerLabels: string[];
+  developmentActivity: SnapshotDevelopmentActivity;
+  developmentStatistics: ReturnType<typeof useDevelopmentStatistics>;
+  floodConstraint: SnapshotFloodConstraint;
+  floodSummary: ReturnType<typeof useFloodConstraintSummary>;
+  onCopyParcelId: () => void | Promise<void>;
+  onFocusMap: () => void;
+  onOpenPlanningSnapshot: () => void;
+  onSaveSnapshot: () => void | Promise<void>;
+  onShowSelectedParcel: () => void;
+  parcel: Parameters<typeof ParcelSummaryPanel>[0]["parcel"];
+  parcelDashboardMetrics: ReturnType<typeof useParcelDashboardMetrics>;
+  parcelIdCopied: boolean;
+  planningSnapshot: PlanningSnapshot | null;
+  savedPlanningSnapshots: PlanningSnapshot[];
+  schoolConstraint: SnapshotSchoolConstraint;
+  selectedParcelId: string | null;
+  snapshotSaved: boolean;
+  snapshotSaving: boolean;
+  showCountywideBrief: boolean;
+  source: Parameters<typeof ParcelSummaryPanel>[0]["source"];
+  transportationContext: ReturnType<typeof useTransportationContextSummary>;
+}) {
+  const hasParcel = Boolean(parcel) && !showCountywideBrief;
+
+  return (
+    <section
+      className="rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/78 p-3 shadow-[0_14px_38px_rgba(0,0,0,0.2)]"
+      id="cfs-intelligence-brief"
+    >
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#68d8ff]/24 bg-[#68d8ff]/10 text-[#8fe7ff]">
+          {hasParcel ? (
+            <MapPin className="h-4 w-4" />
+          ) : (
+            <BrainCircuit className="h-4 w-4" />
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
+            {hasParcel ? "Selected Parcel Intelligence" : "Intelligence Brief"}
+          </p>
+          <h3 className="mt-1 truncate text-base font-semibold text-white">
+            {hasParcel
+              ? parcel?.officialParcelId
+              : "Countywide planning context"}
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            {hasParcel
+              ? "Snapshot-ready parcel facts, constraints, and observed activity."
+              : "Headline indicators, active map context, and safe report actions."}
+          </p>
+        </div>
+      </div>
+
+      {hasParcel && parcel ? (
+        <SelectedParcelBrief
+          developmentActivity={developmentActivity}
+          floodConstraint={floodConstraint}
+          onCopyParcelId={onCopyParcelId}
+          onFocusMap={onFocusMap}
+          parcel={parcel}
+          parcelIdCopied={parcelIdCopied}
+          schoolConstraint={schoolConstraint}
+          source={source}
+          transportationContext={transportationContext}
+        />
+      ) : (
+        <CountywideBrief
+          activeLayerLabels={activeLayerLabels}
+          developmentStatistics={developmentStatistics}
+          floodSummary={floodSummary}
+          parcelDashboardMetrics={parcelDashboardMetrics}
+          planningSnapshot={planningSnapshot}
+          savedPlanningSnapshots={savedPlanningSnapshots}
+          selectedParcelId={selectedParcelId}
+          onShowSelectedParcel={parcel ? onShowSelectedParcel : undefined}
+        />
+      )}
+
+      <div className="mt-3 grid gap-2">
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
+          disabled={snapshotSaving}
+          onClick={() => {
+            void onSaveSnapshot();
+          }}
+          type="button"
+        >
+          <Save className="h-3.5 w-3.5" />
+          {snapshotSaving ? "Capturing Map..." : "Save Snapshot"}
+        </button>
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+          onClick={onOpenPlanningSnapshot}
+          type="button"
+        >
+          <FileSearch className="h-3.5 w-3.5" />
+          Open Snapshots
+        </button>
+      </div>
+
+      {snapshotSaved ? (
+        <div className="mt-3 rounded-md border border-[#55d38f]/22 bg-[#55d38f]/[0.07] px-3 py-2 text-xs leading-5 text-[#9ff0bd]">
+          <p className="font-semibold text-[#d7ffe4]">
+            {planningSnapshot?.mapScreenshotStatus === "failed" ||
+            planningSnapshot?.mapScreenshotStatus === "unavailable"
+              ? "Planning snapshot saved, but map image was unavailable."
+              : "Planning snapshot saved."}
+          </p>
+          <p className="mt-1 text-[#9ff0bd]/80">
+            Captured map view, selected parcel if available, active layers,
+            Intelligence Brief, key stats, caveats, and explanations.
+          </p>
+          {planningSnapshot?.mapScreenshotStatus === "failed" ||
+          planningSnapshot?.mapScreenshotStatus === "unavailable" ? (
+            <p className="mt-2 rounded border border-amber-300/20 bg-amber-300/[0.07] px-2 py-1.5 text-amber-100/85">
+              Report will show a map-unavailable placeholder.
             </p>
-            <p className="mt-1 text-sm leading-6 text-slate-300">
-              {selectedParcelId
-                ? "Switch to Due Diligence for flood constraints, development activity, permit timeline, and map context."
-                : "Use the top parcel search or turn on a live map layer to begin."}
+          ) : null}
+        </div>
+      ) : null}
+
+      <details className="mt-3 rounded-md border border-white/10 bg-white/[0.025] px-3 py-2 text-xs text-slate-400">
+        <summary className="cursor-pointer font-semibold text-slate-200">
+          More Details
+        </summary>
+        <div className="mt-2 space-y-2 leading-5">
+          <p>
+            Active map context:{" "}
+            {activeLayerLabels.length ? activeLayerLabels.join(", ") : "none"}.
+          </p>
+          <p>
+            Internal model research is aggregate governance only. CFS does not
+            show parcel probabilities, ranking classes, or public prediction
+            scores.
+          </p>
+        </div>
+      </details>
+    </section>
+  );
+}
+
+function CountywideBrief({
+  activeLayerLabels,
+  developmentStatistics,
+  floodSummary,
+  onShowSelectedParcel,
+  parcelDashboardMetrics,
+  planningSnapshot,
+  savedPlanningSnapshots,
+  selectedParcelId,
+}: {
+  activeLayerLabels: string[];
+  developmentStatistics: ReturnType<typeof useDevelopmentStatistics>;
+  floodSummary: ReturnType<typeof useFloodConstraintSummary>;
+  onShowSelectedParcel?: () => void;
+  parcelDashboardMetrics: ReturnType<typeof useParcelDashboardMetrics>;
+  planningSnapshot: PlanningSnapshot | null;
+  savedPlanningSnapshots: PlanningSnapshot[];
+  selectedParcelId: string | null;
+}) {
+  const totalPermits =
+    developmentStatistics.coreMetrics.find(
+      (metric) => metric.id === "total-permits",
+    )?.value ?? formatDevelopmentCount(0);
+  const activeParcels =
+    developmentStatistics.coreMetrics.find(
+      (metric) => metric.id === "parcels-with-activity",
+    )?.value ?? formatDevelopmentCount(0);
+  const floodReviewParcels =
+    floodSummary.metrics.find(
+      (metric) => metric.id === "review-required-parcels",
+    )?.value ?? (floodSummary.isLoading ? "Loading" : "Pending");
+  const totalParcels = formatIntelligenceCount(
+    parcelDashboardMetrics.summary.totalParcels,
+  );
+
+  return (
+    <div className="mt-3 space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="Observed permit/development records, not prediction."
+          label="Permit Records"
+          value={totalPermits}
+        />
+        <BriefStat
+          caveat="Parcels with observed permit/development activity."
+          label="Active Parcels"
+          value={activeParcels}
+        />
+        <BriefStat
+          caveat="FEMA-related review context for county parcels."
+          label="Flood Review"
+          value={floodReviewParcels}
+        />
+        <BriefStat
+          caveat={`${formatIntelligencePercentage(
+            parcelDashboardMetrics.summary.zoningCoveragePercentage,
+          )} zoning coverage.`}
+          label="Parcel Coverage"
+          value={totalParcels}
+        />
+      </div>
+
+      <div className="rounded-md border border-white/10 bg-white/[0.035] p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Model Status
+            </p>
+            <p className="mt-1 text-sm font-semibold text-white">
+              Internal only
             </p>
           </div>
+          <span className="shrink-0 rounded-full border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-[10px] font-semibold uppercase text-[#f0cd79]">
+            Not public-facing
+          </span>
         </div>
-      </section>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          Current best internal model research remains aggregate-only. No
+          parcel probability or ranking class is shown in Overview.
+        </p>
+      </div>
+
+      <div className="rounded-md border border-white/10 bg-white/[0.035] p-3 text-xs leading-5 text-slate-400">
+        {selectedParcelId ? (
+          <span>Parcel context is still selected and ready for snapshots.</span>
+        ) : (
+          <span>Search a parcel to add parcel-specific facts.</span>
+        )}{" "}
+        {activeLayerLabels.length ? (
+          <span>{activeLayerLabels.length} active map context labels are available.</span>
+        ) : (
+          <span>Optional overlays are currently off.</span>
+        )}{" "}
+        {savedPlanningSnapshots.length ? (
+          <span>
+            {savedPlanningSnapshots.length} saved Planning Snapshot
+            {savedPlanningSnapshots.length === 1 ? "" : "s"} available.
+          </span>
+        ) : planningSnapshot ? (
+          <span>A saved Planning Snapshot is available.</span>
+        ) : (
+          <span>No snapshot has been saved yet.</span>
+        )}
+      </div>
+
+      {selectedParcelId && onShowSelectedParcel ? (
+        <button
+          className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
+          onClick={onShowSelectedParcel}
+          type="button"
+        >
+          <MapPin className="h-3.5 w-3.5" />
+          Show Selected Parcel Intelligence
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function SelectedParcelBrief({
+  developmentActivity,
+  floodConstraint,
+  onCopyParcelId,
+  onFocusMap,
+  parcel,
+  parcelIdCopied,
+  schoolConstraint,
+  source,
+  transportationContext,
+}: {
+  developmentActivity: SnapshotDevelopmentActivity;
+  floodConstraint: SnapshotFloodConstraint;
+  onCopyParcelId: () => void | Promise<void>;
+  onFocusMap: () => void;
+  parcel: NonNullable<Parameters<typeof ParcelSummaryPanel>[0]["parcel"]>;
+  parcelIdCopied: boolean;
+  schoolConstraint: SnapshotSchoolConstraint;
+  source: Parameters<typeof ParcelSummaryPanel>[0]["source"];
+  transportationContext: ReturnType<typeof useTransportationContextSummary>;
+}) {
+  const zoning = [parcel.zoningJurisdiction, parcel.zoningCode]
+    .filter(Boolean)
+    .join(" / ");
+  const floodReview =
+    floodConstraint.constraint?.flood_review_required === true
+      ? "Review Required"
+      : floodConstraint.constraint?.flood_review_required === false
+        ? "Not flagged"
+        : floodConstraint.source === "loading"
+          ? "Checking FEMA"
+          : "Not available";
+  const latestActivity = developmentActivity.activity
+    ? `${formatDevelopmentCount(
+        developmentActivity.activity.total_permit_count ?? 0,
+      )} permits`
+    : developmentActivity.source === "loading"
+      ? "Checking permits"
+      : "No matched summary";
+  const schoolAssignmentCount = schoolConstraint.assignments.filter(
+    (assignment) => assignment.hasAssignment,
+  ).length;
+  const schoolStatus =
+    schoolConstraint.source === "loading"
+      ? "Checking assignments"
+      : schoolAssignmentCount > 0
+        ? `${schoolAssignmentCount}/3 levels assigned`
+        : "Assignment unavailable";
+  const transportationStatus =
+    transportationContext.source === "loading"
+      ? "Checking context"
+      : transportationContext.source === "api"
+        ? "Context available"
+        : "Not available";
+
+  return (
+    <div className="mt-3 space-y-3">
+      <div className="grid gap-2">
+        <CompactParcelLine label="Owner / Account" value={parcel.ownerName ?? "Unavailable"} />
+        <CompactParcelLine label="Zoning" value={zoning || formatCompactLabel(parcel.zoningCategory)} />
+        <CompactParcelLine
+          label="Source"
+          value={
+            source === "api"
+              ? "Live parcel intelligence"
+              : source === "fallback"
+                ? "Static fallback"
+                : "Parcel intelligence"
+          }
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="FEMA NFHL remains authoritative."
+          label="Flood"
+          value={floodReview}
+        />
+        <BriefStat
+          caveat="Official capacity/enrollment still needed."
+          label="Schools"
+          value={schoolStatus}
+        />
+        <BriefStat
+          caveat="Observed permit context, not prediction."
+          label="Activity"
+          value={latestActivity}
+        />
+        <BriefStat
+          caveat="Utility proxy does not confirm capacity."
+          label="Utility"
+          value="Proxy only"
+        />
+        <BriefStat
+          caveat="Transportation/STIP/AADT context is current-context evidence."
+          label="Transportation"
+          value={transportationStatus}
+        />
+        <BriefStat
+          caveat="Aggregate governance only; no parcel prediction is shown."
+          label="Model"
+          value="Internal only"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]"
+          onClick={onFocusMap}
+          type="button"
+        >
+          <Crosshair className="h-3.5 w-3.5" />
+          Focus Map
+        </button>
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]"
+          onClick={() => {
+            void onCopyParcelId();
+          }}
+          type="button"
+        >
+          <Copy className="h-3.5 w-3.5" />
+          {parcelIdCopied ? "Copied" : "Copy Parcel ID"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function BriefStat({
+  caveat,
+  label,
+  value,
+}: {
+  caveat: string;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="min-w-0 rounded-md border border-white/10 bg-white/[0.035] p-2.5">
+      <p className="truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 truncate text-sm font-semibold text-white" title={value}>
+        {value}
+      </p>
+      <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-slate-500">
+        {caveat}
+      </p>
     </div>
   );
 }
@@ -352,192 +970,28 @@ function MethodologyModeContent() {
   );
 }
 
-function DueDiligenceModeContent({
-  clearSelectedSchoolUtilizationZone,
-  developmentHotspotsEnabled,
-  floodConstraintsEnabled,
-  floodZonesEnabled,
-  schoolUtilizationZonesEnabled,
-  selectedParcelId,
-  selectedParcelIntelligence,
-  selectedParcelIntelligenceSource,
-  selectedSchoolUtilizationZone,
-}: {
-  clearSelectedSchoolUtilizationZone: () => void;
-  developmentHotspotsEnabled: boolean;
-  floodConstraintsEnabled: boolean;
-  floodZonesEnabled: boolean;
-  schoolUtilizationZonesEnabled: boolean;
-  selectedParcelId: string | null;
-  selectedParcelIntelligence: Parameters<typeof ParcelSummaryPanel>[0]["parcel"];
-  selectedParcelIntelligenceSource: Parameters<typeof ParcelSummaryPanel>[0]["source"];
-  selectedSchoolUtilizationZone: SelectedSchoolUtilizationZone | null;
-}) {
-  if (!selectedParcelIntelligence) {
-    return (
-      <div className="space-y-4">
-        <SelectedSchoolUtilizationZoneCard
-          enabled={schoolUtilizationZonesEnabled}
-          onClear={clearSelectedSchoolUtilizationZone}
-          zone={selectedSchoolUtilizationZone}
-        />
-        <section className="rounded-lg border border-white/10 bg-black/20 p-5 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg border border-[#d8b86a]/35 bg-[#d8b86a]/10 text-[#f0cd79]">
-            <FileSearch className="h-5 w-5" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold text-white">
-            Select a parcel from the map or search results to begin due diligence.
-          </h3>
-          <p className="mt-2 text-sm leading-6 text-slate-400">
-            Due Diligence stays quiet until a real parcel is selected. No
-            selected-parcel API calls are shown as loading before selection.
-          </p>
-        </section>
-        <PanelIntro
-          description="Use the top search bar, map markers, or the Parcel Intelligence tools below."
-          icon={<MapPin className="h-4 w-4" />}
-          title="How to start"
-        />
-        <CollapsedSection
-          description="Full parcel search, filtering, zoning, quality, and governance tools."
-          title="Parcel Intelligence"
-        >
-          <ParcelSearchPanel />
-          <ParcelIntelligencePanel />
-          <ZoningDistributionPanel />
-          <ParcelQualityPanel />
-          <GovernanceWarningsPanel />
-        </CollapsedSection>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <PanelIntro
-        description="Selected parcel, permits, FEMA constraints, and map context."
-        icon={<FileSearch className="h-4 w-4" />}
-        title="Selected Parcel Deep Dive"
-      />
-
-      <SelectedSchoolUtilizationZoneCard
-        enabled={schoolUtilizationZonesEnabled}
-        onClear={clearSelectedSchoolUtilizationZone}
-        zone={selectedSchoolUtilizationZone}
-      />
-
-      <ParcelSummaryPanel
-        parcel={selectedParcelIntelligence}
-        source={selectedParcelIntelligenceSource}
-      />
-
-      <SelectedParcelDevelopmentActivityPanel
-        officialParcelId={selectedParcelIntelligence.officialParcelId}
-      />
-
-      <SelectedParcelPermitEventsPanel
-        officialParcelId={selectedParcelIntelligence.officialParcelId}
-      />
-
-      <SelectedParcelFloodConstraintPanel
-        officialParcelId={selectedParcelIntelligence.officialParcelId}
-      />
-
-      <SelectedParcelSchoolAssignmentPanel
-        officialParcelId={selectedParcelIntelligence.officialParcelId}
-      />
-
-      <MapContextCard
-        developmentHotspotsEnabled={developmentHotspotsEnabled}
-        floodConstraintsEnabled={floodConstraintsEnabled}
-        floodZonesEnabled={floodZonesEnabled}
-        selectedParcelId={selectedParcelId}
-      />
-
-      <CollapsedSection
-        description="Search, filters, zoning distribution, parcel quality, and governance warnings."
-        title="Parcel Intelligence"
-      >
-        <ParcelSearchPanel />
-        <ParcelIntelligencePanel />
-        <ZoningDistributionPanel />
-        <GovernanceWarningsPanel />
-        <ParcelQualityPanel />
-      </CollapsedSection>
-
-      <CollapsedSection
-        description="Countywide development, hotspot, zoning, and FEMA constraint context."
-        title="Supporting Context"
-      >
-        <PermitIntelligenceSegmentsPanel />
-        <DevelopmentActivityPanel />
-        <DevelopmentTrendPanel />
-        <DevelopmentHotspotsPanel />
-        <DevelopmentZoningPanel />
-        <FloodConstraintSummaryPanel />
-        <SchoolConstraintSummaryPanel />
-      </CollapsedSection>
-    </div>
-  );
-}
-
-function OverviewSelectedParcelCard({
-  onOpenDueDiligence,
-  onOpenExecutivePrint,
-  parcel,
-  source,
-}: {
-  onOpenDueDiligence: () => void;
-  onOpenExecutivePrint: () => void;
-  parcel: Parameters<typeof ParcelSummaryPanel>[0]["parcel"];
-  source: Parameters<typeof ParcelSummaryPanel>[0]["source"];
-}) {
-  if (!parcel) {
-    return (
-      <section className="rounded-lg border border-white/10 bg-black/20 p-4">
-        <p className="text-xs font-medium uppercase text-slate-500">
-          Selected Parcel
-        </p>
-        <h3 className="mt-1 text-lg font-semibold text-white">
-          No parcel selected
-        </h3>
-        <p className="mt-2 text-sm leading-6 text-slate-400">
-          Search from the top bar or click a map marker to begin.
-        </p>
-      </section>
-    );
-  }
-
-  return (
-    <OverviewSelectedParcelSummary
-      onOpenDueDiligence={onOpenDueDiligence}
-      onOpenExecutivePrint={onOpenExecutivePrint}
-      parcel={parcel}
-      source={source}
-    />
-  );
-}
-
+// Legacy selected-parcel card retained temporarily for rollback while the
+// Overview rail uses the new Selected Parcel Brief.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function OverviewSelectedParcelSummary({
-  onOpenDueDiligence,
-  onOpenExecutivePrint,
+  developmentActivity,
+  floodConstraint,
+  onOpenExecutiveSummary,
+  onOpenPlanningSnapshot,
   parcel,
+  planningSnapshot,
+  schoolConstraint,
   source,
 }: {
-  onOpenDueDiligence: () => void;
-  onOpenExecutivePrint: () => void;
+  developmentActivity: SnapshotDevelopmentActivity;
+  floodConstraint: SnapshotFloodConstraint;
+  onOpenExecutiveSummary: () => void;
+  onOpenPlanningSnapshot: () => void;
   parcel: NonNullable<Parameters<typeof ParcelSummaryPanel>[0]["parcel"]>;
+  planningSnapshot: PlanningSnapshot | null;
+  schoolConstraint: SnapshotSchoolConstraint;
   source: Parameters<typeof ParcelSummaryPanel>[0]["source"];
 }) {
-  const developmentActivity = useSelectedParcelDevelopmentActivity(
-    parcel.officialParcelId,
-  );
-  const floodConstraint = useSelectedParcelFloodConstraint(
-    parcel.officialParcelId,
-  );
-  const schoolConstraint = useSelectedParcelSchoolConstraint(
-    parcel.officialParcelId,
-  );
   const neighborhood = [parcel.neighborhood, parcel.subdivision]
     .filter(Boolean)
     .join(" / ");
@@ -573,6 +1027,8 @@ function OverviewSelectedParcelSummary({
     schoolConstraint.assignments.find(
       (assignment) => assignment.levelLabel === "High",
     )?.schoolName ?? "Checking assignment";
+  const snapshotMatchesParcel =
+    planningSnapshot?.selectedParcelId === parcel.officialParcelId;
 
   return (
     <section className="rounded-lg border border-white/10 bg-black/20 p-4">
@@ -607,28 +1063,730 @@ function OverviewSelectedParcelSummary({
         elementaryAssignment={elementaryAssignment}
         highAssignment={highAssignment}
         middleAssignment={middleAssignment}
-        scoreLabel={schoolConstraint.scoreLabel}
+        scoreLabel={schoolConstraint.scoreLabel ?? "Not scored"}
         source={schoolConstraint.source}
       />
 
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
-          className="rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f0cd79] transition hover:bg-[#d8b86a]/15"
-          onClick={onOpenDueDiligence}
+          className="rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+          onClick={onOpenPlanningSnapshot}
           type="button"
         >
-          Open Due Diligence
+          Open Planning Snapshot
         </button>
         <button
           className="rounded-md border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]"
-          onClick={onOpenExecutivePrint}
+          onClick={onOpenExecutiveSummary}
           type="button"
         >
-          Executive Print
+          Executive Summary
         </button>
       </div>
+
+      {snapshotMatchesParcel ? (
+        <div className="mt-3 rounded-md border border-[#55d38f]/22 bg-[#55d38f]/[0.07] px-3 py-2 text-xs leading-5 text-[#9ff0bd]">
+          Latest Planning Snapshot matches this parcel.
+        </div>
+      ) : null}
     </section>
   );
+}
+
+interface SnapshotDevelopmentActivity {
+  activity: {
+    development_activity_class?: string | null;
+    latest_permit_date?: string | null;
+    latest_permit_status?: string | null;
+    total_permit_count?: number | null;
+  } | null;
+  source: string;
+}
+
+interface SnapshotFloodConstraint {
+  constraint: {
+    buildability_impact?: string | null;
+    dominant_flood_zone?: string | null;
+    flood_review_required?: boolean | null;
+    floodway_present?: boolean | null;
+    percent_parcel_constrained?: number | null;
+    sfha_present?: boolean | null;
+  } | null;
+  source: string;
+}
+
+interface SnapshotSchoolConstraint {
+  assignments: Array<{
+    confidenceLabel?: string | null;
+    hasAssignment: boolean;
+    levelLabel: string;
+    schoolName: string;
+    utilizationLabel: string;
+  }>;
+  scoreLabel?: string | null;
+  source: ReturnType<typeof useSelectedParcelSchoolConstraint>["source"];
+}
+
+interface PlanningMapSnapshotCapture {
+  cameraSummary?: string;
+  capturedAt?: string | null;
+  dataUrl?: string | null;
+  extentSummary?: string;
+  failureReason?: string | null;
+  status: "captured" | "failed" | "unavailable";
+}
+
+const MAP_SNAPSHOT_CAPTURE_TIMEOUT_MS = 4500;
+
+const defaultPlanningSnapshotIncludedSections: Record<
+  PlanningSnapshotSectionKey,
+  boolean
+> = {
+  data_needed_caveats: true,
+  development_permits: true,
+  fema_flood: true,
+  map_view: true,
+  model_governance: true,
+  new_construction: true,
+  parcel_facts: true,
+  recommended_actions: true,
+  schools: true,
+  transportation: true,
+  utility_proxy: true,
+  zoning_planning: true,
+};
+
+async function captureMapSnapshotForPlanning(): Promise<PlanningMapSnapshotCapture> {
+  if (typeof window === "undefined") {
+    return {
+      failureReason: "Map screenshot capture is only available in the browser.",
+      status: "unavailable",
+    };
+  }
+
+  const cfsWindow = window as Window & {
+    __cfsCaptureMapSnapshot?: () => Promise<PlanningMapSnapshotCapture>;
+  };
+
+  if (!cfsWindow.__cfsCaptureMapSnapshot) {
+    return {
+      failureReason: "SceneView screenshot helper is not available.",
+      status: "unavailable",
+    };
+  }
+
+  try {
+    const timeoutCapture = new Promise<PlanningMapSnapshotCapture>((resolve) => {
+      window.setTimeout(() => {
+        resolve({
+          capturedAt: new Date().toISOString(),
+          failureReason:
+            "SceneView screenshot capture timed out; snapshot was saved without a map image.",
+          status: "failed",
+        });
+      }, MAP_SNAPSHOT_CAPTURE_TIMEOUT_MS);
+    });
+
+    return await Promise.race([
+      cfsWindow.__cfsCaptureMapSnapshot(),
+      timeoutCapture,
+    ]);
+  } catch (error) {
+    return {
+      capturedAt: new Date().toISOString(),
+      failureReason:
+        error instanceof Error
+          ? error.message
+          : "Map screenshot capture failed.",
+      status: "failed",
+    };
+  }
+}
+
+function buildPlanningSnapshot({
+  activeLayerIds,
+  activeLayerLabels,
+  developmentActivity,
+  focusMode,
+  focusModeLabel,
+  floodConstraint,
+  mapSnapshot,
+  parcel,
+  schoolConstraint,
+}: {
+  activeLayerIds: string[];
+  activeLayerLabels: string[];
+  developmentActivity: SnapshotDevelopmentActivity;
+  focusMode: PlanningReviewFocusMode;
+  focusModeLabel: string;
+  floodConstraint: SnapshotFloodConstraint;
+  mapSnapshot: PlanningMapSnapshotCapture;
+  parcel: Parameters<typeof ParcelSummaryPanel>[0]["parcel"] | null;
+  schoolConstraint: SnapshotSchoolConstraint;
+}): PlanningSnapshot {
+  const createdAt = new Date().toISOString();
+
+  if (!parcel) {
+    return buildContextOnlyPlanningSnapshot({
+      activeLayerIds,
+      activeLayerLabels,
+      createdAt,
+      focusMode,
+      focusModeLabel,
+      mapSnapshot,
+      schoolConstraint,
+    });
+  }
+
+  const zoning = [parcel.zoningJurisdiction, parcel.zoningCode]
+    .filter(Boolean)
+    .join(" / ");
+  const address = [parcel.mailingAddress, parcel.mailingCity, parcel.mailingState]
+    .filter(Boolean)
+    .join(", ");
+  const flood = floodConstraint.constraint;
+  const activity = developmentActivity.activity;
+  const assignments = schoolConstraint.assignments;
+  const schoolSummary =
+    assignments
+      .map((assignment) => `${assignment.levelLabel}: ${assignment.schoolName}`)
+      .join(" / ") || "School assignment not available";
+  const floodValue = flood?.flood_review_required
+    ? "Review Required"
+    : flood
+      ? "Not Flagged"
+      : floodConstraint.source === "loading"
+        ? "Checking FEMA overlay"
+        : "Not Available";
+
+  return {
+    activeLayerIds,
+    activeLayers: activeLayerLabels.length
+      ? activeLayerLabels
+      : ["No optional overlays active at capture time"],
+    caveats: [
+      "Snapshot is a saved front-end review context, not a new official record.",
+      "Overview command context organizes report evidence; it does not create a public model layer.",
+      "FEMA NFHL remains authoritative for regulatory flood review.",
+      "School utilization is presentation-derived and requires official verification.",
+      "Utility proxy context does not confirm available service capacity.",
+      "Internal model research is aggregate-only; no parcel-level predictions are stored or shown.",
+      ...(mapSnapshot.status === "captured"
+        ? []
+        : [
+            `Map screenshot unavailable: ${
+              mapSnapshot.failureReason ??
+              "SceneView did not provide a map image."
+            }`,
+          ]),
+    ],
+    createdAt,
+    explainableMetrics: [
+      {
+        caveat:
+          "The saved command context frames the report; it does not alter source records.",
+        label: "Snapshot Context",
+        meaning:
+          "Shows whether the snapshot was saved from a selected parcel or the broader map context.",
+        method:
+          "CFS records the active Overview command context with the saved report evidence.",
+        recommendedAction:
+          "Use this label to frame the executive summary and staff follow-up discussion.",
+        source: "CFS Overview command state",
+        value: focusModeLabel,
+      },
+      {
+        caveat:
+          mapSnapshot.status === "captured"
+            ? "The image reflects the browser SceneView at capture time."
+            : "The snapshot was saved without a map image because capture was unavailable.",
+        label: "Map Snapshot",
+        meaning:
+          "Shows whether the report includes a captured image of the current CFS map view.",
+        method:
+            "CFS saves the current map view, selected parcel if available, active layers, and Intelligence Brief into a report-ready Planning Snapshot.",
+        recommendedAction:
+          mapSnapshot.status === "captured"
+            ? "Use the image as visual context, not as an official GIS export."
+            : "Reopen Overview and save another snapshot if a map image is needed.",
+        source: "ArcGIS SceneView browser screenshot",
+        value:
+          mapSnapshot.status === "captured"
+            ? "Captured"
+            : mapSnapshot.status === "failed"
+              ? "Capture Failed"
+              : "Unavailable",
+      },
+      {
+        caveat:
+          "FEMA NFHL remains the authoritative regulatory flood source.",
+        label: "Flood Review Status",
+        meaning:
+          "Indicates whether the selected parcel intersects FEMA flood hazard context requiring review.",
+        method:
+          "Parcel geometry is compared against FEMA flood hazard polygons and summarized as review context.",
+        recommendedAction: flood?.flood_review_required
+          ? "Confirm floodplain requirements during formal review."
+          : "Keep FEMA review available for due diligence records.",
+        source: "FEMA NFHL parcel flood overlay",
+        value: floodValue,
+      },
+      {
+        caveat:
+          "Official school capacity/enrollment is not fully integrated yet.",
+        label: "School Assignment",
+        meaning:
+          "Shows CCS V1 attendance-zone assignments generated by polygon overlap.",
+        method:
+          "Parcel geometry is joined to elementary, middle, and high school attendance zones.",
+        recommendedAction:
+          "Verify capacity/enrollment when official school data is received.",
+        source: "School attendance zone GIS layers",
+        value: schoolSummary,
+      },
+      {
+        caveat:
+          "Permit activity is observed context and does not prove future development.",
+        label: "Development Activity",
+        meaning:
+          "Summarizes historical permit activity associated with the selected parcel.",
+        method:
+          "CFS matches permit activity records to the selected parcel and summarizes counts and latest status.",
+        recommendedAction:
+          "Review source permit records when recent or high-value activity appears.",
+        source: "Permit and development activity tables",
+        value: activity
+          ? `${formatDevelopmentCount(activity.total_permit_count ?? 0)} permits / ${formatDevelopmentLabel(
+              activity.development_activity_class,
+            )}`
+          : "Not Available",
+      },
+      {
+        caveat:
+          "Utility proxy context does not confirm available sewer or water capacity.",
+        label: "Utility Proxy",
+        meaning:
+          "Shows proximity/service context only; it is not a confirmed capacity finding.",
+        method:
+          "CFS displays available utility proxy context and names provider verification as the next step.",
+        recommendedAction:
+          "Confirm service readiness and capacity with WSACC or the relevant utility provider.",
+        source: "Utility proxy and planning context layers",
+        value: "Proxy Only",
+      },
+      {
+        caveat:
+          "Transportation features are current-context unless dated historical transportation/project data is available.",
+        label: "Transportation Context",
+        meaning:
+          "Shows road, rail, STIP, and traffic context as planning evidence, not as a parcel decision score.",
+        method:
+          "CFS summarizes transportation accessibility and project/traffic context from prepared transportation feature tables.",
+        recommendedAction:
+          "Confirm dated local transportation projects and access constraints for formal review.",
+        source: "Transportation accessibility, STIP, and AADT context",
+        value: "Current Context Only",
+      },
+      {
+        caveat:
+          "No exact parcel probability or parcel-level ranking class is exposed.",
+        label: "Internal Model Research Status",
+        meaning:
+          "Shows aggregate model governance only so staff understand model readiness boundaries.",
+        method:
+          "CFS compares internal feature groups against historical new construction outcomes for research QA.",
+        recommendedAction:
+          "Use model notes as governance context only; do not use as parcel-level decision output.",
+        source: "CFS internal model QA outputs",
+        value: "Internal Research Only",
+      },
+    ],
+    includedSections: { ...defaultPlanningSnapshotIncludedSections },
+    focusMode,
+    focusModeLabel,
+    keyFacts: [
+      { label: "Snapshot context", value: focusModeLabel },
+      { label: "Intelligence Brief", value: "Selected Parcel Intelligence" },
+      { label: "Selected parcel", value: parcel.officialParcelId },
+      { label: "Owner / account", value: parcel.ownerName ?? "Not Available" },
+      { label: "Zoning", value: zoning || formatCompactLabel(parcel.zoningCategory) },
+      {
+        label: "Planning jurisdiction",
+        value:
+          parcel.planningJurisdiction ??
+          parcel.zoningJurisdiction ??
+          "Not Available",
+      },
+      {
+        label: "Active overlays",
+        value: activeLayerLabels.length ? activeLayerLabels.join(", ") : "None",
+      },
+      {
+        label: "Map image",
+        value:
+          mapSnapshot.status === "captured"
+            ? "Captured"
+            : mapSnapshot.status === "failed"
+              ? "Capture Failed"
+              : "Unavailable",
+      },
+    ],
+    knownReviewFlags: [
+      {
+        label: "Snapshot context",
+        reason: `Snapshot was saved from ${focusModeLabel.toLowerCase()} context.`,
+        status: "Saved Context",
+      },
+      {
+        label: "Flood review",
+        reason:
+          flood?.flood_review_required === true
+            ? "FEMA flood context is flagged for staff review."
+            : "No FEMA flood review flag was returned at capture time.",
+        status: floodValue,
+      },
+      {
+        label: "School capacity",
+        reason:
+          "Official enrollment/capacity data is not loaded, so school capacity scoring is disabled.",
+        status: "Capacity Data Needed",
+      },
+      {
+        label: "Utility capacity",
+        reason:
+          "Utility proxy context is available, but true available capacity is not confirmed.",
+        status: "Proxy Only",
+      },
+      {
+        label: "Model output",
+        reason:
+          "Internal model research remains aggregate-only with no parcel-level output.",
+        status: "Not Public-Facing",
+      },
+      {
+        label: "Map snapshot",
+        reason:
+          mapSnapshot.status === "captured"
+            ? "SceneView image was captured for the report."
+            : mapSnapshot.failureReason ??
+              "SceneView image was not available when the snapshot was saved.",
+        status:
+          mapSnapshot.status === "captured"
+            ? "Captured"
+            : mapSnapshot.status === "failed"
+              ? "Capture Failed"
+              : "Unavailable",
+      },
+    ],
+    mapContext: {
+      cameraSummary: mapSnapshot.cameraSummary,
+      description:
+        activeLayerLabels.length > 0
+          ? `Snapshot captured from ${focusModeLabel} with ${activeLayerLabels.join(", ")} active.`
+          : `Snapshot captured from ${focusModeLabel} with no optional overlays active.`,
+      extentCaptured: Boolean(mapSnapshot.extentSummary),
+      extentSummary: mapSnapshot.extentSummary,
+    },
+    mapScreenshotCapturedAt: mapSnapshot.capturedAt ?? null,
+    mapScreenshotDataUrl: mapSnapshot.dataUrl ?? null,
+    mapScreenshotFailureReason: mapSnapshot.failureReason ?? null,
+    mapScreenshotStatus: mapSnapshot.status,
+    overviewKpis: [
+      {
+        caveat: "Snapshot context is a workflow label, not a data source.",
+        label: "Snapshot Context",
+        value: focusModeLabel,
+      },
+      {
+        caveat: "Descriptive source context only.",
+        label: "Selected Parcel",
+        value: parcel.officialParcelId,
+      },
+      {
+        caveat: "Zoning context is not a development entitlement decision.",
+        label: "Zoning Context",
+        value: zoning || formatCompactLabel(parcel.zoningCategory),
+      },
+      {
+        caveat: "Missing capacity is not confirmed school impact.",
+        label: "School Score",
+        value: schoolConstraint.scoreLabel || "Not scored",
+      },
+      {
+        caveat: "Model outputs remain hidden and internal-only.",
+        label: "Model Governance",
+        value: "Internal research only",
+      },
+    ],
+    selectedParcelId: parcel.officialParcelId,
+    selectedParcelSummary: {
+      acreageOrSize: formatCompactLabel(parcel.parcelSizeCategory),
+      address: address || "Not Available",
+      assessedValue:
+        typeof parcel.assessedValue === "number"
+          ? formatCurrency(parcel.assessedValue)
+          : "Not Available",
+      marketValue:
+        typeof parcel.marketValue === "number"
+          ? formatCurrency(parcel.marketValue)
+          : "Not Available",
+      officialParcelId: parcel.officialParcelId,
+      ownerOrAccount: parcel.ownerName ?? "Not Available",
+      parcelQualityStatus: formatCompactLabel(parcel.parcelQualityStatus),
+      pin14: parcel.pin14 ?? "Not Available",
+      planningJurisdiction:
+        parcel.planningJurisdiction ??
+        parcel.zoningJurisdiction ??
+        "Not Available",
+      zoning: zoning || formatCompactLabel(parcel.zoningCategory),
+    },
+    snapshotId: `phase22e-${parcel.officialParcelId}-${Date.now()}`,
+    snapshotVersion: "phase22e_v1",
+  };
+}
+
+function buildContextOnlyPlanningSnapshot({
+  activeLayerIds,
+  activeLayerLabels,
+  createdAt,
+  focusMode,
+  focusModeLabel,
+  mapSnapshot,
+  schoolConstraint,
+}: {
+  activeLayerIds: string[];
+  activeLayerLabels: string[];
+  createdAt: string;
+  focusMode: PlanningReviewFocusMode;
+  focusModeLabel: string;
+  mapSnapshot: PlanningMapSnapshotCapture;
+  schoolConstraint: SnapshotSchoolConstraint;
+}): PlanningSnapshot {
+  const activeLayerSummary = activeLayerLabels.length
+    ? activeLayerLabels.join(", ")
+    : "No optional overlays active at capture time";
+  const mapStatusLabel =
+    mapSnapshot.status === "captured"
+      ? "Captured"
+      : mapSnapshot.status === "failed"
+        ? "Capture Failed"
+        : "Unavailable";
+
+  return {
+    activeLayerIds,
+    activeLayers: activeLayerLabels.length
+      ? activeLayerLabels
+      : ["No optional overlays active at capture time"],
+    caveats: [
+      "Snapshot is a saved front-end review context, not a new official record.",
+      "No selected parcel was captured; parcel-specific facts require selecting a parcel in Overview.",
+      "Overview command context organizes report evidence; it does not create a public model layer.",
+      "FEMA NFHL remains authoritative for regulatory flood review.",
+      "School utilization is presentation-derived and requires official verification.",
+      "Utility proxy context does not confirm available service capacity.",
+      "Internal model research is aggregate-only; no parcel-level predictions are stored or shown.",
+      ...(mapSnapshot.status === "captured"
+        ? []
+        : [
+            `Map screenshot unavailable: ${
+              mapSnapshot.failureReason ??
+              "SceneView did not provide a map image."
+            }`,
+          ]),
+    ],
+    createdAt,
+    explainableMetrics: [
+      {
+        caveat:
+          "The saved command context frames the report; it does not alter source records.",
+        label: "Snapshot Context",
+        meaning:
+          "Shows whether the snapshot was saved from a selected parcel or broader map context.",
+        method:
+          "CFS records the active Overview command context with the saved report evidence.",
+        recommendedAction:
+          "Use this label to frame the executive summary and staff follow-up discussion.",
+        source: "CFS Overview command state",
+        value: focusModeLabel,
+      },
+      {
+        caveat:
+          mapSnapshot.status === "captured"
+            ? "The image reflects the browser SceneView at capture time."
+            : "The snapshot was saved without a map image because capture was unavailable.",
+        label: "Map Snapshot",
+        meaning:
+          "Shows whether the report includes a captured image of the current CFS map view.",
+        method:
+            "CFS saves the current map view, active layers, and Intelligence Brief into a report-ready Planning Snapshot.",
+        recommendedAction:
+          mapSnapshot.status === "captured"
+            ? "Use the image as visual context, not as an official GIS export."
+            : "Reopen Overview and save another snapshot if a map image is needed.",
+        source: "ArcGIS SceneView browser screenshot",
+        value: mapStatusLabel,
+      },
+      {
+        caveat:
+          "Permit activity is observed context and does not prove future development.",
+        label: "Development Activity",
+        meaning:
+          "Captures development activity as map/layer context because no parcel was selected.",
+        method:
+          "CFS records active development layers without creating a parcel-level permit summary.",
+        recommendedAction:
+          "Select a parcel before using permit records in formal parcel review.",
+        source: "Permit and development activity tables",
+        value: "Map/layer context only",
+      },
+      {
+        caveat:
+          "FEMA NFHL remains the authoritative regulatory flood source.",
+        label: "Flood Review Status",
+        meaning:
+          "Indicates that flood context was captured as map/layer context because no parcel was selected.",
+        method:
+          "The snapshot records active flood layers and caveats without assigning parcel-specific flood status.",
+        recommendedAction:
+          "Select a parcel before making parcel-specific flood review statements.",
+        source: "FEMA NFHL parcel flood overlay",
+        value: "Map/layer context only",
+      },
+      {
+        caveat:
+          "Official school capacity/enrollment is not fully integrated yet.",
+        label: "School Assignment",
+        meaning:
+          "School context remains layer/scope context until a parcel is selected.",
+        method:
+          "CFS records active school context and caveats without assigning schools to a map-only snapshot.",
+        recommendedAction:
+          "Select a parcel and verify capacity/enrollment when official school data is received.",
+        source: "School attendance zone GIS layers",
+        value:
+          schoolConstraint.scoreLabel && schoolConstraint.source !== "waiting"
+            ? schoolConstraint.scoreLabel
+            : "No selected parcel",
+      },
+      {
+        caveat:
+          "Utility proxy context does not confirm available sewer or water capacity.",
+        label: "Utility Proxy",
+        meaning:
+          "Shows proximity/service context only; it is not a confirmed capacity finding.",
+        method:
+          "CFS displays available utility proxy context and names provider verification as the next step.",
+        recommendedAction:
+          "Confirm service readiness and capacity with WSACC or the relevant utility provider.",
+        source: "Utility proxy and planning context layers",
+        value: "Proxy Only",
+      },
+      {
+        caveat:
+          "Transportation features are current-context unless dated historical transportation/project data is available.",
+        label: "Transportation Context",
+        meaning:
+          "Shows road, rail, STIP, and traffic context as planning evidence, not as a parcel decision score.",
+        method:
+          "CFS summarizes transportation accessibility and project/traffic context from prepared transportation feature tables.",
+        recommendedAction:
+          "Confirm dated local transportation projects and access constraints for formal review.",
+        source: "Transportation accessibility, STIP, and AADT context",
+        value: "Current Context Only",
+      },
+      {
+        caveat:
+          "No exact parcel probability or parcel-level ranking class is exposed.",
+        label: "Internal Model Research Status",
+        meaning:
+          "Shows aggregate model governance only so staff understand model readiness boundaries.",
+        method:
+          "CFS compares internal feature groups against historical new construction outcomes for research QA.",
+        recommendedAction:
+          "Use model notes as governance context only; do not use as parcel-level decision output.",
+        source: "CFS internal model QA outputs",
+        value: "Internal Research Only",
+      },
+    ],
+    focusMode,
+    focusModeLabel,
+    includedSections: { ...defaultPlanningSnapshotIncludedSections },
+    keyFacts: [
+      { label: "Snapshot context", value: focusModeLabel },
+      { label: "Intelligence Brief", value: "Countywide Intelligence Brief" },
+      { label: "Selected parcel", value: "No selected parcel captured" },
+      { label: "Active overlays", value: activeLayerSummary },
+      { label: "Map image", value: mapStatusLabel },
+      { label: "Model governance", value: "Internal research only" },
+    ],
+    knownReviewFlags: [
+      {
+        label: "Snapshot context",
+        reason: `Snapshot was saved from ${focusModeLabel.toLowerCase()} context.`,
+        status: "Saved Context",
+      },
+      {
+        label: "Parcel context",
+        reason:
+          "No parcel was selected, so the snapshot contains map/layer context instead of parcel-specific findings.",
+        status: "Parcel Recommended",
+      },
+      {
+        label: "Map snapshot",
+        reason:
+          mapSnapshot.status === "captured"
+            ? "SceneView image was captured for the report."
+            : mapSnapshot.failureReason ??
+              "SceneView image was not available when the snapshot was saved.",
+        status: mapStatusLabel,
+      },
+      {
+        label: "Model output",
+        reason:
+          "Internal model research remains aggregate-only with no parcel-level output.",
+        status: "Not Public-Facing",
+      },
+    ],
+    mapContext: {
+      cameraSummary: mapSnapshot.cameraSummary,
+      description:
+        activeLayerLabels.length > 0
+          ? `Snapshot captured from ${focusModeLabel} with ${activeLayerSummary} active.`
+          : `Snapshot captured from ${focusModeLabel} with no optional overlays active.`,
+      extentCaptured: Boolean(mapSnapshot.extentSummary),
+      extentSummary: mapSnapshot.extentSummary,
+    },
+    mapScreenshotCapturedAt: mapSnapshot.capturedAt ?? null,
+    mapScreenshotDataUrl: mapSnapshot.dataUrl ?? null,
+    mapScreenshotFailureReason: mapSnapshot.failureReason ?? null,
+    mapScreenshotStatus: mapSnapshot.status,
+    overviewKpis: [
+      {
+        caveat: "Snapshot context is a workflow label, not a data source.",
+        label: "Snapshot Context",
+        value: focusModeLabel,
+      },
+      {
+        caveat: "Select a parcel for parcel-specific due diligence.",
+        label: "Selected Parcel",
+        value: "No selected parcel",
+      },
+      {
+        caveat: "Active layers are visual/report context only.",
+        label: "Active Context",
+        value: activeLayerSummary,
+      },
+      {
+        caveat: "Model outputs remain hidden and internal-only.",
+        label: "Model Governance",
+        value: "Internal research only",
+      },
+    ],
+    selectedParcelId: null,
+    selectedParcelSummary: null,
+    snapshotId: `phase22e-map-context-${Date.now()}`,
+    snapshotVersion: "phase22e_v1",
+  };
 }
 
 function SelectedSchoolUtilizationZoneCard({
@@ -729,56 +1887,6 @@ function SelectedSchoolUtilizationZoneCard({
         enrollment/capacity data. Official school capacity scoring remains
         disabled.
       </p>
-    </section>
-  );
-}
-
-function MapContextCard({
-  developmentHotspotsEnabled,
-  floodConstraintsEnabled,
-  floodZonesEnabled,
-  selectedParcelId,
-}: {
-  developmentHotspotsEnabled: boolean;
-  floodConstraintsEnabled: boolean;
-  floodZonesEnabled: boolean;
-  selectedParcelId: string | null;
-}) {
-  const activeLayers = [
-    developmentHotspotsEnabled ? "Development Hotspots" : null,
-    floodConstraintsEnabled ? "Flood Constraints" : null,
-    floodZonesEnabled ? "FEMA Flood Zones" : null,
-  ].filter(Boolean);
-
-  return (
-    <section className="rounded-lg border border-white/10 bg-black/20 p-4">
-      <div className="flex items-start gap-3">
-        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#68d8ff]" />
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium uppercase text-slate-500">
-            Map Context
-          </p>
-          <h3 className="mt-1 text-base font-semibold text-white">
-            Focus, boundary, and active overlays
-          </h3>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <MapContextMetric
-              label="Selected Parcel"
-              value={selectedParcelId ?? "Unavailable"}
-            />
-            <MapContextMetric label="Scene Focus" value="Centroid / extent" />
-            <MapContextMetric label="Parcel Cage" value="Active on selection" />
-            <MapContextMetric
-              label="Active Overlays"
-              value={activeLayers.length ? activeLayers.join(", ") : "None"}
-            />
-          </div>
-          <p className="mt-3 text-[11px] leading-5 text-slate-500">
-            Parcel focus and boundary cage are controlled by the existing
-            SceneView workflow. Layer toggles remain in Overview Map Layers.
-          </p>
-        </div>
-      </div>
     </section>
   );
 }
@@ -1118,15 +2226,4 @@ function formatCompactLabel(value: string | null) {
     .replaceAll("-", " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function MapContextMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded-md border border-white/10 bg-white/[0.035] p-2">
-      <p className="text-[10px] uppercase text-slate-500">{label}</p>
-      <p className="mt-1 truncate text-xs font-semibold text-slate-100">
-        {value}
-      </p>
-    </div>
-  );
 }

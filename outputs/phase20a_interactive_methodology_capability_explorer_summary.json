@@ -1,0 +1,146 @@
+{
+  "phase": "20A",
+  "name": "Interactive Methodology and CFS Capability Explorer",
+  "branch": "main",
+  "scope": "Frontend Methodology workspace only",
+  "files_changed": [
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "outputs/phase20a_interactive_methodology_capability_explorer_summary.json"
+  ],
+  "methodology_structure_added": [
+    "CFS Overview",
+    "How the System Works",
+    "Current Capabilities",
+    "Data Inventory",
+    "Model Research and Governance",
+    "What Is In Progress",
+    "Data Still Needed",
+    "Roadmap / Next Phases",
+    "Limitations and Guardrails",
+    "FAQ / Plain-English Explanation"
+  ],
+  "interactive_elements_added": [
+    "Top-level methodology section tabs",
+    "Capability search input",
+    "Capability status filters",
+    "Expandable capability cards",
+    "Expandable data inventory rows",
+    "Expandable official data request rows",
+    "Expandable FAQ rows"
+  ],
+  "capability_sections_added": [
+    "Parcel Intelligence",
+    "Zoning and Historical Zoning",
+    "Development / Permit Activity",
+    "New Construction Permit History",
+    "FEMA Flood Constraints",
+    "School Assignment and Utilization Seed",
+    "Transportation Accessibility / STIP / AADT",
+    "Utility / Infrastructure Proxy",
+    "Internal Model Governance",
+    "Due Diligence Review",
+    "Executive Print Reporting"
+  ],
+  "data_inventory_added": [
+    "Parcel / Tax",
+    "Zoning / Planning",
+    "Development",
+    "Constraints",
+    "Transportation",
+    "Utility / Infrastructure",
+    "Model"
+  ],
+  "missing_data_section_added": {
+    "priority_1": [
+      "WSACC true utility capacity / service areas / capacity constraints",
+      "Official school enrollment and capacity by school",
+      "Countywide future land use / small-area plan GIS",
+      "Official rezoning case records"
+    ],
+    "priority_2": [
+      "Countywide development pipeline / subdivision approvals",
+      "Planned local road projects with dates/status",
+      "Planned utility extensions",
+      "Parks, greenways, and bike-ped plans"
+    ],
+    "priority_3": [
+      "Detailed environmental suitability layers",
+      "Land supply / vacant developable land",
+      "Infrastructure constraint layers"
+    ]
+  },
+  "roadmap_section_added": [
+    "Current demo-ready internal planning intelligence prototype",
+    "Official missing data ingestion",
+    "Refined due diligence scoring after verified data",
+    "Stronger internal model validation",
+    "Scenario planning and executive reporting improvements",
+    "Possible simplified public viewer only after validation and governance"
+  ],
+  "model_governance_behavior": {
+    "uses_existing_aggregate_hooks": true,
+    "static_fallback_if_backend_unavailable": true,
+    "current_best_internal_model_text": "Zoning + Transportation + Tax/Value",
+    "production_ready": false,
+    "prediction_probability_available": false,
+    "public_exposure_allowed": false,
+    "parcel_level_predictions_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "phase16c_finding_summarized": "Tax/value helped; Accela, Central Area Plan, utility proxy, and current-context metadata remain useful context but are not recommended for the current best internal model."
+  },
+  "model_safety_verification": {
+    "methodology_renders_sceneview": false,
+    "sceneview_reference_in_methodology_file": false,
+    "raw_model_terms_in_methodology_file": "Only aggregate ranking distribution keys and safety flags are referenced in code; visible labels are formatted and no parcel-level output is shown.",
+    "browser_visible_experimental_probability": false,
+    "browser_visible_raw_ranking_classes": false,
+    "browser_visible_sceneview_label_in_methodology": false
+  },
+  "tests": {
+    "frontend_tests_added": false,
+    "reason": "No frontend unit test runner configuration was present in package scripts; validation was performed with typecheck, lint, build, and browser smoke."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not run; backend files were not changed"
+  },
+  "runtime_results": {
+    "npm_run_dev_cfs": "started after validation",
+    "frontend_url": "http://localhost:3000",
+    "frontend_status": 200,
+    "backend_health_url": "http://127.0.0.1:8000/health",
+    "backend_health_status": 200,
+    "database_health_url": "http://127.0.0.1:8000/health/database",
+    "database_health_status": 200
+  },
+  "smoke_test_results": {
+    "overview_loads": true,
+    "methodology_loads": true,
+    "cfs_overview_section_appears": true,
+    "current_capabilities_section_appears": true,
+    "capability_search_filters_results": true,
+    "capability_status_filter_has_results": true,
+    "data_inventory_section_appears": true,
+    "data_still_needed_section_appears": true,
+    "roadmap_section_appears": true,
+    "model_research_section_appears": true,
+    "guardrails_section_appears": true,
+    "faq_section_appears": true,
+    "methodology_sceneview_absent": true,
+    "due_diligence_mode_loads": true,
+    "executive_print_mode_loads": true,
+    "console_notes": [
+      "Browser console captured existing Next dev RSC payload fallback messages during local mode switching.",
+      "Browser console also captured ArcGIS terrain tile errors after the map initialized on Overview.",
+      "No Methodology blank page, parcel-level prediction exposure, or Methodology SceneView render was observed."
+    ]
+  },
+  "remaining_known_limitations": [
+    "Methodology content is curated static frontend content rather than markdown-imported docs.",
+    "Aggregate model summaries depend on existing backend endpoints when available and fall back to safe static text.",
+    "No automated frontend test runner is configured for component-level tests.",
+    "Local Next dev can emit RSC fallback messages after production build; restarting npm run dev:cfs restored a responsive dev stack."
+  ]
+}

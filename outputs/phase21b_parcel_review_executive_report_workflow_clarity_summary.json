@@ -1,0 +1,150 @@
+{
+  "phase": "21B",
+  "title": "Parcel Review Workflow Clarity and Executive Report Action Redesign",
+  "branch": "main",
+  "files_changed": [
+    "README.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/layout/TopNav.tsx"
+  ],
+  "top_nav_behavior": {
+    "due_diligence": "Opens the Parcel Review workspace on the Review view.",
+    "executive_report": "Opens the same Parcel Review workspace directly on the Executive Summary view.",
+    "label_change": "Executive Print remains functionally supported by the legacy product mode but the visible top nav label is Executive Report.",
+    "no_parcel_report_behavior": "Shows a report-specific empty state: Select a parcel to generate an Executive Report."
+  },
+  "no_parcel_empty_state_changes": {
+    "generic_review_title": "Select a parcel to begin review",
+    "report_specific_title": "Select a parcel to generate an Executive Report",
+    "message": "Use the top search bar or click a live map marker. Once selected, CFS will show review flags, zoning, activity, flood, school, transportation, utility proxy, and report options.",
+    "locked_action_cards": [
+      "Parcel Review - Locked until parcel selected.",
+      "Executive Summary - Select a parcel to generate report preview.",
+      "Print Report - Select a parcel before printing."
+    ],
+    "demo_parcel_hint": "CFS-PARCEL-0149726579",
+    "removed_awkward_wording": [
+      "Report Preview disabled",
+      "Print Report disabled"
+    ]
+  },
+  "selected_parcel_command_header_changes": {
+    "title": "Parcel Review Workspace",
+    "subtitle": "Review selected parcel context, constraints, activity, and generate a printable executive summary from the same evidence.",
+    "facts_shown": [
+      "Parcel ID",
+      "Owner / Account",
+      "PIN",
+      "Address",
+      "Municipality / Jurisdiction",
+      "Zoning",
+      "Acreage / Size",
+      "Parcel Quality",
+      "Neighborhood"
+    ],
+    "primary_actions": [
+      "Review Parcel",
+      "View Executive Summary",
+      "Print Report",
+      "Focus Map",
+      "Copy Parcel ID"
+    ]
+  },
+  "review_tab_changes": {
+    "main_view": "Review remains the working Due Diligence view.",
+    "section_order": [
+      "Parcel Snapshot",
+      "Priority Review Flags",
+      "Planning & Zoning",
+      "Development & New Construction",
+      "Constraints & Services",
+      "Internal Model Research Status",
+      "Recommended Review Actions"
+    ],
+    "development_cleanup": "Development Activity and New Construction Permit History were combined into one stronger Development & New Construction section.",
+    "constraints_cleanup": "Flood, school, transportation, and utility proxy cards are grouped under Constraints & Services.",
+    "disabled_report_sections_removed_from_review": true
+  },
+  "executive_summary_tab_changes": {
+    "tab_label": "Executive Summary",
+    "preview_header": "Executive Summary Preview",
+    "preview_subtext": "This report is generated from the selected parcel review context and is formatted for stakeholder discussion or printing.",
+    "component_reuse": "ExecutivePrintView is still reused for the print-ready report body.",
+    "prominent_print_button": "Print Executive Summary"
+  },
+  "print_report_behavior": {
+    "no_parcel": "No active print button is shown; locked card says Select a parcel before printing.",
+    "selected_parcel": "Header Print Report switches to the Executive Summary view and calls window.print() after the report view is ready.",
+    "print_css": "Existing print CSS remains responsible for hiding app chrome, nav, sidebars, and interactive controls."
+  },
+  "documentation_updates": [
+    {
+      "file": "README.md",
+      "summary": "Updated product-mode descriptions to describe Due Diligence as the Parcel Review workspace and Executive Report as the executive summary shortcut."
+    },
+    {
+      "file": "docs/demo/cfs_demo_walkthrough.md",
+      "summary": "Updated demo flow and talking points around Parcel Review, Executive Summary, and Print Report."
+    },
+    {
+      "file": "docs/demo/cfs_final_demo_checklist.md",
+      "summary": "Updated checklist language from Executive Print to Executive Report / Executive Summary."
+    }
+  ],
+  "safety_verification": {
+    "parcel_level_prediction_probabilities_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "model_caveats_removed": false,
+    "visible_ui_raw_term_check": {
+      "tested_terms": [
+        "experimental_probability",
+        "prediction_probability",
+        "development_signal_class",
+        "very_high_development_signal",
+        "high_development_signal"
+      ],
+      "visible_workflow_terms_found": []
+    },
+    "source_grep_note": "Prediction-related names remain in API type definitions and aggregate internal research hooks only; browser smoke showed none as visible parcel-level workflow outputs."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not_run_backend_not_changed",
+    "build_note": "The first build attempt timed out while the active Next dev server held .next/dev/lock. The CFS frontend listener was stopped, build reran successfully, and npm run dev:cfs was restarted afterward."
+  },
+  "smoke_test_results": {
+    "npm_run_dev_cfs": "passed",
+    "frontend_url": "http://localhost:3000",
+    "backend_url": "http://127.0.0.1:8000",
+    "frontend_health": 200,
+    "backend_health": 200,
+    "database_health": 200,
+    "due_diligence_no_parcel_empty_state": "passed",
+    "executive_report_no_parcel_empty_state": "passed",
+    "awkward_disabled_wording_absent": true,
+    "parcel_search": "passed via top search using keypress input",
+    "demo_parcel": "CFS-PARCEL-0149726579",
+    "active_selection_updated": true,
+    "review_tab_loaded": true,
+    "executive_summary_from_action_loaded": true,
+    "executive_report_top_nav_shortcut_loaded": true,
+    "print_action_visible": true,
+    "overview_still_loads": true,
+    "methodology_still_loads": true,
+    "console_errors": 0,
+    "known_warnings": [
+      "ArcGIS draped graphics label-placement warnings remain."
+    ],
+    "browser_test_note": "Some automated text assertions were case-sensitive while CSS renders selected labels uppercase; functional and visible workflow checks passed."
+  },
+  "remaining_known_issues": [
+    "ArcGIS label-placement warnings remain unrelated to this workflow.",
+    "The Browser plugin virtual clipboard is not installed, so automated search entry used keypress events instead of clipboard-based fill/type."
+  ],
+  "ready_for_next_phase": true
+}

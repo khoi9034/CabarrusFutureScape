@@ -11,7 +11,6 @@ import {
   Loader2,
   Map,
   MoreHorizontal,
-  Printer,
   RadioTower,
   Search,
   UserRound,
@@ -57,9 +56,9 @@ const productModes: Array<{
   {
     icon: FileSearch,
     id: "due_diligence",
-    label: "Due Diligence",
-    shortLabel: "Diligence",
-    title: "Selected parcel due diligence assessment",
+    label: "Planning Snapshot",
+    shortLabel: "Snapshot",
+    title: "Saved planning context, explanations, and executive summary",
   },
   {
     icon: BookOpen,
@@ -67,13 +66,6 @@ const productModes: Array<{
     label: "Methodology",
     shortLabel: "Method",
     title: "Data sources, assumptions, limitations, and model foundation",
-  },
-  {
-    icon: Printer,
-    id: "executive_print",
-    label: "Executive Print",
-    shortLabel: "Print",
-    title: "Print-friendly executive site intelligence report",
   },
 ];
 
@@ -98,6 +90,8 @@ export function TopNav() {
     roleId,
     scenarioName,
     productMode,
+    setParcelReviewView,
+    setPlanningSnapshotView,
     setProductMode,
     setSelectedParcelIntelligence,
     viewMode,
@@ -349,7 +343,11 @@ export function TopNav() {
         >
           {productModes.map((mode) => {
             const Icon = mode.icon;
-            const active = productMode === mode.id;
+            const active =
+              mode.id === "due_diligence"
+                ? productMode === "due_diligence" ||
+                  productMode === "executive_print"
+                : productMode === mode.id;
 
             return (
               <button
@@ -361,7 +359,14 @@ export function TopNav() {
                     : "border-transparent bg-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.045] hover:text-white",
                 )}
                 key={mode.id}
-                onClick={() => setProductMode(mode.id)}
+                onClick={() => {
+                  if (mode.id === "due_diligence") {
+                    setParcelReviewView("review");
+                    setPlanningSnapshotView("overview");
+                  }
+
+                  setProductMode(mode.id);
+                }}
                 title={mode.title}
                 type="button"
               >

@@ -1,0 +1,141 @@
+{
+  "phase": "21A",
+  "title": "Unified Parcel Review and Executive Report Workflow",
+  "branch": "main",
+  "files_changed": [
+    "README.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/ExecutivePrintView.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/TopNav.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "src/types/index.ts"
+  ],
+  "ux_decision": {
+    "selected_option": "Option A",
+    "summary": "Due Diligence is now the primary selected-parcel review workspace. Executive Report is a shortcut into Due Diligence > Report Preview rather than a separate disconnected analysis mode.",
+    "legacy_mode_handling": "The legacy executive_print product mode is redirected to due_diligence with parcelReviewView=report for compatibility."
+  },
+  "due_diligence_structure_changes": {
+    "review_subviews": [
+      "Review",
+      "Report Preview",
+      "Review Notes / Actions"
+    ],
+    "command_header": [
+      "Parcel ID",
+      "owner/account",
+      "address",
+      "municipality/jurisdiction",
+      "zoning",
+      "acreage",
+      "parcel quality/status"
+    ],
+    "header_actions": [
+      "Back to Overview",
+      "Focus Map",
+      "Open Report Preview",
+      "Print Report",
+      "Copy Parcel ID"
+    ],
+    "primary_review_sections": [
+      "Parcel Snapshot",
+      "High-Priority Review Flags",
+      "Planning & Zoning",
+      "Development & New Construction",
+      "Constraints",
+      "Internal Model Research Status",
+      "Recommended Review Actions"
+    ],
+    "empty_state": "Due Diligence now shows a clear no-parcel-selected instruction with disabled Report Preview and Print Report actions until a parcel is selected."
+  },
+  "priority_review_flags": {
+    "behavior": "Priority flags summarize zoning availability, flood review, school assignment/capacity caveat, development activity, utility capacity caveat, and model exposure guardrails without treating missing data as confirmed risk.",
+    "recommended_next_action_present": true
+  },
+  "report_preview_integration": {
+    "component_reuse": "Report Preview reuses ExecutivePrintView inside DueDiligenceReview.",
+    "context_copy_added": "Executive Report uses the same reviewed parcel context shown here, formatted for printing or stakeholder discussion.",
+    "report_preview_copy_added": "Executive Report generated from Due Diligence.",
+    "separate_dataset_implication_removed": true
+  },
+  "top_nav_behavior": {
+    "old_label": "Executive Print",
+    "new_label": "Executive Report",
+    "shortcut_behavior": "Clicking Executive Report sets parcelReviewView=report and productMode=due_diligence.",
+    "due_diligence_active_behavior": "Due Diligence is active for review/actions views; Executive Report is active for report preview.",
+    "routing_preserved": true
+  },
+  "print_action_behavior": {
+    "due_diligence_print_button": "Switches to Report Preview and calls window.print().",
+    "executive_report_preview_print_button": "Calls window.print() from the print-preview context.",
+    "print_css_preserved": true,
+    "interactive_controls_hidden_in_print": "Existing print CSS remains responsible for hiding app chrome and interactive controls."
+  },
+  "documentation_updates": [
+    {
+      "file": "README.md",
+      "summary": "Updated product mode wording so Due Diligence is the primary review workflow and Executive Report is a report-preview shortcut."
+    },
+    {
+      "file": "docs/demo/cfs_demo_walkthrough.md",
+      "summary": "Updated demo flow and talking points to show Report Preview/Print Report as generated from Due Diligence."
+    }
+  ],
+  "safety_verification": {
+    "parcel_level_prediction_probabilities_exposed": false,
+    "parcel_level_ranking_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "model_safety_caveats_preserved": true,
+    "visible_ui_raw_term_check": {
+      "tested_terms": [
+        "experimental_probability",
+        "prediction_probability",
+        "development_signal_class",
+        "very_high_development_signal",
+        "high_development_signal"
+      ],
+      "overview_visible_terms": [],
+      "due_diligence_visible_terms": [],
+      "report_preview_visible_terms": [],
+      "review_actions_visible_terms": [],
+      "methodology_visible_terms": []
+    },
+    "source_grep_note": "Prediction-related field names remain in API type definitions and aggregate internal research-status plumbing; browser smoke confirmed they are not shown as parcel-level outputs in the unified workflow."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_validation": "not_run_backend_not_changed"
+  },
+  "runtime_smoke_test": {
+    "npm_run_dev_cfs": "passed",
+    "frontend_url": "http://localhost:3000",
+    "frontend_status": 200,
+    "backend_health_status": 200,
+    "backend_database_health_status": 200,
+    "parcel_tested": "CFS-PARCEL-0149726579",
+    "selection_method": "Top parcel search in desktop viewport",
+    "selected_parcel_loaded": true,
+    "active_selection_updated": true,
+    "due_diligence_loaded": true,
+    "review_tab_present": true,
+    "report_preview_tab_present": true,
+    "review_notes_actions_tab_present": true,
+    "report_preview_opened_from_due_diligence": true,
+    "executive_report_top_nav_shortcut_verified": true,
+    "print_report_action_visible": true,
+    "methodology_still_loads": true,
+    "overview_still_loads": true,
+    "console_errors": "No new workflow errors observed. Known ArcGIS label-placement and placeholder-layer warnings still appear."
+  },
+  "remaining_known_issues": [
+    "The in-app browser initially opened below the desktop breakpoint, so the top search was hidden until the browser viewport capability was set to a desktop size for smoke testing.",
+    "Known ArcGIS label-placement warnings continue to appear for draped graphics.",
+    "Known placeholder-layer warnings continue to appear for disabled mock/placeholder GIS layer definitions."
+  ],
+  "ready_for_next_phase": true
+}
