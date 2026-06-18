@@ -925,8 +925,8 @@ export function LayerToggle({
   }
 
   return (
-    <section className="rounded-lg border border-white/10 bg-black/20 p-3">
-      <div className="flex items-start justify-between gap-3">
+    <section className="min-w-0 overflow-hidden rounded-lg border border-white/10 bg-black/20 p-3">
+      <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase text-slate-500">
             Map Layers
@@ -983,20 +983,20 @@ export function LayerToggle({
 
           return (
             <details
-              className="group rounded-md border border-white/10 bg-white/[0.025]"
+              className="group min-w-0 overflow-hidden rounded-md border border-white/10 bg-white/[0.025]"
               key={group.id}
               onToggle={(event) =>
                 setGroupOpen(group.id, event.currentTarget.open)
               }
               open={isOpen}
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2">
+              <summary className="flex min-w-0 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-3 py-2">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-100">
                     {group.title}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-1.5">
+                <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5">
                   <LayerStatusBadge active={activeCount > 0} tone="gold">
                     {`${activeCount} active`}
                   </LayerStatusBadge>
@@ -1008,7 +1008,7 @@ export function LayerToggle({
               </summary>
 
               {isOpen ? (
-                <div className="space-y-2 border-t border-white/10 p-2">
+                <div className="min-w-0 space-y-2 overflow-hidden border-t border-white/10 p-2">
                   {group.emptyNotice ? (
                     <LayerInlinePanel>
                       <p className="text-xs leading-5 text-slate-500">
@@ -1071,7 +1071,7 @@ export function LayerToggle({
                     return (
                       <article
                         className={cn(
-                          "rounded-md border p-2 transition",
+                          "min-w-0 overflow-hidden rounded-md border p-2 transition",
                           active
                             ? "border-white/15 bg-white/[0.06]"
                             : "border-white/[0.08] bg-black/10 hover:border-white/[0.12] hover:bg-white/[0.035]",
@@ -1079,7 +1079,7 @@ export function LayerToggle({
                         )}
                         key={layer.id}
                       >
-                        <div className="flex min-w-0 items-center gap-2">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
                           <span
                             className="h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_16px_currentColor]"
                             style={{
@@ -1087,7 +1087,7 @@ export function LayerToggle({
                               color: layer.accent,
                             }}
                           />
-                          <div className="min-w-0 flex-1">
+                          <div className="min-w-[9.5rem] flex-1">
                             <p className="truncate text-sm font-semibold leading-5 text-slate-100">
                               {layer.title}
                             </p>
@@ -1109,18 +1109,19 @@ export function LayerToggle({
                               ) : null}
                             </div>
                           </div>
-                          <button
-                            aria-label={`More information for ${layer.title}`}
-                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
-                            onClick={() =>
-                              setOpenInfoLayerId(infoOpen ? null : layer.id)
-                            }
-                            title="More Info"
-                            type="button"
-                          >
-                            <Info className="h-3.5 w-3.5" />
-                          </button>
-                          {hasConfigure ? (
+                          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+                            <button
+                              aria-label={`More information for ${layer.title}`}
+                              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
+                              onClick={() =>
+                                setOpenInfoLayerId(infoOpen ? null : layer.id)
+                              }
+                              title="More Info"
+                              type="button"
+                            >
+                              <Info className="h-3.5 w-3.5" />
+                            </button>
+                            {hasConfigure ? (
                             <button
                               aria-label={`Configure ${layer.title}`}
                               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#d8b86a]/35 hover:bg-[#d8b86a]/10 hover:text-[#f6d98e]"
@@ -1134,8 +1135,8 @@ export function LayerToggle({
                             >
                               <Settings2 className="h-3.5 w-3.5" />
                             </button>
-                          ) : null}
-                          {hasLegend ? (
+                            ) : null}
+                            {hasLegend ? (
                             <button
                               aria-label={`Legend for ${layer.title}`}
                               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
@@ -1149,30 +1150,31 @@ export function LayerToggle({
                             >
                               <SwatchBook className="h-3.5 w-3.5" />
                             </button>
-                          ) : null}
-                          <button
-                            aria-label={`${active ? "Hide" : "Show"} ${layer.title}`}
-                            aria-pressed={active}
-                            className={cn(
-                              "relative h-5 w-9 shrink-0 rounded-full border transition disabled:cursor-not-allowed",
-                              active
-                                ? "border-[#d8b86a]/40 bg-[#d8b86a]/25"
-                                : "border-white/10 bg-white/5",
-                            )}
-                            disabled={disabled}
-                            onClick={() => setLayerOn(layer, !active)}
-                            title={active ? "Hide layer" : "Show layer"}
-                            type="button"
-                          >
-                            <span
+                            ) : null}
+                            <button
+                              aria-label={`${active ? "Hide" : "Show"} ${layer.title}`}
+                              aria-pressed={active}
                               className={cn(
-                                "absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full transition",
+                                "relative h-5 w-9 shrink-0 rounded-full border transition disabled:cursor-not-allowed",
                                 active
-                                  ? "left-[18px] bg-[#f0cd79]"
-                                  : "left-1 bg-slate-500",
+                                  ? "border-[#d8b86a]/40 bg-[#d8b86a]/25"
+                                  : "border-white/10 bg-white/5",
                               )}
-                            />
-                          </button>
+                              disabled={disabled}
+                              onClick={() => setLayerOn(layer, !active)}
+                              title={active ? "Hide layer" : "Show layer"}
+                              type="button"
+                            >
+                              <span
+                                className={cn(
+                                  "absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full transition",
+                                  active
+                                    ? "left-[18px] bg-[#f0cd79]"
+                                    : "left-1 bg-slate-500",
+                                )}
+                              />
+                            </button>
+                          </div>
                         </div>
 
                         <p className="mt-1 truncate text-[11px] leading-5 text-slate-500">
@@ -1268,7 +1270,7 @@ function ModelResearchStatusCard({
 
 function LayerInlinePanel({ children }: { children: ReactNode }) {
   return (
-    <div className="mt-2 rounded-md border border-white/10 bg-black/18 p-2">
+    <div className="mt-2 min-w-0 overflow-hidden rounded-md border border-white/10 bg-black/18 p-2">
       {children}
     </div>
   );
@@ -1286,8 +1288,8 @@ function ComingSoonLayerRow({
   open: boolean;
 }) {
   return (
-    <article className="rounded-md border border-white/10 bg-black/12 p-2">
-      <div className="flex min-w-0 items-center gap-2">
+    <article className="min-w-0 overflow-hidden rounded-md border border-white/10 bg-black/12 p-2">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         <span
           className="h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_16px_currentColor]"
           style={{ background: layer.accent, color: layer.accent }}
@@ -1301,23 +1303,25 @@ function ComingSoonLayerRow({
             <LayerStatusBadge>Methodology</LayerStatusBadge>
           </div>
         </div>
-        <button
-          aria-label={`More information for ${layer.title}`}
-          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
-          onClick={onMoreInfo}
-          title="More Info"
-          type="button"
-        >
-          <Info className="h-3.5 w-3.5" />
-        </button>
-        <button
-          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[#68d8ff]/18 bg-[#68d8ff]/10 text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
-          onClick={onOpenMethodology}
-          title="Open Methodology"
-          type="button"
-        >
-          <BookOpen className="h-3.5 w-3.5" />
-        </button>
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          <button
+            aria-label={`More information for ${layer.title}`}
+            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
+            onClick={onMoreInfo}
+            title="More Info"
+            type="button"
+          >
+            <Info className="h-3.5 w-3.5" />
+          </button>
+          <button
+            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[#68d8ff]/18 bg-[#68d8ff]/10 text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+            onClick={onOpenMethodology}
+            title="Open Methodology"
+            type="button"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
       <p className="mt-2 text-[11px] leading-5 text-slate-500">
         Infrastructure readiness is tracked in Methodology and will become
@@ -1388,7 +1392,9 @@ function LayerInfoFact({ label, value }: { label: string; value: string }) {
       <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
         {label}
       </p>
-      <p className="mt-0.5 text-[11px] leading-5 text-slate-300">{value}</p>
+      <p className="mt-0.5 break-words text-[11px] leading-5 text-slate-300">
+        {value}
+      </p>
     </div>
   );
 }
@@ -1489,7 +1495,7 @@ function LayerStatusBadge({
   return (
     <span
       className={cn(
-        "max-w-full rounded border px-2 py-1 text-[10px] font-medium leading-4",
+        "max-w-full whitespace-nowrap rounded border px-2 py-1 text-[10px] font-medium leading-4",
         active ? activeTone[tone] : activeTone.neutral,
       )}
     >

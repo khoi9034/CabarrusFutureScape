@@ -3,10 +3,11 @@
 import {
   ArrowRight,
   BarChart3,
-  FileSearch,
+  FlaskConical,
   Layers3,
   Save,
   Search,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDashboardState } from "@/hooks/useDashboardState";
@@ -14,9 +15,13 @@ import { cn } from "@/lib/utils";
 
 export const CFS_SAVE_PLANNING_SNAPSHOT_EVENT =
   "cfs:save-planning-snapshot";
+export const CFS_EXPAND_OVERVIEW_RAIL_EVENT = "cfs:expand-overview-rail";
 export const CFS_OPEN_LAYER_RAIL_EVENT = "cfs:open-layer-rail";
+export const CFS_OPEN_MODEL_LAB_EVENT = "cfs:open-model-lab";
 export const CFS_PLANNING_SNAPSHOT_SAVED_EVENT =
   "cfs:planning-snapshot-saved";
+export const CFS_TOGGLE_OVERVIEW_CUSTOM_LAYOUT_EVENT =
+  "cfs:toggle-overview-custom-layout";
 
 const commandWorkflows = [
   {
@@ -24,33 +29,38 @@ const commandWorkflows = [
     actionLabel: "Search Parcel",
     icon: Search,
     id: "find-parcel",
-    helper: "Focus the parcel search bar.",
+    helper: "Find parcel context.",
   },
   {
-    actionLabel: "Countywide Intelligence",
+    actionLabel: "Explore Countywide",
     icon: BarChart3,
     id: "explore-intelligence",
-    helper: "Open advanced layers and indicators.",
+    helper: "Open layers and indicators.",
+  },
+  {
+    actionLabel: "Model Lab",
+    icon: FlaskConical,
+    id: "model-lab",
+    helper: "Review internal model research.",
   },
   {
     icon: Save,
     id: "build-snapshot",
-    actionLabel: "Save Snapshot",
-    helper: "Capture the current map context.",
-  },
-  {
-    actionLabel: "Open Snapshots",
-    icon: FileSearch,
-    id: "open-snapshots",
-    helper: "Review saved report snapshots.",
+    actionLabel: "Snapshot Builder",
+    helper: "Choose what to capture.",
   },
 ];
 
 export function OverviewCommandCenter() {
   const {
+    overviewCommandMode,
+    overviewLayout,
     planningSnapshot,
     savedPlanningSnapshots,
     selectedParcelId,
+    setOverviewCommandMode,
+    setOverviewLayoutCommandCenter,
+    setOverviewLayoutPanel,
     setPlanningSnapshotView,
     setProductMode,
   } = useDashboardState();
@@ -76,6 +86,10 @@ export function OverviewCommandCenter() {
   }, []);
 
   function focusParcelSearch() {
+    setOverviewCommandMode("parcel");
+    setOverviewLayoutPanel("left", "collapsed");
+    setOverviewLayoutPanel("right", "visible");
+    setOverviewLayoutCommandCenter("compact");
     const searchInput = document.querySelector<HTMLInputElement>(
       'input[aria-label="Search parcels"]',
     );
@@ -84,7 +98,34 @@ export function OverviewCommandCenter() {
   }
 
   function showIntelligenceBrief() {
+    setOverviewCommandMode("countywide");
+    setOverviewLayoutPanel("left", "visible");
+    setOverviewLayoutPanel("right", "visible");
+    setOverviewLayoutCommandCenter("compact");
     window.dispatchEvent(new CustomEvent(CFS_OPEN_LAYER_RAIL_EVENT));
+    document
+      .getElementById("cfs-intelligence-brief")
+      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+
+  function openSnapshotBuilder() {
+    setOverviewCommandMode("snapshot");
+    setOverviewLayoutPanel("left", "visible");
+    setOverviewLayoutPanel("right", "visible");
+    setOverviewLayoutCommandCenter("compact");
+    window.dispatchEvent(new CustomEvent(CFS_EXPAND_OVERVIEW_RAIL_EVENT));
+    document
+      .getElementById("cfs-intelligence-brief")
+      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+
+  function showModelLab() {
+    setOverviewCommandMode("modelLab");
+    setOverviewLayoutPanel("left", "visible");
+    setOverviewLayoutPanel("right", "visible");
+    setOverviewLayoutCommandCenter("compact");
+    window.dispatchEvent(new CustomEvent(CFS_OPEN_MODEL_LAB_EVENT));
+    window.dispatchEvent(new CustomEvent(CFS_EXPAND_OVERVIEW_RAIL_EVENT));
     document
       .getElementById("cfs-intelligence-brief")
       ?.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -92,11 +133,18 @@ export function OverviewCommandCenter() {
 
   function saveSnapshotForReport() {
     window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT));
+    setOverviewCommandMode("snapshot");
   }
 
   function openPlanningSnapshot() {
     setPlanningSnapshotView("overview");
     setProductMode("due_diligence");
+  }
+
+  function openCustomizeLayout() {
+    window.dispatchEvent(
+      new CustomEvent(CFS_TOGGLE_OVERVIEW_CUSTOM_LAYOUT_EVENT),
+    );
   }
 
   function handleWorkflowAction(workflowId: string) {
@@ -110,46 +158,87 @@ export function OverviewCommandCenter() {
       return;
     }
 
-    if (workflowId === "open-snapshots") {
-      openPlanningSnapshot();
+    if (workflowId === "model-lab") {
+      showModelLab();
       return;
     }
 
-    saveSnapshotForReport();
+    openSnapshotBuilder();
   }
+
+  const snapshotStatusText = savedPlanningSnapshots.length
+    ? `${savedPlanningSnapshots.length} saved`
+    : planningSnapshot
+      ? "Snapshot ready"
+      : "No snapshots";
+  const commandCenterCompact = overviewLayout.commandCenter === "compact";
 
   return (
     <section
-      className="app-chrome rounded-lg border border-white/10 bg-[#07111f]/90 px-3 py-2.5 shadow-[0_14px_42px_rgba(0,0,0,0.24)] backdrop-blur-xl"
+      className={cn(
+        "app-chrome rounded-lg border border-white/10 bg-[#07111f]/90 px-3 shadow-[0_12px_34px_rgba(0,0,0,0.22)] backdrop-blur-xl",
+        commandCenterCompact ? "py-1.5" : "py-2",
+      )}
       data-testid="cfs-command-center"
     >
-      <div className="flex min-w-0 flex-col gap-3 2xl:flex-row 2xl:items-center">
-        <div className="min-w-0 2xl:w-[22rem] 2xl:shrink-0">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
-            CFS Command Center
-          </p>
-          <h1 className="mt-1 text-base font-semibold leading-6 text-white md:text-lg">
-            Search, explore, and save report-ready context.
-          </h1>
-          <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-500">
-            {selectedParcelId
-              ? `Selected parcel: ${selectedParcelId}`
-              : "Search a parcel, review countywide intelligence, or capture the current map into an executive-ready planning snapshot."}
-          </p>
+      <div className="flex min-w-0 flex-col gap-2">
+        <div className="flex min-w-0 flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
+              CFS Command Center
+            </p>
+            <h1 className="mt-0.5 text-sm font-semibold leading-5 text-white md:text-base">
+              Search, explore, model, or save a report-ready snapshot.
+            </h1>
+            {selectedParcelId ? (
+              <p className="mt-0.5 text-[11px] leading-4 text-slate-500">
+                Selected parcel: {selectedParcelId}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="flex w-fit max-w-full shrink-0 flex-wrap items-center gap-2">
+            <button
+              aria-label="Customize Overview layout"
+              className="inline-flex items-center gap-2 rounded-md border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#f8dc91] transition hover:border-[#d8b86a]/45 hover:bg-[#d8b86a]/15"
+              onClick={openCustomizeLayout}
+              type="button"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" />
+              <span className="whitespace-nowrap">Customize Layout</span>
+            </button>
+
+            <div className="inline-flex max-w-full shrink-0 items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-400">
+              <Layers3 className="h-3.5 w-3.5 shrink-0 text-[#8fe7ff]" />
+              <span className="whitespace-nowrap">{snapshotStatusText}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-1.5 sm:grid-cols-2 2xl:grid-cols-4">
           {commandWorkflows.map((workflow) => {
             const Icon = workflow.icon;
             const primary = workflow.accent === "primary";
+            const active =
+              (workflow.id === "find-parcel" &&
+                overviewCommandMode === "parcel") ||
+              (workflow.id === "explore-intelligence" &&
+                overviewCommandMode === "countywide") ||
+              (workflow.id === "model-lab" &&
+                overviewCommandMode === "modelLab") ||
+              (workflow.id === "build-snapshot" &&
+                overviewCommandMode === "snapshot");
 
             return (
               <button
+                aria-pressed={active}
                 className={cn(
-                  "group inline-flex min-h-10 min-w-0 items-center justify-between gap-3 rounded-md border px-3 py-2 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-                  primary
-                    ? "border-[#d8b86a]/35 bg-[#d8b86a]/12 text-[#f8dc91] hover:bg-[#d8b86a]/18 focus-visible:outline-[#d8b86a]/70"
-                    : "border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/20 hover:bg-white/[0.07] focus-visible:outline-[#68d8ff]/70",
+                  "group relative flex min-h-[68px] min-w-0 overflow-hidden rounded-lg border px-3 py-2 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+                  active
+                    ? "border-[#68d8ff]/65 bg-[#68d8ff]/16 text-white shadow-[0_0_30px_rgba(104,216,255,0.2)] focus-visible:outline-[#68d8ff]/70"
+                    : primary
+                      ? "border-[#d8b86a]/28 bg-[#d8b86a]/10 text-[#f8dc91] hover:border-[#d8b86a]/48 hover:bg-[#d8b86a]/15 focus-visible:outline-[#d8b86a]/70"
+                      : "border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/20 hover:bg-white/[0.07] focus-visible:outline-[#68d8ff]/70",
                 )}
                 data-testid={`command-center-${workflow.id}`}
                 key={workflow.id}
@@ -157,27 +246,46 @@ export function OverviewCommandCenter() {
                 title={workflow.helper}
                 type="button"
               >
-                <span className="flex min-w-0 items-center gap-2">
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate text-sm font-semibold">
-                    {workflow.actionLabel}
+                {active ? (
+                  <span className="absolute inset-y-2 left-0 w-1 rounded-r-full bg-[#68d8ff] shadow-[0_0_14px_rgba(104,216,255,0.85)]" />
+                ) : null}
+                {active ? (
+                  <span className="absolute right-2 top-1.5 rounded-full border border-[#68d8ff]/35 bg-[#68d8ff]/13 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-[#bff3ff]">
+                    Active
+                  </span>
+                ) : (
+                  <ArrowRight className="absolute right-2 top-2 h-3.5 w-3.5 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-300" />
+                )}
+                <span className="flex min-w-0 flex-1 items-center gap-2.5 pr-7">
+                  <span
+                    className={cn(
+                      "flex h-7 w-7 shrink-0 items-center justify-center rounded-md border",
+                      active
+                        ? "border-[#68d8ff]/45 bg-[#68d8ff]/18 text-[#d7f8ff] shadow-[0_0_16px_rgba(104,216,255,0.22)]"
+                        : primary
+                          ? "border-[#d8b86a]/25 bg-[#d8b86a]/12 text-[#f8dc91]"
+                          : "border-white/10 bg-white/[0.06] text-[#8fe7ff]",
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span
+                      className={cn(
+                        "block text-sm font-semibold leading-4",
+                        active ? "text-[#e7fbff]" : "text-white",
+                      )}
+                    >
+                      {workflow.actionLabel}
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-4 text-slate-400">
+                      {workflow.helper}
+                    </span>
                   </span>
                 </span>
-                <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
               </button>
             );
           })}
-        </div>
-
-        <div className="flex min-w-0 shrink-0 items-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.11em] text-slate-400 2xl:max-w-[10rem]">
-          <Layers3 className="h-3.5 w-3.5 text-[#8fe7ff]" />
-          <span className="truncate">
-            {savedPlanningSnapshots.length
-              ? `${savedPlanningSnapshots.length} saved`
-              : planningSnapshot
-                ? "Snapshot ready"
-                : "No snapshots"}
-          </span>
         </div>
       </div>
 
@@ -223,8 +331,7 @@ export function OverviewCommandCenter() {
         </div>
       ) : (
         <p className="mt-2 text-[11px] leading-5 text-slate-600">
-          Layers stay collapsed by default. Use Countywide Intelligence when
-          you need advanced overlays and indicators.
+          Layers stay collapsed by default. Use Explore Countywide for overlays.
         </p>
       )}
     </section>

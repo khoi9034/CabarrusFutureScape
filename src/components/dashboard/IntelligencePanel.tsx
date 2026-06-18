@@ -9,6 +9,7 @@ import {
   Crosshair,
   Database,
   FileSearch,
+  FlaskConical,
   MapPin,
   Monitor,
   Save,
@@ -31,9 +32,18 @@ import { SchoolConstraintSummaryPanel } from "@/components/dashboard/SchoolConst
 import { TemporalAnalysisPanel } from "@/components/dashboard/TemporalAnalysisPanel";
 import {
   CFS_OPEN_LAYER_RAIL_EVENT,
+  CFS_OPEN_MODEL_LAB_EVENT,
   CFS_PLANNING_SNAPSHOT_SAVED_EVENT,
   CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
 } from "@/components/dashboard/OverviewCommandCenter";
+import {
+  developmentModelLabSummary,
+  formatModelResearchDriverLabel,
+  formatRelativeDevelopmentSignalBand,
+  futureModelLabPlaceholders,
+  getModelResearchDriverExplanation,
+  modelResearchLegendLabels,
+} from "@/data/intelligence/developmentModelLab";
 import {
   formatDevelopmentCount,
   formatDevelopmentDate,
@@ -60,7 +70,10 @@ import type {
   PlanningReviewFocusMode,
   PlanningSnapshotSectionKey,
   ProductMode,
+  ModelResearchMapSummary,
+  OverviewCommandMode,
 } from "@/types";
+import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
 import type { SelectedSchoolUtilizationZone } from "@/types/map/schoolUtilizationZones";
 
 const showDeveloperSections =
@@ -103,11 +116,15 @@ export function IntelligencePanel() {
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
     floodZonesEnabled,
+    modelResearchOverlayEnabled,
+    modelResearchMapSummary,
+    overviewCommandMode,
     productMode,
     parcelReviewView,
     selectedParcelId,
     selectedParcelIntelligence,
     selectedParcelIntelligenceSource,
+    selectedModelResearchContext,
     selectedSchoolUtilizationZone,
     planningSnapshot,
     savedPlanningSnapshots,
@@ -115,6 +132,7 @@ export function IntelligencePanel() {
     savePlanningSnapshot,
     schoolUtilizationZonesEnabled,
     setMapFocusMode,
+    setOverviewCommandMode,
     setParcelReviewView,
     setPlanningSnapshotView,
     setProductMode,
@@ -131,7 +149,7 @@ export function IntelligencePanel() {
   return (
     <aside
       aria-label={`${metadata.label} intelligence panel`}
-      className="glass-panel no-scrollbar order-3 min-h-0 overflow-auto rounded-lg p-3 md:max-h-[72vh] lg:order-3 lg:max-h-none"
+      className="glass-panel no-scrollbar order-3 h-full min-h-0 max-h-full w-full overflow-x-hidden overflow-y-auto rounded-lg p-3 lg:order-3"
     >
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="min-w-0">
@@ -161,6 +179,7 @@ export function IntelligencePanel() {
           selectedParcelId={selectedParcelId}
           selectedParcelIntelligence={selectedParcelIntelligence}
           selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
+          selectedModelResearchContext={selectedModelResearchContext}
           selectedSchoolUtilizationZone={selectedSchoolUtilizationZone}
           clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
           activeLayerIds={activeLayerIds}
@@ -168,11 +187,15 @@ export function IntelligencePanel() {
           developmentHotspotsEnabled={developmentHotspotsEnabled}
           floodConstraintsEnabled={floodConstraintsEnabled}
           floodZonesEnabled={floodZonesEnabled}
+          modelResearchOverlayEnabled={modelResearchOverlayEnabled}
+          modelResearchMapSummary={modelResearchMapSummary}
+          overviewCommandMode={overviewCommandMode}
           schoolUtilizationZonesEnabled={schoolUtilizationZonesEnabled}
           planningSnapshot={planningSnapshot}
           savedPlanningSnapshots={savedPlanningSnapshots}
           savePlanningSnapshot={savePlanningSnapshot}
           setMapFocusMode={setMapFocusMode}
+          setOverviewCommandMode={setOverviewCommandMode}
           setProductMode={setProductMode}
           setPlanningSnapshotView={setPlanningSnapshotView}
         />
@@ -207,6 +230,9 @@ function OverviewModeContent({
   developmentHotspotsEnabled,
   floodConstraintsEnabled,
   floodZonesEnabled,
+  modelResearchOverlayEnabled,
+  modelResearchMapSummary,
+  overviewCommandMode,
   planningSnapshot,
   savedPlanningSnapshots,
   savePlanningSnapshot,
@@ -214,8 +240,10 @@ function OverviewModeContent({
   selectedParcelId,
   selectedParcelIntelligence,
   selectedParcelIntelligenceSource,
+  selectedModelResearchContext,
   selectedSchoolUtilizationZone,
   setMapFocusMode,
+  setOverviewCommandMode,
   setProductMode,
   setPlanningSnapshotView,
 }: {
@@ -225,6 +253,9 @@ function OverviewModeContent({
   developmentHotspotsEnabled: boolean;
   floodConstraintsEnabled: boolean;
   floodZonesEnabled: boolean;
+  modelResearchOverlayEnabled: boolean;
+  modelResearchMapSummary: ModelResearchMapSummary;
+  overviewCommandMode: OverviewCommandMode;
   planningSnapshot: PlanningSnapshot | null;
   savedPlanningSnapshots: PlanningSnapshot[];
   savePlanningSnapshot: (snapshot: PlanningSnapshot) => void;
@@ -232,8 +263,10 @@ function OverviewModeContent({
   selectedParcelId: string | null;
   selectedParcelIntelligence: Parameters<typeof ParcelSummaryPanel>[0]["parcel"];
   selectedParcelIntelligenceSource: Parameters<typeof ParcelSummaryPanel>[0]["source"];
+  selectedModelResearchContext: ModelResearchPreviewMarker | null;
   selectedSchoolUtilizationZone: SelectedSchoolUtilizationZone | null;
   setMapFocusMode: ReturnType<typeof useDashboardState>["setMapFocusMode"];
+  setOverviewCommandMode: ReturnType<typeof useDashboardState>["setOverviewCommandMode"];
   setProductMode: (mode: ProductMode) => void;
   setPlanningSnapshotView: ReturnType<typeof useDashboardState>["setPlanningSnapshotView"];
 }) {
@@ -280,11 +313,14 @@ function OverviewModeContent({
 
     try {
       const mapSnapshot = await captureMapSnapshotForPlanning();
-      const snapshotFocusMode: PlanningReviewFocusMode =
-        selectedParcelForSnapshot ? "parcel_lookup" : "planning_snapshot_report";
-      const snapshotFocusLabel = selectedParcelForSnapshot
-        ? "Selected Parcel Snapshot"
-        : "Overview Command Center";
+      const snapshotFocusMode = getPlanningFocusModeForOverviewMode(
+        overviewCommandMode,
+        Boolean(selectedParcelForSnapshot),
+      );
+      const snapshotFocusLabel = getSnapshotFocusLabelForOverviewMode(
+        overviewCommandMode,
+        Boolean(selectedParcelForSnapshot),
+      );
       const nextSnapshot = buildPlanningSnapshot({
         activeLayerIds,
         activeLayerLabels,
@@ -293,8 +329,12 @@ function OverviewModeContent({
         focusMode: snapshotFocusMode,
         focusModeLabel: snapshotFocusLabel,
         mapSnapshot,
+        modelResearchMapSummary,
+        modelResearchOverlayEnabled,
+        overviewCommandMode,
         parcel: selectedParcelForSnapshot,
         schoolConstraint,
+        selectedModelResearchContext,
       });
       savePlanningSnapshot(nextSnapshot);
       setPlanningSnapshotView("overview");
@@ -311,8 +351,12 @@ function OverviewModeContent({
     activeLayerLabels,
     developmentActivity,
     floodConstraint,
+    modelResearchMapSummary,
+    modelResearchOverlayEnabled,
+    overviewCommandMode,
     savePlanningSnapshot,
     schoolConstraint,
+    selectedModelResearchContext,
     selectedParcelForSnapshot,
     setPlanningSnapshotView,
     snapshotSaving,
@@ -323,9 +367,13 @@ function OverviewModeContent({
       void handleSaveOverviewSnapshot();
     }
     function handleCountywideIntelligence() {
+      setOverviewCommandMode("countywide");
       setCountywideBriefOverride({
         parcelId: selectedParcelOfficialId ?? null,
       });
+    }
+    function handleModelLab() {
+      setOverviewCommandMode("modelLab");
     }
 
     window.addEventListener(
@@ -336,6 +384,7 @@ function OverviewModeContent({
       CFS_OPEN_LAYER_RAIL_EVENT,
       handleCountywideIntelligence,
     );
+    window.addEventListener(CFS_OPEN_MODEL_LAB_EVENT, handleModelLab);
 
     return () => {
       window.removeEventListener(
@@ -346,10 +395,16 @@ function OverviewModeContent({
         CFS_OPEN_LAYER_RAIL_EVENT,
         handleCountywideIntelligence,
       );
+      window.removeEventListener(CFS_OPEN_MODEL_LAB_EVENT, handleModelLab);
     };
-  }, [handleSaveOverviewSnapshot, selectedParcelOfficialId]);
+  }, [
+    handleSaveOverviewSnapshot,
+    selectedParcelOfficialId,
+    setOverviewCommandMode,
+  ]);
 
   const countywideBriefVisible =
+    overviewCommandMode === "countywide" ||
     countywideBriefOverride?.parcelId === (selectedParcelOfficialId ?? null);
 
   async function handleCopyParcelId() {
@@ -368,33 +423,75 @@ function OverviewModeContent({
 
   return (
     <div className="space-y-4">
-      <IntelligenceBriefPanel
-        activeLayerLabels={activeLayerLabels}
-        developmentActivity={developmentActivity}
-        developmentStatistics={developmentStatistics}
-        floodConstraint={floodConstraint}
-        floodSummary={floodSummary}
-        onOpenPlanningSnapshot={() => {
-          setPlanningSnapshotView("overview");
-          setProductMode("due_diligence");
-        }}
-        onCopyParcelId={handleCopyParcelId}
-        onFocusMap={() => setMapFocusMode(true)}
-        onSaveSnapshot={handleSaveOverviewSnapshot}
-        onShowSelectedParcel={() => setCountywideBriefOverride(null)}
-        parcel={selectedParcelIntelligence}
-        parcelDashboardMetrics={parcelDashboardMetrics}
-        parcelIdCopied={parcelIdCopied}
-        planningSnapshot={planningSnapshot}
-        savedPlanningSnapshots={savedPlanningSnapshots}
-        schoolConstraint={schoolConstraint}
-        selectedParcelId={selectedParcelOfficialId}
-        source={selectedParcelIntelligenceSource}
-        snapshotSaved={snapshotSaved}
-        snapshotSaving={snapshotSaving}
-        showCountywideBrief={countywideBriefVisible}
-        transportationContext={transportationContext}
-      />
+      {overviewCommandMode === "modelLab" ? (
+        <ModelLabPanel
+          modelResearchOverlayEnabled={modelResearchOverlayEnabled}
+          modelResearchMapSummary={modelResearchMapSummary}
+          onOpenMethodology={() => {
+            window.location.hash = "methodology-model-lab";
+            setProductMode("methodology");
+          }}
+          onOpenPlanningSnapshot={() => {
+            setPlanningSnapshotView("overview");
+            setProductMode("due_diligence");
+          }}
+          onReturnToBrief={() => {
+            setOverviewCommandMode("countywide");
+            setCountywideBriefOverride({
+              parcelId: selectedParcelOfficialId ?? null,
+            });
+          }}
+          onSaveSnapshot={handleSaveOverviewSnapshot}
+          selectedModelResearchContext={selectedModelResearchContext}
+          selectedParcelId={selectedParcelOfficialId}
+          snapshotSaving={snapshotSaving}
+        />
+      ) : overviewCommandMode === "snapshot" ? (
+        <SnapshotCapturePanel
+          activeLayerLabels={activeLayerLabels}
+          onOpenPlanningSnapshot={() => {
+            setPlanningSnapshotView("overview");
+            setProductMode("due_diligence");
+          }}
+          onSaveSnapshot={handleSaveOverviewSnapshot}
+          planningSnapshot={planningSnapshot}
+          savedPlanningSnapshots={savedPlanningSnapshots}
+          selectedParcelId={selectedParcelOfficialId}
+          snapshotSaving={snapshotSaving}
+        />
+      ) : (
+        <IntelligenceBriefPanel
+          activeLayerLabels={activeLayerLabels}
+          developmentActivity={developmentActivity}
+          developmentStatistics={developmentStatistics}
+          floodConstraint={floodConstraint}
+          floodSummary={floodSummary}
+          onOpenPlanningSnapshot={() => {
+            setPlanningSnapshotView("overview");
+            setProductMode("due_diligence");
+          }}
+          onCopyParcelId={handleCopyParcelId}
+          onFocusMap={() => setMapFocusMode(true)}
+          onSaveSnapshot={handleSaveOverviewSnapshot}
+          onShowSelectedParcel={() => {
+            setCountywideBriefOverride(null);
+            setOverviewCommandMode("parcel");
+          }}
+          overviewCommandMode={overviewCommandMode}
+          parcel={selectedParcelIntelligence}
+          parcelDashboardMetrics={parcelDashboardMetrics}
+          parcelIdCopied={parcelIdCopied}
+          planningSnapshot={planningSnapshot}
+          savedPlanningSnapshots={savedPlanningSnapshots}
+          schoolConstraint={schoolConstraint}
+          selectedParcelId={selectedParcelOfficialId}
+          source={selectedParcelIntelligenceSource}
+          snapshotSaved={snapshotSaved}
+          snapshotSaving={snapshotSaving}
+          showCountywideBrief={countywideBriefVisible}
+          transportationContext={transportationContext}
+        />
+      )}
 
       <SelectedSchoolUtilizationZoneCard
         enabled={schoolUtilizationZonesEnabled}
@@ -416,6 +513,7 @@ function IntelligenceBriefPanel({
   onOpenPlanningSnapshot,
   onSaveSnapshot,
   onShowSelectedParcel,
+  overviewCommandMode,
   parcel,
   parcelDashboardMetrics,
   parcelIdCopied,
@@ -439,6 +537,7 @@ function IntelligenceBriefPanel({
   onOpenPlanningSnapshot: () => void;
   onSaveSnapshot: () => void | Promise<void>;
   onShowSelectedParcel: () => void;
+  overviewCommandMode: OverviewCommandMode;
   parcel: Parameters<typeof ParcelSummaryPanel>[0]["parcel"];
   parcelDashboardMetrics: ReturnType<typeof useParcelDashboardMetrics>;
   parcelIdCopied: boolean;
@@ -453,6 +552,7 @@ function IntelligenceBriefPanel({
   transportationContext: ReturnType<typeof useTransportationContextSummary>;
 }) {
   const hasParcel = Boolean(parcel) && !showCountywideBrief;
+  const showParcelHelper = !hasParcel && overviewCommandMode === "parcel";
 
   return (
     <section
@@ -469,17 +569,23 @@ function IntelligenceBriefPanel({
         </div>
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-            {hasParcel ? "Selected Parcel Intelligence" : "Intelligence Brief"}
+            {hasParcel || showParcelHelper
+              ? "Selected Parcel Intelligence"
+              : "Countywide Intelligence"}
           </p>
           <h3 className="mt-1 truncate text-base font-semibold text-white">
             {hasParcel
               ? parcel?.officialParcelId
-              : "Countywide planning context"}
+              : showParcelHelper
+                ? "Search a parcel to begin"
+              : "Countywide indicators"}
           </h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             {hasParcel
               ? "Snapshot-ready parcel facts, constraints, and observed activity."
-              : "Headline indicators, active map context, and safe report actions."}
+              : showParcelHelper
+                ? "Use the top search bar to add zoning, flood, school, activity, transportation, and utility context."
+                : "Countywide indicators, active layers, and safe report actions."}
           </p>
         </div>
       </div>
@@ -496,6 +602,8 @@ function IntelligenceBriefPanel({
           source={source}
           transportationContext={transportationContext}
         />
+      ) : showParcelHelper ? (
+        <ParcelSearchBrief />
       ) : (
         <CountywideBrief
           activeLayerLabels={activeLayerLabels}
@@ -569,6 +677,747 @@ function IntelligenceBriefPanel({
         </div>
       </details>
     </section>
+  );
+}
+
+function ParcelSearchBrief() {
+  return (
+    <div className="mt-3 space-y-3">
+      <div className="rounded-md border border-white/10 bg-white/[0.035] p-3">
+        <div className="flex items-start gap-3">
+          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#d8b86a]" />
+          <div>
+            <p className="text-xs font-semibold text-slate-200">
+              Parcel-first workflow
+            </p>
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              Search parcel ID, PIN, owner, address, or subdivision. Once a
+              parcel is selected, CFS will focus the map and show parcel facts,
+              zoning, flood, school, development, transportation, utility proxy,
+              and model-governance caveats.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="Use the global search bar at the top of CFS."
+          label="Step 1"
+          value="Search"
+        />
+        <BriefStat
+          caveat="The map focuses on selected parcel context."
+          label="Step 2"
+          value="Focus"
+        />
+        <BriefStat
+          caveat="Right panel switches to parcel intelligence."
+          label="Step 3"
+          value="Review"
+        />
+        <BriefStat
+          caveat="Save map and intelligence context for reporting."
+          label="Step 4"
+          value="Snapshot"
+        />
+      </div>
+    </div>
+  );
+}
+
+function SnapshotCapturePanel({
+  activeLayerLabels,
+  onOpenPlanningSnapshot,
+  onSaveSnapshot,
+  planningSnapshot,
+  savedPlanningSnapshots,
+  selectedParcelId,
+  snapshotSaving,
+}: {
+  activeLayerLabels: string[];
+  onOpenPlanningSnapshot: () => void;
+  onSaveSnapshot: () => void | Promise<void>;
+  planningSnapshot: PlanningSnapshot | null;
+  savedPlanningSnapshots: PlanningSnapshot[];
+  selectedParcelId: string | null;
+  snapshotSaving: boolean;
+}) {
+  const latestCapturedMode = planningSnapshot?.overviewCommandMode
+    ? formatOverviewCommandModeLabel(planningSnapshot.overviewCommandMode)
+    : "No snapshot captured yet";
+  const mapStatus =
+    planningSnapshot?.mapScreenshotStatus === "captured"
+      ? "Map image captured"
+      : planningSnapshot?.mapScreenshotStatus === "failed"
+        ? "Map image unavailable"
+        : planningSnapshot?.mapScreenshotStatus === "unavailable"
+          ? "Map image unavailable"
+          : "Awaiting capture";
+
+  return (
+    <section
+      className="rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/82 p-3 shadow-[0_14px_38px_rgba(0,0,0,0.2)]"
+      id="cfs-intelligence-brief"
+    >
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#d8b86a]/26 bg-[#d8b86a]/10 text-[#f0cd79]">
+          <Save className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f0cd79]">
+            Snapshot Builder
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-white">
+            Snapshot Builder mode active
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Click Save Snapshot to capture the current map and intelligence
+            context. A Planning Snapshot combines the map image with selected
+            CFS intelligence so the executive summary can explain what the
+            viewer is seeing.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="Snapshot records the Overview task mode that was active when saved."
+          label="Last captured mode"
+          value={latestCapturedMode}
+        />
+        <BriefStat
+          caveat="SceneView provides the map image when browser/GPU support allows it."
+          label="Map image"
+          value={mapStatus}
+        />
+        <BriefStat
+          caveat="Parcel-specific facts are included when a parcel is selected."
+          label="Selected parcel"
+          value={selectedParcelId ?? "No parcel selected"}
+        />
+        <BriefStat
+          caveat="Active layer names are carried into the report context."
+          label="Active layers"
+          value={String(activeLayerLabels.length)}
+        />
+        <BriefStat
+          caveat="Snapshots are stored locally for this prototype."
+          label="Saved snapshots"
+          value={String(savedPlanningSnapshots.length)}
+        />
+        <BriefStat
+          caveat="Executive Summary is generated from the selected saved snapshot."
+          label="Report builder"
+          value={planningSnapshot ? "Ready" : "Not saved"}
+        />
+      </div>
+
+      <div className="mt-3 rounded-md border border-white/10 bg-white/[0.035] p-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Captured evidence
+        </p>
+        <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-400">
+          <li>- Map view and screenshot status</li>
+          <li>- Selected parcel if available</li>
+          <li>- Active layers and Intelligence summary</li>
+          <li>- Headline indicators, caveats, and explainable metrics</li>
+          <li>- Internal Model Lab context only when active</li>
+        </ul>
+      </div>
+
+      <div className="mt-3 grid gap-2">
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
+          disabled={snapshotSaving}
+          onClick={() => {
+            void onSaveSnapshot();
+          }}
+          type="button"
+        >
+          <Save className="h-3.5 w-3.5" />
+          {snapshotSaving ? "Capturing Map..." : "Save Snapshot"}
+        </button>
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+          onClick={onOpenPlanningSnapshot}
+          type="button"
+        >
+          <FileSearch className="h-3.5 w-3.5" />
+          Open Snapshot Library
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function ModelLabPanel({
+  modelResearchOverlayEnabled,
+  modelResearchMapSummary,
+  onOpenMethodology,
+  onOpenPlanningSnapshot,
+  onReturnToBrief,
+  onSaveSnapshot,
+  selectedModelResearchContext,
+  selectedParcelId,
+  snapshotSaving,
+}: {
+  modelResearchOverlayEnabled: boolean;
+  modelResearchMapSummary: ModelResearchMapSummary;
+  onOpenMethodology: () => void;
+  onOpenPlanningSnapshot: () => void;
+  onReturnToBrief: () => void;
+  onSaveSnapshot: () => void | Promise<void>;
+  selectedModelResearchContext: ModelResearchPreviewMarker | null;
+  selectedParcelId: string | null;
+  snapshotSaving: boolean;
+}) {
+  const overlayStatus = modelResearchOverlayEnabled
+    ? "On"
+    : "Off by default";
+  const selectedResearchDrivers = selectedModelResearchContext?.topDrivers ?? [];
+  const selectedIsCluster =
+    selectedModelResearchContext?.contextKind === "cluster" ||
+    selectedModelResearchContext?.contextKind === "heatmap_cell";
+  const selectedRelativeBand = selectedModelResearchContext
+    ? selectedModelResearchContext.dominantResearchBand ??
+      formatRelativeDevelopmentSignalBand({
+          rankBand: selectedModelResearchContext.researchRankBand,
+          signalLabel: selectedModelResearchContext.researchSignalLabel,
+        })
+    : null;
+  const selectedRepresentedCount =
+    selectedModelResearchContext?.representedFeatureCount ?? 1;
+  const dominantRelativeBand = formatRelativeDevelopmentSignalBand({
+    signalLabel: modelResearchMapSummary.dominantSignalLabel,
+  });
+  const [explainNumbersOpen, setExplainNumbersOpen] = useState(false);
+  const [modelQaOpen, setModelQaOpen] = useState(false);
+  const [futureModelsOpen, setFutureModelsOpen] = useState(false);
+  const visibleContextLabel = modelResearchMapSummary.overlayEnabled
+    ? `${formatDevelopmentCount(
+        modelResearchMapSummary.visibleFeatureCount,
+      )} safe research ${
+        modelResearchMapSummary.displayMode === "countywide_heatmap"
+          ? "records represented"
+          : modelResearchMapSummary.displayMode === "clustered_markers" ||
+              modelResearchMapSummary.displayMode === "intermediate_subclusters"
+            ? "records clustered"
+            : modelResearchMapSummary.displayMode === "fine_local_clusters"
+              ? "records locally clustered"
+            : "markers visible"
+      }`
+    : "Overlay off";
+  const legendModeHint = getModelResearchLegendModeHint(
+    modelResearchOverlayEnabled,
+    modelResearchMapSummary.displayMode,
+  );
+
+  return (
+    <section
+      className="rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/82 p-3 shadow-[0_14px_38px_rgba(0,0,0,0.2)]"
+      id="cfs-intelligence-brief"
+    >
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#d8b86a]/26 bg-[#d8b86a]/10 text-[#f0cd79]">
+          <FlaskConical className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f0cd79]">
+            Model Lab
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-white">
+            Model Lab Intelligence
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Internal research preview for relative development signal bands.
+            Exact parcel probabilities are not shown.
+          </p>
+        </div>
+      </div>
+
+      {selectedModelResearchContext ? (
+        <div className="mt-3 rounded-lg border border-[#68d8ff]/24 bg-[#68d8ff]/[0.07] p-3 shadow-[0_14px_34px_rgba(104,216,255,0.09)]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8fe7ff]">
+                {getSelectedModelResearchContextTitle(
+                  selectedModelResearchContext,
+                )}
+              </p>
+              <h4 className="mt-1 text-sm font-semibold text-white">
+                {getSelectedModelResearchContextHeading(
+                  selectedModelResearchContext,
+                )}
+              </h4>
+              <p className="mt-1 text-[11px] leading-4 text-slate-400">
+                {selectedIsCluster
+                  ? formatRepresentedResearchCount(selectedRepresentedCount)
+                  : selectedModelResearchContext.officialParcelId ??
+                    "Parcel-safe research feature"}
+              </p>
+            </div>
+            <span className="shrink-0 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold uppercase text-slate-300">
+              Research only
+            </span>
+          </div>
+
+          <div className="mt-3 grid gap-2">
+            {selectedIsCluster ? (
+              <>
+                <BriefStat
+                  caveat="Label uses safe CFS context only; no area names are invented."
+                  label="Area label"
+                  value={getSelectedModelResearchContextHeading(
+                    selectedModelResearchContext,
+                  )}
+                />
+                <BriefStat
+                  caveat="Safe research records represented by this selected map feature."
+                  label="Parcels represented"
+                  value={formatRepresentedResearchCount(
+                    selectedRepresentedCount,
+                  )}
+                />
+              </>
+            ) : null}
+            <BriefStat
+              caveat="Relative band only. It is not an exact probability or official parcel class."
+              label={selectedIsCluster ? "Dominant band" : "Research band"}
+              value={selectedRelativeBand ?? "Relative Research Signal"}
+            />
+            {selectedIsCluster ? (
+              <BriefStat
+                caveat="Distribution of relative research bands inside the selected cluster."
+                label="Band distribution"
+                value={formatModelResearchBandDistribution(
+                  selectedModelResearchContext.bandCounts,
+                )}
+              />
+            ) : (
+              <BriefStat
+                caveat="Relative rank band only; not a numeric likelihood."
+                label="Relative rank band"
+                value={formatResearchBandLabel(
+                  selectedModelResearchContext.researchRankBand,
+                )}
+              />
+            )}
+            <BriefStat
+              caveat="Scale-dependent map mode used when this context was selected."
+              label="Map display"
+              value={formatSelectedModelResearchDisplayMode(
+                selectedModelResearchContext.displayMode ??
+                  modelResearchMapSummary.displayMode,
+              )}
+            />
+          </div>
+
+          <div className="mt-3 rounded-md border border-white/10 bg-black/18 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Top drivers
+            </p>
+            {selectedResearchDrivers.length ? (
+              <ul className="mt-2 space-y-1.5">
+                {selectedResearchDrivers.slice(0, 3).map((driver) => (
+                  <li
+                    className="text-[11px] leading-4 text-slate-300"
+                    key={driver}
+                  >
+                    <span className="block font-semibold text-slate-200">
+                      {formatModelResearchDriverLabel(driver)}
+                    </span>
+                    <span className="block text-slate-500">
+                      {getModelResearchDriverExplanation(driver)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-[11px] leading-4 text-slate-500">
+                Driver context was not available for this marker.
+              </p>
+            )}
+          </div>
+
+          <div className="mt-3 grid gap-2">
+            <ReviewMiniBlock
+              label="Why highlighted"
+              value={getModelResearchHighlightExplanation(
+                selectedModelResearchContext,
+              )}
+            />
+            <ReviewMiniBlock
+              label="Recommended interpretation"
+              value="Use this as internal research context to guide staff questions, not as a decision finding."
+            />
+          </div>
+
+          <div className="mt-3 grid gap-2">
+            <button
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
+              disabled={snapshotSaving}
+              onClick={() => {
+                void onSaveSnapshot();
+              }}
+              type="button"
+            >
+              <Save className="h-3.5 w-3.5" />
+              {snapshotSaving ? "Capturing Map..." : "Save Snapshot"}
+            </button>
+            <button
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+              onClick={onOpenPlanningSnapshot}
+              type="button"
+            >
+              <FileSearch className="h-3.5 w-3.5" />
+              Open Snapshots
+            </button>
+          </div>
+
+          <p className="mt-3 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.07] px-3 py-2 text-[11px] leading-5 text-[#f0cd79]">
+            Internal research only. Not an exact probability. Not an official parcel score.
+          </p>
+        </div>
+      ) : null}
+
+      {!selectedModelResearchContext ? (
+        <div className="mt-3 rounded-lg border border-[#d8b86a]/22 bg-[#d8b86a]/[0.065] p-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
+          Development Research Signal
+        </p>
+        <h4 className="mt-1 text-sm font-semibold text-white">
+          Current view: Relative research bands
+        </h4>
+        <p className="mt-2 text-[11px] leading-5 text-slate-300">
+          Bands compare parcels and areas against each other. They are not
+          probability percentages.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {modelResearchLegendLabels.map((label) => (
+            <span
+              className="rounded-full border border-white/10 bg-black/18 px-2 py-1 text-[10px] font-semibold text-slate-200"
+              key={label}
+            >
+              {label.replace(" Research Signal", "")}
+            </span>
+          ))}
+        </div>
+        <p className="mt-3 rounded-md border border-white/10 bg-black/18 px-3 py-2 text-[11px] leading-5 text-slate-300">
+          {legendModeHint}
+        </p>
+      </div>
+      ) : null}
+
+      <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
+              Current Map View
+            </p>
+            <h4 className="mt-1 text-sm font-semibold text-white">
+              {modelResearchMapSummary.overlayEnabled
+                ? modelResearchMapSummary.displayModeLabel
+                : "Development Research Signal off"}
+            </h4>
+          </div>
+          <span className="shrink-0 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold uppercase text-slate-300">
+            {overlayStatus}
+          </span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <BriefStat
+            caveat="Scale-dependent display: countywide surface, clusters, then parcel markers."
+            label="Display"
+            value={
+              modelResearchMapSummary.overlayEnabled
+                ? modelResearchMapSummary.viewScaleLabel
+                : "Off"
+            }
+          />
+          <BriefStat
+            caveat="Visible context is capped for performance and readability."
+            label="Visible Context"
+            value={visibleContextLabel}
+          />
+          <BriefStat
+            caveat="Dominant relative band in the current rendered view."
+            label="Dominant Signal"
+            value={dominantRelativeBand}
+          />
+          <BriefStat
+            caveat="Research rows available in the safe preview source."
+            label="Preview Rows"
+            value={formatDevelopmentCount(
+              modelResearchMapSummary.totalFeatureCount,
+            )}
+          />
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg border border-white/10 bg-black/20 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Key Model Status
+            </p>
+            <h4 className="mt-1 text-sm font-semibold text-white">
+              {developmentModelLabSummary.currentBestInternalVariant}
+            </h4>
+            <p className="mt-2 text-xs leading-5 text-slate-400">
+              Target: {developmentModelLabSummary.target}
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-[10px] font-semibold uppercase text-[#f0cd79]">
+            Internal only
+          </span>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <BriefStat
+            caveat="Research status only; no operational deployment."
+            label="Status"
+            value="Internal only"
+          />
+          <BriefStat
+            caveat="No public model activation."
+            label="Production ready"
+            value="No"
+          />
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 rounded-lg border border-white/10 bg-black/20 p-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Explain / Details
+        </p>
+        <ModelLabDisclosureButton
+          isOpen={explainNumbersOpen}
+          label="Explain the Numbers"
+          onClick={() => setExplainNumbersOpen((open) => !open)}
+        />
+        {explainNumbersOpen ? <ModelLabExplainNumbersPanel /> : null}
+        <ModelLabDisclosureButton
+          isOpen={modelQaOpen}
+          label="Model QA Details"
+          onClick={() => setModelQaOpen((open) => !open)}
+        />
+        {modelQaOpen ? <ModelLabQaDetailsPanel /> : null}
+        <ModelLabDisclosureButton
+          isOpen={futureModelsOpen}
+          label="Future Model Ideas"
+          onClick={() => setFutureModelsOpen((open) => !open)}
+        />
+        {futureModelsOpen ? <FutureModelIdeasPanel /> : null}
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]"
+          onClick={onOpenMethodology}
+          type="button"
+        >
+          <BookOpen className="h-3.5 w-3.5" />
+          Open Methodology Model Lab
+        </button>
+      </div>
+
+      {selectedParcelId ? (
+        <div className="mt-3 rounded-md border border-[#68d8ff]/18 bg-[#68d8ff]/[0.055] px-3 py-2 text-xs leading-5 text-slate-300">
+          Parcel context is selected for snapshots, but Model Lab does not show
+          parcel-level model output.
+        </div>
+      ) : null}
+
+      <div className="mt-3 grid gap-2">
+        {!selectedModelResearchContext ? (
+          <button
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
+            disabled={snapshotSaving}
+            onClick={() => {
+              void onSaveSnapshot();
+            }}
+            type="button"
+          >
+            <Save className="h-3.5 w-3.5" />
+            {snapshotSaving ? "Capturing Map..." : "Save Snapshot"}
+          </button>
+        ) : null}
+        <div className="grid grid-cols-2 gap-2">
+          {!selectedModelResearchContext ? (
+            <button
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+              onClick={onOpenPlanningSnapshot}
+              type="button"
+            >
+              <FileSearch className="h-3.5 w-3.5" />
+              Open Snapshots
+            </button>
+          ) : null}
+          <button
+            className={cn(
+              "inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]",
+              selectedModelResearchContext ? "col-span-2" : "",
+            )}
+            onClick={onReturnToBrief}
+            type="button"
+          >
+            Intelligence Brief
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ModelLabDisclosureButton({
+  isOpen,
+  label,
+  onClick,
+}: {
+  isOpen: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      aria-expanded={isOpen}
+      className="inline-flex w-full items-center justify-between gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]"
+      onClick={onClick}
+      type="button"
+    >
+      <span>{label}</span>
+      <ChevronDown
+        className={cn(
+          "h-3.5 w-3.5 transition",
+          isOpen ? "rotate-180" : "",
+        )}
+      />
+    </button>
+  );
+}
+
+function ModelLabExplainNumbersPanel() {
+  return (
+    <div className="mt-3 grid gap-2">
+      <MetricExplanation
+        label="Research bands"
+        value="Research bands compare parcels or areas against each other. They are relative internal research groups, not probabilities."
+      />
+      <MetricExplanation
+        label="Very Strong Research Signal"
+        value="Highest-ranked internal research group. It means this area ranks near the top compared with other parcels or areas. It is not a probability."
+      />
+      <MetricExplanation
+        label="Strong Research Signal"
+        value="Above-average internal research signal based on similarity to historical new construction patterns."
+      />
+      <MetricExplanation
+        label="Moderate Research Signal"
+        value="Middle research band. It suggests some similarity to historical new construction context, but not enough to treat as a decision signal."
+      />
+      <MetricExplanation
+        label="Lower Research Signal"
+        value="Lower relative research band compared with areas that looked more similar to historic new construction cases."
+      />
+      <MetricExplanation
+        label="Insufficient Data"
+        value="Not enough safe model context to interpret confidently."
+      />
+      <MetricExplanation
+        label="Relative development signal"
+        value="A stronger signal means the parcel or area looks more similar to places where new construction occurred historically."
+      />
+      <MetricExplanation
+        label="Clusters"
+        value="When the map is zoomed out, CFS fuses nearby preview records into clusters. Cluster size represents how many parcels or features are included, and cluster color represents the dominant relative research band."
+      />
+      <MetricExplanation
+        label="Why exact probabilities are hidden"
+        value="The model is not calibrated enough for official parcel probabilities. CFS shows relative research signal only."
+      />
+      <MetricExplanation
+        label="What the model uses"
+        value="Historical new construction permits, historical/current zoning context, transportation accessibility / STIP / AADT context, tax/value enrichment, and a parcel-year feature matrix."
+      />
+      <div className="rounded-md border border-[#68d8ff]/18 bg-[#68d8ff]/[0.055] px-3 py-2">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#8fe7ff]">
+          How this is calculated
+        </p>
+        <ol className="mt-2 list-decimal space-y-1 pl-4 text-[11px] leading-5 text-slate-300">
+          <li>
+            CFS uses historical new construction permits to identify where
+            development happened.
+          </li>
+          <li>
+            CFS builds parcel-year records showing parcel conditions before
+            future development.
+          </li>
+          <li>
+            The model compares parcel context such as zoning, transportation
+            access, and tax/value patterns.
+          </li>
+          <li>
+            Parcels and areas are ranked by relative similarity to historical
+            development patterns.
+          </li>
+          <li>
+            The UI shows research bands instead of exact probabilities.
+          </li>
+        </ol>
+      </div>
+      <p className="rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.06] px-3 py-2 text-[11px] leading-5 text-[#f0cd79]">
+        These are aggregate test metrics and relative research bands, not
+        parcel-level scores. This is internal research, not an official parcel
+        score.
+      </p>
+    </div>
+  );
+}
+
+function ModelLabQaDetailsPanel() {
+  return (
+    <div className="mt-3 grid gap-2 rounded-md border border-white/10 bg-black/18 p-3">
+      {developmentModelLabSummary.aggregateMetrics.map((metric) => (
+        <MetricExplanation
+          key={metric.label}
+          label={`${metric.label}: ${metric.value}`}
+          value={
+            metric.label === "PR-AUC"
+              ? "Tests whether higher-ranked rows contain more true new construction cases."
+              : metric.label === "Lift@top 5%"
+                ? "Shows how much better the highest-ranked research group performed compared with random selection."
+                : metric.label === "Precision@top 5%"
+                  ? "Among the top-ranked 5% of test rows, this is the share that actually became new construction cases."
+                  : "Aggregate model QA metric shown for internal research governance only."
+          }
+        />
+      ))}
+      <p className="rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.06] px-3 py-2 text-[11px] leading-5 text-[#f0cd79]">
+        These are aggregate model test metrics, not parcel-level scores.
+      </p>
+    </div>
+  );
+}
+
+function FutureModelIdeasPanel() {
+  return (
+    <div className="mt-3 grid gap-2 rounded-md border border-white/10 bg-black/18 p-3">
+      {futureModelLabPlaceholders.map((model) => (
+        <MetricExplanation
+          key={model.title}
+          label={`${model.title}: ${model.status}`}
+          value={model.caveat}
+        />
+      ))}
+    </div>
+  );
+}
+
+function MetricExplanation({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-white/10 bg-black/18 px-3 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-[11px] leading-5 text-slate-300">{value}</p>
+    </div>
   );
 }
 
@@ -789,7 +1638,7 @@ function SelectedParcelBrief({
           value={transportationStatus}
         />
         <BriefStat
-          caveat="Aggregate governance only; no parcel prediction is shown."
+          caveat={`${developmentModelLabSummary.currentBestInternalVariant}; no parcel prediction is shown.`}
           label="Model"
           value="Internal only"
         />
@@ -838,6 +1687,17 @@ function BriefStat({
       <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-slate-500">
         {caveat}
       </p>
+    </div>
+  );
+}
+
+function ReviewMiniBlock({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-white/10 bg-black/18 px-3 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-[11px] leading-5 text-slate-300">{value}</p>
     </div>
   );
 }
@@ -1156,6 +2016,257 @@ const defaultPlanningSnapshotIncludedSections: Record<
   zoning_planning: true,
 };
 
+function formatResearchBandLabel(value: string | null | undefined) {
+  switch (value) {
+    case "top_1_percent_research_band":
+    case "top_5_percent_research_band":
+      return "Very Strong Research Signal";
+    case "top_15_percent_research_band":
+      return "Strong Research Signal";
+    case "remaining_research_band":
+      return "Lower Research Signal";
+    case "insufficient_data":
+      return "Insufficient Data";
+    default:
+      return "Relative Research Signal";
+  }
+}
+
+function getModelResearchHighlightExplanation(
+  context: ModelResearchPreviewMarker,
+) {
+  const driverFamilies = getModelResearchDriverFamilies(context.topDrivers);
+
+  if (driverFamilies.length) {
+    return `This area is highlighted because its ${formatDriverFamilyList(
+      driverFamilies,
+    )} context resembles places where new construction occurred historically.`;
+  }
+
+  return "This area is highlighted because it falls into a higher relative research band in the internal development model preview.";
+}
+
+function formatModelResearchBandDistribution(
+  counts: ModelResearchPreviewMarker["bandCounts"],
+) {
+  if (!counts) {
+    return "Band distribution unavailable";
+  }
+
+  const parts = [
+    ["Very Strong", counts.veryStrong],
+    ["Strong", counts.strong],
+    ["Moderate", counts.moderate],
+    ["Lower", counts.lower],
+    ["Insufficient", counts.insufficient],
+  ]
+    .filter(([, count]) => Number(count) > 0)
+    .map(([label, count]) => `${label}: ${formatDevelopmentCount(Number(count))}`);
+
+  return parts.length ? parts.join(" / ") : "Band distribution unavailable";
+}
+
+function formatSelectedModelResearchDisplayMode(
+  mode: ModelResearchMapSummary["displayMode"],
+) {
+  switch (mode) {
+    case "countywide_heatmap":
+      return "Countywide fused surface";
+    case "clustered_markers":
+      return "Count-scaled clusters";
+    case "intermediate_subclusters":
+      return "Intermediate sub-clusters";
+    case "fine_local_clusters":
+      return "Fine local clusters";
+    case "parcel_detail":
+      return "Parcel detail markers";
+    default:
+      return "Overlay off";
+  }
+}
+
+function getSelectedModelResearchContextTitle(
+  context: ModelResearchPreviewMarker,
+) {
+  const representedCount = context.representedFeatureCount ?? 1;
+
+  if (
+    representedCount === 1 ||
+    (context.contextKind !== "cluster" &&
+      context.contextKind !== "heatmap_cell")
+  ) {
+    return "Selected Research Feature";
+  }
+
+  return "Selected Research Cluster";
+}
+
+function getSelectedModelResearchContextHeading(
+  context: ModelResearchPreviewMarker,
+) {
+  const representedCount = context.representedFeatureCount ?? 1;
+
+  if (
+    context.approximateAreaLabel &&
+    !context.approximateAreaLabel.includes(["1", "parcels"].join(" "))
+  ) {
+    return context.approximateAreaLabel;
+  }
+
+  if (
+    representedCount === 1 &&
+    context.officialParcelId &&
+    context.officialParcelId !== "research_cluster"
+  ) {
+    return context.officialParcelId;
+  }
+
+  if (representedCount === 1) {
+    return "Single research feature";
+  }
+
+  return `Research cluster of ${formatDevelopmentCount(representedCount)} parcels`;
+}
+
+function formatRepresentedResearchCount(count: number) {
+  return count === 1
+    ? "1 parcel represented"
+    : `${formatDevelopmentCount(count)} parcels represented`;
+}
+
+function getModelResearchDriverFamilies(drivers: string[]) {
+  const families: string[] = [];
+
+  drivers.forEach((driver) => {
+    const normalized = driver.toLowerCase();
+    if (normalized.includes("zoning") && !families.includes("zoning")) {
+      families.push("zoning");
+    } else if (
+      (normalized.includes("transportation") ||
+        normalized.includes("road") ||
+        normalized.includes("aadt") ||
+        normalized.includes("stip")) &&
+      !families.includes("transportation")
+    ) {
+      families.push("transportation");
+    } else if (
+      (normalized.includes("tax") ||
+        normalized.includes("value") ||
+        normalized.includes("valuation")) &&
+      !families.includes("tax/value")
+    ) {
+      families.push("tax/value");
+    } else if (
+      (normalized.includes("permit") ||
+        normalized.includes("construction")) &&
+      !families.includes("new construction")
+    ) {
+      families.push("new construction");
+    }
+  });
+
+  return families.slice(0, 3);
+}
+
+function formatDriverFamilyList(families: string[]) {
+  if (families.length === 1) {
+    return families[0];
+  }
+
+  if (families.length === 2) {
+    return `${families[0]} and ${families[1]}`;
+  }
+
+  return `${families.slice(0, -1).join(", ")}, and ${
+    families[families.length - 1]
+  }`;
+}
+
+function getModelResearchLegendModeHint(
+  overlayEnabled: boolean,
+  mode: ModelResearchMapSummary["displayMode"],
+) {
+  if (!overlayEnabled || mode === "off") {
+    return "Turn on Development Research Signal to show relative research context. Relative research signal only. Not exact probability.";
+  }
+
+  if (mode === "countywide_heatmap") {
+    return "Warmer areas show stronger relative research signal concentration. Relative research signal only. Not exact probability.";
+  }
+
+  if (mode === "clustered_markers") {
+    return "Marker size represents the number of parcels or features in the cluster. Marker color represents the dominant research band. Relative research signal only.";
+  }
+
+  if (mode === "intermediate_subclusters") {
+    return "Large concentrations split into count-labeled sub-clusters. Marker size shows represented research records; color shows the dominant research band.";
+  }
+
+  if (mode === "fine_local_clusters") {
+    return "Fine local clusters group only nearby overlapping records before parcel detail appears. Counts are relative research records, not probabilities.";
+  }
+
+  return "Marker color represents the parcel-safe research band. Relative research signal only. Not exact probability.";
+}
+
+function formatOverviewCommandModeLabel(mode: OverviewCommandMode) {
+  if (mode === "modelLab") {
+    return "Model Lab";
+  }
+
+  if (mode === "countywide") {
+    return "Countywide Intelligence";
+  }
+
+  if (mode === "snapshot") {
+    return "Planning Snapshot";
+  }
+
+  return "Parcel Search";
+}
+
+function getPlanningFocusModeForOverviewMode(
+  mode: OverviewCommandMode,
+  hasSelectedParcel: boolean,
+): PlanningReviewFocusMode {
+  if (hasSelectedParcel) {
+    return "parcel_lookup";
+  }
+
+  if (mode === "countywide") {
+    return "development_activity";
+  }
+
+  return "planning_snapshot_report";
+}
+
+function getSnapshotFocusLabelForOverviewMode(
+  mode: OverviewCommandMode,
+  hasSelectedParcel: boolean,
+) {
+  if (hasSelectedParcel && mode === "modelLab") {
+    return "Model Lab Parcel Context Snapshot";
+  }
+
+  if (hasSelectedParcel) {
+    return "Selected Parcel Snapshot";
+  }
+
+  if (mode === "modelLab") {
+    return "Model Lab Research Snapshot";
+  }
+
+  if (mode === "countywide") {
+    return "Countywide Intelligence Snapshot";
+  }
+
+  if (mode === "snapshot") {
+    return "Planning Snapshot Context";
+  }
+
+  return "Overview Command Center";
+}
+
 async function captureMapSnapshotForPlanning(): Promise<PlanningMapSnapshotCapture> {
   if (typeof window === "undefined") {
     return {
@@ -1211,8 +2322,12 @@ function buildPlanningSnapshot({
   focusModeLabel,
   floodConstraint,
   mapSnapshot,
+  modelResearchOverlayEnabled,
+  modelResearchMapSummary,
+  overviewCommandMode,
   parcel,
   schoolConstraint,
+  selectedModelResearchContext,
 }: {
   activeLayerIds: string[];
   activeLayerLabels: string[];
@@ -1221,10 +2336,31 @@ function buildPlanningSnapshot({
   focusModeLabel: string;
   floodConstraint: SnapshotFloodConstraint;
   mapSnapshot: PlanningMapSnapshotCapture;
+  modelResearchOverlayEnabled: boolean;
+  modelResearchMapSummary: ModelResearchMapSummary;
+  overviewCommandMode: OverviewCommandMode;
   parcel: Parameters<typeof ParcelSummaryPanel>[0]["parcel"] | null;
   schoolConstraint: SnapshotSchoolConstraint;
+  selectedModelResearchContext: ModelResearchPreviewMarker | null;
 }): PlanningSnapshot {
   const createdAt = new Date().toISOString();
+  const overviewModeLabel = formatOverviewCommandModeLabel(overviewCommandMode);
+  const modelLabContext =
+    overviewCommandMode === "modelLab"
+      ? {
+          displayMode: modelResearchMapSummary.displayMode,
+          displayModeLabel: modelResearchMapSummary.displayModeLabel,
+          dominantSignalLabel: modelResearchMapSummary.dominantSignalLabel,
+          overlayEnabled: modelResearchOverlayEnabled,
+          selectedResearchContext: serializeModelResearchSnapshotContext(
+            selectedModelResearchContext,
+          ),
+          status: modelResearchOverlayEnabled
+            ? "safe_research_overlay_enabled_without_exact_probabilities"
+            : "research_overlay_off_by_default",
+          visibleFeatureCount: modelResearchMapSummary.visibleFeatureCount,
+        }
+      : undefined;
 
   if (!parcel) {
     return buildContextOnlyPlanningSnapshot({
@@ -1234,6 +2370,10 @@ function buildPlanningSnapshot({
       focusMode,
       focusModeLabel,
       mapSnapshot,
+      modelLabContext,
+      modelResearchMapSummary,
+      overviewCommandMode,
+      overviewModeLabel,
       schoolConstraint,
     });
   }
@@ -1270,7 +2410,12 @@ function buildPlanningSnapshot({
       "FEMA NFHL remains authoritative for regulatory flood review.",
       "School utilization is presentation-derived and requires official verification.",
       "Utility proxy context does not confirm available service capacity.",
-      "Internal model research is aggregate-only; no parcel-level predictions are stored or shown.",
+      `Internal model research is aggregate-only; current best variant is ${developmentModelLabSummary.currentBestInternalVariant}, and no parcel-level predictions are stored or shown.`,
+      ...(overviewCommandMode === "modelLab"
+        ? [
+            "Model Lab research preview is internal-only and does not show exact probabilities or official parcel classes.",
+          ]
+        : []),
       ...(mapSnapshot.status === "captured"
         ? []
         : [
@@ -1294,6 +2439,19 @@ function buildPlanningSnapshot({
           "Use this label to frame the executive summary and staff follow-up discussion.",
         source: "CFS Overview command state",
         value: focusModeLabel,
+      },
+      {
+        caveat:
+          "Overview mode records the product workspace used at capture time; it is not a prediction feature.",
+        label: "Overview Mode",
+        meaning:
+          "Shows whether the snapshot came from parcel search, countywide intelligence, Model Lab, or snapshot workflow context.",
+        method:
+          "CFS stores the active Overview command mode alongside map and intelligence context.",
+        recommendedAction:
+          "Use the mode label to explain why the report emphasizes parcel facts, countywide indicators, or model governance.",
+        source: "CFS Overview command state",
+        value: overviewModeLabel,
       },
       {
         caveat:
@@ -1389,7 +2547,7 @@ function buildPlanningSnapshot({
       },
       {
         caveat:
-          "No exact parcel probability or parcel-level ranking class is exposed.",
+          `Current best internal variant is ${developmentModelLabSummary.currentBestInternalVariant}. No exact parcel probability or parcel-level ranking class is exposed.`,
         label: "Internal Model Research Status",
         meaning:
           "Shows aggregate model governance only so staff understand model readiness boundaries.",
@@ -1398,14 +2556,81 @@ function buildPlanningSnapshot({
         recommendedAction:
           "Use model notes as governance context only; do not use as parcel-level decision output.",
         source: "CFS internal model QA outputs",
-        value: "Internal Research Only",
+        value: developmentModelLabSummary.currentBestInternalVariant,
       },
+      ...(overviewCommandMode === "modelLab"
+        ? [
+            {
+              caveat:
+                modelLabContext?.selectedResearchContext
+                  ? `${modelLabContext.selectedResearchContext.caveat} No exact probabilities, hidden model outputs, or official parcel classes are stored.`
+                  : "Model Lab snapshots include research governance context only. No exact probabilities, hidden model outputs, or official parcel classes are stored.",
+              label: "Model Lab Context",
+              meaning:
+                "Shows that the snapshot was captured from internal development model research mode.",
+              method:
+                "CFS records the relative research signal band, selected safe context if available, and safety status without storing hidden model scores.",
+              recommendedAction:
+                "Use as internal research context to guide questions; do not treat it as an official parcel output.",
+              source: "CFS internal model QA outputs",
+              value: modelLabContext?.selectedResearchContext
+                ? formatRelativeDevelopmentSignalBand({
+                    rankBand:
+                      modelLabContext.selectedResearchContext.researchRankBand,
+                    signalLabel:
+                      modelLabContext.selectedResearchContext.researchSignalLabel,
+                  })
+                : modelResearchOverlayEnabled
+                  ? "Development Research Signal active"
+                  : "Research overlay off by default",
+            },
+            ...(modelLabContext?.selectedResearchContext
+              ? [
+                  {
+                    caveat:
+                      "This is an internal research preview. It does not show exact parcel development probability and is not an official parcel score.",
+                    label: "Model Signal Rationale",
+                    meaning:
+                      "Explains why the selected marker was highlighted in the research overlay.",
+                    method:
+                      "CFS summarizes top contextual drivers from the safe research-preview record.",
+                    recommendedAction:
+                      "Review zoning, transportation access, valuation context, and historical new construction patterns before using this as staff discussion context.",
+                    source: "CFS internal model QA outputs",
+                    value: getModelResearchHighlightExplanation({
+                      caveat: modelLabContext.selectedResearchContext.caveat,
+                      centroid: {
+                        latitude: 0,
+                        longitude: 0,
+                      },
+                      dataQualityFlag:
+                        modelLabContext.selectedResearchContext.dataQualityFlag,
+                      exactProbabilityAvailable: false,
+                      modelVersion:
+                        modelLabContext.selectedResearchContext.modelVersion,
+                      officialParcelId:
+                        modelLabContext.selectedResearchContext.officialParcelId,
+                      productionReady: false,
+                      publicExposureAllowed: false,
+                      researchRankBand:
+                        modelLabContext.selectedResearchContext.researchRankBand,
+                      researchSignalLabel:
+                        modelLabContext.selectedResearchContext.researchSignalLabel,
+                      topDrivers:
+                        modelLabContext.selectedResearchContext.topDrivers,
+                    }),
+                  },
+                ]
+              : []),
+          ]
+        : []),
     ],
     includedSections: { ...defaultPlanningSnapshotIncludedSections },
     focusMode,
     focusModeLabel,
     keyFacts: [
       { label: "Snapshot context", value: focusModeLabel },
+      { label: "Overview mode", value: overviewModeLabel },
       { label: "Intelligence Brief", value: "Selected Parcel Intelligence" },
       { label: "Selected parcel", value: parcel.officialParcelId },
       { label: "Owner / account", value: parcel.ownerName ?? "Not Available" },
@@ -1421,6 +2646,32 @@ function buildPlanningSnapshot({
         label: "Active overlays",
         value: activeLayerLabels.length ? activeLayerLabels.join(", ") : "None",
       },
+      {
+        label: "Development model",
+        value: `${developmentModelLabSummary.currentBestInternalVariant} / Internal research only`,
+      },
+      ...(modelLabContext
+        ? [
+            {
+              label: "Model map display",
+              value: modelLabContext.overlayEnabled
+                ? modelLabContext.displayModeLabel ?? "Development Research Signal active"
+                : "Development Research Signal off",
+            },
+          ]
+        : []),
+      ...(modelLabContext?.selectedResearchContext
+        ? [
+            {
+              label: "Selected research context",
+              value: formatRelativeDevelopmentSignalBand({
+                rankBand: modelLabContext.selectedResearchContext.researchRankBand,
+                signalLabel:
+                  modelLabContext.selectedResearchContext.researchSignalLabel,
+              }),
+            },
+          ]
+        : []),
       {
         label: "Map image",
         value:
@@ -1460,7 +2711,7 @@ function buildPlanningSnapshot({
       {
         label: "Model output",
         reason:
-          "Internal model research remains aggregate-only with no parcel-level output.",
+          `Internal model research remains aggregate-only. ${developmentModelLabSummary.currentBestInternalVariant} is not exposed as a parcel-level output.`,
         status: "Not Public-Facing",
       },
       {
@@ -1491,6 +2742,8 @@ function buildPlanningSnapshot({
     mapScreenshotDataUrl: mapSnapshot.dataUrl ?? null,
     mapScreenshotFailureReason: mapSnapshot.failureReason ?? null,
     mapScreenshotStatus: mapSnapshot.status,
+    modelLabContext,
+    overviewCommandMode,
     overviewKpis: [
       {
         caveat: "Snapshot context is a workflow label, not a data source.",
@@ -1515,7 +2768,7 @@ function buildPlanningSnapshot({
       {
         caveat: "Model outputs remain hidden and internal-only.",
         label: "Model Governance",
-        value: "Internal research only",
+        value: `${developmentModelLabSummary.currentBestInternalVariant} / Internal research only`,
       },
     ],
     selectedParcelId: parcel.officialParcelId,
@@ -1540,8 +2793,40 @@ function buildPlanningSnapshot({
         "Not Available",
       zoning: zoning || formatCompactLabel(parcel.zoningCategory),
     },
-    snapshotId: `phase22e-${parcel.officialParcelId}-${Date.now()}`,
-    snapshotVersion: "phase22e_v1",
+    snapshotId: `phase23g-${parcel.officialParcelId}-${Date.now()}`,
+    snapshotVersion: "phase23g_v1",
+  };
+}
+
+function serializeModelResearchSnapshotContext(
+  context: ModelResearchPreviewMarker | null,
+):
+  | NonNullable<
+      NonNullable<PlanningSnapshot["modelLabContext"]>["selectedResearchContext"]
+    >
+  | null {
+  if (!context) {
+    return null;
+  }
+
+  return {
+    approximateAreaLabel: context.approximateAreaLabel,
+    bandCounts: context.bandCounts,
+    caveat: context.caveat,
+    clusterId: context.clusterId,
+    contextKind: context.contextKind,
+    dataQualityFlag: context.dataQualityFlag,
+    displayMode: context.displayMode,
+    dominantResearchBand: context.dominantResearchBand,
+    modelVersion: context.modelVersion,
+    officialParcelId: context.officialParcelId,
+    representativeSignalLabel: context.representativeSignalLabel,
+    representedFeatureCount: context.representedFeatureCount,
+    researchRankBand: context.researchRankBand,
+    researchSignalLabel: context.researchSignalLabel,
+    selectedFeatureGroupSummary: context.selectedFeatureGroupSummary,
+    topDriverSummary: context.topDriverSummary,
+    topDrivers: context.topDrivers,
   };
 }
 
@@ -1552,6 +2837,10 @@ function buildContextOnlyPlanningSnapshot({
   focusMode,
   focusModeLabel,
   mapSnapshot,
+  modelLabContext,
+  modelResearchMapSummary,
+  overviewCommandMode,
+  overviewModeLabel,
   schoolConstraint,
 }: {
   activeLayerIds: string[];
@@ -1560,6 +2849,10 @@ function buildContextOnlyPlanningSnapshot({
   focusMode: PlanningReviewFocusMode;
   focusModeLabel: string;
   mapSnapshot: PlanningMapSnapshotCapture;
+  modelLabContext?: PlanningSnapshot["modelLabContext"];
+  modelResearchMapSummary: ModelResearchMapSummary;
+  overviewCommandMode: OverviewCommandMode;
+  overviewModeLabel: string;
   schoolConstraint: SnapshotSchoolConstraint;
 }): PlanningSnapshot {
   const activeLayerSummary = activeLayerLabels.length
@@ -1584,7 +2877,12 @@ function buildContextOnlyPlanningSnapshot({
       "FEMA NFHL remains authoritative for regulatory flood review.",
       "School utilization is presentation-derived and requires official verification.",
       "Utility proxy context does not confirm available service capacity.",
-      "Internal model research is aggregate-only; no parcel-level predictions are stored or shown.",
+      `Internal model research is aggregate-only; current best variant is ${developmentModelLabSummary.currentBestInternalVariant}, and no parcel-level predictions are stored or shown.`,
+      ...(overviewCommandMode === "modelLab"
+        ? [
+            "Model Lab research preview is internal-only and does not show exact probabilities or official parcel classes.",
+          ]
+        : []),
       ...(mapSnapshot.status === "captured"
         ? []
         : [
@@ -1608,6 +2906,19 @@ function buildContextOnlyPlanningSnapshot({
           "Use this label to frame the executive summary and staff follow-up discussion.",
         source: "CFS Overview command state",
         value: focusModeLabel,
+      },
+      {
+        caveat:
+          "Overview mode records the product workspace used at capture time; it is not a prediction feature.",
+        label: "Overview Mode",
+        meaning:
+          "Shows whether the snapshot came from parcel search, countywide intelligence, Model Lab, or snapshot workflow context.",
+        method:
+          "CFS stores the active Overview command mode alongside map and intelligence context.",
+        recommendedAction:
+          "Use the mode label to explain why the report emphasizes parcel facts, countywide indicators, or model governance.",
+        source: "CFS Overview command state",
+        value: overviewModeLabel,
       },
       {
         caveat:
@@ -1696,7 +3007,7 @@ function buildContextOnlyPlanningSnapshot({
       },
       {
         caveat:
-          "No exact parcel probability or parcel-level ranking class is exposed.",
+          `Current best internal variant is ${developmentModelLabSummary.currentBestInternalVariant}. No exact parcel probability or parcel-level ranking class is exposed.`,
         label: "Internal Model Research Status",
         meaning:
           "Shows aggregate model governance only so staff understand model readiness boundaries.",
@@ -1705,19 +3016,130 @@ function buildContextOnlyPlanningSnapshot({
         recommendedAction:
           "Use model notes as governance context only; do not use as parcel-level decision output.",
         source: "CFS internal model QA outputs",
-        value: "Internal Research Only",
+        value: developmentModelLabSummary.currentBestInternalVariant,
       },
+      ...(overviewCommandMode === "modelLab"
+        ? [
+            {
+              caveat:
+                "Display mode is based on map scale and is saved for report context.",
+              label: "Model Map Display",
+              meaning:
+                "Shows whether the snapshot captured a countywide surface, clusters, or parcel-scale research markers.",
+              method:
+                "CFS switches the Development Research Signal display by map scale to avoid clutter and improve performance.",
+              recommendedAction:
+                "Use the display label to explain whether the report is strategic countywide context or parcel-scale research context.",
+              source: "CFS Model Lab map display state",
+              value: modelResearchMapSummary.overlayEnabled
+                ? modelResearchMapSummary.displayModeLabel
+                : "Development Research Signal off",
+            },
+          ]
+        : []),
+      ...(overviewCommandMode === "modelLab"
+        ? [
+            {
+              caveat:
+                modelLabContext?.selectedResearchContext
+                  ? `${modelLabContext.selectedResearchContext.caveat} No exact probabilities, hidden model outputs, or official parcel classes are stored.`
+                  : "Model Lab snapshots include research governance context only. No exact probabilities, hidden model outputs, or official parcel classes are stored.",
+              label: "Model Lab Context",
+              meaning:
+                "Shows that the snapshot was captured from internal development model research mode.",
+              method:
+                "CFS records the relative research signal band, selected safe context if available, and safety status without storing hidden model scores.",
+              recommendedAction:
+                "Use as internal research context to guide questions; do not treat it as an official parcel output.",
+              source: "CFS internal model QA outputs",
+              value: modelLabContext?.selectedResearchContext
+                ? formatRelativeDevelopmentSignalBand({
+                    rankBand:
+                      modelLabContext.selectedResearchContext.researchRankBand,
+                    signalLabel:
+                      modelLabContext.selectedResearchContext.researchSignalLabel,
+                  })
+                : modelLabContext?.overlayEnabled
+                  ? "Development Research Signal active"
+                  : "Research overlay off by default",
+            },
+            ...(modelLabContext?.selectedResearchContext
+              ? [
+                  {
+                    caveat:
+                      "This is an internal research preview. It does not show exact parcel development probability and is not an official parcel score.",
+                    label: "Model Signal Rationale",
+                    meaning:
+                      "Explains why the selected marker was highlighted in the research overlay.",
+                    method:
+                      "CFS summarizes top contextual drivers from the safe research-preview record.",
+                    recommendedAction:
+                      "Review zoning, transportation access, valuation context, and historical new construction patterns before using this as staff discussion context.",
+                    source: "CFS internal model QA outputs",
+                    value: getModelResearchHighlightExplanation({
+                      caveat: modelLabContext.selectedResearchContext.caveat,
+                      centroid: {
+                        latitude: 0,
+                        longitude: 0,
+                      },
+                      dataQualityFlag:
+                        modelLabContext.selectedResearchContext.dataQualityFlag,
+                      exactProbabilityAvailable: false,
+                      modelVersion:
+                        modelLabContext.selectedResearchContext.modelVersion,
+                      officialParcelId:
+                        modelLabContext.selectedResearchContext.officialParcelId,
+                      productionReady: false,
+                      publicExposureAllowed: false,
+                      researchRankBand:
+                        modelLabContext.selectedResearchContext.researchRankBand,
+                      researchSignalLabel:
+                        modelLabContext.selectedResearchContext.researchSignalLabel,
+                      topDrivers:
+                        modelLabContext.selectedResearchContext.topDrivers,
+                    }),
+                  },
+                ]
+              : []),
+          ]
+        : []),
     ],
     focusMode,
     focusModeLabel,
     includedSections: { ...defaultPlanningSnapshotIncludedSections },
     keyFacts: [
       { label: "Snapshot context", value: focusModeLabel },
+      { label: "Overview mode", value: overviewModeLabel },
       { label: "Intelligence Brief", value: "Countywide Intelligence Brief" },
       { label: "Selected parcel", value: "No selected parcel captured" },
       { label: "Active overlays", value: activeLayerSummary },
       { label: "Map image", value: mapStatusLabel },
-      { label: "Model governance", value: "Internal research only" },
+      {
+        label: "Model governance",
+        value: `${developmentModelLabSummary.currentBestInternalVariant} / Internal research only`,
+      },
+      ...(modelLabContext
+        ? [
+            {
+              label: "Model map display",
+              value: modelLabContext.overlayEnabled
+                ? modelLabContext.displayModeLabel ?? "Development Research Signal active"
+                : "Development Research Signal off",
+            },
+          ]
+        : []),
+      ...(modelLabContext?.selectedResearchContext
+        ? [
+            {
+              label: "Selected research context",
+              value: formatRelativeDevelopmentSignalBand({
+                rankBand: modelLabContext.selectedResearchContext.researchRankBand,
+                signalLabel:
+                  modelLabContext.selectedResearchContext.researchSignalLabel,
+              }),
+            },
+          ]
+        : []),
     ],
     knownReviewFlags: [
       {
@@ -1743,7 +3165,7 @@ function buildContextOnlyPlanningSnapshot({
       {
         label: "Model output",
         reason:
-          "Internal model research remains aggregate-only with no parcel-level output.",
+          `Internal model research remains aggregate-only. ${developmentModelLabSummary.currentBestInternalVariant} is not exposed as a parcel-level output.`,
         status: "Not Public-Facing",
       },
     ],
@@ -1760,6 +3182,8 @@ function buildContextOnlyPlanningSnapshot({
     mapScreenshotDataUrl: mapSnapshot.dataUrl ?? null,
     mapScreenshotFailureReason: mapSnapshot.failureReason ?? null,
     mapScreenshotStatus: mapSnapshot.status,
+    modelLabContext,
+    overviewCommandMode,
     overviewKpis: [
       {
         caveat: "Snapshot context is a workflow label, not a data source.",
@@ -1779,13 +3203,13 @@ function buildContextOnlyPlanningSnapshot({
       {
         caveat: "Model outputs remain hidden and internal-only.",
         label: "Model Governance",
-        value: "Internal research only",
+        value: `${developmentModelLabSummary.currentBestInternalVariant} / Internal research only`,
       },
     ],
     selectedParcelId: null,
     selectedParcelSummary: null,
-    snapshotId: `phase22e-map-context-${Date.now()}`,
-    snapshotVersion: "phase22e_v1",
+    snapshotId: `phase23g-map-context-${Date.now()}`,
+    snapshotVersion: "phase23g_v1",
   };
 }
 

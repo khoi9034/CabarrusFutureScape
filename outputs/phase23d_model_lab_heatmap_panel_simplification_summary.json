@@ -1,0 +1,144 @@
+{
+  "phase": "23D",
+  "title": "Model Lab Heatmap View, Progressive Parcel Detail, Right-Panel Simplification, and Performance Polish",
+  "files_changed": [
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "src/types/index.ts",
+    "src/types/map/modelResearchPreview.ts",
+    "backend/tests/test_development_prediction_features.py",
+    "README.md",
+    "docs/demo/cfs_model_explanation_for_nontechnical_audience.md",
+    "docs/demo/cfs_expected_questions_and_answers.md",
+    "docs/modeling/development_prediction_model_readiness.md"
+  ],
+  "heatmap_aggregation_redesign": {
+    "overlay_name": "Development Research Signal",
+    "default_state": "off",
+    "countywide_display": "Aggregated countywide research surface using capped grid cells instead of drawing the full parcel point cloud.",
+    "medium_zoom_display": "Clustered research markers from aggregated safe preview records.",
+    "parcel_scale_display": "Capped parcel-scale research markers for closer inspection.",
+    "safe_labels": [
+      "Higher research signal",
+      "Moderate research signal",
+      "Lower research signal",
+      "Insufficient data"
+    ],
+    "not_displayed": [
+      "exact parcel probabilities",
+      "raw model scores",
+      "official parcel prediction classes",
+      "public prediction endpoints"
+    ]
+  },
+  "zoom_based_display_logic": {
+    "display_modes": [
+      "countywide_heatmap",
+      "clustered_markers",
+      "parcel_detail"
+    ],
+    "countywide_threshold": "SceneView scale >= 125000",
+    "cluster_threshold": "SceneView scale >= 42000 and < 125000",
+    "parcel_detail_threshold": "SceneView scale < 42000",
+    "render_caps": {
+      "countywide_heatmap_cells": 80,
+      "clustered_markers": 150,
+      "parcel_detail_markers": 320
+    }
+  },
+  "right_panel_simplification": {
+    "default_state": "Model Lab Intelligence now emphasizes current map display, visible safe research context, dominant signal, preview row count, aggregate model status, and key aggregate metrics.",
+    "selected_state": "Selected Model Research Context shows safe signal band, relative rank band, heatmap/cluster/parcel context, represented record count, top drivers, why highlighted, and caveats.",
+    "removed_clutter": [
+      "always-visible long methodology text",
+      "future model placeholder list in the operational panel",
+      "duplicated Model Lab explanation blocks"
+    ]
+  },
+  "metric_explanation_drawer": {
+    "control_label": "How these stats are calculated",
+    "explains": [
+      "PR-AUC",
+      "Lift@top 5%",
+      "Precision@top 5%",
+      "Current best internal variant",
+      "Why probability values are not shown"
+    ],
+    "default_visibility": "collapsed"
+  },
+  "left_panel_model_lab_controls": {
+    "summary": "Model Lab controls are shorter and operational: model status, overlay toggle, Auto by zoom display mode, current map mode, compact legend, feature groups used/excluded, Save Snapshot, and Methodology link.",
+    "advanced_layers": "Generic map layers remain available inside a collapsed Advanced map layers section."
+  },
+  "snapshot_report_integration": {
+    "snapshot_version": "phase23d_v1",
+    "captured_model_context": [
+      "active mode",
+      "overlay enabled state",
+      "display mode",
+      "display mode label",
+      "dominant signal label",
+      "visible feature count",
+      "selected research context when available",
+      "top drivers",
+      "internal-only caveats"
+    ],
+    "executive_report": "Executive Summary includes Development Model Research Context for Model Lab snapshots, including map display, selected heatmap cell/cluster/parcel context, drivers, missing data, and the internal-only caveat."
+  },
+  "performance_improvements": [
+    "Avoids rendering all parcel markers at county extent.",
+    "Aggregates visible preview records into grid cells at broad and medium zoom.",
+    "Caps rendered graphics by display mode.",
+    "Publishes lightweight map summary state for the right panel instead of recomputing panel context from every marker.",
+    "Keeps right-panel state changes separate from overlay source data."
+  ],
+  "documentation_updates": [
+    "README Model Lab section now describes countywide surface, clusters, parcel markers, and metric drawer.",
+    "Nontechnical model explanation now explains progressive map display.",
+    "Expected Q&A now explains the Development Research Signal as relative rank context.",
+    "Model readiness doc now includes Phase 23D progressive map display governance notes."
+  ],
+  "tests_added": [
+    "backend/tests/test_development_prediction_features.py::test_phase23d_model_lab_progressive_ui_copy_and_guardrails"
+  ],
+  "safety_verification": {
+    "production_ready": false,
+    "public_exposure_allowed": false,
+    "exact_probabilities_exposed": false,
+    "raw_model_scores_exposed": false,
+    "official_prediction_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "notes": "Browser smoke and pytest guard checked relevant UI strings for unsafe probability/raw-score/ranking-class exposure."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_backend_app": "passed",
+    "python_pytest": "passed: 279 tests, 3 warnings",
+    "dev_server": "CFS was already running on localhost:3000 and 127.0.0.1:8000, so smoke testing reused the active CFS dev stack instead of launching a second npm run dev:cfs process."
+  },
+  "smoke_test_results": {
+    "localhost_3000_loaded": true,
+    "model_lab_opened": true,
+    "research_overlay_off_by_default": true,
+    "research_overlay_on_countywide_display": "passed: right panel reported Countywide research surface with safe represented-record count.",
+    "metric_explanation_drawer": "passed",
+    "selected_research_context": "passed: map click selected a countywide heatmap cell with relative band, represented count, drivers, and caveat.",
+    "snapshot_saved_from_model_lab": true,
+    "executive_summary_model_section": "passed: report included map display, selected heatmap cell context, drivers, missing data, and internal-only caveat.",
+    "methodology_loaded": true,
+    "unsafe_model_output_terms_visible": false,
+    "browser_console": "Known opaque console error 'r' observed; no new actionable console error identified.",
+    "zoom_transition_browser_check": "inconclusive in automated browser because SceneView scroll/zoom did not yield a stable visible display-mode update, but source thresholds and countywide display were verified."
+  },
+  "remaining_limitations": [
+    "Automated browser zoom-transition verification was inconclusive; manual QA should zoom from countywide to parcel scale to visually confirm clustered and parcel-detail transitions.",
+    "Model Lab remains internal research only and should not be presented as a public prediction product.",
+    "Map screenshot capture still depends on ArcGIS SceneView screenshot availability.",
+    "The known opaque browser console error 'r' remains from prior smoke tests."
+  ]
+}

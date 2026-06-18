@@ -1,0 +1,172 @@
+{
+  "phase": "25A",
+  "title": "Overview Customizable Enterprise Workspace Builder",
+  "generated_at": "2026-06-18T00:00:00-04:00",
+  "files_changed": [
+    "src/components/dashboard/OverviewWorkspaceBuilder.tsx",
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase25a_overview_custom_workspace_builder_summary.json"
+  ],
+  "customization_system_added": {
+    "status": "implemented",
+    "entry_points": [
+      "Customize Layout button in the Overview command center",
+      "floating Customize Layout button when the workspace is locked for normal use"
+    ],
+    "edit_mode_behavior": [
+      "Overview enters a locked/unlocked layout editor mode",
+      "normal dashboard controls remain clean when edit mode is off",
+      "edit mode shows a compact toolbar with Done, Save Layout, Reset Layout, Add Panel, and Lock Layout",
+      "tiles show drag handles, resize handles, and hide controls only in edit mode"
+    ]
+  },
+  "draggable_resizable_tiles": {
+    "status": "implemented",
+    "tiles": [
+      "Map / SceneView",
+      "CFS Command Center",
+      "Intelligence Panel",
+      "Map Layers / Layer Controls",
+      "Model Lab Controls",
+      "Snapshot Helper",
+      "Active Selection",
+      "Countywide Indicators / KPI Summary",
+      "Snapshot Library Shortcut / Saved Snapshot Status"
+    ],
+    "grid": {
+      "columns": 12,
+      "row_height_px": 32,
+      "gap_px": 12,
+      "bounded": true,
+      "overlap_resolution": "layout changes are clamped and overlapping tiles are pushed to the next available grid rows"
+    },
+    "browser_smoke_note": "The in-app browser verified rendered edit handles and toolbar controls. Its automation surface did not provide a reliable pointer drag stream for mechanical drag/resize proof, so manual drag/resize QA is still recommended even though the pointer-event code path is implemented."
+  },
+  "layout_storage_key": "cfs.overview.customLayout.v1",
+  "save_reset_behavior": {
+    "version": "phase25a_v1",
+    "saved_fields": [
+      "tile positions",
+      "tile sizes",
+      "tile visible/hidden status",
+      "locked state",
+      "last updated timestamp",
+      "layout version"
+    ],
+    "save_layout": "writes the normalized custom layout to localStorage",
+    "reset_layout": "restores the default enterprise layout, persists it, clears the selected tile, scrolls the workspace viewport back to top, and dispatches a resize event for the map",
+    "lock_layout": "persists the locked layout and removes edit handles"
+  },
+  "tile_constraints": {
+    "map": "required tile; cannot be permanently hidden; has large minimum width and height for SceneView usability",
+    "command_center": "compact tile with limited height so it cannot become a giant dashboard block by accident",
+    "intelligence": "readable minimum width with standard and wide layout support through grid resizing",
+    "layers": "can be hidden, restored, narrowed, or widened while retaining all existing layer controls",
+    "model_lab_controls": "hidden by default, available through Add Panel and automatically surfaced in Model Lab mode",
+    "snapshot_helper": "hidden by default, available through Add Panel and automatically surfaced in Snapshot Builder mode"
+  },
+  "add_panel_and_hide_behavior": {
+    "status": "implemented",
+    "available_panels": [
+      "Map",
+      "Command Center",
+      "Intelligence",
+      "Layers",
+      "Model Lab Controls",
+      "Snapshot Helper",
+      "Active Selection",
+      "KPI Summary",
+      "Snapshot Status"
+    ],
+    "map_protection": "Add Panel explains that the map is required and stays available; hide is blocked for the map tile",
+    "restore_controls": "hidden panels can be restored through Add Panel"
+  },
+  "mode_aware_behavior": {
+    "parcel": "surfaces Active Selection and keeps Selected Parcel Intelligence in the right tile",
+    "countywide": "surfaces the Layers tile and Countywide Intelligence",
+    "modelLab": "surfaces Model Lab Controls and Model Lab Intelligence while preserving the overlay-off default",
+    "snapshot": "surfaces Snapshot Helper and Snapshot Capture actions",
+    "principle": "layout customization changes arrangement only; it does not change the underlying parcel, layer, model, or snapshot data logic"
+  },
+  "sceneview_preservation_notes": [
+    "SceneView remains inside a stable Map / SceneView tile instead of being recreated by layout toolbar interactions",
+    "layout drag, resize, reset, save, and lock actions dispatch resize events so the map can refresh to the new tile size",
+    "the reset behavior now scrolls the workspace viewport back to top so the restored default layout is immediately visible",
+    "existing selected-parcel focus and map layer logic were left intact"
+  ],
+  "snapshot_report_behavior": {
+    "status": "preserved",
+    "captured_context": [
+      "map screenshot if available",
+      "selected parcel if any",
+      "active layers",
+      "right-panel intelligence summary",
+      "headline indicators",
+      "active Overview mode",
+      "caveats and explainable metrics"
+    ],
+    "not_captured": [
+      "tile positions",
+      "tile resize handles",
+      "layout editor toolbar",
+      "hidden model outputs",
+      "exact probabilities",
+      "raw model scores"
+    ]
+  },
+  "workflow_preservation": {
+    "search_parcel": "browser smoke verified Search Parcel focuses the parcel search input and keeps parcel intelligence available",
+    "countywide": "browser smoke verified Explore Countywide shows the Layers tile and Countywide Intelligence",
+    "model_lab": "browser smoke verified Model Lab mode surfaces the model controls tile and Model Lab Intelligence without unsafe score/probability labels",
+    "snapshot_builder": "browser smoke verified Snapshot Builder surfaces the Snapshot Helper tile and save/open snapshot actions without immediate snapshot creation",
+    "planning_snapshot": "browser smoke verified the Planning Snapshot Library loads",
+    "methodology": "browser smoke verified Methodology still loads; Methodology layout was not redesigned for this phase"
+  },
+  "safety_verification": {
+    "datasets_added": false,
+    "models_trained": false,
+    "postgis_schemas_modified": false,
+    "public_prediction_endpoint_added": false,
+    "exact_probabilities_exposed": false,
+    "raw_model_scores_exposed": false,
+    "official_parcel_prediction_classes_exposed": false,
+    "notes": [
+      "Phase 25A introduced layout state only and did not add model outputs or prediction endpoints.",
+      "Safety keyword scan over src and backend/app found existing internal research schema/repository field names and safety flags from prior Model Lab work; no new layout builder code exposes probabilities or raw scores.",
+      "Visible browser smoke found no prediction_probability or raw_model_score text in Model Lab mode."
+    ]
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_m_compileall_app": "exit 0, but repository has no top-level app package to list",
+    "python_m_compileall_backend_app": "passed",
+    "python_m_pytest": "291 passed, 3 warnings"
+  },
+  "smoke_test_results": {
+    "localhost_3000_loads": "passed; title Cabarrus FutureScape",
+    "customize_layout_button": "passed; two entry points rendered",
+    "edit_mode_toolbar": "passed; Done, Save Layout, Reset Layout, Add Panel, and Lock Layout rendered",
+    "edit_handles": "passed; Map / SceneView drag and resize handles rendered",
+    "add_panel_menu": "passed; hidden/restorable tiles listed and map protection message shown",
+    "save_layout": "passed; toolbar showed Layout Saved after clicking Save Layout",
+    "reset_layout": "passed; default map, command, and intelligence tiles restored; scroll-to-top behavior patched",
+    "search_parcel": "passed; search input focused with aria-label Search parcels",
+    "countywide_mode": "passed; Map Layers and Countywide Intelligence visible",
+    "model_lab_mode": "passed; Model Lab Intelligence visible and model controls tile present",
+    "snapshot_builder_mode": "passed; Snapshot Helper tile present with Save Snapshot/Open Snapshot actions",
+    "planning_snapshot_page": "passed; Planning Snapshot Library loaded",
+    "methodology_page": "passed; Methodology page loaded",
+    "browser_console": "not captured; the in-app browser wrapper did not expose console message retrieval in this session",
+    "drag_resize_interaction": "partially verified; handles rendered and implementation code is present, but in-app browser automation could not deliver a reliable pointer drag stream for end-to-end drag movement"
+  },
+  "remaining_known_limitations": [
+    "Manual drag/resize QA should be performed in a normal browser because the in-app browser automation surface did not support a reliable pointer drag stream during smoke testing.",
+    "The previous quick layout preset controls remain available as secondary controls, but the new Customize Layout editor is now the primary enterprise customization path.",
+    "Snapshots intentionally do not capture UI tile positions; they remain planning-context artifacts, not layout artifacts."
+  ]
+}

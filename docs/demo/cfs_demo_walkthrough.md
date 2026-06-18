@@ -30,25 +30,38 @@ Demo parcel:
 ## Recommended Demo Sequence
 
 1. Open `Overview`.
-2. Point out the `CFS Command Center`: Search Parcel, Countywide Intelligence,
-   Save Snapshot, and Open Snapshots.
-3. Search for `CFS-PARCEL-0149726579`.
-4. Select the parcel and show the active map focus.
-5. Point out the selected parcel cage or boundary highlight.
-6. Click `Save Snapshot` from Overview.
-7. Open `Planning Snapshot`.
-8. Use the `Planning Snapshot Library` to show saved snapshots, thumbnails,
+2. Point out the `CFS Command Center`: Search Parcel, Explore Countywide,
+   Model Lab, and Snapshot Builder.
+   The optional `Customize Layout` button is local workspace personalization;
+   the default Overview is still the recommended demo layout.
+3. Click `Search Parcel` and explain that Overview switches into the
+   parcel-first helper workspace.
+4. Search for `CFS-PARCEL-0149726579`.
+5. Select the parcel and show the active map focus.
+6. Point out the selected parcel cage or boundary highlight.
+7. Click `Explore Countywide` and explain that this is the layer-first
+   workspace for advanced map controls and countywide indicators.
+8. Click `Model Lab` and show that the left rail becomes Model Lab Controls,
+   the map enters safe research mode, and the right rail shows Model Lab
+   Intelligence.
+9. Click `Snapshot Builder` from Overview and point out that it opens the
+   Snapshot Builder helper without saving yet.
+10. Click `Save Snapshot` inside the helper to capture the map/intelligence
+   context and show the saved confirmation.
+11. Open `Planning Snapshot`.
+12. Use the `Planning Snapshot Library` to show saved snapshots, thumbnails,
    Use / Open, and Delete.
-9. Use `Snapshot Overview` to explain the saved command context, active layers, and map
+13. Use `Snapshot Overview` to explain the saved command context, active layers, and map
    snapshot capture status.
-10. Use `Explain the Numbers` to show source, method, caveat, and action for
+14. Use `Explain the Numbers` to show source, method, caveat, and action for
    the major metrics.
-11. Open `Executive Summary` and show that the report is generated from the
+15. Open `Executive Summary` and show that the report is generated from the
    saved snapshot.
-12. Point out the `Print Executive Summary` action.
-13. Open `Review Actions` and summarize staff follow-up items.
-14. Open `Methodology`.
-15. Explain model safety, missing data, and what is not public-facing.
+16. Point out the `Print Executive Summary` action.
+17. Open `Review Actions` and summarize staff follow-up items.
+18. Open `Methodology`.
+19. Explain Model Lab, model safety, missing data, and what is not
+   public-facing.
 
 ## Suggested Talking Points
 
@@ -109,6 +122,15 @@ or allocation."
 Tax/Value. It is not production-ready. Exact probabilities and parcel-level
 ranking classes are intentionally not exposed because calibration and
 governance review are still required."
+
+### Model Lab
+
+"Model Lab is a safe internal research preview. It changes the Overview into a
+model-governance workspace with Model Lab controls, a Development Research
+Signal overlay, and aggregate-only Model Lab Intelligence. The optional overlay
+is off by default. When enabled, it shows relative research bands and driver
+context; it does not publish parcel probabilities, hidden model outputs, or
+official parcel prediction classes."
 
 ### Close
 

@@ -1,0 +1,199 @@
+{
+  "phase": "23B-QA",
+  "title": "Model Lab Map Overlay Fix and Nonblocking Layout Polish",
+  "created_at": "2026-06-16T14:47:00-04:00",
+  "branch": "main",
+  "files_changed_for_this_phase": [
+    "backend/app/repositories/development_repository.py",
+    "backend/app/routers/development_router.py",
+    "backend/app/schemas/__init__.py",
+    "backend/app/schemas/development.py",
+    "backend/app/services/development_service.py",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "src/hooks/useModelResearchPreviewLayer.ts",
+    "src/lib/api/development.ts",
+    "src/types/api/development.ts",
+    "src/types/index.ts",
+    "src/types/map/modelResearchPreview.ts"
+  ],
+  "removed_fixed_overlay_card_details": {
+    "removed_large_sceneview_card": true,
+    "removed_center_blocking_text": [
+      "MODEL LAB MAP MODE",
+      "Research overlay requested",
+      "Open Methodology Model Lab"
+    ],
+    "replacement": "Small noninteractive Model Lab map badge showing overlay on/off and Internal only status."
+  },
+  "new_nonblocking_map_badge": {
+    "location": "upper-left of SceneView container",
+    "pointer_events": "disabled",
+    "labels": [
+      "Model Lab",
+      "Research overlay on/off",
+      "Internal only"
+    ],
+    "map_remains_usable": true
+  },
+  "research_overlay_implementation": {
+    "overlay_off_by_default": true,
+    "visible_overlay_when_enabled": true,
+    "visualization": "Capped centroid marker layer using safe internal model research preview records.",
+    "default_limit": 500,
+    "default_signal_filter": "higher",
+    "camera_behavior": "When markers load, Model Lab mode fits the map to the safe marker extent so the preview is visible.",
+    "legend_labels": [
+      "Higher research signal",
+      "Moderate research signal",
+      "Lower research signal",
+      "Insufficient data"
+    ],
+    "not_used": [
+      "prediction probability",
+      "growth probability",
+      "development score",
+      "will develop",
+      "official score"
+    ]
+  },
+  "backend_endpoint": {
+    "added": true,
+    "path": "/development/model-research/preview",
+    "public_prediction_endpoint_added": false,
+    "source_tables": [
+      "public.development_prediction_ranking_classes",
+      "public.development_prediction_ranking_explanations",
+      "public.parcels_enriched"
+    ],
+    "latest_experiment_observed": "phase10e_zoning_enhanced_v1",
+    "safe_response_fields": [
+      "official_parcel_id",
+      "research_signal_label",
+      "research_rank_band",
+      "top_driver_1",
+      "top_driver_2",
+      "top_driver_3",
+      "data_quality_flag",
+      "caveat",
+      "model_version",
+      "production_ready=false",
+      "public_exposure_allowed=false",
+      "exact_probability_available=false",
+      "centroid"
+    ],
+    "forbidden_response_fields_excluded": [
+      "prediction_probability",
+      "experimental_probability",
+      "exact_probability",
+      "raw_model_score",
+      "official prediction class"
+    ],
+    "live_endpoint_smoke": {
+      "status_code": 200,
+      "returned_count_for_limit_1": 1,
+      "total_count": 5501,
+      "production_ready": false,
+      "public_exposure_allowed": false,
+      "exact_probability_available": false,
+      "no_raw_model_scores": true,
+      "no_official_prediction_classes": true
+    }
+  },
+  "click_selection_behavior": {
+    "implemented": true,
+    "right_panel_state": "Selected Research Context",
+    "shown_fields": [
+      "parcel identifier",
+      "safe research signal label",
+      "research band",
+      "top contextual drivers",
+      "model version",
+      "data quality flag",
+      "internal-only caveat"
+    ],
+    "not_shown": [
+      "exact probability",
+      "raw score",
+      "official high/medium/low prediction",
+      "development_signal_class",
+      "prediction_probability",
+      "experimental_probability"
+    ]
+  },
+  "model_lab_left_panel_changes": {
+    "toggle_label_kept": "Development Research Signal Overlay",
+    "toggle_copy_updated": "Explains that the overlay draws capped, probability-free research markers.",
+    "generic_map_layers_hidden_by_default_in_model_lab": true,
+    "caveats_preserved": true
+  },
+  "model_lab_right_panel_changes": {
+    "no_selection_state": "Aggregate Model Lab Intelligence with overlay status, model metrics, and safety caveats.",
+    "selection_state": "Selected Research Context with safe signal label, band, drivers, model version, data quality, and caveat.",
+    "exact_probabilities_shown": false,
+    "official_parcel_prediction_classes_shown": false
+  },
+  "snapshot_integration": {
+    "active_mode_preserved": "modelLab",
+    "selected_research_context_preserved_if_selected": true,
+    "model_lab_caveat_added": "Model Lab snapshot includes internal research context only. No exact parcel probabilities or official scores are shown.",
+    "hidden_model_scores_stored": false
+  },
+  "safety_verification": {
+    "model_active_changed": false,
+    "production_ready_marked_true": false,
+    "public_prediction_endpoint_added": false,
+    "exact_probability_exposed": false,
+    "raw_model_score_exposed": false,
+    "official_prediction_class_exposed": false,
+    "frontend_dom_probability_field_check": "No prediction_probability, experimental_probability, or exact_probability text appeared during browser smoke.",
+    "code_search_note": "Forbidden terms remain only in backend schemas/internal mapping/guardrail hooks where safety flags are false or internal ranking classes are translated to safe labels."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_backend_app": "passed",
+    "python_m_pytest": "timed out after approximately 244 seconds without a reported assertion failure",
+    "npm_run_dev_cfs": "restarted local CFS services; command timed out because the launcher keeps services running after startup",
+    "frontend_health": {
+      "url": "http://localhost:3000",
+      "status_code": 200
+    },
+    "backend_health": {
+      "url": "http://127.0.0.1:8000/health",
+      "status_code": 200
+    },
+    "database_health": {
+      "url": "http://127.0.0.1:8000/health/database",
+      "status_code": 200
+    }
+  },
+  "browser_smoke_results": {
+    "overview_loaded": true,
+    "model_lab_mode_changes_left_panel": true,
+    "large_fixed_model_lab_card_removed": true,
+    "compact_map_badge_visible": true,
+    "research_overlay_off_by_default": true,
+    "turning_overlay_on_updates_controls_and_badge": true,
+    "research_overlay_markers_rendered": true,
+    "map_fits_to_preview_extent": true,
+    "clicking_research_marker_updates_right_panel": true,
+    "planning_snapshot_saves_model_lab_context": true,
+    "planning_snapshot_opens": true,
+    "methodology_opens": true,
+    "sceneview_not_rendered_in_methodology": true,
+    "parcel_level_probabilities_visible": false,
+    "official_prediction_classes_visible": false,
+    "browser_console_note": "One minified map/runtime error message 'r' was captured during smoke testing; the app remained functional and no CFS UI failure was observed."
+  },
+  "remaining_known_limitations": [
+    "The research preview uses centroid markers rather than parcel polygons.",
+    "The overlay depends on existing internal ranking/explanation tables; if those tables are absent, the endpoint returns preview_available=false instead of fake data.",
+    "Full pytest did not complete within the allotted validation window.",
+    "The safe preview endpoint returns false exact_probability_available flags as explicit safety metadata, but no exact probability values or raw scores."
+  ]
+}

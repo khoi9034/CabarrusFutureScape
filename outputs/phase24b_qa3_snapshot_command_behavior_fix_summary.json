@@ -1,0 +1,95 @@
+{
+  "phase": "24B-QA3",
+  "title": "Snapshot Command Behavior Fix",
+  "branch": "main",
+  "files_changed": [
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "README.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "docs/demo/cfs_2_minute_demo_script.md"
+  ],
+  "top_command_rename": {
+    "old_label": "Save Snapshot",
+    "new_label": "Snapshot Builder",
+    "helper_text": "Choose what to capture."
+  },
+  "old_behavior_fixed": {
+    "previous_behavior": "The top command center snapshot action dispatched the snapshot save event immediately.",
+    "new_behavior": "The top Snapshot Builder command only switches Overview into snapshot mode, expands the Snapshot Builder helper, and scrolls the Intelligence panel into view.",
+    "save_event_dispatched_from_top_command": false,
+    "local_storage_write_from_top_command": false,
+    "map_screenshot_capture_from_top_command": false
+  },
+  "new_snapshot_mode_behavior": {
+    "active_mode": "snapshot",
+    "left_panel": "Snapshot Builder helper",
+    "right_panel": "Snapshot Builder mode active",
+    "no_parcel_copy": "Snapshot will capture the current map, active layers, countywide intelligence, and caveats. Select a parcel first if you want parcel-specific facts included.",
+    "selected_parcel_copy": "Snapshot will include selected parcel facts, map view, active layers, Intelligence Brief, and caveats."
+  },
+  "real_save_button_behavior": {
+    "location": "Snapshot Builder helper and explicit Snapshot Builder right-panel action",
+    "button_label": "Save Snapshot",
+    "dispatches_save_event": true,
+    "captures": [
+      "map screenshot when available",
+      "selected parcel when available",
+      "active Overview mode/context",
+      "active layers",
+      "Intelligence Brief",
+      "key stats",
+      "caveats"
+    ],
+    "confirmation": "Planning snapshot saved."
+  },
+  "saved_count_verification": {
+    "top_snapshot_builder_click": "Did not show saved confirmation and did not change the rendered saved-count state.",
+    "explicit_save_click": "Created saved snapshot state and updated the rendered saved-count chip.",
+    "selected_parcel_builder_state": "With CFS-PARCEL-0149726579 selected, Snapshot Builder showed parcel-specific capture wording and did not save until the explicit save action."
+  },
+  "documentation_updates": [
+    "README now explains Snapshot Builder opens the capture workflow and Save Snapshot inside the helper creates the saved snapshot.",
+    "Demo walkthrough now uses Snapshot Builder as the command entry and Save Snapshot as the explicit save action.",
+    "Final demo checklist now verifies that Snapshot Builder does not create a snapshot before explicit save.",
+    "Two-minute demo script uses Snapshot Builder in the command-center action list."
+  ],
+  "safety_verification": {
+    "exact_probability_stored_or_shown": false,
+    "prediction_probability_stored_or_shown": false,
+    "experimental_probability_stored_or_shown": false,
+    "raw_model_score_stored_or_shown": false,
+    "official_parcel_prediction_class_stored_or_shown": false,
+    "development_signal_class_public_output": false,
+    "browser_visible_unsafe_terms": []
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "focused_pytest": "backend/tests/test_development_prediction_features.py passed: 27 passed, 1 warning",
+    "python_compileall_app": "passed from backend directory",
+    "python_compileall_backend_app": "passed from repository root",
+    "python_m_pytest": "passed: 284 passed, 3 warnings"
+  },
+  "smoke_test_results": {
+    "dev_stack": "npm run dev:cfs started CFS on http://localhost:3000 and FastAPI on http://127.0.0.1:8000 with health checks passing.",
+    "overview_loads": true,
+    "top_command_label": "Snapshot Builder",
+    "top_command_does_not_save": true,
+    "snapshot_helper_visible_after_top_command": true,
+    "snapshot_helper_save_button_visible": true,
+    "explicit_save_creates_snapshot": true,
+    "open_snapshots_opens_library": true,
+    "demo_parcel_search_and_select": "CFS-PARCEL-0149726579 selected successfully; selected parcel intelligence appeared.",
+    "selected_parcel_context_copy": true,
+    "browser_console_errors": "No blocking errors observed during this smoke path."
+  },
+  "remaining_known_issues": [
+    "The repository still contains unrelated dirty worktree changes from prior phases; this phase did not revert or delete them.",
+    "A first root-level attempt to run python -m compileall app could not list app because this repository stores the backend package at backend/app; the exact command passed when run from the backend directory."
+  ]
+}

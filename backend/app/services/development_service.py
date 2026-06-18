@@ -15,6 +15,7 @@ from app.repositories.development_repository import (
 from app.schemas import (
     DevelopmentActivitySummaryResponse,
     DevelopmentHotspotsResponse,
+    DevelopmentModelResearchPreviewResponse,
     DevelopmentParcelPermitEventsResponse,
     DevelopmentPredictionRankingSummaryResponse,
     DevelopmentPredictionTransportationAccessibilitySummaryResponse,
@@ -41,6 +42,8 @@ from app.schemas.development import (
     DevelopmentActivitySummaryYearBucket,
     DevelopmentLookupItem,
     DevelopmentLookupResponse,
+    DevelopmentModelResearchPreviewCentroid,
+    DevelopmentModelResearchPreviewFeature,
     DevelopmentHotspotMapCentroid,
     DevelopmentHotspotMapFocus,
     DevelopmentHotspotSpatialReference,
@@ -1061,6 +1064,76 @@ class DevelopmentService:
             exact_probabilities_exposed=False,
             caveat="internal_ranking_research_not_for_public_decision",
             no_parcel_level_scores=True,
+        )
+
+    def get_model_research_preview(
+        self,
+        *,
+        include_geometry: bool,
+        limit: int,
+        signal: str,
+    ) -> DevelopmentModelResearchPreviewResponse:
+        if self.repository is None:
+            raise RuntimeError(
+                "DevelopmentRepository is required for model research preview.",
+            )
+
+        record = self.repository.get_model_research_preview(
+            include_geometry=include_geometry,
+            limit=limit,
+            signal=signal,
+        )
+        features: list[DevelopmentModelResearchPreviewFeature] = []
+        for row in record.get("features") or []:
+            latitude = optional_float(row.get("latitude"))
+            longitude = optional_float(row.get("longitude"))
+            centroid = (
+                DevelopmentModelResearchPreviewCentroid(
+                    latitude=latitude,
+                    longitude=longitude,
+                )
+                if latitude is not None and longitude is not None
+                else None
+            )
+            features.append(
+                DevelopmentModelResearchPreviewFeature(
+                    official_parcel_id=str(row["official_parcel_id"]),
+                    research_signal_label=str(row["research_signal_label"]),
+                    research_rank_band=str(row["research_rank_band"]),
+                    top_driver_1=row.get("top_driver_1"),
+                    top_driver_2=row.get("top_driver_2"),
+                    top_driver_3=row.get("top_driver_3"),
+                    data_quality_flag=str(
+                        row.get("data_quality_flag")
+                        or "research_preview_context_only",
+                    ),
+                    caveat=str(
+                        row.get("caveat")
+                        or "Internal research preview only. Not an official parcel score.",
+                    ),
+                    model_version=str(row["model_version"]),
+                    production_ready=False,
+                    public_exposure_allowed=False,
+                    exact_probability_available=False,
+                    centroid=centroid,
+                ),
+            )
+
+        return DevelopmentModelResearchPreviewResponse(
+            preview_available=bool(record.get("preview_available")),
+            experiment_id=record.get("experiment_id"),
+            features=features,
+            returned_count=len(features),
+            total_count=int(record.get("total_count") or 0),
+            limit=int(record.get("limit") or limit),
+            signal_filter=str(record.get("signal_filter") or signal),
+            production_ready=False,
+            public_exposure_allowed=False,
+            exact_probability_available=False,
+            caveat="internal_model_research_preview_not_for_public_decision",
+            no_exact_probabilities=True,
+            no_raw_model_scores=True,
+            no_official_prediction_classes=True,
         )
 
     def get_transportation_accessibility_summary(

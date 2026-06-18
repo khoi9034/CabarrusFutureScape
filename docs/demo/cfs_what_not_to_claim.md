@@ -17,6 +17,7 @@ Use this sheet to keep demos accurate, confident, and honest.
 - CFS proves causality between a feature and future development.
 - CFS exposes parcel-level prediction probabilities.
 - CFS exposes parcel-level model ranking classes.
+- Model Lab is an official production prediction product.
 
 ## Approved Wording
 
@@ -25,6 +26,11 @@ Use this sheet to keep demos accurate, confident, and honest.
 - "Evidence review and constraint screening."
 - "Model research is aggregate-only and not public-facing."
 - "Current best internal model research is Zoning + Transportation + Tax/Value."
+- "Model Lab is an internal research preview, not a public parcel score."
+- "Development Research Signal shows relative research bands, not exact
+  probability."
+- "Driver explanations show why a research marker was highlighted; they are
+  not entitlement findings."
 - "Utility layers are proxy/context only."
 - "School utilization seed requires verification."
 - "Official school capacity scoring is not active."
@@ -49,6 +55,7 @@ Avoid:
 - "development risk score";
 - "final prediction";
 - "automated recommendation".
+- "official model class".
 
 ## School Wording
 

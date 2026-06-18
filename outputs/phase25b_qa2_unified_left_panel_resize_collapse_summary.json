@@ -1,0 +1,97 @@
+{
+  "phase": "25B-QA2",
+  "title": "Unified Left Panel Resize/Collapse Behavior and Explore Countywide Layer Drawer Fix",
+  "files_changed": [
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/components/dashboard/LayerToggle.tsx",
+    "src/styles/cfs-theme.css",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase25b_qa2_unified_left_panel_resize_collapse_summary.json"
+  ],
+  "shared_panel_shell_behavior": {
+    "summary": "Search Parcel, Explore Countywide, Model Lab, and Snapshot Builder now use the same left panel shell for collapsed rail, expanded panel, resizing, drag-to-collapse, and internal scrolling.",
+    "mode_labels": {
+      "parcel": "Parcel",
+      "countywide": "Layers",
+      "modelLab": "Model Lab",
+      "snapshot": "Snapshot"
+    },
+    "click_behavior": [
+      "Collapsed rail icon expands the current mode panel.",
+      "Collapsed vertical label expands the current mode panel.",
+      "Existing collapse arrow remains available in expanded mode."
+    ]
+  },
+  "drag_to_collapse_threshold": {
+    "threshold_px": 210,
+    "behavior": "Dragging the expanded left panel below the threshold snaps to the collapsed rail state and hides expanded content."
+  },
+  "resize_width_constraints": {
+    "collapsed_width_px": 64,
+    "min_expanded_width_px": 320,
+    "default_width_px": 372,
+    "wide_preset_px": 456,
+    "max_expanded_width_px": 520,
+    "last_width_behavior": "Expanding from the collapsed rail restores the last safe expanded width or the current preset width."
+  },
+  "collapsed_rail_restoration": {
+    "summary": "Collapsed state remains a long slim rail aligned to the map workspace rather than a small floating pill.",
+    "visual_notes": [
+      "Mode-specific icon is visible.",
+      "Vertical mode label is readable.",
+      "Rail remains full-height within the map workspace.",
+      "No incorrect small PARCEL pill style is used."
+    ]
+  },
+  "explore_countywide_cut_off_fix": {
+    "summary": "The Countywide layer drawer now constrains width and overflow inside the shared panel shell.",
+    "changes": [
+      "Expanded sidebar uses full-height, min-width: 0, overflow-hidden shell.",
+      "Panel body uses overflow-y:auto and overflow-x:hidden.",
+      "Layer group containers and rows use min-width:0 and overflow-hidden.",
+      "Layer action buttons are grouped so More Info, Configure, Legend, and toggles wrap safely instead of clipping.",
+      "Layer drawer scroller retains vertical access to long controls."
+    ]
+  },
+  "model_lab_panel_consistency": {
+    "summary": "Model Lab Controls now inherit the same collapsed rail, resize handle, drag-to-collapse threshold, and vertical scroll behavior from the shared Sidebar shell.",
+    "smoke_result": "Model Lab expanded at standard width, scrolled internally, and collapsed via drag-left."
+  },
+  "snapshot_helper_consistency": {
+    "summary": "Snapshot Builder helper now inherits the same collapsed rail, resize handle, drag-to-collapse threshold, and vertical scroll behavior from the shared Sidebar shell.",
+    "smoke_result": "Snapshot Builder expanded at standard width, scrolled internally, and collapsed via drag-left."
+  },
+  "localStorage_layout_state_handling": {
+    "summary": "No storage key change was needed. Collapsed state overrides width at render time, and dragging from collapsed restores a safe expanded width.",
+    "storage_key_preserved": "cfs.overview.layout.v2"
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "exit code 0; repo has no top-level app directory, command reported 'Can't list app'",
+    "python_pytest": "passed on rerun with longer timeout: 294 passed, 3 warnings"
+  },
+  "smoke_test_results": {
+    "localhost_3000_loads_cfs": "passed",
+    "default_search_parcel_left_rail_collapsed_clean": "passed",
+    "collapsed_rail_expands_on_click": "passed",
+    "open_panel_can_be_resized": "passed",
+    "dragging_panel_left_past_threshold_collapses": "passed in Parcel, Countywide, Model Lab, and Snapshot Builder modes",
+    "explore_countywide_opens_layer_drawer": "passed",
+    "layer_drawer_content_not_cut_off": "passed; flood and FEMA rows kept More Info, Configure, Legend, and toggle buttons inside panel bounds",
+    "right_intelligence_panel_still_works": "passed; right panel scrolls internally when content is long",
+    "search_parcel_still_works": "passed; CFS-PARCEL-0149726579 selected and right panel showed Selected Parcel Intelligence",
+    "model_lab_overlay_still_works": "not retoggled in this scoped smoke; Model Lab mode and controls loaded successfully",
+    "planning_snapshot_still_works": "passed; Planning Snapshot loaded and Print Executive Summary was present",
+    "methodology_still_works": "passed; Methodology loaded and Data Needed content was present",
+    "console_errors": "no new browser errors observed; existing ArcGIS label-placement warnings and placeholder layer warnings remained",
+    "forbidden_model_outputs": "targeted scan of modified UI files found no prediction_probability, exact_probability, experimental_probability, raw_model_score, parcel_score, growth_probability, will_develop, or development_signal_class"
+  },
+  "remaining_known_issues": [
+    "ArcGIS label-placement warnings still appear for draped graphics.",
+    "Existing placeholder layer warnings still appear for layer definitions that intentionally lack approved service URLs.",
+    "The collapse arrow intentionally protrudes outside the rail edge as an affordance; regular layer content and action controls remain inside panel bounds."
+  ]
+}

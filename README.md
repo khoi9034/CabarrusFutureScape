@@ -41,9 +41,15 @@ Current product modes:
 
 - `Overview`: CFS Command Center for parcel search, 3D SceneView exploration,
   countywide headline intelligence, secondary/advanced map layers, selected
-  parcel status, and compact `Search Parcel`, `Countywide Intelligence`,
-  `Save Snapshot`, and `Open Snapshots` actions. The `Layers` rail starts
-  collapsed so advanced map controls stay secondary until opened.
+  parcel status, and compact `Search Parcel`, `Explore Countywide`,
+  `Model Lab`, and `Snapshot Builder` actions. These actions now switch the
+  Overview into mode-specific workspaces: parcel-first helper, countywide layer
+  controls, internal Model Lab controls, or Snapshot Builder. The top Snapshot
+  Builder command opens the capture workflow; the explicit `Save Snapshot`
+  button inside the helper creates the saved snapshot. The `Layers` rail starts
+  collapsed so advanced map controls stay secondary until opened. Overview also
+  includes an optional local `Customize Layout` mode for rearranging panels, but
+  the stable default Overview remains the recommended demo layout.
 - `Planning Snapshot`: local saved-snapshot library and report builder captured from Overview, with
   Snapshot Overview, Explain the Numbers, Executive Summary, and Review Actions
   views for the saved command context, map screenshot when available, parcel facts,
@@ -94,6 +100,24 @@ review, delete snapshots that are no longer needed, and print the active
 summary. Printing uses `window.print()` and print CSS that hides app chrome and
 formats the snapshot summary on a light/white print surface for readability
 while keeping the on-screen CFS interface dark.
+
+Phase 23A/23B/23C/23D adds a `Model Lab` entry point inside Overview and Methodology.
+In Overview, Model Lab becomes its own workspace: the left rail changes to
+Model Lab Controls, the optional `Development Research Signal` overlay is off
+by default, and the right rail shows Model Lab Intelligence. It showcases the
+internal development model research in aggregate form only: historical outcome,
+target, feature rows, current best internal variant (`Zoning + Transportation +
+Tax/Value`), feature groups that helped, feature groups excluded for now, and
+safety caveats. When enabled, the overlay uses relative signal color bands and
+driver explanations so staff can understand why a marker, cluster, or
+countywide research cell is highlighted. The display now adapts by map scale:
+countywide views show an aggregated research surface, medium zooms show
+clustered research markers, and close parcel-scale views show safer individual
+research markers. The right rail keeps aggregate metrics concise and places
+plain-English metric explanations behind `How these stats are calculated`. It
+does not draw exact probabilities, hidden model outputs, or official
+parcel-level prediction classes. CFS does not add a public prediction endpoint
+and does not mark any model production-ready.
 
 ## Permit Intelligence Segmentation
 

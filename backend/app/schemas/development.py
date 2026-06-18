@@ -431,6 +431,49 @@ class DevelopmentPredictionRankingSummaryResponse(BaseModel):
     no_parcel_level_scores: bool = True
 
 
+class DevelopmentModelResearchPreviewCentroid(BaseModel):
+    latitude: float
+    longitude: float
+    spatial_reference: dict[str, Any] = Field(
+        default_factory=lambda: {"wkid": 4326},
+    )
+
+
+class DevelopmentModelResearchPreviewFeature(BaseModel):
+    official_parcel_id: str
+    research_signal_label: str
+    research_rank_band: str
+    top_driver_1: str | None = None
+    top_driver_2: str | None = None
+    top_driver_3: str | None = None
+    data_quality_flag: str = "research_preview_context_only"
+    caveat: str = "Internal research preview only. Not an official parcel score."
+    model_version: str
+    production_ready: bool = False
+    public_exposure_allowed: bool = False
+    exact_probability_available: bool = False
+    centroid: DevelopmentModelResearchPreviewCentroid | None = None
+
+
+class DevelopmentModelResearchPreviewResponse(BaseModel):
+    preview_available: bool
+    experiment_id: str | None = None
+    features: list[DevelopmentModelResearchPreviewFeature] = Field(
+        default_factory=list,
+    )
+    returned_count: int = 0
+    total_count: int = 0
+    limit: int = 500
+    signal_filter: str = "higher"
+    production_ready: bool = False
+    public_exposure_allowed: bool = False
+    exact_probability_available: bool = False
+    caveat: str = "internal_model_research_preview_not_for_public_decision"
+    no_exact_probabilities: bool = True
+    no_raw_model_scores: bool = True
+    no_official_prediction_classes: bool = True
+
+
 class TransportationAccessibilityMissingness(BaseModel):
     feature_name: str
     missing_count: int

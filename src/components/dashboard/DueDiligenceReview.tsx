@@ -5,8 +5,6 @@ import {
   BrainCircuit,
   Building2,
   CheckCircle2,
-  Clipboard,
-  ClipboardCheck,
   FileText,
   History,
   MapPinned,
@@ -20,8 +18,16 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
+import {
+  developmentModelLabSummary,
+  formatModelResearchDriverLabel,
+  formatRelativeDevelopmentSignalBand,
+  getModelResearchBandMeaning,
+  getModelResearchDriverExplanation,
+  modelResearchDriverSources,
+} from "@/data/intelligence/developmentModelLab";
 import {
   formatDevelopmentCount,
   formatDevelopmentDate,
@@ -41,7 +47,6 @@ import type {
   ParcelReviewView,
   PlanningSnapshot,
   PlanningSnapshotSectionKey,
-  PlanningSnapshotView,
   ProductMode,
 } from "@/types";
 
@@ -75,43 +80,13 @@ interface PriorityFlag extends ReviewBadge {
   title: string;
 }
 
-const planningSnapshotTabs: Array<{
-  description: string;
-  id: PlanningSnapshotView;
-  label: string;
-}> = [
-  {
-    description: "Captured parcel, layer, and caveat context.",
-    id: "overview",
-    label: "Snapshot Overview",
-  },
-  {
-    description: "Plain-English source, method, and caveat cards.",
-    id: "explain",
-    label: "Explain the Numbers",
-  },
-  {
-    description: "Snapshot-based stakeholder report preview.",
-    id: "summary",
-    label: "Executive Summary",
-  },
-  {
-    description: "Planner follow-up guidance.",
-    id: "actions",
-    label: "Review Actions",
-  },
-];
-
 export function DueDiligenceReview({
   developmentHotspotsEnabled,
   floodConstraintsEnabled,
   floodZonesEnabled,
-  parcelReviewView,
   selectedParcelId,
   selectedParcelIntelligence,
   selectedParcelIntelligenceSource,
-  setMapFocusMode,
-  setParcelReviewView,
   setProductMode,
 }: DueDiligenceReviewProps) {
   const {
@@ -119,7 +94,6 @@ export function DueDiligenceReview({
     clearPlanningSnapshot,
     deletePlanningSnapshot,
     planningSnapshot,
-    planningSnapshotView,
     savedPlanningSnapshots,
     setActivePlanningSnapshot,
     setPlanningSnapshotSectionIncluded,
@@ -136,23 +110,13 @@ export function DueDiligenceReview({
     snapshots: savedPlanningSnapshots,
   };
 
-  useEffect(() => {
-    if (parcelReviewView === "report") {
-      setPlanningSnapshotView("summary");
-      return;
-    }
-
-    if (parcelReviewView === "actions") {
-      setPlanningSnapshotView("actions");
-    }
-  }, [parcelReviewView, setPlanningSnapshotView]);
-
   if (!planningSnapshot) {
     return (
       <EmptyPlanningSnapshotState
         hasSelectedParcel={Boolean(selectedParcelIntelligence)}
         snapshotLibrary={snapshotLibraryProps}
         onGoOverview={() => setProductMode("overview")}
+        onOpenMethodology={() => setProductMode("methodology")}
       />
     );
   }
@@ -162,12 +126,11 @@ export function DueDiligenceReview({
       <SnapshotOnlyWorkspace
         clearPlanningSnapshot={clearPlanningSnapshot}
         onGoOverview={() => setProductMode("overview")}
+        onOpenMethodology={() => setProductMode("methodology")}
         onPrint={() => window.print()}
         planningSnapshot={planningSnapshot}
-        planningSnapshotView={planningSnapshotView}
         snapshotLibrary={snapshotLibraryProps}
         setPlanningSnapshotSectionIncluded={setPlanningSnapshotSectionIncluded}
-        setPlanningSnapshotView={setPlanningSnapshotView}
       />
     );
   }
@@ -179,15 +142,11 @@ export function DueDiligenceReview({
       floodZonesEnabled={floodZonesEnabled}
       parcel={selectedParcelIntelligence}
       planningSnapshot={planningSnapshot}
-      planningSnapshotView={planningSnapshotView}
       selectedParcelId={selectedParcelId}
       source={selectedParcelIntelligenceSource}
       clearPlanningSnapshot={clearPlanningSnapshot}
       snapshotLibrary={snapshotLibraryProps}
-      setMapFocusMode={setMapFocusMode}
-      setParcelReviewView={setParcelReviewView}
       setPlanningSnapshotSectionIncluded={setPlanningSnapshotSectionIncluded}
-      setPlanningSnapshotView={setPlanningSnapshotView}
       setProductMode={setProductMode}
     />
   );
@@ -200,14 +159,10 @@ function SelectedParcelDueDiligence({
   floodZonesEnabled,
   parcel,
   planningSnapshot,
-  planningSnapshotView,
   selectedParcelId,
   snapshotLibrary,
   source,
-  setMapFocusMode,
-  setParcelReviewView,
   setPlanningSnapshotSectionIncluded,
-  setPlanningSnapshotView,
   setProductMode,
 }: {
   clearPlanningSnapshot: () => void;
@@ -216,20 +171,16 @@ function SelectedParcelDueDiligence({
   floodZonesEnabled: boolean;
   parcel: ParcelSearchRecord;
   planningSnapshot: PlanningSnapshot;
-  planningSnapshotView: PlanningSnapshotView;
   selectedParcelId: string | null;
   snapshotLibrary: PlanningSnapshotLibraryProps;
   source: SelectedParcelIntelligenceSource | null;
-  setMapFocusMode: (enabled: boolean) => void;
-  setParcelReviewView: (view: ParcelReviewView) => void;
   setPlanningSnapshotSectionIncluded: (
     sectionKey: PlanningSnapshotSectionKey,
     included: boolean,
   ) => void;
-  setPlanningSnapshotView: (view: PlanningSnapshotView) => void;
   setProductMode: (mode: ProductMode) => void;
 }) {
-  const [copied, setCopied] = useState(false);
+  const [showExplanationCards, setShowExplanationCards] = useState(false);
   const developmentActivity = useSelectedParcelDevelopmentActivity(
     parcel.officialParcelId,
   );
@@ -250,16 +201,9 @@ function SelectedParcelDueDiligence({
   const flood = floodConstraint.constraint;
   const newConstructionSummary = newConstruction.summary;
   const latestPermit = permitEvents.permits[0] ?? null;
-  const zoningSummary = [parcel.zoningJurisdiction, parcel.zoningCode]
-    .filter(Boolean)
-    .join(" / ");
   const addressSummary = [parcel.mailingAddress, parcel.mailingCity, parcel.mailingState]
     .filter(Boolean)
     .join(", ");
-  const acreage =
-    typeof flood?.parcel_area_acres === "number"
-      ? `${formatNumber(flood.parcel_area_acres, 2)} acres`
-      : formatLabel(parcel.parcelSizeCategory);
   const badges = buildHeaderBadges({
     activity,
     flood,
@@ -293,169 +237,26 @@ function SelectedParcelDueDiligence({
           ? "Static index"
           : "Parcel intelligence";
 
-  async function copyParcelId() {
-    try {
-      await navigator.clipboard.writeText(parcel.officialParcelId);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      setCopied(false);
-    }
-  }
-
-  function openReportPreview() {
-    setPlanningSnapshotView("summary");
-    setParcelReviewView("report");
-  }
-
-  function openReview() {
-    setPlanningSnapshotView("overview");
-    setParcelReviewView("review");
-  }
-
   function printReport() {
-    setPlanningSnapshotView("summary");
-    setParcelReviewView("report");
     window.setTimeout(() => window.print(), 120);
   }
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/88 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.24)]">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-                Planning Snapshot
-              </p>
-              <h3 className="mt-2 break-words text-xl font-semibold leading-7 text-white">
-                {parcel.officialParcelId}
-              </h3>
-              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">
-                Save the current map view, selected parcel, active layers, and
-                Intelligence Brief into a report-ready Planning Snapshot.
-              </p>
-              <p className="mt-2 text-xs uppercase tracking-[0.12em] text-slate-500">
-                Snapshot saved {formatDateTime(planningSnapshot.createdAt)} / {sourceLabel} / Selected ID {selectedParcelId ?? parcel.officialParcelId}
-              </p>
-            </div>
-            <MapPinned className="h-5 w-5 shrink-0 text-[#d8b86a]" />
-          </div>
-
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-            <HeaderFact label="Owner / Account" value={parcel.ownerName ?? "Not Available"} />
-            <HeaderFact label="PIN" value={parcel.pin14 ?? "Not Available"} />
-            <HeaderFact label="Address" value={addressSummary || "Not Available"} />
-            <HeaderFact
-              label="Municipality / Jurisdiction"
-              value={
-                parcel.planningJurisdiction ??
-                parcel.zoningJurisdiction ??
-                "Not Available"
-              }
-            />
-            <HeaderFact label="Zoning" value={zoningSummary || formatLabel(parcel.zoningCategory)} />
-            <HeaderFact label="Acreage / Size" value={acreage} />
-            <HeaderFact
-              label="Parcel Quality"
-              value={formatLabel(parcel.parcelQualityStatus)}
-            />
-            <HeaderFact label="Neighborhood" value={neighborhoodLabel(parcel)} />
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {badges.map((badge) => (
-              <StatusBadge key={badge.label} label={badge.label} tone={badge.tone} />
-            ))}
-          </div>
-
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
-            <ActionButton
-              active={planningSnapshotView === "overview"}
-              icon={<FileText className="h-3.5 w-3.5" />}
-              label="Snapshot Overview"
-              onClick={openReview}
-            />
-            <ActionButton
-              active={planningSnapshotView === "summary"}
-              icon={<FileText className="h-3.5 w-3.5" />}
-              label="Executive Summary"
-              onClick={openReportPreview}
-            />
-            <ActionButton
-              icon={<Printer className="h-3.5 w-3.5" />}
-              label="Print Executive Summary"
-              onClick={printReport}
-              variant="gold"
-            />
-            <ActionButton
-              icon={<MapPinned className="h-3.5 w-3.5" />}
-              label="Focus Map"
-              onClick={() => {
-                setMapFocusMode(true);
-                setProductMode("overview");
-              }}
-            />
-            <ActionButton
-              icon={
-                copied ? (
-                  <ClipboardCheck className="h-3.5 w-3.5" />
-                ) : (
-                  <Clipboard className="h-3.5 w-3.5" />
-                )
-              }
-              label={copied ? "Copied Parcel ID" : "Copy Parcel ID"}
-              onClick={copyParcelId}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-[#d8b86a]/20 bg-[#1d1607]/34 p-4">
-        <p className="text-sm leading-6 text-slate-300">
-          Executive Summary is generated from the saved Planning Snapshot: map
-          image when available, selected parcel facts, active layers,
-          Intelligence Brief, explainable metrics, caveats, and recommended
-          staff review actions.
-        </p>
-      </section>
-
-      <SnapshotInclusionControls
-        includedSections={planningSnapshot.includedSections}
-        onClear={clearPlanningSnapshot}
-        onToggle={setPlanningSnapshotSectionIncluded}
-      />
-
-      <PlanningSnapshotLibraryPanel {...snapshotLibrary} />
-
-      <PlanningSnapshotTabs
-        activeView={planningSnapshotView}
-        onChange={(view) => {
-          setPlanningSnapshotView(view);
-          if (view === "summary") {
-            setParcelReviewView("report");
-          } else if (view === "actions") {
-            setParcelReviewView("actions");
-          } else {
-            setParcelReviewView("review");
-          }
-        }}
-        onPrint={printReport}
-      />
-
-      {planningSnapshotView === "summary" ? (
-        <SnapshotExecutiveSummary
-          onPrint={printReport}
-          planningSnapshot={planningSnapshot}
-        />
-      ) : planningSnapshotView === "actions" ? (
-        <ReviewNotesActionsPanel
-          flags={priorityFlags}
-          reviewActions={reviewActions}
-        />
-      ) : planningSnapshotView === "explain" ? (
-        <ExplainableMetricsPanel planningSnapshot={planningSnapshot} />
-      ) : (
+    <PlanningSnapshotReportBuilder
+      activeContextLabel={`${sourceLabel} / Selected ID ${
+        selectedParcelId ?? parcel.officialParcelId
+      }`}
+      contextBadges={badges}
+      onClearSnapshot={clearPlanningSnapshot}
+      onGoOverview={() => setProductMode("overview")}
+      onOpenMethodology={() => setProductMode("methodology")}
+      onPrint={printReport}
+      onToggleSection={setPlanningSnapshotSectionIncluded}
+      planningSnapshot={planningSnapshot}
+      showExplanationCards={showExplanationCards}
+      snapshotLibrary={snapshotLibrary}
+      toggleExplanationCards={setShowExplanationCards}
+      advancedDetails={
         <>
       <SnapshotOverviewPanel planningSnapshot={planningSnapshot} />
 
@@ -855,91 +656,47 @@ function SelectedParcelDueDiligence({
         </p>
       </section>
         </>
-      )}
-    </div>
+      }
+    />
   );
 }
 
 function SnapshotOnlyWorkspace({
   clearPlanningSnapshot,
   onGoOverview,
+  onOpenMethodology,
   onPrint,
   planningSnapshot,
-  planningSnapshotView,
   snapshotLibrary,
   setPlanningSnapshotSectionIncluded,
-  setPlanningSnapshotView,
 }: {
   clearPlanningSnapshot: () => void;
   onGoOverview: () => void;
+  onOpenMethodology: () => void;
   onPrint: () => void;
   planningSnapshot: PlanningSnapshot;
-  planningSnapshotView: PlanningSnapshotView;
   snapshotLibrary: PlanningSnapshotLibraryProps;
   setPlanningSnapshotSectionIncluded: (
     sectionKey: PlanningSnapshotSectionKey,
     included: boolean,
   ) => void;
-  setPlanningSnapshotView: (view: PlanningSnapshotView) => void;
 }) {
+  const [showExplanationCards, setShowExplanationCards] = useState(false);
+
   return (
-    <div className="space-y-4">
-      <section className="rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/88 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.24)]">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-              Planning Snapshot
-            </p>
-            <h3 className="mt-2 break-words text-xl font-semibold leading-7 text-white">
-              {planningSnapshot.selectedParcelId ?? "Saved map context"}
-            </h3>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">
-              Saved {formatDateTime(planningSnapshot.createdAt)}. Live parcel
-              detail state is not loaded, so this view shows the captured
-              snapshot summary and report-ready explanations.
-            </p>
-            <p className="mt-2 max-w-3xl text-xs leading-5 text-slate-500">
-              A Planning Snapshot is not just a screenshot. It combines the
-              current map image with selected parcel facts, active layers,
-              headline indicators, caveats, and explanation cards so the report
-              can explain what the viewer is seeing.
-            </p>
-          </div>
-          <ActionButton
-            icon={<MapPinned className="h-3.5 w-3.5" />}
-            label="Go to Overview"
-            onClick={onGoOverview}
-          />
-        </div>
-      </section>
-
-      <SnapshotInclusionControls
-        includedSections={planningSnapshot.includedSections}
-        onClear={clearPlanningSnapshot}
-        onToggle={setPlanningSnapshotSectionIncluded}
-      />
-
-      <PlanningSnapshotLibraryPanel {...snapshotLibrary} />
-
-      <PlanningSnapshotTabs
-        activeView={planningSnapshotView}
-        onChange={setPlanningSnapshotView}
-        onPrint={onPrint}
-      />
-
-      {planningSnapshotView === "summary" ? (
-        <SnapshotExecutiveSummary
-          onPrint={onPrint}
-          planningSnapshot={planningSnapshot}
-        />
-      ) : planningSnapshotView === "actions" ? (
-        <SnapshotReviewActionsPanel planningSnapshot={planningSnapshot} />
-      ) : planningSnapshotView === "explain" ? (
-        <ExplainableMetricsPanel planningSnapshot={planningSnapshot} />
-      ) : (
-        <SnapshotOverviewPanel planningSnapshot={planningSnapshot} />
-      )}
-    </div>
+    <PlanningSnapshotReportBuilder
+      activeContextLabel={getSnapshotContextLabel(planningSnapshot)}
+      onClearSnapshot={clearPlanningSnapshot}
+      onGoOverview={onGoOverview}
+      onOpenMethodology={onOpenMethodology}
+      onPrint={onPrint}
+      onToggleSection={setPlanningSnapshotSectionIncluded}
+      planningSnapshot={planningSnapshot}
+      showExplanationCards={showExplanationCards}
+      snapshotLibrary={snapshotLibrary}
+      toggleExplanationCards={setShowExplanationCards}
+      advancedDetails={<SnapshotReviewActionsPanel planningSnapshot={planningSnapshot} />}
+    />
   );
 }
 
@@ -947,10 +704,12 @@ function EmptyPlanningSnapshotState({
   hasSelectedParcel,
   snapshotLibrary,
   onGoOverview,
+  onOpenMethodology,
 }: {
   hasSelectedParcel: boolean;
   snapshotLibrary: PlanningSnapshotLibraryProps;
   onGoOverview: () => void;
+  onOpenMethodology: () => void;
 }) {
   return (
     <div className="space-y-4">
@@ -966,40 +725,9 @@ function EmptyPlanningSnapshotState({
             No planning snapshots saved yet
           </h3>
           <p className="mt-2 text-sm leading-6 text-slate-400">
-            Use Overview to search a parcel, adjust the map, or review
-            countywide intelligence, then save a snapshot for report generation.
-            A Planning Snapshot is not just a screenshot; it combines the map
-            image with context, active layers, explanations, caveats, and staff
-            review actions.
+            Use Overview to search a parcel, inspect the map, or open Model
+            Lab, then save a Planning Snapshot.
           </p>
-        </div>
-
-        <div className="mt-5 grid gap-3 lg:grid-cols-5">
-          <WorkflowStepCard
-            description="Start in the Overview Command Center."
-            step="1"
-            title="Explore Overview"
-          />
-          <WorkflowStepCard
-            description="Search for a parcel or activate the context layers needed for the memo."
-            step="2"
-            title="Select Context"
-          />
-          <WorkflowStepCard
-            description="Use the Overview button to capture the current context."
-            step="3"
-            title="Save Snapshot"
-          />
-          <WorkflowStepCard
-            description="Review the captured facts, caveats, sources, and plain-English explanations."
-            step="4"
-            title="Explain Numbers"
-          />
-          <WorkflowStepCard
-            description="Generate and print a stakeholder-ready executive summary."
-            step="5"
-            title="Print Summary"
-          />
         </div>
 
         <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -1010,19 +738,19 @@ function EmptyPlanningSnapshotState({
           >
             Go to Overview
           </button>
+          <button
+            className="rounded-md border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
+            onClick={onOpenMethodology}
+            type="button"
+          >
+            Open Methodology
+          </button>
           {hasSelectedParcel ? (
             <p className="text-xs leading-5 text-slate-500">
               A parcel is selected. Use Overview&apos;s Save Snapshot for
               Report button to capture it.
             </p>
           ) : null}
-        </div>
-
-        <div className="mt-5 rounded-md border border-white/10 bg-white/[0.035] px-3 py-2 text-center text-xs leading-5 text-slate-400">
-          Demo parcel:{" "}
-          <span className="font-semibold text-slate-200">
-            CFS-PARCEL-0149726579
-          </span>
         </div>
       </section>
 
@@ -1031,29 +759,272 @@ function EmptyPlanningSnapshotState({
   );
 }
 
-function WorkflowStepCard({
-  description,
-  step,
-  title,
+type ExtraReportSectionKey = "countywide_indicators" | "key_findings";
+
+type ReportBuilderSectionKey =
+  | ExtraReportSectionKey
+  | PlanningSnapshotSectionKey;
+
+interface ReportSectionVisibility {
+  countywide_indicators: boolean;
+  key_findings: boolean;
+}
+
+const reportBuilderSections: Array<{
+  key: ReportBuilderSectionKey;
+  label: string;
+}> = [
+  { key: "map_view", label: "Map View" },
+  { key: "key_findings", label: "Key Findings" },
+  { key: "parcel_facts", label: "Parcel Facts" },
+  { key: "countywide_indicators", label: "Countywide Indicators" },
+  { key: "development_permits", label: "Development / Permits" },
+  { key: "fema_flood", label: "FEMA Flood" },
+  { key: "schools", label: "Schools" },
+  { key: "transportation", label: "Transportation" },
+  { key: "utility_proxy", label: "Utility Proxy" },
+  { key: "model_governance", label: "Model Governance" },
+  { key: "data_needed_caveats", label: "Data Needed / Caveats" },
+  { key: "recommended_actions", label: "Recommended Actions" },
+];
+
+const snapshotSectionKeys = new Set<PlanningSnapshotSectionKey>([
+  "data_needed_caveats",
+  "development_permits",
+  "fema_flood",
+  "map_view",
+  "model_governance",
+  "new_construction",
+  "parcel_facts",
+  "recommended_actions",
+  "schools",
+  "transportation",
+  "utility_proxy",
+  "zoning_planning",
+]);
+
+function PlanningSnapshotReportBuilder({
+  activeContextLabel,
+  advancedDetails,
+  contextBadges = [],
+  onClearSnapshot,
+  onGoOverview,
+  onOpenMethodology,
+  onPrint,
+  onToggleSection,
+  planningSnapshot,
+  showExplanationCards,
+  snapshotLibrary,
+  toggleExplanationCards,
 }: {
-  description: string;
-  step: string;
-  title: string;
+  activeContextLabel?: string;
+  advancedDetails?: ReactNode;
+  contextBadges?: ReviewBadge[];
+  onClearSnapshot: () => void;
+  onGoOverview: () => void;
+  onOpenMethodology: () => void;
+  onPrint: () => void;
+  onToggleSection: (
+    sectionKey: PlanningSnapshotSectionKey,
+    included: boolean,
+  ) => void;
+  planningSnapshot: PlanningSnapshot;
+  showExplanationCards: boolean;
+  snapshotLibrary: PlanningSnapshotLibraryProps;
+  toggleExplanationCards: (show: boolean) => void;
 }) {
+  const [extraSections, setExtraSections] = useState<ReportSectionVisibility>({
+    countywide_indicators: true,
+    key_findings: true,
+  });
+
+  function isSectionChecked(sectionKey: ReportBuilderSectionKey) {
+    if (sectionKey === "countywide_indicators") {
+      return extraSections.countywide_indicators;
+    }
+
+    if (sectionKey === "key_findings") {
+      return extraSections.key_findings;
+    }
+
+    return planningSnapshot.includedSections[sectionKey] ?? true;
+  }
+
+  function toggleReportSection(
+    sectionKey: ReportBuilderSectionKey,
+    included: boolean,
+  ) {
+    if (sectionKey === "countywide_indicators" || sectionKey === "key_findings") {
+      setExtraSections((current) => ({
+        ...current,
+        [sectionKey]: included,
+      }));
+      return;
+    }
+
+    if (snapshotSectionKeys.has(sectionKey)) {
+      onToggleSection(sectionKey, included);
+    }
+  }
+
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
-      <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#68d8ff]/25 bg-[#68d8ff]/10 text-sm font-semibold text-[#b7f0ff]">
-          {step}
+    <div className="space-y-4">
+      <section className="app-chrome no-print rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/88 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.24)]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
+              Planning Snapshot
+            </p>
+            <h3 className="mt-2 break-words text-xl font-semibold leading-7 text-white">
+              {planningSnapshot.selectedParcelId ??
+                planningSnapshot.focusModeLabel ??
+                "Saved map context"}
+            </h3>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">
+              A Planning Snapshot combines a map image with selected CFS
+              context, active layers, key indicators, and caveats for
+              report-ready review.
+            </p>
+            <p className="mt-2 text-xs uppercase tracking-[0.12em] text-slate-500">
+              Snapshot saved {formatDateTime(planningSnapshot.createdAt)}
+              {activeContextLabel ? ` / ${activeContextLabel}` : ""}
+            </p>
+            {contextBadges.length ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {contextBadges.map((badge) => (
+                  <StatusBadge
+                    key={badge.label}
+                    label={badge.label}
+                    tone={badge.tone}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <div className="grid shrink-0 gap-2 sm:grid-cols-2 lg:min-w-72">
+            <ActionButton
+              icon={<Printer className="h-3.5 w-3.5" />}
+              label="Print Executive Summary"
+              onClick={onPrint}
+              variant="gold"
+            />
+            <ActionButton
+              icon={<MapPinned className="h-3.5 w-3.5" />}
+              label="Go to Overview"
+              onClick={onGoOverview}
+            />
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-slate-100">{title}</p>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            {description}
-          </p>
-        </div>
+      </section>
+
+      <PlanningSnapshotLibraryPanel {...snapshotLibrary} />
+
+      <MapSnapshotPreview planningSnapshot={planningSnapshot} />
+
+      <ReportBuilderControls
+        onClear={onClearSnapshot}
+        onToggle={toggleReportSection}
+        sectionChecked={isSectionChecked}
+        showExplanationCards={showExplanationCards}
+        toggleExplanationCards={toggleExplanationCards}
+      />
+
+      <SnapshotExecutiveSummary
+        extraSections={extraSections}
+        onPrint={onPrint}
+        planningSnapshot={planningSnapshot}
+        showExplanationCards={showExplanationCards}
+      />
+
+      {advancedDetails ? (
+        <details className="no-print rounded-lg border border-white/10 bg-black/18 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-slate-200">
+            Advanced saved evidence
+          </summary>
+          <div className="mt-4 space-y-4">{advancedDetails}</div>
+        </details>
+      ) : null}
+
+      <div className="no-print flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3">
+        <p className="text-xs leading-5 text-slate-500">
+          Need the full methodology behind a caveat or data source?
+        </p>
+        <button
+          className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
+          onClick={onOpenMethodology}
+          type="button"
+        >
+          Open Methodology
+        </button>
       </div>
     </div>
+  );
+}
+
+function ReportBuilderControls({
+  onClear,
+  onToggle,
+  sectionChecked,
+  showExplanationCards,
+  toggleExplanationCards,
+}: {
+  onClear: () => void;
+  onToggle: (sectionKey: ReportBuilderSectionKey, included: boolean) => void;
+  sectionChecked: (sectionKey: ReportBuilderSectionKey) => boolean;
+  showExplanationCards: boolean;
+  toggleExplanationCards: (show: boolean) => void;
+}) {
+  return (
+    <section className="app-chrome no-print rounded-lg border border-white/10 bg-black/22 p-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
+            Customize Report
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-white">
+            Report section controls
+          </h3>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <label className="inline-flex items-center gap-2 rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff]">
+            <input
+              checked={showExplanationCards}
+              className="h-3.5 w-3.5 accent-[#68d8ff]"
+              onChange={(event) =>
+                toggleExplanationCards(event.target.checked)
+              }
+              type="checkbox"
+            />
+            Show explanation cards
+          </label>
+          <button
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+            onClick={onClear}
+            type="button"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Clear Snapshot
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        {reportBuilderSections.map((section) => (
+          <label
+            className="flex min-w-0 items-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-3 py-2 text-xs font-semibold text-slate-200"
+            key={section.key}
+          >
+            <input
+              checked={sectionChecked(section.key)}
+              className="h-3.5 w-3.5 accent-[#68d8ff]"
+              onChange={(event) => onToggle(section.key, event.target.checked)}
+              type="checkbox"
+            />
+            <span className="min-w-0 truncate">{section.label}</span>
+          </label>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -1081,9 +1052,8 @@ function PlanningSnapshotLibraryPanel({
             Saved report snapshots
           </h3>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">
-            A Planning Snapshot combines the map image, selected parcel facts,
-            active layers, headline indicators, caveats, and explanation cards
-            so the report can explain what the viewer is seeing.
+            Compact saved views from Overview. Open one to build or print the
+            executive summary.
           </p>
         </div>
         <StatusBadge
@@ -1166,7 +1136,7 @@ function PlanningSnapshotLibraryPanel({
                         value={snapshot.selectedParcelId ?? "Map/context only"}
                       />
                       <CompactSnapshotFact
-                        label="Context"
+                        label="Type"
                         value={getSnapshotContextLabel(snapshot)}
                       />
                       <CompactSnapshotFact
@@ -1248,6 +1218,16 @@ function getSnapshotLibraryTitle(snapshot: PlanningSnapshot) {
 }
 
 function getSnapshotContextLabel(snapshot: PlanningSnapshot) {
+  if (snapshot.overviewCommandMode === "modelLab") {
+    return snapshot.selectedParcelId
+      ? "Model Lab parcel-context snapshot"
+      : "Model Lab research snapshot";
+  }
+
+  if (snapshot.overviewCommandMode === "countywide") {
+    return "Countywide intelligence snapshot";
+  }
+
   if (snapshot.selectedParcelId) {
     return "Parcel snapshot";
   }
@@ -1260,62 +1240,17 @@ function getSnapshotContextLabel(snapshot: PlanningSnapshot) {
 }
 
 function getSnapshotIntelligenceBriefTitle(snapshot: PlanningSnapshot) {
+  if (snapshot.overviewCommandMode === "modelLab") {
+    return "Model Lab Intelligence";
+  }
+
+  if (snapshot.overviewCommandMode === "countywide") {
+    return "Countywide Intelligence Brief";
+  }
+
   return snapshot.selectedParcelId
     ? "Selected Parcel Intelligence"
     : "Intelligence Brief";
-}
-
-function PlanningSnapshotTabs({
-  activeView,
-  onChange,
-  onPrint,
-}: {
-  activeView: PlanningSnapshotView;
-  onChange: (view: PlanningSnapshotView) => void;
-  onPrint: () => void;
-}) {
-  return (
-    <nav
-      aria-label="Planning Snapshot workflow"
-      className="grid gap-2 rounded-lg border border-white/10 bg-black/24 p-2 lg:grid-cols-4"
-    >
-      {planningSnapshotTabs.map((tab) => {
-        const active = tab.id === activeView;
-
-        return (
-          <button
-            aria-pressed={active}
-            className={cn(
-              "rounded-md border px-3 py-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/70",
-              active
-                ? "border-[#68d8ff]/35 bg-[#68d8ff]/10 text-white shadow-[0_0_24px_rgba(104,216,255,0.12)]"
-                : "border-white/10 bg-white/[0.035] text-slate-300 hover:border-white/20 hover:bg-white/[0.06]",
-            )}
-            key={tab.id}
-            onClick={() => onChange(tab.id)}
-            type="button"
-          >
-            <span className="block text-sm font-semibold">{tab.label}</span>
-            <span className="mt-1 block text-xs leading-5 text-slate-500">
-              {tab.description}
-            </span>
-          </button>
-        );
-      })}
-      <button
-        className="rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-3 text-left text-[#f6d98e] transition hover:border-[#d8b86a]/45 hover:bg-[#d8b86a]/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/70"
-        onClick={onPrint}
-        type="button"
-      >
-        <span className="block text-sm font-semibold">
-          Print Executive Summary
-        </span>
-        <span className="mt-1 block text-xs leading-5 text-[#f6d98e]/75">
-          Open the executive summary print dialog.
-        </span>
-      </button>
-    </nav>
-  );
 }
 
 const snapshotSectionLabels: Record<PlanningSnapshotSectionKey, string> = {
@@ -1338,69 +1273,15 @@ const metricSectionMap: Record<string, PlanningSnapshotSectionKey> = {
   "Flood Review Status": "fema_flood",
   "Internal Model Research Status": "model_governance",
   "Map Snapshot": "map_view",
+  "Model Map Display": "model_governance",
+  "Model Lab Context": "model_governance",
+  "Model Signal Rationale": "model_governance",
+  "Overview Mode": "data_needed_caveats",
   "Snapshot Context": "data_needed_caveats",
   "School Assignment": "schools",
   "Transportation Context": "transportation",
   "Utility Proxy": "utility_proxy",
 };
-
-function SnapshotInclusionControls({
-  includedSections,
-  onClear,
-  onToggle,
-}: {
-  includedSections: PlanningSnapshot["includedSections"];
-  onClear: () => void;
-  onToggle: (sectionKey: PlanningSnapshotSectionKey, included: boolean) => void;
-}) {
-  return (
-    <section className="app-chrome no-print rounded-lg border border-white/10 bg-black/22 p-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-            Included in Snapshot
-          </p>
-          <h3 className="mt-1 text-base font-semibold text-white">
-            Report section controls
-          </h3>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">
-            Choose which saved evidence groups appear in the Executive Summary.
-            These controls affect the report only; they do not change map
-            rendering or source data.
-          </p>
-        </div>
-        <button
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
-          onClick={onClear}
-          type="button"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-          Clear Snapshot
-        </button>
-      </div>
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
-        {(Object.keys(snapshotSectionLabels) as PlanningSnapshotSectionKey[]).map(
-          (sectionKey) => (
-            <label
-              className="flex min-w-0 items-center gap-2 rounded-md border border-white/10 bg-white/[0.035] px-3 py-2 text-xs font-semibold text-slate-200"
-              key={sectionKey}
-            >
-              <input
-                checked={includedSections[sectionKey] ?? true}
-                className="h-3.5 w-3.5 accent-[#68d8ff]"
-                onChange={(event) => onToggle(sectionKey, event.target.checked)}
-                type="checkbox"
-              />
-              <span className="min-w-0 truncate">
-                {snapshotSectionLabels[sectionKey]}
-              </span>
-            </label>
-          ),
-        )}
-      </div>
-    </section>
-  );
-}
 
 function SnapshotOverviewPanel({
   planningSnapshot,
@@ -1491,13 +1372,14 @@ function MapSnapshotPreview({
     Boolean(planningSnapshot.mapScreenshotDataUrl);
   const capturedAt =
     planningSnapshot.mapScreenshotCapturedAt ?? planningSnapshot.createdAt;
+  const legend = getSnapshotMapLegend(planningSnapshot);
 
   return (
-    <section className="mt-4 rounded-lg border border-white/10 bg-black/20 p-3">
+    <section className="rounded-lg border border-white/10 bg-black/20 p-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-            Map Snapshot
+            Selected Snapshot Map
           </p>
           <p className="mt-1 text-sm leading-6 text-slate-400">
             {captured
@@ -1518,7 +1400,7 @@ function MapSnapshotPreview({
           tone={captured ? "positive" : "caution"}
         />
       </div>
-      <div className="mt-3 overflow-hidden rounded-md border border-white/10 bg-[#020814]">
+      <div className="relative mt-3 overflow-hidden rounded-md border border-white/10 bg-[#020814]">
         {captured && planningSnapshot.mapScreenshotDataUrl ? (
           <Image
             alt="Captured CFS map snapshot"
@@ -1540,77 +1422,202 @@ function MapSnapshotPreview({
             </p>
           </div>
         )}
+        <NorthArrow />
       </div>
-      <div className="mt-3 grid gap-2 sm:grid-cols-3">
-        <HeaderFact
-          label="Snapshot context"
-          value={planningSnapshot.focusModeLabel ?? "Planning Snapshot"}
-        />
-        <HeaderFact
-          label="Camera"
-          value={planningSnapshot.mapContext.cameraSummary ?? "Not captured"}
-        />
-        <HeaderFact
-          label="Extent"
-          value={planningSnapshot.mapContext.extentSummary ?? "Not captured"}
-        />
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+          {planningSnapshot.focusModeLabel ?? "Planning Snapshot"}
+        </span>
+        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+          {planningSnapshot.selectedParcelId ?? "No parcel captured"}
+        </span>
+        {planningSnapshot.activeLayers.map((layer) => (
+          <span
+            className="rounded-full border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2.5 py-1 text-[11px] font-semibold text-[#b7f0ff]"
+            key={layer}
+          >
+            {layer}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_15rem]">
+        <MapLegendPanel legend={legend} />
+        <div className="rounded-md border border-white/10 bg-white/[0.035] p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.13em] text-slate-500">
+            Scale note
+          </p>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Scale is approximate; 3D scene perspective affects distance.
+          </p>
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Camera: {planningSnapshot.mapContext.cameraSummary ?? "Not captured"}
+          </p>
+        </div>
       </div>
     </section>
   );
 }
 
-function ExplainableMetricsPanel({
-  planningSnapshot,
-}: {
-  planningSnapshot: PlanningSnapshot;
-}) {
+interface SnapshotLegend {
+  caveat?: string;
+  items: Array<{ colorClassName: string; label: string }>;
+  message?: string;
+  title: string;
+}
+
+function MapLegendPanel({ legend }: { legend: SnapshotLegend }) {
   return (
-    <div className="space-y-3">
-      <ReviewGroupIntro
-        eyebrow="Explain the Numbers"
-        summary="Each metric names what it means, where it came from, how CFS interprets it, what caveat applies, and what staff should review next."
-        title="Plain-English metric explanations"
-      />
-      {planningSnapshot.explainableMetrics.map((metric) => (
-        <section
-          className="rounded-lg border border-white/10 bg-[#07111f]/78 p-4"
-          key={metric.label}
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-                {metric.label}
-              </p>
-              <h3 className="mt-1 text-xl font-semibold text-white">
-                {metric.value}
-              </h3>
-            </div>
-            <StatusBadge label="Explainable" tone="info" />
-          </div>
-          <div className="mt-4 grid gap-2">
-            <ReviewFactItem label="What it means" value={metric.meaning} />
-            <ReviewFactItem label="Source" value={metric.source} />
-            <ReviewFactItem label="Method / rationale" value={metric.method} />
-            <ReviewFactItem label="Caveat" value={metric.caveat} />
-            {metric.recommendedAction ? (
-              <ReviewFactItem
-                label="Recommended action"
-                value={metric.recommendedAction}
+    <div className="rounded-md border border-white/10 bg-white/[0.035] p-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.13em] text-slate-500">
+        Legend
+      </p>
+      <h4 className="mt-1 text-sm font-semibold text-white">{legend.title}</h4>
+      {legend.items.length ? (
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          {legend.items.map((item) => (
+            <div
+              className="flex items-center gap-2 text-xs text-slate-300"
+              key={item.label}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "h-3 w-3 shrink-0 rounded-full border",
+                  item.colorClassName,
+                )}
               />
-            ) : null}
-          </div>
-        </section>
-      ))}
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          {legend.message ??
+            "Active layers are listed below. No specialized legend was available for this snapshot."}
+        </p>
+      )}
+      {legend.caveat ? (
+        <p className="mt-2 text-xs leading-5 text-[#f6d98e]">{legend.caveat}</p>
+      ) : null}
     </div>
   );
 }
 
+function NorthArrow() {
+  return (
+    <div className="absolute right-3 top-3 flex h-12 w-10 flex-col items-center justify-center rounded-md border border-white/20 bg-black/55 text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] print:border-slate-300 print:bg-white print:text-slate-900">
+      <span className="text-[10px] font-bold leading-none">N</span>
+      <span className="mt-0.5 text-lg leading-none">▲</span>
+    </div>
+  );
+}
+
+function getSnapshotMapLegend(planningSnapshot: PlanningSnapshot): SnapshotLegend {
+  const layerText = [
+    ...planningSnapshot.activeLayers,
+    ...(planningSnapshot.activeLayerIds ?? []),
+    planningSnapshot.focusModeLabel ?? "",
+    planningSnapshot.overviewCommandMode ?? "",
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (planningSnapshot.overviewCommandMode === "modelLab") {
+    return {
+      caveat: "Relative research signal only. Not exact probability.",
+      items: [
+        {
+          colorClassName: "border-orange-200/70 bg-orange-400",
+          label: "Very Strong Research Signal",
+        },
+        {
+          colorClassName: "border-amber-200/70 bg-amber-300",
+          label: "Strong Research Signal",
+        },
+        {
+          colorClassName: "border-cyan-100/70 bg-cyan-400",
+          label: "Moderate Research Signal",
+        },
+        {
+          colorClassName: "border-slate-300/50 bg-slate-500",
+          label: "Lower Research Signal",
+        },
+        {
+          colorClassName: "border-slate-400/40 bg-slate-700/60",
+          label: "Insufficient Data",
+        },
+      ],
+      title: "Development Research Signal",
+    };
+  }
+
+  if (layerText.includes("fema") || layerText.includes("flood")) {
+    return {
+      items: [
+        { colorClassName: "border-red-200/70 bg-red-500", label: "Floodway" },
+        { colorClassName: "border-orange-200/70 bg-orange-400", label: "SFHA" },
+        { colorClassName: "border-sky-100/70 bg-sky-400", label: "Moderate" },
+        { colorClassName: "border-slate-300/50 bg-slate-500", label: "Minimal" },
+      ],
+      title: "FEMA Flood Context",
+    };
+  }
+
+  if (layerText.includes("school")) {
+    return {
+      caveat: "School utilization values are seed/context data until official capacity is integrated.",
+      items: [
+        { colorClassName: "border-emerald-100/70 bg-emerald-400", label: "Under capacity" },
+        { colorClassName: "border-amber-100/70 bg-amber-300", label: "Approaching capacity" },
+        { colorClassName: "border-orange-100/70 bg-orange-400", label: "Over capacity" },
+        { colorClassName: "border-red-100/70 bg-red-500", label: "Severely over capacity" },
+      ],
+      title: "School Utilization Seed",
+    };
+  }
+
+  if (
+    layerText.includes("development") ||
+    layerText.includes("permit") ||
+    layerText.includes("hotspot") ||
+    layerText.includes("construction")
+  ) {
+    return {
+      caveat: "Permit/development activity is observed history/context, not a prediction.",
+      items: [
+        {
+          colorClassName: "border-[#d8b86a]/70 bg-[#d8b86a]",
+          label: "Permit/development activity",
+        },
+        {
+          colorClassName: "border-[#68d8ff]/70 bg-[#68d8ff]",
+          label: "Marker size/count indicates relative concentration where applicable",
+        },
+      ],
+      title: "Development Activity",
+    };
+  }
+
+  return {
+    items: [],
+    message:
+      "Active layers are listed below. No specialized legend was available for this snapshot.",
+    title: "Active Layer Context",
+  };
+}
+
 function SnapshotExecutiveSummary({
+  extraSections = { countywide_indicators: true, key_findings: true },
   onPrint,
   planningSnapshot,
+  showExplanationCards = false,
 }: {
+  extraSections?: ReportSectionVisibility;
   onPrint: () => void;
   planningSnapshot: PlanningSnapshot;
+  showExplanationCards?: boolean;
 }) {
   const includedMetrics = planningSnapshot.explainableMetrics.filter(
     (metric) =>
@@ -1618,11 +1625,13 @@ function SnapshotExecutiveSummary({
         metricSectionMap[metric.label] ?? "data_needed_caveats"
       ] ?? true,
   );
+  const conciseMetrics = includedMetrics.slice(0, 6);
   const includedSectionLabels = (
     Object.keys(snapshotSectionLabels) as PlanningSnapshotSectionKey[]
   )
     .filter((sectionKey) => planningSnapshot.includedSections[sectionKey] ?? true)
     .map((sectionKey) => snapshotSectionLabels[sectionKey]);
+  const keyFindings = planningSnapshot.knownReviewFlags.slice(0, 5);
 
   return (
     <div className="space-y-4">
@@ -1668,7 +1677,17 @@ function SnapshotExecutiveSummary({
           <ReportMapSnapshotSection planningSnapshot={planningSnapshot} />
         ) : null}
 
-        <ReportIntelligenceBriefSection planningSnapshot={planningSnapshot} />
+        {extraSections.countywide_indicators ? (
+          <ReportIntelligenceBriefSection planningSnapshot={planningSnapshot} />
+        ) : null}
+
+        {planningSnapshot.modelLabContext &&
+        planningSnapshot.includedSections.model_governance !== false ? (
+          <ReportModelResearchSection
+            planningSnapshot={planningSnapshot}
+            showExplanationCards={showExplanationCards}
+          />
+        ) : null}
 
         <section className="mt-5 grid gap-3 md:grid-cols-2 print:grid-cols-2">
           {planningSnapshot.selectedParcelSummary ? (
@@ -1706,12 +1725,13 @@ function SnapshotExecutiveSummary({
           />
         </section>
 
+        {extraSections.key_findings ? (
         <section className="mt-6">
           <h3 className="text-lg font-semibold text-white print:text-slate-950">
             Key Findings
           </h3>
           <div className="mt-3 grid gap-2">
-            {planningSnapshot.knownReviewFlags.map((flag) => (
+            {keyFindings.map((flag) => (
               <ReportFact
                 key={`${flag.label}-report`}
                 label={`${flag.label}: ${flag.status}`}
@@ -1720,10 +1740,12 @@ function SnapshotExecutiveSummary({
             ))}
           </div>
         </section>
+        ) : null}
 
+        {showExplanationCards ? (
         <section className="mt-6">
           <h3 className="text-lg font-semibold text-white print:text-slate-950">
-            Explainable Metrics
+            Explain Numbers
           </h3>
           <div className="mt-3 grid gap-3">
             {includedMetrics.map((metric) => (
@@ -1738,7 +1760,10 @@ function SnapshotExecutiveSummary({
                   {metric.value}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-400 print:text-slate-700">
-                  {metric.meaning}
+                  What it means: {metric.meaning}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-400 print:text-slate-700">
+                  Source: {metric.source}
                 </p>
                 <p className="mt-2 text-xs leading-5 text-[#f6d98e] print:text-slate-700">
                   Caveat: {metric.caveat}
@@ -1747,6 +1772,22 @@ function SnapshotExecutiveSummary({
             ))}
           </div>
         </section>
+        ) : (
+          <section className="mt-6">
+            <h3 className="text-lg font-semibold text-white print:text-slate-950">
+              Included Evidence Sections
+            </h3>
+            <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+              {conciseMetrics.map((metric) => (
+                <ReportFact
+                  key={`${metric.label}-concise`}
+                  label={metric.label}
+                  value={`${metric.value}${metric.caveat ? ` / ${metric.caveat}` : ""}`}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
         {planningSnapshot.includedSections.recommended_actions !== false ? (
           <section className="mt-6">
@@ -1782,6 +1823,237 @@ function SnapshotExecutiveSummary({
       </article>
     </div>
   );
+}
+
+function ReportModelResearchSection({
+  planningSnapshot,
+  showExplanationCards,
+}: {
+  planningSnapshot: PlanningSnapshot;
+  showExplanationCards: boolean;
+}) {
+  const context = planningSnapshot.modelLabContext?.selectedResearchContext;
+  const topDrivers = context?.topDrivers?.length
+    ? context.topDrivers
+    : modelResearchDriverSources;
+  const signalBand = context
+    ? context.dominantResearchBand ??
+      formatRelativeDevelopmentSignalBand({
+          rankBand: context.researchRankBand,
+          signalLabel: context.researchSignalLabel,
+        })
+    : "No marker selected";
+  const rankBand = context
+    ? formatModelResearchBandLabel(context.researchRankBand)
+    : "No relative rank band selected";
+  const contextLabel = context
+    ? getModelResearchReportContextLabel(context)
+    : "Aggregate model context only";
+  const contextIsCluster =
+    context?.contextKind === "cluster" || context?.contextKind === "heatmap_cell";
+  const bandDistribution = context?.bandCounts
+    ? formatModelResearchReportBandDistribution(context.bandCounts)
+    : null;
+  const whyHighlighted = context
+    ? `This area is highlighted because its parcel context resembles places where new construction occurred historically, using ${topDrivers
+        .slice(0, 3)
+        .map((driver) => formatModelResearchDriverLabel(driver).toLowerCase())
+        .join(", ")}.`
+    : "No individual research marker was selected when the snapshot was saved; the section documents aggregate Model Lab context only.";
+
+  return (
+    <section className="mt-5 rounded-md border border-[#d8b86a]/24 bg-[#d8b86a]/[0.06] p-3 print:border-slate-300 print:bg-white">
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-white print:text-slate-950">
+            Development Model Research Context
+          </h3>
+          <p className="mt-1 text-sm leading-6 text-slate-300 print:text-slate-700">
+            Model Lab context is included because this snapshot was saved from
+            internal model research mode.
+          </p>
+        </div>
+        <span className="inline-flex shrink-0 rounded-md border border-[#d8b86a]/28 bg-[#d8b86a]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f6d98e] print:border-slate-300 print:bg-white print:text-slate-700">
+          Internal research only
+        </span>
+      </div>
+
+      <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+        <ReportFact
+          label="Current best internal model"
+          value={developmentModelLabSummary.currentBestInternalVariant}
+        />
+        <ReportFact label="Relative signal band" value={signalBand} />
+        <ReportFact
+          label="What the band means"
+          value={getModelResearchBandMeaning(signalBand)}
+        />
+        <ReportFact
+          label={context ? getModelResearchReportContextTitle(context) : "Selected context"}
+          value={contextLabel}
+        />
+        {contextIsCluster ? (
+          <>
+            <ReportFact
+              label="Parcels represented"
+              value={formatModelResearchReportRepresentedCount(
+                context.representedFeatureCount ?? 1,
+              )}
+            />
+            {bandDistribution ? (
+              <ReportFact
+                label="Band distribution"
+                value={bandDistribution}
+              />
+            ) : null}
+          </>
+        ) : null}
+      </div>
+
+      <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+        <ReportFact label="Why highlighted" value={whyHighlighted} />
+        <ReportFact
+          label="What it does not mean"
+          value="This is not an exact parcel development probability, official parcel score, entitlement decision, or statement that development will occur."
+        />
+      </div>
+
+      <div className="mt-3 rounded-md border border-white/10 bg-black/20 p-3 print:border-slate-300 print:bg-white">
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          Top drivers / source context
+        </p>
+        <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-300 print:text-slate-700">
+          {topDrivers.map((driver) => (
+            <li key={driver}>
+              - {formatModelResearchDriverLabel(driver)}:{" "}
+              {getModelResearchDriverExplanation(driver)}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {showExplanationCards ? (
+        <>
+          <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+            <ReportFact label="Source rank band" value={rankBand} />
+            <ReportFact
+              label="Overlay status"
+              value={
+                planningSnapshot.modelLabContext?.overlayEnabled
+                  ? "Development Research Signal active"
+                  : "Development Research Signal off"
+              }
+            />
+            <ReportFact
+              label="Map display"
+              value={
+                planningSnapshot.modelLabContext?.displayModeLabel ??
+                "Model Lab display not captured"
+              }
+            />
+            <ReportFact
+              label="How signal is calculated"
+              value="CFS compares parcel-year context such as zoning, transportation access, and tax/value patterns against historical new construction permit outcomes, then shows relative research bands instead of exact probabilities."
+            />
+          </div>
+          <div className="mt-3 rounded-md border border-white/10 bg-black/20 p-3 print:border-slate-300 print:bg-white">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Missing data needed
+            </p>
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-300 print:text-slate-700">
+              {developmentModelLabSummary.whyNotPublicFacing.map((item) => (
+                <li key={item}>- {item}</li>
+              ))}
+            </ul>
+          </div>
+        </>
+      ) : null}
+
+      <p className="mt-3 text-sm leading-6 text-[#f6d98e] print:text-slate-700">
+        {contextIsCluster
+          ? "This Model Lab snapshot summarizes a relative research cluster. It does not show exact parcel development probability and is not an official parcel score."
+          : "This is an internal research preview. It does not show exact parcel development probability and is not an official parcel score."}
+      </p>
+    </section>
+  );
+}
+
+function getModelResearchReportContextLabel(
+  context: NonNullable<
+    NonNullable<PlanningSnapshot["modelLabContext"]>["selectedResearchContext"]
+  >,
+) {
+  const representedCount = context.representedFeatureCount ?? 1;
+  const safeAreaLabel =
+    context.approximateAreaLabel &&
+    !context.approximateAreaLabel.includes(["1", "parcels"].join(" "))
+      ? context.approximateAreaLabel
+      : null;
+
+  if (context.contextKind === "heatmap_cell") {
+    return (
+      safeAreaLabel ??
+      (representedCount === 1
+        ? "Single research feature in countywide heatmap cell"
+        : `${formatDevelopmentCount(
+            representedCount,
+          )} research records in a countywide heatmap cell`)
+    );
+  }
+
+  if (context.contextKind === "cluster") {
+    return (
+      safeAreaLabel ??
+      (representedCount === 1
+        ? "Single research feature"
+        : `${formatDevelopmentCount(representedCount)} research records in a cluster`)
+    );
+  }
+
+  return context.officialParcelId;
+}
+
+function getModelResearchReportContextTitle(
+  context: NonNullable<
+    NonNullable<PlanningSnapshot["modelLabContext"]>["selectedResearchContext"]
+  >,
+) {
+  const representedCount = context.representedFeatureCount ?? 1;
+
+  if (
+    representedCount === 1 ||
+    (context.contextKind !== "cluster" &&
+      context.contextKind !== "heatmap_cell")
+  ) {
+    return "Selected research feature";
+  }
+
+  return "Selected research cluster";
+}
+
+function formatModelResearchReportRepresentedCount(count: number) {
+  return count === 1
+    ? "1 parcel represented"
+    : `${formatDevelopmentCount(count)} parcels represented`;
+}
+
+function formatModelResearchReportBandDistribution(
+  counts: NonNullable<
+    NonNullable<
+      NonNullable<PlanningSnapshot["modelLabContext"]>["selectedResearchContext"]
+    >["bandCounts"]
+  >,
+) {
+  return [
+    ["Very Strong", counts.veryStrong],
+    ["Strong", counts.strong],
+    ["Moderate", counts.moderate],
+    ["Lower", counts.lower],
+    ["Insufficient", counts.insufficient],
+  ]
+    .filter(([, count]) => Number(count) > 0)
+    .map(([label, count]) => `${label}: ${formatDevelopmentCount(Number(count))}`)
+    .join(" / ");
 }
 
 function ReportIntelligenceBriefSection({
@@ -1846,6 +2118,7 @@ function ReportMapSnapshotSection({
     Boolean(planningSnapshot.mapScreenshotDataUrl);
   const capturedAt =
     planningSnapshot.mapScreenshotCapturedAt ?? planningSnapshot.createdAt;
+  const legend = getSnapshotMapLegend(planningSnapshot);
 
   return (
     <section className="mt-5 rounded-md border border-white/10 bg-black/20 p-3 print:border-slate-300 print:bg-white">
@@ -1859,7 +2132,7 @@ function ReportMapSnapshotSection({
             )}.`
           : "Map snapshot unavailable for this report."}
       </p>
-      <div className="mt-3 overflow-hidden rounded-md border border-white/10 bg-[#020814] print:border-slate-300 print:bg-white">
+      <div className="relative mt-3 overflow-hidden rounded-md border border-white/10 bg-[#020814] print:border-slate-300 print:bg-white">
         {captured && planningSnapshot.mapScreenshotDataUrl ? (
           <Image
             alt="Captured CFS map snapshot for executive summary"
@@ -1881,6 +2154,7 @@ function ReportMapSnapshotSection({
             </p>
           </div>
         )}
+        <NorthArrow />
       </div>
       <div className="mt-3 grid gap-2 md:grid-cols-3 print:grid-cols-3">
         <ReportFact
@@ -1896,6 +2170,17 @@ function ReportMapSnapshotSection({
           value={planningSnapshot.selectedParcelId ?? "No parcel captured"}
         />
       </div>
+      <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_14rem] print:grid-cols-[minmax(0,1fr)_14rem]">
+        <MapLegendPanel legend={legend} />
+        <div className="rounded-md border border-white/10 bg-black/20 p-3 print:border-slate-300 print:bg-white">
+          <p className="text-xs font-semibold uppercase tracking-[0.13em] text-slate-500">
+            Scale note
+          </p>
+          <p className="mt-1 text-xs leading-5 text-slate-400 print:text-slate-700">
+            Scale is approximate; 3D scene perspective affects distance.
+          </p>
+        </div>
+      </div>
     </section>
   );
 }
@@ -1909,60 +2194,6 @@ function ReportFact({ label, value }: ReviewFact) {
       <p className="mt-1 break-words text-sm font-medium leading-5 text-slate-200 print:text-slate-900">
         {value || "Not Available"}
       </p>
-    </div>
-  );
-}
-
-function ReviewNotesActionsPanel({
-  flags,
-  reviewActions,
-}: {
-  flags: PriorityFlag[];
-  reviewActions: string[];
-}) {
-  return (
-    <div className="space-y-4">
-      <PriorityFlagsPanel flags={flags} />
-      <ReviewSection
-        caveat="Review notes are generated from visible parcel context and caveats. They are prompts for staff follow-up, not automated decisions."
-        facts={reviewActions.map((action, index) => ({
-          label: `Action ${index + 1}`,
-          value: action,
-        }))}
-        icon={CheckCircle2}
-        status={{ label: "Planner Review", tone: "info" }}
-        summary="Recommended follow-up steps based on selected parcel evidence, constraints, and current data gaps."
-        title="Recommended Review Actions"
-      />
-      <ReviewSection
-        caveat="Missing official datasets should be named plainly. Missing data is not the same as confirmed risk."
-        facts={[
-          {
-            label: "School capacity",
-            value: "Official enrollment/capacity data needed",
-          },
-          {
-            label: "Utility capacity",
-            value: "Provider confirmation needed",
-          },
-          {
-            label: "Rezoning case history",
-            value: "Official dated case records needed",
-          },
-          {
-            label: "Future land use",
-            value: "Countywide GIS/table preferred",
-          },
-          {
-            label: "Model output",
-            value: "Internal research only; no parcel-level output",
-          },
-        ]}
-        icon={FileText}
-        status={{ label: "Official Data Needed", tone: "caution" }}
-        summary="Follow-up data requests that would make parcel review stronger and reduce caveats."
-        title="Data Gaps To Resolve"
-      />
     </div>
   );
 }
@@ -2365,23 +2596,12 @@ function buildReviewActions({
   return actions;
 }
 
-function neighborhoodLabel(parcel: ParcelSearchRecord) {
-  return [parcel.neighborhood, parcel.subdivision].filter(Boolean).join(" / ") || "Not Available";
-}
-
 function formatOptionalCurrency(value: number | null | undefined) {
   return typeof value === "number" ? formatCurrency(value) : "Not Available";
 }
 
 function formatOptionalCount(value: number | null | undefined) {
   return typeof value === "number" ? formatDevelopmentCount(value) : "Not Available";
-}
-
-function formatNumber(value: number, digits = 1) {
-  return value.toLocaleString("en-US", {
-    maximumFractionDigits: digits,
-    minimumFractionDigits: 0,
-  });
 }
 
 function formatDateTime(value: string) {
@@ -2432,6 +2652,22 @@ function formatModelVariant(value: string | null | undefined) {
   }
 
   return formatLabel(normalized);
+}
+
+function formatModelResearchBandLabel(value: string | null | undefined) {
+  switch (value) {
+    case "top_1_percent_research_band":
+    case "top_5_percent_research_band":
+      return "Very Strong Research Signal";
+    case "top_15_percent_research_band":
+      return "Strong Research Signal";
+    case "remaining_research_band":
+      return "Lower Research Signal";
+    case "insufficient_data":
+      return "Insufficient Data";
+    default:
+      return "No relative rank band selected";
+  }
 }
 
 function formatLabel(value: string | null | undefined) {

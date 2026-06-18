@@ -15,7 +15,7 @@ faster to assemble, easier to explain, and safer to discuss.
 1. CFS turns scattered planning and GIS records into a parcel-based due
    diligence workflow.
 2. It supports a guided demo flow: start from the CFS Command Center, search a
-   parcel, focus the map, open countywide intelligence when needed, save one or
+   parcel, focus the map, use Explore Countywide when broader layers are needed, save one or
    more Planning Snapshots with map context, generate an Executive Summary, and
    explain Methodology.
 3. It integrates multiple high-value data domains without hiding caveats.

@@ -1,0 +1,157 @@
+{
+  "phase": "23A",
+  "name": "Integrated Model Lab and Development Prediction Research Preview",
+  "generated_at": "2026-06-16T06:48:13-04:00",
+  "files_changed": [
+    "README.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_expected_questions_and_answers.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "docs/demo/cfs_model_explanation_for_nontechnical_audience.md",
+    "docs/demo/cfs_what_not_to_claim.md",
+    "docs/modeling/development_prediction_feature_registry.md",
+    "docs/modeling/development_prediction_model_qa_report.md",
+    "docs/modeling/development_prediction_model_readiness.md",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/data/intelligence/developmentModelLab.ts"
+  ],
+  "model_lab_ui_integration": {
+    "overview_command_center_actions": [
+      "Search Parcel",
+      "Countywide Intelligence",
+      "Model Lab",
+      "Save Snapshot"
+    ],
+    "model_lab_panel_added": true,
+    "panel_type": "aggregate_internal_research_preview",
+    "public_prediction_endpoint_added": false,
+    "frontend_prediction_probability_exposed": false,
+    "parcel_level_ranking_class_exposed": false
+  },
+  "development_model_card_details": {
+    "historical_outcome": "new construction permits",
+    "target": "new construction permit within next 3 years",
+    "feature_unit": "parcel-year",
+    "feature_rows": "1,430,221",
+    "current_best_internal_variant": "Zoning + Transportation + Tax/Value",
+    "best_ablation_variant": "transportation_plus_tax_value_only",
+    "status": "Internal research preview",
+    "production_ready": false,
+    "public_facing": false,
+    "exact_probabilities_shown": false
+  },
+  "aggregate_metrics_displayed": {
+    "source": "existing Phase 16C/16D model-governance outputs",
+    "pr_auc": 0.137928,
+    "lift_at_top_5_pct": 4.051123,
+    "precision_at_top_5_pct": 0.155245,
+    "parcel_level_scores_displayed": false
+  },
+  "feature_group_summary": {
+    "helped": [
+      "historical zoning",
+      "transportation accessibility",
+      "tax/value enrichment"
+    ],
+    "excluded_for_now": [
+      "Accela plan reviews",
+      "Central Area Plan layers",
+      "utility proxy",
+      "current-context metadata flags"
+    ],
+    "reasoning": "Excluded groups remain useful as context or future candidates but need stronger temporal coverage, countywide scope, true capacity data, or better top-k ranking behavior."
+  },
+  "methodology_model_lab_update": {
+    "development_model_lab_section_added": true,
+    "plain_english_flow_added": true,
+    "current_best_variant_visible": true,
+    "parcel_probability_caveat_visible": true
+  },
+  "optional_preview_layer_or_endpoint": {
+    "research_preview_layer_created": false,
+    "backend_model_research_summary_endpoint_created": false,
+    "reason": "Existing aggregate outputs and frontend state were sufficient; adding a preview layer or endpoint was not necessary for Phase 23A."
+  },
+  "selected_parcel_model_context_behavior": {
+    "selected_parcel_card_mentions_model_context": true,
+    "wording": "Internal only; current best internal variant is referenced as context.",
+    "exact_probability_shown": false,
+    "official_parcel_score_shown": false
+  },
+  "planning_snapshot_integration": {
+    "model_research_metric_updated": true,
+    "current_best_variant_in_snapshot_caveats": true,
+    "hidden_model_outputs_stored": false,
+    "snapshot_remains_report_context_only": true
+  },
+  "documentation_updates": {
+    "readme_updated": true,
+    "demo_docs_updated": true,
+    "modeling_docs_updated": true,
+    "what_not_to_claim_updated": true
+  },
+  "tests_added": {
+    "frontend_unit_tests_added": false,
+    "reason": "The repo does not define a frontend test runner; validation used typecheck, lint, build, targeted backend model-safety tests, and browser smoke."
+  },
+  "safety_verification": {
+    "unsafe_ui_strings_checked": [
+      "experimental_probability",
+      "prediction_probability",
+      "exact_probability",
+      "development_signal_class",
+      "very_high_development_signal",
+      "high_development_signal",
+      "parcel_score"
+    ],
+    "frontend_visible_smoke_found_unsafe_strings": false,
+    "pipeline_backend_internal_fields_still_exist": true,
+    "pipeline_backend_note": "Existing internal pipeline/backend fields remain for prior phases and tests; Phase 23A did not expose them in user-facing UI."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_backend_app": "passed",
+    "python_m_pytest": "timed out twice before producing captured output",
+    "targeted_backend_model_safety_tests": {
+      "command": "python -m pytest backend\\tests\\test_development_prediction_features.py backend\\tests\\test_development_baseline_model.py -q",
+      "result": "passed",
+      "tests": 29,
+      "warnings": 1
+    },
+    "npm_run_dev_cfs": {
+      "result": "started frontend and backend but launcher exited nonzero",
+      "reason": "Launcher reported one cold-start parcel-search API check as ERR; direct follow-up request to the same endpoint returned HTTP 200.",
+      "frontend_port": 3000,
+      "backend_port": 8000,
+      "direct_parcel_search_status": 200
+    }
+  },
+  "browser_smoke_results": {
+    "localhost_3000_loaded": true,
+    "overview_actions_visible": [
+      "Search Parcel",
+      "Countywide Intelligence",
+      "Model Lab",
+      "Save Snapshot"
+    ],
+    "model_lab_opens": true,
+    "development_model_card_visible": true,
+    "current_best_internal_variant_visible": true,
+    "model_safety_caveats_visible": true,
+    "methodology_development_model_lab_visible": true,
+    "planning_snapshot_loads": true,
+    "browser_console_errors": 0,
+    "parcel_level_probabilities_visible": false,
+    "parcel_level_ranking_classes_visible": false
+  },
+  "remaining_known_limitations": [
+    "Model Lab is aggregate-only and does not support public parcel prediction.",
+    "Exact probability calibration remains weak and under review.",
+    "Official utility capacity, school capacity/enrollment, rezoning case records, countywide future land use, and development pipeline data are still needed.",
+    "No research preview map layer was added in this phase."
+  ]
+}

@@ -21,13 +21,17 @@ import {
   Workflow,
   type LucideIcon,
 } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   developmentPredictionPublicBlockers,
   developmentPredictionRoadmap,
   standardizedDevelopmentPredictionMetrics,
   useDevelopmentPredictionResearchStatus,
 } from "@/hooks/useDevelopmentPredictionResearchStatus";
+import {
+  developmentModelLabSummary,
+  modelResearchLegendLabels,
+} from "@/data/intelligence/developmentModelLab";
 import {
   useEnterpriseDiagnostics,
   type EnterpriseDiagnosticCheck,
@@ -68,16 +72,25 @@ type DataDomainStatus =
   | "Presentation-Derived"
   | "Proxy Only";
 
+type OpenAccordionSet = ReadonlySet<string>;
+
 const currentBestModelFallback = {
-  excludedGroups: [
-    "Accela plan reviews",
-    "Central Area Plan",
-    "utility proxy",
-    "metadata/current-context flags",
-  ],
-  variantLabel: "Zoning + Transportation + Tax/Value",
-  variantValue: "transportation_plus_tax_value_only",
+  excludedGroups: developmentModelLabSummary.excludedFeatureGroups,
+  variantLabel: developmentModelLabSummary.currentBestInternalVariant,
+  variantValue: developmentModelLabSummary.bestAblationVariant,
 };
+
+function toggleOpenAccordionId(openIds: OpenAccordionSet, id: string) {
+  const nextOpenIds = new Set(openIds);
+
+  if (nextOpenIds.has(id)) {
+    nextOpenIds.delete(id);
+  } else {
+    nextOpenIds.add(id);
+  }
+
+  return nextOpenIds;
+}
 
 const explorerSections: {
   id: ExplorerSection;
@@ -131,7 +144,7 @@ const overviewBadges = [
   "School Assignment",
   "Transportation Context",
   "Internal Model Research",
-  "Not Production Prediction",
+  "Not Production-Ready",
 ];
 
 const cfsAtAGlanceCards = [
@@ -212,13 +225,7 @@ const plainEnglishLogic = [
   "Planning Snapshot and Executive Summary are descriptive review tools, not automated decision tools.",
 ];
 
-const modelResearchFlow = [
-  "Permits show what happened.",
-  "Parcel features describe context before development.",
-  "The model tests which conditions are associated with future new construction.",
-  "CFS reviews results at an aggregate level.",
-  "Parcel-level predictions stay hidden until data and calibration improve.",
-];
+const modelResearchFlow = developmentModelLabSummary.plainEnglishFlow;
 
 const capabilityCards: {
   caveat: string;
@@ -478,7 +485,7 @@ const dataInventory: {
       "model QA outputs",
       "feature governance outputs",
     ],
-    limitation: "Internal research only; exact probabilities and parcel ranking classes are not exposed.",
+    limitation: "Internal research only; model probability values are hidden and parcel-level classes are not exposed.",
     nextNeededData: "Better calibration, more official dated features, and governance approval.",
     status: "Internal Research",
     usedFor: "Aggregate model transparency, feature readiness, safety flags, and non-public research documentation.",
@@ -680,11 +687,11 @@ const faqItems = [
     question: "Is this public-facing?",
   },
   {
-    answer: "It studies development patterns internally, but it does not publish parcel predictions or exact probabilities.",
+    answer: "It studies development patterns internally, but it does not publish parcel predictions or model probability values.",
     question: "Does it predict development?",
   },
   {
-    answer: "Calibration is weak and still under review. Showing exact probabilities would overstate model readiness.",
+    answer: "Calibration is weak and still under review. Showing precise probability values would overstate model readiness.",
     question: "Why are probabilities hidden?",
   },
   {
@@ -710,24 +717,48 @@ const faqItems = [
 ];
 
 export function MethodologyWorkspace() {
-  const [activeSection, setActiveSection] =
-    useState<ExplorerSection>("overview");
+  const [activeSection, setActiveSection] = useState<ExplorerSection>(() =>
+    typeof window !== "undefined" &&
+    window.location.hash === "#methodology-model-lab"
+      ? "model"
+      : "overview",
+  );
   const [capabilityFilter, setCapabilityFilter] = useState<
     "All" | CapabilityStatus
   >("All");
   const [capabilityQuery, setCapabilityQuery] = useState("");
-  const [openCapabilityId, setOpenCapabilityId] = useState(
-    capabilityCards[0]?.id ?? "",
-  );
-  const [openDataDomain, setOpenDataDomain] = useState(
-    dataInventory[0]?.domain ?? "",
-  );
-  const [openNeedDataset, setOpenNeedDataset] = useState(
-    dataNeedDetails[0]?.dataset ?? "",
-  );
-  const [openFaqQuestion, setOpenFaqQuestion] = useState(
-    faqItems[0]?.question ?? "",
-  );
+  const [openCapabilityIds, setOpenCapabilityIds] =
+    useState<OpenAccordionSet>(() =>
+      new Set(capabilityCards[0]?.id ? [capabilityCards[0].id] : []),
+    );
+  const [openDataDomainIds, setOpenDataDomainIds] =
+    useState<OpenAccordionSet>(() =>
+      new Set(dataInventory[0]?.domain ? [dataInventory[0].domain] : []),
+    );
+  const [openNeedDatasetIds, setOpenNeedDatasetIds] =
+    useState<OpenAccordionSet>(() =>
+      new Set(dataNeedDetails[0]?.dataset ? [dataNeedDetails[0].dataset] : []),
+    );
+  const [openFaqQuestionIds, setOpenFaqQuestionIds] =
+    useState<OpenAccordionSet>(() =>
+      new Set(faqItems[0]?.question ? [faqItems[0].question] : []),
+    );
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (window.location.hash !== "#methodology-model-lab") {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById("development-model-lab")
+        ?.scrollIntoView({ block: "start" });
+    });
+  }, []);
 
   const filteredCapabilities = useMemo(() => {
     const normalizedQuery = capabilityQuery.trim().toLowerCase();
@@ -787,28 +818,44 @@ export function MethodologyWorkspace() {
                 capabilityQuery={capabilityQuery}
                 filteredCapabilities={filteredCapabilities}
                 onFilterChange={setCapabilityFilter}
-                onOpenCapabilityChange={setOpenCapabilityId}
+                onToggleCapability={(id) =>
+                  setOpenCapabilityIds((openIds) =>
+                    toggleOpenAccordionId(openIds, id),
+                  )
+                }
                 onQueryChange={setCapabilityQuery}
-                openCapabilityId={openCapabilityId}
+                openCapabilityIds={openCapabilityIds}
               />
             ) : null}
             {activeSection === "data" ? (
               <DataInventorySection
-                onOpenDomainChange={setOpenDataDomain}
-                openDataDomain={openDataDomain}
+                onToggleDomain={(domain) =>
+                  setOpenDataDomainIds((openIds) =>
+                    toggleOpenAccordionId(openIds, domain),
+                  )
+                }
+                openDataDomainIds={openDataDomainIds}
               />
             ) : null}
             {activeSection === "model" ? <ModelSection /> : null}
             {activeSection === "needs" ? (
               <DataNeedsSection
-                onOpenDatasetChange={setOpenNeedDataset}
-                openNeedDataset={openNeedDataset}
+                onToggleDataset={(dataset) =>
+                  setOpenNeedDatasetIds((openIds) =>
+                    toggleOpenAccordionId(openIds, dataset),
+                  )
+                }
+                openNeedDatasetIds={openNeedDatasetIds}
               />
             ) : null}
             {activeSection === "roadmap" ? (
               <RoadmapGuardrailsSection
-                onOpenQuestionChange={setOpenFaqQuestion}
-                openQuestion={openFaqQuestion}
+                onToggleQuestion={(question) =>
+                  setOpenFaqQuestionIds((openIds) =>
+                    toggleOpenAccordionId(openIds, question),
+                  )
+                }
+                openQuestionIds={openFaqQuestionIds}
               />
             ) : null}
           </div>
@@ -1014,17 +1061,17 @@ function CapabilitiesSection({
   capabilityQuery,
   filteredCapabilities,
   onFilterChange,
-  onOpenCapabilityChange,
+  onToggleCapability,
   onQueryChange,
-  openCapabilityId,
+  openCapabilityIds,
 }: {
   capabilityFilter: "All" | CapabilityStatus;
   capabilityQuery: string;
   filteredCapabilities: typeof capabilityCards;
   onFilterChange: (filter: "All" | CapabilityStatus) => void;
-  onOpenCapabilityChange: (id: string) => void;
+  onToggleCapability: (id: string) => void;
   onQueryChange: (query: string) => void;
-  openCapabilityId: string;
+  openCapabilityIds: OpenAccordionSet;
 }) {
   return (
     <div className="space-y-4">
@@ -1106,13 +1153,9 @@ function CapabilitiesSection({
                   {cards.map((card) => (
                     <CapabilityCard
                       card={card}
-                      isOpen={openCapabilityId === card.id}
+                      isOpen={openCapabilityIds.has(card.id)}
                       key={card.id}
-                      onToggle={() =>
-                        onOpenCapabilityChange(
-                          openCapabilityId === card.id ? "" : card.id,
-                        )
-                      }
+                      onToggle={() => onToggleCapability(card.id)}
                     />
                   ))}
                 </div>
@@ -1182,11 +1225,11 @@ function CapabilityCard({
 }
 
 function DataInventorySection({
-  onOpenDomainChange,
-  openDataDomain,
+  onToggleDomain,
+  openDataDomainIds,
 }: {
-  onOpenDomainChange: (domain: string) => void;
-  openDataDomain: string;
+  onToggleDomain: (domain: string) => void;
+  openDataDomainIds: OpenAccordionSet;
 }) {
   return (
     <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
@@ -1203,13 +1246,9 @@ function DataInventorySection({
         <div className="space-y-2">
           {dataInventory.map((domain) => (
             <AccordionRow
-              isOpen={openDataDomain === domain.domain}
+              isOpen={openDataDomainIds.has(domain.domain)}
               key={domain.domain}
-              onToggle={() =>
-                onOpenDomainChange(
-                  openDataDomain === domain.domain ? "" : domain.domain,
-                )
-              }
+              onToggle={() => onToggleDomain(domain.domain)}
               title={domain.domain}
             >
               <div className="space-y-3">
@@ -1295,30 +1334,43 @@ function DataInventorySection({
 
 function ModelSection() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" id="development-model-lab">
       <MethodCard
         icon={BrainCircuit}
         kicker="Internal research only"
-        title="Internal Development Prediction Model Research"
+        title="Development Model Lab"
       >
+        <p className="mb-4 rounded-lg border border-[#68d8ff]/18 bg-[#68d8ff]/[0.055] px-3 py-2 text-sm leading-6 text-slate-300">
+          CFS includes an internal development model research pipeline. It
+          studies historical new construction permit outcomes against
+          parcel-year context, but it does not publish parcel-level prediction
+          scores or model probability values.
+        </p>
         <div className="grid gap-3 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="grid gap-2 sm:grid-cols-2">
             <ResearchStatusItem
               label="Target"
-              value="New construction permit within next 3 years"
+              value={developmentModelLabSummary.target}
             />
-            <ResearchStatusItem label="Unit" value="Parcel-year" />
+            <ResearchStatusItem
+              label="Unit"
+              value={developmentModelLabSummary.unit}
+            />
             <ResearchStatusItem
               label="Feature rows"
-              value="1,430,221 parcel-year records"
+              value={`${developmentModelLabSummary.featureRows} parcel-year records`}
             />
             <ResearchStatusItem
               label="Historical outcome"
-              value="New construction permits"
+              value={developmentModelLabSummary.historicalOutcome}
             />
             <ResearchStatusItem
               label="Current best internal model"
-              value={currentBestModelFallback.variantLabel}
+              value={developmentModelLabSummary.currentBestInternalVariant}
+            />
+            <ResearchStatusItem
+              label="Best ablation variant"
+              value={developmentModelLabSummary.bestAblationVariant}
             />
             <ResearchStatusItem
               label="Calibration"
@@ -1349,22 +1401,18 @@ function ModelSection() {
           <div className="grid gap-3">
             <ResearchListCard
               accent="cyan"
-              items={[
-                "historical zoning",
-                "transportation",
-                "tax/value",
-              ]}
+              items={developmentModelLabSummary.helpedFeatureGroups}
               title="Strong Feature Groups"
             />
             <ResearchListCard
               accent="rose"
-              items={[
-                "Accela plan reviews",
-                "Central Area Plan",
-                "utility proxy",
-                "current-context metadata flags",
-              ]}
+              items={developmentModelLabSummary.excludedFeatureGroups}
               title="Excluded For Now"
+            />
+            <ResearchListCard
+              accent="cyan"
+              items={developmentModelLabSummary.whatItUses}
+              title="Research Inputs"
             />
           </div>
         </div>
@@ -1384,7 +1432,7 @@ function ModelSection() {
         >
           <MethodList
             items={[
-              "Calibration remains weak, so exact probabilities could mislead users.",
+              "Calibration remains weak, so model probability values could mislead users.",
               "Some important official datasets are still missing.",
               "The model is intended for internal QA and feature governance only.",
               "Parcel-level scores and ranking classes are not shown in the app.",
@@ -1453,12 +1501,14 @@ function ProgressSection() {
 }
 
 function DataNeedsSection({
-  onOpenDatasetChange,
-  openNeedDataset,
+  onToggleDataset,
+  openNeedDatasetIds,
 }: {
-  onOpenDatasetChange: (dataset: string) => void;
-  openNeedDataset: string;
+  onToggleDataset: (dataset: string) => void;
+  openNeedDatasetIds: OpenAccordionSet;
 }) {
+  const dataNeedColumns = splitIntoIndependentColumns(dataNeedDetails);
+
   return (
     <div className="space-y-4">
       <MethodCard
@@ -1491,29 +1541,32 @@ function DataNeedsSection({
         kicker="Request format"
         title="What To Ask For And Why It Matters"
       >
-        <div className="grid gap-2 lg:grid-cols-2">
-          {dataNeedDetails.map((need) => (
-            <AccordionRow
-              isOpen={openNeedDataset === need.dataset}
-              key={need.dataset}
-              onToggle={() =>
-                onOpenDatasetChange(
-                  openNeedDataset === need.dataset ? "" : need.dataset,
-                )
-              }
-              title={need.dataset}
-            >
-              <div className="grid gap-3 sm:grid-cols-2">
-                <InfoTile label="Why it matters" text={need.why} />
-                <InfoTile label="Best format" text={need.format} />
-                <InfoTile
-                  label="PDF-only limitation"
-                  text={need.pdfLimit}
-                  tone="amber"
-                />
-                <InfoTile label="How it improves CFS" text={need.improvement} />
-              </div>
-            </AccordionRow>
+        <div className="grid gap-2 lg:grid-cols-2 lg:items-start">
+          {dataNeedColumns.map((column, columnIndex) => (
+            <div className="space-y-2" key={`data-need-column-${columnIndex}`}>
+              {column.map((need) => (
+                <AccordionRow
+                  isOpen={openNeedDatasetIds.has(need.dataset)}
+                  key={need.dataset}
+                  onToggle={() => onToggleDataset(need.dataset)}
+                  title={need.dataset}
+                >
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <InfoTile label="Why it matters" text={need.why} />
+                    <InfoTile label="Best format" text={need.format} />
+                    <InfoTile
+                      label="PDF-only limitation"
+                      text={need.pdfLimit}
+                      tone="amber"
+                    />
+                    <InfoTile
+                      label="How it improves CFS"
+                      text={need.improvement}
+                    />
+                  </div>
+                </AccordionRow>
+              ))}
+            </div>
           ))}
         </div>
       </MethodCard>
@@ -1521,12 +1574,22 @@ function DataNeedsSection({
   );
 }
 
+function splitIntoIndependentColumns<T>(items: T[]) {
+  return items.reduce<[T[], T[]]>(
+    (columns, item, index) => {
+      columns[index % 2].push(item);
+      return columns;
+    },
+    [[], []],
+  );
+}
+
 function RoadmapGuardrailsSection({
-  onOpenQuestionChange,
-  openQuestion,
+  onToggleQuestion,
+  openQuestionIds,
 }: {
-  onOpenQuestionChange: (question: string) => void;
-  openQuestion: string;
+  onToggleQuestion: (question: string) => void;
+  openQuestionIds: OpenAccordionSet;
 }) {
   return (
     <div className="space-y-4">
@@ -1571,8 +1634,8 @@ function RoadmapGuardrailsSection({
       <ProgressSection />
       <GuardrailsSection />
       <FaqSection
-        onOpenQuestionChange={onOpenQuestionChange}
-        openQuestion={openQuestion}
+        onToggleQuestion={onToggleQuestion}
+        openQuestionIds={openQuestionIds}
       />
     </div>
   );
@@ -1612,32 +1675,36 @@ function GuardrailsSection() {
 }
 
 function FaqSection({
-  onOpenQuestionChange,
-  openQuestion,
+  onToggleQuestion,
+  openQuestionIds,
 }: {
-  onOpenQuestionChange: (question: string) => void;
-  openQuestion: string;
+  onToggleQuestion: (question: string) => void;
+  openQuestionIds: OpenAccordionSet;
 }) {
+  const faqColumns = splitIntoIndependentColumns(faqItems);
+
   return (
     <MethodCard
       icon={HelpCircle}
       kicker="Plain-English Q&A"
       title="Common Questions"
     >
-      <div className="grid gap-2 lg:grid-cols-2">
-        {faqItems.map((item) => (
-          <AccordionRow
-            isOpen={openQuestion === item.question}
-            key={item.question}
-            onToggle={() =>
-              onOpenQuestionChange(
-                openQuestion === item.question ? "" : item.question,
-              )
-            }
-            title={item.question}
-          >
-            <p className="text-sm leading-6 text-slate-400">{item.answer}</p>
-          </AccordionRow>
+      <div className="grid gap-2 lg:grid-cols-2 lg:items-start">
+        {faqColumns.map((column, columnIndex) => (
+          <div className="space-y-2" key={`faq-column-${columnIndex}`}>
+            {column.map((item) => (
+              <AccordionRow
+                isOpen={openQuestionIds.has(item.question)}
+                key={item.question}
+                onToggle={() => onToggleQuestion(item.question)}
+                title={item.question}
+              >
+                <p className="text-sm leading-6 text-slate-400">
+                  {item.answer}
+                </p>
+              </AccordionRow>
+            ))}
+          </div>
         ))}
       </div>
     </MethodCard>
@@ -1809,13 +1876,44 @@ function DevelopmentPredictionResearchStatusCard() {
             </p>
           </section>
 
+          <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Research band language
+            </p>
+            <h4 className="mt-1 text-sm font-semibold text-white">
+              Relative ranking only
+            </h4>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {modelResearchLegendLabels.map((label) => (
+                <StatusTag
+                  key={label}
+                  label={label}
+                  tone={
+                    label === "Very Strong Research Signal" ||
+                    label === "Strong Research Signal"
+                      ? "amber"
+                      : label === "Insufficient Data"
+                        ? "slate"
+                        : "cyan"
+                  }
+                />
+              ))}
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-400">
+              Very Strong Research Signal corresponds to the highest-ranked
+              internal research band. These labels compare parcels or areas
+              against each other; they are not precise parcel probability
+              outputs, official parcel scores, or operational development
+              predictions.
+            </p>
+          </section>
+
           <div className="rounded-lg border border-white/10 bg-black/20 p-3">
             <div className="flex items-start gap-2">
               <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
               <p className="text-xs leading-5 text-slate-400">
                 This section intentionally shows aggregate research status only.
-                It does not display parcel IDs, parcel ranking classes, or model
-                probability values.
+                It does not display parcel IDs, parcel ranking classes, or model probability values.
               </p>
             </div>
             <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-slate-500">
@@ -1866,7 +1964,7 @@ function DevelopmentPredictionResearchStatusCard() {
                 value="Hidden"
               />
               <ResearchStatusItem
-                label="Exact probabilities"
+                label="Probability values"
                 tone="rose"
                 value="Hidden"
               />
@@ -1905,6 +2003,16 @@ function DevelopmentPredictionResearchStatusCard() {
                 label="Zoning-enhanced tie-aware lift@top 5%"
                 value={
                   standardizedDevelopmentPredictionMetrics.zoningEnhancedLiftAtTop5
+                }
+              />
+              <ResearchMetric
+                label="Current best PR-AUC"
+                value={standardizedDevelopmentPredictionMetrics.currentBestPrAuc}
+              />
+              <ResearchMetric
+                label="Current best lift@top 5%"
+                value={
+                  standardizedDevelopmentPredictionMetrics.currentBestLiftAtTop5
                 }
               />
             </div>
@@ -1978,10 +2086,16 @@ function AccordionRow({
   title: string;
 }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-black/18">
+    <div
+      className={`self-start overflow-hidden rounded-lg border bg-black/18 transition ${
+        isOpen
+          ? "border-[#68d8ff]/28 shadow-[0_0_24px_rgba(104,216,255,0.08)]"
+          : "border-white/10"
+      }`}
+    >
       <button
         aria-expanded={isOpen}
-        className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left"
+        className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left transition hover:bg-white/[0.035] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/70"
         onClick={onToggle}
         type="button"
       >

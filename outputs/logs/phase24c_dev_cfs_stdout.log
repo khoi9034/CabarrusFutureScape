@@ -1,0 +1,33 @@
+
+> cabarrusfuturescape@0.1.0 dev:cfs
+> powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-cfs-local.ps1
+
+[cfs-local] Reserved CFS local ports: frontend 3000, backend 8000.
+[cfs-local] Port 3000 is available.
+[cfs-local] Port 8000 is occupied by PID 11708 (python).
+[cfs-local] Port 8000 command line: "C:\Python314\python.exe" -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+[cfs-local] Stopping process 11708 on port 8000 (python)
+[cfs-local] Stopped process command line: "C:\Python314\python.exe" -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+[cfs-local] Starting FastAPI on http://127.0.0.1:8000
+[cfs-local] Starting Next.js on http://localhost:3000
+[cfs-local] FastAPI health: HTTP 200
+[cfs-local] Frontend health: HTTP 200
+
+Endpoint                                             Status Length   Ok
+--------                                             ------ ------   --
+/health                                                 200     15 True
+/health/database                                        200     24 True
+/parcels/search?q=CFS-PARCEL-0149726579&limit=1         200    614 True
+/parcels/CFS-PARCEL-0149726579?include_geometry=true    200   7820 True
+/development/hotspots?limit=1                           200   1668 True
+/constraints/flood/high-review?limit=1                  200    706 True
+/constraints/flood/summary                              200   1155 True
+/constraints/flood/zones?limit=1                        200   1262 True
+/constraints/schools/statistics                         200   1923 True
+/constraints/schools/CFS-PARCEL-0149726579              200   2037 True
+/constraints/schools/qa-summary                         200   3548 True
+
+
+[cfs-local] Local CFS is ready.
+[cfs-local] Frontend: http://localhost:3000
+[cfs-local] FastAPI:  http://127.0.0.1:8000

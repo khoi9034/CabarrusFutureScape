@@ -21,6 +21,7 @@ from app.schemas import (
     PermitSegmentOptionsResponse,
     PermitSegmentStatisticsResponse,
     DevelopmentParcelPermitEventsResponse,
+    DevelopmentModelResearchPreviewResponse,
     DevelopmentPredictionFeaturesSummaryResponse,
     DevelopmentPredictionRankingSummaryResponse,
     DevelopmentPredictionTransportationAccessibilitySummaryResponse,
@@ -132,6 +133,24 @@ def get_prediction_ranking_summary(
 ) -> DevelopmentPredictionRankingSummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_prediction_ranking_summary()
+
+
+@router.get(
+    "/model-research/preview",
+    response_model=DevelopmentModelResearchPreviewResponse,
+)
+def get_development_model_research_preview(
+    limit: int = Query(default=500, ge=1, le=1000),
+    signal: str = Query(default="higher"),
+    include_geometry: bool = Query(default=False),
+    db: Session = Depends(get_read_only_db),
+) -> DevelopmentModelResearchPreviewResponse:
+    service = DevelopmentService(DevelopmentRepository(db))
+    return service.get_model_research_preview(
+        include_geometry=include_geometry,
+        limit=limit,
+        signal=signal,
+    )
 
 
 @router.get(

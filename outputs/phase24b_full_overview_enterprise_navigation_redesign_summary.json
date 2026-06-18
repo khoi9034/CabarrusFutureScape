@@ -1,0 +1,155 @@
+{
+  "phase": "24B",
+  "title": "Full Overview Enterprise Navigation Redesign",
+  "files_changed": [
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "README.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "docs/demo/cfs_2_minute_demo_script.md",
+    "docs/demo/cfs_higher_up_speaking_notes.md",
+    "outputs/phase24b_full_overview_enterprise_navigation_redesign_summary.json"
+  ],
+  "mode_state_implementation": {
+    "overview_modes": [
+      "parcel",
+      "countywide",
+      "modelLab",
+      "snapshot"
+    ],
+    "command_buttons": [
+      "Search Parcel",
+      "Explore Countywide",
+      "Model Lab",
+      "Save Snapshot"
+    ],
+    "active_mode_behavior": {
+      "search_parcel": "Sets parcel mode and focuses the global parcel search input without expanding the layer rail.",
+      "explore_countywide": "Sets countywide mode and opens the advanced layer drawer.",
+      "model_lab": "Sets modelLab mode, opens Model Lab controls, and leaves the research overlay off by default.",
+      "save_snapshot": "Saves the current mode/map/context first, then switches the Overview to Snapshot Capture mode."
+    }
+  },
+  "default_overview_cleanup": {
+    "default_state": "Parcel mode with collapsed/slim layer rail, compact command center, large map, adaptive right Intelligence panel, and simple bottom KPI strip.",
+    "removed_from_default": [
+      "expanded layer drawer",
+      "active model overlay",
+      "report-builder controls",
+      "duplicated focus category cards"
+    ],
+    "bottom_kpis": [
+      "Growth Activity / permit records",
+      "Flood Review",
+      "Development Activity",
+      "Total Parcels"
+    ]
+  },
+  "left_panel_mode_behavior": {
+    "parcel": "Collapsed by default; when expanded, shows parcel-search guidance, selected parcel summary, Focus Map, Save Snapshot, Open Planning Snapshot, and Open Layers.",
+    "countywide": "Shows compact Map Layers controls with grouped layers and advanced configuration preserved.",
+    "modelLab": "Shows Model Lab controls, Development Research Signal toggle, Auto by zoom display mode, compact legend, included/excluded feature groups, Save Snapshot, Methodology link, and collapsed advanced map layers.",
+    "snapshot": "Shows snapshot helper with current captured mode, selected parcel, active layers count, map image status, Save Snapshot, and Open Snapshot Library."
+  },
+  "right_panel_mode_behavior": {
+    "parcel": "Shows Selected Parcel Intelligence. Without a parcel, it explains the search workflow; with a parcel, it shows owner/account, zoning, flood, schools, development activity, transportation, utility proxy caveat, and model safety status.",
+    "countywide": "Shows Countywide Intelligence with total parcels, permit records, development-active parcels, flood review count, active layer context, and internal-only model status.",
+    "modelLab": "Shows Model Lab Intelligence with current best internal model, overlay status, display mode, aggregate metrics, safety status, metric explanations, and selected research context when clicked.",
+    "snapshot": "Shows Snapshot Capture with what will be captured, latest snapshot status, saved snapshot count, active layers, selected parcel, and report-builder actions."
+  },
+  "search_parcel_flow": {
+    "focuses_search_input": true,
+    "demo_parcel_tested": "CFS-PARCEL-0149726579",
+    "selected_parcel_state": "Selected parcel appeared in Active Selection and right panel showed parcel facts, zoning, flood, schools, activity, transportation, utility proxy, and internal-only model status."
+  },
+  "countywide_flow": {
+    "button_label": "Explore Countywide",
+    "opens_layer_drawer": true,
+    "right_panel": "Countywide indicators and active map context.",
+    "does_not_enable_all_layers": true
+  },
+  "model_lab_flow": {
+    "left_panel": "Model Lab Controls",
+    "right_panel": "Model Lab Intelligence",
+    "overlay_default": "off",
+    "safe_output": "Relative research signal and aggregate metrics only; no exact probabilities, raw model scores, or official parcel classes."
+  },
+  "snapshot_flow": {
+    "snapshot_mode_added": true,
+    "snapshot_captures": [
+      "snapshot_id",
+      "timestamp",
+      "active mode at save time",
+      "map screenshot if available",
+      "selected parcel if available",
+      "active layers",
+      "right-panel intelligence summary",
+      "headline indicators",
+      "model lab context if active",
+      "caveats",
+      "explainable metrics"
+    ],
+    "not_stored": [
+      "exact_probability",
+      "prediction_probability",
+      "experimental_probability",
+      "raw model score",
+      "official parcel prediction class",
+      "development_signal_class"
+    ]
+  },
+  "planning_snapshot_compatibility": {
+    "library_still_opens": true,
+    "report_builder_preserved": true,
+    "wording": "Planning Snapshot remains the saved map/context/report builder generated from Overview modes."
+  },
+  "documentation_updates": [
+    "README now names Explore Countywide and Snapshot Capture.",
+    "Demo walkthrough now uses Search Parcel, Explore Countywide, Model Lab, and Save Snapshot.",
+    "Final checklist now verifies Search focus, Explore Countywide layer controls, Model Lab overlay off, and Snapshot Capture.",
+    "Two-minute script and higher-up speaking notes now use the updated task-mode language."
+  ],
+  "tests_added": [
+    "backend/tests/test_development_prediction_features.py::test_phase24b_overview_task_mode_navigation_copy_and_guardrails"
+  ],
+  "safety_verification": {
+    "exact_probabilities_exposed": false,
+    "raw_model_scores_exposed": false,
+    "official_parcel_ranking_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "model_marked_production_ready": false,
+    "browser_text_check_found_unsafe_terms": false
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_backend_app": "passed",
+    "python_pytest": "passed: 280 tests, 3 warnings",
+    "dev_server": "CFS was already running on localhost:3000 and 127.0.0.1:8000; smoke testing reused the active CFS dev stack."
+  },
+  "smoke_test_results": {
+    "localhost_3000_loaded": true,
+    "default_overview_readable": true,
+    "command_buttons_readable": true,
+    "search_parcel_focuses_search": true,
+    "demo_parcel_search_select": "passed",
+    "selected_parcel_intelligence": "passed",
+    "explore_countywide_opens_layers": "passed",
+    "model_lab_mode_panels": "passed",
+    "model_lab_overlay_off_by_default": "passed",
+    "save_snapshot_mode": "passed: Snapshot Capture displayed captured-evidence guidance.",
+    "planning_snapshot_opens": true,
+    "methodology_opens": true,
+    "unsafe_model_outputs_visible": false,
+    "browser_console": "Known opaque console error 'r' observed; no new actionable console error identified."
+  },
+  "remaining_known_issues": [
+    "Browser automation needed coordinate-based clicks for some controls because ArcGIS/Next runtime made a few role/test-id clicks slow.",
+    "The known opaque console error 'r' remains from prior smoke runs.",
+    "Snapshot confirmation can fade before automated checks; Snapshot Capture state and saved snapshot flow were verified."
+  ]
+}

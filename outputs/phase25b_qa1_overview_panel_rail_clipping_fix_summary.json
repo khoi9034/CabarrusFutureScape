@@ -1,0 +1,90 @@
+{
+  "phase": "25B-QA1",
+  "title": "Restore Collapsed Layer Rail Style and Fix Right Intelligence Panel Clipping",
+  "files_changed": [
+    "src/components/layout/Sidebar.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase25b_qa1_overview_panel_rail_clipping_fix_summary.json"
+  ],
+  "left_collapsed_rail_fix": {
+    "old_issue": "Collapsed left rail inherited the active Overview mode label, so parcel mode rendered as a short PARCEL rail/tag.",
+    "changes": [
+      "Collapsed normal Overview rail now uses the neutral label Layers.",
+      "Collapsed rail is stretched to the full map workspace height with h-full and a minimum rail height.",
+      "Vertical label is centered in the rail and protected from wrapping/clipping.",
+      "Embedded/custom workspace rails can still use mode-specific labels where appropriate."
+    ],
+    "visual_result": "Browser smoke test measured a 58px-wide by 382px-tall collapsed rail aligned with the map/intelligence row, labeled Layers."
+  },
+  "right_panel_clipping_fix": {
+    "old_issue": "Right Intelligence panel could appear clipped because the stable shell wrapper hid overflow and the panel root used a viewport max-height instead of the actual workspace row height.",
+    "changes": [
+      "Stable Overview right wrapper now uses full-height flex sizing and overflow-visible so panel chrome is not clipped.",
+      "IntelligencePanel root now fills the available row height with h-full, max-h-full, w-full, overflow-x-hidden, and overflow-y-auto.",
+      "Panel content scrolls internally when the brief or action area is longer than the viewport.",
+      "Left panel wrapper now uses full-height flex sizing so the collapsed rail can stretch properly."
+    ],
+    "scroll_result": "Browser scroll smoke confirmed Save Snapshot and Open Snapshots buttons become fully visible inside the right panel after scrolling."
+  },
+  "overflow_scroll_behavior": {
+    "horizontal_overflow": "No document horizontal overflow detected in browser smoke checks.",
+    "right_panel": "Overview Intelligence panel reported overflow-y: auto and remained inside the 720px viewport with panel bottom at 704px.",
+    "actions": "Save Snapshot and Open Snapshots were reachable and fully visible after an in-panel scroll gesture."
+  },
+  "default_layout_preservation": {
+    "stable_overview": "Default Overview remains the stable shell with command center, central SceneView, collapsed left rail, and right adaptive Intelligence panel.",
+    "customization": "Customize Layout button remains available, and browser smoke found no edit handles visible by default.",
+    "workflows_preserved": [
+      "Search Parcel collapsed-rail mode",
+      "Countywide mode with expanded Map Controls",
+      "Model Lab mode with Model Lab controls and Intelligence panel",
+      "Planning Snapshot top nav",
+      "Methodology top nav"
+    ]
+  },
+  "visual_qa_result": {
+    "localhost": "http://localhost:3000 loaded successfully.",
+    "collapsed_rail": "Long slim rail rendered as Layers; no PARCEL label in the collapsed rail.",
+    "right_panel": "Panel scrolls internally and is not cut off at the viewport edge.",
+    "mode_checks": "Explore Countywide opened layer controls; Model Lab opened Model Lab controls and Model Lab Intelligence.",
+    "navigation_checks": "Planning Snapshot and Methodology loaded successfully.",
+    "console": "No browser console errors observed during the smoke pass."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "exited 0; command reports no top-level app directory in this repo",
+    "python_pytest": "292 passed, 3 warnings",
+    "focused_regression": "backend/tests/test_development_prediction_features.py -k phase25b_qa1 passed"
+  },
+  "smoke_test_results": {
+    "default_overview_loads": "passed",
+    "left_collapsed_layer_rail_long_and_polished": "passed",
+    "left_rail_expands_for_countywide": "passed",
+    "right_intelligence_panel_not_clipped": "passed",
+    "right_intelligence_panel_scrolls": "passed",
+    "save_snapshot_button_visible_or_reachable": "passed",
+    "open_snapshots_button_visible_or_reachable": "passed",
+    "search_parcel_mode_still_works": "passed",
+    "countywide_mode_still_works": "passed",
+    "model_lab_mode_still_works": "passed",
+    "planning_snapshot_still_loads": "passed",
+    "methodology_still_loads": "passed",
+    "customize_layout_button_exists_and_handles_hidden_by_default": "passed"
+  },
+  "safety_verification": {
+    "datasets_added": false,
+    "models_trained": false,
+    "postgis_schema_modified": false,
+    "public_prediction_endpoint_added": false,
+    "probabilities_or_raw_scores_exposed": false,
+    "notes": "Changed only Overview shell/panel layout code and a regression test. Unsafe term search hits were existing guardrail/test assertions, not new user-facing exposure."
+  },
+  "remaining_known_issues": [
+    "Right panel content can exceed the viewport in dense states, but it now scrolls internally and keeps action buttons reachable.",
+    "The browser smoke test was run at the default 1280x720 in-app viewport; additional manual review at wider desktop widths is still useful for final visual polish."
+  ]
+}

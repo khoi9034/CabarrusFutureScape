@@ -1,0 +1,102 @@
+{
+  "phase": "24B-QA1",
+  "title": "Command Center Readability and Action Card Redesign",
+  "completed_at": "2026-06-16",
+  "status": "completed",
+  "files_changed": [
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase24b_qa1_command_center_readability_summary.json"
+  ],
+  "old_issue_summary": [
+    "Phase 24B rendered command actions as compact inline buttons inside a tight row.",
+    "The button title span used truncation, producing unreadable labels such as S..., E..., M..., and S... at the live desktop layout.",
+    "The snapshot count occupied a separate flex item beside the action row, reducing available action width."
+  ],
+  "new_command_card_layout": {
+    "layout": "responsive action-card grid",
+    "desktop_behavior": "four readable cards where wide enough, otherwise a clean two-by-two grid",
+    "narrow_behavior": "cards stack in a single column",
+    "card_min_height_px": 108,
+    "title_truncation_removed": true,
+    "main_action_titles_use_full_text": true,
+    "card_content": [
+      "icon",
+      "full title",
+      "one short explanatory sentence",
+      "active/open action hint"
+    ],
+    "visual_hierarchy": [
+      "CFS Command Center header",
+      "short command-center subtitle",
+      "snapshot status chip in header area",
+      "four enterprise action cards"
+    ]
+  },
+  "action_copy_used": {
+    "Search Parcel": "Find a parcel and show zoning, flood, school, development, and service context.",
+    "Explore Countywide": "Open layer controls and review countywide indicators.",
+    "Model Lab": "Explore internal development model research and safe research signals.",
+    "Save Snapshot": "Capture the current map and intelligence brief for an executive report."
+  },
+  "snapshot_count_placement": {
+    "placement": "header status chip",
+    "reason": "prevents saved snapshot count from squeezing the action card grid",
+    "labels": [
+      "No snapshots",
+      "Snapshot ready",
+      "N saved"
+    ]
+  },
+  "mode_behavior_verification": {
+    "Search Parcel": "Activates parcel mode and focuses the top search input.",
+    "Explore Countywide": "Activates countywide mode and opens layer controls.",
+    "Model Lab": "Activates Model Lab mode and shows Model Lab Intelligence.",
+    "Save Snapshot": "Dispatches snapshot capture and switches to Snapshot Capture mode."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "focused_pytest": {
+      "command": "python -m pytest backend/tests/test_development_prediction_features.py -q",
+      "result": "passed",
+      "tests": 24,
+      "warnings": 1
+    },
+    "python_compileall_app": "not_run_no_backend_app_changes"
+  },
+  "smoke_test_results": {
+    "dev_stack": {
+      "frontend": "http://localhost:3000 responded with 200 and was owned by the CFS Next dev process",
+      "backend": "http://127.0.0.1:8000 was owned by the CFS Uvicorn process"
+    },
+    "rendered_command_cards": {
+      "card_count": 4,
+      "card_widths_px": [387, 387, 387, 387],
+      "card_heights_px": [110, 110, 110, 110],
+      "titles_clipped": false,
+      "bad_ellipsis_labels_found": []
+    },
+    "browser_behavior": {
+      "Search Parcel": "passed; search input received focus",
+      "Explore Countywide": "passed; countywide intelligence and map layers were visible",
+      "Model Lab": "passed; Model Lab Intelligence was visible and overlay remained off by default",
+      "Save Snapshot": "passed; Snapshot Capture state became visible"
+    },
+    "safety_terms_found": []
+  },
+  "remaining_known_issues": [
+    "In-app browser screenshot capture timed out on the ArcGIS-heavy scene during QA, so browser smoke used DOM/layout checks instead of a screenshot artifact.",
+    "Snapshot saved confirmation can be transient while map capture completes; the smoke test verified Snapshot Capture mode rather than relying on the toast timing."
+  ],
+  "safety_confirmation": {
+    "exact_parcel_probabilities_exposed": false,
+    "raw_model_scores_exposed": false,
+    "official_parcel_prediction_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "datasets_added": false,
+    "models_trained": false,
+    "postgis_schema_modified": false
+  }
+}

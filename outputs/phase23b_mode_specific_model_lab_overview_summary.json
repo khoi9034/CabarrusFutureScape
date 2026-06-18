@@ -1,0 +1,140 @@
+{
+  "phase": "23B",
+  "title": "Mode-Specific Overview Layout and Integrated Development Model Lab Map Experience",
+  "status": "completed",
+  "completed_at": "2026-06-16T00:00:00-04:00",
+  "files_changed": [
+    "README.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "docs/demo/cfs_model_explanation_for_nontechnical_audience.md",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/data/intelligence/developmentModelLab.ts",
+    "src/hooks/useDashboardState.tsx",
+    "src/types/index.ts"
+  ],
+  "overview_mode_state_changes": {
+    "mode_values": [
+      "parcel",
+      "countywide",
+      "modelLab",
+      "snapshot"
+    ],
+    "default_mode": "parcel",
+    "search_parcel_action": "sets parcel mode and expands the parcel helper rail without switching to countywide intelligence",
+    "countywide_intelligence_action": "sets countywide mode and opens the map layer controls",
+    "model_lab_action": "sets modelLab mode, opens Model Lab Controls, and shows Model Lab Intelligence",
+    "save_snapshot_action": "keeps the current mode and saves it into the Planning Snapshot object"
+  },
+  "left_panel_mode_specific_behavior": {
+    "parcel_mode": "shows a compact parcel helper with search guidance, selected parcel summary, Focus Map, Save Snapshot, Open Planning Snapshot, and Open Layers actions",
+    "countywide_mode": "shows existing compact layer controls and all existing layer groups",
+    "model_lab_mode": "replaces generic layer controls with Model Lab Controls, development model facts, overlay toggle, display options, safe legend, included/excluded feature groups, and Methodology link",
+    "snapshot_mode": "shows a small snapshot helper with saved snapshot count, latest snapshot status, Save Snapshot, and Open Snapshot Library actions"
+  },
+  "model_lab_controls": {
+    "current_best_internal_variant": "Zoning + Transportation + Tax/Value",
+    "target": "new construction permit within next 3 years",
+    "status": "Internal research preview",
+    "production_ready": false,
+    "public_exposure_allowed": false,
+    "exact_probabilities_shown": false,
+    "overlay_default": "off",
+    "overlay_labels": [
+      "Higher research signal",
+      "Moderate research signal",
+      "Lower research signal",
+      "Insufficient data"
+    ]
+  },
+  "research_overlay_implementation": {
+    "implemented": "safe UI research-mode overlay context only",
+    "map_behavior": "Model Lab mode shows a map research banner and safe legend context; turning on the overlay updates the banner and right-panel context",
+    "parcel_feature_layer_added": false,
+    "reason_no_parcel_layer": "No reviewed, probability-free parcel-level preview source was added in this phase, and no data was fabricated.",
+    "off_by_default": true,
+    "exact_probabilities_exposed": false,
+    "official_prediction_classes_exposed": false
+  },
+  "click_behavior_for_model_overlay": {
+    "implemented": false,
+    "reason": "Feature click inspection was intentionally not added because there is not yet a reviewed, versioned, probability-free preview feature source for clickable model research features.",
+    "current_behavior": "Right panel explains aggregate Model Lab context and prompts that click inspection remains unavailable until a safe preview source exists."
+  },
+  "right_panel_model_lab_intelligence_behavior": {
+    "no_feature_selected": "shows current best internal variant, model question, aggregate metrics, feature groups that helped, excluded feature groups, future model placeholders, overlay status, and safety caveats",
+    "feature_selected": "not available in this phase because no parcel-level preview source is rendered",
+    "selected_parcel_context": "if a parcel is selected, Model Lab notes that parcel context can be saved in snapshots but no parcel-level model output is shown"
+  },
+  "snapshot_active_mode_integration": {
+    "snapshot_version": "phase23b_v1",
+    "stores_overview_command_mode": true,
+    "stores_model_lab_context": true,
+    "model_lab_context_fields": [
+      "overlayEnabled",
+      "displayType",
+      "status"
+    ],
+    "report_adaptation": {
+      "parcel": "report emphasizes selected parcel intelligence",
+      "countywide": "report labels context as countywide intelligence",
+      "modelLab": "report labels context as Model Lab Intelligence and includes internal-only model caveats"
+    },
+    "hidden_model_scores_stored": false
+  },
+  "methodology_link_behavior": {
+    "button_label": "Open Methodology Model Lab",
+    "behavior": "switches to Methodology and opens the Model Research section using the methodology-model-lab hash",
+    "new_route_added": false
+  },
+  "documentation_updates": [
+    "README.md documents mode-specific Overview workspaces and the safe Model Lab overlay behavior",
+    "docs/demo/cfs_demo_walkthrough.md includes the Model Lab workflow and mode-specific sequence",
+    "docs/demo/cfs_final_demo_checklist.md adds Parcel, Countywide, and Model Lab mode checks",
+    "docs/demo/cfs_model_explanation_for_nontechnical_audience.md explains that the optional map research overlay is off by default and does not show scores or official classes"
+  ],
+  "safety_verification": {
+    "no_exact_probabilities_in_new_ui": true,
+    "no_official_parcel_prediction_classes_in_new_ui": true,
+    "no_public_prediction_endpoint_added": true,
+    "production_ready": false,
+    "public_exposure_allowed": false,
+    "model_active_changed": false,
+    "backend_changed": false,
+    "postgis_schema_changed": false,
+    "unsafe_terms_search_notes": "Search found only existing aggregate guardrail/test/backend schema names and an aggregate research-status hook; the new UI does not expose exact probabilities, raw scores, or official parcel prediction classes."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "backend_compile_or_pytest": "not run; backend files were not changed"
+  },
+  "smoke_test_results": {
+    "frontend_localhost_3000": 200,
+    "backend_health": 200,
+    "backend_database_health": 200,
+    "parcel_search_api": 200,
+    "browser_overview_loaded": true,
+    "parcel_mode_left_panel": "verified",
+    "countywide_mode_left_panel": "verified",
+    "model_lab_left_panel": "verified",
+    "model_lab_right_panel": "verified",
+    "model_lab_overlay_toggle": "verified safe legend/context only",
+    "selected_demo_parcel_loaded": true,
+    "selected_parcel_intelligence_loaded": true,
+    "browser_console_errors": 0,
+    "no_parcel_level_probabilities_or_classes_visible": true
+  },
+  "remaining_known_limitations": [
+    "Model research overlay is a safe research-mode UI context, not a rendered parcel feature layer.",
+    "Clickable model overlay feature inspection is deferred until a reviewed probability-free preview source exists.",
+    "Model Lab remains internal research only and is not production-ready.",
+    "Exact probabilities, raw model scores, and official parcel prediction classes remain hidden."
+  ]
+}

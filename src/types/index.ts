@@ -70,6 +70,62 @@ export type ProductMode =
 
 export type ParcelReviewView = "actions" | "report" | "review";
 
+export type OverviewCommandMode =
+  | "countywide"
+  | "modelLab"
+  | "parcel"
+  | "snapshot";
+
+export type OverviewLayoutPreset =
+  | "command_center"
+  | "countywide_layers"
+  | "executive_demo"
+  | "map_focus"
+  | "model_lab"
+  | "parcel_intelligence"
+  | "snapshot_builder";
+
+export type OverviewPanelVisibility = "collapsed" | "hidden" | "visible";
+
+export type OverviewCommandCenterState =
+  | "compact"
+  | "hidden"
+  | "visible";
+
+export type OverviewPanelWidthPreset = "compact" | "standard" | "wide";
+
+export interface OverviewLayoutPreference {
+  commandCenter: OverviewCommandCenterState;
+  leftPanel: OverviewPanelVisibility;
+  leftPanelWidth: OverviewPanelWidthPreset;
+  preset: OverviewLayoutPreset;
+  rightPanel: Exclude<OverviewPanelVisibility, "collapsed">;
+  rightPanelWidth: OverviewPanelWidthPreset;
+}
+
+export type ModelResearchOverlayDisplay =
+  | "parcel_research_signal_preview"
+  | "research_signal_hotspots"
+  | "top_driver_context";
+
+export type ModelResearchMapDisplayMode =
+  | "clustered_markers"
+  | "countywide_heatmap"
+  | "fine_local_clusters"
+  | "intermediate_subclusters"
+  | "off"
+  | "parcel_detail";
+
+export interface ModelResearchMapSummary {
+  displayMode: ModelResearchMapDisplayMode;
+  displayModeLabel: string;
+  dominantSignalLabel: string;
+  overlayEnabled: boolean;
+  totalFeatureCount: number;
+  viewScaleLabel: string;
+  visibleFeatureCount: number;
+}
+
 export type PlanningSnapshotView =
   | "actions"
   | "explain"
@@ -142,11 +198,53 @@ export interface PlanningSnapshot {
   mapScreenshotDataUrl?: string | null;
   mapScreenshotFailureReason?: string | null;
   mapScreenshotStatus?: "captured" | "failed" | "unavailable";
+  modelLabContext?: {
+    displayType?: ModelResearchOverlayDisplay;
+    displayMode?: ModelResearchMapDisplayMode;
+    displayModeLabel?: string;
+    dominantSignalLabel?: string;
+    overlayEnabled: boolean;
+    visibleFeatureCount?: number;
+    selectedResearchContext?: {
+      approximateAreaLabel?: string;
+      bandCounts?: {
+        insufficient: number;
+        lower: number;
+        moderate: number;
+        strong: number;
+        veryStrong: number;
+      };
+      caveat: string;
+      clusterId?: string;
+      contextKind?: "cluster" | "heatmap_cell" | "parcel_marker";
+      dataQualityFlag: string;
+      displayMode?: ModelResearchMapDisplayMode;
+      dominantResearchBand?: string;
+      modelVersion: string;
+      officialParcelId: string;
+      representativeSignalLabel?: string;
+      researchRankBand: string;
+      researchSignalLabel: string;
+      representedFeatureCount?: number;
+      selectedFeatureGroupSummary?: string;
+      topDriverSummary?: string;
+      topDrivers: string[];
+    } | null;
+    status: string;
+  };
+  overviewCommandMode?: OverviewCommandMode;
   overviewKpis: Array<{ caveat?: string; label: string; value: string }>;
   selectedParcelId: string | null;
   selectedParcelSummary: PlanningSnapshotParcelSummary | null;
   snapshotId: string;
-  snapshotVersion: "phase22a_v1" | "phase22b_v1" | "phase22e_v1";
+  snapshotVersion:
+    | "phase22a_v1"
+    | "phase22b_v1"
+    | "phase22e_v1"
+    | "phase23b_v1"
+    | "phase23c_v1"
+    | "phase23d_v1"
+    | "phase23g_v1";
 }
 
 export type ParcelSelectionSource = "dashboard" | "map" | "url";

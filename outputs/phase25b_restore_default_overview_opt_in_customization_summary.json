@@ -1,0 +1,128 @@
+{
+  "phase": "25B",
+  "title": "Restore Stable Default Overview Layout and Make Customization Opt-In Only",
+  "generated_at": "2026-06-18T00:00:00-04:00",
+  "files_changed": [
+    "src/components/layout/AppShell.tsx",
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/components/dashboard/OverviewWorkspaceBuilder.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "README.md",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_final_demo_checklist.md",
+    "outputs/phase25b_restore_default_overview_opt_in_customization_summary.json"
+  ],
+  "default_layout_restoration_summary": {
+    "status": "implemented",
+    "root_issue": "Phase 25A made the draggable tile workspace the normal Overview shell, so the default app opened as a customization grid instead of the stable map-first product layout.",
+    "fix": "Restored a separate StableOverviewWorkspace as the default Overview path in AppShell.",
+    "default_layout": [
+      "Top navigation remains fixed at the top",
+      "CFS Command Center stays above the workspace",
+      "left layer rail starts collapsed/slim",
+      "SceneView/map is central and visually dominant",
+      "right adaptive Intelligence panel remains visible",
+      "no draggable tile boxes, edit borders, or layout handles appear by default"
+    ],
+    "custom_grid_default": "not rendered in normal Overview mode"
+  },
+  "customization_opt_in_behavior": {
+    "status": "implemented",
+    "entry_point": "small Customize Layout button in the Command Center",
+    "normal_mode": [
+      "no workspace tile grid",
+      "no drag handles",
+      "no resize handles",
+      "no layout editor toolbar"
+    ],
+    "edit_mode": [
+      "clicking Customize Layout renders OverviewWorkspaceBuilder",
+      "editor opens with initialEditMode enabled",
+      "tile drag and resize handles appear only in edit mode",
+      "Done hides all edit handles",
+      "Reset Layout clears custom layout storage and returns to the stable default Overview"
+    ]
+  },
+  "localStorage_versioning_fix": {
+    "overview_layout_key": "cfs.overview.layout.v2",
+    "legacy_overview_layout_key_ignored_and_clearable": "cfs.overview.layout.v1",
+    "custom_layout_key": "cfs.overview.customLayout.v2",
+    "legacy_custom_layout_key_ignored_and_clearable": "cfs.overview.customLayout.v1",
+    "custom_layout_version": "phase25b_v2",
+    "behavior": [
+      "old v1 custom grid layouts are not loaded into the default Overview",
+      "old v1 panel preference layouts are not loaded on app start",
+      "Overview command-mode changes no longer auto-persist layout preferences",
+      "explicit Save Layout is still available inside the customization editor"
+    ]
+  },
+  "edit_mode_toolbar_behavior": {
+    "toolbar_title": "Customize Layout",
+    "controls": [
+      "Done",
+      "Save Layout",
+      "Reset Layout",
+      "Add Panel",
+      "Lock Layout"
+    ],
+    "helper_copy": "Drag or resize panels. This only changes your local workspace layout.",
+    "reset_behavior": "Reset Layout removes v2 and legacy v1 custom layout storage and exits to the stable default Overview."
+  },
+  "workflow_preservation": {
+    "search_parcel": "preserved; browser smoke verified Search Parcel focuses the top search input.",
+    "selected_parcel_intelligence": "preserved through the adaptive Intelligence panel.",
+    "countywide_layers": "preserved; Explore Countywide opens layer controls in the stable left rail.",
+    "model_lab": "preserved; browser smoke verified Model Lab Controls and Model Lab Intelligence appear and unsafe labels do not.",
+    "planning_snapshot": "preserved; browser smoke verified Planning Snapshot Library loads.",
+    "methodology": "preserved; browser smoke verified Methodology loads.",
+    "customization": "preserved as an opt-in local workspace editor."
+  },
+  "documentation_updates": [
+    "README.md notes that Customize Layout is optional local personalization and that the stable default Overview remains the recommended demo layout.",
+    "docs/demo/cfs_demo_walkthrough.md adds the same brief demo note.",
+    "docs/demo/cfs_final_demo_checklist.md adds a check that Customize Layout is small/optional and edit handles are hidden by default."
+  ],
+  "safety_verification": {
+    "datasets_added": false,
+    "models_trained": false,
+    "postgis_schemas_modified": false,
+    "public_prediction_endpoint_added": false,
+    "exact_probabilities_exposed": false,
+    "raw_model_scores_exposed": false,
+    "official_parcel_prediction_classes_exposed": false,
+    "notes": [
+      "Phase 25B changed only frontend layout behavior, documentation copy, and regression tests.",
+      "Safety keyword scan over src and backend/app found existing internal Model Lab schema/service fields and explicit safety flags only.",
+      "Browser smoke verified no prediction_probability or raw_model_score text appears in Model Lab mode."
+    ]
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed after rerun with a larger timeout; first run timed out without returning a build error",
+    "python_m_compileall_app": "exit 0, but repository has no top-level app package to list",
+    "python_m_compileall_backend_app": "passed",
+    "python_m_pytest": "291 passed, 3 warnings",
+    "focused_phase25_tests": "2 passed"
+  },
+  "smoke_test_results": {
+    "localhost_3000_loads": "passed; Cabarrus FutureScape loaded after restarting stale local dev server",
+    "default_overview_stable": "passed; command center visible, map central, right intelligence visible, left layer rail collapsed",
+    "no_edit_handles_by_default": "passed; zero workspace tiles, zero drag handles, zero resize handles in default Overview",
+    "customize_button": "passed; one small Customize Layout button visible in normal mode",
+    "customize_enters_edit_mode": "passed; editor toolbar, workspace tiles, drag handles, and resize handles appear only after clicking Customize Layout",
+    "done_exits_edit_mode": "passed; Done removes edit toolbar and handles",
+    "reset_returns_default": "passed; Reset Layout returns to stable default with zero workspace tiles and collapsed layer rail",
+    "search_parcel": "passed; search input received focus with aria-label Search parcels",
+    "model_lab": "passed; Model Lab controls/intelligence visible and no exact probability/raw score labels visible",
+    "planning_snapshot": "passed; Planning Snapshot Library loaded",
+    "methodology": "passed; Methodology loaded",
+    "browser_console": "not captured; in-app browser wrapper did not expose console message retrieval in this session"
+  },
+  "remaining_known_issues": [
+    "The optional custom editor remains available after Done until the user chooses Reset Layout; this is intentional for users who opted into a custom workspace.",
+    "Manual pointer-drag QA in a normal browser is still recommended for the custom editor because the in-app browser automation surface is limited for drag streams.",
+    "The local dev server on port 3000 had to be restarted because an old node process was accepting the port but timing out."
+  ]
+}

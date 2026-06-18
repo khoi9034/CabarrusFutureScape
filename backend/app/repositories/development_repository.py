@@ -2702,6 +2702,202 @@ class DevelopmentRepository:
             "exact_probabilities_exposed": False,
         }
 
+    def get_model_research_preview(
+        self,
+        *,
+        include_geometry: bool = False,
+        limit: int = 500,
+        signal: str = "higher",
+    ) -> dict[str, object]:
+        table_status = self._fetch_one(
+            """
+            SELECT
+              to_regclass('public.development_prediction_ranking_classes') IS NOT NULL
+                AS ranking_table_available,
+              to_regclass('public.development_prediction_ranking_explanations') IS NOT NULL
+                AS explanation_table_available,
+              to_regclass('public.parcels_enriched') IS NOT NULL
+                AS parcel_table_available
+            """,
+        )
+        if (
+            not table_status["ranking_table_available"]
+            or not table_status["parcel_table_available"]
+        ):
+            return {
+                "preview_available": False,
+                "experiment_id": None,
+                "features": [],
+                "returned_count": 0,
+                "total_count": 0,
+                "limit": limit,
+                "signal_filter": signal,
+            }
+
+        latest = self._fetch_one_or_none(
+            """
+            SELECT model_experiment_id
+            FROM public.development_prediction_ranking_classes
+            GROUP BY model_experiment_id
+            ORDER BY MAX(created_at) DESC
+            LIMIT 1
+            """,
+        )
+        if latest is None:
+            return {
+                "preview_available": False,
+                "experiment_id": None,
+                "features": [],
+                "returned_count": 0,
+                "total_count": 0,
+                "limit": limit,
+                "signal_filter": signal,
+            }
+
+        normalized_signal = (signal or "higher").strip().lower()
+        class_filter_sql = {
+            "all": "",
+            "higher": """
+              AND r.development_signal_class IN (
+                'very_high_development_signal',
+                'high_development_signal'
+              )
+            """,
+            "moderate": "AND r.development_signal_class = 'moderate_development_signal'",
+            "lower": "AND r.development_signal_class = 'low_development_signal'",
+        }.get(
+            normalized_signal,
+            """
+              AND r.development_signal_class IN (
+                'very_high_development_signal',
+                'high_development_signal'
+              )
+            """,
+        )
+        params: dict[str, object] = {
+            "experiment_id": latest["model_experiment_id"],
+            "limit": max(1, min(int(limit or 500), 1000)),
+        }
+
+        total_record = self._fetch_one(
+            f"""
+            SELECT COUNT(*) AS total_count
+            FROM public.development_prediction_ranking_classes r
+            JOIN public.parcels_enriched p
+              ON p.official_parcel_id = r.official_parcel_id
+            WHERE r.model_experiment_id = :experiment_id
+              AND p.geometry IS NOT NULL
+              AND NOT ST_IsEmpty(p.geometry)
+              {class_filter_sql}
+            """,
+            params,
+        )
+
+        geometry_expression = (
+            """
+            ST_AsGeoJSON(
+              ST_SimplifyPreserveTopology(p.geometry, 0.000025),
+              6
+            )::json AS geometry,
+            """
+            if include_geometry
+            else "NULL::json AS geometry,"
+        )
+        explanation_select_sql = (
+            """
+              e.top_driver_1,
+              e.top_driver_2,
+              e.top_driver_3,
+              COALESCE(
+                NULLIF(e.caveat, ''),
+                'Internal research preview only. Not an official parcel score.'
+              ) AS caveat,
+            """
+            if table_status["explanation_table_available"]
+            else """
+              NULL::text AS top_driver_1,
+              NULL::text AS top_driver_2,
+              NULL::text AS top_driver_3,
+              'Internal research preview only. Not an official parcel score.' AS caveat,
+            """
+        )
+        explanation_join_sql = (
+            """
+            LEFT JOIN public.development_prediction_ranking_explanations e
+              ON e.model_experiment_id = r.model_experiment_id
+             AND e.official_parcel_id = r.official_parcel_id
+            """
+            if table_status["explanation_table_available"]
+            else ""
+        )
+
+        rows = self._fetch_all(
+            f"""
+            SELECT
+              r.official_parcel_id,
+              CASE
+                WHEN r.development_signal_class IN (
+                  'very_high_development_signal',
+                  'high_development_signal'
+                ) THEN 'Higher research signal'
+                WHEN r.development_signal_class = 'moderate_development_signal'
+                  THEN 'Moderate research signal'
+                WHEN r.development_signal_class = 'low_development_signal'
+                  THEN 'Lower research signal'
+                ELSE 'Insufficient data'
+              END AS research_signal_label,
+              CASE
+                WHEN r.development_signal_class = 'very_high_development_signal'
+                  THEN 'top_1_percent_research_band'
+                WHEN r.development_signal_class = 'high_development_signal'
+                  THEN 'top_5_percent_research_band'
+                WHEN r.development_signal_class = 'moderate_development_signal'
+                  THEN 'top_15_percent_research_band'
+                WHEN r.development_signal_class = 'low_development_signal'
+                  THEN 'remaining_research_band'
+                ELSE 'insufficient_data'
+              END AS research_rank_band,
+              {explanation_select_sql}
+              r.model_experiment_id AS model_version,
+              FALSE AS production_ready,
+              FALSE AS public_exposure_allowed,
+              FALSE AS exact_probability_available,
+              ST_X(ST_PointOnSurface(p.geometry)) AS longitude,
+              ST_Y(ST_PointOnSurface(p.geometry)) AS latitude,
+              {geometry_expression}
+              'research_preview_context_only' AS data_quality_flag
+            FROM public.development_prediction_ranking_classes r
+            JOIN public.parcels_enriched p
+              ON p.official_parcel_id = r.official_parcel_id
+            {explanation_join_sql}
+            WHERE r.model_experiment_id = :experiment_id
+              AND p.geometry IS NOT NULL
+              AND NOT ST_IsEmpty(p.geometry)
+              {class_filter_sql}
+            ORDER BY
+              CASE r.development_signal_class
+                WHEN 'very_high_development_signal' THEN 1
+                WHEN 'high_development_signal' THEN 2
+                WHEN 'moderate_development_signal' THEN 3
+                WHEN 'low_development_signal' THEN 4
+                ELSE 5
+              END,
+              md5(r.official_parcel_id)
+            LIMIT :limit
+            """,
+            params,
+        )
+
+        return {
+            "preview_available": True,
+            "experiment_id": latest["model_experiment_id"],
+            "features": rows,
+            "returned_count": len(rows),
+            "total_count": int(total_record["total_count"] or 0),
+            "limit": params["limit"],
+            "signal_filter": normalized_signal,
+        }
+
     def get_transportation_accessibility_summary(self) -> dict[str, object]:
         table_status = self._fetch_one(
             """

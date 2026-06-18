@@ -436,3 +436,27 @@ Excluded groups may remain useful for dashboards, QA, data-readiness planning,
 or future model comparison, but they should not be treated as production model
 drivers without better temporal coverage, countywide scope, and authoritative
 source data.
+
+## Phase 23A Model Lab Display Policy
+
+The Model Lab UI can reference feature registry decisions, but only as
+aggregate model-governance information.
+
+Allowed Model Lab display:
+
+- current best internal variant: Zoning + Transportation + Tax/Value;
+- best ablation feature set: `transportation_plus_tax_value_only`;
+- included groups: historical zoning, transportation accessibility / STIP /
+  AADT, and tax/value enrichment;
+- excluded groups: Accela plan reviews, Central Area Plan, utility proxy, and
+  current-context metadata flags;
+- aggregate metrics from Phase 16C/16D outputs;
+- caveats and missing official data.
+
+Not allowed:
+
+- exact parcel-level probabilities;
+- raw parcel model scores;
+- official parcel ranking classes;
+- public prediction endpoint responses;
+- production-ready model wording.

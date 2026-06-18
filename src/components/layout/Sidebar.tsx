@@ -4,46 +4,88 @@ import type {
   KeyboardEvent as ReactKeyboardEvent,
   PointerEvent as ReactPointerEvent,
 } from "react";
-import { ChevronLeft, ChevronRight, Layers3, SlidersHorizontal } from "lucide-react";
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Crosshair,
+  FlaskConical,
+  Layers3,
+  MapPin,
+  Save,
+  SlidersHorizontal,
+} from "lucide-react";
 import { LayerToggle } from "@/components/dashboard/LayerToggle";
+import {
+  CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
+} from "@/components/dashboard/OverviewCommandCenter";
+import {
+  developmentModelLabSummary,
+  formatModelResearchDriverLabel,
+  getModelResearchDriverExplanation,
+  modelResearchDriverSources,
+  modelResearchSignalLegend,
+} from "@/data/intelligence/developmentModelLab";
+import { useDashboardState } from "@/hooks/useDashboardState";
 import { cn } from "@/lib/utils";
+import type { OverviewCommandMode } from "@/types";
 
 interface SidebarProps {
   collapsed?: boolean;
   dragging?: boolean;
+  embedded?: boolean;
   onResizeStart?: (event: ReactPointerEvent) => void;
   onToggleCollapsed?: () => void;
+  overviewCommandMode?: OverviewCommandMode;
 }
 
 export function Sidebar({
   collapsed = false,
   dragging = false,
+  embedded = false,
   onResizeStart,
   onToggleCollapsed,
+  overviewCommandMode = "parcel",
 }: SidebarProps) {
+  const collapsedLabel = getCollapsedRailLabel(overviewCommandMode);
+
   if (collapsed) {
     return (
       <aside
-        aria-label="Collapsed map layer controls"
+        aria-label={`Collapsed ${collapsedLabel} controls`}
         className={cn(
-          "app-chrome glass-panel cfs-layer-rail cfs-layer-rail--collapsed relative order-2 flex min-h-0 flex-col items-center gap-3 overflow-visible rounded-lg p-2 md:max-h-[72vh] lg:order-1 lg:max-h-none",
+          "app-chrome glass-panel cfs-layer-rail cfs-layer-rail--collapsed relative order-2 flex h-full min-h-[22rem] min-w-0 flex-col items-center overflow-visible rounded-lg p-2 md:max-h-none lg:order-1",
+          embedded && "h-full order-none md:max-h-none lg:order-none",
           dragging && "cfs-layer-rail--dragging",
         )}
       >
-        <LayerRailEdgeHandle
-          collapsed
-          onPointerDown={onResizeStart}
-          onToggleCollapsed={onToggleCollapsed}
-        />
-        <div
-          aria-hidden="true"
+        {!embedded ? (
+          <LayerRailEdgeHandle
+            collapsed
+            onPointerDown={onResizeStart}
+            onToggleCollapsed={onToggleCollapsed}
+          />
+        ) : null}
+        <button
+          aria-label={`Expand ${collapsedLabel} panel`}
           className="mt-2 flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#9eeeff]"
+          onClick={onToggleCollapsed}
+          title={`Expand ${collapsedLabel} panel`}
+          type="button"
         >
-          <Layers3 className="h-4 w-4" />
-        </div>
-        <p className="mt-1 [writing-mode:vertical-rl] rotate-180 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-          Layers
-        </p>
+          <CollapsedRailGlyph mode={overviewCommandMode} />
+        </button>
+        <button
+          aria-label={`Expand ${collapsedLabel} panel`}
+          className="flex min-h-0 flex-1 items-center justify-center py-4"
+          onClick={onToggleCollapsed}
+          title={`Expand ${collapsedLabel} panel`}
+          type="button"
+        >
+          <span className="[writing-mode:vertical-rl] rotate-180 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            {collapsedLabel}
+          </span>
+        </button>
       </aside>
     );
   }
@@ -52,22 +94,26 @@ export function Sidebar({
     <aside
       aria-label="Advanced map layer control panel"
       className={cn(
-        "app-chrome glass-panel cfs-layer-rail relative order-2 flex min-h-0 flex-col overflow-visible rounded-lg md:max-h-[72vh] lg:order-1 lg:max-h-none",
+        "app-chrome glass-panel cfs-layer-rail relative order-2 flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-lg lg:order-1",
+        embedded &&
+          "h-full order-none overflow-hidden border-white/10 bg-[#07111f]/90 md:max-h-none lg:order-none",
         dragging && "cfs-layer-rail--dragging",
       )}
     >
-      <LayerRailEdgeHandle
-        onPointerDown={onResizeStart}
-        onToggleCollapsed={onToggleCollapsed}
-      />
-      <div className="no-scrollbar min-h-0 flex-1 overflow-auto rounded-lg p-3">
-        <div className="mb-3 flex items-center justify-between gap-3">
+      {!embedded ? (
+        <LayerRailEdgeHandle
+          onPointerDown={onResizeStart}
+          onToggleCollapsed={onToggleCollapsed}
+        />
+      ) : null}
+      <div className="no-scrollbar min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto rounded-lg p-3 pr-3 lg:pr-4">
+        <div className="mb-3 flex min-w-0 items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase text-slate-500">
               Advanced
             </p>
             <h2 className="mt-1 text-lg font-semibold leading-6 text-white">
-              Map Controls
+              {getExpandedRailTitle(overviewCommandMode)}
             </h2>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -80,12 +126,524 @@ export function Sidebar({
           </div>
         </div>
 
-        <div className="space-y-3 pr-0 lg:pr-2">
-          <LayerToggle onCollapseDrawer={onToggleCollapsed} />
+        <div className="min-w-0 space-y-3 pr-1">
+          <ModeSpecificRailContent
+            mode={overviewCommandMode}
+            onCollapseDrawer={onToggleCollapsed}
+          />
         </div>
       </div>
     </aside>
   );
+}
+
+function ModeSpecificRailContent({
+  mode,
+  onCollapseDrawer,
+}: {
+  mode: OverviewCommandMode;
+  onCollapseDrawer?: () => void;
+}) {
+  if (mode === "modelLab") {
+    return <ModelLabControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+  }
+
+  if (mode === "parcel") {
+    return <ParcelModeControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+  }
+
+  if (mode === "snapshot") {
+    return <SnapshotModeControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+  }
+
+  return <LayerToggle onCollapseDrawer={onCollapseDrawer} />;
+}
+
+function CollapsedRailGlyph({ mode }: { mode: OverviewCommandMode }) {
+  if (mode === "modelLab") {
+    return <FlaskConical className="h-4 w-4" />;
+  }
+
+  if (mode === "snapshot") {
+    return <Save className="h-4 w-4" />;
+  }
+
+  if (mode === "parcel") {
+    return <MapPin className="h-4 w-4" />;
+  }
+
+  return <Layers3 className="h-4 w-4" />;
+}
+
+function ParcelModeControlsPanel({
+  onCollapseDrawer,
+}: {
+  onCollapseDrawer?: () => void;
+}) {
+  const {
+    planningSnapshot,
+    selectedParcelId,
+    selectedParcelIntelligence,
+    setMapFocusMode,
+    setOverviewCommandMode,
+    setPlanningSnapshotView,
+    setProductMode,
+  } = useDashboardState();
+
+  function saveSnapshot() {
+    window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT));
+  }
+
+  function openSnapshots() {
+    setPlanningSnapshotView("overview");
+    setProductMode("due_diligence");
+  }
+
+  return (
+    <div className="space-y-3">
+      <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+        <div className="flex items-start gap-3">
+          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#d8b86a]" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Parcel mode
+            </p>
+            <h3 className="mt-1 text-sm font-semibold text-white">
+              Search and review a parcel
+            </h3>
+            <p className="mt-2 text-xs leading-5 text-slate-400">
+              Use the top search bar to add zoning, flood, school,
+              development, transportation, utility proxy, and model-governance
+              context.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Selected parcel
+        </p>
+        <h4 className="mt-1 truncate text-sm font-semibold text-white">
+          {selectedParcelId ?? "No parcel selected"}
+        </h4>
+        <p className="mt-2 text-xs leading-5 text-slate-400">
+          {selectedParcelIntelligence
+            ? `${selectedParcelIntelligence.ownerName ?? "Owner unavailable"} / ${
+                selectedParcelIntelligence.zoningCode ??
+                selectedParcelIntelligence.zoningCategory ??
+                "zoning pending"
+              }`
+            : "Search parcel ID, PIN, owner, address, or subdivision."}
+        </p>
+      </section>
+
+      <div className="grid gap-2">
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15"
+          onClick={saveSnapshot}
+          type="button"
+        >
+          <Save className="h-3.5 w-3.5" />
+          Save Snapshot
+        </button>
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]"
+          onClick={openSnapshots}
+          type="button"
+        >
+          Open Planning Snapshot
+        </button>
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07] disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!selectedParcelId}
+          onClick={() => setMapFocusMode(true)}
+          type="button"
+        >
+          <Crosshair className="h-3.5 w-3.5" />
+          Focus Map
+        </button>
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]"
+          onClick={() => {
+            setOverviewCommandMode("countywide");
+          }}
+          type="button"
+        >
+          <Layers3 className="h-3.5 w-3.5" />
+          Open Layers
+        </button>
+      </div>
+
+      {planningSnapshot ? (
+        <p className="rounded-md border border-[#55d38f]/20 bg-[#55d38f]/[0.06] px-3 py-2 text-[11px] leading-5 text-[#a8f3c4]">
+          Latest snapshot is ready in the Planning Snapshot library.
+        </p>
+      ) : null}
+
+      <button
+        className="w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
+        onClick={onCollapseDrawer}
+        type="button"
+      >
+        Collapse parcel helper
+      </button>
+    </div>
+  );
+}
+
+function ModelLabControlsPanel({
+  onCollapseDrawer,
+}: {
+  onCollapseDrawer?: () => void;
+}) {
+  const {
+    modelResearchMapSummary,
+    modelResearchOverlayEnabled,
+    setModelResearchOverlayEnabled,
+    setProductMode,
+  } = useDashboardState();
+
+  function openMethodologyModelLab() {
+    window.location.hash = "methodology-model-lab";
+    setProductMode("methodology");
+  }
+
+  function saveSnapshot() {
+    window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT));
+  }
+
+  return (
+    <div className="space-y-3" data-testid="model-lab-controls">
+      <section className="rounded-lg border border-[#d8b86a]/20 bg-[#1b1506]/40 p-3">
+        <div className="flex items-start gap-3">
+          <FlaskConical className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
+              Model Lab
+            </p>
+            <h3 className="mt-1 text-sm font-semibold text-white">
+              Development Model
+            </h3>
+            <p className="mt-2 text-xs leading-5 text-slate-400">
+              Relative development signal based on historical new construction
+              patterns. Not an exact probability.
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 grid gap-2">
+          <RailFact
+            label="Current best internal variant"
+            value={developmentModelLabSummary.currentBestInternalVariant}
+          />
+          <RailFact label="Target" value={developmentModelLabSummary.target} />
+          <RailFact label="Status" value="Internal research only" />
+          <RailFact label="Public exposure" value="Not allowed" />
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Overlay
+            </p>
+            <h4 className="mt-1 text-sm font-semibold text-white">
+              Development Research Signal
+            </h4>
+          </div>
+          <button
+            aria-pressed={modelResearchOverlayEnabled}
+            className={cn(
+              "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase transition",
+              modelResearchOverlayEnabled
+                ? "border-[#55d38f]/35 bg-[#55d38f]/12 text-[#a8f3c4]"
+                : "border-white/10 bg-white/[0.04] text-slate-400",
+            )}
+            onClick={() =>
+              setModelResearchOverlayEnabled(!modelResearchOverlayEnabled)
+            }
+            type="button"
+          >
+            {modelResearchOverlayEnabled ? "On" : "Off"}
+          </button>
+        </div>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          Relative bands compare parcels against other parcels in the county.
+          They are not a probability that development will occur.
+        </p>
+        <div className="mt-3 grid gap-2">
+          <RailFact label="Display mode" value="Auto by zoom" />
+          <RailFact
+            label="Current map mode"
+            value={
+              modelResearchMapSummary.overlayEnabled
+                ? modelResearchMapSummary.displayModeLabel
+                : "Overlay off"
+            }
+          />
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Legend
+        </p>
+        <div className="mt-2 grid gap-2">
+          {modelResearchSignalLegend.map((item) => (
+            <div
+              className="flex items-center gap-2 text-xs text-slate-300"
+              key={item.label}
+            >
+              <span
+                aria-hidden="true"
+                className={cn("mt-0.5 h-3 w-3 shrink-0 rounded-full border", item.dotClassName)}
+              />
+              <span className="block font-semibold text-slate-200">
+                {item.label}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.06] px-3 py-2 text-[11px] leading-5 text-[#f0cd79]">
+          Countywide view uses fused, count-scaled clusters. Medium zooms split
+          into intermediate sub-clusters, closer zooms use fine local clusters,
+          and closest zooms reveal parcel-safe detail markers.
+        </p>
+      </section>
+
+      <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Driver sources
+        </p>
+        <ul className="mt-2 space-y-2">
+          {modelResearchDriverSources.map((source) => (
+            <li className="text-xs leading-5 text-slate-300" key={source}>
+              <span className="block font-semibold text-slate-200">
+                {formatModelResearchDriverLabel(source)}
+              </span>
+              <span className="block text-[11px] leading-4 text-slate-500">
+                {getModelResearchDriverExplanation(source)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="grid gap-2 rounded-lg border border-white/10 bg-white/[0.025] p-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Feature Groups
+        </p>
+        <RailMiniList
+          items={developmentModelLabSummary.helpedFeatureGroups}
+          title="Included"
+        />
+        <RailMiniList
+          items={developmentModelLabSummary.excludedFeatureGroups}
+          title="Excluded for now"
+        />
+      </section>
+
+      <div className="grid gap-2">
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15"
+          onClick={saveSnapshot}
+          type="button"
+        >
+          <Save className="h-3.5 w-3.5" />
+          Save Snapshot
+        </button>
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+          onClick={openMethodologyModelLab}
+          type="button"
+        >
+          <BookOpen className="h-3.5 w-3.5" />
+          Open Methodology Model Lab
+        </button>
+        <button
+          className="rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
+          onClick={onCollapseDrawer}
+          type="button"
+        >
+          Collapse controls
+        </button>
+      </div>
+
+      <details className="rounded-lg border border-white/10 bg-black/18 p-3">
+        <summary className="cursor-pointer text-xs font-semibold text-slate-200">
+          Advanced map layers
+        </summary>
+        <div className="mt-3">
+          <LayerToggle onCollapseDrawer={onCollapseDrawer} />
+        </div>
+      </details>
+    </div>
+  );
+}
+
+function SnapshotModeControlsPanel({
+  onCollapseDrawer,
+}: {
+  onCollapseDrawer?: () => void;
+}) {
+  const {
+    activeLayerIds,
+    overviewCommandMode,
+    planningSnapshot,
+    savedPlanningSnapshots,
+    selectedParcelId,
+    setPlanningSnapshotView,
+    setProductMode,
+  } = useDashboardState();
+  const latestCapturedMode = planningSnapshot?.overviewCommandMode
+    ? formatRailModeLabel(planningSnapshot.overviewCommandMode)
+    : formatRailModeLabel(overviewCommandMode);
+  const mapImageStatus =
+    planningSnapshot?.mapScreenshotStatus === "captured"
+      ? "Captured"
+      : planningSnapshot?.mapScreenshotStatus === "failed" ||
+          planningSnapshot?.mapScreenshotStatus === "unavailable"
+        ? "Unavailable"
+        : "Pending";
+
+  function saveSnapshot() {
+    window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT));
+  }
+
+  return (
+    <div className="space-y-3">
+      <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Snapshot Builder
+        </p>
+        <h3 className="mt-1 text-sm font-semibold text-white">
+          Choose what to capture
+        </h3>
+        <p className="mt-2 text-xs leading-5 text-slate-400">
+          {selectedParcelId
+            ? "Snapshot will include selected parcel facts, map view, active layers, Intelligence Brief, and caveats."
+            : "Snapshot will capture the current map, active layers, countywide intelligence, and caveats. Select a parcel first if you want parcel-specific facts included."}
+        </p>
+      </section>
+      <RailFact
+        label="Saved snapshots"
+        value={String(savedPlanningSnapshots.length)}
+      />
+      <RailFact label="Current mode" value={latestCapturedMode} />
+      <RailFact
+        label="Selected parcel"
+        value={selectedParcelId ?? "No parcel selected"}
+      />
+      <RailFact label="Active layers" value={String(activeLayerIds.length)} />
+      <RailFact label="Map image" value={mapImageStatus} />
+      <RailFact
+        label="Latest snapshot"
+        value={planningSnapshot ? "Available" : "Not saved"}
+      />
+      <button
+        className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15"
+        onClick={saveSnapshot}
+        type="button"
+      >
+        <Save className="h-3.5 w-3.5" />
+        Save Snapshot
+      </button>
+      <button
+        className="w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]"
+        onClick={() => {
+          setPlanningSnapshotView("overview");
+          setProductMode("due_diligence");
+        }}
+        type="button"
+      >
+        Open Snapshot Library
+      </button>
+      <button
+        className="w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
+        onClick={onCollapseDrawer}
+        type="button"
+      >
+        Collapse helper
+      </button>
+    </div>
+  );
+}
+
+function RailFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-white/10 bg-white/[0.035] px-2.5 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-xs font-semibold leading-5 text-slate-100">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function RailMiniList({ items, title }: { items: string[]; title: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+        {title}
+      </p>
+      <ul className="mt-1 space-y-1 text-xs leading-5 text-slate-400">
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function formatRailModeLabel(mode: OverviewCommandMode) {
+  if (mode === "countywide") {
+    return "Explore Countywide";
+  }
+
+  if (mode === "modelLab") {
+    return "Model Lab";
+  }
+
+  if (mode === "snapshot") {
+    return "Snapshot Builder";
+  }
+
+  return "Search Parcel";
+}
+
+function getCollapsedRailLabel(mode: OverviewCommandMode) {
+  if (mode === "modelLab") {
+    return "Model Lab";
+  }
+
+  if (mode === "parcel") {
+    return "Parcel";
+  }
+
+  if (mode === "snapshot") {
+    return "Snapshot";
+  }
+
+  return "Layers";
+}
+
+function getExpandedRailTitle(mode: OverviewCommandMode) {
+  if (mode === "modelLab") {
+    return "Model Lab";
+  }
+
+  if (mode === "parcel") {
+    return "Parcel Helper";
+  }
+
+  if (mode === "snapshot") {
+    return "Snapshot Builder";
+  }
+
+  return "Map Controls";
 }
 
 function LayerRailEdgeHandle({

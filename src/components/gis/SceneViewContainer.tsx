@@ -23,7 +23,15 @@ import {
   type ParcelSearchEventDetail,
 } from "@/components/dashboard/ParcelSearchState";
 import { MapViewportPlaceholder } from "@/components/gis/MapViewportPlaceholder";
+import {
+  formatDevelopmentCount,
+} from "@/data/intelligence/developmentActivityMetrics";
+import {
+  formatModelResearchDriverLabel,
+  formatRelativeDevelopmentSignalBand,
+} from "@/data/intelligence/developmentModelLab";
 import { useDashboardState } from "@/hooks/useDashboardState";
+import { useModelResearchPreviewLayer } from "@/hooks/useModelResearchPreviewLayer";
 import {
   loadArcGISRuntime,
   type ArcGISRuntime,
@@ -61,10 +69,34 @@ import type {
   SchoolUtilizationZoneMapPolygon,
   SelectedSchoolUtilizationZone,
 } from "@/types/map/schoolUtilizationZones";
+import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
+import type {
+  ModelResearchMapDisplayMode,
+  ModelResearchMapSummary,
+} from "@/types";
 
 type ArcGISHandle = {
   remove: () => void;
 };
+
+const MODEL_LAB_COUNTYWIDE_CLUSTER_SCALE = 78000;
+const MODEL_LAB_INTERMEDIATE_CLUSTER_SCALE = 36000;
+const MODEL_LAB_FINE_CLUSTER_SCALE = 9000;
+const MODEL_LAB_INDIVIDUAL_SCALE = MODEL_LAB_FINE_CLUSTER_SCALE;
+const MODEL_LAB_COUNTYWIDE_SCALE_THRESHOLD = MODEL_LAB_COUNTYWIDE_CLUSTER_SCALE;
+const MODEL_LAB_CLUSTER_SCALE_THRESHOLD = MODEL_LAB_INTERMEDIATE_CLUSTER_SCALE;
+const MODEL_LAB_DETAIL_SCALE_THRESHOLD = MODEL_LAB_INDIVIDUAL_SCALE;
+const MODEL_LAB_COUNTYWIDE_MIN_SCALE = MODEL_LAB_COUNTYWIDE_SCALE_THRESHOLD;
+const MODEL_LAB_CLUSTER_MIN_SCALE = MODEL_LAB_CLUSTER_SCALE_THRESHOLD;
+const MODEL_LAB_COUNTYWIDE_CELL_SIZE_DEGREES = 0.08;
+const MODEL_LAB_CLUSTER_CELL_SIZE_DEGREES = 0.038;
+const MODEL_LAB_INTERMEDIATE_CELL_SIZE_DEGREES = MODEL_LAB_CLUSTER_CELL_SIZE_DEGREES;
+const MODEL_LAB_FINE_CELL_SIZE_DEGREES = 0.014;
+const MODEL_LAB_COUNTYWIDE_MAX_CELLS = 32;
+const MODEL_LAB_CLUSTER_MAX_CELLS = 52;
+const MODEL_LAB_INTERMEDIATE_MAX_CELLS = MODEL_LAB_CLUSTER_MAX_CELLS;
+const MODEL_LAB_FINE_MAX_CELLS = 112;
+const MODEL_LAB_PARCEL_DETAIL_MAX_MARKERS = 120;
 
 interface ParcelFocusBeacon {
   boundaryHighlighted: boolean;
@@ -155,6 +187,8 @@ export function SceneViewContainer() {
   const hotspotLayerRef = useRef<GraphicsLayer | null>(null);
   const floodConstraintLayerRef = useRef<GraphicsLayer | null>(null);
   const floodZoneLayerRef = useRef<GraphicsLayer | null>(null);
+  const modelResearchPreviewLayerRef = useRef<GraphicsLayer | null>(null);
+  const modelResearchGoToKeyRef = useRef<string | null>(null);
   const schoolUtilizationZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const lastFocusedParcelIdRef = useRef<string | null>(null);
   const latestFocusRequestParcelIdRef = useRef<string | null>(null);
@@ -210,6 +244,7 @@ export function SceneViewContainer() {
     useState<OverlayCardPosition | null>(null);
   const [schoolUtilizationHover, setSchoolUtilizationHover] =
     useState<SchoolUtilizationHoverCallout | null>(null);
+  const [modelResearchRenderTick, setModelResearchRenderTick] = useState(0);
   const {
     activeLayerIds,
     clearSelectedSchoolUtilizationZone,
@@ -225,6 +260,8 @@ export function SceneViewContainer() {
     isMapFocusMode,
     mapStatus,
     mapError,
+    modelResearchOverlayEnabled,
+    overviewCommandMode,
     selectedParcel,
     selectedParcelId,
     selectedParcelIntelligence,
@@ -237,9 +274,16 @@ export function SceneViewContainer() {
     setMapFocusMode,
     setMapError,
     setMapStatus,
+    setModelResearchMapSummary,
+    setSelectedModelResearchContext,
     setSelectedSchoolUtilizationZone,
     toggleMapFocusMode,
   } = useDashboardState();
+  const modelResearchPreviewLayer = useModelResearchPreviewLayer({
+    enabled: overviewCommandMode === "modelLab" && modelResearchOverlayEnabled,
+    limit: 720,
+    signal: "all",
+  });
   const selectedParcelIdRef = useRef(selectedParcelId);
 
   useEffect(() => {
@@ -872,6 +916,9 @@ export function SceneViewContainer() {
         map.add(floodConstraintLayerRef.current);
         floodZoneLayerRef.current = createFemaFloodZoneLayer(runtime);
         map.add(floodZoneLayerRef.current);
+        modelResearchPreviewLayerRef.current =
+          createModelResearchPreviewLayer(runtime);
+        map.add(modelResearchPreviewLayerRef.current);
         schoolUtilizationZoneLayerRef.current =
           createSchoolUtilizationZoneLayer(runtime);
         map.add(schoolUtilizationZoneLayerRef.current);
@@ -904,61 +951,79 @@ export function SceneViewContainer() {
         });
 
         clickHandle = view.on("click", (event) => {
-          void handleDevelopmentHotspotClick(
-            view,
-            event,
-            hotspotLayerRef.current,
-            setHotspotInfo,
-            closeFloodInfo,
-          ).then((handledHotspotClick) => {
+          void (async () => {
+            const handledHotspotClick = await handleDevelopmentHotspotClick(
+              view,
+              event,
+              hotspotLayerRef.current,
+              setHotspotInfo,
+              closeFloodInfo,
+            );
+
             if (handledHotspotClick) {
               closeFloodZoneInfo();
               closeSchoolUtilizationInfo();
               return;
             }
 
-            void handleFloodConstraintClick(
+            const handledModelResearchClick =
+              await handleModelResearchPreviewClick(
+                view,
+                event,
+                modelResearchPreviewLayerRef.current,
+                setSelectedModelResearchContext,
+              );
+
+            if (handledModelResearchClick) {
+              closeHotspotInfo();
+              closeFloodInfo();
+              closeFloodZoneInfo();
+              closeSchoolUtilizationInfo();
+              return;
+            }
+
+            const handledFloodClick = await handleFloodConstraintClick(
               view,
               event,
               floodConstraintLayerRef.current,
               setFloodInfo,
               closeHotspotInfo,
-            ).then((handledFloodClick) => {
-              if (handledFloodClick) {
-                closeFloodZoneInfo();
-                closeSchoolUtilizationInfo();
-                return;
-              }
+            );
 
-              void handleFemaFloodZoneClick(
-                view,
-                event,
-                floodZoneLayerRef.current,
-                setFloodZoneInfo,
-                closeHotspotInfo,
-                closeFloodInfo,
-              ).then((handledFloodZoneClick) => {
-                if (handledFloodZoneClick) {
-                  closeSchoolUtilizationInfo();
-                  return;
-                }
+            if (handledFloodClick) {
+              closeFloodZoneInfo();
+              closeSchoolUtilizationInfo();
+              return;
+            }
 
-                void handleSchoolUtilizationZoneClick(
-                  view,
-                  event,
-                  schoolUtilizationZoneLayerRef.current,
-                  setSelectedSchoolUtilizationZone,
-                  closeHotspotInfo,
-                  closeFloodInfo,
-                  closeFloodZoneInfo,
-                ).then((handledSchoolClick) => {
-                  if (!handledSchoolClick) {
-                    void interactionController.handleClick(event);
-                  }
-                });
-              });
-            });
-          });
+            const handledFloodZoneClick = await handleFemaFloodZoneClick(
+              view,
+              event,
+              floodZoneLayerRef.current,
+              setFloodZoneInfo,
+              closeHotspotInfo,
+              closeFloodInfo,
+            );
+
+            if (handledFloodZoneClick) {
+              closeSchoolUtilizationInfo();
+              return;
+            }
+
+            const handledSchoolClick = await handleSchoolUtilizationZoneClick(
+              view,
+              event,
+              schoolUtilizationZoneLayerRef.current,
+              setSelectedSchoolUtilizationZone,
+              closeHotspotInfo,
+              closeFloodInfo,
+              closeFloodZoneInfo,
+            );
+
+            if (!handledSchoolClick) {
+              void interactionController.handleClick(event);
+            }
+          })();
         });
         hoverHandle = view.on("pointer-move", (event) => {
           if (schoolHoverFrameRef.current !== null) {
@@ -991,10 +1056,16 @@ export function SceneViewContainer() {
           CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
           focusEventHandler,
         );
+        const queueModelResearchRender = () => {
+          setModelResearchRenderTick((currentTick) =>
+            currentTick >= 100000 ? 0 : currentTick + 1,
+          );
+        };
         zoomWatchHandle = runtime.reactiveUtils.watch(() => view.zoom, (zoom) => {
           if (focusLayerRef.current) {
             updateParcelFocusMarkerScale(focusLayerRef.current, zoom);
           }
+          queueModelResearchRender();
         }) as ArcGISHandle;
         const publishFloodZoneExtent = () => {
           const extent = getSceneViewWgs84Extent(runtime, view);
@@ -1009,6 +1080,7 @@ export function SceneViewContainer() {
           (stationary) => {
             if (stationary) {
               publishFloodZoneExtent();
+              queueModelResearchRender();
             }
           },
         ) as ArcGISHandle;
@@ -1062,6 +1134,8 @@ export function SceneViewContainer() {
       floodConstraintLayerRef.current = null;
       floodZoneLayerRef.current?.removeAll();
       floodZoneLayerRef.current = null;
+      modelResearchPreviewLayerRef.current?.removeAll();
+      modelResearchPreviewLayerRef.current = null;
       schoolUtilizationZoneLayerRef.current?.removeAll();
       schoolUtilizationZoneLayerRef.current = null;
       layerRefs.current = {};
@@ -1087,6 +1161,7 @@ export function SceneViewContainer() {
     setFloodZoneViewExtent,
     setMapError,
     setMapStatus,
+    setSelectedModelResearchContext,
     setSelectedSchoolUtilizationZone,
     updateSchoolUtilizationHover,
   ]);
@@ -1202,6 +1277,87 @@ export function SceneViewContainer() {
     floodZoneLayer.totalCount,
     floodZonesEnabled,
     mapStatus,
+  ]);
+
+  useEffect(() => {
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+
+    if (!runtime || !view || view.destroyed) {
+      return;
+    }
+
+    const researchLayer = ensureModelResearchPreviewLayer(runtime, view);
+    modelResearchPreviewLayerRef.current = researchLayer;
+    researchLayer.removeAll();
+
+    if (
+      overviewCommandMode !== "modelLab" ||
+      !modelResearchOverlayEnabled ||
+      modelResearchPreviewLayer.status !== "ready"
+    ) {
+      setSelectedModelResearchContext(null);
+      modelResearchGoToKeyRef.current = null;
+      setModelResearchMapSummary(createModelResearchMapSummary({
+        displayMode: "off",
+        overlayEnabled: false,
+        totalFeatureCount: modelResearchPreviewLayer.totalCount,
+        visibleFeatureCount: 0,
+      }));
+      return;
+    }
+
+    const displayMode = getModelResearchMapDisplayMode(view.scale);
+    const currentExtent = getSceneViewWgs84Extent(runtime, view);
+    const renderResult = buildModelResearchDisplayGraphics({
+      displayMode,
+      extent: currentExtent,
+      markers: modelResearchPreviewLayer.markers,
+      runtime,
+    });
+
+    researchLayer.addMany(renderResult.graphics);
+    setModelResearchMapSummary(createModelResearchMapSummary({
+      displayMode,
+      dominantSignalLabel: renderResult.dominantSignalLabel,
+      overlayEnabled: true,
+      totalFeatureCount: modelResearchPreviewLayer.totalCount,
+      viewScaleLabel: getModelResearchViewScaleLabel(displayMode),
+      visibleFeatureCount: renderResult.visibleFeatureCount,
+    }));
+
+    const researchExtent = createModelResearchPreviewExtent(
+      runtime,
+      renderResult.extentMarkers,
+    );
+
+    const goToKey = `modelLab-${modelResearchPreviewLayer.totalCount}`;
+    if (researchExtent && modelResearchGoToKeyRef.current !== goToKey) {
+      modelResearchGoToKeyRef.current = goToKey;
+      void view.goTo(researchExtent, {
+        animate: true,
+        duration: 900,
+      }).catch((error: unknown) => {
+        console.debug("[CFS model research preview]", "goTo skipped", error);
+      });
+    }
+
+    console.debug("[CFS model research preview]", "rendered safe display", {
+      displayMode,
+      graphicCount: renderResult.graphics.length,
+      markerCount: renderResult.visibleFeatureCount,
+      totalCount: modelResearchPreviewLayer.totalCount,
+    });
+  }, [
+    mapStatus,
+    modelResearchRenderTick,
+    modelResearchOverlayEnabled,
+    modelResearchPreviewLayer.markers,
+    modelResearchPreviewLayer.status,
+    modelResearchPreviewLayer.totalCount,
+    overviewCommandMode,
+    setModelResearchMapSummary,
+    setSelectedModelResearchContext,
   ]);
 
   useEffect(() => {
@@ -2139,6 +2295,18 @@ function createFemaFloodZoneLayer(runtime: ArcGISRuntime) {
   });
 }
 
+function createModelResearchPreviewLayer(runtime: ArcGISRuntime) {
+  return new runtime.GraphicsLayer({
+    elevationInfo: {
+      mode: "relative-to-ground",
+      offset: 88,
+    },
+    id: "cfs-model-research-preview-layer",
+    listMode: "hide",
+    title: "Development Model Research Preview",
+  });
+}
+
 function createSchoolUtilizationZoneLayer(runtime: ArcGISRuntime) {
   return new runtime.GraphicsLayer({
     elevationInfo: {
@@ -2223,6 +2391,27 @@ function ensureFemaFloodZoneLayer(runtime: ArcGISRuntime, view: SceneView) {
   const floodZoneLayer = createFemaFloodZoneLayer(runtime);
   map.add(floodZoneLayer);
   return floodZoneLayer;
+}
+
+function ensureModelResearchPreviewLayer(
+  runtime: ArcGISRuntime,
+  view: SceneView,
+) {
+  const map = view.map;
+
+  if (!map) {
+    throw new Error("SceneView map is unavailable for model research preview.");
+  }
+
+  const existingLayer = map.findLayerById("cfs-model-research-preview-layer");
+
+  if (existingLayer) {
+    return existingLayer as GraphicsLayer;
+  }
+
+  const previewLayer = createModelResearchPreviewLayer(runtime);
+  map.add(previewLayer);
+  return previewLayer;
 }
 
 function ensureSchoolUtilizationZoneLayer(
@@ -2381,6 +2570,564 @@ function createFloodConstraintGraphic(
       },
     } as unknown as Graphic["symbol"],
   });
+}
+
+function createModelResearchPreviewGraphic(
+  runtime: ArcGISRuntime,
+  marker: ModelResearchPreviewMarker,
+) {
+  const profile = getModelResearchPreviewMarkerProfile(marker);
+
+  return new runtime.Graphic({
+    attributes: {
+      approximateAreaLabel:
+        marker.approximateAreaLabel ?? marker.officialParcelId,
+      bandCountInsufficient: marker.bandCounts?.insufficient ?? 0,
+      bandCountLower: marker.bandCounts?.lower ?? 0,
+      bandCountModerate: marker.bandCounts?.moderate ?? 0,
+      bandCountStrong: marker.bandCounts?.strong ?? 0,
+      bandCountVeryStrong: marker.bandCounts?.veryStrong ?? 0,
+      caveat: marker.caveat,
+      clusterId: marker.clusterId ?? null,
+      contextKind: marker.contextKind ?? "parcel_marker",
+      dataQualityFlag: marker.dataQualityFlag,
+      displayMode: marker.displayMode ?? "parcel_detail",
+      dominantResearchBand:
+        marker.dominantResearchBand ??
+        formatRelativeDevelopmentSignalBand({
+          rankBand: marker.researchRankBand,
+          signalLabel: marker.researchSignalLabel,
+        }),
+      exactProbabilityAvailable: false,
+      graphicRole: "model-research-preview",
+      modelVersion: marker.modelVersion,
+      officialParcelId: marker.officialParcelId,
+      productionReady: false,
+      publicExposureAllowed: false,
+      representativeSignalLabel:
+        marker.representativeSignalLabel ?? marker.researchSignalLabel,
+      representedFeatureCount: marker.representedFeatureCount ?? 1,
+      researchRankBand: marker.researchRankBand,
+      researchSignalLabel: marker.researchSignalLabel,
+      selectedFeatureGroupSummary: marker.selectedFeatureGroupSummary ?? null,
+      topDriver1: marker.topDrivers[0] ?? null,
+      topDriver2: marker.topDrivers[1] ?? null,
+      topDriver3: marker.topDrivers[2] ?? null,
+      topDriverSummary:
+        marker.topDriverSummary ??
+        createModelResearchTopDriverSummary(marker.topDrivers),
+    },
+    geometry: new runtime.Point({
+      spatialReference: {
+        wkid: marker.centroid.spatialReference?.wkid ?? 4326,
+      },
+      x: marker.centroid.longitude,
+      y: marker.centroid.latitude,
+    }),
+    symbol: {
+      symbolLayers: [
+        {
+          material: {
+            color: profile.haloColor,
+          },
+          outline: {
+            color: profile.haloOutlineColor,
+            size: 1,
+          },
+          resource: {
+            primitive: "circle",
+          },
+          size: profile.haloSize,
+          type: "icon",
+        },
+        {
+          material: {
+            color: profile.color,
+          },
+          outline: {
+            color: profile.outlineColor,
+            size: profile.outlineSize,
+          },
+          resource: {
+            primitive: "circle",
+          },
+          size: profile.size,
+          type: "icon",
+        },
+      ],
+      type: "point-3d",
+      verticalOffset: {
+        maxWorldLength: profile.maxWorldLength,
+        minWorldLength: 54,
+        screenLength: profile.screenLength,
+      },
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+interface ModelResearchDisplayOptions {
+  displayMode: ModelResearchMapDisplayMode;
+  extent: FloodZoneExtent | null;
+  markers: ModelResearchPreviewMarker[];
+  runtime: ArcGISRuntime;
+}
+
+interface ModelResearchDisplayResult {
+  dominantSignalLabel: string;
+  extentMarkers: ModelResearchPreviewMarker[];
+  graphics: Graphic[];
+  visibleFeatureCount: number;
+}
+
+interface ModelResearchAggregateCell {
+  bandCounts: NonNullable<ModelResearchPreviewMarker["bandCounts"]>;
+  count: number;
+  displayMode: ModelResearchMapDisplayMode;
+  dominantSignalLabel: string;
+  id: string;
+  latitude: number;
+  longitude: number;
+  markers: ModelResearchPreviewMarker[];
+  topDrivers: string[];
+  weight: number;
+}
+
+function getModelResearchMapDisplayMode(
+  scale: number | null | undefined,
+): ModelResearchMapDisplayMode {
+  if (!scale || !Number.isFinite(scale)) {
+    return "countywide_heatmap";
+  }
+
+  if (scale >= MODEL_LAB_COUNTYWIDE_MIN_SCALE) {
+    return "countywide_heatmap";
+  }
+
+  if (scale >= MODEL_LAB_CLUSTER_MIN_SCALE) {
+    return "intermediate_subclusters";
+  }
+
+  if (scale >= MODEL_LAB_DETAIL_SCALE_THRESHOLD) {
+    return "fine_local_clusters";
+  }
+
+  return "parcel_detail";
+}
+
+function getModelResearchViewScaleLabel(mode: ModelResearchMapDisplayMode) {
+  switch (mode) {
+    case "countywide_heatmap":
+      return "Countywide fused clusters";
+    case "clustered_markers":
+      return "Clustered research markers";
+    case "intermediate_subclusters":
+      return "Intermediate sub-clusters";
+    case "fine_local_clusters":
+      return "Fine local clusters";
+    case "parcel_detail":
+      return "Parcel-scale research markers";
+    default:
+      return "Overlay off";
+  }
+}
+
+function getModelResearchClusterCellSize(
+  displayMode: ModelResearchMapDisplayMode,
+) {
+  switch (displayMode) {
+    case "countywide_heatmap":
+      return MODEL_LAB_COUNTYWIDE_CELL_SIZE_DEGREES;
+    case "fine_local_clusters":
+      return MODEL_LAB_FINE_CELL_SIZE_DEGREES;
+    case "clustered_markers":
+    case "intermediate_subclusters":
+    default:
+      return MODEL_LAB_INTERMEDIATE_CELL_SIZE_DEGREES;
+  }
+}
+
+function getModelResearchClusterMaxCells(
+  displayMode: ModelResearchMapDisplayMode,
+) {
+  switch (displayMode) {
+    case "countywide_heatmap":
+      return MODEL_LAB_COUNTYWIDE_MAX_CELLS;
+    case "fine_local_clusters":
+      return MODEL_LAB_FINE_MAX_CELLS;
+    case "clustered_markers":
+    case "intermediate_subclusters":
+    default:
+      return MODEL_LAB_INTERMEDIATE_MAX_CELLS;
+  }
+}
+
+function createModelResearchMapSummary({
+  displayMode,
+  dominantSignalLabel = "No visible research signal",
+  overlayEnabled,
+  totalFeatureCount,
+  viewScaleLabel,
+  visibleFeatureCount,
+}: Partial<ModelResearchMapSummary> & {
+  displayMode: ModelResearchMapDisplayMode;
+  overlayEnabled: boolean;
+  totalFeatureCount: number;
+  visibleFeatureCount: number;
+}): ModelResearchMapSummary {
+  return {
+    displayMode,
+    displayModeLabel: getModelResearchViewScaleLabel(displayMode),
+    dominantSignalLabel,
+    overlayEnabled,
+    totalFeatureCount,
+    viewScaleLabel: viewScaleLabel ?? getModelResearchViewScaleLabel(displayMode),
+    visibleFeatureCount,
+  };
+}
+
+function buildModelResearchDisplayGraphics({
+  displayMode,
+  extent,
+  markers,
+  runtime,
+}: ModelResearchDisplayOptions): ModelResearchDisplayResult {
+  const visibleMarkers = filterModelResearchMarkersForExtent(markers, extent);
+  const sourceMarkers = visibleMarkers.length ? visibleMarkers : markers;
+
+  if (!sourceMarkers.length) {
+    return {
+      dominantSignalLabel: "No visible research signal",
+      extentMarkers: [],
+      graphics: [],
+      visibleFeatureCount: 0,
+    };
+  }
+
+  if (displayMode === "parcel_detail") {
+    const detailMarkers = prioritizeModelResearchMarkers(sourceMarkers).slice(
+      0,
+      MODEL_LAB_PARCEL_DETAIL_MAX_MARKERS,
+    );
+
+    return {
+      dominantSignalLabel: getDominantResearchSignalLabel(detailMarkers),
+      extentMarkers: detailMarkers,
+      graphics: detailMarkers.map((marker) =>
+        createModelResearchPreviewGraphic(runtime, {
+          ...marker,
+          contextKind: "parcel_marker",
+          representedFeatureCount: 1,
+        }),
+      ),
+      visibleFeatureCount: detailMarkers.length,
+    };
+  }
+
+  const cells = aggregateModelResearchMarkers(
+    sourceMarkers,
+    getModelResearchClusterCellSize(displayMode),
+    displayMode,
+  ).slice(0, getModelResearchClusterMaxCells(displayMode));
+
+  return {
+    dominantSignalLabel: getDominantResearchSignalLabel(sourceMarkers),
+    extentMarkers: cells.map((cell) => aggregateCellToMarker(cell, displayMode)),
+    graphics: cells.flatMap((cell) => {
+      const graphic = createModelResearchAggregateGraphic(
+        runtime,
+        cell,
+        displayMode,
+      );
+      const labelGraphic = createModelResearchAggregateLabelGraphic(
+        runtime,
+        cell,
+        displayMode,
+      );
+
+      return labelGraphic ? [graphic, labelGraphic] : [graphic];
+    }),
+    visibleFeatureCount: cells.reduce((sum, cell) => sum + cell.count, 0),
+  };
+}
+
+function filterModelResearchMarkersForExtent(
+  markers: ModelResearchPreviewMarker[],
+  extent: FloodZoneExtent | null,
+) {
+  if (!extent) {
+    return markers;
+  }
+
+  const longitudePadding = Math.max(0.015, (extent.xmax - extent.xmin) * 0.12);
+  const latitudePadding = Math.max(0.015, (extent.ymax - extent.ymin) * 0.12);
+
+  return markers.filter((marker) => {
+    const { latitude, longitude } = marker.centroid;
+
+    return (
+      longitude >= extent.xmin - longitudePadding &&
+      longitude <= extent.xmax + longitudePadding &&
+      latitude >= extent.ymin - latitudePadding &&
+      latitude <= extent.ymax + latitudePadding
+    );
+  });
+}
+
+function prioritizeModelResearchMarkers(markers: ModelResearchPreviewMarker[]) {
+  return [...markers].sort((left, right) => {
+    const signalDelta =
+      getResearchSignalWeight(right.researchSignalLabel) -
+      getResearchSignalWeight(left.researchSignalLabel);
+
+    if (signalDelta !== 0) {
+      return signalDelta;
+    }
+
+    return (
+      getResearchBandWeight(right.researchRankBand) -
+      getResearchBandWeight(left.researchRankBand)
+    );
+  });
+}
+
+function aggregateModelResearchMarkers(
+  markers: ModelResearchPreviewMarker[],
+  cellSizeDegrees: number,
+  displayMode: ModelResearchMapDisplayMode,
+) {
+  const cells = new Map<string, ModelResearchAggregateCell>();
+
+  markers.forEach((marker) => {
+    const longitudeKey =
+      Math.floor(marker.centroid.longitude / cellSizeDegrees) * cellSizeDegrees;
+    const latitudeKey =
+      Math.floor(marker.centroid.latitude / cellSizeDegrees) * cellSizeDegrees;
+    const key = `${longitudeKey.toFixed(5)}:${latitudeKey.toFixed(5)}`;
+    const weight = getResearchSignalWeight(marker.researchSignalLabel);
+    const bandCounts = getInitialModelResearchBandCounts();
+    incrementModelResearchBandCount(bandCounts, marker);
+    const existingCell = cells.get(key);
+
+    if (!existingCell) {
+      cells.set(key, {
+        bandCounts,
+        count: 1,
+        displayMode,
+        dominantSignalLabel: marker.researchSignalLabel,
+        id: `${displayMode}:${key}`,
+        latitude: marker.centroid.latitude,
+        longitude: marker.centroid.longitude,
+        markers: [marker],
+        topDrivers: marker.topDrivers,
+        weight,
+      });
+      return;
+    }
+
+    const nextCount = existingCell.count + 1;
+    existingCell.latitude =
+      (existingCell.latitude * existingCell.count + marker.centroid.latitude) /
+      nextCount;
+    existingCell.longitude =
+      (existingCell.longitude * existingCell.count + marker.centroid.longitude) /
+      nextCount;
+    existingCell.count = nextCount;
+    existingCell.weight += weight;
+    existingCell.markers.push(marker);
+    incrementModelResearchBandCount(existingCell.bandCounts, marker);
+    existingCell.dominantSignalLabel = getDominantResearchSignalLabel(
+      existingCell.markers,
+    );
+    existingCell.topDrivers = getCommonTopDrivers(existingCell.markers);
+  });
+
+  return [...cells.values()].sort((left, right) => {
+    const concentrationDelta =
+      right.count * 2 + right.weight - (left.count * 2 + left.weight);
+
+    if (concentrationDelta !== 0) {
+      return concentrationDelta;
+    }
+
+    return (
+      right.weight / Math.max(1, right.count) -
+      left.weight / Math.max(1, left.count)
+    );
+  });
+}
+
+function aggregateCellToMarker(
+  cell: ModelResearchAggregateCell,
+  displayMode: ModelResearchMapDisplayMode,
+): ModelResearchPreviewMarker {
+  const dominantResearchBand = formatRelativeDevelopmentSignalBand({
+    rankBand: getAggregateResearchBand(cell.dominantSignalLabel),
+    signalLabel: cell.dominantSignalLabel,
+  });
+  const approximateAreaLabel = createModelResearchAreaLabel(cell, displayMode);
+  const topDriverSummary = createModelResearchTopDriverSummary(cell.topDrivers);
+
+  return {
+    approximateAreaLabel,
+    bandCounts: cell.bandCounts,
+    caveat: "Internal research preview only. Not an official parcel score.",
+    clusterId: cell.id,
+    centroid: {
+      latitude: cell.latitude,
+      longitude: cell.longitude,
+      spatialReference: { wkid: 4326 },
+    },
+    contextKind:
+      displayMode === "countywide_heatmap" ? "heatmap_cell" : "cluster",
+    dataQualityFlag: "research_preview_aggregate_context",
+    displayMode,
+    dominantResearchBand,
+    exactProbabilityAvailable: false,
+    modelVersion:
+      cell.markers[0]?.modelVersion ?? "internal_model_research_preview",
+    officialParcelId: approximateAreaLabel,
+    productionReady: false,
+    publicExposureAllowed: false,
+    representativeSignalLabel: cell.dominantSignalLabel,
+    representedFeatureCount: cell.count,
+    researchRankBand: getAggregateResearchBand(cell.dominantSignalLabel),
+    researchSignalLabel: cell.dominantSignalLabel,
+    selectedFeatureGroupSummary: topDriverSummary,
+    topDriverSummary,
+    topDrivers: cell.topDrivers,
+  };
+}
+
+function createModelResearchAggregateGraphic(
+  runtime: ArcGISRuntime,
+  cell: ModelResearchAggregateCell,
+  displayMode: ModelResearchMapDisplayMode,
+) {
+  const aggregateMarker = aggregateCellToMarker(cell, displayMode);
+  const profile = getModelResearchAggregateProfile(cell, displayMode);
+
+  return new runtime.Graphic({
+    attributes: createModelResearchAggregateAttributes(
+      aggregateMarker,
+      displayMode,
+    ),
+    geometry: new runtime.Point({
+      spatialReference: { wkid: 4326 },
+      x: cell.longitude,
+      y: cell.latitude,
+    }),
+    symbol: {
+      symbolLayers: [
+        {
+          material: {
+            color: profile.outerColor,
+          },
+          outline: {
+            color: profile.outlineColor,
+            size: 0.5,
+          },
+          resource: {
+            primitive: "circle",
+          },
+          size: profile.outerSize,
+          type: "icon",
+        },
+        {
+          material: {
+            color: profile.innerColor,
+          },
+          outline: {
+            color: profile.innerOutlineColor,
+            size: 0.8,
+          },
+          resource: {
+            primitive: "circle",
+          },
+          size: profile.innerSize,
+          type: "icon",
+        },
+      ],
+      type: "point-3d",
+      verticalOffset: {
+        maxWorldLength: profile.maxWorldLength,
+        minWorldLength: 65,
+        screenLength: profile.screenLength,
+      },
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createModelResearchAggregateLabelGraphic(
+  runtime: ArcGISRuntime,
+  cell: ModelResearchAggregateCell,
+  displayMode: ModelResearchMapDisplayMode,
+) {
+  if (cell.count <= 1) {
+    return null;
+  }
+
+  const aggregateMarker = aggregateCellToMarker(cell, displayMode);
+  const profile = getModelResearchAggregateProfile(cell, displayMode);
+
+  return new runtime.Graphic({
+    attributes: createModelResearchAggregateAttributes(
+      aggregateMarker,
+      displayMode,
+    ),
+    geometry: new runtime.Point({
+      spatialReference: { wkid: 4326 },
+      x: cell.longitude,
+      y: cell.latitude,
+    }),
+    symbol: {
+      color: [255, 255, 255, 0.96],
+      font: {
+        family: "Inter, Arial, sans-serif",
+        size: profile.labelSize,
+        weight: "bold",
+      },
+      haloColor: [7, 17, 31, 0.88],
+      haloSize: 1.4,
+      text: formatDevelopmentCount(cell.count),
+      type: "text",
+      yoffset: 0,
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createModelResearchAggregateAttributes(
+  aggregateMarker: ModelResearchPreviewMarker,
+  displayMode: ModelResearchMapDisplayMode,
+) {
+  return {
+    approximateAreaLabel: aggregateMarker.approximateAreaLabel,
+    bandCountInsufficient: aggregateMarker.bandCounts?.insufficient ?? 0,
+    bandCountLower: aggregateMarker.bandCounts?.lower ?? 0,
+    bandCountModerate: aggregateMarker.bandCounts?.moderate ?? 0,
+    bandCountStrong: aggregateMarker.bandCounts?.strong ?? 0,
+    bandCountVeryStrong: aggregateMarker.bandCounts?.veryStrong ?? 0,
+    caveat: aggregateMarker.caveat,
+    clusterId: aggregateMarker.clusterId,
+    contextKind: aggregateMarker.contextKind,
+    dataQualityFlag: aggregateMarker.dataQualityFlag,
+    displayMode,
+    dominantResearchBand: aggregateMarker.dominantResearchBand,
+    exactProbabilityAvailable: false,
+    graphicRole: "model-research-preview",
+    modelVersion: aggregateMarker.modelVersion,
+    officialParcelId: aggregateMarker.officialParcelId,
+    productionReady: false,
+    publicExposureAllowed: false,
+    representativeSignalLabel: aggregateMarker.representativeSignalLabel,
+    representedFeatureCount: aggregateMarker.representedFeatureCount,
+    researchRankBand: aggregateMarker.researchRankBand,
+    researchSignalLabel: aggregateMarker.researchSignalLabel,
+    selectedFeatureGroupSummary: aggregateMarker.selectedFeatureGroupSummary,
+    topDriver1: aggregateMarker.topDrivers[0] ?? null,
+    topDriver2: aggregateMarker.topDrivers[1] ?? null,
+    topDriver3: aggregateMarker.topDrivers[2] ?? null,
+    topDriverSummary: aggregateMarker.topDriverSummary,
+  };
 }
 
 function createFemaFloodZoneGraphic(
@@ -2901,6 +3648,496 @@ function getPermitSegmentVisualProfile(segment: string | null | undefined) {
   }
 }
 
+function getModelResearchPreviewMarkerProfile(
+  marker: ModelResearchPreviewMarker,
+) {
+  const relativeBand = formatRelativeDevelopmentSignalBand({
+    rankBand: marker.researchRankBand,
+    signalLabel: marker.researchSignalLabel,
+  });
+
+  if (relativeBand === "Very Strong Research Signal") {
+    return {
+      color: [249, 115, 22, 0.9],
+      haloColor: [249, 115, 22, 0.07],
+      haloOutlineColor: [254, 215, 170, 0.18],
+      haloSize: 16,
+      maxWorldLength: 520,
+      outlineColor: [255, 247, 237, 0.86],
+      outlineSize: 1,
+      screenLength: 42,
+      size: 9,
+    };
+  }
+
+  if (relativeBand === "Strong Research Signal") {
+    return {
+      color: [250, 204, 21, 0.78],
+      haloColor: [250, 204, 21, 0.06],
+      haloOutlineColor: [253, 230, 138, 0.16],
+      haloSize: 14,
+      maxWorldLength: 460,
+      outlineColor: [254, 249, 195, 0.78],
+      outlineSize: 0.8,
+      screenLength: 36,
+      size: 8,
+    };
+  }
+
+  if (relativeBand === "Moderate Research Signal") {
+    return {
+      color: [56, 189, 248, 0.72],
+      haloColor: [56, 189, 248, 0.05],
+      haloOutlineColor: [191, 219, 254, 0.14],
+      haloSize: 12,
+      maxWorldLength: 420,
+      outlineColor: [224, 242, 254, 0.78],
+      outlineSize: 0.7,
+      screenLength: 32,
+      size: 7,
+    };
+  }
+
+  if (relativeBand === "Insufficient Data") {
+    return {
+      color: [30, 41, 59, 0.42],
+      haloColor: [15, 23, 42, 0.08],
+      haloOutlineColor: [100, 116, 139, 0.16],
+      haloSize: 12,
+      maxWorldLength: 380,
+      outlineColor: [100, 116, 139, 0.45],
+      outlineSize: 0.8,
+      screenLength: 32,
+      size: 5,
+    };
+  }
+
+  return {
+    color: [100, 116, 139, 0.58],
+    haloColor: [100, 116, 139, 0.1],
+    haloOutlineColor: [203, 213, 225, 0.18],
+    haloSize: 11,
+    maxWorldLength: 380,
+    outlineColor: [203, 213, 225, 0.62],
+    outlineSize: 0.7,
+    screenLength: 30,
+    size: 5,
+  };
+}
+
+function getModelResearchAggregateProfile(
+  cell: ModelResearchAggregateCell,
+  displayMode: ModelResearchMapDisplayMode,
+) {
+  const relativeBand = formatRelativeDevelopmentSignalBand({
+    rankBand: getAggregateResearchBand(cell.dominantSignalLabel),
+    signalLabel: cell.dominantSignalLabel,
+  });
+  const averageWeight = cell.weight / Math.max(1, cell.count);
+  const countProfile = getModelResearchCountSizeProfile(
+    cell.count,
+    displayMode,
+  );
+  const baseOuterSize = countProfile.outerSize;
+  const baseInnerSize = countProfile.innerSize;
+  const opacityBoost = Math.min(0.16, averageWeight * 0.025);
+
+  if (relativeBand === "Very Strong Research Signal") {
+    return {
+      innerColor: [249, 115, 22, 0.62 + opacityBoost],
+      innerOutlineColor: [255, 237, 213, 0.7],
+      innerSize: baseInnerSize,
+      maxWorldLength: getModelResearchAggregateWorldLength(
+        displayMode,
+        3900,
+        1650,
+      ),
+      outerColor: [249, 115, 22, 0.1 + opacityBoost],
+      outerSize: baseOuterSize,
+      outlineColor: [254, 215, 170, 0.14],
+      labelSize: countProfile.labelSize,
+      screenLength: countProfile.screenLength,
+    };
+  }
+
+  if (relativeBand === "Strong Research Signal") {
+    return {
+      innerColor: [250, 204, 21, 0.48 + opacityBoost],
+      innerOutlineColor: [254, 249, 195, 0.58],
+      innerSize: baseInnerSize,
+      maxWorldLength: getModelResearchAggregateWorldLength(
+        displayMode,
+        3300,
+        1400,
+      ),
+      outerColor: [250, 204, 21, 0.08 + opacityBoost],
+      outerSize: baseOuterSize,
+      outlineColor: [253, 230, 138, 0.16],
+      labelSize: countProfile.labelSize,
+      screenLength: countProfile.screenLength,
+    };
+  }
+
+  if (relativeBand === "Moderate Research Signal") {
+    return {
+      innerColor: [56, 189, 248, 0.38 + opacityBoost],
+      innerOutlineColor: [191, 219, 254, 0.46],
+      innerSize: baseInnerSize,
+      maxWorldLength: getModelResearchAggregateWorldLength(
+        displayMode,
+        2700,
+        1150,
+      ),
+      outerColor: [56, 189, 248, 0.07 + opacityBoost],
+      outerSize: baseOuterSize,
+      outlineColor: [125, 211, 252, 0.14],
+      labelSize: countProfile.labelSize,
+      screenLength: countProfile.screenLength,
+    };
+  }
+
+  if (relativeBand === "Insufficient Data") {
+    return {
+      innerColor: [30, 41, 59, 0.34],
+      innerOutlineColor: [100, 116, 139, 0.34],
+      innerSize: baseInnerSize,
+      maxWorldLength: getModelResearchAggregateWorldLength(
+        displayMode,
+        2100,
+        900,
+      ),
+      outerColor: [15, 23, 42, 0.07],
+      outerSize: baseOuterSize,
+      outlineColor: [71, 85, 105, 0.16],
+      labelSize: countProfile.labelSize,
+      screenLength: countProfile.screenLength,
+    };
+  }
+
+  return {
+    innerColor: [100, 116, 139, 0.44],
+    innerOutlineColor: [203, 213, 225, 0.42],
+    innerSize: baseInnerSize,
+    maxWorldLength: getModelResearchAggregateWorldLength(
+      displayMode,
+      2400,
+      1000,
+    ),
+    outerColor: [100, 116, 139, 0.08],
+    outerSize: baseOuterSize,
+    outlineColor: [148, 163, 184, 0.15],
+    labelSize: countProfile.labelSize,
+    screenLength: countProfile.screenLength,
+  };
+}
+
+function getModelResearchCountSizeProfile(
+  count: number,
+  displayMode: ModelResearchMapDisplayMode,
+) {
+  const normalizedCount = Math.max(1, Math.round(count));
+  const modeScale =
+    displayMode === "countywide_heatmap"
+      ? 1.04
+      : displayMode === "fine_local_clusters"
+        ? 0.9
+        : 1;
+  const bucket =
+    normalizedCount <= 1
+      ? { innerSize: 9, labelSize: 0, outerSize: 15, screenLength: 32 }
+      : normalizedCount <= 5
+        ? { innerSize: 18, labelSize: 10, outerSize: 24, screenLength: 42 }
+        : normalizedCount <= 15
+          ? { innerSize: 26, labelSize: 11, outerSize: 33, screenLength: 50 }
+          : normalizedCount <= 35
+            ? { innerSize: 36, labelSize: 12, outerSize: 45, screenLength: 60 }
+            : normalizedCount <= 75
+              ? { innerSize: 48, labelSize: 13, outerSize: 59, screenLength: 70 }
+              : { innerSize: 60, labelSize: 14, outerSize: 70, screenLength: 78 };
+
+  return {
+    innerSize: Math.round(bucket.innerSize * modeScale),
+    labelSize: bucket.labelSize,
+    outerSize: Math.round(bucket.outerSize * modeScale),
+    screenLength: Math.round(bucket.screenLength * modeScale),
+  };
+}
+
+function getModelResearchAggregateWorldLength(
+  displayMode: ModelResearchMapDisplayMode,
+  countywideLength: number,
+  groupedLength: number,
+) {
+  if (displayMode === "countywide_heatmap") {
+    return countywideLength;
+  }
+
+  if (displayMode === "fine_local_clusters") {
+    return Math.round(groupedLength * 0.78);
+  }
+
+  return groupedLength;
+}
+
+function getResearchSignalWeight(label: string) {
+  switch (label) {
+    case "Very Strong Research Signal":
+    case "Higher research signal":
+      return 4;
+    case "Strong Research Signal":
+      return 3.2;
+    case "Moderate Research Signal":
+    case "Moderate research signal":
+      return 2.4;
+    case "Lower Research Signal":
+    case "Lower research signal":
+      return 1;
+    case "Insufficient Data":
+    case "Insufficient data":
+      return 0.2;
+    default:
+      return 0.35;
+  }
+}
+
+function getResearchBandWeight(band: string) {
+  switch (band) {
+    case "top_1_percent_research_band":
+      return 4;
+    case "top_5_percent_research_band":
+      return 3;
+    case "top_15_percent_research_band":
+      return 2;
+    default:
+      return 1;
+  }
+}
+
+function getDominantResearchSignalLabel(
+  markers: ModelResearchPreviewMarker[],
+) {
+  if (!markers.length) {
+    return "No visible research signal";
+  }
+
+  const totals = new Map<string, number>();
+
+  markers.forEach((marker) => {
+    totals.set(
+      marker.researchSignalLabel,
+      (totals.get(marker.researchSignalLabel) ?? 0) +
+        getResearchSignalWeight(marker.researchSignalLabel),
+    );
+  });
+
+  return [...totals.entries()].sort((left, right) => right[1] - left[1])[0]?.[0]
+    ?? "No visible research signal";
+}
+
+function getAggregateResearchBand(signalLabel: string) {
+  if (signalLabel === "Very Strong Research Signal") {
+    return "top_5_percent_research_band";
+  }
+
+  if (signalLabel === "Strong Research Signal") {
+    return "top_15_percent_research_band";
+  }
+
+  if (signalLabel === "Higher research signal") {
+    return "top_5_percent_research_band";
+  }
+
+  if (signalLabel === "Moderate Research Signal") {
+    return "top_15_percent_research_band";
+  }
+
+  if (signalLabel === "Moderate research signal") {
+    return "top_15_percent_research_band";
+  }
+
+  if (signalLabel === "Insufficient Data") {
+    return "insufficient_data";
+  }
+
+  return "remaining_research_band";
+}
+
+function getCommonTopDrivers(markers: ModelResearchPreviewMarker[]) {
+  const driverCounts = new Map<string, number>();
+
+  markers.forEach((marker) => {
+    marker.topDrivers.forEach((driver) => {
+      driverCounts.set(driver, (driverCounts.get(driver) ?? 0) + 1);
+    });
+  });
+
+  return [...driverCounts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 3)
+    .map(([driver]) => driver);
+}
+
+function getInitialModelResearchBandCounts(): NonNullable<
+  ModelResearchPreviewMarker["bandCounts"]
+> {
+  return {
+    insufficient: 0,
+    lower: 0,
+    moderate: 0,
+    strong: 0,
+    veryStrong: 0,
+  };
+}
+
+function incrementModelResearchBandCount(
+  counts: NonNullable<ModelResearchPreviewMarker["bandCounts"]>,
+  marker: ModelResearchPreviewMarker,
+) {
+  const relativeBand = formatRelativeDevelopmentSignalBand({
+    rankBand: marker.researchRankBand,
+    signalLabel: marker.researchSignalLabel,
+  });
+
+  switch (relativeBand) {
+    case "Very Strong Research Signal":
+      counts.veryStrong += 1;
+      break;
+    case "Strong Research Signal":
+      counts.strong += 1;
+      break;
+    case "Moderate Research Signal":
+      counts.moderate += 1;
+      break;
+    case "Lower Research Signal":
+      counts.lower += 1;
+      break;
+    case "Insufficient Data":
+      counts.insufficient += 1;
+      break;
+    default:
+      counts.insufficient += 1;
+      break;
+  }
+}
+
+function createModelResearchAreaLabel(
+  cell: ModelResearchAggregateCell,
+  displayMode: ModelResearchMapDisplayMode,
+) {
+  const contextualLabel = getContextualModelResearchAreaLabel(
+    cell.markers,
+    cell.count,
+  );
+
+  if (displayMode === "countywide_heatmap") {
+    return (
+      contextualLabel ??
+      `Research surface cell of ${formatModelResearchParcelCountLabel(cell.count)}`
+    );
+  }
+
+  if (cell.count === 1) {
+    return contextualLabel ?? "Single research feature";
+  }
+
+  return (
+    contextualLabel ??
+    `Research cluster of ${formatModelResearchParcelCountLabel(cell.count)}`
+  );
+}
+
+function getContextualModelResearchAreaLabel(
+  markers: ModelResearchPreviewMarker[],
+  count: number,
+) {
+  const labelCounts = new Map<string, number>();
+
+  markers.forEach((marker) => {
+    const label = marker.approximateAreaLabel?.trim();
+
+    if (!label || !isUsableModelResearchAreaLabel(label)) {
+      return;
+    }
+
+    labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1);
+  });
+
+  const [dominantLabel] =
+    [...labelCounts.entries()].sort((left, right) => right[1] - left[1])[0] ??
+    [];
+
+  if (!dominantLabel) {
+    return null;
+  }
+
+  if (/^(cluster|research|single)/i.test(dominantLabel)) {
+    return dominantLabel;
+  }
+
+  return count === 1 ? dominantLabel : `Cluster near ${dominantLabel}`;
+}
+
+function isUsableModelResearchAreaLabel(label: string) {
+  const normalized = label.toLowerCase();
+
+  return (
+    !normalized.includes("unknown") &&
+    !normalized.includes("research cluster of") &&
+    !normalized.includes("research surface cell of") &&
+    !normalized.includes("single research feature")
+  );
+}
+
+function createModelResearchTopDriverSummary(drivers: string[]) {
+  if (!drivers.length) {
+    return "Driver summary unavailable";
+  }
+
+  return drivers
+    .map((driver) => formatModelResearchDriverLabel(driver))
+    .join(", ");
+}
+
+function formatModelResearchParcelCountLabel(count: number) {
+  return count === 1
+    ? "1 parcel"
+    : `${formatDevelopmentCount(count)} parcels`;
+}
+
+function createModelResearchPreviewExtent(
+  runtime: ArcGISRuntime,
+  markers: ModelResearchPreviewMarker[],
+) {
+  const validMarkers = markers.filter(
+    (marker) =>
+      Number.isFinite(marker.centroid.longitude) &&
+      Number.isFinite(marker.centroid.latitude),
+  );
+
+  if (!validMarkers.length) {
+    return null;
+  }
+
+  const longitudes = validMarkers.map((marker) => marker.centroid.longitude);
+  const latitudes = validMarkers.map((marker) => marker.centroid.latitude);
+  const xmin = Math.min(...longitudes);
+  const xmax = Math.max(...longitudes);
+  const ymin = Math.min(...latitudes);
+  const ymax = Math.max(...latitudes);
+  const xPadding = Math.max((xmax - xmin) * 0.24, 0.012);
+  const yPadding = Math.max((ymax - ymin) * 0.24, 0.012);
+
+  return new runtime.Extent({
+    spatialReference: {
+      wkid: 4326,
+    },
+    xmax: xmax + xPadding,
+    xmin: xmin - xPadding,
+    ymax: ymax + yPadding,
+    ymin: ymin - yPadding,
+  });
+}
+
 function getFloodConstraintMarkerProfile(marker: FloodConstraintMapMarker) {
   const strength = getFloodConstraintMarkerStrength(marker);
 
@@ -3085,6 +4322,88 @@ async function handleDevelopmentHotspotClick(
     console.warn("Development hotspot hit test failed", error);
     return false;
   }
+}
+
+async function handleModelResearchPreviewClick(
+  view: SceneView,
+  event: Parameters<SceneView["hitTest"]>[0],
+  previewLayer: GraphicsLayer | null,
+  onModelResearchContext: (context: ModelResearchPreviewMarker | null) => void,
+) {
+  if (!previewLayer || !previewLayer.visible || previewLayer.graphics.length === 0) {
+    return false;
+  }
+
+  try {
+    const response = await view.hitTest(event, {
+      include: [previewLayer],
+    });
+    const results = response.results as Array<{ graphic?: Graphic }>;
+    const researchGraphic = results.find(
+      (result) =>
+        result.graphic?.attributes?.graphicRole === "model-research-preview",
+    )?.graphic ?? findNearestModelResearchGraphic(view, event, previewLayer);
+
+    if (!researchGraphic) {
+      return false;
+    }
+
+    closeSceneViewPopup(view);
+    onModelResearchContext(createModelResearchPreviewContext(researchGraphic));
+
+    console.debug("[CFS model research preview]", "safe marker selected", {
+      modelVersion: researchGraphic?.attributes?.modelVersion,
+      officialParcelId: researchGraphic?.attributes?.officialParcelId,
+      researchRankBand: researchGraphic?.attributes?.researchRankBand,
+      researchSignalLabel: researchGraphic?.attributes?.researchSignalLabel,
+    });
+
+    return true;
+  } catch (error) {
+    console.warn("Model research preview hit test failed", error);
+    return false;
+  }
+}
+
+function findNearestModelResearchGraphic(
+  view: SceneView,
+  event: Parameters<SceneView["hitTest"]>[0],
+  previewLayer: GraphicsLayer,
+) {
+  const eventX = numberAttribute((event as { x?: unknown }).x);
+  const eventY = numberAttribute((event as { y?: unknown }).y);
+
+  if (eventX === null || eventY === null) {
+    return null;
+  }
+
+  let nearestGraphic: Graphic | null = null;
+  let nearestDistance = 38;
+
+  previewLayer.graphics.forEach((graphic) => {
+    if (graphic.attributes?.graphicRole !== "model-research-preview") {
+      return;
+    }
+
+    const screenPoint = view.toScreen(graphic.geometry as never);
+
+    if (
+      !screenPoint ||
+      typeof screenPoint.x !== "number" ||
+      typeof screenPoint.y !== "number"
+    ) {
+      return;
+    }
+
+    const distance = Math.hypot(screenPoint.x - eventX, screenPoint.y - eventY);
+
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestGraphic = graphic;
+    }
+  });
+
+  return nearestGraphic;
 }
 
 async function handleFloodConstraintClick(
@@ -3311,6 +4630,114 @@ function createDevelopmentHotspotInfoCard(
     totalPermitCount: numberAttribute(attributes.totalPermitCount) ?? 0,
     zoningJurisdictionName: stringAttribute(attributes.zoningJurisdictionName),
   };
+}
+
+function createModelResearchPreviewContext(
+  graphic: Graphic,
+): ModelResearchPreviewMarker {
+  const attributes = graphic.attributes ?? {};
+  const pointGeometry = graphic.geometry as {
+    latitude?: number;
+    longitude?: number;
+    spatialReference?: { wkid?: number };
+  } | null;
+  const latitude =
+    typeof pointGeometry?.latitude === "number"
+      ? pointGeometry.latitude
+      : numberAttribute(attributes.latitude) ?? 0;
+  const longitude =
+    typeof pointGeometry?.longitude === "number"
+      ? pointGeometry.longitude
+      : numberAttribute(attributes.longitude) ?? 0;
+  const topDrivers = [
+    stringAttribute(attributes.topDriver1),
+    stringAttribute(attributes.topDriver2),
+    stringAttribute(attributes.topDriver3),
+  ].filter((driver): driver is string => Boolean(driver));
+  const contextKind =
+    stringAttribute(attributes.contextKind) === "heatmap_cell"
+      ? "heatmap_cell"
+      : stringAttribute(attributes.contextKind) === "cluster"
+        ? "cluster"
+        : "parcel_marker";
+
+  return {
+    approximateAreaLabel:
+      stringAttribute(attributes.approximateAreaLabel) ?? undefined,
+    bandCounts: {
+      insufficient: numberAttribute(attributes.bandCountInsufficient) ?? 0,
+      lower: numberAttribute(attributes.bandCountLower) ?? 0,
+      moderate: numberAttribute(attributes.bandCountModerate) ?? 0,
+      strong: numberAttribute(attributes.bandCountStrong) ?? 0,
+      veryStrong: numberAttribute(attributes.bandCountVeryStrong) ?? 0,
+    },
+    caveat:
+      stringAttribute(attributes.caveat) ??
+      "Internal research preview only. Not an official parcel score.",
+    clusterId: stringAttribute(attributes.clusterId) ?? undefined,
+    centroid: {
+      latitude,
+      longitude,
+      spatialReference: {
+        wkid: pointGeometry?.spatialReference?.wkid ?? 4326,
+      },
+    },
+    contextKind,
+    dataQualityFlag:
+      stringAttribute(attributes.dataQualityFlag) ??
+      "research_preview_context_only",
+    displayMode: getSafeModelResearchDisplayMode(
+      stringAttribute(attributes.displayMode),
+      contextKind,
+    ),
+    dominantResearchBand:
+      stringAttribute(attributes.dominantResearchBand) ?? undefined,
+    exactProbabilityAvailable: false,
+    modelVersion:
+      stringAttribute(attributes.modelVersion) ??
+      "internal_model_research_preview",
+    officialParcelId:
+      stringAttribute(attributes.officialParcelId) ?? "Unknown parcel",
+    productionReady: false,
+    publicExposureAllowed: false,
+    representativeSignalLabel:
+      stringAttribute(attributes.representativeSignalLabel) ?? undefined,
+    representedFeatureCount:
+      numberAttribute(attributes.representedFeatureCount) ?? 1,
+    researchRankBand:
+      stringAttribute(attributes.researchRankBand) ?? "research_preview_band",
+    researchSignalLabel:
+      stringAttribute(attributes.researchSignalLabel) ?? "Research signal",
+    selectedFeatureGroupSummary:
+      stringAttribute(attributes.selectedFeatureGroupSummary) ?? undefined,
+    topDriverSummary: stringAttribute(attributes.topDriverSummary) ?? undefined,
+    topDrivers,
+  };
+}
+
+function getSafeModelResearchDisplayMode(
+  value: string | null,
+  contextKind: ModelResearchPreviewMarker["contextKind"],
+): ModelResearchMapDisplayMode {
+  switch (value) {
+    case "clustered_markers":
+    case "countywide_heatmap":
+    case "fine_local_clusters":
+    case "intermediate_subclusters":
+    case "off":
+    case "parcel_detail":
+      return value;
+    default:
+      if (contextKind === "heatmap_cell") {
+        return "countywide_heatmap";
+      }
+
+      if (contextKind === "cluster") {
+        return "intermediate_subclusters";
+      }
+
+      return "parcel_detail";
+  }
 }
 
 function createFloodZoneInfoCard(graphic: Graphic): FloodZoneInfoCard {

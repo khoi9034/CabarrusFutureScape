@@ -7,6 +7,7 @@ import type {
   PermitSegmentOptionsResponse,
   PermitSegmentStatisticsResponse,
   DevelopmentParcelPermitEventsResponse,
+  DevelopmentModelResearchPreviewResponse,
   DevelopmentPredictionFeaturesSummaryResponse,
   DevelopmentPredictionRankingSummaryResponse,
   DevelopmentPredictionTransportationAccessibilitySummaryResponse,
@@ -90,6 +91,12 @@ export interface DevelopmentParcelPermitEventsParams extends ApiQueryParams {
   limit?: number;
   offset?: number;
   sort?: "latest_first" | "oldest_first";
+}
+
+export interface DevelopmentModelResearchPreviewParams extends ApiQueryParams {
+  include_geometry?: boolean;
+  limit?: number;
+  signal?: "all" | "higher" | "lower" | "moderate";
 }
 
 export function getDevelopmentStatistics(
@@ -266,6 +273,17 @@ export function getDevelopmentPredictionRankingSummary(
   return apiGet<DevelopmentPredictionRankingSummaryResponse>(
     "/development/prediction/ranking/summary",
     undefined,
+    options,
+  );
+}
+
+export function getDevelopmentModelResearchPreview(
+  params: DevelopmentModelResearchPreviewParams = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<DevelopmentModelResearchPreviewResponse>(
+    "/development/model-research/preview",
+    params,
     options,
   );
 }

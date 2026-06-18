@@ -44,7 +44,15 @@ import {
 } from "@/lib/dashboard/urlState";
 import type {
   DashboardStatus,
+  ModelResearchMapSummary,
+  ModelResearchOverlayDisplay,
   OperationalLayer,
+  OverviewCommandMode,
+  OverviewCommandCenterState,
+  OverviewLayoutPreference,
+  OverviewLayoutPreset,
+  OverviewPanelVisibility,
+  OverviewPanelWidthPreset,
   ParcelSelectionSource,
   ParcelSummary,
   ParcelReviewView,
@@ -57,6 +65,7 @@ import type {
   ScenarioId,
 } from "@/types";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
+import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
 import type {
   DashboardRoleDefinition,
   DashboardPanelId,
@@ -141,6 +150,12 @@ interface DashboardContextValue {
   isMapFocusMode: boolean;
   lastExportResult: ReportExportResult | null;
   mapError: string | null;
+  modelResearchOverlayDisplay: ModelResearchOverlayDisplay;
+  modelResearchOverlayEnabled: boolean;
+  modelResearchMapSummary: ModelResearchMapSummary;
+  overviewCommandMode: OverviewCommandMode;
+  overviewLayout: OverviewLayoutPreference;
+  selectedModelResearchContext: ModelResearchPreviewMarker | null;
   printableViewMode: PrintableViewMode;
   parcelReviewView: ParcelReviewView;
   planningSnapshot: PlanningSnapshot | null;
@@ -201,6 +216,29 @@ interface DashboardContextValue {
   setReportIntent: (intent: ReportExportIntent) => void;
   setLayerVisibility: (layerId: string, visible: boolean) => void;
   toggleLayer: (layerId: string) => void;
+  setModelResearchOverlayDisplay: (
+    display: ModelResearchOverlayDisplay,
+  ) => void;
+  setModelResearchOverlayEnabled: (enabled: boolean) => void;
+  setModelResearchMapSummary: (summary: ModelResearchMapSummary) => void;
+  setOverviewCommandMode: (mode: OverviewCommandMode) => void;
+  applyOverviewLayoutPreset: (preset: OverviewLayoutPreset) => void;
+  resetOverviewLayout: () => void;
+  saveOverviewLayoutPreference: () => void;
+  setOverviewLayoutCommandCenter: (
+    state: OverviewCommandCenterState,
+  ) => void;
+  setOverviewLayoutPanel: (
+    panel: "left" | "right",
+    visibility: OverviewPanelVisibility,
+  ) => void;
+  setOverviewLayoutWidthPreset: (
+    panel: "left" | "right",
+    width: OverviewPanelWidthPreset,
+  ) => void;
+  setSelectedModelResearchContext: (
+    context: ModelResearchPreviewMarker | null,
+  ) => void;
   selectParcel: (
     parcelId: string,
     options?: { source?: ParcelSelectionSource },
@@ -241,7 +279,188 @@ const DashboardContext = createContext<DashboardContextValue | null>(null);
 const PLANNING_SNAPSHOT_STORAGE_KEY = "cfs.planningSnapshot.phase22a.latest";
 const PLANNING_SNAPSHOT_LIBRARY_STORAGE_KEY =
   "cfs.planningSnapshots.phase22e.library";
+const OVERVIEW_LAYOUT_STORAGE_KEY = "cfs.overview.layout.v2";
+const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEY = "cfs.overview.layout.v1";
 const MAX_STORED_PLANNING_SNAPSHOTS = 8;
+
+const defaultOverviewLayout: OverviewLayoutPreference = {
+  commandCenter: "visible",
+  leftPanel: "collapsed",
+  leftPanelWidth: "standard",
+  preset: "command_center",
+  rightPanel: "visible",
+  rightPanelWidth: "standard",
+};
+
+const overviewLayoutPresets: Record<
+  OverviewLayoutPreset,
+  OverviewLayoutPreference
+> = {
+  command_center: defaultOverviewLayout,
+  countywide_layers: {
+    commandCenter: "compact",
+    leftPanel: "visible",
+    leftPanelWidth: "standard",
+    preset: "countywide_layers",
+    rightPanel: "visible",
+    rightPanelWidth: "standard",
+  },
+  executive_demo: {
+    commandCenter: "compact",
+    leftPanel: "collapsed",
+    leftPanelWidth: "standard",
+    preset: "executive_demo",
+    rightPanel: "visible",
+    rightPanelWidth: "standard",
+  },
+  map_focus: {
+    commandCenter: "hidden",
+    leftPanel: "hidden",
+    leftPanelWidth: "compact",
+    preset: "map_focus",
+    rightPanel: "hidden",
+    rightPanelWidth: "compact",
+  },
+  model_lab: {
+    commandCenter: "compact",
+    leftPanel: "visible",
+    leftPanelWidth: "standard",
+    preset: "model_lab",
+    rightPanel: "visible",
+    rightPanelWidth: "standard",
+  },
+  parcel_intelligence: {
+    commandCenter: "compact",
+    leftPanel: "collapsed",
+    leftPanelWidth: "compact",
+    preset: "parcel_intelligence",
+    rightPanel: "visible",
+    rightPanelWidth: "wide",
+  },
+  snapshot_builder: {
+    commandCenter: "compact",
+    leftPanel: "visible",
+    leftPanelWidth: "standard",
+    preset: "snapshot_builder",
+    rightPanel: "visible",
+    rightPanelWidth: "standard",
+  },
+};
+
+const defaultModelResearchMapSummary: ModelResearchMapSummary = {
+  displayMode: "off",
+  displayModeLabel: "Overlay off",
+  dominantSignalLabel: "No overlay visible",
+  overlayEnabled: false,
+  totalFeatureCount: 0,
+  viewScaleLabel: "Map view",
+  visibleFeatureCount: 0,
+};
+
+function isOverviewLayoutPreset(
+  value: unknown,
+): value is OverviewLayoutPreset {
+  return (
+    value === "command_center" ||
+    value === "countywide_layers" ||
+    value === "executive_demo" ||
+    value === "map_focus" ||
+    value === "model_lab" ||
+    value === "parcel_intelligence" ||
+    value === "snapshot_builder"
+  );
+}
+
+function isOverviewPanelVisibility(
+  value: unknown,
+): value is OverviewPanelVisibility {
+  return value === "collapsed" || value === "hidden" || value === "visible";
+}
+
+function isOverviewRightPanelVisibility(
+  value: unknown,
+): value is OverviewLayoutPreference["rightPanel"] {
+  return value === "hidden" || value === "visible";
+}
+
+function isOverviewCommandCenterState(
+  value: unknown,
+): value is OverviewCommandCenterState {
+  return value === "compact" || value === "hidden" || value === "visible";
+}
+
+function isOverviewPanelWidthPreset(
+  value: unknown,
+): value is OverviewPanelWidthPreset {
+  return value === "compact" || value === "standard" || value === "wide";
+}
+
+function normalizeOverviewLayoutPreference(
+  value: Partial<OverviewLayoutPreference> | null | undefined,
+): OverviewLayoutPreference {
+  return {
+    commandCenter: isOverviewCommandCenterState(value?.commandCenter)
+      ? value.commandCenter
+      : defaultOverviewLayout.commandCenter,
+    leftPanel: isOverviewPanelVisibility(value?.leftPanel)
+      ? value.leftPanel
+      : defaultOverviewLayout.leftPanel,
+    leftPanelWidth: isOverviewPanelWidthPreset(value?.leftPanelWidth)
+      ? value.leftPanelWidth
+      : defaultOverviewLayout.leftPanelWidth,
+    preset: isOverviewLayoutPreset(value?.preset)
+      ? value.preset
+      : defaultOverviewLayout.preset,
+    rightPanel: isOverviewRightPanelVisibility(value?.rightPanel)
+      ? value.rightPanel
+      : defaultOverviewLayout.rightPanel,
+    rightPanelWidth: isOverviewPanelWidthPreset(value?.rightPanelWidth)
+      ? value.rightPanelWidth
+      : defaultOverviewLayout.rightPanelWidth,
+  };
+}
+
+function readStoredOverviewLayoutPreference() {
+  if (typeof window === "undefined") {
+    return defaultOverviewLayout;
+  }
+
+  try {
+    const storedPreference = window.localStorage.getItem(
+      OVERVIEW_LAYOUT_STORAGE_KEY,
+    );
+
+    if (!storedPreference) {
+      return defaultOverviewLayout;
+    }
+
+    return normalizeOverviewLayoutPreference(JSON.parse(storedPreference));
+  } catch {
+    return defaultOverviewLayout;
+  }
+}
+
+function writeStoredOverviewLayoutPreference(
+  preference: OverviewLayoutPreference,
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    OVERVIEW_LAYOUT_STORAGE_KEY,
+    JSON.stringify(preference),
+  );
+}
+
+function clearStoredOverviewLayoutPreference() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(OVERVIEW_LAYOUT_STORAGE_KEY);
+  window.localStorage.removeItem(LEGACY_OVERVIEW_LAYOUT_STORAGE_KEY);
+}
 
 interface StoredPlanningSnapshotLibrary {
   activeSnapshotId: string | null;
@@ -261,7 +480,11 @@ function isSupportedPlanningSnapshot(
   return (
     snapshotVersion === "phase22a_v1" ||
     snapshotVersion === "phase22b_v1" ||
-    snapshotVersion === "phase22e_v1"
+    snapshotVersion === "phase22e_v1" ||
+    snapshotVersion === "phase23b_v1" ||
+    snapshotVersion === "phase23c_v1" ||
+    snapshotVersion === "phase23d_v1" ||
+    snapshotVersion === "phase23g_v1"
   );
 }
 
@@ -453,6 +676,26 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setSelectedSchoolUtilizationZone,
   ] = useState<SelectedSchoolUtilizationZone | null>(null);
   const [productMode, setProductMode] = useState<ProductMode>("overview");
+  const [overviewCommandMode, setOverviewCommandMode] =
+    useState<OverviewCommandMode>("parcel");
+  const [overviewLayout, setOverviewLayout] =
+    useState<OverviewLayoutPreference>(defaultOverviewLayout);
+  const [
+    modelResearchOverlayDisplay,
+    setModelResearchOverlayDisplay,
+  ] = useState<ModelResearchOverlayDisplay>("research_signal_hotspots");
+  const [
+    modelResearchOverlayEnabled,
+    setModelResearchOverlayEnabled,
+  ] = useState(false);
+  const [
+    modelResearchMapSummary,
+    setModelResearchMapSummary,
+  ] = useState<ModelResearchMapSummary>(defaultModelResearchMapSummary);
+  const [
+    selectedModelResearchContext,
+    setSelectedModelResearchContext,
+  ] = useState<ModelResearchPreviewMarker | null>(null);
   const [parcelReviewView, setParcelReviewView] =
     useState<ParcelReviewView>("review");
   const [planningSnapshot, setPlanningSnapshot] =
@@ -641,6 +884,95 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
+      setOverviewLayout(readStoredOverviewLayoutPreference());
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, []);
+
+  const updateOverviewLayoutPreference = useCallback(
+    (
+      updater: (
+        currentLayout: OverviewLayoutPreference,
+      ) => OverviewLayoutPreference,
+    ) => {
+      setOverviewLayout((currentLayout) => {
+        const normalizedLayout = normalizeOverviewLayoutPreference(
+          updater(currentLayout),
+        );
+        return normalizedLayout;
+      });
+    },
+    [],
+  );
+
+  const applyOverviewLayoutPreset = useCallback(
+    (preset: OverviewLayoutPreset) => {
+      const nextLayout =
+        overviewLayoutPresets[preset] ?? overviewLayoutPresets.command_center;
+      setOverviewLayout(normalizeOverviewLayoutPreference(nextLayout));
+
+      if (preset === "countywide_layers") {
+        setOverviewCommandMode("countywide");
+      } else if (preset === "model_lab") {
+        setOverviewCommandMode("modelLab");
+      } else if (preset === "parcel_intelligence") {
+        setOverviewCommandMode("parcel");
+      } else if (preset === "snapshot_builder") {
+        setOverviewCommandMode("snapshot");
+      }
+    },
+    [],
+  );
+
+  const resetOverviewLayout = useCallback(() => {
+    clearStoredOverviewLayoutPreference();
+    setOverviewLayout(defaultOverviewLayout);
+  }, []);
+
+  const saveOverviewLayoutPreference = useCallback(() => {
+    writeStoredOverviewLayoutPreference(overviewLayout);
+  }, [overviewLayout]);
+
+  const setOverviewLayoutCommandCenter = useCallback(
+    (state: OverviewCommandCenterState) => {
+      updateOverviewLayoutPreference((currentLayout) => ({
+        ...currentLayout,
+        commandCenter: state,
+      }));
+    },
+    [updateOverviewLayoutPreference],
+  );
+
+  const setOverviewLayoutPanel = useCallback(
+    (panel: "left" | "right", visibility: OverviewPanelVisibility) => {
+      updateOverviewLayoutPreference((currentLayout) => ({
+        ...currentLayout,
+        ...(panel === "left"
+          ? { leftPanel: visibility }
+          : {
+              rightPanel:
+                visibility === "collapsed" ? "hidden" : visibility,
+            }),
+      }));
+    },
+    [updateOverviewLayoutPreference],
+  );
+
+  const setOverviewLayoutWidthPreset = useCallback(
+    (panel: "left" | "right", width: OverviewPanelWidthPreset) => {
+      updateOverviewLayoutPreference((currentLayout) => ({
+        ...currentLayout,
+        ...(panel === "left"
+          ? { leftPanelWidth: width }
+          : { rightPanelWidth: width }),
+      }));
+    },
+    [updateOverviewLayoutPreference],
+  );
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
       const storedLibrary = readStoredPlanningSnapshotLibrary();
       const activeSnapshot =
         storedLibrary.snapshots.find(
@@ -659,7 +991,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const savePlanningSnapshot = useCallback((snapshot: PlanningSnapshot) => {
     const versionedSnapshot: PlanningSnapshot = {
       ...snapshot,
-      snapshotVersion: "phase22e_v1",
+      snapshotVersion: snapshot.snapshotVersion ?? "phase23g_v1",
     };
 
     setSavedPlanningSnapshots((currentSnapshots) => {
@@ -857,7 +1189,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       lastExportResult,
       mapError,
       mapStatus,
+      modelResearchOverlayDisplay,
+      modelResearchOverlayEnabled,
+      modelResearchMapSummary,
       openPrintLayout,
+      overviewCommandMode,
+      overviewLayout,
       printableViewMode,
       parcelReviewView,
       planningSnapshot,
@@ -877,6 +1214,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectParcel,
       selectReportPackage,
       selectedExecutiveNarrative,
+      selectedModelResearchContext,
       selectedNarrativeId,
       selectedParcel,
       selectedParcelId,
@@ -902,6 +1240,17 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setMapError,
       setMapFocusMode,
       setMapStatus,
+      setModelResearchOverlayDisplay,
+      setModelResearchOverlayEnabled,
+      setModelResearchMapSummary,
+      setOverviewCommandMode,
+      applyOverviewLayoutPreset,
+      resetOverviewLayout,
+      saveOverviewLayoutPreference,
+      setOverviewLayoutCommandCenter,
+      setOverviewLayoutPanel,
+      setOverviewLayoutWidthPreset,
+      setSelectedModelResearchContext,
       setSelectedParcelIntelligence,
       setPrintableViewMode,
       setParcelReviewView,
@@ -970,7 +1319,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       lastExportResult,
       mapError,
       mapStatus,
+      modelResearchOverlayDisplay,
+      modelResearchOverlayEnabled,
+      modelResearchMapSummary,
       openPrintLayout,
+      overviewCommandMode,
+      overviewLayout,
       printableViewMode,
       parcelReviewView,
       planningSnapshot,
@@ -990,6 +1344,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectParcel,
       selectReportPackage,
       selectedExecutiveNarrative,
+      selectedModelResearchContext,
       selectedNarrativeId,
       selectedParcel,
       selectedParcelId,
@@ -1015,6 +1370,17 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setMapError,
       setMapFocusMode,
       setMapStatus,
+      setModelResearchOverlayDisplay,
+      setModelResearchOverlayEnabled,
+      setModelResearchMapSummary,
+      setOverviewCommandMode,
+      applyOverviewLayoutPreset,
+      resetOverviewLayout,
+      saveOverviewLayoutPreference,
+      setOverviewLayoutCommandCenter,
+      setOverviewLayoutPanel,
+      setOverviewLayoutWidthPreset,
+      setSelectedModelResearchContext,
       setSelectedParcelIntelligence,
       setPrintableViewMode,
       setParcelReviewView,

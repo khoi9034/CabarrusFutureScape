@@ -211,6 +211,29 @@ The Methodology workspace should show only aggregate governance status. It must
 not show parcel-level rankings, parcel-level model outputs, or public model
 claims.
 
+## Phase 23A-23C Model Lab Research Preview
+
+Phase 23A surfaces the existing QA/governance work through a Model Lab panel in
+Overview and a Development Model Lab section in Methodology. Phase 23B adds a
+mode-specific Model Lab workspace. Phase 23C simplifies the map preview into a
+single `Development Research Signal` overlay with distinct relative color bands
+and driver explanations. This is a transparency surface, not a new experiment.
+
+Model Lab may show:
+
+- target, historical outcome, feature unit, and feature-row count;
+- current best internal variant: Zoning + Transportation + Tax/Value;
+- best ablation variant: `transportation_plus_tax_value_only`;
+- aggregate Phase 16C metrics such as PR-AUC `0.137928` and lift@top 5%
+  `4.051123`;
+- feature groups that helped and feature groups excluded for now;
+- relative research signal bands with caveats;
+- contextual drivers explaining why a marker is highlighted;
+- missing official data needed before any public-facing use.
+
+Model Lab must not show exact parcel probabilities, raw model scores,
+parcel-level ranking classes, or official high/medium/low parcel predictions.
+
 ## Next Step
 
 Add official rezoning case dates, future land use, time-safe transportation

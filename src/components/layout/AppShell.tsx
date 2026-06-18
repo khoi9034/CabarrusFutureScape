@@ -1,36 +1,49 @@
 "use client";
 
 import {
-  useCallback,
   useEffect,
-  useRef,
   useState,
-  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { flushSync } from "react-dom";
 import { DashboardUrlSync } from "@/components/dashboard/DashboardUrlSync";
 import { DueDiligenceReview } from "@/components/dashboard/DueDiligenceReview";
 import { IntelligencePanel } from "@/components/dashboard/IntelligencePanel";
 import { MethodologyWorkspace } from "@/components/dashboard/MethodologyWorkspace";
 import {
-  CFS_OPEN_LAYER_RAIL_EVENT,
+  CFS_TOGGLE_OVERVIEW_CUSTOM_LAYOUT_EVENT,
   OverviewCommandCenter,
 } from "@/components/dashboard/OverviewCommandCenter";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
-import { MetricsBar } from "@/components/layout/MetricsBar";
+import { OverviewWorkspaceBuilder } from "@/components/dashboard/OverviewWorkspaceBuilder";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary";
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
 import { cn } from "@/lib/utils";
+import type { OverviewPanelWidthPreset } from "@/types";
 
-const LAYER_RAIL_DEFAULT_WIDTH = 360;
-const LAYER_RAIL_MIN_WIDTH = 300;
-const LAYER_RAIL_COLLAPSE_INTENT_DISTANCE = 14;
-const LAYER_RAIL_COLLAPSED_WIDTH = 64;
-const LAYER_RAIL_STORAGE_KEY = "cfs.layerRailWidth";
-type LayerRailDragPreview = "collapsed" | "expanded" | null;
+const LEFT_PANEL_WIDTHS: Record<OverviewPanelWidthPreset, number> = {
+  compact: 320,
+  standard: 372,
+  wide: 456,
+};
+const LEFT_PANEL_COLLAPSED_WIDTH = 64;
+const LEFT_PANEL_MIN_EXPANDED_WIDTH = 320;
+const LEFT_PANEL_MAX_EXPANDED_WIDTH = 520;
+const LEFT_PANEL_COLLAPSE_THRESHOLD = 210;
+
+const RIGHT_PANEL_WIDTHS: Record<OverviewPanelWidthPreset, number> = {
+  compact: 320,
+  standard: 390,
+  wide: 460,
+};
+
+function clampLeftPanelWidth(width: number) {
+  return Math.min(
+    LEFT_PANEL_MAX_EXPANDED_WIDTH,
+    Math.max(LEFT_PANEL_MIN_EXPANDED_WIDTH, width),
+  );
+}
 
 export function AppShell() {
   return (
@@ -57,20 +70,7 @@ function ProductShell() {
     setPlanningSnapshotView,
     setProductMode,
   } = useDashboardState();
-  const gridRef = useRef<HTMLDivElement | null>(null);
-  const layerRailWidthRef = useRef(LAYER_RAIL_DEFAULT_WIDTH);
-  const layerRailDragPreviewRef = useRef<LayerRailDragPreview>(null);
-  const layerRailPreviewWidthRef = useRef<number | null>(null);
-  const [layerRailWidth, setLayerRailWidth] = useState(
-    LAYER_RAIL_DEFAULT_WIDTH,
-  );
-  const [layerRailCollapsed, setLayerRailCollapsed] = useState(true);
-  const [layerRailDragPreview, setLayerRailDragPreview] =
-    useState<LayerRailDragPreview>(null);
-  const [layerRailPreviewWidth, setLayerRailPreviewWidth] = useState<
-    number | null
-  >(null);
-  const [layerRailDragging, setLayerRailDragging] = useState(false);
+  const [customOverviewActive, setCustomOverviewActive] = useState(false);
   const executivePrintMode = productMode === "executive_print";
   const parcelReviewMode =
     productMode === "due_diligence" || executivePrintMode;
@@ -78,33 +78,6 @@ function ProductShell() {
     ? "report"
     : parcelReviewView;
   const methodologyMode = productMode === "methodology";
-  const showLayerRail = productMode === "overview" || isMapFocusMode;
-  const showIntelligencePanel = !isMapFocusMode && !methodologyMode;
-  const previewLayerRailCollapsed =
-    layerRailDragPreview === null
-      ? layerRailCollapsed
-      : layerRailDragPreview === "collapsed";
-  const effectiveLayerRailWidth = previewLayerRailCollapsed
-    ? LAYER_RAIL_COLLAPSED_WIDTH
-    : (layerRailPreviewWidth ?? layerRailWidth);
-  const shellGridStyle = {
-    "--cfs-layer-rail-width": `${effectiveLayerRailWidth}px`,
-  } as CSSProperties;
-
-  useEffect(() => {
-    layerRailWidthRef.current = layerRailWidth;
-  }, [layerRailWidth]);
-
-  useEffect(() => {
-    const storedWidth = getStoredLayerRailWidth();
-    layerRailWidthRef.current = storedWidth;
-
-    const frameId = window.requestAnimationFrame(() => {
-      setLayerRailWidth(storedWidth);
-    });
-
-    return () => window.cancelAnimationFrame(frameId);
-  }, []);
 
   useEffect(() => {
     if (productMode === "executive_print") {
@@ -120,6 +93,33 @@ function ProductShell() {
   ]);
 
   useEffect(() => {
+    function handleCustomizeLayout() {
+      setCustomOverviewActive(true);
+    }
+
+    window.addEventListener(
+      CFS_TOGGLE_OVERVIEW_CUSTOM_LAYOUT_EVENT,
+      handleCustomizeLayout,
+    );
+
+    return () =>
+      window.removeEventListener(
+        CFS_TOGGLE_OVERVIEW_CUSTOM_LAYOUT_EVENT,
+        handleCustomizeLayout,
+      );
+  }, []);
+
+  useEffect(() => {
+    if (productMode !== "overview") {
+      const frameId = window.requestAnimationFrame(() =>
+        setCustomOverviewActive(false),
+      );
+
+      return () => window.cancelAnimationFrame(frameId);
+    }
+  }, [productMode]);
+
+  useEffect(() => {
     if (!isMapFocusMode) {
       return;
     }
@@ -133,208 +133,6 @@ function ProductShell() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMapFocusMode, setMapFocusMode]);
-
-  useEffect(() => {
-    function handleOpenLayerRail() {
-      setLayerRailCollapsed(false);
-    }
-
-    window.addEventListener(CFS_OPEN_LAYER_RAIL_EVENT, handleOpenLayerRail);
-    return () => {
-      window.removeEventListener(
-        CFS_OPEN_LAYER_RAIL_EVENT,
-        handleOpenLayerRail,
-      );
-    };
-  }, []);
-
-  const beginLayerRailResize = useCallback(
-    (event: ReactPointerEvent) => {
-      if (!showLayerRail) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-      const startX = event.clientX;
-      const wasCollapsed = layerRailCollapsed;
-      const startWidth = layerRailWidthRef.current;
-      let latestClientX = startX;
-      let frameId: number | null = null;
-      let moved = false;
-      let shouldCollapse = wasCollapsed;
-      let nextCommittedWidth = startWidth;
-      let lastPointerX = startX;
-      const previousCursor = document.body.style.cursor;
-      const previousUserSelect = document.body.style.userSelect;
-
-      document.body.classList.add("cfs-resizing");
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-      layerRailDragPreviewRef.current = wasCollapsed
-        ? "collapsed"
-        : "expanded";
-      layerRailPreviewWidthRef.current = wasCollapsed ? null : startWidth;
-      setLayerRailDragging(true);
-      setLayerRailDragPreview(layerRailDragPreviewRef.current);
-      setLayerRailPreviewWidth(layerRailPreviewWidthRef.current);
-
-      function applyVisualWidth(nextWidth: number) {
-        gridRef.current?.style.setProperty(
-          "--cfs-layer-rail-width",
-          `${nextWidth}px`,
-        );
-      }
-
-      function applyPreview(
-        nextPreview: Exclude<LayerRailDragPreview, null>,
-        previewWidth: number | null,
-      ) {
-        const previewChanged = layerRailDragPreviewRef.current !== nextPreview;
-        const widthChanged = layerRailPreviewWidthRef.current !== previewWidth;
-
-        if (previewChanged) {
-          layerRailDragPreviewRef.current = nextPreview;
-        }
-
-        if (widthChanged) {
-          layerRailPreviewWidthRef.current = previewWidth;
-        }
-
-        if (previewChanged) {
-          // Flush only when crossing collapsed/expanded states so the expanded
-          // rail content is removed before the CSS width snaps to the slim rail.
-          flushSync(() => {
-            setLayerRailDragPreview(nextPreview);
-            if (widthChanged) {
-              setLayerRailPreviewWidth(previewWidth);
-            }
-          });
-        } else if (widthChanged && nextPreview === "expanded") {
-          setLayerRailPreviewWidth(previewWidth);
-        }
-      }
-
-      function applyPendingMove() {
-        frameId = null;
-        const delta = latestClientX - startX;
-        const proposedWidth = startWidth + delta;
-        const movingLeft = latestClientX < lastPointerX;
-        const collapseTriggerWidth =
-          LAYER_RAIL_MIN_WIDTH - LAYER_RAIL_COLLAPSE_INTENT_DISTANCE;
-        moved = moved || Math.abs(delta) > 4;
-        const maxWidth = getLayerRailMaxWidth();
-
-        if (wasCollapsed) {
-          if (delta > 8) {
-            shouldCollapse = false;
-            nextCommittedWidth = clampLayerRailWidth(
-              startWidth + delta,
-              maxWidth,
-            );
-            applyPreview("expanded", nextCommittedWidth);
-            applyVisualWidth(nextCommittedWidth);
-          } else {
-            shouldCollapse = true;
-            applyPreview("collapsed", null);
-            applyVisualWidth(LAYER_RAIL_COLLAPSED_WIDTH);
-          }
-          lastPointerX = latestClientX;
-          return;
-        }
-
-        if (proposedWidth <= collapseTriggerWidth && movingLeft) {
-          shouldCollapse = true;
-          applyPreview("collapsed", null);
-          applyVisualWidth(LAYER_RAIL_COLLAPSED_WIDTH);
-          lastPointerX = latestClientX;
-          return;
-        }
-
-        if (
-          layerRailDragPreviewRef.current === "collapsed" &&
-          proposedWidth < LAYER_RAIL_MIN_WIDTH
-        ) {
-          shouldCollapse = true;
-          applyPreview("collapsed", null);
-          applyVisualWidth(LAYER_RAIL_COLLAPSED_WIDTH);
-          lastPointerX = latestClientX;
-          return;
-        }
-
-        if (proposedWidth <= LAYER_RAIL_MIN_WIDTH) {
-          shouldCollapse = false;
-          nextCommittedWidth = LAYER_RAIL_MIN_WIDTH;
-          applyPreview("expanded", LAYER_RAIL_MIN_WIDTH);
-          applyVisualWidth(LAYER_RAIL_MIN_WIDTH);
-          lastPointerX = latestClientX;
-          return;
-        }
-
-        shouldCollapse = false;
-        nextCommittedWidth = clampLayerRailWidth(proposedWidth, maxWidth);
-        applyPreview("expanded", nextCommittedWidth);
-        applyVisualWidth(nextCommittedWidth);
-        lastPointerX = latestClientX;
-      }
-
-      function queueMove(moveEvent: PointerEvent) {
-        latestClientX = moveEvent.clientX;
-
-        if (frameId !== null) {
-          return;
-        }
-
-        frameId = window.requestAnimationFrame(applyPendingMove);
-      }
-
-      function handlePointerUp() {
-        if (frameId !== null) {
-          window.cancelAnimationFrame(frameId);
-          applyPendingMove();
-        }
-
-        document.body.classList.remove("cfs-resizing");
-        document.body.style.cursor = previousCursor;
-        document.body.style.userSelect = previousUserSelect;
-        window.removeEventListener("pointermove", queueMove);
-        window.removeEventListener("pointerup", handlePointerUp);
-        layerRailDragPreviewRef.current = null;
-        layerRailPreviewWidthRef.current = null;
-        setLayerRailDragging(false);
-        setLayerRailDragPreview(null);
-        setLayerRailPreviewWidth(null);
-
-        if (!moved) {
-          const nextCollapsed = !wasCollapsed;
-          setLayerRailCollapsed(nextCollapsed);
-          applyVisualWidth(
-            nextCollapsed ? LAYER_RAIL_COLLAPSED_WIDTH : layerRailWidthRef.current,
-          );
-          return;
-        }
-
-        if (shouldCollapse) {
-          setLayerRailCollapsed(true);
-          applyVisualWidth(LAYER_RAIL_COLLAPSED_WIDTH);
-          return;
-        }
-
-        setLayerRailCollapsed(false);
-        setLayerRailWidth(nextCommittedWidth);
-        storeLayerRailWidth(nextCommittedWidth);
-        applyVisualWidth(nextCommittedWidth);
-      }
-
-      window.addEventListener("pointermove", queueMove);
-      window.addEventListener("pointerup", handlePointerUp);
-    },
-    [layerRailCollapsed, showLayerRail],
-  );
-
-  const toggleLayerRailCollapsed = useCallback(() => {
-    setLayerRailCollapsed((collapsed) => !collapsed);
-  }, []);
 
   return (
     <div className="metric-grid relative flex min-h-screen flex-col overflow-x-hidden bg-[#060b12] text-slate-100 lg:h-screen lg:overflow-hidden">
@@ -369,110 +167,228 @@ function ProductShell() {
         <EnterpriseErrorBoundary moduleName="Methodology" resetKey={productMode}>
           <MethodologyWorkspace />
         </EnterpriseErrorBoundary>
+      ) : customOverviewActive ? (
+        <OverviewWorkspaceBuilder
+          initialEditMode
+          onResetToDefault={() => setCustomOverviewActive(false)}
+        />
       ) : (
-        <div
-          ref={gridRef}
-          className={cn(
-            "relative z-10 grid min-h-0 flex-1 grid-cols-1 gap-3 p-3 md:grid-cols-2 lg:p-3",
-            isMapFocusMode
-              ? "lg:grid-cols-[var(--cfs-layer-rail-width)_minmax(0,1fr)]"
-              : productMode === "overview"
-                ? "lg:grid-cols-[var(--cfs-layer-rail-width)_minmax(0,1fr)_332px] xl:grid-cols-[var(--cfs-layer-rail-width)_minmax(0,1fr)_352px]"
-                : "lg:grid-cols-[minmax(0,1fr)_386px] xl:grid-cols-[minmax(0,1fr)_412px]",
-          )}
-          style={showLayerRail ? shellGridStyle : undefined}
-        >
-          {showLayerRail ? (
-            <EnterpriseErrorBoundary
-              moduleName="Map Layers"
-              resetKey={`${productMode}-${previewLayerRailCollapsed}`}
-            >
-              <Sidebar
-                collapsed={previewLayerRailCollapsed}
-                dragging={layerRailDragging}
-                onResizeStart={beginLayerRailResize}
-                onToggleCollapsed={toggleLayerRailCollapsed}
-              />
-            </EnterpriseErrorBoundary>
-          ) : null}
-          <main
-            className={cn(
-              "order-1 flex min-h-[58vh] flex-col gap-3 md:col-span-2 md:min-h-[62vh] lg:col-span-1 lg:min-h-0",
-              showLayerRail ? "lg:order-2" : "lg:order-1",
-              isMapFocusMode && "min-h-[calc(100vh-7.25rem)] md:min-h-[calc(100vh-7.25rem)]",
-            )}
-          >
-            {productMode === "overview" && !isMapFocusMode ? (
-              <EnterpriseErrorBoundary moduleName="Command Center">
-                <OverviewCommandCenter />
-              </EnterpriseErrorBoundary>
-            ) : null}
-            <EnterpriseErrorBoundary
-              moduleName="3D SceneView"
-              resetKey={selectedParcelId}
-            >
-              <div className="min-h-0 flex-1">
-                <SceneViewContainer />
-              </div>
-            </EnterpriseErrorBoundary>
-          </main>
-          {showIntelligencePanel ? (
-            <EnterpriseErrorBoundary
-              moduleName="Intelligence Panel"
-              resetKey={`${productMode}-${selectedParcelId ?? "none"}`}
-            >
-              <IntelligencePanel />
-            </EnterpriseErrorBoundary>
-          ) : null}
-        </div>
+        <StableOverviewWorkspace />
       )}
-
-      {!parcelReviewMode && !isMapFocusMode && !methodologyMode ? (
-        <div className="app-chrome">
-          <EnterpriseErrorBoundary moduleName="County Metrics">
-            <MetricsBar />
-          </EnterpriseErrorBoundary>
-        </div>
-      ) : null}
     </div>
   );
 }
 
-function getLayerRailMaxWidth() {
-  if (typeof window === "undefined") {
-    return 520;
-  }
-
-  return Math.min(640, Math.max(LAYER_RAIL_MIN_WIDTH, window.innerWidth * 0.4));
-}
-
-function clampLayerRailWidth(width: number, maxWidth = getLayerRailMaxWidth()) {
-  return Math.round(
-    Math.min(Math.max(width, LAYER_RAIL_MIN_WIDTH), maxWidth),
+function StableOverviewWorkspace() {
+  const {
+    isMapFocusMode,
+    overviewCommandMode,
+    overviewLayout,
+    selectedParcelId,
+    setOverviewLayoutCommandCenter,
+    setOverviewLayoutPanel,
+  } = useDashboardState();
+  const [layerRailWidth, setLayerRailWidth] = useState(
+    LEFT_PANEL_WIDTHS[overviewLayout.leftPanelWidth],
   );
-}
+  const [lastExpandedLayerRailWidth, setLastExpandedLayerRailWidth] = useState(
+    LEFT_PANEL_WIDTHS[overviewLayout.leftPanelWidth],
+  );
+  const [draggingLayerRail, setDraggingLayerRail] = useState(false);
+  const commandCenterHidden = overviewLayout.commandCenter === "hidden";
+  const leftPanelHidden = overviewLayout.leftPanel === "hidden";
+  const leftPanelCollapsed = overviewLayout.leftPanel === "collapsed";
+  const rightPanelHidden = overviewLayout.rightPanel === "hidden";
+  const rightPanelWidth = RIGHT_PANEL_WIDTHS[overviewLayout.rightPanelWidth];
 
-function getStoredLayerRailWidth() {
-  if (typeof window === "undefined") {
-    return LAYER_RAIL_DEFAULT_WIDTH;
+  useEffect(() => {
+    if (!draggingLayerRail) {
+      const frameId = window.requestAnimationFrame(() => {
+        const nextWidth = clampLeftPanelWidth(
+          LEFT_PANEL_WIDTHS[overviewLayout.leftPanelWidth],
+        );
+
+        setLayerRailWidth(nextWidth);
+        setLastExpandedLayerRailWidth(nextWidth);
+      });
+
+      return () => window.cancelAnimationFrame(frameId);
+    }
+  }, [draggingLayerRail, overviewLayout.leftPanelWidth]);
+
+  function requestMapResize() {
+    window.requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
   }
 
-  const stored = Number(window.localStorage.getItem(LAYER_RAIL_STORAGE_KEY));
+  function toggleLayerRailCollapsed() {
+    if (leftPanelCollapsed) {
+      const nextWidth = clampLeftPanelWidth(lastExpandedLayerRailWidth);
 
-  if (!Number.isFinite(stored)) {
-    return LAYER_RAIL_DEFAULT_WIDTH;
+      setLayerRailWidth(nextWidth);
+      setLastExpandedLayerRailWidth(nextWidth);
+      setOverviewLayoutPanel("left", "visible");
+      requestMapResize();
+      return;
+    }
+
+    setLastExpandedLayerRailWidth(clampLeftPanelWidth(layerRailWidth));
+    setOverviewLayoutPanel("left", "collapsed");
+    requestMapResize();
   }
 
-  return clampLayerRailWidth(stored);
-}
+  function handleLayerRailResizeStart(event: ReactPointerEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    setDraggingLayerRail(true);
+    setOverviewLayoutPanel("left", "visible");
+    document.body.classList.add("cfs-resizing");
 
-function storeLayerRailWidth(width: number) {
-  if (typeof window === "undefined") {
-    return;
+    const startX = event.clientX;
+    const startWidth = clampLeftPanelWidth(
+      leftPanelCollapsed ? lastExpandedLayerRailWidth : layerRailWidth,
+    );
+    let latestWidth = startWidth;
+    let latestCollapsed = false;
+
+    setLayerRailWidth(startWidth);
+    setLastExpandedLayerRailWidth(startWidth);
+
+    function handlePointerMove(moveEvent: PointerEvent) {
+      const rawWidth = startWidth + moveEvent.clientX - startX;
+
+      if (rawWidth <= LEFT_PANEL_COLLAPSE_THRESHOLD) {
+        latestCollapsed = true;
+        setOverviewLayoutPanel("left", "collapsed");
+        window.dispatchEvent(new Event("resize"));
+        return;
+      }
+
+      if (latestCollapsed) {
+        setOverviewLayoutPanel("left", "visible");
+      }
+
+      latestCollapsed = false;
+      latestWidth = clampLeftPanelWidth(rawWidth);
+      setLayerRailWidth(latestWidth);
+      setLastExpandedLayerRailWidth(latestWidth);
+      window.dispatchEvent(new Event("resize"));
+    }
+
+    function handlePointerUp() {
+      setDraggingLayerRail(false);
+      document.body.classList.remove("cfs-resizing");
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+
+      if (latestCollapsed) {
+        setOverviewLayoutPanel("left", "collapsed");
+      } else {
+        setLayerRailWidth(latestWidth);
+        setLastExpandedLayerRailWidth(latestWidth);
+        setOverviewLayoutPanel("left", "visible");
+      }
+
+      requestMapResize();
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
   }
 
-  window.localStorage.setItem(
-    LAYER_RAIL_STORAGE_KEY,
-    String(clampLayerRailWidth(width)),
+  return (
+    <main
+      className={cn(
+        "relative z-10 flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-3 lg:p-4",
+        isMapFocusMode && "p-0 lg:p-0",
+      )}
+    >
+      {!isMapFocusMode && !commandCenterHidden ? (
+        <EnterpriseErrorBoundary moduleName="Command Center">
+          <OverviewCommandCenter />
+        </EnterpriseErrorBoundary>
+      ) : null}
+
+      <div
+        className={cn(
+          "relative flex min-h-0 flex-1 gap-3 overflow-hidden",
+          isMapFocusMode &&
+            "fixed inset-3 top-[4.75rem] z-50 rounded-xl bg-[#050911]/95 p-0",
+        )}
+      >
+        {!isMapFocusMode && !leftPanelHidden ? (
+          <div
+            className="flex h-full min-h-0 shrink-0 transition-[width] duration-150 ease-out"
+            style={{
+              width: leftPanelCollapsed
+                ? LEFT_PANEL_COLLAPSED_WIDTH
+                : layerRailWidth,
+            }}
+          >
+            <Sidebar
+              collapsed={leftPanelCollapsed}
+              dragging={draggingLayerRail}
+              onResizeStart={handleLayerRailResizeStart}
+              onToggleCollapsed={toggleLayerRailCollapsed}
+              overviewCommandMode={overviewCommandMode}
+            />
+          </div>
+        ) : null}
+
+        <section className="relative min-w-0 flex-1 overflow-hidden rounded-lg border border-white/10 bg-[#050911] shadow-[0_18px_54px_rgba(0,0,0,0.34)]">
+          <EnterpriseErrorBoundary
+            moduleName="3D SceneView"
+            resetKey={selectedParcelId}
+          >
+            <SceneViewContainer />
+          </EnterpriseErrorBoundary>
+        </section>
+
+        {!isMapFocusMode && !rightPanelHidden ? (
+          <aside
+            className="flex h-full min-h-0 shrink-0 overflow-visible"
+            style={{ width: rightPanelWidth }}
+          >
+            <EnterpriseErrorBoundary
+              moduleName="Intelligence Panel"
+              resetKey={`overview-stable-${selectedParcelId ?? "none"}`}
+            >
+              <IntelligencePanel />
+            </EnterpriseErrorBoundary>
+          </aside>
+        ) : null}
+      </div>
+
+      {!isMapFocusMode ? (
+        <div className="pointer-events-none fixed inset-x-3 bottom-3 z-40 flex flex-wrap justify-end gap-2">
+          {leftPanelHidden ? (
+            <button
+              className="pointer-events-auto rounded-full border border-[#68d8ff]/25 bg-[#07111f]/90 px-3 py-2 text-xs font-semibold text-[#d7f8ff] shadow-[0_12px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl transition hover:border-[#68d8ff]/50 hover:bg-[#68d8ff]/12"
+              onClick={() => setOverviewLayoutPanel("left", "collapsed")}
+              type="button"
+            >
+              Show Layers
+            </button>
+          ) : null}
+          {rightPanelHidden ? (
+            <button
+              className="pointer-events-auto rounded-full border border-[#68d8ff]/25 bg-[#07111f]/90 px-3 py-2 text-xs font-semibold text-[#d7f8ff] shadow-[0_12px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl transition hover:border-[#68d8ff]/50 hover:bg-[#68d8ff]/12"
+              onClick={() => setOverviewLayoutPanel("right", "visible")}
+              type="button"
+            >
+              Show Intelligence
+            </button>
+          ) : null}
+          {commandCenterHidden ? (
+            <button
+              className="pointer-events-auto rounded-full border border-[#68d8ff]/25 bg-[#07111f]/90 px-3 py-2 text-xs font-semibold text-[#d7f8ff] shadow-[0_12px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl transition hover:border-[#68d8ff]/50 hover:bg-[#68d8ff]/12"
+              onClick={() => setOverviewLayoutCommandCenter("visible")}
+              type="button"
+            >
+              Show Command Center
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+    </main>
   );
 }

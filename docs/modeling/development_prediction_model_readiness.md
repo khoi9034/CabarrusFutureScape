@@ -554,6 +554,80 @@ Current required model flags remain:
 No parcel-level probabilities, parcel-level ranking classes, public prediction
 endpoint, or frontend prediction surface should be added from Phase 16D.
 
+## Phase 23A Integrated Model Lab
+
+Phase 23A makes the existing development model research easier to explain in
+the UI. It adds an aggregate-only `Model Lab` surface in Overview and a
+matching Development Model Lab explanation in Methodology.
+
+Displayed aggregate research facts:
+
+- historical outcome: new construction permits;
+- target: new construction permit within next 3 years;
+- feature unit: parcel-year;
+- feature rows: `1,430,221`;
+- current best internal variant: Zoning + Transportation + Tax/Value;
+- best ablation feature set: `transportation_plus_tax_value_only`;
+- Phase 16C current-best PR-AUC: `0.137928`;
+- Phase 16C current-best lift@top 5%: `4.051123`.
+
+Feature groups shown as helpful:
+
+- historical zoning;
+- transportation accessibility / STIP / AADT;
+- tax/value enrichment.
+
+Feature groups shown as excluded for now:
+
+- Accela plan reviews;
+- Central Area Plan layers;
+- utility proxy;
+- current-context metadata flags.
+
+Phase 23A does not train a model, add a public prediction endpoint, expose
+exact parcel probabilities, expose parcel-level ranking classes, or mark the
+model production-ready.
+
+## Phase 23C Development Research Signal Clarity
+
+Phase 23C refines the Model Lab map preview into one safe overlay:
+`Development Research Signal`. The overlay is off by default and uses relative
+signal bands only:
+
+- higher research signal;
+- moderate research signal;
+- lower research signal;
+- insufficient data.
+
+These bands are relative internal ranking context, not exact parcel
+probabilities. Marker explanations summarize why a parcel or area was
+highlighted using safe contextual drivers: historical zoning, transportation
+accessibility, tax/value enrichment, and new construction permit-label research.
+
+Phase 23C also carries the selected model research context into Planning
+Snapshots and Executive Summaries with the required caveat that it is internal
+research only, not an official parcel score.
+
+## Phase 23D Model Lab Progressive Map Display
+
+Phase 23D keeps the same saved research outputs and safety rules, but changes
+how Model Lab presents the research map:
+
+- countywide zoom uses an aggregated research surface rather than a dense point
+  cloud;
+- medium zoom uses clustered research markers;
+- close parcel-scale zoom uses individual safe research markers;
+- the right Intelligence panel shows concise overlay status, current display
+  mode, key aggregate metrics, and a collapsible "How these stats are
+  calculated" explanation;
+- Planning Snapshots and Executive Summaries record the display mode and whether
+  the selected context was a heatmap cell, cluster, or parcel-scale marker.
+
+This remains a relative research-signal preview only. It does not expose exact
+probabilities, raw model scores, or official parcel prediction classes, and it
+does not change `model_active=false`, `prediction_probability_available=false`,
+`production_ready=false`, or `public_exposure_allowed=false`.
+
 ## Recommended Modeling Sequence
 
 1. Freeze feature registry and leakage policy.

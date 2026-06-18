@@ -1,0 +1,138 @@
+{
+  "phase": "24B-QA2",
+  "title": "Overview Command Center Compact Polish and Bottom KPI Removal",
+  "completed_at": "2026-06-16",
+  "status": "completed",
+  "files_changed": [
+    "src/components/layout/AppShell.tsx",
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase24b_qa2_overview_command_center_compact_polish_summary.json"
+  ],
+  "bottom_kpi_removal": {
+    "removed_from_default_overview": true,
+    "removed_component_mount": "MetricsBar is no longer mounted as a permanent bottom strip in AppShell.",
+    "data_preserved": true,
+    "headline_indicators_location": "Right Intelligence panel in Countywide/default intelligence mode.",
+    "headline_indicators_verified": [
+      "Permit Records",
+      "Active Parcels",
+      "Flood Review",
+      "Parcel Coverage"
+    ],
+    "map_layout_effect": "Overview grid can use the vertical space formerly occupied by the permanent KPI strip; no fixed KPI footer remains."
+  },
+  "command_center_height_reduction": {
+    "old_card_min_height_px": 108,
+    "new_card_min_height_px": 68,
+    "command_center_copy": "Search, explore, model, or save a report-ready snapshot.",
+    "rendered_default_command_height_px": 232,
+    "rendered_default_card_height_px": 68,
+    "result": "Command cards are visibly shorter and the command area reads as a slim control header rather than a large dashboard block."
+  },
+  "shortened_command_copy": {
+    "Search Parcel": "Find parcel context.",
+    "Explore Countywide": "Open layers and indicators.",
+    "Model Lab": "Review internal model research.",
+    "Save Snapshot": "Capture map and brief."
+  },
+  "active_mode_styling": {
+    "active_visuals": [
+      "stronger cyan border",
+      "subtle filled cyan background",
+      "stronger glow",
+      "left accent bar",
+      "highlighted icon",
+      "small Active badge"
+    ],
+    "inactive_visuals": [
+      "lower-emphasis border/background",
+      "small arrow affordance",
+      "subtle hover brightening"
+    ],
+    "active_state_not_only_text": true
+  },
+  "snapshot_count_placement": {
+    "placement": "compact Command Center header chip",
+    "effect": "Snapshot count no longer squeezes the command card grid."
+  },
+  "map_layout_improvement": {
+    "permanent_bottom_kpi_strip_removed": true,
+    "sceneview_not_covered_by_command_cards": true,
+    "left_right_panel_behavior_preserved": true,
+    "known_note": "Browser DOM smoke verified the KPI strip removal and compact command area. SceneView canvas height was not used as a hard metric because ArcGIS rendering is asynchronous."
+  },
+  "workflow_preservation": {
+    "Search Parcel": "passed; search card focuses the top search input.",
+    "Explore Countywide": "passed; countywide panel and map layer controls appear.",
+    "Model Lab": "passed; Model Lab Intelligence and Development Research Signal copy appear.",
+    "Save Snapshot": "passed; Snapshot Capture state appears.",
+    "Planning Snapshot": "passed; Planning Snapshot and Executive Summary surfaces load.",
+    "Methodology": "passed; Methodology loads."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": {
+      "result": "passed",
+      "note": "An initial build command timed out while the Next build process continued in the background. After that process exited, a clean rerun completed successfully."
+    },
+    "focused_pytest": {
+      "command": "python -m pytest backend/tests/test_development_prediction_features.py -q",
+      "result": "passed",
+      "tests": 26,
+      "warnings": 1
+    },
+    "npm_run_dev_cfs": {
+      "result": "passed",
+      "frontend_health": 200,
+      "backend_health": 200,
+      "database_health": 200
+    },
+    "python_compileall_app": "not_run_no_backend_app_changes"
+  },
+  "smoke_test_results": {
+    "url": "http://localhost:3000",
+    "default_overview": {
+      "loaded": true,
+      "bottom_kpi_strip_gone": true,
+      "command_center_visible": true,
+      "card_count": 4,
+      "card_heights_px": [68, 68, 68, 68],
+      "card_widths_px": [392, 392, 392, 392],
+      "card_titles_clipped": false,
+      "compact_copy_visible": true
+    },
+    "countywide_mode": {
+      "layer_controls_visible": true,
+      "right_panel_headline_indicators_visible": true
+    },
+    "model_lab_mode": {
+      "model_lab_intelligence_visible": true,
+      "development_research_signal_visible": true
+    },
+    "snapshot_mode": {
+      "snapshot_capture_visible": true,
+      "toast_note": "The saved toast can be transient; Snapshot Capture state was verified."
+    },
+    "planning_snapshot": "loads",
+    "methodology": "loads",
+    "browser_console": [
+      "Existing opaque ArcGIS-style error message: r"
+    ],
+    "unsafe_terms_found": []
+  },
+  "safety_verification": {
+    "exact_parcel_probabilities_exposed": false,
+    "raw_model_scores_exposed": false,
+    "official_parcel_prediction_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "datasets_added": false,
+    "models_trained": false,
+    "postgis_schema_modified": false
+  },
+  "remaining_known_issues": [
+    "The existing ArcGIS-related opaque console error 'r' remains present and was not introduced by this UI polish.",
+    "The Snapshot saved toast may disappear before smoke checks catch it; the persistent Snapshot Capture state was used for verification."
+  ]
+}

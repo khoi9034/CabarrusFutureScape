@@ -1,0 +1,143 @@
+{
+  "phase": "24C",
+  "title": "Independent Methodology Accordions and Model Lab Explain-the-Numbers Panel",
+  "files_changed": [
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/data/intelligence/developmentModelLab.ts",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase24c_independent_methodology_accordions_explain_numbers_summary.json"
+  ],
+  "accordion_state_fix": {
+    "summary": "Methodology accordions now use section-scoped multi-open state instead of one active item per section.",
+    "implementation": [
+      "Added a Set-based toggle helper for accordion IDs.",
+      "Capabilities, Data Inventory, Data Needed, and FAQ each keep independent open-id state.",
+      "Opening a closed panel adds it to that section's open set.",
+      "Clicking an already-open panel removes only that panel from the open set."
+    ],
+    "sections_covered": [
+      "Capabilities",
+      "Data Inventory",
+      "Data Needed / What To Ask For And Why It Matters",
+      "Roadmap & Guardrails FAQ"
+    ]
+  },
+  "independent_open_collapse_behavior": {
+    "verified": true,
+    "browser_sequence": [
+      "WSACC true utility capacity started open.",
+      "Official school enrollment was opened and WSACC stayed open.",
+      "Official rezoning case records was opened and both WSACC and School stayed open.",
+      "School was clicked again and only School collapsed; WSACC and Rezoning remained open."
+    ],
+    "measured_card_states": {
+      "after_opening_school": {
+        "wsacc": "expanded",
+        "school": "expanded",
+        "rezoning": "collapsed"
+      },
+      "after_opening_rezoning": {
+        "wsacc": "expanded",
+        "school": "expanded",
+        "rezoning": "expanded"
+      },
+      "after_closing_school": {
+        "wsacc": "expanded",
+        "school": "collapsed",
+        "rezoning": "expanded"
+      }
+    }
+  },
+  "blank_space_layout_fix": {
+    "root_cause": "Accordion cards were visually arranged in two-column grids that could behave like shared rows, making unrelated cards appear stretched when a neighbor expanded.",
+    "layout_approach": [
+      "Data Needed and FAQ accordion items are split into independent column stacks.",
+      "Accordion cards use self-start sizing.",
+      "Collapsed accordion content is conditionally rendered so hidden detail does not occupy height."
+    ],
+    "verified": "Collapsed cards returned to compact header height while neighboring cards stayed open."
+  },
+  "explain_the_numbers_ux": {
+    "button_added": "Explain the Numbers",
+    "placement": [
+      "Model Lab Intelligence panel",
+      "Selected Development Research Context panel"
+    ],
+    "content": [
+      "Research bands are explained as relative internal research groups, not probabilities.",
+      "Very Strong, Strong, Moderate, Lower, and Insufficient Data bands are defined in plain English.",
+      "How this is calculated explains historical permits, parcel-year records, zoning, transportation, tax/value context, relative ranking, and hidden exact probabilities.",
+      "Why exact probabilities are hidden is explicitly stated."
+    ]
+  },
+  "model_qa_details_behavior": {
+    "summary": "PR-AUC, Lift@top 5%, and Precision@top 5% are no longer the first visible explanation content.",
+    "default_state": "Collapsed inside Model QA details.",
+    "expanded_content": [
+      "PR-AUC: 0.137928",
+      "Lift@top 5%: 4.051123",
+      "Precision@top 5%: 0.155245",
+      "Aggregate metric caveat: these are aggregate model test metrics, not parcel-level scores."
+    ],
+    "verified": true
+  },
+  "selected_marker_explanation_changes": {
+    "summary": "Selected Model Lab context includes the research band, band meaning, source band, selected context kind, data quality, top contextual drivers, why highlighted, what it does not mean, and Explain the Numbers access.",
+    "required_caveat": "Not an exact probability. Not an official parcel score."
+  },
+  "snapshot_report_integration": {
+    "summary": "Model Lab snapshot/report language includes development model research context, research band meaning, top drivers, calculation explanation, and the internal-only caveat.",
+    "required_caveat": "This is an internal research preview. It does not show exact parcel development probability and is not an official parcel score.",
+    "hidden_outputs": [
+      "exact parcel probability",
+      "raw model score",
+      "official parcel prediction class"
+    ]
+  },
+  "safety_verification": {
+    "browser_ui_scan": "No unsafe model-output terms appeared in Overview, Methodology, Model Lab, or Planning Snapshot browser smoke checks.",
+    "source_audit": "Unsafe terms remain only in internal safety flags, schemas, guardrail documentation, tests, or non-rendered implementation guards; they are not surfaced by this phase's UI changes.",
+    "terms_checked": [
+      "prediction_probability",
+      "exact_probability",
+      "experimental_probability",
+      "raw_model_score",
+      "parcel_score",
+      "growth_probability",
+      "will_develop",
+      "will develop",
+      "development_signal_class"
+    ]
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed after stopping the active CFS Next dev helper process that was holding the build output",
+    "python_compileall_app": "passed",
+    "python_pytest": "285 passed, 3 warnings",
+    "targeted_phase_test": "backend/tests/test_development_prediction_features.py: 28 passed, 1 warning"
+  },
+  "smoke_test_results": {
+    "dev_server": "npm run dev:cfs restarted successfully on localhost:3000 and 127.0.0.1:8000",
+    "frontend_health": "http://localhost:3000 returned 200",
+    "backend_health": "http://127.0.0.1:8000/health returned 200",
+    "database_health": "http://127.0.0.1:8000/health/database returned 200",
+    "methodology_loads": true,
+    "data_needed_multi_open": true,
+    "no_blank_space_issue_observed": true,
+    "model_lab_loads": true,
+    "explain_the_numbers_panel": true,
+    "model_qa_details_collapsed_by_default": true,
+    "model_qa_details_expandable": true,
+    "planning_snapshot_loads": true,
+    "overview_loads": true,
+    "browser_console_errors": "none observed"
+  },
+  "remaining_known_issues": [
+    "The source tree still contains expected internal model safety fields and guardrail documentation references; these are intentionally retained and not exposed as public parcel outputs.",
+    "No new datasets, model training, schema changes, or public prediction endpoints were added."
+  ]
+}

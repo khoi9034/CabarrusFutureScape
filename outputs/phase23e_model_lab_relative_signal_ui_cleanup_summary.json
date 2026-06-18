@@ -1,0 +1,152 @@
+{
+  "phase": "23E",
+  "title": "Model Lab UI Simplification, Relative Development Signal Bands, and Nonblocking Map Cleanup",
+  "completed_at": "2026-06-16",
+  "status": "completed",
+  "files_changed": [
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/data/intelligence/developmentModelLab.ts",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase23e_model_lab_relative_signal_ui_cleanup_summary.json"
+  ],
+  "removed_map_blocking_ui": {
+    "removed_component": "ModelLabMapModeBadge",
+    "old_behavior": "A floating Model Lab pill/card appeared over the SceneView and repeated overlay status.",
+    "new_behavior": "Model Lab status is shown in the left Model Lab Controls and right Model Lab Intelligence panels only.",
+    "map_center_blocked": false
+  },
+  "relative_signal_rank_band_wording": {
+    "primary_overlay_name": "Development Research Signal",
+    "plain_english_description": "Relative model research signal based on historical new construction patterns.",
+    "probability_wording": "Exact probabilities are not shown.",
+    "user_facing_bands": [
+      "Top 5% relative development signal",
+      "Top 10-15% relative development signal",
+      "Lower relative development signal",
+      "Insufficient data"
+    ],
+    "source_note": "The existing safe preview source exposes top 1%, top 5%, top 15%, remaining, and insufficient-data bands. The UI uses Top 10-15% rather than inventing a precise top 10% split."
+  },
+  "legend_color_updates": {
+    "highest_band": "warm orange/gold",
+    "moderate_high_band": "amber/yellow",
+    "lower_band": "muted slate/gray",
+    "insufficient_data": "low-opacity neutral",
+    "map_symbol_changes": "Marker and aggregate surface profiles now derive presentation from relative band labels and use smaller halos to reduce visual clutter."
+  },
+  "right_panel_simplification": {
+    "new_leading_section": "Development Research Signal",
+    "leads_with": [
+      "Current view: Relative research bands",
+      "What it means",
+      "What it does not mean",
+      "Relative band list"
+    ],
+    "technical_metrics_moved": "PR-AUC, Lift@top 5%, and Precision@top 5% are hidden behind the Model QA details accordion.",
+    "selected_context_title": "Selected Development Research Context"
+  },
+  "selected_marker_context_changes": {
+    "fields": [
+      "Relative rank band",
+      "Source band",
+      "Context",
+      "Data quality",
+      "Top contextual drivers",
+      "Why highlighted",
+      "What this does not mean",
+      "Why this matters"
+    ],
+    "driver_explanations": {
+      "Zoning context": "Historical/current zoning pattern was useful in the model.",
+      "Transportation accessibility": "Road, STIP, and AADT context helped separate stronger development patterns.",
+      "Tax/value enrichment": "Land, building, and value context improved the best internal model.",
+      "New construction history": "Historical permit outcomes were used as the model learning target."
+    },
+    "caveat": "Internal research only. Not an official parcel score. Exact probabilities are not shown."
+  },
+  "model_qa_details_behavior": {
+    "button_label": "Model QA details",
+    "collapsed_by_default": true,
+    "metrics_inside": {
+      "PR-AUC": "0.137928",
+      "Lift@top 5%": "4.051123",
+      "Precision@top 5%": "0.155245"
+    },
+    "safety_note": "These are aggregate test metrics, not parcel-level scores."
+  },
+  "snapshot_report_integration": {
+    "model_lab_snapshot_saved": true,
+    "executive_summary_model_section_verified": true,
+    "report_section": "Development Model Research Context",
+    "report_includes": [
+      "current best internal model",
+      "relative signal band",
+      "source rank band",
+      "top drivers with explanations",
+      "what the signal does not mean",
+      "missing data needed",
+      "internal research caveat"
+    ],
+    "required_caveat_verified": "This is an internal research preview. It does not show exact parcel development probability and is not an official parcel score."
+  },
+  "safety_verification": {
+    "exact_probabilities_exposed": false,
+    "raw_model_scores_exposed": false,
+    "official_parcel_prediction_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "model_marked_production_ready": false,
+    "model_retrained": false,
+    "datasets_added": false,
+    "known_internal_terms": "Safety scan still finds guardrail/schema/test terms such as prediction_probability_available, exact_probability_available, no_raw_model_scores, and internal development_signal_class usage in backend mapping/tests. The UI and preview response continue to use safe labels and false exposure flags."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "focused_pytest": {
+      "command": "python -m pytest backend/tests/test_development_prediction_features.py -q",
+      "result": "passed",
+      "tests": 25,
+      "warnings": 1
+    },
+    "python_compileall_app": "not_run_no_backend_app_changes"
+  },
+  "smoke_test_results": {
+    "dev_stack": {
+      "frontend": "http://localhost:3000 responded with 200 and was owned by the CFS Next dev process.",
+      "backend": "http://127.0.0.1:8000 was owned by the CFS Uvicorn process."
+    },
+    "overview": "loaded",
+    "model_lab": {
+      "opened": true,
+      "floating_map_pill_removed": true,
+      "left_model_lab_controls_visible": true,
+      "right_model_lab_intelligence_visible": true,
+      "relative_signal_language_visible": true,
+      "model_qa_details_hidden_before_open": true,
+      "model_qa_details_opened": true,
+      "overlay_toggle_on": true,
+      "overlay_visible_context_reported": true
+    },
+    "planning_snapshot": {
+      "loads": true,
+      "model_lab_snapshot_saved": true,
+      "executive_summary_model_context_visible": true
+    },
+    "methodology": {
+      "loads": true
+    },
+    "browser_console": [
+      "Existing opaque ArcGIS-style error message: r"
+    ],
+    "unsafe_terms_found_in_rendered_smoke": []
+  },
+  "remaining_limitations": [
+    "The safe preview source currently exposes top 1%, top 5%, top 15%, remaining, and insufficient-data bands. The UI labels the moderate-high band as Top 10-15% rather than claiming a precise top 10% band.",
+    "A blind smoke-test click in the map did not conclusively select a research marker, though the SceneView hit-test path for model research preview markers remains implemented and the overlay reported visible safe research context."
+  ]
+}

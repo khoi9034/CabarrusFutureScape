@@ -1,0 +1,95 @@
+{
+  "phase": "23H",
+  "title": "Model Lab Intelligence Panel Prioritization and Selected Context Cleanup",
+  "files_changed": [
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase23h_model_lab_intelligence_panel_prioritization_summary.json"
+  ],
+  "right_panel_reordering": {
+    "selected_state": "Selected Model Lab context now renders immediately below the Model Lab Intelligence header, before Current Map View and generic model status content.",
+    "default_state": "No-selection state keeps a short Model Lab Intelligence sentence, compact relative-band legend, Current Map View, Key Model Status, and collapsed detail controls.",
+    "removed_repetition": "Generic Development Research Signal explanations and full band definitions no longer appear above selected context."
+  },
+  "selected_cluster_summary_changes": {
+    "title": "Selected Research Cluster",
+    "fields": [
+      "area label",
+      "parcels represented",
+      "dominant research band",
+      "band distribution",
+      "top drivers",
+      "why highlighted",
+      "recommended interpretation",
+      "short caveat"
+    ],
+    "grammar": "Single-record selections are labeled as Selected Research Feature and use 1 parcel represented instead of awkward singular/plural cluster wording."
+  },
+  "selected_individual_marker_summary_changes": {
+    "title": "Selected Research Feature",
+    "fields": [
+      "parcel ID when available",
+      "research band",
+      "relative rank band",
+      "top drivers",
+      "why highlighted",
+      "data caveat",
+      "recommended interpretation"
+    ],
+    "safe_copy": "Selected feature copy avoids exact probabilities, raw scores, and official classes."
+  },
+  "collapsed_explanation_sections": {
+    "explain_the_numbers": "Research bands, calculation workflow, and why probabilities stay hidden are behind Explain the Numbers.",
+    "model_qa_details": "PR-AUC, Lift@top 5%, and Precision@top 5% are behind Model QA Details.",
+    "future_model_ideas": "Future model placeholders are behind Future Model Ideas.",
+    "methodology_link": "Open Methodology Model Lab remains available for deeper explanation."
+  },
+  "model_status_compacting": {
+    "visible": [
+      "best internal variant",
+      "target",
+      "status: Internal only",
+      "production ready: No"
+    ],
+    "hidden_by_default": [
+      "aggregate QA metrics",
+      "future model ideas",
+      "full band definitions",
+      "long calculation narrative"
+    ]
+  },
+  "snapshot_report_integration": {
+    "report_changes": "Planning Snapshot / Executive Summary now uses concise selected model context labels, Parcels represented, Band distribution, Why highlighted, top drivers, and the required internal-only caveat.",
+    "grammar": "Report helpers avoid awkward single-record cluster wording.",
+    "technical_metrics": "Technical aggregate metrics remain outside the primary report summary unless shown through QA detail UI."
+  },
+  "safety_verification": {
+    "no_exact_probabilities": true,
+    "no_raw_model_scores": true,
+    "no_official_prediction_classes": true,
+    "no_public_prediction_endpoint_added": true,
+    "no_model_training": true,
+    "no_dataset_changes": true,
+    "safety_audit_notes": "Search hits were limited to existing backend/schema/service guardrail fields and internal transformations; edited UI/report sources are covered by tests that reject unsafe user-facing tokens."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "passed: 287 passed, 3 warnings",
+    "targeted_backend_test": "passed: backend/tests/test_development_prediction_features.py"
+  },
+  "smoke_test_results": {
+    "localhost_3000_http": "passed: HTTP 200",
+    "dev_server": "CFS dev server is running on localhost:3000",
+    "browser_smoke": "blocked: in-app browser navigation timed out despite localhost:3000 responding from shell",
+    "manual_cluster_click": "not browser-verified in this pass because browser navigation timed out",
+    "static_selected_context_order": "covered by backend/tests/test_development_prediction_features.py"
+  },
+  "remaining_known_issues": [
+    "Browser smoke for clicking a rendered Model Lab cluster was not completed because the in-app browser timed out on navigation.",
+    "Selected context behavior is covered by static tests and build/type validation; a visual follow-up is recommended once the browser tool is responsive."
+  ]
+}

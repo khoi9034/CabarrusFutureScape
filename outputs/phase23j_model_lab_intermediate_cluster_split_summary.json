@@ -1,0 +1,132 @@
+{
+  "phase": "23J",
+  "title": "Model Lab Intermediate Cluster Split Level",
+  "files_changed": [
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/types/index.ts",
+    "src/types/map/modelResearchPreview.ts",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase23j_model_lab_intermediate_cluster_split_summary.json"
+  ],
+  "old_clustering_issue": "The previous Model Lab overlay had one clustered stage between countywide aggregation and parcel detail. At medium-close zoom, large grouped bubbles could stay fused too long, so a high-count cluster could look like one giant marker instead of splitting into nearby sub-clusters.",
+  "new_four_stage_clustering_behavior": {
+    "stage_a_countywide_fused_clusters": "Scale >= 78000 renders countywide fused clusters using broad 0.08-degree cells and capped cell count for strategic overview.",
+    "stage_b_intermediate_subclusters": "Scale >= 36000 renders intermediate_subclusters using the existing 0.038-degree grouping so broad countywide clusters split into readable sub-clusters before parcel detail.",
+    "stage_c_fine_local_clusters": "Scale >= 9000 renders fine_local_clusters using smaller 0.014-degree cells and a higher cap so medium-close views split oversized groups into local clusters instead of one giant bubble.",
+    "stage_d_individual_markers": "Scale < 9000 renders parcel-safe individual research markers capped for readability."
+  },
+  "zoom_scale_threshold_changes": {
+    "MODEL_LAB_COUNTYWIDE_CLUSTER_SCALE": 78000,
+    "MODEL_LAB_INTERMEDIATE_CLUSTER_SCALE": 36000,
+    "MODEL_LAB_FINE_CLUSTER_SCALE": 9000,
+    "MODEL_LAB_INDIVIDUAL_SCALE": "MODEL_LAB_FINE_CLUSTER_SCALE",
+    "legacy_aliases_preserved": [
+      "MODEL_LAB_COUNTYWIDE_SCALE_THRESHOLD",
+      "MODEL_LAB_CLUSTER_SCALE_THRESHOLD",
+      "MODEL_LAB_DETAIL_SCALE_THRESHOLD",
+      "MODEL_LAB_COUNTYWIDE_MIN_SCALE",
+      "MODEL_LAB_CLUSTER_MIN_SCALE"
+    ]
+  },
+  "clustering_radius_changes": {
+    "countywide_cell_size_degrees": 0.08,
+    "intermediate_cell_size_degrees": 0.038,
+    "fine_cell_size_degrees": 0.014,
+    "countywide_max_cells": 32,
+    "intermediate_max_cells": 52,
+    "fine_max_cells": 112,
+    "implementation": "SceneViewContainer now uses getModelResearchClusterCellSize() and getModelResearchClusterMaxCells() so radius and cap vary by display stage."
+  },
+  "sizing_behavior_preserved": {
+    "approach": "Existing count-bucket sizing remains intact, with circle size still driven by represented record count.",
+    "buckets": [
+      "1 record: individual/detail size",
+      "2-5: small cluster",
+      "6-15: medium cluster",
+      "16-35: large cluster",
+      "36-75: very large cluster",
+      "76+: capped largest cluster"
+    ],
+    "fine_cluster_adjustment": "Fine local clusters use a modest 0.9 size multiplier and reduced world-length halos so local split clusters do not visually merge back into one large bubble."
+  },
+  "count_label_behavior": {
+    "clusters": "Grouped clusters with count > 1 keep centered count labels.",
+    "intermediate_subclusters": "Intermediate sub-clusters keep count labels.",
+    "fine_local_clusters": "Fine local clusters keep count labels when grouped.",
+    "individual_markers": "Parcel detail markers do not show cluster count labels."
+  },
+  "selected_cluster_behavior": {
+    "behavior": "Clicked aggregate graphics continue to emit safe ModelResearchPreviewMarker context with contextKind=cluster or heatmap_cell, representedFeatureCount, bandCounts, dominantResearchBand, top drivers, model version, data quality flag, and internal-only caveat.",
+    "new_display_modes": [
+      "intermediate_subclusters",
+      "fine_local_clusters"
+    ],
+    "right_panel_labels": [
+      "Intermediate sub-clusters",
+      "Fine local clusters"
+    ],
+    "grammar_guardrail": "Existing right-panel grammar for single features is preserved: '1 parcel represented', not '1 parcels represented'."
+  },
+  "area_label_behavior": {
+    "implementation": "Clusters now attempt to reuse a safe existing approximateAreaLabel from member markers when available. If the source label is not usable, the UI falls back to neutral count-based labels.",
+    "fallbacks": [
+      "Single research feature",
+      "Research cluster of N parcels",
+      "Research surface cell of N parcels"
+    ],
+    "anti_fake_data_guardrail": "No road, municipality, subdivision, or neighborhood names are invented. Context labels are only reused from available marker context."
+  },
+  "performance_notes": [
+    "Countywide and medium views do not render all individual records.",
+    "Fine local clustering delays individual markers until closest zoom.",
+    "Rendered aggregate counts remain capped by stage.",
+    "Cluster helpers keep aggregation choices stage-specific without adding external dependencies."
+  ],
+  "snapshot_report_integration": {
+    "status": "Existing Model Lab snapshot/report fields continue to preserve selected cluster or marker context.",
+    "preserved_fields": [
+      "displayMode",
+      "displayModeLabel",
+      "representedFeatureCount",
+      "bandCounts",
+      "dominantResearchBand",
+      "topDrivers",
+      "approximateAreaLabel",
+      "internal-only caveat"
+    ],
+    "report_caveat": "This Model Lab snapshot summarizes a relative research cluster. It does not show exact parcel development probability and is not an official parcel score."
+  },
+  "safety_verification": {
+    "no_exact_probabilities_added": true,
+    "no_raw_scores_added": true,
+    "no_official_prediction_classes_added": true,
+    "no_public_prediction_endpoint_added": true,
+    "model_production_ready_claimed": false,
+    "safety_scan": "rg found existing internal schema/service guardrail fields such as prediction_probability_available=false and exact_probability_available=false, plus existing internal development_signal_class repository usage. No new Phase 23J UI exposure of exact probabilities, raw scores, or official parcel prediction classes was added."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "passed: 289 passed, 3 warnings",
+    "focused_test": "python -m pytest tests/test_development_prediction_features.py -q passed: 32 passed, 1 warning"
+  },
+  "smoke_test_results": {
+    "localhost_3000_loaded": true,
+    "model_lab_opened": true,
+    "overlay_default_off": true,
+    "overlay_toggle_on": true,
+    "countywide_fused_clusters_reported": true,
+    "preview_rows_reported": "110,017",
+    "browser_console": "No blocking app errors observed. ArcGIS labelPlacement warnings appeared and are consistent with known external ArcGIS warnings.",
+    "visual_medium_close_split_verified": "Not conclusively verified in browser automation; static thresholds/tests verify the new intermediate/fine split logic."
+  },
+  "remaining_limitations": [
+    "Browser smoke confirmed countywide fused clusters but did not visually verify the specific C.C. Griffin medium-close 79-record cluster split.",
+    "Area labels only use available marker context or neutral fallbacks; no new geographic naming data was added.",
+    "Scale thresholds may still need visual tuning after hands-on map QA across multiple county extents."
+  ]
+}

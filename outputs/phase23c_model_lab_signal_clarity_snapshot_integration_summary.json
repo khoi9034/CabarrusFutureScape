@@ -1,0 +1,141 @@
+{
+  "phase": "23C",
+  "title": "Model Lab Research Signal Clarity, Color Bands, Driver Explanations, and Snapshot/Report Integration",
+  "status": "completed",
+  "files_changed": [
+    "README.md",
+    "backend/tests/test_development_prediction_features.py",
+    "docs/demo/cfs_demo_walkthrough.md",
+    "docs/demo/cfs_expected_questions_and_answers.md",
+    "docs/demo/cfs_model_explanation_for_nontechnical_audience.md",
+    "docs/demo/cfs_what_not_to_claim.md",
+    "docs/modeling/development_prediction_model_qa_report.md",
+    "docs/modeling/development_prediction_model_readiness.md",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/data/intelligence/developmentModelLab.ts",
+    "src/hooks/useDashboardState.tsx",
+    "src/hooks/useModelResearchPreviewLayer.ts",
+    "src/types/index.ts"
+  ],
+  "overlay_label_cleanup": {
+    "main_overlay_label": "Development Research Signal",
+    "subtitle": "Relative model research signal based on historical new construction patterns.",
+    "removed_or_hidden_confusing_choices": [
+      "Research signal hotspots",
+      "Parcel research signal preview",
+      "Top-driver context"
+    ],
+    "safe_explanation": "This shows relative research signal bands. It does not show exact development probability."
+  },
+  "color_band_changes": {
+    "higher_research_signal": "warm orange/gold marker with strongest emphasis",
+    "moderate_research_signal": "cyan/blue marker",
+    "lower_research_signal": "muted slate marker",
+    "insufficient_data": "dark low-emphasis neutral marker",
+    "legend_matches_map": true
+  },
+  "how_signal_is_calculated_explained": {
+    "plain_english": "Markers are relative research bands based on internal model ranking and contextual drivers, not probabilities.",
+    "driver_sources": [
+      "historical zoning",
+      "transportation accessibility",
+      "tax/value enrichment",
+      "new construction permit labels"
+    ],
+    "map_reading_guidance": [
+      "Brighter markers show higher relative research signal.",
+      "Signal bands are based on internal model ranking, not exact probability.",
+      "Drivers explain which parcel context features contributed.",
+      "Missing official data means this remains research-only.",
+      "Use this to guide questions, not decisions."
+    ]
+  },
+  "right_panel_selected_marker_behavior": {
+    "no_marker_selected": "Model Lab Intelligence explains current best model, overlay meaning, colors, helpful feature groups, missing data, and caveats.",
+    "marker_selected": "Selected Model Research Context shows signal band, relative rank band, parcel id, top contextual drivers, model version, data quality, why highlighted, what it does not mean, and caveat.",
+    "unsafe_values_exposed": false
+  },
+  "snapshot_integration": {
+    "snapshot_version": "phase23c_v1",
+    "captures_model_lab_mode": true,
+    "captures_overlay_enabled_status": true,
+    "captures_selected_research_context_if_available": true,
+    "stores_exact_probability": false,
+    "stores_raw_model_score": false,
+    "stores_official_prediction_class": false,
+    "adds_explainable_metrics": [
+      "Model Lab Context",
+      "Model Signal Rationale"
+    ]
+  },
+  "executive_report_integration": {
+    "section_added": "Development Model Research Context",
+    "shown_when": "Planning Snapshot was saved from Model Lab mode",
+    "includes": [
+      "current best internal model",
+      "research signal band",
+      "relative rank band if selected",
+      "top drivers/source context",
+      "why the signal matters",
+      "what it does not mean",
+      "missing data needed",
+      "required internal-research caveat"
+    ],
+    "required_caveat_present": "This is an internal research preview. It does not show exact parcel development probability and is not an official parcel score."
+  },
+  "documentation_updates": [
+    "README Model Lab overview updated for Phase 23C",
+    "nontechnical model explanation updated with relative signal bands",
+    "what-not-to-claim sheet updated with approved Development Research Signal wording",
+    "expected Q&A explains Development Research Signal",
+    "model readiness and QA report updated with Phase 23C research-signal caveats"
+  ],
+  "tests_added": [
+    "backend/tests/test_development_prediction_features.py::test_phase23_model_research_preview_endpoint_is_safe"
+  ],
+  "safety_verification": {
+    "exact_probabilities_exposed": false,
+    "raw_model_scores_exposed": false,
+    "official_parcel_prediction_classes_exposed": false,
+    "public_prediction_endpoint_added": false,
+    "production_ready": false,
+    "model_training_performed": false,
+    "unsafe_ui_field_names_found": false,
+    "notes": "Safety flag names such as exact_probability_available remain in typed API contracts and backend responses as false guardrail metadata; no exact probability values or raw scores are displayed."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_backend_app": "passed",
+    "targeted_pytest_model_research_preview_safety": "passed",
+    "python_m_pytest": "passed: 278 tests, 3 warnings"
+  },
+  "smoke_test_results": {
+    "localhost_3000": "200 and CFS loaded",
+    "backend_health": "200",
+    "model_research_preview_endpoint": "200 with safe preview fields only",
+    "model_lab_opens": true,
+    "left_panel_simplified": true,
+    "confusing_overlay_type_selector_removed": true,
+    "overlay_off_by_default": true,
+    "overlay_on_draws_visible_markers": true,
+    "legend_distinct_signal_bands": true,
+    "marker_click_updates_right_panel": true,
+    "snapshot_captures_model_lab_context": true,
+    "executive_summary_model_section_visible": true,
+    "methodology_loads": true,
+    "browser_console": "One existing opaque 'r' error was observed at localhost; no visible Model Lab, snapshot, or Methodology breakage."
+  },
+  "remaining_known_limitations": [
+    "Development Research Signal remains internal research only and should guide staff questions, not decisions.",
+    "The preview overlay uses safe centroid markers from existing internal research outputs; it does not expose raw scores or probabilities.",
+    "Official utility capacity, official school capacity/enrollment, official rezoning records, and countywide development pipeline data are still needed before any public-facing model signal is considered.",
+    "A persistent opaque one-character browser console error remains from the local map/runtime smoke test and should be tracked separately if it becomes user-visible."
+  ]
+}

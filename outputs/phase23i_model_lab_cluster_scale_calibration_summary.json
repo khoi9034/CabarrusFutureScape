@@ -1,0 +1,125 @@
+{
+  "phase": "23I",
+  "title": "Model Lab Cluster Scale Calibration and Visual Count Accuracy",
+  "files_changed": [
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase23i_model_lab_cluster_scale_calibration_summary.json"
+  ],
+  "old_sizing_issue": "Aggregate Model Lab markers used a narrow sqrt count boost and band multipliers, so small clusters and high-count clusters could render at similar sizes. The render cap also favored average signal strength before concentration, which could under-emphasize larger clusters.",
+  "new_size_scale_buckets": {
+    "strategy": "Cluster marker area now uses explicit count buckets with much wider visual separation. Main marker size reflects count, while color reflects dominant research band.",
+    "buckets": [
+      "1 record: individual-scale marker, no count label",
+      "2-5 records: small cluster",
+      "6-15 records: medium cluster",
+      "16-35 records: large cluster",
+      "36-75 records: very large cluster",
+      "76+ records: capped largest cluster"
+    ],
+    "implementation": "getModelResearchCountSizeProfile returns count-based innerSize, outerSize, labelSize, and screenLength. Band color no longer shrinks lower-band clusters to the point that count becomes visually ambiguous."
+  },
+  "cluster_radius_zoom_threshold_changes": {
+    "MODEL_LAB_COUNTYWIDE_SCALE_THRESHOLD": 78000,
+    "MODEL_LAB_CLUSTER_SCALE_THRESHOLD": 14000,
+    "MODEL_LAB_DETAIL_SCALE_THRESHOLD": 14000,
+    "MODEL_LAB_COUNTYWIDE_CELL_SIZE_DEGREES": 0.08,
+    "MODEL_LAB_CLUSTER_CELL_SIZE_DEGREES": 0.038,
+    "MODEL_LAB_COUNTYWIDE_MAX_CELLS": 32,
+    "MODEL_LAB_CLUSTER_MAX_CELLS": 52,
+    "MODEL_LAB_PARCEL_DETAIL_MAX_MARKERS": 120,
+    "effect": "Countywide/fused display remains active longer, medium zoom uses fewer larger clusters, and individual parcel-safe markers appear only at finer scales."
+  },
+  "count_label_behavior": {
+    "implemented": true,
+    "details": "Cluster/cell graphics with count greater than 1 now get a centered text label using the same safe attributes as the circle graphic, so clicking either the label or circle can resolve the same safe selected context.",
+    "not_rendered_for": "Single-record markers do not receive count labels."
+  },
+  "color_band_logic": {
+    "dominant_band": "Cluster color still reflects the dominant/weighted safe research band.",
+    "bands": [
+      "Very Strong Research Signal",
+      "Strong Research Signal",
+      "Moderate Research Signal",
+      "Lower Research Signal",
+      "Insufficient Data"
+    ],
+    "safety": "No probability wording, raw scores, or official prediction classes were introduced."
+  },
+  "selected_cluster_panel_changes": {
+    "right_panel": "Selected cluster context remains prioritized at the top of Model Lab Intelligence and now includes a compact Map display field such as Count-scaled clusters.",
+    "fields": [
+      "area label",
+      "parcels represented",
+      "dominant research band",
+      "band distribution",
+      "top drivers",
+      "why highlighted",
+      "map display mode",
+      "internal-only caveat"
+    ],
+    "single_count_grammar": "Single-record contexts use Selected Research Feature and 1 parcel represented."
+  },
+  "area_label_logic": {
+    "implemented": "Available context is used when already present. Otherwise, fallback labels are neutral and count-aware.",
+    "fallbacks": [
+      "Research cluster of N parcels",
+      "Research surface cell of N parcels",
+      "Single research feature"
+    ],
+    "no_fabrication": "No road, municipality, subdivision, or place names are invented when not present in the safe preview payload."
+  },
+  "performance_improvements": [
+    "Broader countywide and medium cell sizes reduce overlapping circles.",
+    "Lower max aggregate cell counts reduce map noise.",
+    "Parcel detail marker cap reduced from 175 to 120.",
+    "Cluster sorting now prioritizes concentration plus weight so larger concentrations are less likely to be dropped by caps.",
+    "No external clustering dependency or backend endpoint was added."
+  ],
+  "snapshot_report_integration": {
+    "report_changes": "If a Model Lab cluster is selected, Executive Summary states that the snapshot summarizes a relative research cluster and repeats that it is not an exact parcel development probability or official parcel score.",
+    "preserved_context": [
+      "cluster count / parcels represented",
+      "dominant research band",
+      "band distribution",
+      "area label",
+      "top drivers",
+      "map screenshot when available",
+      "caveat"
+    ]
+  },
+  "safety_verification": {
+    "no_exact_probabilities": true,
+    "no_raw_model_scores": true,
+    "no_official_prediction_classes": true,
+    "no_public_prediction_endpoint_added": true,
+    "no_model_training": true,
+    "no_dataset_changes": true,
+    "scan_notes": "Forbidden-token search hits are in guardrail tests and existing test assertions only; edited UI/report code avoids exact probability, raw score, official prediction class, and will-develop wording."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "passed: 288 passed, 3 warnings",
+    "targeted_backend_test": "passed: backend/tests/test_development_prediction_features.py"
+  },
+  "smoke_test_results": {
+    "localhost_3000_loads": "passed in browser",
+    "model_lab_opens": "passed",
+    "overlay_off_by_default": "passed",
+    "turn_overlay_on": "passed",
+    "fused_display_at_current_scale": "passed: browser showed Countywide research surface / Warmer areas",
+    "console_errors": "passed: no browser console errors captured",
+    "visual_size_difference": "not conclusively pixel-verified in browser; implementation is covered by count-bucket static tests",
+    "cluster_click": "not reverified visually in this pass"
+  },
+  "remaining_limitations": [
+    "Count labels use ArcGIS text symbols and should be visually checked on a full desktop display for exact label placement.",
+    "Area labels remain neutral fallback labels until safe road, municipality, subdivision, or place context is added to the preview payload.",
+    "Browser smoke verified overlay activation and fused display text, but did not conclusively click a visible cluster or compare pixel sizes."
+  ]
+}

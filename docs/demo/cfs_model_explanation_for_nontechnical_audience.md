@@ -26,6 +26,47 @@ That means the strongest internal research result so far came from combining
 zoning context, transportation context, and tax/value enrichment with the
 existing parcel development features.
 
+## What Model Lab Shows
+
+The CFS Model Lab is a safe research preview. It explains the development model
+without turning it into a public parcel score.
+
+Model Lab can show:
+
+- historical outcome: new construction permits;
+- target: new construction permit within next 3 years;
+- unit: parcel-year;
+- feature rows: 1,430,221;
+- current best internal variant: Zoning + Transportation + Tax/Value;
+- feature groups that helped: historical zoning, transportation, and tax/value;
+- feature groups excluded for now: Accela plan reviews, Central Area Plan,
+  utility proxy, and current-context metadata flags.
+
+Model Lab does not show exact parcel probabilities or official high/medium/low
+parcel classes.
+
+In Overview, Model Lab also changes the workspace into a research-preview mode.
+The optional Development Research Signal overlay is off by default. If enabled,
+it uses relative signal bands with distinct colors:
+
+- higher research signal;
+- moderate research signal;
+- lower research signal;
+- insufficient data.
+
+These are relative rank bands, not probabilities. A higher band means the
+parcel or area context more closely resembles places where new construction
+occurred historically, based on zoning, transportation access, tax/value
+patterns, and permit-label research. Model Lab does not draw exact
+probabilities, hidden model outputs, or official parcel prediction classes.
+
+The map now starts countywide: at broad zoom levels CFS shows an aggregated
+research surface instead of hundreds of overlapping parcel markers. As the user
+zooms in, the display moves to clustered research markers and then parcel-scale
+research markers. The right panel keeps only the most important aggregate
+metrics visible and places plain-English explanations behind "How these stats
+are calculated."
+
 ## Why Exact Probabilities Are Not Shown
 
 The model is better treated as a ranking research tool than as a precise

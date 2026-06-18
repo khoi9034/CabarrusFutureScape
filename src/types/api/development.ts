@@ -570,3 +570,44 @@ export interface DevelopmentPredictionRankingSummaryResponse {
   ranking_row_count: number;
   unique_parcel_count: number;
 }
+
+export interface DevelopmentModelResearchPreviewCentroidResponse {
+  latitude: number;
+  longitude: number;
+  spatial_reference?: {
+    wkid?: number;
+  };
+}
+
+export interface DevelopmentModelResearchPreviewFeatureResponse {
+  caveat: string;
+  centroid: DevelopmentModelResearchPreviewCentroidResponse | null;
+  data_quality_flag: string;
+  exact_probability_available: boolean;
+  model_version: string;
+  official_parcel_id: string;
+  production_ready: boolean;
+  public_exposure_allowed: boolean;
+  research_rank_band: string;
+  research_signal_label: string;
+  top_driver_1?: string | null;
+  top_driver_2?: string | null;
+  top_driver_3?: string | null;
+}
+
+export interface DevelopmentModelResearchPreviewResponse {
+  caveat: string;
+  exact_probability_available: boolean;
+  experiment_id: string | null;
+  features: DevelopmentModelResearchPreviewFeatureResponse[];
+  limit: number;
+  no_exact_probabilities: boolean;
+  no_official_prediction_classes: boolean;
+  no_raw_model_scores: boolean;
+  preview_available: boolean;
+  production_ready: boolean;
+  public_exposure_allowed: boolean;
+  returned_count: number;
+  signal_filter: string;
+  total_count: number;
+}

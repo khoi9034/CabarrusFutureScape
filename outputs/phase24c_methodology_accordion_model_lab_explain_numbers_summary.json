@@ -1,0 +1,147 @@
+{
+  "phase": "24C",
+  "title": "Methodology Accordion Independence and Model Lab Explain-the-Numbers UX",
+  "branch": "main",
+  "files_changed": [
+    "src/components/dashboard/MethodologyWorkspace.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/data/intelligence/developmentModelLab.ts",
+    "backend/tests/test_development_prediction_features.py"
+  ],
+  "accordion_root_cause": "Methodology accordion cards in the Data Needed and FAQ sections were rendered in a shared two-column CSS grid. Expanded content increased the shared grid row height, which stretched the paired card in the other column and created a large blank area.",
+  "layout_fix_approach": {
+    "approach": "Independent column stacks",
+    "details": [
+      "Split accordion items into left and right column arrays.",
+      "Each column renders as its own vertical stack with space-y spacing.",
+      "The parent grid uses lg:items-start, so columns align at the top without shared row stretching.",
+      "Accordion cards use self-start and overflow-hidden so collapsed content does not leave residual height."
+    ],
+    "sections_updated": [
+      "Data Still Needed / What To Ask For And Why It Matters",
+      "Roadmap & Guardrails / Common Questions"
+    ]
+  },
+  "independent_collapse_behavior": {
+    "right_card_open_left_card_compact": true,
+    "left_card_open_right_card_compact": true,
+    "collapsed_cards_return_to_header_height": true,
+    "hidden_content_occupies_layout_height": false,
+    "browser_height_check": {
+      "school_card_open_height": "288.67px",
+      "wsacc_card_when_school_open": "45.33px",
+      "wsacc_card_open_height": "288.67px",
+      "school_card_when_wsacc_open": "45.33px"
+    }
+  },
+  "model_lab_explain_the_numbers_ux": {
+    "button_label": "Explain the Numbers",
+    "locations": [
+      "Default Model Lab Intelligence panel",
+      "Selected Development Research Context panel"
+    ],
+    "explains": [
+      "research bands",
+      "highest-ranked research band",
+      "relative development signal",
+      "PR-AUC",
+      "Lift@top 5%",
+      "Precision@top 5%",
+      "why exact probabilities are hidden",
+      "what the model uses",
+      "how the Development Research Signal is calculated"
+    ],
+    "default_visibility": "collapsed",
+    "browser_verified_open": true
+  },
+  "band_wording_changes": {
+    "old_examples_removed_from_user_facing_ui": [
+      "Top 5% relative development signal",
+      "Top 10-15% relative development signal"
+    ],
+    "new_labels": [
+      "Very Strong Research Signal",
+      "Strong Research Signal",
+      "Moderate Research Signal",
+      "Lower Research Signal",
+      "Insufficient Data"
+    ],
+    "ranking_detail_location": "Explain the Numbers panel and Methodology Model Research language",
+    "probability_caveat": "Research bands rank parcels or areas against each other and are not probability percentages."
+  },
+  "selected_marker_explanation_changes": {
+    "selected_context_title": "Selected Development Research Context",
+    "fields_added_or_refined": [
+      "Research band",
+      "What the band means",
+      "Why highlighted",
+      "Top contextual drivers",
+      "What this does not mean",
+      "Explain the Numbers button"
+    ],
+    "required_caveat": "Not an exact probability. Not an official parcel score.",
+    "browser_marker_click": "Not exercised in this smoke run; source and regression tests verify the selected-context panel contains Explain the Numbers access and the required caveat."
+  },
+  "snapshot_report_integration": {
+    "executive_summary_section": "Development Model Research Context",
+    "added_context": [
+      "What the band means",
+      "How signal is calculated",
+      "Current best internal model",
+      "Top drivers / source context",
+      "Missing data needed",
+      "Internal research caveat"
+    ],
+    "required_caveat_present": true,
+    "forbidden_outputs_in_report": [
+      "exact parcel probability",
+      "raw model score",
+      "official parcel prediction class"
+    ]
+  },
+  "methodology_model_explanation_alignment": {
+    "added_card": "Research band language",
+    "current_best_internal_model": "Zoning + Transportation + Tax/Value",
+    "relative_ranking_only": true,
+    "official_data_needed_before_operational_use": true,
+    "legacy_aggregate_only_guardrail_preserved": true
+  },
+  "safety_verification": {
+    "exact_probability_visible": false,
+    "prediction_probability_visible": false,
+    "experimental_probability_visible": false,
+    "raw_model_score_visible": false,
+    "parcel_score_visible": false,
+    "official_prediction_class_visible": false,
+    "development_signal_class_user_facing": false,
+    "notes": "Safety audit found existing backend/schema/internal guardrail fields such as prediction_probability_available=false and exact_probability_available=false; no new public prediction endpoints or UI probability outputs were added."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "focused_pytest": "backend/tests/test_development_prediction_features.py passed: 28 passed, 1 warning",
+    "python_compileall_app": "passed from backend directory",
+    "python_m_pytest": "passed: 285 passed, 3 warnings"
+  },
+  "smoke_test_results": {
+    "dev_stack": "npm run dev:cfs started CFS on http://localhost:3000 and FastAPI on http://127.0.0.1:8000 with health checks passing.",
+    "overview_loads": true,
+    "methodology_loads": true,
+    "data_needed_accordion_right_open_no_left_blank": true,
+    "data_needed_accordion_left_open_no_right_blank": true,
+    "collapsed_cards_compact": true,
+    "model_lab_opens": true,
+    "explain_the_numbers_button_visible": true,
+    "explain_panel_opens": true,
+    "explain_panel_required_topics_present": true,
+    "planning_snapshot_loads": true,
+    "browser_console_errors": []
+  },
+  "remaining_known_issues": [
+    "The broader repository remains dirty from prior phases; this phase did not revert unrelated files.",
+    "Browser smoke did not click an actual SceneView model marker because canvas marker targeting is not deterministic through the current automation surface; the selected marker panel path is covered by source and regression tests."
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "phase": "23G",
+  "title": "Model Lab Adaptive Clustering, Heatmap Fusion, and Cluster Intelligence Panel",
+  "files_changed": [
+    "src/components/gis/SceneViewContainer.tsx",
+    "src/components/dashboard/IntelligencePanel.tsx",
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "src/hooks/useDashboardState.tsx",
+    "src/types/index.ts",
+    "src/types/map/modelResearchPreview.ts",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase23g_model_lab_adaptive_clustering_summary.json"
+  ],
+  "clustering_heatmap_strategy": {
+    "countywide": "At countywide scale, the Development Research Signal uses fused aggregate surface cells instead of drawing all individual parcel-safe markers.",
+    "medium_zoom": "At medium scale, the overlay renders count-scaled cluster markers. Cluster color reflects the dominant safe research band and marker size reflects capped feature count.",
+    "close_zoom": "At close scale, the overlay switches to capped individual parcel-safe research markers using relative research band colors.",
+    "no_external_dependencies": true,
+    "no_backend_schema_change": true
+  },
+  "zoom_thresholds": {
+    "MODEL_LAB_COUNTYWIDE_MIN_SCALE": 95000,
+    "MODEL_LAB_CLUSTER_MIN_SCALE": 24000,
+    "MODEL_LAB_COUNTYWIDE_CELL_SIZE_DEGREES": 0.055,
+    "MODEL_LAB_CLUSTER_CELL_SIZE_DEGREES": 0.024,
+    "MODEL_LAB_COUNTYWIDE_MAX_CELLS": 44,
+    "MODEL_LAB_CLUSTER_MAX_CELLS": 78,
+    "MODEL_LAB_PARCEL_DETAIL_MAX_MARKERS": 175
+  },
+  "cluster_fields": [
+    "cluster_id",
+    "cluster_count",
+    "dominant_research_band",
+    "band_counts",
+    "representative_signal_label",
+    "top_driver_summary",
+    "selected_feature_group_summary",
+    "approximate_area_label",
+    "centroid",
+    "display_mode",
+    "production_ready=false",
+    "public_exposure_allowed=false",
+    "exact_probability_available=false"
+  ],
+  "area_naming_logic": {
+    "implemented": "Uses honest fallback labels derived from cluster contents, such as Research cluster of N parcels or Research surface cell of N parcels.",
+    "not_implemented": "No corridor, municipality, subdivision, or place names are invented when source context is not available in the preview marker payload."
+  },
+  "click_behavior": {
+    "cluster_click": "Cluster and heat-surface graphics carry safe aggregate fields so the right panel can show Selected Research Cluster, count, dominant band, band distribution, top drivers, display mode, and caveat.",
+    "marker_click": "Parcel-detail markers continue to show Selected Development Research Context with parcel-safe identifier, research band, relative rank band, top drivers, data quality flag, and caveat.",
+    "fallback": "Added a nearest rendered model-research graphic fallback for map clicks when ArcGIS hitTest misses a nearby safe cluster or marker."
+  },
+  "right_panel_changes": {
+    "default_state": "Model Lab Intelligence stays concise and shows current display mode, overlay status, map-reading guidance, Explain the Numbers, and collapsed Model QA details.",
+    "selected_cluster_state": "Selected Research Cluster shows area label, cluster count, dominant band, band distribution, top drivers, why highlighted, map scale/display mode, and internal-only caveat.",
+    "selected_marker_state": "Selected Development Research Context remains parcel-safe and avoids exact probabilities, raw scores, and official prediction classes."
+  },
+  "performance_improvements": [
+    "Avoids rendering all individual research markers at countywide scale.",
+    "Aggregates markers into countywide cells and medium-zoom clusters.",
+    "Caps rendered aggregate cells and parcel-detail markers.",
+    "Memoizes derived display-mode and aggregation data.",
+    "Reduces symbol halo sizes and opacity to lower visual clutter."
+  ],
+  "snapshot_report_integration": {
+    "snapshot_version": "phase23g_v1",
+    "saved_context": [
+      "active display mode",
+      "selected cluster or marker context",
+      "cluster count",
+      "dominant research band",
+      "band distribution",
+      "top drivers",
+      "map screenshot when available",
+      "internal-only caveat"
+    ],
+    "report_behavior": "Planning Snapshot / Executive Summary now includes cluster or heatmap-cell context when selected, including Cluster / cell count and Band distribution, while preserving the required no-probability caveat."
+  },
+  "safety_verification": {
+    "no_exact_probabilities": true,
+    "no_raw_model_scores": true,
+    "no_official_prediction_classes": true,
+    "no_public_prediction_endpoint_added": true,
+    "no_model_training": true,
+    "no_external_datasets": true,
+    "safety_audit_notes": "Unsafe tokens found by rg are limited to existing internal API/schema/service guardrail fields and safe hook checks such as prediction_probability_available=false, exact_probability_available=false, no_raw_model_scores, and backend mappings that translate internal classes into safe research labels. Phase 23G user-facing sources were covered by tests to reject unsafe public wording."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "passed",
+    "python_pytest": "passed: 286 passed, 3 warnings",
+    "targeted_test_after_final_frontend_adjustment": "passed: backend/tests/test_development_prediction_features.py"
+  },
+  "smoke_test_results": {
+    "localhost_3000_loads": "passed",
+    "model_lab_mode_opens": "passed",
+    "research_overlay_off_by_default": "passed",
+    "turning_overlay_on": "passed",
+    "countywide_fused_view_text": "passed: UI showed Countywide research surface and Warmer areas guidance",
+    "unsafe_terms_in_browser_ui": "passed: none found for exact/raw/probability terms checked",
+    "cluster_click_panel_update": "not conclusively browser-verified; bounded automated clicks in the small SceneView canvas missed a selectable rendered research feature, but cluster context fields, selected-panel UI, nearest-click fallback, and report integration are covered by static tests",
+    "browser_console_errors": "not fully rechecked after the final click attempt; earlier smoke showed no unexpected app errors beyond known ArcGIS external behavior"
+  },
+  "remaining_limitations": [
+    "Cluster area labels intentionally use honest fallback wording until safe road, jurisdiction, or neighborhood context is available in the preview payload.",
+    "Automated browser smoke did not conclusively select a cluster because canvas clicks missed rendered research graphics at the tested viewport.",
+    "No backend clustering endpoint was added; Phase 23G uses frontend aggregation over the existing safe research preview markers."
+  ]
+}

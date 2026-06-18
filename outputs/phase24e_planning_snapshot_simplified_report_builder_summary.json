@@ -1,0 +1,132 @@
+{
+  "phase": "24E",
+  "title": "Planning Snapshot Simplified Report Builder UX",
+  "files_changed": [
+    "src/components/dashboard/DueDiligenceReview.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase24e_planning_snapshot_simplified_report_builder_summary.json"
+  ],
+  "layout_simplification": {
+    "summary": "Planning Snapshot now renders as a single vertical report builder instead of a multi-tab workflow.",
+    "default_order": [
+      "Planning Snapshot header with top Print Executive Summary button",
+      "Compact Snapshot Library",
+      "Selected Snapshot Map",
+      "Customize Report controls",
+      "Executive Summary Preview",
+      "Optional collapsed Advanced saved evidence"
+    ],
+    "empty_state": "No-snapshot state now shows a simple message plus Go to Overview and Open Methodology buttons."
+  },
+  "removed_or_reduced_top_level_tabs": {
+    "removed_from_default_page": [
+      "Snapshot Overview tab card",
+      "Explain the Numbers tab card",
+      "Executive Summary tab card",
+      "Review Actions tab card"
+    ],
+    "replacement": "Detailed legacy evidence remains available only through a collapsed Advanced saved evidence section."
+  },
+  "print_button_visibility": {
+    "top_button": "A prominent Print Executive Summary button is visible in the Planning Snapshot header without scrolling.",
+    "bottom_button": "A second Print Executive Summary button remains in the Executive Summary Preview controls.",
+    "target": "Print uses the existing .print-report article while dashboard controls are marked no-print."
+  },
+  "map_snapshot_cartography_changes": {
+    "map_first": "Selected Snapshot Map is shown directly after the compact library.",
+    "screenshot_behavior": "Captured map screenshots render when available; unavailable screenshots show the existing clean placeholder and failure reason.",
+    "caption": "Map snapshot captured from CFS Overview at the snapshot timestamp.",
+    "legend": "Legend is generated from snapshot context for Model Lab, FEMA flood, schools, development activity, or a neutral active-layer fallback.",
+    "north_arrow": "A compact north arrow appears over the map image/placeholder.",
+    "scale_note": "Scale note states that scale is approximate because 3D scene perspective affects distance.",
+    "active_context": "Active layer chips and selected parcel/context chips appear under the map."
+  },
+  "report_controls_changes": {
+    "panel": "Customize Report is a compact checklist panel instead of large workflow cards.",
+    "sections": [
+      "Map View",
+      "Key Findings",
+      "Parcel Facts",
+      "Countywide Indicators",
+      "Development / Permits",
+      "FEMA Flood",
+      "Schools",
+      "Transportation",
+      "Utility Proxy",
+      "Model Governance",
+      "Data Needed / Caveats",
+      "Recommended Actions"
+    ],
+    "clear_snapshot": "Clear Snapshot remains available inside the compact controls."
+  },
+  "explanation_toggle_behavior": {
+    "default": "Show explanation cards is off by default.",
+    "when_off": "Executive Summary shows concise values and caveats only.",
+    "when_on": "Explanation cards show only What it means, Source, and Caveat.",
+    "removed_from_default_explanations": [
+      "long method/rationale copy",
+      "long recommended-action explanation cards",
+      "repeated Explainable labels"
+    ]
+  },
+  "executive_summary_simplification": {
+    "report_header": "Cabarrus FutureScape / Planning Snapshot Executive Summary with generated and snapshot timestamps.",
+    "map_section": "Printable map section includes image or placeholder, legend, north arrow, active layers, selected parcel, and scale note.",
+    "key_findings": "Limited to up to five review flags.",
+    "evidence_sections": "Included Evidence Sections are concise by default and obey report toggles.",
+    "model_lab": "Model Lab snapshots show concise research band/context, top drivers, current best internal model, and required caveat. Extra rank/display/missing-data detail appears only when explanation cards are enabled.",
+    "caveats": "Limitations/caveats remain in the printable report when selected."
+  },
+  "print_css_changes": {
+    "css_files_changed": [],
+    "existing_print_css_used": [
+      ".no-print hides dashboard controls",
+      ".print-report uses white background and dark text",
+      ".print-report hides buttons and summaries",
+      "map image, legend, north arrow, scale note, key findings, caveats, and recommendations remain inside the printable article"
+    ],
+    "browser_print_target_check": "DOM smoke confirmed .print-report exists and does not include Snapshot Library, Customize Report, Delete/Open controls, or dashboard controls."
+  },
+  "safety_verification": {
+    "datasets_added": false,
+    "models_trained": false,
+    "postgis_schema_modified": false,
+    "public_prediction_endpoint_added": false,
+    "map_screenshots_faked": false,
+    "probabilities_or_raw_scores_exposed": false,
+    "model_caveats_removed": false,
+    "notes": "Model Lab report wording remains internal research only, not exact probability, not official parcel score."
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "exited 0; command reports no top-level app directory in this repo",
+    "python_pytest": "293 passed, 3 warnings",
+    "focused_phase24e_test": "passed"
+  },
+  "smoke_test_results": {
+    "localhost_3000_loads": "passed",
+    "planning_snapshot_loads": "passed",
+    "page_is_simpler_and_report_focused": "passed",
+    "print_button_visible_without_scrolling": "passed",
+    "snapshot_library_compact": "passed",
+    "selected_map_snapshot_prominent": "passed",
+    "legend_appears": "passed",
+    "north_arrow_appears": "passed",
+    "scale_note_appears": "passed",
+    "customize_report_controls_compact": "passed",
+    "explanation_cards_hidden_by_default": "passed",
+    "show_explanation_cards_toggle_works": "passed",
+    "executive_summary_preview_concise": "passed",
+    "print_preview_hides_dashboard_controls": "verified by print-report/no-print DOM and CSS checks",
+    "no_exact_probabilities_or_raw_scores": "passed",
+    "overview_still_works": "passed",
+    "methodology_still_works": "passed",
+    "browser_console_errors": "none observed"
+  },
+  "remaining_known_issues": [
+    "Browser smoke used existing saved snapshots in localStorage; one snapshot had a captured map and another had the clean unavailable placeholder.",
+    "Actual browser print dialog was not opened during automation, but print-target DOM and CSS behavior were verified."
+  ]
+}

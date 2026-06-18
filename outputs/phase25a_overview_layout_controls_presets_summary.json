@@ -1,0 +1,126 @@
+{
+  "phase": "25A",
+  "title": "Overview Workspace Layout Controls and User Presets",
+  "files_changed": [
+    "src/types/index.ts",
+    "src/hooks/useDashboardState.tsx",
+    "src/components/layout/AppShell.tsx",
+    "src/components/dashboard/OverviewCommandCenter.tsx",
+    "src/components/layout/Sidebar.tsx",
+    "backend/tests/test_development_prediction_features.py",
+    "outputs/phase25a_overview_layout_controls_presets_summary.json"
+  ],
+  "layout_presets_added": [
+    {
+      "preset": "Command Center",
+      "behavior": "Default balanced layout with command center visible, left panel collapsed, right Intelligence panel visible, and map central."
+    },
+    {
+      "preset": "Map Focus",
+      "behavior": "Hides command center and both side panels so the SceneView takes maximum space while floating restore controls remain visible."
+    },
+    {
+      "preset": "Parcel Intelligence",
+      "behavior": "Keeps the command center compact, left panel collapsed, right Intelligence panel wide, and parcel search emphasized."
+    },
+    {
+      "preset": "Countywide Layers",
+      "behavior": "Opens the layer controls and keeps countywide intelligence visible without turning every layer on."
+    },
+    {
+      "preset": "Model Lab",
+      "behavior": "Shows Model Lab controls on the left and Model Lab Intelligence on the right. Overlay behavior remains off by default unless already enabled."
+    },
+    {
+      "preset": "Snapshot Builder",
+      "behavior": "Shows the Snapshot Helper and Snapshot Capture context so the real Save Snapshot action stays explicit."
+    },
+    {
+      "preset": "Executive Demo",
+      "behavior": "Keeps a compact command center, collapsed layers, right panel visible, and report actions easy to reach."
+    }
+  ],
+  "panel_visibility_controls": {
+    "left_panel": "Layout menu can hide/show the Layers panel, and Map Focus hides it with a Show Layers restore button.",
+    "right_panel": "Layout menu can hide/show the Intelligence panel, and Map Focus hides it with a Show Intelligence restore button.",
+    "command_center": "Layout menu can compact, expand, or hide the command center. A Show Command Center restore button appears when hidden.",
+    "reset_layout": "Reset Layout restores the Command Center preset.",
+    "save_layout": "Save Layout writes the current layout preference to the cfs.overview.layout.v1 localStorage preference."
+  },
+  "panel_sizing_behavior": {
+    "left_panel_width_presets": [
+      "compact",
+      "standard",
+      "wide"
+    ],
+    "right_panel_width_presets": [
+      "compact",
+      "standard",
+      "wide"
+    ],
+    "map_protection": "The shell uses fixed width buckets and grid minmax constraints so panels cannot drag or preset the map out of view."
+  },
+  "localStorage_persistence": {
+    "key": "cfs.overview.layout.v1",
+    "stored_fields": [
+      "active layout preset",
+      "left panel visibility",
+      "right panel visibility",
+      "command center state",
+      "left panel width preset",
+      "right panel width preset"
+    ],
+    "normalization": "Stored preferences are validated before use and fall back to the Command Center preset when invalid or missing."
+  },
+  "restore_controls": {
+    "behavior": "Floating controls appear when panels or the command center are hidden.",
+    "controls": [
+      "Show Layers",
+      "Show Intelligence",
+      "Show Command Center",
+      "Reset Layout"
+    ]
+  },
+  "workflow_preservation": {
+    "search_parcel": "Search Parcel still activates parcel mode, focuses the search input, and keeps Selected Parcel Intelligence available.",
+    "explore_countywide": "Explore Countywide still activates countywide mode and opens layer controls.",
+    "model_lab": "Model Lab still activates Model Lab mode, shows Model Lab controls and Intelligence, and keeps unsafe probability/score fields out of the UI.",
+    "snapshot_builder": "Snapshot Builder still opens snapshot mode without creating a snapshot. The explicit Save Snapshot action remains inside the helper/right panel.",
+    "planning_snapshot": "No report data model changes were made; snapshots continue to capture planning context, not UI panel positions.",
+    "methodology": "Methodology was not redesigned."
+  },
+  "safety_verification": {
+    "datasets_added": false,
+    "models_trained": false,
+    "postgis_schema_modified": false,
+    "public_prediction_endpoint_added": false,
+    "exact_parcel_probabilities_exposed": false,
+    "raw_model_scores_exposed": false,
+    "official_parcel_prediction_classes_exposed": false,
+    "model_readiness_overclaimed": false
+  },
+  "validation_results": {
+    "npm_run_typecheck": "passed",
+    "npm_run_lint": "passed",
+    "npm_run_build_webpack": "passed",
+    "python_compileall_app": "top-level app directory is not present; command reports cannot list app",
+    "python_compileall_backend_app": "passed",
+    "python_pytest": "passed: 290 passed, 3 warnings",
+    "targeted_phase25a_pytest": "passed"
+  },
+  "smoke_test_results": {
+    "localhost_3000_loads": "passed",
+    "command_center_actions_readable": "passed",
+    "layout_control_visible": "passed",
+    "map_focus_preset": "passed; command center and panels hide, map remains visible, restore controls appear",
+    "reset_layout": "passed; command center returns and restore clutter disappears",
+    "model_lab_mode": "passed; controls and Intelligence panel show with no unsafe probability/raw score wording",
+    "snapshot_builder_mode": "passed; explicit Save Snapshot action remains visible and top command does not save",
+    "search_parcel_focus": "passed; Search Parcel focuses the aria-label Search parcels input",
+    "browser_console": "only known ArcGIS draped graphics label-placement warnings observed"
+  },
+  "remaining_limitations": [
+    "The in-app browser read-only evaluation context did not expose localStorage directly, so persistence was verified through UI behavior and automated source/test coverage rather than direct browser storage inspection.",
+    "Layout preferences store panel arrangement only; Planning Snapshot reports intentionally do not include panel positions or command-center UI clutter."
+  ]
+}

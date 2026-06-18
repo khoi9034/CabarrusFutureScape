@@ -10,8 +10,8 @@ automate decisions. The goal is to help staff see what is known, what needs
 review, and what caveats matter.
 
 I will start in Overview at the CFS Command Center. It gives four compact
-actions: Search Parcel, Countywide Intelligence, Save Snapshot, and Open
-Snapshots. The Layers rail starts collapsed so the map stays central. Then I use the parcel search. For this demo I am using
+actions: Search Parcel, Explore Countywide, Model Lab, and Snapshot Builder. The
+Layers rail starts collapsed so the map stays central. Then I use the parcel search. For this demo I am using
 `CFS-PARCEL-0149726579`. When the parcel is selected, the map and dashboard
 focus on the same record, and the active selection overlay confirms the parcel,
 owner, zoning, and data source.
