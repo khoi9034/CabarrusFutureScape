@@ -7,9 +7,10 @@ Generated: 2026-06-21
 - Local repo path: `C:\CabarrusFutureScape`
 - Git remote: `https://github.com/khoi9034/CabarrusFutureScape.git`
 - Branch: `main`
-- Latest prepared code commit before this report refresh: `cbd481f7993e1eaaafaf27948f59633aa367af33`
+- Latest prepared source/deploy commit before this report refresh: `27cf8eb`
 - Final UI/deploy source commit: `ec032c4`
 - Vercel build-script fix commit: `cbd481f`
+- Production API localhost fallback fix commit: `27cf8eb`
 - Vercel project name: `cabarrus-future-scape`
 - Vercel project ID: `prj_Rr2cFrMxWCVym8zJxxikAvvT6ZrH`
 
