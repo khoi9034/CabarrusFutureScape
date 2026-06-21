@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   BookOpen,
   BrainCircuit,
+  BarChart3,
   ChevronDown,
   Copy,
   Crosshair,
@@ -16,13 +17,18 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { DataRegistryPanel } from "@/components/dashboard/DataRegistryPanel";
 import { DueDiligenceReview } from "@/components/dashboard/DueDiligenceReview";
 import { EventStreamPanel } from "@/components/dashboard/EventStreamPanel";
 import { ExecutiveBriefingPanel } from "@/components/dashboard/ExecutiveBriefingPanel";
 import { ExecutiveReportPanel } from "@/components/dashboard/ExecutiveReportPanel";
 import { GISIntegrationReadinessPanel } from "@/components/dashboard/GISIntegrationReadinessPanel";
+import {
+  buildIndicatorCenterSummaryCards,
+  toIndicatorCenterSnapshotSummaries,
+  type IndicatorCenterSummaryCard,
+} from "@/components/dashboard/IndicatorCenterWorkspace";
 import { ParcelSummaryPanel } from "@/components/dashboard/ParcelSummaryPanel";
 import { PrintLayoutPreview } from "@/components/dashboard/PrintLayoutPreview";
 import { RoleIntelligencePanel } from "@/components/dashboard/RoleIntelligencePanel";
@@ -50,6 +56,13 @@ import {
   formatDevelopmentLabel,
 } from "@/data/intelligence/developmentActivityMetrics";
 import {
+  buildIndicatorCenterHeadlineMetrics,
+  buildIndicatorCenterReviewThemes,
+  filterIndicatorCenterDefinitions,
+  getIndicatorCenterDisplayModeLabel,
+  indicatorCenterDefinitions,
+} from "@/data/intelligence/indicatorCenter";
+import {
   formatIntelligenceCount,
   formatIntelligencePercentage,
 } from "@/data/intelligence/parcelDashboardMetrics";
@@ -69,10 +82,17 @@ import type {
   PlanningSnapshot,
   PlanningReviewFocusMode,
   PlanningSnapshotSectionKey,
+  PlanningSnapshotDevelopmentActivityContext,
+  IndicatorCenterDisplayMode,
+  IndicatorCenterGroupId,
+  IndicatorCenterContext,
+  PlanningSnapshotIndicatorSummary,
+  PlanningSnapshotIndicatorCenterContext,
   ProductMode,
   ModelResearchMapSummary,
   OverviewCommandMode,
 } from "@/types";
+import type { SelectedDevelopmentHotspotContext } from "@/types/map/developmentHotspots";
 import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
 import type { SelectedSchoolUtilizationZone } from "@/types/map/schoolUtilizationZones";
 
@@ -103,9 +123,14 @@ const modeMetadata: Record<
     label: "Methodology",
   },
   overview: {
-    description: "Map exploration, parcel search, live layers, and headline intelligence.",
+    description: "Cabarrus FutureScape introduction and safe-use overview.",
     icon: BrainCircuit,
     label: "Overview",
+  },
+  workspace: {
+    description: "Map exploration, global parcel search, live layers, and headline intelligence.",
+    icon: BrainCircuit,
+    label: "Workspace",
   },
 };
 
@@ -116,6 +141,7 @@ export function IntelligencePanel() {
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
     floodZonesEnabled,
+    indicatorCenterDisplayMode,
     modelResearchOverlayEnabled,
     modelResearchMapSummary,
     overviewCommandMode,
@@ -124,6 +150,9 @@ export function IntelligencePanel() {
     selectedParcelId,
     selectedParcelIntelligence,
     selectedParcelIntelligenceSource,
+    selectedDevelopmentHotspotContext,
+    selectedIndicatorCenterGroupIds,
+    selectedIndicatorCenterContext,
     selectedModelResearchContext,
     selectedSchoolUtilizationZone,
     planningSnapshot,
@@ -131,6 +160,7 @@ export function IntelligencePanel() {
     clearSelectedSchoolUtilizationZone,
     savePlanningSnapshot,
     schoolUtilizationZonesEnabled,
+    setSelectedIndicatorCenterContext,
     setMapFocusMode,
     setOverviewCommandMode,
     setParcelReviewView,
@@ -174,11 +204,14 @@ export function IntelligencePanel() {
         </div>
       </div>
 
-      {productMode === "overview" ? (
+      {productMode === "workspace" ? (
         <OverviewModeContent
           selectedParcelId={selectedParcelId}
           selectedParcelIntelligence={selectedParcelIntelligence}
           selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
+          selectedDevelopmentHotspotContext={selectedDevelopmentHotspotContext}
+          selectedIndicatorCenterGroupIds={selectedIndicatorCenterGroupIds}
+          selectedIndicatorCenterContext={selectedIndicatorCenterContext}
           selectedModelResearchContext={selectedModelResearchContext}
           selectedSchoolUtilizationZone={selectedSchoolUtilizationZone}
           clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
@@ -187,6 +220,7 @@ export function IntelligencePanel() {
           developmentHotspotsEnabled={developmentHotspotsEnabled}
           floodConstraintsEnabled={floodConstraintsEnabled}
           floodZonesEnabled={floodZonesEnabled}
+          indicatorCenterDisplayMode={indicatorCenterDisplayMode}
           modelResearchOverlayEnabled={modelResearchOverlayEnabled}
           modelResearchMapSummary={modelResearchMapSummary}
           overviewCommandMode={overviewCommandMode}
@@ -195,6 +229,7 @@ export function IntelligencePanel() {
           savedPlanningSnapshots={savedPlanningSnapshots}
           savePlanningSnapshot={savePlanningSnapshot}
           setMapFocusMode={setMapFocusMode}
+          setSelectedIndicatorCenterContext={setSelectedIndicatorCenterContext}
           setOverviewCommandMode={setOverviewCommandMode}
           setProductMode={setProductMode}
           setPlanningSnapshotView={setPlanningSnapshotView}
@@ -230,6 +265,7 @@ function OverviewModeContent({
   developmentHotspotsEnabled,
   floodConstraintsEnabled,
   floodZonesEnabled,
+  indicatorCenterDisplayMode,
   modelResearchOverlayEnabled,
   modelResearchMapSummary,
   overviewCommandMode,
@@ -237,6 +273,9 @@ function OverviewModeContent({
   savedPlanningSnapshots,
   savePlanningSnapshot,
   schoolUtilizationZonesEnabled,
+  selectedDevelopmentHotspotContext,
+  selectedIndicatorCenterGroupIds,
+  selectedIndicatorCenterContext,
   selectedParcelId,
   selectedParcelIntelligence,
   selectedParcelIntelligenceSource,
@@ -244,6 +283,7 @@ function OverviewModeContent({
   selectedSchoolUtilizationZone,
   setMapFocusMode,
   setOverviewCommandMode,
+  setSelectedIndicatorCenterContext,
   setProductMode,
   setPlanningSnapshotView,
 }: {
@@ -253,6 +293,7 @@ function OverviewModeContent({
   developmentHotspotsEnabled: boolean;
   floodConstraintsEnabled: boolean;
   floodZonesEnabled: boolean;
+  indicatorCenterDisplayMode: IndicatorCenterDisplayMode;
   modelResearchOverlayEnabled: boolean;
   modelResearchMapSummary: ModelResearchMapSummary;
   overviewCommandMode: OverviewCommandMode;
@@ -260,6 +301,9 @@ function OverviewModeContent({
   savedPlanningSnapshots: PlanningSnapshot[];
   savePlanningSnapshot: (snapshot: PlanningSnapshot) => void;
   schoolUtilizationZonesEnabled: boolean;
+  selectedDevelopmentHotspotContext: SelectedDevelopmentHotspotContext | null;
+  selectedIndicatorCenterGroupIds: IndicatorCenterGroupId[];
+  selectedIndicatorCenterContext: IndicatorCenterContext | null;
   selectedParcelId: string | null;
   selectedParcelIntelligence: Parameters<typeof ParcelSummaryPanel>[0]["parcel"];
   selectedParcelIntelligenceSource: Parameters<typeof ParcelSummaryPanel>[0]["source"];
@@ -267,6 +311,7 @@ function OverviewModeContent({
   selectedSchoolUtilizationZone: SelectedSchoolUtilizationZone | null;
   setMapFocusMode: ReturnType<typeof useDashboardState>["setMapFocusMode"];
   setOverviewCommandMode: ReturnType<typeof useDashboardState>["setOverviewCommandMode"];
+  setSelectedIndicatorCenterContext: ReturnType<typeof useDashboardState>["setSelectedIndicatorCenterContext"];
   setProductMode: (mode: ProductMode) => void;
   setPlanningSnapshotView: ReturnType<typeof useDashboardState>["setPlanningSnapshotView"];
 }) {
@@ -279,6 +324,14 @@ function OverviewModeContent({
   const parcelDashboardMetrics = useParcelDashboardMetrics();
   const developmentStatistics = useDevelopmentStatistics();
   const floodSummary = useFloodConstraintSummary();
+  const indicatorCenterCards = useMemo(
+    () =>
+      buildIndicatorCenterSummaryCards({
+        developmentStatistics,
+        floodSummary,
+      }),
+    [developmentStatistics, floodSummary],
+  );
   const selectedParcelForSnapshot = selectedParcelIntelligence ?? null;
   const selectedParcelOfficialId =
     selectedParcelForSnapshot?.officialParcelId ?? selectedParcelId;
@@ -312,7 +365,10 @@ function OverviewModeContent({
     setSnapshotSaving(true);
 
     try {
-      const mapSnapshot = await captureMapSnapshotForPlanning();
+      const mapSnapshot =
+        overviewCommandMode === "indicatorCenter"
+          ? createIndicatorCenterSnapshotCapture()
+          : await captureMapSnapshotForPlanning();
       const snapshotFocusMode = getPlanningFocusModeForOverviewMode(
         overviewCommandMode,
         Boolean(selectedParcelForSnapshot),
@@ -334,6 +390,12 @@ function OverviewModeContent({
         overviewCommandMode,
         parcel: selectedParcelForSnapshot,
         schoolConstraint,
+        selectedDevelopmentHotspotContext,
+        selectedIndicatorCenterContext,
+        selectedIndicatorCenterDisplayMode: indicatorCenterDisplayMode,
+        selectedIndicatorCenterGroupIds,
+        selectedIndicatorCenterSummaries:
+          toIndicatorCenterSnapshotSummaries(indicatorCenterCards),
         selectedModelResearchContext,
       });
       savePlanningSnapshot(nextSnapshot);
@@ -351,11 +413,16 @@ function OverviewModeContent({
     activeLayerLabels,
     developmentActivity,
     floodConstraint,
+    indicatorCenterCards,
+    indicatorCenterDisplayMode,
     modelResearchMapSummary,
     modelResearchOverlayEnabled,
     overviewCommandMode,
     savePlanningSnapshot,
     schoolConstraint,
+    selectedDevelopmentHotspotContext,
+    selectedIndicatorCenterGroupIds,
+    selectedIndicatorCenterContext,
     selectedModelResearchContext,
     selectedParcelForSnapshot,
     setPlanningSnapshotView,
@@ -404,8 +471,9 @@ function OverviewModeContent({
   ]);
 
   const countywideBriefVisible =
-    overviewCommandMode === "countywide" ||
-    countywideBriefOverride?.parcelId === (selectedParcelOfficialId ?? null);
+    overviewCommandMode === "countywide" &&
+    (!selectedParcelOfficialId ||
+      countywideBriefOverride?.parcelId === (selectedParcelOfficialId ?? null));
 
   async function handleCopyParcelId() {
     if (!selectedParcelOfficialId) {
@@ -446,6 +514,25 @@ function OverviewModeContent({
           selectedParcelId={selectedParcelOfficialId}
           snapshotSaving={snapshotSaving}
         />
+      ) : overviewCommandMode === "indicatorCenter" ? (
+        <IndicatorCenterPanel
+          displayMode={indicatorCenterDisplayMode}
+          indicatorCards={indicatorCenterCards}
+          onOpenMethodology={() => {
+            window.location.hash = "methodology-data-needed";
+            setProductMode("methodology");
+          }}
+          onOpenPlanningSnapshot={() => {
+            setPlanningSnapshotView("overview");
+            setProductMode("due_diligence");
+          }}
+          onSaveSnapshot={handleSaveOverviewSnapshot}
+          selectedGroupIds={selectedIndicatorCenterGroupIds}
+          selectedIndicator={selectedIndicatorCenterContext}
+          selectedParcelId={selectedParcelOfficialId}
+          setSelectedIndicator={setSelectedIndicatorCenterContext}
+          snapshotSaving={snapshotSaving}
+        />
       ) : overviewCommandMode === "snapshot" ? (
         <SnapshotCapturePanel
           activeLayerLabels={activeLayerLabels}
@@ -475,7 +562,6 @@ function OverviewModeContent({
           onSaveSnapshot={handleSaveOverviewSnapshot}
           onShowSelectedParcel={() => {
             setCountywideBriefOverride(null);
-            setOverviewCommandMode("parcel");
           }}
           overviewCommandMode={overviewCommandMode}
           parcel={selectedParcelIntelligence}
@@ -484,6 +570,7 @@ function OverviewModeContent({
           planningSnapshot={planningSnapshot}
           savedPlanningSnapshots={savedPlanningSnapshots}
           schoolConstraint={schoolConstraint}
+          selectedDevelopmentHotspotContext={selectedDevelopmentHotspotContext}
           selectedParcelId={selectedParcelOfficialId}
           source={selectedParcelIntelligenceSource}
           snapshotSaved={snapshotSaved}
@@ -520,6 +607,7 @@ function IntelligenceBriefPanel({
   planningSnapshot,
   savedPlanningSnapshots,
   schoolConstraint,
+  selectedDevelopmentHotspotContext,
   selectedParcelId,
   snapshotSaved,
   snapshotSaving,
@@ -544,6 +632,7 @@ function IntelligenceBriefPanel({
   planningSnapshot: PlanningSnapshot | null;
   savedPlanningSnapshots: PlanningSnapshot[];
   schoolConstraint: SnapshotSchoolConstraint;
+  selectedDevelopmentHotspotContext: SelectedDevelopmentHotspotContext | null;
   selectedParcelId: string | null;
   snapshotSaved: boolean;
   snapshotSaving: boolean;
@@ -553,6 +642,15 @@ function IntelligenceBriefPanel({
 }) {
   const hasParcel = Boolean(parcel) && !showCountywideBrief;
   const showParcelHelper = !hasParcel && overviewCommandMode === "parcel";
+  const selectedDevelopmentContext =
+    !hasParcel &&
+    !showParcelHelper &&
+    overviewCommandMode === "countywide"
+      ? selectedDevelopmentHotspotContext
+      : null;
+  const selectedDevelopmentTitle = selectedDevelopmentContext
+    ? getDevelopmentHotspotContextTitle(selectedDevelopmentContext)
+    : null;
 
   return (
     <section
@@ -569,19 +667,25 @@ function IntelligenceBriefPanel({
         </div>
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-            {hasParcel || showParcelHelper
-              ? "Selected Parcel Intelligence"
-              : "Countywide Intelligence"}
+            {selectedDevelopmentTitle
+              ? "Development Activity Context"
+              : hasParcel || showParcelHelper
+                ? "Selected Parcel Intelligence"
+                : "Countywide Intelligence"}
           </p>
           <h3 className="mt-1 truncate text-base font-semibold text-white">
-            {hasParcel
+            {selectedDevelopmentTitle
+              ? selectedDevelopmentTitle
+              : hasParcel
               ? parcel?.officialParcelId
               : showParcelHelper
                 ? "Search a parcel to begin"
               : "Countywide indicators"}
           </h3>
           <p className="mt-1 text-xs leading-5 text-slate-400">
-            {hasParcel
+            {selectedDevelopmentTitle
+              ? "Observed permit/development activity only. Not a prediction."
+              : hasParcel
               ? "Snapshot-ready parcel facts, constraints, and observed activity."
               : showParcelHelper
                 ? "Use the top search bar to add zoning, flood, school, activity, transportation, and utility context."
@@ -612,6 +716,7 @@ function IntelligenceBriefPanel({
           parcelDashboardMetrics={parcelDashboardMetrics}
           planningSnapshot={planningSnapshot}
           savedPlanningSnapshots={savedPlanningSnapshots}
+          selectedDevelopmentHotspotContext={selectedDevelopmentContext}
           selectedParcelId={selectedParcelId}
           onShowSelectedParcel={parcel ? onShowSelectedParcel : undefined}
         />
@@ -844,6 +949,341 @@ function SnapshotCapturePanel({
         >
           <FileSearch className="h-3.5 w-3.5" />
           Open Snapshot Library
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function IndicatorCenterPanel({
+  displayMode,
+  indicatorCards,
+  onOpenMethodology,
+  onOpenPlanningSnapshot,
+  onSaveSnapshot,
+  selectedGroupIds,
+  selectedIndicator,
+  selectedParcelId,
+  setSelectedIndicator,
+  snapshotSaving,
+}: {
+  displayMode: IndicatorCenterDisplayMode;
+  indicatorCards: IndicatorCenterSummaryCard[];
+  onOpenMethodology: () => void;
+  onOpenPlanningSnapshot: () => void;
+  onSaveSnapshot: () => void | Promise<void>;
+  selectedGroupIds: IndicatorCenterGroupId[];
+  selectedIndicator: IndicatorCenterContext | null;
+  selectedParcelId: string | null;
+  setSelectedIndicator: (indicator: IndicatorCenterContext | null) => void;
+  snapshotSaving: boolean;
+}) {
+  const visibleDefinitions = filterIndicatorCenterDefinitions({
+    definitions: indicatorCenterDefinitions,
+    displayMode,
+    selectedGroupIds,
+    selectedIndicator,
+  });
+  const visibleCards = indicatorCards.filter((card) =>
+    visibleDefinitions.some(
+      (indicator) => indicator.indicatorId === card.indicator.indicatorId,
+    ),
+  );
+  const selectedCard = selectedIndicator
+    ? indicatorCards.find(
+        (card) => card.indicator.indicatorId === selectedIndicator.indicatorId,
+      )
+    : null;
+  const highAttentionCards = indicatorCards.filter((card) =>
+    ["High Attention", "Review Needed"].includes(
+      card.indicator.priorityLabel,
+    ),
+  );
+  const dataNeededCards = indicatorCards.filter((card) =>
+    ["Data Needed", "Proxy Only", "Preliminary Data"].includes(
+      card.indicator.priorityLabel,
+    ),
+  );
+  const headlineMetrics = buildIndicatorCenterHeadlineMetrics({
+    selectedGroupCount: selectedGroupIds.length,
+    snapshotReady: visibleCards.length > 0,
+  });
+  const reviewThemes = buildIndicatorCenterReviewThemes(visibleDefinitions);
+  const selectedGroupNames = indicatorCenterDefinitions
+    .filter((indicator) => selectedGroupIds.includes(indicator.groupId))
+    .map((indicator) => indicator.name);
+
+  return (
+    <section
+      className="rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/82 p-3 shadow-[0_14px_38px_rgba(0,0,0,0.2)]"
+      id="cfs-intelligence-brief"
+    >
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#68d8ff]/24 bg-[#68d8ff]/10 text-[#8fe7ff]">
+          <BarChart3 className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
+            Indicator Intelligence
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-white">
+            Indicator Intelligence
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Indicator Center answers what needs review, why it matters, and
+            what staff should do next. These are monitoring indicators,
+            not official determinations.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {headlineMetrics.map((metric) => (
+          <BriefStat
+            caveat={metric.caveat}
+            key={metric.label}
+            label={metric.label}
+            value={metric.value}
+          />
+        ))}
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="Current dashboard posture; it does not calculate a score."
+          label="Dashboard"
+          value={getIndicatorCenterDisplayModeLabel(displayMode)}
+        />
+        <BriefStat
+          caveat="Missing values are labeled as data needed or proxy only."
+          label="Data posture"
+          value="No fake values"
+        />
+      </div>
+
+      {selectedParcelId ? (
+        <p className="mt-3 rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/[0.055] px-3 py-2 text-xs leading-5 text-[#b7f0ff]">
+          Selected parcel context is active:{" "}
+          <span className="font-mono font-semibold text-white">
+            {selectedParcelId}
+          </span>
+          . Indicator Center can be saved with this parcel context, but it does
+          not create a parcel score.
+        </p>
+      ) : null}
+
+      {selectedIndicator ? (
+        <div className="mt-3 rounded-md border border-[#68d8ff]/22 bg-[#68d8ff]/[0.055] p-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8fe7ff]">
+                Selected indicator
+              </p>
+              <h4 className="mt-1 text-sm font-semibold text-white">
+                {selectedIndicator.name}
+              </h4>
+            </div>
+            <button
+              className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-300 transition hover:bg-white/[0.07]"
+              onClick={() => setSelectedIndicator(null)}
+              type="button"
+            >
+              Clear
+            </button>
+          </div>
+          <div className="mt-3 space-y-2 text-xs leading-5 text-slate-400">
+            <CompactParcelLine
+              label="Value"
+              value={selectedCard?.value ?? "Context available"}
+            />
+            <CompactParcelLine
+              label="Snapshot"
+              value={
+                selectedIndicator.snapshotIncluded
+                  ? "Included by default"
+                  : "Optional"
+              }
+            />
+            <CompactParcelLine
+              label="Category"
+              value={selectedIndicator.category}
+            />
+            <CompactParcelLine
+              label="Priority"
+              value={selectedIndicator.priorityLabel}
+            />
+            <CompactParcelLine
+              label="Status"
+              value={selectedIndicator.status}
+            />
+            <CompactTextBlock
+              label="What it means"
+              value={selectedIndicator.whatItMeans}
+            />
+            <CompactTextBlock
+              label="Source"
+              value={selectedIndicator.source}
+            />
+            <CompactTextBlock
+              label="Data used"
+              value={selectedIndicator.dataUsed.join(" / ")}
+            />
+            <CompactTextBlock
+              label="Caveat"
+              value={selectedIndicator.caveat}
+            />
+            <CompactTextBlock
+              label="Recommended follow-up"
+              value={selectedIndicator.recommendedFollowUp}
+            />
+            <CompactTextBlock
+              label="Planning Snapshot"
+              value="This indicator can be included with the saved dashboard context, caveats, and recommended follow-up."
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="mt-3 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.055] px-3 py-2 text-xs leading-5 text-[#f6d98e]">
+          <p>
+            {
+              "Select an indicator card to inspect what it means, its source, the caveat, and recommended follow-up. No official risk scores, predictions, or made-up measures are generated."
+            }
+          </p>
+          <p className="mt-2 text-[#f8e4ac]">
+            Highest-priority attention categories:{" "}
+            {highAttentionCards
+              .map((card) => card.indicator.name)
+              .join(" / ")}
+            .
+          </p>
+          <p className="mt-1 text-[#f8e4ac]">
+            Data-needed categories:{" "}
+            {dataNeededCards
+              .map((card) => card.indicator.name)
+              .join(" / ")}
+            .
+          </p>
+        </div>
+      )}
+
+      <div className="mt-3 rounded-md border border-white/10 bg-black/16 p-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Review themes
+        </p>
+        <div className="mt-2 grid gap-1.5">
+          {reviewThemes.slice(0, 4).map((theme) => (
+            <button
+              className="rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-2 text-left transition hover:border-white/20 hover:bg-white/[0.055]"
+              key={theme.indicatorId}
+              onClick={() => {
+                const indicator = indicatorCenterDefinitions.find(
+                  (candidate) => candidate.indicatorId === theme.indicatorId,
+                );
+
+                if (indicator) {
+                  setSelectedIndicator(indicator);
+                }
+              }}
+              type="button"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[11px] leading-4 text-slate-300">
+                  {theme.label}
+                </p>
+                <span className="shrink-0 rounded border border-white/10 bg-black/18 px-1.5 py-0.5 text-[9px] font-semibold text-slate-300">
+                  {theme.status}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-md border border-white/10 bg-white/[0.035] p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Indicator summary cards
+            </p>
+            <p className="mt-1 text-[11px] leading-4 text-slate-500">
+              Groups: {selectedGroupNames.join(" / ") || "None selected"}
+            </p>
+          </div>
+          <span className="rounded-md border border-white/10 bg-black/18 px-2 py-0.5 text-[10px] font-semibold text-slate-400">
+            {visibleCards.length} shown
+          </span>
+        </div>
+        <div className="mt-2 grid gap-2">
+          {visibleCards.length ? (
+            visibleCards.map((card) => {
+              const selected =
+                selectedIndicator?.indicatorId === card.indicator.indicatorId;
+
+              return (
+                <button
+                  aria-pressed={selected}
+                  className={cn(
+                    "rounded-md border px-3 py-2 text-left transition",
+                    selected
+                      ? "border-[#68d8ff]/45 bg-[#68d8ff]/12"
+                      : "border-white/10 bg-black/16 hover:border-white/20 hover:bg-white/[0.05]",
+                  )}
+                  key={card.indicator.indicatorId}
+                  onClick={() => setSelectedIndicator(card.indicator)}
+                  type="button"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-xs font-semibold text-white">
+                      {card.indicator.name}
+                    </p>
+                      <span className="rounded border border-[#d8b86a]/18 bg-[#d8b86a]/10 px-1.5 py-0.5 text-[9px] font-semibold text-[#f6d98e]">
+                      {card.indicator.status}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm font-semibold text-[#b7f0ff]">
+                    {card.value}
+                  </p>
+                  <p className="mt-1 text-[11px] leading-4 text-slate-500">
+                    {card.secondaryValue ?? card.indicator.whatItMeans}
+                  </p>
+                </button>
+              );
+            })
+          ) : (
+            <p className="rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.055] px-3 py-2 text-xs leading-5 text-[#f6d98e]">
+              No enabled indicators match this display filter.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2">
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
+          disabled={snapshotSaving}
+          onClick={() => {
+            void onSaveSnapshot();
+          }}
+          type="button"
+        >
+          <Save className="h-3.5 w-3.5" />
+          {snapshotSaving ? "Capturing Map..." : "Save Snapshot"}
+        </button>
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/[0.07]"
+          onClick={onOpenMethodology}
+          type="button"
+        >
+          <BookOpen className="h-3.5 w-3.5" />
+          Open Methodology
+        </button>
+        <button
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+          onClick={onOpenPlanningSnapshot}
+          type="button"
+        >
+          <FileSearch className="h-3.5 w-3.5" />
+          Open Snapshots
         </button>
       </div>
     </section>
@@ -1429,6 +1869,7 @@ function CountywideBrief({
   parcelDashboardMetrics,
   planningSnapshot,
   savedPlanningSnapshots,
+  selectedDevelopmentHotspotContext,
   selectedParcelId,
 }: {
   activeLayerLabels: string[];
@@ -1438,6 +1879,7 @@ function CountywideBrief({
   parcelDashboardMetrics: ReturnType<typeof useParcelDashboardMetrics>;
   planningSnapshot: PlanningSnapshot | null;
   savedPlanningSnapshots: PlanningSnapshot[];
+  selectedDevelopmentHotspotContext: SelectedDevelopmentHotspotContext | null;
   selectedParcelId: string | null;
 }) {
   const totalPermits =
@@ -1458,6 +1900,10 @@ function CountywideBrief({
 
   return (
     <div className="mt-3 space-y-3">
+      {selectedDevelopmentHotspotContext ? (
+        <SelectedDevelopmentHotspotCard context={selectedDevelopmentHotspotContext} />
+      ) : null}
+
       <div className="grid grid-cols-2 gap-2">
         <BriefStat
           caveat="Observed permit/development records, not prediction."
@@ -1538,6 +1984,135 @@ function CountywideBrief({
       ) : null}
     </div>
   );
+}
+
+function SelectedDevelopmentHotspotCard({
+  context,
+}: {
+  context: SelectedDevelopmentHotspotContext;
+}) {
+  const isCluster = context.contextKind === "cluster";
+  const segmentMix = formatDevelopmentHotspotSegmentMix(context);
+  const topDrivers = context.topDrivers.length
+    ? context.topDrivers
+    : ["Observed permit concentration"];
+
+  return (
+    <div className="rounded-md border border-[#d8b86a]/24 bg-[#d8b86a]/[0.065] p-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f6d98e]">
+            {getDevelopmentHotspotContextTitle(context)}
+          </p>
+          <h4 className="mt-1 truncate text-sm font-semibold text-white">
+            {context.areaLabel}
+          </h4>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            {formatDevelopmentHotspotRepresentedCount(context)}
+          </p>
+        </div>
+        <span className="inline-flex shrink-0 rounded-full border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-[10px] font-semibold uppercase text-[#f0cd79]">
+          Observed activity
+        </span>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="Observed permit segment, not prediction."
+          label={isCluster ? "Dominant Segment" : "Activity Segment"}
+          value={formatDevelopmentLabel(
+            context.dominantPermitSegment ?? context.selectedPermitSegment,
+          )}
+        />
+        <BriefStat
+          caveat="Development activity grouping from permit context."
+          label="Activity Type"
+          value={formatDevelopmentLabel(context.dominantActivityType)}
+        />
+        <BriefStat
+          caveat="Filtered records represented by this map feature."
+          label="Records"
+          value={formatDevelopmentCount(context.recordsRepresented)}
+        />
+        <BriefStat
+          caveat="Latest activity context from available permit counts."
+          label="Recent Context"
+          value={context.latestActivityLabel}
+        />
+      </div>
+
+      {segmentMix ? (
+        <div className="mt-3 rounded-md border border-white/10 bg-black/18 px-3 py-2 text-xs leading-5 text-slate-300">
+          <span className="font-semibold text-slate-200">Segment mix:</span>{" "}
+          {segmentMix}
+        </div>
+      ) : null}
+
+      <div className="mt-3 rounded-md border border-white/10 bg-black/18 px-3 py-2">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+          Top drivers
+        </p>
+        <p className="mt-1 text-xs leading-5 text-slate-300">
+          {topDrivers.join(" / ")}
+        </p>
+      </div>
+
+      <p className="mt-3 text-xs leading-5 text-slate-400">
+        <span className="font-semibold text-slate-200">Why highlighted:</span>{" "}
+        {context.whyHighlighted}
+      </p>
+      <p className="mt-2 text-xs leading-5 text-[#f6d98e]">
+        {context.caveat}
+      </p>
+    </div>
+  );
+}
+
+function getDevelopmentHotspotContextTitle(
+  context: Pick<SelectedDevelopmentHotspotContext, "contextKind" | "parcelsRepresented">,
+) {
+  if (context.contextKind === "cluster" && context.parcelsRepresented > 1) {
+    return "Selected Development Activity Cluster";
+  }
+
+  return "Selected Development Activity";
+}
+
+function formatDevelopmentHotspotRepresentedCount(
+  context: Pick<
+    SelectedDevelopmentHotspotContext,
+    "parcelsRepresented" | "recordsRepresented"
+  >,
+) {
+  const parcelText =
+    context.parcelsRepresented === 1
+      ? "1 parcel represented"
+      : `${formatDevelopmentCount(context.parcelsRepresented)} parcels represented`;
+  const recordText =
+    context.recordsRepresented === 1
+      ? "1 record represented"
+      : `${formatDevelopmentCount(context.recordsRepresented)} records represented`;
+
+  return `${parcelText} / ${recordText}`;
+}
+
+function formatDevelopmentHotspotSegmentMix(
+  context: SelectedDevelopmentHotspotContext,
+) {
+  return [
+    ["Residential", context.segmentCounts.residentialGrowth],
+    ["Commercial", context.segmentCounts.commercialActivity],
+    ["Industrial", context.segmentCounts.industrialActivity],
+    ["Institutional", context.segmentCounts.institutionalActivity],
+    ["Redevelopment", context.segmentCounts.redevelopmentSignal],
+    ["Minor", context.segmentCounts.minorMaintenance],
+    ["Demolition", context.segmentCounts.demolition],
+    ["Other", context.segmentCounts.administrativeOrUnknown],
+  ]
+    .filter(([, count]) => Number(count) > 0)
+    .slice(0, 4)
+    .map(([label, count]) => `${label}: ${formatDevelopmentCount(Number(count))}`)
+    .join(" / ");
 }
 
 function SelectedParcelBrief({
@@ -1998,6 +2573,14 @@ interface PlanningMapSnapshotCapture {
 
 const MAP_SNAPSHOT_CAPTURE_TIMEOUT_MS = 4500;
 
+function createIndicatorCenterSnapshotCapture(): PlanningMapSnapshotCapture {
+  return {
+    capturedAt: new Date().toISOString(),
+    failureReason: "Indicator Center snapshot - monitoring dashboard context, no map image required.",
+    status: "unavailable",
+  };
+}
+
 const defaultPlanningSnapshotIncludedSections: Record<
   PlanningSnapshotSectionKey,
   boolean
@@ -2215,7 +2798,11 @@ function formatOverviewCommandModeLabel(mode: OverviewCommandMode) {
   }
 
   if (mode === "countywide") {
-    return "Countywide Intelligence";
+    return "Explore Countywide";
+  }
+
+  if (mode === "indicatorCenter") {
+    return "Indicator Center";
   }
 
   if (mode === "snapshot") {
@@ -2234,6 +2821,10 @@ function getPlanningFocusModeForOverviewMode(
   }
 
   if (mode === "countywide") {
+    return "development_activity";
+  }
+
+  if (mode === "indicatorCenter") {
     return "development_activity";
   }
 
@@ -2260,11 +2851,15 @@ function getSnapshotFocusLabelForOverviewMode(
     return "Countywide Intelligence Snapshot";
   }
 
+  if (mode === "indicatorCenter") {
+    return "Indicator Center Snapshot";
+  }
+
   if (mode === "snapshot") {
     return "Planning Snapshot Context";
   }
 
-  return "Overview Command Center";
+  return "Workspace Context Snapshot";
 }
 
 async function captureMapSnapshotForPlanning(): Promise<PlanningMapSnapshotCapture> {
@@ -2327,6 +2922,11 @@ function buildPlanningSnapshot({
   overviewCommandMode,
   parcel,
   schoolConstraint,
+  selectedDevelopmentHotspotContext,
+  selectedIndicatorCenterDisplayMode,
+  selectedIndicatorCenterGroupIds,
+  selectedIndicatorCenterContext,
+  selectedIndicatorCenterSummaries,
   selectedModelResearchContext,
 }: {
   activeLayerIds: string[];
@@ -2341,10 +2941,21 @@ function buildPlanningSnapshot({
   overviewCommandMode: OverviewCommandMode;
   parcel: Parameters<typeof ParcelSummaryPanel>[0]["parcel"] | null;
   schoolConstraint: SnapshotSchoolConstraint;
+  selectedDevelopmentHotspotContext: SelectedDevelopmentHotspotContext | null;
+  selectedIndicatorCenterDisplayMode: IndicatorCenterDisplayMode;
+  selectedIndicatorCenterGroupIds: IndicatorCenterGroupId[];
+  selectedIndicatorCenterContext: IndicatorCenterContext | null;
+  selectedIndicatorCenterSummaries: PlanningSnapshotIndicatorSummary[];
   selectedModelResearchContext: ModelResearchPreviewMarker | null;
 }): PlanningSnapshot {
   const createdAt = new Date().toISOString();
   const overviewModeLabel = formatOverviewCommandModeLabel(overviewCommandMode);
+  const developmentActivityContext =
+    overviewCommandMode === "countywide"
+      ? serializeDevelopmentActivitySnapshotContext(
+          selectedDevelopmentHotspotContext,
+        )
+      : null;
   const modelLabContext =
     overviewCommandMode === "modelLab"
       ? {
@@ -2361,6 +2972,15 @@ function buildPlanningSnapshot({
           visibleFeatureCount: modelResearchMapSummary.visibleFeatureCount,
         }
       : undefined;
+  const indicatorCenterContext =
+    overviewCommandMode === "indicatorCenter"
+      ? serializeIndicatorCenterSnapshotContext({
+          displayMode: selectedIndicatorCenterDisplayMode,
+          indicatorSummaries: selectedIndicatorCenterSummaries,
+          selectedGroupIds: selectedIndicatorCenterGroupIds,
+          selectedIndicator: selectedIndicatorCenterContext,
+        })
+      : undefined;
 
   if (!parcel) {
     return buildContextOnlyPlanningSnapshot({
@@ -2370,6 +2990,8 @@ function buildPlanningSnapshot({
       focusMode,
       focusModeLabel,
       mapSnapshot,
+      developmentActivityContext,
+      indicatorCenterContext,
       modelLabContext,
       modelResearchMapSummary,
       overviewCommandMode,
@@ -2406,7 +3028,7 @@ function buildPlanningSnapshot({
       : ["No optional overlays active at capture time"],
     caveats: [
       "Snapshot is a saved front-end review context, not a new official record.",
-      "Overview command context organizes report evidence; it does not create a public model layer.",
+      "Workspace context organizes report evidence; it does not create a public model layer.",
       "FEMA NFHL remains authoritative for regulatory flood review.",
       "School utilization is presentation-derived and requires official verification.",
       "Utility proxy context does not confirm available service capacity.",
@@ -2414,6 +3036,16 @@ function buildPlanningSnapshot({
       ...(overviewCommandMode === "modelLab"
         ? [
             "Model Lab research preview is internal-only and does not show exact probabilities or official parcel classes.",
+          ]
+        : []),
+      ...(developmentActivityContext
+        ? [
+            "Development Hotspots summarize observed permit/development activity only. They are not predictions.",
+          ]
+        : []),
+      ...(indicatorCenterContext
+        ? [
+            "Indicator Center snapshots summarize monitoring indicators, attention flags, and data gaps. They are not official determinations.",
           ]
         : []),
       ...(mapSnapshot.status === "captured"
@@ -2434,25 +3066,28 @@ function buildPlanningSnapshot({
         meaning:
           "Shows whether the snapshot was saved from a selected parcel or the broader map context.",
         method:
-          "CFS records the active Overview command context with the saved report evidence.",
+          "CFS records the active Workspace context with the saved report evidence.",
         recommendedAction:
           "Use this label to frame the executive summary and staff follow-up discussion.",
-        source: "CFS Overview command state",
+        source: "CFS Workspace mode state",
         value: focusModeLabel,
       },
       {
         caveat:
-          "Overview mode records the product workspace used at capture time; it is not a prediction feature.",
-        label: "Overview Mode",
+          "Workspace mode records the product workspace used at capture time; it is not a prediction feature.",
+        label: "Workspace Mode",
         meaning:
           "Shows whether the snapshot came from parcel search, countywide intelligence, Model Lab, or snapshot workflow context.",
         method:
-          "CFS stores the active Overview command mode alongside map and intelligence context.",
+          "CFS stores the active Workspace mode alongside map and intelligence context.",
         recommendedAction:
           "Use the mode label to explain why the report emphasizes parcel facts, countywide indicators, or model governance.",
-        source: "CFS Overview command state",
+        source: "CFS Workspace mode state",
         value: overviewModeLabel,
       },
+      ...(indicatorCenterContext
+        ? [createIndicatorCenterSnapshotMetric(indicatorCenterContext)]
+        : []),
       {
         caveat:
           mapSnapshot.status === "captured"
@@ -2519,6 +3154,13 @@ function buildPlanningSnapshot({
             )}`
           : "Not Available",
       },
+      ...(developmentActivityContext
+        ? [
+            createDevelopmentActivitySnapshotMetric(
+              developmentActivityContext,
+            ),
+          ]
+        : []),
       {
         caveat:
           "Utility proxy context does not confirm available sewer or water capacity.",
@@ -2630,7 +3272,7 @@ function buildPlanningSnapshot({
     focusModeLabel,
     keyFacts: [
       { label: "Snapshot context", value: focusModeLabel },
-      { label: "Overview mode", value: overviewModeLabel },
+      { label: "Workspace mode", value: overviewModeLabel },
       { label: "Intelligence Brief", value: "Selected Parcel Intelligence" },
       { label: "Selected parcel", value: parcel.officialParcelId },
       { label: "Owner / account", value: parcel.ownerName ?? "Not Available" },
@@ -2669,6 +3311,36 @@ function buildPlanningSnapshot({
                 signalLabel:
                   modelLabContext.selectedResearchContext.researchSignalLabel,
               }),
+            },
+          ]
+        : []),
+      ...(developmentActivityContext
+        ? [
+            {
+              label: "Selected development activity",
+              value: `${developmentActivityContext.areaLabel} / ${formatDevelopmentCount(
+                developmentActivityContext.recordsRepresented,
+              )} records`,
+            },
+          ]
+        : []),
+      ...(indicatorCenterContext
+        ? [
+            {
+              label: "Indicator Center context",
+              value: indicatorCenterContext.selectedIndicator
+                ? `${indicatorCenterContext.selectedIndicator.name} / ${indicatorCenterContext.selectedIndicator.status}`
+                : `${indicatorCenterContext.selectedGroupIds.length} review groups enabled`,
+            },
+            {
+              label: "Indicator display",
+              value: getIndicatorCenterDisplayModeLabel(
+                indicatorCenterContext.displayMode,
+              ),
+            },
+            {
+              label: "Indicator summaries",
+              value: `${indicatorCenterContext.indicatorSummaries.length} cards captured`,
             },
           ]
         : []),
@@ -2728,6 +3400,34 @@ function buildPlanningSnapshot({
               ? "Capture Failed"
               : "Unavailable",
       },
+      ...(developmentActivityContext
+        ? [
+            {
+              label: "Development activity context",
+              reason:
+                "A Development Hotspots cluster or feature was selected when the snapshot was saved.",
+              status:
+                developmentActivityContext.contextKind === "cluster"
+                  ? "Cluster selected"
+                  : "Feature selected",
+            },
+          ]
+        : []),
+      ...(indicatorCenterContext
+        ? [
+            {
+              label: "Indicator Center context",
+              reason: indicatorCenterContext.selectedIndicator
+                ? `${indicatorCenterContext.selectedIndicator.name} was selected as a review indicator when the snapshot was saved.`
+                : `${indicatorCenterContext.indicatorSummaries.length} Indicator Center summary cards were captured.`,
+              status: indicatorCenterContext.selectedIndicator
+                ? indicatorCenterContext.selectedIndicator.status
+                : getIndicatorCenterDisplayModeLabel(
+                    indicatorCenterContext.displayMode,
+                  ),
+            },
+          ]
+        : []),
     ],
     mapContext: {
       cameraSummary: mapSnapshot.cameraSummary,
@@ -2742,6 +3442,8 @@ function buildPlanningSnapshot({
     mapScreenshotDataUrl: mapSnapshot.dataUrl ?? null,
     mapScreenshotFailureReason: mapSnapshot.failureReason ?? null,
     mapScreenshotStatus: mapSnapshot.status,
+    developmentActivityContext,
+    indicatorCenterContext,
     modelLabContext,
     overviewCommandMode,
     overviewKpis: [
@@ -2793,8 +3495,10 @@ function buildPlanningSnapshot({
         "Not Available",
       zoning: zoning || formatCompactLabel(parcel.zoningCategory),
     },
-    snapshotId: `phase23g-${parcel.officialParcelId}-${Date.now()}`,
-    snapshotVersion: "phase23g_v1",
+    snapshotId: `${
+      indicatorCenterContext ? "phase28i" : "phase26a"
+    }-${parcel.officialParcelId}-${Date.now()}`,
+    snapshotVersion: indicatorCenterContext ? "phase28i_v1" : "phase26a_v1",
   };
 }
 
@@ -2830,12 +3534,116 @@ function serializeModelResearchSnapshotContext(
   };
 }
 
+function serializeDevelopmentActivitySnapshotContext(
+  context: SelectedDevelopmentHotspotContext | null,
+): PlanningSnapshotDevelopmentActivityContext | null {
+  if (!context) {
+    return null;
+  }
+
+  return {
+    activityClass: context.activityClass,
+    areaLabel: context.areaLabel,
+    caveat: context.caveat,
+    contextKind: context.contextKind,
+    displayMode: context.displayMode,
+    dominantActivityType: context.dominantActivityType,
+    dominantPermitSegment: context.dominantPermitSegment,
+    highValuePermits: context.highValuePermits,
+    latestActivityLabel: context.latestActivityLabel,
+    majorValuePermits: context.majorValuePermits,
+    officialParcelId: context.officialParcelId,
+    parcelsRepresented: context.parcelsRepresented,
+    pin14: context.pin14,
+    recentPermitCount1yr: context.recentPermitCount1yr,
+    recentPermitCount3yr: context.recentPermitCount3yr,
+    recordsRepresented: context.recordsRepresented,
+    selectedPermitSegment: context.selectedPermitSegment,
+    segmentCounts: context.segmentCounts,
+    topDrivers: context.topDrivers,
+    totalPermitCount: context.totalPermitCount,
+    whyHighlighted: context.whyHighlighted,
+    zoningJurisdictionName: context.zoningJurisdictionName,
+  };
+}
+
+function serializeIndicatorCenterSnapshotContext(
+  {
+    displayMode,
+    indicatorSummaries,
+    selectedGroupIds,
+    selectedIndicator,
+  }: {
+    displayMode: IndicatorCenterDisplayMode;
+    indicatorSummaries: PlanningSnapshotIndicatorSummary[];
+    selectedGroupIds: IndicatorCenterGroupId[];
+    selectedIndicator: IndicatorCenterContext | null;
+  },
+): PlanningSnapshotIndicatorCenterContext {
+  return {
+    availableGroups: indicatorCenterDefinitions.map(
+      (indicator) => indicator.name,
+    ),
+    caveat:
+      "Indicator Center summarizes existing CFS attention flags, observed activity, data gaps, and review indicators. These are monitoring indicators, not official determinations.",
+    displayMode,
+    indicatorSummaries,
+    recommendedFollowUp:
+      selectedIndicator?.recommendedFollowUp ??
+      "Use Indicator Center to choose the source records or official datasets that need follow-up.",
+    selectedIndicator,
+    selectedGroupIds,
+  };
+}
+
+function createIndicatorCenterSnapshotMetric(
+  context: PlanningSnapshotIndicatorCenterContext,
+): PlanningSnapshot["explainableMetrics"][number] {
+  const selected = context.selectedIndicator;
+
+  return {
+    caveat: selected?.caveat ?? context.caveat,
+    label: "Indicator Center Context",
+    meaning:
+      selected?.whatItMeans ??
+      "Shows that the snapshot was saved from Indicator Center attention flags and data gaps.",
+    method:
+      "CFS records the active Indicator Center display filter, enabled review groups, card summaries, selected indicator, and follow-up caveats using existing CFS data only.",
+    recommendedAction: context.recommendedFollowUp,
+    source: selected?.source ?? "CFS Indicator Center definitions",
+    value: selected
+      ? `${selected.name} / ${selected.status}`
+      : `${context.selectedGroupIds.length} review groups enabled`,
+  };
+}
+
+function createDevelopmentActivitySnapshotMetric(
+  context: PlanningSnapshotDevelopmentActivityContext,
+): PlanningSnapshot["explainableMetrics"][number] {
+  return {
+    caveat: "Observed permit/development activity only. Not a prediction.",
+    label: "Development Activity Context",
+    meaning:
+      "Summarizes the selected Development Hotspots cluster or feature from the countywide map layer.",
+    method:
+      "CFS groups observed permit/development activity by map scale and records the selected safe cluster or marker context.",
+    recommendedAction:
+      "Review underlying permit records before formal planning decisions.",
+    source: "Permit and development activity tables",
+    value: `${context.areaLabel} / ${formatDevelopmentCount(
+      context.recordsRepresented,
+    )} observed records`,
+  };
+}
+
 function buildContextOnlyPlanningSnapshot({
   activeLayerIds,
   activeLayerLabels,
   createdAt,
+  developmentActivityContext,
   focusMode,
   focusModeLabel,
+  indicatorCenterContext,
   mapSnapshot,
   modelLabContext,
   modelResearchMapSummary,
@@ -2846,8 +3654,10 @@ function buildContextOnlyPlanningSnapshot({
   activeLayerIds: string[];
   activeLayerLabels: string[];
   createdAt: string;
+  developmentActivityContext: PlanningSnapshotDevelopmentActivityContext | null;
   focusMode: PlanningReviewFocusMode;
   focusModeLabel: string;
+  indicatorCenterContext?: PlanningSnapshot["indicatorCenterContext"];
   mapSnapshot: PlanningMapSnapshotCapture;
   modelLabContext?: PlanningSnapshot["modelLabContext"];
   modelResearchMapSummary: ModelResearchMapSummary;
@@ -2872,8 +3682,8 @@ function buildContextOnlyPlanningSnapshot({
       : ["No optional overlays active at capture time"],
     caveats: [
       "Snapshot is a saved front-end review context, not a new official record.",
-      "No selected parcel was captured; parcel-specific facts require selecting a parcel in Overview.",
-      "Overview command context organizes report evidence; it does not create a public model layer.",
+      "No selected parcel was captured; parcel-specific facts require selecting a parcel in Workspace.",
+      "Workspace context organizes report evidence; it does not create a public model layer.",
       "FEMA NFHL remains authoritative for regulatory flood review.",
       "School utilization is presentation-derived and requires official verification.",
       "Utility proxy context does not confirm available service capacity.",
@@ -2891,6 +3701,11 @@ function buildContextOnlyPlanningSnapshot({
               "SceneView did not provide a map image."
             }`,
           ]),
+      ...(indicatorCenterContext
+        ? [
+            "Indicator Center snapshots summarize existing CFS attention flags and data gaps. These are monitoring indicators, not official determinations.",
+          ]
+        : []),
     ],
     createdAt,
     explainableMetrics: [
@@ -2901,23 +3716,23 @@ function buildContextOnlyPlanningSnapshot({
         meaning:
           "Shows whether the snapshot was saved from a selected parcel or broader map context.",
         method:
-          "CFS records the active Overview command context with the saved report evidence.",
+          "CFS records the active Workspace context with the saved report evidence.",
         recommendedAction:
           "Use this label to frame the executive summary and staff follow-up discussion.",
-        source: "CFS Overview command state",
+        source: "CFS Workspace mode state",
         value: focusModeLabel,
       },
       {
         caveat:
-          "Overview mode records the product workspace used at capture time; it is not a prediction feature.",
-        label: "Overview Mode",
+          "Workspace mode records the product workspace used at capture time; it is not a prediction feature.",
+        label: "Workspace Mode",
         meaning:
           "Shows whether the snapshot came from parcel search, countywide intelligence, Model Lab, or snapshot workflow context.",
         method:
-          "CFS stores the active Overview command mode alongside map and intelligence context.",
+          "CFS stores the active Workspace mode alongside map and intelligence context.",
         recommendedAction:
           "Use the mode label to explain why the report emphasizes parcel facts, countywide indicators, or model governance.",
-        source: "CFS Overview command state",
+        source: "CFS Workspace mode state",
         value: overviewModeLabel,
       },
       {
@@ -2950,6 +3765,16 @@ function buildContextOnlyPlanningSnapshot({
         source: "Permit and development activity tables",
         value: "Map/layer context only",
       },
+      ...(developmentActivityContext
+        ? [
+            createDevelopmentActivitySnapshotMetric(
+              developmentActivityContext,
+            ),
+          ]
+        : []),
+      ...(indicatorCenterContext
+        ? [createIndicatorCenterSnapshotMetric(indicatorCenterContext)]
+        : []),
       {
         caveat:
           "FEMA NFHL remains the authoritative regulatory flood source.",
@@ -3109,7 +3934,7 @@ function buildContextOnlyPlanningSnapshot({
     includedSections: { ...defaultPlanningSnapshotIncludedSections },
     keyFacts: [
       { label: "Snapshot context", value: focusModeLabel },
-      { label: "Overview mode", value: overviewModeLabel },
+      { label: "Workspace mode", value: overviewModeLabel },
       { label: "Intelligence Brief", value: "Countywide Intelligence Brief" },
       { label: "Selected parcel", value: "No selected parcel captured" },
       { label: "Active overlays", value: activeLayerSummary },
@@ -3137,6 +3962,36 @@ function buildContextOnlyPlanningSnapshot({
                 signalLabel:
                   modelLabContext.selectedResearchContext.researchSignalLabel,
               }),
+            },
+          ]
+        : []),
+      ...(developmentActivityContext
+        ? [
+            {
+              label: "Selected development activity",
+              value: `${developmentActivityContext.areaLabel} / ${formatDevelopmentCount(
+                developmentActivityContext.recordsRepresented,
+              )} records`,
+            },
+          ]
+        : []),
+      ...(indicatorCenterContext
+        ? [
+            {
+              label: "Indicator Center context",
+              value: indicatorCenterContext.selectedIndicator
+                ? `${indicatorCenterContext.selectedIndicator.name} / ${indicatorCenterContext.selectedIndicator.status}`
+                : `${indicatorCenterContext.selectedGroupIds.length} review groups enabled`,
+            },
+            {
+              label: "Indicator display",
+              value: getIndicatorCenterDisplayModeLabel(
+                indicatorCenterContext.displayMode,
+              ),
+            },
+            {
+              label: "Indicator summaries",
+              value: `${indicatorCenterContext.indicatorSummaries.length} cards captured`,
             },
           ]
         : []),
@@ -3168,6 +4023,34 @@ function buildContextOnlyPlanningSnapshot({
           `Internal model research remains aggregate-only. ${developmentModelLabSummary.currentBestInternalVariant} is not exposed as a parcel-level output.`,
         status: "Not Public-Facing",
       },
+      ...(developmentActivityContext
+        ? [
+            {
+              label: "Development activity context",
+              reason:
+                "A Development Hotspots cluster or feature was selected when the snapshot was saved.",
+              status:
+                developmentActivityContext.contextKind === "cluster"
+                  ? "Cluster selected"
+                  : "Feature selected",
+            },
+          ]
+        : []),
+      ...(indicatorCenterContext
+        ? [
+            {
+              label: "Indicator Center context",
+              reason: indicatorCenterContext.selectedIndicator
+                ? `${indicatorCenterContext.selectedIndicator.name} was selected as a review indicator when the snapshot was saved.`
+                : `${indicatorCenterContext.indicatorSummaries.length} Indicator Center summary cards were captured.`,
+              status: indicatorCenterContext.selectedIndicator
+                ? indicatorCenterContext.selectedIndicator.status
+                : getIndicatorCenterDisplayModeLabel(
+                    indicatorCenterContext.displayMode,
+                  ),
+            },
+          ]
+        : []),
     ],
     mapContext: {
       cameraSummary: mapSnapshot.cameraSummary,
@@ -3182,6 +4065,8 @@ function buildContextOnlyPlanningSnapshot({
     mapScreenshotDataUrl: mapSnapshot.dataUrl ?? null,
     mapScreenshotFailureReason: mapSnapshot.failureReason ?? null,
     mapScreenshotStatus: mapSnapshot.status,
+    developmentActivityContext,
+    indicatorCenterContext,
     modelLabContext,
     overviewCommandMode,
     overviewKpis: [
@@ -3208,8 +4093,8 @@ function buildContextOnlyPlanningSnapshot({
     ],
     selectedParcelId: null,
     selectedParcelSummary: null,
-    snapshotId: `phase23g-map-context-${Date.now()}`,
-    snapshotVersion: "phase23g_v1",
+    snapshotId: `${indicatorCenterContext ? "phase28i" : "phase26a"}-map-context-${Date.now()}`,
+    snapshotVersion: indicatorCenterContext ? "phase28i_v1" : "phase26a_v1",
   };
 }
 
@@ -3602,6 +4487,23 @@ function CompactParcelLine({
       <p className="truncate text-xs font-semibold leading-5 text-slate-100">
         {value ?? "Unavailable"}
       </p>
+    </div>
+  );
+}
+
+function CompactTextBlock({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-md border border-white/10 bg-white/[0.035] px-3 py-2">
+      <p className="text-[10px] font-medium uppercase leading-5 text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-xs leading-5 text-slate-200">{value}</p>
     </div>
   );
 }

@@ -59,7 +59,12 @@ import type {
   ParcelMapFocus,
   ParcelMapFocusRequestEventDetail,
 } from "@/types/map/parcelFocus";
-import type { DevelopmentHotspotMapMarker } from "@/types/map/developmentHotspots";
+import type {
+  DevelopmentHotspotMapDisplayMode,
+  DevelopmentHotspotMapMarker,
+  DevelopmentHotspotSegmentCounts,
+  SelectedDevelopmentHotspotContext,
+} from "@/types/map/developmentHotspots";
 import type { FloodConstraintMapMarker } from "@/types/map/floodConstraints";
 import type {
   FloodZoneExtent,
@@ -73,11 +78,29 @@ import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPrevie
 import type {
   ModelResearchMapDisplayMode,
   ModelResearchMapSummary,
+  OverviewCommandMode,
 } from "@/types";
 
 type ArcGISHandle = {
   remove: () => void;
 };
+
+function allowsParcelSelectionGraphics(mode: OverviewCommandMode) {
+  return (
+    mode === "countywide" ||
+    mode === "indicatorCenter" ||
+    mode === "modelLab" ||
+    mode === "parcel" ||
+    mode === "snapshot"
+  );
+}
+
+function getSelectedParcelGraphicsId(
+  mode: OverviewCommandMode,
+  selectedParcelId: string | null,
+) {
+  return allowsParcelSelectionGraphics(mode) ? selectedParcelId : null;
+}
 
 const MODEL_LAB_COUNTYWIDE_CLUSTER_SCALE = 78000;
 const MODEL_LAB_INTERMEDIATE_CLUSTER_SCALE = 36000;
@@ -97,34 +120,22 @@ const MODEL_LAB_CLUSTER_MAX_CELLS = 52;
 const MODEL_LAB_INTERMEDIATE_MAX_CELLS = MODEL_LAB_CLUSTER_MAX_CELLS;
 const MODEL_LAB_FINE_MAX_CELLS = 112;
 const MODEL_LAB_PARCEL_DETAIL_MAX_MARKERS = 120;
+const DEVELOPMENT_HOTSPOT_COUNTYWIDE_CLUSTER_SCALE = 78000;
+const DEVELOPMENT_HOTSPOT_INTERMEDIATE_CLUSTER_SCALE = 36000;
+const DEVELOPMENT_HOTSPOT_FINE_CLUSTER_SCALE = 9000;
+const DEVELOPMENT_HOTSPOT_COUNTYWIDE_CELL_SIZE_DEGREES = 0.075;
+const DEVELOPMENT_HOTSPOT_INTERMEDIATE_CELL_SIZE_DEGREES = 0.034;
+const DEVELOPMENT_HOTSPOT_FINE_CELL_SIZE_DEGREES = 0.012;
+const DEVELOPMENT_HOTSPOT_COUNTYWIDE_MAX_CELLS = 36;
+const DEVELOPMENT_HOTSPOT_INTERMEDIATE_MAX_CELLS = 64;
+const DEVELOPMENT_HOTSPOT_FINE_MAX_CELLS = 120;
+const DEVELOPMENT_HOTSPOT_DETAIL_MAX_MARKERS = 160;
 
 interface ParcelFocusBeacon {
   boundaryHighlighted: boolean;
   officialParcelId: string;
   pin14?: string | null;
   statusMessage: string;
-}
-
-interface DevelopmentHotspotInfoCard {
-  developmentActivityClass: string | null;
-  developmentActivityScore: number | null;
-  dominantGrowthSignal: string | null;
-  dominantPermitSegment: string | null;
-  dominantZoningCodeRaw: string | null;
-  highValuePermits: number;
-  majorValuePermits: number;
-  officialParcelId: string;
-  permitSignalScoreMax: number | null;
-  pin14: string | null;
-  recentPermitCount1yr: number;
-  recentPermitCount3yr: number;
-  renderedPermitSegment: string | null;
-  selectedSegmentCount: number | null;
-  selectedSegmentIntensity: number | null;
-  selectedSegmentScore: number | null;
-  selectedSegmentSizeTier: string | null;
-  totalPermitCount: number;
-  zoningJurisdictionName: string | null;
 }
 
 interface FloodConstraintInfoCard {
@@ -178,7 +189,6 @@ declare global {
 export function SceneViewContainer() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const parcelFocusCardRef = useRef<HTMLDivElement | null>(null);
-  const hotspotInfoCardRef = useRef<HTMLDivElement | null>(null);
   const floodInfoCardRef = useRef<HTMLDivElement | null>(null);
   const floodZoneInfoCardRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<SceneView | null>(null);
@@ -192,21 +202,18 @@ export function SceneViewContainer() {
   const schoolUtilizationZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const lastFocusedParcelIdRef = useRef<string | null>(null);
   const latestFocusRequestParcelIdRef = useRef<string | null>(null);
+  const overviewCommandModeRef = useRef<OverviewCommandMode>("countywide");
   const runtimeRef = useRef<ArcGISRuntime | null>(null);
   const activeLayerIdsRef = useRef<string[]>([]);
   const hoveredSchoolZoneIdRef = useRef<string | null>(null);
   const selectedSchoolZoneIdRef = useRef<string | null>(null);
+  const parcelFocusCleanupFrameRef = useRef<number | null>(null);
   const schoolHoverFrameRef = useRef<number | null>(null);
   const schoolUtilizationHoverRef =
     useRef<SchoolUtilizationHoverCallout | null>(null);
   const focusBeaconTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
-  const hotspotInfoDragRef = useRef<{
-    offsetX: number;
-    offsetY: number;
-    pointerId: number;
-  } | null>(null);
   const floodInfoDragRef = useRef<{
     offsetX: number;
     offsetY: number;
@@ -229,10 +236,6 @@ export function SceneViewContainer() {
     useState<ParcelFocusBeacon | null>(null);
   const [focusBeaconCollapsed, setFocusBeaconCollapsed] = useState(false);
   const [focusBeaconPosition, setFocusBeaconPosition] =
-    useState<OverlayCardPosition | null>(null);
-  const [hotspotInfo, setHotspotInfo] =
-    useState<DevelopmentHotspotInfoCard | null>(null);
-  const [hotspotInfoPosition, setHotspotInfoPosition] =
     useState<OverlayCardPosition | null>(null);
   const [floodInfo, setFloodInfo] =
     useState<FloodConstraintInfoCard | null>(null);
@@ -275,6 +278,7 @@ export function SceneViewContainer() {
     setMapError,
     setMapStatus,
     setModelResearchMapSummary,
+    setSelectedDevelopmentHotspotContext,
     setSelectedModelResearchContext,
     setSelectedSchoolUtilizationZone,
     toggleMapFocusMode,
@@ -284,6 +288,28 @@ export function SceneViewContainer() {
     limit: 720,
     signal: "all",
   });
+  const clearParcelSceneFocus = useCallback(() => {
+    latestFocusRequestParcelIdRef.current = null;
+    lastFocusedParcelIdRef.current = null;
+    focusLayerRef.current?.removeAll();
+    setFocusBeacon(null);
+    setLastParcelFocusSummary(null);
+
+    if (focusBeaconTimeoutRef.current) {
+      clearTimeout(focusBeaconTimeoutRef.current);
+      focusBeaconTimeoutRef.current = null;
+    }
+  }, []);
+  const scheduleClearParcelSceneFocus = useCallback(() => {
+    if (parcelFocusCleanupFrameRef.current !== null) {
+      window.cancelAnimationFrame(parcelFocusCleanupFrameRef.current);
+    }
+
+    parcelFocusCleanupFrameRef.current = window.requestAnimationFrame(() => {
+      parcelFocusCleanupFrameRef.current = null;
+      clearParcelSceneFocus();
+    });
+  }, [clearParcelSceneFocus]);
   const selectedParcelIdRef = useRef(selectedParcelId);
 
   useEffect(() => {
@@ -291,8 +317,27 @@ export function SceneViewContainer() {
   }, [activeLayerIds]);
 
   useEffect(() => {
-    selectedParcelIdRef.current = selectedParcelId;
+    selectedParcelIdRef.current = getSelectedParcelGraphicsId(
+      overviewCommandModeRef.current,
+      selectedParcelId,
+    );
   }, [selectedParcelId]);
+
+  useEffect(() => {
+    overviewCommandModeRef.current = overviewCommandMode;
+
+    if (!allowsParcelSelectionGraphics(overviewCommandMode)) {
+      selectedParcelIdRef.current = null;
+      latestFocusRequestParcelIdRef.current = null;
+      lastFocusedParcelIdRef.current = null;
+      focusLayerRef.current?.removeAll();
+      scheduleClearParcelSceneFocus();
+      updateSelectedParcelSymbols(
+        getMockGraphicsLayerSubset(layerRefs.current, operationalLayerRegistry),
+        null,
+      );
+    }
+  }, [overviewCommandMode, scheduleClearParcelSceneFocus]);
 
   useEffect(() => {
     selectedSchoolZoneIdRef.current =
@@ -319,9 +364,8 @@ export function SceneViewContainer() {
   }, [isMapFocusMode]);
 
   const closeHotspotInfo = useCallback(() => {
-    setHotspotInfo(null);
-    setHotspotInfoPosition(null);
-  }, []);
+    setSelectedDevelopmentHotspotContext(null);
+  }, [setSelectedDevelopmentHotspotContext]);
 
   const closeFloodInfo = useCallback(() => {
     setFloodInfo(null);
@@ -456,71 +500,6 @@ export function SceneViewContainer() {
     (event: PointerEvent<HTMLDivElement>) => {
       if (parcelFocusDragRef.current?.pointerId === event.pointerId) {
         parcelFocusDragRef.current = null;
-      }
-
-      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      }
-    },
-    [],
-  );
-
-  const handleHotspotCardPointerDown = useCallback(
-    (event: PointerEvent<HTMLDivElement>) => {
-      const rect = hotspotInfoCardRef.current?.getBoundingClientRect();
-
-      if (!rect) {
-        return;
-      }
-
-      hotspotInfoDragRef.current = {
-        offsetX: event.clientX - rect.left,
-        offsetY: event.clientY - rect.top,
-        pointerId: event.pointerId,
-      };
-      setHotspotInfoPosition({
-        x: rect.left,
-        y: rect.top,
-      });
-      event.currentTarget.setPointerCapture(event.pointerId);
-    },
-    [],
-  );
-
-  const handleHotspotCardPointerMove = useCallback(
-    (event: PointerEvent<HTMLDivElement>) => {
-      const dragState = hotspotInfoDragRef.current;
-
-      if (!dragState || dragState.pointerId !== event.pointerId) {
-        return;
-      }
-
-      const card = hotspotInfoCardRef.current;
-      const cardWidth = card?.offsetWidth ?? 300;
-      const cardHeight = card?.offsetHeight ?? 220;
-      const maxX = Math.max(12, window.innerWidth - cardWidth - 12);
-      const maxY = Math.max(12, window.innerHeight - cardHeight - 12);
-      const nextX = Math.min(
-        Math.max(12, event.clientX - dragState.offsetX),
-        maxX,
-      );
-      const nextY = Math.min(
-        Math.max(12, event.clientY - dragState.offsetY),
-        maxY,
-      );
-
-      setHotspotInfoPosition({
-        x: nextX,
-        y: nextY,
-      });
-    },
-    [],
-  );
-
-  const handleHotspotCardPointerUp = useCallback(
-    (event: PointerEvent<HTMLDivElement>) => {
-      if (hotspotInfoDragRef.current?.pointerId === event.pointerId) {
-        hotspotInfoDragRef.current = null;
       }
 
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -677,6 +656,19 @@ export function SceneViewContainer() {
       const focusResult = resolveParcelMapFocus(focus);
       const previousFocusId = lastFocusedParcelIdRef.current;
 
+      if (!allowsParcelSelectionGraphics(overviewCommandModeRef.current)) {
+        clearParcelSceneFocus();
+        logParcelMapFocusDiagnostic(
+          "SceneView parcel focus ignored outside parcel mode",
+          {
+            focusStatus: focusResult.focusStatus,
+            officialParcelId: focus.officialParcelId,
+            overviewCommandMode: overviewCommandModeRef.current,
+          },
+        );
+        return;
+      }
+
       logParcelMapFocusDiagnostic("SceneView received focus request", {
         canFocus: focusResult.canFocus,
         centroid: focus.centroid,
@@ -737,6 +729,18 @@ export function SceneViewContainer() {
         focusLayerRef.current = focusLayer;
         focusLayer.removeAll();
 
+        if (!allowsParcelSelectionGraphics(overviewCommandModeRef.current)) {
+          clearParcelSceneFocus();
+          logParcelMapFocusDiagnostic(
+            "SceneView parcel focus drawing skipped after mode change",
+            {
+              officialParcelId: focus.officialParcelId,
+              overviewCommandMode: overviewCommandModeRef.current,
+            },
+          );
+          return;
+        }
+
         if (focusGraphics.length) {
           focusGraphics.forEach((graphic) => focusLayer.add(graphic));
         }
@@ -783,6 +787,18 @@ export function SceneViewContainer() {
           animate: true,
           duration: 900,
         });
+
+        if (!allowsParcelSelectionGraphics(overviewCommandModeRef.current)) {
+          clearParcelSceneFocus();
+          logParcelMapFocusDiagnostic(
+            "SceneView parcel focus result ignored after mode change",
+            {
+              officialParcelId: focus.officialParcelId,
+              overviewCommandMode: overviewCommandModeRef.current,
+            },
+          );
+          return;
+        }
 
         if (latestFocusRequestParcelIdRef.current !== focus.officialParcelId) {
           logParcelMapFocusDiagnostic("stale SceneView focus result ignored", {
@@ -928,7 +944,10 @@ export function SceneViewContainer() {
         applyOperationalLayerVisibility(layers, activeLayerIdsRef.current);
         updateSelectedParcelSymbols(
           getMockGraphicsLayerSubset(layers, operationalLayerRegistry),
-          selectedParcelIdRef.current,
+          getSelectedParcelGraphicsId(
+            overviewCommandModeRef.current,
+            selectedParcelIdRef.current,
+          ),
         );
 
         const interactionController = createMapInteractionController({
@@ -939,6 +958,17 @@ export function SceneViewContainer() {
           },
           onSelection: (event) => {
             if (event.action === "select" && event.parcelId) {
+              if (!allowsParcelSelectionGraphics(overviewCommandModeRef.current)) {
+                updateSelectedParcelSymbols(
+                  getMockGraphicsLayerSubset(
+                    layerRefs.current,
+                    operationalLayerRegistry,
+                  ),
+                  null,
+                );
+                return;
+              }
+
               selectParcel(event.parcelId, { source: event.source });
               return;
             }
@@ -956,7 +986,7 @@ export function SceneViewContainer() {
               view,
               event,
               hotspotLayerRef.current,
-              setHotspotInfo,
+              setSelectedDevelopmentHotspotContext,
               closeFloodInfo,
             );
 
@@ -1048,9 +1078,12 @@ export function SceneViewContainer() {
             event as CustomEvent<ParcelMapFocusRequestEventDetail>
           ).detail;
 
-          if (detail?.focus) {
+          if (detail?.focus && allowsParcelSelectionGraphics(overviewCommandModeRef.current)) {
             void applyParcelFocus(detail.focus);
+            return;
           }
+
+          clearParcelSceneFocus();
         };
         window.addEventListener(
           CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
@@ -1125,6 +1158,10 @@ export function SceneViewContainer() {
         window.cancelAnimationFrame(schoolHoverFrameRef.current);
         schoolHoverFrameRef.current = null;
       }
+      if (parcelFocusCleanupFrameRef.current !== null) {
+        window.cancelAnimationFrame(parcelFocusCleanupFrameRef.current);
+        parcelFocusCleanupFrameRef.current = null;
+      }
       clearSchoolUtilizationHover();
       focusLayerRef.current?.removeAll();
       focusLayerRef.current = null;
@@ -1155,12 +1192,14 @@ export function SceneViewContainer() {
     closeFloodZoneInfo,
     closeHotspotInfo,
     closeSchoolUtilizationInfo,
+    clearParcelSceneFocus,
     clearSelectedParcel,
     clearSchoolUtilizationHover,
     selectParcel,
     setFloodZoneViewExtent,
     setMapError,
     setMapStatus,
+    setSelectedDevelopmentHotspotContext,
     setSelectedModelResearchContext,
     setSelectedSchoolUtilizationZone,
     updateSchoolUtilizationHover,
@@ -1184,25 +1223,33 @@ export function SceneViewContainer() {
 
     if (
       !developmentHotspotsEnabled ||
-      developmentHotspotLayer.status !== "ready"
+      developmentHotspotLayer.status !== "ready" ||
+      developmentHotspotControls.permitSegment === "all"
     ) {
+      setSelectedDevelopmentHotspotContext(null);
       return;
     }
 
-    const activePermitSegment =
-      developmentHotspotControls.permitSegment === "all"
-        ? null
-        : developmentHotspotControls.permitSegment;
-
-    developmentHotspotLayer.markers.forEach((marker) => {
-      hotspotLayer.add(
-        createDevelopmentHotspotGraphic(runtime, marker, activePermitSegment),
-      );
+    const activePermitSegment = developmentHotspotControls.permitSegment;
+    const displayMode = getDevelopmentHotspotMapDisplayMode(view.scale);
+    const currentExtent = getSceneViewWgs84Extent(runtime, view);
+    const renderResult = buildDevelopmentHotspotDisplayGraphics({
+      activePermitSegment,
+      displayMode,
+      extent: currentExtent,
+      markers: developmentHotspotLayer.markers,
+      runtime,
     });
 
-    console.debug("[CFS development hotspots]", "rendered map markers", {
-      markerCount: developmentHotspotLayer.markers.length,
+    hotspotLayer.addMany(renderResult.graphics);
+
+    console.debug("[CFS development hotspots]", "rendered grouped display", {
+      displayMode,
+      graphicCount: renderResult.graphics.length,
+      parcelCount: renderResult.visibleParcelCount,
+      recordCount: renderResult.visibleRecordCount,
       totalCount: developmentHotspotLayer.totalCount,
+      viewScaleLabel: getDevelopmentHotspotViewScaleLabel(displayMode),
     });
   }, [
     developmentHotspotLayer.markers,
@@ -1211,6 +1258,8 @@ export function SceneViewContainer() {
     developmentHotspotControls.permitSegment,
     developmentHotspotsEnabled,
     mapStatus,
+    modelResearchRenderTick,
+    setSelectedDevelopmentHotspotContext,
   ]);
 
   useEffect(() => {
@@ -1417,18 +1466,9 @@ export function SceneViewContainer() {
   useEffect(() => {
     updateSelectedParcelSymbols(
       getMockGraphicsLayerSubset(layerRefs.current, operationalLayerRegistry),
-      selectedParcelId,
+      getSelectedParcelGraphicsId(overviewCommandMode, selectedParcelId),
     );
-  }, [selectedParcelId]);
-
-  const visibleHotspotInfo =
-    hotspotInfo &&
-    developmentHotspotsEnabled &&
-    developmentHotspotLayer.markers.some(
-      (marker) => marker.officialParcelId === hotspotInfo.officialParcelId,
-    )
-      ? hotspotInfo
-      : null;
+  }, [overviewCommandMode, selectedParcelId]);
 
   const visibleFloodInfo =
     floodInfo &&
@@ -1610,132 +1650,6 @@ export function SceneViewContainer() {
               </div>
             </div>
           )}
-        </div>
-      )}
-      {visibleHotspotInfo && (
-        <div
-          aria-label="Development hotspot information"
-          className="fixed z-[85] w-[min(320px,calc(100vw-24px))] rounded-lg border border-[#ffb454]/35 bg-[#06101a]/95 text-left shadow-[0_0_42px_rgba(255,180,84,0.26)] backdrop-blur-xl"
-          ref={hotspotInfoCardRef}
-          style={
-            hotspotInfoPosition
-              ? {
-                  left: hotspotInfoPosition.x,
-                  top: hotspotInfoPosition.y,
-                }
-              : {
-                  bottom: "1.5rem",
-                  right: "1.5rem",
-                }
-          }
-        >
-          <div
-            className="flex cursor-move touch-none items-start justify-between gap-3 border-b border-white/10 px-3 py-2"
-            onPointerCancel={handleHotspotCardPointerUp}
-            onPointerDown={handleHotspotCardPointerDown}
-            onPointerMove={handleHotspotCardPointerMove}
-            onPointerUp={handleHotspotCardPointerUp}
-            title="Drag hotspot info card"
-          >
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ffcf92]">
-                Development Hotspot
-              </p>
-              <p className="mt-1 truncate font-mono text-xs font-semibold text-white">
-                {visibleHotspotInfo.officialParcelId}
-              </p>
-            </div>
-            <button
-              aria-label="Close development hotspot information"
-              className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
-              onClick={closeHotspotInfo}
-              title="Close hotspot info"
-              type="button"
-            >
-              Close
-            </button>
-          </div>
-          <div className="space-y-2 px-3 py-3 text-xs">
-            <div className="grid grid-cols-2 gap-2">
-              <HotspotInfoMetric label="PIN" value={visibleHotspotInfo.pin14} />
-              <HotspotInfoMetric
-                label="Activity"
-                value={formatHotspotPopupLabel(
-                  visibleHotspotInfo.developmentActivityClass,
-                )}
-              />
-              <HotspotInfoMetric
-                label="Selected Segment"
-                value={formatHotspotPopupLabel(
-                  visibleHotspotInfo.renderedPermitSegment ??
-                    visibleHotspotInfo.dominantPermitSegment,
-                )}
-              />
-              <HotspotInfoMetric
-                label="Segment Count"
-                value={visibleHotspotInfo.selectedSegmentCount}
-              />
-              <HotspotInfoMetric
-                label="Concentration"
-                value={formatHotspotPopupLabel(
-                  visibleHotspotInfo.selectedSegmentSizeTier,
-                )}
-              />
-              {visibleHotspotInfo.selectedSegmentScore !== null ? (
-                <HotspotInfoMetric
-                  label="Segment Score"
-                  value={formatHotspotScore(
-                    visibleHotspotInfo.selectedSegmentScore,
-                  )}
-                />
-              ) : null}
-              <HotspotInfoMetric
-                label="Growth Signal"
-                value={formatHotspotPopupLabel(
-                  visibleHotspotInfo.dominantGrowthSignal,
-                )}
-              />
-              <HotspotInfoMetric
-                label="Domain"
-                value={formatDevelopmentDomainLabel(
-                  visibleHotspotInfo.renderedPermitSegment ??
-                    visibleHotspotInfo.dominantPermitSegment,
-                )}
-              />
-              <HotspotInfoMetric
-                label="Permits"
-                value={visibleHotspotInfo.totalPermitCount}
-              />
-              <HotspotInfoMetric
-                label="Recent 1yr"
-                value={visibleHotspotInfo.recentPermitCount1yr}
-              />
-              <HotspotInfoMetric
-                label="Recent 3yr"
-                value={visibleHotspotInfo.recentPermitCount3yr}
-              />
-              <HotspotInfoMetric
-                label="High Value"
-                value={visibleHotspotInfo.highValuePermits}
-              />
-              <HotspotInfoMetric
-                label="Major Value"
-                value={visibleHotspotInfo.majorValuePermits}
-              />
-            </div>
-            <div className="rounded border border-white/10 bg-black/20 px-2 py-2">
-              <p className="text-[10px] uppercase text-slate-500">Zoning</p>
-              <p className="mt-1 truncate text-slate-200">
-                {visibleHotspotInfo.zoningJurisdictionName ?? "Unavailable"} /{" "}
-                {visibleHotspotInfo.dominantZoningCodeRaw ?? "No code"}
-              </p>
-            </div>
-            <p className="text-[11px] leading-5 text-slate-500">
-              This marker already selected the parcel. The selected parcel card,
-              boundary highlight, and permit events use the standard parcel
-              flow.
-            </p>
-          </div>
         </div>
       )}
       {visibleFloodInfo && (
@@ -2187,23 +2101,6 @@ function formatSceneViewExtent(extent: FloodZoneExtent | null) {
   )}, E ${extent.xmax.toFixed(5)}, N ${extent.ymax.toFixed(5)}`;
 }
 
-function HotspotInfoMetric({
-  label,
-  value,
-}: {
-  label: string;
-  value: number | string | null | undefined;
-}) {
-  return (
-    <div className="rounded border border-white/10 bg-black/20 px-2 py-2">
-      <p className="text-[10px] uppercase text-slate-500">{label}</p>
-      <p className="mt-1 truncate text-xs font-semibold text-slate-100">
-        {value ?? "Unavailable"}
-      </p>
-    </div>
-  );
-}
-
 function FloodInfoMetric({
   label,
   value,
@@ -2219,14 +2116,6 @@ function FloodInfoMetric({
       </p>
     </div>
   );
-}
-
-function formatHotspotScore(value: number | null | undefined) {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return null;
-  }
-
-  return value.toFixed(1);
 }
 
 function formatFloodBoolean(value: boolean) {
@@ -2441,14 +2330,21 @@ function createDevelopmentHotspotGraphic(
   runtime: ArcGISRuntime,
   marker: DevelopmentHotspotMapMarker,
   activePermitSegment: string | null,
+  displayMode: DevelopmentHotspotMapDisplayMode = "individual_markers",
 ) {
   const profile = getDevelopmentHotspotMarkerProfile(
     marker,
     activePermitSegment,
   );
+  const context = createDevelopmentHotspotContextFromMarker(
+    marker,
+    activePermitSegment,
+    displayMode,
+  );
 
   return new runtime.Graphic({
     attributes: {
+      ...createDevelopmentHotspotContextAttributes(context),
       developmentActivityClass: marker.developmentActivityClass,
       developmentActivityScore: marker.developmentActivityScore,
       dominantGrowthSignal: marker.dominantGrowthSignal,
@@ -2514,6 +2410,95 @@ function createDevelopmentHotspotGraphic(
         minWorldLength: 60,
         screenLength: profile.screenLength,
       },
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createDevelopmentHotspotAggregateGraphic(
+  runtime: ArcGISRuntime,
+  cell: DevelopmentHotspotAggregateCell,
+) {
+  const profile = getDevelopmentHotspotAggregateProfile(cell);
+  const context = createDevelopmentHotspotContextFromCell(cell);
+
+  return new runtime.Graphic({
+    attributes: createDevelopmentHotspotContextAttributes(context),
+    geometry: new runtime.Point({
+      spatialReference: { wkid: 4326 },
+      x: cell.longitude,
+      y: cell.latitude,
+    }),
+    symbol: {
+      symbolLayers: [
+        {
+          material: {
+            color: profile.outerColor,
+          },
+          outline: {
+            color: profile.outlineColor,
+            size: 0.7,
+          },
+          resource: {
+            primitive: profile.primitive,
+          },
+          size: profile.outerSize,
+          type: "icon",
+        },
+        {
+          material: {
+            color: profile.innerColor,
+          },
+          outline: {
+            color: profile.innerOutlineColor,
+            size: 0.9,
+          },
+          resource: {
+            primitive: profile.primitive,
+          },
+          size: profile.innerSize,
+          type: "icon",
+        },
+      ],
+      type: "point-3d",
+      verticalOffset: {
+        maxWorldLength: profile.maxWorldLength,
+        minWorldLength: 64,
+        screenLength: profile.screenLength,
+      },
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createDevelopmentHotspotAggregateLabelGraphic(
+  runtime: ArcGISRuntime,
+  cell: DevelopmentHotspotAggregateCell,
+) {
+  if (cell.recordsRepresented <= 1) {
+    return null;
+  }
+
+  const profile = getDevelopmentHotspotAggregateProfile(cell);
+  const context = createDevelopmentHotspotContextFromCell(cell);
+
+  return new runtime.Graphic({
+    attributes: createDevelopmentHotspotContextAttributes(context),
+    geometry: new runtime.Point({
+      spatialReference: { wkid: 4326 },
+      x: cell.longitude,
+      y: cell.latitude,
+    }),
+    symbol: {
+      color: [255, 255, 255, 0.96],
+      font: {
+        family: "Inter, Arial, sans-serif",
+        size: profile.labelSize,
+        weight: "bold",
+      },
+      haloColor: [7, 17, 31, 0.9],
+      haloSize: 1.35,
+      text: formatDevelopmentCount(cell.recordsRepresented),
+      type: "text",
+      yoffset: 0,
     } as unknown as Graphic["symbol"],
   });
 }
@@ -2665,6 +2650,43 @@ function createModelResearchPreviewGraphic(
   });
 }
 
+interface DevelopmentHotspotDisplayOptions {
+  activePermitSegment: string | null;
+  displayMode: DevelopmentHotspotMapDisplayMode;
+  extent: FloodZoneExtent | null;
+  markers: DevelopmentHotspotMapMarker[];
+  runtime: ArcGISRuntime;
+}
+
+interface DevelopmentHotspotDisplayResult {
+  extentMarkers: DevelopmentHotspotMapMarker[];
+  graphics: Graphic[];
+  visibleParcelCount: number;
+  visibleRecordCount: number;
+}
+
+interface DevelopmentHotspotAggregateCell {
+  activityClass: string | null;
+  clusterId: string;
+  developmentActivityScore: number | null;
+  displayMode: DevelopmentHotspotMapDisplayMode;
+  dominantPermitSegment: string | null;
+  highValuePermits: number;
+  latitude: number;
+  longitude: number;
+  majorValuePermits: number;
+  markers: DevelopmentHotspotMapMarker[];
+  parcelsRepresented: number;
+  recentPermitCount1yr: number;
+  recentPermitCount3yr: number;
+  recordsRepresented: number;
+  selectedPermitSegment: string | null;
+  segmentCounts: DevelopmentHotspotSegmentCounts;
+  totalPermitCount: number;
+  weight: number;
+  zoningJurisdictionName: string | null;
+}
+
 interface ModelResearchDisplayOptions {
   displayMode: ModelResearchMapDisplayMode;
   extent: FloodZoneExtent | null;
@@ -2690,6 +2712,295 @@ interface ModelResearchAggregateCell {
   markers: ModelResearchPreviewMarker[];
   topDrivers: string[];
   weight: number;
+}
+
+function getDevelopmentHotspotMapDisplayMode(
+  scale: number | null | undefined,
+): DevelopmentHotspotMapDisplayMode {
+  if (!scale || !Number.isFinite(scale)) {
+    return "countywide_clusters";
+  }
+
+  if (scale >= DEVELOPMENT_HOTSPOT_COUNTYWIDE_CLUSTER_SCALE) {
+    return "countywide_clusters";
+  }
+
+  if (scale >= DEVELOPMENT_HOTSPOT_INTERMEDIATE_CLUSTER_SCALE) {
+    return "intermediate_clusters";
+  }
+
+  if (scale >= DEVELOPMENT_HOTSPOT_FINE_CLUSTER_SCALE) {
+    return "fine_clusters";
+  }
+
+  return "individual_markers";
+}
+
+function getDevelopmentHotspotViewScaleLabel(
+  displayMode: DevelopmentHotspotMapDisplayMode,
+) {
+  switch (displayMode) {
+    case "countywide_clusters":
+      return "Countywide activity clusters";
+    case "intermediate_clusters":
+      return "Intermediate activity clusters";
+    case "fine_clusters":
+      return "Fine local activity clusters";
+    case "individual_markers":
+      return "Individual activity markers";
+    default:
+      return "Development Hotspots off";
+  }
+}
+
+function getDevelopmentHotspotClusterCellSize(
+  displayMode: DevelopmentHotspotMapDisplayMode,
+) {
+  switch (displayMode) {
+    case "countywide_clusters":
+      return DEVELOPMENT_HOTSPOT_COUNTYWIDE_CELL_SIZE_DEGREES;
+    case "fine_clusters":
+      return DEVELOPMENT_HOTSPOT_FINE_CELL_SIZE_DEGREES;
+    case "intermediate_clusters":
+    default:
+      return DEVELOPMENT_HOTSPOT_INTERMEDIATE_CELL_SIZE_DEGREES;
+  }
+}
+
+function getDevelopmentHotspotClusterMaxCells(
+  displayMode: DevelopmentHotspotMapDisplayMode,
+) {
+  switch (displayMode) {
+    case "countywide_clusters":
+      return DEVELOPMENT_HOTSPOT_COUNTYWIDE_MAX_CELLS;
+    case "fine_clusters":
+      return DEVELOPMENT_HOTSPOT_FINE_MAX_CELLS;
+    case "intermediate_clusters":
+    default:
+      return DEVELOPMENT_HOTSPOT_INTERMEDIATE_MAX_CELLS;
+  }
+}
+
+function buildDevelopmentHotspotDisplayGraphics({
+  activePermitSegment,
+  displayMode,
+  extent,
+  markers,
+  runtime,
+}: DevelopmentHotspotDisplayOptions): DevelopmentHotspotDisplayResult {
+  const visibleMarkers = filterDevelopmentHotspotMarkersForExtent(
+    markers,
+    extent,
+  );
+  const sourceMarkers = visibleMarkers.length ? visibleMarkers : markers;
+
+  if (!sourceMarkers.length) {
+    return {
+      extentMarkers: [],
+      graphics: [],
+      visibleParcelCount: 0,
+      visibleRecordCount: 0,
+    };
+  }
+
+  if (displayMode === "individual_markers") {
+    const detailMarkers = prioritizeDevelopmentHotspotMarkers(
+      sourceMarkers,
+      activePermitSegment,
+    ).slice(0, DEVELOPMENT_HOTSPOT_DETAIL_MAX_MARKERS);
+
+    return {
+      extentMarkers: detailMarkers,
+      graphics: detailMarkers.map((marker) =>
+        createDevelopmentHotspotGraphic(
+          runtime,
+          marker,
+          activePermitSegment,
+          displayMode,
+        ),
+      ),
+      visibleParcelCount: detailMarkers.length,
+      visibleRecordCount: detailMarkers.reduce(
+        (sum, marker) =>
+          sum + getDevelopmentHotspotRecordCount(marker, activePermitSegment),
+        0,
+      ),
+    };
+  }
+
+  const cells = aggregateDevelopmentHotspotMarkers(
+    sourceMarkers,
+    activePermitSegment,
+    getDevelopmentHotspotClusterCellSize(displayMode),
+    displayMode,
+  ).slice(0, getDevelopmentHotspotClusterMaxCells(displayMode));
+
+  return {
+    extentMarkers: cells.flatMap((cell) => cell.markers),
+    graphics: cells.flatMap((cell) => {
+      const graphic = createDevelopmentHotspotAggregateGraphic(runtime, cell);
+      const labelGraphic = createDevelopmentHotspotAggregateLabelGraphic(
+        runtime,
+        cell,
+      );
+
+      return labelGraphic ? [graphic, labelGraphic] : [graphic];
+    }),
+    visibleParcelCount: cells.reduce(
+      (sum, cell) => sum + cell.parcelsRepresented,
+      0,
+    ),
+    visibleRecordCount: cells.reduce(
+      (sum, cell) => sum + cell.recordsRepresented,
+      0,
+    ),
+  };
+}
+
+function filterDevelopmentHotspotMarkersForExtent(
+  markers: DevelopmentHotspotMapMarker[],
+  extent: FloodZoneExtent | null,
+) {
+  if (!extent) {
+    return markers;
+  }
+
+  const longitudePadding = Math.max(0.015, (extent.xmax - extent.xmin) * 0.12);
+  const latitudePadding = Math.max(0.015, (extent.ymax - extent.ymin) * 0.12);
+
+  return markers.filter((marker) => {
+    const { latitude, longitude } = marker.centroid;
+
+    return (
+      longitude >= extent.xmin - longitudePadding &&
+      longitude <= extent.xmax + longitudePadding &&
+      latitude >= extent.ymin - latitudePadding &&
+      latitude <= extent.ymax + latitudePadding
+    );
+  });
+}
+
+function prioritizeDevelopmentHotspotMarkers(
+  markers: DevelopmentHotspotMapMarker[],
+  activePermitSegment: string | null,
+) {
+  return [...markers].sort((left, right) => {
+    const recordDelta =
+      getDevelopmentHotspotRecordCount(right, activePermitSegment) -
+      getDevelopmentHotspotRecordCount(left, activePermitSegment);
+
+    if (recordDelta !== 0) {
+      return recordDelta;
+    }
+
+    return (
+      getDevelopmentHotspotMarkerWeight(right, activePermitSegment) -
+      getDevelopmentHotspotMarkerWeight(left, activePermitSegment)
+    );
+  });
+}
+
+function aggregateDevelopmentHotspotMarkers(
+  markers: DevelopmentHotspotMapMarker[],
+  activePermitSegment: string | null,
+  cellSizeDegrees: number,
+  displayMode: DevelopmentHotspotMapDisplayMode,
+) {
+  const cells = new Map<string, DevelopmentHotspotAggregateCell>();
+
+  markers.forEach((marker) => {
+    const longitudeKey =
+      Math.floor(marker.centroid.longitude / cellSizeDegrees) * cellSizeDegrees;
+    const latitudeKey =
+      Math.floor(marker.centroid.latitude / cellSizeDegrees) * cellSizeDegrees;
+    const key = `${longitudeKey.toFixed(5)}:${latitudeKey.toFixed(5)}`;
+    const recordsRepresented = getDevelopmentHotspotRecordCount(
+      marker,
+      activePermitSegment,
+    );
+    const segmentCounts = getDevelopmentHotspotSegmentCounts(marker);
+    const weight = getDevelopmentHotspotMarkerWeight(
+      marker,
+      activePermitSegment,
+    );
+    const existingCell = cells.get(key);
+
+    if (!existingCell) {
+      cells.set(key, {
+        activityClass: marker.developmentActivityClass,
+        clusterId: `${displayMode}:${key}`,
+        developmentActivityScore: marker.developmentActivityScore,
+        displayMode,
+        dominantPermitSegment:
+          activePermitSegment ??
+          getDominantDevelopmentHotspotSegment(segmentCounts) ??
+          marker.dominantPermitSegment,
+        highValuePermits: marker.highValuePermits,
+        latitude: marker.centroid.latitude,
+        longitude: marker.centroid.longitude,
+        majorValuePermits: marker.majorValuePermits,
+        markers: [marker],
+        parcelsRepresented: 1,
+        recentPermitCount1yr: marker.recentPermitCount1yr,
+        recentPermitCount3yr: marker.recentPermitCount3yr,
+        recordsRepresented,
+        selectedPermitSegment: activePermitSegment,
+        segmentCounts,
+        totalPermitCount: marker.totalPermitCount,
+        weight,
+        zoningJurisdictionName: marker.zoningJurisdictionName,
+      });
+      return;
+    }
+
+    const nextParcelCount = existingCell.parcelsRepresented + 1;
+    existingCell.latitude =
+      (existingCell.latitude * existingCell.parcelsRepresented +
+        marker.centroid.latitude) /
+      nextParcelCount;
+    existingCell.longitude =
+      (existingCell.longitude * existingCell.parcelsRepresented +
+        marker.centroid.longitude) /
+      nextParcelCount;
+    existingCell.parcelsRepresented = nextParcelCount;
+    existingCell.recordsRepresented += recordsRepresented;
+    existingCell.highValuePermits += marker.highValuePermits;
+    existingCell.majorValuePermits += marker.majorValuePermits;
+    existingCell.recentPermitCount1yr += marker.recentPermitCount1yr;
+    existingCell.recentPermitCount3yr += marker.recentPermitCount3yr;
+    existingCell.totalPermitCount += marker.totalPermitCount;
+    existingCell.weight += weight;
+    existingCell.markers.push(marker);
+    existingCell.segmentCounts = mergeDevelopmentHotspotSegmentCounts(
+      existingCell.segmentCounts,
+      segmentCounts,
+    );
+    existingCell.dominantPermitSegment =
+      activePermitSegment ??
+      getDominantDevelopmentHotspotSegment(existingCell.segmentCounts) ??
+      existingCell.dominantPermitSegment;
+    existingCell.activityClass = getDominantDevelopmentHotspotActivityClass(
+      existingCell.markers,
+    );
+    existingCell.developmentActivityScore =
+      getAverageDevelopmentActivityScore(existingCell.markers);
+    existingCell.zoningJurisdictionName =
+      getDominantDevelopmentHotspotJurisdiction(existingCell.markers);
+  });
+
+  return [...cells.values()].sort((left, right) => {
+    const concentrationDelta =
+      right.recordsRepresented * 2 +
+      right.parcelsRepresented +
+      right.weight -
+      (left.recordsRepresented * 2 + left.parcelsRepresented + left.weight);
+
+    if (concentrationDelta !== 0) {
+      return concentrationDelta;
+    }
+
+    return right.parcelsRepresented - left.parcelsRepresented;
+  });
 }
 
 function getModelResearchMapDisplayMode(
@@ -3498,6 +3809,432 @@ function getDevelopmentHotspotMarkerProfile(
   };
 }
 
+function getDevelopmentHotspotRecordCount(
+  marker: DevelopmentHotspotMapMarker,
+  activePermitSegment: string | null,
+) {
+  if (activePermitSegment) {
+    return Math.max(1, getSelectedSegmentPermitCount(marker, activePermitSegment));
+  }
+
+  return Math.max(1, marker.totalPermitCount);
+}
+
+function getDevelopmentHotspotMarkerWeight(
+  marker: DevelopmentHotspotMapMarker,
+  activePermitSegment: string | null,
+) {
+  return (
+    getDevelopmentHotspotRecordCount(marker, activePermitSegment) +
+    marker.recentPermitCount3yr * 0.35 +
+    marker.highValuePermits * 1.5 +
+    marker.majorValuePermits * 2.25
+  );
+}
+
+function getDevelopmentHotspotSegmentCounts(
+  marker: DevelopmentHotspotMapMarker,
+): DevelopmentHotspotSegmentCounts {
+  return {
+    administrativeOrUnknown: Math.max(
+      0,
+      marker.totalPermitCount -
+        marker.commercialActivityPermits -
+        marker.demolitionPermits -
+        marker.industrialActivityPermits -
+        marker.institutionalActivityPermits -
+        marker.minorMaintenancePermits -
+        marker.redevelopmentSignalPermits -
+        marker.residentialGrowthPermits,
+    ),
+    commercialActivity: marker.commercialActivityPermits,
+    demolition: marker.demolitionPermits,
+    industrialActivity: marker.industrialActivityPermits,
+    institutionalActivity: marker.institutionalActivityPermits,
+    minorMaintenance: marker.minorMaintenancePermits,
+    redevelopmentSignal: marker.redevelopmentSignalPermits,
+    residentialGrowth: marker.residentialGrowthPermits,
+  };
+}
+
+function mergeDevelopmentHotspotSegmentCounts(
+  left: DevelopmentHotspotSegmentCounts,
+  right: DevelopmentHotspotSegmentCounts,
+): DevelopmentHotspotSegmentCounts {
+  return {
+    administrativeOrUnknown:
+      left.administrativeOrUnknown + right.administrativeOrUnknown,
+    commercialActivity: left.commercialActivity + right.commercialActivity,
+    demolition: left.demolition + right.demolition,
+    industrialActivity: left.industrialActivity + right.industrialActivity,
+    institutionalActivity: left.institutionalActivity + right.institutionalActivity,
+    minorMaintenance: left.minorMaintenance + right.minorMaintenance,
+    redevelopmentSignal: left.redevelopmentSignal + right.redevelopmentSignal,
+    residentialGrowth: left.residentialGrowth + right.residentialGrowth,
+  };
+}
+
+function getDominantDevelopmentHotspotSegment(
+  counts: DevelopmentHotspotSegmentCounts,
+) {
+  const entries: Array<[string, number]> = [
+    ["residential_growth", counts.residentialGrowth],
+    ["commercial_activity", counts.commercialActivity],
+    ["industrial_activity", counts.industrialActivity],
+    ["redevelopment_signal", counts.redevelopmentSignal],
+    ["institutional_activity", counts.institutionalActivity],
+    ["minor_maintenance", counts.minorMaintenance],
+    ["demolition", counts.demolition],
+    ["administrative_or_unknown", counts.administrativeOrUnknown],
+  ];
+  const [segment, count] = entries.sort((left, right) => right[1] - left[1])[0] ?? [];
+
+  return count && count > 0 ? segment : null;
+}
+
+function getDominantDevelopmentHotspotActivityClass(
+  markers: DevelopmentHotspotMapMarker[],
+) {
+  const counts = new Map<string, number>();
+
+  markers.forEach((marker) => {
+    const activityClass = marker.developmentActivityClass;
+    counts.set(activityClass, (counts.get(activityClass) ?? 0) + 1);
+  });
+
+  return [...counts.entries()].sort((left, right) => right[1] - left[1])[0]?.[0]
+    ?? null;
+}
+
+function getAverageDevelopmentActivityScore(
+  markers: DevelopmentHotspotMapMarker[],
+) {
+  const scores = markers
+    .map((marker) => marker.developmentActivityScore)
+    .filter((score): score is number => typeof score === "number");
+
+  if (!scores.length) {
+    return null;
+  }
+
+  return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+}
+
+function getDominantDevelopmentHotspotJurisdiction(
+  markers: DevelopmentHotspotMapMarker[],
+) {
+  const counts = new Map<string, number>();
+
+  markers.forEach((marker) => {
+    const jurisdiction = marker.zoningJurisdictionName?.trim();
+
+    if (!jurisdiction) {
+      return;
+    }
+
+    counts.set(jurisdiction, (counts.get(jurisdiction) ?? 0) + 1);
+  });
+
+  return [...counts.entries()].sort((left, right) => right[1] - left[1])[0]?.[0]
+    ?? null;
+}
+
+function createDevelopmentHotspotContextFromMarker(
+  marker: DevelopmentHotspotMapMarker,
+  activePermitSegment: string | null,
+  displayMode: DevelopmentHotspotMapDisplayMode,
+): SelectedDevelopmentHotspotContext {
+  const segmentCounts = getDevelopmentHotspotSegmentCounts(marker);
+  const dominantPermitSegment =
+    activePermitSegment ??
+    getDominantDevelopmentHotspotSegment(segmentCounts) ??
+    marker.dominantPermitSegment;
+  const recordsRepresented = getDevelopmentHotspotRecordCount(
+    marker,
+    activePermitSegment,
+  );
+  const topDrivers = getDevelopmentHotspotTopDrivers({
+    dominantPermitSegment,
+    highValuePermits: marker.highValuePermits,
+    recentPermitCount3yr: marker.recentPermitCount3yr,
+    totalPermitCount: marker.totalPermitCount,
+  });
+
+  return {
+    activityClass: marker.developmentActivityClass,
+    areaLabel: marker.officialParcelId,
+    caveat: "Observed permit context, not a prediction.",
+    contextKind: "individual",
+    developmentActivityScore: marker.developmentActivityScore,
+    displayMode,
+    dominantActivityType: marker.developmentActivityClass,
+    dominantPermitSegment,
+    highValuePermits: marker.highValuePermits,
+    latestActivityLabel: formatDevelopmentHotspotRecentActivityLabel(
+      marker.recentPermitCount1yr,
+      marker.recentPermitCount3yr,
+    ),
+    majorValuePermits: marker.majorValuePermits,
+    officialParcelId: marker.officialParcelId,
+    parcelsRepresented: 1,
+    pin14: marker.pin14,
+    recentPermitCount1yr: marker.recentPermitCount1yr,
+    recentPermitCount3yr: marker.recentPermitCount3yr,
+    recordsRepresented,
+    representedParcelIds: [marker.officialParcelId],
+    selectedPermitSegment: activePermitSegment,
+    segmentCounts,
+    topDrivers,
+    totalPermitCount: marker.totalPermitCount,
+    whyHighlighted:
+      "This parcel is highlighted because observed permit/development activity is concentrated in the selected countywide layer filters.",
+    zoningJurisdictionName: marker.zoningJurisdictionName,
+  };
+}
+
+function createDevelopmentHotspotContextFromCell(
+  cell: DevelopmentHotspotAggregateCell,
+): SelectedDevelopmentHotspotContext {
+  const areaLabel = createDevelopmentHotspotAreaLabel(cell);
+  const topDrivers = getDevelopmentHotspotTopDrivers({
+    dominantPermitSegment: cell.dominantPermitSegment,
+    highValuePermits: cell.highValuePermits,
+    recentPermitCount3yr: cell.recentPermitCount3yr,
+    totalPermitCount: cell.totalPermitCount,
+  });
+
+  return {
+    activityClass: cell.activityClass,
+    areaLabel,
+    caveat: "Observed permit/development activity only. Not a prediction.",
+    clusterId: cell.clusterId,
+    contextKind: "cluster",
+    developmentActivityScore: cell.developmentActivityScore,
+    displayMode: cell.displayMode,
+    dominantActivityType: cell.activityClass,
+    dominantPermitSegment: cell.dominantPermitSegment,
+    highValuePermits: cell.highValuePermits,
+    latestActivityLabel: formatDevelopmentHotspotRecentActivityLabel(
+      cell.recentPermitCount1yr,
+      cell.recentPermitCount3yr,
+    ),
+    majorValuePermits: cell.majorValuePermits,
+    parcelsRepresented: cell.parcelsRepresented,
+    recentPermitCount1yr: cell.recentPermitCount1yr,
+    recentPermitCount3yr: cell.recentPermitCount3yr,
+    recordsRepresented: cell.recordsRepresented,
+    representedParcelIds: cell.markers
+      .map((marker) => marker.officialParcelId)
+      .slice(0, 20),
+    selectedPermitSegment: cell.selectedPermitSegment,
+    segmentCounts: cell.segmentCounts,
+    topDrivers,
+    totalPermitCount: cell.totalPermitCount,
+    whyHighlighted:
+      "This cluster contains parcels with observed permit/development activity concentrated in the current map view and layer filters.",
+    zoningJurisdictionName: cell.zoningJurisdictionName,
+  };
+}
+
+function createDevelopmentHotspotContextAttributes(
+  context: SelectedDevelopmentHotspotContext,
+) {
+  return {
+    activityClass: context.activityClass,
+    areaLabel: context.areaLabel,
+    caveat: context.caveat,
+    clusterId: context.clusterId ?? null,
+    contextKind: context.contextKind,
+    developmentActivityScore: context.developmentActivityScore,
+    displayMode: context.displayMode,
+    dominantActivityType: context.dominantActivityType,
+    dominantPermitSegment: context.dominantPermitSegment,
+    graphicRole: "development-hotspot",
+    highValuePermits: context.highValuePermits,
+    latestActivityLabel: context.latestActivityLabel,
+    majorValuePermits: context.majorValuePermits,
+    officialParcelId: context.officialParcelId ?? null,
+    parcelsRepresented: context.parcelsRepresented,
+    pin14: context.pin14 ?? null,
+    recentPermitCount1yr: context.recentPermitCount1yr,
+    recentPermitCount3yr: context.recentPermitCount3yr,
+    recordsRepresented: context.recordsRepresented,
+    representedParcelIds: context.representedParcelIds.join(","),
+    selectedPermitSegment: context.selectedPermitSegment,
+    segmentCountAdministrativeOrUnknown:
+      context.segmentCounts.administrativeOrUnknown,
+    segmentCountCommercialActivity: context.segmentCounts.commercialActivity,
+    segmentCountDemolition: context.segmentCounts.demolition,
+    segmentCountIndustrialActivity: context.segmentCounts.industrialActivity,
+    segmentCountInstitutionalActivity:
+      context.segmentCounts.institutionalActivity,
+    segmentCountMinorMaintenance: context.segmentCounts.minorMaintenance,
+    segmentCountRedevelopmentSignal: context.segmentCounts.redevelopmentSignal,
+    segmentCountResidentialGrowth: context.segmentCounts.residentialGrowth,
+    topDriver1: context.topDrivers[0] ?? null,
+    topDriver2: context.topDrivers[1] ?? null,
+    topDriver3: context.topDrivers[2] ?? null,
+    totalPermitCount: context.totalPermitCount,
+    whyHighlighted: context.whyHighlighted,
+    zoningJurisdictionName: context.zoningJurisdictionName,
+  };
+}
+
+function createDevelopmentHotspotAreaLabel(
+  cell: DevelopmentHotspotAggregateCell,
+) {
+  const jurisdiction = cell.zoningJurisdictionName?.trim();
+
+  if (jurisdiction) {
+    return `Cluster near ${jurisdiction}`;
+  }
+
+  return `Development activity cluster of ${formatDevelopmentCount(
+    cell.recordsRepresented,
+  )} records`;
+}
+
+function formatDevelopmentHotspotRecentActivityLabel(
+  recentPermitCount1yr: number,
+  recentPermitCount3yr: number,
+) {
+  if (recentPermitCount1yr > 0) {
+    return `${formatDevelopmentCount(recentPermitCount1yr)} records in the last year`;
+  }
+
+  if (recentPermitCount3yr > 0) {
+    return `${formatDevelopmentCount(recentPermitCount3yr)} records in the last 3 years`;
+  }
+
+  return "No recent activity in the selected recent-window filters";
+}
+
+function getDevelopmentHotspotTopDrivers({
+  dominantPermitSegment,
+  highValuePermits,
+  recentPermitCount3yr,
+  totalPermitCount,
+}: {
+  dominantPermitSegment: string | null;
+  highValuePermits: number;
+  recentPermitCount3yr: number;
+  totalPermitCount: number;
+}) {
+  const drivers: string[] = [];
+
+  if (dominantPermitSegment) {
+    drivers.push(formatDevelopmentDomainLabel(dominantPermitSegment));
+  }
+
+  if (recentPermitCount3yr > 0) {
+    drivers.push("Recent permit activity");
+  }
+
+  if (highValuePermits > 0) {
+    drivers.push("High-value permits");
+  }
+
+  if (totalPermitCount > 0) {
+    drivers.push("Observed permit concentration");
+  }
+
+  return [...new Set(drivers)].slice(0, 3);
+}
+
+function getDevelopmentHotspotAggregateProfile(
+  cell: DevelopmentHotspotAggregateCell,
+) {
+  const segmentProfile = getPermitSegmentVisualProfile(
+    cell.dominantPermitSegment,
+  );
+  const sizeProfile = getDevelopmentHotspotCountSizeProfile(
+    cell.recordsRepresented,
+    cell.displayMode,
+  );
+
+  return {
+    innerColor: segmentProfile.color,
+    innerOutlineColor: segmentProfile.outlineColor,
+    innerSize: sizeProfile.innerSize,
+    labelSize: sizeProfile.labelSize,
+    maxWorldLength: sizeProfile.maxWorldLength,
+    outerColor: segmentProfile.haloColor,
+    outerSize: sizeProfile.outerSize,
+    outlineColor: segmentProfile.outlineColor,
+    primitive: segmentProfile.primitive,
+    screenLength: sizeProfile.screenLength,
+  };
+}
+
+function getDevelopmentHotspotCountSizeProfile(
+  count: number,
+  displayMode: DevelopmentHotspotMapDisplayMode,
+) {
+  const normalizedCount = Math.max(1, Math.round(count));
+  const modeScale =
+    displayMode === "countywide_clusters"
+      ? 1.04
+      : displayMode === "fine_clusters"
+        ? 0.92
+        : 1;
+  const bucket =
+    normalizedCount <= 1
+      ? {
+          innerSize: 9,
+          labelSize: 0,
+          maxWorldLength: 520,
+          outerSize: 14,
+          screenLength: 34,
+        }
+      : normalizedCount <= 5
+        ? {
+            innerSize: 18,
+            labelSize: 10,
+            maxWorldLength: 980,
+            outerSize: 25,
+            screenLength: 42,
+          }
+        : normalizedCount <= 15
+          ? {
+              innerSize: 27,
+              labelSize: 11,
+              maxWorldLength: 1350,
+              outerSize: 35,
+              screenLength: 52,
+            }
+          : normalizedCount <= 35
+            ? {
+                innerSize: 37,
+                labelSize: 12,
+                maxWorldLength: 1750,
+                outerSize: 47,
+                screenLength: 62,
+              }
+            : normalizedCount <= 75
+              ? {
+                  innerSize: 50,
+                  labelSize: 13,
+                  maxWorldLength: 2200,
+                  outerSize: 61,
+                  screenLength: 72,
+                }
+              : {
+                  innerSize: 62,
+                  labelSize: 14,
+                  maxWorldLength: 2600,
+                  outerSize: 74,
+                  screenLength: 80,
+                };
+
+  return {
+    innerSize: Math.round(bucket.innerSize * modeScale),
+    labelSize: bucket.labelSize,
+    maxWorldLength: Math.round(bucket.maxWorldLength * modeScale),
+    outerSize: Math.round(bucket.outerSize * modeScale),
+    screenLength: Math.round(bucket.screenLength * modeScale),
+  };
+}
+
 function getDevelopmentHotspotMarkerIntensity(selectedSegmentCount: number) {
   return Math.min(Math.max(selectedSegmentCount / 40, 0), 1);
 }
@@ -3508,21 +4245,21 @@ function getDevelopmentHotspotSizeProfile(
 ) {
   const tier = getDevelopmentHotspotMarkerTier(selectedSegmentCount);
   const size = getDevelopmentHotspotMarkerSize(selectedSegmentCount, intensity);
-  const haloSize = Math.round(size * 1.72);
+  const haloSize = Math.round(size * 1.48);
 
   return {
     haloOutlineColor: [255, 255, 255, 0.1],
     haloSize,
-    maxWorldLength: Math.round(size * 18),
+    maxWorldLength: Math.round(size * 42),
     outlineSize:
       tier === "very_high"
-        ? 2.8
+        ? 1.2
         : tier === "high"
-          ? 2.3
+          ? 1.05
           : tier === "moderate"
-            ? 1.8
-            : 1.4,
-    screenLength: Math.round(size * 1.55),
+            ? 0.9
+            : 0.75,
+    screenLength: Math.round(size * 3.6),
     size,
     tier,
   };
@@ -3533,18 +4270,18 @@ function getDevelopmentHotspotMarkerSize(
   intensity: number,
 ) {
   if (selectedSegmentCount >= 26) {
-    return Math.min(46, 36 + Math.log10(selectedSegmentCount - 24) * 7);
+    return 10;
   }
 
   if (selectedSegmentCount >= 11) {
-    return 27 + Math.min(8, (selectedSegmentCount - 11) * 0.55);
+    return 9;
   }
 
   if (selectedSegmentCount >= 3) {
-    return 18 + Math.min(8, (selectedSegmentCount - 3) * 0.9);
+    return 8;
   }
 
-  return 12 + Math.max(selectedSegmentCount, intensity * 2) * 2.5;
+  return 7 + Math.min(1, Math.max(selectedSegmentCount, intensity * 2) * 0.25);
 }
 
 function getDevelopmentHotspotMarkerTier(selectedSegmentCount: number) {
@@ -4278,7 +5015,9 @@ async function handleDevelopmentHotspotClick(
   view: SceneView,
   event: Parameters<SceneView["hitTest"]>[0],
   hotspotLayer: GraphicsLayer | null,
-  onHotspotInfo: (hotspotInfo: DevelopmentHotspotInfoCard) => void,
+  onHotspotContext: (
+    hotspotContext: SelectedDevelopmentHotspotContext | null,
+  ) => void,
   onFloodInfoClose: () => void,
 ) {
   if (!hotspotLayer || !hotspotLayer.visible) {
@@ -4294,29 +5033,21 @@ async function handleDevelopmentHotspotClick(
       (result) =>
         result.graphic?.attributes?.graphicRole === "development-hotspot",
     )?.graphic;
-    const officialParcelId =
-      hotspotGraphic?.attributes?.officialParcelId as string | undefined;
 
-    if (!hotspotGraphic || !officialParcelId) {
+    if (!hotspotGraphic) {
       return false;
     }
 
     closeSceneViewPopup(view);
     onFloodInfoClose();
-    onHotspotInfo(createDevelopmentHotspotInfoCard(hotspotGraphic));
+    onHotspotContext(createDevelopmentHotspotSelectionContext(hotspotGraphic));
 
     console.debug("[CFS development hotspots]", "hotspot selected", {
-      officialParcelId,
-      pin14: hotspotGraphic?.attributes?.pin14,
+      areaLabel: hotspotGraphic?.attributes?.areaLabel,
+      contextKind: hotspotGraphic?.attributes?.contextKind,
+      recordsRepresented: hotspotGraphic?.attributes?.recordsRepresented,
     });
 
-    window.dispatchEvent(
-      new CustomEvent<ParcelSearchEventDetail>(PARCEL_SEARCH_INSPECT_EVENT, {
-        detail: {
-          officialParcelId,
-        },
-      }),
-    );
     return true;
   } catch (error) {
     console.warn("Development hotspot hit test failed", error);
@@ -4595,39 +5326,82 @@ async function handleSchoolUtilizationZoneHover(
   }
 }
 
-function createDevelopmentHotspotInfoCard(
+function createDevelopmentHotspotSelectionContext(
   graphic: Graphic,
-): DevelopmentHotspotInfoCard {
+): SelectedDevelopmentHotspotContext {
   const attributes = graphic.attributes ?? {};
+  const contextKind =
+    stringAttribute(attributes.contextKind) === "cluster"
+      ? "cluster"
+      : "individual";
+  const representedParcelIds =
+    stringAttribute(attributes.representedParcelIds)
+      ?.split(",")
+      .map((parcelId) => parcelId.trim())
+      .filter(Boolean) ?? [];
+  const segmentCounts: DevelopmentHotspotSegmentCounts = {
+    administrativeOrUnknown:
+      numberAttribute(attributes.segmentCountAdministrativeOrUnknown) ?? 0,
+    commercialActivity:
+      numberAttribute(attributes.segmentCountCommercialActivity) ?? 0,
+    demolition: numberAttribute(attributes.segmentCountDemolition) ?? 0,
+    industrialActivity:
+      numberAttribute(attributes.segmentCountIndustrialActivity) ?? 0,
+    institutionalActivity:
+      numberAttribute(attributes.segmentCountInstitutionalActivity) ?? 0,
+    minorMaintenance:
+      numberAttribute(attributes.segmentCountMinorMaintenance) ?? 0,
+    redevelopmentSignal:
+      numberAttribute(attributes.segmentCountRedevelopmentSignal) ?? 0,
+    residentialGrowth:
+      numberAttribute(attributes.segmentCountResidentialGrowth) ?? 0,
+  };
+  const topDrivers = [
+    stringAttribute(attributes.topDriver1),
+    stringAttribute(attributes.topDriver2),
+    stringAttribute(attributes.topDriver3),
+  ].filter((driver): driver is string => Boolean(driver));
 
   return {
-    developmentActivityClass: stringAttribute(
-      attributes.developmentActivityClass,
-    ),
+    activityClass: stringAttribute(attributes.activityClass),
+    areaLabel:
+      stringAttribute(attributes.areaLabel) ??
+      stringAttribute(attributes.officialParcelId) ??
+      "Selected development activity",
+    caveat:
+      stringAttribute(attributes.caveat) ??
+      "Observed permit/development activity only. Not a prediction.",
+    clusterId: stringAttribute(attributes.clusterId) ?? undefined,
+    contextKind,
     developmentActivityScore: numberAttribute(
       attributes.developmentActivityScore,
     ),
-    dominantGrowthSignal: stringAttribute(attributes.dominantGrowthSignal),
+    displayMode: getSafeDevelopmentHotspotDisplayMode(
+      stringAttribute(attributes.displayMode),
+      contextKind,
+    ),
+    dominantActivityType: stringAttribute(attributes.dominantActivityType),
     dominantPermitSegment: stringAttribute(attributes.dominantPermitSegment),
-    dominantZoningCodeRaw: stringAttribute(attributes.dominantZoningCodeRaw),
     highValuePermits: numberAttribute(attributes.highValuePermits) ?? 0,
+    latestActivityLabel:
+      stringAttribute(attributes.latestActivityLabel) ??
+      "Recent activity context unavailable",
     majorValuePermits: numberAttribute(attributes.majorValuePermits) ?? 0,
     officialParcelId:
-      stringAttribute(attributes.officialParcelId) ?? "Unknown parcel",
-    permitSignalScoreMax: numberAttribute(attributes.permitSignalScoreMax),
+      stringAttribute(attributes.officialParcelId) ?? undefined,
+    parcelsRepresented: numberAttribute(attributes.parcelsRepresented) ?? 1,
     pin14: stringAttribute(attributes.pin14),
     recentPermitCount1yr: numberAttribute(attributes.recentPermitCount1yr) ?? 0,
     recentPermitCount3yr: numberAttribute(attributes.recentPermitCount3yr) ?? 0,
-    renderedPermitSegment: stringAttribute(attributes.renderedPermitSegment),
-    selectedSegmentCount: numberAttribute(attributes.selectedSegmentCount),
-    selectedSegmentIntensity: numberAttribute(
-      attributes.selectedSegmentIntensity,
-    ),
-    selectedSegmentScore: numberAttribute(attributes.selectedSegmentScore),
-    selectedSegmentSizeTier: stringAttribute(
-      attributes.selectedSegmentSizeTier,
-    ),
+    recordsRepresented: numberAttribute(attributes.recordsRepresented) ?? 1,
+    representedParcelIds,
+    selectedPermitSegment: stringAttribute(attributes.selectedPermitSegment),
+    segmentCounts,
+    topDrivers,
     totalPermitCount: numberAttribute(attributes.totalPermitCount) ?? 0,
+    whyHighlighted:
+      stringAttribute(attributes.whyHighlighted) ??
+      "This area is highlighted because observed permit/development activity is concentrated in the selected layer filters.",
     zoningJurisdictionName: stringAttribute(attributes.zoningJurisdictionName),
   };
 }
@@ -4737,6 +5511,24 @@ function getSafeModelResearchDisplayMode(
       }
 
       return "parcel_detail";
+  }
+}
+
+function getSafeDevelopmentHotspotDisplayMode(
+  value: string | null,
+  contextKind: SelectedDevelopmentHotspotContext["contextKind"],
+): DevelopmentHotspotMapDisplayMode {
+  switch (value) {
+    case "countywide_clusters":
+    case "intermediate_clusters":
+    case "fine_clusters":
+    case "individual_markers":
+    case "off":
+      return value;
+    default:
+      return contextKind === "cluster"
+        ? "intermediate_clusters"
+        : "individual_markers";
   }
 }
 

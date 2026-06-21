@@ -66,24 +66,17 @@ export type ProductMode =
   | "due_diligence"
   | "executive_print"
   | "methodology"
-  | "overview";
+  | "overview"
+  | "workspace";
 
 export type ParcelReviewView = "actions" | "report" | "review";
 
 export type OverviewCommandMode =
   | "countywide"
+  | "indicatorCenter"
   | "modelLab"
   | "parcel"
   | "snapshot";
-
-export type OverviewLayoutPreset =
-  | "command_center"
-  | "countywide_layers"
-  | "executive_demo"
-  | "map_focus"
-  | "model_lab"
-  | "parcel_intelligence"
-  | "snapshot_builder";
 
 export type OverviewPanelVisibility = "collapsed" | "hidden" | "visible";
 
@@ -98,7 +91,6 @@ export interface OverviewLayoutPreference {
   commandCenter: OverviewCommandCenterState;
   leftPanel: OverviewPanelVisibility;
   leftPanelWidth: OverviewPanelWidthPreset;
-  preset: OverviewLayoutPreset;
   rightPanel: Exclude<OverviewPanelVisibility, "collapsed">;
   rightPanelWidth: OverviewPanelWidthPreset;
 }
@@ -177,14 +169,126 @@ export interface PlanningSnapshotParcelSummary {
   zoning: string;
 }
 
+export type IndicatorCenterGroupId =
+  | "data-gaps"
+  | "development-activity"
+  | "flood-review"
+  | "model-research"
+  | "school-context"
+  | "utility-infrastructure";
+
+export type IndicatorCenterDisplayMode =
+  | "all"
+  | "dataNeeded"
+  | "highPriority"
+  | "selectedGroup";
+
+export type IndicatorCenterPriorityLabel =
+  | "Context available"
+  | "Data needed"
+  | "High attention"
+  | "Internal research only"
+  | "Review needed"
+  | "Context Available"
+  | "Data Needed"
+  | "High Attention"
+  | "Internal Research Only"
+  | "Not Scored"
+  | "Preliminary Data"
+  | "Proxy Only"
+  | "Review Needed"
+  | "Verified Source";
+
+export interface PlanningSnapshotDevelopmentActivityContext {
+  activityClass: string | null;
+  areaLabel: string;
+  caveat: string;
+  contextKind: "cluster" | "individual";
+  displayMode?: string;
+  dominantActivityType: string | null;
+  dominantPermitSegment: string | null;
+  highValuePermits?: number;
+  latestActivityLabel?: string;
+  majorValuePermits?: number;
+  officialParcelId?: string;
+  parcelsRepresented: number;
+  pin14?: string | null;
+  recentPermitCount1yr?: number;
+  recentPermitCount3yr?: number;
+  recordsRepresented: number;
+  selectedPermitSegment: string | null;
+  segmentCounts?: {
+    administrativeOrUnknown: number;
+    commercialActivity: number;
+    demolition: number;
+    industrialActivity: number;
+    institutionalActivity: number;
+    minorMaintenance: number;
+    redevelopmentSignal: number;
+    residentialGrowth: number;
+  };
+  topDrivers: string[];
+  totalPermitCount?: number;
+  whyHighlighted: string;
+  zoningJurisdictionName: string | null;
+}
+
+export interface IndicatorCenterContext {
+  caveat: string;
+  category: string;
+  dataUsed: string[];
+  groupId: IndicatorCenterGroupId;
+  indicatorId: string;
+  chartSupported?: boolean;
+  metricKey?: string;
+  name: string;
+  officialDataNeeded?: boolean;
+  priority?: IndicatorCenterPriorityLabel;
+  priorityLabel: IndicatorCenterPriorityLabel;
+  recommendedFollowUp: string;
+  snapshotIncluded: boolean;
+  source: string;
+  status: string;
+  title?: string;
+  whatItMeans: string;
+  mapSupported?: boolean;
+}
+
+export interface PlanningSnapshotIndicatorSummary {
+  caveat: string;
+  indicatorId: string;
+  name: string;
+  priorityLabel: IndicatorCenterPriorityLabel;
+  status: string;
+  value: string;
+}
+
+export interface PlanningSnapshotIndicatorCenterContext {
+  availableGroups: string[];
+  caveat: string;
+  displayMode: IndicatorCenterDisplayMode;
+  indicatorSummaries: PlanningSnapshotIndicatorSummary[];
+  recommendedFollowUp: string;
+  selectedIndicator: IndicatorCenterContext | null;
+  selectedGroupIds: IndicatorCenterGroupId[];
+}
+
 export interface PlanningSnapshot {
   activeLayers: string[];
   activeLayerIds?: string[];
   caveats: string[];
+  capturedSections?: string[];
   createdAt: string;
+  dashboardImageAlt?: string;
+  dashboardImageCapturedAt?: string | null;
+  dashboardImageDataUrl?: string | null;
+  dashboardImageFailureReason?: string | null;
+  dashboardImageStatus?: "captured" | "failed" | "unavailable";
   explainableMetrics: PlanningSnapshotMetric[];
   focusMode?: PlanningReviewFocusMode;
   focusModeLabel?: string;
+  hasDashboardImage?: boolean;
+  hasMapImage?: boolean;
   includedSections: Record<PlanningSnapshotSectionKey, boolean>;
   keyFacts: Array<{ label: string; value: string }>;
   knownReviewFlags: Array<{ label: string; reason: string; status: string }>;
@@ -194,6 +298,8 @@ export interface PlanningSnapshot {
     extentCaptured: boolean;
     extentSummary?: string;
   };
+  developmentActivityContext?: PlanningSnapshotDevelopmentActivityContext | null;
+  indicatorCenterContext?: PlanningSnapshotIndicatorCenterContext | null;
   mapScreenshotCapturedAt?: string | null;
   mapScreenshotDataUrl?: string | null;
   mapScreenshotFailureReason?: string | null;
@@ -237,6 +343,8 @@ export interface PlanningSnapshot {
   selectedParcelId: string | null;
   selectedParcelSummary: PlanningSnapshotParcelSummary | null;
   snapshotId: string;
+  snapshotTitle?: string;
+  snapshotType?: "indicator_center" | "map";
   snapshotVersion:
     | "phase22a_v1"
     | "phase22b_v1"
@@ -244,7 +352,20 @@ export interface PlanningSnapshot {
     | "phase23b_v1"
     | "phase23c_v1"
     | "phase23d_v1"
-    | "phase23g_v1";
+    | "phase23g_v1"
+    | "phase26a_v1"
+    | "phase27b_v1"
+    | "phase28a_v1"
+    | "phase28b_v1"
+    | "phase28c_v1"
+    | "phase28d_v1"
+    | "phase28e_v1"
+    | "phase28f_v1"
+    | "phase28g_v1"
+    | "phase28h_v1"
+    | "phase28i_v1"
+    | "phase28k_v1";
+  visualType?: "dashboard" | "map";
 }
 
 export type ParcelSelectionSource = "dashboard" | "map" | "url";

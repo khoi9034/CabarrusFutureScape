@@ -5,15 +5,16 @@ import type {
   PointerEvent as ReactPointerEvent,
 } from "react";
 import {
+  ArrowLeftRight,
   BookOpen,
   ChevronLeft,
   ChevronRight,
   Crosshair,
   FlaskConical,
+  Gauge,
   Layers3,
   MapPin,
   Save,
-  SlidersHorizontal,
 } from "lucide-react";
 import { LayerToggle } from "@/components/dashboard/LayerToggle";
 import {
@@ -54,7 +55,7 @@ export function Sidebar({
       <aside
         aria-label={`Collapsed ${collapsedLabel} controls`}
         className={cn(
-          "app-chrome glass-panel cfs-layer-rail cfs-layer-rail--collapsed relative order-2 flex h-full min-h-[22rem] min-w-0 flex-col items-center overflow-visible rounded-lg p-2 md:max-h-none lg:order-1",
+          "app-chrome glass-panel cfs-layer-rail cfs-layer-rail--collapsed relative order-2 grid h-full min-h-[22rem] min-w-0 grid-rows-[auto_minmax(0,1fr)_auto] place-items-center overflow-visible rounded-lg p-2 md:max-h-none lg:order-1",
           embedded && "h-full order-none md:max-h-none lg:order-none",
           dragging && "cfs-layer-rail--dragging",
         )}
@@ -68,7 +69,7 @@ export function Sidebar({
         ) : null}
         <button
           aria-label={`Expand ${collapsedLabel} panel`}
-          className="mt-2 flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#9eeeff]"
+          className="flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#9eeeff]"
           onClick={onToggleCollapsed}
           title={`Expand ${collapsedLabel} panel`}
           type="button"
@@ -77,7 +78,7 @@ export function Sidebar({
         </button>
         <button
           aria-label={`Expand ${collapsedLabel} panel`}
-          className="flex min-h-0 flex-1 items-center justify-center py-4"
+          className="flex h-full min-h-0 w-full items-center justify-center py-3"
           onClick={onToggleCollapsed}
           title={`Expand ${collapsedLabel} panel`}
           type="button"
@@ -86,6 +87,10 @@ export function Sidebar({
             {collapsedLabel}
           </span>
         </button>
+        <div
+          aria-hidden="true"
+          className="h-10 w-10 rounded-md border border-white/0"
+        />
       </aside>
     );
   }
@@ -94,7 +99,7 @@ export function Sidebar({
     <aside
       aria-label="Advanced map layer control panel"
       className={cn(
-        "app-chrome glass-panel cfs-layer-rail relative order-2 flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden rounded-lg lg:order-1",
+        "app-chrome glass-panel cfs-layer-rail relative z-20 order-2 flex h-full min-h-0 w-full min-w-0 flex-col overflow-visible rounded-lg lg:order-1",
         embedded &&
           "h-full order-none overflow-hidden border-white/10 bg-[#07111f]/90 md:max-h-none lg:order-none",
         dragging && "cfs-layer-rail--dragging",
@@ -116,14 +121,23 @@ export function Sidebar({
               {getExpandedRailTitle(overviewCommandMode)}
             </h2>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <div
-              aria-hidden="true"
-              className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-[#d8b86a]"
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-            </div>
-          </div>
+          <button
+            aria-label={
+              overviewCommandMode === "countywide"
+                ? "Collapse map controls"
+                : `Collapse ${getExpandedRailTitle(overviewCommandMode)}`
+            }
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-[#d8b86a]/35 hover:bg-[#d8b86a]/10 hover:text-[#f0cd79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
+            onClick={onToggleCollapsed}
+            title={
+              overviewCommandMode === "countywide"
+                ? "Collapse map controls"
+                : `Collapse ${getExpandedRailTitle(overviewCommandMode)}`
+            }
+            type="button"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
         </div>
 
         <div className="min-w-0 space-y-3 pr-1">
@@ -148,6 +162,10 @@ function ModeSpecificRailContent({
     return <ModelLabControlsPanel onCollapseDrawer={onCollapseDrawer} />;
   }
 
+  if (mode === "indicatorCenter") {
+    return null;
+  }
+
   if (mode === "parcel") {
     return <ParcelModeControlsPanel onCollapseDrawer={onCollapseDrawer} />;
   }
@@ -156,12 +174,16 @@ function ModeSpecificRailContent({
     return <SnapshotModeControlsPanel onCollapseDrawer={onCollapseDrawer} />;
   }
 
-  return <LayerToggle onCollapseDrawer={onCollapseDrawer} />;
+  return <LayerToggle />;
 }
 
 function CollapsedRailGlyph({ mode }: { mode: OverviewCommandMode }) {
   if (mode === "modelLab") {
     return <FlaskConical className="h-4 w-4" />;
+  }
+
+  if (mode === "indicatorCenter") {
+    return <Gauge className="h-4 w-4" />;
   }
 
   if (mode === "snapshot") {
@@ -475,7 +497,7 @@ function ModelLabControlsPanel({
           Advanced map layers
         </summary>
         <div className="mt-3">
-          <LayerToggle onCollapseDrawer={onCollapseDrawer} />
+          <LayerToggle />
         </div>
       </details>
     </div>
@@ -611,6 +633,10 @@ function formatRailModeLabel(mode: OverviewCommandMode) {
     return "Snapshot Builder";
   }
 
+  if (mode === "indicatorCenter") {
+    return "Indicator Center";
+  }
+
   return "Search Parcel";
 }
 
@@ -627,6 +653,10 @@ function getCollapsedRailLabel(mode: OverviewCommandMode) {
     return "Snapshot";
   }
 
+  if (mode === "indicatorCenter") {
+    return "Indicators";
+  }
+
   return "Layers";
 }
 
@@ -641,6 +671,10 @@ function getExpandedRailTitle(mode: OverviewCommandMode) {
 
   if (mode === "snapshot") {
     return "Snapshot Builder";
+  }
+
+  if (mode === "indicatorCenter") {
+    return "Indicator Center";
   }
 
   return "Map Controls";
@@ -664,6 +698,32 @@ function LayerRailEdgeHandle({
     onToggleCollapsed?.();
   }
 
+  if (!collapsed) {
+    return (
+      <>
+        <div
+          aria-hidden="true"
+          className="cfs-layer-rail-resize-zone absolute -right-1.5 top-2 bottom-2 z-20 hidden touch-none cursor-ew-resize lg:block"
+          onPointerDown={onPointerDown}
+          title="Drag to resize panel"
+        />
+        <div
+          aria-label="Drag to resize panel"
+          aria-orientation="vertical"
+          className={cn(
+            "cfs-layer-rail-arrow group absolute right-[-0.85rem] top-[44%] z-30 hidden -translate-y-1/2 touch-none cursor-ew-resize items-center justify-center lg:flex",
+          )}
+          onPointerDown={onPointerDown}
+          role="separator"
+          tabIndex={0}
+          title="Drag to resize panel"
+        >
+          <ArrowLeftRight className="relative h-4 w-4 text-slate-200 transition group-hover:text-[#f0cd79] group-focus-visible:text-[#f0cd79]" />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div
@@ -677,14 +737,10 @@ function LayerRailEdgeHandle({
         }
       />
       <button
-        aria-label={
-          collapsed
-            ? "Expand map layers panel"
-            : "Collapse map layers panel"
-        }
+        aria-label="Expand map layers panel"
         aria-pressed={collapsed}
         className={cn(
-          "cfs-layer-rail-arrow group absolute right-[-0.85rem] top-[44%] z-30 hidden -translate-y-1/2 touch-none items-center justify-center lg:flex",
+          "cfs-layer-rail-arrow group absolute right-[-0.85rem] top-1/2 z-30 hidden -translate-y-1/2 touch-none items-center justify-center lg:flex",
         )}
         onClick={(event) => {
           event.stopPropagation();
@@ -692,18 +748,10 @@ function LayerRailEdgeHandle({
         }}
         onKeyDown={handleKeyDown}
         onPointerDown={(event) => event.stopPropagation()}
-        title={
-          collapsed
-            ? "Expand map layers panel"
-            : "Collapse map layers panel"
-        }
+        title="Expand map layers panel"
         type="button"
       >
-        {collapsed ? (
-          <ChevronRight className="relative h-4 w-4 text-slate-200 transition group-hover:text-[#f0cd79] group-focus-visible:text-[#f0cd79]" />
-        ) : (
-          <ChevronLeft className="relative h-4 w-4 text-slate-200 transition group-hover:text-[#f0cd79] group-focus-visible:text-[#f0cd79]" />
-        )}
+        <ChevronRight className="relative h-4 w-4 text-slate-200 transition group-hover:text-[#f0cd79] group-focus-visible:text-[#f0cd79]" />
       </button>
     </>
   );

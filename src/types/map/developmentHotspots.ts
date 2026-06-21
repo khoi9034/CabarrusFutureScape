@@ -126,3 +126,49 @@ export interface DevelopmentHotspotLayerState {
   temporalContextLabel: string | null;
   totalCount: number;
 }
+
+export type DevelopmentHotspotMapDisplayMode =
+  | "countywide_clusters"
+  | "intermediate_clusters"
+  | "fine_clusters"
+  | "individual_markers"
+  | "off";
+
+export interface DevelopmentHotspotSegmentCounts {
+  administrativeOrUnknown: number;
+  commercialActivity: number;
+  demolition: number;
+  industrialActivity: number;
+  institutionalActivity: number;
+  minorMaintenance: number;
+  redevelopmentSignal: number;
+  residentialGrowth: number;
+}
+
+export interface SelectedDevelopmentHotspotContext {
+  activityClass: string | null;
+  areaLabel: string;
+  caveat: string;
+  clusterId?: string;
+  contextKind: "cluster" | "individual";
+  developmentActivityScore: number | null;
+  displayMode: DevelopmentHotspotMapDisplayMode;
+  dominantActivityType: string | null;
+  dominantPermitSegment: string | null;
+  highValuePermits: number;
+  latestActivityLabel: string;
+  majorValuePermits: number;
+  officialParcelId?: string;
+  parcelsRepresented: number;
+  pin14?: string | null;
+  recentPermitCount1yr: number;
+  recentPermitCount3yr: number;
+  recordsRepresented: number;
+  representedParcelIds: string[];
+  selectedPermitSegment: string | null;
+  segmentCounts: DevelopmentHotspotSegmentCounts;
+  topDrivers: string[];
+  totalPermitCount: number;
+  whyHighlighted: string;
+  zoningJurisdictionName: string | null;
+}

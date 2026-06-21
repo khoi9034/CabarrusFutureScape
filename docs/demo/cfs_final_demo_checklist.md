@@ -17,47 +17,67 @@ npm run dev:cfs
 - Confirm `GET /health/database` returns 200.
 - Use `http://localhost:3000` for the browser demo.
 - Do not use `http://127.0.0.1:3000` for frontend testing.
-- Confirm Overview shows the `CFS Command Center`.
+- Confirm top nav shows `Overview`, `Workspace`, `Planning Snapshot`, and
+  `Methodology`.
+- Confirm Overview shows the landing/safe-use page and does not render the map
+  workspace.
+- Click `Go to Workspace` and confirm Workspace shows the `CFS Workspace
+  Center`.
 - Confirm the left `Layers` rail starts collapsed/slim.
-- Confirm `Customize Layout` is present as a small optional control, with no
-  edit handles visible by default.
-- Click `Search Parcel` and confirm the top search receives focus and the right
-  panel explains selected parcel intelligence.
-- Click `Explore Countywide` and confirm the left rail shows layer
-  controls.
+- Confirm no dashboard customization controls or edit handles are visible.
+- Confirm Workspace mode cards are `Explore Countywide`, `Indicator Center`,
+  and `Model Lab`.
+- Confirm `Search Parcel` and `Snapshot Builder` are not Workspace mode cards.
+- Use the global search and confirm selected parcel intelligence appears in
+  Workspace.
+- Click `Explore Countywide` and confirm the left rail stays collapsed until
+  opened, then shows layer controls without clipping.
+- Click `Indicator Center` and confirm it renders a full-width map-free
+  enterprise Mission Control dashboard with no SceneView, no left layer rail, no
+  right Intelligence panel, Critical Signals, Monitoring Charts,
+  Priority Issues Board, School Capacity Watch drilldowns, data
+  readiness, existing CFS context, and no made-up numbers or official risk
+  scores.
 - Click `Model Lab` and confirm the left rail shows Model Lab Controls, the
   right rail shows Model Lab Intelligence, and the research overlay is off by
   default.
 - Search for `CFS-PARCEL-0149726579`.
 - Confirm the selected parcel appears in the Active Selection overlay.
-- Click `Snapshot Builder` and confirm it opens the helper without creating a
-  snapshot.
-- Click `Save Snapshot` inside the helper and confirm the saved confirmation.
+- Click `Save Snapshot` from Workspace and confirm the saved confirmation.
 - Open Planning Snapshot and confirm the Planning Snapshot Library appears.
 - Confirm map snapshot appears, or a clean map-unavailable message appears.
-- Open Executive Summary from inside Planning Snapshot.
+- Confirm Report Drafts can save and reload report section selections.
+- Confirm `Explain the Numbers` is off by default and optional.
+- Confirm `Print Report` is visible near the top.
+- Review the Executive Report Preview from inside Planning Snapshot.
 - Open Methodology.
 - Confirm no parcel-level prediction probabilities appear.
 - Confirm no parcel-level ranking classes appear.
 
 ## During Demo
 
-- Start with Overview and parcel search.
-- Use the Command Center to frame the workflow: Search Parcel, Explore
-  Countywide, Model Lab, and Snapshot Builder.
+- Start with Overview as the landing/safe-use page.
+- Use `Go to Workspace` and the Workspace Center to frame the workflow:
+  Explore Countywide, Indicator Center, and Model Lab.
 - Select `CFS-PARCEL-0149726579`.
 - Show the map focus and selected parcel context.
 - Use Explore Countywide to open advanced layer/indicator controls.
+- Show Indicator Center as a full-width map-free Mission Control dashboard with
+  Critical Signals, Monitoring Charts, Priority Issues Board, School Capacity Watch
+  Inspect drawer, and no fake data.
 - Use Model Lab to explain aggregate-only development model research and why
   exact parcel probabilities stay hidden.
-- Open Snapshot Builder, then save a Planning Snapshot for the selected parcel
-  or map context.
+- Save a Planning Snapshot for the selected parcel or map context from
+  Workspace.
 - Open Planning Snapshot and walk through the saved snapshot library and what
   was captured.
-- Open Explain the Numbers and show source/method/caveat/action cards.
+- Save and load a Report Draft to show section selections persist locally.
+- Toggle Explain the Numbers only when you want to show concise source/caveat
+  explanation cards.
 - Show zoning, development, flood, school, transportation, and utility context.
-- Open Executive Summary and show that it is generated from the saved snapshot.
-- Point out the Print Executive Summary action.
+- Show the Executive Report Preview and explain that it is generated from the
+  saved snapshot.
+- Point out the Print Report action.
 - Open Model Lab and Methodology to explain model safety and missing data.
 - Mention caveats honestly before discussing future work.
 

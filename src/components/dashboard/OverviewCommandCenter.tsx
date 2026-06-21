@@ -2,12 +2,10 @@
 
 import {
   ArrowRight,
-  BarChart3,
   FlaskConical,
+  Gauge,
   Layers3,
   Save,
-  Search,
-  SlidersHorizontal,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDashboardState } from "@/hooks/useDashboardState";
@@ -15,39 +13,33 @@ import { cn } from "@/lib/utils";
 
 export const CFS_SAVE_PLANNING_SNAPSHOT_EVENT =
   "cfs:save-planning-snapshot";
-export const CFS_EXPAND_OVERVIEW_RAIL_EVENT = "cfs:expand-overview-rail";
 export const CFS_OPEN_LAYER_RAIL_EVENT = "cfs:open-layer-rail";
 export const CFS_OPEN_MODEL_LAB_EVENT = "cfs:open-model-lab";
 export const CFS_PLANNING_SNAPSHOT_SAVED_EVENT =
   "cfs:planning-snapshot-saved";
-export const CFS_TOGGLE_OVERVIEW_CUSTOM_LAYOUT_EVENT =
-  "cfs:toggle-overview-custom-layout";
 
 const commandWorkflows = [
   {
     accent: "primary",
-    actionLabel: "Search Parcel",
-    icon: Search,
-    id: "find-parcel",
-    helper: "Find parcel context.",
+    actionLabel: "Explore Countywide",
+    icon: Layers3,
+    id: "explore-intelligence",
+    helper:
+      "Explore live map layers, activity, constraints, schools, transportation, and infrastructure.",
   },
   {
-    actionLabel: "Explore Countywide",
-    icon: BarChart3,
-    id: "explore-intelligence",
-    helper: "Open layers and indicators.",
+    actionLabel: "Indicator Center",
+    icon: Gauge,
+    id: "indicator-center",
+    helper:
+      "Review attention flags and countywide signals that show where staff may need follow-up.",
   },
   {
     actionLabel: "Model Lab",
     icon: FlaskConical,
     id: "model-lab",
-    helper: "Review internal model research.",
-  },
-  {
-    icon: Save,
-    id: "build-snapshot",
-    actionLabel: "Snapshot Builder",
-    helper: "Choose what to capture.",
+    helper:
+      "Explore internal development model research and relative research signals.",
   },
 ];
 
@@ -61,6 +53,7 @@ export function OverviewCommandCenter() {
     setOverviewCommandMode,
     setOverviewLayoutCommandCenter,
     setOverviewLayoutPanel,
+    setMapFocusMode,
     setPlanningSnapshotView,
     setProductMode,
   } = useDashboardState();
@@ -85,21 +78,9 @@ export function OverviewCommandCenter() {
     };
   }, []);
 
-  function focusParcelSearch() {
-    setOverviewCommandMode("parcel");
-    setOverviewLayoutPanel("left", "collapsed");
-    setOverviewLayoutPanel("right", "visible");
-    setOverviewLayoutCommandCenter("compact");
-    const searchInput = document.querySelector<HTMLInputElement>(
-      'input[aria-label="Search parcels"]',
-    );
-
-    searchInput?.focus();
-  }
-
   function showIntelligenceBrief() {
     setOverviewCommandMode("countywide");
-    setOverviewLayoutPanel("left", "visible");
+    setOverviewLayoutPanel("left", "collapsed");
     setOverviewLayoutPanel("right", "visible");
     setOverviewLayoutCommandCenter("compact");
     window.dispatchEvent(new CustomEvent(CFS_OPEN_LAYER_RAIL_EVENT));
@@ -108,24 +89,23 @@ export function OverviewCommandCenter() {
       ?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
 
-  function openSnapshotBuilder() {
-    setOverviewCommandMode("snapshot");
-    setOverviewLayoutPanel("left", "visible");
-    setOverviewLayoutPanel("right", "visible");
+  function showIndicatorCenter() {
+    setOverviewCommandMode("indicatorCenter");
+    setMapFocusMode(false);
+    setOverviewLayoutPanel("left", "hidden");
+    setOverviewLayoutPanel("right", "hidden");
     setOverviewLayoutCommandCenter("compact");
-    window.dispatchEvent(new CustomEvent(CFS_EXPAND_OVERVIEW_RAIL_EVENT));
     document
-      .getElementById("cfs-intelligence-brief")
+      .getElementById("cfs-indicator-center-dashboard")
       ?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
 
   function showModelLab() {
     setOverviewCommandMode("modelLab");
-    setOverviewLayoutPanel("left", "visible");
+    setOverviewLayoutPanel("left", "collapsed");
     setOverviewLayoutPanel("right", "visible");
     setOverviewLayoutCommandCenter("compact");
     window.dispatchEvent(new CustomEvent(CFS_OPEN_MODEL_LAB_EVENT));
-    window.dispatchEvent(new CustomEvent(CFS_EXPAND_OVERVIEW_RAIL_EVENT));
     document
       .getElementById("cfs-intelligence-brief")
       ?.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -133,7 +113,6 @@ export function OverviewCommandCenter() {
 
   function saveSnapshotForReport() {
     window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT));
-    setOverviewCommandMode("snapshot");
   }
 
   function openPlanningSnapshot() {
@@ -141,29 +120,20 @@ export function OverviewCommandCenter() {
     setProductMode("due_diligence");
   }
 
-  function openCustomizeLayout() {
-    window.dispatchEvent(
-      new CustomEvent(CFS_TOGGLE_OVERVIEW_CUSTOM_LAYOUT_EVENT),
-    );
-  }
-
   function handleWorkflowAction(workflowId: string) {
-    if (workflowId === "find-parcel") {
-      focusParcelSearch();
-      return;
-    }
-
     if (workflowId === "explore-intelligence") {
       showIntelligenceBrief();
       return;
     }
 
-    if (workflowId === "model-lab") {
-      showModelLab();
+    if (workflowId === "indicator-center") {
+      showIndicatorCenter();
       return;
     }
 
-    openSnapshotBuilder();
+    if (workflowId === "model-lab") {
+      showModelLab();
+    }
   }
 
   const snapshotStatusText = savedPlanningSnapshots.length
@@ -185,10 +155,10 @@ export function OverviewCommandCenter() {
         <div className="flex min-w-0 flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
-              CFS Command Center
+              CFS Workspace Center
             </p>
             <h1 className="mt-0.5 text-sm font-semibold leading-5 text-white md:text-base">
-              Search, explore, model, or save a report-ready snapshot.
+              Explore countywide, review indicators, or open internal research.
             </h1>
             {selectedParcelId ? (
               <p className="mt-0.5 text-[11px] leading-4 text-slate-500">
@@ -199,13 +169,13 @@ export function OverviewCommandCenter() {
 
           <div className="flex w-fit max-w-full shrink-0 flex-wrap items-center gap-2">
             <button
-              aria-label="Customize Overview layout"
-              className="inline-flex items-center gap-2 rounded-md border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#f8dc91] transition hover:border-[#d8b86a]/45 hover:bg-[#d8b86a]/15"
-              onClick={openCustomizeLayout}
+              aria-label="Save Planning Snapshot"
+              className="inline-flex items-center gap-2 rounded-md border border-[#55d38f]/25 bg-[#55d38f]/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#a8f3c4] transition hover:border-[#55d38f]/45 hover:bg-[#55d38f]/15"
+              onClick={saveSnapshotForReport}
               type="button"
             >
-              <SlidersHorizontal className="h-3.5 w-3.5 shrink-0" />
-              <span className="whitespace-nowrap">Customize Layout</span>
+              <Save className="h-3.5 w-3.5 shrink-0" />
+              <span className="whitespace-nowrap">Save Snapshot</span>
             </button>
 
             <div className="inline-flex max-w-full shrink-0 items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-400">
@@ -215,19 +185,17 @@ export function OverviewCommandCenter() {
           </div>
         </div>
 
-        <div className="grid min-w-0 grid-cols-1 gap-1.5 sm:grid-cols-2 2xl:grid-cols-4">
+        <div className="grid min-w-0 grid-cols-1 gap-1.5 md:grid-cols-3">
           {commandWorkflows.map((workflow) => {
             const Icon = workflow.icon;
             const primary = workflow.accent === "primary";
             const active =
-              (workflow.id === "find-parcel" &&
-                overviewCommandMode === "parcel") ||
               (workflow.id === "explore-intelligence" &&
                 overviewCommandMode === "countywide") ||
+              (workflow.id === "indicator-center" &&
+                overviewCommandMode === "indicatorCenter") ||
               (workflow.id === "model-lab" &&
-                overviewCommandMode === "modelLab") ||
-              (workflow.id === "build-snapshot" &&
-                overviewCommandMode === "snapshot");
+                overviewCommandMode === "modelLab");
 
             return (
               <button
@@ -300,8 +268,10 @@ export function OverviewCommandCenter() {
                   : "Planning snapshot saved."}
               </p>
               <p className="mt-1 text-[#9ff0bd]/80">
-                Captured map view, selected parcel if available, active layers,
-                Intelligence Brief, key stats, and caveats.
+                {overviewCommandMode === "indicatorCenter" ||
+                planningSnapshot?.indicatorCenterContext
+                  ? "Captured dashboard signals, selected indicator if available, Intelligence Brief, key stats, and caveats."
+                  : "Captured map view, selected parcel if available, active layers, Intelligence Brief, key stats, and caveats."}
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -331,7 +301,8 @@ export function OverviewCommandCenter() {
         </div>
       ) : (
         <p className="mt-2 text-[11px] leading-5 text-slate-600">
-          Layers stay collapsed by default. Use Explore Countywide for overlays.
+          Use the global search bar for parcel search. Planning Snapshot remains
+          the top-level report builder.
         </p>
       )}
     </section>

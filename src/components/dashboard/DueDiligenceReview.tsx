@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import {
+  BarChart3,
   BrainCircuit,
   Building2,
   CheckCircle2,
@@ -10,6 +11,7 @@ import {
   MapPinned,
   Printer,
   Route,
+  Save,
   School,
   TrafficCone,
   Trash2,
@@ -33,6 +35,7 @@ import {
   formatDevelopmentDate,
   formatDevelopmentLabel,
 } from "@/data/intelligence/developmentActivityMetrics";
+import { getIndicatorCenterDisplayModeLabel } from "@/data/intelligence/indicatorCenter";
 import { useDevelopmentPredictionResearchStatus } from "@/hooks/useDevelopmentPredictionResearchStatus";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
@@ -94,6 +97,7 @@ export function DueDiligenceReview({
     clearPlanningSnapshot,
     deletePlanningSnapshot,
     planningSnapshot,
+    renamePlanningSnapshot,
     savedPlanningSnapshots,
     setActivePlanningSnapshot,
     setPlanningSnapshotSectionIncluded,
@@ -103,6 +107,7 @@ export function DueDiligenceReview({
   const snapshotLibraryProps: PlanningSnapshotLibraryProps = {
     activeSnapshotId: activePlanningSnapshotId,
     onDelete: deletePlanningSnapshot,
+    onRename: renamePlanningSnapshot,
     onUse: (snapshotId) => {
       setActivePlanningSnapshot(snapshotId);
       setPlanningSnapshotView("overview");
@@ -115,7 +120,7 @@ export function DueDiligenceReview({
       <EmptyPlanningSnapshotState
         hasSelectedParcel={Boolean(selectedParcelIntelligence)}
         snapshotLibrary={snapshotLibraryProps}
-        onGoOverview={() => setProductMode("overview")}
+        onGoOverview={() => setProductMode("workspace")}
         onOpenMethodology={() => setProductMode("methodology")}
       />
     );
@@ -125,7 +130,7 @@ export function DueDiligenceReview({
     return (
       <SnapshotOnlyWorkspace
         clearPlanningSnapshot={clearPlanningSnapshot}
-        onGoOverview={() => setProductMode("overview")}
+        onGoOverview={() => setProductMode("workspace")}
         onOpenMethodology={() => setProductMode("methodology")}
         onPrint={() => window.print()}
         planningSnapshot={planningSnapshot}
@@ -248,7 +253,7 @@ function SelectedParcelDueDiligence({
       }`}
       contextBadges={badges}
       onClearSnapshot={clearPlanningSnapshot}
-      onGoOverview={() => setProductMode("overview")}
+      onGoOverview={() => setProductMode("workspace")}
       onOpenMethodology={() => setProductMode("methodology")}
       onPrint={printReport}
       onToggleSection={setPlanningSnapshotSectionIncluded}
@@ -725,7 +730,7 @@ function EmptyPlanningSnapshotState({
             No planning snapshots saved yet
           </h3>
           <p className="mt-2 text-sm leading-6 text-slate-400">
-            Use Overview to search a parcel, inspect the map, or open Model
+            Use Workspace to search a parcel, inspect the map, or open Model
             Lab, then save a Planning Snapshot.
           </p>
         </div>
@@ -736,7 +741,7 @@ function EmptyPlanningSnapshotState({
             onClick={onGoOverview}
             type="button"
           >
-            Go to Overview
+            Go to Workspace
           </button>
           <button
             className="rounded-md border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
@@ -747,7 +752,7 @@ function EmptyPlanningSnapshotState({
           </button>
           {hasSelectedParcel ? (
             <p className="text-xs leading-5 text-slate-500">
-              A parcel is selected. Use Overview&apos;s Save Snapshot for
+              A parcel is selected. Use Workspace&apos;s Save Snapshot for
               Report button to capture it.
             </p>
           ) : null}
@@ -759,7 +764,10 @@ function EmptyPlanningSnapshotState({
   );
 }
 
-type ExtraReportSectionKey = "countywide_indicators" | "key_findings";
+type ExtraReportSectionKey =
+  | "countywide_indicators"
+  | "key_findings"
+  | "legend_map_notes";
 
 type ReportBuilderSectionKey =
   | ExtraReportSectionKey
@@ -768,25 +776,132 @@ type ReportBuilderSectionKey =
 interface ReportSectionVisibility {
   countywide_indicators: boolean;
   key_findings: boolean;
+  legend_map_notes: boolean;
 }
 
 const reportBuilderSections: Array<{
   key: ReportBuilderSectionKey;
   label: string;
 }> = [
-  { key: "map_view", label: "Map View" },
-  { key: "key_findings", label: "Key Findings" },
+  { key: "map_view", label: "Map Snapshot" },
+  { key: "countywide_indicators", label: "Key Statistics" },
   { key: "parcel_facts", label: "Parcel Facts" },
-  { key: "countywide_indicators", label: "Countywide Indicators" },
   { key: "development_permits", label: "Development / Permits" },
+  { key: "new_construction", label: "New Construction" },
   { key: "fema_flood", label: "FEMA Flood" },
   { key: "schools", label: "Schools" },
   { key: "transportation", label: "Transportation" },
   { key: "utility_proxy", label: "Utility Proxy" },
-  { key: "model_governance", label: "Model Governance" },
+  { key: "model_governance", label: "Model Research Context" },
   { key: "data_needed_caveats", label: "Data Needed / Caveats" },
   { key: "recommended_actions", label: "Recommended Actions" },
 ];
+
+const defaultExtraReportSections: ReportSectionVisibility = {
+  countywide_indicators: true,
+  key_findings: false,
+  legend_map_notes: true,
+};
+
+const REPORT_DRAFTS_STORAGE_KEY = "cfs.planningSnapshot.reportDrafts.v1";
+const DEFAULT_EXECUTIVE_REPORT_TITLE = "Planning Snapshot Executive Summary";
+
+interface PlanningSnapshotReportDraft {
+  createdAt: string;
+  draftId: string;
+  draftName: string;
+  explainNumbers: boolean;
+  reportNotes?: string;
+  reportTitle: string;
+  selectedSections: Record<ReportBuilderSectionKey, boolean>;
+  sourceSnapshotId: string;
+  updatedAt: string;
+}
+
+function createDraftId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function createReportDraftName(snapshot: PlanningSnapshot) {
+  return `${getSnapshotLibraryTitle(snapshot)} report draft`;
+}
+
+function getReportSectionSelectionSnapshot(
+  snapshot: PlanningSnapshot,
+  extraSections: ReportSectionVisibility,
+) {
+  return reportBuilderSections.reduce(
+    (sections, section) => ({
+      ...sections,
+      [section.key]:
+        section.key === "countywide_indicators" ||
+        section.key === "key_findings" ||
+        section.key === "legend_map_notes"
+          ? extraSections[section.key]
+          : (snapshot.includedSections[section.key] ?? true),
+    }),
+    {} as Record<ReportBuilderSectionKey, boolean>,
+  );
+}
+
+function readStoredReportDrafts() {
+  if (typeof window === "undefined") {
+    return [] as PlanningSnapshotReportDraft[];
+  }
+
+  try {
+    const storedDrafts = window.localStorage.getItem(REPORT_DRAFTS_STORAGE_KEY);
+
+    if (!storedDrafts) {
+      return [] as PlanningSnapshotReportDraft[];
+    }
+
+    const parsedDrafts = JSON.parse(storedDrafts);
+
+    if (!Array.isArray(parsedDrafts)) {
+      return [] as PlanningSnapshotReportDraft[];
+    }
+
+    return parsedDrafts.filter(
+      (draft): draft is PlanningSnapshotReportDraft =>
+        Boolean(
+          draft &&
+            typeof draft === "object" &&
+            typeof draft.draftId === "string" &&
+            typeof draft.sourceSnapshotId === "string" &&
+            typeof draft.draftName === "string" &&
+            draft.selectedSections &&
+            typeof draft.selectedSections === "object",
+        ),
+    );
+  } catch {
+    return [] as PlanningSnapshotReportDraft[];
+  }
+}
+
+function writeStoredReportDrafts(drafts: PlanningSnapshotReportDraft[]) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    if (!drafts.length) {
+      window.localStorage.removeItem(REPORT_DRAFTS_STORAGE_KEY);
+      return;
+    }
+
+    window.localStorage.setItem(
+      REPORT_DRAFTS_STORAGE_KEY,
+      JSON.stringify(drafts),
+    );
+  } catch {
+    // Local storage can be unavailable or full. Keep the in-memory draft library.
+  }
+}
 
 const snapshotSectionKeys = new Set<PlanningSnapshotSectionKey>([
   "data_needed_caveats",
@@ -834,9 +949,23 @@ function PlanningSnapshotReportBuilder({
   toggleExplanationCards: (show: boolean) => void;
 }) {
   const [extraSections, setExtraSections] = useState<ReportSectionVisibility>({
-    countywide_indicators: true,
-    key_findings: true,
+    ...defaultExtraReportSections,
   });
+  const [reportDrafts, setReportDrafts] = useState<
+    PlanningSnapshotReportDraft[]
+  >(() => readStoredReportDrafts());
+  const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
+  const [draftMessage, setDraftMessage] = useState<string | null>(null);
+  const [draftWarning, setDraftWarning] = useState<string | null>(null);
+  const [reportTitle, setReportTitle] = useState(
+    DEFAULT_EXECUTIVE_REPORT_TITLE,
+  );
+  const [reportNotes, setReportNotes] = useState("");
+
+  function persistDrafts(nextDrafts: PlanningSnapshotReportDraft[]) {
+    setReportDrafts(nextDrafts);
+    writeStoredReportDrafts(nextDrafts);
+  }
 
   function isSectionChecked(sectionKey: ReportBuilderSectionKey) {
     if (sectionKey === "countywide_indicators") {
@@ -847,6 +976,10 @@ function PlanningSnapshotReportBuilder({
       return extraSections.key_findings;
     }
 
+    if (sectionKey === "legend_map_notes") {
+      return extraSections.legend_map_notes;
+    }
+
     return planningSnapshot.includedSections[sectionKey] ?? true;
   }
 
@@ -854,7 +987,11 @@ function PlanningSnapshotReportBuilder({
     sectionKey: ReportBuilderSectionKey,
     included: boolean,
   ) {
-    if (sectionKey === "countywide_indicators" || sectionKey === "key_findings") {
+    if (
+      sectionKey === "countywide_indicators" ||
+      sectionKey === "key_findings" ||
+      sectionKey === "legend_map_notes"
+    ) {
       setExtraSections((current) => ({
         ...current,
         [sectionKey]: included,
@@ -867,6 +1004,151 @@ function PlanningSnapshotReportBuilder({
     }
   }
 
+  function buildDraftPayload(
+    draftId: string,
+    draftName: string,
+    createdAt: string,
+  ): PlanningSnapshotReportDraft {
+    const now = new Date().toISOString();
+
+    return {
+      createdAt,
+      draftId,
+      draftName,
+      explainNumbers: showExplanationCards,
+      reportNotes: reportNotes.trim(),
+      reportTitle: reportTitle.trim() || DEFAULT_EXECUTIVE_REPORT_TITLE,
+      selectedSections: getReportSectionSelectionSnapshot(
+        planningSnapshot,
+        extraSections,
+      ),
+      sourceSnapshotId: planningSnapshot.snapshotId,
+      updatedAt: now,
+    };
+  }
+
+  function createDraftFromSnapshot() {
+    const draftId = createDraftId();
+    const draft = buildDraftPayload(
+      draftId,
+      createReportDraftName(planningSnapshot),
+      new Date().toISOString(),
+    );
+    const nextDrafts = [draft, ...reportDrafts].slice(0, 12);
+
+    persistDrafts(nextDrafts);
+    setActiveDraftId(draftId);
+    setDraftWarning(null);
+    setDraftMessage("New report draft created from the selected snapshot.");
+  }
+
+  function saveCurrentDraft() {
+    if (activeDraftId) {
+      const existingDraft = reportDrafts.find(
+        (draft) => draft.draftId === activeDraftId,
+      );
+      const nextDraft = buildDraftPayload(
+        activeDraftId,
+        existingDraft?.draftName ?? createReportDraftName(planningSnapshot),
+        existingDraft?.createdAt ?? new Date().toISOString(),
+      );
+      const nextDrafts = [
+        nextDraft,
+        ...reportDrafts.filter((draft) => draft.draftId !== activeDraftId),
+      ];
+
+      persistDrafts(nextDrafts);
+      setDraftWarning(null);
+      setDraftMessage("Current report draft saved.");
+      return;
+    }
+
+    createDraftFromSnapshot();
+  }
+
+  function applyDraft(draft: PlanningSnapshotReportDraft) {
+    const sourceSnapshotExists = snapshotLibrary.snapshots.some(
+      (snapshot) => snapshot.snapshotId === draft.sourceSnapshotId,
+    );
+
+    setActiveDraftId(draft.draftId);
+    setDraftMessage(`Loaded ${draft.draftName}.`);
+    setDraftWarning(
+      sourceSnapshotExists
+        ? null
+        : "The source snapshot for this draft is no longer in the library. Section selections were restored, but the current snapshot remains active.",
+    );
+    setReportTitle(draft.reportTitle || DEFAULT_EXECUTIVE_REPORT_TITLE);
+    setReportNotes(draft.reportNotes ?? "");
+
+    function restoreDraftSelections() {
+      setExtraSections({
+        countywide_indicators:
+          draft.selectedSections.countywide_indicators ?? true,
+        key_findings: draft.selectedSections.key_findings ?? true,
+        legend_map_notes: draft.selectedSections.legend_map_notes ?? true,
+      });
+
+      snapshotSectionKeys.forEach((sectionKey) => {
+        const included = draft.selectedSections[sectionKey];
+
+        if (typeof included === "boolean") {
+          onToggleSection(sectionKey, included);
+        }
+      });
+      toggleExplanationCards(draft.explainNumbers);
+    }
+
+    if (sourceSnapshotExists) {
+      snapshotLibrary.onUse(draft.sourceSnapshotId);
+      window.setTimeout(restoreDraftSelections, 0);
+      return;
+    }
+
+    restoreDraftSelections();
+  }
+
+  function renameDraft(draft: PlanningSnapshotReportDraft) {
+    const nextName = window.prompt("Rename report draft", draft.draftName);
+
+    if (!nextName?.trim()) {
+      return;
+    }
+
+    const safeName = nextName.trim().slice(0, 80);
+    const nextDrafts = reportDrafts.map((candidate) =>
+      candidate.draftId === draft.draftId
+        ? {
+            ...candidate,
+            draftName: safeName,
+            updatedAt: new Date().toISOString(),
+          }
+        : candidate,
+    );
+
+    persistDrafts(nextDrafts);
+    setDraftMessage("Report draft renamed.");
+  }
+
+  function deleteDraft(draftId: string) {
+    const shouldDelete = window.confirm(
+      "Delete this report draft? The source planning snapshot will not be deleted.",
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    const nextDrafts = reportDrafts.filter((draft) => draft.draftId !== draftId);
+
+    persistDrafts(nextDrafts);
+    if (activeDraftId === draftId) {
+      setActiveDraftId(null);
+    }
+    setDraftWarning(null);
+    setDraftMessage("Report draft deleted.");
+  }
+
   return (
     <div className="space-y-4">
       <section className="app-chrome no-print rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/88 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.24)]">
@@ -876,14 +1158,16 @@ function PlanningSnapshotReportBuilder({
               Planning Snapshot
             </p>
             <h3 className="mt-2 break-words text-xl font-semibold leading-7 text-white">
-              {planningSnapshot.selectedParcelId ??
-                planningSnapshot.focusModeLabel ??
-                "Saved map context"}
+              Planning Snapshot
             </h3>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">
-              A Planning Snapshot combines a map image with selected CFS
-              context, active layers, key indicators, and caveats for
-              report-ready review.
+              Choose a saved snapshot, select what to include, and print an
+              executive summary.
+            </p>
+            <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-500">
+              {isIndicatorDashboardSnapshot(planningSnapshot)
+                ? "A Planning Snapshot can capture an Indicator Center dashboard visual, key monitoring signals, data gaps, and caveats for report-ready review."
+                : "A Planning Snapshot captures the map image, active layers, selected parcel if available, and Intelligence Brief for report-ready review."}
             </p>
             <p className="mt-2 text-xs uppercase tracking-[0.12em] text-slate-500">
               Snapshot saved {formatDateTime(planningSnapshot.createdAt)}
@@ -901,17 +1185,36 @@ function PlanningSnapshotReportBuilder({
               </div>
             ) : null}
           </div>
-          <div className="grid shrink-0 gap-2 sm:grid-cols-2 lg:min-w-72">
+          <div className="grid shrink-0 gap-2 sm:grid-cols-2 xl:grid-cols-3">
             <ActionButton
               icon={<Printer className="h-3.5 w-3.5" />}
-              label="Print Executive Summary"
+              label="Print Report"
               onClick={onPrint}
               variant="gold"
             />
             <ActionButton
               icon={<MapPinned className="h-3.5 w-3.5" />}
-              label="Go to Overview"
+              label="Go to Workspace"
               onClick={onGoOverview}
+            />
+            <ActionButton
+              icon={<FileText className="h-3.5 w-3.5" />}
+              label="New Draft from Snapshot"
+              onClick={createDraftFromSnapshot}
+            />
+            <ActionButton
+              icon={<Save className="h-3.5 w-3.5" />}
+              label="Save Draft"
+              onClick={saveCurrentDraft}
+            />
+            <ActionButton
+              icon={<History className="h-3.5 w-3.5" />}
+              label="Load Draft"
+              onClick={() =>
+                document
+                  .getElementById("cfs-report-drafts")
+                  ?.scrollIntoView({ block: "nearest" })
+              }
             />
           </div>
         </div>
@@ -919,12 +1222,30 @@ function PlanningSnapshotReportBuilder({
 
       <PlanningSnapshotLibraryPanel {...snapshotLibrary} />
 
-      <MapSnapshotPreview planningSnapshot={planningSnapshot} />
+      <ReportDraftsPanel
+        activeDraftId={activeDraftId}
+        draftMessage={draftMessage}
+        draftWarning={draftWarning}
+        drafts={reportDrafts}
+        onDelete={deleteDraft}
+        onLoad={applyDraft}
+        onRename={renameDraft}
+        onSaveCurrent={saveCurrentDraft}
+        onCreate={createDraftFromSnapshot}
+        snapshots={snapshotLibrary.snapshots}
+      />
+
+      <SnapshotVisualPreview planningSnapshot={planningSnapshot} />
 
       <ReportBuilderControls
         onClear={onClearSnapshot}
         onToggle={toggleReportSection}
+        planningSnapshot={planningSnapshot}
+        reportNotes={reportNotes}
+        reportTitle={reportTitle}
         sectionChecked={isSectionChecked}
+        setReportNotes={setReportNotes}
+        setReportTitle={setReportTitle}
         showExplanationCards={showExplanationCards}
         toggleExplanationCards={toggleExplanationCards}
       />
@@ -933,6 +1254,8 @@ function PlanningSnapshotReportBuilder({
         extraSections={extraSections}
         onPrint={onPrint}
         planningSnapshot={planningSnapshot}
+        reportNotes={reportNotes}
+        reportTitle={reportTitle}
         showExplanationCards={showExplanationCards}
       />
 
@@ -964,13 +1287,23 @@ function PlanningSnapshotReportBuilder({
 function ReportBuilderControls({
   onClear,
   onToggle,
+  planningSnapshot,
+  reportNotes,
+  reportTitle,
   sectionChecked,
+  setReportNotes,
+  setReportTitle,
   showExplanationCards,
   toggleExplanationCards,
 }: {
   onClear: () => void;
   onToggle: (sectionKey: ReportBuilderSectionKey, included: boolean) => void;
+  planningSnapshot: PlanningSnapshot;
+  reportNotes: string;
+  reportTitle: string;
   sectionChecked: (sectionKey: ReportBuilderSectionKey) => boolean;
+  setReportNotes: (value: string) => void;
+  setReportTitle: (value: string) => void;
   showExplanationCards: boolean;
   toggleExplanationCards: (show: boolean) => void;
 }) {
@@ -982,7 +1315,7 @@ function ReportBuilderControls({
             Customize Report
           </p>
           <h3 className="mt-1 text-base font-semibold text-white">
-            Report section controls
+            Report title, notes, and sections
           </h3>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -995,7 +1328,7 @@ function ReportBuilderControls({
               }
               type="checkbox"
             />
-            Show explanation cards
+            Explain the Numbers Appendix
           </label>
           <button
             className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
@@ -1006,6 +1339,29 @@ function ReportBuilderControls({
             Clear Snapshot
           </button>
         </div>
+      </div>
+
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.55fr)]">
+        <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          Report title
+          <input
+            className="min-h-10 rounded-md border border-white/10 bg-black/24 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-white outline-none transition placeholder:text-slate-600 focus:border-[#68d8ff]/45"
+            onChange={(event) => setReportTitle(event.target.value)}
+            placeholder={DEFAULT_EXECUTIVE_REPORT_TITLE}
+            type="text"
+            value={reportTitle}
+          />
+        </label>
+        <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          Report notes
+          <input
+            className="min-h-10 rounded-md border border-white/10 bg-black/24 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none transition placeholder:text-slate-600 focus:border-[#68d8ff]/45"
+            onChange={(event) => setReportNotes(event.target.value)}
+            placeholder="Optional staff note for the report"
+            type="text"
+            value={reportNotes}
+          />
+        </label>
       </div>
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
@@ -1020,7 +1376,11 @@ function ReportBuilderControls({
               onChange={(event) => onToggle(section.key, event.target.checked)}
               type="checkbox"
             />
-            <span className="min-w-0 truncate">{section.label}</span>
+            <span className="min-w-0 truncate">
+              {section.key === "map_view"
+                ? getVisualSnapshotSectionLabel(planningSnapshot)
+                : section.label}
+            </span>
           </label>
         ))}
       </div>
@@ -1028,9 +1388,167 @@ function ReportBuilderControls({
   );
 }
 
+function ReportDraftsPanel({
+  activeDraftId,
+  draftMessage,
+  draftWarning,
+  drafts,
+  onCreate,
+  onDelete,
+  onLoad,
+  onRename,
+  onSaveCurrent,
+  snapshots,
+}: {
+  activeDraftId: string | null;
+  draftMessage: string | null;
+  draftWarning: string | null;
+  drafts: PlanningSnapshotReportDraft[];
+  onCreate: () => void;
+  onDelete: (draftId: string) => void;
+  onLoad: (draft: PlanningSnapshotReportDraft) => void;
+  onRename: (draft: PlanningSnapshotReportDraft) => void;
+  onSaveCurrent: () => void;
+  snapshots: PlanningSnapshot[];
+}) {
+  return (
+    <section
+      className="app-chrome no-print rounded-lg border border-white/10 bg-black/22 p-3"
+      id="cfs-report-drafts"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
+            Report Drafts
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-white">
+            Save and reload report section selections
+          </h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">
+            Drafts save the chosen snapshot, checked report sections, and
+            Explain the Numbers setting in local storage.
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <button
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+            onClick={onCreate}
+            type="button"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            New Draft from Snapshot
+          </button>
+          <button
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15"
+            onClick={onSaveCurrent}
+            type="button"
+          >
+            <Save className="h-3.5 w-3.5" />
+            Save Current Draft
+          </button>
+        </div>
+      </div>
+
+      {draftMessage ? (
+        <p className="mt-3 rounded-md border border-[#55d38f]/20 bg-[#55d38f]/[0.06] px-3 py-2 text-xs leading-5 text-[#a8f3c4]">
+          {draftMessage}
+        </p>
+      ) : null}
+      {draftWarning ? (
+        <p className="mt-3 rounded-md border border-[#d8b86a]/24 bg-[#d8b86a]/[0.07] px-3 py-2 text-xs leading-5 text-[#f6d98e]">
+          {draftWarning}
+        </p>
+      ) : null}
+
+      {drafts.length ? (
+        <div className="mt-3 grid gap-2 xl:grid-cols-2">
+          {drafts.map((draft) => {
+            const sourceSnapshot = snapshots.find(
+              (snapshot) => snapshot.snapshotId === draft.sourceSnapshotId,
+            );
+            const active = activeDraftId === draft.draftId;
+
+            return (
+              <article
+                className={cn(
+                  "rounded-md border bg-white/[0.035] p-3",
+                  active ? "border-[#68d8ff]/35" : "border-white/10",
+                )}
+                key={draft.draftId}
+              >
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-white">
+                      {draft.draftName}
+                    </p>
+                    <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                      Updated {formatDateTime(draft.updatedAt)}
+                    </p>
+                  </div>
+                  <StatusBadge
+                    label={sourceSnapshot ? "Snapshot linked" : "Missing snapshot"}
+                    tone={sourceSnapshot ? "positive" : "caution"}
+                  />
+                </div>
+                <div className="mt-3 grid gap-2 text-xs text-slate-400 sm:grid-cols-2">
+                  <CompactSnapshotFact
+                    label="Source"
+                    value={
+                      sourceSnapshot
+                        ? getSnapshotLibraryTitle(sourceSnapshot)
+                        : draft.sourceSnapshotId
+                    }
+                  />
+                  <CompactSnapshotFact
+                    label="Title"
+                    value={draft.reportTitle || DEFAULT_EXECUTIVE_REPORT_TITLE}
+                  />
+                  <CompactSnapshotFact
+                    label="Explain"
+                    value={draft.explainNumbers ? "On" : "Off"}
+                  />
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  <button
+                    className="rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+                    onClick={() => onLoad(draft)}
+                    type="button"
+                  >
+                    Load
+                  </button>
+                  <button
+                    className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
+                    onClick={() => onRename(draft)}
+                    type="button"
+                  >
+                    Rename
+                  </button>
+                  <button
+                    className="rounded-md border border-rose-300/18 bg-rose-400/[0.07] px-3 py-2 text-xs font-semibold text-rose-100 transition hover:bg-rose-400/[0.12]"
+                    onClick={() => onDelete(draft.draftId)}
+                    type="button"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mt-3 rounded-md border border-white/10 bg-white/[0.035] p-3 text-sm leading-6 text-slate-400">
+          No report drafts saved yet. Choose report sections, then click Save
+          Current Draft.
+        </div>
+      )}
+    </section>
+  );
+}
+
 interface PlanningSnapshotLibraryProps {
   activeSnapshotId: string | null;
   onDelete: (snapshotId: string) => void;
+  onRename: (snapshotId: string, snapshotTitle: string) => void;
   onUse: (snapshotId: string) => void;
   snapshots: PlanningSnapshot[];
 }
@@ -1038,6 +1556,7 @@ interface PlanningSnapshotLibraryProps {
 function PlanningSnapshotLibraryPanel({
   activeSnapshotId,
   onDelete,
+  onRename,
   onUse,
   snapshots,
 }: PlanningSnapshotLibraryProps) {
@@ -1066,9 +1585,14 @@ function PlanningSnapshotLibraryPanel({
         <div className="mt-4 grid gap-3 xl:grid-cols-2">
           {snapshots.map((snapshot) => {
             const active = snapshot.snapshotId === activeSnapshotId;
-            const captured =
+            const dashboardSnapshot = isIndicatorDashboardSnapshot(snapshot);
+            const dashboardCaptured = hasCapturedDashboardImage(snapshot);
+            const mapCaptured =
               snapshot.mapScreenshotStatus === "captured" &&
               Boolean(snapshot.mapScreenshotDataUrl);
+            const captured = dashboardSnapshot
+              ? dashboardCaptured
+              : mapCaptured;
 
             return (
               <article
@@ -1082,7 +1606,19 @@ function PlanningSnapshotLibraryPanel({
               >
                 <div className="grid gap-0 sm:grid-cols-[9.5rem_minmax(0,1fr)]">
                   <div className="relative min-h-28 overflow-hidden border-b border-white/10 bg-[#020814] sm:border-b-0 sm:border-r">
-                    {captured && snapshot.mapScreenshotDataUrl ? (
+                    {dashboardSnapshot && dashboardCaptured && snapshot.dashboardImageDataUrl ? (
+                      <Image
+                        alt={
+                          snapshot.dashboardImageAlt ??
+                          "Indicator Center dashboard snapshot thumbnail"
+                        }
+                        className="h-full w-full object-cover"
+                        height={180}
+                        src={snapshot.dashboardImageDataUrl}
+                        unoptimized
+                        width={260}
+                      />
+                    ) : !dashboardSnapshot && captured && snapshot.mapScreenshotDataUrl ? (
                       <Image
                         alt="Planning snapshot map thumbnail"
                         className="h-full w-full object-cover"
@@ -1093,9 +1629,15 @@ function PlanningSnapshotLibraryPanel({
                       />
                     ) : (
                       <div className="flex h-full min-h-28 flex-col items-center justify-center gap-1.5 p-3 text-center">
-                        <MapPinned className="h-5 w-5 text-slate-500" />
+                        {dashboardSnapshot ? (
+                          <BarChart3 className="h-5 w-5 text-slate-500" />
+                        ) : (
+                          <MapPinned className="h-5 w-5 text-slate-500" />
+                        )}
                         <p className="text-[11px] font-semibold text-slate-300">
-                          Map unavailable
+                          {dashboardSnapshot
+                            ? "Dashboard unavailable"
+                            : "Map unavailable"}
                         </p>
                       </div>
                     )}
@@ -1117,16 +1659,8 @@ function PlanningSnapshotLibraryPanel({
                         </p>
                       </div>
                       <StatusBadge
-                        label={
-                          snapshot.mapScreenshotStatus === "captured"
-                            ? "Map captured"
-                            : "Map unavailable"
-                        }
-                        tone={
-                          snapshot.mapScreenshotStatus === "captured"
-                            ? "positive"
-                            : "caution"
-                        }
+                        label={getSnapshotVisualStatusLabel(snapshot)}
+                        tone={captured ? "positive" : "caution"}
                       />
                     </div>
 
@@ -1140,6 +1674,18 @@ function PlanningSnapshotLibraryPanel({
                         value={getSnapshotContextLabel(snapshot)}
                       />
                       <CompactSnapshotFact
+                        label="Visual"
+                        value={
+                          dashboardSnapshot
+                            ? captured
+                              ? "Dashboard captured"
+                              : "Dashboard unavailable"
+                            : captured
+                              ? "Map captured"
+                              : "Map unavailable"
+                        }
+                      />
+                      <CompactSnapshotFact
                         label="Layers"
                         value={`${snapshot.activeLayers.length} included`}
                       />
@@ -1149,14 +1695,29 @@ function PlanningSnapshotLibraryPanel({
                       />
                     </div>
 
-                    <div className="mt-3 grid grid-cols-2 gap-2">
+                    <div className="mt-3 grid grid-cols-3 gap-2">
                       <button
                         className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
                         onClick={() => onUse(snapshot.snapshotId)}
                         type="button"
                       >
                         <FileText className="h-3.5 w-3.5" />
-                        Open
+                        Use
+                      </button>
+                      <button
+                        className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
+                        onClick={() => {
+                          const nextTitle = window.prompt(
+                            "Rename this planning snapshot",
+                            getSnapshotLibraryTitle(snapshot),
+                          );
+                          if (nextTitle) {
+                            onRename(snapshot.snapshotId, nextTitle);
+                          }
+                        }}
+                        type="button"
+                      >
+                        Rename
                       </button>
                       <button
                         className="inline-flex items-center justify-center gap-2 rounded-md border border-rose-300/18 bg-rose-400/[0.07] px-3 py-2 text-xs font-semibold text-rose-100 transition hover:bg-rose-400/[0.12]"
@@ -1182,7 +1743,7 @@ function PlanningSnapshotLibraryPanel({
         </div>
       ) : (
         <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.035] p-4 text-sm leading-6 text-slate-400">
-          No planning snapshots saved yet. Go to Overview, search/select a
+          No planning snapshots saved yet. Go to Workspace, search/select a
           parcel or adjust the map, then click Save Snapshot.
         </div>
       )}
@@ -1210,6 +1771,10 @@ function CompactSnapshotFact({
 }
 
 function getSnapshotLibraryTitle(snapshot: PlanningSnapshot) {
+  if (snapshot.snapshotTitle) {
+    return snapshot.snapshotTitle;
+  }
+
   if (snapshot.selectedParcelId) {
     return `Parcel ${snapshot.selectedParcelId}`;
   }
@@ -1218,6 +1783,12 @@ function getSnapshotLibraryTitle(snapshot: PlanningSnapshot) {
 }
 
 function getSnapshotContextLabel(snapshot: PlanningSnapshot) {
+  if (snapshot.overviewCommandMode === "indicatorCenter") {
+    return snapshot.selectedParcelId
+      ? "Indicator Center parcel-context snapshot"
+      : "Indicator Center snapshot";
+  }
+
   if (snapshot.overviewCommandMode === "modelLab") {
     return snapshot.selectedParcelId
       ? "Model Lab parcel-context snapshot"
@@ -1240,6 +1811,10 @@ function getSnapshotContextLabel(snapshot: PlanningSnapshot) {
 }
 
 function getSnapshotIntelligenceBriefTitle(snapshot: PlanningSnapshot) {
+  if (snapshot.overviewCommandMode === "indicatorCenter") {
+    return "Indicator Intelligence";
+  }
+
   if (snapshot.overviewCommandMode === "modelLab") {
     return "Model Lab Intelligence";
   }
@@ -1251,6 +1826,66 @@ function getSnapshotIntelligenceBriefTitle(snapshot: PlanningSnapshot) {
   return snapshot.selectedParcelId
     ? "Selected Parcel Intelligence"
     : "Intelligence Brief";
+}
+
+function getSnapshotVisualType(snapshot: PlanningSnapshot): "dashboard" | "map" {
+  if (
+    snapshot.visualType === "dashboard" ||
+    snapshot.snapshotType === "indicator_center" ||
+    snapshot.overviewCommandMode === "indicatorCenter" ||
+    Boolean(snapshot.indicatorCenterContext)
+  ) {
+    return "dashboard";
+  }
+
+  return "map";
+}
+
+function isIndicatorDashboardSnapshot(snapshot: PlanningSnapshot) {
+  return getSnapshotVisualType(snapshot) === "dashboard";
+}
+
+function hasCapturedDashboardImage(snapshot: PlanningSnapshot) {
+  return (
+    isIndicatorDashboardSnapshot(snapshot) &&
+    snapshot.dashboardImageStatus === "captured" &&
+    Boolean(snapshot.dashboardImageDataUrl)
+  );
+}
+
+function getSnapshotVisualStatusLabel(snapshot: PlanningSnapshot) {
+  if (isIndicatorDashboardSnapshot(snapshot)) {
+    return hasCapturedDashboardImage(snapshot)
+      ? "Dashboard captured"
+      : "Dashboard unavailable";
+  }
+
+  return snapshot.mapScreenshotStatus === "captured"
+    ? "Map captured"
+    : "Map unavailable";
+}
+
+function getVisualSnapshotSectionLabel(snapshot: PlanningSnapshot) {
+  return isIndicatorDashboardSnapshot(snapshot)
+    ? "Dashboard Snapshot"
+    : "Map Snapshot";
+}
+
+function formatDashboardCapturedSection(section: string) {
+  switch (section) {
+    case "critical_signals":
+      return "Critical Signals";
+    case "monitoring_charts":
+      return "Monitoring Charts";
+    case "priority_issues":
+      return "Priority Issues";
+    default:
+      return section
+        .split(/[_-]+/)
+        .filter(Boolean)
+        .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+        .join(" ");
+  }
 }
 
 const snapshotSectionLabels: Record<PlanningSnapshotSectionKey, string> = {
@@ -1270,14 +1905,17 @@ const snapshotSectionLabels: Record<PlanningSnapshotSectionKey, string> = {
 
 const metricSectionMap: Record<string, PlanningSnapshotSectionKey> = {
   "Development Activity": "development_permits",
+  "Development Activity Context": "development_permits",
   "Flood Review Status": "fema_flood",
   "Internal Model Research Status": "model_governance",
+  "Indicator Center Context": "data_needed_caveats",
   "Map Snapshot": "map_view",
   "Model Map Display": "model_governance",
   "Model Lab Context": "model_governance",
   "Model Signal Rationale": "model_governance",
   "Overview Mode": "data_needed_caveats",
   "Snapshot Context": "data_needed_caveats",
+  "Workspace Mode": "data_needed_caveats",
   "School Assignment": "schools",
   "Transportation Context": "transportation",
   "Utility Proxy": "utility_proxy",
@@ -1299,15 +1937,14 @@ function SnapshotOverviewPanel({
             What was captured
           </h3>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-400">
-            This snapshot preserves the saved command context, map image when
-            available, active context labels, key facts, review flags, and
-            caveats that should be explained in an executive-ready planning
-            memo.
+            {isIndicatorDashboardSnapshot(planningSnapshot)
+              ? "This snapshot preserves dashboard visual context, key facts, review flags, and caveats for an executive-ready planning memo."
+              : "This snapshot preserves the saved command context, map image when available, active context labels, key facts, review flags, and caveats that should be explained in an executive-ready planning memo."}
           </p>
           <p className="mt-2 max-w-4xl text-xs leading-5 text-slate-500">
-            It is not just a screenshot. CFS combines the map image with the
-            Intelligence Brief, active layers, headline indicators, caveats, and
-            explanation cards so the report has meaning.
+            {isIndicatorDashboardSnapshot(planningSnapshot)
+              ? "CFS combines the dashboard capture with monitoring summaries, caveats, and explanation cards so the report has meaning."
+              : "It is not just a screenshot. CFS combines the map image with the Intelligence Brief, active layers, headline indicators, caveats, and explanation cards so the report has meaning."}
           </p>
         </div>
         <StatusBadge label="Saved Context" tone="info" />
@@ -1336,7 +1973,7 @@ function SnapshotOverviewPanel({
         />
       </div>
 
-      <MapSnapshotPreview planningSnapshot={planningSnapshot} />
+      <SnapshotVisualPreview planningSnapshot={planningSnapshot} />
 
       <div className="mt-4 grid gap-2">
         {planningSnapshot.knownReviewFlags.map((flag) => (
@@ -1362,11 +1999,87 @@ function SnapshotOverviewPanel({
   );
 }
 
-function MapSnapshotPreview({
+function SnapshotVisualPreview({
   planningSnapshot,
 }: {
   planningSnapshot: PlanningSnapshot;
 }) {
+  if (isIndicatorDashboardSnapshot(planningSnapshot)) {
+    const captured = hasCapturedDashboardImage(planningSnapshot);
+    const capturedAt =
+      planningSnapshot.dashboardImageCapturedAt ?? planningSnapshot.createdAt;
+
+    return (
+      <section className="app-chrome no-print rounded-lg border border-white/10 bg-black/20 p-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
+              Selected Dashboard Snapshot
+            </p>
+            <p className="mt-1 text-sm leading-6 text-slate-400">
+              {captured
+                ? `Indicator Center dashboard snapshot captured at ${formatDateTime(
+                    capturedAt,
+                  )}.`
+                : "Dashboard snapshot unavailable for this saved Indicator Center context."}
+            </p>
+          </div>
+          <StatusBadge
+            label={captured ? "Dashboard captured" : "Dashboard unavailable"}
+            tone={captured ? "positive" : "caution"}
+          />
+        </div>
+        <div className="mt-3 overflow-hidden rounded-md border border-white/10 bg-[#020814]">
+          {captured && planningSnapshot.dashboardImageDataUrl ? (
+            <Image
+              alt={
+                planningSnapshot.dashboardImageAlt ??
+                "Indicator Center dashboard snapshot"
+              }
+              className="h-auto max-h-[36rem] w-full object-contain"
+              height={720}
+              src={planningSnapshot.dashboardImageDataUrl}
+              unoptimized
+              width={1280}
+            />
+          ) : (
+            <div className="flex min-h-44 flex-col items-center justify-center gap-2 p-6 text-center">
+              <BarChart3 className="h-6 w-6 text-slate-500" />
+              <p className="text-sm font-semibold text-slate-200">
+                Dashboard snapshot unavailable
+              </p>
+              <p className="max-w-xl text-xs leading-5 text-slate-500">
+                {planningSnapshot.dashboardImageFailureReason ??
+                  "Indicator Center is map-free. Dashboard image capture failed or was not available."}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+            Indicator Dashboard
+          </span>
+          {(planningSnapshot.capturedSections?.length
+            ? planningSnapshot.capturedSections
+            : ["critical_signals", "monitoring_charts"]
+          ).map((section) => (
+            <span
+              className="rounded-full border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2.5 py-1 text-[11px] font-semibold text-[#b7f0ff]"
+              key={section}
+            >
+              {formatDashboardCapturedSection(section)}
+            </span>
+          ))}
+        </div>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          Captures Critical Signals and Monitoring Charts. No map legend,
+          north arrow, scale note, camera, or map context is required.
+        </p>
+      </section>
+    );
+  }
+
   const captured =
     planningSnapshot.mapScreenshotStatus === "captured" &&
     Boolean(planningSnapshot.mapScreenshotDataUrl);
@@ -1375,7 +2088,7 @@ function MapSnapshotPreview({
   const legend = getSnapshotMapLegend(planningSnapshot);
 
   return (
-    <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+    <section className="app-chrome no-print rounded-lg border border-white/10 bg-black/20 p-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
@@ -1509,7 +2222,7 @@ function NorthArrow() {
   return (
     <div className="absolute right-3 top-3 flex h-12 w-10 flex-col items-center justify-center rounded-md border border-white/20 bg-black/55 text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] print:border-slate-300 print:bg-white print:text-slate-900">
       <span className="text-[10px] font-bold leading-none">N</span>
-      <span className="mt-0.5 text-lg leading-none">▲</span>
+      <span className="mt-0.5 text-lg leading-none">^</span>
     </div>
   );
 }
@@ -1525,7 +2238,7 @@ function getSnapshotMapLegend(planningSnapshot: PlanningSnapshot): SnapshotLegen
     .toLowerCase();
 
   if (planningSnapshot.overviewCommandMode === "modelLab") {
-    return {
+    return withSelectedParcelLegend(planningSnapshot, {
       caveat: "Relative research signal only. Not exact probability.",
       items: [
         {
@@ -1550,11 +2263,36 @@ function getSnapshotMapLegend(planningSnapshot: PlanningSnapshot): SnapshotLegen
         },
       ],
       title: "Development Research Signal",
-    };
+    });
+  }
+
+  if (planningSnapshot.overviewCommandMode === "indicatorCenter") {
+    return withSelectedParcelLegend(planningSnapshot, {
+      caveat: "Attention flags and data-needed markers are planning review context only.",
+      items: [
+        {
+          colorClassName: "border-[#d8b86a]/70 bg-[#d8b86a]",
+          label: "Development activity attention flag",
+        },
+        {
+          colorClassName: "border-[#68d8ff]/70 bg-[#68d8ff]",
+          label: "Flood or infrastructure review flag",
+        },
+        {
+          colorClassName: "border-amber-200/70 bg-amber-300",
+          label: "Official data needed",
+        },
+        {
+          colorClassName: "border-slate-300/50 bg-slate-500",
+          label: "Internal research context",
+        },
+      ],
+      title: "Indicator Center Flags",
+    });
   }
 
   if (layerText.includes("fema") || layerText.includes("flood")) {
-    return {
+    return withSelectedParcelLegend(planningSnapshot, {
       items: [
         { colorClassName: "border-red-200/70 bg-red-500", label: "Floodway" },
         { colorClassName: "border-orange-200/70 bg-orange-400", label: "SFHA" },
@@ -1562,11 +2300,11 @@ function getSnapshotMapLegend(planningSnapshot: PlanningSnapshot): SnapshotLegen
         { colorClassName: "border-slate-300/50 bg-slate-500", label: "Minimal" },
       ],
       title: "FEMA Flood Context",
-    };
+    });
   }
 
   if (layerText.includes("school")) {
-    return {
+    return withSelectedParcelLegend(planningSnapshot, {
       caveat: "School utilization values are seed/context data until official capacity is integrated.",
       items: [
         { colorClassName: "border-emerald-100/70 bg-emerald-400", label: "Under capacity" },
@@ -1575,7 +2313,7 @@ function getSnapshotMapLegend(planningSnapshot: PlanningSnapshot): SnapshotLegen
         { colorClassName: "border-red-100/70 bg-red-500", label: "Severely over capacity" },
       ],
       title: "School Utilization Seed",
-    };
+    });
   }
 
   if (
@@ -1584,39 +2322,67 @@ function getSnapshotMapLegend(planningSnapshot: PlanningSnapshot): SnapshotLegen
     layerText.includes("hotspot") ||
     layerText.includes("construction")
   ) {
-    return {
-      caveat: "Permit/development activity is observed history/context, not a prediction.",
+    return withSelectedParcelLegend(planningSnapshot, {
+      caveat: "Observed permit/development activity only. Not prediction.",
       items: [
         {
           colorClassName: "border-[#d8b86a]/70 bg-[#d8b86a]",
-          label: "Permit/development activity",
+          label: "Development activity cluster",
         },
         {
           colorClassName: "border-[#68d8ff]/70 bg-[#68d8ff]",
-          label: "Marker size/count indicates relative concentration where applicable",
+          label: "Permit/development activity marker",
+        },
+        {
+          colorClassName: "border-white/60 bg-white/60",
+          label: "Marker count = records/parcels represented",
         },
       ],
       title: "Development Activity",
-    };
+    });
   }
 
-  return {
+  return withSelectedParcelLegend(planningSnapshot, {
     items: [],
     message:
       "Active layers are listed below. No specialized legend was available for this snapshot.",
     title: "Active Layer Context",
+  });
+}
+
+function withSelectedParcelLegend(
+  planningSnapshot: PlanningSnapshot,
+  legend: SnapshotLegend,
+): SnapshotLegend {
+  if (!planningSnapshot.selectedParcelId) {
+    return legend;
+  }
+
+  return {
+    ...legend,
+    items: [
+      ...legend.items,
+      {
+        colorClassName: "border-[#f6d98e] bg-transparent",
+        label: "Selected parcel outline",
+      },
+    ],
   };
 }
 
 function SnapshotExecutiveSummary({
-  extraSections = { countywide_indicators: true, key_findings: true },
+  extraSections = defaultExtraReportSections,
   onPrint,
   planningSnapshot,
+  reportNotes = "",
+  reportTitle = DEFAULT_EXECUTIVE_REPORT_TITLE,
   showExplanationCards = false,
 }: {
   extraSections?: ReportSectionVisibility;
   onPrint: () => void;
   planningSnapshot: PlanningSnapshot;
+  reportNotes?: string;
+  reportTitle?: string;
   showExplanationCards?: boolean;
 }) {
   const includedMetrics = planningSnapshot.explainableMetrics.filter(
@@ -1625,13 +2391,23 @@ function SnapshotExecutiveSummary({
         metricSectionMap[metric.label] ?? "data_needed_caveats"
       ] ?? true,
   );
-  const conciseMetrics = includedMetrics.slice(0, 6);
   const includedSectionLabels = (
     Object.keys(snapshotSectionLabels) as PlanningSnapshotSectionKey[]
   )
     .filter((sectionKey) => planningSnapshot.includedSections[sectionKey] ?? true)
-    .map((sectionKey) => snapshotSectionLabels[sectionKey]);
-  const keyFindings = planningSnapshot.knownReviewFlags.slice(0, 5);
+    .map((sectionKey) =>
+      sectionKey === "map_view"
+        ? getVisualSnapshotSectionLabel(planningSnapshot)
+        : snapshotSectionLabels[sectionKey],
+    );
+  const keyStatistics = buildExecutiveKeyStatistics(
+    planningSnapshot,
+    includedMetrics,
+  );
+  const recommendedActions = buildExecutiveRecommendedActions(planningSnapshot);
+  const importantCaveats = buildExecutiveCaveats(planningSnapshot);
+  const safeReportTitle =
+    reportTitle.trim() || DEFAULT_EXECUTIVE_REPORT_TITLE;
 
   return (
     <div className="space-y-4">
@@ -1665,20 +2441,50 @@ function SnapshotExecutiveSummary({
             Cabarrus FutureScape
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-white print:text-slate-950">
-            Planning Snapshot Executive Summary
+            {safeReportTitle}
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-400 print:text-slate-700">
             Generated {formatDateTime(new Date().toISOString())}. Snapshot
             saved {formatDateTime(planningSnapshot.createdAt)}.
           </p>
+          <p className="mt-1 text-sm leading-6 text-slate-400 print:text-slate-700">
+            {getSnapshotContextLabel(planningSnapshot)}
+            {planningSnapshot.selectedParcelId
+              ? ` / Selected parcel ${planningSnapshot.selectedParcelId}`
+              : " / No selected parcel captured"}
+          </p>
+          {reportNotes.trim() ? (
+            <p className="mt-2 rounded-md border border-white/10 bg-black/20 px-3 py-2 text-sm leading-6 text-slate-300 print:border-slate-300 print:bg-white print:text-slate-700">
+              {reportNotes.trim()}
+            </p>
+          ) : null}
         </header>
 
         {planningSnapshot.includedSections.map_view !== false ? (
-          <ReportMapSnapshotSection planningSnapshot={planningSnapshot} />
+          <ReportMapSnapshotSection
+            planningSnapshot={planningSnapshot}
+            showLegendAndNotes={extraSections.legend_map_notes}
+          />
         ) : null}
 
         {extraSections.countywide_indicators ? (
-          <ReportIntelligenceBriefSection planningSnapshot={planningSnapshot} />
+          <ReportKeyStatisticsSection statistics={keyStatistics} />
+        ) : null}
+
+        {planningSnapshot.indicatorCenterContext &&
+        planningSnapshot.includedSections.data_needed_caveats !== false ? (
+          <ReportIndicatorCenterContextSection
+            planningSnapshot={planningSnapshot}
+            showExplanationCards={showExplanationCards}
+          />
+        ) : null}
+
+        {planningSnapshot.developmentActivityContext &&
+        planningSnapshot.includedSections.development_permits !== false ? (
+          <ReportDevelopmentActivityContextSection
+            planningSnapshot={planningSnapshot}
+            showExplanationCards={showExplanationCards}
+          />
         ) : null}
 
         {planningSnapshot.modelLabContext &&
@@ -1689,8 +2495,9 @@ function SnapshotExecutiveSummary({
           />
         ) : null}
 
-        <section className="mt-5 grid gap-3 md:grid-cols-2 print:grid-cols-2">
-          {planningSnapshot.selectedParcelSummary ? (
+        {planningSnapshot.includedSections.parcel_facts !== false ? (
+          <section className="mt-5 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+            {planningSnapshot.selectedParcelSummary ? (
             <>
               <ReportFact
                 label="Selected parcel"
@@ -1715,37 +2522,21 @@ function SnapshotExecutiveSummary({
               value="No parcel captured in this snapshot"
             />
           )}
-          <ReportFact
-            label="Active context"
-            value={planningSnapshot.activeLayers.join(", ")}
-          />
-          <ReportFact
-            label="Included sections"
-            value={includedSectionLabels.join(", ")}
-          />
-        </section>
-
-        {extraSections.key_findings ? (
-        <section className="mt-6">
-          <h3 className="text-lg font-semibold text-white print:text-slate-950">
-            Key Findings
-          </h3>
-          <div className="mt-3 grid gap-2">
-            {keyFindings.map((flag) => (
-              <ReportFact
-                key={`${flag.label}-report`}
-                label={`${flag.label}: ${flag.status}`}
-                value={flag.reason}
-              />
-            ))}
-          </div>
-        </section>
+            <ReportFact
+              label="Active context"
+              value={planningSnapshot.activeLayers.join(", ")}
+            />
+            <ReportFact
+              label="Included sections"
+              value={includedSectionLabels.join(", ")}
+            />
+          </section>
         ) : null}
 
         {showExplanationCards ? (
         <section className="mt-6">
           <h3 className="text-lg font-semibold text-white print:text-slate-950">
-            Explain Numbers
+            Explain the Numbers Appendix
           </h3>
           <div className="mt-3 grid gap-3">
             {includedMetrics.map((metric) => (
@@ -1772,56 +2563,257 @@ function SnapshotExecutiveSummary({
             ))}
           </div>
         </section>
-        ) : (
-          <section className="mt-6">
-            <h3 className="text-lg font-semibold text-white print:text-slate-950">
-              Included Evidence Sections
+        ) : null}
+
+        {planningSnapshot.includedSections.data_needed_caveats !== false ? (
+          <section className="mt-6 rounded-md border border-[#d8b86a]/24 bg-[#d8b86a]/[0.06] p-3 print:border-slate-300 print:bg-white">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#f6d98e] print:text-slate-700">
+              Important caveats
             </h3>
-            <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
-              {conciseMetrics.map((metric) => (
-                <ReportFact
-                  key={`${metric.label}-concise`}
-                  label={metric.label}
-                  value={`${metric.value}${metric.caveat ? ` / ${metric.caveat}` : ""}`}
-                />
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-300 print:text-slate-700">
+              {importantCaveats.map((caveat) => (
+                <li key={caveat}>- {caveat}</li>
               ))}
-            </div>
+            </ul>
           </section>
-        )}
+        ) : null}
 
         {planningSnapshot.includedSections.recommended_actions !== false ? (
           <section className="mt-6">
             <h3 className="text-lg font-semibold text-white print:text-slate-950">
               Recommended Actions
             </h3>
-            <div className="mt-3 grid gap-2">
-              {includedMetrics
-                .filter((metric) => metric.recommendedAction)
-                .map((metric) => (
-                  <ReportFact
-                    key={`${metric.label}-action`}
-                    label={metric.label}
-                    value={metric.recommendedAction ?? "Review source records"}
-                  />
-                ))}
-            </div>
-          </section>
-        ) : null}
-
-        {planningSnapshot.includedSections.data_needed_caveats !== false ? (
-          <section className="mt-6 rounded-md border border-[#d8b86a]/24 bg-[#d8b86a]/[0.06] p-3 print:border-slate-300 print:bg-white">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#f6d98e] print:text-slate-700">
-              Limitations and caveats
-            </h3>
             <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-300 print:text-slate-700">
-              {planningSnapshot.caveats.map((caveat) => (
-                <li key={caveat}>- {caveat}</li>
+              {recommendedActions.map((action) => (
+                <li key={action}>- {action}</li>
               ))}
             </ul>
           </section>
         ) : null}
       </article>
+
+      <div className="no-print flex justify-end">
+        <ActionButton
+          icon={<Printer className="h-3.5 w-3.5" />}
+          label="Print Report"
+          onClick={onPrint}
+          variant="gold"
+        />
+      </div>
     </div>
+  );
+}
+
+function ReportIndicatorCenterContextSection({
+  planningSnapshot,
+  showExplanationCards,
+}: {
+  planningSnapshot: PlanningSnapshot;
+  showExplanationCards: boolean;
+}) {
+  const context = planningSnapshot.indicatorCenterContext;
+
+  if (!context) {
+    return null;
+  }
+
+  const selected = context.selectedIndicator;
+  const selectedGroupCount =
+    context.selectedGroupIds?.length ?? context.availableGroups.length;
+  const indicatorSummaries = context.indicatorSummaries ?? [];
+  const displayModeLabel = context.displayMode
+    ? getIndicatorCenterDisplayModeLabel(context.displayMode)
+    : "All indicators";
+  const summaryValue = indicatorSummaries.length
+    ? indicatorSummaries
+        .slice(0, 4)
+        .map((summary) => `${summary.name}: ${summary.value}`)
+        .join(" / ")
+    : context.availableGroups.slice(0, 4).join(" / ");
+
+  return (
+    <section className="mt-5 rounded-md border border-[#68d8ff]/18 bg-[#68d8ff]/[0.055] p-3 print:border-slate-300 print:bg-white">
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-white print:text-slate-950">
+            Indicator Center Context
+          </h3>
+          <p className="mt-1 text-sm leading-6 text-slate-300 print:text-slate-700">
+            Monitoring dashboard context from existing CFS signals. Not an
+            official determination.
+          </p>
+        </div>
+        <span className="inline-flex shrink-0 rounded-md border border-[#68d8ff]/24 bg-[#68d8ff]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#b7f0ff] print:border-slate-300 print:bg-white print:text-slate-700">
+          Review indicators
+        </span>
+      </div>
+
+      <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+        <ReportFact
+          label="Selected indicator"
+          value={selected ? selected.name : "No specific indicator selected"}
+        />
+        <ReportFact
+          label="Status"
+          value={selected ? selected.status : "Review groups available"}
+        />
+        <ReportFact
+          label="Dashboard posture"
+          value={`${selectedGroupCount} groups / ${displayModeLabel}`}
+        />
+        <ReportFact
+          label="Captured summaries"
+          value={summaryValue}
+        />
+        <ReportFact
+          label="Recommended follow-up"
+          value={context.recommendedFollowUp}
+        />
+      </div>
+
+      {selected && showExplanationCards ? (
+        <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+          <ReportFact label="Category" value={selected.category} />
+          <ReportFact label="What it means" value={selected.whatItMeans} />
+          <ReportFact label="Source" value={selected.source} />
+          <ReportFact
+            label="Data used"
+            value={selected.dataUsed?.join(" / ") ?? selected.source}
+          />
+          <ReportFact label="Caveat" value={selected.caveat} />
+        </div>
+      ) : null}
+
+      {showExplanationCards ? (
+        <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+          <ReportFact
+            label="How to use"
+            value="Use Indicator Center to choose which existing CFS evidence or missing official datasets need follow-up review."
+          />
+          <ReportFact
+            label="What it is not"
+            value="It is not an official risk score, prediction, or parcel development probability."
+          />
+        </div>
+      ) : null}
+
+      <p className="mt-3 text-sm leading-6 text-[#f6d98e] print:text-slate-700">
+        {context.caveat}
+      </p>
+    </section>
+  );
+}
+
+function ReportDevelopmentActivityContextSection({
+  planningSnapshot,
+  showExplanationCards,
+}: {
+  planningSnapshot: PlanningSnapshot;
+  showExplanationCards: boolean;
+}) {
+  const context = planningSnapshot.developmentActivityContext;
+
+  if (!context) {
+    return null;
+  }
+
+  const topDrivers = context.topDrivers?.length
+    ? context.topDrivers
+    : ["Observed permit/development activity"];
+  const segmentMix = formatDevelopmentActivityContextSegmentMix(context);
+
+  return (
+    <section className="mt-5 rounded-md border border-[#68d8ff]/18 bg-[#68d8ff]/[0.055] p-3 print:border-slate-300 print:bg-white">
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-white print:text-slate-950">
+            Development Activity Context
+          </h3>
+          <p className="mt-1 text-sm leading-6 text-slate-300 print:text-slate-700">
+            Development Hotspots context is included because a countywide
+            activity cluster or feature was selected when this snapshot was
+            saved.
+          </p>
+        </div>
+        <span className="inline-flex shrink-0 rounded-md border border-[#68d8ff]/24 bg-[#68d8ff]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#b7f0ff] print:border-slate-300 print:bg-white print:text-slate-700">
+          Observed activity only
+        </span>
+      </div>
+
+      <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+        <ReportFact
+          label={getDevelopmentActivityContextReportTitle(context)}
+          value={context.areaLabel}
+        />
+        <ReportFact
+          label="Records represented"
+          value={formatDevelopmentCount(context.recordsRepresented)}
+        />
+        <ReportFact
+          label="Parcels represented"
+          value={
+            context.parcelsRepresented === 1
+              ? "1 parcel represented"
+              : `${formatDevelopmentCount(context.parcelsRepresented)} parcels represented`
+          }
+        />
+        <ReportFact
+          label="Dominant segment"
+          value={formatDevelopmentLabel(
+            context.dominantPermitSegment ?? context.selectedPermitSegment,
+          )}
+        />
+        <ReportFact
+          label="Activity type"
+          value={formatDevelopmentLabel(context.dominantActivityType)}
+        />
+        <ReportFact
+          label="Recent context"
+          value={context.latestActivityLabel ?? "Recent activity unavailable"}
+        />
+      </div>
+
+      <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+        <ReportFact
+          label="Top drivers"
+          value={topDrivers.join(" / ")}
+        />
+        <ReportFact label="Why highlighted" value={context.whyHighlighted} />
+        {segmentMix ? (
+          <ReportFact label="Segment mix" value={segmentMix} />
+        ) : null}
+        <ReportFact
+          label="Staff follow-up"
+          value="Review underlying permit records before formal planning decisions."
+        />
+      </div>
+
+      {showExplanationCards ? (
+        <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
+          <ReportFact
+            label="What it means"
+            value="This section summarizes observed permit/development activity concentration from the selected Development Hotspots map feature."
+          />
+          <ReportFact
+            label="Source"
+            value="Permit and development activity tables joined to map-safe countywide layer records."
+          />
+          <ReportFact
+            label="Map display"
+            value={formatDevelopmentLabel(context.displayMode)}
+          />
+          <ReportFact
+            label="Caveat"
+            value="Observed permit/development activity only. Not a prediction."
+          />
+        </div>
+      ) : null}
+
+      <p className="mt-3 text-sm leading-6 text-[#f6d98e] print:text-slate-700">
+        {context.caveat} Review underlying permit records before formal
+        planning decisions.
+      </p>
+    </section>
   );
 }
 
@@ -1978,6 +2970,41 @@ function ReportModelResearchSection({
   );
 }
 
+function getDevelopmentActivityContextReportTitle(
+  context: NonNullable<PlanningSnapshot["developmentActivityContext"]>,
+) {
+  if (context.contextKind === "cluster" && context.parcelsRepresented > 1) {
+    return "Selected activity cluster";
+  }
+
+  return "Selected activity feature";
+}
+
+function formatDevelopmentActivityContextSegmentMix(
+  context: NonNullable<PlanningSnapshot["developmentActivityContext"]>,
+) {
+  const counts = context.segmentCounts;
+
+  if (!counts) {
+    return null;
+  }
+
+  return [
+    ["Residential", counts.residentialGrowth],
+    ["Commercial", counts.commercialActivity],
+    ["Industrial", counts.industrialActivity],
+    ["Institutional", counts.institutionalActivity],
+    ["Redevelopment", counts.redevelopmentSignal],
+    ["Minor", counts.minorMaintenance],
+    ["Demolition", counts.demolition],
+    ["Other", counts.administrativeOrUnknown],
+  ]
+    .filter(([, count]) => Number(count) > 0)
+    .slice(0, 5)
+    .map(([label, count]) => `${label}: ${formatDevelopmentCount(Number(count))}`)
+    .join(" / ");
+}
+
 function getModelResearchReportContextLabel(
   context: NonNullable<
     NonNullable<PlanningSnapshot["modelLabContext"]>["selectedResearchContext"]
@@ -2056,63 +3083,374 @@ function formatModelResearchReportBandDistribution(
     .join(" / ");
 }
 
-function ReportIntelligenceBriefSection({
-  planningSnapshot,
-}: {
-  planningSnapshot: PlanningSnapshot;
-}) {
-  const briefTitle = getSnapshotIntelligenceBriefTitle(planningSnapshot);
-  const keyFacts = planningSnapshot.keyFacts.slice(0, 6);
-  const headlineMetrics = planningSnapshot.overviewKpis.slice(0, 4);
+interface ExecutiveReportStat {
+  caveat?: string;
+  label: string;
+  value: string;
+}
 
+function ReportKeyStatisticsSection({
+  statistics,
+}: {
+  statistics: ExecutiveReportStat[];
+}) {
   return (
     <section className="mt-5 rounded-md border border-white/10 bg-black/20 p-3 print:border-slate-300 print:bg-white">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-white print:text-slate-950">
-            Intelligence Brief
+            Key Statistics
           </h3>
           <p className="mt-1 text-sm leading-6 text-slate-400 print:text-slate-700">
-            {briefTitle} captured from Overview at snapshot time. This section
-            summarizes the saved context; it does not include hidden model
-            scores or parcel-level predictions.
+            Concise snapshot indicators selected for executive review.
           </p>
         </div>
         <span className="inline-flex shrink-0 rounded-md border border-[#d8b86a]/28 bg-[#d8b86a]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f6d98e] print:border-slate-300 print:bg-white print:text-slate-700">
-          {getSnapshotContextLabel(planningSnapshot)}
+          Report-ready
         </span>
       </div>
 
       <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
-        {keyFacts.map((fact) => (
+        {statistics.map((stat) => (
           <ReportFact
-            key={`brief-${fact.label}`}
-            label={fact.label}
-            value={fact.value}
+            key={`stat-${stat.label}`}
+            label={stat.label}
+            value={`${stat.value}${stat.caveat ? ` / ${stat.caveat}` : ""}`}
           />
         ))}
       </div>
-
-      {headlineMetrics.length ? (
-        <div className="mt-3 grid gap-2 md:grid-cols-2 print:grid-cols-2">
-          {headlineMetrics.map((metric) => (
-            <ReportFact
-              key={`brief-kpi-${metric.label}`}
-              label={metric.label}
-              value={`${metric.value}${metric.caveat ? ` / ${metric.caveat}` : ""}`}
-            />
-          ))}
-        </div>
-      ) : null}
     </section>
   );
 }
 
+function buildExecutiveKeyStatistics(
+  planningSnapshot: PlanningSnapshot,
+  includedMetrics: PlanningSnapshot["explainableMetrics"],
+): ExecutiveReportStat[] {
+  if (planningSnapshot.overviewCommandMode === "modelLab") {
+    const researchContext =
+      planningSnapshot.modelLabContext?.selectedResearchContext;
+
+    return trimReportStats([
+      {
+        label: "Snapshot type",
+        value: "Model Lab Research Snapshot",
+      },
+      {
+        caveat: "Relative research context only.",
+        label: "Map display",
+        value: planningSnapshot.modelLabContext?.displayModeLabel ??
+          "Model Lab context",
+      },
+      {
+        caveat: "Not an official parcel score.",
+        label: "Selected research band",
+        value: researchContext
+          ? researchContext.dominantResearchBand ??
+            formatRelativeDevelopmentSignalBand({
+              rankBand: researchContext.researchRankBand,
+              signalLabel: researchContext.researchSignalLabel,
+            })
+          : "No selected research feature",
+      },
+      {
+        label: "Parcels represented",
+        value: researchContext?.representedFeatureCount
+          ? formatDevelopmentCount(researchContext.representedFeatureCount)
+          : "Not selected",
+      },
+      {
+        caveat: "Internal research only.",
+        label: "Current best internal model",
+        value: developmentModelLabSummary.currentBestInternalVariant,
+      },
+      {
+        caveat: "Exact probabilities are not shown.",
+        label: "Model status",
+        value: "Internal research only",
+      },
+    ]);
+  }
+
+  if (planningSnapshot.overviewCommandMode === "indicatorCenter") {
+    const indicatorContext = planningSnapshot.indicatorCenterContext;
+    const selected = indicatorContext?.selectedIndicator;
+    const displayModeLabel = indicatorContext?.displayMode
+      ? getIndicatorCenterDisplayModeLabel(indicatorContext.displayMode)
+      : "All indicators";
+
+    return trimReportStats([
+      {
+        label: "Snapshot type",
+        value: "Indicator Center Snapshot",
+      },
+      {
+        caveat: "Planning review indicators only.",
+        label: "Selected indicator",
+        value: selected ? selected.name : "No specific indicator selected",
+      },
+      {
+        label: "Indicator status",
+        value: selected
+          ? selected.status
+          : `${indicatorContext?.selectedGroupIds?.length ?? indicatorContext?.availableGroups.length ?? 0} groups enabled`,
+      },
+      {
+        label: "Dashboard posture",
+        value: displayModeLabel,
+      },
+      {
+        label: "Captured summaries",
+        value: `${indicatorContext?.indicatorSummaries?.length ?? 0} cards`,
+      },
+      {
+        caveat: "Not an official determination.",
+        label: "Indicator caveat",
+        value:
+          selected?.caveat ??
+          "Attention flags and data gaps use existing CFS context only.",
+      },
+      {
+        caveat: "No fake values shown.",
+        label: "Data posture",
+        value: "Existing CFS data only",
+      },
+    ]);
+  }
+
+  if (planningSnapshot.selectedParcelSummary) {
+    return trimReportStats([
+      {
+        label: "Parcel ID",
+        value: planningSnapshot.selectedParcelSummary.officialParcelId,
+      },
+      {
+        caveat: "Zoning is planning context, not entitlement.",
+        label: "Zoning",
+        value: planningSnapshot.selectedParcelSummary.zoning,
+      },
+      findMetricStat(includedMetrics, "Flood Review Status", "Flood status"),
+      findMetricStat(includedMetrics, "School Assignment", "Schools"),
+      findMetricStat(
+        includedMetrics,
+        "Development Activity",
+        "Development activity",
+      ),
+      findMetricStat(includedMetrics, "Utility Proxy", "Utility proxy"),
+      findMetricStat(
+        includedMetrics,
+        "Transportation Context",
+        "Transportation",
+      ),
+      {
+        caveat: "No parcel probability is shown.",
+        label: "Model status",
+        value: "Internal only",
+      },
+    ]);
+  }
+
+  return trimReportStats([
+    {
+      label: "Snapshot type",
+      value: getSnapshotContextLabel(planningSnapshot),
+    },
+    getOverviewKpiStat(planningSnapshot, "Selected Parcel") ?? {
+      label: "Selected parcel",
+      value: "No parcel captured",
+    },
+    getOverviewKpiStat(planningSnapshot, "Active Context") ?? {
+      label: "Active layers",
+      value: planningSnapshot.activeLayers.join(", "),
+      caveat: "Active layers are report context only.",
+    },
+    findMetricStat(includedMetrics, "Development Activity", "Development activity"),
+    findMetricStat(includedMetrics, "Flood Review Status", "Flood review"),
+    findMetricStat(includedMetrics, "School Assignment", "Schools"),
+    {
+      caveat: "No public parcel prediction output.",
+      label: "Model status",
+      value: "Internal only",
+    },
+  ]);
+}
+
+function trimReportStats(stats: Array<ExecutiveReportStat | null | undefined>) {
+  return stats
+    .filter((stat): stat is ExecutiveReportStat => Boolean(stat))
+    .slice(0, 8);
+}
+
+function findMetricStat(
+  metrics: PlanningSnapshot["explainableMetrics"],
+  metricLabel: string,
+  label: string,
+): ExecutiveReportStat | null {
+  const metric = metrics.find((candidate) => candidate.label === metricLabel);
+
+  if (!metric) {
+    return null;
+  }
+
+  return {
+    caveat: metric.caveat,
+    label,
+    value: metric.value,
+  };
+}
+
+function getOverviewKpiStat(
+  planningSnapshot: PlanningSnapshot,
+  label: string,
+): ExecutiveReportStat | null {
+  const metric = planningSnapshot.overviewKpis.find(
+    (candidate) => candidate.label === label,
+  );
+
+  if (!metric) {
+    return null;
+  }
+
+  return {
+    caveat: metric.caveat,
+    label: metric.label,
+    value: metric.value,
+  };
+}
+
+function buildExecutiveRecommendedActions(
+  planningSnapshot: PlanningSnapshot,
+): string[] {
+  const actions = [
+    "Use this snapshot as visual planning context, not an official record.",
+  ];
+
+  if (!planningSnapshot.selectedParcelId) {
+    actions.push("Select a parcel before using parcel-specific findings.");
+  }
+
+  if (
+    planningSnapshot.activeLayers.some((layer) =>
+      layer.toLowerCase().includes("flood"),
+    )
+  ) {
+    actions.push(
+      "Confirm FEMA flood requirements if parcel flood review is needed.",
+    );
+  }
+
+  actions.push("Request official school capacity/enrollment data.");
+  actions.push(
+    "Confirm utility capacity with WSACC before relying on utility readiness.",
+  );
+
+  if (planningSnapshot.modelLabContext) {
+    actions.push(
+      "Treat model research signal as internal research only.",
+    );
+  }
+
+  if (planningSnapshot.developmentActivityContext) {
+    actions.push(
+      "Review underlying permit records before formal planning decisions.",
+    );
+  }
+
+  if (planningSnapshot.indicatorCenterContext) {
+    actions.push(
+      planningSnapshot.indicatorCenterContext.recommendedFollowUp,
+    );
+  }
+
+  return [...new Set(actions)].slice(0, 6);
+}
+
+function buildExecutiveCaveats(planningSnapshot: PlanningSnapshot): string[] {
+  return [
+    "Snapshot is a saved review context, not a new official record.",
+    "FEMA NFHL remains authoritative for regulatory flood context.",
+    "Utility proxy does not confirm capacity.",
+    "Preliminary school utilization requires official enrollment/capacity verification.",
+    "Internal model research does not show exact probabilities or official parcel scores.",
+    ...(planningSnapshot.developmentActivityContext
+      ? ["Development Hotspots show observed permit/development activity only, not prediction."]
+      : []),
+    ...(planningSnapshot.indicatorCenterContext
+      ? ["Indicator Center flags are monitoring indicators, not official determinations."]
+      : []),
+  ].slice(0, 6);
+}
+
 function ReportMapSnapshotSection({
   planningSnapshot,
+  showLegendAndNotes = true,
 }: {
   planningSnapshot: PlanningSnapshot;
+  showLegendAndNotes?: boolean;
 }) {
+  if (isIndicatorDashboardSnapshot(planningSnapshot)) {
+    const captured = hasCapturedDashboardImage(planningSnapshot);
+    const capturedAt =
+      planningSnapshot.dashboardImageCapturedAt ?? planningSnapshot.createdAt;
+
+    return (
+      <section className="mt-5 break-inside-avoid rounded-md border border-white/10 bg-black/20 p-3 print:border-slate-300 print:bg-white">
+        <h3 className="text-lg font-semibold text-white print:text-slate-950">
+          Indicator Center Dashboard Snapshot
+        </h3>
+        <p className="mt-1 text-sm leading-6 text-slate-400 print:text-slate-700">
+          {captured
+            ? `Critical Signals and Monitoring Charts captured from Indicator Center at ${formatDateTime(
+                capturedAt,
+              )}.`
+            : "Dashboard snapshot unavailable for this Indicator Center report."}
+        </p>
+        <div className="mt-3 overflow-hidden rounded-md border border-white/10 bg-[#020814] print:border-slate-300 print:bg-white">
+          {captured && planningSnapshot.dashboardImageDataUrl ? (
+            <Image
+              alt={
+                planningSnapshot.dashboardImageAlt ??
+                "Indicator Center dashboard snapshot"
+              }
+              className="h-auto max-h-[46rem] w-full object-contain print:max-h-[8.2in]"
+              height={720}
+              src={planningSnapshot.dashboardImageDataUrl}
+              unoptimized
+              width={1280}
+            />
+          ) : (
+            <div className="flex min-h-36 flex-col items-center justify-center gap-2 p-5 text-center print:min-h-24">
+              <BarChart3 className="h-5 w-5 text-slate-500" />
+              <p className="text-sm font-semibold text-slate-200 print:text-slate-800">
+                Dashboard snapshot unavailable
+              </p>
+              <p className="max-w-xl text-xs leading-5 text-slate-500 print:text-slate-700">
+                {planningSnapshot.dashboardImageFailureReason ??
+                  "Indicator Center is map-free. Dashboard image capture failed or was not available."}
+              </p>
+            </div>
+          )}
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-3 print:grid-cols-3">
+          <ReportFact label="Visual type" value="Dashboard" />
+          <ReportFact
+            label="Captured sections"
+            value={(planningSnapshot.capturedSections?.length
+              ? planningSnapshot.capturedSections
+              : ["critical_signals", "monitoring_charts"]
+            )
+              .map(formatDashboardCapturedSection)
+              .join(", ")}
+          />
+          <ReportFact
+            label="Snapshot context"
+            value={planningSnapshot.focusModeLabel ?? "Indicator Center"}
+          />
+        </div>
+      </section>
+    );
+  }
+
   const captured =
     planningSnapshot.mapScreenshotStatus === "captured" &&
     Boolean(planningSnapshot.mapScreenshotDataUrl);
@@ -2170,17 +3508,19 @@ function ReportMapSnapshotSection({
           value={planningSnapshot.selectedParcelId ?? "No parcel captured"}
         />
       </div>
-      <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_14rem] print:grid-cols-[minmax(0,1fr)_14rem]">
-        <MapLegendPanel legend={legend} />
-        <div className="rounded-md border border-white/10 bg-black/20 p-3 print:border-slate-300 print:bg-white">
-          <p className="text-xs font-semibold uppercase tracking-[0.13em] text-slate-500">
-            Scale note
-          </p>
-          <p className="mt-1 text-xs leading-5 text-slate-400 print:text-slate-700">
-            Scale is approximate; 3D scene perspective affects distance.
-          </p>
+      {showLegendAndNotes ? (
+        <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_14rem] print:grid-cols-[minmax(0,1fr)_14rem]">
+          <MapLegendPanel legend={legend} />
+          <div className="rounded-md border border-white/10 bg-black/20 p-3 print:border-slate-300 print:bg-white">
+            <p className="text-xs font-semibold uppercase tracking-[0.13em] text-slate-500">
+              Scale note
+            </p>
+            <p className="mt-1 text-xs leading-5 text-slate-400 print:text-slate-700">
+              Scale is approximate; 3D scene perspective affects distance.
+            </p>
+          </div>
         </div>
-      </div>
+      ) : null}
     </section>
   );
 }

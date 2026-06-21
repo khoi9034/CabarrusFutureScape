@@ -39,21 +39,32 @@ keep FEMA NFHL as the authoritative regulatory flood source.
 
 Current product modes:
 
-- `Overview`: CFS Command Center for parcel search, 3D SceneView exploration,
-  countywide headline intelligence, secondary/advanced map layers, selected
-  parcel status, and compact `Search Parcel`, `Explore Countywide`,
-  `Model Lab`, and `Snapshot Builder` actions. These actions now switch the
-  Overview into mode-specific workspaces: parcel-first helper, countywide layer
-  controls, internal Model Lab controls, or Snapshot Builder. The top Snapshot
-  Builder command opens the capture workflow; the explicit `Save Snapshot`
-  button inside the helper creates the saved snapshot. The `Layers` rail starts
-  collapsed so advanced map controls stay secondary until opened. Overview also
-  includes an optional local `Customize Layout` mode for rearranging panels, but
-  the stable default Overview remains the recommended demo layout.
-- `Planning Snapshot`: local saved-snapshot library and report builder captured from Overview, with
-  Snapshot Overview, Explain the Numbers, Executive Summary, and Review Actions
-  views for the saved command context, map screenshot when available, parcel facts,
-  active layers, development activity, FEMA flood constraints, school
+- `Overview`: landing and safe-use introduction for Cabarrus FutureScape. It
+  explains what CFS is, what it can do today, what remains internal research,
+  what official data is still needed, and what not to overclaim. It does not
+  render the SceneView, layer rail, or Intelligence panel.
+- `Workspace`: the live map work area for 3D SceneView exploration, global
+  parcel search, countywide layer review, selected parcel context, internal
+  Model Lab research, and snapshot actions. The Workspace Center offers
+  `Explore Countywide`, `Indicator Center`, and `Model Lab`. Parcel search stays
+  in the global header, and Planning Snapshot remains the top-level report
+  builder. Workspace uses fixed, intentional layouts instead of dashboard
+  customization controls.
+  `Indicator Center` is the deployable full-width map-free monitoring dashboard
+  that uses existing CFS context only: observed development activity, flood review
+  exposure, preliminary school capacity context, utility/infrastructure
+  proxy caveats, internal model readiness, and official-data gaps. It includes
+  a compact Mission Control header, Critical Signals strip, Monitoring Charts,
+  Priority Issues Board, draggable/resizable Inspect drawer, School Capacity
+  Watch drilldowns, Data Still Needed section, and report-ready
+  snapshot context. It does not render the SceneView, left layer rail, or right
+  Intelligence panel, and it does not invent indicator values or create
+  official risk scores.
+- `Planning Snapshot`: simplified local report builder captured from Workspace,
+  with a compact Snapshot Library, map snapshot/cartography section, report
+  section checkboxes, optional Explain the Numbers cards, local Report Drafts,
+  and a print-ready Executive Report Preview for saved command context, parcel
+  facts, active layers, development activity, FEMA flood constraints, school
   attendance-zone assignment, transportation, utility proxy, recommended
   actions, and model governance caveats.
 - `Methodology`: source, capability, assumption, limitation, and model
@@ -93,16 +104,17 @@ parcel cage highlight, Development Hotspots, Flood Constraints, FEMA Flood
 Zones, selected parcel flood panel, selected parcel school assignment panel,
 and permit events remain preserved.
 
-Planning Snapshot's Executive Summary uses the active saved snapshot from the
-local Planning Snapshot Library, including the captured map image when ArcGIS
-SceneView provides one. Users can save multiple snapshots, open a snapshot for
-review, delete snapshots that are no longer needed, and print the active
-summary. Printing uses `window.print()` and print CSS that hides app chrome and
-formats the snapshot summary on a light/white print surface for readability
-while keeping the on-screen CFS interface dark.
+Planning Snapshot's Executive Report Preview uses the active saved snapshot
+from the local Planning Snapshot Library, including the captured map image when
+ArcGIS SceneView provides one. Users can save multiple snapshots, rename or
+delete snapshots, choose report sections with checkboxes, save/load local report
+drafts, keep Explain the Numbers off by default for a concise report, and print
+the active summary. Printing uses `window.print()` and print CSS that hides app
+chrome and formats the snapshot summary on a light/white print surface for
+readability while keeping the on-screen CFS interface dark.
 
-Phase 23A/23B/23C/23D adds a `Model Lab` entry point inside Overview and Methodology.
-In Overview, Model Lab becomes its own workspace: the left rail changes to
+Phase 23A/23B/23C/23D adds a `Model Lab` entry point inside Workspace and Methodology.
+In Workspace, Model Lab becomes its own mode: the left rail changes to
 Model Lab Controls, the optional `Development Research Signal` overlay is off
 by default, and the right rail shows Model Lab Intelligence. It showcases the
 internal development model research in aggregate form only: historical outcome,

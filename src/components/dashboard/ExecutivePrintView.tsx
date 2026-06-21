@@ -90,7 +90,7 @@ export function ExecutivePrintView() {
             No parcel selected. Select a parcel before generating a report.
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-400">
-            Use Overview search or map layers to select a parcel, then return to
+            Use Workspace search or map layers to select a parcel, then return to
             Planning Snapshot &gt; Executive Summary for a report-ready planning memo.
           </p>
         </div>

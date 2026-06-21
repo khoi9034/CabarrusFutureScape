@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -42,15 +43,18 @@ import {
   createDashboardUrlState,
   type DashboardUrlState,
 } from "@/lib/dashboard/urlState";
+import { defaultIndicatorCenterGroupIds } from "@/data/intelligence/indicatorCenter";
 import type {
   DashboardStatus,
+  IndicatorCenterDisplayMode,
+  IndicatorCenterGroupId,
+  IndicatorCenterContext,
   ModelResearchMapSummary,
   ModelResearchOverlayDisplay,
   OperationalLayer,
   OverviewCommandMode,
   OverviewCommandCenterState,
   OverviewLayoutPreference,
-  OverviewLayoutPreset,
   OverviewPanelVisibility,
   OverviewPanelWidthPreset,
   ParcelSelectionSource,
@@ -99,6 +103,7 @@ import {
   defaultDevelopmentHotspotControls,
   type DevelopmentHotspotControls,
   type DevelopmentHotspotLayerState,
+  type SelectedDevelopmentHotspotContext,
 } from "@/types/map/developmentHotspots";
 import type { FloodConstraintLayerState } from "@/types/map/floodConstraints";
 import {
@@ -155,7 +160,11 @@ interface DashboardContextValue {
   modelResearchMapSummary: ModelResearchMapSummary;
   overviewCommandMode: OverviewCommandMode;
   overviewLayout: OverviewLayoutPreference;
+  indicatorCenterDisplayMode: IndicatorCenterDisplayMode;
+  selectedIndicatorCenterGroupIds: IndicatorCenterGroupId[];
   selectedModelResearchContext: ModelResearchPreviewMarker | null;
+  selectedDevelopmentHotspotContext: SelectedDevelopmentHotspotContext | null;
+  selectedIndicatorCenterContext: IndicatorCenterContext | null;
   printableViewMode: PrintableViewMode;
   parcelReviewView: ParcelReviewView;
   planningSnapshot: PlanningSnapshot | null;
@@ -183,6 +192,7 @@ interface DashboardContextValue {
   applyRolePreset: (roleId: DashboardRoleId) => void;
   applyWorkspacePreset: (viewMode: DashboardViewMode) => void;
   clearMapError: () => void;
+  clearParcelSelectionContext: () => void;
   clearSelectedParcel: () => void;
   clearSelectedSchoolUtilizationZone: () => void;
   isLayerActive: (layerId: string) => boolean;
@@ -206,6 +216,7 @@ interface DashboardContextValue {
   savePlanningSnapshot: (snapshot: PlanningSnapshot) => void;
   setActivePlanningSnapshot: (snapshotId: string) => void;
   deletePlanningSnapshot: (snapshotId: string) => void;
+  renamePlanningSnapshot: (snapshotId: string, snapshotTitle: string) => void;
   clearPlanningSnapshot: () => void;
   clearPlanningSnapshots: () => void;
   setPlanningSnapshotSectionIncluded: (
@@ -222,9 +233,6 @@ interface DashboardContextValue {
   setModelResearchOverlayEnabled: (enabled: boolean) => void;
   setModelResearchMapSummary: (summary: ModelResearchMapSummary) => void;
   setOverviewCommandMode: (mode: OverviewCommandMode) => void;
-  applyOverviewLayoutPreset: (preset: OverviewLayoutPreset) => void;
-  resetOverviewLayout: () => void;
-  saveOverviewLayoutPreference: () => void;
   setOverviewLayoutCommandCenter: (
     state: OverviewCommandCenterState,
   ) => void;
@@ -232,12 +240,20 @@ interface DashboardContextValue {
     panel: "left" | "right",
     visibility: OverviewPanelVisibility,
   ) => void;
-  setOverviewLayoutWidthPreset: (
-    panel: "left" | "right",
-    width: OverviewPanelWidthPreset,
-  ) => void;
   setSelectedModelResearchContext: (
     context: ModelResearchPreviewMarker | null,
+  ) => void;
+  setSelectedDevelopmentHotspotContext: (
+    context: SelectedDevelopmentHotspotContext | null,
+  ) => void;
+  setSelectedIndicatorCenterContext: (
+    context: IndicatorCenterContext | null,
+  ) => void;
+  setIndicatorCenterDisplayMode: (
+    mode: IndicatorCenterDisplayMode,
+  ) => void;
+  setSelectedIndicatorCenterGroupIds: (
+    groupIds: IndicatorCenterGroupId[],
   ) => void;
   selectParcel: (
     parcelId: string,
@@ -279,72 +295,20 @@ const DashboardContext = createContext<DashboardContextValue | null>(null);
 const PLANNING_SNAPSHOT_STORAGE_KEY = "cfs.planningSnapshot.phase22a.latest";
 const PLANNING_SNAPSHOT_LIBRARY_STORAGE_KEY =
   "cfs.planningSnapshots.phase22e.library";
-const OVERVIEW_LAYOUT_STORAGE_KEY = "cfs.overview.layout.v2";
-const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEY = "cfs.overview.layout.v1";
+const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS = [
+  "cfs.overview.layout.v2",
+  "cfs.overview.layout.v1",
+  "cfs.overview.customLayout.v2",
+  "cfs.overview.customLayout.v1",
+];
 const MAX_STORED_PLANNING_SNAPSHOTS = 8;
 
 const defaultOverviewLayout: OverviewLayoutPreference = {
   commandCenter: "visible",
   leftPanel: "collapsed",
   leftPanelWidth: "standard",
-  preset: "command_center",
   rightPanel: "visible",
   rightPanelWidth: "standard",
-};
-
-const overviewLayoutPresets: Record<
-  OverviewLayoutPreset,
-  OverviewLayoutPreference
-> = {
-  command_center: defaultOverviewLayout,
-  countywide_layers: {
-    commandCenter: "compact",
-    leftPanel: "visible",
-    leftPanelWidth: "standard",
-    preset: "countywide_layers",
-    rightPanel: "visible",
-    rightPanelWidth: "standard",
-  },
-  executive_demo: {
-    commandCenter: "compact",
-    leftPanel: "collapsed",
-    leftPanelWidth: "standard",
-    preset: "executive_demo",
-    rightPanel: "visible",
-    rightPanelWidth: "standard",
-  },
-  map_focus: {
-    commandCenter: "hidden",
-    leftPanel: "hidden",
-    leftPanelWidth: "compact",
-    preset: "map_focus",
-    rightPanel: "hidden",
-    rightPanelWidth: "compact",
-  },
-  model_lab: {
-    commandCenter: "compact",
-    leftPanel: "visible",
-    leftPanelWidth: "standard",
-    preset: "model_lab",
-    rightPanel: "visible",
-    rightPanelWidth: "standard",
-  },
-  parcel_intelligence: {
-    commandCenter: "compact",
-    leftPanel: "collapsed",
-    leftPanelWidth: "compact",
-    preset: "parcel_intelligence",
-    rightPanel: "visible",
-    rightPanelWidth: "wide",
-  },
-  snapshot_builder: {
-    commandCenter: "compact",
-    leftPanel: "visible",
-    leftPanelWidth: "standard",
-    preset: "snapshot_builder",
-    rightPanel: "visible",
-    rightPanelWidth: "standard",
-  },
 };
 
 const defaultModelResearchMapSummary: ModelResearchMapSummary = {
@@ -356,20 +320,6 @@ const defaultModelResearchMapSummary: ModelResearchMapSummary = {
   viewScaleLabel: "Map view",
   visibleFeatureCount: 0,
 };
-
-function isOverviewLayoutPreset(
-  value: unknown,
-): value is OverviewLayoutPreset {
-  return (
-    value === "command_center" ||
-    value === "countywide_layers" ||
-    value === "executive_demo" ||
-    value === "map_focus" ||
-    value === "model_lab" ||
-    value === "parcel_intelligence" ||
-    value === "snapshot_builder"
-  );
-}
 
 function isOverviewPanelVisibility(
   value: unknown,
@@ -408,9 +358,6 @@ function normalizeOverviewLayoutPreference(
     leftPanelWidth: isOverviewPanelWidthPreset(value?.leftPanelWidth)
       ? value.leftPanelWidth
       : defaultOverviewLayout.leftPanelWidth,
-    preset: isOverviewLayoutPreset(value?.preset)
-      ? value.preset
-      : defaultOverviewLayout.preset,
     rightPanel: isOverviewRightPanelVisibility(value?.rightPanel)
       ? value.rightPanel
       : defaultOverviewLayout.rightPanel,
@@ -420,46 +367,14 @@ function normalizeOverviewLayoutPreference(
   };
 }
 
-function readStoredOverviewLayoutPreference() {
-  if (typeof window === "undefined") {
-    return defaultOverviewLayout;
-  }
-
-  try {
-    const storedPreference = window.localStorage.getItem(
-      OVERVIEW_LAYOUT_STORAGE_KEY,
-    );
-
-    if (!storedPreference) {
-      return defaultOverviewLayout;
-    }
-
-    return normalizeOverviewLayoutPreference(JSON.parse(storedPreference));
-  } catch {
-    return defaultOverviewLayout;
-  }
-}
-
-function writeStoredOverviewLayoutPreference(
-  preference: OverviewLayoutPreference,
-) {
+function clearLegacyOverviewLayoutStorage() {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.localStorage.setItem(
-    OVERVIEW_LAYOUT_STORAGE_KEY,
-    JSON.stringify(preference),
-  );
-}
-
-function clearStoredOverviewLayoutPreference() {
-  if (typeof window === "undefined") {
-    return;
+  for (const storageKey of LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS) {
+    window.localStorage.removeItem(storageKey);
   }
-
-  window.localStorage.removeItem(OVERVIEW_LAYOUT_STORAGE_KEY);
-  window.localStorage.removeItem(LEGACY_OVERVIEW_LAYOUT_STORAGE_KEY);
 }
 
 interface StoredPlanningSnapshotLibrary {
@@ -484,7 +399,19 @@ function isSupportedPlanningSnapshot(
     snapshotVersion === "phase23b_v1" ||
     snapshotVersion === "phase23c_v1" ||
     snapshotVersion === "phase23d_v1" ||
-    snapshotVersion === "phase23g_v1"
+    snapshotVersion === "phase23g_v1" ||
+    snapshotVersion === "phase26a_v1" ||
+    snapshotVersion === "phase27b_v1" ||
+    snapshotVersion === "phase28a_v1" ||
+    snapshotVersion === "phase28b_v1" ||
+    snapshotVersion === "phase28c_v1" ||
+    snapshotVersion === "phase28d_v1" ||
+    snapshotVersion === "phase28e_v1" ||
+    snapshotVersion === "phase28f_v1" ||
+    snapshotVersion === "phase28g_v1" ||
+    snapshotVersion === "phase28h_v1" ||
+    snapshotVersion === "phase28i_v1" ||
+    snapshotVersion === "phase28k_v1"
   );
 }
 
@@ -676,8 +603,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setSelectedSchoolUtilizationZone,
   ] = useState<SelectedSchoolUtilizationZone | null>(null);
   const [productMode, setProductMode] = useState<ProductMode>("overview");
-  const [overviewCommandMode, setOverviewCommandMode] =
-    useState<OverviewCommandMode>("parcel");
+  const [overviewCommandMode, setOverviewCommandModeState] =
+    useState<OverviewCommandMode>("countywide");
+  const overviewCommandModeRef = useRef<OverviewCommandMode>("countywide");
   const [overviewLayout, setOverviewLayout] =
     useState<OverviewLayoutPreference>(defaultOverviewLayout);
   const [
@@ -696,6 +624,22 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedModelResearchContext,
     setSelectedModelResearchContext,
   ] = useState<ModelResearchPreviewMarker | null>(null);
+  const [
+    selectedDevelopmentHotspotContext,
+    setSelectedDevelopmentHotspotContext,
+  ] = useState<SelectedDevelopmentHotspotContext | null>(null);
+  const [
+    selectedIndicatorCenterContext,
+    setSelectedIndicatorCenterContext,
+  ] = useState<IndicatorCenterContext | null>(null);
+  const [
+    indicatorCenterDisplayMode,
+    setIndicatorCenterDisplayMode,
+  ] = useState<IndicatorCenterDisplayMode>("all");
+  const [
+    selectedIndicatorCenterGroupIds,
+    setSelectedIndicatorCenterGroupIds,
+  ] = useState<IndicatorCenterGroupId[]>(defaultIndicatorCenterGroupIds);
   const [parcelReviewView, setParcelReviewView] =
     useState<ParcelReviewView>("review");
   const [planningSnapshot, setPlanningSnapshot] =
@@ -758,14 +702,47 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   } = useScenarioState();
   const {
     clearSelectedParcel,
-    selectParcel,
+    selectParcel: selectParcelState,
     selectedParcel,
     selectedParcelId,
     selectedParcelIntelligence,
     selectedParcelIntelligenceSource,
     selectedParcelSource,
-    setSelectedParcelIntelligence,
+    setSelectedParcelIntelligence: setSelectedParcelIntelligenceState,
   } = useSelectedParcel();
+
+  const clearParcelSelectionContext = useCallback(() => {
+    clearSelectedParcel();
+  }, [clearSelectedParcel]);
+
+  const selectParcel = useCallback(
+    (
+      parcelId: string,
+      options?: { source?: ParcelSelectionSource },
+    ) => {
+      selectParcelState(parcelId, options);
+    },
+    [selectParcelState],
+  );
+
+  const setSelectedParcelIntelligence = useCallback(
+    (
+      parcel: ParcelSearchRecord,
+      source: SelectedParcelIntelligenceSource,
+    ) => {
+      setSelectedParcelIntelligenceState(parcel, source);
+    },
+    [setSelectedParcelIntelligenceState],
+  );
+
+  const setOverviewCommandMode = useCallback(
+    (mode: OverviewCommandMode) => {
+      overviewCommandModeRef.current = mode;
+
+      setOverviewCommandModeState(mode);
+    },
+    [],
+  );
   const {
     activeWorkspacePreset,
     setDashboardViewMode,
@@ -883,11 +860,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
-      setOverviewLayout(readStoredOverviewLayoutPreference());
-    });
-
-    return () => window.cancelAnimationFrame(frameId);
+    clearLegacyOverviewLayoutStorage();
   }, []);
 
   const updateOverviewLayoutPreference = useCallback(
@@ -905,34 +878,6 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
-
-  const applyOverviewLayoutPreset = useCallback(
-    (preset: OverviewLayoutPreset) => {
-      const nextLayout =
-        overviewLayoutPresets[preset] ?? overviewLayoutPresets.command_center;
-      setOverviewLayout(normalizeOverviewLayoutPreference(nextLayout));
-
-      if (preset === "countywide_layers") {
-        setOverviewCommandMode("countywide");
-      } else if (preset === "model_lab") {
-        setOverviewCommandMode("modelLab");
-      } else if (preset === "parcel_intelligence") {
-        setOverviewCommandMode("parcel");
-      } else if (preset === "snapshot_builder") {
-        setOverviewCommandMode("snapshot");
-      }
-    },
-    [],
-  );
-
-  const resetOverviewLayout = useCallback(() => {
-    clearStoredOverviewLayoutPreference();
-    setOverviewLayout(defaultOverviewLayout);
-  }, []);
-
-  const saveOverviewLayoutPreference = useCallback(() => {
-    writeStoredOverviewLayoutPreference(overviewLayout);
-  }, [overviewLayout]);
 
   const setOverviewLayoutCommandCenter = useCallback(
     (state: OverviewCommandCenterState) => {
@@ -954,18 +899,6 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
               rightPanel:
                 visibility === "collapsed" ? "hidden" : visibility,
             }),
-      }));
-    },
-    [updateOverviewLayoutPreference],
-  );
-
-  const setOverviewLayoutWidthPreset = useCallback(
-    (panel: "left" | "right", width: OverviewPanelWidthPreset) => {
-      updateOverviewLayoutPreference((currentLayout) => ({
-        ...currentLayout,
-        ...(panel === "left"
-          ? { leftPanelWidth: width }
-          : { rightPanelWidth: width }),
       }));
     },
     [updateOverviewLayoutPreference],
@@ -1054,6 +987,33 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       return nextSnapshots;
     });
   }, []);
+
+  const renamePlanningSnapshot = useCallback(
+    (snapshotId: string, snapshotTitle: string) => {
+      const safeTitle = snapshotTitle.trim().slice(0, 80);
+
+      if (!safeTitle) {
+        return;
+      }
+
+      setSavedPlanningSnapshots((currentSnapshots) => {
+        const nextSnapshots = currentSnapshots.map((snapshot) =>
+          snapshot.snapshotId === snapshotId
+            ? { ...snapshot, snapshotTitle: safeTitle }
+            : snapshot,
+        );
+
+        setPlanningSnapshot((currentSnapshot) =>
+          currentSnapshot?.snapshotId === snapshotId
+            ? { ...currentSnapshot, snapshotTitle: safeTitle }
+            : currentSnapshot,
+        );
+        writeStoredPlanningSnapshotLibrary(nextSnapshots, activePlanningSnapshotId);
+        return nextSnapshots;
+      });
+    },
+    [activePlanningSnapshotId],
+  );
 
   const clearPlanningSnapshot = useCallback(() => {
     if (!activePlanningSnapshotId) {
@@ -1161,6 +1121,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       briefingMode,
       briefingSections,
       clearMapError,
+      clearParcelSelectionContext,
       clearSelectedParcel,
       clearSelectedSchoolUtilizationZone,
       comparisonMetrics,
@@ -1189,6 +1150,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       lastExportResult,
       mapError,
       mapStatus,
+      indicatorCenterDisplayMode,
       modelResearchOverlayDisplay,
       modelResearchOverlayEnabled,
       modelResearchMapSummary,
@@ -1214,7 +1176,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectParcel,
       selectReportPackage,
       selectedExecutiveNarrative,
+      selectedIndicatorCenterGroupIds,
       selectedModelResearchContext,
+      selectedDevelopmentHotspotContext,
+      selectedIndicatorCenterContext,
       selectedNarrativeId,
       selectedParcel,
       selectedParcelId,
@@ -1244,13 +1209,13 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setModelResearchOverlayEnabled,
       setModelResearchMapSummary,
       setOverviewCommandMode,
-      applyOverviewLayoutPreset,
-      resetOverviewLayout,
-      saveOverviewLayoutPreference,
       setOverviewLayoutCommandCenter,
       setOverviewLayoutPanel,
-      setOverviewLayoutWidthPreset,
+      setIndicatorCenterDisplayMode,
       setSelectedModelResearchContext,
+      setSelectedDevelopmentHotspotContext,
+      setSelectedIndicatorCenterGroupIds,
+      setSelectedIndicatorCenterContext,
       setSelectedParcelIntelligence,
       setPrintableViewMode,
       setParcelReviewView,
@@ -1259,6 +1224,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       savePlanningSnapshot,
       setActivePlanningSnapshot,
       deletePlanningSnapshot,
+      renamePlanningSnapshot,
       clearPlanningSnapshot,
       clearPlanningSnapshots,
       setPlanningSnapshotSectionIncluded,
@@ -1291,6 +1257,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       briefingMode,
       briefingSections,
       clearMapError,
+      clearParcelSelectionContext,
       clearSelectedParcel,
       clearSelectedSchoolUtilizationZone,
       comparisonMetrics,
@@ -1319,6 +1286,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       lastExportResult,
       mapError,
       mapStatus,
+      indicatorCenterDisplayMode,
       modelResearchOverlayDisplay,
       modelResearchOverlayEnabled,
       modelResearchMapSummary,
@@ -1344,7 +1312,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       selectParcel,
       selectReportPackage,
       selectedExecutiveNarrative,
+      selectedIndicatorCenterGroupIds,
       selectedModelResearchContext,
+      selectedDevelopmentHotspotContext,
+      selectedIndicatorCenterContext,
       selectedNarrativeId,
       selectedParcel,
       selectedParcelId,
@@ -1374,13 +1345,13 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setModelResearchOverlayEnabled,
       setModelResearchMapSummary,
       setOverviewCommandMode,
-      applyOverviewLayoutPreset,
-      resetOverviewLayout,
-      saveOverviewLayoutPreference,
       setOverviewLayoutCommandCenter,
       setOverviewLayoutPanel,
-      setOverviewLayoutWidthPreset,
+      setIndicatorCenterDisplayMode,
       setSelectedModelResearchContext,
+      setSelectedDevelopmentHotspotContext,
+      setSelectedIndicatorCenterGroupIds,
+      setSelectedIndicatorCenterContext,
       setSelectedParcelIntelligence,
       setPrintableViewMode,
       setParcelReviewView,
@@ -1389,6 +1360,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       savePlanningSnapshot,
       setActivePlanningSnapshot,
       deletePlanningSnapshot,
+      renamePlanningSnapshot,
       clearPlanningSnapshot,
       clearPlanningSnapshots,
       setPlanningSnapshotSectionIncluded,

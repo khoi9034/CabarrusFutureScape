@@ -2,6 +2,14 @@
 
 This packet organizes the next data requests needed to move CFS from
 demo-ready prototype toward a governed internal planning tool.
+The Workspace Indicator Center V1 surfaces these requests in the full-width
+map-free Mission Control Data Still Needed section and Priority Issues Board so staff
+can see which official inputs are still needed before stronger operational
+conclusions.
+The dashboard lists seven priority missing inputs: WSACC true utility capacity,
+official school enrollment/capacity, official rezoning case records,
+countywide development pipeline, countywide future land use, and planned local
+road projects, plus planned utility extensions.
 
 PDF-only sources can be useful for reference, but GIS, REST, CSV, database
 tables, or structured spreadsheets are much more useful for repeatable CFS

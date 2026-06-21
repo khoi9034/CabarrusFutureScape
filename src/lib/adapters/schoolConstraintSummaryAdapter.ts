@@ -37,6 +37,20 @@ export interface SchoolUtilizationSeedReviewViewModel {
   matchLabel: string;
 }
 
+export interface SchoolUtilizationSeedDetailViewModel {
+  matchStatus: string;
+  matchedSchoolReferenceId: string | null;
+  needsVerification: boolean;
+  schoolLevel: string;
+  schoolName: string;
+  schoolYear: string;
+  sourceConfidence: string;
+  utilizationClass: string;
+  utilizationClassLabel: string;
+  utilizationPct: number | null;
+  utilizationPctLabel: string;
+}
+
 export interface SchoolConstraintSummaryViewModel {
   capacityStatusLabel: string;
   confidenceDistribution: SchoolConfidenceBucketViewModel[];
@@ -47,6 +61,7 @@ export interface SchoolConstraintSummaryViewModel {
   presentationSeedCountLabel: string;
   source: SchoolConstraintSummarySource;
   totalParcels: number;
+  utilizationSeedRows: SchoolUtilizationSeedDetailViewModel[];
   unmatchedPresentationSeedRows: SchoolUtilizationSeedReviewViewModel[];
   utilizationClassDistribution: SchoolUtilizationSeedBucketViewModel[];
 }
@@ -70,6 +85,7 @@ export function getUnavailableSchoolConstraintSummary(
     presentationSeedCountLabel: "Unavailable",
     source: "unavailable",
     totalParcels: 0,
+    utilizationSeedRows: [],
     unmatchedPresentationSeedRows: [],
     utilizationClassDistribution: [],
   };
@@ -159,6 +175,9 @@ export function normalizeSchoolConstraintSummary(
         ? formatCount(utilizationSeed.total_count)
         : "Unavailable",
     totalParcels: statistics.total_parcels,
+    utilizationSeedRows: (utilizationSeed?.rows ?? []).map(
+      toUtilizationSeedDetailViewModel,
+    ),
     unmatchedPresentationSeedRows: (utilizationSeed?.rows ?? [])
       .filter((row) => row.match_confidence === "unmatched_reference_review")
       .map(toPresentationSeedReviewViewModel),
@@ -203,5 +222,33 @@ function toPresentationSeedReviewViewModel(
     matchLabel: row.match_confidence
       ? formatSchoolLabel(row.match_confidence)
       : "Reference review needed",
+  };
+}
+
+function toUtilizationSeedDetailViewModel(
+  row: SchoolUtilizationSeedResponse,
+): SchoolUtilizationSeedDetailViewModel {
+  const utilizationClass = row.utilization_class ?? "not_available";
+  return {
+    matchStatus: row.match_confidence
+      ? formatSchoolLabel(row.match_confidence)
+      : "Not available from current source",
+    matchedSchoolReferenceId: row.matched_school_reference_id,
+    needsVerification: row.needs_verification,
+    schoolLevel: row.school_level
+      ? formatSchoolLabel(row.school_level)
+      : "Not available from current source",
+    schoolName: row.school_name ?? "Unnamed school",
+    schoolYear: row.school_year ?? "Not available from current source",
+    sourceConfidence: row.source_confidence
+      ? formatSchoolLabel(row.source_confidence)
+      : "Not available from current source",
+    utilizationClass,
+    utilizationClassLabel: formatPreliminaryUtilizationClass(utilizationClass),
+    utilizationPct: row.utilization_pct,
+    utilizationPctLabel:
+      typeof row.utilization_pct === "number"
+        ? `${row.utilization_pct.toFixed(row.utilization_pct % 1 === 0 ? 0 : 1)}%`
+        : "Utilization percent not available from current source",
   };
 }

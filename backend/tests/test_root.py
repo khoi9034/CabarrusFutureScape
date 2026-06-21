@@ -21,4 +21,5 @@ def test_root_endpoint_returns_api_status() -> None:
         "parcels": "/parcels",
         "development": "/development",
         "constraints": "/constraints",
+        "indicators": "/indicators",
     }

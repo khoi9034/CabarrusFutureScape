@@ -30,37 +30,45 @@ Demo parcel:
 ## Recommended Demo Sequence
 
 1. Open `Overview`.
-2. Point out the `CFS Command Center`: Search Parcel, Explore Countywide,
-   Model Lab, and Snapshot Builder.
-   The optional `Customize Layout` button is local workspace personalization;
-   the default Overview is still the recommended demo layout.
-3. Click `Search Parcel` and explain that Overview switches into the
-   parcel-first helper workspace.
-4. Search for `CFS-PARCEL-0149726579`.
-5. Select the parcel and show the active map focus.
-6. Point out the selected parcel cage or boundary highlight.
-7. Click `Explore Countywide` and explain that this is the layer-first
+2. Point out that Overview is now the safe-use landing page: what CFS is, what
+   it can do today, what remains internal research, what data is still needed,
+   and what not to overclaim.
+3. Click `Go to Workspace`.
+4. Point out the `CFS Workspace Center`: Explore Countywide, Indicator Center,
+   and Model Lab. Workspace now uses fixed, recommended layouts rather than
+   local dashboard customization.
+5. Use the global search bar to search for `CFS-PARCEL-0149726579`.
+6. Select the parcel and show the active map focus.
+7. Point out the selected parcel cage or boundary highlight.
+8. Click `Explore Countywide` and explain that this is the layer-first
    workspace for advanced map controls and countywide indicators.
-8. Click `Model Lab` and show that the left rail becomes Model Lab Controls,
+9. Click `Indicator Center` and explain that it is the deployable full-width
+   map-free Mission Control dashboard: Critical Signals, Monitoring Charts,
+   Priority Issues Board, School Capacity Watch drilldowns, and
+   data gaps from existing CFS context without showing made-up numbers or
+   official risk scores. Indicator details open in the dashboard drawer instead
+   of a right-side Intelligence panel.
+10. Click `Model Lab` and show that the left rail becomes Model Lab Controls,
    the map enters safe research mode, and the right rail shows Model Lab
    Intelligence.
-9. Click `Snapshot Builder` from Overview and point out that it opens the
-   Snapshot Builder helper without saving yet.
-10. Click `Save Snapshot` inside the helper to capture the map/intelligence
-   context and show the saved confirmation.
-11. Open `Planning Snapshot`.
-12. Use the `Planning Snapshot Library` to show saved snapshots, thumbnails,
-   Use / Open, and Delete.
-13. Use `Snapshot Overview` to explain the saved command context, active layers, and map
-   snapshot capture status.
-14. Use `Explain the Numbers` to show source, method, caveat, and action for
-   the major metrics.
-15. Open `Executive Summary` and show that the report is generated from the
-   saved snapshot.
-16. Point out the `Print Executive Summary` action.
-17. Open `Review Actions` and summarize staff follow-up items.
-18. Open `Methodology`.
-19. Explain Model Lab, model safety, missing data, and what is not
+11. Click `Save Snapshot` from the Workspace action area to capture the active
+   intelligence context and show the saved confirmation. Indicator Center
+   snapshots do not require a map image.
+12. Open `Planning Snapshot`.
+13. Use the `Planning Snapshot Library` to show saved snapshots, thumbnails,
+   Use, Rename, and Delete.
+14. Point out the map snapshot, legend, north arrow, scale note, active layers,
+   and selected parcel context.
+15. Use the Report Builder checkboxes to choose report sections. Leave `Explain
+   the Numbers` off for the concise executive report, then turn it on briefly
+   to show optional source/caveat cards.
+16. Save a local Report Draft, reload it, and explain that drafts preserve the
+   snapshot plus selected report sections.
+17. Use the Executive Report Preview to show that the report is generated from
+   the saved snapshot.
+18. Point out the `Print Report` action.
+19. Open `Methodology`.
+20. Explain Model Lab, model safety, missing data, and what is not
    public-facing.
 
 ## Suggested Talking Points
@@ -68,15 +76,17 @@ Demo parcel:
 ### Opening
 
 "Cabarrus FutureScape brings parcel, zoning, permits, flood, school,
-transportation, and model-governance context into one review workspace. The
-goal is not to automate decisions. The goal is to make parcel due diligence
-faster, clearer, and easier to explain."
+transportation, and model-governance context into one planning intelligence
+prototype. Overview explains the system; Workspace is where the live map and
+parcel review happen. The goal is not to automate decisions. The goal is to
+make parcel due diligence faster, clearer, and easier to explain."
 
 ### Parcel Search
 
-"The top search is the main entry point. Staff can search by parcel ID, PIN,
-owner, address, subdivision, or neighborhood, then CFS hydrates the selected
-parcel from the local FastAPI and PostGIS stack."
+"The global search is the main parcel entry point. Staff can search by parcel
+ID, PIN, owner, address, subdivision, or neighborhood from any page. Selecting a
+parcel opens Workspace, focuses the map, and hydrates the selected parcel from
+the local FastAPI and PostGIS stack."
 
 ### Map Focus
 
@@ -88,15 +98,16 @@ parcel used to create the Planning Snapshot."
 
 "Planning Snapshot is the saved review context. It captures the selected
 parcel when available, active layer context, map snapshot
-when available, caveats, and explainable metrics so the report is based on a
-deliberate saved view instead of a loose screen of numbers."
+when available, caveats, and selected report sections so the report is based on
+a deliberate saved view instead of a loose screen of numbers. Report Drafts save
+the current section selections for later editing or printing."
 
 ### Executive Summary
 
 "The Executive Summary is not another dataset or another model. It is generated
 from the saved Planning Snapshot and formatted as a print-ready planning memo.
-The map image is included when SceneView screenshot capture succeeds. Print
-Executive Summary sends that snapshot report to print."
+The map image is included when SceneView screenshot capture succeeds. `Print
+Report` sends only the report preview to print, without the dashboard controls."
 
 ### Flood
 
@@ -125,12 +136,11 @@ governance review are still required."
 
 ### Model Lab
 
-"Model Lab is a safe internal research preview. It changes the Overview into a
-model-governance workspace with Model Lab controls, a Development Research
-Signal overlay, and aggregate-only Model Lab Intelligence. The optional overlay
-is off by default. When enabled, it shows relative research bands and driver
-context; it does not publish parcel probabilities, hidden model outputs, or
-official parcel prediction classes."
+"Model Lab is a safe internal research preview inside Workspace. It uses Model
+Lab controls, a Development Research Signal overlay, and aggregate-only Model
+Lab Intelligence. The optional overlay is off by default. When enabled, it
+shows relative research bands and driver context; it does not publish parcel
+probabilities, hidden model outputs, or official parcel prediction classes."
 
 ### Close
 

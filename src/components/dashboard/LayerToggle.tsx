@@ -7,7 +7,6 @@ import {
   BrainCircuit,
   ChevronDown,
   Info,
-  Layers3,
   ListRestart,
   Settings2,
   SwatchBook,
@@ -49,11 +48,9 @@ const FEMA_FLOOD_ZONE_LAYER_ID = "fema-flood-zones";
 const SCHOOL_UTILIZATION_LAYER_ID = "school-utilization-seed";
 
 interface LayerDisplayGroup {
-  emptyNotice?: string;
   id: string;
   includeModelResearchStatus?: boolean;
   predicate: (layer: OperationalLayer) => boolean;
-  statusLabel?: string;
   title: string;
 }
 
@@ -72,33 +69,12 @@ const layerDisplayGroups: LayerDisplayGroup[] = [
   {
     id: "flood-constraints",
     predicate: (layer) => layer.category === "Risk",
-    title: "Flood / Constraints",
+    title: "Floodplain Review",
   },
   {
     id: "schools",
     predicate: (layer) => layer.category === "Schools",
     title: "Schools",
-  },
-  {
-    emptyNotice:
-      "Transportation accessibility, STIP, and AADT context are available in Planning Snapshot and Methodology. Live transportation map controls can be added when a service-backed overlay is ready.",
-    id: "transportation",
-    predicate: () => false,
-    statusLabel: "Context",
-    title: "Transportation",
-  },
-  {
-    id: "utility-infrastructure",
-    predicate: (layer) => layer.category === "Infrastructure",
-    title: "Utility / Infrastructure",
-  },
-  {
-    id: "planning-context",
-    predicate: (layer) =>
-      layer.category === "Planning" &&
-      layer.id !== "parcel-intelligence" &&
-      layer.id !== "permit-activity",
-    title: "Planning Context",
   },
   {
     id: "internal-research-governance",
@@ -110,7 +86,48 @@ const layerDisplayGroups: LayerDisplayGroup[] = [
 
 const defaultOpenLayerGroups: Record<string, boolean> = {
   "base-parcel": true,
+  "development-activity": true,
 };
+
+interface ComingSoonOverlay {
+  accent?: string;
+  id: string;
+  note?: string;
+  title: string;
+}
+
+const comingSoonLayerTopics: ComingSoonOverlay[] = [
+  {
+    accent: "#55d38f",
+    id: "utility-capacity",
+    title: "Utility Capacity",
+  },
+  {
+    accent: "#55d38f",
+    id: "planned-utility-extensions",
+    title: "Planned Utility Extensions",
+  },
+  {
+    accent: "#68d8ff",
+    id: "planned-road-projects",
+    title: "Planned Road Projects",
+  },
+  {
+    accent: "#f0cd79",
+    id: "planning-context-future-land-use",
+    title: "Planning Context / Future Land Use",
+  },
+  {
+    accent: "#f0cd79",
+    id: "official-rezoning-records",
+    title: "Official Rezoning Records",
+  },
+  {
+    accent: "#b597ff",
+    id: "development-pipeline-subdivision-approvals",
+    title: "Countywide Development Pipeline / Subdivision Approvals",
+  },
+];
 
 interface LayerInfoContent {
   caveat: string;
@@ -137,7 +154,8 @@ const layerInfoById: Record<string, LayerInfoContent> = {
   },
   "fema-flood-zones": {
     caveat: "FEMA NFHL remains authoritative for regulatory flood context.",
-    interpretation: "Use polygons to understand FEMA source-zone context; parcel review flags are separate.",
+    interpretation:
+      "Use FEMA floodplain polygons to understand source-zone context; parcel review flags are separate.",
     reportUse: "Supports flood context and FEMA caveats in Executive Summary reports.",
     source: "FEMA NFHL source polygons served through the CFS backend.",
     summary: "Shows FEMA flood hazard source polygons with transparent fills.",
@@ -175,7 +193,7 @@ const layerInfoById: Record<string, LayerInfoContent> = {
     interpretation: "Use as preliminary context for attendance zones; this is not official capacity scoring.",
     reportUse: "Feeds school caveats and attendance-zone context when included in a snapshot.",
     source: "School attendance-zone polygons joined to presentation-derived utilization seed values.",
-    summary: "Shows preliminary school utilization context by attendance-zone polygon.",
+    summary: "Shows preliminary school capacity context by attendance-zone polygon.",
   },
 };
 
@@ -284,7 +302,7 @@ const floodLegendItems = [
   },
   {
     color: "#ffb454",
-    label: "High / SFHA",
+    label: "High / Special Flood Hazard Area",
     shape: "kite",
     size: "h-3.5 w-3.5",
   },
@@ -322,7 +340,7 @@ const floodZoneLegendItems = [
   },
   {
     color: "#ffb454",
-    label: "SFHA",
+    label: "Special Flood Hazard Area",
   },
   {
     color: "#f7d94c",
@@ -349,11 +367,11 @@ const schoolUtilizationClassOptions: Array<{
   value: SchoolUtilizationClassFilter;
 }> = [
   { label: "All classes", value: "all" },
-  { label: "Under capacity seed", value: "under_capacity" },
-  { label: "Approaching capacity seed", value: "approaching_capacity" },
-  { label: "Over capacity seed", value: "over_capacity" },
+  { label: "Under capacity", value: "under_capacity" },
+  { label: "Approaching capacity", value: "approaching_capacity" },
+  { label: "Above capacity", value: "over_capacity" },
   {
-    label: "Severely over capacity seed",
+    label: "Very high utilization",
     value: "severely_over_capacity",
   },
 ];
@@ -381,11 +399,7 @@ const schoolUtilizationLegendItems = [
   },
 ];
 
-export function LayerToggle({
-  onCollapseDrawer,
-}: {
-  onCollapseDrawer?: () => void;
-}) {
+export function LayerToggle() {
   const [openLayerGroups, setOpenLayerGroups] = useState<Record<string, boolean>>(
     defaultOpenLayerGroups,
   );
@@ -433,7 +447,7 @@ export function LayerToggle({
     !developmentHotspotsEnabled
       ? "Hotspots off"
       : noHotspotSegmentSelected
-        ? "Select a permit segment to view hotspot concentration"
+        ? "Choose a permit segment to view hotspot concentration"
       : developmentHotspotLayer.isLoading
         ? "Loading hotspots"
         : developmentHotspotLayer.status === "ready"
@@ -445,39 +459,39 @@ export function LayerToggle({
             : "Hotspots unavailable";
   const floodStatus =
     !floodConstraintsEnabled
-      ? "Flood constraints off"
+      ? "Floodplain review off"
       : floodConstraintLayer.isLoading
-        ? "Loading FEMA constraints"
+        ? "Loading floodplain review"
         : floodConstraintLayer.status === "ready"
           ? `Showing ${floodConstraintLayer.markers.length} flood review parcels`
           : floodConstraintLayer.status === "empty"
             ? "No high-review parcels"
-            : "Flood constraints unavailable";
+            : "Floodplain review unavailable";
   const floodSeverityCounts = floodConstraintLayer.severityCounts;
   const showFloodSeverityCounts =
     floodConstraintsEnabled && floodConstraintLayer.status === "ready";
   const floodZoneStatus =
     !floodZonesEnabled
-      ? "FEMA zones off"
+      ? "Floodplain source areas off"
       : floodZoneLayer.isLoading
-        ? "Loading FEMA zones"
-        : floodZoneLayer.status === "ready"
-          ? floodZoneControls.limitMode === "visible_extent"
-            ? `Showing ${floodZoneLayer.polygons.length} visible FEMA polygons`
-            : `Showing ${floodZoneLayer.polygons.length} FEMA polygons`
-          : floodZoneLayer.status === "empty"
-            ? "No FEMA zones match filters"
-            : "FEMA zones unavailable";
+        ? "Loading floodplain areas"
+      : floodZoneLayer.status === "ready"
+        ? floodZoneControls.limitMode === "visible_extent"
+            ? `Showing ${floodZoneLayer.polygons.length} visible floodplain polygons`
+            : `Showing ${floodZoneLayer.polygons.length} floodplain polygons`
+        : floodZoneLayer.status === "empty"
+            ? "No floodplain areas match filters"
+            : "Floodplain source areas unavailable";
   const showFloodZoneSeverityCounts =
     floodZonesEnabled && floodZoneLayer.status === "ready";
   const schoolUtilizationStatus =
     !schoolUtilizationZonesEnabled
-      ? "School utilization off"
+      ? "School capacity watch off"
       : schoolUtilizationZoneLayer.isLoading
         ? "Loading school zones"
-        : schoolUtilizationZoneLayer.status === "ready"
+      : schoolUtilizationZoneLayer.status === "ready"
           ? schoolUtilizationZoneControls.level === "all"
-            ? `Showing ${schoolUtilizationZoneLayer.polygons.length} utilization zones`
+            ? `Showing ${schoolUtilizationZoneLayer.polygons.length} preliminary capacity zones`
             : `Showing ${schoolUtilizationZoneLayer.polygons.length} ${formatSchoolLevelLabel(
                 schoolUtilizationZoneControls.level,
               )} zones`
@@ -665,42 +679,6 @@ export function LayerToggle({
       );
     }
 
-    if (layer.id === DEVELOPMENT_HOTSPOT_LAYER_ID) {
-      return (
-        <LayerInlinePanel>
-          <div className="grid grid-cols-2 gap-2">
-            {hotspotTemporalContext ? (
-              <p className="col-span-2 rounded-md border border-[#68d8ff]/15 bg-[#68d8ff]/[0.045] px-2 py-1.5 text-[11px] leading-5 text-[#bfefff]">
-                Synced to Temporal Analysis: {hotspotTemporalContext}.
-              </p>
-            ) : null}
-            <HotspotSelect
-              className="col-span-2"
-              label="Permit segment"
-              onChange={(value) =>
-                updateHotspotControls(
-                  "permitSegment",
-                  value as DevelopmentHotspotPermitSegmentFilter,
-                )
-              }
-              options={permitSegmentOptions}
-              value={developmentHotspotControls.permitSegment}
-            />
-            {!selectedHotspotSegment ? (
-              <div className="col-span-2 rounded-md border border-[#68d8ff]/15 bg-[#68d8ff]/[0.045] px-2 py-2 text-[11px] leading-5 text-[#bfefff]">
-                Select a permit segment to view hotspot concentration.
-                Generic all-permit markers stay hidden to keep the map readable.
-              </div>
-            ) : null}
-            <HotspotAdvancedFilters
-              controls={developmentHotspotControls}
-              onChange={updateHotspotControls}
-            />
-          </div>
-        </LayerInlinePanel>
-      );
-    }
-
     if (layer.id === FEMA_FLOOD_ZONE_LAYER_ID) {
       return (
         <LayerInlinePanel>
@@ -793,6 +771,49 @@ export function LayerToggle({
     }
 
     return null;
+  }
+
+  function renderDevelopmentHotspotControls() {
+    return (
+      <LayerInlinePanel>
+        <div className="grid grid-cols-2 gap-2">
+          {hotspotTemporalContext ? (
+            <p className="col-span-2 rounded-md border border-[#68d8ff]/15 bg-[#68d8ff]/[0.045] px-2 py-1.5 text-[11px] leading-5 text-[#bfefff]">
+              Synced to Temporal Analysis: {hotspotTemporalContext}.
+            </p>
+          ) : null}
+          <p className="col-span-2 text-[11px] leading-5 text-slate-400">
+            Choose a permit segment to view hotspot concentration.
+          </p>
+          <HotspotSelect
+            className="col-span-2"
+            label="Permit Segment"
+            onChange={(value) =>
+              updateHotspotControls(
+                "permitSegment",
+                value as DevelopmentHotspotPermitSegmentFilter,
+              )
+            }
+            options={permitSegmentOptions}
+            value={developmentHotspotControls.permitSegment}
+          />
+          {!selectedHotspotSegment ? (
+            <div className="col-span-2 rounded-md border border-[#68d8ff]/15 bg-[#68d8ff]/[0.045] px-2 py-2 text-[11px] leading-5 text-[#bfefff]">
+              Select a permit segment to display hotspot concentration. Generic
+              all-permit markers stay hidden to keep the map readable.
+            </div>
+          ) : (
+            <div className="col-span-2 rounded-md border border-[#d8b86a]/15 bg-[#d8b86a]/[0.05] px-2 py-2 text-[11px] leading-5 text-[#f2d895]">
+              Showing concentration for {selectedHotspotSegmentLabel}.
+            </div>
+          )}
+          <HotspotAdvancedFilters
+            controls={developmentHotspotControls}
+            onChange={updateHotspotControls}
+          />
+        </div>
+      </LayerInlinePanel>
+    );
   }
 
   function renderLegendPanel(layer: OperationalLayer) {
@@ -948,14 +969,6 @@ export function LayerToggle({
           >
             <ListRestart className="h-4 w-4" />
           </button>
-          <button
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-[#d8b86a] transition hover:border-[#d8b86a]/35 hover:bg-[#d8b86a]/10"
-            onClick={onCollapseDrawer}
-            title="Collapse drawer"
-            type="button"
-          >
-            <Layers3 className="h-4 w-4" />
-          </button>
         </div>
       </div>
 
@@ -967,6 +980,14 @@ export function LayerToggle({
       </div>
 
       <div className="mt-3 space-y-2">
+        <div className="flex items-center justify-between gap-2 px-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#bfefff]">
+            Available Map Layers
+          </p>
+          <LayerStatusBadge active tone="green">
+            Available now
+          </LayerStatusBadge>
+        </div>
         {layerDisplayGroups.map((group) => {
           const showModelResearchStatus = group.includeModelResearchStatus;
           const layers = operationalLayerRegistry.filter(
@@ -977,7 +998,7 @@ export function LayerToggle({
           const activeCount = getGroupActiveCount(group);
           const isOpen = Boolean(openLayerGroups[group.id]);
 
-          if (!layers.length && !showModelResearchStatus && !group.emptyNotice) {
+          if (!layers.length && !showModelResearchStatus) {
             return null;
           }
 
@@ -1000,22 +1021,12 @@ export function LayerToggle({
                   <LayerStatusBadge active={activeCount > 0} tone="gold">
                     {`${activeCount} active`}
                   </LayerStatusBadge>
-                  {group.statusLabel ? (
-                    <LayerStatusBadge>{group.statusLabel}</LayerStatusBadge>
-                  ) : null}
                   <ChevronDown className="h-3.5 w-3.5 text-slate-500 transition group-open:rotate-180" />
                 </div>
               </summary>
 
               {isOpen ? (
                 <div className="min-w-0 space-y-2 overflow-hidden border-t border-white/10 p-2">
-                  {group.emptyNotice ? (
-                    <LayerInlinePanel>
-                      <p className="text-xs leading-5 text-slate-500">
-                        {group.emptyNotice}
-                      </p>
-                    </LayerInlinePanel>
-                  ) : null}
                   {showModelResearchStatus ? (
                     <ModelResearchStatusCard
                       onOpenMethodology={() => setProductMode("methodology")}
@@ -1031,11 +1042,10 @@ export function LayerToggle({
                     const isSchoolUtilizationLayer =
                       layer.id === SCHOOL_UTILIZATION_LAYER_ID;
                     const hasConfigure =
-                      isDevelopmentHotspotLayer ||
-                      isFemaFloodZoneLayer ||
-                      isSchoolUtilizationLayer;
+                      isFemaFloodZoneLayer || isSchoolUtilizationLayer;
                     const hasLegend =
-                      isDevelopmentHotspotLayer ||
+                      (isDevelopmentHotspotLayer &&
+                        Boolean(selectedHotspotSegment)) ||
                       isFloodConstraintLayer ||
                       isFemaFloodZoneLayer ||
                       isSchoolUtilizationLayer;
@@ -1051,22 +1061,7 @@ export function LayerToggle({
                     const infoOpen = openInfoLayerId === layer.id;
                     const configureOpen = openConfigLayerId === layer.id;
                     const legendOpen = openLegendLayerId === layer.id;
-
-                    if (layer.id === "infrastructure-readiness") {
-                      return (
-                        <ComingSoonLayerRow
-                          key={layer.id}
-                          layer={layer}
-                          onMoreInfo={() =>
-                            setOpenInfoLayerId(infoOpen ? null : layer.id)
-                          }
-                          open={infoOpen}
-                          onOpenMethodology={() =>
-                            setProductMode("methodology")
-                          }
-                        />
-                      );
-                    }
+                    const layerDisplayTitle = getLayerDisplayTitle(layer);
 
                     return (
                       <article
@@ -1089,7 +1084,7 @@ export function LayerToggle({
                           />
                           <div className="min-w-[9.5rem] flex-1">
                             <p className="truncate text-sm font-semibold leading-5 text-slate-100">
-                              {layer.title}
+                              {layerDisplayTitle}
                             </p>
                             <div className="mt-1 flex flex-wrap items-center gap-1.5">
                               <LayerStatusBadge
@@ -1101,17 +1096,22 @@ export function LayerToggle({
                               <LayerStatusBadge>
                                 {getLayerSourceStatusLabel(layer)}
                               </LayerStatusBadge>
-                              {layer.id === SCHOOL_UTILIZATION_LAYER_ID ? (
-                                <LayerStatusBadge>Seed only</LayerStatusBadge>
+                              {isDevelopmentHotspotLayer &&
+                              !selectedHotspotSegment ? (
+                                <LayerStatusBadge active tone="orange">
+                                  Choose segment
+                                </LayerStatusBadge>
                               ) : null}
-                              {layer.id === "infrastructure-readiness" ? (
-                                <LayerStatusBadge>Proxy only</LayerStatusBadge>
+                              {layer.id === SCHOOL_UTILIZATION_LAYER_ID ? (
+                                <LayerStatusBadge>
+                                  Preliminary Data
+                                </LayerStatusBadge>
                               ) : null}
                             </div>
                           </div>
                           <div className="ml-auto flex shrink-0 items-center gap-1.5">
                             <button
-                              aria-label={`More information for ${layer.title}`}
+                              aria-label={`More information for ${layerDisplayTitle}`}
                               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
                               onClick={() =>
                                 setOpenInfoLayerId(infoOpen ? null : layer.id)
@@ -1123,7 +1123,7 @@ export function LayerToggle({
                             </button>
                             {hasConfigure ? (
                             <button
-                              aria-label={`Configure ${layer.title}`}
+                              aria-label={`Configure ${layerDisplayTitle}`}
                               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#d8b86a]/35 hover:bg-[#d8b86a]/10 hover:text-[#f6d98e]"
                               onClick={() =>
                                 setOpenConfigLayerId(
@@ -1138,7 +1138,7 @@ export function LayerToggle({
                             ) : null}
                             {hasLegend ? (
                             <button
-                              aria-label={`Legend for ${layer.title}`}
+                              aria-label={`Legend for ${layerDisplayTitle}`}
                               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
                               onClick={() =>
                                 setOpenLegendLayerId(
@@ -1152,7 +1152,7 @@ export function LayerToggle({
                             </button>
                             ) : null}
                             <button
-                              aria-label={`${active ? "Hide" : "Show"} ${layer.title}`}
+                              aria-label={`${active ? "Hide" : "Show"} ${layerDisplayTitle}`}
                               aria-pressed={active}
                               className={cn(
                                 "relative h-5 w-9 shrink-0 rounded-full border transition disabled:cursor-not-allowed",
@@ -1180,6 +1180,9 @@ export function LayerToggle({
                         <p className="mt-1 truncate text-[11px] leading-5 text-slate-500">
                           {getLayerStatusText(layer)}
                         </p>
+                        {isDevelopmentHotspotLayer
+                          ? renderDevelopmentHotspotControls()
+                          : null}
 
                         {infoOpen ? (
                           <LayerMoreInfoPanel
@@ -1219,11 +1222,35 @@ export function LayerToggle({
             </details>
           );
         })}
+
+        <div className="mt-4 border-t border-white/10 pt-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Coming Soon / Official Data Needed
+              </p>
+              <p className="mt-1 text-[11px] leading-5 text-slate-600">
+                Official data needed before these overlays can be enabled.
+              </p>
+            </div>
+            <LayerStatusBadge>Official data needed</LayerStatusBadge>
+          </div>
+          <div className="mt-2 grid gap-2 opacity-85">
+            {comingSoonLayerTopics.map((row) => (
+              <ComingSoonLayerRow
+                accent={row.accent ?? "#64748b"}
+                key={row.id}
+                note={row.note}
+                title={row.title}
+                open={false}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="mt-3 rounded-md border border-white/10 bg-white/[0.025] px-3 py-2 text-[11px] leading-5 text-slate-500">
-        Detailed methodology, caveats, and data lineage live in Methodology.
-        This drawer stays compact so the map remains the main workspace.
+        Methodology contains source notes and caveats.
       </div>
     </section>
   );
@@ -1277,60 +1304,80 @@ function LayerInlinePanel({ children }: { children: ReactNode }) {
 }
 
 function ComingSoonLayerRow({
-  layer,
+  accent,
+  note = "Available when official data is added.",
   onMoreInfo,
   onOpenMethodology,
   open,
+  sourceLayer,
+  title,
 }: {
-  layer: OperationalLayer;
-  onMoreInfo: () => void;
-  onOpenMethodology: () => void;
+  accent: string;
+  note?: string;
+  onMoreInfo?: () => void;
+  onOpenMethodology?: () => void;
   open: boolean;
+  sourceLayer?: OperationalLayer;
+  title: string;
 }) {
   return (
-    <article className="min-w-0 overflow-hidden rounded-md border border-white/10 bg-black/12 p-2">
+    <article
+      className="min-w-0 overflow-hidden rounded-md border border-white/10 bg-black/12 p-2 opacity-70"
+      data-layer-disabled="true"
+    >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <span
           className="h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_16px_currentColor]"
-          style={{ background: layer.accent, color: layer.accent }}
+          style={{ background: accent, color: accent }}
         />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold leading-5 text-slate-100">
-            {layer.title}
+            {title}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <LayerStatusBadge>Proxy only</LayerStatusBadge>
-            <LayerStatusBadge>Methodology</LayerStatusBadge>
+            <LayerStatusBadge>Coming Soon</LayerStatusBadge>
+            <LayerStatusBadge>Data still needed</LayerStatusBadge>
           </div>
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          {sourceLayer && onMoreInfo ? (
+            <button
+              aria-label={`More information for ${title}`}
+              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
+              onClick={onMoreInfo}
+              title="More Info"
+              type="button"
+            >
+              <Info className="h-3.5 w-3.5" />
+            </button>
+          ) : null}
+          {onOpenMethodology ? (
+            <button
+              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[#68d8ff]/18 bg-[#68d8ff]/10 text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+              onClick={onOpenMethodology}
+              title="Open Methodology"
+              type="button"
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+            </button>
+          ) : null}
           <button
-            aria-label={`More information for ${layer.title}`}
-            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
-            onClick={onMoreInfo}
-            title="More Info"
+            aria-label={`${title} unavailable`}
+            className="relative h-5 w-9 shrink-0 cursor-not-allowed rounded-full border border-white/10 bg-white/5 opacity-60"
+            disabled
+            title="Coming Soon"
             type="button"
           >
-            <Info className="h-3.5 w-3.5" />
-          </button>
-          <button
-            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[#68d8ff]/18 bg-[#68d8ff]/10 text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
-            onClick={onOpenMethodology}
-            title="Open Methodology"
-            type="button"
-          >
-            <BookOpen className="h-3.5 w-3.5" />
+            <span className="absolute left-1 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-slate-500" />
           </button>
         </div>
       </div>
       <p className="mt-2 text-[11px] leading-5 text-slate-500">
-        Infrastructure readiness is tracked in Methodology and will become
-        stronger after official utility capacity and planned infrastructure data
-        are available.
+        {note}
       </p>
-      {open ? (
+      {open && sourceLayer && onOpenMethodology ? (
         <LayerMoreInfoPanel
-          layer={layer}
+          layer={sourceLayer}
           onOpenMethodology={onOpenMethodology}
         />
       ) : null}
@@ -1475,6 +1522,19 @@ function getLayerSourceStatusLabel(layer: OperationalLayer) {
   return "Placeholder";
 }
 
+function getLayerDisplayTitle(layer: OperationalLayer) {
+  switch (layer.id) {
+    case FLOOD_CONSTRAINT_LAYER_ID:
+      return "Floodplain Review";
+    case FEMA_FLOOD_ZONE_LAYER_ID:
+      return "Floodplain Source Areas";
+    case SCHOOL_UTILIZATION_LAYER_ID:
+      return "School Capacity Watch";
+    default:
+      return layer.title;
+  }
+}
+
 function LayerStatusBadge({
   active = false,
   children,
@@ -1523,7 +1583,7 @@ function HotspotAdvancedFilters({
       open={isOpen}
     >
       <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-        Advanced filters
+        Advanced Filters
       </summary>
       {isOpen ? (
         <div className="mt-2 grid grid-cols-2 gap-2 border-t border-white/10 pt-2">

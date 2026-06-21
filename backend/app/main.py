@@ -7,6 +7,7 @@ from app.database import verify_database_connection
 from app.routers import (
     constraints_router,
     development_router,
+    indicators_router,
     parcel_router,
     school_constraints_router,
     temporal_router,
@@ -47,6 +48,7 @@ def root() -> dict[str, object]:
             "parcels": "/parcels",
             "development": "/development",
             "constraints": "/constraints",
+            "indicators": "/indicators",
         },
     }
 
@@ -74,3 +76,4 @@ app.include_router(development_router.router)
 app.include_router(temporal_router.router)
 app.include_router(constraints_router.router)
 app.include_router(school_constraints_router.router)
+app.include_router(indicators_router.router)

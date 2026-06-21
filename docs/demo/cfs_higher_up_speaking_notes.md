@@ -14,10 +14,11 @@ faster to assemble, easier to explain, and safer to discuss.
 
 1. CFS turns scattered planning and GIS records into a parcel-based due
    diligence workflow.
-2. It supports a guided demo flow: start from the CFS Command Center, search a
-   parcel, focus the map, use Explore Countywide when broader layers are needed, save one or
-   more Planning Snapshots with map context, generate an Executive Summary, and
-   explain Methodology.
+2. It supports a guided demo flow: start from the Overview landing page, open
+   Workspace, search a parcel from the global header, focus the map, use
+   Explore Countywide when broader layers are needed, save one or more Planning
+   Snapshots with map context, generate an Executive Summary, and explain
+   Methodology.
 3. It integrates multiple high-value data domains without hiding caveats.
 4. It separates verified evidence from presentation-derived data, proxy context,
    and internal model research.
@@ -26,16 +27,19 @@ faster to assemble, easier to explain, and safer to discuss.
 
 ## What To Show First
 
-Start with Overview, point out the CFS Command Center and collapsed Layers
-rail, and then use the Search Parcel action or top parcel search. Search for:
+Start with Overview, point out the safe-use landing page, then click `Go to
+Workspace`. In Workspace, show the CFS Workspace Center, collapsed Layers rail,
+and global parcel search. Search for:
 
 `CFS-PARCEL-0149726579`
 
 Then show:
 
 1. the selected parcel map focus;
-2. Planning Snapshot Library with saved command context, active layers, and map image status;
-3. high-priority review flags;
+2. Indicator Center full-width map-free Mission Control dashboard with Critical
+   Signals, Monitoring Charts, Priority Issues Board, School Capacity Watch
+   drilldowns, Inspect drawer, and official-data gaps;
+3. Planning Snapshot Library with saved command context, active layers, and map image status;
 4. Executive Summary report;
 5. Methodology model safety section.
 

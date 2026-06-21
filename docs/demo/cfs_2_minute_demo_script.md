@@ -9,18 +9,23 @@ context, and model governance in one review workspace. The goal is not to
 automate decisions. The goal is to help staff see what is known, what needs
 review, and what caveats matter.
 
-I will start in Overview at the CFS Command Center. It gives four compact
-actions: Search Parcel, Explore Countywide, Model Lab, and Snapshot Builder. The
-Layers rail starts collapsed so the map stays central. Then I use the parcel search. For this demo I am using
-`CFS-PARCEL-0149726579`. When the parcel is selected, the map and dashboard
-focus on the same record, and the active selection overlay confirms the parcel,
-owner, zoning, and data source.
+I will start in Overview, which is now the landing page and safe-use
+introduction. It explains what CFS is, what works today, what remains internal
+research, and what data is still needed. Then I open Workspace, where the live
+map, global parcel search, Explore Countywide, Indicator Center, and Model Lab
+live. Indicator Center is the full-width map-free Mission Control dashboard: it
+uses Critical Signals, Monitoring Charts, a Priority Issues Board, School
+Capacity Watch drilldowns, an Inspect drawer, and Data Still Needed status
+using existing CFS context only. For this demo I am using
+`CFS-PARCEL-0149726579`. When the parcel
+is selected, the map and dashboard focus on the same record, and the active
+selection overlay confirms the parcel, owner, zoning, and data source.
 
-Next I save a Planning Snapshot for the report. This captures the selected
-parcel when available, active context, map image when the
-SceneView screenshot is available, caveats, and explainable metrics so the
-executive summary is based on a deliberate saved view rather than a loose screen
-of numbers. Multiple snapshots can be saved in the local Planning Snapshot
+Next I save a Planning Snapshot from Workspace for the report. This captures
+the selected parcel when available, active context, dashboard signals or map
+image when applicable, caveats, and explainable metrics so the executive
+summary is based on a deliberate saved view rather than a loose screen of
+numbers. Multiple snapshots can be saved in the local Planning Snapshot
 Library, opened for review, or deleted when they are no longer needed.
 
 The Planning Snapshot has an Explain the Numbers view. Each major item names

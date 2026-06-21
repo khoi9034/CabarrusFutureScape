@@ -40,6 +40,7 @@ import type { DashboardViewMode } from "@/types/workspace";
 import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
 
 const productModes: Array<{
+  description: string;
   id: ProductMode;
   label: string;
   shortLabel: string;
@@ -47,13 +48,23 @@ const productModes: Array<{
   icon: typeof LayoutDashboard;
 }> = [
   {
+    description: "Intro and safe-use posture",
     icon: LayoutDashboard,
     id: "overview",
     label: "Overview",
     shortLabel: "Overview",
-    title: "Main site-sourcing and map exploration workspace",
+    title: "Cabarrus FutureScape introduction and safe-use overview",
   },
   {
+    description: "Countywide work area",
+    icon: Map,
+    id: "workspace",
+    label: "Workspace",
+    shortLabel: "Work",
+    title: "Live map workspace for countywide exploration and Model Lab",
+  },
+  {
+    description: "Executive reports",
     icon: FileSearch,
     id: "due_diligence",
     label: "Planning Snapshot",
@@ -61,6 +72,7 @@ const productModes: Array<{
     title: "Saved planning context, explanations, and executive summary",
   },
   {
+    description: "Sources and caveats",
     icon: BookOpen,
     id: "methodology",
     label: "Methodology",
@@ -90,6 +102,7 @@ export function TopNav() {
     roleId,
     scenarioName,
     productMode,
+    setOverviewCommandMode,
     setParcelReviewView,
     setPlanningSnapshotView,
     setProductMode,
@@ -294,9 +307,15 @@ export function TopNav() {
       setQuickSearchResults([record]);
       setQuickSearchStatus("ready");
       setQuickSearchError(null);
+
+      if (productMode !== "workspace") {
+        setOverviewCommandMode("countywide");
+      }
+
+      setProductMode("workspace");
       hydrateSelectedParcel(record, USE_BACKEND_API ? "fallback" : "static");
     },
-    [hydrateSelectedParcel],
+    [hydrateSelectedParcel, productMode, setOverviewCommandMode, setProductMode],
   );
 
   const handleQuickSearchKeyDown = useCallback(
@@ -321,9 +340,9 @@ export function TopNav() {
         open={commandPaletteOpen}
       />
 
-      <header className="relative z-30 flex h-16 shrink-0 items-center gap-3 overflow-visible border-b border-white/10 bg-[#060b12]/92 px-3 backdrop-blur-2xl lg:px-4">
-        <div className="flex min-w-[168px] max-w-[230px] shrink-0 items-center gap-3">
-          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#d8b86a]/35 bg-[#d8b86a]/[0.12] shadow-[0_0_24px_rgba(216,184,106,0.2)]">
+      <header className="cfs-command-bar relative z-30 flex min-h-[4.5rem] shrink-0 flex-wrap items-center gap-2 overflow-visible border-b border-white/10 bg-[#060b12]/92 px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4">
+        <div className="order-1 flex min-w-[12.5rem] max-w-[16rem] shrink-0 items-center gap-3">
+          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#d8b86a]/35 bg-[#d8b86a]/[0.12] shadow-[0_0_28px_rgba(216,184,106,0.22)]">
             <Map className="h-4 w-4 text-[#f0cd79]" />
             <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border border-[#060b12] bg-[#55d38f]" />
           </div>
@@ -339,7 +358,7 @@ export function TopNav() {
 
         <nav
           aria-label="CFS product mode"
-          className="flex h-10 shrink-0 items-center gap-1 rounded-xl border border-white/10 bg-[#020812]/72 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.055),0_0_34px_rgba(104,216,255,0.055)]"
+          className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-4 gap-1 rounded-2xl border border-white/10 bg-[#020812]/78 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_40px_rgba(104,216,255,0.075)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
         >
           {productModes.map((mode) => {
             const Icon = mode.icon;
@@ -351,18 +370,23 @@ export function TopNav() {
 
             return (
               <button
+                aria-label={`${mode.label}: ${mode.title}`}
                 aria-pressed={active}
                 className={cn(
-                  "group relative inline-flex h-8 items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg border px-2.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/70",
+                  "group relative inline-flex h-10 min-w-0 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-xl border px-2.5 text-[11px] font-semibold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75 sm:px-3 lg:justify-start lg:px-3.5 lg:text-xs xl:text-[13px]",
                   active
-                    ? "border-[#68d8ff]/38 bg-[#102235] text-[#e7fbff] shadow-[0_0_26px_rgba(104,216,255,0.16)]"
-                    : "border-transparent bg-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.045] hover:text-white",
+                    ? "border-[#68d8ff]/48 bg-[#102235]/95 text-[#e7fbff] shadow-[0_0_30px_rgba(104,216,255,0.22),inset_0_1px_0_rgba(255,255,255,0.09)]"
+                    : "border-transparent bg-transparent text-slate-400 hover:border-[#68d8ff]/18 hover:bg-white/[0.055] hover:text-white",
                 )}
                 key={mode.id}
                 onClick={() => {
                   if (mode.id === "due_diligence") {
                     setParcelReviewView("review");
                     setPlanningSnapshotView("overview");
+                  }
+
+                  if (mode.id === "workspace" && productMode !== "workspace") {
+                    setOverviewCommandMode("countywide");
                   }
 
                   setProductMode(mode.id);
@@ -373,28 +397,36 @@ export function TopNav() {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "absolute inset-x-2 top-0 h-px bg-[#68d8ff] opacity-0 transition-opacity",
+                    "absolute inset-x-3 top-0 h-px bg-[#68d8ff] opacity-0 transition-opacity",
                     active && "opacity-90",
                   )}
                 />
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "absolute bottom-0 left-1/2 h-px w-5 -translate-x-1/2 bg-[#d8b86a] opacity-0 transition-opacity",
+                    "absolute bottom-0 left-1/2 h-px w-8 -translate-x-1/2 bg-[#d8b86a] opacity-0 transition-opacity",
                     active && "opacity-85",
                   )}
                 />
-                <Icon className="h-3.5 w-3.5" />
-                <span className="hidden xl:inline">{mode.label}</span>
-                <span className="hidden md:inline xl:hidden">{mode.shortLabel}</span>
+                <Icon
+                  className={cn(
+                    "h-4 w-4 shrink-0 transition-transform duration-150 group-hover:scale-105",
+                    active ? "text-[#8fe7ff]" : "text-slate-500 group-hover:text-[#b7f0ff]",
+                  )}
+                />
+                <span className="min-w-0 truncate">
+                  <span className="hidden xl:inline">{mode.label}</span>
+                  <span className="inline xl:hidden">{mode.shortLabel}</span>
+                </span>
+                <span className="sr-only">{mode.description}</span>
               </button>
             );
           })}
         </nav>
 
-        <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div className="order-4 flex w-full min-w-0 items-center gap-2 md:order-2 md:w-auto md:flex-1 lg:order-3">
           <div
-            className="relative hidden min-w-[180px] flex-1 md:block"
+            className="relative block min-w-0 flex-1 md:min-w-[12rem]"
             ref={quickSearchRef}
           >
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
@@ -543,7 +575,7 @@ export function TopNav() {
             ) : null}
           </div>
 
-          <div className="hidden shrink-0 items-center gap-2 lg:flex">
+          <div className="hidden shrink-0 items-center gap-2 2xl:flex">
             <CompactStatusChip
               icon={RadioTower}
               label={dashboardStatusLabels[mapStatus]}
@@ -557,7 +589,7 @@ export function TopNav() {
           </div>
         </div>
 
-        <div className="relative flex shrink-0 items-center gap-2">
+        <div className="relative order-2 flex shrink-0 items-center gap-2 lg:order-4">
           <button
             aria-label="Open command palette"
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white md:hidden xl:flex"
