@@ -7,10 +7,13 @@ Generated: 2026-06-21
 - Local repo path: `C:\CabarrusFutureScape`
 - Git remote: `https://github.com/khoi9034/CabarrusFutureScape.git`
 - Branch: `main`
+- Latest prepared code commit before this report refresh: `cbd481f7993e1eaaafaf27948f59633aa367af33`
+- Final UI/deploy source commit: `ec032c4`
+- Vercel build-script fix commit: `cbd481f`
 - Vercel project name: `cabarrus-future-scape`
 - Vercel project ID: `prj_Rr2cFrMxWCVym8zJxxikAvvT6ZrH`
 
-The working tree already contained many uncommitted CFS phase changes before deployment prep. Deployment changes were kept scoped to env examples, backend deployment config support, health/database timeout handling, tests, and this report.
+Safe CFS source/docs/config changes have been committed and pushed. Generated `outputs/**` phase summaries remain uncommitted and were not included in the production deploy commits.
 
 ## Detected Architecture
 
@@ -18,6 +21,7 @@ The working tree already contained many uncommitted CFS phase changes before dep
 - Package manager: npm with `package-lock.json`
 - Frontend dev command: `npm run dev`
 - Frontend build command: `npm run build`
+- Build script: `next build --webpack`
 - Frontend typecheck: `npm run typecheck`
 - Frontend lint: `npm run lint`
 - Backend: FastAPI app under `backend`
@@ -47,6 +51,8 @@ Recommended Vercel project settings:
 - Build command: `npm run build`
 - Output directory: leave empty/default for Next.js
 - Framework preset: Next.js
+
+The `build` script explicitly runs `next build --webpack` so Vercel's normal `npm run build` path uses the same bundler that validates locally with ArcGIS/Next.js 16.
 
 Production environment variables in Vercel:
 
@@ -106,13 +112,15 @@ In production, wildcard CORS origins are filtered out.
 The failed Vercel deployment should be checked for these common causes:
 
 - Wrong root directory: should be `.`
-- Wrong build command: should be `npm run build`
+- Wrong build command: should be `npm run build`; the package script now runs `next build --webpack`
 - Package manager mismatch: repo uses npm and `package-lock.json`
 - Missing frontend API env vars
 - Production frontend still calling `http://127.0.0.1:8000`
 - TypeScript/build failure in current source
 - Attempting to host FastAPI backend on Vercel
 - Backend unavailable or CORS not allowing the Vercel origin
+
+Local diagnosis found that the webpack build path is the safe path for this app. `package.json` now makes webpack the default production build script so Vercel does not need an extra build argument.
 
 Local deployment credentials were not present in the shell, so automated Vercel log inspection was not performed.
 
@@ -171,6 +179,7 @@ Local validation on 2026-06-21:
 
 - `npm run typecheck`: passed
 - `npm run lint`: passed
+- `npm run build`: passed
 - `npm run build -- --webpack`: passed
 - `python -m compileall backend`: passed
 - `python -m pytest backend`: passed, 309 tests
