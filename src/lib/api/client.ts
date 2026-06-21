@@ -61,8 +61,17 @@ export class ApiClientError extends Error {
   }
 }
 
-const DEFAULT_BACKEND_BASE_URL = "http://127.0.0.1:8000";
+const LOCAL_BACKEND_BASE_URL = "http://127.0.0.1:8000";
+const PRODUCTION_BACKEND_BASE_URL = "https://cfs-api.example.invalid";
+const DEFAULT_BACKEND_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? PRODUCTION_BACKEND_BASE_URL
+    : LOCAL_BACKEND_BASE_URL;
 const DEFAULT_TIMEOUT_MS = 20000;
+const API_TIMEOUT_DISPLAY_MESSAGE =
+  process.env.NODE_ENV === "production"
+    ? "CFS API request timed out. Confirm the deployed API base URL and backend health."
+    : "CFS API request timed out. Check that FastAPI is running on 127.0.0.1:8000.";
 
 export const CFS_API_BASE_URL =
   process.env.NEXT_PUBLIC_CFS_API_BASE_URL ?? DEFAULT_BACKEND_BASE_URL;
@@ -146,7 +155,7 @@ export async function apiGet<TResponse>(
       const kind = timedOut ? "timeout" : "cancelled";
       throw new ApiClientError({
         displayMessage: timedOut
-          ? "CFS API request timed out. Check that FastAPI is running on 127.0.0.1:8000."
+          ? API_TIMEOUT_DISPLAY_MESSAGE
           : "CFS API request was cancelled.",
         kind,
         message: timedOut

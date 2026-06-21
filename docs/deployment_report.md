@@ -99,6 +99,8 @@ No production database writes were performed during deployment prep.
 
 The frontend currently calls the backend through `NEXT_PUBLIC_CFS_API_BASE_URL`. In production, this must be set to the deployed backend URL, not localhost.
 
+If the production API base URL is missing, the frontend now falls back to a non-routable placeholder instead of localhost. This prevents accidental production browser calls to `127.0.0.1`, but the deployed app still needs the real backend URL for live search/layer data.
+
 The backend CORS configuration should include exact production origins only:
 
 ```text
