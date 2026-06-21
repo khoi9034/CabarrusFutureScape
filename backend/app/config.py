@@ -50,6 +50,24 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("POSTGRES_PASSWORD", "CFS_POSTGRES_PASSWORD"),
     )
+    database_url: str = Field(
+        default="",
+        validation_alias=AliasChoices("DATABASE_URL"),
+    )
+    database_connect_timeout_seconds: int = Field(
+        default=5,
+        validation_alias=AliasChoices(
+            "DATABASE_CONNECT_TIMEOUT_SECONDS",
+            "DB_CONNECT_TIMEOUT_SECONDS",
+        ),
+    )
+    database_statement_timeout_ms: int = Field(
+        default=3000,
+        validation_alias=AliasChoices(
+            "DATABASE_STATEMENT_TIMEOUT_MS",
+            "DB_STATEMENT_TIMEOUT_MS",
+        ),
+    )
     sqlalchemy_echo: bool = Field(
         default=False,
         validation_alias=AliasChoices("SQLALCHEMY_ECHO"),
