@@ -12,6 +12,7 @@ import {
 
 export type SchoolConstraintSummarySource =
   | "api"
+  | "demo"
   | "loading"
   | "unavailable";
 

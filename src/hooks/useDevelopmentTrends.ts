@@ -6,8 +6,9 @@ import {
   normalizeDevelopmentTrends,
   type DevelopmentTrendsViewModel,
 } from "@/lib/adapters/developmentTrendsAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentTrends } from "@/lib/api/development";
+import { getDemoDevelopmentTrendsResponse } from "@/lib/demo-data/client";
 
 export function useDevelopmentTrends() {
   const [trends, setTrends] = useState<DevelopmentTrendsViewModel>(() => {
@@ -23,6 +24,31 @@ export function useDevelopmentTrends() {
   });
 
   useEffect(() => {
+    if (USE_DEMO_DATA) {
+      getDemoDevelopmentTrendsResponse()
+        .then((developmentTrends) => {
+          setTrends({
+            ...normalizeDevelopmentTrends(developmentTrends),
+            errorMessage: null,
+            isLoading: false,
+            source: "static",
+          });
+        })
+        .catch((error: unknown) => {
+          const fallbackTrends = getStaticDevelopmentTrends();
+          setTrends({
+            ...fallbackTrends,
+            errorMessage:
+              error instanceof Error
+                ? error.message
+                : "CFS demo development trends are unavailable.",
+            isLoading: false,
+            source: "static",
+          });
+        });
+      return;
+    }
+
     if (!USE_BACKEND_API) {
       return;
     }

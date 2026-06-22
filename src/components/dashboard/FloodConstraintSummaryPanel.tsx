@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const sourceLabels: Record<FloodConstraintSummarySource, string> = {
   api: "FastAPI",
+  demo: "Demo Extract",
   loading: "Loading API",
   unavailable: "Unavailable",
 };
@@ -17,6 +18,8 @@ export function FloodConstraintSummaryPanel() {
   const sourceDescription =
     source === "api"
       ? "Flood constraints are loaded from GET /constraints/flood/summary using FEMA NFHL Layer 28 parcel overlay results."
+      : source === "demo"
+        ? "Floodplain review uses the cached portfolio demo extract."
       : source === "loading"
         ? "Checking FastAPI flood constraint summary."
         : "Flood summary is unavailable. No flood values are fabricated from mock data or the old TIFF reference.";
@@ -41,6 +44,8 @@ export function FloodConstraintSummaryPanel() {
               "rounded-full border px-2 py-1 text-[10px] font-semibold uppercase",
               source === "api"
                 ? "border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-100"
+                : source === "demo"
+                  ? "border-sky-300/25 bg-sky-300/[0.08] text-sky-100"
                 : source === "unavailable"
                   ? "border-amber-300/25 bg-amber-300/[0.08] text-amber-100"
                   : "border-white/10 bg-white/[0.04] text-slate-300",

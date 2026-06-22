@@ -1,0 +1,12 @@
+{
+  "caveat": "Portfolio demo uses cached CFS demo data, not a live production database.",
+  "generated_at": "2026-06-22T19:05:37Z",
+  "mode": "portfolio_demo",
+  "record_counts": {
+    "sample_parcels": 300,
+    "school_capacity_rows": 37,
+    "permit_segment_buckets": 9,
+    "development_annual_trends": 31
+  },
+  "source_label": "Local CFS PostGIS cached extract"
+}

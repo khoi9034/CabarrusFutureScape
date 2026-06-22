@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const sourceLabels: Record<SchoolConstraintSummarySource, string> = {
   api: "FastAPI",
+  demo: "Demo Extract",
   loading: "Loading API",
   unavailable: "Unavailable",
 };
@@ -27,6 +28,8 @@ export function SchoolConstraintSummaryPanel() {
   const sourceDescription =
     source === "api"
       ? "School constraints are loaded from the read-only attendance-zone assignment APIs."
+      : source === "demo"
+        ? "School Capacity Watch uses the cached portfolio demo extract."
       : source === "loading"
         ? "Checking FastAPI school assignment summary and QA readiness."
         : "School assignment summary is unavailable. No capacity or enrollment values are fabricated.";
@@ -51,6 +54,8 @@ export function SchoolConstraintSummaryPanel() {
               "rounded-full border px-2 py-1 text-[10px] font-semibold uppercase",
               source === "api"
                 ? "border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-100"
+                : source === "demo"
+                  ? "border-sky-300/25 bg-sky-300/[0.08] text-sky-100"
                 : source === "unavailable"
                   ? "border-amber-300/25 bg-amber-300/[0.08] text-amber-100"
                   : "border-white/10 bg-white/[0.04] text-slate-300",

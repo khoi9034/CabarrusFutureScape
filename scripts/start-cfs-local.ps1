@@ -77,6 +77,7 @@ function Ensure-FrontendEnv {
     $lines = @(Get-Content -LiteralPath $FrontendEnv)
   }
 
+  $lines = Upsert-EnvLine -Lines $lines -Key "NEXT_PUBLIC_CFS_DEPLOYMENT_MODE" -Value "live"
   $lines = Upsert-EnvLine -Lines $lines -Key "NEXT_PUBLIC_USE_BACKEND_API" -Value "true"
   $lines = Upsert-EnvLine -Lines $lines -Key "NEXT_PUBLIC_CFS_API_BASE_URL" -Value $ApiBaseUrl
   Set-Content -LiteralPath $FrontendEnv -Value $lines -Encoding utf8

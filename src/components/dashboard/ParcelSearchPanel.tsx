@@ -36,8 +36,13 @@ import {
   applyParcelSearchUiFilters,
   normalizeBackendParcelSearchResponse,
 } from "@/lib/adapters/parcelSearchAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { filterParcels, getParcelDetail, searchParcels } from "@/lib/api/parcels";
+import {
+  getDemoManifest,
+  getDemoParcelById,
+  getDemoSampleParcels,
+} from "@/lib/demo-data/client";
 import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import { useParcelMapFocus } from "@/hooks/useParcelMapFocus";
@@ -197,7 +202,20 @@ export function ParcelSearchPanel() {
   useEffect(() => {
     let cancelled = false;
 
-    loadParcelSearchIndex()
+    const parcelRecordsPromise = USE_DEMO_DATA
+      ? Promise.all([getDemoSampleParcels(), getDemoManifest()]).then(
+          ([demoRecords, manifest]) => ({
+            metadata: {
+              generatedAt: manifest.generated_at ?? "Demo data unavailable",
+              recordCount: demoRecords.length,
+              sourceTables: ["public/demo-data/sample_parcels.json"],
+            },
+            records: demoRecords,
+          }),
+        )
+      : loadParcelSearchIndex();
+
+    parcelRecordsPromise
       .then((index) => {
         if (cancelled) {
           return;
@@ -216,7 +234,9 @@ export function ParcelSearchPanel() {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : "Parcel search index could not be loaded.",
+            : USE_DEMO_DATA
+              ? "Demo parcel sample could not be loaded."
+              : "Parcel search index could not be loaded.",
         );
       })
       .finally(() => {
@@ -405,12 +425,13 @@ export function ParcelSearchPanel() {
       }
 
       setQuery(detail.officialParcelId);
-      loadParcelSearchIndex().then((index) => {
-        const nextRecord = getParcelSearchRecordById(
-          index.records,
-          detail.officialParcelId,
-        );
+      const parcelLookupPromise = USE_DEMO_DATA
+        ? getDemoParcelById(detail.officialParcelId)
+        : loadParcelSearchIndex().then((index) =>
+            getParcelSearchRecordById(index.records, detail.officialParcelId),
+          );
 
+      parcelLookupPromise.then((nextRecord) => {
         if (nextRecord) {
           handleSelectRecord(nextRecord, "command");
           return;
@@ -549,18 +570,22 @@ export function ParcelSearchPanel() {
     ? "Searching FastAPI parcel intelligence"
     : backendFilterLoading
       ? "Filtering FastAPI parcel intelligence"
-      : "Loading parcel intelligence index";
+      : USE_DEMO_DATA
+        ? "Loading cached demo parcels"
+        : "Loading parcel intelligence index";
   const sourceLabel = usingBackendResults
     ? "FastAPI Search"
     : usingBackendFilterResults
       ? "FastAPI Filter"
     : usingBackendFallback
       ? "Static fallback"
-      : backendSearchLoading
-        ? "API Search"
-        : backendFilterLoading
-          ? "API Filter"
-        : "Static Index";
+    : backendSearchLoading
+      ? "API Search"
+      : backendFilterLoading
+        ? "API Filter"
+        : USE_DEMO_DATA
+          ? "Demo Sample"
+          : "Static Index";
   const sourceDescription = usingBackendResults
     ? "Search results are loaded from GET /parcels/search."
     : usingBackendFilterResults
@@ -569,10 +594,12 @@ export function ParcelSearchPanel() {
       ? "FastAPI parcel discovery is unavailable, so results are using the generated static index."
     : backendSearchLoading
       ? "Searching FastAPI parcel intelligence; static results are preserved during the request."
-      : backendFilterLoading
-        ? "Filtering FastAPI parcel intelligence; static results are preserved during the request."
-        : USE_BACKEND_API
-          ? "Blank searches use FastAPI filters when available. Queries of three or more characters use FastAPI search."
+    : backendFilterLoading
+      ? "Filtering FastAPI parcel intelligence; static results are preserved during the request."
+      : USE_BACKEND_API
+        ? "Blank searches use FastAPI filters when available. Queries of three or more characters use FastAPI search."
+        : USE_DEMO_DATA
+          ? "Search uses cached, sanitized demo parcels."
           : "Search uses a generated static parcel intelligence artifact.";
 
   function handleQueryChange(event: ChangeEvent<HTMLInputElement>) {
@@ -614,7 +641,11 @@ export function ParcelSearchPanel() {
             className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-slate-600"
             disabled={searchInputDisabled}
             onChange={handleQueryChange}
-            placeholder="PIN, owner, address, subdivision, zoning"
+            placeholder={
+              USE_DEMO_DATA
+                ? "PIN, parcel ID, subdivision, zoning"
+                : "PIN, owner, address, subdivision, zoning"
+            }
             type="search"
             value={query}
           />

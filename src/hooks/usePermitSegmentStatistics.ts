@@ -6,8 +6,9 @@ import {
   normalizePermitSegmentStatistics,
   type PermitSegmentStatisticsViewModel,
 } from "@/lib/adapters/permitSegmentsAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getPermitSegmentStatistics } from "@/lib/api/development";
+import { getDemoPermitSegmentStatisticsResponse } from "@/lib/demo-data/client";
 
 export function usePermitSegmentStatistics(): PermitSegmentStatisticsViewModel {
   const [statistics, setStatistics] = useState<PermitSegmentStatisticsViewModel>(
@@ -18,6 +19,28 @@ export function usePermitSegmentStatistics(): PermitSegmentStatisticsViewModel {
   );
 
   useEffect(() => {
+    if (USE_DEMO_DATA) {
+      getDemoPermitSegmentStatisticsResponse()
+        .then((response) => {
+          setStatistics({
+            ...normalizePermitSegmentStatistics(response),
+            errorMessage: null,
+            isLoading: false,
+            source: "static",
+          });
+        })
+        .catch((error: unknown) => {
+          setStatistics({
+            ...emptyPermitSegmentStatistics("static"),
+            errorMessage:
+              error instanceof Error
+                ? error.message
+                : "CFS demo permit segment statistics are unavailable.",
+          });
+        });
+      return;
+    }
+
     if (!USE_BACKEND_API) {
       return;
     }

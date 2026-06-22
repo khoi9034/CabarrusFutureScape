@@ -1,0 +1,649 @@
+{
+  "available": true,
+  "generated_at": "2026-06-22T19:05:37Z",
+  "qa_summary": {
+    "capacity_available": false,
+    "caveats": [
+      "Official school enrollment/capacity data is still needed."
+    ],
+    "duplicate_normalized_names": [],
+    "excluded_count_by_reason": [
+      {
+        "value": "included",
+        "count": 34
+      },
+      {
+        "value": "level_not_v1",
+        "count": 11
+      },
+      {
+        "value": "non_ccs_not_v1",
+        "count": 7
+      },
+      {
+        "value": "magnet_not_v1",
+        "count": 1
+      }
+    ],
+    "included_public_ccs_count": 34,
+    "missing_elementary_assignment_count": 18856,
+    "missing_high_assignment_count": 18856,
+    "missing_middle_assignment_count": 23796,
+    "multi_zone_overlap_counts": {},
+    "parcel_assignment_count": 110017,
+    "parcels_assigned_to_unmatched_school_zones": 0,
+    "safe_for_api_exposure": true,
+    "school_reference_count": 53,
+    "school_zones_count_by_level": [
+      {
+        "value": "elementary",
+        "count": 25
+      },
+      {
+        "value": "high",
+        "count": 9
+      },
+      {
+        "value": "middle",
+        "count": 10
+      }
+    ],
+    "unmatched_zone_names": [
+      {
+        "issue_type": "unmatched_reference_review",
+        "detail": "non_ccs_not_v1",
+        "parcel_count": null,
+        "recommended_action": "Verify official school reference and attendance-zone mapping.",
+        "school_level": "elementary",
+        "school_name": "GW Carver ES",
+        "severity": "review"
+      },
+      {
+        "issue_type": "unmatched_reference_review",
+        "detail": "Reference review needed",
+        "parcel_count": null,
+        "recommended_action": "Verify official school reference and attendance-zone mapping.",
+        "school_level": "elementary",
+        "school_name": "Hickory Ridge ES",
+        "severity": "review"
+      },
+      {
+        "issue_type": "unmatched_reference_review",
+        "detail": "non_ccs_not_v1",
+        "parcel_count": null,
+        "recommended_action": "Verify official school reference and attendance-zone mapping.",
+        "school_level": "elementary",
+        "school_name": "North Kannapolis ES",
+        "severity": "review"
+      },
+      {
+        "issue_type": "unmatched_reference_review",
+        "detail": "Reference review needed",
+        "parcel_count": null,
+        "recommended_action": "Verify official school reference and attendance-zone mapping.",
+        "school_level": "high",
+        "school_name": "West Cabarrus HS",
+        "severity": "review"
+      },
+      {
+        "issue_type": "unmatched_reference_review",
+        "detail": "Reference review needed",
+        "parcel_count": null,
+        "recommended_action": "Verify official school reference and attendance-zone mapping.",
+        "school_level": "middle",
+        "school_name": "Roberta Road MS",
+        "severity": "review"
+      }
+    ]
+  },
+  "statistics": {
+    "total_parcels": 110017,
+    "elementary_assigned_parcels": 91161,
+    "middle_assigned_parcels": 86221,
+    "high_assigned_parcels": 91161,
+    "missing_elementary_assignment_parcels": 18856,
+    "missing_middle_assignment_parcels": 23796,
+    "missing_high_assignment_parcels": 18856,
+    "assignment_review_required_parcels": 75143,
+    "capacity_data_available_parcels": 0,
+    "capacity_not_available_parcels": 110017,
+    "school_constraint_score_non_null_parcels": 0,
+    "assignment_confidence_distribution": [
+      {
+        "count": 54973,
+        "percentage": 49.9677,
+        "value": "review"
+      },
+      {
+        "count": 34200,
+        "percentage": 31.0861,
+        "value": "high"
+      },
+      {
+        "count": 18856,
+        "percentage": 17.1392,
+        "value": "low"
+      },
+      {
+        "count": 1988,
+        "percentage": 1.807,
+        "value": "medium"
+      }
+    ],
+    "caveats": [
+      "School assignment context is preliminary until official capacity data is received."
+    ],
+    "constraint_class_distribution": [
+      {
+        "count": 110017,
+        "percentage": 100.0,
+        "value": "not_scored"
+      }
+    ],
+    "filters_applied": {},
+    "included_cfs_v1_zone_count": 35,
+    "included_public_ccs_reference_count": 34,
+    "reference_exclusion_distribution": [
+      {
+        "value": "included",
+        "count": 34
+      },
+      {
+        "value": "level_not_v1",
+        "count": 11
+      },
+      {
+        "value": "non_ccs_not_v1",
+        "count": 7
+      },
+      {
+        "value": "magnet_not_v1",
+        "count": 1
+      }
+    ],
+    "safe_for_api_exposure": true,
+    "school_reference_count": 53,
+    "school_zone_count": 44,
+    "summary_status_distribution": [
+      {
+        "count": 86221,
+        "percentage": 78.3706,
+        "value": "assignment_available_capacity_pending"
+      },
+      {
+        "count": 23796,
+        "percentage": 21.6294,
+        "value": "assignment_incomplete"
+      }
+    ],
+    "zone_level_distribution": [
+      {
+        "value": "elementary",
+        "count": 25
+      },
+      {
+        "value": "high",
+        "count": 9
+      },
+      {
+        "value": "middle",
+        "count": 10
+      }
+    ]
+  },
+  "utilization_seed": {
+    "caveats": [
+      "Preliminary utilization from planning materials. Confirm with official enrollment and capacity."
+    ],
+    "filters_applied": {},
+    "limit": 500,
+    "offset": 0,
+    "rows": [
+      {
+        "school_name": "Coltrane-Webb Elementary School",
+        "school_name_normalized": "coltrane_webb_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 152.0,
+        "utilization_class": "severely_over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-COLTRANE_WEBB_ELEMENTARY-57",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "W.R. Odell Primary School",
+        "school_name_normalized": "w_r_odell_primary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 133.0,
+        "utilization_class": "severely_over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": null,
+        "match_confidence": "unmatched_reference_review"
+      },
+      {
+        "school_name": "Cox Mill Elementary School",
+        "school_name_normalized": "cox_mill_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 125.0,
+        "utilization_class": "severely_over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-COX_MILL_ELEMENTARY-71",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Weddington Hills Elementary School",
+        "school_name_normalized": "weddington_hills_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 125.0,
+        "utilization_class": "severely_over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-WEDDINGTON_HILLS_ELEMENTARY-61",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "W.R. Odell Elementary School",
+        "school_name_normalized": "w_r_odell_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 120.0,
+        "utilization_class": "severely_over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-W_R_ODELL_ELEMENTARY-5693",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Cox Mill High School",
+        "school_name_normalized": "cox_mill_high",
+        "school_level": "high",
+        "school_year": "2024-2025",
+        "utilization_pct": 119.0,
+        "utilization_class": "severely_over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-HIGH-COX_MILL_HIGH-55",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Hickory Ridge High School",
+        "school_name_normalized": "hickory_ridge_high",
+        "school_level": "high",
+        "school_year": "2024-2025",
+        "utilization_pct": 111.0,
+        "utilization_class": "severely_over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-HIGH-HICKORY_RIDGE_HIGH-76",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Harold E. Winkler Middle School",
+        "school_name_normalized": "harold_e_winkler_middle",
+        "school_level": "middle",
+        "school_year": "2024-2025",
+        "utilization_pct": 108.0,
+        "utilization_class": "over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-MIDDLE-HAROLD_E_WINKLER_MIDDLE-4892",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Charles E. Boger Elementary School",
+        "school_name_normalized": "charles_e_boger_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 107.0,
+        "utilization_class": "over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-CHARLES_E_BOGER_ELEMENTARY-74",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Harrisburg Elementary School",
+        "school_name_normalized": "harrisburg_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 106.0,
+        "utilization_class": "over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-HARRISBURG_ELEMENTARY-69",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Northwest Cabarrus Middle School",
+        "school_name_normalized": "northwest_cabarrus_middle",
+        "school_level": "middle",
+        "school_year": "2024-2025",
+        "utilization_pct": 104.0,
+        "utilization_class": "over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-MIDDLE-NORTHWEST_CABARRUS_MIDDLE-45",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Central Cabarrus High School",
+        "school_name_normalized": "central_cabarrus_high",
+        "school_level": "high",
+        "school_year": "2024-2025",
+        "utilization_pct": 102.0,
+        "utilization_class": "over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-HIGH-CENTRAL_CABARRUS_HIGH-65",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Pitts School Road Elementary School",
+        "school_name_normalized": "pitts_school_road_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 101.0,
+        "utilization_class": "over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-PITTS_ROAD_ELEMENTARY-73",
+        "match_confidence": "safe_alias_normalized"
+      },
+      {
+        "school_name": "Hickory Ridge Elementary School",
+        "school_name_normalized": "hickory_ridge_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 100.0,
+        "utilization_class": "over_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": null,
+        "match_confidence": "unmatched_reference_review"
+      },
+      {
+        "school_name": "Carl A. Furr Elementary School",
+        "school_name_normalized": "carl_a_furr_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 95.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-CARL_A_FURR_ELEMENTARY-75",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "J.N. Fries Middle School",
+        "school_name_normalized": "j_n_fries_middle",
+        "school_level": "middle",
+        "school_year": "2024-2025",
+        "utilization_pct": 95.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": null,
+        "match_confidence": "unmatched_reference_review"
+      },
+      {
+        "school_name": "Mount Pleasant Elementary School",
+        "school_name_normalized": "mount_pleasant_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 94.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-MT_PLEASANT_ELEMENTARY-53",
+        "match_confidence": "safe_alias_normalized"
+      },
+      {
+        "school_name": "R. Brown McAllister Elementary School",
+        "school_name_normalized": "r_brown_mcallister_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 92.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-R_BROWN_MCALLISTER_ELEMENTARY-60",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Wolf Meadow Elementary School",
+        "school_name_normalized": "wolf_meadow_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 92.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-WOLF_MEADOW_ELEMENTARY-62",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Royal Oaks School of the Arts",
+        "school_name_normalized": "royal_oaks_of_the_arts",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 91.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-ROYAL_OAKS_ELEMENTARY-44",
+        "match_confidence": "safe_alias_normalized"
+      },
+      {
+        "school_name": "Winecoff Elementary School",
+        "school_name_normalized": "winecoff_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 89.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-WINECOFF_ELEMENTARY-47",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "West Cabarrus High School",
+        "school_name_normalized": "west_cabarrus_high",
+        "school_level": "high",
+        "school_year": "2024-2025",
+        "utilization_pct": 88.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": null,
+        "match_confidence": "unmatched_reference_review"
+      },
+      {
+        "school_name": "Hickory Ridge Middle School",
+        "school_name_normalized": "hickory_ridge_middle",
+        "school_level": "middle",
+        "school_year": "2024-2025",
+        "utilization_pct": 87.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-MIDDLE-HICKORY_RIDGE_MIDDLE-5293",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "W.M. Irvin Elementary School",
+        "school_name_normalized": "w_m_irvin_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 85.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-W_M_IRVIN_ELEMENTARY-52",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Mount Pleasant High School",
+        "school_name_normalized": "mount_pleasant_high",
+        "school_level": "high",
+        "school_year": "2024-2025",
+        "utilization_pct": 85.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-HIGH-MT_PLEASANT_HIGH-59",
+        "match_confidence": "safe_alias_normalized"
+      },
+      {
+        "school_name": "Harris Road Middle School",
+        "school_name_normalized": "harris_road_middle",
+        "school_level": "middle",
+        "school_year": "2024-2025",
+        "utilization_pct": 84.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-MIDDLE-HARRIS_RD_MIDDLE-70",
+        "match_confidence": "safe_alias_normalized"
+      },
+      {
+        "school_name": "Mount Pleasant Middle School",
+        "school_name_normalized": "mount_pleasant_middle",
+        "school_level": "middle",
+        "school_year": "2024-2025",
+        "utilization_pct": 83.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-MIDDLE-MT_PLEASANT_MIDDLE-58",
+        "match_confidence": "safe_alias_normalized"
+      },
+      {
+        "school_name": "Northwest Cabarrus High School",
+        "school_name_normalized": "northwest_cabarrus_high",
+        "school_level": "high",
+        "school_year": "2024-2025",
+        "utilization_pct": 82.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-HIGH-NORTHWEST_CABARRUS_HIGH-46",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Jay M. Robinson High School",
+        "school_name_normalized": "jay_m_robinson_high",
+        "school_level": "high",
+        "school_year": "2024-2025",
+        "utilization_pct": 81.0,
+        "utilization_class": "approaching_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-HIGH-JAY_M_ROBINSON_HIGH-66",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "A.T. Allen Elementary School",
+        "school_name_normalized": "a_t_allen_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 78.0,
+        "utilization_class": "under_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-A_T_ALLEN_ELEMENTARY-64",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Patriots Elementary School",
+        "school_name_normalized": "patriots_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 78.0,
+        "utilization_class": "under_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-PATRIOTS_ELEMENTARY-5292",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Concord High School",
+        "school_name_normalized": "concord_high",
+        "school_level": "high",
+        "school_year": "2024-2025",
+        "utilization_pct": 78.0,
+        "utilization_class": "under_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-HIGH-CONCORD_HIGH-49",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Rocky River Elementary School",
+        "school_name_normalized": "rocky_river_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 76.0,
+        "utilization_class": "under_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-ROCKY_RIVER_ELEMENTARY-67",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Roberta Road Middle School",
+        "school_name_normalized": "roberta_road_middle",
+        "school_level": "middle",
+        "school_year": "2024-2025",
+        "utilization_pct": 72.0,
+        "utilization_class": "under_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": null,
+        "match_confidence": "unmatched_reference_review"
+      },
+      {
+        "school_name": "Bethel Elementary School",
+        "school_name_normalized": "bethel_elementary",
+        "school_level": "elementary",
+        "school_year": "2024-2025",
+        "utilization_pct": 70.0,
+        "utilization_class": "under_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-BETHEL_ELEMENTARY-68",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "C.C. Griffin Middle School",
+        "school_name_normalized": "c_c_griffin_middle",
+        "school_level": "middle",
+        "school_year": "2024-2025",
+        "utilization_pct": 63.0,
+        "utilization_class": "under_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-MIDDLE-C_C_GRIFFIN_MIDDLE-72",
+        "match_confidence": "normalized_exact"
+      },
+      {
+        "school_name": "Concord Middle School",
+        "school_name_normalized": "concord_middle",
+        "school_level": "middle",
+        "school_year": "2024-2025",
+        "utilization_pct": 47.0,
+        "utilization_class": "under_capacity",
+        "source_confidence": "presentation_derived",
+        "needs_verification": true,
+        "matched_school_reference_id": "SCHOOLREF-MIDDLE-CONCORD_MIDDLE-51",
+        "match_confidence": "normalized_exact"
+      }
+    ],
+    "total_count": 37
+  }
+}

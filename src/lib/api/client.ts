@@ -76,8 +76,27 @@ const API_TIMEOUT_DISPLAY_MESSAGE =
 export const CFS_API_BASE_URL =
   process.env.NEXT_PUBLIC_CFS_API_BASE_URL ?? DEFAULT_BACKEND_BASE_URL;
 
+export type CfsDeploymentMode = "auto" | "demo" | "live";
+
+function normalizeDeploymentMode(value: string | undefined): CfsDeploymentMode {
+  if (value === "demo" || value === "live" || value === "auto") {
+    return value;
+  }
+
+  return "live";
+}
+
+export const CFS_DEPLOYMENT_MODE = normalizeDeploymentMode(
+  process.env.NEXT_PUBLIC_CFS_DEPLOYMENT_MODE,
+);
+
+export const IS_DEMO_MODE = CFS_DEPLOYMENT_MODE === "demo";
+export const IS_AUTO_MODE = CFS_DEPLOYMENT_MODE === "auto";
+
 export const USE_BACKEND_API =
-  process.env.NEXT_PUBLIC_USE_BACKEND_API === "true";
+  !IS_DEMO_MODE && process.env.NEXT_PUBLIC_USE_BACKEND_API === "true";
+export const USE_DEMO_DATA =
+  IS_DEMO_MODE || (IS_AUTO_MODE && !USE_BACKEND_API);
 
 export function buildApiUrl(path: string, params?: ApiQueryParams) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

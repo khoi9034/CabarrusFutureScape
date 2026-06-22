@@ -7,12 +7,17 @@ import {
   normalizeSchoolConstraintSummary,
   type SchoolConstraintSummaryViewModel,
 } from "@/lib/adapters/schoolConstraintSummaryAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import {
   getSchoolConstraintQaSummary,
   getSchoolConstraintStatistics,
   getSchoolUtilizationSeed,
 } from "@/lib/api/constraints";
+import {
+  getDemoSchoolConstraintStatisticsResponse,
+  getDemoSchoolQaSummaryResponse,
+  getDemoSchoolUtilizationSeedResponse,
+} from "@/lib/demo-data/client";
 
 export function useSchoolConstraintSummary(): SchoolConstraintSummaryViewModel {
   const [summary, setSummary] = useState<SchoolConstraintSummaryViewModel>(() =>
@@ -24,6 +29,36 @@ export function useSchoolConstraintSummary(): SchoolConstraintSummaryViewModel {
   );
 
   useEffect(() => {
+    if (USE_DEMO_DATA) {
+      Promise.all([
+        getDemoSchoolConstraintStatisticsResponse(),
+        getDemoSchoolQaSummaryResponse(),
+        getDemoSchoolUtilizationSeedResponse(),
+      ])
+        .then(([statistics, qaSummary, utilizationSeed]) => {
+          setSummary({
+            ...normalizeSchoolConstraintSummary(
+              statistics,
+              qaSummary,
+              utilizationSeed,
+            ),
+            errorMessage: null,
+            isLoading: false,
+            source: "demo",
+          });
+        })
+        .catch((error: unknown) => {
+          setSummary(
+            getUnavailableSchoolConstraintSummary(
+              error instanceof Error
+                ? error.message
+                : "Demo school capacity watch is unavailable.",
+            ),
+          );
+        });
+      return;
+    }
+
     if (!USE_BACKEND_API) {
       return;
     }
@@ -68,7 +103,7 @@ export function useSchoolConstraintSummary(): SchoolConstraintSummaryViewModel {
     return () => controller.abort();
   }, []);
 
-  if (!USE_BACKEND_API) {
+  if (!USE_BACKEND_API && !USE_DEMO_DATA) {
     return getUnavailableSchoolConstraintSummary(
       "School assignment summary requires backend API mode.",
     );

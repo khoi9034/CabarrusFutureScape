@@ -41,8 +41,9 @@ import {
   normalizeBackendParcelMapFocusResponse,
 } from "@/lib/adapters/parcelDetailAdapter";
 import { normalizeBackendParcelSearchResponse } from "@/lib/adapters/parcelSearchAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getParcelDetail, searchParcels } from "@/lib/api/parcels";
+import { searchDemoParcels } from "@/lib/demo-data/client";
 import { mockDashboardSearchServiceAdapter } from "@/lib/dashboard/searchServiceAdapter";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import { useParcelMapFocus } from "@/hooks/useParcelMapFocus";
@@ -137,10 +138,15 @@ export function CommandPalette({
           offset: 0,
           q: trimmedQuery,
         }).then(normalizeBackendParcelSearchResponse)
-      : searchParcelIndex({
-          limit: 6,
-          query: trimmedQuery,
-        });
+      : USE_DEMO_DATA
+        ? searchDemoParcels({
+            limit: 6,
+            query: trimmedQuery,
+          })
+        : searchParcelIndex({
+            limit: 6,
+            query: trimmedQuery,
+          });
 
     searchPromise
       .then((parcelResults) => {

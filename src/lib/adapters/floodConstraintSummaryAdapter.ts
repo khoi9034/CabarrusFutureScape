@@ -2,6 +2,7 @@ import type { FloodConstraintSummaryResponse } from "@/types/api";
 
 export type FloodConstraintSummarySource =
   | "api"
+  | "demo"
   | "loading"
   | "unavailable";
 

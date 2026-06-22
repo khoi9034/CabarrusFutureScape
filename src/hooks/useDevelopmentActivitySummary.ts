@@ -6,8 +6,9 @@ import {
   normalizeDevelopmentActivitySummary,
   type DevelopmentActivitySummaryViewModel,
 } from "@/lib/adapters/developmentActivitySummaryAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentActivitySummary } from "@/lib/api/development";
+import { getDemoDevelopmentActivitySummaryResponse } from "@/lib/demo-data/client";
 
 export function useDevelopmentActivitySummary() {
   const [summary, setSummary] = useState<DevelopmentActivitySummaryViewModel>(
@@ -25,6 +26,31 @@ export function useDevelopmentActivitySummary() {
   );
 
   useEffect(() => {
+    if (USE_DEMO_DATA) {
+      getDemoDevelopmentActivitySummaryResponse()
+        .then((activitySummary) => {
+          setSummary({
+            ...normalizeDevelopmentActivitySummary(activitySummary),
+            errorMessage: null,
+            isLoading: false,
+            source: "static",
+          });
+        })
+        .catch((error: unknown) => {
+          const fallbackSummary = getStaticDevelopmentActivitySummary();
+          setSummary({
+            ...fallbackSummary,
+            errorMessage:
+              error instanceof Error
+                ? error.message
+                : "CFS demo development activity summary is unavailable.",
+            isLoading: false,
+            source: "static",
+          });
+        });
+      return;
+    }
+
     if (!USE_BACKEND_API) {
       return;
     }

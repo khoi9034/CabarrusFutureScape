@@ -7,8 +7,9 @@ import {
   normalizeFloodConstraintSummary,
   type FloodConstraintSummaryViewModel,
 } from "@/lib/adapters/floodConstraintSummaryAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getFloodSummary } from "@/lib/api/constraints";
+import { getDemoFloodSummaryResponse } from "@/lib/demo-data/client";
 
 export function useFloodConstraintSummary(): FloodConstraintSummaryViewModel {
   const [summary, setSummary] = useState<FloodConstraintSummaryViewModel>(() =>
@@ -20,6 +21,28 @@ export function useFloodConstraintSummary(): FloodConstraintSummaryViewModel {
   );
 
   useEffect(() => {
+    if (USE_DEMO_DATA) {
+      getDemoFloodSummaryResponse()
+        .then((response) => {
+          setSummary({
+            ...normalizeFloodConstraintSummary(response),
+            errorMessage: null,
+            isLoading: false,
+            source: "demo",
+          });
+        })
+        .catch((error: unknown) => {
+          setSummary(
+            getUnavailableFloodConstraintSummary(
+              error instanceof Error
+                ? error.message
+                : "Demo floodplain summary is unavailable.",
+            ),
+          );
+        });
+      return;
+    }
+
     if (!USE_BACKEND_API) {
       return;
     }
@@ -52,7 +75,7 @@ export function useFloodConstraintSummary(): FloodConstraintSummaryViewModel {
     return () => controller.abort();
   }, []);
 
-  if (!USE_BACKEND_API) {
+  if (!USE_BACKEND_API && !USE_DEMO_DATA) {
     return getUnavailableFloodConstraintSummary(
       "Flood constraint summary requires backend API mode.",
     );

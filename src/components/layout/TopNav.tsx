@@ -30,8 +30,13 @@ import {
 import { normalizeBackendParcelSearchResponse } from "@/lib/adapters/parcelSearchAdapter";
 import { dashboardRoleRegistry } from "@/lib/dashboard/roleRegistry";
 import { workspaceLayoutPresets } from "@/lib/dashboard/workspacePresets";
-import { getApiErrorDisplayMessage, USE_BACKEND_API } from "@/lib/api/client";
+import {
+  getApiErrorDisplayMessage,
+  USE_BACKEND_API,
+  USE_DEMO_DATA,
+} from "@/lib/api/client";
 import { getParcelDetail, searchParcels } from "@/lib/api/parcels";
+import { searchDemoParcels } from "@/lib/demo-data/client";
 import { dispatchParcelMapFocusRequest } from "@/lib/map/parcelMapFocus";
 import { cn } from "@/lib/utils";
 import type { ProductMode } from "@/types";
@@ -124,6 +129,18 @@ export function TopNav() {
     trimmedQuickSearchQuery.length >= QUICK_SEARCH_MIN_LENGTH;
   const quickSearchDropdownVisible =
     quickSearchOpen && (quickSearchReady || quickSearchStatus === "loading");
+  const runtimeStatusLabel = USE_DEMO_DATA
+    ? "Portfolio Demo"
+    : USE_BACKEND_API
+      ? "API Live"
+      : "Static";
+  const runtimeStatusTone = USE_BACKEND_API ? "green" : "blue";
+  const searchPlaceholder = USE_DEMO_DATA
+    ? "Search demo parcel, PIN, zoning, subdivision"
+    : "Search parcel, PIN, owner, address, subdivision";
+  const searchTitle = USE_DEMO_DATA
+    ? "Search demo parcels, PINs, zoning, subdivisions, or neighborhoods"
+    : "Search parcels, PINs, owners, addresses, subdivisions, or neighborhoods";
 
   useEffect(() => {
     function handleOutsidePointerDown(event: MouseEvent) {
@@ -154,10 +171,15 @@ export function TopNav() {
       const runStaticFallback = async (
         fallbackMessage: string | null,
       ) => {
-        const staticResults = await searchParcelIndex({
-          limit: QUICK_SEARCH_LIMIT,
-          query: trimmedQuickSearchQuery,
-        });
+        const staticResults = await (USE_DEMO_DATA
+          ? searchDemoParcels({
+              limit: QUICK_SEARCH_LIMIT,
+              query: trimmedQuickSearchQuery,
+            })
+          : searchParcelIndex({
+              limit: QUICK_SEARCH_LIMIT,
+              query: trimmedQuickSearchQuery,
+            }));
 
         if (controller.signal.aborted) {
           return;
@@ -449,9 +471,9 @@ export function TopNav() {
               }}
               onFocus={() => setQuickSearchOpen(true)}
               onKeyDown={handleQuickSearchKeyDown}
-              placeholder="Search parcel, PIN, owner, address, subdivision"
+              placeholder={searchPlaceholder}
               role="combobox"
-              title="Search parcels, PINs, owners, addresses, subdivisions, or neighborhoods"
+              title={searchTitle}
               type="search"
               value={quickSearchQuery}
             />
@@ -487,6 +509,8 @@ export function TopNav() {
                       "rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase",
                       quickSearchStatus === "fallback"
                         ? "border-amber-300/20 bg-amber-300/[0.08] text-amber-100"
+                        : USE_DEMO_DATA
+                          ? "border-sky-300/20 bg-sky-300/[0.08] text-sky-100"
                         : USE_BACKEND_API
                           ? "border-emerald-300/20 bg-emerald-300/[0.08] text-emerald-100"
                           : "border-sky-300/20 bg-sky-300/[0.08] text-sky-100",
@@ -494,6 +518,8 @@ export function TopNav() {
                   >
                     {quickSearchStatus === "fallback"
                       ? "Static fallback"
+                      : USE_DEMO_DATA
+                        ? "Demo Search"
                       : USE_BACKEND_API
                         ? "API Search"
                         : "Static Search"}
@@ -583,8 +609,8 @@ export function TopNav() {
             />
             <CompactStatusChip
               icon={Activity}
-              label={USE_BACKEND_API ? "API Live" : "Static"}
-              tone={USE_BACKEND_API ? "green" : "blue"}
+              label={runtimeStatusLabel}
+              tone={runtimeStatusTone}
             />
           </div>
         </div>

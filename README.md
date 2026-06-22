@@ -79,6 +79,63 @@ Developer-only surfaces:
 These remain collapsed or hidden unless `NEXT_PUBLIC_CFS_DEVELOPER_MODE=true`
 is configured.
 
+## Runtime Modes
+
+CFS stays in one repo and supports two safe runtime modes.
+
+### Local Real Data Mode
+
+Use this mode for in-person demos on the development machine. It runs the
+Next.js frontend against the local FastAPI backend and local PostGIS `cfs_dev`
+database.
+
+```text
+NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=live
+NEXT_PUBLIC_USE_BACKEND_API=true
+NEXT_PUBLIC_CFS_API_BASE_URL=http://127.0.0.1:8000
+```
+
+`npm run dev:cfs` writes these frontend values into `.env.local`, starts the
+local FastAPI backend, and preserves the full real-data workflow.
+
+### Portfolio Demo Mode
+
+Use this mode for the public Vercel portfolio site. It does not require Render,
+Supabase, PostGIS, or any production database restore. The frontend reads small
+cached JSON extracts from `public/demo-data`.
+
+```text
+NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo
+NEXT_PUBLIC_USE_BACKEND_API=false
+```
+
+Portfolio Demo Mode supports the Overview, Workspace shell, Indicator Center,
+Planning Snapshot, Methodology, Model Lab context, and sanitized sample parcel
+search. It uses cached demo extracts and clearly labels the public site as a
+Portfolio Demo. The full local version remains the source of truth for
+PostGIS-backed countywide data.
+
+Regenerate the static portfolio data locally with:
+
+```powershell
+python scripts/export_cfs_demo_data.py
+```
+
+The exporter reads clean/summary local CFS tables only and writes:
+
+- `public/demo-data/demo_manifest.json`
+- `public/demo-data/indicator_summary.json`
+- `public/demo-data/development_trends.json`
+- `public/demo-data/flood_summary.json`
+- `public/demo-data/school_capacity_watch.json`
+- `public/demo-data/model_status.json`
+- `public/demo-data/sample_parcels.json`
+- `public/demo-data/model_lab_demo_clusters.json`
+
+The demo extract excludes sensitive contact fields and does not include exact
+parcel-level probabilities, raw model scores, or official parcel-level
+prediction classes.
+
 The left rail is now a compact `Layers` rail by default. The `Countywide
 Intelligence` action opens it for broader indicators and advanced map controls
 while preserving:
@@ -1214,7 +1271,11 @@ Core files:
 
 Feature flags:
 
-- `NEXT_PUBLIC_USE_BACKEND_API=false` keeps the dashboard in the existing static/generated-output mode.
+- `NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo` puts the public portfolio site on
+  cached files under `public/demo-data` and prevents backend API calls.
+- `NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=live` keeps the existing backend API path
+  for local real-data demos and future full production hosting.
+- `NEXT_PUBLIC_USE_BACKEND_API=false` keeps the dashboard in a static/generated-output mode.
 - `NEXT_PUBLIC_USE_BACKEND_API=true` lets the first migrated dashboard surface request the FastAPI backend.
 - `NEXT_PUBLIC_CFS_API_BASE_URL=http://127.0.0.1:8000` configures the local FastAPI base URL.
 
@@ -1244,6 +1305,9 @@ Parcel Search API behavior:
 - Blank searches can use the backend parcel filter endpoint when the backend flag is enabled.
 - Queries shorter than three characters with typed text stay on the generated static search index.
 - Queries of three or more characters call `GET /parcels/search` when `NEXT_PUBLIC_USE_BACKEND_API=true`.
+- In `NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo`, global and panel parcel search use
+  sanitized records from `public/demo-data/sample_parcels.json` instead of the
+  larger generated parcel search index.
 - Supported backend filters are passed through for zoning jurisdiction, zoning category, parcel quality status, zoning confidence, and valuation band.
 - When a text search is active, subdivision, neighborhood, zoning code, parcel size, safe-for-dashboard, and governance warning filters remain client-side filters over the normalized result set.
 - Selected search results still open the existing parcel detail drawer and can dispatch SceneView-safe map focus when backend `map_focus` data is available.
@@ -1254,7 +1318,9 @@ Parcel Filter API behavior:
 - Supported backend filters include zoning jurisdiction, zoning category, zoning code, parcel quality status, zoning confidence, governance warning, valuation band, parcel size category, subdivision, neighborhood, safe-for-dashboard, limit, and offset.
 - Backend filter rows are normalized into the existing Parcel Discovery result shape, then merged with static search-index records when available so owner and mailing context remain visible.
 - If the filter endpoint fails, times out, or returns an invalid shape, Parcel Discovery falls back to the generated static search index and shows a non-blocking fallback status.
-- The static search index remains the default mode when `NEXT_PUBLIC_USE_BACKEND_API=false`.
+- The static search index remains available when `NEXT_PUBLIC_USE_BACKEND_API=false`
+  outside Portfolio Demo Mode; Portfolio Demo Mode uses the sanitized sample
+  parcel extract.
 
 Parcel Summary Panel API behavior:
 

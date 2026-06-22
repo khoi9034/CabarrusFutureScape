@@ -7,8 +7,9 @@ import {
   normalizeDevelopmentStatistics,
   type DevelopmentStatisticsViewModel,
 } from "@/lib/adapters/developmentStatisticsAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentStatistics } from "@/lib/api/development";
+import { getDemoDevelopmentStatisticsResponse } from "@/lib/demo-data/client";
 
 export function useDevelopmentStatistics(
   activitySummary?: DevelopmentActivitySummaryViewModel,
@@ -28,6 +29,34 @@ export function useDevelopmentStatistics(
   );
 
   useEffect(() => {
+    if (USE_DEMO_DATA) {
+      getDemoDevelopmentStatisticsResponse()
+        .then((developmentStatistics) => {
+          setStatistics({
+            ...normalizeDevelopmentStatistics(
+              developmentStatistics,
+              activitySummary,
+            ),
+            errorMessage: null,
+            isLoading: false,
+            source: "static",
+          });
+        })
+        .catch((error: unknown) => {
+          const fallbackStatistics = getStaticDevelopmentStatistics();
+          setStatistics({
+            ...fallbackStatistics,
+            errorMessage:
+              error instanceof Error
+                ? error.message
+                : "CFS demo development statistics are unavailable.",
+            isLoading: false,
+            source: "static",
+          });
+        });
+      return;
+    }
+
     if (!USE_BACKEND_API) {
       return;
     }

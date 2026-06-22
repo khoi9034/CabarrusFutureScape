@@ -39,7 +39,15 @@ Safe CFS source/docs/config changes have been committed and pushed. Generated `o
 
 ## Recommended Deployment Architecture
 
-Use a split full-stack deployment:
+Use one codebase with two runtime modes:
+
+- Local Real Data Mode: Next.js frontend, local FastAPI backend, local PostGIS
+  `cfs_dev`, and full CFS county data.
+- Portfolio Demo Mode: public Vercel frontend using static cached JSON from
+  `public/demo-data`, with no production PostGIS database required.
+
+For the public portfolio deployment, use Portfolio Demo Mode first. A split
+full-stack deployment remains available for future paid/live hosting:
 
 - Frontend: Vercel, root directory `.`
 - Backend: Render/Railway/Fly/Cloud Run, with Render suitable for the current FastAPI service
@@ -59,14 +67,51 @@ Recommended Vercel project settings:
 
 The `build` script explicitly runs `next build --webpack` so Vercel's normal `npm run build` path uses the same bundler that validates locally with ArcGIS/Next.js 16.
 
-Production environment variables in Vercel:
+Portfolio Demo Mode environment variables in Vercel:
 
 ```text
+NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo
+NEXT_PUBLIC_USE_BACKEND_API=false
+```
+
+Do not set `DATABASE_URL` in Vercel. The portfolio site reads static demo JSON
+from `public/demo-data` and should not call Render, Supabase, localhost, or
+PostGIS.
+
+Future full live-mode environment variables in Vercel:
+
+```text
+NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=live
 NEXT_PUBLIC_USE_BACKEND_API=true
 NEXT_PUBLIC_CFS_API_BASE_URL=https://cfs-api-backend.onrender.com
 ```
 
 These frontend variables are public and browser-visible. Do not add database URLs, backend API keys, service role keys, or provider tokens to Vercel frontend variables.
+
+## Portfolio Demo Data
+
+The production portfolio path no longer depends on a production database
+restore. Generate demo data locally with:
+
+```powershell
+python scripts/export_cfs_demo_data.py
+```
+
+Generated files:
+
+- `public/demo-data/demo_manifest.json`
+- `public/demo-data/indicator_summary.json`
+- `public/demo-data/development_trends.json`
+- `public/demo-data/flood_summary.json`
+- `public/demo-data/school_capacity_watch.json`
+- `public/demo-data/model_status.json`
+- `public/demo-data/sample_parcels.json`
+- `public/demo-data/model_lab_demo_clusters.json`
+
+The current demo extract is about 430 KB and contains 300 sanitized sample
+parcel records. It uses clean/summary local tables only, excludes sensitive
+contact fields, and does not expose exact parcel-level probabilities, raw model
+scores, or official prediction classes.
 
 ## Backend Host Configuration
 
@@ -214,21 +259,32 @@ Deployment continuation validation on 2026-06-22:
 - `GET https://cfs-api-backend.onrender.com/health`: passed, returned status `ok`.
 - `GET https://cfs-api-backend.onrender.com/health/database`: initially failed with HTTP 503 because the configured database credential was rejected by the database provider.
 - After securely updating the backend-only Render `DATABASE_URL`, `GET https://cfs-api-backend.onrender.com/health/database` passed and returned database status `connected`.
-- Vercel production env vars configured: `NEXT_PUBLIC_USE_BACKEND_API`, `NEXT_PUBLIC_CFS_API_BASE_URL`.
+- Vercel production env vars were configured for live backend mode during the first deploy attempt. The current public portfolio plan should switch Vercel to `NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo` and `NEXT_PUBLIC_USE_BACKEND_API=false`.
 - Vercel production deploy: succeeded and aliased to `https://cabarrus-future-scape.vercel.app`.
 - `GET https://cabarrus-future-scape.vercel.app`: passed with HTTP 200.
 - CORS check from `https://cabarrus-future-scape.vercel.app` to `https://cfs-api-backend.onrender.com/health`: passed; backend returns the exact production origin in `Access-Control-Allow-Origin`.
 - Representative data-backed endpoint `GET /parcels/search?q=CFS-PARCEL-0149726579&limit=1`: reached the deployed backend but returned HTTP 500 because the connected production database does not currently contain the expected CFS public data tables.
 - Production HTML scan: no `localhost`, `127.0.0.1`, `DATABASE_URL`, service-role key, or raw credential values found in the initial document.
 - Static bundle scan: backend URL is present as expected. Local fallback and guardrail field-name strings remain in bundled code; these are not active production network requests and do not expose probabilities, raw scores, credentials, or database URLs.
-- Production browser/data smoke is partially blocked until the production database is populated with the expected CFS schema/tables or `DATABASE_URL` is pointed at a populated CFS database.
+- Production browser/data smoke for full live mode is blocked until a populated production database exists. Portfolio Demo Mode avoids this blocker by using `public/demo-data`.
+
+Portfolio Demo Mode validation on 2026-06-22:
+
+- `python scripts/export_cfs_demo_data.py`: passed.
+- Demo data generated: 8 JSON files, 300 sample parcels, about 430 KB total.
+- `rg "DATABASE_URL|password|token|secret|owner|mailing|acctname|mailaddr" public/demo-data`: no matches.
+- `npm run typecheck`: passed.
+- `npm run lint`: passed.
+- `npm run build -- --webpack`: passed in local live env.
+- Demo-mode build with `NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo` and `NEXT_PUBLIC_USE_BACKEND_API=false`: passed.
+- `python -m compileall backend`: passed.
+- `python -m pytest backend`: passed, 315 tests.
 
 ## Remaining Blockers
 
-- Production database connectivity is now configured, but the connected database only contains provider/system schemas and does not contain CFS public data tables.
-- Populate the production database with the expected CFS schema/tables, or point backend `DATABASE_URL` to a populated CFS database.
-- Once CFS tables are available, smoke test global parcel search and data-backed map/dashboard flows from `https://cabarrus-future-scape.vercel.app`.
-- Production DB migrations/write actions still need explicit approval before running.
+- Public Vercel portfolio mode has no production database blocker after Vercel env vars are set to demo mode.
+- Full live cloud mode still requires a populated backend database and explicit approval before any production DB write/migration action.
+- If live cloud mode is re-enabled later, smoke test global parcel search and data-backed map/dashboard flows from `https://cabarrus-future-scape.vercel.app`.
 
 ## Production Database Restore Attempt
 

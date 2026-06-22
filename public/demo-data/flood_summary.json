@@ -1,0 +1,74 @@
+{
+  "available": true,
+  "generated_at": "2026-06-22T19:05:37Z",
+  "summary": {
+    "average_percent_constrained": 3.3261,
+    "buildability_impact_distribution": [
+      {
+        "parcel_count": 102582,
+        "percentage": 93.242,
+        "value": "low"
+      },
+      {
+        "parcel_count": 4880,
+        "percentage": 4.4357,
+        "value": "severe"
+      },
+      {
+        "parcel_count": 1482,
+        "percentage": 1.3471,
+        "value": "high"
+      },
+      {
+        "parcel_count": 1073,
+        "percentage": 0.9753,
+        "value": "moderate"
+      }
+    ],
+    "caveats": [
+      "Based on FEMA floodplain data; FEMA remains authoritative."
+    ],
+    "dominant_zone_distribution": [
+      {
+        "parcel_count": 107860,
+        "percentage": 98.0394,
+        "value": "X"
+      },
+      {
+        "parcel_count": 2157,
+        "percentage": 1.9606,
+        "value": "AE"
+      }
+    ],
+    "filters_applied": {},
+    "floodplain_parcels": 8661,
+    "floodway_parcels": 3229,
+    "high_severe_buildability_parcels": 6362,
+    "max_percent_constrained": 100.0,
+    "review_required_parcels": 7989,
+    "severity_distribution": [
+      {
+        "parcel_count": 101356,
+        "percentage": 92.1276,
+        "value": "low"
+      },
+      {
+        "parcel_count": 4025,
+        "percentage": 3.6585,
+        "value": "high"
+      },
+      {
+        "parcel_count": 3229,
+        "percentage": 2.935,
+        "value": "severe"
+      },
+      {
+        "parcel_count": 1407,
+        "percentage": 1.2789,
+        "value": "moderate"
+      }
+    ],
+    "sfha_parcels": 7254,
+    "total_parcels": 110017
+  }
+}

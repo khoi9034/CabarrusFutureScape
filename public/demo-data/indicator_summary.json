@@ -1,0 +1,1832 @@
+{
+  "available": true,
+  "caveats": [
+    "Portfolio demo uses a cached local extract, not a live production database.",
+    "Monitoring indicators are not official determinations.",
+    "Preliminary school utilization must be verified with official enrollment and capacity.",
+    "Utility proxy context does not confirm available capacity.",
+    "Model research remains internal and does not show exact probabilities or raw scores."
+  ],
+  "data_still_needed": [
+    {
+      "best_format": "REST/GIS/table",
+      "id": "wsacc-utility-capacity",
+      "label": "WSACC true utility capacity",
+      "status": "Data still needed",
+      "unlocks": "Capacity-aware utility readiness review"
+    },
+    {
+      "best_format": "REST/GIS/table",
+      "id": "official-school-capacity",
+      "label": "Official school enrollment/capacity",
+      "status": "Data still needed",
+      "unlocks": "Verified school capacity watch"
+    },
+    {
+      "best_format": "REST/GIS/table",
+      "id": "official-rezoning-records",
+      "label": "Official rezoning records",
+      "status": "Data still needed",
+      "unlocks": "Rezoning-aware planning context"
+    },
+    {
+      "best_format": "REST/GIS/table",
+      "id": "countywide-development-pipeline",
+      "label": "Countywide development pipeline",
+      "status": "Data still needed",
+      "unlocks": "Subdivision and site-plan monitoring"
+    },
+    {
+      "best_format": "GIS/table",
+      "id": "future-land-use",
+      "label": "Future land use / small-area plans",
+      "status": "Data still needed",
+      "unlocks": "Plan-alignment review"
+    },
+    {
+      "best_format": "GIS/table",
+      "id": "planned-road-projects",
+      "label": "Planned road projects",
+      "status": "Data still needed",
+      "unlocks": "Transportation readiness context"
+    },
+    {
+      "best_format": "GIS/table",
+      "id": "planned-utility-extensions",
+      "label": "Planned utility extensions",
+      "status": "Data still needed",
+      "unlocks": "Utility expansion context"
+    }
+  ],
+  "development_activity": {
+    "activity_summary": {
+      "active_parcel_count": 43474,
+      "avg_permit_amount": 219907.87532687376,
+      "by_activity_class": [
+        {
+          "value": "moderate_activity",
+          "active_parcel_count": 27425,
+          "permit_count": 36110,
+          "total_permit_amount": 3461697158.88
+        },
+        {
+          "value": "low_activity",
+          "active_parcel_count": 13068,
+          "permit_count": 14699,
+          "total_permit_amount": 62774.7
+        },
+        {
+          "value": "high_activity",
+          "active_parcel_count": 2430,
+          "permit_count": 8421,
+          "total_permit_amount": 1510979335.47
+        },
+        {
+          "value": "very_high_activity",
+          "active_parcel_count": 551,
+          "permit_count": 7852,
+          "total_permit_amount": 4662662054.96
+        },
+        {
+          "value": "no_activity",
+          "active_parcel_count": 0,
+          "permit_count": 0,
+          "total_permit_amount": 0.0
+        }
+      ],
+      "by_month": [
+        {
+          "year": 2024,
+          "month": 1,
+          "active_parcel_count": 325,
+          "permit_count": 357,
+          "total_permit_amount": 48314522.64
+        },
+        {
+          "year": 2024,
+          "month": 2,
+          "active_parcel_count": 352,
+          "permit_count": 360,
+          "total_permit_amount": 49387068.4
+        },
+        {
+          "year": 2024,
+          "month": 3,
+          "active_parcel_count": 365,
+          "permit_count": 390,
+          "total_permit_amount": 81277087.74
+        },
+        {
+          "year": 2024,
+          "month": 4,
+          "active_parcel_count": 435,
+          "permit_count": 437,
+          "total_permit_amount": 79871909.63
+        },
+        {
+          "year": 2024,
+          "month": 5,
+          "active_parcel_count": 366,
+          "permit_count": 423,
+          "total_permit_amount": 80430755.55
+        },
+        {
+          "year": 2024,
+          "month": 6,
+          "active_parcel_count": 277,
+          "permit_count": 284,
+          "total_permit_amount": 77915275.11
+        },
+        {
+          "year": 2024,
+          "month": 7,
+          "active_parcel_count": 313,
+          "permit_count": 340,
+          "total_permit_amount": 57387459.72
+        },
+        {
+          "year": 2024,
+          "month": 8,
+          "active_parcel_count": 359,
+          "permit_count": 385,
+          "total_permit_amount": 261942359.45
+        },
+        {
+          "year": 2024,
+          "month": 9,
+          "active_parcel_count": 324,
+          "permit_count": 331,
+          "total_permit_amount": 81965967.39
+        },
+        {
+          "year": 2024,
+          "month": 10,
+          "active_parcel_count": 300,
+          "permit_count": 303,
+          "total_permit_amount": 102054483.09
+        },
+        {
+          "year": 2024,
+          "month": 11,
+          "active_parcel_count": 242,
+          "permit_count": 245,
+          "total_permit_amount": 64903303.64
+        },
+        {
+          "year": 2024,
+          "month": 12,
+          "active_parcel_count": 276,
+          "permit_count": 313,
+          "total_permit_amount": 135068870.18
+        },
+        {
+          "year": 2025,
+          "month": 1,
+          "active_parcel_count": 298,
+          "permit_count": 331,
+          "total_permit_amount": 67864380.48
+        },
+        {
+          "year": 2025,
+          "month": 2,
+          "active_parcel_count": 251,
+          "permit_count": 252,
+          "total_permit_amount": 39595684.47
+        },
+        {
+          "year": 2025,
+          "month": 3,
+          "active_parcel_count": 317,
+          "permit_count": 349,
+          "total_permit_amount": 90072320.01
+        },
+        {
+          "year": 2025,
+          "month": 4,
+          "active_parcel_count": 310,
+          "permit_count": 332,
+          "total_permit_amount": 46427701.93
+        },
+        {
+          "year": 2025,
+          "month": 5,
+          "active_parcel_count": 259,
+          "permit_count": 287,
+          "total_permit_amount": 92469130.05
+        },
+        {
+          "year": 2025,
+          "month": 6,
+          "active_parcel_count": 314,
+          "permit_count": 347,
+          "total_permit_amount": 91226265.21
+        },
+        {
+          "year": 2025,
+          "month": 7,
+          "active_parcel_count": 306,
+          "permit_count": 343,
+          "total_permit_amount": 59000733.52
+        },
+        {
+          "year": 2025,
+          "month": 8,
+          "active_parcel_count": 259,
+          "permit_count": 283,
+          "total_permit_amount": 57548819.4
+        },
+        {
+          "year": 2025,
+          "month": 9,
+          "active_parcel_count": 341,
+          "permit_count": 356,
+          "total_permit_amount": 61533274.45
+        },
+        {
+          "year": 2025,
+          "month": 10,
+          "active_parcel_count": 303,
+          "permit_count": 320,
+          "total_permit_amount": 64569448.28
+        },
+        {
+          "year": 2025,
+          "month": 11,
+          "active_parcel_count": 229,
+          "permit_count": 226,
+          "total_permit_amount": 39297035.11
+        },
+        {
+          "year": 2025,
+          "month": 12,
+          "active_parcel_count": 211,
+          "permit_count": 216,
+          "total_permit_amount": 26573797.84
+        }
+      ],
+      "by_permit_type": [
+        {
+          "value": "NEW CONSTRUCTION",
+          "active_parcel_count": 27708,
+          "permit_count": 28278,
+          "total_permit_amount": 3168429134.03
+        },
+        {
+          "value": "OTHER",
+          "active_parcel_count": 8578,
+          "permit_count": 12076,
+          "total_permit_amount": 665820892.28
+        },
+        {
+          "value": "REMODEL",
+          "active_parcel_count": 5476,
+          "permit_count": 6056,
+          "total_permit_amount": 148935295.03
+        },
+        {
+          "value": "ADDITION RESIDENTIAL",
+          "active_parcel_count": 4217,
+          "permit_count": 4609,
+          "total_permit_amount": 128006993.48
+        },
+        {
+          "value": "EXTRA FEATURE",
+          "active_parcel_count": 3882,
+          "permit_count": 4370,
+          "total_permit_amount": 1513147352.08
+        },
+        {
+          "value": "COMMERCIAL NEW CONSTRUCTION",
+          "active_parcel_count": 1797,
+          "permit_count": 3914,
+          "total_permit_amount": 2542223625.16
+        },
+        {
+          "value": "UPFIT",
+          "active_parcel_count": 1224,
+          "permit_count": 2502,
+          "total_permit_amount": 1267037567.62
+        },
+        {
+          "value": "DEMOLITION",
+          "active_parcel_count": 867,
+          "permit_count": 987,
+          "total_permit_amount": 36931618.85
+        },
+        {
+          "value": "OUT BUILDING",
+          "active_parcel_count": 815,
+          "permit_count": 836,
+          "total_permit_amount": 43306701.64
+        },
+        {
+          "value": "Residential Manufactored Home",
+          "active_parcel_count": 195,
+          "permit_count": 373,
+          "total_permit_amount": 18255990.21
+        },
+        {
+          "value": "Commercial Addition",
+          "active_parcel_count": 103,
+          "permit_count": 125,
+          "total_permit_amount": 126812665.26
+        },
+        {
+          "value": "Residential Modular",
+          "active_parcel_count": 123,
+          "permit_count": 125,
+          "total_permit_amount": 19723696.0
+        }
+      ],
+      "by_status": [
+        {
+          "value": "unknown",
+          "active_parcel_count": 33041,
+          "permit_count": 45735,
+          "total_permit_amount": 4205609409.12
+        },
+        {
+          "value": "CLOSED",
+          "active_parcel_count": 5780,
+          "permit_count": 8704,
+          "total_permit_amount": 3352942938.27
+        },
+        {
+          "value": "INSPECTIONS",
+          "active_parcel_count": 4694,
+          "permit_count": 5306,
+          "total_permit_amount": 1253234203.75
+        },
+        {
+          "value": "ISSUED",
+          "active_parcel_count": 3760,
+          "permit_count": 4102,
+          "total_permit_amount": 752683434.06
+        },
+        {
+          "value": "CO ISSUED",
+          "active_parcel_count": 502,
+          "permit_count": 502,
+          "total_permit_amount": 120310026.58
+        },
+        {
+          "value": "VOID",
+          "active_parcel_count": 77,
+          "permit_count": 76,
+          "total_permit_amount": 6280146.0
+        },
+        {
+          "value": "PENDING",
+          "active_parcel_count": 1,
+          "permit_count": 1,
+          "total_permit_amount": 60000.0
+        }
+      ],
+      "by_work_type": [
+        {
+          "value": "unknown",
+          "active_parcel_count": 35383,
+          "permit_count": 49660,
+          "total_permit_amount": 4718159041.81
+        },
+        {
+          "value": "Residential New",
+          "active_parcel_count": 5355,
+          "permit_count": 5424,
+          "total_permit_amount": 1030142366.89
+        },
+        {
+          "value": "Residential Repair",
+          "active_parcel_count": 1802,
+          "permit_count": 1916,
+          "total_permit_amount": 64470171.98
+        },
+        {
+          "value": "Residential Addition",
+          "active_parcel_count": 1541,
+          "permit_count": 1622,
+          "total_permit_amount": 55886290.31
+        },
+        {
+          "value": "Commercial Upfit",
+          "active_parcel_count": 608,
+          "permit_count": 1112,
+          "total_permit_amount": 922038498.54
+        },
+        {
+          "value": "Residential Accessory Structure",
+          "active_parcel_count": 1027,
+          "permit_count": 1100,
+          "total_permit_amount": 1359884180.91
+        },
+        {
+          "value": "Commercial Sign",
+          "active_parcel_count": 480,
+          "permit_count": 609,
+          "total_permit_amount": 7713971.45
+        },
+        {
+          "value": "Residential Pool",
+          "active_parcel_count": 515,
+          "permit_count": 522,
+          "total_permit_amount": 57205159.31
+        },
+        {
+          "value": "Commercial New",
+          "active_parcel_count": 245,
+          "permit_count": 453,
+          "total_permit_amount": 1115028620.98
+        },
+        {
+          "value": "Residential Deck",
+          "active_parcel_count": 360,
+          "permit_count": 360,
+          "total_permit_amount": 5944332.3
+        },
+        {
+          "value": "Residential Demolition",
+          "active_parcel_count": 189,
+          "permit_count": 200,
+          "total_permit_amount": 2243640.75
+        },
+        {
+          "value": "Residential Mobile",
+          "active_parcel_count": 72,
+          "permit_count": 189,
+          "total_permit_amount": 11055019.92
+        }
+      ],
+      "by_year": [
+        {
+          "year": 1986,
+          "active_parcel_count": 1,
+          "permit_count": 1,
+          "total_permit_amount": null
+        },
+        {
+          "year": 1989,
+          "active_parcel_count": 1,
+          "permit_count": 1,
+          "total_permit_amount": null
+        },
+        {
+          "year": 1991,
+          "active_parcel_count": 1,
+          "permit_count": 1,
+          "total_permit_amount": null
+        },
+        {
+          "year": 1998,
+          "active_parcel_count": 1,
+          "permit_count": 1,
+          "total_permit_amount": null
+        },
+        {
+          "year": 1999,
+          "active_parcel_count": 1,
+          "permit_count": 1,
+          "total_permit_amount": null
+        },
+        {
+          "year": 2000,
+          "active_parcel_count": 5,
+          "permit_count": 5,
+          "total_permit_amount": 134890.0
+        },
+        {
+          "year": 2001,
+          "active_parcel_count": 12,
+          "permit_count": 11,
+          "total_permit_amount": 367101.0
+        },
+        {
+          "year": 2002,
+          "active_parcel_count": 28,
+          "permit_count": 27,
+          "total_permit_amount": 1607913.0
+        },
+        {
+          "year": 2003,
+          "active_parcel_count": 1802,
+          "permit_count": 1864,
+          "total_permit_amount": null
+        },
+        {
+          "year": 2004,
+          "active_parcel_count": 1955,
+          "permit_count": 1979,
+          "total_permit_amount": null
+        },
+        {
+          "year": 2005,
+          "active_parcel_count": 858,
+          "permit_count": 862,
+          "total_permit_amount": null
+        },
+        {
+          "year": 2006,
+          "active_parcel_count": 1371,
+          "permit_count": 1396,
+          "total_permit_amount": null
+        },
+        {
+          "year": 2007,
+          "active_parcel_count": 3061,
+          "permit_count": 3172,
+          "total_permit_amount": null
+        },
+        {
+          "year": 2008,
+          "active_parcel_count": 2041,
+          "permit_count": 2243,
+          "total_permit_amount": 3500.0
+        },
+        {
+          "year": 2009,
+          "active_parcel_count": 1413,
+          "permit_count": 1690,
+          "total_permit_amount": 165600.0
+        },
+        {
+          "year": 2010,
+          "active_parcel_count": 1397,
+          "permit_count": 1495,
+          "total_permit_amount": 766320.0
+        },
+        {
+          "year": 2011,
+          "active_parcel_count": 1498,
+          "permit_count": 1663,
+          "total_permit_amount": 119200.0
+        },
+        {
+          "year": 2012,
+          "active_parcel_count": 1648,
+          "permit_count": 1806,
+          "total_permit_amount": 4789685.0
+        },
+        {
+          "year": 2013,
+          "active_parcel_count": 1931,
+          "permit_count": 2068,
+          "total_permit_amount": 16318575.06
+        },
+        {
+          "year": 2014,
+          "active_parcel_count": 2445,
+          "permit_count": 2787,
+          "total_permit_amount": 332771328.52
+        },
+        {
+          "year": 2015,
+          "active_parcel_count": 2796,
+          "permit_count": 3141,
+          "total_permit_amount": 486552629.37
+        },
+        {
+          "year": 2016,
+          "active_parcel_count": 2842,
+          "permit_count": 3310,
+          "total_permit_amount": 623884099.1
+        },
+        {
+          "year": 2017,
+          "active_parcel_count": 2991,
+          "permit_count": 3382,
+          "total_permit_amount": 556915680.87
+        },
+        {
+          "year": 2018,
+          "active_parcel_count": 3172,
+          "permit_count": 3593,
+          "total_permit_amount": 690520272.11
+        },
+        {
+          "year": 2019,
+          "active_parcel_count": 3368,
+          "permit_count": 3720,
+          "total_permit_amount": 477250735.47
+        },
+        {
+          "year": 2020,
+          "active_parcel_count": 3577,
+          "permit_count": 3821,
+          "total_permit_amount": 653090507.34
+        },
+        {
+          "year": 2021,
+          "active_parcel_count": 3971,
+          "permit_count": 4304,
+          "total_permit_amount": 638309049.05
+        },
+        {
+          "year": 2022,
+          "active_parcel_count": 3425,
+          "permit_count": 4202,
+          "total_permit_amount": 922079926.23
+        },
+        {
+          "year": 2023,
+          "active_parcel_count": 3496,
+          "permit_count": 4044,
+          "total_permit_amount": 2428525936.48
+        },
+        {
+          "year": 2024,
+          "active_parcel_count": 3573,
+          "permit_count": 4168,
+          "total_permit_amount": 1120519062.54
+        },
+        {
+          "year": 2025,
+          "active_parcel_count": 3074,
+          "permit_count": 3642,
+          "total_permit_amount": 736178590.75
+        }
+      ],
+      "by_zoning_category": [
+        {
+          "value": "residential",
+          "active_parcel_count": 27001,
+          "permit_count": 36370,
+          "total_permit_amount": 2289772956.95
+        },
+        {
+          "value": "unknown",
+          "active_parcel_count": 11798,
+          "permit_count": 19452,
+          "total_permit_amount": 4479878137.41
+        },
+        {
+          "value": "agricultural",
+          "active_parcel_count": 2983,
+          "permit_count": 4601,
+          "total_permit_amount": 409042759.06
+        },
+        {
+          "value": "commercial",
+          "active_parcel_count": 959,
+          "permit_count": 2436,
+          "total_permit_amount": 2063195338.37
+        },
+        {
+          "value": "mixed_use",
+          "active_parcel_count": 341,
+          "permit_count": 658,
+          "total_permit_amount": 97059045.87
+        },
+        {
+          "value": "office",
+          "active_parcel_count": 228,
+          "permit_count": 498,
+          "total_permit_amount": 190961719.93
+        },
+        {
+          "value": "industrial",
+          "active_parcel_count": 164,
+          "permit_count": 422,
+          "total_permit_amount": 161210200.19
+        }
+      ],
+      "by_zoning_jurisdiction": [
+        {
+          "value": "Concord",
+          "active_parcel_count": 19929,
+          "permit_count": 30620,
+          "total_permit_amount": 5968845712.0
+        },
+        {
+          "value": "Cabarrus County / Unincorporated",
+          "active_parcel_count": 7579,
+          "permit_count": 11603,
+          "total_permit_amount": 867544871.54
+        },
+        {
+          "value": "Kannapolis",
+          "active_parcel_count": 8186,
+          "permit_count": 11449,
+          "total_permit_amount": 1643119156.14
+        },
+        {
+          "value": "Harrisburg",
+          "active_parcel_count": 5548,
+          "permit_count": 7670,
+          "total_permit_amount": 821142477.44
+        },
+        {
+          "value": "Midland",
+          "active_parcel_count": 1435,
+          "permit_count": 1769,
+          "total_permit_amount": 171840627.59
+        },
+        {
+          "value": "Mt. Pleasant",
+          "active_parcel_count": 480,
+          "permit_count": 752,
+          "total_permit_amount": 125723580.26
+        },
+        {
+          "value": "Locust",
+          "active_parcel_count": 316,
+          "permit_count": 372,
+          "total_permit_amount": 37172399.04
+        },
+        {
+          "value": "unknown",
+          "active_parcel_count": 1,
+          "permit_count": 197,
+          "total_permit_amount": 55731333.77
+        }
+      ],
+      "date_range": {
+        "activity_date_max": "2025-12-31",
+        "activity_date_min": "1986-12-01"
+      },
+      "filters_applied": {},
+      "recent_activity": {
+        "recent_1yr_parcels": 3091,
+        "recent_3yr_parcels": 9388
+      },
+      "total_permit_amount": 9691120157.78,
+      "total_permits": 64426
+    },
+    "permit_segments": {
+      "by_development_domain": [
+        {
+          "value": "residential",
+          "count": 42206
+        },
+        {
+          "value": "mixed_or_unknown",
+          "count": 19196
+        },
+        {
+          "value": "commercial",
+          "count": 2993
+        },
+        {
+          "value": "institutional",
+          "count": 20
+        },
+        {
+          "value": "industrial",
+          "count": 11
+        }
+      ],
+      "by_permit_growth_signal": [
+        {
+          "value": "major_growth",
+          "count": 34611
+        },
+        {
+          "value": "moderate_activity",
+          "count": 10619
+        },
+        {
+          "value": "redevelopment_signal",
+          "count": 9287
+        },
+        {
+          "value": "unknown",
+          "count": 5792
+        },
+        {
+          "value": "minor_activity",
+          "count": 4117
+        }
+      ],
+      "by_permit_segment": [
+        {
+          "value": "residential_growth",
+          "count": 42206
+        },
+        {
+          "value": "redevelopment_signal",
+          "count": 7866
+        },
+        {
+          "value": "administrative_or_unknown",
+          "count": 5792
+        },
+        {
+          "value": "commercial_activity",
+          "count": 2993
+        },
+        {
+          "value": "accessory_or_misc",
+          "count": 2251
+        },
+        {
+          "value": "minor_maintenance",
+          "count": 1866
+        },
+        {
+          "value": "demolition",
+          "count": 1421
+        },
+        {
+          "value": "institutional_activity",
+          "count": 20
+        },
+        {
+          "value": "industrial_activity",
+          "count": 11
+        }
+      ],
+      "by_permit_status_stage": [
+        {
+          "value": "unknown",
+          "count": 45735
+        },
+        {
+          "value": "completed",
+          "count": 9206
+        },
+        {
+          "value": "active_construction",
+          "count": 5306
+        },
+        {
+          "value": "issued_or_starting",
+          "count": 4102
+        },
+        {
+          "value": "inactive_or_removed",
+          "count": 76
+        },
+        {
+          "value": "pending_or_review",
+          "count": 1
+        }
+      ],
+      "by_permit_value_class": [
+        {
+          "value": "unknown_value",
+          "count": 22142
+        },
+        {
+          "value": "high_value",
+          "count": 16604
+        },
+        {
+          "value": "low_value",
+          "count": 14359
+        },
+        {
+          "value": "medium_value",
+          "count": 9816
+        },
+        {
+          "value": "major_value",
+          "count": 1505
+        }
+      ],
+      "total_permits": 64426
+    },
+    "statistics": {
+      "activity_classes": {
+        "high_activity": 2430,
+        "low_activity": 13068,
+        "moderate_activity": 27425,
+        "no_activity": 66543,
+        "very_high_activity": 551
+      },
+      "activity_date_max": "2025-12-31",
+      "activity_date_min": "1986-12-01",
+      "by_permit_type": [
+        {
+          "value": "NEW CONSTRUCTION",
+          "count": 29031
+        },
+        {
+          "value": "OTHER",
+          "count": 12880
+        },
+        {
+          "value": "REMODEL",
+          "count": 6250
+        },
+        {
+          "value": "ADDITION RESIDENTIAL",
+          "count": 4722
+        },
+        {
+          "value": "EXTRA FEATURE",
+          "count": 4497
+        },
+        {
+          "value": "COMMERCIAL NEW CONSTRUCTION",
+          "count": 4364
+        },
+        {
+          "value": "UPFIT",
+          "count": 2712
+        },
+        {
+          "value": "DEMOLITION",
+          "count": 1072
+        },
+        {
+          "value": "OUT BUILDING",
+          "count": 872
+        },
+        {
+          "value": "Residential Manufactored Home",
+          "count": 405
+        },
+        {
+          "value": "Comm Extra Features",
+          "count": 153
+        },
+        {
+          "value": "Commercial Addition",
+          "count": 133
+        }
+      ],
+      "by_status": [
+        {
+          "value": "unknown",
+          "count": 47685
+        },
+        {
+          "value": "CLOSED",
+          "count": 9184
+        },
+        {
+          "value": "INSPECTIONS",
+          "count": 5520
+        },
+        {
+          "value": "ISSUED",
+          "count": 4287
+        },
+        {
+          "value": "CO ISSUED",
+          "count": 522
+        },
+        {
+          "value": "VOID",
+          "count": 78
+        },
+        {
+          "value": "PENDING",
+          "count": 1
+        }
+      ],
+      "by_work_type": [
+        {
+          "value": "unknown",
+          "count": 51825
+        },
+        {
+          "value": "Residential New",
+          "count": 5629
+        },
+        {
+          "value": "Residential Repair",
+          "count": 1985
+        },
+        {
+          "value": "Residential Addition",
+          "count": 1666
+        },
+        {
+          "value": "Commercial Upfit",
+          "count": 1208
+        },
+        {
+          "value": "Residential Accessory Structure",
+          "count": 1128
+        },
+        {
+          "value": "Commercial Sign",
+          "count": 683
+        },
+        {
+          "value": "Residential Pool",
+          "count": 531
+        },
+        {
+          "value": "Commercial New",
+          "count": 482
+        },
+        {
+          "value": "Residential Deck",
+          "count": 367
+        },
+        {
+          "value": "Residential Demolition",
+          "count": 214
+        },
+        {
+          "value": "Residential Mobile",
+          "count": 204
+        }
+      ],
+      "by_zoning_category": [
+        {
+          "value": "residential",
+          "count": 37424
+        },
+        {
+          "value": "unknown",
+          "count": 20662
+        },
+        {
+          "value": "agricultural",
+          "count": 4779
+        },
+        {
+          "value": "commercial",
+          "count": 2663
+        },
+        {
+          "value": "mixed_use",
+          "count": 748
+        },
+        {
+          "value": "office",
+          "count": 532
+        },
+        {
+          "value": "industrial",
+          "count": 469
+        }
+      ],
+      "by_zoning_jurisdiction": [
+        {
+          "value": "Concord",
+          "count": 31975
+        },
+        {
+          "value": "Cabarrus County / Unincorporated",
+          "count": 12078
+        },
+        {
+          "value": "Kannapolis",
+          "count": 11905
+        },
+        {
+          "value": "Harrisburg",
+          "count": 8026
+        },
+        {
+          "value": "Midland",
+          "count": 1902
+        },
+        {
+          "value": "Mt. Pleasant",
+          "count": 817
+        },
+        {
+          "value": "Locust",
+          "count": 377
+        },
+        {
+          "value": "unknown",
+          "count": 197
+        }
+      ],
+      "filters_applied": {},
+      "parcels_with_activity": 43474,
+      "parcels_without_activity": 66543,
+      "recent_activity_parcels_1yr": 3091,
+      "recent_activity_parcels_3yr": 9388,
+      "total_permits": 64426
+    }
+  },
+  "floodplain_review": {
+    "average_percent_constrained": 3.3261,
+    "buildability_impact_distribution": [
+      {
+        "parcel_count": 102582,
+        "percentage": 93.242,
+        "value": "low"
+      },
+      {
+        "parcel_count": 4880,
+        "percentage": 4.4357,
+        "value": "severe"
+      },
+      {
+        "parcel_count": 1482,
+        "percentage": 1.3471,
+        "value": "high"
+      },
+      {
+        "parcel_count": 1073,
+        "percentage": 0.9753,
+        "value": "moderate"
+      }
+    ],
+    "caveats": [
+      "Based on FEMA floodplain data; FEMA remains authoritative."
+    ],
+    "dominant_zone_distribution": [
+      {
+        "parcel_count": 107860,
+        "percentage": 98.0394,
+        "value": "X"
+      },
+      {
+        "parcel_count": 2157,
+        "percentage": 1.9606,
+        "value": "AE"
+      }
+    ],
+    "filters_applied": {},
+    "floodplain_parcels": 8661,
+    "floodway_parcels": 3229,
+    "high_severe_buildability_parcels": 6362,
+    "max_percent_constrained": 100.0,
+    "review_required_parcels": 7989,
+    "severity_distribution": [
+      {
+        "parcel_count": 101356,
+        "percentage": 92.1276,
+        "value": "low"
+      },
+      {
+        "parcel_count": 4025,
+        "percentage": 3.6585,
+        "value": "high"
+      },
+      {
+        "parcel_count": 3229,
+        "percentage": 2.935,
+        "value": "severe"
+      },
+      {
+        "parcel_count": 1407,
+        "percentage": 1.2789,
+        "value": "moderate"
+      }
+    ],
+    "sfha_parcels": 7254,
+    "total_parcels": 110017
+  },
+  "generated_at": "2026-06-22T19:05:37Z",
+  "model_status": {
+    "caveat": "Internal research only. No exact probabilities or raw scores are shown.",
+    "current_best_internal_model": "Zoning + Transportation + Tax/Value",
+    "exact_probabilities_shown": false,
+    "feature_rows": 1430221,
+    "generated_at": "2026-06-22T19:05:37Z",
+    "model_status": "Internal only",
+    "production_ready": false,
+    "public_exposure_allowed": false,
+    "raw_scores_shown": false
+  },
+  "school_capacity_watch": {
+    "qa_summary": {
+      "capacity_available": false,
+      "caveats": [
+        "Official school enrollment/capacity data is still needed."
+      ],
+      "duplicate_normalized_names": [],
+      "excluded_count_by_reason": [
+        {
+          "value": "included",
+          "count": 34
+        },
+        {
+          "value": "level_not_v1",
+          "count": 11
+        },
+        {
+          "value": "non_ccs_not_v1",
+          "count": 7
+        },
+        {
+          "value": "magnet_not_v1",
+          "count": 1
+        }
+      ],
+      "included_public_ccs_count": 34,
+      "missing_elementary_assignment_count": 18856,
+      "missing_high_assignment_count": 18856,
+      "missing_middle_assignment_count": 23796,
+      "multi_zone_overlap_counts": {},
+      "parcel_assignment_count": 110017,
+      "parcels_assigned_to_unmatched_school_zones": 0,
+      "safe_for_api_exposure": true,
+      "school_reference_count": 53,
+      "school_zones_count_by_level": [
+        {
+          "value": "elementary",
+          "count": 25
+        },
+        {
+          "value": "high",
+          "count": 9
+        },
+        {
+          "value": "middle",
+          "count": 10
+        }
+      ],
+      "unmatched_zone_names": [
+        {
+          "issue_type": "unmatched_reference_review",
+          "detail": "non_ccs_not_v1",
+          "parcel_count": null,
+          "recommended_action": "Verify official school reference and attendance-zone mapping.",
+          "school_level": "elementary",
+          "school_name": "GW Carver ES",
+          "severity": "review"
+        },
+        {
+          "issue_type": "unmatched_reference_review",
+          "detail": "Reference review needed",
+          "parcel_count": null,
+          "recommended_action": "Verify official school reference and attendance-zone mapping.",
+          "school_level": "elementary",
+          "school_name": "Hickory Ridge ES",
+          "severity": "review"
+        },
+        {
+          "issue_type": "unmatched_reference_review",
+          "detail": "non_ccs_not_v1",
+          "parcel_count": null,
+          "recommended_action": "Verify official school reference and attendance-zone mapping.",
+          "school_level": "elementary",
+          "school_name": "North Kannapolis ES",
+          "severity": "review"
+        },
+        {
+          "issue_type": "unmatched_reference_review",
+          "detail": "Reference review needed",
+          "parcel_count": null,
+          "recommended_action": "Verify official school reference and attendance-zone mapping.",
+          "school_level": "high",
+          "school_name": "West Cabarrus HS",
+          "severity": "review"
+        },
+        {
+          "issue_type": "unmatched_reference_review",
+          "detail": "Reference review needed",
+          "parcel_count": null,
+          "recommended_action": "Verify official school reference and attendance-zone mapping.",
+          "school_level": "middle",
+          "school_name": "Roberta Road MS",
+          "severity": "review"
+        }
+      ]
+    },
+    "statistics": {
+      "total_parcels": 110017,
+      "elementary_assigned_parcels": 91161,
+      "middle_assigned_parcels": 86221,
+      "high_assigned_parcels": 91161,
+      "missing_elementary_assignment_parcels": 18856,
+      "missing_middle_assignment_parcels": 23796,
+      "missing_high_assignment_parcels": 18856,
+      "assignment_review_required_parcels": 75143,
+      "capacity_data_available_parcels": 0,
+      "capacity_not_available_parcels": 110017,
+      "school_constraint_score_non_null_parcels": 0,
+      "assignment_confidence_distribution": [
+        {
+          "count": 54973,
+          "percentage": 49.9677,
+          "value": "review"
+        },
+        {
+          "count": 34200,
+          "percentage": 31.0861,
+          "value": "high"
+        },
+        {
+          "count": 18856,
+          "percentage": 17.1392,
+          "value": "low"
+        },
+        {
+          "count": 1988,
+          "percentage": 1.807,
+          "value": "medium"
+        }
+      ],
+      "caveats": [
+        "School assignment context is preliminary until official capacity data is received."
+      ],
+      "constraint_class_distribution": [
+        {
+          "count": 110017,
+          "percentage": 100.0,
+          "value": "not_scored"
+        }
+      ],
+      "filters_applied": {},
+      "included_cfs_v1_zone_count": 35,
+      "included_public_ccs_reference_count": 34,
+      "reference_exclusion_distribution": [
+        {
+          "value": "included",
+          "count": 34
+        },
+        {
+          "value": "level_not_v1",
+          "count": 11
+        },
+        {
+          "value": "non_ccs_not_v1",
+          "count": 7
+        },
+        {
+          "value": "magnet_not_v1",
+          "count": 1
+        }
+      ],
+      "safe_for_api_exposure": true,
+      "school_reference_count": 53,
+      "school_zone_count": 44,
+      "summary_status_distribution": [
+        {
+          "count": 86221,
+          "percentage": 78.3706,
+          "value": "assignment_available_capacity_pending"
+        },
+        {
+          "count": 23796,
+          "percentage": 21.6294,
+          "value": "assignment_incomplete"
+        }
+      ],
+      "zone_level_distribution": [
+        {
+          "value": "elementary",
+          "count": 25
+        },
+        {
+          "value": "high",
+          "count": 9
+        },
+        {
+          "value": "middle",
+          "count": 10
+        }
+      ]
+    },
+    "utilization_seed": {
+      "caveats": [
+        "Preliminary utilization from planning materials. Confirm with official enrollment and capacity."
+      ],
+      "filters_applied": {},
+      "limit": 500,
+      "offset": 0,
+      "rows": [
+        {
+          "school_name": "Coltrane-Webb Elementary School",
+          "school_name_normalized": "coltrane_webb_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 152.0,
+          "utilization_class": "severely_over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-COLTRANE_WEBB_ELEMENTARY-57",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "W.R. Odell Primary School",
+          "school_name_normalized": "w_r_odell_primary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 133.0,
+          "utilization_class": "severely_over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": null,
+          "match_confidence": "unmatched_reference_review"
+        },
+        {
+          "school_name": "Cox Mill Elementary School",
+          "school_name_normalized": "cox_mill_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 125.0,
+          "utilization_class": "severely_over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-COX_MILL_ELEMENTARY-71",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Weddington Hills Elementary School",
+          "school_name_normalized": "weddington_hills_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 125.0,
+          "utilization_class": "severely_over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-WEDDINGTON_HILLS_ELEMENTARY-61",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "W.R. Odell Elementary School",
+          "school_name_normalized": "w_r_odell_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 120.0,
+          "utilization_class": "severely_over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-W_R_ODELL_ELEMENTARY-5693",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Cox Mill High School",
+          "school_name_normalized": "cox_mill_high",
+          "school_level": "high",
+          "school_year": "2024-2025",
+          "utilization_pct": 119.0,
+          "utilization_class": "severely_over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-HIGH-COX_MILL_HIGH-55",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Hickory Ridge High School",
+          "school_name_normalized": "hickory_ridge_high",
+          "school_level": "high",
+          "school_year": "2024-2025",
+          "utilization_pct": 111.0,
+          "utilization_class": "severely_over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-HIGH-HICKORY_RIDGE_HIGH-76",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Harold E. Winkler Middle School",
+          "school_name_normalized": "harold_e_winkler_middle",
+          "school_level": "middle",
+          "school_year": "2024-2025",
+          "utilization_pct": 108.0,
+          "utilization_class": "over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-MIDDLE-HAROLD_E_WINKLER_MIDDLE-4892",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Charles E. Boger Elementary School",
+          "school_name_normalized": "charles_e_boger_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 107.0,
+          "utilization_class": "over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-CHARLES_E_BOGER_ELEMENTARY-74",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Harrisburg Elementary School",
+          "school_name_normalized": "harrisburg_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 106.0,
+          "utilization_class": "over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-HARRISBURG_ELEMENTARY-69",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Northwest Cabarrus Middle School",
+          "school_name_normalized": "northwest_cabarrus_middle",
+          "school_level": "middle",
+          "school_year": "2024-2025",
+          "utilization_pct": 104.0,
+          "utilization_class": "over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-MIDDLE-NORTHWEST_CABARRUS_MIDDLE-45",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Central Cabarrus High School",
+          "school_name_normalized": "central_cabarrus_high",
+          "school_level": "high",
+          "school_year": "2024-2025",
+          "utilization_pct": 102.0,
+          "utilization_class": "over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-HIGH-CENTRAL_CABARRUS_HIGH-65",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Pitts School Road Elementary School",
+          "school_name_normalized": "pitts_school_road_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 101.0,
+          "utilization_class": "over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-PITTS_ROAD_ELEMENTARY-73",
+          "match_confidence": "safe_alias_normalized"
+        },
+        {
+          "school_name": "Hickory Ridge Elementary School",
+          "school_name_normalized": "hickory_ridge_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 100.0,
+          "utilization_class": "over_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": null,
+          "match_confidence": "unmatched_reference_review"
+        },
+        {
+          "school_name": "Carl A. Furr Elementary School",
+          "school_name_normalized": "carl_a_furr_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 95.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-CARL_A_FURR_ELEMENTARY-75",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "J.N. Fries Middle School",
+          "school_name_normalized": "j_n_fries_middle",
+          "school_level": "middle",
+          "school_year": "2024-2025",
+          "utilization_pct": 95.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": null,
+          "match_confidence": "unmatched_reference_review"
+        },
+        {
+          "school_name": "Mount Pleasant Elementary School",
+          "school_name_normalized": "mount_pleasant_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 94.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-MT_PLEASANT_ELEMENTARY-53",
+          "match_confidence": "safe_alias_normalized"
+        },
+        {
+          "school_name": "R. Brown McAllister Elementary School",
+          "school_name_normalized": "r_brown_mcallister_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 92.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-R_BROWN_MCALLISTER_ELEMENTARY-60",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Wolf Meadow Elementary School",
+          "school_name_normalized": "wolf_meadow_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 92.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-WOLF_MEADOW_ELEMENTARY-62",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Royal Oaks School of the Arts",
+          "school_name_normalized": "royal_oaks_of_the_arts",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 91.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-ROYAL_OAKS_ELEMENTARY-44",
+          "match_confidence": "safe_alias_normalized"
+        },
+        {
+          "school_name": "Winecoff Elementary School",
+          "school_name_normalized": "winecoff_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 89.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-WINECOFF_ELEMENTARY-47",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "West Cabarrus High School",
+          "school_name_normalized": "west_cabarrus_high",
+          "school_level": "high",
+          "school_year": "2024-2025",
+          "utilization_pct": 88.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": null,
+          "match_confidence": "unmatched_reference_review"
+        },
+        {
+          "school_name": "Hickory Ridge Middle School",
+          "school_name_normalized": "hickory_ridge_middle",
+          "school_level": "middle",
+          "school_year": "2024-2025",
+          "utilization_pct": 87.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-MIDDLE-HICKORY_RIDGE_MIDDLE-5293",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "W.M. Irvin Elementary School",
+          "school_name_normalized": "w_m_irvin_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 85.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-W_M_IRVIN_ELEMENTARY-52",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Mount Pleasant High School",
+          "school_name_normalized": "mount_pleasant_high",
+          "school_level": "high",
+          "school_year": "2024-2025",
+          "utilization_pct": 85.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-HIGH-MT_PLEASANT_HIGH-59",
+          "match_confidence": "safe_alias_normalized"
+        },
+        {
+          "school_name": "Harris Road Middle School",
+          "school_name_normalized": "harris_road_middle",
+          "school_level": "middle",
+          "school_year": "2024-2025",
+          "utilization_pct": 84.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-MIDDLE-HARRIS_RD_MIDDLE-70",
+          "match_confidence": "safe_alias_normalized"
+        },
+        {
+          "school_name": "Mount Pleasant Middle School",
+          "school_name_normalized": "mount_pleasant_middle",
+          "school_level": "middle",
+          "school_year": "2024-2025",
+          "utilization_pct": 83.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-MIDDLE-MT_PLEASANT_MIDDLE-58",
+          "match_confidence": "safe_alias_normalized"
+        },
+        {
+          "school_name": "Northwest Cabarrus High School",
+          "school_name_normalized": "northwest_cabarrus_high",
+          "school_level": "high",
+          "school_year": "2024-2025",
+          "utilization_pct": 82.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-HIGH-NORTHWEST_CABARRUS_HIGH-46",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Jay M. Robinson High School",
+          "school_name_normalized": "jay_m_robinson_high",
+          "school_level": "high",
+          "school_year": "2024-2025",
+          "utilization_pct": 81.0,
+          "utilization_class": "approaching_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-HIGH-JAY_M_ROBINSON_HIGH-66",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "A.T. Allen Elementary School",
+          "school_name_normalized": "a_t_allen_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 78.0,
+          "utilization_class": "under_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-A_T_ALLEN_ELEMENTARY-64",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Patriots Elementary School",
+          "school_name_normalized": "patriots_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 78.0,
+          "utilization_class": "under_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-PATRIOTS_ELEMENTARY-5292",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Concord High School",
+          "school_name_normalized": "concord_high",
+          "school_level": "high",
+          "school_year": "2024-2025",
+          "utilization_pct": 78.0,
+          "utilization_class": "under_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-HIGH-CONCORD_HIGH-49",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Rocky River Elementary School",
+          "school_name_normalized": "rocky_river_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 76.0,
+          "utilization_class": "under_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-ROCKY_RIVER_ELEMENTARY-67",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Roberta Road Middle School",
+          "school_name_normalized": "roberta_road_middle",
+          "school_level": "middle",
+          "school_year": "2024-2025",
+          "utilization_pct": 72.0,
+          "utilization_class": "under_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": null,
+          "match_confidence": "unmatched_reference_review"
+        },
+        {
+          "school_name": "Bethel Elementary School",
+          "school_name_normalized": "bethel_elementary",
+          "school_level": "elementary",
+          "school_year": "2024-2025",
+          "utilization_pct": 70.0,
+          "utilization_class": "under_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-BETHEL_ELEMENTARY-68",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "C.C. Griffin Middle School",
+          "school_name_normalized": "c_c_griffin_middle",
+          "school_level": "middle",
+          "school_year": "2024-2025",
+          "utilization_pct": 63.0,
+          "utilization_class": "under_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-MIDDLE-C_C_GRIFFIN_MIDDLE-72",
+          "match_confidence": "normalized_exact"
+        },
+        {
+          "school_name": "Concord Middle School",
+          "school_name_normalized": "concord_middle",
+          "school_level": "middle",
+          "school_year": "2024-2025",
+          "utilization_pct": 47.0,
+          "utilization_class": "under_capacity",
+          "source_confidence": "presentation_derived",
+          "needs_verification": true,
+          "matched_school_reference_id": "SCHOOLREF-MIDDLE-CONCORD_MIDDLE-51",
+          "match_confidence": "normalized_exact"
+        }
+      ],
+      "total_count": 37
+    }
+  },
+  "utility_readiness": {
+    "caveat": "Utility proxy does not confirm available capacity.",
+    "status": "Data still needed",
+    "true_capacity_available": false
+  }
+}
