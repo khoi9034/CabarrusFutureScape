@@ -47,6 +47,18 @@ def test_database_url_setting_builds_cloud_database_url() -> None:
     assert database_url.database == "postgres"
 
 
+def test_database_url_setting_normalizes_plain_postgresql_driver() -> None:
+    settings = Settings(
+        DATABASE_URL="postgresql://cloud_user:example-password@db.example.com:6543/postgres",
+    )
+
+    database_url = build_database_url(settings)
+
+    assert database_url.drivername == "postgresql+psycopg"
+    assert database_url.username == "cloud_user"
+    assert database_url.host == "db.example.com"
+
+
 def test_database_health_timeout_settings_accept_cloud_aliases() -> None:
     settings = Settings(
         DATABASE_CONNECT_TIMEOUT_SECONDS=7,

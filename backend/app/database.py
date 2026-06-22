@@ -8,7 +8,11 @@ from app.config import Settings, get_settings
 
 def build_database_url(settings: Settings) -> URL:
     if settings.database_url.strip():
-        return make_url(settings.database_url.strip())
+        database_url = make_url(settings.database_url.strip())
+        if database_url.drivername == "postgresql":
+            return database_url.set(drivername="postgresql+psycopg")
+
+        return database_url
 
     return URL.create(
         drivername="postgresql+psycopg",
