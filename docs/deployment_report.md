@@ -229,3 +229,60 @@ Deployment continuation validation on 2026-06-22:
 - Populate the production database with the expected CFS schema/tables, or point backend `DATABASE_URL` to a populated CFS database.
 - Once CFS tables are available, smoke test global parcel search and data-backed map/dashboard flows from `https://cabarrus-future-scape.vercel.app`.
 - Production DB migrations/write actions still need explicit approval before running.
+
+## Production Database Restore Attempt
+
+Restore attempt date: 2026-06-22
+
+Pre-restore source inspection:
+
+- Local source database: `cfs_dev` on local Postgres.
+- Local PostGIS status: enabled.
+- Local public base tables: 95.
+- Approximate local public row count: 13,216,846.
+- Key local table counts:
+  - `public.parcels_enriched`: 110,017
+  - `public.development_activity_parcel_summary`: 110,017
+  - `public.parcel_flood_constraint_overlay`: 110,017
+  - `public.parcel_school_assignment`: 110,017
+  - `public.parcel_development_prediction_labels`: 1,430,221
+
+Pre-restore production inspection:
+
+- Production database connection: working.
+- Production public table count before PostGIS: 0.
+- Production CFS application tables before restore: absent.
+- Production PostGIS status before restore: not enabled.
+
+Approved production write actions performed:
+
+- Enabled PostGIS with `CREATE EXTENSION IF NOT EXISTS postgis`.
+- Created a temporary custom-format local dump outside the repo using `pg_dump -Fc`.
+- Restored schema only into the existing production `public` schema, skipping only the pre-existing `public` schema creation/comment entries.
+- Production schema restore succeeded: 89 CFS application tables created plus the PostGIS extension table.
+- Attempted data restore using `pg_restore --data-only --single-transaction --exit-on-error`.
+
+Restore result:
+
+- Data restore failed because the production database ran out of disk space while loading a raw FEMA table.
+- The data restore used a single transaction, so data rows were expected to roll back on failure.
+- After the failure, the production database reported disk/full-WAL symptoms and stopped accepting normal connections.
+- Temporary dump file was removed from local disk after the failed restore.
+
+Current production DB blocker:
+
+- Supabase/Postgres storage is insufficient for a full CFS public-schema restore.
+- The production database may need storage recovery, a database restart, or a storage/plan upgrade through the Supabase dashboard before additional restores or smoke tests can continue.
+- The full local public schema is too large for the current production database allocation.
+
+Recommended next steps:
+
+1. Open the Supabase dashboard and check database storage/health for the production project.
+2. Increase database storage/plan or create a larger managed Postgres target.
+3. After the database accepts connections again, choose one of:
+   - Restore a curated API-required subset of CFS tables, excluding raw/source-heavy tables and large model feature matrices; or
+   - Restore the full public schema into a larger database.
+4. Re-run `GET https://cfs-api-backend.onrender.com/health/database`.
+5. Re-run data-backed endpoint smoke tests.
+
+No dump files, connection strings, passwords, tokens, or provider secrets were committed.
