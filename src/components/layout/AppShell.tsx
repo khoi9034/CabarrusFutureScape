@@ -39,6 +39,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary";
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
+import { USE_DEMO_DATA } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import type { OverviewPanelWidthPreset } from "@/types";
 
@@ -352,8 +353,15 @@ function OverviewLandingPage({
                     Ready for guided review
                   </h2>
                 </div>
-                <span className="rounded-full border border-[#55d38f]/25 bg-[#55d38f]/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#a8f3c4]">
-                  API Live
+                <span
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em]",
+                    USE_DEMO_DATA
+                      ? "border-[#68d8ff]/25 bg-[#68d8ff]/10 text-[#b8edff]"
+                      : "border-[#55d38f]/25 bg-[#55d38f]/10 text-[#a8f3c4]",
+                  )}
+                >
+                  {USE_DEMO_DATA ? "Portfolio Demo" : "API Live"}
                 </span>
               </div>
               <div className="grid gap-2">
