@@ -1,9 +1,9 @@
-import developmentActivityValidationJson from "../../../cfs-data-pipelines/outputs/development_activity_parcel_summary_validation.json";
 import type {
   DevelopmentHotspotRecord,
   DevelopmentTrendRecord,
   DevelopmentZoningRecord,
 } from "@/data/intelligence/developmentActivityMetrics";
+import { developmentActivityStaticValidation } from "@/data/intelligence/developmentActivityMetrics";
 
 export interface TemporalDateRange {
   end: string | null;
@@ -105,7 +105,7 @@ type DevelopmentActivityValidation = {
 };
 
 const validation =
-  developmentActivityValidationJson as DevelopmentActivityValidation;
+  developmentActivityStaticValidation as DevelopmentActivityValidation;
 
 const annualTrend = validation.annual_trend_summary.filter(
   (record): record is DevelopmentTrendRecord & { activity_year: number } =>

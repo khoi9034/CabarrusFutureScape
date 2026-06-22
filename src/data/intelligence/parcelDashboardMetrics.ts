@@ -1,6 +1,6 @@
 import type { MetricCard } from "@/types";
-import parcelsEnrichedSummaryJson from "../../../cfs-data-pipelines/outputs/parcels_enriched_summary.json";
-import zoningQaSummaryJson from "../../../cfs-data-pipelines/outputs/parcel_zoning_intelligence_qa_summary.json";
+import demoIndicatorSummaryJson from "../../../public/demo-data/indicator_summary.json";
+import demoSampleParcelsJson from "../../../public/demo-data/sample_parcels.json";
 
 type CountSummary = {
   total_parcels: number;
@@ -63,6 +63,15 @@ type ParcelsEnrichedSummary = {
   };
 };
 
+type DemoSampleParcel = {
+  governance_warnings?: string[] | null;
+  official_parcel_id?: string | null;
+  parcel_quality_status?: string | null;
+  safe_for_dashboard?: boolean | null;
+  zoning_assignment_confidence?: string | null;
+  zoning_jurisdiction?: string | null;
+};
+
 export type IntelligenceMetricTone =
   | "critical"
   | "neutral"
@@ -111,9 +120,140 @@ export interface ParcelQualityMetric {
   tone: IntelligenceMetricTone;
 }
 
-const zoningQaSummary = zoningQaSummaryJson as ParcelZoningQaSummary;
-const parcelsEnrichedSummary =
-  parcelsEnrichedSummaryJson as ParcelsEnrichedSummary;
+const demoIndicatorSummary = demoIndicatorSummaryJson as {
+  floodplain_review?: {
+    total_parcels?: number;
+  };
+  generated_at?: string;
+  school_context?: {
+    statistics?: {
+      total_parcels?: number;
+    };
+  };
+};
+const demoSampleParcels = demoSampleParcelsJson as {
+  generated_at?: string;
+  records?: DemoSampleParcel[];
+};
+
+const demoRecords = demoSampleParcels.records ?? [];
+const demoGeneratedAt =
+  demoIndicatorSummary.generated_at ??
+  demoSampleParcels.generated_at ??
+  "Not available";
+const demoTotalParcels =
+  demoIndicatorSummary.floodplain_review?.total_parcels ??
+  demoIndicatorSummary.school_context?.statistics?.total_parcels ??
+  demoRecords.length;
+
+function countBy<T extends string>(
+  records: DemoSampleParcel[],
+  getValue: (record: DemoSampleParcel) => T | null | undefined,
+) {
+  const counts = new Map<T, number>();
+  records.forEach((record) => {
+    const value = getValue(record);
+    if (!value) {
+      return;
+    }
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  });
+  return counts;
+}
+
+function countPercentage(count: number) {
+  return demoRecords.length > 0 ? (count / demoRecords.length) * 100 : 0;
+}
+
+function mapDistribution(
+  counts: Map<string, number>,
+  keyName: "value" | "warning_category",
+) {
+  return [...counts.entries()].map(([value, count]) => ({
+    [keyName]: value,
+    parcel_count: count,
+    parcel_percentage: countPercentage(count),
+  }));
+}
+
+const confidenceCounts = countBy(demoRecords, (record) =>
+  record.zoning_assignment_confidence ?? "not_available",
+);
+const qualityCounts = countBy(demoRecords, (record) =>
+  record.parcel_quality_status ?? "not_available",
+);
+const warningCounts = new Map<string, number>();
+demoRecords.forEach((record) => {
+  const warnings =
+    record.governance_warnings && record.governance_warnings.length > 0
+      ? record.governance_warnings
+      : [record.safe_for_dashboard ? "safe_for_dashboard" : "review_needed"];
+  warnings.forEach((warning) => {
+    warningCounts.set(warning, (warningCounts.get(warning) ?? 0) + 1);
+  });
+});
+const jurisdictionCounts = countBy(demoRecords, (record) =>
+  record.zoning_jurisdiction ?? "Not available",
+);
+const safeDemoRecords = demoRecords.filter(
+  (record) => record.safe_for_dashboard,
+).length;
+const reviewDemoRecords = Math.max(demoRecords.length - safeDemoRecords, 0);
+const lowConfidenceDemoRecords = demoRecords.filter(
+  (record) => record.zoning_assignment_confidence === "low",
+).length;
+
+const zoningQaSummary: ParcelZoningQaSummary = {
+  confidence_distribution: mapDistribution(
+    confidenceCounts,
+    "value",
+  ) as ConfidenceRecord[],
+  count_summary: {
+    assigned_parcels: demoTotalParcels,
+    low_confidence_parcels: lowConfidenceDemoRecords,
+    multi_jurisdiction_parcels: 0,
+    no_match_parcels: 0,
+    review_parcels: reviewDemoRecords,
+    review_percentage: countPercentage(reviewDemoRecords),
+    safe_for_dashboard_parcels: safeDemoRecords || demoRecords.length,
+    safe_for_dashboard_percentage: countPercentage(
+      safeDemoRecords || demoRecords.length,
+    ),
+    total_parcels: demoTotalParcels,
+    v1_assigned_parcels: demoTotalParcels,
+  },
+  generated_at: demoGeneratedAt,
+  governance_warning_category_distribution: mapDistribution(
+    warningCounts,
+    "warning_category",
+  ) as GovernanceWarningRecord[],
+  zoning_jurisdiction_distribution: [...jurisdictionCounts.entries()].map(
+    ([jurisdiction, count]) => ({
+      assigned_parcels: count,
+      low_confidence_count: 0,
+      multi_jurisdiction_count: 0,
+      no_match_parcels: 0,
+      review_parcels: 0,
+      safe_for_dashboard_parcels: count,
+      total_parcels: count,
+      zoning_jurisdiction_name: jurisdiction,
+    }),
+  ),
+};
+
+const parcelsEnrichedSummary: ParcelsEnrichedSummary = {
+  flagged_parcel_count: reviewDemoRecords,
+  generated_at: demoGeneratedAt,
+  quality_distributions: {
+    parcel_quality_status: mapDistribution(
+      qualityCounts,
+      "value",
+    ) as ParcelQualityRecord[],
+  },
+  row_count_comparison: {
+    enriched_row_count: demoTotalParcels,
+  },
+};
 
 const countFormatter = new Intl.NumberFormat("en-US");
 const percentFormatter = new Intl.NumberFormat("en-US", {

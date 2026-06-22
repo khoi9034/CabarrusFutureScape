@@ -1,4 +1,5 @@
-import developmentActivityValidationJson from "../../../cfs-data-pipelines/outputs/development_activity_parcel_summary_validation.json";
+import demoIndicatorSummaryJson from "../../../public/demo-data/indicator_summary.json";
+import demoSampleParcelsJson from "../../../public/demo-data/sample_parcels.json";
 
 export type DevelopmentMetricTone =
   | "critical"
@@ -138,6 +139,38 @@ type DevelopmentActivityValidation = {
   outputs: Record<string, string>;
 };
 
+type DemoBucketRecord = {
+  active_parcel_count?: number | null;
+  count?: number | null;
+  parcel_count?: number | null;
+  percentage?: number | null;
+  permit_count?: number | null;
+  total_permit_amount?: number | null;
+  value?: string | null;
+  year?: number | null;
+  month?: number | null;
+};
+
+type DemoSampleParcel = {
+  development_activity_summary?: string | null;
+  flood_summary?: string | null;
+  municipality?: string | null;
+  neighborhood?: string | null;
+  objectid_1?: number | null;
+  official_parcel_id?: string | null;
+  parcel_quality_status?: string | null;
+  parcel_size_category?: string | null;
+  pin14?: string | null;
+  planning_jurisdiction?: string | null;
+  safe_for_dashboard?: boolean | null;
+  subdivision?: string | null;
+  valuation_band?: string | null;
+  zoning_assignment_confidence?: string | null;
+  zoning_category?: string | null;
+  zoning_code?: string | null;
+  zoning_jurisdiction?: string | null;
+};
+
 export interface DevelopmentCoreMetric {
   accent: string;
   description: string;
@@ -159,8 +192,214 @@ export interface DevelopmentActivityClassMetric {
   tone: DevelopmentMetricTone;
 }
 
-const validation =
-  developmentActivityValidationJson as DevelopmentActivityValidation;
+const demoSummary = demoIndicatorSummaryJson as {
+  development_activity?: {
+    activity_summary?: {
+      active_parcel_count?: number;
+      by_activity_class?: DemoBucketRecord[];
+      by_month?: DemoBucketRecord[];
+      by_year?: DemoBucketRecord[];
+      by_zoning_category?: DemoBucketRecord[];
+      date_range?: {
+        activity_date_max?: string | null;
+        activity_date_min?: string | null;
+      };
+      recent_activity?: {
+        recent_1yr_parcels?: number;
+        recent_3yr_parcels?: number;
+      };
+      total_permit_amount?: number | null;
+      total_permits?: number;
+    };
+    statistics?: {
+      parcels_with_activity?: number;
+      parcels_without_activity?: number;
+      recent_activity_parcels_1yr?: number;
+      recent_activity_parcels_3yr?: number;
+      total_permits?: number;
+    };
+  };
+  floodplain_review?: {
+    total_parcels?: number;
+  };
+  generated_at?: string;
+};
+
+const demoParcels = demoSampleParcelsJson as {
+  records?: DemoSampleParcel[];
+};
+
+const demoActivity =
+  demoSummary.development_activity?.activity_summary ?? {};
+const demoStatistics = demoSummary.development_activity?.statistics ?? {};
+const demoDateRange = demoActivity.date_range ?? {};
+const demoRecentActivity = demoActivity.recent_activity ?? {};
+const totalDemoParcels =
+  demoSummary.floodplain_review?.total_parcels ??
+  (demoStatistics.parcels_with_activity ?? 0) +
+    (demoStatistics.parcels_without_activity ?? 0);
+const demoParcelsWithActivity =
+  demoStatistics.parcels_with_activity ??
+  demoActivity.active_parcel_count ??
+  0;
+const demoParcelsWithoutActivity =
+  demoStatistics.parcels_without_activity ??
+  Math.max(totalDemoParcels - demoParcelsWithActivity, 0);
+const demoTotalPermits =
+  demoActivity.total_permits ?? demoStatistics.total_permits ?? 0;
+
+function demoNumber(value: number | null | undefined) {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function demoPercentage(count: number) {
+  return totalDemoParcels > 0 ? (count / totalDemoParcels) * 100 : 0;
+}
+
+function mapDemoTrend(record: DemoBucketRecord): DevelopmentTrendRecord {
+  return {
+    activity_year: typeof record.year === "number" ? record.year : null,
+    activity_month: typeof record.month === "number" ? record.month : null,
+    active_parcel_count: demoNumber(
+      record.active_parcel_count ?? record.parcel_count,
+    ),
+    ambiguous_permit_count: 0,
+    first_permit_date: demoDateRange.activity_date_min ?? null,
+    latest_permit_date: demoDateRange.activity_date_max ?? null,
+    permit_count: demoNumber(record.permit_count ?? record.count),
+    relationship_permit_amount_total: record.total_permit_amount ?? null,
+    source_permit_amount_total: record.total_permit_amount ?? null,
+    unmatched_permit_count: 0,
+  };
+}
+
+function mapDemoParcel(record: DemoSampleParcel): DevelopmentHotspotRecord {
+  return {
+    active_year_count: 0,
+    ambiguous_permit_count: 0,
+    avg_permit_amount: null,
+    co_date_future_outlier_count: 0,
+    current_activity_status: record.development_activity_summary ?? null,
+    development_activity_class:
+      record.development_activity_summary ?? "portfolio_demo_sample",
+    development_activity_score: 0,
+    dominant_growth_signal: null,
+    dominant_permit_segment: null,
+    dominant_permit_type: null,
+    dominant_work_type: null,
+    dominant_zoning_code_raw: record.zoning_code ?? null,
+    dominant_zoning_general_normalized: record.zoning_category ?? null,
+    first_permit_date: null,
+    has_unmatched_or_ambiguous_permit_flag: false,
+    latest_permit_date: null,
+    latest_permit_status: null,
+    nbh_name: record.neighborhood ?? null,
+    objectid_1: record.objectid_1 ?? 0,
+    official_parcel_id: record.official_parcel_id ?? "",
+    parcel_quality_status: record.parcel_quality_status ?? null,
+    parcel_size_category: record.parcel_size_category ?? null,
+    pin14: record.pin14 ?? "",
+    planning_jurisdiction_name: record.planning_jurisdiction ?? null,
+    primary_governance_warning: record.safe_for_dashboard
+      ? "safe_for_dashboard"
+      : null,
+    recent_permit_count_1yr: 0,
+    recent_permit_count_3yr: 0,
+    subdiv_name: record.subdivision ?? null,
+    total_permit_amount: null,
+    total_permit_count: 0,
+    valuation_band: record.valuation_band ?? null,
+    zoning_assignment_confidence:
+      record.zoning_assignment_confidence ?? null,
+    zoning_jurisdiction_name: record.zoning_jurisdiction ?? null,
+  };
+}
+
+export const developmentActivityStaticValidation: DevelopmentActivityValidation =
+  {
+    activity_class_distribution: (
+      demoActivity.by_activity_class ?? []
+    ).map((record) => {
+      const parcelCount = demoNumber(
+        record.active_parcel_count ?? record.parcel_count ?? record.count,
+      );
+      return {
+        ambiguous_flag_parcel_count: 0,
+        avg_development_activity_score: 0,
+        development_activity_class: record.value ?? "unclassified",
+        parcel_count: parcelCount,
+        parcel_percentage: record.percentage ?? demoPercentage(parcelCount),
+      };
+    }),
+    annual_trend_summary: (demoActivity.by_year ?? []).map(mapDemoTrend),
+    date_range: {
+      activity_anchor_date: demoDateRange.activity_date_max ?? null,
+      first_permit_date: demoDateRange.activity_date_min ?? null,
+      latest_permit_date: demoDateRange.activity_date_max ?? null,
+    },
+    generated_at: demoSummary.generated_at ?? "Not available",
+    outputs: {
+      source: "public/demo-data/indicator_summary.json",
+    },
+    parcel_activity_summary: {
+      parcels_with_ambiguous_permit_flag: 0,
+      parcels_with_permits: demoParcelsWithActivity,
+      parcels_with_recent_1yr_activity:
+        demoRecentActivity.recent_1yr_parcels ??
+        demoStatistics.recent_activity_parcels_1yr ??
+        0,
+      parcels_with_recent_3yr_activity:
+        demoRecentActivity.recent_3yr_parcels ??
+        demoStatistics.recent_activity_parcels_3yr ??
+        0,
+      parcels_without_permits: demoParcelsWithoutActivity,
+      total_parcels: totalDemoParcels,
+    },
+    permit_amount_summary: {
+      parcel_summary_permit_amount_total:
+        demoActivity.total_permit_amount ?? null,
+      relationship_row_permit_amount_total:
+        demoActivity.total_permit_amount ?? null,
+      source_permit_amount_total: demoActivity.total_permit_amount ?? null,
+    },
+    permit_representation_summary: {
+      ambiguous_distinct_permit_count: 0,
+      matched_distinct_permit_count: demoTotalPermits,
+      relationship_distinct_permit_count: demoTotalPermits,
+      relationship_row_count: demoTotalPermits,
+      source_permit_count: demoTotalPermits,
+      unmatched_distinct_permit_count: 0,
+    },
+    recent_monthly_trend_summary: (demoActivity.by_month ?? []).map(
+      mapDemoTrend,
+    ),
+    top_activity_parcels: (demoParcels.records ?? [])
+      .filter((record) => record.official_parcel_id)
+      .slice(0, 25)
+      .map(mapDemoParcel),
+    zoning_activity_summary: (demoActivity.by_zoning_category ?? []).map(
+      (record) => ({
+        active_parcel_count: demoNumber(
+          record.active_parcel_count ?? record.parcel_count,
+        ),
+        ambiguous_permit_count: 0,
+        avg_permit_amount: null,
+        dominant_zoning_code_raw: "Mixed",
+        dominant_zoning_general_normalized:
+          record.value ?? "unclassified",
+        first_permit_date: demoDateRange.activity_date_min ?? null,
+        latest_permit_date: demoDateRange.activity_date_max ?? null,
+        permit_count: demoNumber(record.permit_count ?? record.count),
+        permit_type: null,
+        relationship_row_count: demoNumber(record.permit_count ?? record.count),
+        total_permit_amount: record.total_permit_amount ?? null,
+        unmatched_permit_count: 0,
+        zoning_jurisdiction_name: "Countywide",
+      }),
+    ),
+  };
+
+const validation = developmentActivityStaticValidation;
 
 const numberFormatter = new Intl.NumberFormat("en-US");
 const compactNumberFormatter = new Intl.NumberFormat("en-US", {
