@@ -216,6 +216,8 @@ Deployment continuation validation on 2026-06-22:
 - Vercel production env vars configured: `NEXT_PUBLIC_USE_BACKEND_API`, `NEXT_PUBLIC_CFS_API_BASE_URL`.
 - Vercel production deploy: succeeded and aliased to `https://cabarrus-future-scape.vercel.app`.
 - `GET https://cabarrus-future-scape.vercel.app`: passed with HTTP 200.
+- CORS check from `https://cabarrus-future-scape.vercel.app` to `https://cfs-api-backend.onrender.com/health`: passed; backend returns the exact production origin in `Access-Control-Allow-Origin`.
+- Representative data-backed endpoint `GET /parcels/search?q=CFS-PARCEL-0149726579&limit=1`: reached the deployed backend but failed with HTTP 500 while database health is failing.
 - Production HTML scan: no `localhost`, `127.0.0.1`, `DATABASE_URL`, service-role key, or raw credential values found in the initial document.
 - Static bundle scan: backend URL is present as expected. Local fallback and guardrail field-name strings remain in bundled code; these are not active production network requests and do not expose probabilities, raw scores, credentials, or database URLs.
 - Production browser/data smoke is partially blocked until `DATABASE_URL` is corrected on Render.
