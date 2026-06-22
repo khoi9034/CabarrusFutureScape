@@ -10,7 +10,14 @@ def build_database_url(settings: Settings) -> URL:
     if settings.database_url.strip():
         database_url = make_url(settings.database_url.strip())
         if database_url.drivername == "postgresql":
-            return database_url.set(drivername="postgresql+psycopg")
+            database_url = database_url.set(drivername="postgresql+psycopg")
+
+        if (
+            database_url.host
+            and database_url.host not in {"127.0.0.1", "localhost"}
+            and "sslmode" not in database_url.query
+        ):
+            database_url = database_url.update_query_dict({"sslmode": "require"})
 
         return database_url
 

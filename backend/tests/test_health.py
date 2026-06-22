@@ -57,6 +57,21 @@ def test_database_url_setting_normalizes_plain_postgresql_driver() -> None:
     assert database_url.drivername == "postgresql+psycopg"
     assert database_url.username == "cloud_user"
     assert database_url.host == "db.example.com"
+    assert database_url.query["sslmode"] == "require"
+
+
+def test_database_url_setting_preserves_explicit_sslmode() -> None:
+    settings = Settings(
+        DATABASE_URL=(
+            "postgresql://cloud_user:example-password"
+            "@db.example.com:6543/postgres?sslmode=verify-full"
+        ),
+    )
+
+    database_url = build_database_url(settings)
+
+    assert database_url.drivername == "postgresql+psycopg"
+    assert database_url.query["sslmode"] == "verify-full"
 
 
 def test_database_health_timeout_settings_accept_cloud_aliases() -> None:
