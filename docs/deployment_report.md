@@ -1,6 +1,6 @@
 # Cabarrus FutureScape Deployment Report
 
-Generated: 2026-06-21
+Generated: 2026-06-22
 
 ## Repo Verification
 
@@ -11,8 +11,12 @@ Generated: 2026-06-21
 - Final UI/deploy source commit: `ec032c4`
 - Vercel build-script fix commit: `cbd481f`
 - Production API localhost fallback fix commit: `27cf8eb`
+- Cloud Postgres driver/SSL fix commits: `1b89063`, `c9d77a3`
+- Latest deployed/prepared commit: `c9d77a3`
 - Vercel project name: `cabarrus-future-scape`
 - Vercel project ID: `prj_Rr2cFrMxWCVym8zJxxikAvvT6ZrH`
+- Production frontend URL: `https://cabarrus-future-scape.vercel.app`
+- Render backend URL: `https://cfs-api-backend.onrender.com`
 
 Safe CFS source/docs/config changes have been committed and pushed. Generated `outputs/**` phase summaries remain uncommitted and were not included in the production deploy commits.
 
@@ -59,7 +63,7 @@ Production environment variables in Vercel:
 
 ```text
 NEXT_PUBLIC_USE_BACKEND_API=true
-NEXT_PUBLIC_CFS_API_BASE_URL=https://<backend-service-domain>
+NEXT_PUBLIC_CFS_API_BASE_URL=https://cfs-api-backend.onrender.com
 ```
 
 These frontend variables are public and browser-visible. Do not add database URLs, backend API keys, service role keys, or provider tokens to Vercel frontend variables.
@@ -72,6 +76,12 @@ Recommended Render settings:
 - Build command: `pip install -r requirements.txt`
 - Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - Health check path: `/health`
+
+Current Render backend service:
+
+- Service name: `cfs-api-backend`
+- Service URL: `https://cfs-api-backend.onrender.com`
+- Latest deployed commit: `c9d77a3`
 
 Production environment variables on the backend host:
 
@@ -199,14 +209,20 @@ Deployment continuation validation on 2026-06-22:
 - `npm run lint`: passed
 - `npm run build -- --webpack`: passed
 - `python -m compileall backend`: passed
-- `python -m pytest backend`: passed, 309 tests
-- Windows user environment check: `VERCEL_TOKEN`, `RENDER_API_KEY`, `DATABASE_URL`, and `RENDER_SERVICE_ID` were not set.
-- Automated backend/frontend deploy was not attempted because required local credentials were unavailable.
+- `python -m pytest backend`: passed, 311 tests
+- Render backend deploy: succeeded, latest service status live.
+- `GET https://cfs-api-backend.onrender.com/health`: passed, returned status `ok`.
+- `GET https://cfs-api-backend.onrender.com/health/database`: failed with HTTP 503 because the configured database credential was rejected by the database provider.
+- Vercel production env vars configured: `NEXT_PUBLIC_USE_BACKEND_API`, `NEXT_PUBLIC_CFS_API_BASE_URL`.
+- Vercel production deploy: succeeded and aliased to `https://cabarrus-future-scape.vercel.app`.
+- `GET https://cabarrus-future-scape.vercel.app`: passed with HTTP 200.
+- Production HTML scan: no `localhost`, `127.0.0.1`, `DATABASE_URL`, service-role key, or raw credential values found in the initial document.
+- Static bundle scan: backend URL is present as expected. Local fallback and guardrail field-name strings remain in bundled code; these are not active production network requests and do not expose probabilities, raw scores, credentials, or database URLs.
+- Production browser/data smoke is partially blocked until `DATABASE_URL` is corrected on Render.
 
 ## Remaining Blockers
 
-- Automated Vercel log inspection requires a local `VERCEL_TOKEN`.
-- Automated Render deployment/log inspection requires local Render credentials.
-- Production backend URL must be known before setting `NEXT_PUBLIC_CFS_API_BASE_URL`.
-- Production database connection should be configured on the backend host only.
-- Production DB migrations/write actions need explicit approval before running.
+- Correct the backend-only `DATABASE_URL` in Render. The current value reaches the database host but fails password authentication; replace the placeholder/incorrect password with the real database password in the full connection URL.
+- After updating Render `DATABASE_URL`, redeploy/restart the backend and verify `GET https://cfs-api-backend.onrender.com/health/database`.
+- Once database health passes, smoke test global parcel search and data-backed map/dashboard flows from `https://cabarrus-future-scape.vercel.app`.
+- Production DB migrations/write actions still need explicit approval before running.
