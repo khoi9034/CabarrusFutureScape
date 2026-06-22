@@ -286,3 +286,94 @@ Recommended next steps:
 5. Re-run data-backed endpoint smoke tests.
 
 No dump files, connection strings, passwords, tokens, or provider secrets were committed.
+
+## Production Serving Subset Attempt
+
+Attempt date: 2026-06-22
+
+Purpose:
+
+- Avoid retrying the full 13.2M-row local warehouse restore.
+- Populate only clean/summary/API-required CFS serving tables.
+- Exclude raw/source-heavy/staging/training/model-feature tables from production.
+
+Planning artifacts created:
+
+- `docs/production_serving_table_dependency_map.md`
+- `config/production_db_subset_manifest.json`
+
+Target database pre-check:
+
+- Connection: working before restore.
+- Public base tables: 0.
+- Existing selected CFS rows: 0.
+- PostGIS before restore: not enabled.
+- No truncate/delete was needed because the target was empty.
+
+Serving subset estimate:
+
+- Selected serving tables: 28.
+- Selected supporting views: 1.
+- Selected rows: 1,262,422.
+- Estimated selected table size from local source: 1.05 GiB.
+- Excluded tables: 67.
+- Excluded rows: 11,954,424.
+- Estimated excluded table size from local source: 7.95 GiB.
+
+Largest included tables:
+
+- `fema_nfhl_flood_zones_clean`
+- `parcels_enriched`
+- `parcel_school_summary`
+- `parcel_school_assignment`
+- `parcel_zoning_overlay_v2`
+
+Largest excluded tables:
+
+- `parcel_development_prediction_features_planning_pipeline_utilit`
+- `parcel_development_prediction_features_transportation_enhanced`
+- `parcel_development_prediction_features_zoning_enhanced`
+- `parcel_development_prediction_features`
+- `parcel_zoning_snapshot_year`
+
+Approved serving subset write actions:
+
+- User approved with `APPROVE_SERVING_SUBSET`.
+- Enabled PostGIS with `CREATE EXTENSION IF NOT EXISTS postgis`.
+- Created a temporary custom-format subset dump outside the repo.
+- Dumped only selected serving tables/views.
+- Temporary dump size: about 345 MiB.
+- Removed the temporary dump after the restore attempt.
+
+Serving subset restore result:
+
+- `pg_dump` subset export succeeded.
+- `pg_restore` began restoring selected serving objects.
+- The target database terminated the connection during post-data index creation.
+- A sanitized retry check also failed to connect to the target database.
+- No further production database writes were attempted after the target became unhealthy.
+
+Current production database status:
+
+- Production serving subset populated: not confirmed.
+- The target database is not accepting normal connections after the partial restore attempt.
+- Partial schema/data may exist, but row counts could not be verified because the database rejected connections.
+- Do not retry against this target until the provider reports it healthy again.
+- Do not truncate/drop partial objects without explicit approval.
+
+Endpoint smoke test status:
+
+- Backend endpoint smoke tests could not be run after the subset attempt because the target database stopped accepting connections.
+- Frontend smoke tests that depend on backend data remain blocked until a healthy populated production database is available.
+
+Recommended next step:
+
+Use a larger managed Postgres/PostGIS target or upgrade the database storage/plan before retrying the serving subset. If a fresh empty target is created, repeat the serving subset process rather than the full raw/research restore.
+
+Safety confirmation:
+
+- No full 13.2M-row restore was retried.
+- No raw/source-heavy tables were intentionally restored.
+- No training/model feature matrices were included in the serving subset.
+- No dump files were committed.
+- No connection strings, passwords, tokens, or provider secrets were committed.

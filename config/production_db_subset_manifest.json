@@ -1,0 +1,1376 @@
+{
+  "generated_at": "2026-06-22T18:07:23.018298+00:00",
+  "source_database": "local CFS warehouse (masked)",
+  "target_database": "current local DATABASE_URL (masked)",
+  "restore_strategy": "production-serving subset only; no raw/source-heavy or training tables",
+  "selected_table_count": 28,
+  "selected_view_count": 1,
+  "selected_row_count": 1262422,
+  "selected_estimated_size_bytes": 1128800256,
+  "excluded_table_count": 67,
+  "excluded_row_count": 11954424,
+  "excluded_estimated_size_bytes": 8537079808,
+  "largest_included_tables": [
+    {
+      "table": "fema_nfhl_flood_zones_clean",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/flood/zones"
+      ],
+      "row_count": 7712,
+      "estimated_size_bytes": 199598080,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcels_enriched",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/parcels/statistics",
+        "/parcels/search",
+        "/parcels/filter",
+        "/parcels/{official_parcel_id}",
+        "/constraints/schools/{official_parcel_id}",
+        "/development/hotspots"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 118857728,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_school_summary",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/statistics",
+        "/constraints/schools/filter",
+        "/constraints/schools/{official_parcel_id}",
+        "/constraints/schools/district-summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 115204096,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_school_assignment",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/{official_parcel_id}",
+        "/constraints/schools/district-summary",
+        "/constraints/schools/qa-summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 111607808,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_zoning_overlay_v2",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/parcels/statistics",
+        "/parcels/search",
+        "/parcels/zoning-summary",
+        "/parcels/{official_parcel_id}"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 107995136,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_zoning_intelligence_qa",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/parcels/statistics",
+        "/parcels/search",
+        "/parcels/governance-warnings",
+        "/parcels/{official_parcel_id}"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 97034240,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_flood_constraint_overlay",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/flood/statistics",
+        "/constraints/flood/{official_parcel_id}",
+        "/constraints/flood/high-review",
+        "/constraints/flood/summary",
+        "/indicators/summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 81780736,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_transportation_accessibility_features",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/prediction/transportation-accessibility/summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 74113024,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "development_activity_parcel_summary",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/statistics",
+        "/development/hotspots",
+        "/development/activity-summary",
+        "/indicators/summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 51945472,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "real_property_permit_parcel_relationship",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/statistics",
+        "/development/trends",
+        "/development/hotspots",
+        "/development/zoning-summary",
+        "/development/activity-summary",
+        "/development/parcel/{official_parcel_id}/permits"
+      ],
+      "row_count": 67277,
+      "estimated_size_bytes": 49061888,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    }
+  ],
+  "largest_excluded_tables": [
+    {
+      "table": "parcel_development_prediction_features_planning_pipeline_utilit",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 1786937344,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "parcel_development_prediction_features_transportation_enhanced",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 1483407360,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "parcel_development_prediction_features_zoning_enhanced",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 1254940672,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "parcel_development_prediction_features",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 1036206080,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "parcel_zoning_snapshot_year",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 2420374,
+      "estimated_size_bytes": 698834944,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "parcel_development_prediction_labels",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 292945920,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "tax_parcel_value_enrichment",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110215,
+      "estimated_size_bytes": 255418368,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "tax_parcel_full_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110215,
+      "estimated_size_bytes": 231260160,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "fema_nfhl_flood_zones_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 7712,
+      "estimated_size_bytes": 200540160,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "development_prediction_model_experiment_scores",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 440068,
+      "estimated_size_bytes": 199999488,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    }
+  ],
+  "entries": [
+    {
+      "table": "accela_plan_reviews_clean",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110381,
+      "estimated_size_bytes": 133955584,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "accela_plan_reviews_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110381,
+      "estimated_size_bytes": 102998016,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "central_area_plan_clean",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 37,
+      "estimated_size_bytes": 712704,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "central_area_plan_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 37,
+      "estimated_size_bytes": 425984,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "development_activity_parcel_summary",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/statistics",
+        "/development/hotspots",
+        "/development/activity-summary",
+        "/indicators/summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 51945472,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "development_activity_time_summary",
+      "object_type": "table",
+      "classification": "Supporting Clean Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "supporting clean time summary retained for reporting lineage"
+      ],
+      "row_count": 12164,
+      "estimated_size_bytes": 2670592,
+      "reason": "Small clean/reference summary retained for lineage and reporting support."
+    },
+    {
+      "table": "development_activity_zoning_summary",
+      "object_type": "table",
+      "classification": "Supporting Clean Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "supporting clean zoning/activity summary retained for reporting lineage"
+      ],
+      "row_count": 977,
+      "estimated_size_bytes": 352256,
+      "reason": "Small clean/reference summary retained for lineage and reporting support."
+    },
+    {
+      "table": "development_prediction_model_experiment_scores",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 440068,
+      "estimated_size_bytes": 199999488,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "development_prediction_ranking_classes",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 43712512,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "development_prediction_ranking_explanations",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 66273280,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "fema_nfhl_flood_zones_clean",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/flood/zones"
+      ],
+      "row_count": 7712,
+      "estimated_size_bytes": 199598080,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "fema_nfhl_flood_zones_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 7712,
+      "estimated_size_bytes": 200540160,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "historical_zoning_clean",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 21567,
+      "estimated_size_bytes": 51159040,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "historical_zoning_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 21567,
+      "estimated_size_bytes": 55222272,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "mobilitydb_opcache",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1681,
+      "estimated_size_bytes": 114688,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "new_construction_permit_parcel_relationship",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/new-construction/statistics",
+        "/development/new-construction/trends"
+      ],
+      "row_count": 20614,
+      "estimated_size_bytes": 7716864,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "new_construction_permits_clean",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/new-construction/statistics",
+        "/development/new-construction/trends"
+      ],
+      "row_count": 20614,
+      "estimated_size_bytes": 9928704,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "new_construction_permits_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 20614,
+      "estimated_size_bytes": 5447680,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "parcel_accela_plan_review_features",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 21815296,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "parcel_central_area_plan_features",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 24174592,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "parcel_development_prediction_features",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 1036206080,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "parcel_development_prediction_features_planning_pipeline_utilit",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 1786937344,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "parcel_development_prediction_features_transportation_enhanced",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 1483407360,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "parcel_development_prediction_features_zoning_enhanced",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 1254940672,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "parcel_development_prediction_labels",
+      "object_type": "table",
+      "classification": "Training / Research Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1430221,
+      "estimated_size_bytes": 292945920,
+      "reason": "Model-training or parcel-level research artifact; production returns safe governance/unavailable states instead."
+    },
+    {
+      "table": "parcel_flood_constraint_overlay",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/flood/statistics",
+        "/constraints/flood/{official_parcel_id}",
+        "/constraints/flood/high-review",
+        "/constraints/flood/summary",
+        "/indicators/summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 81780736,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_jurisdiction_overlay",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 72048640,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "parcel_new_construction_summary",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/new-construction/parcel/{official_parcel_id}"
+      ],
+      "row_count": 16200,
+      "estimated_size_bytes": 4194304,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_permit_segment_summary",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/permit-segments/statistics",
+        "/development/permit-segments/{official_parcel_id}"
+      ],
+      "row_count": 43474,
+      "estimated_size_bytes": 16080896,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_planning_pipeline_utility_features",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 47841280,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "parcel_school_assignment",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/{official_parcel_id}",
+        "/constraints/schools/district-summary",
+        "/constraints/schools/qa-summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 111607808,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_school_summary",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/statistics",
+        "/constraints/schools/filter",
+        "/constraints/schools/{official_parcel_id}",
+        "/constraints/schools/district-summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 115204096,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_tax_value_enrichment_features",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 24846336,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "parcel_transportation_accessibility_features",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/prediction/transportation-accessibility/summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 74113024,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_transportation_plan_traffic_features",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/prediction/transportation-plan-traffic/summary"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 35979264,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_utility_proxy_features",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 26558464,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "parcel_zoning_change_events",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 32988,
+      "estimated_size_bytes": 13926400,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "parcel_zoning_intelligence_qa",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/parcels/statistics",
+        "/parcels/search",
+        "/parcels/governance-warnings",
+        "/parcels/{official_parcel_id}"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 97034240,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_zoning_overlay",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 69419008,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "parcel_zoning_overlay_v2",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/parcels/statistics",
+        "/parcels/search",
+        "/parcels/zoning-summary",
+        "/parcels/{official_parcel_id}"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 107995136,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "parcel_zoning_snapshot_year",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 2420374,
+      "estimated_size_bytes": 698834944,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "parcels",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 79470592,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "parcels_clean",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110017,
+      "estimated_size_bytes": 92790784,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "parcels_enriched",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/parcels/statistics",
+        "/parcels/search",
+        "/parcels/filter",
+        "/parcels/{official_parcel_id}",
+        "/constraints/schools/{official_parcel_id}",
+        "/development/hotspots"
+      ],
+      "row_count": 110017,
+      "estimated_size_bytes": 118857728,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "permit_activity",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 6766,
+      "estimated_size_bytes": 12214272,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "permit_activity_clean",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 6766,
+      "estimated_size_bytes": 12763136,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "permit_intelligence_segments",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/permit-segments/statistics",
+        "/development/permit-segments/options"
+      ],
+      "row_count": 64426,
+      "estimated_size_bytes": 25477120,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "planning_boundaries",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 5,
+      "estimated_size_bytes": 139264,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "planning_boundaries_clean",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 5,
+      "estimated_size_bytes": 204800,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "pointcloud_formats",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 16384,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "real_property_permit",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 64426,
+      "estimated_size_bytes": 37822464,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "real_property_permit_clean",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 64426,
+      "estimated_size_bytes": 51781632,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "real_property_permit_parcel_relationship",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/statistics",
+        "/development/trends",
+        "/development/hotspots",
+        "/development/zoning-summary",
+        "/development/activity-summary",
+        "/development/parcel/{official_parcel_id}/permits"
+      ],
+      "row_count": 67277,
+      "estimated_size_bytes": 49061888,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "school_capacity",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/statistics",
+        "/constraints/schools/qa-summary"
+      ],
+      "row_count": 0,
+      "estimated_size_bytes": 40960,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "school_capacity_history",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 24576,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "school_capacity_ingestion_qa",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 33,
+      "estimated_size_bytes": 81920,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "school_capacity_projection",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 24576,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "school_enrollment_history",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 24576,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "school_grade_enrollment_history",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 24576,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "school_lea_pupil_context",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/lea-pupil-context",
+        "/constraints/schools/lea-pupil-context/summary"
+      ],
+      "row_count": 60,
+      "estimated_size_bytes": 122880,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "school_planned_capacity_changes",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 24576,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "school_presentation_utilization_seed",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/utilization-seed",
+        "/indicators/school-utilization-detail",
+        "/indicators/summary"
+      ],
+      "row_count": 37,
+      "estimated_size_bytes": 114688,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "school_reference",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/statistics",
+        "/constraints/schools/qa-summary"
+      ],
+      "row_count": 53,
+      "estimated_size_bytes": 73728,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "school_reference_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 53,
+      "estimated_size_bytes": 40960,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "school_zones",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/statistics",
+        "/constraints/schools/qa-summary",
+        "/constraints/schools/utilization-zones"
+      ],
+      "row_count": 44,
+      "estimated_size_bytes": 860160,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "school_zones_elementary_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 25,
+      "estimated_size_bytes": 360448,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "school_zones_high_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 9,
+      "estimated_size_bytes": 245760,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "school_zones_middle_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 10,
+      "estimated_size_bytes": 245760,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "spatial_ref_sys",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 8500,
+      "estimated_size_bytes": 7315456,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "tax_parcel_full_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110215,
+      "estimated_size_bytes": 231260160,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "tax_parcel_value_enrichment",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110215,
+      "estimated_size_bytes": 255418368,
+      "reason": "Useful for local warehouse/rebuilds but not required by first production UI."
+    },
+    {
+      "table": "transportation_aadt_stations_clean",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/prediction/transportation-plan-traffic/summary"
+      ],
+      "row_count": 642,
+      "estimated_size_bytes": 425984,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "transportation_aadt_stations_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 642,
+      "estimated_size_bytes": 778240,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "transportation_centerlines_clean",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/prediction/transportation-accessibility/summary"
+      ],
+      "row_count": 14455,
+      "estimated_size_bytes": 9388032,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "transportation_centerlines_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 14455,
+      "estimated_size_bytes": 20594688,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "transportation_rail_clean",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/prediction/transportation-accessibility/summary"
+      ],
+      "row_count": 64,
+      "estimated_size_bytes": 393216,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "transportation_rail_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 64,
+      "estimated_size_bytes": 262144,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "transportation_stip_projects_clean",
+      "object_type": "table",
+      "classification": "Required Serving Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/development/prediction/transportation-plan-traffic/summary"
+      ],
+      "row_count": 18,
+      "estimated_size_bytes": 204800,
+      "reason": "Used directly by production API/frontend serving endpoints."
+    },
+    {
+      "table": "transportation_stip_projects_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 18,
+      "estimated_size_bytes": 139264,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "us_gaz",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1074,
+      "estimated_size_bytes": 163840,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "us_lex",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 2940,
+      "estimated_size_bytes": 311296,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "us_rules",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 4369,
+      "estimated_size_bytes": 466944,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "utility_proxy_wsacc_clean",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 3337,
+      "estimated_size_bytes": 4136960,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "utility_proxy_wsacc_raw",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 3337,
+      "estimated_size_bytes": 3366912,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "zoning",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 295,
+      "estimated_size_bytes": 1253376,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "zoning_clean",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 293,
+      "estimated_size_bytes": 1458176,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "zoning_concord",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 826,
+      "estimated_size_bytes": 1466368,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "zoning_county",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 295,
+      "estimated_size_bytes": 1253376,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "zoning_harrisburg",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 188,
+      "estimated_size_bytes": 458752,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "zoning_jurisdictional_clean",
+      "object_type": "table",
+      "classification": "Supporting Clean Table",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "supporting clean zoning reference retained for production lineage"
+      ],
+      "row_count": 3438,
+      "estimated_size_bytes": 7577600,
+      "reason": "Small clean/reference summary retained for lineage and reporting support."
+    },
+    {
+      "table": "zoning_kannapolis",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 1839,
+      "estimated_size_bytes": 3530752,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "zoning_locust",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 8,
+      "estimated_size_bytes": 40960,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "zoning_midland",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 110,
+      "estimated_size_bytes": 221184,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "zoning_mount_pleasant",
+      "object_type": "table",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 174,
+      "estimated_size_bytes": 385024,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "zoning_source_inventory",
+      "object_type": "table",
+      "classification": "Raw / Source / Staging Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 7,
+      "estimated_size_bytes": 32768,
+      "reason": "Raw/source/staging/diagnostic table excluded from serving database."
+    },
+    {
+      "table": "geography_columns",
+      "object_type": "view",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 0,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "geometry_columns",
+      "object_type": "view",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 70,
+      "estimated_size_bytes": 0,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "pointcloud_columns",
+      "object_type": "view",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 0,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "raster_columns",
+      "object_type": "view",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 0,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "raster_overviews",
+      "object_type": "view",
+      "classification": "Optional Heavy Table",
+      "include_in_production": false,
+      "required_by_endpoints": [],
+      "row_count": 0,
+      "estimated_size_bytes": 0,
+      "reason": "Not referenced by current production backend/frontend dependency map."
+    },
+    {
+      "table": "school_utilization_seed_current",
+      "object_type": "view",
+      "classification": "Supporting Clean View",
+      "include_in_production": true,
+      "required_by_endpoints": [
+        "/constraints/schools/utilization-seed",
+        "/indicators/school-utilization-detail",
+        "/indicators/summary"
+      ],
+      "row_count": 37,
+      "estimated_size_bytes": 0,
+      "reason": "View required by school utilization and Indicator Center endpoints."
+    }
+  ]
+}
