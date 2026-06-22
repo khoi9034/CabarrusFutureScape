@@ -212,19 +212,20 @@ Deployment continuation validation on 2026-06-22:
 - `python -m pytest backend`: passed, 311 tests
 - Render backend deploy: succeeded, latest service status live.
 - `GET https://cfs-api-backend.onrender.com/health`: passed, returned status `ok`.
-- `GET https://cfs-api-backend.onrender.com/health/database`: failed with HTTP 503 because the configured database credential was rejected by the database provider.
+- `GET https://cfs-api-backend.onrender.com/health/database`: initially failed with HTTP 503 because the configured database credential was rejected by the database provider.
+- After securely updating the backend-only Render `DATABASE_URL`, `GET https://cfs-api-backend.onrender.com/health/database` passed and returned database status `connected`.
 - Vercel production env vars configured: `NEXT_PUBLIC_USE_BACKEND_API`, `NEXT_PUBLIC_CFS_API_BASE_URL`.
 - Vercel production deploy: succeeded and aliased to `https://cabarrus-future-scape.vercel.app`.
 - `GET https://cabarrus-future-scape.vercel.app`: passed with HTTP 200.
 - CORS check from `https://cabarrus-future-scape.vercel.app` to `https://cfs-api-backend.onrender.com/health`: passed; backend returns the exact production origin in `Access-Control-Allow-Origin`.
-- Representative data-backed endpoint `GET /parcels/search?q=CFS-PARCEL-0149726579&limit=1`: reached the deployed backend but failed with HTTP 500 while database health is failing.
+- Representative data-backed endpoint `GET /parcels/search?q=CFS-PARCEL-0149726579&limit=1`: reached the deployed backend but returned HTTP 500 because the connected production database does not currently contain the expected CFS public data tables.
 - Production HTML scan: no `localhost`, `127.0.0.1`, `DATABASE_URL`, service-role key, or raw credential values found in the initial document.
 - Static bundle scan: backend URL is present as expected. Local fallback and guardrail field-name strings remain in bundled code; these are not active production network requests and do not expose probabilities, raw scores, credentials, or database URLs.
-- Production browser/data smoke is partially blocked until `DATABASE_URL` is corrected on Render.
+- Production browser/data smoke is partially blocked until the production database is populated with the expected CFS schema/tables or `DATABASE_URL` is pointed at a populated CFS database.
 
 ## Remaining Blockers
 
-- Correct the backend-only `DATABASE_URL` in Render. The current value reaches the database host but fails password authentication; replace the placeholder/incorrect password with the real database password in the full connection URL.
-- After updating Render `DATABASE_URL`, redeploy/restart the backend and verify `GET https://cfs-api-backend.onrender.com/health/database`.
-- Once database health passes, smoke test global parcel search and data-backed map/dashboard flows from `https://cabarrus-future-scape.vercel.app`.
+- Production database connectivity is now configured, but the connected database only contains provider/system schemas and does not contain CFS public data tables.
+- Populate the production database with the expected CFS schema/tables, or point backend `DATABASE_URL` to a populated CFS database.
+- Once CFS tables are available, smoke test global parcel search and data-backed map/dashboard flows from `https://cabarrus-future-scape.vercel.app`.
 - Production DB migrations/write actions still need explicit approval before running.
