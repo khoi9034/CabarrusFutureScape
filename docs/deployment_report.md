@@ -289,7 +289,8 @@ Portfolio Demo deployment update on 2026-06-22:
 - The `NEXT_PUBLIC_*` demo env vars are configured as non-sensitive public build
   variables, which is required for the Next.js client bundle.
 - Render, Supabase, and `DATABASE_URL` are not required for this public portfolio deployment.
-- This docs-only commit is safe to use as the Vercel Git deployment trigger from `main`.
+- A follow-up docs-only commit after the public env fix is safe to use as the
+  Vercel Git deployment trigger from `main`.
 
 ## Remaining Blockers
 
