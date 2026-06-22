@@ -280,6 +280,15 @@ Portfolio Demo Mode validation on 2026-06-22:
 - `python -m compileall backend`: passed.
 - `python -m pytest backend`: passed, 315 tests.
 
+Portfolio Demo deployment update on 2026-06-22:
+
+- Vercel production env vars configured for portfolio demo mode:
+  - `NEXT_PUBLIC_CFS_DEPLOYMENT_MODE`
+  - `NEXT_PUBLIC_USE_BACKEND_API`
+- `NEXT_PUBLIC_CFS_API_BASE_URL` removed from Vercel production for portfolio demo mode.
+- Render, Supabase, and `DATABASE_URL` are not required for this public portfolio deployment.
+- This docs-only commit is safe to use as the Vercel Git deployment trigger from `main`.
+
 ## Remaining Blockers
 
 - Public Vercel portfolio mode has no production database blocker after Vercel env vars are set to demo mode.
