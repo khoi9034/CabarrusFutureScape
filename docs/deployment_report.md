@@ -292,6 +292,31 @@ Portfolio Demo deployment update on 2026-06-22:
 - A follow-up docs-only commit after the public env fix is safe to use as the
   Vercel Git deployment trigger from `main`.
 
+Final Portfolio Demo deployment result on 2026-06-22:
+
+- Direct Vercel production deployment succeeded and was aliased to
+  `https://cabarrus-future-scape.vercel.app`.
+- Deployment URL produced by Vercel:
+  `https://cabarrus-future-scape-ky6vgetd8-khoi-nguyens-projects-9f6b140b.vercel.app`.
+- Vercel production build command executed successfully through `npm run build`.
+- Vercel build portability fix: static dashboard metrics now read committed
+  in-repo demo summaries instead of external local pipeline output files.
+- Public HTML smoke:
+  - HTTP 200 from `https://cabarrus-future-scape.vercel.app`
+  - `Portfolio Demo` present
+  - `API Live` absent
+  - no `localhost`, `127.0.0.1`, `example.invalid`, or Render backend URL in the initial document
+- Hydrated browser smoke:
+  - Overview loaded with `Portfolio Demo`
+  - Workspace loaded
+  - Explore Countywide loaded
+  - Indicator Center loaded as a full-width monitoring dashboard
+  - Model Lab loaded
+  - Planning Snapshot loaded
+  - Methodology loaded
+  - demo parcel search returned a sanitized demo parcel result
+  - observed runtime resources did not call localhost, `127.0.0.1`, `example.invalid`, or the Render backend
+
 ## Remaining Blockers
 
 - Public Vercel portfolio mode has no production database blocker after Vercel env vars are set to demo mode.
