@@ -76,6 +76,11 @@ import { useSelectedParcelFloodConstraint } from "@/hooks/useSelectedParcelFlood
 import { useSelectedParcelSchoolConstraint } from "@/hooks/useSelectedParcelSchoolConstraint";
 import { useTransportationContextSummary } from "@/hooks/useTransportationContextSummary";
 import { CFS_API_BASE_URL, USE_BACKEND_API } from "@/lib/api/client";
+import {
+  getModeScopedActiveLayers,
+  isExploreCountywideMode,
+  isModelLabMode,
+} from "@/lib/gis/layerModeOwnership";
 import { cn, formatCurrency } from "@/lib/utils";
 import { ScoreCard } from "@/components/ui/ScoreCard";
 import type {
@@ -136,7 +141,6 @@ const modeMetadata: Record<
 
 export function IntelligencePanel() {
   const {
-    activeLayerIds,
     activeLayers,
     developmentHotspotControls,
     developmentHotspotsEnabled,
@@ -216,7 +220,6 @@ export function IntelligencePanel() {
           selectedModelResearchContext={selectedModelResearchContext}
           selectedSchoolUtilizationZone={selectedSchoolUtilizationZone}
           clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
-          activeLayerIds={activeLayerIds}
           activeLayers={activeLayers}
           developmentHotspotControls={developmentHotspotControls}
           developmentHotspotsEnabled={developmentHotspotsEnabled}
@@ -261,7 +264,6 @@ export function IntelligencePanel() {
 }
 
 function OverviewModeContent({
-  activeLayerIds,
   activeLayers,
   clearSelectedSchoolUtilizationZone,
   developmentHotspotControls,
@@ -290,7 +292,6 @@ function OverviewModeContent({
   setProductMode,
   setPlanningSnapshotView,
 }: {
-  activeLayerIds: string[];
   activeLayers: ReturnType<typeof useDashboardState>["activeLayers"];
   clearSelectedSchoolUtilizationZone: () => void;
   developmentHotspotControls: ReturnType<typeof useDashboardState>["developmentHotspotControls"];
@@ -349,14 +350,35 @@ function OverviewModeContent({
     selectedParcelOfficialId,
   );
   const transportationContext = useTransportationContextSummary();
+  const scopedActiveLayers = useMemo(
+    () => getModeScopedActiveLayers(activeLayers, overviewCommandMode),
+    [activeLayers, overviewCommandMode],
+  );
+  const scopedActiveLayerIds = useMemo(
+    () => scopedActiveLayers.map((layer) => layer.id),
+    [scopedActiveLayers],
+  );
+  const includeExploreMapContext = isExploreCountywideMode(overviewCommandMode);
+  const includeModelLabMapContext = isModelLabMode(overviewCommandMode);
   const activeLayerLabels = Array.from(
     new Set(
       [
-        ...activeLayers.map((layer) => layer.title),
-        developmentHotspotsEnabled ? "Development Hotspots" : null,
-        floodConstraintsEnabled ? "Flood Constraints" : null,
-        floodZonesEnabled ? "FEMA Flood Zones" : null,
-        schoolUtilizationZonesEnabled ? "School Utilization Seed" : null,
+        ...scopedActiveLayers.map((layer) => layer.title),
+        includeExploreMapContext && developmentHotspotsEnabled
+          ? "Development Hotspots"
+          : null,
+        includeExploreMapContext && floodConstraintsEnabled
+          ? "Flood Constraints"
+          : null,
+        includeExploreMapContext && floodZonesEnabled
+          ? "FEMA Flood Zones"
+          : null,
+        includeExploreMapContext && schoolUtilizationZonesEnabled
+          ? "School Utilization Seed"
+          : null,
+        includeModelLabMapContext && modelResearchOverlayEnabled
+          ? "Model Lab Research Preview"
+          : null,
       ].filter((label): label is string => Boolean(label)),
     ),
   );
@@ -382,7 +404,7 @@ function OverviewModeContent({
         Boolean(selectedParcelForSnapshot),
       );
       const nextSnapshot = buildPlanningSnapshot({
-        activeLayerIds,
+        activeLayerIds: scopedActiveLayerIds,
         activeLayerLabels,
         developmentActivity,
         floodConstraint,
@@ -414,7 +436,6 @@ function OverviewModeContent({
       setSnapshotSaving(false);
     }
   }, [
-    activeLayerIds,
     activeLayerLabels,
     developmentActivity,
     developmentHotspotControls,
@@ -433,6 +454,7 @@ function OverviewModeContent({
     selectedParcelForSnapshot,
     setPlanningSnapshotView,
     snapshotSaving,
+    scopedActiveLayerIds,
   ]);
 
   useEffect(() => {

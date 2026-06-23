@@ -46,6 +46,11 @@ import {
   getRenderableOperationalLayers,
   type OperationalLayerInstanceMap,
 } from "@/lib/gis/layerFactory";
+import {
+  getModeScopedActiveLayerIds,
+  isExploreCountywideMode,
+  isModelLabMode,
+} from "@/lib/gis/layerModeOwnership";
 import { operationalLayerRegistry } from "@/lib/gis/layerRegistry";
 import { createMapInteractionController } from "@/lib/gis/mapInteractionController";
 import { createCabarrusSceneView } from "@/lib/gis/sceneViewFactory";
@@ -296,6 +301,9 @@ export function SceneViewContainer() {
     limit: 720,
     signal: "all",
   });
+  const exploreCountywideLayersActive =
+    isExploreCountywideMode(overviewCommandMode);
+  const modelLabLayersActive = isModelLabMode(overviewCommandMode);
   const clearParcelSceneFocus = useCallback(() => {
     latestFocusRequestParcelIdRef.current = null;
     lastFocusedParcelIdRef.current = null;
@@ -321,8 +329,13 @@ export function SceneViewContainer() {
   const selectedParcelIdRef = useRef(selectedParcelId);
 
   useEffect(() => {
-    activeLayerIdsRef.current = activeLayerIds;
-  }, [activeLayerIds]);
+    const scopedLayerIds = getModeScopedActiveLayerIds(
+      activeLayerIds,
+      overviewCommandMode,
+    );
+    activeLayerIdsRef.current = scopedLayerIds;
+    applyOperationalLayerVisibility(layerRefs.current, scopedLayerIds);
+  }, [activeLayerIds, overviewCommandMode]);
 
   useEffect(() => {
     selectedParcelIdRef.current = getSelectedParcelGraphicsId(
@@ -333,6 +346,65 @@ export function SceneViewContainer() {
 
   useEffect(() => {
     overviewCommandModeRef.current = overviewCommandMode;
+    let contextCleanupFrame: number | null = null;
+
+    if (!isExploreCountywideMode(overviewCommandMode)) {
+      const exploreLayers = [
+        hotspotLayerRef.current,
+        floodConstraintLayerRef.current,
+        floodZoneLayerRef.current,
+        schoolUtilizationZoneLayerRef.current,
+      ];
+
+      exploreLayers.forEach((layer) => {
+        if (!layer) {
+          return;
+        }
+
+        layer.removeAll();
+        layer.visible = false;
+      });
+    }
+
+    if (!isModelLabMode(overviewCommandMode)) {
+      modelResearchPreviewLayerRef.current?.removeAll();
+
+      if (modelResearchPreviewLayerRef.current) {
+        modelResearchPreviewLayerRef.current.visible = false;
+      }
+
+      modelResearchGoToKeyRef.current = null;
+    }
+
+    if (
+      !isExploreCountywideMode(overviewCommandMode) ||
+      !isModelLabMode(overviewCommandMode)
+    ) {
+      contextCleanupFrame = window.requestAnimationFrame(() => {
+        contextCleanupFrame = null;
+
+        if (!isExploreCountywideMode(overviewCommandMode)) {
+          setSelectedDevelopmentHotspotContext(null);
+          setFloodInfo(null);
+          setFloodInfoPosition(null);
+          setFloodZoneInfo(null);
+          setFloodZoneInfoPosition(null);
+          clearSelectedSchoolUtilizationZone();
+          schoolUtilizationHoverRef.current = null;
+          setSchoolUtilizationHover(null);
+        }
+
+        if (!isModelLabMode(overviewCommandMode)) {
+          setSelectedModelResearchContext(null);
+          setModelResearchMapSummary(createModelResearchMapSummary({
+            displayMode: "off",
+            overlayEnabled: false,
+            totalFeatureCount: 0,
+            visibleFeatureCount: 0,
+          }));
+        }
+      });
+    }
 
     if (!allowsParcelSelectionGraphics(overviewCommandMode)) {
       selectedParcelIdRef.current = null;
@@ -345,7 +417,20 @@ export function SceneViewContainer() {
         null,
       );
     }
-  }, [overviewCommandMode, scheduleClearParcelSceneFocus]);
+
+    return () => {
+      if (contextCleanupFrame !== null) {
+        window.cancelAnimationFrame(contextCleanupFrame);
+      }
+    };
+  }, [
+    clearSelectedSchoolUtilizationZone,
+    overviewCommandMode,
+    scheduleClearParcelSceneFocus,
+    setModelResearchMapSummary,
+    setSelectedDevelopmentHotspotContext,
+    setSelectedModelResearchContext,
+  ]);
 
   useEffect(() => {
     selectedSchoolZoneIdRef.current =
@@ -1217,10 +1302,6 @@ export function SceneViewContainer() {
   ]);
 
   useEffect(() => {
-    applyOperationalLayerVisibility(layerRefs.current, activeLayerIds);
-  }, [activeLayerIds]);
-
-  useEffect(() => {
     const runtime = runtimeRef.current;
     const view = viewRef.current;
 
@@ -1233,14 +1314,17 @@ export function SceneViewContainer() {
     hotspotLayer.removeAll();
 
     if (
+      !exploreCountywideLayersActive ||
       !developmentHotspotsEnabled ||
       developmentHotspotLayer.status !== "ready" ||
       developmentHotspotControls.permitSegment === "all"
     ) {
+      hotspotLayer.visible = false;
       setSelectedDevelopmentHotspotContext(null);
       return;
     }
 
+    hotspotLayer.visible = true;
     const activePermitSegment = developmentHotspotControls.permitSegment;
     const displayMode = getDevelopmentHotspotMapDisplayMode(view.scale);
     const currentExtent = getSceneViewWgs84Extent(runtime, view);
@@ -1268,6 +1352,7 @@ export function SceneViewContainer() {
     developmentHotspotLayer.totalCount,
     developmentHotspotControls.permitSegment,
     developmentHotspotsEnabled,
+    exploreCountywideLayersActive,
     mapStatus,
     modelResearchRenderTick,
     setSelectedDevelopmentHotspotContext,
@@ -1285,10 +1370,16 @@ export function SceneViewContainer() {
     floodConstraintLayerRef.current = floodLayer;
     floodLayer.removeAll();
 
-    if (!floodConstraintsEnabled || floodConstraintLayer.status !== "ready") {
+    if (
+      !exploreCountywideLayersActive ||
+      !floodConstraintsEnabled ||
+      floodConstraintLayer.status !== "ready"
+    ) {
+      floodLayer.visible = false;
       return;
     }
 
+    floodLayer.visible = true;
     floodConstraintLayer.markers.forEach((marker) => {
       floodLayer.add(createFloodConstraintGraphic(runtime, marker));
     });
@@ -1301,6 +1392,7 @@ export function SceneViewContainer() {
     floodConstraintLayer.markers,
     floodConstraintLayer.status,
     floodConstraintLayer.totalCount,
+    exploreCountywideLayersActive,
     floodConstraintsEnabled,
     mapStatus,
   ]);
@@ -1317,10 +1409,16 @@ export function SceneViewContainer() {
     floodZoneLayerRef.current = femaFloodZoneGraphicsLayer;
     femaFloodZoneGraphicsLayer.removeAll();
 
-    if (!floodZonesEnabled || floodZoneLayer.status !== "ready") {
+    if (
+      !exploreCountywideLayersActive ||
+      !floodZonesEnabled ||
+      floodZoneLayer.status !== "ready"
+    ) {
+      femaFloodZoneGraphicsLayer.visible = false;
       return;
     }
 
+    femaFloodZoneGraphicsLayer.visible = true;
     femaFloodZoneGraphicsLayer.addMany(
       floodZoneLayer.polygons
         .map((polygon) => createFemaFloodZoneGraphic(runtime, polygon))
@@ -1335,6 +1433,7 @@ export function SceneViewContainer() {
     floodZoneLayer.polygons,
     floodZoneLayer.status,
     floodZoneLayer.totalCount,
+    exploreCountywideLayersActive,
     floodZonesEnabled,
     mapStatus,
   ]);
@@ -1352,10 +1451,11 @@ export function SceneViewContainer() {
     researchLayer.removeAll();
 
     if (
-      overviewCommandMode !== "modelLab" ||
+      !modelLabLayersActive ||
       !modelResearchOverlayEnabled ||
       modelResearchPreviewLayer.status !== "ready"
     ) {
+      researchLayer.visible = false;
       setSelectedModelResearchContext(null);
       modelResearchGoToKeyRef.current = null;
       setModelResearchMapSummary(createModelResearchMapSummary({
@@ -1367,6 +1467,7 @@ export function SceneViewContainer() {
       return;
     }
 
+    researchLayer.visible = true;
     const displayMode = getModelResearchMapDisplayMode(view.scale);
     const currentExtent = getSceneViewWgs84Extent(runtime, view);
     const renderResult = buildModelResearchDisplayGraphics({
@@ -1415,7 +1516,7 @@ export function SceneViewContainer() {
     modelResearchPreviewLayer.markers,
     modelResearchPreviewLayer.status,
     modelResearchPreviewLayer.totalCount,
-    overviewCommandMode,
+    modelLabLayersActive,
     setModelResearchMapSummary,
     setSelectedModelResearchContext,
   ]);
@@ -1433,9 +1534,11 @@ export function SceneViewContainer() {
     schoolLayer.removeAll();
 
     if (
+      !exploreCountywideLayersActive ||
       !schoolUtilizationZonesEnabled ||
       schoolUtilizationZoneLayer.status !== "ready"
     ) {
+      schoolLayer.visible = false;
       clearSchoolUtilizationHover();
       if (selectedSchoolUtilizationZone) {
         clearSelectedSchoolUtilizationZone();
@@ -1443,6 +1546,7 @@ export function SceneViewContainer() {
       return;
     }
 
+    schoolLayer.visible = true;
     schoolLayer.addMany(
       schoolUtilizationZoneLayer.polygons
         .map((polygon) =>
@@ -1467,6 +1571,7 @@ export function SceneViewContainer() {
     mapStatus,
     clearSchoolUtilizationHover,
     clearSelectedSchoolUtilizationZone,
+    exploreCountywideLayersActive,
     schoolUtilizationZoneLayer.polygons,
     schoolUtilizationZoneLayer.status,
     schoolUtilizationZoneLayer.totalCount,
@@ -1483,6 +1588,7 @@ export function SceneViewContainer() {
 
   const visibleFloodInfo =
     floodInfo &&
+    exploreCountywideLayersActive &&
     floodConstraintsEnabled &&
     floodConstraintLayer.markers.some(
       (marker) => marker.officialParcelId === floodInfo.officialParcelId,
@@ -1490,11 +1596,15 @@ export function SceneViewContainer() {
       ? floodInfo
       : null;
   const visibleFloodZoneInfo =
-    floodZoneInfo && floodZonesEnabled && floodZoneLayer.status === "ready"
+    floodZoneInfo &&
+    exploreCountywideLayersActive &&
+    floodZonesEnabled &&
+    floodZoneLayer.status === "ready"
       ? floodZoneInfo
       : null;
   const visibleSchoolUtilizationInfo =
     selectedSchoolUtilizationZone &&
+    exploreCountywideLayersActive &&
     schoolUtilizationZonesEnabled &&
     schoolUtilizationZoneLayer.status === "ready"
       ? selectedSchoolUtilizationZone
@@ -1505,6 +1615,7 @@ export function SceneViewContainer() {
       : null;
   const visibleSchoolUtilizationHover =
     schoolUtilizationHover &&
+    exploreCountywideLayersActive &&
     schoolUtilizationZonesEnabled &&
     schoolUtilizationZoneLayer.status === "ready"
       ? schoolUtilizationHover
@@ -2349,6 +2460,7 @@ function createDevelopmentHotspotLayer(runtime: ArcGISRuntime) {
     id: "cfs-development-hotspots-layer",
     listMode: "hide",
     title: "Development Hotspots",
+    visible: false,
   });
 }
 
@@ -2361,6 +2473,7 @@ function createFloodConstraintLayer(runtime: ArcGISRuntime) {
     id: "cfs-flood-constraints-layer",
     listMode: "hide",
     title: "Flood Constraints",
+    visible: false,
   });
 }
 
@@ -2372,6 +2485,7 @@ function createFemaFloodZoneLayer(runtime: ArcGISRuntime) {
     id: "cfs-fema-flood-zones-layer",
     listMode: "hide",
     title: "FEMA Flood Zones",
+    visible: false,
   });
 }
 
@@ -2384,6 +2498,7 @@ function createModelResearchPreviewLayer(runtime: ArcGISRuntime) {
     id: "cfs-model-research-preview-layer",
     listMode: "hide",
     title: "Development Model Research Preview",
+    visible: false,
   });
 }
 
@@ -2395,6 +2510,7 @@ function createSchoolUtilizationZoneLayer(runtime: ArcGISRuntime) {
     id: "cfs-school-utilization-zones-layer",
     listMode: "hide",
     title: "School Utilization Seed Zones",
+    visible: false,
   });
 }
 

@@ -120,6 +120,37 @@ def test_demo_map_layers_are_wired_without_backend_calls() -> None:
     assert "Demo Sample" in layer_toggle
 
 
+def test_workspace_mode_layer_isolation_guards_map_overlays() -> None:
+    ownership = read("src/lib/gis/layerModeOwnership.ts")
+    scene = read("src/components/gis/SceneViewContainer.tsx")
+    dashboard_state = read("src/hooks/useDashboardState.tsx")
+    intelligence_panel = read("src/components/dashboard/IntelligencePanel.tsx")
+
+    assert '"county-boundary": "sharedBase"' in ownership
+    assert '"permit-activity": "exploreCountywide"' in ownership
+    assert '"flood-risk": "exploreCountywide"' in ownership
+    assert '"fema-flood-zones": "exploreCountywide"' in ownership
+    assert '"school-utilization-seed": "exploreCountywide"' in ownership
+    assert '"transportation-context": "exploreCountywide"' in ownership
+    assert '"opportunity-extrusions": "modelLab"' in ownership
+    assert "getModeScopedActiveLayerIds" in scene
+    assert "applyOperationalLayerVisibility(layerRefs.current, scopedLayerIds)" in scene
+    assert "!exploreCountywideLayersActive" in scene
+    assert "!modelLabLayersActive" in scene
+    assert "setSelectedDevelopmentHotspotContext(null)" in scene
+    assert "setSelectedModelResearchContext(null)" in scene
+    assert "developmentHotspotsEnabled && exploreCountywideLayersActive" in dashboard_state
+    assert "floodConstraintsEnabled && exploreCountywideLayersActive" in dashboard_state
+    assert "floodZonesEnabled && exploreCountywideLayersActive" in dashboard_state
+    assert "schoolUtilizationZonesEnabled && exploreCountywideLayersActive" in dashboard_state
+    assert 'mode !== "countywide"' in dashboard_state
+    assert 'mode !== "modelLab"' in dashboard_state
+    assert "getModeScopedActiveLayers" in intelligence_panel
+    assert "includeExploreMapContext && developmentHotspotsEnabled" in intelligence_panel
+    assert "includeModelLabMapContext && modelResearchOverlayEnabled" in intelligence_panel
+    assert "activeLayerIds: scopedActiveLayerIds" in intelligence_panel
+
+
 def test_portfolio_demo_mode_is_documented() -> None:
     readme = read("README.md")
     env_example = read(".env.example")

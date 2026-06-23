@@ -44,6 +44,7 @@ import {
   type DashboardUrlState,
 } from "@/lib/dashboard/urlState";
 import { USE_DEMO_DATA } from "@/lib/api/client";
+import { isExploreCountywideMode } from "@/lib/gis/layerModeOwnership";
 import { defaultIndicatorCenterGroupIds } from "@/data/intelligence/indicatorCenter";
 import type {
   DashboardStatus,
@@ -657,9 +658,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     useState<PlanningReviewFocusMode>("development_activity");
   const [isMapFocusMode, setMapFocusMode] = useState(false);
   const temporalAnalysisState = useTemporalAnalysisState();
+  const exploreCountywideLayersActive =
+    isExploreCountywideMode(overviewCommandMode);
   const developmentHotspotLayer = useDevelopmentHotspotLayer({
     activityClass: developmentHotspotControls.activityClass,
-    enabled: developmentHotspotsEnabled,
+    enabled: developmentHotspotsEnabled && exploreCountywideLayersActive,
     growthSignal: developmentHotspotControls.growthSignal,
     limit: developmentHotspotControls.limit,
     permitYearEnd: developmentHotspotControls.permitYearEnd,
@@ -678,17 +681,17 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     zoningJurisdiction: developmentHotspotControls.zoningJurisdiction || undefined,
   });
   const floodConstraintLayer = useFloodConstraintLayer({
-    enabled: floodConstraintsEnabled,
+    enabled: floodConstraintsEnabled && exploreCountywideLayersActive,
     limit: 100,
   });
   const floodZoneLayer = useFloodZoneLayer({
-    enabled: floodZonesEnabled,
+    enabled: floodZonesEnabled && exploreCountywideLayersActive,
     extent: floodZoneViewExtent,
     limitMode: floodZoneControls.limitMode,
     severity: floodZoneControls.severity,
   });
   const schoolUtilizationZoneLayer = useSchoolUtilizationZoneLayer({
-    enabled: schoolUtilizationZonesEnabled,
+    enabled: schoolUtilizationZonesEnabled && exploreCountywideLayersActive,
     level: schoolUtilizationZoneControls.level,
     limit: schoolUtilizationZoneControls.limit,
     utilizationClass: schoolUtilizationZoneControls.utilizationClass,
@@ -741,6 +744,19 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const setOverviewCommandMode = useCallback(
     (mode: OverviewCommandMode) => {
       overviewCommandModeRef.current = mode;
+
+      if (mode !== "countywide") {
+        setSelectedDevelopmentHotspotContext(null);
+        setSelectedSchoolUtilizationZone(null);
+      }
+
+      if (mode !== "modelLab") {
+        setSelectedModelResearchContext(null);
+      }
+
+      if (mode !== "indicatorCenter") {
+        setSelectedIndicatorCenterContext(null);
+      }
 
       setOverviewCommandModeState(mode);
     },
