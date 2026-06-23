@@ -1,3 +1,5 @@
+import type { MapOverlayViewMode } from "@/types/map/overlayViewModes";
+
 export type DevelopmentHotspotLayerStatus =
   | "empty"
   | "error"
@@ -69,6 +71,7 @@ export interface DevelopmentHotspotControls {
   sortBy: DevelopmentHotspotSortBy;
   statusStage: DevelopmentHotspotStatusStageFilter;
   valueClass: DevelopmentHotspotValueClassFilter;
+  viewMode: MapOverlayViewMode;
   zoningJurisdiction: string;
 }
 
@@ -83,6 +86,7 @@ export const defaultDevelopmentHotspotControls: DevelopmentHotspotControls = {
   sortBy: "development_activity_score",
   statusStage: "all",
   valueClass: "all",
+  viewMode: "clusters",
   zoningJurisdiction: "",
 };
 
@@ -135,6 +139,7 @@ export type DevelopmentHotspotMapDisplayMode =
   | "countywide_clusters"
   | "intermediate_clusters"
   | "fine_clusters"
+  | "heatmap"
   | "individual_markers"
   | "off";
 
@@ -154,7 +159,7 @@ export interface SelectedDevelopmentHotspotContext {
   areaLabel: string;
   caveat: string;
   clusterId?: string;
-  contextKind: "cluster" | "individual";
+  contextKind: "cluster" | "heatmap_cell" | "individual";
   developmentActivityScore: number | null;
   displayMode: DevelopmentHotspotMapDisplayMode;
   dominantActivityType: string | null;

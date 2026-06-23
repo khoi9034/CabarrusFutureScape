@@ -101,6 +101,7 @@ import type {
   ReportExportResult,
   ReportPackageId,
 } from "@/types/reports";
+import type { MapOverlayViewMode } from "@/types/map/overlayViewModes";
 import {
   defaultDevelopmentHotspotControls,
   type DevelopmentHotspotControls,
@@ -159,6 +160,7 @@ interface DashboardContextValue {
   mapError: string | null;
   modelResearchOverlayDisplay: ModelResearchOverlayDisplay;
   modelResearchOverlayEnabled: boolean;
+  modelResearchViewMode: MapOverlayViewMode;
   modelResearchMapSummary: ModelResearchMapSummary;
   overviewCommandMode: OverviewCommandMode;
   overviewLayout: OverviewLayoutPreference;
@@ -233,6 +235,7 @@ interface DashboardContextValue {
     display: ModelResearchOverlayDisplay,
   ) => void;
   setModelResearchOverlayEnabled: (enabled: boolean) => void;
+  setModelResearchViewMode: (mode: MapOverlayViewMode) => void;
   setModelResearchMapSummary: (summary: ModelResearchMapSummary) => void;
   setOverviewCommandMode: (mode: OverviewCommandMode) => void;
   setOverviewLayoutCommandCenter: (
@@ -618,6 +621,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     modelResearchOverlayEnabled,
     setModelResearchOverlayEnabled,
   ] = useState(USE_DEMO_DATA);
+  const [modelResearchViewMode, setModelResearchViewMode] =
+    useState<MapOverlayViewMode>("clusters");
   const [
     modelResearchMapSummary,
     setModelResearchMapSummary,
@@ -1172,6 +1177,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       indicatorCenterDisplayMode,
       modelResearchOverlayDisplay,
       modelResearchOverlayEnabled,
+      modelResearchViewMode,
       modelResearchMapSummary,
       openPrintLayout,
       overviewCommandMode,
@@ -1226,6 +1232,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setMapStatus,
       setModelResearchOverlayDisplay,
       setModelResearchOverlayEnabled,
+      setModelResearchViewMode,
       setModelResearchMapSummary,
       setOverviewCommandMode,
       setOverviewLayoutCommandCenter,
@@ -1308,6 +1315,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       indicatorCenterDisplayMode,
       modelResearchOverlayDisplay,
       modelResearchOverlayEnabled,
+      modelResearchViewMode,
       modelResearchMapSummary,
       openPrintLayout,
       overviewCommandMode,

@@ -1,3 +1,5 @@
+import type { MapOverlayViewMode } from "@/types/map/overlayViewModes";
+
 export type RiskLevel = "Low" | "Moderate" | "Elevated" | "Severe";
 
 export type LayerCategory =
@@ -203,7 +205,7 @@ export interface PlanningSnapshotDevelopmentActivityContext {
   activityClass: string | null;
   areaLabel: string;
   caveat: string;
-  contextKind: "cluster" | "individual";
+  contextKind: "cluster" | "heatmap_cell" | "individual";
   displayMode?: string;
   dominantActivityType: string | null;
   dominantPermitSegment: string | null;
@@ -234,6 +236,8 @@ export interface PlanningSnapshotDevelopmentActivityContext {
   };
   topDrivers: string[];
   totalPermitCount?: number;
+  viewMode?: MapOverlayViewMode;
+  viewModeLabel?: string;
   whyHighlighted: string;
   zoningJurisdictionName: string | null;
 }
@@ -315,6 +319,8 @@ export interface PlanningSnapshot {
     displayModeLabel?: string;
     dominantSignalLabel?: string;
     overlayEnabled: boolean;
+    viewMode?: MapOverlayViewMode;
+    viewModeLabel?: string;
     visibleFeatureCount?: number;
     selectedResearchContext?: {
       approximateAreaLabel?: string;

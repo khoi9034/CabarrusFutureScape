@@ -19,6 +19,11 @@ import {
   type DemoDevelopmentYears,
 } from "@/lib/demo-data/mapLayerClient";
 import {
+  formatMapOverlayViewMode,
+  mapOverlayViewModes,
+  type MapOverlayViewMode,
+} from "@/types/map/overlayViewModes";
+import {
   isLayerVisibilityControllable,
   isLayerPlaceholder,
   operationalLayerRegistry,
@@ -944,6 +949,12 @@ export function LayerToggle() {
             selectedEnd={selectedPermitYearEnd}
             selectedStart={selectedPermitYearStart}
           />
+          <HotspotViewModeControl
+            onChange={(viewMode) =>
+              updateHotspotControls("viewMode", viewMode)
+            }
+            selectedViewMode={developmentHotspotControls.viewMode}
+          />
           {!selectedHotspotSegment ? (
             <div className="col-span-2 rounded-md border border-[#68d8ff]/15 bg-[#68d8ff]/[0.045] px-2 py-2 text-[11px] leading-5 text-[#bfefff]">
               {USE_DEMO_DATA
@@ -952,7 +963,10 @@ export function LayerToggle() {
             </div>
           ) : (
             <div className="col-span-2 rounded-md border border-[#d8b86a]/15 bg-[#d8b86a]/[0.05] px-2 py-2 text-[11px] leading-5 text-[#f2d895]">
-              Showing concentration for {selectedHotspotSegmentLabel}.
+              {developmentHotspotControls.viewMode === "heatmap"
+                ? "Permit Activity Heatmap"
+                : "Showing concentration"}{" "}
+              for {selectedHotspotSegmentLabel}.
             </div>
           )}
           <HotspotAdvancedFilters
@@ -1728,6 +1742,61 @@ function LayerStatusBadge({
     >
       {children}
     </span>
+  );
+}
+
+function HotspotViewModeControl({
+  onChange,
+  selectedViewMode,
+}: {
+  onChange: (mode: MapOverlayViewMode) => void;
+  selectedViewMode: MapOverlayViewMode;
+}) {
+  return (
+    <div className="col-span-2 rounded-md border border-white/10 bg-black/15 p-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+            View
+          </p>
+          <p className="mt-1 text-[11px] leading-4 text-slate-300">
+            Points, clusters, or permit activity heatmap
+          </p>
+        </div>
+        <div
+          aria-label="Development Hotspots view mode"
+          className="grid grid-cols-3 overflow-hidden rounded-md border border-white/10 bg-white/[0.035]"
+          role="group"
+        >
+          {mapOverlayViewModes.map((mode) => {
+            const selected = selectedViewMode === mode;
+
+            return (
+              <button
+                aria-pressed={selected}
+                className={cn(
+                  "min-w-[72px] border-r border-white/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] transition last:border-r-0",
+                  selected
+                    ? "bg-[#68d8ff]/16 text-[#b7f0ff] shadow-[inset_0_-2px_0_rgba(104,216,255,0.45)]"
+                    : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200",
+                )}
+                key={mode}
+                onClick={() => onChange(mode)}
+                title={`${formatMapOverlayViewMode(mode)} view`}
+                type="button"
+              >
+                {formatMapOverlayViewMode(mode)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {selectedViewMode === "heatmap" ? (
+        <p className="mt-2 rounded border border-[#d8b86a]/15 bg-[#d8b86a]/[0.05] px-2 py-1.5 text-[11px] leading-5 text-[#f2d895]">
+          Heatmap shows observed permit hotspot concentration, not prediction.
+        </p>
+      ) : null}
+    </div>
   );
 }
 

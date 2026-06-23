@@ -151,6 +151,34 @@ def test_workspace_mode_layer_isolation_guards_map_overlays() -> None:
     assert "activeLayerIds: scopedActiveLayerIds" in intelligence_panel
 
 
+def test_points_clusters_heatmap_view_modes_are_wired_for_map_modes() -> None:
+    overlay_modes = read("src/types/map/overlayViewModes.ts")
+    hotspot_types = read("src/types/map/developmentHotspots.ts")
+    layer_toggle = read("src/components/dashboard/LayerToggle.tsx")
+    sidebar = read("src/components/layout/Sidebar.tsx")
+    scene = read("src/components/gis/SceneViewContainer.tsx")
+    dashboard_state = read("src/hooks/useDashboardState.tsx")
+    intelligence_panel = read("src/components/dashboard/IntelligencePanel.tsx")
+
+    assert '"points" | "clusters" | "heatmap"' in overlay_modes
+    assert 'viewMode: "clusters"' in hotspot_types
+    assert "HotspotViewModeControl" in layer_toggle
+    assert "Development Hotspots view mode" in layer_toggle
+    assert "Permit Activity Heatmap" in layer_toggle
+    assert "ModelLabViewModeControl" in sidebar
+    assert "Model Lab research overlay view mode" in sidebar
+    assert "They are not exact probabilities or official parcel classes." in sidebar
+    assert "modelResearchViewMode" in dashboard_state
+    assert "getDevelopmentHotspotDisplayModeForViewMode" in scene
+    assert "createDevelopmentHotspotHeatmapGraphic" in scene
+    assert "getModelResearchDisplayModeForViewMode" in scene
+    assert "createModelResearchHeatmapGraphic" in scene
+    assert "developmentHotspotControls.viewMode" in scene
+    assert "modelResearchViewMode === \"heatmap\"" in scene
+    assert "formatMapOverlayViewMode(modelResearchViewMode)" in intelligence_panel
+    assert "formatMapOverlayViewMode(controls.viewMode)" in intelligence_panel
+
+
 def test_portfolio_demo_mode_is_documented() -> None:
     readme = read("README.md")
     env_example = read(".env.example")

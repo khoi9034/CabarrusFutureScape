@@ -83,6 +83,7 @@ import {
 } from "@/lib/gis/layerModeOwnership";
 import { cn, formatCurrency } from "@/lib/utils";
 import { ScoreCard } from "@/components/ui/ScoreCard";
+import { formatMapOverlayViewMode } from "@/types/map/overlayViewModes";
 import type {
   PlanningSnapshot,
   PlanningReviewFocusMode,
@@ -148,6 +149,7 @@ export function IntelligencePanel() {
     floodZonesEnabled,
     indicatorCenterDisplayMode,
     modelResearchOverlayEnabled,
+    modelResearchViewMode,
     modelResearchMapSummary,
     overviewCommandMode,
     productMode,
@@ -227,6 +229,7 @@ export function IntelligencePanel() {
           floodZonesEnabled={floodZonesEnabled}
           indicatorCenterDisplayMode={indicatorCenterDisplayMode}
           modelResearchOverlayEnabled={modelResearchOverlayEnabled}
+          modelResearchViewMode={modelResearchViewMode}
           modelResearchMapSummary={modelResearchMapSummary}
           overviewCommandMode={overviewCommandMode}
           schoolUtilizationZonesEnabled={schoolUtilizationZonesEnabled}
@@ -272,6 +275,7 @@ function OverviewModeContent({
   floodZonesEnabled,
   indicatorCenterDisplayMode,
   modelResearchOverlayEnabled,
+  modelResearchViewMode,
   modelResearchMapSummary,
   overviewCommandMode,
   planningSnapshot,
@@ -300,6 +304,7 @@ function OverviewModeContent({
   floodZonesEnabled: boolean;
   indicatorCenterDisplayMode: IndicatorCenterDisplayMode;
   modelResearchOverlayEnabled: boolean;
+  modelResearchViewMode: ReturnType<typeof useDashboardState>["modelResearchViewMode"];
   modelResearchMapSummary: ModelResearchMapSummary;
   overviewCommandMode: OverviewCommandMode;
   planningSnapshot: PlanningSnapshot | null;
@@ -365,7 +370,9 @@ function OverviewModeContent({
       [
         ...scopedActiveLayers.map((layer) => layer.title),
         includeExploreMapContext && developmentHotspotsEnabled
-          ? "Development Hotspots"
+          ? `Development Hotspots (${formatMapOverlayViewMode(
+              developmentHotspotControls.viewMode,
+            )})`
           : null,
         includeExploreMapContext && floodConstraintsEnabled
           ? "Flood Constraints"
@@ -377,7 +384,9 @@ function OverviewModeContent({
           ? "School Utilization Seed"
           : null,
         includeModelLabMapContext && modelResearchOverlayEnabled
-          ? "Model Lab Research Preview"
+          ? `Model Lab Research Preview (${formatMapOverlayViewMode(
+              modelResearchViewMode,
+            )})`
           : null,
       ].filter((label): label is string => Boolean(label)),
     ),
@@ -413,6 +422,7 @@ function OverviewModeContent({
         mapSnapshot,
         modelResearchMapSummary,
         modelResearchOverlayEnabled,
+        modelResearchViewMode,
         overviewCommandMode,
         parcel: selectedParcelForSnapshot,
         schoolConstraint,
@@ -444,6 +454,7 @@ function OverviewModeContent({
     indicatorCenterDisplayMode,
     modelResearchMapSummary,
     modelResearchOverlayEnabled,
+    modelResearchViewMode,
     overviewCommandMode,
     savePlanningSnapshot,
     schoolConstraint,
@@ -522,6 +533,7 @@ function OverviewModeContent({
       {overviewCommandMode === "modelLab" ? (
         <ModelLabPanel
           modelResearchOverlayEnabled={modelResearchOverlayEnabled}
+          modelResearchViewMode={modelResearchViewMode}
           modelResearchMapSummary={modelResearchMapSummary}
           onOpenMethodology={() => {
             window.location.hash = "methodology-model-lab";
@@ -1320,6 +1332,7 @@ function IndicatorCenterPanel({
 
 function ModelLabPanel({
   modelResearchOverlayEnabled,
+  modelResearchViewMode,
   modelResearchMapSummary,
   onOpenMethodology,
   onOpenPlanningSnapshot,
@@ -1330,6 +1343,7 @@ function ModelLabPanel({
   snapshotSaving,
 }: {
   modelResearchOverlayEnabled: boolean;
+  modelResearchViewMode: ReturnType<typeof useDashboardState>["modelResearchViewMode"];
   modelResearchMapSummary: ModelResearchMapSummary;
   onOpenMethodology: () => void;
   onOpenPlanningSnapshot: () => void;
@@ -1601,6 +1615,11 @@ function ModelLabPanel({
                 ? modelResearchMapSummary.viewScaleLabel
                 : "Off"
             }
+          />
+          <BriefStat
+            caveat="User-selected visualization for the research overlay."
+            label="View"
+            value={formatMapOverlayViewMode(modelResearchViewMode)}
           />
           <BriefStat
             caveat="Visible context is capped for performance and readability."
@@ -2682,7 +2701,7 @@ function formatSelectedModelResearchDisplayMode(
 ) {
   switch (mode) {
     case "countywide_heatmap":
-      return "Countywide fused surface";
+      return "Relative research heatmap";
     case "clustered_markers":
       return "Count-scaled clusters";
     case "intermediate_subclusters":
@@ -2947,6 +2966,7 @@ function buildPlanningSnapshot({
   floodConstraint,
   mapSnapshot,
   modelResearchOverlayEnabled,
+  modelResearchViewMode,
   modelResearchMapSummary,
   overviewCommandMode,
   parcel,
@@ -2967,6 +2987,7 @@ function buildPlanningSnapshot({
   floodConstraint: SnapshotFloodConstraint;
   mapSnapshot: PlanningMapSnapshotCapture;
   modelResearchOverlayEnabled: boolean;
+  modelResearchViewMode: ReturnType<typeof useDashboardState>["modelResearchViewMode"];
   modelResearchMapSummary: ModelResearchMapSummary;
   overviewCommandMode: OverviewCommandMode;
   parcel: Parameters<typeof ParcelSummaryPanel>[0]["parcel"] | null;
@@ -3000,6 +3021,8 @@ function buildPlanningSnapshot({
           status: modelResearchOverlayEnabled
             ? "safe_research_overlay_enabled_without_exact_probabilities"
             : "research_overlay_off_by_default",
+          viewMode: modelResearchViewMode,
+          viewModeLabel: formatMapOverlayViewMode(modelResearchViewMode),
           visibleFeatureCount: modelResearchMapSummary.visibleFeatureCount,
         }
       : undefined;
@@ -3610,6 +3633,8 @@ function serializeDevelopmentActivitySnapshotContext(
     segmentCounts: context.segmentCounts,
     topDrivers: context.topDrivers,
     totalPermitCount: context.totalPermitCount,
+    viewMode: controls.viewMode,
+    viewModeLabel: formatMapOverlayViewMode(controls.viewMode),
     whyHighlighted: context.whyHighlighted,
     zoningJurisdictionName: context.zoningJurisdictionName,
   };

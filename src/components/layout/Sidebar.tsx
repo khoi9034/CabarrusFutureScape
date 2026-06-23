@@ -30,6 +30,11 @@ import {
 import { useDashboardState } from "@/hooks/useDashboardState";
 import { cn } from "@/lib/utils";
 import type { OverviewCommandMode } from "@/types";
+import {
+  formatMapOverlayViewMode,
+  mapOverlayViewModes,
+  type MapOverlayViewMode,
+} from "@/types/map/overlayViewModes";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -322,7 +327,9 @@ function ModelLabControlsPanel({
   const {
     modelResearchMapSummary,
     modelResearchOverlayEnabled,
+    modelResearchViewMode,
     setModelResearchOverlayEnabled,
+    setModelResearchViewMode,
     setProductMode,
   } = useDashboardState();
 
@@ -392,10 +399,13 @@ function ModelLabControlsPanel({
         </div>
         <p className="mt-2 text-xs leading-5 text-slate-500">
           Relative bands compare parcels against other parcels in the county.
-          They are not a probability that development will occur.
+          They are not exact probabilities or official parcel classes.
         </p>
         <div className="mt-3 grid gap-2">
-          <RailFact label="Display mode" value="Auto by zoom" />
+          <ModelLabViewModeControl
+            onChange={setModelResearchViewMode}
+            selectedViewMode={modelResearchViewMode}
+          />
           <RailFact
             label="Current map mode"
             value={
@@ -405,6 +415,12 @@ function ModelLabControlsPanel({
             }
           />
         </div>
+        {modelResearchViewMode === "heatmap" ? (
+          <p className="mt-3 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.06] px-3 py-2 text-[11px] leading-5 text-[#f0cd79]">
+            Heatmap shows relative research concentration only. No exact
+            probabilities are shown.
+          </p>
+        ) : null}
       </section>
 
       <section className="rounded-lg border border-white/10 bg-black/20 p-3">
@@ -588,6 +604,51 @@ function SnapshotModeControlsPanel({
       >
         Collapse helper
       </button>
+    </div>
+  );
+}
+
+function ModelLabViewModeControl({
+  onChange,
+  selectedViewMode,
+}: {
+  onChange: (mode: MapOverlayViewMode) => void;
+  selectedViewMode: MapOverlayViewMode;
+}) {
+  return (
+    <div className="rounded-md border border-white/10 bg-black/18 p-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          View
+        </p>
+        <div
+          aria-label="Model Lab research overlay view mode"
+          className="grid grid-cols-3 overflow-hidden rounded-md border border-white/10 bg-white/[0.035]"
+          role="group"
+        >
+          {mapOverlayViewModes.map((mode) => {
+            const selected = selectedViewMode === mode;
+
+            return (
+              <button
+                aria-pressed={selected}
+                className={cn(
+                  "min-w-[64px] border-r border-white/10 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] transition last:border-r-0",
+                  selected
+                    ? "bg-[#d8b86a]/18 text-[#f6d98e] shadow-[inset_0_-2px_0_rgba(216,184,106,0.45)]"
+                    : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200",
+                )}
+                key={mode}
+                onClick={() => onChange(mode)}
+                title={`${formatMapOverlayViewMode(mode)} view`}
+                type="button"
+              >
+                {formatMapOverlayViewMode(mode)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
