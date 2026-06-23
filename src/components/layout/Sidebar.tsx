@@ -617,13 +617,18 @@ function ModelLabViewModeControl({
 }) {
   return (
     <div className="rounded-md border border-white/10 bg-black/18 p-2">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-          View
-        </p>
+      <div className="grid gap-2">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold text-slate-400">
+            Display
+          </p>
+          <p className="mt-1 text-[11px] leading-4 text-slate-300">
+            Choose how research signals appear on the map.
+          </p>
+        </div>
         <div
           aria-label="Model Lab research overlay view mode"
-          className="grid grid-cols-3 overflow-hidden rounded-md border border-white/10 bg-white/[0.035]"
+          className="grid w-full grid-cols-1 gap-1 rounded-md border border-white/10 bg-white/[0.035] p-1 min-[380px]:grid-cols-3"
           role="group"
         >
           {mapOverlayViewModes.map((mode) => {
@@ -631,12 +636,13 @@ function ModelLabViewModeControl({
 
             return (
               <button
+                aria-label={`Show Model Lab research as ${formatMapOverlayViewMode(mode)}`}
                 aria-pressed={selected}
                 className={cn(
-                  "min-w-[64px] border-r border-white/10 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] transition last:border-r-0",
+                  "min-h-8 min-w-0 rounded px-2.5 py-1.5 text-center text-[11px] font-semibold leading-4 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/70",
                   selected
-                    ? "bg-[#d8b86a]/18 text-[#f6d98e] shadow-[inset_0_-2px_0_rgba(216,184,106,0.45)]"
-                    : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200",
+                    ? "border border-[#68d8ff]/45 bg-[#68d8ff]/16 text-[#dff9ff] shadow-[0_0_18px_rgba(104,216,255,0.16)]"
+                    : "border border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-slate-200",
                 )}
                 key={mode}
                 onClick={() => onChange(mode)}

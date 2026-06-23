@@ -1754,18 +1754,18 @@ function HotspotViewModeControl({
 }) {
   return (
     <div className="col-span-2 rounded-md border border-white/10 bg-black/15 p-2">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="grid gap-2">
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-            View
+          <p className="text-[10px] font-semibold text-slate-400">
+            Display
           </p>
           <p className="mt-1 text-[11px] leading-4 text-slate-300">
-            Points, clusters, or permit activity heatmap
+            Choose how permit activity appears on the map.
           </p>
         </div>
         <div
           aria-label="Development Hotspots view mode"
-          className="grid grid-cols-3 overflow-hidden rounded-md border border-white/10 bg-white/[0.035]"
+          className="grid w-full grid-cols-1 gap-1 rounded-md border border-white/10 bg-white/[0.035] p-1 min-[380px]:grid-cols-3"
           role="group"
         >
           {mapOverlayViewModes.map((mode) => {
@@ -1773,12 +1773,13 @@ function HotspotViewModeControl({
 
             return (
               <button
+                aria-label={`Show Development Hotspots as ${formatMapOverlayViewMode(mode)}`}
                 aria-pressed={selected}
                 className={cn(
-                  "min-w-[72px] border-r border-white/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] transition last:border-r-0",
+                  "min-h-8 min-w-0 rounded px-2.5 py-1.5 text-center text-[11px] font-semibold leading-4 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/70",
                   selected
-                    ? "bg-[#68d8ff]/16 text-[#b7f0ff] shadow-[inset_0_-2px_0_rgba(104,216,255,0.45)]"
-                    : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200",
+                    ? "border border-[#68d8ff]/45 bg-[#68d8ff]/16 text-[#dff9ff] shadow-[0_0_18px_rgba(104,216,255,0.16)]"
+                    : "border border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.06] hover:text-slate-200",
                 )}
                 key={mode}
                 onClick={() => onChange(mode)}

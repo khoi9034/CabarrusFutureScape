@@ -124,6 +124,8 @@ def test_demo_map_layers_are_wired_without_backend_calls() -> None:
     assert "Reset Years" in layer_toggle
     assert "Portfolio Demo" in layer_toggle
     assert "Demo Sample" in layer_toggle
+    assert "Choose how permit activity appears on the map." in layer_toggle
+    assert "min-[380px]:grid-cols-3" in layer_toggle
 
 
 def test_workspace_mode_layer_isolation_guards_map_overlays() -> None:
@@ -176,13 +178,18 @@ def test_points_clusters_heatmap_view_modes_are_wired_for_map_modes() -> None:
     assert "They are not exact probabilities or official parcel classes." in sidebar
     assert "modelResearchViewMode" in dashboard_state
     assert "getDevelopmentHotspotDisplayModeForViewMode" in scene
-    assert "createDevelopmentHotspotHeatmapGraphic" in scene
+    assert "createDevelopmentHotspotHeatmapFeatureLayer" in scene
+    assert "createPermitActivityHeatmapRenderer" in scene
     assert "getModelResearchDisplayModeForViewMode" in scene
-    assert "createModelResearchHeatmapGraphic" in scene
+    assert "createModelResearchHeatmapFeatureLayer" in scene
+    assert "createResearchSignalHeatmapRenderer" in scene
+    assert "removeFeatureLayerFromView(view, hotspotHeatmapLayerRef.current)" in scene
+    assert "removeFeatureLayerFromView(view, modelResearchHeatmapLayerRef.current)" in scene
     assert "developmentHotspotControls.viewMode" in scene
     assert "modelResearchViewMode === \"heatmap\"" in scene
     assert "formatMapOverlayViewMode(modelResearchViewMode)" in intelligence_panel
     assert "formatMapOverlayViewMode(controls.viewMode)" in intelligence_panel
+    assert "Choose how research signals appear on the map." in sidebar
 
 
 def test_portfolio_demo_mode_is_documented() -> None:

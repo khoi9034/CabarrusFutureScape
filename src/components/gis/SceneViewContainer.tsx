@@ -1,6 +1,7 @@
 "use client";
 
 import type Graphic from "@arcgis/core/Graphic";
+import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type SceneView from "@arcgis/core/views/SceneView";
 import {
@@ -209,9 +210,11 @@ export function SceneViewContainer() {
   const layerRefs = useRef<OperationalLayerInstanceMap>({});
   const focusLayerRef = useRef<GraphicsLayer | null>(null);
   const hotspotLayerRef = useRef<GraphicsLayer | null>(null);
+  const hotspotHeatmapLayerRef = useRef<FeatureLayer | null>(null);
   const floodConstraintLayerRef = useRef<GraphicsLayer | null>(null);
   const floodZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const modelResearchPreviewLayerRef = useRef<GraphicsLayer | null>(null);
+  const modelResearchHeatmapLayerRef = useRef<FeatureLayer | null>(null);
   const modelResearchGoToKeyRef = useRef<string | null>(null);
   const schoolUtilizationZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const lastFocusedParcelIdRef = useRef<string | null>(null);
@@ -366,10 +369,17 @@ export function SceneViewContainer() {
         layer.removeAll();
         layer.visible = false;
       });
+      removeFeatureLayerFromView(viewRef.current, hotspotHeatmapLayerRef.current);
+      hotspotHeatmapLayerRef.current = null;
     }
 
     if (!isModelLabMode(overviewCommandMode)) {
       modelResearchPreviewLayerRef.current?.removeAll();
+      removeFeatureLayerFromView(
+        viewRef.current,
+        modelResearchHeatmapLayerRef.current,
+      );
+      modelResearchHeatmapLayerRef.current = null;
 
       if (modelResearchPreviewLayerRef.current) {
         modelResearchPreviewLayerRef.current.visible = false;
@@ -1265,12 +1275,16 @@ export function SceneViewContainer() {
       focusLayerRef.current = null;
       hotspotLayerRef.current?.removeAll();
       hotspotLayerRef.current = null;
+      removeFeatureLayerFromView(localView, hotspotHeatmapLayerRef.current);
+      hotspotHeatmapLayerRef.current = null;
       floodConstraintLayerRef.current?.removeAll();
       floodConstraintLayerRef.current = null;
       floodZoneLayerRef.current?.removeAll();
       floodZoneLayerRef.current = null;
       modelResearchPreviewLayerRef.current?.removeAll();
       modelResearchPreviewLayerRef.current = null;
+      removeFeatureLayerFromView(localView, modelResearchHeatmapLayerRef.current);
+      modelResearchHeatmapLayerRef.current = null;
       schoolUtilizationZoneLayerRef.current?.removeAll();
       schoolUtilizationZoneLayerRef.current = null;
       layerRefs.current = {};
@@ -1314,6 +1328,8 @@ export function SceneViewContainer() {
     const hotspotLayer = ensureDevelopmentHotspotLayer(runtime, view);
     hotspotLayerRef.current = hotspotLayer;
     hotspotLayer.removeAll();
+    removeFeatureLayerFromView(view, hotspotHeatmapLayerRef.current);
+    hotspotHeatmapLayerRef.current = null;
 
     if (
       !exploreCountywideLayersActive ||
@@ -1333,6 +1349,37 @@ export function SceneViewContainer() {
       view.scale,
     );
     const currentExtent = getSceneViewWgs84Extent(runtime, view);
+    if (displayMode === "heatmap") {
+      hotspotLayer.visible = false;
+      setSelectedDevelopmentHotspotContext(null);
+
+      const heatmapResult = buildDevelopmentHotspotHeatmapFeatureGraphics({
+        activePermitSegment,
+        extent: currentExtent,
+        markers: developmentHotspotLayer.markers,
+        runtime,
+      });
+
+      if (heatmapResult.graphics.length) {
+        const heatmapLayer = createDevelopmentHotspotHeatmapFeatureLayer(
+          runtime,
+          heatmapResult.graphics,
+        );
+        view.map?.add(heatmapLayer);
+        hotspotHeatmapLayerRef.current = heatmapLayer;
+      }
+
+      console.debug("[CFS development hotspots]", "rendered heatmap display", {
+        displayMode,
+        featureCount: heatmapResult.graphics.length,
+        parcelCount: heatmapResult.visibleParcelCount,
+        recordCount: heatmapResult.visibleRecordCount,
+        totalCount: developmentHotspotLayer.totalCount,
+        viewScaleLabel: getDevelopmentHotspotViewScaleLabel(displayMode),
+      });
+      return;
+    }
+
     const renderResult = buildDevelopmentHotspotDisplayGraphics({
       activePermitSegment,
       displayMode,
@@ -1455,6 +1502,8 @@ export function SceneViewContainer() {
     const researchLayer = ensureModelResearchPreviewLayer(runtime, view);
     modelResearchPreviewLayerRef.current = researchLayer;
     researchLayer.removeAll();
+    removeFeatureLayerFromView(view, modelResearchHeatmapLayerRef.current);
+    modelResearchHeatmapLayerRef.current = null;
 
     if (
       !modelLabLayersActive ||
@@ -1482,6 +1531,42 @@ export function SceneViewContainer() {
       setSelectedModelResearchContext(null);
     }
     const currentExtent = getSceneViewWgs84Extent(runtime, view);
+    if (displayMode === "countywide_heatmap") {
+      researchLayer.visible = false;
+      const heatmapResult = buildModelResearchHeatmapFeatureGraphics({
+        displayMode,
+        extent: currentExtent,
+        markers: modelResearchPreviewLayer.markers,
+        runtime,
+      });
+
+      if (heatmapResult.graphics.length) {
+        const heatmapLayer = createModelResearchHeatmapFeatureLayer(
+          runtime,
+          heatmapResult.graphics,
+        );
+        view.map?.add(heatmapLayer);
+        modelResearchHeatmapLayerRef.current = heatmapLayer;
+      }
+
+      setModelResearchMapSummary(createModelResearchMapSummary({
+        displayMode,
+        dominantSignalLabel: heatmapResult.dominantSignalLabel,
+        overlayEnabled: true,
+        totalFeatureCount: modelResearchPreviewLayer.totalCount,
+        viewScaleLabel: getModelResearchViewScaleLabel(displayMode),
+        visibleFeatureCount: heatmapResult.visibleFeatureCount,
+      }));
+
+      console.debug("[CFS model research preview]", "rendered heatmap display", {
+        displayMode,
+        featureCount: heatmapResult.graphics.length,
+        totalCount: modelResearchPreviewLayer.totalCount,
+        visibleFeatureCount: heatmapResult.visibleFeatureCount,
+      });
+      return;
+    }
+
     const renderResult = buildModelResearchDisplayGraphics({
       displayMode,
       extent: currentExtent,
@@ -2545,6 +2630,109 @@ function ensureParcelFocusLayer(runtime: ArcGISRuntime, view: SceneView) {
   return focusLayer;
 }
 
+function removeFeatureLayerFromView(
+  view: SceneView | null,
+  layer: FeatureLayer | null,
+) {
+  if (!layer) {
+    return;
+  }
+
+  const map = view?.map;
+  if (map && map.findLayerById(layer.id)) {
+    map.remove(layer);
+  }
+
+  if (!layer.destroyed) {
+    layer.destroy();
+  }
+}
+
+function createDevelopmentHotspotHeatmapFeatureLayer(
+  runtime: ArcGISRuntime,
+  source: Graphic[],
+) {
+  return new runtime.FeatureLayer({
+    elevationInfo: { mode: "on-the-ground" },
+    fields: getHeatmapFeatureFields(),
+    geometryType: "point",
+    id: "cfs-development-hotspots-heatmap-layer",
+    objectIdField: "objectId",
+    opacity: 0.82,
+    popupEnabled: false,
+    renderer: createPermitActivityHeatmapRenderer(),
+    source,
+    spatialReference: { wkid: 4326 },
+    title: "Permit Activity Heatmap",
+  } as never) as FeatureLayer;
+}
+
+function createModelResearchHeatmapFeatureLayer(
+  runtime: ArcGISRuntime,
+  source: Graphic[],
+) {
+  return new runtime.FeatureLayer({
+    elevationInfo: { mode: "on-the-ground" },
+    fields: getHeatmapFeatureFields(),
+    geometryType: "point",
+    id: "cfs-model-research-heatmap-layer",
+    objectIdField: "objectId",
+    opacity: 0.78,
+    popupEnabled: false,
+    renderer: createResearchSignalHeatmapRenderer(),
+    source,
+    spatialReference: { wkid: 4326 },
+    title: "Research Signal Heatmap",
+  } as never) as FeatureLayer;
+}
+
+function getHeatmapFeatureFields() {
+  return [
+    { name: "objectId", type: "oid" },
+    { name: "heatmapWeight", type: "double" },
+    { length: 64, name: "graphicRole", type: "string" },
+    { length: 64, name: "renderedViewMode", type: "string" },
+  ];
+}
+
+function createPermitActivityHeatmapRenderer() {
+  return {
+    blurRadius: 34,
+    colorStops: [
+      { color: [2, 8, 18, 0], ratio: 0 },
+      { color: [20, 83, 116, 0.12], ratio: 0.18 },
+      { color: [41, 228, 197, 0.34], ratio: 0.38 },
+      { color: [246, 211, 101, 0.58], ratio: 0.66 },
+      { color: [249, 115, 22, 0.76], ratio: 0.84 },
+      { color: [236, 92, 255, 0.86], ratio: 1 },
+    ],
+    field: "heatmapWeight",
+    maxDensity: 0.03,
+    minDensity: 0,
+    radius: 48,
+    type: "heatmap",
+  };
+}
+
+function createResearchSignalHeatmapRenderer() {
+  return {
+    blurRadius: 36,
+    colorStops: [
+      { color: [2, 8, 18, 0], ratio: 0 },
+      { color: [30, 41, 59, 0.14], ratio: 0.16 },
+      { color: [56, 189, 248, 0.34], ratio: 0.36 },
+      { color: [41, 228, 197, 0.52], ratio: 0.56 },
+      { color: [250, 204, 21, 0.72], ratio: 0.78 },
+      { color: [236, 92, 255, 0.88], ratio: 1 },
+    ],
+    field: "heatmapWeight",
+    maxDensity: 0.026,
+    minDensity: 0,
+    radius: 52,
+    type: "heatmap",
+  };
+}
+
 function ensureDevelopmentHotspotLayer(
   runtime: ArcGISRuntime,
   view: SceneView,
@@ -2823,87 +3011,34 @@ function createDevelopmentHotspotAggregateLabelGraphic(
   });
 }
 
-function createDevelopmentHotspotHeatmapGraphic(
+function createDevelopmentHotspotHeatmapFeatureGraphic(
   runtime: ArcGISRuntime,
-  cell: DevelopmentHotspotAggregateCell,
-  maxRecordsRepresented: number,
+  marker: DevelopmentHotspotMapMarker,
+  activePermitSegment: string | null,
+  objectId: number,
 ) {
-  const profile = getPermitSegmentVisualProfile(cell.dominantPermitSegment);
-  const context = createDevelopmentHotspotContextFromCell(cell);
-  const normalizedWeight = Math.min(
-    1,
-    cell.recordsRepresented / Math.max(1, maxRecordsRepresented),
+  const context = createDevelopmentHotspotContextFromMarker(
+    marker,
+    activePermitSegment,
+    "heatmap",
   );
-  const pulseSize = Math.round(52 + normalizedWeight * 58);
-  const coreSize = Math.round(18 + normalizedWeight * 30);
-  const haloColor = profile.haloColor as [number, number, number, number];
-  const coreColor = profile.color as [number, number, number, number];
+  const recordCount = getDevelopmentHotspotRecordCount(
+    marker,
+    activePermitSegment,
+  );
 
   return new runtime.Graphic({
     attributes: {
       ...createDevelopmentHotspotContextAttributes(context),
-      graphicRole: "development-hotspot",
-      heatmapWeight: cell.recordsRepresented,
+      heatmapWeight: Math.max(1, recordCount),
+      objectId,
       renderedViewMode: "heatmap",
     },
     geometry: new runtime.Point({
       spatialReference: { wkid: 4326 },
-      x: cell.longitude,
-      y: cell.latitude,
+      x: marker.centroid.longitude,
+      y: marker.centroid.latitude,
     }),
-    symbol: {
-      symbolLayers: [
-        {
-          material: {
-            color: [
-              haloColor[0],
-              haloColor[1],
-              haloColor[2],
-              0.2 + normalizedWeight * 0.2,
-            ],
-          },
-          outline: {
-            color: [haloColor[0], haloColor[1], haloColor[2], 0.1],
-            size: 0.2,
-          },
-          resource: {
-            primitive: "circle",
-          },
-          size: pulseSize,
-          type: "icon",
-        },
-        {
-          material: {
-            color: [
-              coreColor[0],
-              coreColor[1],
-              coreColor[2],
-              0.22 + normalizedWeight * 0.38,
-            ],
-          },
-          outline: {
-            color: [
-              coreColor[0],
-              coreColor[1],
-              coreColor[2],
-              0.2 + normalizedWeight * 0.18,
-            ],
-            size: 0.4,
-          },
-          resource: {
-            primitive: "circle",
-          },
-          size: coreSize,
-          type: "icon",
-        },
-      ],
-      type: "point-3d",
-      verticalOffset: {
-        maxWorldLength: 4600,
-        minWorldLength: 80,
-        screenLength: Math.round(70 + normalizedWeight * 42),
-      },
-    } as unknown as Graphic["symbol"],
   });
 }
 
@@ -3225,38 +3360,6 @@ function buildDevelopmentHotspotDisplayGraphics({
     };
   }
 
-  if (displayMode === "heatmap") {
-    const cells = aggregateDevelopmentHotspotMarkers(
-      sourceMarkers,
-      activePermitSegment,
-      DEVELOPMENT_HOTSPOT_COUNTYWIDE_CELL_SIZE_DEGREES,
-      displayMode,
-    ).slice(0, DEVELOPMENT_HOTSPOT_COUNTYWIDE_MAX_CELLS);
-    const maxRecordsRepresented = Math.max(
-      1,
-      ...cells.map((cell) => cell.recordsRepresented),
-    );
-
-    return {
-      extentMarkers: cells.flatMap((cell) => cell.markers),
-      graphics: cells.map((cell) =>
-        createDevelopmentHotspotHeatmapGraphic(
-          runtime,
-          cell,
-          maxRecordsRepresented,
-        ),
-      ),
-      visibleParcelCount: cells.reduce(
-        (sum, cell) => sum + cell.parcelsRepresented,
-        0,
-      ),
-      visibleRecordCount: cells.reduce(
-        (sum, cell) => sum + cell.recordsRepresented,
-        0,
-      ),
-    };
-  }
-
   if (displayMode === "individual_markers") {
     const detailMarkers = prioritizeDevelopmentHotspotMarkers(
       sourceMarkers,
@@ -3304,8 +3407,50 @@ function buildDevelopmentHotspotDisplayGraphics({
       (sum, cell) => sum + cell.parcelsRepresented,
       0,
     ),
-    visibleRecordCount: cells.reduce(
-      (sum, cell) => sum + cell.recordsRepresented,
+      visibleRecordCount: cells.reduce(
+        (sum, cell) => sum + cell.recordsRepresented,
+        0,
+      ),
+    };
+}
+
+function buildDevelopmentHotspotHeatmapFeatureGraphics({
+  activePermitSegment,
+  extent,
+  markers,
+  runtime,
+}: Omit<DevelopmentHotspotDisplayOptions, "displayMode">): DevelopmentHotspotDisplayResult {
+  const visibleMarkers = filterDevelopmentHotspotMarkersForExtent(
+    markers,
+    extent,
+  );
+  const sourceMarkers = visibleMarkers.length ? visibleMarkers : markers;
+  const heatmapMarkers = prioritizeDevelopmentHotspotMarkers(
+    sourceMarkers,
+    activePermitSegment,
+  ).filter(
+    (marker) =>
+      getDevelopmentHotspotRecordCount(marker, activePermitSegment) > 0 &&
+      Number.isFinite(marker.centroid.longitude) &&
+      Number.isFinite(marker.centroid.latitude),
+  );
+
+  return {
+    extentMarkers: heatmapMarkers,
+    graphics: heatmapMarkers.map((marker, index) =>
+      createDevelopmentHotspotHeatmapFeatureGraphic(
+        runtime,
+        marker,
+        activePermitSegment,
+        index + 1,
+      ),
+    ),
+    visibleParcelCount: new Set(
+      heatmapMarkers.map((marker) => marker.officialParcelId),
+    ).size,
+    visibleRecordCount: heatmapMarkers.reduce(
+      (sum, marker) =>
+        sum + getDevelopmentHotspotRecordCount(marker, activePermitSegment),
       0,
     ),
   };
@@ -3612,19 +3757,6 @@ function buildModelResearchDisplayGraphics({
     displayMode,
   ).slice(0, getModelResearchClusterMaxCells(displayMode));
 
-  if (displayMode === "countywide_heatmap") {
-    const maxWeight = Math.max(1, ...cells.map((cell) => cell.weight));
-
-    return {
-      dominantSignalLabel: getDominantResearchSignalLabel(sourceMarkers),
-      extentMarkers: cells.map((cell) => aggregateCellToMarker(cell, displayMode)),
-      graphics: cells.map((cell) =>
-        createModelResearchHeatmapGraphic(runtime, cell, maxWeight),
-      ),
-      visibleFeatureCount: cells.reduce((sum, cell) => sum + cell.count, 0),
-    };
-  }
-
   return {
     dominantSignalLabel: getDominantResearchSignalLabel(sourceMarkers),
     extentMarkers: cells.map((cell) => aggregateCellToMarker(cell, displayMode)),
@@ -3643,6 +3775,40 @@ function buildModelResearchDisplayGraphics({
       return labelGraphic ? [graphic, labelGraphic] : [graphic];
     }),
     visibleFeatureCount: cells.reduce((sum, cell) => sum + cell.count, 0),
+  };
+}
+
+function buildModelResearchHeatmapFeatureGraphics({
+  displayMode,
+  extent,
+  markers,
+  runtime,
+}: ModelResearchDisplayOptions): ModelResearchDisplayResult {
+  const visibleMarkers = filterModelResearchMarkersForExtent(markers, extent);
+  const sourceMarkers = visibleMarkers.length ? visibleMarkers : markers;
+  const heatmapMarkers = prioritizeModelResearchMarkers(sourceMarkers).filter(
+    (marker) =>
+      Number.isFinite(marker.centroid.longitude) &&
+      Number.isFinite(marker.centroid.latitude),
+  );
+
+  return {
+    dominantSignalLabel: getDominantResearchSignalLabel(heatmapMarkers),
+    extentMarkers: heatmapMarkers.map((marker) => ({
+      ...marker,
+      contextKind: "heatmap_cell",
+      displayMode,
+      representedFeatureCount: 1,
+    })),
+    graphics: heatmapMarkers.map((marker, index) =>
+      createModelResearchHeatmapFeatureGraphic(
+        runtime,
+        marker,
+        displayMode,
+        index + 1,
+      ),
+    ),
+    visibleFeatureCount: heatmapMarkers.length,
   };
 }
 
@@ -3853,69 +4019,32 @@ function createModelResearchAggregateGraphic(
   });
 }
 
-function createModelResearchHeatmapGraphic(
+function createModelResearchHeatmapFeatureGraphic(
   runtime: ArcGISRuntime,
-  cell: ModelResearchAggregateCell,
-  maxWeight: number,
+  marker: ModelResearchPreviewMarker,
+  displayMode: ModelResearchMapDisplayMode,
+  objectId: number,
 ) {
-  const aggregateMarker = aggregateCellToMarker(cell, "countywide_heatmap");
-  const profile = getModelResearchAggregateProfile(cell, "countywide_heatmap");
-  const normalizedWeight = Math.min(1, cell.weight / Math.max(1, maxWeight));
-  const outerSize = Math.round(62 + normalizedWeight * 64);
-  const innerSize = Math.round(22 + normalizedWeight * 34);
-
   return new runtime.Graphic({
     attributes: {
       ...createModelResearchAggregateAttributes(
-        aggregateMarker,
-        "countywide_heatmap",
+        {
+          ...marker,
+          contextKind: "heatmap_cell",
+          displayMode,
+          representedFeatureCount: 1,
+        },
+        displayMode,
       ),
-      heatmapWeight: cell.weight,
+      heatmapWeight: getResearchSignalWeight(marker.researchSignalLabel),
+      objectId,
       renderedViewMode: "heatmap",
     },
     geometry: new runtime.Point({
       spatialReference: { wkid: 4326 },
-      x: cell.longitude,
-      y: cell.latitude,
+      x: marker.centroid.longitude,
+      y: marker.centroid.latitude,
     }),
-    symbol: {
-      symbolLayers: [
-        {
-          material: {
-            color: profile.outerColor,
-          },
-          outline: {
-            color: profile.outlineColor,
-            size: 0.2,
-          },
-          resource: {
-            primitive: "circle",
-          },
-          size: outerSize,
-          type: "icon",
-        },
-        {
-          material: {
-            color: profile.innerColor,
-          },
-          outline: {
-            color: profile.innerOutlineColor,
-            size: 0.25,
-          },
-          resource: {
-            primitive: "circle",
-          },
-          size: innerSize,
-          type: "icon",
-        },
-      ],
-      type: "point-3d",
-      verticalOffset: {
-        maxWorldLength: 4800,
-        minWorldLength: 90,
-        screenLength: Math.round(76 + normalizedWeight * 38),
-      },
-    } as unknown as Graphic["symbol"],
   });
 }
 
@@ -5170,21 +5299,22 @@ function getModelResearchAggregateWorldLength(
 function getResearchSignalWeight(label: string) {
   switch (label) {
     case "Very Strong Research Signal":
+      return 5;
     case "Higher research signal":
       return 4;
     case "Strong Research Signal":
-      return 3.2;
+      return 4;
     case "Moderate Research Signal":
     case "Moderate research signal":
-      return 2.4;
+      return 3;
     case "Lower Research Signal":
     case "Lower research signal":
-      return 1;
+      return 2;
     case "Insufficient Data":
     case "Insufficient data":
-      return 0.2;
+      return 1;
     default:
-      return 0.35;
+      return 1;
   }
 }
 
