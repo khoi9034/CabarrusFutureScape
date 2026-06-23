@@ -6,10 +6,7 @@ import {
   BookOpen,
   BrainCircuit,
   ChevronDown,
-  Info,
   ListRestart,
-  Settings2,
-  SwatchBook,
 } from "lucide-react";
 import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentTrends } from "@/lib/api/development";
@@ -786,102 +783,96 @@ export function LayerToggle() {
 
     if (!active) {
       return (
-        <LayerInlinePanel>
-          <p className="text-xs leading-5 text-slate-500">
-            Turn layer on to configure display.
-          </p>
-        </LayerInlinePanel>
+        <p className="text-xs leading-5 text-slate-500">
+          Turn layer on to configure display.
+        </p>
       );
     }
 
     if (layer.id === FEMA_FLOOD_ZONE_LAYER_ID) {
       return (
-        <LayerInlinePanel>
-          <div className="grid grid-cols-2 gap-2">
-            <FloodZoneSelect
-              label="Severity"
-              onChange={(value) =>
-                updateFloodZoneControls(
-                  "severity",
-                  value as FloodZoneSeverityFilter,
-                )
-              }
-              options={floodZoneSeverityOptions}
-              value={floodZoneControls.severity}
-            />
-            <FloodZoneSelect
-              label="Limit"
-              onChange={(value) =>
-                updateFloodZoneControls("limitMode", value as FloodZoneLimitMode)
-              }
-              options={floodZoneLimitOptions}
-              value={floodZoneControls.limitMode}
-            />
-            {showFloodZoneSeverityCounts ? (
-              <div className="col-span-2 flex flex-wrap gap-1.5">
-                <FloodCountBadge
-                  color="#ff5b5b"
-                  label="Severe"
-                  value={floodZoneLayer.severityCounts.severe}
-                />
-                <FloodCountBadge
-                  color="#ffb454"
-                  label="High"
-                  value={floodZoneLayer.severityCounts.high}
-                />
-                <FloodCountBadge
-                  color="#f7d94c"
-                  label="Moderate"
-                  value={floodZoneLayer.severityCounts.moderate}
-                />
-                <FloodCountBadge
-                  color="#9eb6c7"
-                  label="Minimal"
-                  value={floodZoneLayer.severityCounts.low}
-                />
-              </div>
-            ) : null}
-          </div>
-        </LayerInlinePanel>
+        <div className="grid grid-cols-2 gap-2">
+          <FloodZoneSelect
+            label="Severity"
+            onChange={(value) =>
+              updateFloodZoneControls(
+                "severity",
+                value as FloodZoneSeverityFilter,
+              )
+            }
+            options={floodZoneSeverityOptions}
+            value={floodZoneControls.severity}
+          />
+          <FloodZoneSelect
+            label="Limit"
+            onChange={(value) =>
+              updateFloodZoneControls("limitMode", value as FloodZoneLimitMode)
+            }
+            options={floodZoneLimitOptions}
+            value={floodZoneControls.limitMode}
+          />
+          {showFloodZoneSeverityCounts ? (
+            <div className="col-span-2 flex flex-wrap gap-1.5">
+              <FloodCountBadge
+                color="#ff5b5b"
+                label="Severe"
+                value={floodZoneLayer.severityCounts.severe}
+              />
+              <FloodCountBadge
+                color="#ffb454"
+                label="High"
+                value={floodZoneLayer.severityCounts.high}
+              />
+              <FloodCountBadge
+                color="#f7d94c"
+                label="Moderate"
+                value={floodZoneLayer.severityCounts.moderate}
+              />
+              <FloodCountBadge
+                color="#9eb6c7"
+                label="Minimal"
+                value={floodZoneLayer.severityCounts.low}
+              />
+            </div>
+          ) : null}
+        </div>
       );
     }
 
     if (layer.id === SCHOOL_UTILIZATION_LAYER_ID) {
       return (
-        <LayerInlinePanel>
-          <div className="grid grid-cols-2 gap-2">
-            <SchoolUtilizationSelect
-              label="School level"
-              onChange={(value) =>
-                updateSchoolUtilizationControls(
-                  "level",
-                  value as SchoolUtilizationLevel,
-                )
-              }
-              options={schoolLevelOptions}
-              value={schoolUtilizationZoneControls.level}
-            />
-            <SchoolUtilizationSelect
-              label="Utilization class"
-              onChange={(value) =>
-                updateSchoolUtilizationControls(
-                  "utilizationClass",
-                  value as SchoolUtilizationClassFilter,
-                )
-              }
-              options={schoolUtilizationClassOptions}
-              value={schoolUtilizationZoneControls.utilizationClass}
-            />
-            {showSchoolUtilizationCounts ? (
-              <div className="col-span-2 rounded-md border border-[#5cd38f]/15 bg-[#5cd38f]/[0.045] px-2 py-1.5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#b9ffd1]">
-                  {schoolUtilizationZoneLayer.polygons.length} of{" "}
-                  {schoolUtilizationZoneLayer.totalCount} zones loaded
-                </p>
-              </div>
-            ) : null}
-          </div>
-        </LayerInlinePanel>
+        <div className="grid grid-cols-2 gap-2">
+          <SchoolUtilizationSelect
+            label="School level"
+            onChange={(value) =>
+              updateSchoolUtilizationControls(
+                "level",
+                value as SchoolUtilizationLevel,
+              )
+            }
+            options={schoolLevelOptions}
+            value={schoolUtilizationZoneControls.level}
+          />
+          <SchoolUtilizationSelect
+            label="Utilization class"
+            onChange={(value) =>
+              updateSchoolUtilizationControls(
+                "utilizationClass",
+                value as SchoolUtilizationClassFilter,
+              )
+            }
+            options={schoolUtilizationClassOptions}
+            value={schoolUtilizationZoneControls.utilizationClass}
+          />
+          {showSchoolUtilizationCounts ? (
+            <div className="col-span-2 rounded-md border border-[#5cd38f]/15 bg-[#5cd38f]/[0.045] px-2 py-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#b9ffd1]">
+                {schoolUtilizationZoneLayer.polygons.length} of{" "}
+                {schoolUtilizationZoneLayer.totalCount} zones loaded
+              </p>
+            </div>
+          ) : null}
+        </div>
       );
     }
 
@@ -981,62 +972,58 @@ export function LayerToggle() {
   function renderLegendPanel(layer: OperationalLayer) {
     if (layer.id === FLOOD_CONSTRAINT_LAYER_ID) {
       return (
-        <LayerInlinePanel>
-          <div className="grid gap-1.5">
-            {showFloodSeverityCounts ? (
-              <div className="mb-1 flex flex-wrap gap-1.5">
-                <FloodCountBadge
-                  color="#ff5b5b"
-                  label="Severe"
-                  value={floodSeverityCounts.severe}
-                />
-                <FloodCountBadge
-                  color="#ffb454"
-                  label="High"
-                  value={floodSeverityCounts.high}
-                />
-                <FloodCountBadge
-                  color="#f7d94c"
-                  label="Moderate"
-                  value={floodSeverityCounts.moderate}
-                />
-              </div>
-            ) : null}
-            {floodLegendItems.map((item) => (
-              <LayerLegendItem
-                color={item.color}
-                key={item.label}
-                label={item.label}
-                shape={item.shape}
-                size={item.size}
+        <div className="grid gap-1.5">
+          {showFloodSeverityCounts ? (
+            <div className="mb-1 flex flex-wrap gap-1.5">
+              <FloodCountBadge
+                color="#ff5b5b"
+                label="Severe"
+                value={floodSeverityCounts.severe}
               />
-            ))}
-          </div>
-        </LayerInlinePanel>
+              <FloodCountBadge
+                color="#ffb454"
+                label="High"
+                value={floodSeverityCounts.high}
+              />
+              <FloodCountBadge
+                color="#f7d94c"
+                label="Moderate"
+                value={floodSeverityCounts.moderate}
+              />
+            </div>
+          ) : null}
+          {floodLegendItems.map((item) => (
+            <LayerLegendItem
+              color={item.color}
+              key={item.label}
+              label={item.label}
+              shape={item.shape}
+              size={item.size}
+            />
+          ))}
+        </div>
       );
     }
 
     if (layer.id === FEMA_FLOOD_ZONE_LAYER_ID) {
       return (
-        <LayerInlinePanel>
-          <div className="grid gap-1.5">
-            {floodZoneLegendItems.map((item) => (
-              <LayerLegendItem
-                color={item.color}
-                key={item.label}
-                label={item.label}
-                shape="square"
-                size="h-3 w-3"
-              />
-            ))}
-          </div>
-        </LayerInlinePanel>
+        <div className="grid gap-1.5">
+          {floodZoneLegendItems.map((item) => (
+            <LayerLegendItem
+              color={item.color}
+              key={item.label}
+              label={item.label}
+              shape="square"
+              size="h-3 w-3"
+            />
+          ))}
+        </div>
       );
     }
 
     if (layer.id === SCHOOL_UTILIZATION_LAYER_ID) {
       return (
-        <LayerInlinePanel>
+        <>
           <div className="grid gap-1.5">
             {showSchoolUtilizationCounts ? (
               <div className="mb-1 flex flex-wrap gap-1.5">
@@ -1082,25 +1069,23 @@ export function LayerToggle() {
             Utilization values are presentation-derived and require official
             verification.
           </p>
-        </LayerInlinePanel>
+        </>
       );
     }
 
     if (layer.id === DEVELOPMENT_HOTSPOT_LAYER_ID && selectedHotspotSegment) {
       return (
-        <LayerInlinePanel>
-          <div className="grid grid-cols-2 gap-1.5">
-            {hotspotConcentrationLegendItems.map((item) => (
-              <LayerLegendItem
-                color={selectedHotspotSegmentColor}
-                key={item.label}
-                label={item.label}
-                shape={getPermitSegmentLegendShape(selectedHotspotSegment)}
-                size={item.size}
-              />
-            ))}
-          </div>
-        </LayerInlinePanel>
+        <div className="grid grid-cols-2 gap-1.5">
+          {hotspotConcentrationLegendItems.map((item) => (
+            <LayerLegendItem
+              color={selectedHotspotSegmentColor}
+              key={item.label}
+              label={item.label}
+              shape={getPermitSegmentLegendShape(selectedHotspotSegment)}
+              size={item.size}
+            />
+          ))}
+        </div>
       );
     }
 
@@ -1118,18 +1103,19 @@ export function LayerToggle() {
             Compact overlay controls
           </h2>
           <p className="mt-1 text-xs leading-5 text-slate-500">
-            Turn on overlays for the live map. Detailed source notes and
-            caveats are available under More Info.
+            Turn on overlays for the live map. Source notes and legends are
+            shown inside each layer card.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+            className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/60"
             onClick={resetLayers}
             title="Reset layers"
             type="button"
           >
-            <ListRestart className="h-4 w-4" />
+            <ListRestart className="h-3.5 w-3.5" />
+            Reset
           </button>
         </div>
       </div>
@@ -1279,47 +1265,6 @@ export function LayerToggle() {
                           </div>
                           <div className="ml-auto flex shrink-0 items-center gap-1.5">
                             <button
-                              aria-label={`More information for ${layerDisplayTitle}`}
-                              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
-                              onClick={() =>
-                                setOpenInfoLayerId(infoOpen ? null : layer.id)
-                              }
-                              title="More Info"
-                              type="button"
-                            >
-                              <Info className="h-3.5 w-3.5" />
-                            </button>
-                            {hasConfigure ? (
-                            <button
-                              aria-label={`Configure ${layerDisplayTitle}`}
-                              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#d8b86a]/35 hover:bg-[#d8b86a]/10 hover:text-[#f6d98e]"
-                              onClick={() =>
-                                setOpenConfigLayerId(
-                                  configureOpen ? null : layer.id,
-                                )
-                              }
-                              title="Configure"
-                              type="button"
-                            >
-                              <Settings2 className="h-3.5 w-3.5" />
-                            </button>
-                            ) : null}
-                            {hasLegend ? (
-                            <button
-                              aria-label={`Legend for ${layerDisplayTitle}`}
-                              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
-                              onClick={() =>
-                                setOpenLegendLayerId(
-                                  legendOpen ? null : layer.id,
-                                )
-                              }
-                              title="Legend"
-                              type="button"
-                            >
-                              <SwatchBook className="h-3.5 w-3.5" />
-                            </button>
-                            ) : null}
-                            <button
                               aria-label={`${active ? "Hide" : "Show"} ${layerDisplayTitle}`}
                               aria-pressed={active}
                               className={cn(
@@ -1352,16 +1297,53 @@ export function LayerToggle() {
                           ? renderDevelopmentHotspotControls()
                           : null}
 
-                        {infoOpen ? (
+                        <LayerMetadataDisclosure
+                          onToggle={() =>
+                            setOpenInfoLayerId(infoOpen ? null : layer.id)
+                          }
+                          open={infoOpen}
+                          summary="What this layer shows, where it comes from, and how to use it."
+                          title="Source Notes"
+                        >
                           <LayerMoreInfoPanel
                             layer={layer}
                             onOpenMethodology={() =>
                               setProductMode("methodology")
                             }
                           />
+                        </LayerMetadataDisclosure>
+
+                        {hasConfigure ? (
+                          <LayerMetadataDisclosure
+                            onToggle={() =>
+                              setOpenConfigLayerId(
+                                configureOpen ? null : layer.id,
+                              )
+                            }
+                            open={configureOpen}
+                            summary="Filter the visible records for this layer."
+                            title="Layer Filters"
+                            tone="gold"
+                          >
+                            {renderConfigurePanel(layer)}
+                          </LayerMetadataDisclosure>
                         ) : null}
-                        {configureOpen ? renderConfigurePanel(layer) : null}
-                        {legendOpen ? renderLegendPanel(layer) : null}
+
+                        {hasLegend ? (
+                          <LayerMetadataDisclosure
+                            onToggle={() =>
+                              setOpenLegendLayerId(
+                                legendOpen ? null : layer.id,
+                              )
+                            }
+                            open={legendOpen}
+                            summary="Read the symbols and colors used on the map."
+                            title="Legend"
+                            tone="neutral"
+                          >
+                            {renderLegendPanel(layer)}
+                          </LayerMetadataDisclosure>
+                        ) : null}
 
                         {active &&
                         (developmentHotspotLayer.errorMessage ||
@@ -1463,6 +1445,76 @@ function ModelResearchStatusCard({
   );
 }
 
+function LayerMetadataDisclosure({
+  children,
+  onToggle,
+  open,
+  summary,
+  title,
+  tone = "cyan",
+}: {
+  children: ReactNode;
+  onToggle: () => void;
+  open: boolean;
+  summary: string;
+  title: string;
+  tone?: "cyan" | "gold" | "neutral";
+}) {
+  const toneClass =
+    tone === "gold"
+      ? "border-[#d8b86a]/20 bg-[#d8b86a]/[0.045] hover:border-[#d8b86a]/35"
+      : tone === "neutral"
+        ? "border-white/10 bg-white/[0.025] hover:border-white/20"
+        : "border-[#68d8ff]/18 bg-[#68d8ff]/[0.045] hover:border-[#68d8ff]/35";
+  const titleClass =
+    tone === "gold"
+      ? "text-[#f6d98e]"
+      : tone === "neutral"
+        ? "text-slate-200"
+        : "text-[#bfefff]";
+
+  return (
+    <div
+      className={cn(
+        "mt-2 min-w-0 overflow-hidden rounded-md border transition",
+        toneClass,
+      )}
+    >
+      <button
+        aria-expanded={open}
+        className="flex w-full min-w-0 items-center justify-between gap-2 px-2.5 py-2 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/60"
+        onClick={onToggle}
+        type="button"
+      >
+        <span className="min-w-0">
+          <span
+            className={cn(
+              "block text-[11px] font-semibold leading-4",
+              titleClass,
+            )}
+          >
+            {title}
+          </span>
+          <span className="mt-0.5 block text-[11px] leading-4 text-slate-500">
+            {summary}
+          </span>
+        </span>
+        <ChevronDown
+          className={cn(
+            "h-3.5 w-3.5 shrink-0 text-slate-500 transition",
+            open && "rotate-180 text-slate-300",
+          )}
+        />
+      </button>
+      {open ? (
+        <div className="min-w-0 border-t border-white/10 p-2">
+          {children}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function LayerInlinePanel({ children }: { children: ReactNode }) {
   return (
     <div className="cfs-chart-panel mt-2 min-w-0 overflow-hidden rounded-md p-2">
@@ -1510,23 +1562,24 @@ function ComingSoonLayerRow({
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
           {sourceLayer && onMoreInfo ? (
             <button
-              aria-label={`More information for ${title}`}
-              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] text-slate-400 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
+              aria-label={`Source notes for ${title}`}
+              className="inline-flex min-h-7 shrink-0 items-center justify-center rounded border border-white/10 bg-white/[0.035] px-2 py-1 text-[11px] font-semibold text-slate-300 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-[#b7f0ff]"
               onClick={onMoreInfo}
-              title="More Info"
+              title="Source Notes"
               type="button"
             >
-              <Info className="h-3.5 w-3.5" />
+              Source Notes
             </button>
           ) : null}
           {onOpenMethodology ? (
             <button
-              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[#68d8ff]/18 bg-[#68d8ff]/10 text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+              className="inline-flex min-h-7 shrink-0 items-center justify-center gap-1.5 rounded border border-[#68d8ff]/18 bg-[#68d8ff]/10 px-2 py-1 text-[11px] font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
               onClick={onOpenMethodology}
               title="Open Methodology"
               type="button"
             >
               <BookOpen className="h-3.5 w-3.5" />
+              Methodology
             </button>
           ) : null}
           <button
@@ -1575,7 +1628,7 @@ function LayerMoreInfoPanel({
     } satisfies LayerInfoContent);
 
   return (
-    <LayerInlinePanel>
+    <div className="min-w-0">
       <div className="grid gap-2 text-xs leading-5 text-slate-400">
         <LayerInfoFact label="What this layer shows" value={details.summary} />
         <LayerInfoFact label="Source" value={details.source} />
@@ -1597,7 +1650,7 @@ function LayerMoreInfoPanel({
         Open Methodology
         <ArrowUpRight className="h-3 w-3" />
       </button>
-    </LayerInlinePanel>
+    </div>
   );
 }
 

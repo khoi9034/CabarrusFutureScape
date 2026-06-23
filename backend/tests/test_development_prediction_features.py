@@ -2610,6 +2610,38 @@ def test_phase29c_qa2_layer_drawer_available_vs_coming_soon_sections() -> None:
         assert term not in layer_toggle_text.lower()
 
 
+def test_layer_controls_use_text_disclosures_instead_of_icon_only_actions() -> None:
+    layer_toggle_text = (
+        REPO_ROOT
+        / "src"
+        / "components"
+        / "dashboard"
+        / "LayerToggle.tsx"
+    ).read_text(encoding="utf-8")
+
+    assert "function LayerMetadataDisclosure" in layer_toggle_text
+    for required in [
+        "Source Notes",
+        "Layer Filters",
+        "Read the symbols and colors used on the map.",
+        "Source notes and legends are",
+        "shown inside each layer card.",
+    ]:
+        assert required in layer_toggle_text
+
+    for forbidden in [
+        "Settings2",
+        "SwatchBook",
+        "<Info",
+        "inline-flex h-7 w-7",
+        'title="More Info"',
+        'title="Configure"',
+        "aria-label={`Legend for",
+        "aria-label={`Configure",
+    ]:
+        assert forbidden not in layer_toggle_text
+
+
 def test_standardized_lift_calculation_is_tie_aware() -> None:
     metrics = zoning_model.baseline.development_model_metrics.precision_recall_lift_at_fraction(
         [1, 0, 1, 0, 1],
