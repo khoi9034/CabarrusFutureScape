@@ -141,6 +141,11 @@ export function createMockSceneLayers(runtime: ArcGISRuntime): MockSceneLayerMap
     ),
   );
 
+  layers["transportation-context"] = new GraphicsLayer({
+    id: "transportation-context",
+    title: "Transportation Context",
+  });
+
   layers["flood-risk"] = new GraphicsLayer({
     id: "flood-risk",
     title: "Flood Risk",
@@ -192,6 +197,15 @@ export function updateSelectedParcelSymbols(
     layer?.graphics?.forEach((graphic) => {
       const parcelId = graphic.attributes?.parcelId;
       const parcel = mockParcels.find((item) => item.parcelId === parcelId);
+      const isDemoParcel = graphic.attributes?.graphicRole === "demo-parcel";
+
+      if (isDemoParcel) {
+        assignSymbol(
+          graphic,
+          getDemoParcelFootprintSymbol(parcelId === selectedParcelId),
+        );
+        return;
+      }
 
       if (!parcel) {
         return;
@@ -208,6 +222,28 @@ export function updateSelectedParcelSymbols(
       }
     });
   });
+}
+
+function getDemoParcelFootprintSymbol(selected: boolean): GraphicSymbolProperties {
+  return {
+    symbolLayers: [
+      {
+        material: {
+          color: selected
+            ? [216, 184, 106, 0.3]
+            : [104, 216, 255, 0.11],
+        },
+        outline: {
+          color: selected
+            ? [255, 238, 178, 0.98]
+            : [104, 216, 255, 0.56],
+          size: selected ? 2.3 : 0.85,
+        },
+        type: "fill",
+      },
+    ],
+    type: "polygon-3d",
+  };
 }
 
 function assignSymbol(graphic: Graphic, symbol: GraphicSymbolProperties) {

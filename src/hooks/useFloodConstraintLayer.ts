@@ -6,9 +6,11 @@ import {
   CFS_API_BASE_URL,
   getApiErrorDisplayMessage,
   USE_BACKEND_API,
+  USE_DEMO_DATA,
 } from "@/lib/api/client";
 import { getFloodHighReview } from "@/lib/api/constraints";
 import { getParcelDetail } from "@/lib/api/parcels";
+import { getDemoFloodConstraintMarkers } from "@/lib/demo-data/mapLayerClient";
 import type {
   FloodConstraintLayerState,
   FloodConstraintMapMarker,
@@ -150,16 +152,73 @@ export function useFloodConstraintLayer({
     return () => controller.abort();
   }, [enabled, limit, requestKey]);
 
+  useEffect(() => {
+    if (!enabled || !USE_DEMO_DATA) {
+      return;
+    }
+
+    let cancelled = false;
+
+    getDemoFloodConstraintMarkers(limit)
+      .then((markers) => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          errorMessage:
+            markers.length === 0
+              ? "Demo floodplain review layer is not included in this sample."
+              : null,
+          isLoading: false,
+          markers,
+          requestKey,
+          severityCounts: countFloodConstraintSeverities(markers),
+          source: "demo",
+          status: markers.length > 0 ? "ready" : "empty",
+          totalCount: markers.length,
+        });
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          errorMessage: "Demo floodplain review markers are unavailable.",
+          isLoading: false,
+          markers: [],
+          requestKey,
+          severityCounts: offState.severityCounts,
+          source: "none",
+          status: "error",
+          totalCount: 0,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled, limit, requestKey]);
+
   if (!enabled) {
     return offState;
   }
 
-  if (!USE_BACKEND_API) {
+  if (!USE_BACKEND_API && !USE_DEMO_DATA) {
     return {
       ...offState,
       errorMessage:
         "Flood constraint map markers require backend API mode.",
       status: "unavailable",
+    };
+  }
+
+  if (USE_DEMO_DATA && state.requestKey !== requestKey) {
+    return {
+      ...offState,
+      isLoading: true,
+      status: "loading",
     };
   }
 

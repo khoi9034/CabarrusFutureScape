@@ -8,6 +8,8 @@ import {
   resolveParcelMapFocus,
   type ParcelFocusRecordLike,
 } from "@/lib/map/parcelMapFocus";
+import { USE_DEMO_DATA } from "@/lib/api/client";
+import { getDemoParcelMapFocus } from "@/lib/demo-data/mapLayerClient";
 import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
 import type {
   ParcelFocusSource,
@@ -55,6 +57,23 @@ export function useParcelMapFocus() {
         officialParcelId: record.officialParcelId,
         pin14: record.pin14,
       });
+
+      if (USE_DEMO_DATA) {
+        void getDemoParcelMapFocus(record, focusSource).then((focus) => {
+          const focusResult = resolveParcelMapFocus(focus);
+          const normalizedFocus = {
+            ...focus,
+            focusStatus: focusResult.focusStatus,
+          };
+
+          setSelectedParcelFocus(normalizedFocus);
+
+          if (focusResult.canFocus) {
+            dispatchParcelMapFocusRequest(normalizedFocus);
+          }
+        });
+        return;
+      }
 
       setSelectedParcelFocus(createParcelMapFocus(record, focusSource));
     },

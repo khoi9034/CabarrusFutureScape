@@ -1,0 +1,14 @@
+{
+  "features": [],
+  "metadata": {
+    "caveat": "Portfolio demo layer is not included in the current cached extract.",
+    "generated_at": "2026-06-23T14:41:06Z",
+    "layer_id": "model_research",
+    "layer_label": "Internal Model Research",
+    "message": "Portfolio demo does not include parcel-level model research geometry.",
+    "mode": "portfolio_demo",
+    "source_basis": "Data still needed",
+    "status": "not_available"
+  },
+  "type": "FeatureCollection"
+}

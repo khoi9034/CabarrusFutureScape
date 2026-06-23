@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-06-23T14:41:06Z",
+  "layer_count": 7,
+  "layers": [
+    {
+      "feature_count": 1,
+      "file": "map_layers/demo_county_boundary.geojson",
+      "id": "county_boundary",
+      "label": "Demo County Boundary",
+      "status": "available"
+    },
+    {
+      "feature_count": 300,
+      "file": "map_layers/demo_parcels.geojson",
+      "id": "parcels",
+      "label": "Demo Parcels",
+      "status": "available"
+    },
+    {
+      "feature_count": 220,
+      "file": "map_layers/demo_development_hotspots.geojson",
+      "id": "development_hotspots",
+      "label": "Demo Development Hotspots",
+      "status": "available"
+    },
+    {
+      "feature_count": 160,
+      "file": "map_layers/demo_floodplain_review.geojson",
+      "id": "floodplain_review",
+      "label": "Demo Floodplain Review",
+      "status": "available"
+    },
+    {
+      "feature_count": 35,
+      "file": "map_layers/demo_school_capacity.geojson",
+      "id": "school_capacity",
+      "label": "Demo School Capacity Watch",
+      "status": "available"
+    },
+    {
+      "feature_count": 80,
+      "file": "map_layers/demo_transportation_context.geojson",
+      "id": "transportation_context",
+      "label": "Demo Transportation Context",
+      "status": "available"
+    },
+    {
+      "feature_count": 0,
+      "file": "map_layers/demo_model_research.geojson",
+      "id": "model_research",
+      "label": "Internal Model Research",
+      "status": "not_available"
+    }
+  ],
+  "mode": "portfolio_demo",
+  "safe_export_notes": [
+    "Demo map layers are small cached extracts for portfolio review.",
+    "Sensitive contact fields, exact probabilities, and raw model scores are excluded."
+  ]
+}

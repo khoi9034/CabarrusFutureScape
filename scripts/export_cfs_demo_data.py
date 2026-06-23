@@ -23,7 +23,13 @@ from psycopg.rows import dict_row
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEMO_DATA_DIR = REPO_ROOT / "public" / "demo-data"
+DEMO_MAP_LAYER_DIR = DEMO_DATA_DIR / "map_layers"
 SAMPLE_PARCEL_LIMIT = 300
+DEMO_PARCEL_LAYER_LIMIT = 300
+DEMO_HOTSPOT_LAYER_LIMIT = 220
+DEMO_FLOOD_LAYER_LIMIT = 160
+DEMO_SCHOOL_LAYER_LIMIT = 120
+DEMO_TRANSPORTATION_LAYER_LIMIT = 80
 
 DATA_STILL_NEEDED = [
     {
@@ -80,6 +86,7 @@ DATA_STILL_NEEDED = [
 
 def main() -> int:
     DEMO_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    DEMO_MAP_LAYER_DIR.mkdir(parents=True, exist_ok=True)
     generated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
     with psycopg.connect(get_local_connection_string(), row_factory=dict_row) as conn:
@@ -91,6 +98,7 @@ def main() -> int:
         school_watch = build_school_capacity_watch(conn)
         model_status = build_model_status(generated_at)
         sample_parcels = build_sample_parcels(conn, generated_at)
+        map_layer_manifest = export_demo_map_layers(conn, generated_at)
 
     indicator_summary = {
         "available": True,
@@ -128,6 +136,7 @@ def main() -> int:
             "generated_at": generated_at,
             "mode": "portfolio_demo",
             "record_counts": {
+                "demo_map_layers": map_layer_manifest["layer_count"],
                 "sample_parcels": sample_parcels["total_count"],
                 "school_capacity_rows": school_watch["utilization_seed"]["total_count"],
                 "permit_segment_buckets": len(permit_segments["by_permit_segment"]),
@@ -160,7 +169,7 @@ def main() -> int:
             "clusters": [],
             "exact_probabilities_shown": False,
             "generated_at": generated_at,
-            "raw_scores_shown": False,
+            "raw_model_values_visible": False,
             "relative_research_bands_only": True,
         },
     }
@@ -168,12 +177,12 @@ def main() -> int:
     for filename, payload in files.items():
         write_json(DEMO_DATA_DIR / filename, payload)
 
-    total_bytes = sum(path.stat().st_size for path in DEMO_DATA_DIR.glob("*.json"))
+    total_bytes = sum(path.stat().st_size for path in DEMO_DATA_DIR.rglob("*") if path.is_file())
     print(
         json.dumps(
             {
                 "demo_data_dir": str(DEMO_DATA_DIR),
-                "file_count": len(files),
+                "file_count": len(files) + map_layer_manifest["layer_count"] + 1,
                 "sample_parcels": sample_parcels["total_count"],
                 "total_bytes": total_bytes,
             },
@@ -672,7 +681,7 @@ def build_model_status(generated_at: str) -> dict[str, Any]:
         "model_status": "Internal only",
         "production_ready": False,
         "public_exposure_allowed": False,
-        "raw_scores_shown": False,
+        "raw_model_values_visible": False,
     }
 
 
@@ -808,6 +817,691 @@ def build_sample_parcels(conn: psycopg.Connection, generated_at: str) -> dict[st
         ],
         "total_count": len(records),
     }
+
+
+def export_demo_map_layers(conn: psycopg.Connection, generated_at: str) -> dict[str, Any]:
+    layers = {
+        "demo_county_boundary.geojson": build_demo_county_boundary(generated_at),
+        "demo_parcels.geojson": build_demo_parcel_features(conn, generated_at),
+        "demo_development_hotspots.geojson": build_demo_development_hotspots(
+            conn,
+            generated_at,
+        ),
+        "demo_floodplain_review.geojson": build_demo_floodplain_review(
+            conn,
+            generated_at,
+        ),
+        "demo_school_capacity.geojson": build_demo_school_capacity(conn, generated_at),
+        "demo_transportation_context.geojson": build_demo_transportation_context(
+            conn,
+            generated_at,
+        ),
+        "demo_model_research.geojson": empty_feature_collection(
+            generated_at=generated_at,
+            layer_id="model_research",
+            layer_label="Internal Model Research",
+            message="Portfolio demo does not include parcel-level model research geometry.",
+        ),
+    }
+
+    manifest_layers = []
+    for filename, payload in layers.items():
+        write_json(DEMO_MAP_LAYER_DIR / filename, payload)
+        manifest_layers.append(
+            {
+                "feature_count": len(payload["features"]),
+                "file": f"map_layers/{filename}",
+                "id": payload["metadata"]["layer_id"],
+                "label": payload["metadata"]["layer_label"],
+                "status": payload["metadata"]["status"],
+            },
+        )
+
+    manifest = {
+        "generated_at": generated_at,
+        "layer_count": len(layers),
+        "layers": manifest_layers,
+        "mode": "portfolio_demo",
+        "safe_export_notes": [
+            "Demo map layers are small cached extracts for portfolio review.",
+            "Sensitive contact fields, exact probabilities, and raw model scores are excluded.",
+        ],
+    }
+    write_json(DEMO_MAP_LAYER_DIR / "demo_layer_manifest.json", manifest)
+    return manifest
+
+
+def build_demo_parcel_features(conn: psycopg.Connection, generated_at: str) -> dict[str, Any]:
+    if not table_exists(conn, "parcels_enriched"):
+        return empty_feature_collection(
+            generated_at=generated_at,
+            layer_id="parcels",
+            layer_label="Demo Parcels",
+            message="Demo parcel geometry is not available from the local source.",
+        )
+
+    zoning_join = table_exists(conn, "parcel_zoning_overlay_v2")
+    dev_join = table_exists(conn, "development_activity_parcel_summary")
+    flood_join = table_exists(conn, "parcel_flood_constraint_overlay")
+    school_join = table_exists(conn, "parcel_school_summary")
+    activity_order_expr = "COALESCE(d.total_permit_count, 0)" if dev_join else "0"
+
+    rows = fetch_all(
+        conn,
+        f"""
+        SELECT
+          p.official_parcel_id,
+          ROUND(p.parcel_area_acres_calc::numeric, 3)::float8 AS acreage,
+          p.parcel_size_category,
+          {column_expr('z', 'planning_jurisdiction_name', zoning_join)} AS municipality,
+          {column_expr('z', 'dominant_zoning_code_raw', zoning_join)} AS zoning,
+          {column_expr('z', 'dominant_zoning_general_normalized', zoning_join)}
+            AS zoning_category,
+          {column_expr('d', 'development_activity_class', dev_join)}
+            AS development_summary,
+          {bool_expr('f', 'flood_review_required', flood_join)} AS flood_review_required,
+          {bool_expr('f', 'sfha_present', flood_join)} AS sfha_present,
+          {bool_expr('f', 'floodway_present', flood_join)} AS floodway_present,
+          {column_expr('s', 'school_summary_status', school_join)}
+            AS school_summary,
+          {column_expr('s', 'elementary_school_name', school_join)}
+            AS elementary_school_name,
+          {column_expr('s', 'middle_school_name', school_join)}
+            AS middle_school_name,
+          {column_expr('s', 'high_school_name', school_join)}
+            AS high_school_name,
+          ST_AsGeoJSON(
+            ST_SimplifyPreserveTopology(p.geometry, 0.00005),
+            6
+          ) AS geometry_geojson,
+          ST_X(ST_PointOnSurface(p.geometry))::float8 AS centroid_lon,
+          ST_Y(ST_PointOnSurface(p.geometry))::float8 AS centroid_lat,
+          ST_XMin(p.geometry::box3d)::float8 AS xmin,
+          ST_YMin(p.geometry::box3d)::float8 AS ymin,
+          ST_XMax(p.geometry::box3d)::float8 AS xmax,
+          ST_YMax(p.geometry::box3d)::float8 AS ymax
+        FROM public.parcels_enriched p
+        {optional_join(zoning_join, 'parcel_zoning_overlay_v2', 'z')}
+        {optional_join(dev_join, 'development_activity_parcel_summary', 'd')}
+        {optional_join(flood_join, 'parcel_flood_constraint_overlay', 'f')}
+        {optional_join(school_join, 'parcel_school_summary', 's')}
+        WHERE p.geometry IS NOT NULL
+          AND COALESCE(p.has_valid_geometry, TRUE) IS TRUE
+        ORDER BY
+          {activity_order_expr} DESC NULLS LAST,
+          p.official_parcel_id ASC
+        LIMIT %s
+        """,
+        (DEMO_PARCEL_LAYER_LIMIT,),
+    )
+
+    features = []
+    for row in rows:
+        flood_summary = []
+        if row.get("flood_review_required"):
+            flood_summary.append("Floodplain review")
+        if row.get("sfha_present"):
+            flood_summary.append("Special Flood Hazard Area")
+        if row.get("floodway_present"):
+            flood_summary.append("Floodway")
+
+        school_summary = " / ".join(
+            str(value)
+            for value in [
+                row.get("elementary_school_name"),
+                row.get("middle_school_name"),
+                row.get("high_school_name"),
+            ]
+            if value
+        ) or row.get("school_summary")
+
+        features.append(
+            geojson_feature(
+                row.get("geometry_geojson"),
+                {
+                    "acreage": row.get("acreage"),
+                    "centroid_latitude": row.get("centroid_lat"),
+                    "centroid_longitude": row.get("centroid_lon"),
+                    "development_summary": row.get("development_summary"),
+                    "extent": {
+                        "spatialReference": {"wkid": 4326},
+                        "xmax": row.get("xmax"),
+                        "xmin": row.get("xmin"),
+                        "ymax": row.get("ymax"),
+                        "ymin": row.get("ymin"),
+                    },
+                    "flood_summary": " / ".join(flood_summary) or None,
+                    "municipality": row.get("municipality"),
+                    "official_parcel_id": row.get("official_parcel_id"),
+                    "parcel_size_category": row.get("parcel_size_category"),
+                    "school_summary": school_summary,
+                    "zoning": row.get("zoning"),
+                    "zoning_category": row.get("zoning_category"),
+                },
+            ),
+        )
+
+    return feature_collection(
+        features,
+        generated_at=generated_at,
+        layer_id="parcels",
+        layer_label="Demo Parcels",
+        source_basis="parcels_enriched joined to clean summary tables",
+    )
+
+
+def build_demo_development_hotspots(
+    conn: psycopg.Connection,
+    generated_at: str,
+) -> dict[str, Any]:
+    required_tables = [
+        "parcels_enriched",
+        "real_property_permit_parcel_relationship",
+        "permit_intelligence_segments",
+    ]
+    if not all(table_exists(conn, table) for table in required_tables):
+        return empty_feature_collection(
+            generated_at=generated_at,
+            layer_id="development_hotspots",
+            layer_label="Demo Development Hotspots",
+            message="Demo development hotspot geometry is not available from the local source.",
+        )
+
+    dev_join = table_exists(conn, "development_activity_parcel_summary")
+    rows = fetch_all(
+        conn,
+        f"""
+        WITH parcel_segments AS (
+          SELECT
+            r.official_parcel_id,
+            COUNT(DISTINCT r.permit_id)::int AS total_permit_count,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.permit_segment = 'residential_growth'
+            )::int AS residential_growth_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.permit_segment = 'commercial_activity'
+            )::int AS commercial_activity_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.permit_segment = 'industrial_activity'
+            )::int AS industrial_activity_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.permit_segment = 'institutional_activity'
+            )::int AS institutional_activity_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.permit_segment = 'redevelopment_signal'
+            )::int AS redevelopment_signal_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.permit_segment = 'minor_maintenance'
+            )::int AS minor_maintenance_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.permit_segment = 'demolition'
+            )::int AS demolition_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.is_active_construction IS TRUE
+            )::int AS active_construction_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.is_high_value IS TRUE
+            )::int AS high_value_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE s.is_major_value IS TRUE
+            )::int AS major_value_permits,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE r.activity_date >= CURRENT_DATE - INTERVAL '1 year'
+            )::int AS recent_permit_count_1yr,
+            COUNT(DISTINCT r.permit_id) FILTER (
+              WHERE r.activity_date >= CURRENT_DATE - INTERVAL '3 years'
+            )::int AS recent_permit_count_3yr,
+            MODE() WITHIN GROUP (ORDER BY s.permit_segment)
+              AS dominant_permit_segment,
+            MODE() WITHIN GROUP (ORDER BY s.permit_growth_signal)
+              AS dominant_growth_signal,
+            MAX(r.activity_date)::text AS latest_activity_date
+          FROM public.real_property_permit_parcel_relationship r
+          LEFT JOIN public.permit_intelligence_segments s
+            ON s.permit_id = r.permit_id
+          WHERE r.has_parcel_match IS TRUE
+            AND r.official_parcel_id IS NOT NULL
+          GROUP BY r.official_parcel_id
+        )
+        SELECT
+          ps.*,
+          p.pin14,
+          {column_expr('d', 'development_activity_class', dev_join)}
+            AS development_activity_class,
+          {column_expr('d', 'dominant_zoning_code_raw', dev_join)}
+            AS dominant_zoning_code_raw,
+          {column_expr('d', 'zoning_jurisdiction_name', dev_join)}
+            AS zoning_jurisdiction_name,
+          ST_AsGeoJSON(ST_PointOnSurface(p.geometry), 6) AS geometry_geojson,
+          ST_X(ST_PointOnSurface(p.geometry))::float8 AS centroid_lon,
+          ST_Y(ST_PointOnSurface(p.geometry))::float8 AS centroid_lat
+        FROM parcel_segments ps
+        JOIN public.parcels_enriched p
+          ON p.official_parcel_id = ps.official_parcel_id
+        {optional_join(dev_join, 'development_activity_parcel_summary', 'd')}
+        WHERE p.geometry IS NOT NULL
+        ORDER BY ps.total_permit_count DESC, ps.official_parcel_id ASC
+        LIMIT %s
+        """,
+        (DEMO_HOTSPOT_LAYER_LIMIT,),
+    )
+
+    features = [
+        geojson_feature(
+            row.get("geometry_geojson"),
+            {
+                "active_construction_permits": row.get("active_construction_permits"),
+                "commercial_activity_permits": row.get("commercial_activity_permits"),
+                "demolition_permits": row.get("demolition_permits"),
+                "development_activity_class": row.get("development_activity_class"),
+                "dominant_growth_signal": row.get("dominant_growth_signal"),
+                "dominant_permit_segment": row.get("dominant_permit_segment"),
+                "dominant_zoning_code_raw": row.get("dominant_zoning_code_raw"),
+                "high_value_permits": row.get("high_value_permits"),
+                "industrial_activity_permits": row.get("industrial_activity_permits"),
+                "institutional_activity_permits": row.get("institutional_activity_permits"),
+                "intensity_category": get_demo_intensity_category(
+                    int(row.get("total_permit_count") or 0),
+                ),
+                "label": format_demo_segment_label(row.get("dominant_permit_segment")),
+                "latest_activity_date": row.get("latest_activity_date"),
+                "major_value_permits": row.get("major_value_permits"),
+                "minor_maintenance_permits": row.get("minor_maintenance_permits"),
+                "official_parcel_id": row.get("official_parcel_id"),
+                "permit_segment": row.get("dominant_permit_segment")
+                or "administrative_or_unknown",
+                "recent_permit_count_1yr": row.get("recent_permit_count_1yr"),
+                "recent_permit_count_3yr": row.get("recent_permit_count_3yr"),
+                "redevelopment_signal_permits": row.get("redevelopment_signal_permits"),
+                "residential_growth_permits": row.get("residential_growth_permits"),
+                "total_permit_count": row.get("total_permit_count"),
+                "zoning_jurisdiction_name": row.get("zoning_jurisdiction_name"),
+            },
+        )
+        for row in rows
+    ]
+
+    return feature_collection(
+        features,
+        generated_at=generated_at,
+        layer_id="development_hotspots",
+        layer_label="Demo Development Hotspots",
+        source_basis="real_property_permit_parcel_relationship + permit_intelligence_segments",
+    )
+
+
+def build_demo_floodplain_review(
+    conn: psycopg.Connection,
+    generated_at: str,
+) -> dict[str, Any]:
+    if not table_exists(conn, "parcel_flood_constraint_overlay"):
+        return empty_feature_collection(
+            generated_at=generated_at,
+            layer_id="floodplain_review",
+            layer_label="Demo Floodplain Review",
+            message="Demo floodplain review geometry is not available from the local source.",
+        )
+
+    rows = fetch_all(
+        conn,
+        """
+        SELECT
+          official_parcel_id,
+          pin14,
+          flood_review_required,
+          floodway_present,
+          sfha_present,
+          dominant_flood_zone,
+          dominant_flood_constraint_type,
+          flood_severity_class,
+          percent_parcel_constrained::float8 AS percent_parcel_constrained,
+          buildability_impact,
+          ST_AsGeoJSON(
+            ST_SimplifyPreserveTopology(geometry, 0.00006),
+            6
+          ) AS geometry_geojson,
+          ST_X(ST_PointOnSurface(geometry))::float8 AS centroid_lon,
+          ST_Y(ST_PointOnSurface(geometry))::float8 AS centroid_lat
+        FROM public.parcel_flood_constraint_overlay
+        WHERE geometry IS NOT NULL
+          AND (
+            flood_review_required IS TRUE
+            OR floodway_present IS TRUE
+            OR sfha_present IS TRUE
+          )
+        ORDER BY
+          floodway_present DESC,
+          sfha_present DESC,
+          percent_parcel_constrained DESC NULLS LAST,
+          official_parcel_id ASC
+        LIMIT %s
+        """,
+        (DEMO_FLOOD_LAYER_LIMIT,),
+    )
+
+    features = [
+        geojson_feature(
+            row.get("geometry_geojson"),
+            {
+                "buildability_impact": row.get("buildability_impact"),
+                "centroid_latitude": row.get("centroid_lat"),
+                "centroid_longitude": row.get("centroid_lon"),
+                "dominant_flood_zone": row.get("dominant_flood_zone"),
+                "flood_constraint_type": row.get("dominant_flood_constraint_type"),
+                "flood_review_required": row.get("flood_review_required"),
+                "flood_severity_class": normalize_flood_severity(
+                    row.get("flood_severity_class"),
+                    bool(row.get("floodway_present")),
+                    bool(row.get("sfha_present")),
+                ),
+                "floodway_present": row.get("floodway_present"),
+                "label": "Floodplain Review",
+                "official_parcel_id": row.get("official_parcel_id"),
+                "percent_parcel_constrained": row.get("percent_parcel_constrained"),
+                "sfha_present": row.get("sfha_present"),
+                "source_label": "FEMA floodplain data",
+            },
+        )
+        for row in rows
+    ]
+
+    return feature_collection(
+        features,
+        generated_at=generated_at,
+        layer_id="floodplain_review",
+        layer_label="Demo Floodplain Review",
+        source_basis="parcel_flood_constraint_overlay",
+    )
+
+
+def build_demo_school_capacity(conn: psycopg.Connection, generated_at: str) -> dict[str, Any]:
+    if not table_exists(conn, "school_zones"):
+        return empty_feature_collection(
+            generated_at=generated_at,
+            layer_id="school_capacity",
+            layer_label="Demo School Capacity Watch",
+            message="Demo school capacity geometry is not available from the local source.",
+        )
+
+    utilization_table = "school_utilization_seed_current" if relation_exists(
+        conn,
+        "school_utilization_seed_current",
+    ) else (
+        "school_presentation_utilization_seed"
+        if table_exists(conn, "school_presentation_utilization_seed")
+        else None
+    )
+    utilization_join = bool(utilization_table)
+    utilization_pct_expr = (
+        "u.utilization_pct::float8" if utilization_join else "NULL::float8"
+    )
+    rows = fetch_all(
+        conn,
+        f"""
+        SELECT
+          z.zone_id,
+          z.school_name_raw AS school_name,
+          z.school_name_normalized,
+          z.school_level,
+          z.school_system,
+          z.matched_school_reference_id,
+          z.match_confidence AS zone_match_confidence,
+          z.source_layer,
+          z.source_objectid,
+          {column_expr('u', 'school_year', utilization_join)} AS school_year,
+          {column_expr('u', 'utilization_class', utilization_join)}
+            AS utilization_class,
+          {column_expr('u', 'source_confidence', utilization_join)}
+            AS source_confidence,
+          {bool_expr('u', 'needs_verification', utilization_join)}
+            AS needs_verification,
+          {column_expr('u', 'match_confidence', utilization_join)}
+            AS match_confidence,
+          {utilization_pct_expr} AS utilization_pct,
+          ST_AsGeoJSON(
+            ST_SimplifyPreserveTopology(z.geometry, 0.00006),
+            6
+          ) AS geometry_geojson
+        FROM public.school_zones z
+        {optional_join_school_utilization(utilization_table)}
+        WHERE z.geometry IS NOT NULL
+          AND COALESCE(z.include_in_cfs_v1, TRUE) IS TRUE
+        ORDER BY
+          utilization_pct DESC NULLS LAST,
+          z.school_level,
+          z.school_name_raw
+        LIMIT %s
+        """,
+        (DEMO_SCHOOL_LAYER_LIMIT,),
+    )
+
+    features = [
+        geojson_feature(
+            row.get("geometry_geojson"),
+            {
+                "label": "School Capacity Watch",
+                "match_confidence": row.get("match_confidence"),
+                "matched_school_reference_id": row.get("matched_school_reference_id"),
+                "needs_verification": True
+                if row.get("needs_verification") is None
+                else row.get("needs_verification"),
+                "school_level": row.get("school_level"),
+                "school_name": row.get("school_name"),
+                "school_name_normalized": row.get("school_name_normalized"),
+                "school_system": row.get("school_system"),
+                "school_year": row.get("school_year"),
+                "source_confidence": row.get("source_confidence")
+                or "not_available",
+                "source_layer": row.get("source_layer"),
+                "source_objectid": row.get("source_objectid"),
+                "utilization_class": row.get("utilization_class"),
+                "utilization_pct": row.get("utilization_pct"),
+                "verification_status": "Needs official verification",
+                "zone_id": row.get("zone_id"),
+                "zone_match_confidence": row.get("zone_match_confidence"),
+            },
+        )
+        for row in rows
+    ]
+
+    return feature_collection(
+        features,
+        generated_at=generated_at,
+        layer_id="school_capacity",
+        layer_label="Demo School Capacity Watch",
+        source_basis="school_zones joined to preliminary utilization from planning materials",
+    )
+
+
+def build_demo_transportation_context(
+    conn: psycopg.Connection,
+    generated_at: str,
+) -> dict[str, Any]:
+    if not table_exists(conn, "transportation_centerlines_clean"):
+        return empty_feature_collection(
+            generated_at=generated_at,
+            layer_id="transportation_context",
+            layer_label="Demo Transportation Context",
+            message="Demo transportation geometry is not available from the local source.",
+        )
+
+    rows = fetch_all(
+        conn,
+        """
+        SELECT
+          transportation_centerline_id,
+          road_name,
+          road_type,
+          road_class,
+          route_type,
+          jurisdiction_or_maintenance,
+          speed_limit,
+          is_major_road,
+          ROUND(geometry_length_ft::numeric, 1)::float8 AS geometry_length_ft,
+          ST_AsGeoJSON(
+            ST_SimplifyPreserveTopology(geometry, 0.00008),
+            6
+          ) AS geometry_geojson
+        FROM public.transportation_centerlines_clean
+        WHERE geometry IS NOT NULL
+          AND (
+            is_major_road IS TRUE
+            OR road_class IS NOT NULL
+            OR geometry_length_ft > 2500
+          )
+        ORDER BY is_major_road DESC, geometry_length_ft DESC NULLS LAST
+        LIMIT %s
+        """,
+        (DEMO_TRANSPORTATION_LAYER_LIMIT,),
+    )
+
+    features = [
+        geojson_feature(
+            row.get("geometry_geojson"),
+            {
+                "context_status": "Context available",
+                "is_major_road": row.get("is_major_road"),
+                "jurisdiction_or_maintenance": row.get("jurisdiction_or_maintenance"),
+                "label": row.get("road_name") or "Transportation corridor",
+                "length_ft": row.get("geometry_length_ft"),
+                "road_class": row.get("road_class"),
+                "road_name": row.get("road_name"),
+                "road_type": row.get("road_type"),
+                "route_type": row.get("route_type"),
+                "speed_limit": row.get("speed_limit"),
+                "transportation_centerline_id": row.get(
+                    "transportation_centerline_id",
+                ),
+            },
+        )
+        for row in rows
+    ]
+
+    return feature_collection(
+        features,
+        generated_at=generated_at,
+        layer_id="transportation_context",
+        layer_label="Demo Transportation Context",
+        source_basis="transportation_centerlines_clean",
+    )
+
+
+def build_demo_county_boundary(generated_at: str) -> dict[str, Any]:
+    geometry = {
+        "coordinates": [
+            [
+                [-80.861, 35.197],
+                [-80.835, 35.548],
+                [-80.513, 35.574],
+                [-80.346, 35.414],
+                [-80.386, 35.238],
+                [-80.861, 35.197],
+            ],
+        ],
+        "type": "Polygon",
+    }
+    return feature_collection(
+        [
+            {
+                "geometry": geometry,
+                "properties": {
+                    "label": "Cabarrus County operating extent",
+                    "source_label": "CFS operating extent reference",
+                },
+                "type": "Feature",
+            },
+        ],
+        generated_at=generated_at,
+        layer_id="county_boundary",
+        layer_label="Demo County Boundary",
+        source_basis="CFS operating extent reference",
+    )
+
+
+def feature_collection(
+    features: list[dict[str, Any]],
+    *,
+    generated_at: str,
+    layer_id: str,
+    layer_label: str,
+    source_basis: str,
+) -> dict[str, Any]:
+    return {
+        "features": [feature for feature in features if feature.get("geometry")],
+        "metadata": {
+            "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
+            "generated_at": generated_at,
+            "layer_id": layer_id,
+            "layer_label": layer_label,
+            "mode": "portfolio_demo",
+            "source_basis": source_basis,
+            "status": "available" if features else "not_available",
+        },
+        "type": "FeatureCollection",
+    }
+
+
+def empty_feature_collection(
+    *,
+    generated_at: str,
+    layer_id: str,
+    layer_label: str,
+    message: str,
+) -> dict[str, Any]:
+    return {
+        "features": [],
+        "metadata": {
+            "caveat": "Portfolio demo layer is not included in the current cached extract.",
+            "generated_at": generated_at,
+            "layer_id": layer_id,
+            "layer_label": layer_label,
+            "message": message,
+            "mode": "portfolio_demo",
+            "source_basis": "Data still needed",
+            "status": "not_available",
+        },
+        "type": "FeatureCollection",
+    }
+
+
+def geojson_feature(geometry_geojson: str | None, properties: dict[str, Any]) -> dict[str, Any]:
+    geometry = json.loads(geometry_geojson) if geometry_geojson else None
+    return {
+        "geometry": geometry,
+        "properties": properties,
+        "type": "Feature",
+    }
+
+
+def get_demo_intensity_category(count: int) -> str:
+    if count >= 26:
+        return "Very high observed activity"
+    if count >= 11:
+        return "High observed activity"
+    if count >= 3:
+        return "Moderate observed activity"
+    return "Context available"
+
+
+def format_demo_segment_label(value: Any) -> str:
+    if not value:
+        return "Permit activity"
+    return str(value).replace("_", " ").title()
+
+
+def normalize_flood_severity(
+    value: Any,
+    floodway_present: bool,
+    sfha_present: bool,
+) -> str | None:
+    normalized = str(value or "").lower()
+    if floodway_present or normalized == "severe":
+        return "severe"
+    if sfha_present or normalized == "high":
+        return "high"
+    if normalized == "moderate":
+        return "moderate"
+    return "low" if normalized == "low" else None
 
 
 def empty_development_statistics() -> dict[str, Any]:
@@ -1173,6 +1867,21 @@ def optional_join(enabled: bool, table_name: str, alias: str) -> str:
         f"LEFT JOIN public.{table_name} {alias} "
         "ON {alias}.official_parcel_id = p.official_parcel_id"
     ).format(alias=alias)
+
+
+def optional_join_school_utilization(table_name: str | None) -> str:
+    if not table_name:
+        return ""
+    return f"""
+        LEFT JOIN public.{table_name} u
+          ON (
+            u.matched_school_reference_id = z.matched_school_reference_id
+            OR (
+              u.school_name_normalized = z.school_name_normalized
+              AND LOWER(COALESCE(u.school_level, '')) = LOWER(COALESCE(z.school_level, ''))
+            )
+          )
+    """
 
 
 def fetch_one(

@@ -1,8 +1,9 @@
 {
   "caveat": "Portfolio demo uses cached CFS demo data, not a live production database.",
-  "generated_at": "2026-06-22T19:05:37Z",
+  "generated_at": "2026-06-23T14:41:06Z",
   "mode": "portfolio_demo",
   "record_counts": {
+    "demo_map_layers": 7,
     "sample_parcels": 300,
     "school_capacity_rows": 37,
     "permit_segment_buckets": 9,

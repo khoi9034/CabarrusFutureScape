@@ -41,7 +41,7 @@ export interface FloodConstraintLayerState {
   isLoading: boolean;
   markers: FloodConstraintMapMarker[];
   severityCounts: FloodConstraintSeverityCounts;
-  source: "api" | "none";
+  source: "api" | "demo" | "none";
   status: FloodConstraintLayerStatus;
   totalCount: number;
 }

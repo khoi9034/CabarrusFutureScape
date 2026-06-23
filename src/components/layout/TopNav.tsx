@@ -37,6 +37,7 @@ import {
 } from "@/lib/api/client";
 import { getParcelDetail, searchParcels } from "@/lib/api/parcels";
 import { searchDemoParcels } from "@/lib/demo-data/client";
+import { getDemoParcelMapFocus } from "@/lib/demo-data/mapLayerClient";
 import { dispatchParcelMapFocusRequest } from "@/lib/map/parcelMapFocus";
 import { cn } from "@/lib/utils";
 import type { ProductMode } from "@/types";
@@ -270,6 +271,13 @@ export function TopNav() {
       source: SelectedParcelIntelligenceSource,
     ) => {
       setSelectedParcelIntelligence(record, source);
+
+      if (USE_DEMO_DATA) {
+        void getDemoParcelMapFocus(record, "search").then((mapFocus) => {
+          dispatchParcelMapFocusRequest(mapFocus);
+        });
+        return;
+      }
 
       if (!USE_BACKEND_API) {
         return;

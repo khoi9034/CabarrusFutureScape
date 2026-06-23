@@ -1,13 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getApiErrorDisplayMessage, USE_BACKEND_API } from "@/lib/api/client";
+import {
+  getApiErrorDisplayMessage,
+  USE_BACKEND_API,
+  USE_DEMO_DATA,
+} from "@/lib/api/client";
 import type { DevelopmentTemporalFilters } from "@/data/intelligence/developmentTemporalIndex";
 import {
   getDevelopmentHotspots,
   type DevelopmentHotspotsParams,
 } from "@/lib/api/development";
 import { normalizeDevelopmentHotspotMapMarkers } from "@/lib/adapters/developmentHotspotMapAdapter";
+import { getDemoDevelopmentHotspotsBySegment } from "@/lib/demo-data/mapLayerClient";
 import type {
   DevelopmentHotspotActivityClassFilter,
   DevelopmentHotspotGrowthSignalFilter,
@@ -200,19 +205,82 @@ export function useDevelopmentHotspotLayer({
     temporalContextLabel,
     temporalParams,
     valueClass,
-    zoningJurisdiction,
+      zoningJurisdiction,
+  ]);
+
+  useEffect(() => {
+    if (!enabled || !USE_DEMO_DATA || permitSegment === "all") {
+      return;
+    }
+
+    let cancelled = false;
+
+    getDemoDevelopmentHotspotsBySegment(permitSegment)
+      .then((markers) => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          errorMessage:
+            markers.length === 0
+              ? "Demo sample does not include hotspots for this permit segment."
+              : null,
+          isLoading: false,
+          markers,
+          requestKey,
+          source: "demo",
+          status: markers.length > 0 ? "ready" : "empty",
+          temporalContextLabel,
+          totalCount: markers.length,
+        });
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          errorMessage: "Demo development hotspot layer is unavailable.",
+          isLoading: false,
+          markers: [],
+          requestKey,
+          source: "none",
+          status: "error",
+          temporalContextLabel,
+          totalCount: 0,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    enabled,
+    permitSegment,
+    requestKey,
+    temporalContextLabel,
   ]);
 
   if (!enabled) {
     return offState;
   }
 
-  if (!USE_BACKEND_API) {
+  if (!USE_BACKEND_API && !USE_DEMO_DATA) {
     return {
       ...offState,
       errorMessage:
         "Development hotspot map markers require backend API mode because generated static hotspot artifacts do not include coordinates.",
       status: "unavailable",
+    };
+  }
+
+  if (USE_DEMO_DATA && permitSegment !== "all" && state.requestKey !== requestKey) {
+    return {
+      ...offState,
+      isLoading: true,
+      status: "loading",
+      temporalContextLabel,
     };
   }
 

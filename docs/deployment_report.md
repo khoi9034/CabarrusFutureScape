@@ -107,11 +107,19 @@ Generated files:
 - `public/demo-data/model_status.json`
 - `public/demo-data/sample_parcels.json`
 - `public/demo-data/model_lab_demo_clusters.json`
+- `public/demo-data/map_layers/demo_layer_manifest.json`
+- `public/demo-data/map_layers/demo_parcels.geojson`
+- `public/demo-data/map_layers/demo_development_hotspots.geojson`
+- `public/demo-data/map_layers/demo_floodplain_review.geojson`
+- `public/demo-data/map_layers/demo_school_capacity.geojson`
+- `public/demo-data/map_layers/demo_transportation_context.geojson`
 
-The current demo extract is about 430 KB and contains 300 sanitized sample
-parcel records. It uses clean/summary local tables only, excludes sensitive
+The current demo extract is about 2.3 MB and contains 300 sanitized sample
+parcel records plus small static GeoJSON map layers for portfolio Explore
+Countywide visuals. It uses clean/summary local tables only, excludes sensitive
 contact fields, and does not expose exact parcel-level probabilities, raw model
-scores, or official prediction classes.
+scores, or official prediction classes. Public demo layers are cached samples,
+not full county production coverage.
 
 ## Backend Host Configuration
 

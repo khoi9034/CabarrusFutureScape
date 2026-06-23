@@ -1,0 +1,4626 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.369392,
+            35.439517
+          ],
+          [
+            -80.370119,
+            35.44041
+          ],
+          [
+            -80.370318,
+            35.441045
+          ],
+          [
+            -80.369407,
+            35.449848
+          ],
+          [
+            -80.369091,
+            35.455543
+          ],
+          [
+            -80.369962,
+            35.458851
+          ],
+          [
+            -80.369802,
+            35.463078
+          ],
+          [
+            -80.370756,
+            35.466623
+          ],
+          [
+            -80.37096,
+            35.468827
+          ],
+          [
+            -80.370863,
+            35.470619
+          ],
+          [
+            -80.371001,
+            35.471916
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "N LENTZ HARNESS SHOP RD",
+        "length_ft": 11951.0,
+        "road_class": null,
+        "road_name": "N LENTZ HARNESS SHOP RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 8826
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.654421,
+            35.436841
+          ],
+          [
+            -80.65102,
+            35.438031
+          ],
+          [
+            -80.64777,
+            35.438683
+          ],
+          [
+            -80.637558,
+            35.43917
+          ],
+          [
+            -80.632968,
+            35.439825
+          ],
+          [
+            -80.629906,
+            35.440526
+          ],
+          [
+            -80.617754,
+            35.443862
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "US INTERSTATE 85 S",
+        "length_ft": 11302.5,
+        "road_class": null,
+        "road_name": "US INTERSTATE 85 S",
+        "road_type": null,
+        "route_type": null,
+        "speed_limit": 65,
+        "transportation_centerline_id": 10342
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.419543,
+            35.38359
+          ],
+          [
+            -80.419942,
+            35.381856
+          ],
+          [
+            -80.420198,
+            35.377471
+          ],
+          [
+            -80.422305,
+            35.373863
+          ],
+          [
+            -80.422667,
+            35.372184
+          ],
+          [
+            -80.42289,
+            35.36992
+          ],
+          [
+            -80.422205,
+            35.366964
+          ],
+          [
+            -80.421278,
+            35.364312
+          ],
+          [
+            -80.420513,
+            35.360616
+          ],
+          [
+            -80.419762,
+            35.354021
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "LONG RUN FARM RD",
+        "length_ft": 11023.5,
+        "road_class": null,
+        "road_name": "LONG RUN FARM RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 9625
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.711124,
+            35.371444
+          ],
+          [
+            -80.709778,
+            35.373277
+          ],
+          [
+            -80.708541,
+            35.375256
+          ],
+          [
+            -80.706944,
+            35.378559
+          ],
+          [
+            -80.699888,
+            35.398147
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "US INTERSTATE 85 N",
+        "length_ft": 10314.3,
+        "road_class": null,
+        "road_name": "US INTERSTATE 85 N",
+        "road_type": null,
+        "route_type": null,
+        "speed_limit": 65,
+        "transportation_centerline_id": 10032
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.710226,
+            35.373116
+          ],
+          [
+            -80.708379,
+            35.376166
+          ],
+          [
+            -80.707154,
+            35.378794
+          ],
+          [
+            -80.700178,
+            35.398173
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "US INTERSTATE 85 S",
+        "length_ft": 9616.9,
+        "road_class": null,
+        "road_name": "US INTERSTATE 85 S",
+        "road_type": null,
+        "route_type": null,
+        "speed_limit": 65,
+        "transportation_centerline_id": 10031
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.453455,
+            35.439885
+          ],
+          [
+            -80.45393,
+            35.440666
+          ],
+          [
+            -80.455351,
+            35.441614
+          ],
+          [
+            -80.455725,
+            35.44207
+          ],
+          [
+            -80.455762,
+            35.442401
+          ],
+          [
+            -80.45526,
+            35.445498
+          ],
+          [
+            -80.456062,
+            35.448114
+          ],
+          [
+            -80.456372,
+            35.448673
+          ],
+          [
+            -80.457185,
+            35.449583
+          ],
+          [
+            -80.458827,
+            35.451073
+          ],
+          [
+            -80.460057,
+            35.452029
+          ],
+          [
+            -80.462425,
+            35.45358
+          ],
+          [
+            -80.463613,
+            35.454925
+          ],
+          [
+            -80.46578,
+            35.456121
+          ],
+          [
+            -80.466756,
+            35.457968
+          ],
+          [
+            -80.468818,
+            35.459169
+          ],
+          [
+            -80.469515,
+            35.460188
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "CLINE SCHOOL RD",
+        "length_ft": 9390.3,
+        "road_class": null,
+        "road_name": "CLINE SCHOOL RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 8041
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.394408,
+            35.455449
+          ],
+          [
+            -80.393974,
+            35.456037
+          ],
+          [
+            -80.391626,
+            35.457471
+          ],
+          [
+            -80.387359,
+            35.460411
+          ],
+          [
+            -80.384667,
+            35.465694
+          ],
+          [
+            -80.380542,
+            35.47089
+          ],
+          [
+            -80.379456,
+            35.474695
+          ],
+          [
+            -80.378413,
+            35.476718
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "LITTLE BUFFALO CREEK RD",
+        "length_ft": 9355.3,
+        "road_class": null,
+        "road_name": "LITTLE BUFFALO CREEK RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 9212
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.434111,
+            35.471161
+          ],
+          [
+            -80.43213,
+            35.471532
+          ],
+          [
+            -80.425192,
+            35.471735
+          ],
+          [
+            -80.416933,
+            35.472235
+          ],
+          [
+            -80.416052,
+            35.472159
+          ],
+          [
+            -80.414153,
+            35.471583
+          ],
+          [
+            -80.4117,
+            35.471088
+          ],
+          [
+            -80.408582,
+            35.470782
+          ],
+          [
+            -80.406159,
+            35.470711
+          ],
+          [
+            -80.404303,
+            35.471217
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "VINEYARD RD",
+        "length_ft": 9003.3,
+        "road_class": null,
+        "road_name": "VINEYARD RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12236
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.338487,
+            35.475877
+          ],
+          [
+            -80.338767,
+            35.47835
+          ],
+          [
+            -80.338319,
+            35.487287
+          ],
+          [
+            -80.338461,
+            35.488927
+          ],
+          [
+            -80.34167,
+            35.493109
+          ],
+          [
+            -80.344569,
+            35.49777
+          ],
+          [
+            -80.345167,
+            35.49897
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "GOLD HILL / NC",
+        "label": "GOLD HILL RD E",
+        "length_ft": 8935.4,
+        "road_class": null,
+        "road_name": "GOLD HILL RD E",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 10480
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.672133,
+            35.51139
+          ],
+          [
+            -80.67111,
+            35.514629
+          ],
+          [
+            -80.670296,
+            35.516559
+          ],
+          [
+            -80.66995,
+            35.517872
+          ],
+          [
+            -80.669865,
+            35.521536
+          ],
+          [
+            -80.669022,
+            35.527216
+          ],
+          [
+            -80.668048,
+            35.529148
+          ],
+          [
+            -80.666396,
+            35.531787
+          ],
+          [
+            -80.665555,
+            35.535026
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "KANNAPOLIS / NC",
+        "label": "ENOCHVILLE AVE",
+        "length_ft": 8912.6,
+        "road_class": null,
+        "road_name": "ENOCHVILLE AVE",
+        "road_type": "AVE",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 4641
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.476222,
+            35.36755
+          ],
+          [
+            -80.474609,
+            35.366482
+          ],
+          [
+            -80.469288,
+            35.365547
+          ],
+          [
+            -80.463677,
+            35.363042
+          ],
+          [
+            -80.460245,
+            35.361763
+          ],
+          [
+            -80.453461,
+            35.358622
+          ],
+          [
+            -80.450032,
+            35.357543
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "BOST CUTOFF RD",
+        "length_ft": 8693.4,
+        "road_class": null,
+        "road_name": "BOST CUTOFF RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 14184
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.430462,
+            35.442513
+          ],
+          [
+            -80.432227,
+            35.445785
+          ],
+          [
+            -80.431788,
+            35.448208
+          ],
+          [
+            -80.431771,
+            35.448884
+          ],
+          [
+            -80.431877,
+            35.449914
+          ],
+          [
+            -80.432809,
+            35.451946
+          ],
+          [
+            -80.432558,
+            35.453594
+          ],
+          [
+            -80.431775,
+            35.455416
+          ],
+          [
+            -80.431283,
+            35.457494
+          ],
+          [
+            -80.430636,
+            35.459008
+          ],
+          [
+            -80.430297,
+            35.459334
+          ],
+          [
+            -80.428186,
+            35.460653
+          ],
+          [
+            -80.427081,
+            35.46244
+          ],
+          [
+            -80.42534,
+            35.463653
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "NELLIE BEAVER RD",
+        "length_ft": 8638.7,
+        "road_class": null,
+        "road_name": "NELLIE BEAVER RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 8380
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.407626,
+            35.407689
+          ],
+          [
+            -80.403217,
+            35.411726
+          ],
+          [
+            -80.402816,
+            35.411805
+          ],
+          [
+            -80.399688,
+            35.41157
+          ],
+          [
+            -80.389817,
+            35.414113
+          ],
+          [
+            -80.389385,
+            35.414656
+          ],
+          [
+            -80.388106,
+            35.418726
+          ],
+          [
+            -80.386903,
+            35.420421
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "DUTCH RD",
+        "length_ft": 8605.3,
+        "road_class": null,
+        "road_name": "DUTCH RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 6320
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.389447,
+            35.44821
+          ],
+          [
+            -80.383182,
+            35.458868
+          ],
+          [
+            -80.382051,
+            35.460532
+          ],
+          [
+            -80.377676,
+            35.465872
+          ],
+          [
+            -80.376867,
+            35.468136
+          ],
+          [
+            -80.376256,
+            35.468913
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "ST STEPHENS CHURCH RD",
+        "length_ft": 8536.7,
+        "road_class": null,
+        "road_name": "ST STEPHENS CHURCH RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 8447
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.479155,
+            35.437399
+          ],
+          [
+            -80.477107,
+            35.438708
+          ],
+          [
+            -80.474663,
+            35.438926
+          ],
+          [
+            -80.474102,
+            35.438762
+          ],
+          [
+            -80.47231,
+            35.437617
+          ],
+          [
+            -80.471164,
+            35.437066
+          ],
+          [
+            -80.468698,
+            35.436663
+          ],
+          [
+            -80.465995,
+            35.438023
+          ],
+          [
+            -80.460832,
+            35.440251
+          ],
+          [
+            -80.460285,
+            35.440242
+          ],
+          [
+            -80.4571,
+            35.43946
+          ],
+          [
+            -80.453455,
+            35.439885
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "CRESS RD",
+        "length_ft": 8461.6,
+        "road_class": null,
+        "road_name": "CRESS RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 11191
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.440595,
+            35.303547
+          ],
+          [
+            -80.4411,
+            35.303109
+          ],
+          [
+            -80.442925,
+            35.302
+          ],
+          [
+            -80.443494,
+            35.302004
+          ],
+          [
+            -80.444049,
+            35.302298
+          ],
+          [
+            -80.444955,
+            35.303106
+          ],
+          [
+            -80.446795,
+            35.302538
+          ],
+          [
+            -80.449022,
+            35.300326
+          ],
+          [
+            -80.450555,
+            35.299488
+          ],
+          [
+            -80.450976,
+            35.299107
+          ],
+          [
+            -80.451962,
+            35.297602
+          ],
+          [
+            -80.452131,
+            35.297517
+          ],
+          [
+            -80.452648,
+            35.297721
+          ],
+          [
+            -80.452953,
+            35.29765
+          ],
+          [
+            -80.454277,
+            35.294609
+          ],
+          [
+            -80.454473,
+            35.293627
+          ],
+          [
+            -80.4548,
+            35.293178
+          ],
+          [
+            -80.452008,
+            35.291842
+          ],
+          [
+            -80.451737,
+            35.290265
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MIDLAND / NC",
+        "label": "MINERAL DR",
+        "length_ft": 8294.9,
+        "road_class": null,
+        "road_name": "MINERAL DR",
+        "road_type": "DR",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 11748
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.396375,
+            35.435583
+          ],
+          [
+            -80.393713,
+            35.436809
+          ],
+          [
+            -80.390967,
+            35.437465
+          ],
+          [
+            -80.388452,
+            35.437612
+          ],
+          [
+            -80.384156,
+            35.43733
+          ],
+          [
+            -80.38222,
+            35.437358
+          ],
+          [
+            -80.369392,
+            35.439517
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "NC HWY 49 N",
+        "length_ft": 8280.5,
+        "road_class": null,
+        "road_name": "NC HWY 49 N",
+        "road_type": null,
+        "route_type": null,
+        "speed_limit": 55,
+        "transportation_centerline_id": 12698
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.652529,
+            35.437317
+          ],
+          [
+            -80.649648,
+            35.438157
+          ],
+          [
+            -80.647277,
+            35.438541
+          ],
+          [
+            -80.638934,
+            35.438816
+          ],
+          [
+            -80.634585,
+            35.439286
+          ],
+          [
+            -80.631198,
+            35.439938
+          ],
+          [
+            -80.626083,
+            35.441301
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "US INTERSTATE 85 N",
+        "length_ft": 8067.2,
+        "road_class": null,
+        "road_name": "US INTERSTATE 85 N",
+        "road_type": null,
+        "route_type": null,
+        "speed_limit": 65,
+        "transportation_centerline_id": 10319
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.475502,
+            35.415674
+          ],
+          [
+            -80.475851,
+            35.415074
+          ],
+          [
+            -80.476372,
+            35.413628
+          ],
+          [
+            -80.478008,
+            35.412151
+          ],
+          [
+            -80.479253,
+            35.410239
+          ],
+          [
+            -80.479247,
+            35.409784
+          ],
+          [
+            -80.478432,
+            35.407762
+          ],
+          [
+            -80.478718,
+            35.403626
+          ],
+          [
+            -80.479607,
+            35.400588
+          ],
+          [
+            -80.480931,
+            35.397757
+          ],
+          [
+            -80.481169,
+            35.395607
+          ],
+          [
+            -80.480949,
+            35.394893
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "WALKER RD",
+        "length_ft": 8061.5,
+        "road_class": null,
+        "road_name": "WALKER RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 6441
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.544236,
+            35.525938
+          ],
+          [
+            -80.549037,
+            35.525255
+          ],
+          [
+            -80.554868,
+            35.524096
+          ],
+          [
+            -80.562508,
+            35.522382
+          ],
+          [
+            -80.563366,
+            35.522349
+          ],
+          [
+            -80.564407,
+            35.522378
+          ],
+          [
+            -80.566234,
+            35.522716
+          ],
+          [
+            -80.566736,
+            35.523093
+          ],
+          [
+            -80.5678,
+            35.525673
+          ],
+          [
+            -80.568184,
+            35.525805
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CHINA GROVE / NC",
+        "label": "CHALK MAPLE RD",
+        "length_ft": 8037.5,
+        "road_class": null,
+        "road_name": "CHALK MAPLE RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 14001
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.705674,
+            35.453405
+          ],
+          [
+            -80.706092,
+            35.454668
+          ],
+          [
+            -80.706161,
+            35.455814
+          ],
+          [
+            -80.705565,
+            35.458996
+          ],
+          [
+            -80.705043,
+            35.462845
+          ],
+          [
+            -80.705889,
+            35.466684
+          ],
+          [
+            -80.706067,
+            35.468305
+          ],
+          [
+            -80.70453,
+            35.472996
+          ],
+          [
+            -80.703662,
+            35.475003
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "RANKIN RD",
+        "length_ft": 8036.0,
+        "road_class": null,
+        "road_name": "RANKIN RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 9363
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.544829,
+            35.455697
+          ],
+          [
+            -80.543175,
+            35.456111
+          ],
+          [
+            -80.541331,
+            35.457198
+          ],
+          [
+            -80.538308,
+            35.458501
+          ],
+          [
+            -80.537364,
+            35.459278
+          ],
+          [
+            -80.536782,
+            35.460081
+          ],
+          [
+            -80.535157,
+            35.465777
+          ],
+          [
+            -80.535322,
+            35.468189
+          ],
+          [
+            -80.534867,
+            35.470696
+          ],
+          [
+            -80.535769,
+            35.473418
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "SAPP RD",
+        "length_ft": 7919.3,
+        "road_class": null,
+        "road_name": "SAPP RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 35,
+        "transportation_centerline_id": 8986
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.325302,
+            35.481529
+          ],
+          [
+            -80.320041,
+            35.484641
+          ],
+          [
+            -80.314834,
+            35.488175
+          ],
+          [
+            -80.314172,
+            35.488322
+          ],
+          [
+            -80.31314,
+            35.487976
+          ],
+          [
+            -80.312603,
+            35.487982
+          ],
+          [
+            -80.310926,
+            35.489032
+          ],
+          [
+            -80.30959,
+            35.489654
+          ],
+          [
+            -80.309266,
+            35.489957
+          ],
+          [
+            -80.308849,
+            35.491269
+          ],
+          [
+            -80.307997,
+            35.492659
+          ],
+          [
+            -80.305295,
+            35.493753
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "GOLD HILL / NC",
+        "label": "SHORT CUT RD",
+        "length_ft": 7851.4,
+        "road_class": null,
+        "road_name": "SHORT CUT RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12873
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.446247,
+            35.370793
+          ],
+          [
+            -80.444028,
+            35.367641
+          ],
+          [
+            -80.441276,
+            35.364494
+          ],
+          [
+            -80.438949,
+            35.363068
+          ],
+          [
+            -80.437276,
+            35.36168
+          ],
+          [
+            -80.434065,
+            35.359687
+          ],
+          [
+            -80.43351,
+            35.359111
+          ],
+          [
+            -80.433084,
+            35.358367
+          ],
+          [
+            -80.432654,
+            35.358007
+          ],
+          [
+            -80.432043,
+            35.357749
+          ],
+          [
+            -80.429421,
+            35.357164
+          ],
+          [
+            -80.427966,
+            35.356548
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "BARRIER STORE RD",
+        "length_ft": 7769.3,
+        "road_class": null,
+        "road_name": "BARRIER STORE RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 9771
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.470376,
+            35.499407
+          ],
+          [
+            -80.466994,
+            35.498727
+          ],
+          [
+            -80.464621,
+            35.497106
+          ],
+          [
+            -80.463219,
+            35.496409
+          ],
+          [
+            -80.460427,
+            35.495695
+          ],
+          [
+            -80.458342,
+            35.494982
+          ],
+          [
+            -80.457503,
+            35.494939
+          ],
+          [
+            -80.454623,
+            35.495767
+          ],
+          [
+            -80.454119,
+            35.496036
+          ],
+          [
+            -80.453933,
+            35.496286
+          ],
+          [
+            -80.453701,
+            35.496985
+          ],
+          [
+            -80.453672,
+            35.497619
+          ],
+          [
+            -80.454679,
+            35.501096
+          ],
+          [
+            -80.454483,
+            35.501782
+          ],
+          [
+            -80.453902,
+            35.502328
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "ROCKWELL / NC",
+        "label": "SISK CARTER RD",
+        "length_ft": 7766.7,
+        "road_class": null,
+        "road_name": "SISK CARTER RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 11247
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.571773,
+            35.535047
+          ],
+          [
+            -80.552312,
+            35.535515
+          ],
+          [
+            -80.550288,
+            35.53493
+          ],
+          [
+            -80.54956,
+            35.534308
+          ],
+          [
+            -80.549138,
+            35.532687
+          ],
+          [
+            -80.548483,
+            35.531689
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CHINA GROVE / NC",
+        "label": "OLD BEATTY FORD RD",
+        "length_ft": 7764.6,
+        "road_class": null,
+        "road_name": "OLD BEATTY FORD RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 35,
+        "transportation_centerline_id": 13122
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.561733,
+            35.465233
+          ],
+          [
+            -80.559148,
+            35.466808
+          ],
+          [
+            -80.558711,
+            35.467287
+          ],
+          [
+            -80.558522,
+            35.467823
+          ],
+          [
+            -80.558013,
+            35.472396
+          ],
+          [
+            -80.55811,
+            35.477548
+          ],
+          [
+            -80.558365,
+            35.479608
+          ],
+          [
+            -80.557881,
+            35.482732
+          ],
+          [
+            -80.557659,
+            35.485289
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "KANNAPOLIS / NC",
+        "label": "HILTON LAKE RD",
+        "length_ft": 7763.9,
+        "road_class": null,
+        "road_name": "HILTON LAKE RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 9901
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.481033,
+            35.479694
+          ],
+          [
+            -80.479596,
+            35.480173
+          ],
+          [
+            -80.47777,
+            35.481063
+          ],
+          [
+            -80.473259,
+            35.480729
+          ],
+          [
+            -80.471378,
+            35.481391
+          ],
+          [
+            -80.47108,
+            35.481826
+          ],
+          [
+            -80.470705,
+            35.483007
+          ],
+          [
+            -80.470533,
+            35.484677
+          ],
+          [
+            -80.469044,
+            35.486216
+          ],
+          [
+            -80.46728,
+            35.487573
+          ],
+          [
+            -80.466122,
+            35.488982
+          ],
+          [
+            -80.465706,
+            35.489161
+          ],
+          [
+            -80.465065,
+            35.48922
+          ],
+          [
+            -80.46378,
+            35.488884
+          ],
+          [
+            -80.462973,
+            35.488832
+          ],
+          [
+            -80.462489,
+            35.488934
+          ],
+          [
+            -80.461879,
+            35.489291
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "KLUTTZ RD",
+        "length_ft": 7711.5,
+        "road_class": null,
+        "road_name": "KLUTTZ RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 11018
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.544358,
+            35.285198
+          ],
+          [
+            -80.543312,
+            35.283725
+          ],
+          [
+            -80.542789,
+            35.283268
+          ],
+          [
+            -80.540567,
+            35.282444
+          ],
+          [
+            -80.538551,
+            35.281997
+          ],
+          [
+            -80.536927,
+            35.281179
+          ],
+          [
+            -80.535919,
+            35.281045
+          ],
+          [
+            -80.533942,
+            35.281276
+          ],
+          [
+            -80.531309,
+            35.280542
+          ],
+          [
+            -80.530213,
+            35.280422
+          ],
+          [
+            -80.528544,
+            35.280641
+          ],
+          [
+            -80.527561,
+            35.281101
+          ],
+          [
+            -80.523816,
+            35.284766
+          ],
+          [
+            -80.523258,
+            35.285175
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MIDLAND / NC",
+        "label": "CAL BOST RD",
+        "length_ft": 7651.5,
+        "road_class": null,
+        "road_name": "CAL BOST RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 8164
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.513296,
+            35.329862
+          ],
+          [
+            -80.51253,
+            35.328935
+          ],
+          [
+            -80.512128,
+            35.32866
+          ],
+          [
+            -80.511271,
+            35.328368
+          ],
+          [
+            -80.509838,
+            35.328164
+          ],
+          [
+            -80.509242,
+            35.327904
+          ],
+          [
+            -80.508787,
+            35.327529
+          ],
+          [
+            -80.508314,
+            35.326718
+          ],
+          [
+            -80.507891,
+            35.326332
+          ],
+          [
+            -80.50315,
+            35.324505
+          ],
+          [
+            -80.500614,
+            35.322258
+          ],
+          [
+            -80.500161,
+            35.322
+          ],
+          [
+            -80.497751,
+            35.321513
+          ],
+          [
+            -80.496145,
+            35.321545
+          ],
+          [
+            -80.491547,
+            35.321276
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "NC HWY 200",
+        "length_ft": 7630.2,
+        "road_class": null,
+        "road_name": "NC HWY 200",
+        "road_type": null,
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 9911
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.66474,
+            35.395937
+          ],
+          [
+            -80.660848,
+            35.391011
+          ],
+          [
+            -80.658499,
+            35.38671
+          ],
+          [
+            -80.656524,
+            35.385373
+          ],
+          [
+            -80.656285,
+            35.385077
+          ],
+          [
+            -80.656264,
+            35.38459
+          ],
+          [
+            -80.657506,
+            35.379061
+          ],
+          [
+            -80.657413,
+            35.378596
+          ],
+          [
+            -80.65675,
+            35.377447
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "CONCORD FARMS RD",
+        "length_ft": 7609.7,
+        "road_class": null,
+        "road_name": "CONCORD FARMS RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 7829
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.389085,
+            35.365374
+          ],
+          [
+            -80.391732,
+            35.364054
+          ],
+          [
+            -80.392209,
+            35.36356
+          ],
+          [
+            -80.393057,
+            35.35696
+          ],
+          [
+            -80.393301,
+            35.356391
+          ],
+          [
+            -80.394888,
+            35.355442
+          ],
+          [
+            -80.396219,
+            35.35503
+          ],
+          [
+            -80.396893,
+            35.354635
+          ],
+          [
+            -80.397861,
+            35.353577
+          ],
+          [
+            -80.398727,
+            35.351653
+          ],
+          [
+            -80.399274,
+            35.351041
+          ],
+          [
+            -80.399822,
+            35.350812
+          ],
+          [
+            -80.400351,
+            35.350766
+          ],
+          [
+            -80.402108,
+            35.351078
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "PAIGE RD",
+        "length_ft": 7445.8,
+        "road_class": null,
+        "road_name": "PAIGE RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 9849
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.574309,
+            35.280975
+          ],
+          [
+            -80.570208,
+            35.277065
+          ],
+          [
+            -80.568914,
+            35.275394
+          ],
+          [
+            -80.567156,
+            35.274009
+          ],
+          [
+            -80.565962,
+            35.27091
+          ],
+          [
+            -80.565373,
+            35.270052
+          ],
+          [
+            -80.564927,
+            35.269688
+          ],
+          [
+            -80.563317,
+            35.268987
+          ],
+          [
+            -80.562786,
+            35.268593
+          ],
+          [
+            -80.559993,
+            35.264821
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MIDLAND / NC",
+        "label": "SAM BLACK RD",
+        "length_ft": 7426.1,
+        "road_class": null,
+        "road_name": "SAM BLACK RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12480
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.484132,
+            35.436
+          ],
+          [
+            -80.484496,
+            35.437044
+          ],
+          [
+            -80.48508,
+            35.43767
+          ],
+          [
+            -80.499132,
+            35.446121
+          ],
+          [
+            -80.502534,
+            35.449163
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "ST JOHNS CHURCH RD",
+        "length_ft": 7380.2,
+        "road_class": null,
+        "road_name": "ST JOHNS CHURCH RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 6596
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.416286,
+            35.457796
+          ],
+          [
+            -80.409983,
+            35.455285
+          ],
+          [
+            -80.409406,
+            35.455353
+          ],
+          [
+            -80.408087,
+            35.455911
+          ],
+          [
+            -80.405372,
+            35.458146
+          ],
+          [
+            -80.404725,
+            35.458334
+          ],
+          [
+            -80.398808,
+            35.456977
+          ],
+          [
+            -80.394408,
+            35.455449
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "FINK RD",
+        "length_ft": 7321.5,
+        "road_class": null,
+        "road_name": "FINK RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12443
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.43814,
+            35.419625
+          ],
+          [
+            -80.438633,
+            35.42073
+          ],
+          [
+            -80.439178,
+            35.423629
+          ],
+          [
+            -80.439481,
+            35.42432
+          ],
+          [
+            -80.444106,
+            35.429774
+          ],
+          [
+            -80.444511,
+            35.430494
+          ],
+          [
+            -80.445122,
+            35.432357
+          ],
+          [
+            -80.445253,
+            35.433642
+          ],
+          [
+            -80.445291,
+            35.435401
+          ],
+          [
+            -80.445159,
+            35.437123
+          ],
+          [
+            -80.444885,
+            35.438077
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "MT PLEASANT RD N",
+        "length_ft": 7268.6,
+        "road_class": null,
+        "road_name": "MT PLEASANT RD N",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 6307
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.452518,
+            35.471748
+          ],
+          [
+            -80.453001,
+            35.473142
+          ],
+          [
+            -80.453374,
+            35.474804
+          ],
+          [
+            -80.453444,
+            35.475739
+          ],
+          [
+            -80.453259,
+            35.476412
+          ],
+          [
+            -80.452657,
+            35.477185
+          ],
+          [
+            -80.44618,
+            35.484
+          ],
+          [
+            -80.444514,
+            35.489261
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "ROCKWELL / NC",
+        "label": "MT PLEASANT RD N",
+        "length_ft": 7192.7,
+        "road_class": null,
+        "road_name": "MT PLEASANT RD N",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 9992
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.572781,
+            35.284837
+          ],
+          [
+            -80.570356,
+            35.284686
+          ],
+          [
+            -80.56764,
+            35.282962
+          ],
+          [
+            -80.567223,
+            35.282831
+          ],
+          [
+            -80.562606,
+            35.283126
+          ],
+          [
+            -80.55814,
+            35.283995
+          ],
+          [
+            -80.557113,
+            35.284487
+          ],
+          [
+            -80.556363,
+            35.285573
+          ],
+          [
+            -80.55521,
+            35.286651
+          ],
+          [
+            -80.555032,
+            35.28709
+          ],
+          [
+            -80.5551,
+            35.287863
+          ],
+          [
+            -80.554212,
+            35.289793
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MIDLAND / NC",
+        "label": "RUNNING BROOK RD",
+        "length_ft": 7186.7,
+        "road_class": null,
+        "road_name": "RUNNING BROOK RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 5511
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.69595,
+            35.404874
+          ],
+          [
+            -80.69377,
+            35.406761
+          ],
+          [
+            -80.691299,
+            35.408284
+          ],
+          [
+            -80.688609,
+            35.409436
+          ],
+          [
+            -80.680728,
+            35.412117
+          ],
+          [
+            -80.678304,
+            35.413372
+          ],
+          [
+            -80.675926,
+            35.415052
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "US INTERSTATE 85 N",
+        "length_ft": 7109.8,
+        "road_class": null,
+        "road_name": "US INTERSTATE 85 N",
+        "road_type": null,
+        "route_type": null,
+        "speed_limit": 65,
+        "transportation_centerline_id": 10169
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.69621,
+            35.40498
+          ],
+          [
+            -80.69359,
+            35.407149
+          ],
+          [
+            -80.691312,
+            35.408501
+          ],
+          [
+            -80.689333,
+            35.409385
+          ],
+          [
+            -80.682622,
+            35.411605
+          ],
+          [
+            -80.680203,
+            35.412564
+          ],
+          [
+            -80.678214,
+            35.413674
+          ],
+          [
+            -80.676282,
+            35.41507
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "US INTERSTATE 85 S",
+        "length_ft": 7066.5,
+        "road_class": null,
+        "road_name": "US INTERSTATE 85 S",
+        "road_type": null,
+        "route_type": null,
+        "speed_limit": 65,
+        "transportation_centerline_id": 10168
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.63584,
+            35.542926
+          ],
+          [
+            -80.637087,
+            35.541789
+          ],
+          [
+            -80.641046,
+            35.540694
+          ],
+          [
+            -80.644486,
+            35.539066
+          ],
+          [
+            -80.647618,
+            35.538873
+          ],
+          [
+            -80.650677,
+            35.539314
+          ],
+          [
+            -80.65183,
+            35.539327
+          ],
+          [
+            -80.653267,
+            35.538906
+          ],
+          [
+            -80.654507,
+            35.538187
+          ],
+          [
+            -80.657336,
+            35.537074
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "KANNAPOLIS / NC",
+        "label": "CANNON FARM RD",
+        "length_ft": 7034.4,
+        "road_class": null,
+        "road_name": "CANNON FARM RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 5113
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.400457,
+            35.433137
+          ],
+          [
+            -80.400393,
+            35.434791
+          ],
+          [
+            -80.40014,
+            35.436195
+          ],
+          [
+            -80.398852,
+            35.439711
+          ],
+          [
+            -80.398843,
+            35.442361
+          ],
+          [
+            -80.399225,
+            35.445546
+          ],
+          [
+            -80.399139,
+            35.44638
+          ],
+          [
+            -80.398878,
+            35.447083
+          ],
+          [
+            -80.397289,
+            35.449081
+          ],
+          [
+            -80.396018,
+            35.451303
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "LITTLE BUFFALO CREEK RD",
+        "length_ft": 6924.7,
+        "road_class": null,
+        "road_name": "LITTLE BUFFALO CREEK RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 6603
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.546312,
+            35.422958
+          ],
+          [
+            -80.547045,
+            35.423644
+          ],
+          [
+            -80.547252,
+            35.424292
+          ],
+          [
+            -80.546881,
+            35.425616
+          ],
+          [
+            -80.546784,
+            35.427849
+          ],
+          [
+            -80.546106,
+            35.429796
+          ],
+          [
+            -80.545284,
+            35.431553
+          ],
+          [
+            -80.54557,
+            35.436271
+          ],
+          [
+            -80.545664,
+            35.436667
+          ],
+          [
+            -80.546636,
+            35.438343
+          ],
+          [
+            -80.547015,
+            35.439516
+          ],
+          [
+            -80.548842,
+            35.440099
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "NEISLER RD",
+        "length_ft": 6889.8,
+        "road_class": null,
+        "road_name": "NEISLER RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 6727
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.356916,
+            35.470639
+          ],
+          [
+            -80.356049,
+            35.47839
+          ],
+          [
+            -80.354866,
+            35.481348
+          ],
+          [
+            -80.354333,
+            35.485884
+          ],
+          [
+            -80.353197,
+            35.489201
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "GOLD HILL / NC",
+        "label": "SHELLEY RD",
+        "length_ft": 6879.8,
+        "road_class": null,
+        "road_name": "SHELLEY RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 9986
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.469515,
+            35.460188
+          ],
+          [
+            -80.470051,
+            35.462647
+          ],
+          [
+            -80.470851,
+            35.463969
+          ],
+          [
+            -80.47312,
+            35.467164
+          ],
+          [
+            -80.474437,
+            35.470247
+          ],
+          [
+            -80.479329,
+            35.474513
+          ],
+          [
+            -80.481337,
+            35.475686
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "CLINE SCHOOL RD",
+        "length_ft": 6851.2,
+        "road_class": null,
+        "road_name": "CLINE SCHOOL RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 9283
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.510185,
+            35.451045
+          ],
+          [
+            -80.510703,
+            35.453705
+          ],
+          [
+            -80.51103,
+            35.454485
+          ],
+          [
+            -80.511687,
+            35.455299
+          ],
+          [
+            -80.513689,
+            35.457099
+          ],
+          [
+            -80.513914,
+            35.457512
+          ],
+          [
+            -80.513837,
+            35.458579
+          ],
+          [
+            -80.512822,
+            35.461182
+          ],
+          [
+            -80.512423,
+            35.465834
+          ],
+          [
+            -80.511485,
+            35.468177
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "IRISH POTATO RD",
+        "length_ft": 6672.8,
+        "road_class": null,
+        "road_name": "IRISH POTATO RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 50,
+        "transportation_centerline_id": 13609
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.442688,
+            35.274035
+          ],
+          [
+            -80.440325,
+            35.275974
+          ],
+          [
+            -80.438133,
+            35.276431
+          ],
+          [
+            -80.432947,
+            35.280263
+          ],
+          [
+            -80.432171,
+            35.280972
+          ],
+          [
+            -80.431658,
+            35.281678
+          ],
+          [
+            -80.430833,
+            35.283303
+          ],
+          [
+            -80.430123,
+            35.283985
+          ],
+          [
+            -80.429444,
+            35.284585
+          ],
+          [
+            -80.427397,
+            35.285875
+          ],
+          [
+            -80.426744,
+            35.286082
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "LOCUST / NC",
+        "label": "MEADOW CREEK CHURCH RD",
+        "length_ft": 6650.6,
+        "road_class": null,
+        "road_name": "MEADOW CREEK CHURCH RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 5,
+        "transportation_centerline_id": 12884
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.460687,
+            35.313466
+          ],
+          [
+            -80.460599,
+            35.313304
+          ],
+          [
+            -80.460634,
+            35.31001
+          ],
+          [
+            -80.460015,
+            35.308129
+          ],
+          [
+            -80.459687,
+            35.306102
+          ],
+          [
+            -80.46099,
+            35.299802
+          ],
+          [
+            -80.461559,
+            35.29828
+          ],
+          [
+            -80.462872,
+            35.29614
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MIDLAND / NC",
+        "label": "REED MINE RD",
+        "length_ft": 6499.3,
+        "road_class": null,
+        "road_name": "REED MINE RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 11667
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.591783,
+            35.277607
+          ],
+          [
+            -80.591552,
+            35.277213
+          ],
+          [
+            -80.59146,
+            35.276712
+          ],
+          [
+            -80.591318,
+            35.275027
+          ],
+          [
+            -80.591882,
+            35.273014
+          ],
+          [
+            -80.592295,
+            35.26928
+          ],
+          [
+            -80.588686,
+            35.262236
+          ],
+          [
+            -80.588545,
+            35.26171
+          ],
+          [
+            -80.588497,
+            35.260522
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "PIONEER MILL RD",
+        "length_ft": 6491.9,
+        "road_class": null,
+        "road_name": "PIONEER MILL RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12575
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.539112,
+            35.22027
+          ],
+          [
+            -80.532757,
+            35.221635
+          ],
+          [
+            -80.525668,
+            35.222408
+          ],
+          [
+            -80.521683,
+            35.222479
+          ],
+          [
+            -80.517929,
+            35.223256
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MIDLAND / NC",
+        "label": "WALLACE RD",
+        "length_ft": 6446.6,
+        "road_class": null,
+        "road_name": "WALLACE RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 8347
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.360746,
+            35.419409
+          ],
+          [
+            -80.362496,
+            35.420467
+          ],
+          [
+            -80.363572,
+            35.421499
+          ],
+          [
+            -80.365427,
+            35.422488
+          ],
+          [
+            -80.37037,
+            35.423786
+          ],
+          [
+            -80.372564,
+            35.424234
+          ],
+          [
+            -80.372969,
+            35.425854
+          ],
+          [
+            -80.372919,
+            35.427399
+          ],
+          [
+            -80.373374,
+            35.428627
+          ],
+          [
+            -80.373553,
+            35.429923
+          ],
+          [
+            -80.373986,
+            35.430497
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "LITTLE BEAR CREEK RD",
+        "length_ft": 6387.4,
+        "road_class": null,
+        "road_name": "LITTLE BEAR CREEK RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 4496
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.444514,
+            35.489261
+          ],
+          [
+            -80.438735,
+            35.488141
+          ],
+          [
+            -80.43655,
+            35.488464
+          ],
+          [
+            -80.430065,
+            35.488301
+          ],
+          [
+            -80.428977,
+            35.48854
+          ],
+          [
+            -80.425499,
+            35.490072
+          ],
+          [
+            -80.423854,
+            35.490337
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "ROCKWELL / NC",
+        "label": "KLUTTZ RD",
+        "length_ft": 6383.4,
+        "road_class": null,
+        "road_name": "KLUTTZ RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 8549
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.419543,
+            35.38359
+          ],
+          [
+            -80.417099,
+            35.382396
+          ],
+          [
+            -80.415483,
+            35.381421
+          ],
+          [
+            -80.412047,
+            35.379806
+          ],
+          [
+            -80.410936,
+            35.378853
+          ],
+          [
+            -80.406799,
+            35.374678
+          ],
+          [
+            -80.404085,
+            35.373649
+          ],
+          [
+            -80.40292,
+            35.373015
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "BOWMAN BARRIER RD",
+        "length_ft": 6377.7,
+        "road_class": null,
+        "road_name": "BOWMAN BARRIER RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12326
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.350421,
+            35.419975
+          ],
+          [
+            -80.351264,
+            35.420813
+          ],
+          [
+            -80.351576,
+            35.421689
+          ],
+          [
+            -80.351287,
+            35.423992
+          ],
+          [
+            -80.351458,
+            35.425931
+          ],
+          [
+            -80.352569,
+            35.428166
+          ],
+          [
+            -80.354288,
+            35.432468
+          ],
+          [
+            -80.35445,
+            35.434322
+          ],
+          [
+            -80.355231,
+            35.436604
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "BETHEL CHURCH RD",
+        "length_ft": 6349.3,
+        "road_class": null,
+        "road_name": "BETHEL CHURCH RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 5778
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.360746,
+            35.419409
+          ],
+          [
+            -80.361812,
+            35.416468
+          ],
+          [
+            -80.362372,
+            35.415614
+          ],
+          [
+            -80.364522,
+            35.413319
+          ],
+          [
+            -80.365906,
+            35.411541
+          ],
+          [
+            -80.369836,
+            35.407648
+          ],
+          [
+            -80.372572,
+            35.405694
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "S LENTZ HARNESS SHOP RD",
+        "length_ft": 6212.9,
+        "road_class": null,
+        "road_name": "S LENTZ HARNESS SHOP RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 4669
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.623654,
+            35.282488
+          ],
+          [
+            -80.618217,
+            35.285575
+          ],
+          [
+            -80.616954,
+            35.285485
+          ],
+          [
+            -80.616792,
+            35.286043
+          ],
+          [
+            -80.616345,
+            35.286319
+          ],
+          [
+            -80.616203,
+            35.286572
+          ],
+          [
+            -80.615991,
+            35.287607
+          ],
+          [
+            -80.615592,
+            35.288254
+          ],
+          [
+            -80.612227,
+            35.288123
+          ],
+          [
+            -80.612018,
+            35.288788
+          ],
+          [
+            -80.610916,
+            35.29084
+          ],
+          [
+            -80.610594,
+            35.290976
+          ],
+          [
+            -80.609584,
+            35.290719
+          ],
+          [
+            -80.609436,
+            35.290755
+          ],
+          [
+            -80.609253,
+            35.291075
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "HARRISBURG / NC",
+        "label": "GRADY HARRIS SR RD",
+        "length_ft": 6182.4,
+        "road_class": null,
+        "road_name": "GRADY HARRIS SR RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 8260
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.352389,
+            35.454772
+          ],
+          [
+            -80.349907,
+            35.460933
+          ],
+          [
+            -80.349815,
+            35.462076
+          ],
+          [
+            -80.350079,
+            35.462779
+          ],
+          [
+            -80.353703,
+            35.469026
+          ],
+          [
+            -80.354467,
+            35.47059
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "GOLD HILL / NC",
+        "label": "BETHLEHEM CHURCH RD",
+        "length_ft": 6180.6,
+        "road_class": null,
+        "road_name": "BETHLEHEM CHURCH RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 8611
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.624365,
+            35.391873
+          ],
+          [
+            -80.628891,
+            35.390061
+          ],
+          [
+            -80.638742,
+            35.387149
+          ],
+          [
+            -80.640094,
+            35.386564
+          ],
+          [
+            -80.642984,
+            35.384987
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "CONCORD PKWY S",
+        "length_ft": 6114.9,
+        "road_class": null,
+        "road_name": "CONCORD PKWY S",
+        "road_type": "PKWY",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 7401
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.44562,
+            35.445785
+          ],
+          [
+            -80.447159,
+            35.44965
+          ],
+          [
+            -80.447461,
+            35.453254
+          ],
+          [
+            -80.447817,
+            35.455808
+          ],
+          [
+            -80.451007,
+            35.461743
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "MT PLEASANT RD N",
+        "length_ft": 6091.8,
+        "road_class": null,
+        "road_name": "MT PLEASANT RD N",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 5,
+        "transportation_centerline_id": 8228
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.359949,
+            35.443735
+          ],
+          [
+            -80.359019,
+            35.443806
+          ],
+          [
+            -80.357316,
+            35.44309
+          ],
+          [
+            -80.354692,
+            35.442615
+          ],
+          [
+            -80.351806,
+            35.442766
+          ],
+          [
+            -80.349315,
+            35.443349
+          ],
+          [
+            -80.347129,
+            35.443086
+          ],
+          [
+            -80.345519,
+            35.442609
+          ],
+          [
+            -80.342807,
+            35.441425
+          ],
+          [
+            -80.340643,
+            35.440966
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "LOWDER RD",
+        "length_ft": 6041.2,
+        "road_class": null,
+        "road_name": "LOWDER RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12805
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.446831,
+            35.379282
+          ],
+          [
+            -80.442357,
+            35.379226
+          ],
+          [
+            -80.437391,
+            35.37738
+          ],
+          [
+            -80.436695,
+            35.377974
+          ],
+          [
+            -80.435279,
+            35.37968
+          ],
+          [
+            -80.434639,
+            35.37944
+          ],
+          [
+            -80.433464,
+            35.378732
+          ],
+          [
+            -80.430843,
+            35.377707
+          ],
+          [
+            -80.430693,
+            35.377435
+          ],
+          [
+            -80.431107,
+            35.376475
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "MALIBU RD",
+        "length_ft": 6028.0,
+        "road_class": null,
+        "road_name": "MALIBU RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 11578
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.619552,
+            35.336825
+          ],
+          [
+            -80.629818,
+            35.331429
+          ],
+          [
+            -80.631534,
+            35.330239
+          ],
+          [
+            -80.635656,
+            35.326946
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "HARRISBURG / NC",
+        "label": "NC HWY 49 S",
+        "length_ft": 6025.7,
+        "road_class": null,
+        "road_name": "NC HWY 49 S",
+        "road_type": null,
+        "route_type": null,
+        "speed_limit": 55,
+        "transportation_centerline_id": 8608
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.634125,
+            35.387299
+          ],
+          [
+            -80.633916,
+            35.387052
+          ],
+          [
+            -80.633617,
+            35.385646
+          ],
+          [
+            -80.633222,
+            35.385058
+          ],
+          [
+            -80.633151,
+            35.384728
+          ],
+          [
+            -80.63322,
+            35.383934
+          ],
+          [
+            -80.633541,
+            35.383477
+          ],
+          [
+            -80.633614,
+            35.382857
+          ],
+          [
+            -80.633553,
+            35.379991
+          ],
+          [
+            -80.633181,
+            35.379442
+          ],
+          [
+            -80.632022,
+            35.378781
+          ],
+          [
+            -80.628081,
+            35.378913
+          ],
+          [
+            -80.627528,
+            35.379278
+          ],
+          [
+            -80.62737,
+            35.379547
+          ],
+          [
+            -80.627416,
+            35.382492
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "RED BULL RING DR SW",
+        "length_ft": 5986.5,
+        "road_class": "Other",
+        "road_name": "RED BULL RING DR SW",
+        "road_type": "DR",
+        "route_type": null,
+        "speed_limit": 15,
+        "transportation_centerline_id": 14417
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.475576,
+            35.420011
+          ],
+          [
+            -80.477453,
+            35.423961
+          ],
+          [
+            -80.479798,
+            35.425753
+          ],
+          [
+            -80.481753,
+            35.427656
+          ],
+          [
+            -80.483668,
+            35.43438
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "ST JOHNS CHURCH RD",
+        "length_ft": 5922.7,
+        "road_class": null,
+        "road_name": "ST JOHNS CHURCH RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 5643
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.551899,
+            35.399129
+          ],
+          [
+            -80.551117,
+            35.398442
+          ],
+          [
+            -80.550416,
+            35.397435
+          ],
+          [
+            -80.54904,
+            35.394044
+          ],
+          [
+            -80.548904,
+            35.393163
+          ],
+          [
+            -80.549169,
+            35.391638
+          ],
+          [
+            -80.550966,
+            35.385145
+          ],
+          [
+            -80.551057,
+            35.383732
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "BRANCHVIEW DR SE",
+        "length_ft": 5892.2,
+        "road_class": null,
+        "road_name": "BRANCHVIEW DR SE",
+        "road_type": "DR",
+        "route_type": null,
+        "speed_limit": 55,
+        "transportation_centerline_id": 6990
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.376064,
+            35.484282
+          ],
+          [
+            -80.374248,
+            35.486451
+          ],
+          [
+            -80.372196,
+            35.487667
+          ],
+          [
+            -80.371096,
+            35.488862
+          ],
+          [
+            -80.370896,
+            35.489383
+          ],
+          [
+            -80.371025,
+            35.491108
+          ],
+          [
+            -80.370795,
+            35.491996
+          ],
+          [
+            -80.369476,
+            35.494408
+          ],
+          [
+            -80.367784,
+            35.497019
+          ],
+          [
+            -80.367533,
+            35.497934
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "GOLD HILL / NC",
+        "label": "OLD MINE RD",
+        "length_ft": 5804.9,
+        "road_class": null,
+        "road_name": "OLD MINE RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12712
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.428705,
+            35.444022
+          ],
+          [
+            -80.425792,
+            35.447844
+          ],
+          [
+            -80.419487,
+            35.453996
+          ],
+          [
+            -80.417209,
+            35.456689
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "MT OLIVE RD",
+        "length_ft": 5754.6,
+        "road_class": null,
+        "road_name": "MT OLIVE RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 11944
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.367533,
+            35.497934
+          ],
+          [
+            -80.366485,
+            35.499071
+          ],
+          [
+            -80.365836,
+            35.49932
+          ],
+          [
+            -80.362414,
+            35.498304
+          ],
+          [
+            -80.360694,
+            35.498345
+          ],
+          [
+            -80.357676,
+            35.497208
+          ],
+          [
+            -80.353256,
+            35.497337
+          ],
+          [
+            -80.351819,
+            35.497211
+          ],
+          [
+            -80.349679,
+            35.497465
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "GOLD HILL / NC",
+        "label": "OLD MINE RD",
+        "length_ft": 5727.0,
+        "road_class": null,
+        "road_name": "OLD MINE RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12793
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.532512,
+            35.300468
+          ],
+          [
+            -80.521634,
+            35.298107
+          ],
+          [
+            -80.519216,
+            35.298442
+          ],
+          [
+            -80.514022,
+            35.299854
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "FLOWES STORE RD E",
+        "length_ft": 5726.2,
+        "road_class": null,
+        "road_name": "FLOWES STORE RD E",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 8624
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.36819,
+            35.479972
+          ],
+          [
+            -80.366816,
+            35.481328
+          ],
+          [
+            -80.366108,
+            35.48184
+          ],
+          [
+            -80.362533,
+            35.483574
+          ],
+          [
+            -80.360712,
+            35.484673
+          ],
+          [
+            -80.358895,
+            35.486803
+          ],
+          [
+            -80.358305,
+            35.487271
+          ],
+          [
+            -80.356802,
+            35.488013
+          ],
+          [
+            -80.353197,
+            35.489201
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "GOLD HILL / NC",
+        "label": "ST STEPHENS CHURCH RD",
+        "length_ft": 5709.2,
+        "road_class": null,
+        "road_name": "ST STEPHENS CHURCH RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 10011
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.693479,
+            35.386943
+          ],
+          [
+            -80.693997,
+            35.388029
+          ],
+          [
+            -80.694701,
+            35.39286
+          ],
+          [
+            -80.696054,
+            35.397272
+          ],
+          [
+            -80.696449,
+            35.399339
+          ],
+          [
+            -80.696355,
+            35.39987
+          ],
+          [
+            -80.695929,
+            35.4004
+          ],
+          [
+            -80.693944,
+            35.401177
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "PITTS SCHOOL RD NW",
+        "length_ft": 5704.0,
+        "road_class": null,
+        "road_name": "PITTS SCHOOL RD NW",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 4049
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.435746,
+            35.39171
+          ],
+          [
+            -80.436057,
+            35.390475
+          ],
+          [
+            -80.437931,
+            35.38741
+          ],
+          [
+            -80.440871,
+            35.384891
+          ],
+          [
+            -80.443861,
+            35.382724
+          ],
+          [
+            -80.446831,
+            35.379282
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "MT PLEASANT RD S",
+        "length_ft": 5702.2,
+        "road_class": null,
+        "road_name": "MT PLEASANT RD S",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 8014
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.544829,
+            35.455697
+          ],
+          [
+            -80.544651,
+            35.457363
+          ],
+          [
+            -80.544746,
+            35.458055
+          ],
+          [
+            -80.545115,
+            35.458616
+          ],
+          [
+            -80.546512,
+            35.460092
+          ],
+          [
+            -80.546917,
+            35.460958
+          ],
+          [
+            -80.546142,
+            35.465623
+          ],
+          [
+            -80.546193,
+            35.466228
+          ],
+          [
+            -80.546626,
+            35.466966
+          ],
+          [
+            -80.548659,
+            35.468836
+          ],
+          [
+            -80.549216,
+            35.469847
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "OLD SALISBURY-CONCORD RD",
+        "length_ft": 5670.8,
+        "road_class": null,
+        "road_name": "OLD SALISBURY-CONCORD RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 45,
+        "transportation_centerline_id": 8857
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.340643,
+            35.440966
+          ],
+          [
+            -80.340323,
+            35.442432
+          ],
+          [
+            -80.340054,
+            35.447545
+          ],
+          [
+            -80.339479,
+            35.449708
+          ],
+          [
+            -80.340249,
+            35.451754
+          ],
+          [
+            -80.34029,
+            35.454785
+          ],
+          [
+            -80.340658,
+            35.456217
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "GOLD HILL RD E",
+        "length_ft": 5633.8,
+        "road_class": null,
+        "road_name": "GOLD HILL RD E",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 7802
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.440316,
+            35.339741
+          ],
+          [
+            -80.438292,
+            35.338656
+          ],
+          [
+            -80.433847,
+            35.33404
+          ],
+          [
+            -80.43355,
+            35.333556
+          ],
+          [
+            -80.433509,
+            35.33319
+          ],
+          [
+            -80.433988,
+            35.332011
+          ],
+          [
+            -80.43368,
+            35.331238
+          ],
+          [
+            -80.433357,
+            35.330802
+          ],
+          [
+            -80.432605,
+            35.330278
+          ],
+          [
+            -80.430661,
+            35.32956
+          ],
+          [
+            -80.429147,
+            35.32869
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MT PLEASANT / NC",
+        "label": "CRAYTON RD",
+        "length_ft": 5624.2,
+        "road_class": null,
+        "road_name": "CRAYTON RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 10927
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.542138,
+            35.36204
+          ],
+          [
+            -80.540937,
+            35.362647
+          ],
+          [
+            -80.539832,
+            35.36342
+          ],
+          [
+            -80.53764,
+            35.363781
+          ],
+          [
+            -80.536241,
+            35.36336
+          ],
+          [
+            -80.531891,
+            35.362944
+          ],
+          [
+            -80.526764,
+            35.360987
+          ],
+          [
+            -80.525161,
+            35.360219
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "MIAMI CHURCH RD",
+        "length_ft": 5520.5,
+        "road_class": null,
+        "road_name": "MIAMI CHURCH RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 40,
+        "transportation_centerline_id": 8137
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.501596,
+            35.400357
+          ],
+          [
+            -80.501199,
+            35.401411
+          ],
+          [
+            -80.499618,
+            35.402644
+          ],
+          [
+            -80.497032,
+            35.403426
+          ],
+          [
+            -80.496028,
+            35.403412
+          ],
+          [
+            -80.495335,
+            35.402677
+          ],
+          [
+            -80.495111,
+            35.402615
+          ],
+          [
+            -80.492425,
+            35.403579
+          ],
+          [
+            -80.490407,
+            35.403704
+          ],
+          [
+            -80.48937,
+            35.403296
+          ],
+          [
+            -80.488371,
+            35.402105
+          ],
+          [
+            -80.487038,
+            35.40192
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "ALDERMAN RD",
+        "length_ft": 5360.3,
+        "road_class": null,
+        "road_name": "ALDERMAN RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 9860
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.650208,
+            35.385556
+          ],
+          [
+            -80.651574,
+            35.38643
+          ],
+          [
+            -80.652284,
+            35.387099
+          ],
+          [
+            -80.65291,
+            35.387917
+          ],
+          [
+            -80.658392,
+            35.396225
+          ],
+          [
+            -80.658989,
+            35.397409
+          ],
+          [
+            -80.659108,
+            35.397895
+          ],
+          [
+            -80.659021,
+            35.398102
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "GEORGE W LILES PKWY NW",
+        "length_ft": 5355.5,
+        "road_class": null,
+        "road_name": "GEORGE W LILES PKWY NW",
+        "road_type": "PKWY",
+        "route_type": null,
+        "speed_limit": 50,
+        "transportation_centerline_id": 13588
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.548061,
+            35.249349
+          ],
+          [
+            -80.546484,
+            35.244389
+          ],
+          [
+            -80.546161,
+            35.240466
+          ],
+          [
+            -80.54516,
+            35.238177
+          ],
+          [
+            -80.544849,
+            35.237853
+          ],
+          [
+            -80.542864,
+            35.237476
+          ],
+          [
+            -80.541754,
+            35.236857
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "MIDLAND / NC",
+        "label": "SAM BLACK RD",
+        "length_ft": 5351.2,
+        "road_class": null,
+        "road_name": "SAM BLACK RD",
+        "road_type": "RD",
+        "route_type": null,
+        "speed_limit": 30,
+        "transportation_centerline_id": 12754
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.649864,
+            35.385664
+          ],
+          [
+            -80.651462,
+            35.38669
+          ],
+          [
+            -80.652036,
+            35.387225
+          ],
+          [
+            -80.652718,
+            35.388126
+          ],
+          [
+            -80.658176,
+            35.396303
+          ],
+          [
+            -80.659021,
+            35.398102
+          ]
+        ]
+      },
+      "properties": {
+        "context_status": "Context available",
+        "is_major_road": null,
+        "jurisdiction_or_maintenance": "CONCORD / NC",
+        "label": "GEORGE W LILES PKWY NW",
+        "length_ft": 5344.5,
+        "road_class": "Collector Street",
+        "road_name": "GEORGE W LILES PKWY NW",
+        "road_type": "PKWY",
+        "route_type": null,
+        "speed_limit": 10,
+        "transportation_centerline_id": 13577
+      },
+      "type": "Feature"
+    }
+  ],
+  "metadata": {
+    "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
+    "generated_at": "2026-06-23T14:41:06Z",
+    "layer_id": "transportation_context",
+    "layer_label": "Demo Transportation Context",
+    "mode": "portfolio_demo",
+    "source_basis": "transportation_centerlines_clean",
+    "status": "available"
+  },
+  "type": "FeatureCollection"
+}

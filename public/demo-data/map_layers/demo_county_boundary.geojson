@@ -1,0 +1,52 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              -80.861,
+              35.197
+            ],
+            [
+              -80.835,
+              35.548
+            ],
+            [
+              -80.513,
+              35.574
+            ],
+            [
+              -80.346,
+              35.414
+            ],
+            [
+              -80.386,
+              35.238
+            ],
+            [
+              -80.861,
+              35.197
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "properties": {
+        "label": "Cabarrus County operating extent",
+        "source_label": "CFS operating extent reference"
+      },
+      "type": "Feature"
+    }
+  ],
+  "metadata": {
+    "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
+    "generated_at": "2026-06-23T14:41:06Z",
+    "layer_id": "county_boundary",
+    "layer_label": "Demo County Boundary",
+    "mode": "portfolio_demo",
+    "source_basis": "CFS operating extent reference",
+    "status": "available"
+  },
+  "type": "FeatureCollection"
+}

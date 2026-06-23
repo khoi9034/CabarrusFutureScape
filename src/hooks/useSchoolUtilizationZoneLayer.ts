@@ -6,8 +6,10 @@ import {
   CFS_API_BASE_URL,
   getApiErrorDisplayMessage,
   USE_BACKEND_API,
+  USE_DEMO_DATA,
 } from "@/lib/api/client";
 import { getSchoolUtilizationZones } from "@/lib/api/constraints";
+import { getDemoSchoolUtilizationPolygons } from "@/lib/demo-data/mapLayerClient";
 import type {
   SchoolUtilizationClassCounts,
   SchoolUtilizationZoneControls,
@@ -143,15 +145,80 @@ export function useSchoolUtilizationZoneLayer({
     return () => controller.abort();
   }, [enabled, level, limit, requestKey, utilizationClass]);
 
+  useEffect(() => {
+    if (!enabled || !USE_DEMO_DATA) {
+      return;
+    }
+
+    let cancelled = false;
+
+    getDemoSchoolUtilizationPolygons({
+      level,
+      limit,
+      utilizationClass,
+    })
+      .then((polygons) => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          caveats: [
+            "Preliminary utilization from planning materials. Confirm with official enrollment and capacity.",
+          ],
+          classCounts: countUtilizationClasses(polygons),
+          errorMessage:
+            polygons.length === 0
+              ? "Demo school capacity watch layer is not included in this sample."
+              : null,
+          isLoading: false,
+          polygons,
+          requestKey,
+          source: "demo",
+          status: polygons.length > 0 ? "ready" : "empty",
+          totalCount: polygons.length,
+        });
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          caveats: [],
+          classCounts: emptyClassCounts,
+          errorMessage: "Demo school capacity watch layer is unavailable.",
+          isLoading: false,
+          polygons: [],
+          requestKey,
+          source: "none",
+          status: "error",
+          totalCount: 0,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled, level, limit, requestKey, utilizationClass]);
+
   if (!enabled) {
     return offState;
   }
 
-  if (!USE_BACKEND_API) {
+  if (!USE_BACKEND_API && !USE_DEMO_DATA) {
     return {
       ...offState,
       errorMessage: "School utilization zones require backend API mode.",
       status: "unavailable",
+    };
+  }
+
+  if (USE_DEMO_DATA && state.requestKey !== requestKey) {
+    return {
+      ...offState,
+      isLoading: true,
+      status: "loading",
     };
   }
 

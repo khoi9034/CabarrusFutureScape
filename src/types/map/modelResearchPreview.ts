@@ -55,7 +55,7 @@ export interface ModelResearchPreviewLayerState {
   errorMessage: string | null;
   isLoading: boolean;
   markers: ModelResearchPreviewMarker[];
-  source: "api" | "none";
+  source: "api" | "demo" | "none";
   status: ModelResearchPreviewLayerStatus;
   totalCount: number;
 }

@@ -6,8 +6,10 @@ import {
   CFS_API_BASE_URL,
   getApiErrorDisplayMessage,
   USE_BACKEND_API,
+  USE_DEMO_DATA,
 } from "@/lib/api/client";
 import { getFloodZones } from "@/lib/api/constraints";
+import { getDemoFloodZonePolygons } from "@/lib/demo-data/mapLayerClient";
 import type {
   FloodZoneControls,
   FloodZoneExtent,
@@ -134,15 +136,76 @@ export function useFloodZoneLayer({
     return () => controller.abort();
   }, [enabled, extentParam, requestKey, requestLimit, severity]);
 
+  useEffect(() => {
+    if (!enabled || !USE_DEMO_DATA) {
+      return;
+    }
+
+    let cancelled = false;
+    const demoLimit = limitMode === "500" ? 500 : 100;
+
+    getDemoFloodZonePolygons({
+      limit: demoLimit,
+      severity,
+    })
+      .then((polygons) => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          errorMessage:
+            polygons.length === 0
+              ? "Demo floodplain source areas are not included in this sample."
+              : null,
+          isLoading: false,
+          polygons,
+          requestKey,
+          severityCounts: countFloodZoneSeverities(polygons),
+          source: "demo",
+          status: polygons.length > 0 ? "ready" : "empty",
+          totalCount: polygons.length,
+        });
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          errorMessage: "Demo floodplain source areas are unavailable.",
+          isLoading: false,
+          polygons: [],
+          requestKey,
+          severityCounts: emptySeverityCounts,
+          source: "none",
+          status: "error",
+          totalCount: 0,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled, limitMode, requestKey, severity]);
+
   if (!enabled) {
     return offState;
   }
 
-  if (!USE_BACKEND_API) {
+  if (!USE_BACKEND_API && !USE_DEMO_DATA) {
     return {
       ...offState,
       errorMessage: "FEMA flood zone polygons require backend API mode.",
       status: "unavailable",
+    };
+  }
+
+  if (USE_DEMO_DATA && state.requestKey !== requestKey) {
+    return {
+      ...offState,
+      isLoading: true,
+      status: "loading",
     };
   }
 

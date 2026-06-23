@@ -66,7 +66,7 @@ export interface FloodZoneLayerState {
   isLoading: boolean;
   polygons: FloodZoneMapPolygon[];
   severityCounts: FloodZoneSeverityCounts;
-  source: "api" | "none";
+  source: "api" | "demo" | "none";
   status: FloodZoneLayerStatus;
   totalCount: number;
 }

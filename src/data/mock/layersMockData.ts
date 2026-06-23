@@ -159,6 +159,43 @@ export const mockOperationalLayers: OperationalLayer[] = [
     futureSource: "Water, sewer, road, school, and broadband feeds",
   },
   {
+    id: "transportation-context",
+    title: "Transportation Context",
+    category: "Infrastructure",
+    description: "Cached portfolio demo sample of major roadway context",
+    kind: "GraphicsLayer",
+    defaultVisible: false,
+    visibility: true,
+    sourceStatus: "mock",
+    accent: "#68d8ff",
+    opacity: 0.76,
+    fields: [
+      {
+        alias: "Road name",
+        display: true,
+        name: "roadName",
+        type: "string",
+      },
+      {
+        alias: "Road class",
+        display: true,
+        name: "roadClass",
+        type: "string",
+      },
+    ],
+    popup: {
+      enabled: true,
+      fieldNames: ["roadName", "roadClass"],
+      title: "Transportation Context",
+    },
+    renderer: {
+      description: "Portfolio demo roadway context lines.",
+      field: "roadClass",
+      type: "simple",
+    },
+    futureSource: "Transportation centerlines and planned road project feeds",
+  },
+  {
     id: "flood-risk",
     title: "Flood Constraints",
     category: "Risk",

@@ -40,12 +40,26 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
         "sample_parcels.json",
         "model_lab_demo_clusters.json",
     }
+    expected_map_files = {
+        "demo_county_boundary.geojson",
+        "demo_development_hotspots.geojson",
+        "demo_floodplain_review.geojson",
+        "demo_layer_manifest.json",
+        "demo_model_research.geojson",
+        "demo_parcels.geojson",
+        "demo_school_capacity.geojson",
+        "demo_transportation_context.geojson",
+    }
 
     assert expected_files.issubset({path.name for path in demo_dir.glob("*.json")})
+    assert expected_map_files.issubset(
+        {path.name for path in (demo_dir / "map_layers").glob("*")}
+    )
 
     demo_text = "\n".join(
         path.read_text(encoding="utf-8").lower()
-        for path in demo_dir.glob("*.json")
+        for path in demo_dir.rglob("*")
+        if path.is_file()
     )
     blocked_terms = [
         "acctname",
@@ -60,6 +74,25 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
 
     for term in blocked_terms:
         assert term not in demo_text
+
+
+def test_demo_map_layers_are_wired_without_backend_calls() -> None:
+    map_client = read("src/lib/demo-data/mapLayerClient.ts")
+    hotspot_hook = read("src/hooks/useDevelopmentHotspotLayer.ts")
+    flood_hook = read("src/hooks/useFloodConstraintLayer.ts")
+    flood_zone_hook = read("src/hooks/useFloodZoneLayer.ts")
+    school_hook = read("src/hooks/useSchoolUtilizationZoneLayer.ts")
+    layer_toggle = read("src/components/dashboard/LayerToggle.tsx")
+
+    assert "getDemoGeoJsonLayer" in map_client
+    assert "getDemoDevelopmentHotspotsBySegment" in map_client
+    assert "getDemoParcelMapFocus" in map_client
+    assert "getDemoDevelopmentHotspotsBySegment" in hotspot_hook
+    assert "getDemoFloodConstraintMarkers" in flood_hook
+    assert "getDemoFloodZonePolygons" in flood_zone_hook
+    assert "getDemoSchoolUtilizationPolygons" in school_hook
+    assert "Portfolio Demo" in layer_toggle
+    assert "Demo Sample" in layer_toggle
 
 
 def test_portfolio_demo_mode_is_documented() -> None:

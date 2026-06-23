@@ -88,7 +88,7 @@ export interface SchoolUtilizationZoneLayerState {
   errorMessage: string | null;
   isLoading: boolean;
   polygons: SchoolUtilizationZoneMapPolygon[];
-  source: "api" | "none";
+  source: "api" | "demo" | "none";
   status: SchoolUtilizationLayerStatus;
   totalCount: number;
 }

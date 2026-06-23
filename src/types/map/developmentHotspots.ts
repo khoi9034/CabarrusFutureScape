@@ -121,7 +121,7 @@ export interface DevelopmentHotspotLayerState {
   errorMessage: string | null;
   isLoading: boolean;
   markers: DevelopmentHotspotMapMarker[];
-  source: "api" | "none";
+  source: "api" | "demo" | "none";
   status: DevelopmentHotspotLayerStatus;
   temporalContextLabel: string | null;
   totalCount: number;

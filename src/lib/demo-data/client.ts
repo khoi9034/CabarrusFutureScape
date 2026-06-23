@@ -88,7 +88,7 @@ export interface DemoModelStatus {
   model_status: "Internal only" | "Not available";
   production_ready: false;
   public_exposure_allowed: false;
-  raw_scores_shown: false;
+  raw_model_values_visible: false;
 }
 
 interface DemoSampleParcel {
@@ -516,7 +516,7 @@ function getUnavailableModelStatus(): DemoModelStatus {
     model_status: "Internal only",
     production_ready: false,
     public_exposure_allowed: false,
-    raw_scores_shown: false,
+    raw_model_values_visible: false,
   };
 }
 
@@ -553,7 +553,7 @@ function getUnavailableSampleParcels(): DemoSampleParcelsPayload {
     records: [],
     safe_export_notes: [
       "Demo sample parcel data is unavailable.",
-      "Owner and mailing fields are not exported in portfolio demo mode.",
+      "Sensitive contact fields are not exported in portfolio demo mode.",
     ],
     total_count: 0,
   };

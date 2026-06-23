@@ -54,6 +54,14 @@ import {
   dispatchParcelMapFocusResult,
   resolveParcelMapFocus,
 } from "@/lib/map/parcelMapFocus";
+import { USE_DEMO_DATA } from "@/lib/api/client";
+import {
+  getDemoGeoJsonLayer,
+  getDemoParcelFeatures,
+  getDemoTransportationFeatures,
+  type DemoGeoJsonFeature,
+  type DemoGeoJsonGeometry,
+} from "@/lib/demo-data/mapLayerClient";
 import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
 import type {
   ParcelMapFocus,
@@ -941,6 +949,9 @@ export function SceneViewContainer() {
         focusLayerRef.current = createParcelFocusLayer(runtime);
         map.add(focusLayerRef.current);
         layerRefs.current = layers;
+        if (USE_DEMO_DATA) {
+          void hydrateDemoReferenceLayers(runtime, layers);
+        }
         applyOperationalLayerVisibility(layers, activeLayerIdsRef.current);
         updateSelectedParcelSymbols(
           getMockGraphicsLayerSubset(layers, operationalLayerRegistry),
@@ -2136,6 +2147,186 @@ function formatFloodScore(value: number | null | undefined) {
   }
 
   return value.toFixed(1);
+}
+
+async function hydrateDemoReferenceLayers(
+  runtime: ArcGISRuntime,
+  layers: OperationalLayerInstanceMap,
+) {
+  const parcelLayer = layers["parcel-intelligence"] as GraphicsLayer | undefined;
+  const boundaryLayer = layers["county-boundary"] as GraphicsLayer | undefined;
+  const transportationLayer = layers["transportation-context"] as
+    | GraphicsLayer
+    | undefined;
+
+  const [parcelFeatures, countyBoundary, transportationFeatures] =
+    await Promise.all([
+      getDemoParcelFeatures(),
+      getDemoGeoJsonLayer("county_boundary"),
+      getDemoTransportationFeatures(),
+    ]);
+
+  if (boundaryLayer && countyBoundary.features.length) {
+    boundaryLayer.removeAll();
+    boundaryLayer.addMany(
+      countyBoundary.features
+        .map((feature) => createDemoBoundaryGraphic(runtime, feature))
+        .filter((graphic): graphic is Graphic => Boolean(graphic)),
+    );
+  }
+
+  if (parcelLayer && parcelFeatures.length) {
+    parcelLayer.removeAll();
+    parcelLayer.addMany(
+      parcelFeatures
+        .map((feature) => createDemoParcelGraphic(runtime, feature))
+        .filter((graphic): graphic is Graphic => Boolean(graphic)),
+    );
+  }
+
+  if (transportationLayer && transportationFeatures.length) {
+    transportationLayer.removeAll();
+    transportationLayer.addMany(
+      transportationFeatures
+        .map((feature) => createDemoTransportationGraphic(runtime, feature))
+        .filter((graphic): graphic is Graphic => Boolean(graphic)),
+    );
+  }
+}
+
+function createDemoBoundaryGraphic(
+  runtime: ArcGISRuntime,
+  feature: DemoGeoJsonFeature,
+) {
+  const rings = convertGeoJsonPolygonCoordinatesToArcGisRings(feature.geometry);
+
+  if (!rings.length) {
+    return null;
+  }
+
+  return new runtime.Graphic({
+    attributes: {
+      graphicRole: "demo-county-boundary",
+      label:
+        stringAttribute(feature.properties?.label) ??
+        "Cabarrus County operating extent",
+    },
+    geometry: new runtime.Polygon({
+      rings,
+      spatialReference: { wkid: 4326 },
+    }),
+    symbol: {
+      symbolLayers: [
+        {
+          material: { color: [13, 22, 34, 0.08] },
+          outline: {
+            color: [216, 184, 106, 0.96],
+            size: 2.1,
+          },
+          type: "fill",
+        },
+      ],
+      type: "polygon-3d",
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createDemoParcelGraphic(
+  runtime: ArcGISRuntime,
+  feature: DemoGeoJsonFeature,
+) {
+  const rings = convertGeoJsonPolygonCoordinatesToArcGisRings(feature.geometry);
+  const properties = feature.properties ?? {};
+  const parcelId = stringAttribute(properties.official_parcel_id);
+
+  if (!rings.length || !parcelId) {
+    return null;
+  }
+
+  return new runtime.Graphic({
+    attributes: {
+      acreage: numberAttribute(properties.acreage),
+      developmentSummary: stringAttribute(properties.development_summary),
+      floodSummary: stringAttribute(properties.flood_summary),
+      graphicRole: "demo-parcel",
+      municipality: stringAttribute(properties.municipality),
+      parcelId,
+      schoolSummary: stringAttribute(properties.school_summary),
+      zoning: stringAttribute(properties.zoning),
+      zoningCategory: stringAttribute(properties.zoning_category),
+    },
+    geometry: new runtime.Polygon({
+      rings,
+      spatialReference: { wkid: 4326 },
+    }),
+    popupTemplate: {
+      content:
+        "Portfolio demo parcel sample. Full local mode uses the PostGIS-backed parcel fabric.",
+      title: parcelId,
+    },
+    symbol: createDemoParcelSymbol(false),
+  });
+}
+
+function createDemoParcelSymbol(selected: boolean) {
+  return {
+    symbolLayers: [
+      {
+        material: {
+          color: selected
+            ? [216, 184, 106, 0.3]
+            : [104, 216, 255, 0.11],
+        },
+        outline: {
+          color: selected
+            ? [255, 238, 178, 0.98]
+            : [104, 216, 255, 0.56],
+          size: selected ? 2.3 : 0.85,
+        },
+        type: "fill",
+      },
+    ],
+    type: "polygon-3d",
+  } as unknown as Graphic["symbol"];
+}
+
+function createDemoTransportationGraphic(
+  runtime: ArcGISRuntime,
+  feature: DemoGeoJsonFeature,
+) {
+  const paths = convertGeoJsonLineCoordinatesToArcGisPaths(feature.geometry);
+  const properties = feature.properties ?? {};
+
+  if (!paths.length) {
+    return null;
+  }
+
+  return new runtime.Graphic({
+    attributes: {
+      contextStatus: stringAttribute(properties.context_status),
+      graphicRole: "demo-transportation-context",
+      isMajorRoad: Boolean(properties.is_major_road),
+      roadClass: stringAttribute(properties.road_class),
+      roadName: stringAttribute(properties.road_name),
+      roadType: stringAttribute(properties.road_type),
+      routeType: stringAttribute(properties.route_type),
+    },
+    geometry: new runtime.Polyline({
+      paths,
+      spatialReference: { wkid: 4326 },
+    }),
+    popupTemplate: {
+      content:
+        "Portfolio demo transportation context. Planned project and capacity data still require official feeds.",
+      title: stringAttribute(properties.road_name) ?? "Transportation Context",
+    },
+    symbol: {
+      color: [104, 216, 255, Boolean(properties.is_major_road) ? 0.88 : 0.58],
+      style: "solid",
+      type: "simple-line",
+      width: Boolean(properties.is_major_road) ? 2.8 : 1.6,
+    } as unknown as Graphic["symbol"],
+  });
 }
 
 function createParcelFocusLayer(runtime: ArcGISRuntime) {
@@ -5898,6 +6089,7 @@ function convertGeoJsonToArcGisRings(
 
 function convertGeoJsonPolygonCoordinatesToArcGisRings(
   geometry:
+    | DemoGeoJsonGeometry
     | {
         coordinates: unknown;
         type: "MultiPolygon" | "Polygon" | string;
@@ -5964,6 +6156,52 @@ function normalizeGeoJsonRing(ring: unknown) {
     first[1] === last[1];
 
   return closed ? normalizedRing : [...normalizedRing, [...first]];
+}
+
+function convertGeoJsonLineCoordinatesToArcGisPaths(
+  geometry: DemoGeoJsonGeometry | null | undefined,
+) {
+  if (!geometry) {
+    return [];
+  }
+
+  const lineCoordinates =
+    geometry.type === "LineString"
+      ? [geometry.coordinates]
+      : geometry.type === "MultiLineString"
+        ? geometry.coordinates
+        : null;
+
+  if (!Array.isArray(lineCoordinates)) {
+    return [];
+  }
+
+  return lineCoordinates
+    .map(normalizeGeoJsonLine)
+    .filter((line): line is number[][] => line.length >= 2);
+}
+
+function normalizeGeoJsonLine(line: unknown) {
+  if (!Array.isArray(line)) {
+    return [];
+  }
+
+  return line
+    .map((position) => {
+      if (!Array.isArray(position) || position.length < 2) {
+        return null;
+      }
+
+      const x = Number(position[0]);
+      const y = Number(position[1]);
+
+      if (!Number.isFinite(x) || !Number.isFinite(y)) {
+        return null;
+      }
+
+      return [x, y];
+    })
+    .filter((position): position is number[] => Boolean(position));
 }
 
 function createParcelFocusExtent(runtime: ArcGISRuntime, focus: ParcelMapFocus) {

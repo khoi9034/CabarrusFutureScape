@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowUpRight,
   BookOpen,
@@ -11,7 +11,8 @@ import {
   Settings2,
   SwatchBook,
 } from "lucide-react";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
+import { getDemoDevelopmentHotspotSegments } from "@/lib/demo-data/mapLayerClient";
 import {
   isLayerVisibilityControllable,
   isLayerPlaceholder,
@@ -75,6 +76,11 @@ const layerDisplayGroups: LayerDisplayGroup[] = [
     id: "schools",
     predicate: (layer) => layer.category === "Schools",
     title: "Schools",
+  },
+  {
+    id: "road-context",
+    predicate: (layer) => USE_DEMO_DATA && layer.id === "transportation-context",
+    title: "Road Context",
   },
   {
     id: "internal-research-governance",
@@ -406,6 +412,7 @@ export function LayerToggle() {
   const [openConfigLayerId, setOpenConfigLayerId] = useState<string | null>(null);
   const [openInfoLayerId, setOpenInfoLayerId] = useState<string | null>(null);
   const [openLegendLayerId, setOpenLegendLayerId] = useState<string | null>(null);
+  const [demoHotspotSegments, setDemoHotspotSegments] = useState<string[]>([]);
   const {
     developmentHotspotControls,
     developmentHotspotLayer,
@@ -447,7 +454,9 @@ export function LayerToggle() {
     !developmentHotspotsEnabled
       ? "Hotspots off"
       : noHotspotSegmentSelected
-        ? "Choose a permit segment to view hotspot concentration"
+        ? USE_DEMO_DATA
+          ? "Choose a permit segment to display demo hotspot concentration"
+          : "Choose a permit segment to view hotspot concentration"
       : developmentHotspotLayer.isLoading
         ? "Loading hotspots"
         : developmentHotspotLayer.status === "ready"
@@ -501,6 +510,31 @@ export function LayerToggle() {
   const showSchoolUtilizationCounts =
     schoolUtilizationZonesEnabled &&
     schoolUtilizationZoneLayer.status === "ready";
+  const visiblePermitSegmentOptions =
+    USE_DEMO_DATA && demoHotspotSegments.length
+      ? permitSegmentOptions.filter(
+          (option) =>
+            option.value === "all" || demoHotspotSegments.includes(option.value),
+        )
+      : permitSegmentOptions;
+
+  useEffect(() => {
+    if (!USE_DEMO_DATA) {
+      return;
+    }
+
+    let cancelled = false;
+
+    getDemoDevelopmentHotspotSegments().then((segments) => {
+      if (!cancelled) {
+        setDemoHotspotSegments(segments.map((segment) => segment.value));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function updateHotspotControls<K extends keyof DevelopmentHotspotControls>(
     key: K,
@@ -783,7 +817,9 @@ export function LayerToggle() {
             </p>
           ) : null}
           <p className="col-span-2 text-[11px] leading-5 text-slate-400">
-            Choose a permit segment to view hotspot concentration.
+            {USE_DEMO_DATA
+              ? "Choose a permit segment to view demo hotspot concentration."
+              : "Choose a permit segment to view hotspot concentration."}
           </p>
           <HotspotSelect
             className="col-span-2"
@@ -794,13 +830,14 @@ export function LayerToggle() {
                 value as DevelopmentHotspotPermitSegmentFilter,
               )
             }
-            options={permitSegmentOptions}
+            options={visiblePermitSegmentOptions}
             value={developmentHotspotControls.permitSegment}
           />
           {!selectedHotspotSegment ? (
             <div className="col-span-2 rounded-md border border-[#68d8ff]/15 bg-[#68d8ff]/[0.045] px-2 py-2 text-[11px] leading-5 text-[#bfefff]">
-              Select a permit segment to display hotspot concentration. Generic
-              all-permit markers stay hidden to keep the map readable.
+              {USE_DEMO_DATA
+                ? "Select a permit segment to display demo hotspot concentration. Generic all-permit markers stay hidden to keep the map readable."
+                : "Select a permit segment to display hotspot concentration. Generic all-permit markers stay hidden to keep the map readable."}
             </div>
           ) : (
             <div className="col-span-2 rounded-md border border-[#d8b86a]/15 bg-[#d8b86a]/[0.05] px-2 py-2 text-[11px] leading-5 text-[#f2d895]">
@@ -976,6 +1013,11 @@ export function LayerToggle() {
         <LayerStatusBadge active tone="gold">
           {`${getActiveLayerCount()} active`}
         </LayerStatusBadge>
+        {USE_DEMO_DATA ? (
+          <LayerStatusBadge active tone="green">
+            Portfolio Demo
+          </LayerStatusBadge>
+        ) : null}
         <LayerStatusBadge>Advanced controls</LayerStatusBadge>
       </div>
 
@@ -1052,6 +1094,7 @@ export function LayerToggle() {
                     const active = isLayerOn(layer);
                     const unavailable =
                       !USE_BACKEND_API &&
+                      !USE_DEMO_DATA &&
                       (isDevelopmentHotspotLayer ||
                         isFloodConstraintLayer ||
                         isFemaFloodZoneLayer ||
@@ -1503,6 +1546,19 @@ function LayerErrorMessage({
 }
 
 function getLayerSourceStatusLabel(layer: OperationalLayer) {
+  if (
+    USE_DEMO_DATA &&
+    (layer.id === "county-boundary" ||
+      layer.id === "parcel-intelligence" ||
+      layer.id === "transportation-context" ||
+      layer.id === DEVELOPMENT_HOTSPOT_LAYER_ID ||
+      layer.id === FLOOD_CONSTRAINT_LAYER_ID ||
+      layer.id === FEMA_FLOOD_ZONE_LAYER_ID ||
+      layer.id === SCHOOL_UTILIZATION_LAYER_ID)
+  ) {
+    return "Demo Sample";
+  }
+
   if (layer.sourceStatus === "live") {
     return "API";
   }
