@@ -22,6 +22,12 @@ def test_demo_mode_uses_sanitized_static_search() -> None:
     parcel_panel = read("src/components/dashboard/ParcelSearchPanel.tsx")
 
     assert "searchDemoParcels" in top_nav
+    assert "DEMO_QUICK_SEARCH_SUGGESTION_LIMIT = 5" in top_nav
+    assert "loadDemoQuickSearchSuggestions" in top_nav
+    assert "Demo Parcel Examples" in top_nav
+    assert "Demo Picks" in top_nav
+    assert 'setOverviewCommandMode("countywide")' in top_nav
+    assert "getDemoParcelMapFocus(record, \"search\")" in top_nav
     assert "searchDemoParcels" in command_palette
     assert "getDemoSampleParcels" in parcel_panel
     assert "getDemoParcelById" in parcel_panel

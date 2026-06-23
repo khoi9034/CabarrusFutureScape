@@ -89,6 +89,7 @@ const productModes: Array<{
 
 const QUICK_SEARCH_LIMIT = 8;
 const QUICK_SEARCH_MIN_LENGTH = 3;
+const DEMO_QUICK_SEARCH_SUGGESTION_LIMIT = 5;
 
 type QuickSearchStatus =
   | "empty"
@@ -123,13 +124,20 @@ export function TopNav() {
   const [quickSearchResults, setQuickSearchResults] = useState<ParcelSearchRecord[]>([]);
   const [quickSearchStatus, setQuickSearchStatus] =
     useState<QuickSearchStatus>("idle");
+  const demoSuggestionRequestRef = useRef(0);
+  const quickSearchQueryRef = useRef("");
   const quickSearchRef = useRef<HTMLDivElement | null>(null);
   const selectionRequestRef = useRef(0);
   const trimmedQuickSearchQuery = quickSearchQuery.trim();
   const quickSearchReady =
     trimmedQuickSearchQuery.length >= QUICK_SEARCH_MIN_LENGTH;
+  const quickSearchShowingDemoSuggestions =
+    USE_DEMO_DATA && !quickSearchReady && quickSearchResults.length > 0;
   const quickSearchDropdownVisible =
-    quickSearchOpen && (quickSearchReady || quickSearchStatus === "loading");
+    quickSearchOpen &&
+    (quickSearchReady ||
+      quickSearchStatus === "loading" ||
+      quickSearchShowingDemoSuggestions);
   const runtimeStatusLabel = USE_DEMO_DATA
     ? "Portfolio Demo"
     : USE_BACKEND_API
@@ -142,6 +150,10 @@ export function TopNav() {
   const searchTitle = USE_DEMO_DATA
     ? "Search demo parcels, PINs, zoning, subdivisions, or neighborhoods"
     : "Search parcels, PINs, owners, addresses, subdivisions, or neighborhoods";
+
+  useEffect(() => {
+    quickSearchQueryRef.current = trimmedQuickSearchQuery;
+  }, [trimmedQuickSearchQuery]);
 
   useEffect(() => {
     function handleOutsidePointerDown(event: MouseEvent) {
@@ -265,6 +277,49 @@ export function TopNav() {
     };
   }, [quickSearchReady, trimmedQuickSearchQuery]);
 
+  const loadDemoQuickSearchSuggestions = useCallback(() => {
+    if (!USE_DEMO_DATA || quickSearchReady) {
+      return;
+    }
+
+    const requestId = demoSuggestionRequestRef.current + 1;
+    demoSuggestionRequestRef.current = requestId;
+
+    setQuickSearchOpen(true);
+    setQuickSearchStatus("loading");
+    setQuickSearchError(null);
+
+    void searchDemoParcels({
+      limit: DEMO_QUICK_SEARCH_SUGGESTION_LIMIT,
+      query: "",
+    })
+      .then((records) => {
+        if (
+          requestId !== demoSuggestionRequestRef.current ||
+          quickSearchQueryRef.current.length >= QUICK_SEARCH_MIN_LENGTH
+        ) {
+          return;
+        }
+
+        setQuickSearchResults(records);
+        setQuickSearchStatus(records.length ? "ready" : "empty");
+        setQuickSearchError(null);
+      })
+      .catch((error: unknown) => {
+        if (requestId !== demoSuggestionRequestRef.current) {
+          return;
+        }
+
+        setQuickSearchResults([]);
+        setQuickSearchError(
+          error instanceof Error
+            ? error.message
+            : "Demo parcel examples could not be loaded.",
+        );
+        setQuickSearchStatus("error");
+      });
+  }, [quickSearchReady]);
+
   const hydrateSelectedParcel = useCallback(
     (
       record: ParcelSearchRecord,
@@ -338,14 +393,11 @@ export function TopNav() {
       setQuickSearchStatus("ready");
       setQuickSearchError(null);
 
-      if (productMode !== "workspace") {
-        setOverviewCommandMode("countywide");
-      }
-
+      setOverviewCommandMode("countywide");
       setProductMode("workspace");
       hydrateSelectedParcel(record, USE_BACKEND_API ? "fallback" : "static");
     },
-    [hydrateSelectedParcel, productMode, setOverviewCommandMode, setProductMode],
+    [hydrateSelectedParcel, setOverviewCommandMode, setProductMode],
   );
 
   const handleQuickSearchKeyDown = useCallback(
@@ -468,6 +520,7 @@ export function TopNav() {
               className="h-10 w-full rounded-lg border border-[#68d8ff]/14 bg-white/[0.045] pl-9 pr-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-[#68d8ff]/50 focus:bg-white/[0.07] focus:shadow-[0_0_24px_rgba(104,216,255,0.14)]"
               onChange={(event) => {
                 const nextQuery = event.target.value;
+                demoSuggestionRequestRef.current += 1;
                 setQuickSearchQuery(nextQuery);
                 setQuickSearchOpen(true);
 
@@ -477,7 +530,11 @@ export function TopNav() {
                   setQuickSearchStatus("idle");
                 }
               }}
-              onFocus={() => setQuickSearchOpen(true)}
+              onClick={loadDemoQuickSearchSuggestions}
+              onFocus={() => {
+                setQuickSearchOpen(true);
+                loadDemoQuickSearchSuggestions();
+              }}
               onKeyDown={handleQuickSearchKeyDown}
               placeholder={searchPlaceholder}
               role="combobox"
@@ -490,6 +547,7 @@ export function TopNav() {
                 aria-label="Clear parcel search"
                 className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-white/[0.07] hover:text-white"
                 onClick={() => {
+                  demoSuggestionRequestRef.current += 1;
                   setQuickSearchQuery("");
                   setQuickSearchResults([]);
                   setQuickSearchError(null);
@@ -510,7 +568,9 @@ export function TopNav() {
               >
                 <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                    Parcel Search
+                    {quickSearchShowingDemoSuggestions
+                      ? "Demo Parcel Examples"
+                      : "Parcel Search"}
                   </p>
                   <span
                     className={cn(
@@ -526,6 +586,8 @@ export function TopNav() {
                   >
                     {quickSearchStatus === "fallback"
                       ? "Static fallback"
+                      : quickSearchShowingDemoSuggestions
+                        ? "Demo Picks"
                       : USE_DEMO_DATA
                         ? "Demo Search"
                       : USE_BACKEND_API
@@ -533,6 +595,13 @@ export function TopNav() {
                         : "Static Search"}
                   </span>
                 </div>
+
+                {quickSearchShowingDemoSuggestions ? (
+                  <p className="border-b border-white/10 px-3 py-2 text-[11px] leading-5 text-slate-400">
+                    Choose a sample parcel to zoom the demo map and open parcel
+                    intelligence.
+                  </p>
+                ) : null}
 
                 {quickSearchStatus === "loading" ? (
                   <div className="flex items-center gap-2 px-3 py-4 text-xs text-slate-400">
