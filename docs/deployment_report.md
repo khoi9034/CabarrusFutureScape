@@ -102,6 +102,7 @@ Generated files:
 - `public/demo-data/demo_manifest.json`
 - `public/demo-data/indicator_summary.json`
 - `public/demo-data/development_trends.json`
+- `public/demo-data/development_years.json`
 - `public/demo-data/flood_summary.json`
 - `public/demo-data/school_capacity_watch.json`
 - `public/demo-data/model_status.json`
@@ -114,12 +115,13 @@ Generated files:
 - `public/demo-data/map_layers/demo_school_capacity.geojson`
 - `public/demo-data/map_layers/demo_transportation_context.geojson`
 
-The current demo extract is about 2.3 MB and contains 300 sanitized sample
-parcel records plus small static GeoJSON map layers for portfolio Explore
-Countywide visuals. It uses clean/summary local tables only, excludes sensitive
-contact fields, and does not expose exact parcel-level probabilities, raw model
-scores, or official prediction classes. Public demo layers are cached samples,
-not full county production coverage.
+The current demo extract is about 2.7 MB and contains 300 sanitized sample
+parcel records, permit-year metadata for the Development Hotspots range
+control, small static GeoJSON map layers for portfolio Explore Countywide
+visuals, and safe Model Lab demo research markers. It uses clean/summary local
+tables only, excludes sensitive contact fields, and does not expose exact
+parcel-level probabilities, raw model scores, or official prediction classes.
+Public demo layers are cached samples, not full county production coverage.
 
 ## Backend Host Configuration
 

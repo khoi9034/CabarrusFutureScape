@@ -1,9 +1,3575 @@
 {
-  "available": false,
-  "caveat": "Portfolio demo does not include parcel-level model preview clusters.",
-  "clusters": [],
-  "exact_probabilities_shown": false,
-  "generated_at": "2026-06-23T14:41:06Z",
-  "raw_model_values_visible": false,
-  "relative_research_bands_only": true
+  "available": true,
+  "caveat": "Relative research signal only. No exact probability shown.",
+  "generated_at": "2026-06-23T15:14:44Z",
+  "markers": [
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-001",
+      "label": "Demo research parcel 001",
+      "latitude": 35.463993524263536,
+      "longitude": -80.6617842079479,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785733",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-002",
+      "label": "Demo research parcel 002",
+      "latitude": 35.464624178625414,
+      "longitude": -80.66363599068484,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149786007",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-003",
+      "label": "Demo research parcel 003",
+      "latitude": 35.31315940975322,
+      "longitude": -80.59114794428554,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762662",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "larger parcel acreage context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-004",
+      "label": "Demo research parcel 004",
+      "latitude": 35.29735246562091,
+      "longitude": -80.43385294143499,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780059",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-005",
+      "label": "Demo research parcel 005",
+      "latitude": 35.310789765715,
+      "longitude": -80.59083505988812,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149761928",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-006",
+      "label": "Demo research parcel 006",
+      "latitude": 35.37292359827809,
+      "longitude": -80.62820406124605,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758699",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-007",
+      "label": "Demo research parcel 007",
+      "latitude": 35.24787030824967,
+      "longitude": -80.46502737119059,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778783",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-008",
+      "label": "Demo research parcel 008",
+      "latitude": 35.40538946046891,
+      "longitude": -80.7372428321894,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149744220",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-009",
+      "label": "Demo research parcel 009",
+      "latitude": 35.46239391730781,
+      "longitude": -80.65978362650415,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785736",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-010",
+      "label": "Demo research parcel 010",
+      "latitude": 35.50657532344931,
+      "longitude": -80.62529474422962,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149723131",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-011",
+      "label": "Demo research parcel 011",
+      "latitude": 35.325692782400665,
+      "longitude": -80.6404343588508,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149754601",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-012",
+      "label": "Demo research parcel 012",
+      "latitude": 35.297691683939576,
+      "longitude": -80.43427507763622,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779537",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-013",
+      "label": "Demo research parcel 013",
+      "latitude": 35.46406844868463,
+      "longitude": -80.6629986541829,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149793537",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-014",
+      "label": "Demo research parcel 014",
+      "latitude": 35.31692903790301,
+      "longitude": -80.57933737803117,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149763966",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-015",
+      "label": "Demo research parcel 015",
+      "latitude": 35.291358224518746,
+      "longitude": -80.65620345752157,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149745571",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-016",
+      "label": "Demo research parcel 016",
+      "latitude": 35.29497853486451,
+      "longitude": -80.66146978026904,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149745226",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "larger parcel acreage context",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-017",
+      "label": "Demo research parcel 017",
+      "latitude": 35.31136848158897,
+      "longitude": -80.5865616427684,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762832",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-018",
+      "label": "Demo research parcel 018",
+      "latitude": 35.29885429384259,
+      "longitude": -80.43147413470408,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780071",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-019",
+      "label": "Demo research parcel 019",
+      "latitude": 35.38556062965699,
+      "longitude": -80.53584971872783,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149776054",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "larger parcel acreage context",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-020",
+      "label": "Demo research parcel 020",
+      "latitude": 35.46947757679985,
+      "longitude": -80.65585568811804,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149795344",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-021",
+      "label": "Demo research parcel 021",
+      "latitude": 35.313834385673836,
+      "longitude": -80.5941614870543,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762232",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-022",
+      "label": "Demo research parcel 022",
+      "latitude": 35.311287320406876,
+      "longitude": -80.58175469299587,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762834",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-023",
+      "label": "Demo research parcel 023",
+      "latitude": 35.311111896133745,
+      "longitude": -80.59092075952108,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149761929",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-024",
+      "label": "Demo research parcel 024",
+      "latitude": 35.37167256357152,
+      "longitude": -80.62453316875411,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758038",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-025",
+      "label": "Demo research parcel 025",
+      "latitude": 35.29966442506648,
+      "longitude": -80.43247382226178,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780332",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-026",
+      "label": "Demo research parcel 026",
+      "latitude": 35.29864281807078,
+      "longitude": -80.43203058343906,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779565",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-027",
+      "label": "Demo research parcel 027",
+      "latitude": 35.25996684995391,
+      "longitude": -80.46504566990987,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779077",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-028",
+      "label": "Demo research parcel 028",
+      "latitude": 35.29088996582342,
+      "longitude": -80.65898756520113,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149745248",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-029",
+      "label": "Demo research parcel 029",
+      "latitude": 35.463888746420565,
+      "longitude": -80.66609256086033,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785698",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-030",
+      "label": "Demo research parcel 030",
+      "latitude": 35.399228866227155,
+      "longitude": -80.73462063803979,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149735122",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-031",
+      "label": "Demo research parcel 031",
+      "latitude": 35.46229536971005,
+      "longitude": -80.65803600864125,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149786372",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-032",
+      "label": "Demo research parcel 032",
+      "latitude": 35.36095572923924,
+      "longitude": -80.54817662667514,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149772856",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-033",
+      "label": "Demo research parcel 033",
+      "latitude": 35.313623760285864,
+      "longitude": -80.58658289341668,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762503",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-034",
+      "label": "Demo research parcel 034",
+      "latitude": 35.38236892415673,
+      "longitude": -80.53026487986442,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149776160",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-035",
+      "label": "Demo research parcel 035",
+      "latitude": 35.316203358262264,
+      "longitude": -80.57923757119562,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149771700",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-036",
+      "label": "Demo research parcel 036",
+      "latitude": 35.30265568791663,
+      "longitude": -80.42953471281632,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780122",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-037",
+      "label": "Demo research parcel 037",
+      "latitude": 35.3130960160582,
+      "longitude": -80.58498894871596,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149763146",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-038",
+      "label": "Demo research parcel 038",
+      "latitude": 35.315244175987424,
+      "longitude": -80.57334424151233,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149767932",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-039",
+      "label": "Demo research parcel 039",
+      "latitude": 35.260047098813665,
+      "longitude": -80.46198038375205,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778580",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-040",
+      "label": "Demo research parcel 040",
+      "latitude": 35.43428737692032,
+      "longitude": -80.75449699282774,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149731296",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-041",
+      "label": "Demo research parcel 041",
+      "latitude": 35.295779072088735,
+      "longitude": -80.43321710072148,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780056",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-042",
+      "label": "Demo research parcel 042",
+      "latitude": 35.29935244933245,
+      "longitude": -80.43107978356562,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149788351",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-043",
+      "label": "Demo research parcel 043",
+      "latitude": 35.30994061165142,
+      "longitude": -80.59014139513955,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762604",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-044",
+      "label": "Demo research parcel 044",
+      "latitude": 35.46651287794171,
+      "longitude": -80.68710226194108,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149742274",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-045",
+      "label": "Demo research parcel 045",
+      "latitude": 35.25958817611556,
+      "longitude": -80.45722168247309,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779002",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-046",
+      "label": "Demo research parcel 046",
+      "latitude": 35.42232556416714,
+      "longitude": -80.75106817101498,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149738015",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-047",
+      "label": "Demo research parcel 047",
+      "latitude": 35.31349781118845,
+      "longitude": -80.58377598320595,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762226",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-048",
+      "label": "Demo research parcel 048",
+      "latitude": 35.449198684709046,
+      "longitude": -80.73681830628622,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149739584",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-049",
+      "label": "Demo research parcel 049",
+      "latitude": 35.300641226980645,
+      "longitude": -80.42944975820524,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780375",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-050",
+      "label": "Demo research parcel 050",
+      "latitude": 35.311743835434434,
+      "longitude": -80.59121647715762,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762661",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-051",
+      "label": "Demo research parcel 051",
+      "latitude": 35.31032912583159,
+      "longitude": -80.59019532274576,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762607",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-052",
+      "label": "Demo research parcel 052",
+      "latitude": 35.403461626876194,
+      "longitude": -80.73880977797839,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149735739",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-053",
+      "label": "Demo research parcel 053",
+      "latitude": 35.297475573620304,
+      "longitude": -80.43370859381521,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149788325",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-054",
+      "label": "Demo research parcel 054",
+      "latitude": 35.38211050331212,
+      "longitude": -80.68627700291476,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149736504",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-055",
+      "label": "Demo research parcel 055",
+      "latitude": 35.37077837902836,
+      "longitude": -80.62391179944468,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758036",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-056",
+      "label": "Demo research parcel 056",
+      "latitude": 35.46233025307629,
+      "longitude": -80.6581290105247,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149794186",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-057",
+      "label": "Demo research parcel 057",
+      "latitude": 35.31090762524978,
+      "longitude": -80.59086790199302,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762377",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-058",
+      "label": "Demo research parcel 058",
+      "latitude": 35.31488991443375,
+      "longitude": -80.58044732189603,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149763877",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-059",
+      "label": "Demo research parcel 059",
+      "latitude": 35.31018613549833,
+      "longitude": -80.59099855750682,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762629",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-060",
+      "label": "Demo research parcel 060",
+      "latitude": 35.36977525335723,
+      "longitude": -80.62448996542017,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758782",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-061",
+      "label": "Demo research parcel 061",
+      "latitude": 35.25960800976546,
+      "longitude": -80.4561942622046,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778629",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-062",
+      "label": "Demo research parcel 062",
+      "latitude": 35.29664844449335,
+      "longitude": -80.43274370824196,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779842",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-063",
+      "label": "Demo research parcel 063",
+      "latitude": 35.25962966013602,
+      "longitude": -80.45712414657939,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778948",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-064",
+      "label": "Demo research parcel 064",
+      "latitude": 35.444543749200776,
+      "longitude": -80.73244680922369,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149749248",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-065",
+      "label": "Demo research parcel 065",
+      "latitude": 35.406667119243295,
+      "longitude": -80.75591376331185,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149729903",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-066",
+      "label": "Demo research parcel 066",
+      "latitude": 35.416942019181334,
+      "longitude": -80.74622868879031,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149732502",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-067",
+      "label": "Demo research parcel 067",
+      "latitude": 35.30053859006053,
+      "longitude": -80.43144255006989,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780142",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-068",
+      "label": "Demo research parcel 068",
+      "latitude": 35.44760605975539,
+      "longitude": -80.68151357304016,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149742395",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-069",
+      "label": "Demo research parcel 069",
+      "latitude": 35.31027665850578,
+      "longitude": -80.5886897737251,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762546",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-070",
+      "label": "Demo research parcel 070",
+      "latitude": 35.25999986818464,
+      "longitude": -80.46289858821045,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778912",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-071",
+      "label": "Demo research parcel 071",
+      "latitude": 35.38648738014493,
+      "longitude": -80.53135738171554,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149775324",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-072",
+      "label": "Demo research parcel 072",
+      "latitude": 35.464031919921,
+      "longitude": -80.65769590523225,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149794189",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-073",
+      "label": "Demo research parcel 073",
+      "latitude": 35.43792771539583,
+      "longitude": -80.76060438110764,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149732233",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-074",
+      "label": "Demo research parcel 074",
+      "latitude": 35.30087184031942,
+      "longitude": -80.43096773867333,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780498",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-075",
+      "label": "Demo research parcel 075",
+      "latitude": 35.38736368773395,
+      "longitude": -80.52880418128939,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149776477",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-076",
+      "label": "Demo research parcel 076",
+      "latitude": 35.37786069109945,
+      "longitude": -80.66323969874551,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149760105",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "larger parcel acreage context",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-077",
+      "label": "Demo research parcel 077",
+      "latitude": 35.318366170121415,
+      "longitude": -80.57561015336702,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149768254",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-078",
+      "label": "Demo research parcel 078",
+      "latitude": 35.380983601506784,
+      "longitude": -80.72117555547686,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149727098",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-079",
+      "label": "Demo research parcel 079",
+      "latitude": 35.310418739770704,
+      "longitude": -80.58980822307223,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149761956",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-080",
+      "label": "Demo research parcel 080",
+      "latitude": 35.36124691863447,
+      "longitude": -80.70665585607425,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149727360",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "recent new-construction permit history",
+        "larger parcel acreage context"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-081",
+      "label": "Demo research parcel 081",
+      "latitude": 35.29035828466853,
+      "longitude": -80.65624124716923,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149745795",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-082",
+      "label": "Demo research parcel 082",
+      "latitude": 35.29369312787526,
+      "longitude": -80.4434235252725,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778674",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "larger parcel acreage context",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-083",
+      "label": "Demo research parcel 083",
+      "latitude": 35.310378413943695,
+      "longitude": -80.58998241863381,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149771016",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-084",
+      "label": "Demo research parcel 084",
+      "latitude": 35.46185665349316,
+      "longitude": -80.66199609081086,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785697",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-085",
+      "label": "Demo research parcel 085",
+      "latitude": 35.46183125631934,
+      "longitude": -80.65916208134779,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785864",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-086",
+      "label": "Demo research parcel 086",
+      "latitude": 35.40547922982475,
+      "longitude": -80.73811232529474,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149734065",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-087",
+      "label": "Demo research parcel 087",
+      "latitude": 35.31084869548383,
+      "longitude": -80.59085148083162,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762655",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-088",
+      "label": "Demo research parcel 088",
+      "latitude": 35.37009810321926,
+      "longitude": -80.62374113900319,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758960",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-089",
+      "label": "Demo research parcel 089",
+      "latitude": 35.310969608518405,
+      "longitude": -80.5903636677289,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149761932",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-090",
+      "label": "Demo research parcel 090",
+      "latitude": 35.29233155913761,
+      "longitude": -80.66079344571575,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149745629",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-091",
+      "label": "Demo research parcel 091",
+      "latitude": 35.449019635934675,
+      "longitude": -80.73614529710588,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149740131",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-092",
+      "label": "Demo research parcel 092",
+      "latitude": 35.367700589127246,
+      "longitude": -80.62199688251269,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758905",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "fema flood review constraint present",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-093",
+      "label": "Demo research parcel 093",
+      "latitude": 35.313025838349496,
+      "longitude": -80.58814406986794,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762483",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-094",
+      "label": "Demo research parcel 094",
+      "latitude": 35.30018143077956,
+      "longitude": -80.43109788385942,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780494",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-095",
+      "label": "Demo research parcel 095",
+      "latitude": 35.260440030471145,
+      "longitude": -80.45557744339507,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778953",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-096",
+      "label": "Demo research parcel 096",
+      "latitude": 35.31128779997955,
+      "longitude": -80.59047443133193,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762380",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-097",
+      "label": "Demo research parcel 097",
+      "latitude": 35.30004028171223,
+      "longitude": -80.43146871064295,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779609",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-098",
+      "label": "Demo research parcel 098",
+      "latitude": 35.37012360429752,
+      "longitude": -80.62634441514632,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758931",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-099",
+      "label": "Demo research parcel 099",
+      "latitude": 35.421281638299064,
+      "longitude": -80.75398380428348,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149731684",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-100",
+      "label": "Demo research parcel 100",
+      "latitude": 35.310671676553795,
+      "longitude": -80.5898704285384,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149761957",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-101",
+      "label": "Demo research parcel 101",
+      "latitude": 35.42766339225117,
+      "longitude": -80.66958407782896,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149784150",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "recent new-construction permit history",
+        "parcel valuation context available"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-102",
+      "label": "Demo research parcel 102",
+      "latitude": 35.46448179513298,
+      "longitude": -80.66206789427973,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785879",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-103",
+      "label": "Demo research parcel 103",
+      "latitude": 35.32469403438148,
+      "longitude": -80.64035800092799,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149754577",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-104",
+      "label": "Demo research parcel 104",
+      "latitude": 35.30052857463716,
+      "longitude": -80.43058214954938,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779604",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-105",
+      "label": "Demo research parcel 105",
+      "latitude": 35.32651943508782,
+      "longitude": -80.64108221896592,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149754559",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "fema flood review constraint present",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-106",
+      "label": "Demo research parcel 106",
+      "latitude": 35.36731462582702,
+      "longitude": -80.61977335384876,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149759079",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-107",
+      "label": "Demo research parcel 107",
+      "latitude": 35.31776579787274,
+      "longitude": -80.58200335491296,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762494",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-108",
+      "label": "Demo research parcel 108",
+      "latitude": 35.3726684741533,
+      "longitude": -80.62853490246826,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758698",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-109",
+      "label": "Demo research parcel 109",
+      "latitude": 35.45084640731147,
+      "longitude": -80.74060521585403,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149739474",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-110",
+      "label": "Demo research parcel 110",
+      "latitude": 35.299396287723276,
+      "longitude": -80.43084006425505,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780169",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-111",
+      "label": "Demo research parcel 111",
+      "latitude": 35.400823300185266,
+      "longitude": -80.71490873283567,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149744622",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-112",
+      "label": "Demo research parcel 112",
+      "latitude": 35.36182129687198,
+      "longitude": -80.5448978370092,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149772524",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "larger parcel acreage context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-113",
+      "label": "Demo research parcel 113",
+      "latitude": 35.31601773782545,
+      "longitude": -80.57831486210605,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149763421",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-114",
+      "label": "Demo research parcel 114",
+      "latitude": 35.260694938955226,
+      "longitude": -80.46432556980955,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778870",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-115",
+      "label": "Demo research parcel 115",
+      "latitude": 35.30207394293693,
+      "longitude": -80.42846828697148,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780386",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-116",
+      "label": "Demo research parcel 116",
+      "latitude": 35.46107937813234,
+      "longitude": -80.6575904756256,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149786793",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-117",
+      "label": "Demo research parcel 117",
+      "latitude": 35.42084024297989,
+      "longitude": -80.75446158166606,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149732683",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-118",
+      "label": "Demo research parcel 118",
+      "latitude": 35.4648329382032,
+      "longitude": -80.66240797237812,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785754",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-119",
+      "label": "Demo research parcel 119",
+      "latitude": 35.37271659953877,
+      "longitude": -80.62708445140815,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758953",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-120",
+      "label": "Demo research parcel 120",
+      "latitude": 35.50625567904036,
+      "longitude": -80.62158314344789,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149721953",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-121",
+      "label": "Demo research parcel 121",
+      "latitude": 35.29864281807078,
+      "longitude": -80.43203058343906,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779566",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-122",
+      "label": "Demo research parcel 122",
+      "latitude": 35.46529636197261,
+      "longitude": -80.65782722953318,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149794760",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-123",
+      "label": "Demo research parcel 123",
+      "latitude": 35.31296948337075,
+      "longitude": -80.58258047931193,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762250",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-124",
+      "label": "Demo research parcel 124",
+      "latitude": 35.420410089130456,
+      "longitude": -80.75320054592419,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149730895",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-125",
+      "label": "Demo research parcel 125",
+      "latitude": 35.25876078323157,
+      "longitude": -80.45682382874492,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778628",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-126",
+      "label": "Demo research parcel 126",
+      "latitude": 35.31319662673541,
+      "longitude": -80.58083191995959,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149763840",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-127",
+      "label": "Demo research parcel 127",
+      "latitude": 35.40538946046891,
+      "longitude": -80.7372428321894,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149744219",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-128",
+      "label": "Demo research parcel 128",
+      "latitude": 35.50671690507165,
+      "longitude": -80.62257856649606,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149721250",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-129",
+      "label": "Demo research parcel 129",
+      "latitude": 35.311308194710406,
+      "longitude": -80.5911867110539,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149771442",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-130",
+      "label": "Demo research parcel 130",
+      "latitude": 35.29724495914253,
+      "longitude": -80.43359423232448,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780292",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-131",
+      "label": "Demo research parcel 131",
+      "latitude": 35.44274759885103,
+      "longitude": -80.73668250558109,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149739599",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-132",
+      "label": "Demo research parcel 132",
+      "latitude": 35.447280911043215,
+      "longitude": -80.73496165005857,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149739679",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-133",
+      "label": "Demo research parcel 133",
+      "latitude": 35.465163730815306,
+      "longitude": -80.66025551871307,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149786305",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-134",
+      "label": "Demo research parcel 134",
+      "latitude": 35.310465857124626,
+      "longitude": -80.59074568206174,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762301",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-135",
+      "label": "Demo research parcel 135",
+      "latitude": 35.30272855117124,
+      "longitude": -80.4297991552589,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780255",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-136",
+      "label": "Demo research parcel 136",
+      "latitude": 35.371700957827514,
+      "longitude": -80.62757726215239,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149758943",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-137",
+      "label": "Demo research parcel 137",
+      "latitude": 35.30053859006053,
+      "longitude": -80.43144255006989,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780143",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-138",
+      "label": "Demo research parcel 138",
+      "latitude": 35.46457850622018,
+      "longitude": -80.66224124080033,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785739",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-139",
+      "label": "Demo research parcel 139",
+      "latitude": 35.46311145080379,
+      "longitude": -80.65978115797942,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149786039",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-140",
+      "label": "Demo research parcel 140",
+      "latitude": 35.29700466339534,
+      "longitude": -80.43388070777989,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779555",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-141",
+      "label": "Demo research parcel 141",
+      "latitude": 35.44920255252474,
+      "longitude": -80.73626847674174,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149739270",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-142",
+      "label": "Demo research parcel 142",
+      "latitude": 35.43384185187821,
+      "longitude": -80.7546731452813,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149731364",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-143",
+      "label": "Demo research parcel 143",
+      "latitude": 35.43893440637789,
+      "longitude": -80.74757698744929,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149733963",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-144",
+      "label": "Demo research parcel 144",
+      "latitude": 35.32604871727218,
+      "longitude": -80.63972955102662,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149761437",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-145",
+      "label": "Demo research parcel 145",
+      "latitude": 35.46549397496484,
+      "longitude": -80.6580681259498,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149786257",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-146",
+      "label": "Demo research parcel 146",
+      "latitude": 35.30691547363105,
+      "longitude": -80.45009239569877,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779021",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-147",
+      "label": "Demo research parcel 147",
+      "latitude": 35.3107960442333,
+      "longitude": -80.59039501241229,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762303",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-148",
+      "label": "Demo research parcel 148",
+      "latitude": 35.31262008051591,
+      "longitude": -80.58133973672855,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149763838",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-149",
+      "label": "Demo research parcel 149",
+      "latitude": 35.291227081645644,
+      "longitude": -80.6563863376634,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149745569",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-150",
+      "label": "Demo research parcel 150",
+      "latitude": 35.449025906560024,
+      "longitude": -80.73391463929914,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149739469",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-151",
+      "label": "Demo research parcel 151",
+      "latitude": 35.42150919662562,
+      "longitude": -80.74897600426911,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149731124",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-152",
+      "label": "Demo research parcel 152",
+      "latitude": 35.46406120363126,
+      "longitude": -80.66214120099264,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785851",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-153",
+      "label": "Demo research parcel 153",
+      "latitude": 35.29108090098895,
+      "longitude": -80.65544487175922,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149746359",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-154",
+      "label": "Demo research parcel 154",
+      "latitude": 35.290418384654515,
+      "longitude": -80.6578916828049,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149754716",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-155",
+      "label": "Demo research parcel 155",
+      "latitude": 35.42217525544592,
+      "longitude": -80.75141336479454,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149732244",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-156",
+      "label": "Demo research parcel 156",
+      "latitude": 35.39551117316819,
+      "longitude": -80.54483652914081,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149819746",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-157",
+      "label": "Demo research parcel 157",
+      "latitude": 35.46330828487491,
+      "longitude": -80.65631071361665,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149786223",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-158",
+      "label": "Demo research parcel 158",
+      "latitude": 35.32812020280419,
+      "longitude": -80.64225563155298,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149749668",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-159",
+      "label": "Demo research parcel 159",
+      "latitude": 35.412764289285676,
+      "longitude": -80.59070453082082,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149805044",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "recent new-construction permit history",
+        "parcel valuation context available"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-160",
+      "label": "Demo research parcel 160",
+      "latitude": 35.462076239523455,
+      "longitude": -80.6594317266559,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149793858",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-161",
+      "label": "Demo research parcel 161",
+      "latitude": 35.31049518325048,
+      "longitude": -80.58946295908163,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762702",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-162",
+      "label": "Demo research parcel 162",
+      "latitude": 35.46494558173205,
+      "longitude": -80.65964273961166,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149786155",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-163",
+      "label": "Demo research parcel 163",
+      "latitude": 35.25907874363223,
+      "longitude": -80.45662839156527,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778951",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-164",
+      "label": "Demo research parcel 164",
+      "latitude": 35.463137504257986,
+      "longitude": -80.66465053027746,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785699",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-165",
+      "label": "Demo research parcel 165",
+      "latitude": 35.463927804982134,
+      "longitude": -80.66158761801691,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149785852",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-166",
+      "label": "Demo research parcel 166",
+      "latitude": 35.26002071139554,
+      "longitude": -80.46017735752682,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778933",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-167",
+      "label": "Demo research parcel 167",
+      "latitude": 35.43033973389013,
+      "longitude": -80.75359540888957,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149733057",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-168",
+      "label": "Demo research parcel 168",
+      "latitude": 35.29687889824599,
+      "longitude": -80.43373301460846,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780068",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-169",
+      "label": "Demo research parcel 169",
+      "latitude": 35.30173411531804,
+      "longitude": -80.42933117988085,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149779904",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-170",
+      "label": "Demo research parcel 170",
+      "latitude": 35.46596259407516,
+      "longitude": -80.68620586306463,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149751095",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-171",
+      "label": "Demo research parcel 171",
+      "latitude": 35.367914452503584,
+      "longitude": -80.70996252975726,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149727236",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "recent new-construction permit history",
+        "parcel valuation context available"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-172",
+      "label": "Demo research parcel 172",
+      "latitude": 35.3243703627358,
+      "longitude": -80.64013063958582,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149755286",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-173",
+      "label": "Demo research parcel 173",
+      "latitude": 35.30257871877305,
+      "longitude": -80.42875869884085,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780389",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-174",
+      "label": "Demo research parcel 174",
+      "latitude": 35.4637197936852,
+      "longitude": -80.65681017494326,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149787427",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-175",
+      "label": "Demo research parcel 175",
+      "latitude": 35.31587598538696,
+      "longitude": -80.57853958803926,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149762996",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-176",
+      "label": "Demo research parcel 176",
+      "latitude": 35.29808878968879,
+      "longitude": -80.43324138101423,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149780487",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-177",
+      "label": "Demo research parcel 177",
+      "latitude": 35.31563293967399,
+      "longitude": -80.57768864860478,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149763473",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-178",
+      "label": "Demo research parcel 178",
+      "latitude": 35.40526277000386,
+      "longitude": -80.73706537943175,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149735321",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-179",
+      "label": "Demo research parcel 179",
+      "latitude": 35.296308163536196,
+      "longitude": -80.45508536574965,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149778448",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "vacant or underbuilt parcel context",
+        "fema flood review constraint present"
+      ],
+      "type": "parcel"
+    },
+    {
+      "caveat": "Relative research signal only. No exact probability shown.",
+      "confidence_label": "Internal research only",
+      "count": 1,
+      "id": "demo-model-180",
+      "label": "Demo research parcel 180",
+      "latitude": 35.46296170137825,
+      "longitude": -80.65725830385043,
+      "model_version": "phase10e_zoning_enhanced_v1",
+      "official_parcel_id": "CFS-PARCEL-0149786599",
+      "recommended_follow_up": "Review source records before drawing conclusions.",
+      "research_band": "Very Strong Research Signal",
+      "research_rank_band": "top_5_percent_research_band",
+      "top_drivers": [
+        "historical zoning context available",
+        "parcel valuation context available",
+        "school attendance-zone context available but not capacity-scored"
+      ],
+      "type": "parcel"
+    }
+  ],
+  "mode": "portfolio_demo",
+  "relative_research_bands_only": true,
+  "safe_export_notes": [
+    "No exact probabilities, raw model values, or official parcel classes are exported.",
+    "Markers are cached demo context for portfolio review."
+  ],
+  "total_count": 180
 }

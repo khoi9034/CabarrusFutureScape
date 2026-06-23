@@ -32,6 +32,7 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
     demo_dir = REPO_ROOT / "public" / "demo-data"
     expected_files = {
         "demo_manifest.json",
+        "development_years.json",
         "indicator_summary.json",
         "development_trends.json",
         "flood_summary.json",
@@ -75,6 +76,23 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
     for term in blocked_terms:
         assert term not in demo_text
 
+    years_text = (demo_dir / "development_years.json").read_text(
+        encoding="utf-8",
+    )
+    hotspot_text = (
+        demo_dir / "map_layers" / "demo_development_hotspots.geojson"
+    ).read_text(encoding="utf-8")
+    model_lab_text = (demo_dir / "model_lab_demo_clusters.json").read_text(
+        encoding="utf-8",
+    )
+    assert "available_years" in years_text
+    assert "segment_year_counts" in years_text
+    assert "year_start" in hotspot_text
+    assert "year_end" in hotspot_text
+    assert "segment_year_counts" in hotspot_text
+    assert "research_band" in model_lab_text
+    assert "top_drivers" in model_lab_text
+
 
 def test_demo_map_layers_are_wired_without_backend_calls() -> None:
     map_client = read("src/lib/demo-data/mapLayerClient.ts")
@@ -83,14 +101,21 @@ def test_demo_map_layers_are_wired_without_backend_calls() -> None:
     flood_zone_hook = read("src/hooks/useFloodZoneLayer.ts")
     school_hook = read("src/hooks/useSchoolUtilizationZoneLayer.ts")
     layer_toggle = read("src/components/dashboard/LayerToggle.tsx")
+    model_hook = read("src/hooks/useModelResearchPreviewLayer.ts")
 
     assert "getDemoGeoJsonLayer" in map_client
+    assert "getDemoDevelopmentYears" in map_client
     assert "getDemoDevelopmentHotspotsBySegment" in map_client
+    assert "getDemoModelLabMarkers" in map_client
     assert "getDemoParcelMapFocus" in map_client
     assert "getDemoDevelopmentHotspotsBySegment" in hotspot_hook
+    assert "yearStart: permitYearStart" in hotspot_hook
     assert "getDemoFloodConstraintMarkers" in flood_hook
     assert "getDemoFloodZonePolygons" in flood_zone_hook
     assert "getDemoSchoolUtilizationPolygons" in school_hook
+    assert "getDemoModelLabMarkers" in model_hook
+    assert "Permit Year Range" in layer_toggle
+    assert "Reset Years" in layer_toggle
     assert "Portfolio Demo" in layer_toggle
     assert "Demo Sample" in layer_toggle
 

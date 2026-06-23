@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getDevelopmentModelResearchPreview } from "@/lib/api/development";
-import { getApiErrorDisplayMessage, USE_BACKEND_API } from "@/lib/api/client";
+import {
+  getApiErrorDisplayMessage,
+  USE_BACKEND_API,
+  USE_DEMO_DATA,
+} from "@/lib/api/client";
+import { getDemoModelLabMarkers } from "@/lib/demo-data/mapLayerClient";
 import type {
   ModelResearchPreviewLayerState,
   ModelResearchPreviewMarker,
@@ -116,11 +121,57 @@ export function useModelResearchPreviewLayer({
     return () => controller.abort();
   }, [enabled, limit, requestKey, signal]);
 
+  useEffect(() => {
+    if (!enabled || !USE_DEMO_DATA) {
+      return;
+    }
+
+    let cancelled = false;
+
+    getDemoModelLabMarkers({ limit, signal })
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          caveat: response.caveat,
+          errorMessage:
+            response.markers.length === 0
+              ? "Portfolio demo model research markers are not available."
+              : null,
+          isLoading: false,
+          markers: response.markers,
+          requestKey,
+          source: "demo",
+          status: response.markers.length > 0 ? "ready" : "unavailable",
+          totalCount: response.totalCount,
+        });
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          ...offState,
+          errorMessage: "Portfolio demo model research markers are unavailable.",
+          isLoading: false,
+          requestKey,
+          status: "error",
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled, limit, requestKey, signal]);
+
   if (!enabled) {
     return offState;
   }
 
-  if (!USE_BACKEND_API) {
+  if (!USE_BACKEND_API && !USE_DEMO_DATA) {
     return {
       ...offState,
       errorMessage: "Model research preview markers require backend API mode.",

@@ -121,6 +121,8 @@ class DevelopmentHotspotsFilters:
     permit_value_class: str | None = None
     recent_window: int | None = None
     rolling_window: int | None = None
+    end_year: int | None = None
+    start_year: int | None = None
     work_type: str | None = None
     year: int | None = None
     zoning_category: str | None = None
@@ -595,6 +597,16 @@ class DevelopmentRepository:
         if filters.year is not None:
             relationship_predicates.append(
                 RealPropertyPermitParcelRelationship.activity_year == filters.year,
+            )
+        if filters.start_year is not None:
+            relationship_predicates.append(
+                RealPropertyPermitParcelRelationship.activity_year
+                >= filters.start_year,
+            )
+        if filters.end_year is not None:
+            relationship_predicates.append(
+                RealPropertyPermitParcelRelationship.activity_year
+                <= filters.end_year,
             )
         if filters.month is not None:
             relationship_predicates.append(

@@ -43,6 +43,7 @@ import {
   createDashboardUrlState,
   type DashboardUrlState,
 } from "@/lib/dashboard/urlState";
+import { USE_DEMO_DATA } from "@/lib/api/client";
 import { defaultIndicatorCenterGroupIds } from "@/data/intelligence/indicatorCenter";
 import type {
   DashboardStatus,
@@ -615,7 +616,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [
     modelResearchOverlayEnabled,
     setModelResearchOverlayEnabled,
-  ] = useState(false);
+  ] = useState(USE_DEMO_DATA);
   const [
     modelResearchMapSummary,
     setModelResearchMapSummary,
@@ -661,6 +662,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     enabled: developmentHotspotsEnabled,
     growthSignal: developmentHotspotControls.growthSignal,
     limit: developmentHotspotControls.limit,
+    permitYearEnd: developmentHotspotControls.permitYearEnd,
+    permitYearStart: developmentHotspotControls.permitYearStart,
     permitSegment: developmentHotspotControls.permitSegment,
     recentWindow:
       developmentHotspotControls.recentWindow === "all"

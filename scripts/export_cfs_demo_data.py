@@ -30,6 +30,7 @@ DEMO_HOTSPOT_LAYER_LIMIT = 220
 DEMO_FLOOD_LAYER_LIMIT = 160
 DEMO_SCHOOL_LAYER_LIMIT = 120
 DEMO_TRANSPORTATION_LAYER_LIMIT = 80
+DEMO_MODEL_LAB_MARKER_LIMIT = 180
 
 DATA_STILL_NEEDED = [
     {
@@ -92,11 +93,13 @@ def main() -> int:
     with psycopg.connect(get_local_connection_string(), row_factory=dict_row) as conn:
         development_statistics = build_development_statistics(conn)
         development_activity_summary = build_development_activity_summary(conn)
+        development_years = build_development_years(conn, generated_at)
         permit_segments = build_permit_segment_statistics(conn)
         development_trends = build_development_trends(conn)
         flood_summary = build_flood_summary(conn)
         school_watch = build_school_capacity_watch(conn)
         model_status = build_model_status(generated_at)
+        model_lab_demo_clusters = build_model_lab_demo_clusters(conn, generated_at)
         sample_parcels = build_sample_parcels(conn, generated_at)
         map_layer_manifest = export_demo_map_layers(conn, generated_at)
 
@@ -150,6 +153,7 @@ def main() -> int:
             "generated_at": generated_at,
             "trends": development_trends,
         },
+        "development_years.json": development_years,
         "flood_summary.json": {
             "available": flood_summary["total_parcels"] > 0,
             "generated_at": generated_at,
@@ -163,15 +167,7 @@ def main() -> int:
         },
         "model_status.json": model_status,
         "sample_parcels.json": sample_parcels,
-        "model_lab_demo_clusters.json": {
-            "available": False,
-            "caveat": "Portfolio demo does not include parcel-level model preview clusters.",
-            "clusters": [],
-            "exact_probabilities_shown": False,
-            "generated_at": generated_at,
-            "raw_model_values_visible": False,
-            "relative_research_bands_only": True,
-        },
+        "model_lab_demo_clusters.json": model_lab_demo_clusters,
     }
 
     for filename, payload in files.items():
@@ -477,6 +473,69 @@ def build_development_trends(conn: psycopg.Connection) -> dict[str, Any]:
     }
 
 
+def build_development_years(
+    conn: psycopg.Connection,
+    generated_at: str,
+) -> dict[str, Any]:
+    if not table_exists(conn, "real_property_permit_parcel_relationship"):
+        return {
+            "available_years": [],
+            "default_year_end": None,
+            "default_year_start": None,
+            "generated_at": generated_at,
+            "max_year": None,
+            "min_year": None,
+            "mode": "portfolio_demo",
+            "segment_year_counts": {},
+            "yearly_counts": {},
+        }
+
+    segment_join = table_exists(conn, "permit_intelligence_segments")
+    rows = fetch_all(
+        conn,
+        f"""
+        SELECT
+          r.activity_year::int AS year,
+          COALESCE(s.permit_segment, 'administrative_or_unknown') AS permit_segment,
+          COUNT(DISTINCT r.permit_id)::int AS permit_count
+        FROM public.real_property_permit_parcel_relationship r
+        {"""
+        LEFT JOIN public.permit_intelligence_segments s
+          ON s.permit_id = r.permit_id
+        """ if segment_join else "LEFT JOIN (SELECT NULL::text AS permit_id, NULL::text AS permit_segment) s ON FALSE"}
+        WHERE r.activity_year IS NOT NULL
+        GROUP BY r.activity_year, COALESCE(s.permit_segment, 'administrative_or_unknown')
+        ORDER BY r.activity_year, COALESCE(s.permit_segment, 'administrative_or_unknown')
+        """,
+    )
+
+    yearly_counts: dict[str, int] = {}
+    segment_year_counts: dict[str, dict[str, int]] = {}
+    for row in rows:
+        year = str(row["year"])
+        segment = row["permit_segment"] or "administrative_or_unknown"
+        count = int(row["permit_count"] or 0)
+        yearly_counts[year] = yearly_counts.get(year, 0) + count
+        segment_year_counts.setdefault(segment, {})[year] = count
+
+    available_years = sorted(int(year) for year in yearly_counts)
+    min_year = available_years[0] if available_years else None
+    max_year = available_years[-1] if available_years else None
+
+    return {
+        "available_years": available_years,
+        "caveat": "Demo permit years come from the cached local extract.",
+        "default_year_end": max_year,
+        "default_year_start": min_year,
+        "generated_at": generated_at,
+        "max_year": max_year,
+        "min_year": min_year,
+        "mode": "portfolio_demo",
+        "segment_year_counts": segment_year_counts,
+        "yearly_counts": yearly_counts,
+    }
+
+
 def build_flood_summary(conn: psycopg.Connection) -> dict[str, Any]:
     if not table_exists(conn, "parcel_flood_constraint_overlay"):
         return empty_flood_summary()
@@ -682,6 +741,179 @@ def build_model_status(generated_at: str) -> dict[str, Any]:
         "production_ready": False,
         "public_exposure_allowed": False,
         "raw_model_values_visible": False,
+    }
+
+
+def build_model_lab_demo_clusters(
+    conn: psycopg.Connection,
+    generated_at: str,
+) -> dict[str, Any]:
+    required_tables = [
+        "development_prediction_ranking_classes",
+        "parcels_enriched",
+    ]
+    if not all(table_exists(conn, table) for table in required_tables):
+        return {
+            "available": False,
+            "caveat": "Portfolio demo model research markers are not available from the current local source.",
+            "generated_at": generated_at,
+            "markers": [],
+            "mode": "portfolio_demo",
+            "relative_research_bands_only": True,
+            "total_count": 0,
+        }
+
+    explanation_join = table_exists(
+        conn,
+        "development_prediction_ranking_explanations",
+    )
+    latest = fetch_one_or_none(
+        conn,
+        """
+        SELECT model_experiment_id
+        FROM public.development_prediction_ranking_classes
+        GROUP BY model_experiment_id
+        ORDER BY MAX(created_at) DESC
+        LIMIT 1
+        """,
+    )
+    if not latest:
+        return {
+            "available": False,
+            "caveat": "Portfolio demo model research markers are not available from the current local source.",
+            "generated_at": generated_at,
+            "markers": [],
+            "mode": "portfolio_demo",
+            "relative_research_bands_only": True,
+            "total_count": 0,
+        }
+
+    explanation_select = (
+        """
+          e.top_driver_1,
+          e.top_driver_2,
+          e.top_driver_3,
+        """
+        if explanation_join
+        else """
+          NULL::text AS top_driver_1,
+          NULL::text AS top_driver_2,
+          NULL::text AS top_driver_3,
+        """
+    )
+    explanation_sql = (
+        """
+        LEFT JOIN public.development_prediction_ranking_explanations e
+          ON e.model_experiment_id = r.model_experiment_id
+         AND e.official_parcel_id = r.official_parcel_id
+        """
+        if explanation_join
+        else ""
+    )
+    rows = fetch_all(
+        conn,
+        f"""
+        SELECT
+          r.official_parcel_id,
+          r.model_experiment_id AS model_version,
+          CASE
+            WHEN r.development_signal_class = 'very_high_development_signal'
+              THEN 'Very Strong Research Signal'
+            WHEN r.development_signal_class = 'high_development_signal'
+              THEN 'Strong Research Signal'
+            WHEN r.development_signal_class = 'moderate_development_signal'
+              THEN 'Moderate Research Signal'
+            WHEN r.development_signal_class = 'low_development_signal'
+              THEN 'Lower Research Signal'
+            ELSE 'Insufficient Data'
+          END AS research_band,
+          CASE
+            WHEN r.development_signal_class = 'very_high_development_signal'
+              THEN 'top_5_percent_research_band'
+            WHEN r.development_signal_class = 'high_development_signal'
+              THEN 'top_15_percent_research_band'
+            WHEN r.development_signal_class = 'moderate_development_signal'
+              THEN 'top_15_percent_research_band'
+            WHEN r.development_signal_class = 'low_development_signal'
+              THEN 'remaining_research_band'
+            ELSE 'insufficient_data'
+          END AS research_rank_band,
+          {explanation_select}
+          ST_X(ST_PointOnSurface(p.geometry))::float8 AS longitude,
+          ST_Y(ST_PointOnSurface(p.geometry))::float8 AS latitude
+        FROM public.development_prediction_ranking_classes r
+        JOIN public.parcels_enriched p
+          ON p.official_parcel_id = r.official_parcel_id
+        {explanation_sql}
+        WHERE r.model_experiment_id = %s
+          AND p.geometry IS NOT NULL
+          AND NOT ST_IsEmpty(p.geometry)
+          AND r.development_signal_class IN (
+            'very_high_development_signal',
+            'high_development_signal',
+            'moderate_development_signal',
+            'low_development_signal'
+          )
+        ORDER BY
+          CASE r.development_signal_class
+            WHEN 'very_high_development_signal' THEN 1
+            WHEN 'high_development_signal' THEN 2
+            WHEN 'moderate_development_signal' THEN 3
+            WHEN 'low_development_signal' THEN 4
+            ELSE 5
+          END,
+          md5(r.official_parcel_id)
+        LIMIT %s
+        """,
+        (latest["model_experiment_id"], DEMO_MODEL_LAB_MARKER_LIMIT),
+    )
+
+    markers = []
+    for index, row in enumerate(rows, start=1):
+        drivers = [
+            driver
+            for driver in [
+                normalize_model_driver(row.get("top_driver_1")),
+                normalize_model_driver(row.get("top_driver_2")),
+                normalize_model_driver(row.get("top_driver_3")),
+            ]
+            if driver
+        ] or [
+            "zoning context",
+            "transportation access",
+            "parcel/tax/value context",
+        ]
+        markers.append(
+            {
+                "caveat": "Relative research signal only. No exact probability shown.",
+                "confidence_label": "Internal research only",
+                "count": 1,
+                "id": f"demo-model-{index:03d}",
+                "label": f"Demo research parcel {index:03d}",
+                "latitude": row.get("latitude"),
+                "longitude": row.get("longitude"),
+                "model_version": row.get("model_version"),
+                "official_parcel_id": row.get("official_parcel_id"),
+                "recommended_follow_up": "Review source records before drawing conclusions.",
+                "research_band": row.get("research_band"),
+                "research_rank_band": row.get("research_rank_band"),
+                "top_drivers": drivers[:3],
+                "type": "parcel",
+            },
+        )
+
+    return {
+        "available": bool(markers),
+        "caveat": "Relative research signal only. No exact probability shown.",
+        "generated_at": generated_at,
+        "markers": markers,
+        "mode": "portfolio_demo",
+        "relative_research_bands_only": True,
+        "safe_export_notes": [
+            "No exact probabilities, raw model values, or official parcel classes are exported.",
+            "Markers are cached demo context for portfolio review.",
+        ],
+        "total_count": len(markers),
     }
 
 
@@ -1011,60 +1243,119 @@ def build_demo_development_hotspots(
     rows = fetch_all(
         conn,
         f"""
-        WITH parcel_segments AS (
+        WITH permit_events AS (
           SELECT
             r.official_parcel_id,
-            COUNT(DISTINCT r.permit_id)::int AS total_permit_count,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.permit_segment = 'residential_growth'
-            )::int AS residential_growth_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.permit_segment = 'commercial_activity'
-            )::int AS commercial_activity_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.permit_segment = 'industrial_activity'
-            )::int AS industrial_activity_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.permit_segment = 'institutional_activity'
-            )::int AS institutional_activity_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.permit_segment = 'redevelopment_signal'
-            )::int AS redevelopment_signal_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.permit_segment = 'minor_maintenance'
-            )::int AS minor_maintenance_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.permit_segment = 'demolition'
-            )::int AS demolition_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.is_active_construction IS TRUE
-            )::int AS active_construction_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.is_high_value IS TRUE
-            )::int AS high_value_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE s.is_major_value IS TRUE
-            )::int AS major_value_permits,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE r.activity_date >= CURRENT_DATE - INTERVAL '1 year'
-            )::int AS recent_permit_count_1yr,
-            COUNT(DISTINCT r.permit_id) FILTER (
-              WHERE r.activity_date >= CURRENT_DATE - INTERVAL '3 years'
-            )::int AS recent_permit_count_3yr,
-            MODE() WITHIN GROUP (ORDER BY s.permit_segment)
-              AS dominant_permit_segment,
-            MODE() WITHIN GROUP (ORDER BY s.permit_growth_signal)
-              AS dominant_growth_signal,
-            MAX(r.activity_date)::text AS latest_activity_date
+            r.permit_id,
+            COALESCE(s.permit_segment, 'administrative_or_unknown')
+              AS permit_segment,
+            s.permit_growth_signal,
+            s.is_active_construction,
+            s.is_high_value,
+            s.is_major_value,
+            r.activity_date,
+            r.activity_year::int AS permit_year
           FROM public.real_property_permit_parcel_relationship r
           LEFT JOIN public.permit_intelligence_segments s
             ON s.permit_id = r.permit_id
           WHERE r.has_parcel_match IS TRUE
             AND r.official_parcel_id IS NOT NULL
-          GROUP BY r.official_parcel_id
+            AND r.activity_year IS NOT NULL
+        ),
+        parcel_year_segments AS (
+          SELECT
+            official_parcel_id,
+            permit_segment,
+            permit_year,
+            COUNT(DISTINCT permit_id)::int AS permit_count
+          FROM permit_events
+          GROUP BY official_parcel_id, permit_segment, permit_year
+        ),
+        parcel_segments AS (
+          SELECT
+            official_parcel_id,
+            COUNT(DISTINCT permit_id)::int AS total_permit_count,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE permit_segment = 'residential_growth'
+            )::int AS residential_growth_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE permit_segment = 'commercial_activity'
+            )::int AS commercial_activity_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE permit_segment = 'industrial_activity'
+            )::int AS industrial_activity_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE permit_segment = 'institutional_activity'
+            )::int AS institutional_activity_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE permit_segment = 'redevelopment_signal'
+            )::int AS redevelopment_signal_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE permit_segment = 'minor_maintenance'
+            )::int AS minor_maintenance_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE permit_segment = 'demolition'
+            )::int AS demolition_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE is_active_construction IS TRUE
+            )::int AS active_construction_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE is_high_value IS TRUE
+            )::int AS high_value_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE is_major_value IS TRUE
+            )::int AS major_value_permits,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE activity_date >= CURRENT_DATE - INTERVAL '1 year'
+            )::int AS recent_permit_count_1yr,
+            COUNT(DISTINCT permit_id) FILTER (
+              WHERE activity_date >= CURRENT_DATE - INTERVAL '3 years'
+            )::int AS recent_permit_count_3yr,
+            MODE() WITHIN GROUP (ORDER BY permit_segment)
+              AS dominant_permit_segment,
+            MODE() WITHIN GROUP (ORDER BY permit_growth_signal)
+              AS dominant_growth_signal,
+            MIN(permit_year)::int AS year_start,
+            MAX(permit_year)::int AS year_end,
+            MAX(activity_date)::text AS latest_activity_date
+          FROM permit_events
+          GROUP BY official_parcel_id
+        ),
+        parcel_year_counts AS (
+          SELECT
+            official_parcel_id,
+            jsonb_object_agg(permit_year::text, permit_count ORDER BY permit_year)
+              AS yearly_counts
+          FROM (
+            SELECT
+              official_parcel_id,
+              permit_year,
+              SUM(permit_count)::int AS permit_count
+            FROM parcel_year_segments
+            GROUP BY official_parcel_id, permit_year
+          ) year_totals
+          GROUP BY official_parcel_id
+        ),
+        parcel_segment_year_counts AS (
+          SELECT
+            official_parcel_id,
+            jsonb_object_agg(permit_segment, year_counts ORDER BY permit_segment)
+              AS segment_year_counts
+          FROM (
+            SELECT
+              official_parcel_id,
+              permit_segment,
+              jsonb_object_agg(permit_year::text, permit_count ORDER BY permit_year)
+                AS year_counts
+            FROM parcel_year_segments
+            GROUP BY official_parcel_id, permit_segment
+          ) segment_totals
+          GROUP BY official_parcel_id
         )
         SELECT
           ps.*,
+          pyc.yearly_counts,
+          psyc.segment_year_counts,
           p.pin14,
           {column_expr('d', 'development_activity_class', dev_join)}
             AS development_activity_class,
@@ -1076,6 +1367,10 @@ def build_demo_development_hotspots(
           ST_X(ST_PointOnSurface(p.geometry))::float8 AS centroid_lon,
           ST_Y(ST_PointOnSurface(p.geometry))::float8 AS centroid_lat
         FROM parcel_segments ps
+        LEFT JOIN parcel_year_counts pyc
+          ON pyc.official_parcel_id = ps.official_parcel_id
+        LEFT JOIN parcel_segment_year_counts psyc
+          ON psyc.official_parcel_id = ps.official_parcel_id
         JOIN public.parcels_enriched p
           ON p.official_parcel_id = ps.official_parcel_id
         {optional_join(dev_join, 'development_activity_parcel_summary', 'd')}
@@ -1114,7 +1409,11 @@ def build_demo_development_hotspots(
                 "recent_permit_count_3yr": row.get("recent_permit_count_3yr"),
                 "redevelopment_signal_permits": row.get("redevelopment_signal_permits"),
                 "residential_growth_permits": row.get("residential_growth_permits"),
+                "segment_year_counts": row.get("segment_year_counts") or {},
                 "total_permit_count": row.get("total_permit_count"),
+                "year_end": row.get("year_end"),
+                "year_start": row.get("year_start"),
+                "yearly_counts": row.get("yearly_counts") or {},
                 "zoning_jurisdiction_name": row.get("zoning_jurisdiction_name"),
             },
         )
@@ -1895,6 +2194,17 @@ def fetch_one(
     return dict(row or {})
 
 
+def fetch_one_or_none(
+    conn: psycopg.Connection,
+    query: str,
+    params: tuple[Any, ...] = (),
+) -> dict[str, Any] | None:
+    with conn.cursor() as cursor:
+        cursor.execute(query, params)
+        row = cursor.fetchone()
+    return dict(row) if row else None
+
+
 def fetch_all(
     conn: psycopg.Connection,
     query: str,
@@ -1909,6 +2219,21 @@ def as_number(value: Any) -> float | None:
     if value is None:
         return None
     return float(value)
+
+
+def normalize_model_driver(value: Any) -> str | None:
+    if not value:
+        return None
+
+    normalized = str(value).strip().lower().replace("_", " ")
+    aliases = {
+        "historical zoning": "zoning context",
+        "new construction permit labels": "permit activity context",
+        "parcel tax value context": "parcel/tax/value context",
+        "tax value enrichment": "parcel/tax/value context",
+        "transportation accessibility": "transportation access",
+    }
+    return aliases.get(normalized, normalized)
 
 
 def write_json(path: Path, payload: Any) -> None:

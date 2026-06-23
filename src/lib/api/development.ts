@@ -42,6 +42,7 @@ export interface DevelopmentHotspotsParams extends DevelopmentStatisticsParams {
   date_end?: string;
   date_start?: string;
   development_domain?: string;
+  end_year?: number;
   growth_signal?: string;
   limit?: number;
   offset?: number;
@@ -51,6 +52,7 @@ export interface DevelopmentHotspotsParams extends DevelopmentStatisticsParams {
   permit_value_class?: string;
   recent_window?: 1 | 3;
   rolling_window?: 12 | 36;
+  start_year?: number;
   sort_by?:
     | "development_activity_score"
     | "recent_permit_count_1yr"

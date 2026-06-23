@@ -29,6 +29,8 @@ interface DevelopmentHotspotLayerOptions {
   enabled: boolean;
   growthSignal?: DevelopmentHotspotGrowthSignalFilter;
   limit?: DevelopmentHotspotLimit;
+  permitYearEnd?: number | null;
+  permitYearStart?: number | null;
   permitSegment?: DevelopmentHotspotPermitSegmentFilter;
   recentWindow?: 1 | 3;
   sortBy?: Extract<
@@ -76,6 +78,8 @@ export function useDevelopmentHotspotLayer({
   enabled,
   growthSignal = "all",
   limit = 100,
+  permitYearEnd = null,
+  permitYearStart = null,
   permitSegment = "all",
   recentWindow,
   sortBy = "development_activity_score",
@@ -101,6 +105,8 @@ export function useDevelopmentHotspotLayer({
         activityClass,
         growthSignal,
         limit,
+        permitYearEnd,
+        permitYearStart,
         permitSegment,
         recentWindow,
         sortBy,
@@ -113,6 +119,8 @@ export function useDevelopmentHotspotLayer({
       activityClass,
       growthSignal,
       limit,
+      permitYearEnd,
+      permitYearStart,
       permitSegment,
       recentWindow,
       sortBy,
@@ -136,11 +144,13 @@ export function useDevelopmentHotspotLayer({
         growth_signal: growthSignal === "all" ? undefined : growthSignal,
         limit,
         offset: 0,
+        end_year: permitYearEnd ?? undefined,
         permit_segment: permitSegment,
         permit_status_stage: statusStage === "all" ? undefined : statusStage,
         permit_value_class: valueClass === "all" ? undefined : valueClass,
         recent_window: recentWindow,
         sort_by: sortBy,
+        start_year: permitYearStart ?? undefined,
         ...temporalParams,
         zoning_jurisdiction: zoningJurisdiction,
       },
@@ -197,6 +207,8 @@ export function useDevelopmentHotspotLayer({
     enabled,
     growthSignal,
     limit,
+    permitYearEnd,
+    permitYearStart,
     permitSegment,
     recentWindow,
     requestKey,
@@ -205,7 +217,7 @@ export function useDevelopmentHotspotLayer({
     temporalContextLabel,
     temporalParams,
     valueClass,
-      zoningJurisdiction,
+    zoningJurisdiction,
   ]);
 
   useEffect(() => {
@@ -215,7 +227,10 @@ export function useDevelopmentHotspotLayer({
 
     let cancelled = false;
 
-    getDemoDevelopmentHotspotsBySegment(permitSegment)
+    getDemoDevelopmentHotspotsBySegment(permitSegment, {
+      yearEnd: permitYearEnd,
+      yearStart: permitYearStart,
+    })
       .then((markers) => {
         if (cancelled) {
           return;
@@ -224,7 +239,9 @@ export function useDevelopmentHotspotLayer({
         setState({
           errorMessage:
             markers.length === 0
-              ? "Demo sample does not include hotspots for this permit segment."
+              ? permitYearStart || permitYearEnd
+                  ? "No demo hotspot records in selected years."
+                  : "Demo sample does not include hotspots for this permit segment."
               : null,
           isLoading: false,
           markers,
@@ -257,6 +274,8 @@ export function useDevelopmentHotspotLayer({
     };
   }, [
     enabled,
+    permitYearEnd,
+    permitYearStart,
     permitSegment,
     requestKey,
     temporalContextLabel,

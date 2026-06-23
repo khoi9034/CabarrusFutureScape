@@ -331,6 +331,13 @@ class DevelopmentService:
         ):
             raise ValueError("date_start must be on or before date_end")
 
+        if (
+            filters.start_year is not None
+            and filters.end_year is not None
+            and filters.start_year > filters.end_year
+        ):
+            raise ValueError("start_year must be on or before end_year")
+
         normalized_sort_by = normalize_filter_value(sort_by) or "development_activity_score"
         if normalized_sort_by not in ALLOWED_HOTSPOT_SORT_BY:
             raise ValueError(
@@ -353,6 +360,8 @@ class DevelopmentService:
             permit_value_class=normalize_filter_value(filters.permit_value_class),
             recent_window=filters.recent_window,
             rolling_window=filters.rolling_window,
+            end_year=filters.end_year,
+            start_year=filters.start_year,
             work_type=normalize_filter_value(filters.work_type),
             year=filters.year,
             zoning_category=normalize_filter_value(filters.zoning_category),

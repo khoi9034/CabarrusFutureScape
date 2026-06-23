@@ -61,6 +61,8 @@ export type DevelopmentHotspotValueClassFilter =
 export interface DevelopmentHotspotControls {
   activityClass: DevelopmentHotspotActivityClassFilter;
   growthSignal: DevelopmentHotspotGrowthSignalFilter;
+  permitYearEnd: number | null;
+  permitYearStart: number | null;
   limit: DevelopmentHotspotLimit;
   permitSegment: DevelopmentHotspotPermitSegmentFilter;
   recentWindow: DevelopmentHotspotRecentWindowFilter;
@@ -73,6 +75,8 @@ export interface DevelopmentHotspotControls {
 export const defaultDevelopmentHotspotControls: DevelopmentHotspotControls = {
   activityClass: "all",
   growthSignal: "all",
+  permitYearEnd: null,
+  permitYearStart: null,
   limit: 100,
   permitSegment: "all",
   recentWindow: "all",

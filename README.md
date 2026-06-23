@@ -110,10 +110,11 @@ NEXT_PUBLIC_USE_BACKEND_API=false
 ```
 
 Portfolio Demo Mode supports the Overview, Workspace shell, Explore Countywide
-demo map layers, Indicator Center, Planning Snapshot, Methodology, Model Lab
-context, and sanitized sample parcel search. It uses cached demo extracts and
-clearly labels the public site as a Portfolio Demo. The full local version
-remains the source of truth for PostGIS-backed countywide data.
+demo map layers, permit-year hotspot filtering, Indicator Center, Planning
+Snapshot, Methodology, Model Lab demo research markers, and sanitized sample
+parcel search. It uses cached demo extracts and clearly labels the public site
+as a Portfolio Demo. The full local version remains the source of truth for
+PostGIS-backed countywide data.
 
 Regenerate the static portfolio data locally with:
 
@@ -126,6 +127,7 @@ The exporter reads clean/summary local CFS tables only and writes:
 - `public/demo-data/demo_manifest.json`
 - `public/demo-data/indicator_summary.json`
 - `public/demo-data/development_trends.json`
+- `public/demo-data/development_years.json`
 - `public/demo-data/flood_summary.json`
 - `public/demo-data/school_capacity_watch.json`
 - `public/demo-data/model_status.json`
@@ -140,8 +142,8 @@ The exporter reads clean/summary local CFS tables only and writes:
 
 The demo extract excludes sensitive contact fields and does not include exact
 parcel-level probabilities, raw model scores, or official parcel-level
-prediction classes. Public Explore Countywide layers are cached demo samples,
-not full county production coverage.
+prediction classes. Public Explore Countywide layers and Model Lab markers are
+cached demo samples, not full county production coverage.
 
 The left rail is now a compact `Layers` rail by default. The `Countywide
 Intelligence` action opens it for broader indicators and advanced map controls

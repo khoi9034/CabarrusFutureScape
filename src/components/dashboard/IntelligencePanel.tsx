@@ -138,6 +138,7 @@ export function IntelligencePanel() {
   const {
     activeLayerIds,
     activeLayers,
+    developmentHotspotControls,
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
     floodZonesEnabled,
@@ -217,6 +218,7 @@ export function IntelligencePanel() {
           clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
           activeLayerIds={activeLayerIds}
           activeLayers={activeLayers}
+          developmentHotspotControls={developmentHotspotControls}
           developmentHotspotsEnabled={developmentHotspotsEnabled}
           floodConstraintsEnabled={floodConstraintsEnabled}
           floodZonesEnabled={floodZonesEnabled}
@@ -262,6 +264,7 @@ function OverviewModeContent({
   activeLayerIds,
   activeLayers,
   clearSelectedSchoolUtilizationZone,
+  developmentHotspotControls,
   developmentHotspotsEnabled,
   floodConstraintsEnabled,
   floodZonesEnabled,
@@ -290,6 +293,7 @@ function OverviewModeContent({
   activeLayerIds: string[];
   activeLayers: ReturnType<typeof useDashboardState>["activeLayers"];
   clearSelectedSchoolUtilizationZone: () => void;
+  developmentHotspotControls: ReturnType<typeof useDashboardState>["developmentHotspotControls"];
   developmentHotspotsEnabled: boolean;
   floodConstraintsEnabled: boolean;
   floodZonesEnabled: boolean;
@@ -390,6 +394,7 @@ function OverviewModeContent({
         overviewCommandMode,
         parcel: selectedParcelForSnapshot,
         schoolConstraint,
+        developmentHotspotControls,
         selectedDevelopmentHotspotContext,
         selectedIndicatorCenterContext,
         selectedIndicatorCenterDisplayMode: indicatorCenterDisplayMode,
@@ -412,6 +417,7 @@ function OverviewModeContent({
     activeLayerIds,
     activeLayerLabels,
     developmentActivity,
+    developmentHotspotControls,
     floodConstraint,
     indicatorCenterCards,
     indicatorCenterDisplayMode,
@@ -2912,6 +2918,7 @@ async function captureMapSnapshotForPlanning(): Promise<PlanningMapSnapshotCaptu
 function buildPlanningSnapshot({
   activeLayerIds,
   activeLayerLabels,
+  developmentHotspotControls,
   developmentActivity,
   focusMode,
   focusModeLabel,
@@ -2931,6 +2938,7 @@ function buildPlanningSnapshot({
 }: {
   activeLayerIds: string[];
   activeLayerLabels: string[];
+  developmentHotspotControls: ReturnType<typeof useDashboardState>["developmentHotspotControls"];
   developmentActivity: SnapshotDevelopmentActivity;
   focusMode: PlanningReviewFocusMode;
   focusModeLabel: string;
@@ -2954,6 +2962,7 @@ function buildPlanningSnapshot({
     overviewCommandMode === "countywide"
       ? serializeDevelopmentActivitySnapshotContext(
           selectedDevelopmentHotspotContext,
+          developmentHotspotControls,
         )
       : null;
   const modelLabContext =
@@ -3536,10 +3545,14 @@ function serializeModelResearchSnapshotContext(
 
 function serializeDevelopmentActivitySnapshotContext(
   context: SelectedDevelopmentHotspotContext | null,
+  controls: ReturnType<typeof useDashboardState>["developmentHotspotControls"],
 ): PlanningSnapshotDevelopmentActivityContext | null {
   if (!context) {
     return null;
   }
+
+  const yearStart = controls.permitYearStart;
+  const yearEnd = controls.permitYearEnd;
 
   return {
     activityClass: context.activityClass,
@@ -3554,6 +3567,19 @@ function serializeDevelopmentActivitySnapshotContext(
     majorValuePermits: context.majorValuePermits,
     officialParcelId: context.officialParcelId,
     parcelsRepresented: context.parcelsRepresented,
+    permitYearRange:
+      yearStart || yearEnd
+        ? {
+            end: yearEnd,
+            label:
+              yearStart && yearEnd
+                ? `${yearStart}-${yearEnd}`
+                : yearStart
+                  ? `Since ${yearStart}`
+                  : `Through ${yearEnd}`,
+            start: yearStart,
+          }
+        : undefined,
     pin14: context.pin14,
     recentPermitCount1yr: context.recentPermitCount1yr,
     recentPermitCount3yr: context.recentPermitCount3yr,

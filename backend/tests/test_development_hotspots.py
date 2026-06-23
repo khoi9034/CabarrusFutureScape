@@ -130,6 +130,34 @@ def test_development_hotspots_date_range_filter() -> None:
     assert body["total_count"] > 0
 
 
+def test_development_hotspots_year_range_filter() -> None:
+    response = client.get(
+        "/development/hotspots",
+        params={"start_year": 2020, "end_year": 2025},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["filters_applied"] == {
+        "end_year": 2025,
+        "start_year": 2020,
+    }
+    assert body["total_count"] > 0
+    assert body["results"]
+
+
+def test_development_hotspots_invalid_year_range() -> None:
+    response = client.get(
+        "/development/hotspots",
+        params={"start_year": 2025, "end_year": 2020},
+    )
+
+    assert response.status_code == 422
+    assert response.json() == {
+        "detail": "start_year must be on or before end_year",
+    }
+
+
 def test_development_hotspots_invalid_date_range() -> None:
     response = client.get(
         "/development/hotspots",

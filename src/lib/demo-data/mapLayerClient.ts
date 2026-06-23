@@ -22,7 +22,11 @@ import type {
   ParcelFocusSource,
   ParcelHighlightGeometry,
 } from "@/types/map/parcelFocus";
+import type {
+  ModelResearchPreviewMarker,
+} from "@/types/map/modelResearchPreview";
 
+const DEMO_DATA_BASE_URL = "/demo-data";
 const DEMO_MAP_LAYER_BASE_URL = "/demo-data/map_layers";
 
 const demoLayerFiles = {
@@ -74,6 +78,44 @@ export interface DemoLayerManifest {
   mode?: string;
 }
 
+export interface DemoDevelopmentYears {
+  available_years: number[];
+  default_year_end: number | null;
+  default_year_start: number | null;
+  generated_at?: string | null;
+  max_year: number | null;
+  min_year: number | null;
+  mode?: string;
+  segment_year_counts: Record<string, Record<string, number>>;
+  yearly_counts: Record<string, number>;
+}
+
+interface DemoModelLabClusters {
+  available?: boolean;
+  caveat?: string;
+  generated_at?: string | null;
+  markers?: DemoModelLabMarker[];
+  mode?: string;
+  total_count?: number;
+}
+
+interface DemoModelLabMarker {
+  caveat?: string | null;
+  confidence_label?: string | null;
+  count?: number | null;
+  id?: string | null;
+  label?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  model_version?: string | null;
+  official_parcel_id?: string | null;
+  recommended_follow_up?: string | null;
+  research_band?: string | null;
+  research_rank_band?: string | null;
+  top_drivers?: string[] | null;
+  type?: "cluster" | "parcel" | string | null;
+}
+
 const emptyFeatureCollection: DemoGeoJsonLayer = {
   features: [],
   metadata: {
@@ -84,6 +126,18 @@ const emptyFeatureCollection: DemoGeoJsonLayer = {
 };
 
 const layerCache = new Map<string, Promise<DemoGeoJsonLayer | DemoLayerManifest>>();
+const dataCache = new Map<string, Promise<unknown>>();
+
+const emptyDevelopmentYears: DemoDevelopmentYears = {
+  available_years: [],
+  default_year_end: null,
+  default_year_start: null,
+  max_year: null,
+  min_year: null,
+  mode: "portfolio_demo",
+  segment_year_counts: {},
+  yearly_counts: {},
+};
 
 export async function getDemoLayerManifest() {
   return loadDemoMapJson<DemoLayerManifest>(
@@ -94,6 +148,13 @@ export async function getDemoLayerManifest() {
       layers: [],
       mode: "portfolio_demo",
     },
+  );
+}
+
+export async function getDemoDevelopmentYears() {
+  return loadDemoDataJson<DemoDevelopmentYears>(
+    "development_years.json",
+    emptyDevelopmentYears,
   );
 }
 
@@ -149,6 +210,7 @@ export async function getDemoDevelopmentHotspotSegments() {
 
 export async function getDemoDevelopmentHotspotsBySegment(
   segment: DevelopmentHotspotPermitSegmentFilter,
+  options: { yearEnd?: number | null; yearStart?: number | null } = {},
 ) {
   if (segment === "all") {
     return [];
@@ -156,8 +218,41 @@ export async function getDemoDevelopmentHotspotsBySegment(
 
   const layer = await getDemoGeoJsonLayer("development_hotspots");
   return layer.features
-    .map((feature) => toDemoDevelopmentHotspotMarker(feature, segment))
+    .map((feature) => toDemoDevelopmentHotspotMarker(feature, segment, options))
     .filter((marker): marker is DevelopmentHotspotMapMarker => Boolean(marker));
+}
+
+export async function getDemoModelLabMarkers({
+  limit = 500,
+  signal = "higher",
+}: {
+  limit?: number;
+  signal?: "all" | "higher" | "lower" | "moderate";
+} = {}) {
+  const payload = await loadDemoDataJson<DemoModelLabClusters>(
+    "model_lab_demo_clusters.json",
+    {
+      available: false,
+      caveat: "Portfolio demo does not include model research markers.",
+      markers: [],
+      mode: "portfolio_demo",
+      total_count: 0,
+    },
+  );
+
+  const markers = (payload.markers ?? [])
+    .map(toDemoModelLabMarker)
+    .filter((marker): marker is ModelResearchPreviewMarker => Boolean(marker))
+    .filter((marker) => matchesDemoModelSignal(marker, signal))
+    .slice(0, limit);
+
+  return {
+    caveat:
+      payload.caveat ??
+      "Relative research signal only. No exact probability shown.",
+    markers,
+    totalCount: payload.total_count ?? markers.length,
+  };
 }
 
 export async function getDemoFloodConstraintMarkers(limit = 100) {
@@ -276,13 +371,52 @@ async function loadDemoMapJson<T>(
   return promise;
 }
 
+async function loadDemoDataJson<T>(
+  fileName: string,
+  fallback: T,
+): Promise<T> {
+  const cacheKey = `${DEMO_DATA_BASE_URL}/${fileName}`;
+  const cached = dataCache.get(cacheKey);
+
+  if (cached) {
+    return cached as Promise<T>;
+  }
+
+  const promise = fetch(cacheKey, {
+    cache: "force-cache",
+    headers: {
+      Accept: "application/json",
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        return fallback;
+      }
+
+      return (await response.json()) as T;
+    })
+    .catch(() => fallback);
+
+  dataCache.set(cacheKey, promise);
+  return promise;
+}
+
 function toDemoDevelopmentHotspotMarker(
   feature: DemoGeoJsonFeature,
   segment: DevelopmentHotspotPermitSegmentFilter,
+  options: { yearEnd?: number | null; yearStart?: number | null },
 ): DevelopmentHotspotMapMarker | null {
   const properties = getProperties(feature);
   const coordinates = getPointCoordinates(feature.geometry);
-  const selectedSegmentCount = getSegmentPermitCount(properties, segment);
+  if (!doesFeatureOverlapYearRange(properties, options)) {
+    return null;
+  }
+
+  const selectedSegmentCount = getSegmentPermitCount(
+    properties,
+    segment,
+    options,
+  );
   const officialParcelId = asString(properties.official_parcel_id);
 
   if (!coordinates || !officialParcelId || selectedSegmentCount <= 0) {
@@ -326,8 +460,72 @@ function toDemoDevelopmentHotspotMarker(
       asNumber(properties.redevelopment_signal_permits) ?? 0,
     residentialGrowthPermits:
       asNumber(properties.residential_growth_permits) ?? 0,
-    totalPermitCount: asNumber(properties.total_permit_count) ?? 0,
+    totalPermitCount: selectedSegmentCount,
     zoningJurisdictionName: asString(properties.zoning_jurisdiction_name),
+  };
+}
+
+function toDemoModelLabMarker(
+  marker: DemoModelLabMarker,
+): ModelResearchPreviewMarker | null {
+  const latitude = asNumber(marker.latitude);
+  const longitude = asNumber(marker.longitude);
+  const researchSignalLabel =
+    normalizeDemoResearchBand(marker.research_band) ??
+    "Moderate Research Signal";
+
+  if (latitude === null || longitude === null) {
+    return null;
+  }
+
+  const contextKind =
+    marker.type === "cluster" ? "cluster" : "parcel_marker";
+  const representedFeatureCount =
+    contextKind === "cluster" ? Math.max(1, asNumber(marker.count) ?? 1) : 1;
+
+  return {
+    approximateAreaLabel: asString(marker.label) ?? undefined,
+    bandCounts:
+      contextKind === "cluster"
+        ? getSingleBandCounts(researchSignalLabel, representedFeatureCount)
+        : undefined,
+    caveat:
+      asString(marker.caveat) ??
+      "Relative research signal only. No exact probability shown.",
+    clusterId: contextKind === "cluster" ? asString(marker.id) ?? undefined : undefined,
+    centroid: {
+      latitude,
+      longitude,
+      spatialReference: { wkid: 4326 },
+    },
+    contextKind,
+    dataQualityFlag:
+      asString(marker.confidence_label) ?? "Demo context",
+    displayMode:
+      contextKind === "cluster" ? "clustered_markers" : "parcel_detail",
+    dominantResearchBand:
+      contextKind === "cluster" ? researchSignalLabel : undefined,
+    exactProbabilityAvailable: false,
+    modelVersion:
+      asString(marker.model_version) ?? "portfolio_demo_model_research",
+    officialParcelId:
+      asString(marker.official_parcel_id) ??
+      asString(marker.label) ??
+      "Demo research context",
+    productionReady: false,
+    publicExposureAllowed: false,
+    representativeSignalLabel:
+      contextKind === "cluster" ? researchSignalLabel : undefined,
+    representedFeatureCount,
+    researchRankBand:
+      asString(marker.research_rank_band) ??
+      getResearchRankBandForSignal(researchSignalLabel),
+    researchSignalLabel,
+    selectedFeatureGroupSummary: (marker.top_drivers ?? []).join(", "),
+    topDriverSummary: (marker.top_drivers ?? []).join(", "),
+    topDrivers: (marker.top_drivers ?? []).filter(
+      (driver): driver is string => typeof driver === "string" && driver.length > 0,
+    ),
   };
 }
 
@@ -498,7 +696,17 @@ function getPolygonGeometry(geometry: DemoGeoJsonGeometry | null) {
 function getSegmentPermitCount(
   properties: Record<string, unknown>,
   segment: DevelopmentHotspotPermitSegmentFilter,
+  options: { yearEnd?: number | null; yearStart?: number | null } = {},
 ) {
+  const rangeCount = getSegmentPermitCountForYearRange(
+    properties,
+    segment,
+    options,
+  );
+  if (rangeCount !== null) {
+    return rangeCount;
+  }
+
   switch (segment) {
     case "commercial_activity":
       return asNumber(properties.commercial_activity_permits) ?? 0;
@@ -530,6 +738,140 @@ function getSegmentPermitCount(
     default:
       return asNumber(properties.total_permit_count) ?? 0;
   }
+}
+
+function getSegmentPermitCountForYearRange(
+  properties: Record<string, unknown>,
+  segment: DevelopmentHotspotPermitSegmentFilter,
+  options: { yearEnd?: number | null; yearStart?: number | null },
+) {
+  const yearStart = options.yearStart;
+  const yearEnd = options.yearEnd;
+
+  if (!yearStart && !yearEnd) {
+    return null;
+  }
+
+  const counts =
+    segment === "all"
+      ? asRecord(properties.yearly_counts)
+      : asRecord(asRecord(properties.segment_year_counts)?.[segment]);
+
+  if (!counts) {
+    return null;
+  }
+
+  return Object.entries(counts).reduce((sum, [yearKey, value]) => {
+    const year = Number(yearKey);
+    const count = Number(value);
+    if (
+      !Number.isFinite(year) ||
+      !Number.isFinite(count) ||
+      (yearStart && year < yearStart) ||
+      (yearEnd && year > yearEnd)
+    ) {
+      return sum;
+    }
+
+    return sum + count;
+  }, 0);
+}
+
+function doesFeatureOverlapYearRange(
+  properties: Record<string, unknown>,
+  options: { yearEnd?: number | null; yearStart?: number | null },
+) {
+  const yearStart = options.yearStart;
+  const yearEnd = options.yearEnd;
+
+  if (!yearStart && !yearEnd) {
+    return true;
+  }
+
+  const featureStart = asNumber(properties.year_start) ?? asNumber(properties.year);
+  const featureEnd = asNumber(properties.year_end) ?? asNumber(properties.year);
+
+  if (featureStart === null || featureEnd === null) {
+    return true;
+  }
+
+  if (yearStart && featureEnd < yearStart) {
+    return false;
+  }
+
+  if (yearEnd && featureStart > yearEnd) {
+    return false;
+  }
+
+  return true;
+}
+
+function matchesDemoModelSignal(
+  marker: ModelResearchPreviewMarker,
+  signal: "all" | "higher" | "lower" | "moderate",
+) {
+  if (signal === "all") {
+    return true;
+  }
+
+  if (signal === "higher") {
+    return (
+      marker.researchSignalLabel === "Very Strong Research Signal" ||
+      marker.researchSignalLabel === "Strong Research Signal"
+    );
+  }
+
+  if (signal === "moderate") {
+    return marker.researchSignalLabel === "Moderate Research Signal";
+  }
+
+  return (
+    marker.researchSignalLabel === "Lower Research Signal" ||
+    marker.researchSignalLabel === "Insufficient Data"
+  );
+}
+
+function normalizeDemoResearchBand(value: string | null | undefined) {
+  switch (value) {
+    case "Very Strong Research Signal":
+    case "Strong Research Signal":
+    case "Moderate Research Signal":
+    case "Lower Research Signal":
+    case "Insufficient Data":
+      return value;
+    case "Higher research signal":
+      return "Strong Research Signal";
+    case "Moderate research signal":
+      return "Moderate Research Signal";
+    case "Lower research signal":
+      return "Lower Research Signal";
+    default:
+      return null;
+  }
+}
+
+function getResearchRankBandForSignal(value: string) {
+  switch (value) {
+    case "Very Strong Research Signal":
+      return "top_5_percent_research_band";
+    case "Strong Research Signal":
+    case "Moderate Research Signal":
+      return "top_15_percent_research_band";
+    case "Insufficient Data":
+      return "insufficient_data";
+    default:
+      return "remaining_research_band";
+  }
+}
+
+function getSingleBandCounts(signalLabel: string, count: number) {
+  return {
+    insufficient: signalLabel === "Insufficient Data" ? count : 0,
+    lower: signalLabel === "Lower Research Signal" ? count : 0,
+    moderate: signalLabel === "Moderate Research Signal" ? count : 0,
+    strong: signalLabel === "Strong Research Signal" ? count : 0,
+    veryStrong: signalLabel === "Very Strong Research Signal" ? count : 0,
+  };
 }
 
 function getFloodConstraintSeverity(
@@ -632,4 +974,10 @@ function asNumber(value: unknown) {
 
 function asBoolean(value: unknown) {
   return value === true;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 }

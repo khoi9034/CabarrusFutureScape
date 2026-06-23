@@ -12,7 +12,12 @@ import {
   SwatchBook,
 } from "lucide-react";
 import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
-import { getDemoDevelopmentHotspotSegments } from "@/lib/demo-data/mapLayerClient";
+import { getDevelopmentTrends } from "@/lib/api/development";
+import {
+  getDemoDevelopmentHotspotSegments,
+  getDemoDevelopmentYears,
+  type DemoDevelopmentYears,
+} from "@/lib/demo-data/mapLayerClient";
 import {
   isLayerVisibilityControllable,
   isLayerPlaceholder,
@@ -413,6 +418,8 @@ export function LayerToggle() {
   const [openInfoLayerId, setOpenInfoLayerId] = useState<string | null>(null);
   const [openLegendLayerId, setOpenLegendLayerId] = useState<string | null>(null);
   const [demoHotspotSegments, setDemoHotspotSegments] = useState<string[]>([]);
+  const [demoDevelopmentYears, setDemoDevelopmentYears] =
+    useState<DemoDevelopmentYears | null>(null);
   const {
     developmentHotspotControls,
     developmentHotspotLayer,
@@ -448,6 +455,22 @@ export function LayerToggle() {
     : null;
   const selectedHotspotSegmentColor =
     getPermitSegmentLegendColor(selectedHotspotSegment);
+  const selectedPermitYearStart =
+    developmentHotspotControls.permitYearStart ??
+    demoDevelopmentYears?.default_year_start ??
+    demoDevelopmentYears?.min_year ??
+    null;
+  const selectedPermitYearEnd =
+    developmentHotspotControls.permitYearEnd ??
+    demoDevelopmentYears?.default_year_end ??
+    demoDevelopmentYears?.max_year ??
+    null;
+  const selectedPermitYearCount = getPermitCountForYearRange(
+    demoDevelopmentYears,
+    selectedHotspotSegment,
+    selectedPermitYearStart,
+    selectedPermitYearEnd,
+  );
   const noHotspotSegmentSelected =
     developmentHotspotsEnabled && !selectedHotspotSegment;
   const hotspotStatus =
@@ -525,11 +548,64 @@ export function LayerToggle() {
 
     let cancelled = false;
 
-    getDemoDevelopmentHotspotSegments().then((segments) => {
+    Promise.all([
+      getDemoDevelopmentHotspotSegments(),
+      getDemoDevelopmentYears(),
+    ]).then(([segments, years]) => {
       if (!cancelled) {
         setDemoHotspotSegments(segments.map((segment) => segment.value));
+        setDemoDevelopmentYears(years);
       }
     });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (USE_DEMO_DATA || !USE_BACKEND_API) {
+      return;
+    }
+
+    let cancelled = false;
+
+    getDevelopmentTrends({ group_by: "year" })
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+
+        const annual = response.annual_trends ?? [];
+        const yearlyCounts = Object.fromEntries(
+          annual
+            .filter((point) => typeof point.year === "number")
+            .map((point) => [String(point.year), point.permit_count ?? 0]),
+        );
+        const years = Object.keys(yearlyCounts)
+          .map(Number)
+          .filter((year) => Number.isFinite(year))
+          .sort((left, right) => left - right);
+        const startYear = response.date_range?.start_year ?? years[0] ?? null;
+        const endYear =
+          response.date_range?.end_year ?? years[years.length - 1] ?? null;
+
+        setDemoDevelopmentYears({
+          available_years: years,
+          default_year_end: endYear,
+          default_year_start: startYear,
+          max_year: endYear,
+          min_year: startYear,
+          mode: "live",
+          segment_year_counts: {},
+          yearly_counts: yearlyCounts,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDemoDevelopmentYears(null);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -832,6 +908,41 @@ export function LayerToggle() {
             }
             options={visiblePermitSegmentOptions}
             value={developmentHotspotControls.permitSegment}
+          />
+          <HotspotYearRangeControl
+            count={selectedPermitYearCount}
+            isDemo={USE_DEMO_DATA}
+            maxYear={demoDevelopmentYears?.max_year ?? null}
+            minYear={demoDevelopmentYears?.min_year ?? null}
+            onReset={() =>
+              setDevelopmentHotspotControls({
+                ...developmentHotspotControls,
+                permitYearEnd: null,
+                permitYearStart: null,
+              })
+            }
+            onYearEndChange={(year) =>
+              setDevelopmentHotspotControls({
+                ...developmentHotspotControls,
+                permitYearEnd: year,
+                permitYearStart:
+                  selectedPermitYearStart && selectedPermitYearStart > year
+                    ? year
+                    : developmentHotspotControls.permitYearStart,
+              })
+            }
+            onYearStartChange={(year) =>
+              setDevelopmentHotspotControls({
+                ...developmentHotspotControls,
+                permitYearEnd:
+                  selectedPermitYearEnd && selectedPermitYearEnd < year
+                    ? year
+                    : developmentHotspotControls.permitYearEnd,
+                permitYearStart: year,
+              })
+            }
+            selectedEnd={selectedPermitYearEnd}
+            selectedStart={selectedPermitYearStart}
           />
           {!selectedHotspotSegment ? (
             <div className="col-span-2 rounded-md border border-[#68d8ff]/15 bg-[#68d8ff]/[0.045] px-2 py-2 text-[11px] leading-5 text-[#bfefff]">
@@ -1620,6 +1731,105 @@ function LayerStatusBadge({
   );
 }
 
+function HotspotYearRangeControl({
+  count,
+  isDemo,
+  maxYear,
+  minYear,
+  onReset,
+  onYearEndChange,
+  onYearStartChange,
+  selectedEnd,
+  selectedStart,
+}: {
+  count: number | null;
+  isDemo: boolean;
+  maxYear: number | null;
+  minYear: number | null;
+  onReset: () => void;
+  onYearEndChange: (year: number) => void;
+  onYearStartChange: (year: number) => void;
+  selectedEnd: number | null;
+  selectedStart: number | null;
+}) {
+  const hasYears = minYear !== null && maxYear !== null;
+  const start = selectedStart ?? minYear ?? new Date().getFullYear();
+  const end = selectedEnd ?? maxYear ?? start;
+  const safeStart = Math.min(start, end);
+  const safeEnd = Math.max(start, end);
+
+  return (
+    <div className="col-span-2 rounded-md border border-white/10 bg-black/15 p-2">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+            Permit Year Range
+          </p>
+          <p className="mt-1 text-[11px] leading-4 text-slate-300">
+            {isDemo
+              ? "Demo permit years"
+              : "Available permit years"}
+          </p>
+        </div>
+        <button
+          className="rounded border border-white/10 bg-white/[0.035] px-2 py-1 text-[10px] font-semibold uppercase text-slate-300 transition hover:bg-white/[0.07] disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!hasYears}
+          onClick={onReset}
+          type="button"
+        >
+          Reset Years
+        </button>
+      </div>
+      <div className="mt-2 grid gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] leading-4 text-slate-400">
+          <span>
+            Available: {hasYears ? `${minYear}-${maxYear}` : "Data still needed"}
+          </span>
+          <span className="font-semibold text-[#b7f0ff]">
+            Selected: {hasYears ? `${safeStart}-${safeEnd}` : "Not available"}
+          </span>
+        </div>
+        <div className="grid gap-2">
+          <label className="grid gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Start year
+            <input
+              aria-label="Permit year range start"
+              className="w-full accent-[#68d8ff]"
+              disabled={!hasYears}
+              max={maxYear ?? undefined}
+              min={minYear ?? undefined}
+              onChange={(event) => onYearStartChange(Number(event.target.value))}
+              type="range"
+              value={safeStart}
+            />
+          </label>
+          <label className="grid gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            End year
+            <input
+              aria-label="Permit year range end"
+              className="w-full accent-[#d8b86a]"
+              disabled={!hasYears}
+              max={maxYear ?? undefined}
+              min={minYear ?? undefined}
+              onChange={(event) => onYearEndChange(Number(event.target.value))}
+              type="range"
+              value={safeEnd}
+            />
+          </label>
+        </div>
+        <p className="rounded border border-[#68d8ff]/15 bg-[#68d8ff]/[0.045] px-2 py-1.5 text-[11px] leading-5 text-[#bfefff]">
+          {hasYears
+            ? isDemo
+              ? `Showing cached demo permit activity from ${safeStart} to ${safeEnd}.`
+              : `Showing permit activity from ${safeStart} to ${safeEnd}.`
+            : "Permit year metadata is not available for this layer."}
+          {count !== null ? ` ${count} records in selected range.` : ""}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function HotspotAdvancedFilters({
   controls,
   onChange,
@@ -1859,6 +2069,45 @@ function getPermitSegmentLegendColor(
     default:
       return "#64748b";
   }
+}
+
+function getPermitCountForYearRange(
+  metadata: DemoDevelopmentYears | null,
+  segment: DevelopmentHotspotPermitSegmentFilter | null,
+  startYear: number | null,
+  endYear: number | null,
+) {
+  if (!metadata || startYear === null || endYear === null) {
+    return null;
+  }
+
+  const counts =
+    segment && segment !== "all"
+      ? metadata.segment_year_counts[segment] ?? null
+      : metadata.yearly_counts;
+
+  if (!counts) {
+    return null;
+  }
+
+  const start = Math.min(startYear, endYear);
+  const end = Math.max(startYear, endYear);
+
+  return Object.entries(counts).reduce((sum, [yearKey, value]) => {
+    const year = Number(yearKey);
+    const count = Number(value);
+
+    if (
+      !Number.isFinite(year) ||
+      !Number.isFinite(count) ||
+      year < start ||
+      year > end
+    ) {
+      return sum;
+    }
+
+    return sum + count;
+  }, 0);
 }
 
 function getPermitSegmentLegendShape(

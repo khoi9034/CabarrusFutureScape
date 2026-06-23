@@ -212,6 +212,11 @@ export interface PlanningSnapshotDevelopmentActivityContext {
   majorValuePermits?: number;
   officialParcelId?: string;
   parcelsRepresented: number;
+  permitYearRange?: {
+    end: number | null;
+    label: string;
+    start: number | null;
+  };
   pin14?: string | null;
   recentPermitCount1yr?: number;
   recentPermitCount3yr?: number;
