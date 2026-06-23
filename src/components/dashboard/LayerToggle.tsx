@@ -1234,10 +1234,10 @@ export function LayerToggle() {
                     return (
                       <article
                         className={cn(
-                          "min-w-0 overflow-hidden rounded-md border p-2 transition",
+                          "cfs-command-card min-w-0 overflow-hidden rounded-md p-2 transition",
                           active
-                            ? "border-white/15 bg-white/[0.06]"
-                            : "border-white/[0.08] bg-black/10 hover:border-white/[0.12] hover:bg-white/[0.035]",
+                            ? "border-[#68d8ff]/24 bg-white/[0.06]"
+                            : "hover:border-[#68d8ff]/22 hover:bg-white/[0.035]",
                           disabled && "opacity-60",
                         )}
                         key={layer.id}
@@ -1465,7 +1465,7 @@ function ModelResearchStatusCard({
 
 function LayerInlinePanel({ children }: { children: ReactNode }) {
   return (
-    <div className="mt-2 min-w-0 overflow-hidden rounded-md border border-white/10 bg-black/18 p-2">
+    <div className="cfs-chart-panel mt-2 min-w-0 overflow-hidden rounded-md p-2">
       {children}
     </div>
   );
@@ -1490,7 +1490,7 @@ function ComingSoonLayerRow({
 }) {
   return (
     <article
-      className="min-w-0 overflow-hidden rounded-md border border-white/10 bg-black/12 p-2 opacity-70"
+      className="cfs-command-card min-w-0 overflow-hidden rounded-md p-2 opacity-60 grayscale-[0.25]"
       data-layer-disabled="true"
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">

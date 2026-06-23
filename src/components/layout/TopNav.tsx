@@ -370,14 +370,14 @@ export function TopNav() {
         open={commandPaletteOpen}
       />
 
-      <header className="cfs-command-bar relative z-30 flex min-h-[4.5rem] shrink-0 flex-wrap items-center gap-2 overflow-visible border-b border-white/10 bg-[#060b12]/92 px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4">
+      <header className="cfs-command-bar relative z-30 flex min-h-[4.5rem] shrink-0 flex-wrap items-center gap-2 overflow-visible border-b border-[#68d8ff]/14 bg-[#03070d]/94 px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4">
         <div className="order-1 flex min-w-[12.5rem] max-w-[16rem] shrink-0 items-center gap-3">
-          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#d8b86a]/35 bg-[#d8b86a]/[0.12] shadow-[0_0_28px_rgba(216,184,106,0.22)]">
+          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#68d8ff]/28 bg-[#68d8ff]/[0.1] shadow-[0_0_28px_rgba(104,216,255,0.18)]">
             <Map className="h-4 w-4 text-[#f0cd79]" />
             <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border border-[#060b12] bg-[#55d38f]" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-[#d8b86a]">
+            <p className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-[#8fe7ff]">
               {appIdentity.eyebrow}
             </p>
             <h1 className="truncate text-lg font-semibold leading-5 text-white">
@@ -388,7 +388,7 @@ export function TopNav() {
 
         <nav
           aria-label="CFS product mode"
-          className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-4 gap-1 rounded-2xl border border-white/10 bg-[#020812]/78 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_40px_rgba(104,216,255,0.075)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
+          className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-4 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
         >
           {productModes.map((mode) => {
             const Icon = mode.icon;
@@ -405,7 +405,7 @@ export function TopNav() {
                 className={cn(
                   "group relative inline-flex h-10 min-w-0 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-xl border px-2.5 text-[11px] font-semibold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75 sm:px-3 lg:justify-start lg:px-3.5 lg:text-xs xl:text-[13px]",
                   active
-                    ? "border-[#68d8ff]/48 bg-[#102235]/95 text-[#e7fbff] shadow-[0_0_30px_rgba(104,216,255,0.22),inset_0_1px_0_rgba(255,255,255,0.09)]"
+                    ? "border-[#68d8ff]/54 bg-[#102235]/95 text-[#e7fbff] shadow-[0_0_34px_rgba(104,216,255,0.25),inset_0_1px_0_rgba(255,255,255,0.1)]"
                     : "border-transparent bg-transparent text-slate-400 hover:border-[#68d8ff]/18 hover:bg-white/[0.055] hover:text-white",
                 )}
                 key={mode.id}
@@ -465,7 +465,7 @@ export function TopNav() {
               aria-expanded={quickSearchDropdownVisible}
               aria-label="Search parcels"
               autoComplete="off"
-              className="h-10 w-full rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
+              className="h-10 w-full rounded-lg border border-[#68d8ff]/14 bg-white/[0.045] pl-9 pr-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-[#68d8ff]/50 focus:bg-white/[0.07] focus:shadow-[0_0_24px_rgba(104,216,255,0.14)]"
               onChange={(event) => {
                 const nextQuery = event.target.value;
                 setQuickSearchQuery(nextQuery);

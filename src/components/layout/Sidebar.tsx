@@ -344,7 +344,7 @@ function ModelLabControlsPanel({
 
   return (
     <div className="space-y-3" data-testid="model-lab-controls">
-      <section className="rounded-lg border border-[#d8b86a]/20 bg-[#1b1506]/40 p-3">
+      <section className="cfs-command-card rounded-lg border-[#d8b86a]/20 bg-[#1b1506]/40 p-3">
         <div className="flex items-start gap-3">
           <FlaskConical className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
           <div>
@@ -371,7 +371,7 @@ function ModelLabControlsPanel({
         </div>
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+      <section className="cfs-command-card rounded-lg p-3">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
@@ -423,7 +423,7 @@ function ModelLabControlsPanel({
         ) : null}
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+      <section className="cfs-command-card rounded-lg p-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
           Legend
         </p>
@@ -450,7 +450,7 @@ function ModelLabControlsPanel({
         </p>
       </section>
 
-      <section className="rounded-lg border border-white/10 bg-black/20 p-3">
+      <section className="cfs-command-card rounded-lg p-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
           Driver sources
         </p>
@@ -468,7 +468,7 @@ function ModelLabControlsPanel({
         </ul>
       </section>
 
-      <section className="grid gap-2 rounded-lg border border-white/10 bg-white/[0.025] p-3">
+      <section className="cfs-command-card grid gap-2 rounded-lg p-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
           Feature Groups
         </p>
@@ -508,7 +508,7 @@ function ModelLabControlsPanel({
         </button>
       </div>
 
-      <details className="rounded-lg border border-white/10 bg-black/18 p-3">
+      <details className="cfs-command-card rounded-lg p-3">
         <summary className="cursor-pointer text-xs font-semibold text-slate-200">
           Advanced map layers
         </summary>

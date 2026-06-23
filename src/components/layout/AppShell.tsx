@@ -132,8 +132,8 @@ function ProductShell() {
   }, [isMapFocusMode, setMapFocusMode]);
 
   return (
-    <div className="metric-grid relative flex min-h-screen flex-col overflow-x-hidden bg-[#060b12] text-slate-100 lg:h-screen lg:overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(6,11,18,0.14),rgba(6,11,18,0.86))]" />
+    <div className="cfs-command-backdrop metric-grid relative flex min-h-screen flex-col overflow-x-hidden text-slate-100 lg:h-screen lg:overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,13,0.08),rgba(3,7,13,0.88))]" />
       <div className="pointer-events-none absolute left-0 right-0 top-[4.5rem] z-10 h-px gold-line opacity-70" />
 
       <div className="app-chrome">
@@ -300,11 +300,11 @@ function OverviewLandingPage({
       data-testid="cfs-overview-landing"
     >
       <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-5">
-        <section className="cfs-overview-hero relative overflow-hidden rounded-2xl border border-white/10 bg-[#07111f]/78 px-5 py-8 shadow-[0_28px_92px_rgba(0,0,0,0.34)] backdrop-blur-xl md:px-8 lg:min-h-[24rem] lg:px-10 lg:py-10">
+        <section className="cfs-command-surface cfs-overview-hero relative overflow-hidden rounded-2xl px-5 py-8 backdrop-blur-xl md:px-8 lg:min-h-[24rem] lg:px-10 lg:py-10">
           <div className="pointer-events-none absolute inset-0 cfs-overview-grid-bg" />
           <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(24rem,0.72fr)] lg:items-center">
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#68d8ff]/24 bg-[#68d8ff]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#bff3ff]">
+              <div className="cfs-status-chip inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]">
                 <Sparkles className="h-3.5 w-3.5" />
                 Enterprise planning intelligence
               </div>
@@ -343,7 +343,7 @@ function OverviewLandingPage({
               </div>
             </div>
 
-            <div className="relative min-w-0 rounded-2xl border border-[#68d8ff]/18 bg-[#04101d]/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+            <div className="cfs-command-card relative min-w-0 rounded-2xl p-4">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
@@ -355,10 +355,10 @@ function OverviewLandingPage({
                 </div>
                 <span
                   className={cn(
-                    "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em]",
+                    "rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em]",
                     USE_DEMO_DATA
-                      ? "border-[#68d8ff]/25 bg-[#68d8ff]/10 text-[#b8edff]"
-                      : "border-[#55d38f]/25 bg-[#55d38f]/10 text-[#a8f3c4]",
+                      ? "cfs-status-chip"
+                      : "cfs-status-chip cfs-status-chip--green",
                   )}
                 >
                   {USE_DEMO_DATA ? "Portfolio Demo" : "API Live"}
@@ -371,7 +371,7 @@ function OverviewLandingPage({
                   ["Governance", "Keep caveats attached"],
                 ].map(([label, value]) => (
                   <div
-                    className="grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5"
+                    className="grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-3 rounded-xl border border-[#68d8ff]/12 bg-white/[0.04] px-3 py-2.5"
                     key={label}
                   >
                     <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
@@ -396,14 +396,14 @@ function OverviewLandingPage({
 
             return (
               <article
-                className="group min-w-0 rounded-xl border border-white/10 bg-[#07111f]/78 p-3 shadow-[0_16px_42px_rgba(0,0,0,0.22)] transition hover:border-[#68d8ff]/28 hover:bg-[#0a1625]/88"
+                className="cfs-command-card group min-w-0 rounded-xl p-3 transition"
                 key={card.title}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#68d8ff]/18 bg-[#68d8ff]/10 text-[#8fe7ff]">
                     <Icon className="h-4 w-4" />
                   </span>
-                  <span className="rounded-full border border-[#d8b86a]/20 bg-[#d8b86a]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#f0cd79]">
+                  <span className="cfs-status-chip cfs-status-chip--amber rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em]">
                     {card.status}
                   </span>
                 </div>
@@ -418,7 +418,7 @@ function OverviewLandingPage({
           })}
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-[#07111f]/72 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.24)] md:p-5">
+        <section className="cfs-command-surface rounded-2xl p-4 md:p-5">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
@@ -438,7 +438,7 @@ function OverviewLandingPage({
 
               return (
                 <div
-                  className="relative flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3"
+                  className="cfs-command-card relative flex min-w-0 items-center gap-3 rounded-xl p-3"
                   key={step.label}
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#b7f0ff]">
@@ -460,7 +460,7 @@ function OverviewLandingPage({
         </section>
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
-          <section className="rounded-2xl border border-white/10 bg-[#07111f]/72 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.24)] md:p-5">
+          <section className="cfs-command-surface rounded-2xl p-4 md:p-5">
             <div className="flex items-center gap-3">
               <Binoculars className="h-5 w-5 text-[#d8b86a]" />
               <div>
@@ -478,7 +478,7 @@ function OverviewLandingPage({
 
                 return (
                   <article
-                    className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3"
+                    className="cfs-command-card flex min-w-0 items-center gap-3 rounded-xl px-3 py-3"
                     key={card.text}
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#68d8ff]/18 bg-[#68d8ff]/10 text-[#8fe7ff]">
@@ -493,7 +493,7 @@ function OverviewLandingPage({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-white/10 bg-[#07111f]/72 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.24)] md:p-5">
+          <section className="cfs-command-surface rounded-2xl p-4 md:p-5">
             <div className="flex items-center gap-3">
               <Network className="h-5 w-5 text-[#8fe7ff]" />
               <div>
@@ -508,7 +508,7 @@ function OverviewLandingPage({
             <div className="mt-4 grid gap-2">
               {officialDataNeeded.map((item) => (
                 <div
-                  className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-[#d8b86a]/12 bg-[#d8b86a]/[0.045] px-3 py-2"
                   key={item}
                 >
                   <span className="min-w-0 truncate text-sm text-slate-200">
@@ -523,7 +523,7 @@ function OverviewLandingPage({
           </section>
         </div>
 
-        <section className="cfs-overview-trust rounded-2xl border border-[#55d38f]/16 bg-[#07111f]/72 p-4 shadow-[0_18px_58px_rgba(0,0,0,0.24)] md:p-5">
+        <section className="cfs-command-surface cfs-overview-trust rounded-2xl p-4 md:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#a8f3c4]">
@@ -547,7 +547,7 @@ function OverviewLandingPage({
           </div>
         </section>
 
-        <section className="mb-2 flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-4 md:flex-row md:items-center md:justify-between">
+        <section className="cfs-command-card mb-2 flex flex-col gap-3 rounded-2xl p-4 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white">
               Ready to work inside the live planning workspace?
@@ -738,7 +738,7 @@ function StableOverviewWorkspace() {
 
         <section
           className={cn(
-            "relative min-w-0 flex-1 overflow-hidden rounded-lg border border-white/10 shadow-[0_18px_54px_rgba(0,0,0,0.34)]",
+            "cfs-command-surface relative min-w-0 flex-1 overflow-hidden rounded-lg",
             indicatorCenterDashboardMode && !isMapFocusMode
               ? "bg-[#07111f]"
               : "bg-[#050911]",

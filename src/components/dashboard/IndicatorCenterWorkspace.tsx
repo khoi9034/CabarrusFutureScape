@@ -574,11 +574,11 @@ export function IndicatorCenterWorkspace() {
 
   return (
     <div
-      className="h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,rgba(104,216,255,0.08),transparent_28%),#07111f] p-4"
+      className="h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,rgba(104,216,255,0.1),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(236,92,255,0.06),transparent_30%),#03070d] p-4"
       id="cfs-indicator-center-dashboard"
       data-testid="indicator-center-dashboard"
     >
-      <section className="rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/92 p-4 shadow-[0_18px_46px_rgba(0,0,0,0.28)]">
+      <section className="cfs-command-surface rounded-lg p-4">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
@@ -623,7 +623,7 @@ export function IndicatorCenterWorkspace() {
         ref={indicatorDashboardSnapshotRef}
       >
         <section
-          className="rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/92 p-4 shadow-[0_18px_46px_rgba(0,0,0,0.28)]"
+          className="cfs-command-surface rounded-lg p-4"
           data-cfs-snapshot-section="critical_signals"
         >
           <SectionHeader
@@ -665,7 +665,7 @@ export function IndicatorCenterWorkspace() {
           icon={<ListChecks className="h-4 w-4" />}
           title="Priority Issues Board"
         />
-        <div className="mt-2 overflow-hidden rounded-lg border border-white/10 bg-black/18">
+        <div className="cfs-op-queue mt-2 overflow-hidden rounded-lg">
           <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 lg:grid lg:grid-cols-[8.5rem_minmax(12rem,1fr)_12rem_7rem_minmax(10rem,1fr)_5rem] lg:items-center lg:gap-2">
             <span>Priority</span>
             <span>Signal</span>
@@ -1623,7 +1623,7 @@ function IndicatorDetailDrawer({
   return (
     <aside
       aria-label="Indicator Detail Drawer"
-      className="fixed z-50 flex max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-xl border border-[#68d8ff]/24 bg-[#07111f]/96 shadow-[0_24px_90px_rgba(0,0,0,0.48)] backdrop-blur-xl"
+      className="cfs-drawer-command fixed z-50 flex max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-xl backdrop-blur-xl"
       role="dialog"
       style={drawerStyle}
     >
@@ -2281,7 +2281,7 @@ function ExecutiveSignalCard({
   return (
     <div
       className={cn(
-        "min-h-[9.5rem] rounded-lg border p-3 shadow-[0_12px_34px_rgba(0,0,0,0.18)]",
+        "cfs-command-card min-h-[9.5rem] rounded-lg p-3",
         getSignalToneClass(signal.tone),
       )}
     >
@@ -2362,7 +2362,7 @@ function MiniChartCard({
   const maxValue = Math.max(...data.map((datum) => datum.value), 0);
 
   return (
-    <div className="rounded-md border border-white/10 bg-black/18 p-3">
+    <div className="cfs-chart-panel rounded-md p-3">
       <div className="flex items-start justify-between gap-2">
         <p className="text-xs font-semibold text-white">{title}</p>
         <span className="rounded border border-white/10 bg-white/[0.035] px-1.5 py-0.5 text-[9px] font-semibold text-slate-400">

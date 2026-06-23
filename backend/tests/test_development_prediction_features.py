@@ -365,7 +365,9 @@ def test_phase23d_model_lab_progressive_ui_copy_and_guardrails() -> None:
     assert "clustered_markers" in scene_text
     assert "parcel_detail" in scene_text
     assert "Explain the Numbers" in right_panel_text
-    assert "Auto by zoom" in sidebar_text
+    assert "ModelLabViewModeControl" in sidebar_text
+    assert "Model Lab research overlay view mode" in sidebar_text
+    assert "Heatmap shows relative research concentration only." in sidebar_text
     assert "countywide heatmap cell" in report_text
     assert "research records in a cluster" in report_text
 
@@ -935,7 +937,8 @@ def test_phase24f_planning_snapshot_executive_report_builder_redesign() -> None:
     assert "What it means:" in snapshot_text
     assert "Source:" in snapshot_text
     assert "Caveat:" in snapshot_text
-    assert "app-chrome no-print rounded-lg border border-white/10 bg-black/20 p-3" in snapshot_text
+    assert "cfs-command-card app-chrome no-print rounded-lg p-3" in snapshot_text
+    assert "cfs-command-surface app-chrome no-print rounded-lg p-4" in snapshot_text
     assert "showLegendAndNotes={extraSections.legend_map_notes}" in snapshot_text
     assert "Development activity cluster" in snapshot_text
     assert "Permit/development activity marker" in snapshot_text
@@ -2259,6 +2262,13 @@ def test_phase29b_final_ui_polish_overview_and_navigation() -> None:
     for required in [
         ".cfs-command-bar",
         ".cfs-product-nav",
+        ".cfs-command-backdrop",
+        ".cfs-command-surface",
+        ".cfs-command-card",
+        ".cfs-status-chip",
+        ".cfs-op-queue",
+        ".cfs-drawer-command",
+        ".cfs-chart-panel",
         ".cfs-overview-grid-bg",
         ".cfs-overview-flow-link",
         ".cfs-overview-trust",
@@ -2282,6 +2292,59 @@ def test_phase29b_final_ui_polish_overview_and_navigation() -> None:
         "will develop",
     ]:
         assert term not in user_facing_text
+
+
+def test_command_center_visual_polish_is_applied_across_core_surfaces() -> None:
+    app_shell_text = (
+        REPO_ROOT / "src" / "components" / "layout" / "AppShell.tsx"
+    ).read_text(encoding="utf-8")
+    top_nav_text = (
+        REPO_ROOT / "src" / "components" / "layout" / "TopNav.tsx"
+    ).read_text(encoding="utf-8")
+    indicator_text = (
+        REPO_ROOT
+        / "src"
+        / "components"
+        / "dashboard"
+        / "IndicatorCenterWorkspace.tsx"
+    ).read_text(encoding="utf-8")
+    layer_toggle_text = (
+        REPO_ROOT / "src" / "components" / "dashboard" / "LayerToggle.tsx"
+    ).read_text(encoding="utf-8")
+    sidebar_text = (
+        REPO_ROOT / "src" / "components" / "layout" / "Sidebar.tsx"
+    ).read_text(encoding="utf-8")
+    snapshot_text = (
+        REPO_ROOT
+        / "src"
+        / "components"
+        / "dashboard"
+        / "DueDiligenceReview.tsx"
+    ).read_text(encoding="utf-8")
+    theme_text = (REPO_ROOT / "src" / "styles" / "cfs-theme.css").read_text(
+        encoding="utf-8",
+    )
+
+    assert "cfs-command-backdrop metric-grid" in app_shell_text
+    assert "cfs-command-surface cfs-overview-hero" in app_shell_text
+    assert "cfs-command-bar" in top_nav_text
+    assert "cfs-product-nav" in top_nav_text
+    assert "cfs-command-surface rounded-lg p-4" in indicator_text
+    assert "cfs-op-queue" in indicator_text
+    assert "cfs-drawer-command" in indicator_text
+    assert "cfs-chart-panel rounded-md p-3" in indicator_text
+    assert "cfs-command-card min-w-0 overflow-hidden rounded-md" in layer_toggle_text
+    assert "cfs-chart-panel mt-2" in layer_toggle_text
+    assert "cfs-command-card rounded-lg" in sidebar_text
+    assert "cfs-command-surface app-chrome no-print" in snapshot_text
+    assert "cfs-command-card app-chrome no-print" in snapshot_text
+
+    for required in [
+        "radial-gradient(circle at 16% 8%",
+        "body::before",
+        "@media (prefers-reduced-motion: reduce)",
+    ]:
+        assert required in theme_text
 
 
 def test_phase29c_explore_countywide_layer_controls_usability_cleanup() -> None:

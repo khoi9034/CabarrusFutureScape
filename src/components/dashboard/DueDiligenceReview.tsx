@@ -1151,7 +1151,7 @@ function PlanningSnapshotReportBuilder({
 
   return (
     <div className="space-y-4">
-      <section className="app-chrome no-print rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/88 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.24)]">
+      <section className="cfs-command-surface app-chrome no-print rounded-lg p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
@@ -1260,7 +1260,7 @@ function PlanningSnapshotReportBuilder({
       />
 
       {advancedDetails ? (
-        <details className="no-print rounded-lg border border-white/10 bg-black/18 p-4">
+        <details className="cfs-command-card no-print rounded-lg p-4">
           <summary className="cursor-pointer text-sm font-semibold text-slate-200">
             Advanced saved evidence
           </summary>
@@ -1268,7 +1268,7 @@ function PlanningSnapshotReportBuilder({
         </details>
       ) : null}
 
-      <div className="no-print flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3">
+      <div className="cfs-command-card no-print flex flex-wrap items-center justify-between gap-3 rounded-lg p-3">
         <p className="text-xs leading-5 text-slate-500">
           Need the full methodology behind a caveat or data source?
         </p>
@@ -1308,7 +1308,7 @@ function ReportBuilderControls({
   toggleExplanationCards: (show: boolean) => void;
 }) {
   return (
-    <section className="app-chrome no-print rounded-lg border border-white/10 bg-black/22 p-3">
+    <section className="cfs-command-card app-chrome no-print rounded-lg p-3">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
@@ -1413,7 +1413,7 @@ function ReportDraftsPanel({
 }) {
   return (
     <section
-      className="app-chrome no-print rounded-lg border border-white/10 bg-black/22 p-3"
+      className="cfs-command-card app-chrome no-print rounded-lg p-3"
       id="cfs-report-drafts"
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -1561,7 +1561,7 @@ function PlanningSnapshotLibraryPanel({
   snapshots,
 }: PlanningSnapshotLibraryProps) {
   return (
-    <section className="app-chrome no-print rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/82 p-4">
+    <section className="cfs-command-surface app-chrome no-print rounded-lg p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
@@ -2010,7 +2010,7 @@ function SnapshotVisualPreview({
       planningSnapshot.dashboardImageCapturedAt ?? planningSnapshot.createdAt;
 
     return (
-      <section className="app-chrome no-print rounded-lg border border-white/10 bg-black/20 p-3">
+      <section className="cfs-command-card app-chrome no-print rounded-lg p-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
@@ -2088,7 +2088,7 @@ function SnapshotVisualPreview({
   const legend = getSnapshotMapLegend(planningSnapshot);
 
   return (
-    <section className="app-chrome no-print rounded-lg border border-white/10 bg-black/20 p-3">
+    <section className="cfs-command-card app-chrome no-print rounded-lg p-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
@@ -2411,7 +2411,7 @@ function SnapshotExecutiveSummary({
 
   return (
     <div className="space-y-4">
-      <section className="app-chrome no-print rounded-lg border border-[#68d8ff]/18 bg-[#07111f]/78 p-4">
+      <section className="cfs-command-surface app-chrome no-print rounded-lg p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
