@@ -46,6 +46,8 @@ import { useDevelopmentTrends } from "@/hooks/useDevelopmentTrends";
 import { useFloodConstraintSummary } from "@/hooks/useFloodConstraintSummary";
 import { usePermitSegmentStatistics } from "@/hooks/usePermitSegmentStatistics";
 import { useSchoolConstraintSummary } from "@/hooks/useSchoolConstraintSummary";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
+import { getDemoManifest } from "@/lib/demo-data/client";
 import { cn } from "@/lib/utils";
 import type {
   IndicatorCenterContext,
@@ -63,6 +65,8 @@ export interface IndicatorCenterSummaryCard {
 
 interface ExecutiveSignalCardModel {
   caveat: string;
+  confidence: string;
+  groupId: IndicatorCenterGroupId;
   icon: ReactNode;
   label: string;
   sparkline?: ChartDatum[];
@@ -71,6 +75,22 @@ interface ExecutiveSignalCardModel {
   tone: "attention" | "data" | "internal" | "neutral" | "review";
   value: string;
 }
+
+interface IndicatorReadinessTab {
+  description: string;
+  groupIds: IndicatorCenterGroupId[];
+  id: IndicatorReadinessTabId;
+  label: string;
+}
+
+type IndicatorReadinessTabId =
+  | "all"
+  | "growth"
+  | "constraints"
+  | "infrastructure"
+  | "schools"
+  | "data"
+  | "watchlist";
 
 interface AttentionQueueRow {
   caveat: string;
@@ -144,6 +164,16 @@ interface DrilldownSectionModel {
   title: string;
 }
 
+interface DomainReadinessRow {
+  caveat: string;
+  coverage: string;
+  currentUse: string;
+  dataStatus: string;
+  domain: string;
+  groupId: IndicatorCenterGroupId;
+  updateCadence: string;
+}
+
 interface SchoolUtilizationCounts {
   approaching: number;
   available: boolean;
@@ -165,6 +195,51 @@ const INDICATOR_DASHBOARD_CAPTURE_SECTIONS = [
   "critical_signals",
   "monitoring_charts",
 ] as const;
+
+const readinessTabs: IndicatorReadinessTab[] = [
+  {
+    description: "All dashboard signals.",
+    groupIds: [],
+    id: "all",
+    label: "All Signals",
+  },
+  {
+    description: "Observed development and permit activity.",
+    groupIds: ["development-activity"],
+    id: "growth",
+    label: "Growth Activity",
+  },
+  {
+    description: "Floodplain and constraint review.",
+    groupIds: ["flood-review"],
+    id: "constraints",
+    label: "Constraints",
+  },
+  {
+    description: "Utility and transportation readiness.",
+    groupIds: ["utility-infrastructure"],
+    id: "infrastructure",
+    label: "Infrastructure",
+  },
+  {
+    description: "Preliminary school capacity context.",
+    groupIds: ["school-context"],
+    id: "schools",
+    label: "Schools",
+  },
+  {
+    description: "Official data gaps and governance.",
+    groupIds: ["data-gaps", "model-research"],
+    id: "data",
+    label: "Data Readiness",
+  },
+  {
+    description: "Priority follow-up rows.",
+    groupIds: [],
+    id: "watchlist",
+    label: "Watchlist",
+  },
+];
 
 const defaultIndicatorSnapshotIncludedSections: Record<
   PlanningSnapshotSectionKey,
@@ -326,6 +401,9 @@ export function IndicatorCenterWorkspace() {
     setSelectedIndicatorCenterContext,
   } = useDashboardState();
   const indicatorDashboardSnapshotRef = useRef<HTMLDivElement | null>(null);
+  const [activeReadinessTab, setActiveReadinessTab] =
+    useState<IndicatorReadinessTabId>("all");
+  const [demoGeneratedAt, setDemoGeneratedAt] = useState<string | null>(null);
   const [showHowIndicatorsWork, setShowHowIndicatorsWork] = useState(false);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
 
@@ -339,13 +417,40 @@ export function IndicatorCenterWorkspace() {
     () => getSchoolUtilizationCounts(schoolSummary),
     [schoolSummary],
   );
+
+  useEffect(() => {
+    if (!USE_DEMO_DATA) {
+      return;
+    }
+
+    let mounted = true;
+    getDemoManifest()
+      .then((manifest) => {
+        if (mounted) {
+          setDemoGeneratedAt(manifest.generated_at);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setDemoGeneratedAt(null);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const cards = buildIndicatorCenterSummaryCards({
     developmentStatistics,
     floodSummary,
     schoolCounts,
     schoolSummary,
   });
-  const visibleDefinitions = indicatorCenterDefinitions;
+  const visibleDefinitions = filterDefinitionsByReadinessTab(
+    indicatorCenterDefinitions,
+    activeReadinessTab,
+  );
   const activeIndicatorGroupIds = visibleDefinitions.map(
     (indicator) => indicator.groupId,
   );
@@ -379,6 +484,18 @@ export function IndicatorCenterWorkspace() {
   });
   const drilldownSections = allDrilldownSections.filter((section) =>
     visibleDefinitionIds.has(section.indicator.indicatorId),
+  );
+  const domainReadinessRows = buildDomainReadinessRows({
+    developmentStatistics,
+    floodSummary,
+    schoolCounts,
+    schoolSummary,
+  });
+  const visibleDomainReadinessRows = domainReadinessRows.filter((row) =>
+    shouldShowGroupForReadinessTab(row.groupId, activeReadinessTab),
+  );
+  const visibleExecutiveSignals = executiveSignals.filter((signal) =>
+    shouldShowGroupForReadinessTab(signal.groupId, activeReadinessTab),
   );
   const monitoringCharts = drilldownSections.filter((section) => section.chart);
   const permitSegmentChart = {
@@ -574,48 +691,24 @@ export function IndicatorCenterWorkspace() {
 
   return (
     <div
-      className="h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,rgba(104,216,255,0.1),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(236,92,255,0.06),transparent_30%),#03070d] p-4"
-      id="cfs-indicator-center-dashboard"
+      className="h-full overflow-y-auto overflow-x-hidden bg-[linear-gradient(90deg,rgba(104,216,255,0.045)_1px,transparent_1px),linear-gradient(rgba(104,216,255,0.035)_1px,transparent_1px),radial-gradient(circle_at_top_left,rgba(104,216,255,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(236,92,255,0.08),transparent_32%),#02050b] bg-[length:42px_42px,42px_42px,100%_100%,100%_100%,100%_100%] p-4"
       data-testid="indicator-center-dashboard"
+      id="cfs-indicator-center-dashboard"
     >
-      <section className="cfs-command-surface rounded-lg p-4">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
-              Indicator Center
-            </p>
-            <h2 className="mt-1 text-xl font-semibold text-white">
-              CFS Mission Control
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">
-              Current countywide monitoring posture from existing CFS intelligence.
-            </p>
-          </div>
+      <MissionHeader
+        activeTab={activeReadinessTab}
+        demoGeneratedAt={demoGeneratedAt}
+        onOpenPlanningSnapshot={openPlanningSnapshot}
+        onSaveSnapshot={() => {
+          void saveSnapshot();
+        }}
+        snapshotSaving={snapshotSaving}
+      />
 
-          <div className="flex max-w-full flex-wrap items-center gap-2">
-            <button
-              className="inline-flex items-center gap-2 rounded-md border border-[#55d38f]/25 bg-[#55d38f]/10 px-3 py-2 text-xs font-semibold text-[#a8f3c4] transition hover:border-[#55d38f]/45 hover:bg-[#55d38f]/15"
-              disabled={snapshotSaving}
-              onClick={() => {
-                void saveSnapshot();
-              }}
-              type="button"
-            >
-              <Save className="h-3.5 w-3.5" />
-              {snapshotSaving ? "Capturing Dashboard..." : "Save Snapshot"}
-            </button>
-            <button
-              className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
-              onClick={openPlanningSnapshot}
-              type="button"
-            >
-              <FileSearch className="h-3.5 w-3.5" />
-              Open Planning Snapshot
-            </button>
-          </div>
-        </div>
-
-      </section>
+      <IndicatorReadinessTabs
+        activeTab={activeReadinessTab}
+        onChange={setActiveReadinessTab}
+      />
 
       <div
         className="mt-4 space-y-4"
@@ -623,29 +716,38 @@ export function IndicatorCenterWorkspace() {
         ref={indicatorDashboardSnapshotRef}
       >
         <section
-          className="cfs-command-surface rounded-lg p-4"
+          className="cfs-command-surface rounded-lg p-4 border-[#68d8ff]/18"
           data-cfs-snapshot-section="critical_signals"
         >
-          <SectionHeader
-            compact
-            description="Top signals."
+          <MissionSectionHeader
+            eyebrow="Primary KPI Strip"
             icon={<Gauge className="h-4 w-4" />}
-            title="Critical Signals"
+            title="Current Readiness Posture"
+            value={`${visibleExecutiveSignals.length} signals`}
           />
-          <div className="mt-4 grid gap-2 md:grid-cols-2 2xl:grid-cols-6">
-            {executiveSignals.map((signal) => (
-              <ExecutiveSignalCard key={signal.label} signal={signal} />
+          <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+            {visibleExecutiveSignals.map((signal) => (
+              <ExecutiveSignalCard
+                key={signal.label}
+                onInspect={() =>
+                  setSelectedIndicatorCenterContext(
+                    getIndicatorByGroup(signal.groupId),
+                  )
+                }
+                signal={signal}
+              />
             ))}
           </div>
         </section>
 
         <section data-cfs-snapshot-section="monitoring_charts">
-          <SectionHeader
-            description="Labels and counts."
+          <MissionSectionHeader
+            eyebrow="Trend Intelligence"
             icon={<BarChart3 className="h-4 w-4" />}
-            title="Monitoring Charts"
+            title="Compact Monitoring Visuals"
+            value="Labeled charts"
           />
-          <div className="mt-2 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+          <div className="mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-4">
             {monitoringChartCards.map((chart) => (
               <MiniChartCard
                 caveat={chart.caveat}
@@ -660,12 +762,13 @@ export function IndicatorCenterWorkspace() {
       </div>
 
       <section className="mt-4">
-        <SectionHeader
-          description="Short rows. No scores."
+        <MissionSectionHeader
+          eyebrow="Operational Watchlist"
           icon={<ListChecks className="h-4 w-4" />}
-          title="Priority Issues Board"
+          title="Operational Watchlist Board"
+          value={`${attentionQueue.length} rows`}
         />
-        <div className="cfs-op-queue mt-2 overflow-hidden rounded-lg">
+        <div className="cfs-op-queue mt-3 overflow-hidden rounded-xl border border-white/10">
           <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 lg:grid lg:grid-cols-[8.5rem_minmax(12rem,1fr)_12rem_7rem_minmax(10rem,1fr)_5rem] lg:items-center lg:gap-2">
             <span>Priority</span>
             <span>Signal</span>
@@ -685,10 +788,26 @@ export function IndicatorCenterWorkspace() {
       </section>
 
       <section className="mt-4">
-        <SectionHeader
-          description="Highest-value source requests."
+        <MissionSectionHeader
+          eyebrow="Domain Readiness Matrix"
+          icon={<ClipboardList className="h-4 w-4" />}
+          title="CFS Intelligence Domains"
+          value={`${visibleDomainReadinessRows.length} domains`}
+        />
+        <DomainReadinessMatrix
+          onInspect={(groupId) =>
+            setSelectedIndicatorCenterContext(getIndicatorByGroup(groupId))
+          }
+          rows={visibleDomainReadinessRows}
+        />
+      </section>
+
+      <section className="mt-4">
+        <MissionSectionHeader
+          eyebrow="Data Readiness"
           icon={<ShieldAlert className="h-4 w-4" />}
-          title="Data Still Needed"
+          title="Official Data Still Needed"
+          value={`${indicatorCenterMissingDataItems.length} requests`}
         />
         <DataStillNeededStrip
           onInspect={() =>
@@ -697,9 +816,34 @@ export function IndicatorCenterWorkspace() {
         />
       </section>
 
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/24 px-3 py-3">
+        <div className="flex min-w-0 items-start gap-2 text-xs leading-5 text-slate-400">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#f6d98e]" />
+          <div className="min-w-0">
+            <p className="font-semibold text-slate-200">
+              Monitoring dashboard only. No map or official scoring.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[
+                "Map-free Indicator Center",
+                "No map required",
+                "No exact probabilities",
+                "No official determinations",
+                "No official capacity claims",
+                "Source caveats preserved",
+              ].map((label) => (
+                <span
+                  className="rounded border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-semibold text-slate-300"
+                  key={label}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
         <button
-          className="inline-flex items-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:border-[#68d8ff]/45 hover:bg-[#68d8ff]/15"
+          className="inline-flex shrink-0 items-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:border-[#68d8ff]/45 hover:bg-[#68d8ff]/15"
           onClick={() =>
             setShowHowIndicatorsWork((currentValue) => !currentValue)
           }
@@ -713,26 +857,6 @@ export function IndicatorCenterWorkspace() {
       {showHowIndicatorsWork ? (
         <HowIndicatorsWorkPanel onOpenMethodology={openMethodology} />
       ) : null}
-
-      <div className="mt-4 flex items-start gap-2 rounded-md border border-white/10 bg-black/18 px-3 py-2 text-xs leading-5 text-slate-400">
-        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#f6d98e]" />
-        <div className="flex flex-wrap gap-2">
-          {[
-            "Monitoring cockpit only",
-            "No map required",
-            "No official scores",
-            "No probabilities",
-            "No official capacity claims",
-          ].map((label) => (
-            <span
-              className="rounded border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-semibold text-slate-300"
-              key={label}
-            >
-              {label}
-            </span>
-          ))}
-        </div>
-      </div>
 
       {selectedIndicatorCenterContext ? (
         <IndicatorDetailDrawer
@@ -885,6 +1009,10 @@ function buildExecutiveSignalCards({
   return [
     {
       caveat: "Observed permit context, not prediction.",
+      confidence: developmentStatistics.errorMessage
+        ? "Coverage: fallback"
+        : "Coverage: available",
+      groupId: "development-activity",
       icon: <TrendingUp className="h-4 w-4" />,
       label: "Development Activity",
       sparkline: developmentTrends.annualTrend.slice(-5).map((point) => ({
@@ -900,6 +1028,10 @@ function buildExecutiveSignalCards({
     },
     {
       caveat: "Verify with official enrollment/capacity.",
+      confidence: schoolCounts.available
+        ? "Coverage: preliminary"
+        : "Coverage: data needed",
+      groupId: "school-context",
       icon: <GraduationCap className="h-4 w-4" />,
       label: "School Capacity Watch",
       status: "Preliminary Data",
@@ -913,6 +1045,10 @@ function buildExecutiveSignalCards({
     },
     {
       caveat: "Based on FEMA floodplain data.",
+      confidence: floodSummary.errorMessage
+        ? "Coverage: not available"
+        : "Coverage: available",
+      groupId: "flood-review",
       icon: <Waves className="h-4 w-4" />,
       label: "Floodplain Review",
       status: "Review Needed",
@@ -930,6 +1066,8 @@ function buildExecutiveSignalCards({
     },
     {
       caveat: "Does not confirm available capacity.",
+      confidence: "Coverage: proxy only",
+      groupId: "utility-infrastructure",
       icon: <Wrench className="h-4 w-4" />,
       label: "Utility Readiness",
       status: "Data Needed",
@@ -939,6 +1077,8 @@ function buildExecutiveSignalCards({
     },
     {
       caveat: "Official data needed before stronger claims.",
+      confidence: "Coverage: incomplete",
+      groupId: "data-gaps",
       icon: <ClipboardList className="h-4 w-4" />,
       label: "Data Still Needed",
       status: "Action Needed",
@@ -947,13 +1087,15 @@ function buildExecutiveSignalCards({
       value: formatCount(indicatorCenterMissingDataItems.length),
     },
     {
-      caveat: "No exact probabilities.",
+      caveat: "Transportation context only; planned local projects still needed.",
+      confidence: "Coverage: context available",
+      groupId: "utility-infrastructure",
       icon: <Gauge className="h-4 w-4" />,
-      label: "Model Status",
-      status: "Research Only",
-      subvalue: "Not production-ready",
-      tone: "internal",
-      value: "Internal Only",
+      label: "Transportation Project Context",
+      status: "Context Available",
+      subvalue: "STIP / AADT / accessibility context",
+      tone: "neutral",
+      value: "Available",
     },
   ];
 }
@@ -1385,6 +1527,116 @@ function buildDrilldownSections({
   ];
 }
 
+function filterDefinitionsByReadinessTab(
+  definitions: IndicatorCenterContext[],
+  tabId: IndicatorReadinessTabId,
+) {
+  if (tabId === "all" || tabId === "watchlist") {
+    return definitions;
+  }
+
+  const activeTab = readinessTabs.find((tab) => tab.id === tabId);
+  const groupSet = new Set(activeTab?.groupIds ?? []);
+
+  return definitions.filter((definition) => groupSet.has(definition.groupId));
+}
+
+function shouldShowGroupForReadinessTab(
+  groupId: IndicatorCenterGroupId,
+  tabId: IndicatorReadinessTabId,
+) {
+  if (tabId === "all" || tabId === "watchlist") {
+    return true;
+  }
+
+  return readinessTabs
+    .find((tab) => tab.id === tabId)
+    ?.groupIds.includes(groupId) ?? false;
+}
+
+function buildDomainReadinessRows({
+  developmentStatistics,
+  floodSummary,
+  schoolCounts,
+  schoolSummary,
+}: {
+  developmentStatistics: ReturnType<typeof useDevelopmentStatistics>;
+  floodSummary: ReturnType<typeof useFloodConstraintSummary>;
+  schoolCounts: SchoolUtilizationCounts;
+  schoolSummary: ReturnType<typeof useSchoolConstraintSummary>;
+}): DomainReadinessRow[] {
+  return [
+    {
+      caveat: "Observed permit activity only, not prediction.",
+      coverage: developmentStatistics.errorMessage ? "Not available" : "Available",
+      currentUse: "Permit activity, active parcels, and trend monitoring.",
+      dataStatus: developmentStatistics.isLoading ? "Loading" : "Available",
+      domain: "Development Activity",
+      groupId: "development-activity",
+      updateCadence: USE_DEMO_DATA ? "Cached extract" : "Backend refresh",
+    },
+    {
+      caveat: "FEMA floodplain data remains authoritative.",
+      coverage: floodSummary.errorMessage ? "Not available" : "Available",
+      currentUse: "Floodplain review, Floodway, and review concentration.",
+      dataStatus: floodSummary.isLoading ? "Loading" : "Available",
+      domain: "Floodplain Review",
+      groupId: "flood-review",
+      updateCadence: USE_DEMO_DATA ? "Cached extract" : "Backend refresh",
+    },
+    {
+      caveat: "Preliminary context requires official enrollment/capacity.",
+      coverage: schoolCounts.available ? "Preliminary" : "Data needed",
+      currentUse: "Capacity watch, category counts, and verification flags.",
+      dataStatus:
+        schoolSummary.isLoading
+          ? "Loading"
+          : schoolCounts.available
+            ? "Preliminary"
+            : "Data needed",
+      domain: "Schools",
+      groupId: "school-context",
+      updateCadence: USE_DEMO_DATA ? "Cached extract" : "Backend refresh",
+    },
+    {
+      caveat: "Utility proxy does not confirm true capacity.",
+      coverage: "Proxy only",
+      currentUse: "Readiness caveat and WSACC data request framing.",
+      dataStatus: "Data needed",
+      domain: "Utilities",
+      groupId: "utility-infrastructure",
+      updateCadence: "Official data needed",
+    },
+    {
+      caveat: "Current-context transportation indicators only.",
+      coverage: "Context available",
+      currentUse: "Transportation/STIP/AADT context for readiness review.",
+      dataStatus: "Context available",
+      domain: "Transportation",
+      groupId: "utility-infrastructure",
+      updateCadence: USE_DEMO_DATA ? "Cached extract" : "Backend refresh",
+    },
+    {
+      caveat: "Future land use and official rezoning records are needed.",
+      coverage: "Incomplete",
+      currentUse: "Data request tracking and planning context caveats.",
+      dataStatus: "Data needed",
+      domain: "Zoning / Land Use",
+      groupId: "data-gaps",
+      updateCadence: "Official data needed",
+    },
+    {
+      caveat: "Internal research only. No exact probabilities.",
+      coverage: "Governance only",
+      currentUse: "Model readiness status and safe-use boundaries.",
+      dataStatus: "Internal only",
+      domain: "Model Research",
+      groupId: "model-research",
+      updateCadence: "Research governance",
+    },
+  ];
+}
+
 function getSchoolUtilizationCounts(
   schoolSummary: ReturnType<typeof useSchoolConstraintSummary>,
 ): SchoolUtilizationCounts {
@@ -1418,6 +1670,217 @@ function getSchoolUtilizationCounts(
   );
 
   return counts;
+}
+
+function MissionHeader({
+  activeTab,
+  demoGeneratedAt,
+  onOpenPlanningSnapshot,
+  onSaveSnapshot,
+  snapshotSaving,
+}: {
+  activeTab: IndicatorReadinessTabId;
+  demoGeneratedAt: string | null;
+  onOpenPlanningSnapshot: () => void;
+  onSaveSnapshot: () => void;
+  snapshotSaving: boolean;
+}) {
+  const statusPills = [
+    "Permit Activity",
+    "Floodplain Review",
+    "School Capacity Watch",
+    "Utility Readiness",
+    "Transportation Context",
+    "Data Readiness",
+  ];
+
+  return (
+    <section className="relative overflow-hidden rounded-2xl border border-[#68d8ff]/20 bg-[linear-gradient(135deg,rgba(4,13,26,0.96),rgba(3,7,13,0.92)),radial-gradient(circle_at_top_right,rgba(104,216,255,0.16),transparent_34%)] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(104,216,255,0.055)_1px,transparent_1px),linear-gradient(rgba(104,216,255,0.035)_1px,transparent_1px)] bg-[length:30px_30px]" />
+      <div className="relative z-10 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusPill
+              label={USE_DEMO_DATA ? "Portfolio Demo" : "Local Live Data"}
+              tone={USE_DEMO_DATA ? "gold" : "cyan"}
+            />
+            <StatusPill
+              label={USE_DEMO_DATA ? "Cached demo extract" : "Backend intelligence"}
+              tone="slate"
+            />
+            <StatusPill
+              label={readinessTabs.find((tab) => tab.id === activeTab)?.label ?? "All Signals"}
+              tone="cyan"
+            />
+          </div>
+          <h2 className="mt-4 text-2xl font-semibold tracking-tight text-white md:text-3xl">
+            CFS Mission Control
+          </h2>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-300">
+            County growth, constraint, and readiness monitoring.
+          </p>
+          <p className="mt-3 text-xs leading-5 text-slate-500">
+            Last updated: {formatFreshnessLabel(demoGeneratedAt)} / Data mode:{" "}
+            {USE_DEMO_DATA
+              ? "public portfolio demo"
+              : USE_BACKEND_API
+                ? "local/live backend"
+                : "static fallback"}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {statusPills.map((label) => (
+              <span
+                className="rounded border border-white/10 bg-white/[0.045] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-300"
+                key={label}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex max-w-full flex-wrap items-center gap-2">
+          <button
+            className="inline-flex items-center gap-2 rounded-md border border-[#55d38f]/25 bg-[#55d38f]/10 px-3 py-2 text-xs font-semibold text-[#a8f3c4] transition hover:border-[#55d38f]/45 hover:bg-[#55d38f]/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#55d38f]/45"
+            disabled={snapshotSaving}
+            onClick={onSaveSnapshot}
+            type="button"
+          >
+            <Save className="h-3.5 w-3.5" />
+            {snapshotSaving ? "Capturing Dashboard..." : "Save Snapshot"}
+          </button>
+          <button
+            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/45"
+            onClick={onOpenPlanningSnapshot}
+            type="button"
+          >
+            <FileSearch className="h-3.5 w-3.5" />
+            Open Planning Snapshot
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function IndicatorReadinessTabs({
+  activeTab,
+  onChange,
+}: {
+  activeTab: IndicatorReadinessTabId;
+  onChange: (tabId: IndicatorReadinessTabId) => void;
+}) {
+  return (
+    <div className="mt-4 rounded-xl border border-white/10 bg-black/24 p-2">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
+        {readinessTabs.map((tab) => {
+          const selected = activeTab === tab.id;
+
+          return (
+            <button
+              aria-pressed={selected}
+              className={cn(
+                "min-w-0 rounded-lg border px-3 py-2 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/60",
+                selected
+                  ? "border-[#68d8ff]/45 bg-[#68d8ff]/14 text-[#dff9ff] shadow-[0_0_24px_rgba(104,216,255,0.14)]"
+                  : "border-white/10 bg-white/[0.025] text-slate-300 hover:border-white/20 hover:bg-white/[0.05]",
+              )}
+              key={tab.id}
+              onClick={() => onChange(tab.id)}
+              type="button"
+            >
+              <span className="block truncate text-xs font-semibold">
+                {tab.label}
+              </span>
+              <span className="mt-1 block truncate text-[10px] text-slate-500">
+                {tab.description}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function MissionSectionHeader({
+  eyebrow,
+  icon,
+  title,
+  value,
+}: {
+  eyebrow: string;
+  icon: ReactNode;
+  title: string;
+  value: string;
+}) {
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#68d8ff]/24 bg-[#68d8ff]/10 text-[#8fe7ff]">
+          {icon}
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
+            {eyebrow}
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-white">{title}</h3>
+        </div>
+      </div>
+      <span className="rounded border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-300">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function DomainReadinessMatrix({
+  onInspect,
+  rows,
+}: {
+  onInspect: (groupId: IndicatorCenterGroupId) => void;
+  rows: DomainReadinessRow[];
+}) {
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-black/20">
+      <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 xl:grid xl:grid-cols-[minmax(10rem,1fr)_8rem_8rem_9rem_minmax(12rem,1.2fr)_minmax(12rem,1.4fr)] xl:gap-3">
+        <span>Domain</span>
+        <span>Data Status</span>
+        <span>Coverage</span>
+        <span>Cadence</span>
+        <span>Current Use</span>
+        <span>Caveat</span>
+      </div>
+      {rows.map((row) => (
+        <button
+          className="grid w-full min-w-0 gap-2 border-b border-white/10 px-3 py-3 text-left transition last:border-b-0 hover:bg-white/[0.045] xl:grid-cols-[minmax(10rem,1fr)_8rem_8rem_9rem_minmax(12rem,1.2fr)_minmax(12rem,1.4fr)] xl:items-center xl:gap-3"
+          key={row.domain}
+          onClick={() => onInspect(row.groupId)}
+          type="button"
+        >
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-white">
+              {row.domain}
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8fe7ff]">
+              Inspect
+            </span>
+          </span>
+          <span className="w-fit rounded border border-[#68d8ff]/18 bg-[#68d8ff]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#b7f0ff]">
+            {row.dataStatus}
+          </span>
+          <span className="text-xs text-slate-300">{row.coverage}</span>
+          <span className="text-xs text-slate-400">{row.updateCadence}</span>
+          <span className="text-xs leading-5 text-slate-300">
+            {row.currentUse}
+          </span>
+          <span className="text-xs leading-5 text-slate-500">
+            {row.caveat}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
 }
 
 function HowIndicatorsWorkPanel({
@@ -1463,7 +1926,7 @@ function HowIndicatorsWorkPanel({
           ],
           [
             "Internal Research",
-            "Model context is governance-only and does not publish exact probabilities or official scores.",
+            "Model context is governance-only and does not publish exact probabilities or official determinations.",
           ],
         ].map(([label, description]) => (
           <div
@@ -2274,16 +2737,20 @@ function DataStillNeededStrip({ onInspect }: { onInspect: () => void }) {
 }
 
 function ExecutiveSignalCard({
+  onInspect,
   signal,
 }: {
+  onInspect: () => void;
   signal: ExecutiveSignalCardModel;
 }) {
   return (
-    <div
+    <button
       className={cn(
-        "cfs-command-card min-h-[9.5rem] rounded-lg p-3",
+        "cfs-command-card min-h-[10rem] rounded-lg p-3 text-left transition hover:-translate-y-0.5 hover:border-[#68d8ff]/30 hover:bg-white/[0.055] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/60",
         getSignalToneClass(signal.tone),
       )}
+      onClick={onInspect}
+      type="button"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -2302,9 +2769,39 @@ function ExecutiveSignalCard({
         {signal.value}
       </p>
       <p className="mt-1 truncate text-xs text-slate-300">{signal.subvalue}</p>
-      <p className="mt-3 rounded border border-white/10 bg-white/[0.035] px-2 py-1 text-[10px] font-semibold text-slate-400">
-        {signal.caveat}
-      </p>
+      <div className="mt-3 grid gap-1.5">
+        {signal.sparkline?.length ? (
+          <TinySparkline data={signal.sparkline} />
+        ) : null}
+        <p className="rounded border border-white/10 bg-white/[0.035] px-2 py-1 text-[10px] font-semibold text-slate-400">
+          {signal.confidence}
+        </p>
+        <p className="text-[10px] leading-4 text-slate-500">
+          {signal.caveat}
+        </p>
+      </div>
+    </button>
+  );
+}
+
+function TinySparkline({ data }: { data: ChartDatum[] }) {
+  const maxValue = Math.max(...data.map((datum) => datum.value), 0);
+
+  return (
+    <div className="flex h-8 items-end gap-1 rounded border border-white/10 bg-black/18 px-2 py-1.5">
+      {data.map((datum) => (
+        <span
+          className="min-h-1 flex-1 rounded-t bg-[#68d8ff]/70"
+          key={`${datum.label}-${datum.value}`}
+          style={{
+            height:
+              maxValue > 0
+                ? `${Math.max(10, (datum.value / maxValue) * 100)}%`
+                : "10%",
+          }}
+          title={`${datum.label}: ${formatCount(datum.value)}`}
+        />
+      ))}
     </div>
   );
 }
@@ -2409,30 +2906,6 @@ function MiniChartCard({
   );
 }
 
-function SectionHeader({
-  compact = false,
-  description,
-  icon,
-  title,
-}: {
-  compact?: boolean;
-  description: string;
-  icon: ReactNode;
-  title: string;
-}) {
-  return (
-    <div className={cn("flex items-start gap-3", compact && "mt-4")}>
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#68d8ff]/24 bg-[#68d8ff]/10 text-[#8fe7ff]">
-        {icon}
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold text-white">{title}</h3>
-        <p className="mt-0.5 text-xs leading-5 text-slate-500">{description}</p>
-      </div>
-    </div>
-  );
-}
-
 function getIndicatorByGroup(groupId: IndicatorCenterGroupId) {
   return (
     indicatorCenterDefinitions.find((indicator) => indicator.groupId === groupId) ??
@@ -2485,6 +2958,23 @@ function getPrioritySort(priority: string) {
 
 function formatCount(value: number) {
   return numberFormatter.format(value);
+}
+
+function formatFreshnessLabel(value: string | null) {
+  if (!value) {
+    return USE_DEMO_DATA ? "cached demo extract" : "current session";
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(parsed);
 }
 
 function shortCaveat(caveat: string) {

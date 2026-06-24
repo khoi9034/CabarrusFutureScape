@@ -1606,10 +1606,13 @@ def test_phase27b_workspace_indicator_center_mode() -> None:
 
     assert "IndicatorCenterWorkspace" in app_shell_text
     assert "CFS Mission Control" in indicator_workspace_text
-    assert "Current countywide monitoring posture from existing CFS intelligence." in indicator_workspace_text
-    assert "Critical Signals" in indicator_workspace_text
-    assert "Monitoring Charts" in indicator_workspace_text
-    assert "Priority Issues Board" in indicator_workspace_text
+    assert "County growth, constraint, and readiness monitoring." in indicator_workspace_text
+    assert "Primary KPI Strip" in indicator_workspace_text
+    assert "Current Readiness Posture" in indicator_workspace_text
+    assert "Trend Intelligence" in indicator_workspace_text
+    assert "Operational Watchlist Board" in indicator_workspace_text
+    assert "Domain Readiness Matrix" in indicator_workspace_text
+    assert "IndicatorReadinessTabs" in indicator_workspace_text
     assert "Infrastructure & Utility Readiness" in indicator_workspace_text
     assert "Data Still Needed" in indicator_workspace_text
     assert "buildIndicatorCenterSummaryCards" in indicator_workspace_text
@@ -1724,7 +1727,7 @@ def test_phase28a_indicator_center_foundation_dashboard() -> None:
 
     assert "IndicatorCenterWorkspace" in app_shell_text
     assert "CFS Mission Control" in indicator_workspace_text
-    assert "Current countywide monitoring posture from existing CFS intelligence." in indicator_workspace_text
+    assert "County growth, constraint, and readiness monitoring." in indicator_workspace_text
     assert "No map required" in indicator_workspace_text
     assert "buildIndicatorCenterSummaryCards" in indicator_workspace_text
     assert "permit records" in indicator_config_text
@@ -1876,11 +1879,21 @@ def test_phase28i_indicator_center_drawer_labels_charts_cleanup() -> None:
 
     for required in [
         "CFS Mission Control",
-        "Critical Signals",
-        "Monitoring Charts",
-        "Priority Issues Board",
+        "Primary KPI Strip",
+        "Current Readiness Posture",
+        "Trend Intelligence",
+        "Compact Monitoring Visuals",
+        "Operational Watchlist Board",
+        "Domain Readiness Matrix",
+        "IndicatorReadinessTabs",
+        "DomainReadinessMatrix",
+        "MissionHeader",
         "Data Still Needed",
-        "Current countywide monitoring posture from existing CFS intelligence.",
+        "County growth, constraint, and readiness monitoring.",
+        "Portfolio Demo",
+        "Cached demo extract",
+        "Local Live Data",
+        "Transportation Project Context",
         "DataStillNeededStrip",
         "DrawerResizeHandleElement",
         "SchoolSeedTable",
