@@ -116,6 +116,40 @@ parcel search. It uses cached demo extracts and clearly labels the public site
 as a Portfolio Demo. The full local version remains the source of truth for
 PostGIS-backed countywide data.
 
+### Ask CFS Indicator Search
+
+Indicator Center includes `Ask CFS`, a grounded search panel for CFS indicators,
+layers, methodology, school pressure, floodplain review, Model Lab context, and
+data readiness.
+
+Local deterministic mode works without paid AI keys:
+
+```text
+CFS_AI_ENABLED=false
+CFS_AI_PROVIDER=none
+```
+
+Optional provider mode is backend-only:
+
+```text
+CFS_AI_ENABLED=true
+CFS_AI_PROVIDER=openai
+CFS_AI_MODEL=<model name>
+OPENAI_API_KEY=<backend only>
+```
+
+or:
+
+```text
+CFS_AI_ENABLED=true
+CFS_AI_PROVIDER=anthropic
+CFS_AI_MODEL=<model name>
+ANTHROPIC_API_KEY=<backend only>
+```
+
+Do not add AI keys to frontend env or Vercel portfolio demo env. Public demo mode
+uses static cached demo answers and does not call the backend or external AI.
+
 Regenerate the static portfolio data locally with:
 
 ```powershell

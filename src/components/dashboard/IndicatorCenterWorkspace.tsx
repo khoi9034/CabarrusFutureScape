@@ -34,6 +34,7 @@ import {
 import {
   CFS_PLANNING_SNAPSHOT_SAVED_EVENT,
 } from "@/components/dashboard/OverviewCommandCenter";
+import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import {
   buildIndicatorCenterReviewThemes,
   indicatorCenterDefinitions,
@@ -718,6 +719,10 @@ export function IndicatorCenterWorkspace() {
         }}
         snapshotSaving={snapshotSaving}
       />
+
+      <div className="mt-4">
+        <AskCfsPanel />
+      </div>
 
       <IndicatorReadinessTabs
         activeTab={activeReadinessTab}

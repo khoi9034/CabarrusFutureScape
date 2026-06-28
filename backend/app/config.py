@@ -6,6 +6,7 @@ from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 EnvironmentName = Literal["dev", "test", "prod"]
+AiProviderName = Literal["none", "openai", "anthropic"]
 BACKEND_ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 LOCAL_FRONTEND_CORS_ORIGINS = (
     "http://localhost:3000",
@@ -75,6 +76,26 @@ class Settings(BaseSettings):
     cors_allowed_origins: str = Field(
         default=",".join(LOCAL_FRONTEND_CORS_ORIGINS),
         validation_alias=AliasChoices("CORS_ALLOWED_ORIGINS", "CFS_CORS_ALLOWED_ORIGINS"),
+    )
+    cfs_ai_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("CFS_AI_ENABLED"),
+    )
+    cfs_ai_provider: AiProviderName = Field(
+        default="none",
+        validation_alias=AliasChoices("CFS_AI_PROVIDER"),
+    )
+    cfs_ai_model: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_AI_MODEL"),
+    )
+    openai_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("OPENAI_API_KEY"),
+    )
+    anthropic_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("ANTHROPIC_API_KEY"),
     )
 
     model_config = SettingsConfigDict(

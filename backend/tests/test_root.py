@@ -18,8 +18,9 @@ def test_root_endpoint_returns_api_status() -> None:
     assert body["health"] == "/health"
     assert body["database_health"] == "/health/database"
     assert body["api_groups"] == {
-        "parcels": "/parcels",
-        "development": "/development",
+        "ai_search": "/ai/search",
         "constraints": "/constraints",
+        "development": "/development",
         "indicators": "/indicators",
+        "parcels": "/parcels",
     }

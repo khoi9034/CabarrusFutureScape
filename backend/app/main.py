@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.config import get_settings
 from app.database import verify_database_connection
 from app.routers import (
+    ai_search_router,
     constraints_router,
     development_router,
     indicators_router,
@@ -48,6 +49,7 @@ def root() -> dict[str, object]:
             "parcels": "/parcels",
             "development": "/development",
             "constraints": "/constraints",
+            "ai_search": "/ai/search",
             "indicators": "/indicators",
         },
     }
@@ -77,3 +79,4 @@ app.include_router(temporal_router.router)
 app.include_router(constraints_router.router)
 app.include_router(school_constraints_router.router)
 app.include_router(indicators_router.router)
+app.include_router(ai_search_router.router)

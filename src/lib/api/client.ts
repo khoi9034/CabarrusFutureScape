@@ -208,6 +208,93 @@ export async function apiGet<TResponse>(
   }
 }
 
+export async function apiPost<TResponse>(
+  path: string,
+  body: unknown,
+  options: ApiRequestOptions = {},
+) {
+  const url = buildApiUrl(path);
+  const controller = new AbortController();
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  let timedOut = false;
+
+  const abortFromParentSignal = () => controller.abort();
+  if (options.signal) {
+    if (options.signal.aborted) {
+      controller.abort();
+    } else {
+      options.signal.addEventListener("abort", abortFromParentSignal, {
+        once: true,
+      });
+    }
+  }
+
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      body: JSON.stringify(body),
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      signal: controller.signal,
+    });
+
+    const payload = await parseApiPayload(response, url);
+
+    if (!response.ok) {
+      throw new ApiClientError({
+        displayMessage: getHttpDisplayMessage(response.status, url),
+        kind: "http",
+        message: `CFS API request failed with status ${response.status} for ${url}`,
+        payload,
+        status: response.status,
+        url,
+      });
+    }
+
+    return payload as TResponse;
+  } catch (error) {
+    if (error instanceof ApiClientError) {
+      throw error;
+    }
+
+    if (error instanceof DOMException && error.name === "AbortError") {
+      const kind = timedOut ? "timeout" : "cancelled";
+      throw new ApiClientError({
+        displayMessage: timedOut
+          ? API_TIMEOUT_DISPLAY_MESSAGE
+          : "CFS API request was cancelled.",
+        kind,
+        message: timedOut
+          ? `CFS API request timed out for ${url}`
+          : `CFS API request was cancelled for ${url}`,
+        payload: error,
+        status: null,
+        url,
+      });
+    }
+
+    throw new ApiClientError({
+      displayMessage: "CFS API request failed unexpectedly.",
+      kind: "unknown",
+      message: `CFS API request failed for ${url}`,
+      payload: error,
+      status: null,
+      url,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+    options.signal?.removeEventListener("abort", abortFromParentSignal);
+  }
+}
+
 export function getApiErrorDisplayMessage(
   error: unknown,
   fallback = "CFS API data is unavailable.",
