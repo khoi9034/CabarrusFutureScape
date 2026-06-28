@@ -3,7 +3,7 @@
   "current_best_internal_model": "Zoning + Transportation + Tax/Value",
   "exact_probabilities_shown": false,
   "feature_rows": 1430221,
-  "generated_at": "2026-06-28T17:32:05Z",
+  "generated_at": "2026-06-28T17:48:36Z",
   "model_status": "Internal only",
   "production_ready": false,
   "public_exposure_allowed": false,

@@ -471,7 +471,7 @@ export function ExecutivePrintView() {
                 value: "Capacity Data Needed",
               },
               {
-                label: "School capacity score",
+                label: "School capacity status",
                 value: schoolConstraint.scoreLabel || "Not scored",
               },
             ]}
@@ -480,7 +480,7 @@ export function ExecutivePrintView() {
             School assignment is based on attendance-zone polygon overlap.
             Presentation-derived utilization values require verification.
             Official school capacity/enrollment data has not been added yet.
-            School capacity score is not active.
+            Official capacity status is not active.
           </ReportCaveat>
         </ReportSection>
 
@@ -566,7 +566,7 @@ export function ExecutivePrintView() {
               },
               {
                 label: "Utility access proxy score",
-                value: "Internal research context; not a capacity score",
+                value: "Internal research context; not capacity confirmation",
               },
               { label: "True utility capacity", value: "Not available" },
             ]}

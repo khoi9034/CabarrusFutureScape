@@ -288,7 +288,7 @@ export function ParcelDetailDrawer({
                 ? `${mapFocus.centroid.latitude}, ${mapFocus.centroid.longitude}`
                 : null,
             ],
-            ["SceneView Action", mapFocusResult.canFocus ? "Ready" : "No-op"],
+            ["MapView Action", mapFocusResult.canFocus ? "Ready" : "No-op"],
           ]}
           title="Map Focus"
         />

@@ -463,7 +463,7 @@ function SelectedParcelDueDiligence({
       />
 
       <ReviewSection
-        caveat="School assignment is based on attendance-zone polygon overlap. Presentation-derived utilization values require verification. Official school capacity/enrollment data has not been added yet. School capacity score is not active."
+        caveat="School assignment is based on attendance-zone polygon overlap. Presentation-derived utilization values require verification. Official school capacity/enrollment data has not been added yet. Official capacity status is not active."
         facts={[
           ...schoolConstraint.assignments.flatMap((assignment) => [
             {
@@ -488,7 +488,7 @@ function SelectedParcelDueDiligence({
             value: "Capacity Data Needed",
           },
           {
-            label: "School constraint score",
+            label: "School constraint status",
             value: schoolConstraint.scoreLabel || "Not scored",
           },
         ]}
@@ -593,7 +593,7 @@ function SelectedParcelDueDiligence({
           },
           {
             label: "Utility access proxy score",
-            value: "Internal research context; not a capacity score",
+            value: "Internal research context; not capacity confirmation",
           },
           {
             label: "True utility capacity",
@@ -653,7 +653,7 @@ function SelectedParcelDueDiligence({
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-400">
           Parcel focus and the selected parcel cage remain controlled by the
-          existing SceneView workflow. Active overlays:{" "}
+          existing MapView workflow. Active overlays:{" "}
           <span className="text-slate-200">
             {activeLayers.length ? activeLayers.join(", ") : "None"}
           </span>
@@ -2131,7 +2131,7 @@ function SnapshotVisualPreview({
             </p>
             <p className="max-w-xl text-xs leading-5 text-slate-500">
               {planningSnapshot.mapScreenshotFailureReason ??
-                "SceneView did not provide an image when this snapshot was saved."}
+                "MapView did not provide an image when this snapshot was saved."}
             </p>
           </div>
         )}
@@ -2162,7 +2162,7 @@ function SnapshotVisualPreview({
             Scale note
           </p>
           <p className="mt-1 text-xs leading-5 text-slate-400">
-            Scale is approximate; 3D scene perspective affects distance.
+            Scale is approximate for this browser map snapshot.
           </p>
           <p className="mt-2 text-xs leading-5 text-slate-500">
             Camera: {planningSnapshot.mapContext.cameraSummary ?? "Not captured"}
@@ -3488,7 +3488,7 @@ function ReportMapSnapshotSection({
             </p>
             <p className="max-w-xl text-xs leading-5 text-slate-500 print:text-slate-700">
               {planningSnapshot.mapScreenshotFailureReason ??
-                "SceneView did not provide an image when this snapshot was saved."}
+                "MapView did not provide an image when this snapshot was saved."}
             </p>
           </div>
         )}
@@ -3516,7 +3516,7 @@ function ReportMapSnapshotSection({
               Scale note
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-400 print:text-slate-700">
-              Scale is approximate; 3D scene perspective affects distance.
+              Scale is approximate for this browser map snapshot.
             </p>
           </div>
         </div>

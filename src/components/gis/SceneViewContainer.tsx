@@ -2259,8 +2259,7 @@ export function SceneViewContainer() {
             <p className="text-[11px] leading-5 text-slate-500">
               Presentation-derived SY 2024-2025 utilization seed. Needs
               verification against official enrollment and capacity data. This
-              is not official capacity scoring and is not a final school
-              capacity score.
+              is not an official capacity determination.
             </p>
           </div>
         </div>
@@ -2288,7 +2287,7 @@ function registerSceneViewSnapshotCapture(
   window.__cfsCaptureMapSnapshot = async () => {
     if (!view || view.destroyed) {
       return {
-        failureReason: "SceneView is not ready.",
+        failureReason: "MapView is not ready.",
         status: "unavailable",
       };
     }
@@ -2311,7 +2310,7 @@ function registerSceneViewSnapshotCapture(
           cameraSummary,
           capturedAt,
           extentSummary,
-          failureReason: "SceneView screenshot API is not available.",
+          failureReason: "MapView screenshot API is not available.",
           status: "unavailable",
         };
       }
@@ -2323,7 +2322,7 @@ function registerSceneViewSnapshotCapture(
           cameraSummary,
           capturedAt,
           extentSummary,
-          failureReason: "SceneView returned no screenshot image.",
+          failureReason: "MapView returned no screenshot image.",
           status: "failed",
         };
       }
@@ -2343,7 +2342,7 @@ function registerSceneViewSnapshotCapture(
         failureReason:
           error instanceof Error
             ? error.message
-            : "SceneView screenshot capture failed.",
+            : "MapView screenshot capture failed.",
         status: "failed",
       };
     }
@@ -2664,7 +2663,7 @@ function ensureParcelFocusLayer(runtime: ArcGISRuntime, view: SceneView) {
   const map = view.map;
 
   if (!map) {
-    throw new Error("SceneView map is unavailable for parcel focus.");
+    throw new Error("MapView map is unavailable for parcel focus.");
   }
 
   const existingLayer = map.findLayerById("cfs-parcel-focus-layer");
@@ -2786,7 +2785,7 @@ function ensureDevelopmentHotspotLayer(
   const map = view.map;
 
   if (!map) {
-    throw new Error("SceneView map is unavailable for development hotspots.");
+    throw new Error("MapView map is unavailable for development hotspots.");
   }
 
   const existingLayer = map.findLayerById("cfs-development-hotspots-layer");
@@ -2804,7 +2803,7 @@ function ensureFloodConstraintLayer(runtime: ArcGISRuntime, view: SceneView) {
   const map = view.map;
 
   if (!map) {
-    throw new Error("SceneView map is unavailable for flood constraints.");
+    throw new Error("MapView map is unavailable for flood constraints.");
   }
 
   const existingLayer = map.findLayerById("cfs-flood-constraints-layer");
@@ -2822,7 +2821,7 @@ function ensureFemaFloodZoneLayer(runtime: ArcGISRuntime, view: SceneView) {
   const map = view.map;
 
   if (!map) {
-    throw new Error("SceneView map is unavailable for FEMA flood zones.");
+    throw new Error("MapView map is unavailable for FEMA flood zones.");
   }
 
   const existingLayer = map.findLayerById("cfs-fema-flood-zones-layer");
@@ -2843,7 +2842,7 @@ function ensureModelResearchPreviewLayer(
   const map = view.map;
 
   if (!map) {
-    throw new Error("SceneView map is unavailable for model research preview.");
+    throw new Error("MapView map is unavailable for model research preview.");
   }
 
   const existingLayer = map.findLayerById("cfs-model-research-preview-layer");
@@ -2864,7 +2863,7 @@ function ensureSchoolUtilizationZoneLayer(
   const map = view.map;
 
   if (!map) {
-    throw new Error("SceneView map is unavailable for school utilization zones.");
+    throw new Error("MapView map is unavailable for school utilization zones.");
   }
 
   const existingLayer = map.findLayerById(

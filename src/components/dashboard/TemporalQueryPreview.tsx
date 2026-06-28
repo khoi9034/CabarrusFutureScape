@@ -84,7 +84,7 @@ export function TemporalQueryPreview({
               temporalQuery.resultCount,
             )} paged records for this temporal context.`
           : "Generated static temporal artifacts remain available for this context."}{" "}
-        It does not alter the SceneView.
+        It does not alter the MapView.
       </p>
     </section>
   );

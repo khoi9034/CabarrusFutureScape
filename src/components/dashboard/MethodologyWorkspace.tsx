@@ -1739,8 +1739,7 @@ function PlatformDiagnosticsCard() {
         <p className="max-w-3xl text-sm leading-6 text-slate-400">
           A compact live check for local demo readiness. It verifies service
           health, database connectivity, core aggregate APIs, and model-safety
-          flags without requesting parcel-level predictions or rendering the 3D
-          map.
+          flags without requesting parcel-level predictions or rendering a map.
         </p>
         <span className="shrink-0 rounded border border-white/10 bg-white/[0.035] px-2 py-1 text-[10px] font-semibold uppercase leading-4 text-slate-400">
           {isLoading

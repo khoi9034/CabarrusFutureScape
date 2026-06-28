@@ -13,8 +13,7 @@ export type LayerCategory =
 export type OperationalLayerKind =
   | "FeatureLayer"
   | "GraphicsLayer"
-  | "MapImageLayer"
-  | "SceneLayer";
+  | "MapImageLayer";
 
 export type LayerKind = OperationalLayerKind;
 

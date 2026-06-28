@@ -13,7 +13,6 @@ export const supportedArcGISLayerTypes: ArcGISLayerType[] = [
   "FeatureLayer",
   "GraphicsLayer",
   "MapImageLayer",
-  "SceneLayer",
 ];
 
 export const supportedLayerSourceStatuses: LayerSourceStatus[] = [

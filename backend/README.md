@@ -1457,7 +1457,7 @@ Important caveats:
   excluded from V1 outputs.
 - `public.school_capacity` is intentionally empty until vetted
   enrollment/capacity data is approved.
-- `capacity_status` is `not_available`, school scores are `null`, and
+- `capacity_status` is `not_available`, school scoring fields are `null`, and
   `school_constraint_class` is `not_scored`.
 
 Current global metrics:

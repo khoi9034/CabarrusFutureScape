@@ -430,11 +430,11 @@ export const futureOperationalLayerPlaceholders: OperationalLayer[] = [
     futureSource: "Planning and zoning MapImageLayer",
   },
   {
-    id: "future-built-environment-scene",
-    title: "Future Built Environment Scene",
+    id: "future-built-environment-layer",
+    title: "Future Built Environment Layer",
     category: "Infrastructure",
     description: "Disabled placeholder for future buildings or infrastructure.",
-    kind: "SceneLayer",
+    kind: "GraphicsLayer",
     defaultVisible: false,
     visibility: false,
     sourceStatus: "disabled",
@@ -446,9 +446,9 @@ export const futureOperationalLayerPlaceholders: OperationalLayer[] = [
     },
     renderer: {
       description: "Future buildings and infrastructure service.",
-      type: "3d-object",
+      type: "simple",
     },
-    futureSource: "Cabarrus buildings or infrastructure SceneLayer",
+    futureSource: "Cabarrus buildings or infrastructure layer",
   },
 ];
 

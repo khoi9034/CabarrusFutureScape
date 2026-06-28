@@ -85,7 +85,7 @@ export function resolveParcelMapFocus(
       canFocus: false,
       focusStatus: "idle",
       message:
-        "Static map mode. Select a parcel to prepare future SceneView focus.",
+        "Static map mode. Select a parcel to prepare map focus.",
       mode: "no-selection",
       requiredBackendFields: REQUIRED_BACKEND_FIELDS,
     };
@@ -118,7 +118,7 @@ export function resolveParcelMapFocus(
       canFocus: false,
       focusStatus: "unsupported",
       message:
-        "SceneView focus is unavailable, so the selected parcel remains in static detail mode.",
+        "Map focus is unavailable, so the selected parcel remains in static detail mode.",
       mode: "no-op",
       requiredBackendFields: REQUIRED_BACKEND_FIELDS,
     };
@@ -139,7 +139,7 @@ export function resolveParcelMapFocus(
           ? hasHighlightGeometry
             ? "Parcel boundary highlighted."
             : "Focused on map — boundary unavailable."
-          : "Map focus ready. SceneView can zoom and show a lightweight focus marker for this parcel.",
+          : "Map focus ready. MapView can zoom and show a lightweight focus marker for this parcel.",
       mode: "focus-ready",
       requiredBackendFields: [],
     };
@@ -152,7 +152,7 @@ export function resolveParcelMapFocus(
     canFocus: false,
     focusStatus: "pending-geometry",
     message:
-      "Map focus pending geometry. The backend needs a parcel centroid, extent, or display geometry before SceneView can zoom or highlight this record.",
+      "Map focus pending geometry. The backend needs a parcel centroid, extent, or display geometry before MapView can zoom or highlight this record.",
     mode: "no-op",
     requiredBackendFields: REQUIRED_BACKEND_FIELDS,
   };
@@ -175,7 +175,7 @@ export function getParcelMapFocusStatusLabel(
     case "pending-geometry":
       return "Map focus pending geometry";
     case "unsupported":
-      return "Mock SceneView mode";
+      return "Static map mode";
     case "idle":
     default:
       return "Static map mode";

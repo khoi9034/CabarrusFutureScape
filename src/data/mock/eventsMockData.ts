@@ -104,7 +104,7 @@ export const mockOperationalEvents: OperationalEvent[] = [
   {
     id: "evt-system-scene-online",
     description:
-      "ArcGIS SceneView runtime, mock GraphicsLayers, and dashboard URL state are reporting normal status.",
+      "ArcGIS MapView runtime, mock GraphicsLayers, and dashboard URL state are reporting normal status.",
     severity: "success",
     source: "system",
     timestamp: "2026-05-24T09:15:00-04:00",

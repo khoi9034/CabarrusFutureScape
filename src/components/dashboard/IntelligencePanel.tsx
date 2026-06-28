@@ -931,7 +931,7 @@ function SnapshotCapturePanel({
           value={latestCapturedMode}
         />
         <BriefStat
-          caveat="SceneView provides the map image when browser/GPU support allows it."
+          caveat="MapView provides the map image when browser support allows it."
           label="Map image"
           value={mapStatus}
         />
@@ -2931,7 +2931,7 @@ async function captureMapSnapshotForPlanning(): Promise<PlanningMapSnapshotCaptu
 
   if (!cfsWindow.__cfsCaptureMapSnapshot) {
     return {
-      failureReason: "SceneView screenshot helper is not available.",
+      failureReason: "MapView screenshot helper is not available.",
       status: "unavailable",
     };
   }
@@ -2942,7 +2942,7 @@ async function captureMapSnapshotForPlanning(): Promise<PlanningMapSnapshotCaptu
         resolve({
           capturedAt: new Date().toISOString(),
           failureReason:
-            "SceneView screenshot capture timed out; snapshot was saved without a map image.",
+            "MapView screenshot capture timed out; snapshot was saved without a map image.",
           status: "failed",
         });
       }, MAP_SNAPSHOT_CAPTURE_TIMEOUT_MS);
@@ -3115,7 +3115,7 @@ function buildPlanningSnapshot({
         : [
             `Map screenshot unavailable: ${
               mapSnapshot.failureReason ??
-              "SceneView did not provide a map image."
+              "MapView did not provide a map image."
             }`,
           ]),
     ],
@@ -3153,7 +3153,7 @@ function buildPlanningSnapshot({
       {
         caveat:
           mapSnapshot.status === "captured"
-            ? "The image reflects the browser SceneView at capture time."
+            ? "The image reflects the browser MapView at capture time."
             : "The snapshot was saved without a map image because capture was unavailable.",
         label: "Map Snapshot",
         meaning:
@@ -3164,7 +3164,7 @@ function buildPlanningSnapshot({
           mapSnapshot.status === "captured"
             ? "Use the image as visual context, not as an official GIS export."
             : "Reopen Overview and save another snapshot if a map image is needed.",
-        source: "ArcGIS SceneView browser screenshot",
+        source: "ArcGIS MapView browser screenshot",
         value:
           mapSnapshot.status === "captured"
             ? "Captured"
@@ -3452,9 +3452,9 @@ function buildPlanningSnapshot({
         label: "Map snapshot",
         reason:
           mapSnapshot.status === "captured"
-            ? "SceneView image was captured for the report."
+            ? "MapView image was captured for the report."
             : mapSnapshot.failureReason ??
-              "SceneView image was not available when the snapshot was saved.",
+              "MapView image was not available when the snapshot was saved.",
         status:
           mapSnapshot.status === "captured"
             ? "Captured"
@@ -3779,7 +3779,7 @@ function buildContextOnlyPlanningSnapshot({
         : [
             `Map screenshot unavailable: ${
               mapSnapshot.failureReason ??
-              "SceneView did not provide a map image."
+              "MapView did not provide a map image."
             }`,
           ]),
       ...(indicatorCenterContext
@@ -3819,7 +3819,7 @@ function buildContextOnlyPlanningSnapshot({
       {
         caveat:
           mapSnapshot.status === "captured"
-            ? "The image reflects the browser SceneView at capture time."
+            ? "The image reflects the browser MapView at capture time."
             : "The snapshot was saved without a map image because capture was unavailable.",
         label: "Map Snapshot",
         meaning:
@@ -3830,7 +3830,7 @@ function buildContextOnlyPlanningSnapshot({
           mapSnapshot.status === "captured"
             ? "Use the image as visual context, not as an official GIS export."
             : "Reopen Overview and save another snapshot if a map image is needed.",
-        source: "ArcGIS SceneView browser screenshot",
+        source: "ArcGIS MapView browser screenshot",
         value: mapStatusLabel,
       },
       {
@@ -4093,9 +4093,9 @@ function buildContextOnlyPlanningSnapshot({
         label: "Map snapshot",
         reason:
           mapSnapshot.status === "captured"
-            ? "SceneView image was captured for the report."
+            ? "MapView image was captured for the report."
             : mapSnapshot.failureReason ??
-              "SceneView image was not available when the snapshot was saved.",
+              "MapView image was not available when the snapshot was saved.",
         status: mapStatusLabel,
       },
       {

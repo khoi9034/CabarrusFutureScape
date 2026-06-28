@@ -888,7 +888,7 @@ def test_phase24e_planning_snapshot_simplified_report_builder() -> None:
         assert legend_label in snapshot_text
 
     assert "NorthArrow" in snapshot_text
-    assert "Scale is approximate; 3D scene perspective affects distance." in snapshot_text
+    assert "Scale is approximate for this browser map snapshot." in snapshot_text
     assert "Active layers are listed below. No specialized legend was available" in snapshot_text
     assert "This is an internal research preview. It does not show exact parcel" in snapshot_text
     assert "showExplanationCards ? (" in snapshot_text
@@ -1226,7 +1226,7 @@ def test_phase25c_left_panel_and_snapshot_report_builder_cleanup() -> None:
     assert "Key Statistics" in snapshot_text
     assert "Report title" in snapshot_text
     assert "NorthArrow" in snapshot_text
-    assert "Scale is approximate; 3D scene perspective affects distance." in snapshot_text
+    assert "Scale is approximate for this browser map snapshot." in snapshot_text
     assert "renamePlanningSnapshot" in state_text
 
     user_facing_text = "\n".join(

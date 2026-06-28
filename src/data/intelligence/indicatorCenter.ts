@@ -192,7 +192,7 @@ export function buildIndicatorCenterHeadlineMetrics({
       value: `${selectedGroupCount} of ${indicatorCenterDefinitions.length}`,
     },
     {
-      caveat: "Attention categories are labels, not official scores.",
+      caveat: "Attention categories are review labels, not official determinations.",
       label: "High attention categories",
       value: String(highAttentionCount),
     },

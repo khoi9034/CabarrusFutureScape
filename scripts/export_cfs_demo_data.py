@@ -99,6 +99,9 @@ def main() -> int:
         flood_summary = build_flood_summary(conn)
         school_watch = build_school_capacity_watch(conn)
         school_pressure = build_school_pressure_demo(conn, generated_at)
+        school_pressure_summary = summarize_school_pressure_response(
+            school_pressure,
+        )
         model_status = build_model_status(generated_at)
         model_lab_demo_clusters = build_model_lab_demo_clusters(conn, generated_at)
         sample_parcels = build_sample_parcels(conn, generated_at)
@@ -131,14 +134,7 @@ def main() -> int:
             "statistics": school_watch["statistics"],
             "utilization_seed": school_watch["utilization_seed"],
         },
-        "school_pressure": {
-            "as_of": school_pressure.get("as_of"),
-            "available": bool(school_pressure.get("features")),
-            "caveats": school_pressure.get("caveats", []),
-            "data_coverage_notes": school_pressure.get("data_coverage_notes", []),
-            "summary": school_pressure.get("summary", {}),
-            "total_count": school_pressure.get("total_count", 0),
-        },
+        "school_pressure": school_pressure_summary,
         "utility_readiness": {
             "caveat": "Utility proxy does not confirm available capacity.",
             "status": "Data still needed",
@@ -178,7 +174,7 @@ def main() -> int:
             "generated_at": generated_at,
             **school_watch,
         },
-        "school_pressure_summary.json": school_pressure,
+        "school_pressure_summary.json": school_pressure_summary,
         "model_status.json": model_status,
         "sample_parcels.json": sample_parcels,
         "model_lab_demo_clusters.json": model_lab_demo_clusters,
@@ -2004,6 +2000,20 @@ def empty_school_pressure_response(generated_at: str) -> dict[str, Any]:
             "recent_residential_permits_in_watched_areas": 0,
         },
         "total_count": 0,
+    }
+
+
+def summarize_school_pressure_response(response: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "as_of": response.get("as_of"),
+        "available": bool(response.get("features")),
+        "caveats": response.get("caveats", []),
+        "data_coverage_notes": response.get("data_coverage_notes", []),
+        "limit": response.get("limit", 0),
+        "mode": response.get("mode", "demo"),
+        "offset": response.get("offset", 0),
+        "summary": response.get("summary", {}),
+        "total_count": response.get("total_count", 0),
     }
 
 

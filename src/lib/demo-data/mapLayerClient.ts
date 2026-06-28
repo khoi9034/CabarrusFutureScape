@@ -18,7 +18,10 @@ import type {
   SchoolUtilizationZoneLevel,
   SchoolUtilizationZoneMapPolygon,
 } from "@/types/map/schoolUtilizationZones";
-import type { SchoolPressureResponse } from "@/types/map/schoolPressure";
+import type {
+  SchoolPressureFeature,
+  SchoolPressureResponse,
+} from "@/types/map/schoolPressure";
 import type {
   ParcelFocusSource,
   ParcelHighlightGeometry,
@@ -184,7 +187,7 @@ export async function getDemoSchoolCapacityFeatures() {
 }
 
 export async function getDemoSchoolPressureResponse() {
-  return loadDemoDataJson<SchoolPressureResponse>("school_pressure_summary.json", {
+  const fallback: SchoolPressureResponse = {
     as_of: null,
     caveats: [
       "Portfolio demo school pressure extract is not available.",
@@ -203,7 +206,27 @@ export async function getDemoSchoolPressureResponse() {
       recent_residential_permits_in_watched_areas: 0,
     },
     total_count: 0,
-  });
+  };
+  const [summary, layer] = await Promise.all([
+    loadDemoDataJson<Partial<SchoolPressureResponse> & { available?: boolean }>(
+      "school_pressure_summary.json",
+      fallback,
+    ),
+    getDemoGeoJsonLayer("school_pressure"),
+  ]);
+  const features = layer.features.filter(
+    hasGeometry,
+  ) as unknown as SchoolPressureFeature[];
+
+  return {
+    ...fallback,
+    ...summary,
+    as_of: summary.as_of ?? layer.metadata?.generated_at ?? null,
+    features,
+    limit: summary.limit ?? features.length,
+    mode: summary.mode ?? "demo",
+    total_count: summary.total_count ?? features.length,
+  };
 }
 
 export async function getDemoTransportationFeatures() {

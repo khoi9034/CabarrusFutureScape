@@ -107,7 +107,7 @@ export function createMapInteractionController({
       } satisfies IdentifyQueryResult;
     }
 
-    // Future live FeatureLayer/SceneLayer identify will plug in here through
+    // Future live layer identify will plug in here through
     // the adapter. Phase 1 returns a mock-safe empty result because production
     // Cabarrus County services are intentionally disconnected.
     return identify(request);

@@ -46,7 +46,7 @@ class SchoolConstraintsService:
         "School assignments use attendance-zone polygon overlap; school point distance is not used.",
         "CFS V1 includes public CCS elementary, middle, and high schools only.",
         "KCS, private, magnet, Other, and non-level records are preserved for QA/future work but excluded from V1 assignment.",
-        "School capacity and enrollment data are not available yet; scores remain null/not_scored.",
+        "School capacity and enrollment data are not available yet; capacity status remains not_scored.",
     ]
     _UTILIZATION_SEED_CAVEATS = [
         "Utilization values are manually read from CCS capital planning presentation maps.",
@@ -63,7 +63,7 @@ class SchoolConstraintsService:
     _LEA_PUPIL_CONTEXT_CAVEATS = [
         "LEA pupil context is district-level only and is not school-level capacity data.",
         "Counts are not joined to parcels and do not populate public.school_capacity.",
-        "School capacity scores remain disabled until verified school-level enrollment and capacity data is ingested.",
+        "Verified school-level enrollment and capacity data is needed before capacity status can be finalized.",
     ]
 
     def __init__(self, repository: SchoolConstraintsRepository) -> None:

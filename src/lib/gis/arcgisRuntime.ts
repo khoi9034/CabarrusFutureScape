@@ -7,7 +7,6 @@ import type MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import type Point from "@arcgis/core/geometry/Point";
 import type Polygon from "@arcgis/core/geometry/Polygon";
 import type Polyline from "@arcgis/core/geometry/Polyline";
-import type SceneLayer from "@arcgis/core/layers/SceneLayer";
 import type MapView from "@arcgis/core/views/MapView";
 import type * as ArcGISReactiveUtils from "@arcgis/core/core/reactiveUtils";
 import type * as ArcGISWebMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils";
@@ -23,7 +22,6 @@ export interface ArcGISRuntime {
   Polygon: typeof Polygon;
   Polyline: typeof Polyline;
   reactiveUtils: typeof ArcGISReactiveUtils;
-  SceneLayer: typeof SceneLayer;
   MapView: typeof MapView;
   webMercatorUtils: typeof ArcGISWebMercatorUtils;
 }
@@ -35,7 +33,6 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     { default: FeatureLayer },
     { default: GraphicsLayer },
     { default: MapImageLayer },
-    { default: SceneLayer },
     { default: Graphic },
     { default: Point },
     { default: Polygon },
@@ -49,7 +46,6 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     import("@arcgis/core/layers/FeatureLayer.js"),
     import("@arcgis/core/layers/GraphicsLayer.js"),
     import("@arcgis/core/layers/MapImageLayer.js"),
-    import("@arcgis/core/layers/SceneLayer.js"),
     import("@arcgis/core/Graphic.js"),
     import("@arcgis/core/geometry/Point.js"),
     import("@arcgis/core/geometry/Polygon.js"),
@@ -70,7 +66,6 @@ export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
     Polygon,
     Polyline,
     reactiveUtils,
-    SceneLayer,
     MapView,
     webMercatorUtils,
   };

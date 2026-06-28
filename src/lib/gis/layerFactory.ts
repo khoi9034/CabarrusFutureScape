@@ -5,8 +5,6 @@ import type Layer from "@arcgis/core/layers/Layer";
 import type { LayerProperties } from "@arcgis/core/layers/Layer";
 import type MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import type { MapImageLayerProperties } from "@arcgis/core/layers/MapImageLayer";
-import type SceneLayer from "@arcgis/core/layers/SceneLayer";
-import type { SceneLayerProperties } from "@arcgis/core/layers/SceneLayer";
 import type { ArcGISRuntime } from "@/lib/gis/arcgisRuntime";
 import {
   hasValidServiceUrl,
@@ -23,8 +21,7 @@ import type { OperationalLayer } from "@/types";
 export type ArcGISOperationalLayer =
   | FeatureLayer
   | GraphicsLayer
-  | MapImageLayer
-  | SceneLayer;
+  | MapImageLayer;
 
 export type OperationalLayerInstanceMap = Partial<
   Record<string, ArcGISOperationalLayer>
@@ -106,10 +103,6 @@ export function createOperationalLayer(
       return new runtime.MapImageLayer(
         getMapImageLayerProperties(definition),
       ) as MapImageLayer;
-    case "SceneLayer":
-      return new runtime.SceneLayer(
-        getSceneLayerProperties(definition),
-      ) as SceneLayer;
     case "GraphicsLayer":
       return null;
     default:
@@ -218,18 +211,6 @@ function getMapImageLayerProperties(
 ): MapImageLayerProperties {
   return {
     ...getCommonLayerPropertiesObject(definition),
-    url: definition.serviceUrl,
-  };
-}
-
-function getSceneLayerProperties(
-  definition: OperationalLayer & { serviceUrl: string },
-): SceneLayerProperties {
-  return {
-    ...getCommonLayerPropertiesObject(definition),
-    outFields: definition.fields?.map((field) => field.name) ?? ["*"],
-    popupEnabled: definition.popup?.enabled ?? false,
-    popupTemplate: getPopupTemplate(definition),
     url: definition.serviceUrl,
   };
 }

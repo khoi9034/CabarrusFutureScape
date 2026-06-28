@@ -380,7 +380,7 @@ export const mockDatasetRegistryEntries: DatasetRegistryEntry[] = [
     layerContractId: "infrastructure-layer-contract",
     name: "Building Footprints",
     notes: [
-      "Future 3D digital twin context could use footprints, multipatch, or SceneLayer content.",
+      "Future built-environment context could use footprint or structure layers.",
     ],
     owner: {
       contactPlaceholder: "Enterprise GIS steward",

@@ -126,7 +126,7 @@ export function TemporalAnalysisPanel({
             : temporalQuery.source === "loading"
               ? "Checking FastAPI temporal analysis; generated static temporal data remains visible while the request completes."
               : "Static time-slice controls prepare future permit queries and playback."}{" "}
-        SceneView playback and map filtering remain disconnected.
+        MapView playback and map filtering remain disconnected.
       </p>
       {temporalQuery.errorMessage ? (
         <p className="mt-2 rounded-md border border-amber-300/15 bg-amber-300/[0.045] px-3 py-2 text-[11px] leading-5 text-amber-100/75">

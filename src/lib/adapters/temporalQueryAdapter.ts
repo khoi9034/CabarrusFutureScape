@@ -126,7 +126,7 @@ function buildApiQueryPreview(
     `-- Active parcels in context: ${response.summary.active_parcel_count}`,
     response.bbox_support.requested
       ? `-- BBOX requested but inactive: ${response.bbox_support.note}`
-      : "-- BBOX not requested; SceneView filtering remains disconnected.",
+      : "-- BBOX not requested; MapView filtering remains disconnected.",
   ].join("\n");
 }
 
@@ -175,7 +175,7 @@ export function normalizeDevelopmentTemporalQuery(
       response.summary.zoning_jurisdiction_breakdown.length,
     queryMode: getQueryMode(filters),
     summaryNote:
-      "Counts are returned by GET /development/temporal-query. SceneView playback and map filtering remain disconnected.",
+      "Counts are returned by GET /development/temporal-query. MapView playback and map filtering remain disconnected.",
   };
 
   return {
