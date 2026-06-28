@@ -129,26 +129,19 @@ CFS_AI_ENABLED=false
 CFS_AI_PROVIDER=none
 ```
 
-Optional provider mode is backend-only:
+Optional OpenAI provider mode is backend-only. Put real local keys in
+`backend.env`; do not commit that file.
 
 ```text
 CFS_AI_ENABLED=true
 CFS_AI_PROVIDER=openai
-CFS_AI_MODEL=<model name>
+CFS_AI_MODEL=gpt-5.1-mini
 OPENAI_API_KEY=<backend only>
 ```
 
-or:
-
-```text
-CFS_AI_ENABLED=true
-CFS_AI_PROVIDER=anthropic
-CFS_AI_MODEL=<model name>
-ANTHROPIC_API_KEY=<backend only>
-```
-
-Do not add AI keys to frontend env or Vercel portfolio demo env. Public demo mode
-uses static cached demo answers and does not call the backend or external AI.
+Do not add AI keys to frontend env, `NEXT_PUBLIC_*`, or Vercel portfolio demo
+env. Public demo mode uses static cached demo answers and does not call the
+backend or external AI.
 
 Regenerate the static portfolio data locally with:
 

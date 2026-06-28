@@ -9,7 +9,11 @@ import {
 import { getApiErrorDisplayMessage, USE_DEMO_DATA } from "@/lib/api/client";
 import type { CfsAiSearchResponse } from "@/types/api";
 
-export function AskCfsPanel() {
+export function AskCfsPanel({
+  onResponse,
+}: {
+  onResponse?: (response: CfsAiSearchResponse) => void;
+}) {
   const [answer, setAnswer] = useState<CfsAiSearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,12 +26,12 @@ export function AskCfsPanel() {
     setError(null);
     setIsLoading(true);
     try {
-      setAnswer(
-        await searchCfsAi({
-          mode: USE_DEMO_DATA ? "demo" : "live",
-          query: trimmedQuery,
-        }),
-      );
+      const response = await searchCfsAi({
+        mode: USE_DEMO_DATA ? "demo" : "live",
+        query: trimmedQuery,
+      });
+      setAnswer(response);
+      onResponse?.(response);
     } catch (requestError) {
       setAnswer(null);
       setError(
@@ -148,6 +152,10 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
 
       <aside className="space-y-3">
         <CompactList title="Related layers" values={response.related_layers} />
+        <CompactList
+          title="Recommended layers to inspect"
+          values={response.dashboard_actions?.recommended_layers ?? []}
+        />
         <CompactList title="Suggested next actions" values={response.suggested_actions} />
         <CompactList title="Caveats" tone="amber" values={response.caveats} />
       </aside>

@@ -9,6 +9,7 @@ import {
 } from "@/lib/demo-data/client";
 import { getDemoSchoolPressureResponse } from "@/lib/demo-data/mapLayerClient";
 import type {
+  CfsAiDashboardActions,
   CfsAiDomain,
   CfsAiEvidenceItem,
   CfsAiSearchRequest,
@@ -256,6 +257,7 @@ function baseDemoResponse(
       "Preliminary school capacity watch is not an official enrollment forecast.",
       "Model Lab is internal research only; no exact probabilities are shown.",
     ],
+    dashboard_actions: dashboardActionsForDomains(domains),
     data_mode: "demo",
     domains,
     evidence: evidenceItems,
@@ -281,6 +283,75 @@ function classifyDemoDomains(query: string): CfsAiDomain[] {
   add("data_readiness", ["missing", "coverage", "data", "readiness"]);
   add("methodology", ["method", "explain", "caveat", "limitation"]);
   return domains.slice(0, 3).length ? domains.slice(0, 3) : ["general"];
+}
+
+function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActions {
+  const primaryDomain = domains[0] ?? "general";
+  const actions: Partial<Record<CfsAiDomain, CfsAiDashboardActions>> = {
+    data_readiness: {
+      filter_watchlist: { domain: "data_readiness", status: "data needed" },
+      focus_domain: "data_readiness",
+      highlight_kpis: ["data_readiness"],
+      open_detail: { type: "domain", id: "data_readiness" },
+      sort_watchlist_by: "data_gap",
+    },
+    flood: {
+      focus_domain: "flood",
+      highlight_kpis: ["floodplain_review"],
+      open_detail: { type: "kpi", id: "floodplain_review" },
+      recommended_layers: ["Floodplain Review"],
+    },
+    general: {
+      focus_domain: "general",
+      highlight_kpis: ["observed_development_activity", "school_pressure"],
+      recommended_layers: [
+        "Development Hotspots",
+        "School Utilization + Permit Pressure",
+        "Floodplain Review",
+      ],
+    },
+    model_lab: {
+      focus_domain: "model_lab",
+      highlight_kpis: ["model_research_status"],
+      open_detail: { type: "domain", id: "model_lab" },
+      recommended_layers: ["Model Lab Research Signals"],
+    },
+    permits: {
+      focus_domain: "permits",
+      highlight_kpis: ["observed_development_activity"],
+      open_detail: { type: "kpi", id: "observed_development_activity" },
+      recommended_layers: ["Development Hotspots"],
+      sort_watchlist_by: "recent_activity",
+    },
+    schools: {
+      filter_watchlist: { domain: "schools", status: "elevated review" },
+      focus_domain: "schools",
+      highlight_kpis: ["school_pressure"],
+      open_detail: { type: "kpi", id: "school_pressure" },
+      recommended_layers: [
+        "School Utilization + Permit Pressure",
+        "Development Hotspots",
+      ],
+      sort_watchlist_by: "severity",
+    },
+    transportation: {
+      focus_domain: "transportation",
+      highlight_kpis: ["transportation_context"],
+      recommended_layers: ["Transportation Context"],
+    },
+    utilities: {
+      focus_domain: "utilities",
+      highlight_kpis: ["utility_readiness"],
+      recommended_layers: ["Utility Readiness"],
+    },
+    zoning: {
+      focus_domain: "zoning",
+      highlight_kpis: ["data_readiness"],
+      recommended_layers: ["Zoning / Land Use"],
+    },
+  };
+
+  return actions[primaryDomain] ?? actions.general ?? {};
 }
 
 function relatedLayers(domains: CfsAiDomain[]) {

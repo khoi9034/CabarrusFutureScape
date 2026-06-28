@@ -57,6 +57,7 @@ import type {
   PlanningSnapshot,
   PlanningSnapshotSectionKey,
 } from "@/types";
+import type { CfsAiDashboardActions, CfsAiSearchResponse } from "@/types/api";
 import type {
   SchoolPressureFeature,
   SchoolPressureLayerState,
@@ -410,6 +411,8 @@ export function IndicatorCenterWorkspace() {
   const indicatorDashboardSnapshotRef = useRef<HTMLDivElement | null>(null);
   const [activeReadinessTab, setActiveReadinessTab] =
     useState<IndicatorReadinessTabId>("all");
+  const [askCfsActions, setAskCfsActions] =
+    useState<CfsAiDashboardActions | null>(null);
   const [demoGeneratedAt, setDemoGeneratedAt] = useState<string | null>(null);
   const [showHowIndicatorsWork, setShowHowIndicatorsWork] = useState(false);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
@@ -482,6 +485,10 @@ export function IndicatorCenterWorkspace() {
     schoolCounts,
     visibleDefinitions,
   });
+  const visibleAttentionQueue = applyAskCfsWatchlistActions(
+    attentionQueue,
+    askCfsActions,
+  );
   const allDrilldownSections = buildDrilldownSections({
     developmentStatistics,
     developmentTrends,
@@ -704,6 +711,24 @@ export function IndicatorCenterWorkspace() {
     setProductMode("methodology");
   }
 
+  const handleAskCfsResponse = useCallback(
+    (response: CfsAiSearchResponse) => {
+      const actions = response.dashboard_actions ?? {};
+      setAskCfsActions(actions);
+
+      const nextTab = mapAskCfsFocusToTab(actions.focus_domain);
+      if (nextTab) {
+        setActiveReadinessTab(nextTab);
+      }
+
+      const detailIndicator = getAskCfsActionIndicator(actions.open_detail?.id);
+      if (detailIndicator) {
+        setSelectedIndicatorCenterContext(detailIndicator);
+      }
+    },
+    [setSelectedIndicatorCenterContext],
+  );
+
   return (
     <div
       className="h-full overflow-y-auto overflow-x-hidden bg-[linear-gradient(90deg,rgba(104,216,255,0.045)_1px,transparent_1px),linear-gradient(rgba(104,216,255,0.035)_1px,transparent_1px),radial-gradient(circle_at_top_left,rgba(104,216,255,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(236,92,255,0.08),transparent_32%),#02050b] bg-[length:42px_42px,42px_42px,100%_100%,100%_100%,100%_100%] p-4"
@@ -721,8 +746,15 @@ export function IndicatorCenterWorkspace() {
       />
 
       <div className="mt-4">
-        <AskCfsPanel />
+        <AskCfsPanel onResponse={handleAskCfsResponse} />
       </div>
+
+      {askCfsActions ? (
+        <AskCfsActionStrip
+          actions={askCfsActions}
+          onReset={() => setAskCfsActions(null)}
+        />
+      ) : null}
 
       <IndicatorReadinessTabs
         activeTab={activeReadinessTab}
@@ -747,6 +779,7 @@ export function IndicatorCenterWorkspace() {
           <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
             {visibleExecutiveSignals.map((signal) => (
               <ExecutiveSignalCard
+                highlighted={isAskCfsKpiHighlighted(signal, askCfsActions)}
                 key={signal.label}
                 onInspect={() =>
                   setSelectedIndicatorCenterContext(
@@ -810,10 +843,10 @@ export function IndicatorCenterWorkspace() {
 
       <section className="mt-4">
         <MissionSectionHeader
-          eyebrow="Operational Watchlist"
-          icon={<ListChecks className="h-4 w-4" />}
-          title="Operational Watchlist Board"
-          value={`${attentionQueue.length} rows`}
+            eyebrow="Operational Watchlist"
+            icon={<ListChecks className="h-4 w-4" />}
+            title="Operational Watchlist Board"
+          value={`${visibleAttentionQueue.length} rows`}
         />
         <div className="cfs-op-queue mt-3 overflow-hidden rounded-xl border border-white/10">
           <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 lg:grid lg:grid-cols-[8.5rem_minmax(12rem,1fr)_12rem_7rem_minmax(10rem,1fr)_5rem] lg:items-center lg:gap-2">
@@ -824,7 +857,7 @@ export function IndicatorCenterWorkspace() {
             <span>Next Action</span>
             <span>Inspect</span>
           </div>
-          {attentionQueue.map((row) => (
+          {visibleAttentionQueue.map((row) => (
             <AttentionRow
               key={`${row.indicator.indicatorId}-${row.indicatorName}-${row.currentEvidence}`}
               onInspect={() => setSelectedIndicatorCenterContext(row.indicator)}
@@ -1601,6 +1634,130 @@ function shouldShowGroupForReadinessTab(
     ?.groupIds.includes(groupId) ?? false;
 }
 
+function mapAskCfsFocusToTab(
+  focusDomain: CfsAiDashboardActions["focus_domain"] | undefined | null,
+): IndicatorReadinessTabId | null {
+  switch (focusDomain) {
+    case "data_readiness":
+    case "model_lab":
+    case "zoning":
+      return "data";
+    case "flood":
+      return "constraints";
+    case "permits":
+      return "growth";
+    case "schools":
+      return "schools";
+    case "transportation":
+    case "utilities":
+      return "infrastructure";
+    case "general":
+      return "all";
+    default:
+      return null;
+  }
+}
+
+function getAskCfsActionIndicator(id: string | undefined) {
+  const groupMap: Record<string, IndicatorCenterGroupId> = {
+    data_readiness: "data-gaps",
+    floodplain_review: "flood-review",
+    model_lab: "model-research",
+    model_research_status: "model-research",
+    observed_development_activity: "development-activity",
+    school_pressure: "school-context",
+  };
+  const groupId = id ? groupMap[id] : null;
+  return groupId ? getIndicatorByGroup(groupId) : null;
+}
+
+function isAskCfsKpiHighlighted(
+  signal: ExecutiveSignalCardModel,
+  actions: CfsAiDashboardActions | null,
+) {
+  const highlights = new Set(actions?.highlight_kpis ?? []);
+  if (!highlights.size) {
+    return false;
+  }
+  const kpiIds: Record<IndicatorCenterGroupId, string[]> = {
+    "data-gaps": ["data_readiness"],
+    "development-activity": ["observed_development_activity"],
+    "flood-review": ["floodplain_review"],
+    "model-research": ["model_research_status"],
+    "school-context": ["school_pressure"],
+    "utility-infrastructure": ["transportation_context", "utility_readiness"],
+  };
+  return (kpiIds[signal.groupId] ?? []).some((id) => highlights.has(id));
+}
+
+function applyAskCfsWatchlistActions(
+  rows: AttentionQueueRow[],
+  actions: CfsAiDashboardActions | null,
+) {
+  const filter = actions?.filter_watchlist;
+  const filteredRows = rows.filter((row) => {
+    if (filter?.domain && !watchlistMatchesDomain(row, filter.domain)) {
+      return false;
+    }
+    if (filter?.status && !watchlistMatchesStatus(row, filter.status)) {
+      return false;
+    }
+    return true;
+  });
+
+  switch (actions?.sort_watchlist_by) {
+    case "data_gap":
+      return [...filteredRows].sort((left, right) =>
+        Number(!watchlistMatchesDomain(left, "data_readiness")) -
+        Number(!watchlistMatchesDomain(right, "data_readiness")),
+      );
+    case "recent_activity":
+      return [...filteredRows].sort((left, right) =>
+        Number(left.indicator.groupId !== "development-activity") -
+        Number(right.indicator.groupId !== "development-activity"),
+      );
+    case "severity":
+      return [...filteredRows].sort(
+        (left, right) =>
+          getPrioritySort(left.priorityLabel) -
+          getPrioritySort(right.priorityLabel),
+      );
+    default:
+      return filteredRows;
+  }
+}
+
+function watchlistMatchesDomain(row: AttentionQueueRow, domain: string) {
+  const normalized = domain.toLowerCase();
+  const text = `${row.category} ${row.indicatorName} ${row.indicator.groupId}`.toLowerCase();
+  if (normalized === "data_readiness") {
+    return row.indicator.groupId === "data-gaps";
+  }
+  if (normalized === "schools") {
+    return row.indicator.groupId === "school-context" || text.includes("school");
+  }
+  if (normalized === "permits") {
+    return row.indicator.groupId === "development-activity" || text.includes("permit");
+  }
+  return text.includes(normalized.replace("_", " "));
+}
+
+function watchlistMatchesStatus(row: AttentionQueueRow, status: string) {
+  const normalized = status.toLowerCase();
+  const text = `${row.priorityLabel} ${row.currentEvidence} ${row.caveat}`.toLowerCase();
+  if (normalized === "elevated review") {
+    return text.includes("high attention") || text.includes("review");
+  }
+  if (normalized === "data needed") {
+    return text.includes("data needed") || text.includes("needed");
+  }
+  return text.includes(normalized);
+}
+
+function formatAskCfsLabel(value: string) {
+  return value.replaceAll("_", " ");
+}
+
 function buildDomainReadinessRows({
   developmentStatistics,
   floodSummary,
@@ -1846,6 +2003,45 @@ function IndicatorReadinessTabs({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function AskCfsActionStrip({
+  actions,
+  onReset,
+}: {
+  actions: CfsAiDashboardActions;
+  onReset: () => void;
+}) {
+  const recommendedLayers = actions.recommended_layers ?? [];
+  const filter = actions.filter_watchlist;
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#68d8ff]/18 bg-[#68d8ff]/[0.055] px-3 py-2 text-xs text-slate-300">
+      {actions.focus_domain ? (
+        <span className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-1 font-semibold text-[#b7f0ff]">
+          Ask CFS focus: {formatAskCfsLabel(actions.focus_domain)}
+        </span>
+      ) : null}
+      {filter?.domain || filter?.status ? (
+        <span className="rounded border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 font-semibold text-[#f6d98e]">
+          Ask CFS filter: {[filter.domain, filter.status].filter(Boolean).join(" / ")}
+        </span>
+      ) : null}
+      {recommendedLayers.length ? (
+        <span className="min-w-0 truncate">
+          Recommended layers to inspect: {recommendedLayers.join(", ")}
+        </span>
+      ) : null}
+      <button
+        className="ml-auto inline-flex items-center gap-1 rounded border border-white/10 bg-white/[0.04] px-2 py-1 font-semibold text-slate-200 hover:border-white/20"
+        onClick={onReset}
+        type="button"
+      >
+        <X className="h-3 w-3" />
+        Reset Ask CFS focus
+      </button>
     </div>
   );
 }
@@ -2784,9 +2980,11 @@ function DataStillNeededStrip({ onInspect }: { onInspect: () => void }) {
 }
 
 function ExecutiveSignalCard({
+  highlighted,
   onInspect,
   signal,
 }: {
+  highlighted?: boolean;
   onInspect: () => void;
   signal: ExecutiveSignalCardModel;
 }) {
@@ -2794,6 +2992,8 @@ function ExecutiveSignalCard({
     <button
       className={cn(
         "cfs-command-card min-h-[10rem] rounded-lg p-3 text-left transition hover:-translate-y-0.5 hover:border-[#68d8ff]/30 hover:bg-white/[0.055] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/60",
+        highlighted &&
+          "border-[#f6d98e]/60 bg-[#f6d98e]/[0.08] shadow-[0_0_28px_rgba(246,217,142,0.18)]",
         getSignalToneClass(signal.tone),
       )}
       onClick={onInspect}

@@ -6,6 +6,7 @@ from app.dependencies.database import get_read_only_db
 from app.main import app
 from app.routers import ai_search_router
 from app.schemas.ai_search import CfsAiSearchRequest
+from app.services import ai_search_service
 from app.services.ai_search_service import (
     CfsAiSearchService,
     classify_query_domains,
@@ -15,7 +16,6 @@ from app.services.ai_search_service import (
 
 def _settings(**overrides):
     values = {
-        "anthropic_api_key": "",
         "cfs_ai_enabled": False,
         "cfs_ai_model": "",
         "cfs_ai_provider": "none",
@@ -99,7 +99,24 @@ def test_ai_search_deterministic_fallback_answers_without_provider() -> None:
     assert response.provider == "none"
     assert response.domains == ["permits"]
     assert response.evidence
+    assert response.dashboard_actions.focus_domain == "permits"
+    assert "observed_development_activity" in response.dashboard_actions.highlight_kpis
     assert "Residential additions" in response.answer
+
+
+def test_ai_search_dashboard_action_mappings() -> None:
+    service = CfsAiSearchService(_settings())
+    cases = [
+        ("Which school areas need review?", "schools", "school_pressure"),
+        ("Summarize floodplain review signals.", "flood", "floodplain_review"),
+        ("Explain Model Lab in safe language.", "model_lab", "model_research_status"),
+        ("Where is data coverage incomplete?", "data_readiness", "data_readiness"),
+    ]
+
+    for query, focus, highlight in cases:
+        response = service.search(CfsAiSearchRequest(query=query), _context())
+        assert response.dashboard_actions.focus_domain == focus
+        assert highlight in response.dashboard_actions.highlight_kpis
 
 
 def test_ai_search_provider_missing_model_falls_back() -> None:
@@ -113,6 +130,30 @@ def test_ai_search_provider_missing_model_falls_back() -> None:
 
     assert response.provider == "none"
     assert "exact probabilities" in " ".join(response.caveats).lower()
+
+
+def test_ai_search_provider_failure_falls_back(monkeypatch) -> None:
+    monkeypatch.setattr(
+        ai_search_service,
+        "_post_provider_json",
+        lambda *_args, **_kwargs: None,
+    )
+    service = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="gpt-5.1-mini",
+            cfs_ai_provider="openai",
+            openai_api_key="test-key",
+        ),
+    )
+    response = service.search(
+        CfsAiSearchRequest(query="What are the main permit trends?"),
+        _context(),
+    )
+
+    assert response.provider == "none"
+    assert response.dashboard_actions.focus_domain == "permits"
+    assert "deterministic CFS answer returned" in " ".join(response.caveats)
 
 
 def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
@@ -133,6 +174,7 @@ def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
     body = response.json()
     assert body["provider"] == "none"
     assert body["domains"] == ["schools"]
+    assert body["dashboard_actions"]["focus_domain"] == "schools"
     text = str(body).lower()
     assert "prediction_probability" not in text
     assert "raw_score" not in text

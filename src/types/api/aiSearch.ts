@@ -27,14 +27,44 @@ export interface CfsAiEvidenceItem {
   title: string;
 }
 
+export interface CfsAiDashboardActions {
+  filter_watchlist?: {
+    domain?: string | null;
+    status?: string | null;
+  } | null;
+  focus_domain?:
+    | "data_readiness"
+    | "flood"
+    | "general"
+    | "model_lab"
+    | "permits"
+    | "schools"
+    | "transportation"
+    | "utilities"
+    | "zoning"
+    | null;
+  highlight_kpis?: string[];
+  open_detail?: {
+    type: "domain" | "kpi" | "watchlist";
+    id: string;
+  } | null;
+  recommended_layers?: string[];
+  sort_watchlist_by?: "data_gap" | "recent_activity" | "severity" | null;
+  time_range?: {
+    end_year?: number | null;
+    start_year?: number | null;
+  } | null;
+}
+
 export interface CfsAiSearchResponse {
   answer: string;
   as_of: string | null;
   caveats: string[];
+  dashboard_actions: CfsAiDashboardActions;
   data_mode: "demo" | "live";
   domains: CfsAiDomain[];
   evidence: CfsAiEvidenceItem[];
-  provider: "anthropic" | "none" | "openai";
+  provider: "none" | "openai";
   related_layers: string[];
   suggested_actions: string[];
 }

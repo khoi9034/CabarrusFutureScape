@@ -42,10 +42,14 @@ logs/next-dev.log
 .env*
 !.env.example
 !backend/.env.example
+backend.env
 backend/.venv/
 
 # vercel
 .vercel
+
+# generated run artifacts
+outputs/
 
 # typescript
 *.tsbuildinfo

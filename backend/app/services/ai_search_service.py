@@ -10,6 +10,7 @@ from typing import Any
 from app.config import Settings
 from app.schemas.ai_search import (
     CfsAiContext,
+    CfsAiDashboardActions,
     CfsAiDomain,
     CfsAiEvidenceItem,
     CfsAiSearchRequest,
@@ -34,6 +35,70 @@ RELATED_LAYERS = {
     "transportation": ["Transportation Context"],
     "utilities": ["Utility Readiness"],
     "zoning": ["Zoning / Land Use"],
+}
+
+DASHBOARD_ACTIONS: dict[CfsAiDomain, dict[str, Any]] = {
+    "data_readiness": {
+        "filter_watchlist": {"domain": "data_readiness", "status": "data needed"},
+        "focus_domain": "data_readiness",
+        "highlight_kpis": ["data_readiness"],
+        "open_detail": {"type": "domain", "id": "data_readiness"},
+        "sort_watchlist_by": "data_gap",
+    },
+    "flood": {
+        "focus_domain": "flood",
+        "highlight_kpis": ["floodplain_review"],
+        "open_detail": {"type": "kpi", "id": "floodplain_review"},
+        "recommended_layers": ["Floodplain Review"],
+    },
+    "general": {
+        "focus_domain": "general",
+        "highlight_kpis": ["observed_development_activity", "school_pressure"],
+        "recommended_layers": [
+            "Development Hotspots",
+            "School Utilization + Permit Pressure",
+            "Floodplain Review",
+        ],
+    },
+    "model_lab": {
+        "focus_domain": "model_lab",
+        "highlight_kpis": ["model_research_status"],
+        "open_detail": {"type": "domain", "id": "model_lab"},
+        "recommended_layers": ["Model Lab Research Signals"],
+    },
+    "permits": {
+        "focus_domain": "permits",
+        "highlight_kpis": ["observed_development_activity"],
+        "open_detail": {"type": "kpi", "id": "observed_development_activity"},
+        "recommended_layers": ["Development Hotspots"],
+        "sort_watchlist_by": "recent_activity",
+    },
+    "schools": {
+        "filter_watchlist": {"domain": "schools", "status": "elevated review"},
+        "focus_domain": "schools",
+        "highlight_kpis": ["school_pressure"],
+        "open_detail": {"type": "kpi", "id": "school_pressure"},
+        "recommended_layers": [
+            "School Utilization + Permit Pressure",
+            "Development Hotspots",
+        ],
+        "sort_watchlist_by": "severity",
+    },
+    "transportation": {
+        "focus_domain": "transportation",
+        "highlight_kpis": ["transportation_context"],
+        "recommended_layers": ["Transportation Context"],
+    },
+    "utilities": {
+        "focus_domain": "utilities",
+        "highlight_kpis": ["utility_readiness"],
+        "recommended_layers": ["Utility Readiness"],
+    },
+    "zoning": {
+        "focus_domain": "zoning",
+        "highlight_kpis": ["data_readiness"],
+        "recommended_layers": ["Zoning / Land Use"],
+    },
 }
 
 DOMAIN_KEYWORDS: list[tuple[CfsAiDomain, tuple[str, ...]]] = [
@@ -105,6 +170,10 @@ class CfsAiSearchService:
             data_mode=request.mode,
             domains=domains,
             evidence=_evidence_items(provider_payload.get("evidence")) or fallback.evidence,
+            dashboard_actions=_dashboard_actions_from_payload(
+                provider_payload.get("dashboard_actions"),
+            )
+            or fallback.dashboard_actions,
             provider=provider,
             related_layers=_string_list(provider_payload.get("related_layers"))
             or fallback.related_layers,
@@ -119,75 +188,42 @@ class CfsAiSearchService:
         context: CfsAiContext,
         domains: list[CfsAiDomain],
     ) -> dict[str, Any] | None:
-        if self._settings.cfs_ai_provider == "openai":
-            api_key = self._settings.openai_api_key.strip()
-            if not api_key:
-                return None
-            payload = {
-                "model": self._settings.cfs_ai_model.strip(),
-                "messages": [
-                    {"role": "system", "content": _provider_system_prompt()},
-                    {
-                        "role": "user",
-                        "content": json.dumps(
-                            {
-                                "domains": domains,
-                                "query": request.query,
-                                "cfs_context": compact_context(context),
-                            },
-                            default=str,
-                        ),
-                    },
-                ],
-                "response_format": {"type": "json_object"},
-            }
-            return _post_provider_json(
-                "https://api.openai.com/v1/chat/completions",
-                payload,
-                {
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json",
-                },
-                ["choices", 0, "message", "content"],
-            )
+        if self._settings.cfs_ai_provider != "openai":
+            return None
 
-        if self._settings.cfs_ai_provider == "anthropic":
-            api_key = self._settings.anthropic_api_key.strip()
-            if not api_key:
-                return None
-            payload = {
-                "max_tokens": 700,
-                "model": self._settings.cfs_ai_model.strip(),
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": (
-                            _provider_system_prompt()
-                            + "\n\nReturn JSON only.\n"
-                            + json.dumps(
-                                {
-                                    "domains": domains,
-                                    "query": request.query,
-                                    "cfs_context": compact_context(context),
-                                },
-                                default=str,
-                            )
-                        ),
-                    },
-                ],
-            }
-            return _post_provider_json(
-                "https://api.anthropic.com/v1/messages",
-                payload,
+        api_key = self._settings.openai_api_key.strip()
+        if not api_key:
+            return None
+        payload = {
+            "model": self._settings.cfs_ai_model.strip(),
+            "messages": [
+                {"role": "system", "content": _provider_system_prompt()},
                 {
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json",
-                    "x-api-key": api_key,
+                    "role": "user",
+                    "content": json.dumps(
+                        {
+                            "domains": domains,
+                            "query": request.query,
+                            "cfs_context": compact_context(context),
+                            "deterministic_dashboard_actions": dashboard_actions_for_domains(
+                                domains,
+                            ).model_dump(exclude_none=True),
+                        },
+                        default=str,
+                    ),
                 },
-                ["content", 0, "text"],
-            )
-
-        return None
+            ],
+            "response_format": {"type": "json_object"},
+        }
+        return _post_provider_json(
+            "https://api.openai.com/v1/chat/completions",
+            payload,
+            {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            ["choices", 0, "message", "content"],
+        )
 
 
 def classify_query_domains(query: str) -> list[CfsAiDomain]:
@@ -233,6 +269,20 @@ def sanitize_text(value: str) -> str:
     for pattern, replacement in UNSAFE_REPLACEMENTS.items():
         sanitized = re.sub(pattern, replacement, sanitized, flags=re.IGNORECASE)
     return sanitized
+
+
+def dashboard_actions_for_domains(
+    domains: list[CfsAiDomain],
+    request: CfsAiSearchRequest | None = None,
+) -> CfsAiDashboardActions:
+    primary = domains[0] if domains else "general"
+    payload = dict(DASHBOARD_ACTIONS.get(primary, DASHBOARD_ACTIONS["general"]))
+    if request and (request.filters.year_start or request.filters.year_end):
+        payload["time_range"] = {
+            "end_year": request.filters.year_end,
+            "start_year": request.filters.year_start,
+        }
+    return CfsAiDashboardActions.model_validate(payload)
 
 
 def compact_context(context: CfsAiContext) -> CfsAiContext:
@@ -499,6 +549,7 @@ def _response(
         answer=answer,
         as_of=context.get("as_of") or datetime.now(UTC).isoformat(),
         caveats=caveats,
+        dashboard_actions=dashboard_actions_for_domains(active_domains, None),
         data_mode=mode,  # type: ignore[arg-type]
         domains=active_domains,
         evidence=evidence,
@@ -589,14 +640,24 @@ def _evidence_items(value: Any) -> list[CfsAiEvidenceItem]:
     return items
 
 
+def _dashboard_actions_from_payload(value: Any) -> CfsAiDashboardActions | None:
+    if not isinstance(value, dict):
+        return None
+    try:
+        return CfsAiDashboardActions.model_validate(value)
+    except Exception:
+        return None
+
+
 def _provider_system_prompt() -> str:
     return (
         "You are the CFS planning intelligence assistant. Answer only from the supplied CFS context. "
-        "Do not invent data. Do not expose exact probabilities, raw model scores, official classifications, "
-        "owner names, mailing addresses, secrets, or database information. Use safe planning language. "
-        "If data is missing, say it is missing. Distinguish observed permit activity from prediction. "
-        "Distinguish preliminary school capacity watch from official school capacity findings. "
-        "Return JSON with answer, evidence, related_layers, caveats, and suggested_actions."
+        "Return valid JSON only. Do not invent data. Do not expose owner names, mailing addresses, secrets, "
+        "exact probabilities, raw model scores, official prediction classes, official school overcrowding claims, "
+        "or database connection details. Use safe planning language. Distinguish observed permit activity from "
+        "prediction. Distinguish preliminary school capacity watch from official school capacity findings. "
+        "dashboard_actions are UI suggestions only and do not create official claims. Return JSON with answer, "
+        "evidence, related_layers, caveats, suggested_actions, and dashboard_actions."
     )
 
 
@@ -628,5 +689,5 @@ def _post_provider_json(
     try:
         parsed = json.loads(content)
     except json.JSONDecodeError:
-        return {"answer": content}
+        return None
     return parsed if isinstance(parsed, dict) else None
