@@ -25,6 +25,10 @@ from app.schemas.school_constraints import (
     SchoolLeaPupilGradeValue,
     SchoolLeaPupilMeasureTotal,
     SchoolLevelAssignmentResponse,
+    SchoolPressureFeatureResponse,
+    SchoolPressurePropertiesResponse,
+    SchoolPressureResponse,
+    SchoolPressureSummaryResponse,
     SchoolQaIssueResponse,
     SchoolQaSummaryResponse,
     SchoolUtilizationSeedPageResponse,
@@ -49,6 +53,12 @@ class SchoolConstraintsService:
         "Presentation-derived values need verification against official enrollment and capacity files.",
         "The seed does not include enrollment counts, functional capacity, available seats, grade-level enrollment, or projections.",
         "The seed does not populate public.school_capacity and does not enable final school capacity scoring.",
+    ]
+    _SCHOOL_PRESSURE_CAVEATS = [
+        "Preliminary school capacity watch based on current utilization context and observed permit activity inside attendance areas.",
+        "Permit activity is not the same as student generation.",
+        "Student-level demographic data is not included.",
+        "This is not an official enrollment forecast.",
     ]
     _LEA_PUPIL_CONTEXT_CAVEATS = [
         "LEA pupil context is district-level only and is not school-level capacity data.",
@@ -337,6 +347,70 @@ class SchoolConstraintsService:
             caveats=self._UTILIZATION_SEED_CAVEATS,
         )
 
+    def get_school_pressure(
+        self,
+        *,
+        school_level: str = "all",
+        limit: int = 100,
+        offset: int = 0,
+    ) -> SchoolPressureResponse:
+        level = self._normalize_string(school_level) or "all"
+        if level not in {"all", "elementary", "middle", "high"}:
+            raise ValueError("level must be all, elementary, middle, or high")
+
+        limit = max(1, min(limit, 500))
+        offset = max(offset, 0)
+        page = self._repository.get_school_pressure_areas(
+            school_level=None if level == "all" else level,
+            limit=limit,
+            offset=offset,
+        )
+        features = [
+            self._school_pressure_feature(row, page.permit_data_available)
+            for row in page.records
+        ]
+        properties = [feature.properties for feature in features]
+        return SchoolPressureResponse(
+            as_of=None,
+            caveats=self._SCHOOL_PRESSURE_CAVEATS,
+            data_coverage_notes=[
+                "Observed permit activity joined by parcel assignment to school attendance areas."
+                if page.permit_data_available
+                else "Permit activity table or school assignment join is not available; permit pressure fields are data needed.",
+                "Official school enrollment/capacity verification is still needed.",
+            ],
+            features=features,
+            limit=limit,
+            mode="live",
+            offset=offset,
+            summary=SchoolPressureSummaryResponse(
+                areas_analyzed=len(features),
+                areas_with_recent_permits=sum(
+                    1 for item in properties if (item.permit_count_recent or 0) > 0
+                ),
+                areas_with_utilization=sum(
+                    1 for item in properties if item.utilization_pct is not None
+                ),
+                data_needed_count=sum(
+                    1
+                    for item in properties
+                    if item.school_pressure_watch_band == "data needed"
+                ),
+                elevated_review_count=sum(
+                    1
+                    for item in properties
+                    if item.school_pressure_watch_band == "elevated review"
+                ),
+                recent_residential_permits_in_watched_areas=sum(
+                    item.residential_permit_count_recent or 0
+                    for item in properties
+                    if item.school_pressure_watch_band
+                    in {"review", "elevated review"}
+                ),
+            ),
+            total_count=page.total_count,
+        )
+
     def get_lea_pupil_context_rows(
         self,
         *,
@@ -599,6 +673,74 @@ class SchoolConstraintsService:
             geometry=row["geometry"],
         )
 
+    def _school_pressure_feature(
+        self,
+        row: dict[str, Any],
+        permit_data_available: bool,
+    ) -> SchoolPressureFeatureResponse:
+        utilization_pct = _float_or_none(row.get("utilization_pct"))
+        utilization_status = row.get("utilization_class") or _utilization_status(
+            utilization_pct,
+        )
+        recent = _int_or_none(row.get("permit_count_recent"))
+        previous = _int_or_none(row.get("permit_count_previous"))
+        delta = (
+            recent - previous
+            if recent is not None and previous is not None
+            else None
+        )
+        growth_pct = (
+            round((delta / previous) * 100, 1)
+            if delta is not None and previous and previous > 0
+            else None
+        )
+        growth_band = _growth_pressure_band(recent)
+        watch_band = _school_pressure_watch_band(
+            permit_data_available=permit_data_available,
+            recent=recent,
+            utilization_status=utilization_status,
+            utilization_pct=utilization_pct,
+        )
+        top_reasons = _school_pressure_reasons(
+            permit_data_available=permit_data_available,
+            recent=recent,
+            utilization_status=utilization_status,
+            utilization_pct=utilization_pct,
+        )
+        caveats = list(self._SCHOOL_PRESSURE_CAVEATS)
+        if row.get("needs_verification", True):
+            caveats.append("Utilization context needs official verification.")
+
+        return SchoolPressureFeatureResponse(
+            geometry=row.get("geometry"),
+            properties=SchoolPressurePropertiesResponse(
+                attendance_area_id=row.get("zone_id"),
+                caveats=caveats,
+                enrollment_year=row.get("school_year"),
+                major_development_permit_count_recent=_int_or_none(
+                    row.get("major_development_permit_count_recent"),
+                ),
+                multifamily_permit_count_recent=_int_or_none(
+                    row.get("multifamily_permit_count_recent"),
+                ),
+                observed_growth_pressure_band=growth_band,
+                permit_count_previous=previous,
+                permit_count_recent=recent,
+                permit_growth_delta=delta,
+                permit_growth_pct=growth_pct,
+                recommended_followup=_school_pressure_followup(watch_band),
+                residential_permit_count_recent=_int_or_none(
+                    row.get("residential_permit_count_recent"),
+                ),
+                school_level=row.get("school_level"),
+                school_name=row.get("school_name"),
+                school_pressure_watch_band=watch_band,
+                top_reasons=top_reasons,
+                utilization_pct=utilization_pct,
+                utilization_status=utilization_status,
+            ),
+        )
+
     def _buckets(self, rows: list[dict[str, Any]]) -> list[SchoolConstraintBucket]:
         return [
             SchoolConstraintBucket(
@@ -674,3 +816,106 @@ class SchoolConstraintsService:
                 "utilization_class must be under_capacity, approaching_capacity, over_capacity, or severely_over_capacity"
             )
         return normalized
+
+
+def _float_or_none(value: Any) -> float | None:
+    if value is None:
+        return None
+    return float(value)
+
+
+def _int_or_none(value: Any) -> int | None:
+    if value is None:
+        return None
+    return int(value)
+
+
+def _utilization_status(utilization_pct: float | None) -> str | None:
+    if utilization_pct is None:
+        return None
+    if utilization_pct >= 110:
+        return "severely_over_capacity"
+    if utilization_pct >= 100:
+        return "over_capacity"
+    if utilization_pct >= 90:
+        return "near_capacity"
+    if utilization_pct >= 80:
+        return "approaching_capacity"
+    return "under_capacity"
+
+
+def _growth_pressure_band(recent: int | None) -> str:
+    if recent is None:
+        return "unknown"
+    if recent >= 40:
+        return "high"
+    if recent >= 15:
+        return "elevated"
+    if recent >= 5:
+        return "moderate"
+    return "low"
+
+
+def _school_pressure_watch_band(
+    *,
+    permit_data_available: bool,
+    recent: int | None,
+    utilization_pct: float | None,
+    utilization_status: str | None,
+) -> str:
+    if utilization_pct is None or not permit_data_available or recent is None:
+        return "data needed"
+
+    high_utilization = utilization_status in {
+        "near_capacity",
+        "over_capacity",
+        "severely_over_capacity",
+    }
+    high_growth = recent >= 15
+    moderate_growth = recent >= 5
+
+    if high_utilization and high_growth:
+        return "elevated review"
+    if high_utilization or moderate_growth:
+        return "review"
+    return "monitor"
+
+
+def _school_pressure_reasons(
+    *,
+    permit_data_available: bool,
+    recent: int | None,
+    utilization_pct: float | None,
+    utilization_status: str | None,
+) -> list[str]:
+    reasons: list[str] = []
+    if utilization_pct is None:
+        reasons.append("Utilization context is not available from the current source.")
+    elif utilization_status in {
+        "near_capacity",
+        "over_capacity",
+        "severely_over_capacity",
+    }:
+        reasons.append("Current utilization context is near or above local review thresholds.")
+    else:
+        reasons.append("Current utilization context is below local review thresholds.")
+
+    if not permit_data_available or recent is None:
+        reasons.append("Observed permit activity by attendance area is data needed.")
+    elif recent >= 15:
+        reasons.append("Recent observed permit activity is elevated inside the attendance area.")
+    elif recent > 0:
+        reasons.append("Observed permit activity exists inside the attendance area.")
+    else:
+        reasons.append("No recent observed permit activity was joined to this attendance area.")
+    return reasons
+
+
+def _school_pressure_followup(watch_band: str) -> str:
+    if watch_band == "data needed":
+        return "Request official enrollment/capacity data and confirm permit-to-attendance-area coverage."
+    if watch_band == "elevated review":
+        return "Review enrollment trends, approved subdivisions, and school capacity assumptions."
+    if watch_band == "review":
+        return "Review school utilization context with recent residential permit activity."
+    return "Monitor as part of regular planning review."

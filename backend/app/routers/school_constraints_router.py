@@ -18,6 +18,7 @@ from app.schemas.school_constraints import (
     SchoolDistrictSummaryResponse,
     SchoolLeaPupilContextResponse,
     SchoolLeaPupilContextSummaryResponse,
+    SchoolPressureResponse,
     SchoolQaSummaryResponse,
     SchoolUtilizationSeedPageResponse,
     SchoolUtilizationZonePageResponse,
@@ -239,6 +240,28 @@ def get_school_utilization_zones(
         return _service(db).get_utilization_zones(
             school_level=level,
             utilization_class=utilization_class,
+            limit=limit,
+            offset=offset,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+
+
+@router.get("/pressure", response_model=SchoolPressureResponse)
+def get_school_pressure(
+    level: str = "all",
+    limit: int = Query(default=100, ge=1),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_read_only_db),
+) -> SchoolPressureResponse:
+    """Return school utilization plus observed permit activity by attendance area."""
+
+    try:
+        return _service(db).get_school_pressure(
+            school_level=level,
             limit=limit,
             offset=offset,
         )

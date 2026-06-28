@@ -46,6 +46,7 @@ import { useDevelopmentTrends } from "@/hooks/useDevelopmentTrends";
 import { useFloodConstraintSummary } from "@/hooks/useFloodConstraintSummary";
 import { usePermitSegmentStatistics } from "@/hooks/usePermitSegmentStatistics";
 import { useSchoolConstraintSummary } from "@/hooks/useSchoolConstraintSummary";
+import { useSchoolPressureLayer } from "@/hooks/useSchoolPressureLayer";
 import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDemoManifest } from "@/lib/demo-data/client";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,11 @@ import type {
   PlanningSnapshot,
   PlanningSnapshotSectionKey,
 } from "@/types";
+import type {
+  SchoolPressureFeature,
+  SchoolPressureLayerState,
+  SchoolPressureSummary,
+} from "@/types/map/schoolPressure";
 
 export interface IndicatorCenterSummaryCard {
   caveat: string;
@@ -412,6 +418,7 @@ export function IndicatorCenterWorkspace() {
   const floodSummary = useFloodConstraintSummary();
   const permitSegments = usePermitSegmentStatistics();
   const schoolSummary = useSchoolConstraintSummary();
+  const schoolPressureLayer = useSchoolPressureLayer({ enabled: true });
 
   const schoolCounts = useMemo(
     () => getSchoolUtilizationCounts(schoolSummary),
@@ -496,6 +503,13 @@ export function IndicatorCenterWorkspace() {
   );
   const visibleExecutiveSignals = executiveSignals.filter((signal) =>
     shouldShowGroupForReadinessTab(signal.groupId, activeReadinessTab),
+  );
+  const showSchoolPressureSection = shouldShowGroupForReadinessTab(
+    "school-context",
+    activeReadinessTab,
+  );
+  const schoolPressureIndicator = buildSchoolPressureIndicatorContext(
+    schoolPressureLayer.summary,
   );
   const monitoringCharts = drilldownSections.filter((section) => section.chart);
   const permitSegmentChart = {
@@ -760,6 +774,34 @@ export function IndicatorCenterWorkspace() {
           </div>
         </section>
       </div>
+
+      {showSchoolPressureSection ? (
+        <section className="mt-4">
+          <MissionSectionHeader
+            eyebrow="School Utilization + Growth Pressure"
+            icon={<GraduationCap className="h-4 w-4" />}
+            title="Attendance-Area Development Pressure"
+            value={
+              schoolPressureLayer.status === "ready"
+                ? `${schoolPressureLayer.summary.areas_analyzed} areas`
+                : schoolPressureLayer.status === "loading"
+                  ? "Loading"
+                  : "Not available"
+            }
+          />
+          <SchoolPressureMissionPanel
+            features={schoolPressureLayer.features}
+            onInspect={(feature) =>
+              setSelectedIndicatorCenterContext(
+                feature
+                  ? buildSchoolPressureFeatureContext(feature)
+                  : schoolPressureIndicator,
+              )
+            }
+            state={schoolPressureLayer}
+          />
+        </section>
+      ) : null}
 
       <section className="mt-4">
         <MissionSectionHeader
@@ -2906,11 +2948,196 @@ function MiniChartCard({
   );
 }
 
+function SchoolPressureMissionPanel({
+  features,
+  onInspect,
+  state,
+}: {
+  features: SchoolPressureFeature[];
+  onInspect: (feature: SchoolPressureFeature | null) => void;
+  state: SchoolPressureLayerState;
+}) {
+  const watchRows = features
+    .filter((feature) =>
+      ["elevated review", "review", "data needed"].includes(
+        feature.properties.school_pressure_watch_band,
+      ),
+    )
+    .slice(0, 5);
+
+  return (
+    <div className="cfs-command-surface mt-3 rounded-xl border-white/10 p-4">
+      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+        <SchoolPressureKpi
+          label="Attendance areas reviewed"
+          value={
+            state.status === "loading"
+              ? "Loading"
+              : formatCount(state.summary.areas_analyzed)
+          }
+        />
+        <SchoolPressureKpi
+          label="Elevated review signal"
+          value={formatCount(state.summary.elevated_review_count)}
+        />
+        <SchoolPressureKpi
+          label="Missing utilization data"
+          value={formatCount(state.summary.data_needed_count)}
+        />
+        <SchoolPressureKpi
+          label="Watched-area residential permits"
+          value={formatCount(
+            state.summary.recent_residential_permits_in_watched_areas,
+          )}
+        />
+      </div>
+
+      {state.errorMessage ? (
+        <p className="mt-3 rounded border border-[#d8b86a]/20 bg-[#d8b86a]/[0.055] px-3 py-2 text-xs text-[#f6d98e]">
+          {state.errorMessage}
+        </p>
+      ) : null}
+
+      <div className="mt-4 overflow-hidden rounded-lg border border-white/10">
+        <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 lg:grid lg:grid-cols-[minmax(12rem,1fr)_6rem_8rem_8rem_5rem] lg:gap-2">
+          <span>School / Area</span>
+          <span>Level</span>
+          <span>Watch Band</span>
+          <span>Recent Permits</span>
+          <span>Inspect</span>
+        </div>
+        {(watchRows.length ? watchRows : features.slice(0, 3)).map((feature) => (
+          <button
+            className="grid w-full min-w-0 gap-2 border-b border-white/10 px-3 py-3 text-left transition last:border-b-0 hover:bg-white/[0.045] lg:grid-cols-[minmax(12rem,1fr)_6rem_8rem_8rem_5rem] lg:items-center lg:gap-2"
+            key={`${feature.properties.attendance_area_id ?? feature.properties.school_name ?? "school-pressure"}-${feature.properties.school_level ?? "level"}`}
+            onClick={() => onInspect(feature)}
+            type="button"
+          >
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold text-white">
+                {feature.properties.school_name ?? "Attendance area"}
+              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                Utilization + permit context
+              </span>
+            </span>
+            <span className="text-xs text-slate-300">
+              {formatSchoolPressureLevel(feature.properties.school_level)}
+            </span>
+            <span className="w-fit rounded border border-[#d8b86a]/20 bg-[#d8b86a]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#f6d98e]">
+              {feature.properties.school_pressure_watch_band}
+            </span>
+            <span className="text-xs font-semibold text-slate-200">
+              {formatNullableCount(feature.properties.permit_count_recent)}
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8fe7ff]">
+              Inspect
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+        <p>
+          Planning review signal only. Combines utilization context with observed
+          permit activity.
+        </p>
+        <button
+          className="rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:border-[#68d8ff]/45 hover:bg-[#68d8ff]/15"
+          onClick={() => onInspect(null)}
+          type="button"
+        >
+          Inspect method
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SchoolPressureKpi({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/24 px-3 py-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+    </div>
+  );
+}
+
 function getIndicatorByGroup(groupId: IndicatorCenterGroupId) {
   return (
     indicatorCenterDefinitions.find((indicator) => indicator.groupId === groupId) ??
     indicatorCenterDefinitions[0]
   );
+}
+
+function buildSchoolPressureIndicatorContext(
+  summary: SchoolPressureSummary,
+): IndicatorCenterContext {
+  return {
+    caveat:
+      "Planning review signal only; not an official enrollment forecast.",
+    category: "Schools",
+    chartSupported: true,
+    dataUsed: [
+      "School attendance areas",
+      "Preliminary utilization context",
+      "Observed permit activity by attendance area",
+    ],
+    groupId: "school-context",
+    indicatorId: "school-pressure",
+    name: "School Utilization + Permit Pressure",
+    officialDataNeeded: summary.data_needed_count > 0,
+    priority: summary.elevated_review_count > 0 ? "Review Needed" : "Context Available",
+    priorityLabel:
+      summary.elevated_review_count > 0 ? "Review Needed" : "Context Available",
+    recommendedFollowUp:
+      "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+    snapshotIncluded: true,
+    source: USE_DEMO_DATA
+      ? "Cached demo extract"
+      : "Local backend school pressure endpoint",
+    status:
+      summary.elevated_review_count > 0
+        ? "Planning review signal"
+        : "Context available",
+    title: "School Utilization + Permit Pressure",
+    whatItMeans:
+      "Compares current school utilization context with observed permit activity inside attendance areas.",
+  };
+}
+
+function buildSchoolPressureFeatureContext(
+  feature: SchoolPressureFeature,
+): IndicatorCenterContext {
+  const properties = feature.properties;
+  return {
+    ...buildSchoolPressureIndicatorContext({
+      areas_analyzed: 1,
+      areas_with_recent_permits:
+        (properties.permit_count_recent ?? 0) > 0 ? 1 : 0,
+      areas_with_utilization:
+        typeof properties.utilization_pct === "number" ? 1 : 0,
+      data_needed_count:
+        properties.school_pressure_watch_band === "data needed" ? 1 : 0,
+      elevated_review_count:
+        properties.school_pressure_watch_band === "elevated review" ? 1 : 0,
+      recent_residential_permits_in_watched_areas:
+        properties.residential_permit_count_recent ?? 0,
+    }),
+    indicatorId: `school-pressure-${properties.attendance_area_id ?? properties.school_name ?? "area"}`,
+    name: properties.school_name ?? "Attendance-area development pressure",
+    title: properties.school_name ?? "Attendance-Area Development Pressure",
+    status: properties.school_pressure_watch_band,
+    whatItMeans: [
+      `Watch band: ${properties.school_pressure_watch_band}.`,
+      `Recent permits: ${formatNullableCount(properties.permit_count_recent)}.`,
+      properties.utilization_pct === null
+        ? "Utilization percent is not available from current source."
+        : `Utilization context: ${properties.utilization_pct.toFixed(1)}%.`,
+    ].join(" "),
+  };
 }
 
 function getDrilldownById(
@@ -2958,6 +3185,32 @@ function getPrioritySort(priority: string) {
 
 function formatCount(value: number) {
   return numberFormatter.format(value);
+}
+
+function formatNullableCount(value: number | null | undefined) {
+  return typeof value === "number" ? formatCount(value) : "Not available";
+}
+
+function formatSchoolPressureLevel(value: string | null | undefined) {
+  if (!value) {
+    return "Level not available";
+  }
+
+  const normalized = value.toLowerCase();
+
+  if (normalized.startsWith("elem")) {
+    return "Elementary";
+  }
+
+  if (normalized.startsWith("mid")) {
+    return "Middle";
+  }
+
+  if (normalized.startsWith("high")) {
+    return "High";
+  }
+
+  return value;
 }
 
 function formatFreshnessLabel(value: string | null) {

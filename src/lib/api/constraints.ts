@@ -16,6 +16,7 @@ import type {
   SchoolUtilizationZonePageResponse,
   ParcelSchoolUtilizationSeedResponse,
 } from "@/types/api";
+import type { SchoolPressureResponse } from "@/types/map/schoolPressure";
 
 export interface FloodConstraintFilterParams extends ApiQueryParams {
   buildability_impact?: string;
@@ -93,6 +94,12 @@ export interface SchoolUtilizationZoneParams extends ApiQueryParams {
     | "over_capacity"
     | "severely_over_capacity"
     | "under_capacity";
+}
+
+export interface SchoolPressureParams extends ApiQueryParams {
+  level?: "all" | "elementary" | "high" | "middle";
+  limit?: number;
+  offset?: number;
 }
 
 export interface SchoolLeaPupilContextParams extends ApiQueryParams {
@@ -270,6 +277,17 @@ export function getSchoolUtilizationZones(
 ) {
   return apiGet<SchoolUtilizationZonePageResponse>(
     "/constraints/schools/utilization-zones",
+    params,
+    options,
+  );
+}
+
+export function getSchoolPressure(
+  params: SchoolPressureParams = {},
+  options?: ApiRequestOptions,
+) {
+  return apiGet<SchoolPressureResponse>(
+    "/constraints/schools/pressure",
     params,
     options,
   );

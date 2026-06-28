@@ -1165,13 +1165,13 @@
     "sfha_parcels": 7254,
     "total_parcels": 110017
   },
-  "generated_at": "2026-06-23T17:28:16Z",
+  "generated_at": "2026-06-28T17:32:05Z",
   "model_status": {
     "caveat": "Internal research only. No exact probabilities or raw scores are shown.",
     "current_best_internal_model": "Zoning + Transportation + Tax/Value",
     "exact_probabilities_shown": false,
     "feature_rows": 1430221,
-    "generated_at": "2026-06-23T17:28:16Z",
+    "generated_at": "2026-06-28T17:32:05Z",
     "model_status": "Internal only",
     "production_ready": false,
     "public_exposure_allowed": false,
@@ -1823,6 +1823,28 @@
       ],
       "total_count": 37
     }
+  },
+  "school_pressure": {
+    "as_of": "2026-06-28T17:32:05Z",
+    "available": true,
+    "caveats": [
+      "Portfolio demo uses a cached CFS demo extract.",
+      "Permit activity is not the same as student generation.",
+      "This is not an official enrollment forecast."
+    ],
+    "data_coverage_notes": [
+      "Observed permit activity joined by parcel assignment to school attendance areas.",
+      "Official school enrollment/capacity verification is still needed."
+    ],
+    "summary": {
+      "areas_analyzed": 35,
+      "areas_with_recent_permits": 35,
+      "areas_with_utilization": 35,
+      "data_needed_count": 0,
+      "elevated_review_count": 13,
+      "recent_residential_permits_in_watched_areas": 24285
+    },
+    "total_count": 35
   },
   "utility_readiness": {
     "caveat": "Utility proxy does not confirm available capacity.",

@@ -1,5 +1,5 @@
 import type Graphic from "@arcgis/core/Graphic";
-import type SceneView from "@arcgis/core/views/SceneView";
+import type MapView from "@arcgis/core/views/MapView";
 import { mockGisServiceAdapter } from "@/lib/gis/gisServiceAdapter";
 import type { GisServiceAdapter } from "@/types/gisServices";
 import type {
@@ -14,8 +14,8 @@ import type {
   MapSelectionEvent,
 } from "@/types/mapInteractions";
 
-type SceneViewHitTestInput = Parameters<SceneView["hitTest"]>[0];
-type SceneViewPointerLikeEvent = SceneViewHitTestInput & {
+type MapViewHitTestInput = Parameters<MapView["hitTest"]>[0];
+type MapViewPointerLikeEvent = MapViewHitTestInput & {
   mapPoint?: unknown;
   x?: number;
   y?: number;
@@ -28,16 +28,16 @@ interface MapInteractionControllerOptions {
   onError?: (error: unknown) => void;
   onHover?: (event: MapHoverEvent) => void;
   onSelection?: (event: MapSelectionEvent) => void;
-  view: SceneView;
+  view: MapView;
 }
 
 export interface MapInteractionController {
   clearSelection: (reason?: string) => MapSelectionEvent;
-  handleClick: (event: SceneViewPointerLikeEvent) => Promise<MapSelectionEvent>;
-  handleHover: (event: SceneViewPointerLikeEvent) => MapHoverEvent | null;
+  handleClick: (event: MapViewPointerLikeEvent) => Promise<MapSelectionEvent>;
+  handleHover: (event: MapViewPointerLikeEvent) => MapHoverEvent | null;
   identify: (request: IdentifyQueryRequest) => Promise<IdentifyQueryResult>;
   runHitTest: (
-    event: SceneViewPointerLikeEvent,
+    event: MapViewPointerLikeEvent,
     clickEvent?: MapClickEvent,
   ) => Promise<IdentifyQueryResult>;
 }
@@ -51,7 +51,7 @@ export function createMapInteractionController({
   onSelection,
   view,
 }: MapInteractionControllerOptions): MapInteractionController {
-  async function handleClick(event: SceneViewPointerLikeEvent) {
+  async function handleClick(event: MapViewPointerLikeEvent) {
     const clickEvent = createMapClickEvent(event, view);
 
     try {
@@ -71,7 +71,7 @@ export function createMapInteractionController({
     }
   }
 
-  function handleHover(event: SceneViewPointerLikeEvent) {
+  function handleHover(event: MapViewPointerLikeEvent) {
     if (!onHover) {
       return null;
     }
@@ -82,7 +82,7 @@ export function createMapInteractionController({
   }
 
   async function runHitTest(
-    event: SceneViewPointerLikeEvent,
+    event: MapViewPointerLikeEvent,
     clickEvent = createMapClickEvent(event, view),
   ) {
     const response = await view.hitTest(event);
@@ -194,8 +194,8 @@ async function resolveSelectionEvent(
 }
 
 function createMapClickEvent(
-  event: SceneViewPointerLikeEvent,
-  view: SceneView,
+  event: MapViewPointerLikeEvent,
+  view: MapView,
 ): MapClickEvent {
   return {
     mapPoint: getMapPointSummary(event.mapPoint ?? view.toMap(event)),
@@ -206,8 +206,8 @@ function createMapClickEvent(
 }
 
 function createMapHoverEvent(
-  event: SceneViewPointerLikeEvent,
-  view: SceneView,
+  event: MapViewPointerLikeEvent,
+  view: MapView,
 ): MapHoverEvent {
   return {
     mapPoint: getMapPointSummary(event.mapPoint ?? view.toMap(event)),
@@ -284,7 +284,7 @@ function getGraphicLayerInfo(graphic: Graphic) {
   };
 }
 
-function getScreenPoint(event: SceneViewPointerLikeEvent): MapScreenPoint {
+function getScreenPoint(event: MapViewPointerLikeEvent): MapScreenPoint {
   return {
     x: typeof event.x === "number" ? event.x : 0,
     y: typeof event.y === "number" ? event.y : 0,

@@ -35,7 +35,7 @@
   "caveat": "Demo permit years come from the cached local extract.",
   "default_year_end": 2025,
   "default_year_start": 1986,
-  "generated_at": "2026-06-23T17:28:16Z",
+  "generated_at": "2026-06-28T17:32:05Z",
   "max_year": 2025,
   "min_year": 1986,
   "mode": "portfolio_demo",

@@ -3,7 +3,7 @@
 import type Graphic from "@arcgis/core/Graphic";
 import type FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
-import type SceneView from "@arcgis/core/views/SceneView";
+import type MapView from "@arcgis/core/views/MapView";
 import {
   useCallback,
   useEffect,
@@ -33,6 +33,7 @@ import {
 } from "@/data/intelligence/developmentModelLab";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import { useModelResearchPreviewLayer } from "@/hooks/useModelResearchPreviewLayer";
+import { useSchoolPressureLayer } from "@/hooks/useSchoolPressureLayer";
 import {
   loadArcGISRuntime,
   type ArcGISRuntime,
@@ -88,6 +89,7 @@ import type {
   SchoolUtilizationZoneMapPolygon,
   SelectedSchoolUtilizationZone,
 } from "@/types/map/schoolUtilizationZones";
+import type { SchoolPressureFeature } from "@/types/map/schoolPressure";
 import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
 import type { MapOverlayViewMode } from "@/types/map/overlayViewModes";
 import type {
@@ -99,6 +101,8 @@ import type {
 type ArcGISHandle = {
   remove: () => void;
 };
+
+type SceneView = MapView;
 
 function allowsParcelSelectionGraphics(mode: OverviewCommandMode) {
   return (
@@ -216,6 +220,7 @@ export function SceneViewContainer() {
   const modelResearchPreviewLayerRef = useRef<GraphicsLayer | null>(null);
   const modelResearchHeatmapLayerRef = useRef<FeatureLayer | null>(null);
   const modelResearchGoToKeyRef = useRef<string | null>(null);
+  const schoolPressureLayerRef = useRef<GraphicsLayer | null>(null);
   const schoolUtilizationZoneLayerRef = useRef<GraphicsLayer | null>(null);
   const lastFocusedParcelIdRef = useRef<string | null>(null);
   const latestFocusRequestParcelIdRef = useRef<string | null>(null);
@@ -308,6 +313,11 @@ export function SceneViewContainer() {
   });
   const exploreCountywideLayersActive =
     isExploreCountywideMode(overviewCommandMode);
+  const schoolPressureLayerEnabled =
+    exploreCountywideLayersActive && activeLayerIds.includes("school-pressure");
+  const schoolPressureLayer = useSchoolPressureLayer({
+    enabled: schoolPressureLayerEnabled,
+  });
   const modelLabLayersActive = isModelLabMode(overviewCommandMode);
   const clearParcelSceneFocus = useCallback(() => {
     latestFocusRequestParcelIdRef.current = null;
@@ -358,6 +368,7 @@ export function SceneViewContainer() {
         hotspotLayerRef.current,
         floodConstraintLayerRef.current,
         floodZoneLayerRef.current,
+        schoolPressureLayerRef.current,
         schoolUtilizationZoneLayerRef.current,
       ];
 
@@ -449,6 +460,11 @@ export function SceneViewContainer() {
       selectedSchoolUtilizationZone?.zoneId ?? null;
     updateSchoolUtilizationZoneInteractionSymbols(
       schoolUtilizationZoneLayerRef.current,
+      selectedSchoolZoneIdRef.current,
+      hoveredSchoolZoneIdRef.current,
+    );
+    updateSchoolUtilizationZoneInteractionSymbols(
+      schoolPressureLayerRef.current,
       selectedSchoolZoneIdRef.current,
       hoveredSchoolZoneIdRef.current,
     );
@@ -1040,6 +1056,8 @@ export function SceneViewContainer() {
         modelResearchPreviewLayerRef.current =
           createModelResearchPreviewLayer(runtime);
         map.add(modelResearchPreviewLayerRef.current);
+        schoolPressureLayerRef.current = createSchoolPressureLayer(runtime);
+        map.add(schoolPressureLayerRef.current);
         schoolUtilizationZoneLayerRef.current =
           createSchoolUtilizationZoneLayer(runtime);
         map.add(schoolUtilizationZoneLayerRef.current);
@@ -1094,6 +1112,7 @@ export function SceneViewContainer() {
               view,
               event,
               hotspotLayerRef.current,
+              schoolPressureLayerRef.current,
               setSelectedDevelopmentHotspotContext,
               closeFloodInfo,
             );
@@ -1145,6 +1164,21 @@ export function SceneViewContainer() {
 
             if (handledFloodZoneClick) {
               closeSchoolUtilizationInfo();
+              return;
+            }
+
+            const handledSchoolPressureClick =
+              await handleSchoolUtilizationZoneClick(
+                view,
+                event,
+                schoolPressureLayerRef.current,
+                setSelectedSchoolUtilizationZone,
+                closeHotspotInfo,
+                closeFloodInfo,
+                closeFloodZoneInfo,
+              );
+
+            if (handledSchoolPressureClick) {
               return;
             }
 
@@ -1236,7 +1270,7 @@ export function SceneViewContainer() {
           return;
         }
 
-        console.error("ArcGIS SceneView failed to initialize", error);
+        console.error("ArcGIS MapView failed to initialize", error);
         setMapError(getSceneErrorMessage(error));
         setMapStatus("degraded");
       }
@@ -1627,6 +1661,48 @@ export function SceneViewContainer() {
       return;
     }
 
+    const pressureLayer = ensureSchoolPressureLayer(runtime, view);
+    schoolPressureLayerRef.current = pressureLayer;
+    pressureLayer.removeAll();
+
+    if (
+      !exploreCountywideLayersActive ||
+      !schoolPressureLayerEnabled ||
+      schoolPressureLayer.status !== "ready"
+    ) {
+      pressureLayer.visible = false;
+      return;
+    }
+
+    pressureLayer.visible = true;
+    pressureLayer.addMany(
+      schoolPressureLayer.features
+        .map((feature) =>
+          createSchoolPressureGraphic(
+            runtime,
+            feature,
+            selectedSchoolUtilizationZone?.zoneId ?? null,
+          ),
+        )
+        .filter((graphic): graphic is Graphic => Boolean(graphic)),
+    );
+  }, [
+    exploreCountywideLayersActive,
+    mapStatus,
+    schoolPressureLayer.features,
+    schoolPressureLayer.status,
+    schoolPressureLayerEnabled,
+    selectedSchoolUtilizationZone?.zoneId,
+  ]);
+
+  useEffect(() => {
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+
+    if (!runtime || !view || view.destroyed) {
+      return;
+    }
+
     const schoolLayer = ensureSchoolUtilizationZoneLayer(runtime, view);
     schoolUtilizationZoneLayerRef.current = schoolLayer;
     schoolLayer.removeAll();
@@ -1730,10 +1806,10 @@ export function SceneViewContainer() {
       selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
     >
       <div
-        aria-label="Cabarrus County ArcGIS SceneView"
+        aria-label="Cabarrus County ArcGIS MapView"
         className="absolute inset-0"
         ref={containerRef}
-        title="Interactive ArcGIS SceneView with Cabarrus County operational layers"
+        title="Interactive ArcGIS MapView with Cabarrus County operational layers"
       />
       <button
         aria-label={isMapFocusMode ? "Exit map focus" : "Expand map"}
@@ -1864,7 +1940,7 @@ export function SceneViewContainer() {
                   </span>
                 </div>
                 <p className="text-[11px] leading-5 text-slate-500">
-                  Drag this card or collapse it to keep SceneView controls
+                  Drag this card or collapse it to keep MapView controls
                   clear.
                 </p>
               </div>
@@ -2425,17 +2501,12 @@ function createDemoBoundaryGraphic(
       spatialReference: { wkid: 4326 },
     }),
     symbol: {
-      symbolLayers: [
-        {
-          material: { color: [13, 22, 34, 0.08] },
-          outline: {
-            color: [216, 184, 106, 0.96],
-            size: 2.1,
-          },
-          type: "fill",
-        },
-      ],
-      type: "polygon-3d",
+      color: [13, 22, 34, 0.08],
+      outline: {
+        color: [216, 184, 106, 0.96],
+        width: 2.1,
+      },
+      type: "simple-fill",
     } as unknown as Graphic["symbol"],
   });
 }
@@ -2479,23 +2550,12 @@ function createDemoParcelGraphic(
 
 function createDemoParcelSymbol(selected: boolean) {
   return {
-    symbolLayers: [
-      {
-        material: {
-          color: selected
-            ? [216, 184, 106, 0.3]
-            : [104, 216, 255, 0.11],
-        },
-        outline: {
-          color: selected
-            ? [255, 238, 178, 0.98]
-            : [104, 216, 255, 0.56],
-          size: selected ? 2.3 : 0.85,
-        },
-        type: "fill",
-      },
-    ],
-    type: "polygon-3d",
+    color: selected ? [216, 184, 106, 0.3] : [104, 216, 255, 0.11],
+    outline: {
+      color: selected ? [255, 238, 178, 0.98] : [104, 216, 255, 0.56],
+      width: selected ? 2.3 : 0.85,
+    },
+    type: "simple-fill",
   } as unknown as Graphic["symbol"];
 }
 
@@ -2540,9 +2600,6 @@ function createDemoTransportationGraphic(
 
 function createParcelFocusLayer(runtime: ArcGISRuntime) {
   return new runtime.GraphicsLayer({
-    elevationInfo: {
-      mode: "on-the-ground",
-    },
     id: "cfs-parcel-focus-layer",
     listMode: "hide",
     title: "Selected Parcel Focus",
@@ -2551,10 +2608,6 @@ function createParcelFocusLayer(runtime: ArcGISRuntime) {
 
 function createDevelopmentHotspotLayer(runtime: ArcGISRuntime) {
   return new runtime.GraphicsLayer({
-    elevationInfo: {
-      mode: "relative-to-ground",
-      offset: 70,
-    },
     id: "cfs-development-hotspots-layer",
     listMode: "hide",
     title: "Development Hotspots",
@@ -2564,10 +2617,6 @@ function createDevelopmentHotspotLayer(runtime: ArcGISRuntime) {
 
 function createFloodConstraintLayer(runtime: ArcGISRuntime) {
   return new runtime.GraphicsLayer({
-    elevationInfo: {
-      mode: "relative-to-ground",
-      offset: 58,
-    },
     id: "cfs-flood-constraints-layer",
     listMode: "hide",
     title: "Flood Constraints",
@@ -2577,9 +2626,6 @@ function createFloodConstraintLayer(runtime: ArcGISRuntime) {
 
 function createFemaFloodZoneLayer(runtime: ArcGISRuntime) {
   return new runtime.GraphicsLayer({
-    elevationInfo: {
-      mode: "on-the-ground",
-    },
     id: "cfs-fema-flood-zones-layer",
     listMode: "hide",
     title: "FEMA Flood Zones",
@@ -2589,10 +2635,6 @@ function createFemaFloodZoneLayer(runtime: ArcGISRuntime) {
 
 function createModelResearchPreviewLayer(runtime: ArcGISRuntime) {
   return new runtime.GraphicsLayer({
-    elevationInfo: {
-      mode: "relative-to-ground",
-      offset: 88,
-    },
     id: "cfs-model-research-preview-layer",
     listMode: "hide",
     title: "Development Model Research Preview",
@@ -2602,12 +2644,18 @@ function createModelResearchPreviewLayer(runtime: ArcGISRuntime) {
 
 function createSchoolUtilizationZoneLayer(runtime: ArcGISRuntime) {
   return new runtime.GraphicsLayer({
-    elevationInfo: {
-      mode: "on-the-ground",
-    },
     id: "cfs-school-utilization-zones-layer",
     listMode: "hide",
     title: "School Utilization Seed Zones",
+    visible: false,
+  });
+}
+
+function createSchoolPressureLayer(runtime: ArcGISRuntime) {
+  return new runtime.GraphicsLayer({
+    id: "cfs-school-pressure-layer",
+    listMode: "hide",
+    title: "School Utilization + Permit Pressure",
     visible: false,
   });
 }
@@ -2653,7 +2701,6 @@ function createDevelopmentHotspotHeatmapFeatureLayer(
   source: Graphic[],
 ) {
   return new runtime.FeatureLayer({
-    elevationInfo: { mode: "on-the-ground" },
     fields: getHeatmapFeatureFields(),
     geometryType: "point",
     id: "cfs-development-hotspots-heatmap-layer",
@@ -2672,7 +2719,6 @@ function createModelResearchHeatmapFeatureLayer(
   source: Graphic[],
 ) {
   return new runtime.FeatureLayer({
-    elevationInfo: { mode: "on-the-ground" },
     fields: getHeatmapFeatureFields(),
     geometryType: "point",
     id: "cfs-model-research-heatmap-layer",
@@ -2834,6 +2880,36 @@ function ensureSchoolUtilizationZoneLayer(
   return schoolLayer;
 }
 
+function ensureSchoolPressureLayer(runtime: ArcGISRuntime, view: SceneView) {
+  const map = view.map;
+
+  if (!map) {
+    throw new Error("MapView map is unavailable for school pressure areas.");
+  }
+
+  const existingLayer = map.findLayerById("cfs-school-pressure-layer");
+
+  if (existingLayer) {
+    return existingLayer as GraphicsLayer;
+  }
+
+  const pressureLayer = createSchoolPressureLayer(runtime);
+  map.add(pressureLayer);
+  return pressureLayer;
+}
+
+function markerPrimitiveToSimpleStyle(primitive: string | null | undefined) {
+  switch (primitive) {
+    case "diamond":
+    case "square":
+    case "triangle":
+    case "x":
+      return primitive;
+    default:
+      return "circle";
+  }
+}
+
 function createDevelopmentHotspotGraphic(
   runtime: ArcGISRuntime,
   marker: DevelopmentHotspotMapMarker,
@@ -2882,42 +2958,14 @@ function createDevelopmentHotspotGraphic(
       y: marker.centroid.latitude,
     }),
     symbol: {
-      symbolLayers: [
-        {
-          material: {
-            color: profile.haloColor,
-          },
-          outline: {
-            color: profile.haloOutlineColor,
-            size: 1,
-          },
-          resource: {
-            primitive: profile.primitive,
-          },
-          size: profile.haloSize,
-          type: "icon",
-        },
-        {
-          material: {
-            color: profile.color,
-          },
-          outline: {
-            color: profile.outlineColor,
-            size: profile.outlineSize,
-          },
-          resource: {
-            primitive: profile.primitive,
-          },
-          size: profile.size,
-          type: "icon",
-        },
-      ],
-      type: "point-3d",
-      verticalOffset: {
-        maxWorldLength: profile.maxWorldLength,
-        minWorldLength: 60,
-        screenLength: profile.screenLength,
+      color: profile.color,
+      outline: {
+        color: profile.outlineColor,
+        width: profile.outlineSize,
       },
+      size: profile.size,
+      style: markerPrimitiveToSimpleStyle(profile.primitive),
+      type: "simple-marker",
     } as unknown as Graphic["symbol"],
   });
 }
@@ -2937,42 +2985,14 @@ function createDevelopmentHotspotAggregateGraphic(
       y: cell.latitude,
     }),
     symbol: {
-      symbolLayers: [
-        {
-          material: {
-            color: profile.outerColor,
-          },
-          outline: {
-            color: profile.outlineColor,
-            size: 0.7,
-          },
-          resource: {
-            primitive: profile.primitive,
-          },
-          size: profile.outerSize,
-          type: "icon",
-        },
-        {
-          material: {
-            color: profile.innerColor,
-          },
-          outline: {
-            color: profile.innerOutlineColor,
-            size: 0.9,
-          },
-          resource: {
-            primitive: profile.primitive,
-          },
-          size: profile.innerSize,
-          type: "icon",
-        },
-      ],
-      type: "point-3d",
-      verticalOffset: {
-        maxWorldLength: profile.maxWorldLength,
-        minWorldLength: 64,
-        screenLength: profile.screenLength,
+      color: profile.innerColor,
+      outline: {
+        color: profile.outlineColor,
+        width: 1.4,
       },
+      size: profile.outerSize,
+      style: markerPrimitiveToSimpleStyle(profile.primitive),
+      type: "simple-marker",
     } as unknown as Graphic["symbol"],
   });
 }
@@ -3070,28 +3090,14 @@ function createFloodConstraintGraphic(
       y: marker.centroid.latitude,
     }),
     symbol: {
-      symbolLayers: [
-        {
-          material: {
-            color: profile.color,
-          },
-          outline: {
-            color: profile.outlineColor,
-            size: profile.outlineSize,
-          },
-          resource: {
-            primitive: profile.primitive,
-          },
-          size: profile.size,
-          type: "icon",
-        },
-      ],
-      type: "point-3d",
-      verticalOffset: {
-        maxWorldLength: profile.maxWorldLength,
-        minWorldLength: 45,
-        screenLength: profile.screenLength,
+      color: profile.color,
+      outline: {
+        color: profile.outlineColor,
+        width: profile.outlineSize,
       },
+      size: profile.size,
+      style: markerPrimitiveToSimpleStyle(profile.primitive),
+      type: "simple-marker",
     } as unknown as Graphic["symbol"],
   });
 }
@@ -3149,42 +3155,14 @@ function createModelResearchPreviewGraphic(
       y: marker.centroid.latitude,
     }),
     symbol: {
-      symbolLayers: [
-        {
-          material: {
-            color: profile.haloColor,
-          },
-          outline: {
-            color: profile.haloOutlineColor,
-            size: 1,
-          },
-          resource: {
-            primitive: "circle",
-          },
-          size: profile.haloSize,
-          type: "icon",
-        },
-        {
-          material: {
-            color: profile.color,
-          },
-          outline: {
-            color: profile.outlineColor,
-            size: profile.outlineSize,
-          },
-          resource: {
-            primitive: "circle",
-          },
-          size: profile.size,
-          type: "icon",
-        },
-      ],
-      type: "point-3d",
-      verticalOffset: {
-        maxWorldLength: profile.maxWorldLength,
-        minWorldLength: 54,
-        screenLength: profile.screenLength,
+      color: profile.color,
+      outline: {
+        color: profile.outlineColor,
+        width: profile.outlineSize,
       },
+      size: profile.size,
+      style: "circle",
+      type: "simple-marker",
     } as unknown as Graphic["symbol"],
   });
 }
@@ -3979,42 +3957,14 @@ function createModelResearchAggregateGraphic(
       y: cell.latitude,
     }),
     symbol: {
-      symbolLayers: [
-        {
-          material: {
-            color: profile.outerColor,
-          },
-          outline: {
-            color: profile.outlineColor,
-            size: 0.5,
-          },
-          resource: {
-            primitive: "circle",
-          },
-          size: profile.outerSize,
-          type: "icon",
-        },
-        {
-          material: {
-            color: profile.innerColor,
-          },
-          outline: {
-            color: profile.innerOutlineColor,
-            size: 0.8,
-          },
-          resource: {
-            primitive: "circle",
-          },
-          size: profile.innerSize,
-          type: "icon",
-        },
-      ],
-      type: "point-3d",
-      verticalOffset: {
-        maxWorldLength: profile.maxWorldLength,
-        minWorldLength: 65,
-        screenLength: profile.screenLength,
+      color: profile.innerColor,
+      outline: {
+        color: profile.outlineColor,
+        width: 1.4,
       },
+      size: profile.outerSize,
+      style: "circle",
+      type: "simple-marker",
     } as unknown as Graphic["symbol"],
   });
 }
@@ -4164,19 +4114,12 @@ function createFemaFloodZoneGraphic(
       title: `FEMA Flood Zone ${polygon.floodZoneCode ?? ""}`.trim(),
     },
     symbol: {
-      symbolLayers: [
-        {
-          material: {
-            color: profile.fillColor,
-          },
-          outline: {
-            color: profile.outlineColor,
-            size: profile.outlineSize,
-          },
-          type: "fill",
-        },
-      ],
-      type: "polygon-3d",
+      color: profile.fillColor,
+      outline: {
+        color: profile.outlineColor,
+        width: profile.outlineSize,
+      },
+      type: "simple-fill",
     } as unknown as Graphic["symbol"],
   });
 }
@@ -4234,6 +4177,71 @@ function createSchoolUtilizationZoneGraphic(
   });
 }
 
+function createSchoolPressureGraphic(
+  runtime: ArcGISRuntime,
+  feature: SchoolPressureFeature,
+  selectedZoneId: string | null = null,
+) {
+  if (!feature.geometry) {
+    return null;
+  }
+
+  const rings = convertGeoJsonPolygonCoordinatesToArcGisRings(
+    feature.geometry,
+  );
+
+  if (!rings.length) {
+    return null;
+  }
+
+  const properties = feature.properties;
+  const profile = getSchoolPressureSymbolProfile(
+    properties.school_pressure_watch_band,
+    properties.attendance_area_id === selectedZoneId ? "selected" : "default",
+  );
+
+  return new runtime.Graphic({
+    attributes: {
+      attendanceAreaId: properties.attendance_area_id,
+      caveats: properties.caveats,
+      graphicRole: "school-pressure-area",
+      observedGrowthPressureBand: properties.observed_growth_pressure_band,
+      permitCountPrevious: properties.permit_count_previous,
+      permitCountRecent: properties.permit_count_recent,
+      permitGrowthDelta: properties.permit_growth_delta,
+      pressureReasons: properties.top_reasons,
+      recommendedFollowup: properties.recommended_followup,
+      residentialPermitCountRecent: properties.residential_permit_count_recent,
+      schoolLevel: properties.school_level,
+      schoolName: properties.school_name,
+      schoolPressureWatchBand: properties.school_pressure_watch_band,
+      schoolYear: properties.enrollment_year,
+      utilizationClass: properties.utilization_status,
+      utilizationPct: properties.utilization_pct,
+      zoneId: properties.attendance_area_id,
+    },
+    geometry: new runtime.Polygon({
+      rings,
+      spatialReference: {
+        wkid: feature.geometry.spatialReference?.wkid ?? 4326,
+      },
+    }),
+    popupTemplate: {
+      content:
+        "Preliminary school capacity watch based on utilization context and observed permit activity. Not an official enrollment forecast.",
+      title: properties.school_name ?? "School pressure area",
+    },
+    symbol: {
+      color: profile.fillColor,
+      outline: {
+        color: profile.outlineColor,
+        width: profile.outlineSize,
+      },
+      type: "simple-fill",
+    } as unknown as Graphic["symbol"],
+  });
+}
+
 function getFemaFloodZoneSymbolProfile(polygon: FloodZoneMapPolygon) {
   if (
     polygon.floodSeverityClass === "severe" ||
@@ -4280,19 +4288,12 @@ function createSchoolUtilizationZoneSymbol(profile: {
   outlineSize: number;
 }): Graphic["symbol"] {
   return {
-    symbolLayers: [
-      {
-        material: {
-          color: profile.fillColor,
-        },
-        outline: {
-          color: profile.outlineColor,
-          size: profile.outlineSize,
-        },
-        type: "fill",
-      },
-    ],
-    type: "polygon-3d",
+    color: profile.fillColor,
+    outline: {
+      color: profile.outlineColor,
+      width: profile.outlineSize,
+    },
+    type: "simple-fill",
   } as unknown as Graphic["symbol"];
 }
 
@@ -4377,6 +4378,38 @@ function getSchoolUtilizationZoneSymbolProfileForValues(
   return enhanceSchoolUtilizationZoneSymbolProfile(profile, state);
 }
 
+function getSchoolPressureSymbolProfile(
+  band: string | null | undefined,
+  state: SchoolUtilizationZoneInteractionState = "default",
+) {
+  const profile =
+    band === "elevated review"
+      ? {
+          fillColor: [236, 72, 153, 0.26],
+          outlineColor: [236, 72, 153, 0.94],
+          outlineSize: 1.8,
+        }
+      : band === "review"
+        ? {
+            fillColor: [249, 115, 22, 0.22],
+            outlineColor: [249, 115, 22, 0.88],
+            outlineSize: 1.4,
+          }
+        : band === "monitor"
+          ? {
+              fillColor: [56, 189, 248, 0.16],
+              outlineColor: [56, 189, 248, 0.72],
+              outlineSize: 1,
+            }
+          : {
+              fillColor: [148, 163, 184, 0.1],
+              outlineColor: [148, 163, 184, 0.46],
+              outlineSize: 0.9,
+            };
+
+  return enhanceSchoolUtilizationZoneSymbolProfile(profile, state);
+}
+
 function enhanceSchoolUtilizationZoneSymbolProfile(
   profile: {
     fillColor: number[];
@@ -4436,7 +4469,10 @@ function updateSchoolUtilizationZoneInteractionSymbols(
   schoolLayer.graphics.toArray().forEach((graphic) => {
     const attributes = graphic.attributes ?? {};
 
-    if (attributes.graphicRole !== "school-utilization-zone") {
+    if (
+      attributes.graphicRole !== "school-utilization-zone" &&
+      attributes.graphicRole !== "school-pressure-area"
+    ) {
       return;
     }
 
@@ -4448,18 +4484,37 @@ function updateSchoolUtilizationZoneInteractionSymbols(
           ? "hover"
           : "default";
 
-    graphic.symbol = createSchoolUtilizationZoneSymbol(
-      getSchoolUtilizationZoneSymbolProfileForValues(
-        {
-          matchedSchoolReferenceId: stringAttribute(
-            attributes.matchedSchoolReferenceId,
-          ),
-          utilizationClass: stringAttribute(attributes.utilizationClass),
-          utilizationPct: numberAttribute(attributes.utilizationPct),
-        },
-        state,
-      ),
-    );
+    graphic.symbol =
+      attributes.graphicRole === "school-pressure-area"
+        ? ({
+            color: getSchoolPressureSymbolProfile(
+              stringAttribute(attributes.schoolPressureWatchBand),
+              state,
+            ).fillColor,
+            outline: {
+              color: getSchoolPressureSymbolProfile(
+                stringAttribute(attributes.schoolPressureWatchBand),
+                state,
+              ).outlineColor,
+              width: getSchoolPressureSymbolProfile(
+                stringAttribute(attributes.schoolPressureWatchBand),
+                state,
+              ).outlineSize,
+            },
+            type: "simple-fill",
+          } as unknown as Graphic["symbol"])
+        : createSchoolUtilizationZoneSymbol(
+            getSchoolUtilizationZoneSymbolProfileForValues(
+              {
+                matchedSchoolReferenceId: stringAttribute(
+                  attributes.matchedSchoolReferenceId,
+                ),
+                utilizationClass: stringAttribute(attributes.utilizationClass),
+                utilizationPct: numberAttribute(attributes.utilizationPct),
+              },
+              state,
+            ),
+          );
   });
 }
 
@@ -5696,6 +5751,7 @@ async function handleDevelopmentHotspotClick(
   view: SceneView,
   event: Parameters<SceneView["hitTest"]>[0],
   hotspotLayer: GraphicsLayer | null,
+  schoolPressureLayer: GraphicsLayer | null,
   onHotspotContext: (
     hotspotContext: SelectedDevelopmentHotspotContext | null,
   ) => void,
@@ -5721,7 +5777,12 @@ async function handleDevelopmentHotspotClick(
 
     closeSceneViewPopup(view);
     onFloodInfoClose();
-    onHotspotContext(createDevelopmentHotspotSelectionContext(hotspotGraphic));
+    onHotspotContext(
+      createDevelopmentHotspotSelectionContext(
+        hotspotGraphic,
+        getRelatedSchoolPressureNote(hotspotGraphic, schoolPressureLayer),
+      ),
+    );
 
     console.debug("[CFS development hotspots]", "hotspot selected", {
       areaLabel: hotspotGraphic?.attributes?.areaLabel,
@@ -6009,6 +6070,7 @@ async function handleSchoolUtilizationZoneHover(
 
 function createDevelopmentHotspotSelectionContext(
   graphic: Graphic,
+  relatedSchoolPressureNote: string | null = null,
 ): SelectedDevelopmentHotspotContext {
   const attributes = graphic.attributes ?? {};
   const contextKind =
@@ -6077,6 +6139,7 @@ function createDevelopmentHotspotSelectionContext(
     recentPermitCount1yr: numberAttribute(attributes.recentPermitCount1yr) ?? 0,
     recentPermitCount3yr: numberAttribute(attributes.recentPermitCount3yr) ?? 0,
     recordsRepresented: numberAttribute(attributes.recordsRepresented) ?? 1,
+    relatedSchoolPressureNote,
     representedParcelIds,
     selectedPermitSegment: stringAttribute(attributes.selectedPermitSegment),
     segmentCounts,
@@ -6087,6 +6150,130 @@ function createDevelopmentHotspotSelectionContext(
       "This area is highlighted because observed permit/development activity is concentrated in the selected layer filters.",
     zoningJurisdictionName: stringAttribute(attributes.zoningJurisdictionName),
   };
+}
+
+function getRelatedSchoolPressureNote(
+  hotspotGraphic: Graphic,
+  schoolPressureLayer: GraphicsLayer | null,
+) {
+  if (!schoolPressureLayer?.visible || schoolPressureLayer.graphics.length === 0) {
+    return null;
+  }
+
+  const point = pointCoordinatesFromGraphic(hotspotGraphic);
+
+  if (!point) {
+    return null;
+  }
+
+  const relatedGraphic = schoolPressureLayer.graphics
+    .toArray()
+    .find((graphic) => polygonGraphicContainsPoint(graphic, point));
+
+  if (!relatedGraphic) {
+    return null;
+  }
+
+  const attributes = relatedGraphic.attributes ?? {};
+  const schoolName =
+    stringAttribute(attributes.schoolName) ?? "a school attendance area";
+  const level = stringAttribute(attributes.schoolLevel);
+  const watchBand = stringAttribute(attributes.schoolPressureWatchBand);
+  const utilizationPct = numberAttribute(attributes.utilizationPct);
+  const utilizationLabel =
+    typeof utilizationPct === "number"
+      ? `${utilizationPct.toFixed(1)}% utilization context`
+      : "utilization context not available";
+
+  return `This permit activity is inside ${schoolName}${
+    level ? ` (${formatSchoolLevelForMap(level)})` : ""
+  } attendance area. Current context: ${
+    watchBand ?? "review context available"
+  }; ${utilizationLabel}.`;
+}
+
+function pointCoordinatesFromGraphic(graphic: Graphic) {
+  const geometry = graphic.geometry as
+    | {
+        latitude?: number;
+        longitude?: number;
+        x?: number;
+        y?: number;
+      }
+    | null;
+  const longitude = geometry?.longitude ?? geometry?.x;
+  const latitude = geometry?.latitude ?? geometry?.y;
+
+  if (typeof longitude !== "number" || typeof latitude !== "number") {
+    return null;
+  }
+
+  return { latitude, longitude };
+}
+
+function polygonGraphicContainsPoint(
+  graphic: Graphic,
+  point: { latitude: number; longitude: number },
+) {
+  const geometry = graphic.geometry as { rings?: number[][][] } | null;
+  return Boolean(
+    geometry?.rings?.some((ring) =>
+      pointInRing(point.longitude, point.latitude, ring),
+    ),
+  );
+}
+
+function pointInRing(longitude: number, latitude: number, ring: number[][]) {
+  let inside = false;
+
+  for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index++) {
+    const currentPoint = ring[index];
+    const previousPoint = ring[previous];
+    const currentX = currentPoint?.[0];
+    const currentY = currentPoint?.[1];
+    const previousX = previousPoint?.[0];
+    const previousY = previousPoint?.[1];
+
+    if (
+      typeof currentX !== "number" ||
+      typeof currentY !== "number" ||
+      typeof previousX !== "number" ||
+      typeof previousY !== "number"
+    ) {
+      continue;
+    }
+
+    const intersects =
+      currentY > latitude !== previousY > latitude &&
+      longitude <
+        ((previousX - currentX) * (latitude - currentY)) /
+          (previousY - currentY || Number.EPSILON) +
+          currentX;
+
+    if (intersects) {
+      inside = !inside;
+    }
+  }
+
+  return inside;
+}
+
+function formatSchoolLevelForMap(level: string) {
+  const normalized = level.toLowerCase();
+
+  if (normalized.startsWith("elem")) {
+    return "Elementary";
+  }
+
+  if (normalized.startsWith("mid")) {
+    return "Middle";
+  }
+
+  if (normalized.startsWith("high")) {
+    return "High";
+  }
+
+  return level;
 }
 
 function createModelResearchPreviewContext(
@@ -6242,8 +6429,23 @@ function createSchoolUtilizationZoneInfoCard(
       attributes.matchedSchoolReferenceId,
     ),
     needsVerification: Boolean(attributes.needsVerification),
+    observedGrowthPressureBand: stringAttribute(
+      attributes.observedGrowthPressureBand,
+    ),
+    permitCountPrevious: numberAttribute(attributes.permitCountPrevious),
+    permitCountRecent: numberAttribute(attributes.permitCountRecent),
+    permitGrowthDelta: numberAttribute(attributes.permitGrowthDelta),
+    pressureCaveats: arrayStringAttribute(attributes.caveats),
+    pressureReasons: arrayStringAttribute(attributes.pressureReasons),
+    recommendedFollowup: stringAttribute(attributes.recommendedFollowup),
+    residentialPermitCountRecent: numberAttribute(
+      attributes.residentialPermitCountRecent,
+    ),
     schoolLevel: stringAttribute(attributes.schoolLevel),
     schoolName: stringAttribute(attributes.schoolName),
+    schoolPressureWatchBand: stringAttribute(
+      attributes.schoolPressureWatchBand,
+    ),
     schoolYear: stringAttribute(attributes.schoolYear),
     sourceConfidence: stringAttribute(attributes.sourceConfidence),
     utilizationClass: stringAttribute(attributes.utilizationClass),
@@ -6294,6 +6496,12 @@ function resizeSceneView(view: SceneView) {
 
 function stringAttribute(value: unknown) {
   return typeof value === "string" && value ? value : null;
+}
+
+function arrayStringAttribute(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string" && item.length > 0)
+    : [];
 }
 
 function numberAttribute(value: unknown) {
@@ -6390,51 +6598,16 @@ function updateParcelFocusMarkerScale(
 
 function createParcelFocusMarkerSymbol(zoom: number) {
   const profile = getParcelFocusMarkerProfile(zoom);
-  const symbolLayers: Array<Record<string, unknown>> = [
-    {
-      material: {
-        color: [104, 216, 255, profile.iconOpacity],
-      },
-      outline: {
-        color: [255, 255, 255, profile.outlineOpacity],
-        size: profile.outlineSize,
-      },
-      resource: {
-        primitive: "circle",
-      },
-      size: profile.iconSize,
-      type: "icon",
-    },
-  ];
-
-  if (profile.objectSize > 0) {
-    symbolLayers.push({
-      material: {
-        color: [216, 184, 106, profile.objectOpacity],
-      },
-      resource: {
-        primitive: "sphere",
-      },
-      depth: profile.objectSize,
-      height: profile.objectSize,
-      type: "object",
-      width: profile.objectSize,
-    });
-  }
 
   return {
-    callout: {
-      color: [104, 216, 255, profile.calloutOpacity],
-      size: profile.calloutSize,
-      type: "line",
+    color: [104, 216, 255, profile.iconOpacity],
+    outline: {
+      color: [255, 255, 255, profile.outlineOpacity],
+      width: profile.outlineSize,
     },
-    symbolLayers,
-    type: "point-3d",
-    verticalOffset: {
-      maxWorldLength: profile.maxWorldLength,
-      minWorldLength: 45,
-      screenLength: profile.screenOffset,
-    },
+    size: profile.iconSize,
+    style: "circle",
+    type: "simple-marker",
   } as unknown as Graphic["symbol"];
 }
 
@@ -6542,24 +6715,13 @@ function createParcelBoundaryGraphic(
 }
 
 function createParcelCageHighlightSymbol() {
-  // SceneView reads flat fills as hovering sheets, so the selected parcel uses
-  // a low translucent extrusion with visible edges to read as a ground-tied cage.
   return {
-    symbolLayers: [
-      {
-        edges: {
-          color: [255, 218, 120, 0.98],
-          size: 2.6,
-          type: "solid",
-        },
-        material: {
-          color: [104, 216, 255, 0.18],
-        },
-        size: 10,
-        type: "extrude",
-      },
-    ],
-    type: "polygon-3d",
+    color: [104, 216, 255, 0.18],
+    outline: {
+      color: [255, 218, 120, 0.98],
+      width: 2.6,
+    },
+    type: "simple-fill",
   } as unknown as Graphic["symbol"];
 }
 

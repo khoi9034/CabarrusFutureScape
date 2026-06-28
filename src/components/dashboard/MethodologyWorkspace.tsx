@@ -322,6 +322,20 @@ const capabilityCards: {
     whereToSeeIt: "Planning Snapshot and School Utilization Seed layer.",
   },
   {
+    caveat: "Planning review signal only; not an official enrollment forecast.",
+    dataBehindIt: "School attendance areas, preliminary utilization context, and observed permit activity inside the same area.",
+    group: "Constraints",
+    id: "school-pressure-method",
+    status: [
+      "Live in App",
+      "Presentation-Derived",
+      "Needs Official Data",
+    ],
+    title: "School Utilization + Permit Pressure Method",
+    whatItDoes: "Connects school utilization context with observed permit activity so staff can identify attendance areas that need follow-up review.",
+    whereToSeeIt: "Explore Countywide School Utilization + Permit Pressure layer and Indicator Center.",
+  },
+  {
     caveat: "Transportation features are current-context and not historical production features yet.",
     dataBehindIt: "Centerlines, STIP, AADT, accessibility features, traffic context.",
     group: "Constraints",

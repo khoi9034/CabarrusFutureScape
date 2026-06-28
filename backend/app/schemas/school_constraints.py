@@ -226,6 +226,62 @@ class SchoolUtilizationZonePageResponse(BaseModel):
     caveats: list[str] = Field(default_factory=list)
 
 
+class SchoolPressurePropertiesResponse(BaseModel):
+    """Safe school utilization plus observed permit activity context."""
+
+    attendance_area_id: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+    enrollment_year: str | None = None
+    major_development_permit_count_recent: int | None = None
+    multifamily_permit_count_recent: int | None = None
+    observed_growth_pressure_band: str = "unknown"
+    permit_count_previous: int | None = None
+    permit_count_recent: int | None = None
+    permit_growth_delta: int | None = None
+    permit_growth_pct: float | None = None
+    recommended_followup: str
+    residential_permit_count_recent: int | None = None
+    school_level: str | None = None
+    school_name: str | None = None
+    school_pressure_watch_band: str = "data needed"
+    top_reasons: list[str] = Field(default_factory=list)
+    utilization_pct: float | None = None
+    utilization_status: str | None = None
+
+
+class SchoolPressureFeatureResponse(BaseModel):
+    """GeoJSON feature for school pressure review."""
+
+    type: str = "Feature"
+    geometry: dict[str, Any] | None = None
+    properties: SchoolPressurePropertiesResponse
+
+
+class SchoolPressureSummaryResponse(BaseModel):
+    """Summary for school utilization and observed permit pressure review."""
+
+    areas_analyzed: int
+    areas_with_recent_permits: int
+    areas_with_utilization: int
+    data_needed_count: int
+    elevated_review_count: int
+    recent_residential_permits_in_watched_areas: int
+
+
+class SchoolPressureResponse(BaseModel):
+    """Attendance-area school utilization plus observed permit activity signal."""
+
+    as_of: str | None = None
+    caveats: list[str] = Field(default_factory=list)
+    data_coverage_notes: list[str] = Field(default_factory=list)
+    features: list[SchoolPressureFeatureResponse] = Field(default_factory=list)
+    limit: int
+    mode: str = "live"
+    offset: int
+    summary: SchoolPressureSummaryResponse
+    total_count: int
+
+
 class ParcelSchoolUtilizationSeedLevelResponse(BaseModel):
     """Assigned school level plus optional presentation-derived utilization seed."""
 

@@ -18,6 +18,7 @@ import type {
   SchoolUtilizationZoneLevel,
   SchoolUtilizationZoneMapPolygon,
 } from "@/types/map/schoolUtilizationZones";
+import type { SchoolPressureResponse } from "@/types/map/schoolPressure";
 import type {
   ParcelFocusSource,
   ParcelHighlightGeometry,
@@ -36,6 +37,7 @@ const demoLayerFiles = {
   model_research: "demo_model_research.geojson",
   parcels: "demo_parcels.geojson",
   school_capacity: "demo_school_capacity.geojson",
+  school_pressure: "demo_school_pressure_areas.geojson",
   transportation_context: "demo_transportation_context.geojson",
 } as const;
 
@@ -179,6 +181,29 @@ export async function getDemoFloodFeatures() {
 export async function getDemoSchoolCapacityFeatures() {
   const layer = await getDemoGeoJsonLayer("school_capacity");
   return layer.features.filter(hasGeometry);
+}
+
+export async function getDemoSchoolPressureResponse() {
+  return loadDemoDataJson<SchoolPressureResponse>("school_pressure_summary.json", {
+    as_of: null,
+    caveats: [
+      "Portfolio demo school pressure extract is not available.",
+    ],
+    data_coverage_notes: ["Demo data not available."],
+    features: [],
+    limit: 0,
+    mode: "demo",
+    offset: 0,
+    summary: {
+      areas_analyzed: 0,
+      areas_with_recent_permits: 0,
+      areas_with_utilization: 0,
+      data_needed_count: 0,
+      elevated_review_count: 0,
+      recent_residential_permits_in_watched_areas: 0,
+    },
+    total_count: 0,
+  });
 }
 
 export async function getDemoTransportationFeatures() {

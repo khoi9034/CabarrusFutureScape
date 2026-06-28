@@ -64,8 +64,17 @@ export interface SelectedSchoolUtilizationZone {
   matchConfidence: string | null;
   matchedSchoolReferenceId: string | null;
   needsVerification: boolean;
+  observedGrowthPressureBand?: string | null;
+  permitCountPrevious?: number | null;
+  permitCountRecent?: number | null;
+  permitGrowthDelta?: number | null;
+  pressureCaveats?: string[];
+  pressureReasons?: string[];
+  recommendedFollowup?: string | null;
+  residentialPermitCountRecent?: number | null;
   schoolLevel: string | null;
   schoolName: string | null;
+  schoolPressureWatchBand?: string | null;
   schoolYear: string | null;
   sourceConfidence: string | null;
   utilizationClass: string | null;

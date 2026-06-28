@@ -281,324 +281,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-COLTRANE_WEBB_ELEMENTARY-57",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-COLTRANE_WEBB_ELEMENTARY-58",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 13,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 262,
+        "permit_count_recent": 278,
+        "permit_growth_delta": 16,
+        "permit_growth_pct": 6.1,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 152,
         "school_level": "elementary",
         "school_name": "Coltrane Webb ES",
-        "school_name_normalized": "coltrane_webb_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "58",
-        "utilization_class": "severely_over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 152.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-COLTRANE_WEBB_ELEMENTARY-58",
-        "zone_match_confidence": "normalized_exact"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -80.71338,
-              35.40743
-            ],
-            [
-              -80.718001,
-              35.409361
-            ],
-            [
-              -80.722441,
-              35.409802
-            ],
-            [
-              -80.723085,
-              35.409705
-            ],
-            [
-              -80.728178,
-              35.408249
-            ],
-            [
-              -80.729865,
-              35.408234
-            ],
-            [
-              -80.732436,
-              35.408395
-            ],
-            [
-              -80.732929,
-              35.407379
-            ],
-            [
-              -80.734672,
-              35.406617
-            ],
-            [
-              -80.734991,
-              35.406076
-            ],
-            [
-              -80.73603,
-              35.405551
-            ],
-            [
-              -80.741244,
-              35.40884
-            ],
-            [
-              -80.741466,
-              35.408833
-            ],
-            [
-              -80.745016,
-              35.407313
-            ],
-            [
-              -80.746169,
-              35.408478
-            ],
-            [
-              -80.745635,
-              35.408736
-            ],
-            [
-              -80.746227,
-              35.408938
-            ],
-            [
-              -80.746475,
-              35.40879
-            ],
-            [
-              -80.747499,
-              35.409167
-            ],
-            [
-              -80.749708,
-              35.406532
-            ],
-            [
-              -80.755687,
-              35.40681
-            ],
-            [
-              -80.756321,
-              35.405473
-            ],
-            [
-              -80.756794,
-              35.404895
-            ],
-            [
-              -80.75613,
-              35.40451
-            ],
-            [
-              -80.756247,
-              35.402724
-            ],
-            [
-              -80.755737,
-              35.401984
-            ],
-            [
-              -80.758289,
-              35.400011
-            ],
-            [
-              -80.758758,
-              35.40029
-            ],
-            [
-              -80.759295,
-              35.400461
-            ],
-            [
-              -80.759569,
-              35.400192
-            ],
-            [
-              -80.759755,
-              35.397504
-            ],
-            [
-              -80.755318,
-              35.394831
-            ],
-            [
-              -80.751441,
-              35.389007
-            ],
-            [
-              -80.747904,
-              35.384808
-            ],
-            [
-              -80.747716,
-              35.384801
-            ],
-            [
-              -80.74768,
-              35.384543
-            ],
-            [
-              -80.747389,
-              35.384197
-            ],
-            [
-              -80.747161,
-              35.38416
-            ],
-            [
-              -80.74722,
-              35.383997
-            ],
-            [
-              -80.746451,
-              35.383086
-            ],
-            [
-              -80.746307,
-              35.383034
-            ],
-            [
-              -80.746333,
-              35.382947
-            ],
-            [
-              -80.744413,
-              35.380671
-            ],
-            [
-              -80.743381,
-              35.379903
-            ],
-            [
-              -80.74319,
-              35.379891
-            ],
-            [
-              -80.743201,
-              35.379768
-            ],
-            [
-              -80.732661,
-              35.371873
-            ],
-            [
-              -80.731848,
-              35.372954
-            ],
-            [
-              -80.731769,
-              35.372939
-            ],
-            [
-              -80.730792,
-              35.37456
-            ],
-            [
-              -80.730828,
-              35.37489
-            ],
-            [
-              -80.730491,
-              35.375151
-            ],
-            [
-              -80.730248,
-              35.375515
-            ],
-            [
-              -80.728912,
-              35.377875
-            ],
-            [
-              -80.727697,
-              35.378809
-            ],
-            [
-              -80.727597,
-              35.378765
-            ],
-            [
-              -80.727378,
-              35.378878
-            ],
-            [
-              -80.727373,
-              35.378989
-            ],
-            [
-              -80.724947,
-              35.38022
-            ],
-            [
-              -80.724924,
-              35.380514
-            ],
-            [
-              -80.724551,
-              35.380331
-            ],
-            [
-              -80.724401,
-              35.380549
-            ],
-            [
-              -80.721975,
-              35.382005
-            ],
-            [
-              -80.721509,
-              35.382563
-            ],
-            [
-              -80.721481,
-              35.382903
-            ],
-            [
-              -80.720556,
-              35.384436
-            ],
-            [
-              -80.717021,
-              35.396353
-            ],
-            [
-              -80.71338,
-              35.40743
-            ]
-          ]
-        ]
-      },
-      "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-COX_MILL_ELEMENTARY-71",
-        "needs_verification": true,
-        "school_level": "elementary",
-        "school_name": "Cox Mill ES",
-        "school_name_normalized": "cox_mill_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "59",
-        "utilization_class": "severely_over_capacity",
-        "utilization_pct": 125.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-COX_MILL_ELEMENTARY-59",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "severely_over_capacity"
       },
       "type": "Feature"
     },
@@ -1127,23 +834,340 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-WEDDINGTON_HILLS_ELEMENTARY-61",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-WEDDINGTON_HILLS_ELEMENTARY-70",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 29,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 813,
+        "permit_count_recent": 937,
+        "permit_growth_delta": 124,
+        "permit_growth_pct": 15.3,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 673,
         "school_level": "elementary",
         "school_name": "Weddington Hills ES",
-        "school_name_normalized": "weddington_hills_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "70",
-        "utilization_class": "severely_over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 125.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-WEDDINGTON_HILLS_ELEMENTARY-70",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "severely_over_capacity"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -80.71338,
+              35.40743
+            ],
+            [
+              -80.718001,
+              35.409361
+            ],
+            [
+              -80.722441,
+              35.409802
+            ],
+            [
+              -80.723085,
+              35.409705
+            ],
+            [
+              -80.728178,
+              35.408249
+            ],
+            [
+              -80.729865,
+              35.408234
+            ],
+            [
+              -80.732436,
+              35.408395
+            ],
+            [
+              -80.732929,
+              35.407379
+            ],
+            [
+              -80.734672,
+              35.406617
+            ],
+            [
+              -80.734991,
+              35.406076
+            ],
+            [
+              -80.73603,
+              35.405551
+            ],
+            [
+              -80.741244,
+              35.40884
+            ],
+            [
+              -80.741466,
+              35.408833
+            ],
+            [
+              -80.745016,
+              35.407313
+            ],
+            [
+              -80.746169,
+              35.408478
+            ],
+            [
+              -80.745635,
+              35.408736
+            ],
+            [
+              -80.746227,
+              35.408938
+            ],
+            [
+              -80.746475,
+              35.40879
+            ],
+            [
+              -80.747499,
+              35.409167
+            ],
+            [
+              -80.749708,
+              35.406532
+            ],
+            [
+              -80.755687,
+              35.40681
+            ],
+            [
+              -80.756321,
+              35.405473
+            ],
+            [
+              -80.756794,
+              35.404895
+            ],
+            [
+              -80.75613,
+              35.40451
+            ],
+            [
+              -80.756247,
+              35.402724
+            ],
+            [
+              -80.755737,
+              35.401984
+            ],
+            [
+              -80.758289,
+              35.400011
+            ],
+            [
+              -80.758758,
+              35.40029
+            ],
+            [
+              -80.759295,
+              35.400461
+            ],
+            [
+              -80.759569,
+              35.400192
+            ],
+            [
+              -80.759755,
+              35.397504
+            ],
+            [
+              -80.755318,
+              35.394831
+            ],
+            [
+              -80.751441,
+              35.389007
+            ],
+            [
+              -80.747904,
+              35.384808
+            ],
+            [
+              -80.747716,
+              35.384801
+            ],
+            [
+              -80.74768,
+              35.384543
+            ],
+            [
+              -80.747389,
+              35.384197
+            ],
+            [
+              -80.747161,
+              35.38416
+            ],
+            [
+              -80.74722,
+              35.383997
+            ],
+            [
+              -80.746451,
+              35.383086
+            ],
+            [
+              -80.746307,
+              35.383034
+            ],
+            [
+              -80.746333,
+              35.382947
+            ],
+            [
+              -80.744413,
+              35.380671
+            ],
+            [
+              -80.743381,
+              35.379903
+            ],
+            [
+              -80.74319,
+              35.379891
+            ],
+            [
+              -80.743201,
+              35.379768
+            ],
+            [
+              -80.732661,
+              35.371873
+            ],
+            [
+              -80.731848,
+              35.372954
+            ],
+            [
+              -80.731769,
+              35.372939
+            ],
+            [
+              -80.730792,
+              35.37456
+            ],
+            [
+              -80.730828,
+              35.37489
+            ],
+            [
+              -80.730491,
+              35.375151
+            ],
+            [
+              -80.730248,
+              35.375515
+            ],
+            [
+              -80.728912,
+              35.377875
+            ],
+            [
+              -80.727697,
+              35.378809
+            ],
+            [
+              -80.727597,
+              35.378765
+            ],
+            [
+              -80.727378,
+              35.378878
+            ],
+            [
+              -80.727373,
+              35.378989
+            ],
+            [
+              -80.724947,
+              35.38022
+            ],
+            [
+              -80.724924,
+              35.380514
+            ],
+            [
+              -80.724551,
+              35.380331
+            ],
+            [
+              -80.724401,
+              35.380549
+            ],
+            [
+              -80.721975,
+              35.382005
+            ],
+            [
+              -80.721509,
+              35.382563
+            ],
+            [
+              -80.721481,
+              35.382903
+            ],
+            [
+              -80.720556,
+              35.384436
+            ],
+            [
+              -80.717021,
+              35.396353
+            ],
+            [
+              -80.71338,
+              35.40743
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-COX_MILL_ELEMENTARY-59",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 10,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 804,
+        "permit_count_recent": 404,
+        "permit_growth_delta": -400,
+        "permit_growth_pct": -49.8,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 265,
+        "school_level": "elementary",
+        "school_name": "Cox Mill ES",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
+        "utilization_pct": 125.0,
+        "utilization_status": "severely_over_capacity"
       },
       "type": "Feature"
     },
@@ -1676,23 +1700,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-W_R_ODELL_ELEMENTARY-5693",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-W_R_ODELL_ELEMENTARY-69",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 6,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1125,
+        "permit_count_recent": 1381,
+        "permit_growth_delta": 256,
+        "permit_growth_pct": 22.8,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 1254,
         "school_level": "elementary",
         "school_name": "W R Odell ES",
-        "school_name_normalized": "w_r_odell_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "69",
-        "utilization_class": "severely_over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 120.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-W_R_ODELL_ELEMENTARY-69",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "severely_over_capacity"
       },
       "type": "Feature"
     },
@@ -2065,23 +2097,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-HIGH-COX_MILL_HIGH-55",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-HIGH-COX_MILL_HIGH-12",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 12,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1540,
+        "permit_count_recent": 792,
+        "permit_growth_delta": -748,
+        "permit_growth_pct": -48.6,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 620,
         "school_level": "high",
         "school_name": "Cox Mill HS",
-        "school_name_normalized": "cox_mill_high",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus High School Attendance Zones",
-        "source_objectid": "12",
-        "utilization_class": "severely_over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 119.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-HIGH-COX_MILL_HIGH-12",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "severely_over_capacity"
       },
       "type": "Feature"
     },
@@ -3188,23 +3228,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-HIGH-HICKORY_RIDGE_HIGH-76",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-HIGH-HICKORY_RIDGE_HIGH-13",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 25,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1678,
+        "permit_count_recent": 1500,
+        "permit_growth_delta": -178,
+        "permit_growth_pct": -10.6,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 1336,
         "school_level": "high",
         "school_name": "Hickory Ridge HS",
-        "school_name_normalized": "hickory_ridge_high",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus High School Attendance Zones",
-        "source_objectid": "13",
-        "utilization_class": "severely_over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 111.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-HIGH-HICKORY_RIDGE_HIGH-13",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "severely_over_capacity"
       },
       "type": "Feature"
     },
@@ -3913,23 +3961,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-MIDDLE-HAROLD_E_WINKLER_MIDDLE-4892",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-MIDDLE-HAROLD_WINKLER_MIDDLE-13",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 57,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1689,
+        "permit_count_recent": 1724,
+        "permit_growth_delta": 35,
+        "permit_growth_pct": 2.1,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 1185,
         "school_level": "middle",
         "school_name": "Harold Winkler MS",
-        "school_name_normalized": "harold_winkler_middle",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Middle School Attendance Zones",
-        "source_objectid": "13",
-        "utilization_class": "over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 108.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-MIDDLE-HAROLD_WINKLER_MIDDLE-13",
-        "zone_match_confidence": "fuzzy_review"
+        "utilization_status": "over_capacity"
       },
       "type": "Feature"
     },
@@ -5040,23 +5096,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-CHARLES_E_BOGER_ELEMENTARY-74",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-CHARLES_E_BOGER_ELEMENTARY-57",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 58,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1201,
+        "permit_count_recent": 1042,
+        "permit_growth_delta": -159,
+        "permit_growth_pct": -13.2,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 726,
         "school_level": "elementary",
         "school_name": "Charles E Boger ES",
-        "school_name_normalized": "charles_e_boger_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "57",
-        "utilization_class": "over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 107.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-CHARLES_E_BOGER_ELEMENTARY-57",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "over_capacity"
       },
       "type": "Feature"
     },
@@ -5481,23 +5545,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-HARRISBURG_ELEMENTARY-69",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-HARRISBURG_ELEMENTARY-60",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 3,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 369,
+        "permit_count_recent": 568,
+        "permit_growth_delta": 199,
+        "permit_growth_pct": 53.9,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 535,
         "school_level": "elementary",
         "school_name": "Harrisburg ES",
-        "school_name_normalized": "harrisburg_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "60",
-        "utilization_class": "over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 106.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-HARRISBURG_ELEMENTARY-60",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "over_capacity"
       },
       "type": "Feature"
     },
@@ -6520,23 +6592,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-MIDDLE-NORTHWEST_CABARRUS_MIDDLE-45",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-MIDDLE-NORTHWEST_CABARRUS_MIDDLE-18",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 52,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1573,
+        "permit_count_recent": 2051,
+        "permit_growth_delta": 478,
+        "permit_growth_pct": 30.4,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 1692,
         "school_level": "middle",
         "school_name": "Northwest Cabarrus MS",
-        "school_name_normalized": "northwest_cabarrus_middle",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Middle School Attendance Zones",
-        "source_objectid": "18",
-        "utilization_class": "over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 104.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-MIDDLE-NORTHWEST_CABARRUS_MIDDLE-18",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "over_capacity"
       },
       "type": "Feature"
     },
@@ -8269,23 +8349,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-HIGH-CENTRAL_CABARRUS_HIGH-65",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-HIGH-CENTRAL_CABARRUS_HIGH-10",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 22,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1322,
+        "permit_count_recent": 911,
+        "permit_growth_delta": -411,
+        "permit_growth_pct": -31.1,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 749,
         "school_level": "high",
         "school_name": "Central Cabarrus HS",
-        "school_name_normalized": "central_cabarrus_high",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus High School Attendance Zones",
-        "source_objectid": "10",
-        "utilization_class": "over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 102.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-HIGH-CENTRAL_CABARRUS_HIGH-10",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "over_capacity"
       },
       "type": "Feature"
     },
@@ -8946,23 +9034,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "safe_alias_normalized",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-PITTS_ROAD_ELEMENTARY-73",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-PITTS_ROAD_ELEMENTARY-64",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 22,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 663,
+        "permit_count_recent": 631,
+        "permit_growth_delta": -32,
+        "permit_growth_pct": -4.8,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 413,
         "school_level": "elementary",
         "school_name": "Pitts School Road ES",
-        "school_name_normalized": "pitts_road_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "64",
-        "utilization_class": "over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 101.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-PITTS_ROAD_ELEMENTARY-64",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "over_capacity"
       },
       "type": "Feature"
     },
@@ -9547,23 +9643,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "unmatched_reference_review",
-        "matched_school_reference_id": null,
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-HICKORY_RIDGE_ELEMENTARY-61",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 11,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 835,
+        "permit_count_recent": 662,
+        "permit_growth_delta": -173,
+        "permit_growth_pct": -20.7,
+        "recommended_followup": "Review enrollment trends, approved subdivisions, and school capacity assumptions.",
+        "residential_permit_count_recent": 573,
         "school_level": "elementary",
         "school_name": "Hickory Ridge ES",
-        "school_name_normalized": "hickory_ridge_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "61",
-        "utilization_class": "over_capacity",
+        "school_pressure_watch_band": "elevated review",
+        "top_reasons": [
+          "Current utilization context is near or above local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 100.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-HICKORY_RIDGE_ELEMENTARY-61",
-        "zone_match_confidence": "unmatched_reference_review"
+        "utilization_status": "over_capacity"
       },
       "type": "Feature"
     },
@@ -10136,23 +10240,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-CARL_A_FURR_ELEMENTARY-75",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-CARL_A_FURR_ELEMENTARY-56",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 43,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 666,
+        "permit_count_recent": 694,
+        "permit_growth_delta": 28,
+        "permit_growth_pct": 4.2,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 232,
         "school_level": "elementary",
         "school_name": "Carl A Furr ES",
-        "school_name_normalized": "carl_a_furr_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "56",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 95.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-CARL_A_FURR_ELEMENTARY-56",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -11193,584 +11305,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "safe_alias_normalized",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-MT_PLEASANT_ELEMENTARY-53",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-MOUNT_PLEASANT_ELEMENTARY-62",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 13,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 570,
+        "permit_count_recent": 511,
+        "permit_growth_delta": -59,
+        "permit_growth_pct": -10.4,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 416,
         "school_level": "elementary",
         "school_name": "Mount Pleasant ES",
-        "school_name_normalized": "mount_pleasant_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "62",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 94.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-MOUNT_PLEASANT_ELEMENTARY-62",
-        "zone_match_confidence": "fuzzy_review"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -80.573892,
-              35.409643
-            ],
-            [
-              -80.574026,
-              35.40965
-            ],
-            [
-              -80.574055,
-              35.409237
-            ],
-            [
-              -80.574239,
-              35.409248
-            ],
-            [
-              -80.57425,
-              35.409111
-            ],
-            [
-              -80.574736,
-              35.409133
-            ],
-            [
-              -80.574684,
-              35.408657
-            ],
-            [
-              -80.575382,
-              35.408549
-            ],
-            [
-              -80.576122,
-              35.408183
-            ],
-            [
-              -80.576421,
-              35.408245
-            ],
-            [
-              -80.576795,
-              35.40857
-            ],
-            [
-              -80.576855,
-              35.408284
-            ],
-            [
-              -80.577311,
-              35.408221
-            ],
-            [
-              -80.57784,
-              35.408692
-            ],
-            [
-              -80.578111,
-              35.408473
-            ],
-            [
-              -80.578249,
-              35.4086
-            ],
-            [
-              -80.578753,
-              35.408262
-            ],
-            [
-              -80.579226,
-              35.408671
-            ],
-            [
-              -80.580313,
-              35.407844
-            ],
-            [
-              -80.580848,
-              35.408362
-            ],
-            [
-              -80.58142,
-              35.407907
-            ],
-            [
-              -80.581324,
-              35.407829
-            ],
-            [
-              -80.581631,
-              35.407316
-            ],
-            [
-              -80.581322,
-              35.407079
-            ],
-            [
-              -80.581599,
-              35.406864
-            ],
-            [
-              -80.583774,
-              35.405557
-            ],
-            [
-              -80.583626,
-              35.405313
-            ],
-            [
-              -80.584249,
-              35.404886
-            ],
-            [
-              -80.584534,
-              35.405128
-            ],
-            [
-              -80.5863,
-              35.404136
-            ],
-            [
-              -80.585857,
-              35.403646
-            ],
-            [
-              -80.586619,
-              35.403254
-            ],
-            [
-              -80.586831,
-              35.403507
-            ],
-            [
-              -80.587254,
-              35.403285
-            ],
-            [
-              -80.587417,
-              35.403516
-            ],
-            [
-              -80.588242,
-              35.402986
-            ],
-            [
-              -80.588002,
-              35.402711
-            ],
-            [
-              -80.588114,
-              35.402635
-            ],
-            [
-              -80.588596,
-              35.402547
-            ],
-            [
-              -80.588857,
-              35.402699
-            ],
-            [
-              -80.588641,
-              35.402466
-            ],
-            [
-              -80.588844,
-              35.402348
-            ],
-            [
-              -80.588704,
-              35.402208
-            ],
-            [
-              -80.588773,
-              35.402168
-            ],
-            [
-              -80.588936,
-              35.402254
-            ],
-            [
-              -80.589275,
-              35.402222
-            ],
-            [
-              -80.589501,
-              35.402376
-            ],
-            [
-              -80.59091,
-              35.401779
-            ],
-            [
-              -80.590097,
-              35.400189
-            ],
-            [
-              -80.589372,
-              35.398263
-            ],
-            [
-              -80.58777,
-              35.392911
-            ],
-            [
-              -80.587642,
-              35.391301
-            ],
-            [
-              -80.587643,
-              35.389398
-            ],
-            [
-              -80.587837,
-              35.387802
-            ],
-            [
-              -80.588548,
-              35.384567
-            ],
-            [
-              -80.587189,
-              35.384385
-            ],
-            [
-              -80.585868,
-              35.384017
-            ],
-            [
-              -80.584617,
-              35.383484
-            ],
-            [
-              -80.581862,
-              35.382083
-            ],
-            [
-              -80.58222,
-              35.380388
-            ],
-            [
-              -80.582188,
-              35.379904
-            ],
-            [
-              -80.580024,
-              35.376653
-            ],
-            [
-              -80.579718,
-              35.375771
-            ],
-            [
-              -80.579637,
-              35.375066
-            ],
-            [
-              -80.578565,
-              35.375567
-            ],
-            [
-              -80.578293,
-              35.375612
-            ],
-            [
-              -80.573032,
-              35.37449
-            ],
-            [
-              -80.571683,
-              35.374367
-            ],
-            [
-              -80.570534,
-              35.373981
-            ],
-            [
-              -80.567631,
-              35.376917
-            ],
-            [
-              -80.566936,
-              35.376738
-            ],
-            [
-              -80.566609,
-              35.377089
-            ],
-            [
-              -80.564768,
-              35.377918
-            ],
-            [
-              -80.563784,
-              35.377191
-            ],
-            [
-              -80.561681,
-              35.376136
-            ],
-            [
-              -80.561619,
-              35.374899
-            ],
-            [
-              -80.560894,
-              35.376655
-            ],
-            [
-              -80.560074,
-              35.37687
-            ],
-            [
-              -80.559548,
-              35.377122
-            ],
-            [
-              -80.558065,
-              35.37744
-            ],
-            [
-              -80.558179,
-              35.376566
-            ],
-            [
-              -80.559035,
-              35.376224
-            ],
-            [
-              -80.559152,
-              35.371686
-            ],
-            [
-              -80.536828,
-              35.376256
-            ],
-            [
-              -80.535659,
-              35.379036
-            ],
-            [
-              -80.535549,
-              35.379789
-            ],
-            [
-              -80.535784,
-              35.381584
-            ],
-            [
-              -80.535964,
-              35.381888
-            ],
-            [
-              -80.53599,
-              35.382298
-            ],
-            [
-              -80.536613,
-              35.38323
-            ],
-            [
-              -80.537145,
-              35.384926
-            ],
-            [
-              -80.539521,
-              35.386603
-            ],
-            [
-              -80.540771,
-              35.387626
-            ],
-            [
-              -80.542285,
-              35.39053
-            ],
-            [
-              -80.542046,
-              35.390578
-            ],
-            [
-              -80.542293,
-              35.391964
-            ],
-            [
-              -80.542388,
-              35.393128
-            ],
-            [
-              -80.542802,
-              35.393324
-            ],
-            [
-              -80.543495,
-              35.393437
-            ],
-            [
-              -80.544637,
-              35.393147
-            ],
-            [
-              -80.545243,
-              35.393162
-            ],
-            [
-              -80.546614,
-              35.393335
-            ],
-            [
-              -80.547702,
-              35.393601
-            ],
-            [
-              -80.547905,
-              35.39381
-            ],
-            [
-              -80.548212,
-              35.394417
-            ],
-            [
-              -80.548491,
-              35.39572
-            ],
-            [
-              -80.549319,
-              35.396819
-            ],
-            [
-              -80.549886,
-              35.398386
-            ],
-            [
-              -80.550896,
-              35.398912
-            ],
-            [
-              -80.551705,
-              35.398899
-            ],
-            [
-              -80.55252,
-              35.399498
-            ],
-            [
-              -80.557811,
-              35.401283
-            ],
-            [
-              -80.558355,
-              35.401556
-            ],
-            [
-              -80.558991,
-              35.401988
-            ],
-            [
-              -80.559864,
-              35.402898
-            ],
-            [
-              -80.563323,
-              35.406837
-            ],
-            [
-              -80.563812,
-              35.407291
-            ],
-            [
-              -80.567058,
-              35.40941
-            ],
-            [
-              -80.569702,
-              35.408772
-            ],
-            [
-              -80.569492,
-              35.408279
-            ],
-            [
-              -80.57038,
-              35.408094
-            ],
-            [
-              -80.570476,
-              35.408604
-            ],
-            [
-              -80.571191,
-              35.408373
-            ],
-            [
-              -80.571137,
-              35.408271
-            ],
-            [
-              -80.571539,
-              35.408269
-            ],
-            [
-              -80.571483,
-              35.407812
-            ],
-            [
-              -80.57203,
-              35.407647
-            ],
-            [
-              -80.572427,
-              35.407737
-            ],
-            [
-              -80.572535,
-              35.407606
-            ],
-            [
-              -80.57308,
-              35.40859
-            ],
-            [
-              -80.573185,
-              35.409122
-            ],
-            [
-              -80.573928,
-              35.409112
-            ],
-            [
-              -80.573892,
-              35.409643
-            ]
-          ]
-        ]
-      },
-      "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-R_BROWN_MCALLISTER_ELEMENTARY-60",
-        "needs_verification": true,
-        "school_level": "elementary",
-        "school_name": "R B McAllister ES",
-        "school_name_normalized": "r_b_mcallister_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "65",
-        "utilization_class": "approaching_capacity",
-        "utilization_pct": 92.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-R_B_MCALLISTER_ELEMENTARY-65",
-        "zone_match_confidence": "fuzzy_review"
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -12491,23 +12050,600 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-WOLF_MEADOW_ELEMENTARY-62",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-WOLF_MEADOW_ELEMENTARY-72",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 10,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 597,
+        "permit_count_recent": 503,
+        "permit_growth_delta": -94,
+        "permit_growth_pct": -15.7,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 376,
         "school_level": "elementary",
         "school_name": "Wolf Meadow ES",
-        "school_name_normalized": "wolf_meadow_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "72",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 92.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-WOLF_MEADOW_ELEMENTARY-72",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "approaching_capacity"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -80.573892,
+              35.409643
+            ],
+            [
+              -80.574026,
+              35.40965
+            ],
+            [
+              -80.574055,
+              35.409237
+            ],
+            [
+              -80.574239,
+              35.409248
+            ],
+            [
+              -80.57425,
+              35.409111
+            ],
+            [
+              -80.574736,
+              35.409133
+            ],
+            [
+              -80.574684,
+              35.408657
+            ],
+            [
+              -80.575382,
+              35.408549
+            ],
+            [
+              -80.576122,
+              35.408183
+            ],
+            [
+              -80.576421,
+              35.408245
+            ],
+            [
+              -80.576795,
+              35.40857
+            ],
+            [
+              -80.576855,
+              35.408284
+            ],
+            [
+              -80.577311,
+              35.408221
+            ],
+            [
+              -80.57784,
+              35.408692
+            ],
+            [
+              -80.578111,
+              35.408473
+            ],
+            [
+              -80.578249,
+              35.4086
+            ],
+            [
+              -80.578753,
+              35.408262
+            ],
+            [
+              -80.579226,
+              35.408671
+            ],
+            [
+              -80.580313,
+              35.407844
+            ],
+            [
+              -80.580848,
+              35.408362
+            ],
+            [
+              -80.58142,
+              35.407907
+            ],
+            [
+              -80.581324,
+              35.407829
+            ],
+            [
+              -80.581631,
+              35.407316
+            ],
+            [
+              -80.581322,
+              35.407079
+            ],
+            [
+              -80.581599,
+              35.406864
+            ],
+            [
+              -80.583774,
+              35.405557
+            ],
+            [
+              -80.583626,
+              35.405313
+            ],
+            [
+              -80.584249,
+              35.404886
+            ],
+            [
+              -80.584534,
+              35.405128
+            ],
+            [
+              -80.5863,
+              35.404136
+            ],
+            [
+              -80.585857,
+              35.403646
+            ],
+            [
+              -80.586619,
+              35.403254
+            ],
+            [
+              -80.586831,
+              35.403507
+            ],
+            [
+              -80.587254,
+              35.403285
+            ],
+            [
+              -80.587417,
+              35.403516
+            ],
+            [
+              -80.588242,
+              35.402986
+            ],
+            [
+              -80.588002,
+              35.402711
+            ],
+            [
+              -80.588114,
+              35.402635
+            ],
+            [
+              -80.588596,
+              35.402547
+            ],
+            [
+              -80.588857,
+              35.402699
+            ],
+            [
+              -80.588641,
+              35.402466
+            ],
+            [
+              -80.588844,
+              35.402348
+            ],
+            [
+              -80.588704,
+              35.402208
+            ],
+            [
+              -80.588773,
+              35.402168
+            ],
+            [
+              -80.588936,
+              35.402254
+            ],
+            [
+              -80.589275,
+              35.402222
+            ],
+            [
+              -80.589501,
+              35.402376
+            ],
+            [
+              -80.59091,
+              35.401779
+            ],
+            [
+              -80.590097,
+              35.400189
+            ],
+            [
+              -80.589372,
+              35.398263
+            ],
+            [
+              -80.58777,
+              35.392911
+            ],
+            [
+              -80.587642,
+              35.391301
+            ],
+            [
+              -80.587643,
+              35.389398
+            ],
+            [
+              -80.587837,
+              35.387802
+            ],
+            [
+              -80.588548,
+              35.384567
+            ],
+            [
+              -80.587189,
+              35.384385
+            ],
+            [
+              -80.585868,
+              35.384017
+            ],
+            [
+              -80.584617,
+              35.383484
+            ],
+            [
+              -80.581862,
+              35.382083
+            ],
+            [
+              -80.58222,
+              35.380388
+            ],
+            [
+              -80.582188,
+              35.379904
+            ],
+            [
+              -80.580024,
+              35.376653
+            ],
+            [
+              -80.579718,
+              35.375771
+            ],
+            [
+              -80.579637,
+              35.375066
+            ],
+            [
+              -80.578565,
+              35.375567
+            ],
+            [
+              -80.578293,
+              35.375612
+            ],
+            [
+              -80.573032,
+              35.37449
+            ],
+            [
+              -80.571683,
+              35.374367
+            ],
+            [
+              -80.570534,
+              35.373981
+            ],
+            [
+              -80.567631,
+              35.376917
+            ],
+            [
+              -80.566936,
+              35.376738
+            ],
+            [
+              -80.566609,
+              35.377089
+            ],
+            [
+              -80.564768,
+              35.377918
+            ],
+            [
+              -80.563784,
+              35.377191
+            ],
+            [
+              -80.561681,
+              35.376136
+            ],
+            [
+              -80.561619,
+              35.374899
+            ],
+            [
+              -80.560894,
+              35.376655
+            ],
+            [
+              -80.560074,
+              35.37687
+            ],
+            [
+              -80.559548,
+              35.377122
+            ],
+            [
+              -80.558065,
+              35.37744
+            ],
+            [
+              -80.558179,
+              35.376566
+            ],
+            [
+              -80.559035,
+              35.376224
+            ],
+            [
+              -80.559152,
+              35.371686
+            ],
+            [
+              -80.536828,
+              35.376256
+            ],
+            [
+              -80.535659,
+              35.379036
+            ],
+            [
+              -80.535549,
+              35.379789
+            ],
+            [
+              -80.535784,
+              35.381584
+            ],
+            [
+              -80.535964,
+              35.381888
+            ],
+            [
+              -80.53599,
+              35.382298
+            ],
+            [
+              -80.536613,
+              35.38323
+            ],
+            [
+              -80.537145,
+              35.384926
+            ],
+            [
+              -80.539521,
+              35.386603
+            ],
+            [
+              -80.540771,
+              35.387626
+            ],
+            [
+              -80.542285,
+              35.39053
+            ],
+            [
+              -80.542046,
+              35.390578
+            ],
+            [
+              -80.542293,
+              35.391964
+            ],
+            [
+              -80.542388,
+              35.393128
+            ],
+            [
+              -80.542802,
+              35.393324
+            ],
+            [
+              -80.543495,
+              35.393437
+            ],
+            [
+              -80.544637,
+              35.393147
+            ],
+            [
+              -80.545243,
+              35.393162
+            ],
+            [
+              -80.546614,
+              35.393335
+            ],
+            [
+              -80.547702,
+              35.393601
+            ],
+            [
+              -80.547905,
+              35.39381
+            ],
+            [
+              -80.548212,
+              35.394417
+            ],
+            [
+              -80.548491,
+              35.39572
+            ],
+            [
+              -80.549319,
+              35.396819
+            ],
+            [
+              -80.549886,
+              35.398386
+            ],
+            [
+              -80.550896,
+              35.398912
+            ],
+            [
+              -80.551705,
+              35.398899
+            ],
+            [
+              -80.55252,
+              35.399498
+            ],
+            [
+              -80.557811,
+              35.401283
+            ],
+            [
+              -80.558355,
+              35.401556
+            ],
+            [
+              -80.558991,
+              35.401988
+            ],
+            [
+              -80.559864,
+              35.402898
+            ],
+            [
+              -80.563323,
+              35.406837
+            ],
+            [
+              -80.563812,
+              35.407291
+            ],
+            [
+              -80.567058,
+              35.40941
+            ],
+            [
+              -80.569702,
+              35.408772
+            ],
+            [
+              -80.569492,
+              35.408279
+            ],
+            [
+              -80.57038,
+              35.408094
+            ],
+            [
+              -80.570476,
+              35.408604
+            ],
+            [
+              -80.571191,
+              35.408373
+            ],
+            [
+              -80.571137,
+              35.408271
+            ],
+            [
+              -80.571539,
+              35.408269
+            ],
+            [
+              -80.571483,
+              35.407812
+            ],
+            [
+              -80.57203,
+              35.407647
+            ],
+            [
+              -80.572427,
+              35.407737
+            ],
+            [
+              -80.572535,
+              35.407606
+            ],
+            [
+              -80.57308,
+              35.40859
+            ],
+            [
+              -80.573185,
+              35.409122
+            ],
+            [
+              -80.573928,
+              35.409112
+            ],
+            [
+              -80.573892,
+              35.409643
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-R_B_MCALLISTER_ELEMENTARY-65",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 1,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 424,
+        "permit_count_recent": 445,
+        "permit_growth_delta": 21,
+        "permit_growth_pct": 5.0,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 361,
+        "school_level": "elementary",
+        "school_name": "R B McAllister ES",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
+        "utilization_pct": 92.0,
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -13096,23 +13232,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "safe_alias_normalized",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-ROYAL_OAKS_ELEMENTARY-44",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-ROYAL_OAKS_ELEMENTARY-67",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 33,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 376,
+        "permit_count_recent": 433,
+        "permit_growth_delta": 57,
+        "permit_growth_pct": 15.2,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 187,
         "school_level": "elementary",
         "school_name": "Royal Oaks ES",
-        "school_name_normalized": "royal_oaks_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "67",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 91.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-ROYAL_OAKS_ELEMENTARY-67",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -13597,23 +13741,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-WINECOFF_ELEMENTARY-47",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-WINECOFF_ELEMENTARY-71",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 7,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 265,
+        "permit_count_recent": 332,
+        "permit_growth_delta": 67,
+        "permit_growth_pct": 25.3,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 244,
         "school_level": "elementary",
         "school_name": "Winecoff ES",
-        "school_name_normalized": "winecoff_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "71",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 89.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-WINECOFF_ELEMENTARY-71",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -14522,23 +14674,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "unmatched_reference_review",
-        "matched_school_reference_id": null,
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-HIGH-WEST_CABARRUS_HIGH-17",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 58,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1919,
+        "permit_count_recent": 1884,
+        "permit_growth_delta": -35,
+        "permit_growth_pct": -1.8,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 1305,
         "school_level": "high",
         "school_name": "West Cabarrus HS",
-        "school_name_normalized": "west_cabarrus_high",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus High School Attendance Zones",
-        "source_objectid": "17",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 88.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-HIGH-WEST_CABARRUS_HIGH-17",
-        "zone_match_confidence": "unmatched_reference_review"
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -15379,23 +15539,1232 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-MIDDLE-HICKORY_RIDGE_MIDDLE-5293",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-MIDDLE-HICKORY_RIDGE_MIDDLE-15",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 14,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1379,
+        "permit_count_recent": 1299,
+        "permit_growth_delta": -80,
+        "permit_growth_pct": -5.8,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 1162,
         "school_level": "middle",
         "school_name": "Hickory Ridge MS",
-        "school_name_normalized": "hickory_ridge_middle",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Middle School Attendance Zones",
-        "source_objectid": "15",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 87.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-MIDDLE-HICKORY_RIDGE_MIDDLE-15",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "approaching_capacity"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -80.53805,
+              35.50282
+            ],
+            [
+              -80.542126,
+              35.502844
+            ],
+            [
+              -80.542303,
+              35.499538
+            ],
+            [
+              -80.539906,
+              35.499081
+            ],
+            [
+              -80.541644,
+              35.498694
+            ],
+            [
+              -80.541671,
+              35.497285
+            ],
+            [
+              -80.542416,
+              35.488586
+            ],
+            [
+              -80.543119,
+              35.483818
+            ],
+            [
+              -80.540331,
+              35.482661
+            ],
+            [
+              -80.53895,
+              35.483213
+            ],
+            [
+              -80.539007,
+              35.482412
+            ],
+            [
+              -80.54299,
+              35.476025
+            ],
+            [
+              -80.541952,
+              35.475655
+            ],
+            [
+              -80.542066,
+              35.475318
+            ],
+            [
+              -80.541638,
+              35.475181
+            ],
+            [
+              -80.541884,
+              35.473003
+            ],
+            [
+              -80.541234,
+              35.471079
+            ],
+            [
+              -80.540783,
+              35.468828
+            ],
+            [
+              -80.541146,
+              35.46876
+            ],
+            [
+              -80.540822,
+              35.468523
+            ],
+            [
+              -80.540758,
+              35.468354
+            ],
+            [
+              -80.541244,
+              35.467201
+            ],
+            [
+              -80.541551,
+              35.466772
+            ],
+            [
+              -80.541613,
+              35.466483
+            ],
+            [
+              -80.540944,
+              35.465977
+            ],
+            [
+              -80.540653,
+              35.46508
+            ],
+            [
+              -80.544386,
+              35.464296
+            ],
+            [
+              -80.540601,
+              35.460634
+            ],
+            [
+              -80.543223,
+              35.459562
+            ],
+            [
+              -80.543154,
+              35.457632
+            ],
+            [
+              -80.543816,
+              35.457527
+            ],
+            [
+              -80.543729,
+              35.456746
+            ],
+            [
+              -80.544697,
+              35.456853
+            ],
+            [
+              -80.544839,
+              35.455591
+            ],
+            [
+              -80.544471,
+              35.455643
+            ],
+            [
+              -80.54258,
+              35.454482
+            ],
+            [
+              -80.542413,
+              35.454661
+            ],
+            [
+              -80.541886,
+              35.454303
+            ],
+            [
+              -80.541594,
+              35.453551
+            ],
+            [
+              -80.5422,
+              35.45343
+            ],
+            [
+              -80.541966,
+              35.452895
+            ],
+            [
+              -80.539546,
+              35.453228
+            ],
+            [
+              -80.539903,
+              35.453796
+            ],
+            [
+              -80.535535,
+              35.454038
+            ],
+            [
+              -80.535456,
+              35.45341
+            ],
+            [
+              -80.533879,
+              35.453549
+            ],
+            [
+              -80.530892,
+              35.453177
+            ],
+            [
+              -80.531481,
+              35.451706
+            ],
+            [
+              -80.531676,
+              35.448832
+            ],
+            [
+              -80.531901,
+              35.448812
+            ],
+            [
+              -80.531741,
+              35.448446
+            ],
+            [
+              -80.531828,
+              35.447943
+            ],
+            [
+              -80.531729,
+              35.44755
+            ],
+            [
+              -80.531873,
+              35.446914
+            ],
+            [
+              -80.53191,
+              35.444915
+            ],
+            [
+              -80.532281,
+              35.44029
+            ],
+            [
+              -80.532851,
+              35.437774
+            ],
+            [
+              -80.533121,
+              35.43702
+            ],
+            [
+              -80.533025,
+              35.436946
+            ],
+            [
+              -80.533039,
+              35.436821
+            ],
+            [
+              -80.533401,
+              35.435436
+            ],
+            [
+              -80.533793,
+              35.434796
+            ],
+            [
+              -80.532276,
+              35.434368
+            ],
+            [
+              -80.536314,
+              35.430507
+            ],
+            [
+              -80.535823,
+              35.429184
+            ],
+            [
+              -80.536156,
+              35.426076
+            ],
+            [
+              -80.536034,
+              35.423589
+            ],
+            [
+              -80.536436,
+              35.417137
+            ],
+            [
+              -80.536609,
+              35.416793
+            ],
+            [
+              -80.536913,
+              35.414279
+            ],
+            [
+              -80.53729,
+              35.408946
+            ],
+            [
+              -80.537585,
+              35.407318
+            ],
+            [
+              -80.537334,
+              35.405914
+            ],
+            [
+              -80.536702,
+              35.404349
+            ],
+            [
+              -80.536692,
+              35.403888
+            ],
+            [
+              -80.536287,
+              35.403051
+            ],
+            [
+              -80.536269,
+              35.402682
+            ],
+            [
+              -80.535593,
+              35.40225
+            ],
+            [
+              -80.534453,
+              35.401013
+            ],
+            [
+              -80.53438,
+              35.400753
+            ],
+            [
+              -80.534765,
+              35.400438
+            ],
+            [
+              -80.534342,
+              35.400211
+            ],
+            [
+              -80.535262,
+              35.399951
+            ],
+            [
+              -80.535422,
+              35.400013
+            ],
+            [
+              -80.537295,
+              35.398373
+            ],
+            [
+              -80.537864,
+              35.397407
+            ],
+            [
+              -80.537769,
+              35.393693
+            ],
+            [
+              -80.53762,
+              35.392879
+            ],
+            [
+              -80.53702,
+              35.390855
+            ],
+            [
+              -80.541417,
+              35.390705
+            ],
+            [
+              -80.542285,
+              35.39053
+            ],
+            [
+              -80.540771,
+              35.387626
+            ],
+            [
+              -80.537145,
+              35.384926
+            ],
+            [
+              -80.536613,
+              35.38323
+            ],
+            [
+              -80.53599,
+              35.382298
+            ],
+            [
+              -80.535964,
+              35.381888
+            ],
+            [
+              -80.535784,
+              35.381584
+            ],
+            [
+              -80.535549,
+              35.379789
+            ],
+            [
+              -80.535659,
+              35.379036
+            ],
+            [
+              -80.536828,
+              35.376256
+            ],
+            [
+              -80.55116,
+              35.373308
+            ],
+            [
+              -80.550991,
+              35.372698
+            ],
+            [
+              -80.550179,
+              35.371368
+            ],
+            [
+              -80.542301,
+              35.362217
+            ],
+            [
+              -80.541596,
+              35.361544
+            ],
+            [
+              -80.54217,
+              35.36089
+            ],
+            [
+              -80.542138,
+              35.360789
+            ],
+            [
+              -80.541966,
+              35.360767
+            ],
+            [
+              -80.542132,
+              35.360127
+            ],
+            [
+              -80.540256,
+              35.358707
+            ],
+            [
+              -80.541336,
+              35.358325
+            ],
+            [
+              -80.540934,
+              35.357799
+            ],
+            [
+              -80.541451,
+              35.357679
+            ],
+            [
+              -80.541755,
+              35.356859
+            ],
+            [
+              -80.540594,
+              35.354206
+            ],
+            [
+              -80.54044,
+              35.353065
+            ],
+            [
+              -80.5397,
+              35.35339
+            ],
+            [
+              -80.537815,
+              35.352217
+            ],
+            [
+              -80.540524,
+              35.348233
+            ],
+            [
+              -80.536451,
+              35.348155
+            ],
+            [
+              -80.536736,
+              35.345351
+            ],
+            [
+              -80.54317,
+              35.342742
+            ],
+            [
+              -80.54383,
+              35.341313
+            ],
+            [
+              -80.543948,
+              35.340823
+            ],
+            [
+              -80.544814,
+              35.339584
+            ],
+            [
+              -80.545059,
+              35.339385
+            ],
+            [
+              -80.544537,
+              35.337875
+            ],
+            [
+              -80.544089,
+              35.337686
+            ],
+            [
+              -80.538969,
+              35.338678
+            ],
+            [
+              -80.538373,
+              35.338645
+            ],
+            [
+              -80.538123,
+              35.338031
+            ],
+            [
+              -80.538542,
+              35.336474
+            ],
+            [
+              -80.538194,
+              35.335803
+            ],
+            [
+              -80.537708,
+              35.335649
+            ],
+            [
+              -80.536715,
+              35.336059
+            ],
+            [
+              -80.535029,
+              35.335468
+            ],
+            [
+              -80.531301,
+              35.33558
+            ],
+            [
+              -80.531731,
+              35.333721
+            ],
+            [
+              -80.521229,
+              35.331715
+            ],
+            [
+              -80.52103,
+              35.332551
+            ],
+            [
+              -80.520927,
+              35.33388
+            ],
+            [
+              -80.518879,
+              35.333545
+            ],
+            [
+              -80.517466,
+              35.333658
+            ],
+            [
+              -80.517445,
+              35.33271
+            ],
+            [
+              -80.516042,
+              35.332961
+            ],
+            [
+              -80.51556,
+              35.331984
+            ],
+            [
+              -80.515412,
+              35.332025
+            ],
+            [
+              -80.515226,
+              35.331554
+            ],
+            [
+              -80.514909,
+              35.331565
+            ],
+            [
+              -80.51488,
+              35.331048
+            ],
+            [
+              -80.514649,
+              35.330631
+            ],
+            [
+              -80.514341,
+              35.330732
+            ],
+            [
+              -80.514018,
+              35.330288
+            ],
+            [
+              -80.514358,
+              35.330083
+            ],
+            [
+              -80.514314,
+              35.329235
+            ],
+            [
+              -80.512948,
+              35.328825
+            ],
+            [
+              -80.513262,
+              35.328116
+            ],
+            [
+              -80.513073,
+              35.327809
+            ],
+            [
+              -80.513726,
+              35.327721
+            ],
+            [
+              -80.513994,
+              35.327451
+            ],
+            [
+              -80.514094,
+              35.32719
+            ],
+            [
+              -80.513826,
+              35.326673
+            ],
+            [
+              -80.513526,
+              35.32683
+            ],
+            [
+              -80.512003,
+              35.326564
+            ],
+            [
+              -80.512336,
+              35.325635
+            ],
+            [
+              -80.512593,
+              35.32551
+            ],
+            [
+              -80.512092,
+              35.324434
+            ],
+            [
+              -80.510606,
+              35.323543
+            ],
+            [
+              -80.509808,
+              35.323571
+            ],
+            [
+              -80.507185,
+              35.324107
+            ],
+            [
+              -80.505523,
+              35.323537
+            ],
+            [
+              -80.504607,
+              35.324004
+            ],
+            [
+              -80.503727,
+              35.324044
+            ],
+            [
+              -80.503449,
+              35.323944
+            ],
+            [
+              -80.503111,
+              35.323492
+            ],
+            [
+              -80.502485,
+              35.323028
+            ],
+            [
+              -80.502083,
+              35.321902
+            ],
+            [
+              -80.501826,
+              35.321448
+            ],
+            [
+              -80.500916,
+              35.320433
+            ],
+            [
+              -80.500286,
+              35.319936
+            ],
+            [
+              -80.496978,
+              35.320587
+            ],
+            [
+              -80.493825,
+              35.320198
+            ],
+            [
+              -80.493784,
+              35.320297
+            ],
+            [
+              -80.488469,
+              35.319185
+            ],
+            [
+              -80.486333,
+              35.318086
+            ],
+            [
+              -80.484402,
+              35.316619
+            ],
+            [
+              -80.48345,
+              35.316124
+            ],
+            [
+              -80.481562,
+              35.314778
+            ],
+            [
+              -80.47882,
+              35.313722
+            ],
+            [
+              -80.477823,
+              35.315299
+            ],
+            [
+              -80.477456,
+              35.316357
+            ],
+            [
+              -80.47727,
+              35.317389
+            ],
+            [
+              -80.476985,
+              35.317828
+            ],
+            [
+              -80.472732,
+              35.3117
+            ],
+            [
+              -80.469758,
+              35.310362
+            ],
+            [
+              -80.467649,
+              35.309278
+            ],
+            [
+              -80.46638,
+              35.308452
+            ],
+            [
+              -80.465772,
+              35.309664
+            ],
+            [
+              -80.463673,
+              35.312044
+            ],
+            [
+              -80.463436,
+              35.31256
+            ],
+            [
+              -80.461335,
+              35.312041
+            ],
+            [
+              -80.461358,
+              35.312241
+            ],
+            [
+              -80.461628,
+              35.312354
+            ],
+            [
+              -80.461663,
+              35.312741
+            ],
+            [
+              -80.461927,
+              35.31281
+            ],
+            [
+              -80.461666,
+              35.312748
+            ],
+            [
+              -80.460685,
+              35.313462
+            ],
+            [
+              -80.460423,
+              35.3133
+            ],
+            [
+              -80.459098,
+              35.313044
+            ],
+            [
+              -80.459297,
+              35.311813
+            ],
+            [
+              -80.457827,
+              35.311052
+            ],
+            [
+              -80.458596,
+              35.309974
+            ],
+            [
+              -80.455196,
+              35.307449
+            ],
+            [
+              -80.452991,
+              35.306012
+            ],
+            [
+              -80.454511,
+              35.304815
+            ],
+            [
+              -80.45378,
+              35.303934
+            ],
+            [
+              -80.453105,
+              35.302045
+            ],
+            [
+              -80.451628,
+              35.300845
+            ],
+            [
+              -80.451423,
+              35.301525
+            ],
+            [
+              -80.451244,
+              35.301566
+            ],
+            [
+              -80.451019,
+              35.301426
+            ],
+            [
+              -80.450785,
+              35.301506
+            ],
+            [
+              -80.450698,
+              35.302138
+            ],
+            [
+              -80.450353,
+              35.302581
+            ],
+            [
+              -80.450192,
+              35.302468
+            ],
+            [
+              -80.449873,
+              35.302551
+            ],
+            [
+              -80.44971,
+              35.30276
+            ],
+            [
+              -80.447844,
+              35.301616
+            ],
+            [
+              -80.44429,
+              35.303186
+            ],
+            [
+              -80.442659,
+              35.304797
+            ],
+            [
+              -80.441681,
+              35.304346
+            ],
+            [
+              -80.440592,
+              35.303543
+            ],
+            [
+              -80.440627,
+              35.30345
+            ],
+            [
+              -80.440287,
+              35.302772
+            ],
+            [
+              -80.440047,
+              35.301815
+            ],
+            [
+              -80.439533,
+              35.300527
+            ],
+            [
+              -80.438918,
+              35.299419
+            ],
+            [
+              -80.437248,
+              35.297158
+            ],
+            [
+              -80.437848,
+              35.296411
+            ],
+            [
+              -80.440116,
+              35.294735
+            ],
+            [
+              -80.439406,
+              35.293938
+            ],
+            [
+              -80.439823,
+              35.292234
+            ],
+            [
+              -80.437707,
+              35.289896
+            ],
+            [
+              -80.436336,
+              35.289678
+            ],
+            [
+              -80.413496,
+              35.32451
+            ],
+            [
+              -80.407059,
+              35.334496
+            ],
+            [
+              -80.406952,
+              35.334447
+            ],
+            [
+              -80.402309,
+              35.341696
+            ],
+            [
+              -80.345459,
+              35.427428
+            ],
+            [
+              -80.333986,
+              35.444916
+            ],
+            [
+              -80.317991,
+              35.468846
+            ],
+            [
+              -80.295429,
+              35.502926
+            ],
+            [
+              -80.315424,
+              35.502955
+            ],
+            [
+              -80.315804,
+              35.501405
+            ],
+            [
+              -80.316561,
+              35.502218
+            ],
+            [
+              -80.316953,
+              35.502944
+            ],
+            [
+              -80.317375,
+              35.502941
+            ],
+            [
+              -80.317515,
+              35.502729
+            ],
+            [
+              -80.318143,
+              35.502932
+            ],
+            [
+              -80.318431,
+              35.502317
+            ],
+            [
+              -80.319532,
+              35.502926
+            ],
+            [
+              -80.319899,
+              35.502971
+            ],
+            [
+              -80.323394,
+              35.504807
+            ],
+            [
+              -80.323496,
+              35.502911
+            ],
+            [
+              -80.341405,
+              35.502817
+            ],
+            [
+              -80.34773,
+              35.502877
+            ],
+            [
+              -80.380186,
+              35.502339
+            ],
+            [
+              -80.385958,
+              35.502191
+            ],
+            [
+              -80.387084,
+              35.502058
+            ],
+            [
+              -80.387951,
+              35.502281
+            ],
+            [
+              -80.394665,
+              35.502124
+            ],
+            [
+              -80.406383,
+              35.502114
+            ],
+            [
+              -80.411368,
+              35.501992
+            ],
+            [
+              -80.421698,
+              35.501978
+            ],
+            [
+              -80.422412,
+              35.501904
+            ],
+            [
+              -80.430652,
+              35.501983
+            ],
+            [
+              -80.43703,
+              35.502102
+            ],
+            [
+              -80.437109,
+              35.502205
+            ],
+            [
+              -80.441549,
+              35.502253
+            ],
+            [
+              -80.481579,
+              35.502496
+            ],
+            [
+              -80.482237,
+              35.500922
+            ],
+            [
+              -80.482925,
+              35.500935
+            ],
+            [
+              -80.482997,
+              35.502507
+            ],
+            [
+              -80.495938,
+              35.502538
+            ],
+            [
+              -80.498298,
+              35.502615
+            ],
+            [
+              -80.498304,
+              35.502543
+            ],
+            [
+              -80.499106,
+              35.502507
+            ],
+            [
+              -80.513568,
+              35.502548
+            ],
+            [
+              -80.51356,
+              35.502676
+            ],
+            [
+              -80.536354,
+              35.502897
+            ],
+            [
+              -80.53805,
+              35.50282
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "attendance_area_id": "SCHOOLZONE-HIGH-MOUNT_PLEASANT_HIGH-15",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 17,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1046,
+        "permit_count_recent": 1004,
+        "permit_growth_delta": -42,
+        "permit_growth_pct": -4.0,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 852,
+        "school_level": "high",
+        "school_name": "Mount Pleasant HS",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
+        "utilization_pct": 85.0,
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -16374,1216 +17743,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-W_M_IRVIN_ELEMENTARY-52",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-W_M_IRVIN_ELEMENTARY-68",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 9,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 668,
+        "permit_count_recent": 734,
+        "permit_growth_delta": 66,
+        "permit_growth_pct": 9.9,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 577,
         "school_level": "elementary",
         "school_name": "W M Irvin ES",
-        "school_name_normalized": "w_m_irvin_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "68",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 85.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-W_M_IRVIN_ELEMENTARY-68",
-        "zone_match_confidence": "normalized_exact"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -80.53805,
-              35.50282
-            ],
-            [
-              -80.542126,
-              35.502844
-            ],
-            [
-              -80.542303,
-              35.499538
-            ],
-            [
-              -80.539906,
-              35.499081
-            ],
-            [
-              -80.541644,
-              35.498694
-            ],
-            [
-              -80.541671,
-              35.497285
-            ],
-            [
-              -80.542416,
-              35.488586
-            ],
-            [
-              -80.543119,
-              35.483818
-            ],
-            [
-              -80.540331,
-              35.482661
-            ],
-            [
-              -80.53895,
-              35.483213
-            ],
-            [
-              -80.539007,
-              35.482412
-            ],
-            [
-              -80.54299,
-              35.476025
-            ],
-            [
-              -80.541952,
-              35.475655
-            ],
-            [
-              -80.542066,
-              35.475318
-            ],
-            [
-              -80.541638,
-              35.475181
-            ],
-            [
-              -80.541884,
-              35.473003
-            ],
-            [
-              -80.541234,
-              35.471079
-            ],
-            [
-              -80.540783,
-              35.468828
-            ],
-            [
-              -80.541146,
-              35.46876
-            ],
-            [
-              -80.540822,
-              35.468523
-            ],
-            [
-              -80.540758,
-              35.468354
-            ],
-            [
-              -80.541244,
-              35.467201
-            ],
-            [
-              -80.541551,
-              35.466772
-            ],
-            [
-              -80.541613,
-              35.466483
-            ],
-            [
-              -80.540944,
-              35.465977
-            ],
-            [
-              -80.540653,
-              35.46508
-            ],
-            [
-              -80.544386,
-              35.464296
-            ],
-            [
-              -80.540601,
-              35.460634
-            ],
-            [
-              -80.543223,
-              35.459562
-            ],
-            [
-              -80.543154,
-              35.457632
-            ],
-            [
-              -80.543816,
-              35.457527
-            ],
-            [
-              -80.543729,
-              35.456746
-            ],
-            [
-              -80.544697,
-              35.456853
-            ],
-            [
-              -80.544839,
-              35.455591
-            ],
-            [
-              -80.544471,
-              35.455643
-            ],
-            [
-              -80.54258,
-              35.454482
-            ],
-            [
-              -80.542413,
-              35.454661
-            ],
-            [
-              -80.541886,
-              35.454303
-            ],
-            [
-              -80.541594,
-              35.453551
-            ],
-            [
-              -80.5422,
-              35.45343
-            ],
-            [
-              -80.541966,
-              35.452895
-            ],
-            [
-              -80.539546,
-              35.453228
-            ],
-            [
-              -80.539903,
-              35.453796
-            ],
-            [
-              -80.535535,
-              35.454038
-            ],
-            [
-              -80.535456,
-              35.45341
-            ],
-            [
-              -80.533879,
-              35.453549
-            ],
-            [
-              -80.530892,
-              35.453177
-            ],
-            [
-              -80.531481,
-              35.451706
-            ],
-            [
-              -80.531676,
-              35.448832
-            ],
-            [
-              -80.531901,
-              35.448812
-            ],
-            [
-              -80.531741,
-              35.448446
-            ],
-            [
-              -80.531828,
-              35.447943
-            ],
-            [
-              -80.531729,
-              35.44755
-            ],
-            [
-              -80.531873,
-              35.446914
-            ],
-            [
-              -80.53191,
-              35.444915
-            ],
-            [
-              -80.532281,
-              35.44029
-            ],
-            [
-              -80.532851,
-              35.437774
-            ],
-            [
-              -80.533121,
-              35.43702
-            ],
-            [
-              -80.533025,
-              35.436946
-            ],
-            [
-              -80.533039,
-              35.436821
-            ],
-            [
-              -80.533401,
-              35.435436
-            ],
-            [
-              -80.533793,
-              35.434796
-            ],
-            [
-              -80.532276,
-              35.434368
-            ],
-            [
-              -80.536314,
-              35.430507
-            ],
-            [
-              -80.535823,
-              35.429184
-            ],
-            [
-              -80.536156,
-              35.426076
-            ],
-            [
-              -80.536034,
-              35.423589
-            ],
-            [
-              -80.536436,
-              35.417137
-            ],
-            [
-              -80.536609,
-              35.416793
-            ],
-            [
-              -80.536913,
-              35.414279
-            ],
-            [
-              -80.53729,
-              35.408946
-            ],
-            [
-              -80.537585,
-              35.407318
-            ],
-            [
-              -80.537334,
-              35.405914
-            ],
-            [
-              -80.536702,
-              35.404349
-            ],
-            [
-              -80.536692,
-              35.403888
-            ],
-            [
-              -80.536287,
-              35.403051
-            ],
-            [
-              -80.536269,
-              35.402682
-            ],
-            [
-              -80.535593,
-              35.40225
-            ],
-            [
-              -80.534453,
-              35.401013
-            ],
-            [
-              -80.53438,
-              35.400753
-            ],
-            [
-              -80.534765,
-              35.400438
-            ],
-            [
-              -80.534342,
-              35.400211
-            ],
-            [
-              -80.535262,
-              35.399951
-            ],
-            [
-              -80.535422,
-              35.400013
-            ],
-            [
-              -80.537295,
-              35.398373
-            ],
-            [
-              -80.537864,
-              35.397407
-            ],
-            [
-              -80.537769,
-              35.393693
-            ],
-            [
-              -80.53762,
-              35.392879
-            ],
-            [
-              -80.53702,
-              35.390855
-            ],
-            [
-              -80.541417,
-              35.390705
-            ],
-            [
-              -80.542285,
-              35.39053
-            ],
-            [
-              -80.540771,
-              35.387626
-            ],
-            [
-              -80.537145,
-              35.384926
-            ],
-            [
-              -80.536613,
-              35.38323
-            ],
-            [
-              -80.53599,
-              35.382298
-            ],
-            [
-              -80.535964,
-              35.381888
-            ],
-            [
-              -80.535784,
-              35.381584
-            ],
-            [
-              -80.535549,
-              35.379789
-            ],
-            [
-              -80.535659,
-              35.379036
-            ],
-            [
-              -80.536828,
-              35.376256
-            ],
-            [
-              -80.55116,
-              35.373308
-            ],
-            [
-              -80.550991,
-              35.372698
-            ],
-            [
-              -80.550179,
-              35.371368
-            ],
-            [
-              -80.542301,
-              35.362217
-            ],
-            [
-              -80.541596,
-              35.361544
-            ],
-            [
-              -80.54217,
-              35.36089
-            ],
-            [
-              -80.542138,
-              35.360789
-            ],
-            [
-              -80.541966,
-              35.360767
-            ],
-            [
-              -80.542132,
-              35.360127
-            ],
-            [
-              -80.540256,
-              35.358707
-            ],
-            [
-              -80.541336,
-              35.358325
-            ],
-            [
-              -80.540934,
-              35.357799
-            ],
-            [
-              -80.541451,
-              35.357679
-            ],
-            [
-              -80.541755,
-              35.356859
-            ],
-            [
-              -80.540594,
-              35.354206
-            ],
-            [
-              -80.54044,
-              35.353065
-            ],
-            [
-              -80.5397,
-              35.35339
-            ],
-            [
-              -80.537815,
-              35.352217
-            ],
-            [
-              -80.540524,
-              35.348233
-            ],
-            [
-              -80.536451,
-              35.348155
-            ],
-            [
-              -80.536736,
-              35.345351
-            ],
-            [
-              -80.54317,
-              35.342742
-            ],
-            [
-              -80.54383,
-              35.341313
-            ],
-            [
-              -80.543948,
-              35.340823
-            ],
-            [
-              -80.544814,
-              35.339584
-            ],
-            [
-              -80.545059,
-              35.339385
-            ],
-            [
-              -80.544537,
-              35.337875
-            ],
-            [
-              -80.544089,
-              35.337686
-            ],
-            [
-              -80.538969,
-              35.338678
-            ],
-            [
-              -80.538373,
-              35.338645
-            ],
-            [
-              -80.538123,
-              35.338031
-            ],
-            [
-              -80.538542,
-              35.336474
-            ],
-            [
-              -80.538194,
-              35.335803
-            ],
-            [
-              -80.537708,
-              35.335649
-            ],
-            [
-              -80.536715,
-              35.336059
-            ],
-            [
-              -80.535029,
-              35.335468
-            ],
-            [
-              -80.531301,
-              35.33558
-            ],
-            [
-              -80.531731,
-              35.333721
-            ],
-            [
-              -80.521229,
-              35.331715
-            ],
-            [
-              -80.52103,
-              35.332551
-            ],
-            [
-              -80.520927,
-              35.33388
-            ],
-            [
-              -80.518879,
-              35.333545
-            ],
-            [
-              -80.517466,
-              35.333658
-            ],
-            [
-              -80.517445,
-              35.33271
-            ],
-            [
-              -80.516042,
-              35.332961
-            ],
-            [
-              -80.51556,
-              35.331984
-            ],
-            [
-              -80.515412,
-              35.332025
-            ],
-            [
-              -80.515226,
-              35.331554
-            ],
-            [
-              -80.514909,
-              35.331565
-            ],
-            [
-              -80.51488,
-              35.331048
-            ],
-            [
-              -80.514649,
-              35.330631
-            ],
-            [
-              -80.514341,
-              35.330732
-            ],
-            [
-              -80.514018,
-              35.330288
-            ],
-            [
-              -80.514358,
-              35.330083
-            ],
-            [
-              -80.514314,
-              35.329235
-            ],
-            [
-              -80.512948,
-              35.328825
-            ],
-            [
-              -80.513262,
-              35.328116
-            ],
-            [
-              -80.513073,
-              35.327809
-            ],
-            [
-              -80.513726,
-              35.327721
-            ],
-            [
-              -80.513994,
-              35.327451
-            ],
-            [
-              -80.514094,
-              35.32719
-            ],
-            [
-              -80.513826,
-              35.326673
-            ],
-            [
-              -80.513526,
-              35.32683
-            ],
-            [
-              -80.512003,
-              35.326564
-            ],
-            [
-              -80.512336,
-              35.325635
-            ],
-            [
-              -80.512593,
-              35.32551
-            ],
-            [
-              -80.512092,
-              35.324434
-            ],
-            [
-              -80.510606,
-              35.323543
-            ],
-            [
-              -80.509808,
-              35.323571
-            ],
-            [
-              -80.507185,
-              35.324107
-            ],
-            [
-              -80.505523,
-              35.323537
-            ],
-            [
-              -80.504607,
-              35.324004
-            ],
-            [
-              -80.503727,
-              35.324044
-            ],
-            [
-              -80.503449,
-              35.323944
-            ],
-            [
-              -80.503111,
-              35.323492
-            ],
-            [
-              -80.502485,
-              35.323028
-            ],
-            [
-              -80.502083,
-              35.321902
-            ],
-            [
-              -80.501826,
-              35.321448
-            ],
-            [
-              -80.500916,
-              35.320433
-            ],
-            [
-              -80.500286,
-              35.319936
-            ],
-            [
-              -80.496978,
-              35.320587
-            ],
-            [
-              -80.493825,
-              35.320198
-            ],
-            [
-              -80.493784,
-              35.320297
-            ],
-            [
-              -80.488469,
-              35.319185
-            ],
-            [
-              -80.486333,
-              35.318086
-            ],
-            [
-              -80.484402,
-              35.316619
-            ],
-            [
-              -80.48345,
-              35.316124
-            ],
-            [
-              -80.481562,
-              35.314778
-            ],
-            [
-              -80.47882,
-              35.313722
-            ],
-            [
-              -80.477823,
-              35.315299
-            ],
-            [
-              -80.477456,
-              35.316357
-            ],
-            [
-              -80.47727,
-              35.317389
-            ],
-            [
-              -80.476985,
-              35.317828
-            ],
-            [
-              -80.472732,
-              35.3117
-            ],
-            [
-              -80.469758,
-              35.310362
-            ],
-            [
-              -80.467649,
-              35.309278
-            ],
-            [
-              -80.46638,
-              35.308452
-            ],
-            [
-              -80.465772,
-              35.309664
-            ],
-            [
-              -80.463673,
-              35.312044
-            ],
-            [
-              -80.463436,
-              35.31256
-            ],
-            [
-              -80.461335,
-              35.312041
-            ],
-            [
-              -80.461358,
-              35.312241
-            ],
-            [
-              -80.461628,
-              35.312354
-            ],
-            [
-              -80.461663,
-              35.312741
-            ],
-            [
-              -80.461927,
-              35.31281
-            ],
-            [
-              -80.461666,
-              35.312748
-            ],
-            [
-              -80.460685,
-              35.313462
-            ],
-            [
-              -80.460423,
-              35.3133
-            ],
-            [
-              -80.459098,
-              35.313044
-            ],
-            [
-              -80.459297,
-              35.311813
-            ],
-            [
-              -80.457827,
-              35.311052
-            ],
-            [
-              -80.458596,
-              35.309974
-            ],
-            [
-              -80.455196,
-              35.307449
-            ],
-            [
-              -80.452991,
-              35.306012
-            ],
-            [
-              -80.454511,
-              35.304815
-            ],
-            [
-              -80.45378,
-              35.303934
-            ],
-            [
-              -80.453105,
-              35.302045
-            ],
-            [
-              -80.451628,
-              35.300845
-            ],
-            [
-              -80.451423,
-              35.301525
-            ],
-            [
-              -80.451244,
-              35.301566
-            ],
-            [
-              -80.451019,
-              35.301426
-            ],
-            [
-              -80.450785,
-              35.301506
-            ],
-            [
-              -80.450698,
-              35.302138
-            ],
-            [
-              -80.450353,
-              35.302581
-            ],
-            [
-              -80.450192,
-              35.302468
-            ],
-            [
-              -80.449873,
-              35.302551
-            ],
-            [
-              -80.44971,
-              35.30276
-            ],
-            [
-              -80.447844,
-              35.301616
-            ],
-            [
-              -80.44429,
-              35.303186
-            ],
-            [
-              -80.442659,
-              35.304797
-            ],
-            [
-              -80.441681,
-              35.304346
-            ],
-            [
-              -80.440592,
-              35.303543
-            ],
-            [
-              -80.440627,
-              35.30345
-            ],
-            [
-              -80.440287,
-              35.302772
-            ],
-            [
-              -80.440047,
-              35.301815
-            ],
-            [
-              -80.439533,
-              35.300527
-            ],
-            [
-              -80.438918,
-              35.299419
-            ],
-            [
-              -80.437248,
-              35.297158
-            ],
-            [
-              -80.437848,
-              35.296411
-            ],
-            [
-              -80.440116,
-              35.294735
-            ],
-            [
-              -80.439406,
-              35.293938
-            ],
-            [
-              -80.439823,
-              35.292234
-            ],
-            [
-              -80.437707,
-              35.289896
-            ],
-            [
-              -80.436336,
-              35.289678
-            ],
-            [
-              -80.413496,
-              35.32451
-            ],
-            [
-              -80.407059,
-              35.334496
-            ],
-            [
-              -80.406952,
-              35.334447
-            ],
-            [
-              -80.402309,
-              35.341696
-            ],
-            [
-              -80.345459,
-              35.427428
-            ],
-            [
-              -80.333986,
-              35.444916
-            ],
-            [
-              -80.317991,
-              35.468846
-            ],
-            [
-              -80.295429,
-              35.502926
-            ],
-            [
-              -80.315424,
-              35.502955
-            ],
-            [
-              -80.315804,
-              35.501405
-            ],
-            [
-              -80.316561,
-              35.502218
-            ],
-            [
-              -80.316953,
-              35.502944
-            ],
-            [
-              -80.317375,
-              35.502941
-            ],
-            [
-              -80.317515,
-              35.502729
-            ],
-            [
-              -80.318143,
-              35.502932
-            ],
-            [
-              -80.318431,
-              35.502317
-            ],
-            [
-              -80.319532,
-              35.502926
-            ],
-            [
-              -80.319899,
-              35.502971
-            ],
-            [
-              -80.323394,
-              35.504807
-            ],
-            [
-              -80.323496,
-              35.502911
-            ],
-            [
-              -80.341405,
-              35.502817
-            ],
-            [
-              -80.34773,
-              35.502877
-            ],
-            [
-              -80.380186,
-              35.502339
-            ],
-            [
-              -80.385958,
-              35.502191
-            ],
-            [
-              -80.387084,
-              35.502058
-            ],
-            [
-              -80.387951,
-              35.502281
-            ],
-            [
-              -80.394665,
-              35.502124
-            ],
-            [
-              -80.406383,
-              35.502114
-            ],
-            [
-              -80.411368,
-              35.501992
-            ],
-            [
-              -80.421698,
-              35.501978
-            ],
-            [
-              -80.422412,
-              35.501904
-            ],
-            [
-              -80.430652,
-              35.501983
-            ],
-            [
-              -80.43703,
-              35.502102
-            ],
-            [
-              -80.437109,
-              35.502205
-            ],
-            [
-              -80.441549,
-              35.502253
-            ],
-            [
-              -80.481579,
-              35.502496
-            ],
-            [
-              -80.482237,
-              35.500922
-            ],
-            [
-              -80.482925,
-              35.500935
-            ],
-            [
-              -80.482997,
-              35.502507
-            ],
-            [
-              -80.495938,
-              35.502538
-            ],
-            [
-              -80.498298,
-              35.502615
-            ],
-            [
-              -80.498304,
-              35.502543
-            ],
-            [
-              -80.499106,
-              35.502507
-            ],
-            [
-              -80.513568,
-              35.502548
-            ],
-            [
-              -80.51356,
-              35.502676
-            ],
-            [
-              -80.536354,
-              35.502897
-            ],
-            [
-              -80.53805,
-              35.50282
-            ]
-          ]
-        ]
-      },
-      "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "safe_alias_normalized",
-        "matched_school_reference_id": "SCHOOLREF-HIGH-MT_PLEASANT_HIGH-59",
-        "needs_verification": true,
-        "school_level": "high",
-        "school_name": "Mount Pleasant HS",
-        "school_name_normalized": "mount_pleasant_high",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus High School Attendance Zones",
-        "source_objectid": "15",
-        "utilization_class": "approaching_capacity",
-        "utilization_pct": 85.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-HIGH-MOUNT_PLEASANT_HIGH-15",
-        "zone_match_confidence": "fuzzy_review"
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -17956,23 +18140,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "safe_alias_normalized",
-        "matched_school_reference_id": "SCHOOLREF-MIDDLE-HARRIS_RD_MIDDLE-70",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-MIDDLE-HARRIS_ROAD_MIDDLE-14",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 12,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1540,
+        "permit_count_recent": 792,
+        "permit_growth_delta": -748,
+        "permit_growth_pct": -48.6,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 620,
         "school_level": "middle",
         "school_name": "Harris Road MS",
-        "school_name_normalized": "harris_road_middle",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Middle School Attendance Zones",
-        "source_objectid": "14",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 84.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-MIDDLE-HARRIS_ROAD_MIDDLE-14",
-        "zone_match_confidence": "fuzzy_review"
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -19149,23 +19341,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "safe_alias_normalized",
-        "matched_school_reference_id": "SCHOOLREF-MIDDLE-MT_PLEASANT_MIDDLE-58",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-MIDDLE-MOUNT_PLEASANT_MIDDLE-17",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 17,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1046,
+        "permit_count_recent": 1004,
+        "permit_growth_delta": -42,
+        "permit_growth_pct": -4.0,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 852,
         "school_level": "middle",
         "school_name": "Mount Pleasant MS",
-        "school_name_normalized": "mount_pleasant_middle",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Middle School Attendance Zones",
-        "source_objectid": "17",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 83.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-MIDDLE-MOUNT_PLEASANT_MIDDLE-17",
-        "zone_match_confidence": "fuzzy_review"
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -20188,23 +20388,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-HIGH-NORTHWEST_CABARRUS_HIGH-46",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-HIGH-NORTHWEST_CABARRUS_HIGH-16",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 52,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1573,
+        "permit_count_recent": 2051,
+        "permit_growth_delta": 478,
+        "permit_growth_pct": 30.4,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 1692,
         "school_level": "high",
         "school_name": "Northwest Cabarrus HS",
-        "school_name_normalized": "northwest_cabarrus_high",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus High School Attendance Zones",
-        "source_objectid": "16",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 82.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-HIGH-NORTHWEST_CABARRUS_HIGH-16",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "approaching_capacity"
       },
       "type": "Feature"
     },
@@ -21571,23 +21779,876 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-HIGH-JAY_M_ROBINSON_HIGH-66",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-HIGH-JAY_M_ROBINSON_HIGH-14",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 61,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1083,
+        "permit_count_recent": 1144,
+        "permit_growth_delta": 61,
+        "permit_growth_pct": 5.6,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 527,
         "school_level": "high",
         "school_name": "Jay M Robinson HS",
-        "school_name_normalized": "jay_m_robinson_high",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus High School Attendance Zones",
-        "source_objectid": "14",
-        "utilization_class": "approaching_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 81.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-HIGH-JAY_M_ROBINSON_HIGH-14",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "approaching_capacity"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -80.604141,
+              35.467707
+            ],
+            [
+              -80.604697,
+              35.468793
+            ],
+            [
+              -80.604876,
+              35.468962
+            ],
+            [
+              -80.608846,
+              35.46858
+            ],
+            [
+              -80.60996,
+              35.468431
+            ],
+            [
+              -80.609776,
+              35.467191
+            ],
+            [
+              -80.616117,
+              35.466568
+            ],
+            [
+              -80.616537,
+              35.466449
+            ],
+            [
+              -80.616434,
+              35.465929
+            ],
+            [
+              -80.618135,
+              35.465603
+            ],
+            [
+              -80.618246,
+              35.465935
+            ],
+            [
+              -80.618693,
+              35.466089
+            ],
+            [
+              -80.61861,
+              35.465662
+            ],
+            [
+              -80.619101,
+              35.465537
+            ],
+            [
+              -80.619225,
+              35.465912
+            ],
+            [
+              -80.620569,
+              35.465632
+            ],
+            [
+              -80.61466,
+              35.448067
+            ],
+            [
+              -80.613979,
+              35.446658
+            ],
+            [
+              -80.610582,
+              35.442565
+            ],
+            [
+              -80.609244,
+              35.440807
+            ],
+            [
+              -80.608456,
+              35.439455
+            ],
+            [
+              -80.607702,
+              35.437799
+            ],
+            [
+              -80.607309,
+              35.436341
+            ],
+            [
+              -80.606954,
+              35.434168
+            ],
+            [
+              -80.606661,
+              35.430498
+            ],
+            [
+              -80.605972,
+              35.424212
+            ],
+            [
+              -80.601375,
+              35.414137
+            ],
+            [
+              -80.599316,
+              35.411328
+            ],
+            [
+              -80.595272,
+              35.407321
+            ],
+            [
+              -80.592322,
+              35.404211
+            ],
+            [
+              -80.590097,
+              35.400189
+            ],
+            [
+              -80.589372,
+              35.398263
+            ],
+            [
+              -80.58777,
+              35.392911
+            ],
+            [
+              -80.587642,
+              35.391301
+            ],
+            [
+              -80.587643,
+              35.389398
+            ],
+            [
+              -80.587837,
+              35.387802
+            ],
+            [
+              -80.588548,
+              35.384567
+            ],
+            [
+              -80.587189,
+              35.384385
+            ],
+            [
+              -80.585868,
+              35.384017
+            ],
+            [
+              -80.584617,
+              35.383484
+            ],
+            [
+              -80.581862,
+              35.382083
+            ],
+            [
+              -80.58222,
+              35.380388
+            ],
+            [
+              -80.582188,
+              35.379904
+            ],
+            [
+              -80.580024,
+              35.376653
+            ],
+            [
+              -80.579718,
+              35.375771
+            ],
+            [
+              -80.579637,
+              35.375066
+            ],
+            [
+              -80.578565,
+              35.375567
+            ],
+            [
+              -80.578293,
+              35.375612
+            ],
+            [
+              -80.573032,
+              35.37449
+            ],
+            [
+              -80.571683,
+              35.374367
+            ],
+            [
+              -80.570534,
+              35.373981
+            ],
+            [
+              -80.567631,
+              35.376917
+            ],
+            [
+              -80.566936,
+              35.376738
+            ],
+            [
+              -80.566609,
+              35.377089
+            ],
+            [
+              -80.564768,
+              35.377918
+            ],
+            [
+              -80.563784,
+              35.377191
+            ],
+            [
+              -80.561681,
+              35.376136
+            ],
+            [
+              -80.561619,
+              35.374899
+            ],
+            [
+              -80.560894,
+              35.376655
+            ],
+            [
+              -80.560074,
+              35.37687
+            ],
+            [
+              -80.559548,
+              35.377122
+            ],
+            [
+              -80.558065,
+              35.37744
+            ],
+            [
+              -80.558179,
+              35.376566
+            ],
+            [
+              -80.559035,
+              35.376224
+            ],
+            [
+              -80.559152,
+              35.371686
+            ],
+            [
+              -80.536828,
+              35.376256
+            ],
+            [
+              -80.535659,
+              35.379036
+            ],
+            [
+              -80.535549,
+              35.379789
+            ],
+            [
+              -80.535784,
+              35.381584
+            ],
+            [
+              -80.535964,
+              35.381888
+            ],
+            [
+              -80.53599,
+              35.382298
+            ],
+            [
+              -80.536613,
+              35.38323
+            ],
+            [
+              -80.537145,
+              35.384926
+            ],
+            [
+              -80.539521,
+              35.386603
+            ],
+            [
+              -80.540771,
+              35.387626
+            ],
+            [
+              -80.542285,
+              35.39053
+            ],
+            [
+              -80.541417,
+              35.390705
+            ],
+            [
+              -80.53702,
+              35.390855
+            ],
+            [
+              -80.53762,
+              35.392879
+            ],
+            [
+              -80.537769,
+              35.393693
+            ],
+            [
+              -80.537864,
+              35.397407
+            ],
+            [
+              -80.537295,
+              35.398373
+            ],
+            [
+              -80.535422,
+              35.400013
+            ],
+            [
+              -80.535262,
+              35.399951
+            ],
+            [
+              -80.534342,
+              35.400211
+            ],
+            [
+              -80.534765,
+              35.400438
+            ],
+            [
+              -80.53438,
+              35.400753
+            ],
+            [
+              -80.534453,
+              35.401013
+            ],
+            [
+              -80.535593,
+              35.40225
+            ],
+            [
+              -80.536269,
+              35.402682
+            ],
+            [
+              -80.536287,
+              35.403051
+            ],
+            [
+              -80.536692,
+              35.403888
+            ],
+            [
+              -80.536702,
+              35.404349
+            ],
+            [
+              -80.537334,
+              35.405914
+            ],
+            [
+              -80.537585,
+              35.407318
+            ],
+            [
+              -80.53729,
+              35.408946
+            ],
+            [
+              -80.536913,
+              35.414279
+            ],
+            [
+              -80.536609,
+              35.416793
+            ],
+            [
+              -80.536436,
+              35.417137
+            ],
+            [
+              -80.536034,
+              35.423589
+            ],
+            [
+              -80.536156,
+              35.426076
+            ],
+            [
+              -80.535823,
+              35.429184
+            ],
+            [
+              -80.536314,
+              35.430507
+            ],
+            [
+              -80.532276,
+              35.434368
+            ],
+            [
+              -80.533793,
+              35.434796
+            ],
+            [
+              -80.533401,
+              35.435436
+            ],
+            [
+              -80.533039,
+              35.436821
+            ],
+            [
+              -80.533025,
+              35.436946
+            ],
+            [
+              -80.533121,
+              35.43702
+            ],
+            [
+              -80.532851,
+              35.437774
+            ],
+            [
+              -80.532281,
+              35.44029
+            ],
+            [
+              -80.53191,
+              35.444915
+            ],
+            [
+              -80.531873,
+              35.446914
+            ],
+            [
+              -80.531729,
+              35.44755
+            ],
+            [
+              -80.531828,
+              35.447943
+            ],
+            [
+              -80.531741,
+              35.448446
+            ],
+            [
+              -80.531901,
+              35.448812
+            ],
+            [
+              -80.531676,
+              35.448832
+            ],
+            [
+              -80.531481,
+              35.451706
+            ],
+            [
+              -80.530892,
+              35.453177
+            ],
+            [
+              -80.533879,
+              35.453549
+            ],
+            [
+              -80.535456,
+              35.45341
+            ],
+            [
+              -80.535535,
+              35.454038
+            ],
+            [
+              -80.539903,
+              35.453796
+            ],
+            [
+              -80.539546,
+              35.453228
+            ],
+            [
+              -80.541966,
+              35.452895
+            ],
+            [
+              -80.5422,
+              35.45343
+            ],
+            [
+              -80.541594,
+              35.453551
+            ],
+            [
+              -80.541886,
+              35.454303
+            ],
+            [
+              -80.542413,
+              35.454661
+            ],
+            [
+              -80.54258,
+              35.454482
+            ],
+            [
+              -80.544471,
+              35.455643
+            ],
+            [
+              -80.544839,
+              35.455591
+            ],
+            [
+              -80.544697,
+              35.456853
+            ],
+            [
+              -80.543729,
+              35.456746
+            ],
+            [
+              -80.543816,
+              35.457527
+            ],
+            [
+              -80.543154,
+              35.457632
+            ],
+            [
+              -80.543223,
+              35.459562
+            ],
+            [
+              -80.540601,
+              35.460634
+            ],
+            [
+              -80.544386,
+              35.464296
+            ],
+            [
+              -80.540653,
+              35.46508
+            ],
+            [
+              -80.540944,
+              35.465977
+            ],
+            [
+              -80.541613,
+              35.466483
+            ],
+            [
+              -80.541551,
+              35.466772
+            ],
+            [
+              -80.541244,
+              35.467201
+            ],
+            [
+              -80.540758,
+              35.468354
+            ],
+            [
+              -80.540822,
+              35.468523
+            ],
+            [
+              -80.541146,
+              35.46876
+            ],
+            [
+              -80.540783,
+              35.468828
+            ],
+            [
+              -80.541234,
+              35.471079
+            ],
+            [
+              -80.541884,
+              35.473003
+            ],
+            [
+              -80.541638,
+              35.475181
+            ],
+            [
+              -80.542066,
+              35.475318
+            ],
+            [
+              -80.541952,
+              35.475655
+            ],
+            [
+              -80.54299,
+              35.476025
+            ],
+            [
+              -80.539007,
+              35.482412
+            ],
+            [
+              -80.53895,
+              35.483213
+            ],
+            [
+              -80.540331,
+              35.482661
+            ],
+            [
+              -80.543119,
+              35.483818
+            ],
+            [
+              -80.542416,
+              35.488586
+            ],
+            [
+              -80.541671,
+              35.497285
+            ],
+            [
+              -80.541644,
+              35.498694
+            ],
+            [
+              -80.539906,
+              35.499081
+            ],
+            [
+              -80.542303,
+              35.499538
+            ],
+            [
+              -80.542126,
+              35.502844
+            ],
+            [
+              -80.543741,
+              35.502819
+            ],
+            [
+              -80.54443,
+              35.502848
+            ],
+            [
+              -80.544449,
+              35.50292
+            ],
+            [
+              -80.549052,
+              35.502976
+            ],
+            [
+              -80.552144,
+              35.503132
+            ],
+            [
+              -80.552136,
+              35.503002
+            ],
+            [
+              -80.557187,
+              35.503055
+            ],
+            [
+              -80.557173,
+              35.503862
+            ],
+            [
+              -80.558663,
+              35.503962
+            ],
+            [
+              -80.559557,
+              35.503849
+            ],
+            [
+              -80.55945,
+              35.50317
+            ],
+            [
+              -80.560765,
+              35.503303
+            ],
+            [
+              -80.560761,
+              35.503094
+            ],
+            [
+              -80.562418,
+              35.503112
+            ],
+            [
+              -80.562519,
+              35.501908
+            ],
+            [
+              -80.562855,
+              35.500505
+            ],
+            [
+              -80.563277,
+              35.499449
+            ],
+            [
+              -80.563961,
+              35.498234
+            ],
+            [
+              -80.572105,
+              35.488184
+            ],
+            [
+              -80.573615,
+              35.486077
+            ],
+            [
+              -80.582912,
+              35.472079
+            ],
+            [
+              -80.584612,
+              35.471023
+            ],
+            [
+              -80.588168,
+              35.465862
+            ],
+            [
+              -80.590622,
+              35.469069
+            ],
+            [
+              -80.591451,
+              35.46978
+            ],
+            [
+              -80.592017,
+              35.470134
+            ],
+            [
+              -80.595506,
+              35.468204
+            ],
+            [
+              -80.596114,
+              35.467985
+            ],
+            [
+              -80.596517,
+              35.468206
+            ],
+            [
+              -80.59788,
+              35.469351
+            ],
+            [
+              -80.599223,
+              35.470874
+            ],
+            [
+              -80.599764,
+              35.471188
+            ],
+            [
+              -80.600351,
+              35.471313
+            ],
+            [
+              -80.600834,
+              35.471348
+            ],
+            [
+              -80.600035,
+              35.468659
+            ],
+            [
+              -80.601796,
+              35.468605
+            ],
+            [
+              -80.604141,
+              35.467707
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "attendance_area_id": "SCHOOLZONE-HIGH-CONCORD_HIGH-11",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 55,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1536,
+        "permit_count_recent": 1677,
+        "permit_growth_delta": 141,
+        "permit_growth_pct": 9.2,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 1093,
+        "school_level": "high",
+        "school_name": "Concord HS",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
+        "utilization_pct": 78.0,
+        "utilization_status": "under_capacity"
       },
       "type": "Feature"
     },
@@ -22792,23 +23853,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-A_T_ALLEN_ELEMENTARY-64",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-A_T_ALLEN_ELEMENTARY-54",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 7,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 602,
+        "permit_count_recent": 364,
+        "permit_growth_delta": -238,
+        "permit_growth_pct": -39.5,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 321,
         "school_level": "elementary",
         "school_name": "A T Allen ES",
-        "school_name_normalized": "a_t_allen_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "54",
-        "utilization_class": "under_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 78.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-A_T_ALLEN_ELEMENTARY-54",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "under_capacity"
       },
       "type": "Feature"
     },
@@ -23625,860 +24694,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-PATRIOTS_ELEMENTARY-5292",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-PATRIOTS_ELEMENTARY-63",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 11,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 339,
+        "permit_count_recent": 235,
+        "permit_growth_delta": -104,
+        "permit_growth_pct": -30.7,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 203,
         "school_level": "elementary",
         "school_name": "Patriots ES",
-        "school_name_normalized": "patriots_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "63",
-        "utilization_class": "under_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 78.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-PATRIOTS_ELEMENTARY-63",
-        "zone_match_confidence": "normalized_exact"
-      },
-      "type": "Feature"
-    },
-    {
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -80.604141,
-              35.467707
-            ],
-            [
-              -80.604697,
-              35.468793
-            ],
-            [
-              -80.604876,
-              35.468962
-            ],
-            [
-              -80.608846,
-              35.46858
-            ],
-            [
-              -80.60996,
-              35.468431
-            ],
-            [
-              -80.609776,
-              35.467191
-            ],
-            [
-              -80.616117,
-              35.466568
-            ],
-            [
-              -80.616537,
-              35.466449
-            ],
-            [
-              -80.616434,
-              35.465929
-            ],
-            [
-              -80.618135,
-              35.465603
-            ],
-            [
-              -80.618246,
-              35.465935
-            ],
-            [
-              -80.618693,
-              35.466089
-            ],
-            [
-              -80.61861,
-              35.465662
-            ],
-            [
-              -80.619101,
-              35.465537
-            ],
-            [
-              -80.619225,
-              35.465912
-            ],
-            [
-              -80.620569,
-              35.465632
-            ],
-            [
-              -80.61466,
-              35.448067
-            ],
-            [
-              -80.613979,
-              35.446658
-            ],
-            [
-              -80.610582,
-              35.442565
-            ],
-            [
-              -80.609244,
-              35.440807
-            ],
-            [
-              -80.608456,
-              35.439455
-            ],
-            [
-              -80.607702,
-              35.437799
-            ],
-            [
-              -80.607309,
-              35.436341
-            ],
-            [
-              -80.606954,
-              35.434168
-            ],
-            [
-              -80.606661,
-              35.430498
-            ],
-            [
-              -80.605972,
-              35.424212
-            ],
-            [
-              -80.601375,
-              35.414137
-            ],
-            [
-              -80.599316,
-              35.411328
-            ],
-            [
-              -80.595272,
-              35.407321
-            ],
-            [
-              -80.592322,
-              35.404211
-            ],
-            [
-              -80.590097,
-              35.400189
-            ],
-            [
-              -80.589372,
-              35.398263
-            ],
-            [
-              -80.58777,
-              35.392911
-            ],
-            [
-              -80.587642,
-              35.391301
-            ],
-            [
-              -80.587643,
-              35.389398
-            ],
-            [
-              -80.587837,
-              35.387802
-            ],
-            [
-              -80.588548,
-              35.384567
-            ],
-            [
-              -80.587189,
-              35.384385
-            ],
-            [
-              -80.585868,
-              35.384017
-            ],
-            [
-              -80.584617,
-              35.383484
-            ],
-            [
-              -80.581862,
-              35.382083
-            ],
-            [
-              -80.58222,
-              35.380388
-            ],
-            [
-              -80.582188,
-              35.379904
-            ],
-            [
-              -80.580024,
-              35.376653
-            ],
-            [
-              -80.579718,
-              35.375771
-            ],
-            [
-              -80.579637,
-              35.375066
-            ],
-            [
-              -80.578565,
-              35.375567
-            ],
-            [
-              -80.578293,
-              35.375612
-            ],
-            [
-              -80.573032,
-              35.37449
-            ],
-            [
-              -80.571683,
-              35.374367
-            ],
-            [
-              -80.570534,
-              35.373981
-            ],
-            [
-              -80.567631,
-              35.376917
-            ],
-            [
-              -80.566936,
-              35.376738
-            ],
-            [
-              -80.566609,
-              35.377089
-            ],
-            [
-              -80.564768,
-              35.377918
-            ],
-            [
-              -80.563784,
-              35.377191
-            ],
-            [
-              -80.561681,
-              35.376136
-            ],
-            [
-              -80.561619,
-              35.374899
-            ],
-            [
-              -80.560894,
-              35.376655
-            ],
-            [
-              -80.560074,
-              35.37687
-            ],
-            [
-              -80.559548,
-              35.377122
-            ],
-            [
-              -80.558065,
-              35.37744
-            ],
-            [
-              -80.558179,
-              35.376566
-            ],
-            [
-              -80.559035,
-              35.376224
-            ],
-            [
-              -80.559152,
-              35.371686
-            ],
-            [
-              -80.536828,
-              35.376256
-            ],
-            [
-              -80.535659,
-              35.379036
-            ],
-            [
-              -80.535549,
-              35.379789
-            ],
-            [
-              -80.535784,
-              35.381584
-            ],
-            [
-              -80.535964,
-              35.381888
-            ],
-            [
-              -80.53599,
-              35.382298
-            ],
-            [
-              -80.536613,
-              35.38323
-            ],
-            [
-              -80.537145,
-              35.384926
-            ],
-            [
-              -80.539521,
-              35.386603
-            ],
-            [
-              -80.540771,
-              35.387626
-            ],
-            [
-              -80.542285,
-              35.39053
-            ],
-            [
-              -80.541417,
-              35.390705
-            ],
-            [
-              -80.53702,
-              35.390855
-            ],
-            [
-              -80.53762,
-              35.392879
-            ],
-            [
-              -80.537769,
-              35.393693
-            ],
-            [
-              -80.537864,
-              35.397407
-            ],
-            [
-              -80.537295,
-              35.398373
-            ],
-            [
-              -80.535422,
-              35.400013
-            ],
-            [
-              -80.535262,
-              35.399951
-            ],
-            [
-              -80.534342,
-              35.400211
-            ],
-            [
-              -80.534765,
-              35.400438
-            ],
-            [
-              -80.53438,
-              35.400753
-            ],
-            [
-              -80.534453,
-              35.401013
-            ],
-            [
-              -80.535593,
-              35.40225
-            ],
-            [
-              -80.536269,
-              35.402682
-            ],
-            [
-              -80.536287,
-              35.403051
-            ],
-            [
-              -80.536692,
-              35.403888
-            ],
-            [
-              -80.536702,
-              35.404349
-            ],
-            [
-              -80.537334,
-              35.405914
-            ],
-            [
-              -80.537585,
-              35.407318
-            ],
-            [
-              -80.53729,
-              35.408946
-            ],
-            [
-              -80.536913,
-              35.414279
-            ],
-            [
-              -80.536609,
-              35.416793
-            ],
-            [
-              -80.536436,
-              35.417137
-            ],
-            [
-              -80.536034,
-              35.423589
-            ],
-            [
-              -80.536156,
-              35.426076
-            ],
-            [
-              -80.535823,
-              35.429184
-            ],
-            [
-              -80.536314,
-              35.430507
-            ],
-            [
-              -80.532276,
-              35.434368
-            ],
-            [
-              -80.533793,
-              35.434796
-            ],
-            [
-              -80.533401,
-              35.435436
-            ],
-            [
-              -80.533039,
-              35.436821
-            ],
-            [
-              -80.533025,
-              35.436946
-            ],
-            [
-              -80.533121,
-              35.43702
-            ],
-            [
-              -80.532851,
-              35.437774
-            ],
-            [
-              -80.532281,
-              35.44029
-            ],
-            [
-              -80.53191,
-              35.444915
-            ],
-            [
-              -80.531873,
-              35.446914
-            ],
-            [
-              -80.531729,
-              35.44755
-            ],
-            [
-              -80.531828,
-              35.447943
-            ],
-            [
-              -80.531741,
-              35.448446
-            ],
-            [
-              -80.531901,
-              35.448812
-            ],
-            [
-              -80.531676,
-              35.448832
-            ],
-            [
-              -80.531481,
-              35.451706
-            ],
-            [
-              -80.530892,
-              35.453177
-            ],
-            [
-              -80.533879,
-              35.453549
-            ],
-            [
-              -80.535456,
-              35.45341
-            ],
-            [
-              -80.535535,
-              35.454038
-            ],
-            [
-              -80.539903,
-              35.453796
-            ],
-            [
-              -80.539546,
-              35.453228
-            ],
-            [
-              -80.541966,
-              35.452895
-            ],
-            [
-              -80.5422,
-              35.45343
-            ],
-            [
-              -80.541594,
-              35.453551
-            ],
-            [
-              -80.541886,
-              35.454303
-            ],
-            [
-              -80.542413,
-              35.454661
-            ],
-            [
-              -80.54258,
-              35.454482
-            ],
-            [
-              -80.544471,
-              35.455643
-            ],
-            [
-              -80.544839,
-              35.455591
-            ],
-            [
-              -80.544697,
-              35.456853
-            ],
-            [
-              -80.543729,
-              35.456746
-            ],
-            [
-              -80.543816,
-              35.457527
-            ],
-            [
-              -80.543154,
-              35.457632
-            ],
-            [
-              -80.543223,
-              35.459562
-            ],
-            [
-              -80.540601,
-              35.460634
-            ],
-            [
-              -80.544386,
-              35.464296
-            ],
-            [
-              -80.540653,
-              35.46508
-            ],
-            [
-              -80.540944,
-              35.465977
-            ],
-            [
-              -80.541613,
-              35.466483
-            ],
-            [
-              -80.541551,
-              35.466772
-            ],
-            [
-              -80.541244,
-              35.467201
-            ],
-            [
-              -80.540758,
-              35.468354
-            ],
-            [
-              -80.540822,
-              35.468523
-            ],
-            [
-              -80.541146,
-              35.46876
-            ],
-            [
-              -80.540783,
-              35.468828
-            ],
-            [
-              -80.541234,
-              35.471079
-            ],
-            [
-              -80.541884,
-              35.473003
-            ],
-            [
-              -80.541638,
-              35.475181
-            ],
-            [
-              -80.542066,
-              35.475318
-            ],
-            [
-              -80.541952,
-              35.475655
-            ],
-            [
-              -80.54299,
-              35.476025
-            ],
-            [
-              -80.539007,
-              35.482412
-            ],
-            [
-              -80.53895,
-              35.483213
-            ],
-            [
-              -80.540331,
-              35.482661
-            ],
-            [
-              -80.543119,
-              35.483818
-            ],
-            [
-              -80.542416,
-              35.488586
-            ],
-            [
-              -80.541671,
-              35.497285
-            ],
-            [
-              -80.541644,
-              35.498694
-            ],
-            [
-              -80.539906,
-              35.499081
-            ],
-            [
-              -80.542303,
-              35.499538
-            ],
-            [
-              -80.542126,
-              35.502844
-            ],
-            [
-              -80.543741,
-              35.502819
-            ],
-            [
-              -80.54443,
-              35.502848
-            ],
-            [
-              -80.544449,
-              35.50292
-            ],
-            [
-              -80.549052,
-              35.502976
-            ],
-            [
-              -80.552144,
-              35.503132
-            ],
-            [
-              -80.552136,
-              35.503002
-            ],
-            [
-              -80.557187,
-              35.503055
-            ],
-            [
-              -80.557173,
-              35.503862
-            ],
-            [
-              -80.558663,
-              35.503962
-            ],
-            [
-              -80.559557,
-              35.503849
-            ],
-            [
-              -80.55945,
-              35.50317
-            ],
-            [
-              -80.560765,
-              35.503303
-            ],
-            [
-              -80.560761,
-              35.503094
-            ],
-            [
-              -80.562418,
-              35.503112
-            ],
-            [
-              -80.562519,
-              35.501908
-            ],
-            [
-              -80.562855,
-              35.500505
-            ],
-            [
-              -80.563277,
-              35.499449
-            ],
-            [
-              -80.563961,
-              35.498234
-            ],
-            [
-              -80.572105,
-              35.488184
-            ],
-            [
-              -80.573615,
-              35.486077
-            ],
-            [
-              -80.582912,
-              35.472079
-            ],
-            [
-              -80.584612,
-              35.471023
-            ],
-            [
-              -80.588168,
-              35.465862
-            ],
-            [
-              -80.590622,
-              35.469069
-            ],
-            [
-              -80.591451,
-              35.46978
-            ],
-            [
-              -80.592017,
-              35.470134
-            ],
-            [
-              -80.595506,
-              35.468204
-            ],
-            [
-              -80.596114,
-              35.467985
-            ],
-            [
-              -80.596517,
-              35.468206
-            ],
-            [
-              -80.59788,
-              35.469351
-            ],
-            [
-              -80.599223,
-              35.470874
-            ],
-            [
-              -80.599764,
-              35.471188
-            ],
-            [
-              -80.600351,
-              35.471313
-            ],
-            [
-              -80.600834,
-              35.471348
-            ],
-            [
-              -80.600035,
-              35.468659
-            ],
-            [
-              -80.601796,
-              35.468605
-            ],
-            [
-              -80.604141,
-              35.467707
-            ]
-          ]
-        ]
-      },
-      "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-HIGH-CONCORD_HIGH-49",
-        "needs_verification": true,
-        "school_level": "high",
-        "school_name": "Concord HS",
-        "school_name_normalized": "concord_high",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus High School Attendance Zones",
-        "source_objectid": "11",
-        "utilization_class": "under_capacity",
-        "utilization_pct": 78.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-HIGH-CONCORD_HIGH-11",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "under_capacity"
       },
       "type": "Feature"
     },
@@ -25095,23 +25335,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-ROCKY_RIVER_ELEMENTARY-67",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-ROCKY_RIVER_ELEMENTARY-66",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 8,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 218,
+        "permit_count_recent": 152,
+        "permit_growth_delta": -66,
+        "permit_growth_pct": -30.3,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 101,
         "school_level": "elementary",
         "school_name": "Rocky River ES",
-        "school_name_normalized": "rocky_river_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "66",
-        "utilization_class": "under_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 76.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-ROCKY_RIVER_ELEMENTARY-66",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "under_capacity"
       },
       "type": "Feature"
     },
@@ -26478,23 +26726,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "unmatched_reference_review",
-        "matched_school_reference_id": null,
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-MIDDLE-ROBERTA_ROAD_MIDDLE-19",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 61,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1088,
+        "permit_count_recent": 1156,
+        "permit_growth_delta": 68,
+        "permit_growth_pct": 6.2,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 529,
         "school_level": "middle",
         "school_name": "Roberta Road MS",
-        "school_name_normalized": "roberta_road_middle",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Middle School Attendance Zones",
-        "source_objectid": "19",
-        "utilization_class": "under_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 72.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-MIDDLE-ROBERTA_ROAD_MIDDLE-19",
-        "zone_match_confidence": "unmatched_reference_review"
+        "utilization_status": "under_capacity"
       },
       "type": "Feature"
     },
@@ -27843,23 +28099,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-ELEMENTARY-BETHEL_ELEMENTARY-68",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-ELEMENTARY-BETHEL_ELEMENTARY-55",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 8,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 900,
+        "permit_count_recent": 657,
+        "permit_growth_delta": -243,
+        "permit_growth_pct": -27.0,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 565,
         "school_level": "elementary",
         "school_name": "Bethel ES",
-        "school_name_normalized": "bethel_elementary",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Elementary School Attendance Zones",
-        "source_objectid": "55",
-        "utilization_class": "under_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 70.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-ELEMENTARY-BETHEL_ELEMENTARY-55",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "under_capacity"
       },
       "type": "Feature"
     },
@@ -29642,23 +29906,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-MIDDLE-C_C_GRIFFIN_MIDDLE-72",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-MIDDLE-C_C_GRIFFIN_MIDDLE-11",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 24,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1424,
+        "permit_count_recent": 930,
+        "permit_growth_delta": -494,
+        "permit_growth_pct": -34.7,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 804,
         "school_level": "middle",
         "school_name": "C C Griffin MS",
-        "school_name_normalized": "c_c_griffin_middle",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Middle School Attendance Zones",
-        "source_objectid": "11",
-        "utilization_class": "under_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 63.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-MIDDLE-C_C_GRIFFIN_MIDDLE-11",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "under_capacity"
       },
       "type": "Feature"
     },
@@ -30479,23 +30751,31 @@
         ]
       },
       "properties": {
-        "label": "School Capacity Watch",
-        "match_confidence": "normalized_exact",
-        "matched_school_reference_id": "SCHOOLREF-MIDDLE-CONCORD_MIDDLE-51",
-        "needs_verification": true,
+        "attendance_area_id": "SCHOOLZONE-MIDDLE-CONCORD_MIDDLE-12",
+        "caveats": [
+          "Cached demo extract.",
+          "Permit activity is not the same as student generation.",
+          "This is not an official enrollment forecast."
+        ],
+        "enrollment_year": "2024-2025",
+        "major_development_permit_count_recent": 56,
+        "multifamily_permit_count_recent": 0,
+        "observed_growth_pressure_band": "high",
+        "permit_count_previous": 1540,
+        "permit_count_recent": 1686,
+        "permit_growth_delta": 146,
+        "permit_growth_pct": 9.5,
+        "recommended_followup": "Review school utilization context with recent residential permit activity.",
+        "residential_permit_count_recent": 1093,
         "school_level": "middle",
         "school_name": "Concord MS",
-        "school_name_normalized": "concord_middle",
-        "school_system": "CCS",
-        "school_year": "2024-2025",
-        "source_confidence": "presentation_derived",
-        "source_layer": "Cabarrus Middle School Attendance Zones",
-        "source_objectid": "12",
-        "utilization_class": "under_capacity",
+        "school_pressure_watch_band": "review",
+        "top_reasons": [
+          "Current utilization context is below local review thresholds.",
+          "Recent observed permit activity is elevated inside the attendance area."
+        ],
         "utilization_pct": 47.0,
-        "verification_status": "Needs official verification",
-        "zone_id": "SCHOOLZONE-MIDDLE-CONCORD_MIDDLE-12",
-        "zone_match_confidence": "normalized_exact"
+        "utilization_status": "under_capacity"
       },
       "type": "Feature"
     }
@@ -30503,10 +30783,10 @@
   "metadata": {
     "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
     "generated_at": "2026-06-28T17:32:05Z",
-    "layer_id": "school_capacity",
-    "layer_label": "Demo School Capacity Watch",
+    "layer_id": "school_pressure",
+    "layer_label": "Demo School Utilization + Permit Pressure",
     "mode": "portfolio_demo",
-    "source_basis": "school_zones joined to preliminary utilization from planning materials",
+    "source_basis": "school_zones plus observed permit activity by attendance area",
     "status": "available"
   },
   "type": "FeatureCollection"

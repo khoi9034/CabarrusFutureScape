@@ -119,7 +119,7 @@ export const mockOperationalLayers: OperationalLayer[] = [
       title: "Development Pressure",
     },
     renderer: {
-      description: "Prototype 3D point columns for active growth pressure.",
+      description: "Prototype 2D markers for active growth pressure.",
       field: "developmentPressure",
       type: "3d-object",
       visualVariables: ["height"],
@@ -151,7 +151,7 @@ export const mockOperationalLayers: OperationalLayer[] = [
       title: "Infrastructure Readiness",
     },
     renderer: {
-      description: "Prototype 3D point columns for infrastructure readiness.",
+      description: "Prototype 2D markers for infrastructure readiness.",
       field: "infrastructureReadiness",
       type: "3d-object",
       visualVariables: ["height"],
@@ -294,6 +294,40 @@ export const mockOperationalLayers: OperationalLayer[] = [
       "Verified CCS enrollment and functional capacity data after official ingestion",
   },
   {
+    id: "school-pressure",
+    title: "School Utilization + Permit Pressure",
+    category: "Schools",
+    description: "Preliminary attendance-area utilization and observed permit activity context",
+    kind: "GraphicsLayer",
+    defaultVisible: false,
+    visibility: true,
+    sourceStatus: "live",
+    runtimeSource: "custom-graphics",
+    accent: "#f0cd79",
+    opacity: 0.5,
+    fields: [
+      {
+        alias: "Watch Band",
+        display: true,
+        name: "schoolPressureWatchBand",
+        type: "string",
+      },
+    ],
+    popup: {
+      enabled: true,
+      fieldNames: ["schoolPressureWatchBand"],
+      title: "School Utilization + Permit Pressure",
+    },
+    renderer: {
+      description:
+        "Attendance-area polygons colored by preliminary utilization and observed permit pressure band.",
+      field: "schoolPressureWatchBand",
+      type: "unique-value",
+    },
+    futureSource:
+      "School attendance zones joined to utilization context and observed permit activity",
+  },
+  {
     id: "permit-activity",
     title: "Development Hotspots",
     category: "Planning",
@@ -399,7 +433,7 @@ export const futureOperationalLayerPlaceholders: OperationalLayer[] = [
     id: "future-built-environment-scene",
     title: "Future Built Environment Scene",
     category: "Infrastructure",
-    description: "Disabled placeholder for future 3D buildings or infrastructure.",
+    description: "Disabled placeholder for future buildings or infrastructure.",
     kind: "SceneLayer",
     defaultVisible: false,
     visibility: false,
@@ -411,7 +445,7 @@ export const futureOperationalLayerPlaceholders: OperationalLayer[] = [
       title: "Built Environment",
     },
     renderer: {
-      description: "Future 3D scene service for buildings and infrastructure.",
+      description: "Future buildings and infrastructure service.",
       type: "3d-object",
     },
     futureSource: "Cabarrus buildings or infrastructure SceneLayer",

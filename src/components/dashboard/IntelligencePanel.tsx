@@ -2108,6 +2108,14 @@ function SelectedDevelopmentHotspotCard({
         <span className="font-semibold text-slate-200">Why highlighted:</span>{" "}
         {context.whyHighlighted}
       </p>
+      {context.relatedSchoolPressureNote ? (
+        <div className="mt-3 rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/[0.07] px-3 py-2 text-xs leading-5 text-[#b7f0ff]">
+          <span className="font-semibold text-white">
+            Related school pressure:
+          </span>{" "}
+          {context.relatedSchoolPressureNote}
+        </div>
+      ) : null}
       <p className="mt-2 text-xs leading-5 text-[#f6d98e]">
         {context.caveat}
       </p>
@@ -4262,6 +4270,53 @@ function SelectedSchoolUtilizationZoneCard({
           value={formatSchoolZonePanelLabel(zone.zoneMatchConfidence)}
         />
       </div>
+
+      {zone.schoolPressureWatchBand ? (
+        <div className="mt-3 rounded-md border border-[#f0cd79]/20 bg-[#f0cd79]/[0.055] p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f8dfa0]">
+            Utilization + Permit Context
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <CompactParcelLine
+              label="Watch Band"
+              value={formatSchoolZonePanelLabel(zone.schoolPressureWatchBand)}
+            />
+            <CompactParcelLine
+              label="Permit Pressure"
+              value={formatSchoolZonePanelLabel(zone.observedGrowthPressureBand)}
+            />
+            <CompactParcelLine
+              label="Recent Permits"
+              value={
+                zone.permitCountRecent === null ||
+                zone.permitCountRecent === undefined
+                  ? "Data needed"
+                  : `${zone.permitCountRecent}`
+              }
+            />
+            <CompactParcelLine
+              label="Residential"
+              value={
+                zone.residentialPermitCountRecent === null ||
+                zone.residentialPermitCountRecent === undefined
+                  ? "Data needed"
+                  : `${zone.residentialPermitCountRecent}`
+              }
+            />
+          </div>
+          {zone.pressureReasons?.length ? (
+            <ul className="mt-2 space-y-1 text-[11px] leading-5 text-slate-300">
+              {zone.pressureReasons.slice(0, 3).map((reason) => (
+                <li key={reason}>{reason}</li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="mt-2 text-[11px] leading-5 text-slate-400">
+            {zone.recommendedFollowup ??
+              "Review school utilization context with observed permit activity."}
+          </p>
+        </div>
+      ) : null}
 
       <p className="mt-3 text-[11px] leading-5 text-slate-400">
         This is separate from Selected Parcel. Values are read from SY

@@ -208,6 +208,13 @@ const layerInfoById: Record<string, LayerInfoContent> = {
     source: "School attendance-zone polygons joined to presentation-derived utilization seed values.",
     summary: "Shows preliminary school capacity context by attendance-zone polygon.",
   },
+  "school-pressure": {
+    caveat: "Planning review signal only. Not an official enrollment forecast.",
+    interpretation: "Combines utilization context with observed permit activity inside attendance areas.",
+    reportUse: "Feeds school utilization and permit growth pressure caveats when included in a snapshot.",
+    source: "School attendance zones joined to utilization context and observed permit activity.",
+    summary: "Shows preliminary school capacity watch areas with permit growth pressure context.",
+  },
 };
 
 const activityClassOptions: Array<{
@@ -410,6 +417,13 @@ const schoolUtilizationLegendItems = [
     label: "Severely over capacity",
     range: ">110%",
   },
+];
+
+const schoolPressureLegendItems = [
+  { color: "#38bdf8", label: "Monitor" },
+  { color: "#f97316", label: "Review" },
+  { color: "#ec4899", label: "Elevated review" },
+  { color: "#94a3b8", label: "Data needed" },
 ];
 
 export function LayerToggle() {
@@ -873,6 +887,28 @@ export function LayerToggle() {
             </div>
           ) : null}
         </div>
+      );
+    }
+
+    if (layer.id === "school-pressure") {
+      return (
+        <>
+          <div className="grid gap-1.5">
+            {schoolPressureLegendItems.map((item) => (
+              <LayerLegendItem
+                color={item.color}
+                key={item.label}
+                label={item.label}
+                shape="square"
+                size="h-3 w-3"
+              />
+            ))}
+          </div>
+          <p className="mt-2 rounded border border-amber-300/15 bg-amber-300/[0.045] px-2 py-1.5 text-[11px] leading-5 text-amber-100/75">
+            Combines preliminary utilization context with observed permit
+            activity. Not an official enrollment forecast.
+          </p>
+        </>
       );
     }
 
@@ -1732,6 +1768,7 @@ function getLayerSourceStatusLabel(layer: OperationalLayer) {
       layer.id === DEVELOPMENT_HOTSPOT_LAYER_ID ||
       layer.id === FLOOD_CONSTRAINT_LAYER_ID ||
       layer.id === FEMA_FLOOD_ZONE_LAYER_ID ||
+      layer.id === "school-pressure" ||
       layer.id === SCHOOL_UTILIZATION_LAYER_ID)
   ) {
     return "Demo Sample";

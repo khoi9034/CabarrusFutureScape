@@ -16,6 +16,7 @@ const layerOwnerScopeById: Record<string, MapLayerOwnerScope> = {
   "opportunity-extrusions": "modelLab",
   "parcel-intelligence": "exploreCountywide",
   "permit-activity": "exploreCountywide",
+  "school-pressure": "exploreCountywide",
   "school-utilization-seed": "exploreCountywide",
   "scenario-envelope": "snapshotOnly",
   "transportation-context": "exploreCountywide",

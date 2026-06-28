@@ -1,12 +1,10 @@
 import type Graphic from "@arcgis/core/Graphic";
 import type { GraphicProperties } from "@arcgis/core/Graphic";
 import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
-import type { Edges3DProperties } from "@arcgis/core/symbols/edges/Edges3D";
 import type { ArcGISRuntime } from "@/lib/gis/arcgisRuntime";
 import { mockParcels } from "@/data/mock/parcelMockData";
 
 type GraphicSymbolProperties = NonNullable<GraphicProperties["symbol"]>;
-type SolidEdgesProperties = Edges3DProperties & { type: "solid" };
 
 export type MockSceneLayerMap = Record<string, GraphicsLayer>;
 export type MockSceneLayerLookup = Partial<Record<string, GraphicsLayer>>;
@@ -36,17 +34,12 @@ export function createMockSceneLayers(runtime: ArcGISRuntime): MockSceneLayerMap
         type: "polygon",
       },
       symbol: {
-        symbolLayers: [
-          {
-            material: { color: [13, 22, 34, 0.1] },
-            outline: {
-              color: [216, 184, 106, 0.9],
-              size: 2,
-            },
-            type: "fill",
-          },
-        ],
-        type: "polygon-3d",
+        color: [13, 22, 34, 0.1],
+        outline: {
+          color: [216, 184, 106, 0.9],
+          width: 2,
+        },
+        type: "simple-fill",
       },
     }),
   );
@@ -74,7 +67,6 @@ export function createMockSceneLayers(runtime: ArcGISRuntime): MockSceneLayerMap
   );
 
   layers["opportunity-extrusions"] = new GraphicsLayer({
-    elevationInfo: { mode: "on-the-ground" },
     id: "opportunity-extrusions",
     title: "Opportunity Extrusions",
   });
@@ -96,7 +88,6 @@ export function createMockSceneLayers(runtime: ArcGISRuntime): MockSceneLayerMap
   );
 
   layers["development-pressure"] = new GraphicsLayer({
-    elevationInfo: { mode: "relative-to-ground" },
     id: "development-pressure",
     title: "Development Pressure",
   });
@@ -119,7 +110,6 @@ export function createMockSceneLayers(runtime: ArcGISRuntime): MockSceneLayerMap
   );
 
   layers["infrastructure-readiness"] = new GraphicsLayer({
-    elevationInfo: { mode: "relative-to-ground" },
     id: "infrastructure-readiness",
     title: "Infrastructure Readiness",
   });
@@ -226,23 +216,12 @@ export function updateSelectedParcelSymbols(
 
 function getDemoParcelFootprintSymbol(selected: boolean): GraphicSymbolProperties {
   return {
-    symbolLayers: [
-      {
-        material: {
-          color: selected
-            ? [216, 184, 106, 0.3]
-            : [104, 216, 255, 0.11],
-        },
-        outline: {
-          color: selected
-            ? [255, 238, 178, 0.98]
-            : [104, 216, 255, 0.56],
-          size: selected ? 2.3 : 0.85,
-        },
-        type: "fill",
-      },
-    ],
-    type: "polygon-3d",
+    color: selected ? [216, 184, 106, 0.3] : [104, 216, 255, 0.11],
+    outline: {
+      color: selected ? [255, 238, 178, 0.98] : [104, 216, 255, 0.56],
+      width: selected ? 2.3 : 0.85,
+    },
+    type: "simple-fill",
   };
 }
 
@@ -255,23 +234,12 @@ function getParcelFootprintSymbol(
   selected: boolean,
 ): GraphicSymbolProperties {
   return {
-    symbolLayers: [
-      {
-        material: {
-          color: selected
-            ? [216, 184, 106, 0.34]
-            : [104, 216, 255, 0.14],
-        },
-        outline: {
-          color: selected
-            ? [255, 238, 178, 0.95]
-            : [104, 216, 255, 0.48],
-          size: selected ? 2 : 0.7,
-        },
-        type: "fill",
-      },
-    ],
-    type: "polygon-3d",
+    color: selected ? [216, 184, 106, 0.34] : [104, 216, 255, 0.14],
+    outline: {
+      color: selected ? [255, 238, 178, 0.95] : [104, 216, 255, 0.48],
+      width: selected ? 2 : 0.7,
+    },
+    type: "simple-fill",
   };
 }
 
@@ -284,20 +252,12 @@ function getOpportunitySymbol(
     : scoreToColor(parcel.opportunityScore);
 
   return {
-    symbolLayers: [
-      {
-        edges: getSolidEdges(
-          selected ? [255, 244, 205, 0.95] : [255, 255, 255, 0.22],
-          selected ? 1.4 : 0.4,
-        ),
-        material: { color },
-        size: selected
-          ? parcel.opportunityScore * 2.9 + 80
-          : parcel.opportunityScore * 2.4 + 40,
-        type: "extrude",
-      },
-    ],
-    type: "polygon-3d",
+    color,
+    outline: {
+      color: selected ? [255, 244, 205, 0.95] : [255, 255, 255, 0.22],
+      width: selected ? 1.4 : 0.4,
+    },
+    type: "simple-fill",
   };
 }
 
@@ -313,14 +273,9 @@ function getFloodSymbol(
   };
 
   return {
-    symbolLayers: [
-      {
-        material: { color: colors[parcel.floodRisk] },
-        outline: { color: [255, 255, 255, selected ? 0.75 : 0.28], size: 0.9 },
-        type: "fill",
-      },
-    ],
-    type: "polygon-3d",
+    color: colors[parcel.floodRisk],
+    outline: { color: [255, 255, 255, selected ? 0.75 : 0.28], width: 0.9 },
+    type: "simple-fill",
   };
 }
 
@@ -330,28 +285,14 @@ function getPointColumnSymbol(
   primitive: "cube" | "cylinder",
 ): GraphicSymbolProperties {
   return {
-    symbolLayers: [
-      {
-        depth: 44,
-        height,
-        material: { color },
-        resource: { primitive },
-        width: 44,
-        type: "object",
-      },
-    ],
-    type: "point-3d",
-  };
-}
-
-function getSolidEdges(
-  color: [number, number, number, number],
-  size: number,
-): SolidEdgesProperties {
-  return {
     color,
-    size,
-    type: "solid",
+    outline: {
+      color: [255, 255, 255, 0.78],
+      width: 1,
+    },
+    size: Math.max(10, Math.min(34, height / 8)),
+    style: primitive === "cube" ? "square" : "circle",
+    type: "simple-marker",
   };
 }
 

@@ -173,6 +173,7 @@ export interface SelectedDevelopmentHotspotContext {
   recentPermitCount1yr: number;
   recentPermitCount3yr: number;
   recordsRepresented: number;
+  relatedSchoolPressureNote?: string | null;
   representedParcelIds: string[];
   selectedPermitSegment: string | null;
   segmentCounts: DevelopmentHotspotSegmentCounts;

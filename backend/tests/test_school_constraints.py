@@ -1,4 +1,5 @@
 import os
+import json
 
 import pytest
 from fastapi.testclient import TestClient
@@ -133,6 +134,22 @@ def test_school_qa_summary_endpoint_returns_review_items() -> None:
     assert {"Hickory Ridge ES", "West Cabarrus HS", "Roberta Road MS"}.issubset(names)
 
 
+def test_school_pressure_endpoint_returns_safe_review_signal() -> None:
+    response = client.get("/constraints/schools/pressure", params={"limit": 5})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["mode"] == "live"
+    assert payload["summary"]["areas_analyzed"] >= 0
+    assert "features" in payload
+
+    text = json.dumps(payload).lower()
+    assert "prediction_probability" not in text
+    assert "raw_score" not in text
+    assert "will develop" not in text
+    assert "official prediction" not in text
+
+
 def test_school_routes_are_in_openapi_schema() -> None:
     response = client.get("/openapi.json")
 
@@ -143,6 +160,7 @@ def test_school_routes_are_in_openapi_schema() -> None:
     assert "/constraints/schools/filter" in paths
     assert "/constraints/schools/district-summary" in paths
     assert "/constraints/schools/qa-summary" in paths
+    assert "/constraints/schools/pressure" in paths
 
 
 def test_school_static_routes_are_not_captured_by_detail_route() -> None:

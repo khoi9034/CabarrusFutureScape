@@ -750,7 +750,7 @@ function StableOverviewWorkspace() {
             </EnterpriseErrorBoundary>
           ) : (
             <EnterpriseErrorBoundary
-              moduleName="3D SceneView"
+              moduleName="2D MapView"
               resetKey={selectedParcelId}
             >
               <SceneViewContainer />

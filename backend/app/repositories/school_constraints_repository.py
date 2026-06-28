@@ -66,6 +66,13 @@ class SchoolUtilizationZonePage:
 
 
 @dataclass(frozen=True)
+class SchoolPressurePage:
+    permit_data_available: bool
+    total_count: int
+    records: list[dict[str, Any]]
+
+
+@dataclass(frozen=True)
 class SchoolLeaPupilContextPage:
     total_count: int
     records: list[dict[str, Any]]
@@ -81,6 +88,7 @@ class SchoolConstraintsRepository:
     _ZONES_TABLE = "public.school_zones"
     _CAPACITY_TABLE = "public.school_capacity"
     _UTILIZATION_SEED_VIEW = "public.school_utilization_seed_current"
+    _PERMIT_TABLE = "public.real_property_permit_parcel_relationship"
     _LEA_PUPIL_CONTEXT_TABLE = "public.school_lea_pupil_context"
     _DETAIL_FIELDS = """
         parcel.official_parcel_id,
@@ -635,6 +643,66 @@ class SchoolConstraintsRepository:
             records=[dict(row) for row in rows],
         )
 
+    def get_school_pressure_areas(
+        self,
+        *,
+        school_level: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> SchoolPressurePage:
+        if not self._relation_exists(self._ZONES_TABLE):
+            return SchoolPressurePage(
+                permit_data_available=False,
+                total_count=0,
+                records=[],
+            )
+
+        permit_data_available = self._relation_exists(
+            self._PERMIT_TABLE,
+        ) and self._relation_exists(self._SUMMARY_TABLE)
+        clauses = [
+            "zone.include_in_cfs_v1 = TRUE",
+            "zone.geometry IS NOT NULL",
+        ]
+        params: dict[str, Any] = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if school_level:
+            clauses.append("zone.school_level = :school_level")
+            params["school_level"] = school_level
+
+        where_sql = "WHERE " + " AND ".join(clauses)
+        count_params = {
+            key: value for key, value in params.items() if key not in {"limit", "offset"}
+        }
+        total = self._db.execute(
+            text(
+                f"""
+                SELECT COUNT(*)::int
+                FROM {self._ZONES_TABLE} AS zone
+                {where_sql}
+                """
+            ),
+            count_params,
+        ).scalar_one()
+
+        rows = self._db.execute(
+            text(
+                self._school_pressure_sql(
+                    permit_data_available=permit_data_available,
+                    where_sql=where_sql,
+                )
+            ),
+            params,
+        ).mappings().all()
+        return SchoolPressurePage(
+            permit_data_available=permit_data_available,
+            total_count=_as_int(total),
+            records=[dict(row) for row in rows],
+        )
+
     def get_lea_pupil_context_rows(
         self,
         *,
@@ -873,6 +941,149 @@ class SchoolConstraintsRepository:
         ).mappings().all()
         return [dict(row) for row in rows]
 
+    def _relation_exists(self, relation_name: str) -> bool:
+        return bool(
+            self._db.execute(
+                text("SELECT to_regclass(:relation_name) IS NOT NULL"),
+                {"relation_name": relation_name},
+            ).scalar_one()
+        )
+
+    def _school_pressure_sql(self, *, permit_data_available: bool, where_sql: str) -> str:
+        utilization_join = (
+            f"""
+            LEFT JOIN {self._UTILIZATION_SEED_VIEW} AS seed
+              ON seed.school_name_normalized = zone.school_name_normalized
+             AND seed.school_level = zone.school_level
+            """
+            if self._relation_exists(self._UTILIZATION_SEED_VIEW)
+            else ""
+        )
+        seed_fields = (
+            """
+            seed.school_year,
+            seed.utilization_pct,
+            seed.utilization_class,
+            seed.source_confidence,
+            seed.needs_verification,
+            """
+            if utilization_join
+            else """
+            NULL::text AS school_year,
+            NULL::float8 AS utilization_pct,
+            NULL::text AS utilization_class,
+            'not_available'::text AS source_confidence,
+            TRUE AS needs_verification,
+            """
+        )
+        permit_cte = (
+            f"""
+            , latest_permit_year AS (
+                SELECT MAX(activity_year)::int AS max_year
+                FROM {self._PERMIT_TABLE}
+                WHERE activity_year BETWEEN 1990 AND 2100
+            ),
+            zone_parcels AS (
+                SELECT 'elementary'::text AS school_level,
+                       elementary_zone_id AS zone_id,
+                       official_parcel_id
+                FROM {self._SUMMARY_TABLE}
+                WHERE elementary_zone_id IS NOT NULL
+                UNION ALL
+                SELECT 'middle'::text, middle_zone_id, official_parcel_id
+                FROM {self._SUMMARY_TABLE}
+                WHERE middle_zone_id IS NOT NULL
+                UNION ALL
+                SELECT 'high'::text, high_zone_id, official_parcel_id
+                FROM {self._SUMMARY_TABLE}
+                WHERE high_zone_id IS NOT NULL
+            ),
+            permit_counts AS (
+                SELECT
+                    parcels.school_level,
+                    parcels.zone_id,
+                    COUNT(permit.official_parcel_id) FILTER (
+                        WHERE permit.activity_year BETWEEN latest.max_year - 2 AND latest.max_year
+                    )::int AS permit_count_recent,
+                    COUNT(permit.official_parcel_id) FILTER (
+                        WHERE permit.activity_year BETWEEN latest.max_year - 5 AND latest.max_year - 3
+                    )::int AS permit_count_previous,
+                    COUNT(permit.official_parcel_id) FILTER (
+                        WHERE permit.activity_year BETWEEN latest.max_year - 2 AND latest.max_year
+                          AND (
+                            permit.permit_type ILIKE '%residential%'
+                            OR permit.work_type ILIKE '%residential%'
+                            OR permit.work_type ILIKE '%single%'
+                            OR permit.work_type ILIKE '%multi%'
+                          )
+                    )::int AS residential_permit_count_recent,
+                    COUNT(permit.official_parcel_id) FILTER (
+                        WHERE permit.activity_year BETWEEN latest.max_year - 2 AND latest.max_year
+                          AND permit.work_type ILIKE '%multi%'
+                    )::int AS multifamily_permit_count_recent,
+                    COUNT(permit.official_parcel_id) FILTER (
+                        WHERE permit.activity_year BETWEEN latest.max_year - 2 AND latest.max_year
+                          AND COALESCE(permit.permit_amount, 0) >= 1000000
+                    )::int AS major_development_permit_count_recent
+                FROM zone_parcels AS parcels
+                CROSS JOIN latest_permit_year AS latest
+                LEFT JOIN {self._PERMIT_TABLE} AS permit
+                  ON permit.official_parcel_id = parcels.official_parcel_id
+                GROUP BY parcels.school_level, parcels.zone_id
+            )
+            """
+            if permit_data_available
+            else """
+            , permit_counts AS (
+                SELECT
+                    NULL::text AS school_level,
+                    NULL::text AS zone_id,
+                    NULL::int AS permit_count_recent,
+                    NULL::int AS permit_count_previous,
+                    NULL::int AS residential_permit_count_recent,
+                    NULL::int AS multifamily_permit_count_recent,
+                    NULL::int AS major_development_permit_count_recent
+                WHERE FALSE
+            )
+            """
+        )
+        return f"""
+            WITH pressure_zones AS (
+                SELECT
+                    zone.zone_id,
+                    zone.school_name_raw AS school_name,
+                    zone.school_name_normalized,
+                    zone.school_level,
+                    zone.school_system,
+                    {seed_fields}
+                    ST_AsGeoJSON(
+                        ST_SimplifyPreserveTopology(zone.geometry, 0.000025),
+                        6
+                    )::json AS geometry
+                FROM {self._ZONES_TABLE} AS zone
+                {utilization_join}
+                {where_sql}
+            )
+            {permit_cte}
+            SELECT
+                pressure_zones.*,
+                permit_counts.permit_count_recent,
+                permit_counts.permit_count_previous,
+                permit_counts.residential_permit_count_recent,
+                permit_counts.multifamily_permit_count_recent,
+                permit_counts.major_development_permit_count_recent
+            FROM pressure_zones
+            LEFT JOIN permit_counts
+              ON permit_counts.zone_id = pressure_zones.zone_id
+             AND permit_counts.school_level = pressure_zones.school_level
+            ORDER BY
+                pressure_zones.utilization_pct DESC NULLS LAST,
+                COALESCE(permit_counts.permit_count_recent, 0) DESC,
+                pressure_zones.school_level,
+                pressure_zones.school_name
+            LIMIT :limit OFFSET :offset
+        """
+
     def _get_distribution(
         self,
         column_name: str,
@@ -966,3 +1177,4 @@ def normalize_school_row(row: dict[str, Any]) -> dict[str, Any]:
         elif key == "data_quality_flags":
             normalized[key] = _as_list(value)
     return normalized
+

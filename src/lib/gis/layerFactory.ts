@@ -138,7 +138,7 @@ export function setOperationalLayerVisibility(
   if (!layer) {
     warnLayerReadiness({
       layerId,
-      reason: "Layer visibility update skipped because the layer is not active in the SceneView runtime.",
+      reason: "Layer visibility update skipped because the layer is not active in the MapView runtime.",
       sourceStatus: "placeholder",
     });
     return;
@@ -157,7 +157,7 @@ export function updateOperationalLayerOpacity(
   if (!layer) {
     warnLayerReadiness({
       layerId,
-      reason: "Layer opacity update skipped because the layer is not active in the SceneView runtime.",
+      reason: "Layer opacity update skipped because the layer is not active in the MapView runtime.",
       sourceStatus: "placeholder",
     });
     return;
@@ -295,7 +295,7 @@ function isCustomGraphicsRuntimeLayer(definition: OperationalLayer) {
 
 function getSkippedLayerReason(definition: OperationalLayer) {
   if (isCustomGraphicsRuntimeLayer(definition)) {
-    return "Custom graphics layer is managed directly by the SceneView integration.";
+    return "Custom graphics layer is managed directly by the MapView integration.";
   }
 
   if (isLayerPlaceholder(definition)) {

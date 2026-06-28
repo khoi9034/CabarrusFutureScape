@@ -98,10 +98,15 @@ def main() -> int:
         development_trends = build_development_trends(conn)
         flood_summary = build_flood_summary(conn)
         school_watch = build_school_capacity_watch(conn)
+        school_pressure = build_school_pressure_demo(conn, generated_at)
         model_status = build_model_status(generated_at)
         model_lab_demo_clusters = build_model_lab_demo_clusters(conn, generated_at)
         sample_parcels = build_sample_parcels(conn, generated_at)
-        map_layer_manifest = export_demo_map_layers(conn, generated_at)
+        map_layer_manifest = export_demo_map_layers(
+            conn,
+            generated_at,
+            school_pressure,
+        )
 
     indicator_summary = {
         "available": True,
@@ -125,6 +130,14 @@ def main() -> int:
             "qa_summary": school_watch["qa_summary"],
             "statistics": school_watch["statistics"],
             "utilization_seed": school_watch["utilization_seed"],
+        },
+        "school_pressure": {
+            "as_of": school_pressure.get("as_of"),
+            "available": bool(school_pressure.get("features")),
+            "caveats": school_pressure.get("caveats", []),
+            "data_coverage_notes": school_pressure.get("data_coverage_notes", []),
+            "summary": school_pressure.get("summary", {}),
+            "total_count": school_pressure.get("total_count", 0),
         },
         "utility_readiness": {
             "caveat": "Utility proxy does not confirm available capacity.",
@@ -165,6 +178,7 @@ def main() -> int:
             "generated_at": generated_at,
             **school_watch,
         },
+        "school_pressure_summary.json": school_pressure,
         "model_status.json": model_status,
         "sample_parcels.json": sample_parcels,
         "model_lab_demo_clusters.json": model_lab_demo_clusters,
@@ -1051,7 +1065,11 @@ def build_sample_parcels(conn: psycopg.Connection, generated_at: str) -> dict[st
     }
 
 
-def export_demo_map_layers(conn: psycopg.Connection, generated_at: str) -> dict[str, Any]:
+def export_demo_map_layers(
+    conn: psycopg.Connection,
+    generated_at: str,
+    school_pressure: dict[str, Any],
+) -> dict[str, Any]:
     layers = {
         "demo_county_boundary.geojson": build_demo_county_boundary(generated_at),
         "demo_parcels.geojson": build_demo_parcel_features(conn, generated_at),
@@ -1064,6 +1082,13 @@ def export_demo_map_layers(conn: psycopg.Connection, generated_at: str) -> dict[
             generated_at,
         ),
         "demo_school_capacity.geojson": build_demo_school_capacity(conn, generated_at),
+        "demo_school_pressure_areas.geojson": feature_collection(
+            school_pressure.get("features", []),
+            generated_at=generated_at,
+            layer_id="school_pressure",
+            layer_label="Demo School Utilization + Permit Pressure",
+            source_basis="school_zones plus observed permit activity by attendance area",
+        ),
         "demo_transportation_context.geojson": build_demo_transportation_context(
             conn,
             generated_at,
@@ -1612,6 +1637,164 @@ def build_demo_school_capacity(conn: psycopg.Connection, generated_at: str) -> d
     )
 
 
+def build_school_pressure_demo(conn: psycopg.Connection, generated_at: str) -> dict[str, Any]:
+    if not table_exists(conn, "school_zones"):
+        return empty_school_pressure_response(generated_at)
+
+    utilization_table = "school_utilization_seed_current" if relation_exists(
+        conn,
+        "school_utilization_seed_current",
+    ) else (
+        "school_presentation_utilization_seed"
+        if table_exists(conn, "school_presentation_utilization_seed")
+        else None
+    )
+    utilization_join = bool(utilization_table)
+    permit_join = table_exists(
+        conn,
+        "real_property_permit_parcel_relationship",
+    ) and table_exists(conn, "parcel_school_summary")
+    permit_cte = """
+      , permit_counts AS (
+          SELECT NULL::text AS school_level,
+                 NULL::text AS zone_id,
+                 NULL::int AS permit_count_recent,
+                 NULL::int AS permit_count_previous,
+                 NULL::int AS residential_permit_count_recent,
+                 NULL::int AS multifamily_permit_count_recent,
+                 NULL::int AS major_development_permit_count_recent
+          WHERE FALSE
+      )
+    """
+    if permit_join:
+        permit_cte = """
+          , latest_permit_year AS (
+              SELECT MAX(activity_year)::int AS max_year
+              FROM public.real_property_permit_parcel_relationship
+              WHERE activity_year BETWEEN 1990 AND 2100
+          ),
+          zone_parcels AS (
+              SELECT 'elementary'::text AS school_level,
+                     elementary_zone_id AS zone_id,
+                     official_parcel_id
+              FROM public.parcel_school_summary
+              WHERE elementary_zone_id IS NOT NULL
+              UNION ALL
+              SELECT 'middle'::text, middle_zone_id, official_parcel_id
+              FROM public.parcel_school_summary
+              WHERE middle_zone_id IS NOT NULL
+              UNION ALL
+              SELECT 'high'::text, high_zone_id, official_parcel_id
+              FROM public.parcel_school_summary
+              WHERE high_zone_id IS NOT NULL
+          ),
+          permit_counts AS (
+              SELECT
+                  parcels.school_level,
+                  parcels.zone_id,
+                  COUNT(permit.official_parcel_id) FILTER (
+                      WHERE permit.activity_year BETWEEN latest.max_year - 2 AND latest.max_year
+                  )::int AS permit_count_recent,
+                  COUNT(permit.official_parcel_id) FILTER (
+                      WHERE permit.activity_year BETWEEN latest.max_year - 5 AND latest.max_year - 3
+                  )::int AS permit_count_previous,
+                  COUNT(permit.official_parcel_id) FILTER (
+                      WHERE permit.activity_year BETWEEN latest.max_year - 2 AND latest.max_year
+                        AND (
+                          permit.permit_type ILIKE '%%residential%%'
+                          OR permit.work_type ILIKE '%%residential%%'
+                          OR permit.work_type ILIKE '%%single%%'
+                          OR permit.work_type ILIKE '%%multi%%'
+                        )
+                  )::int AS residential_permit_count_recent,
+                  COUNT(permit.official_parcel_id) FILTER (
+                      WHERE permit.activity_year BETWEEN latest.max_year - 2 AND latest.max_year
+                        AND permit.work_type ILIKE '%%multi%%'
+                  )::int AS multifamily_permit_count_recent,
+                  COUNT(permit.official_parcel_id) FILTER (
+                      WHERE permit.activity_year BETWEEN latest.max_year - 2 AND latest.max_year
+                        AND COALESCE(permit.permit_amount, 0) >= 1000000
+                  )::int AS major_development_permit_count_recent
+              FROM zone_parcels AS parcels
+              CROSS JOIN latest_permit_year AS latest
+              LEFT JOIN public.real_property_permit_parcel_relationship AS permit
+                ON permit.official_parcel_id = parcels.official_parcel_id
+              GROUP BY parcels.school_level, parcels.zone_id
+          )
+        """
+
+    rows = fetch_all(
+        conn,
+        f"""
+        WITH pressure_zones AS (
+          SELECT
+            z.zone_id,
+            z.school_name_raw AS school_name,
+            z.school_name_normalized,
+            z.school_level,
+            {column_expr('u', 'school_year', utilization_join)} AS school_year,
+            {column_expr('u', 'utilization_class', utilization_join)} AS utilization_class,
+            {"u.utilization_pct::float8" if utilization_join else "NULL::float8"} AS utilization_pct,
+            {bool_expr('u', 'needs_verification', utilization_join)} AS needs_verification,
+            ST_AsGeoJSON(
+              ST_SimplifyPreserveTopology(z.geometry, 0.00006),
+              6
+            ) AS geometry_geojson
+          FROM public.school_zones z
+          {optional_join_school_utilization(utilization_table)}
+          WHERE z.geometry IS NOT NULL
+            AND COALESCE(z.include_in_cfs_v1, TRUE) IS TRUE
+        )
+        {permit_cte}
+        SELECT
+          pressure_zones.*,
+          permit_counts.permit_count_recent,
+          permit_counts.permit_count_previous,
+          permit_counts.residential_permit_count_recent,
+          permit_counts.multifamily_permit_count_recent,
+          permit_counts.major_development_permit_count_recent
+        FROM pressure_zones
+        LEFT JOIN permit_counts
+          ON permit_counts.zone_id = pressure_zones.zone_id
+         AND permit_counts.school_level = pressure_zones.school_level
+        ORDER BY
+          pressure_zones.utilization_pct DESC NULLS LAST,
+          COALESCE(permit_counts.permit_count_recent, 0) DESC,
+          pressure_zones.school_level,
+          pressure_zones.school_name
+        LIMIT %s
+        """,
+        (DEMO_SCHOOL_LAYER_LIMIT,),
+    )
+
+    features = []
+    for row in rows:
+        properties = build_school_pressure_properties(row, permit_join)
+        features.append(geojson_feature(row.get("geometry_geojson"), properties))
+
+    summary = summarize_school_pressure_features(features)
+    return {
+        "as_of": generated_at,
+        "caveats": [
+            "Portfolio demo uses a cached CFS demo extract.",
+            "Permit activity is not the same as student generation.",
+            "This is not an official enrollment forecast.",
+        ],
+        "data_coverage_notes": [
+            "Observed permit activity joined by parcel assignment to school attendance areas."
+            if permit_join
+            else "Permit activity by attendance area is not available in the cached demo extract.",
+            "Official school enrollment/capacity verification is still needed.",
+        ],
+        "features": features,
+        "limit": DEMO_SCHOOL_LAYER_LIMIT,
+        "mode": "demo",
+        "offset": 0,
+        "summary": summary,
+        "total_count": len(features),
+    }
+
+
 def build_demo_transportation_context(
     conn: psycopg.Connection,
     generated_at: str,
@@ -1801,6 +1984,196 @@ def normalize_flood_severity(
     if normalized == "moderate":
         return "moderate"
     return "low" if normalized == "low" else None
+
+
+def empty_school_pressure_response(generated_at: str) -> dict[str, Any]:
+    return {
+        "as_of": generated_at,
+        "caveats": ["School utilization + permit pressure demo data is not available."],
+        "data_coverage_notes": ["Data still needed."],
+        "features": [],
+        "limit": DEMO_SCHOOL_LAYER_LIMIT,
+        "mode": "demo",
+        "offset": 0,
+        "summary": {
+            "areas_analyzed": 0,
+            "areas_with_recent_permits": 0,
+            "areas_with_utilization": 0,
+            "data_needed_count": 0,
+            "elevated_review_count": 0,
+            "recent_residential_permits_in_watched_areas": 0,
+        },
+        "total_count": 0,
+    }
+
+
+def build_school_pressure_properties(
+    row: dict[str, Any],
+    permit_join: bool,
+) -> dict[str, Any]:
+    utilization_pct = row.get("utilization_pct")
+    utilization_status = row.get("utilization_class") or demo_utilization_status(
+        utilization_pct,
+    )
+    recent = row.get("permit_count_recent")
+    previous = row.get("permit_count_previous")
+    delta = recent - previous if recent is not None and previous is not None else None
+    growth_pct = round((delta / previous) * 100, 1) if delta is not None and previous else None
+    watch_band = demo_school_pressure_watch_band(
+        permit_join=permit_join,
+        recent=recent,
+        utilization_pct=utilization_pct,
+        utilization_status=utilization_status,
+    )
+    return {
+        "attendance_area_id": row.get("zone_id"),
+        "caveats": [
+            "Cached demo extract.",
+            "Permit activity is not the same as student generation.",
+            "This is not an official enrollment forecast.",
+        ],
+        "enrollment_year": row.get("school_year"),
+        "major_development_permit_count_recent": row.get(
+            "major_development_permit_count_recent",
+        ),
+        "multifamily_permit_count_recent": row.get(
+            "multifamily_permit_count_recent",
+        ),
+        "observed_growth_pressure_band": demo_growth_pressure_band(recent),
+        "permit_count_previous": previous,
+        "permit_count_recent": recent,
+        "permit_growth_delta": delta,
+        "permit_growth_pct": growth_pct,
+        "recommended_followup": demo_school_pressure_followup(watch_band),
+        "residential_permit_count_recent": row.get(
+            "residential_permit_count_recent",
+        ),
+        "school_level": row.get("school_level"),
+        "school_name": row.get("school_name"),
+        "school_pressure_watch_band": watch_band,
+        "top_reasons": demo_school_pressure_reasons(
+            permit_join=permit_join,
+            recent=recent,
+            utilization_pct=utilization_pct,
+            utilization_status=utilization_status,
+        ),
+        "utilization_pct": utilization_pct,
+        "utilization_status": utilization_status,
+    }
+
+
+def summarize_school_pressure_features(features: list[dict[str, Any]]) -> dict[str, int]:
+    properties = [feature.get("properties", {}) for feature in features]
+    return {
+        "areas_analyzed": len(features),
+        "areas_with_recent_permits": sum(
+            1 for item in properties if (item.get("permit_count_recent") or 0) > 0
+        ),
+        "areas_with_utilization": sum(
+            1 for item in properties if item.get("utilization_pct") is not None
+        ),
+        "data_needed_count": sum(
+            1
+            for item in properties
+            if item.get("school_pressure_watch_band") == "data needed"
+        ),
+        "elevated_review_count": sum(
+            1
+            for item in properties
+            if item.get("school_pressure_watch_band") == "elevated review"
+        ),
+        "recent_residential_permits_in_watched_areas": sum(
+            int(item.get("residential_permit_count_recent") or 0)
+            for item in properties
+            if item.get("school_pressure_watch_band") in {"review", "elevated review"}
+        ),
+    }
+
+
+def demo_utilization_status(value: Any) -> str | None:
+    if value is None:
+        return None
+    utilization_pct = float(value)
+    if utilization_pct >= 110:
+        return "severely_over_capacity"
+    if utilization_pct >= 100:
+        return "over_capacity"
+    if utilization_pct >= 90:
+        return "near_capacity"
+    if utilization_pct >= 80:
+        return "approaching_capacity"
+    return "under_capacity"
+
+
+def demo_growth_pressure_band(recent: Any) -> str:
+    if recent is None:
+        return "unknown"
+    count = int(recent)
+    if count >= 40:
+        return "high"
+    if count >= 15:
+        return "elevated"
+    if count >= 5:
+        return "moderate"
+    return "low"
+
+
+def demo_school_pressure_watch_band(
+    *,
+    permit_join: bool,
+    recent: Any,
+    utilization_pct: Any,
+    utilization_status: str | None,
+) -> str:
+    if utilization_pct is None or not permit_join or recent is None:
+        return "data needed"
+    high_utilization = utilization_status in {
+        "near_capacity",
+        "over_capacity",
+        "severely_over_capacity",
+    }
+    recent_count = int(recent)
+    if high_utilization and recent_count >= 15:
+        return "elevated review"
+    if high_utilization or recent_count >= 5:
+        return "review"
+    return "monitor"
+
+
+def demo_school_pressure_reasons(
+    *,
+    permit_join: bool,
+    recent: Any,
+    utilization_pct: Any,
+    utilization_status: str | None,
+) -> list[str]:
+    reasons = []
+    if utilization_pct is None:
+        reasons.append("Utilization context is not available from the current source.")
+    elif utilization_status in {"near_capacity", "over_capacity", "severely_over_capacity"}:
+        reasons.append("Current utilization context is near or above local review thresholds.")
+    else:
+        reasons.append("Current utilization context is below local review thresholds.")
+
+    if not permit_join or recent is None:
+        reasons.append("Observed permit activity by attendance area is data needed.")
+    elif int(recent) >= 15:
+        reasons.append("Recent observed permit activity is elevated inside the attendance area.")
+    elif int(recent) > 0:
+        reasons.append("Observed permit activity exists inside the attendance area.")
+    else:
+        reasons.append("No recent observed permit activity was joined to this attendance area.")
+    return reasons
+
+
+def demo_school_pressure_followup(watch_band: str) -> str:
+    if watch_band == "data needed":
+        return "Request official enrollment/capacity data and confirm permit-to-attendance-area coverage."
+    if watch_band == "elevated review":
+        return "Review enrollment trends, approved subdivisions, and school capacity assumptions."
+    if watch_band == "review":
+        return "Review school utilization context with recent residential permit activity."
+    return "Monitor as part of regular planning review."
 
 
 def empty_development_statistics() -> dict[str, Any]:
@@ -2258,3 +2631,4 @@ if __name__ == "__main__":
     except psycopg.Error as error:
         print(f"Demo data export failed: {error.__class__.__name__}", file=sys.stderr)
         raise SystemExit(1)
+

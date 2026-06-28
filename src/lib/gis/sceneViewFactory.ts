@@ -1,11 +1,11 @@
 import type ArcGISMap from "@arcgis/core/Map";
-import type SceneView from "@arcgis/core/views/SceneView";
+import type MapView from "@arcgis/core/views/MapView";
 import type { ArcGISRuntime } from "@/lib/gis/arcgisRuntime";
 import { cabarrusSceneConfig } from "@/lib/gis/gisConfig";
 
 export interface CabarrusSceneView {
   map: ArcGISMap;
-  view: SceneView;
+  view: MapView;
 }
 
 export function createCabarrusSceneView(
@@ -14,7 +14,6 @@ export function createCabarrusSceneView(
 ): CabarrusSceneView {
   const map = new runtime.Map({
     basemap: cabarrusSceneConfig.basemap,
-    ground: cabarrusSceneConfig.ground,
   });
   const clippingArea = new runtime.Extent({
     spatialReference: {
@@ -26,46 +25,24 @@ export function createCabarrusSceneView(
     ymin: cabarrusSceneConfig.studyExtent.ymin,
   });
 
-  const view = new runtime.SceneView({
-    camera: {
-      heading: cabarrusSceneConfig.camera.heading,
-      position: {
-        latitude: cabarrusSceneConfig.center.latitude,
-        longitude: cabarrusSceneConfig.center.longitude,
-        z: cabarrusSceneConfig.camera.altitudeMeters,
-      },
-      tilt: cabarrusSceneConfig.camera.tilt,
-    },
+  const view = new runtime.MapView({
+    center: [
+      cabarrusSceneConfig.center.longitude,
+      cabarrusSceneConfig.center.latitude,
+    ],
     container,
     constraints: {
-      altitude: {
-        max: 30000,
-        min: 250,
-      },
-      tilt: {
-        max: 76,
-      },
+      geometry: clippingArea,
+      maxZoom: 20,
+      minZoom: 9,
     },
-    environment: {
-      atmosphereEnabled: false,
-      background: {
-        color: [4, 8, 14, 1],
-        type: "color",
-      },
-      lighting: {
-        date: new Date(cabarrusSceneConfig.mockLightingDate),
-        directShadowsEnabled: false,
-      },
-      starsEnabled: false,
-    },
+    extent: clippingArea,
     map,
-    qualityProfile: "medium",
     ui: {
       components: [],
     },
-    viewingMode: "local",
+    zoom: cabarrusSceneConfig.zoom,
   });
-  view.clippingArea = clippingArea;
 
   return { map, view };
 }

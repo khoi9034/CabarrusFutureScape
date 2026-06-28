@@ -61,7 +61,7 @@ export function MapViewportPlaceholder({
 
   return (
     <section
-      aria-label="Cabarrus County 3D map viewport"
+      aria-label="Cabarrus County 2D map viewport"
       className="relative h-full min-h-[58vh] overflow-hidden rounded-lg border border-white/10 bg-[#050911] shadow-[0_28px_120px_rgba(0,0,0,0.46)] md:min-h-[62vh] lg:min-h-0"
     >
       {children}
@@ -81,12 +81,12 @@ export function MapViewportPlaceholder({
               <LoaderCircle className="mx-auto h-5 w-5 animate-spin text-[#d8b86a]" />
             )}
             <p className="mt-3 text-sm font-semibold text-white">
-              {hasError ? "SceneView unavailable" : "Initializing SceneView"}
+              {hasError ? "MapView unavailable" : "Initializing MapView"}
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-400">
               {hasError
                 ? sceneError ?? "ArcGIS scene initialization did not complete."
-                : "Loading the Cabarrus County 3D operating scene."}
+                : "Loading the Cabarrus County 2D operating map."}
             </p>
             <p className="mt-2 text-[10px] uppercase text-slate-500">
               {hasError ? "Refresh the page to retry" : "Client-only ArcGIS runtime"}
@@ -99,7 +99,7 @@ export function MapViewportPlaceholder({
         <div className="flex items-center gap-2">
           <Satellite className="h-4 w-4 text-[#d8b86a]" />
           <p className="text-xs font-medium uppercase text-slate-400">
-            Cabarrus 3D Scene
+            Cabarrus 2D Map
           </p>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-300">
