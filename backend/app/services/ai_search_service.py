@@ -157,6 +157,12 @@ class CfsAiSearchService:
             )
             return sanitize_response(fallback)
 
+        if provider_payload and provider_payload.get("_provider_unavailable_reason") == "rate_limit_quota":
+            fallback.caveats.append(
+                "OpenAI provider was unavailable due to rate limit or quota status, so CFS used grounded deterministic analysis.",
+            )
+            return sanitize_response(fallback)
+
         if provider_payload is None:
             fallback.caveats.append(
                 "AI provider is not fully configured; deterministic CFS answer returned.",
@@ -672,6 +678,10 @@ def _post_provider_json(
     try:
         with urllib.request.urlopen(request, timeout=20) as response:
             provider_payload = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        if error.code == 429:
+            return {"_provider_unavailable_reason": "rate_limit_quota"}
+        return None
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
         return None
 

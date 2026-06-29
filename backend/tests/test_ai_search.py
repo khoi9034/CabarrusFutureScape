@@ -156,6 +156,32 @@ def test_ai_search_provider_failure_falls_back(monkeypatch) -> None:
     assert "deterministic CFS answer returned" in " ".join(response.caveats)
 
 
+def test_ai_search_openai_429_falls_back_with_safe_caveat(monkeypatch) -> None:
+    monkeypatch.setattr(
+        ai_search_service,
+        "_post_provider_json",
+        lambda *_args, **_kwargs: {"_provider_unavailable_reason": "rate_limit_quota"},
+    )
+    service = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="gpt-4o-mini",
+            cfs_ai_provider="openai",
+            openai_api_key="test-key",
+        ),
+    )
+    response = service.search(
+        CfsAiSearchRequest(query="Which school areas need review?"),
+        _context(),
+    )
+
+    text = " ".join(response.caveats).lower()
+    assert response.provider == "none"
+    assert "rate limit or quota" in text
+    assert "raw" not in text
+    assert response.dashboard_actions.focus_domain == "schools"
+
+
 def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
     def fake_context(_db):
         return _context()

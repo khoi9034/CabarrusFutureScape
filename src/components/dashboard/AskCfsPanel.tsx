@@ -121,6 +121,13 @@ export function AskCfsPanel({
 }
 
 function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
+  const openAiFallbackActive =
+    response.data_mode === "live" &&
+    response.provider === "none" &&
+    response.caveats.some((caveat) =>
+      caveat.toLowerCase().includes("rate limit or quota"),
+    );
+
   return (
     <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
       <div className="rounded-xl border border-white/10 bg-black/24 p-4">
@@ -128,6 +135,11 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
           <FileSearch className="h-3.5 w-3.5" />
           Grounded answer
         </div>
+        {openAiFallbackActive ? (
+          <p className="mb-3 w-fit rounded border border-[#f6d98e]/20 bg-[#f6d98e]/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f6d98e]">
+            Provider: OpenAI configured / Status: fallback active / Reason: rate limit/quota
+          </p>
+        ) : null}
         <p className="text-sm leading-6 text-slate-100">{response.answer}</p>
         <div className="mt-4 grid gap-2 md:grid-cols-2">
           {response.evidence.map((item) => (
