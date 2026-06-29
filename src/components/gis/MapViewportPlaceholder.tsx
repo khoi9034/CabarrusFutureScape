@@ -85,7 +85,7 @@ export function MapViewportPlaceholder({
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-400">
               {hasError
-                ? sceneError ?? "ArcGIS scene initialization did not complete."
+                ? sceneError ?? "ArcGIS map initialization did not complete."
                 : "Loading the Cabarrus County 2D operating map."}
             </p>
             <p className="mt-2 text-[10px] uppercase text-slate-500">
@@ -104,7 +104,7 @@ export function MapViewportPlaceholder({
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-300">
           <span className="rounded-md border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-[#f0cd79]">
-            {mapStatus === "online" ? "Live Scene" : "Scene Standby"}
+            {mapStatus === "online" ? "Map Live" : "Map Standby"}
           </span>
           <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1">
             County extent

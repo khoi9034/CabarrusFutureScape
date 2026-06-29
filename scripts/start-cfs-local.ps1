@@ -166,7 +166,7 @@ function Start-Backend {
       "-ExecutionPolicy",
       "Bypass",
       "-Command",
-      "Set-Location -LiteralPath '$Backend'; `$env:POSTGRES_HOST='$PostgresHost'; `$env:POSTGRES_PORT='$PostgresPort'; `$env:POSTGRES_DB='$PostgresDb'; python -m uvicorn app.main:app --host 127.0.0.1 --port $BackendPort *> '$BackendLog'"
+      "Set-Location -LiteralPath '$Backend'; Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue; `$env:POSTGRES_HOST='$PostgresHost'; `$env:POSTGRES_PORT='$PostgresPort'; `$env:POSTGRES_DB='$PostgresDb'; python -m uvicorn app.main:app --host 127.0.0.1 --port $BackendPort *> '$BackendLog'"
     ) `
     -WindowStyle Hidden
 }
@@ -211,7 +211,7 @@ function Test-ApiEndpoint {
 
   $url = "$ApiBaseUrl$Path"
   try {
-    $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 20
+    $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 45
     [pscustomobject]@{
       Endpoint = $Path
       Status = [int]$response.StatusCode

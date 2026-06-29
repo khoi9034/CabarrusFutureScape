@@ -18,7 +18,7 @@ export const mockOperationalEvents: OperationalEvent[] = [
     type: "permit_activity",
   },
   {
-    id: "evt-risk-mount-pleasant",
+    id: "evt-review-mount-pleasant",
     action: {
       label: "Review Flood Layer",
       layerId: "flood-risk",

@@ -41,7 +41,7 @@ export async function searchCfsAi(
   return apiPost<CfsAiSearchResponse>(
     "/ai/search",
     { ...request, mode: "live" },
-    { signal: options.signal, timeoutMs: 30000 },
+    { signal: options.signal, timeoutMs: 60000 },
   );
 }
 

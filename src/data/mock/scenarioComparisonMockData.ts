@@ -327,14 +327,14 @@ export const mockScenarioComparisons: ScenarioComparison[] = [
     ],
     narratives: [
       {
-        id: "risk-executive-summary",
+        id: "review-executive-summary",
         title: "Executive posture",
         severity: "critical",
         body:
           "This is the highest-stakes mock comparison and should be treated as a briefing lens for capital timing, corridor readiness, and risk acceptance.",
       },
       {
-        id: "risk-infrastructure-summary",
+        id: "review-infrastructure-summary",
         title: "Infrastructure posture",
         severity: "watch",
         body:

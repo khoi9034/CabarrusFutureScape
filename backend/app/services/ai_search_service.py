@@ -676,7 +676,7 @@ def _post_provider_json(
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:
+        with urllib.request.urlopen(request, timeout=8) as response:
             provider_payload = json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
         if error.code == 429:

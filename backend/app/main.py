@@ -26,7 +26,7 @@ if settings.cors_origin_list:
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
         allow_credentials=False,
-        allow_methods=["GET", "OPTIONS"],
+        allow_methods=["GET", "OPTIONS", "POST"],
         allow_headers=[
             "Accept",
             "Authorization",
