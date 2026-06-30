@@ -11,6 +11,7 @@ import {
 import { getDemoSchoolPressureResponse } from "@/lib/demo-data/mapLayerClient";
 import type {
   CfsAiDashboardActions,
+  CfsAiConversationTurn,
   CfsAiDomain,
   CfsAiEvidenceItem,
   CfsAiSearchRequest,
@@ -53,7 +54,7 @@ async function searchDemoCfsAi(
   const context = await buildDemoAiContext();
   const domains = request.filters?.domains?.length
     ? request.filters.domains
-    : classifyDemoDomains(request.query);
+    : resolveDemoDomains(request);
   const primaryDomain = domains[0] ?? "general";
   const response =
     primaryDomain === "schools"
@@ -478,6 +479,66 @@ function classifyDemoDomains(query: string): CfsAiDomain[] {
   add("data_readiness", ["missing", "coverage", "data", "readiness"]);
   add("methodology", ["method", "explain", "caveat", "limitation"]);
   return domains.slice(0, 3).length ? domains.slice(0, 3) : ["general"];
+}
+
+const followUpTerms = [
+  "those",
+  "that",
+  "them",
+  "which ones",
+  "what about",
+  "what layers",
+  "which layers",
+  "inspect next",
+  "why",
+  "show me more",
+  "explain more",
+];
+
+function resolveDemoDomains(request: CfsAiSearchRequest): CfsAiDomain[] {
+  const domains = classifyDemoDomains(request.query);
+  const previous = previousDemoDomains(request.conversation_context ?? []);
+  const isFollowUp = followUpTerms.some((term) =>
+    request.query.toLowerCase().includes(term),
+  );
+
+  if (isFollowUp && domains[0] === "general" && previous.length) {
+    return previous.slice(0, 3);
+  }
+
+  return isFollowUp
+    ? Array.from(new Set([...domains, ...previous])).slice(0, 3)
+    : domains;
+}
+
+function previousDemoDomains(turns: CfsAiConversationTurn[]): CfsAiDomain[] {
+  const domains: CfsAiDomain[] = [];
+  const allowed = new Set<CfsAiDomain>([
+    "data_readiness",
+    "flood",
+    "model_lab",
+    "permits",
+    "schools",
+    "transportation",
+    "utilities",
+    "zoning",
+  ]);
+
+  turns
+    .slice(-5)
+    .reverse()
+    .forEach((turn) => {
+      if (allowed.has(turn.focused_domain as CfsAiDomain)) {
+        domains.push(turn.focused_domain as CfsAiDomain);
+      }
+      (turn.related_layers ?? []).forEach((layer) => {
+        classifyDemoDomains(layer).forEach((domain) => {
+          if (domain !== "general") domains.push(domain);
+        });
+      });
+    });
+
+  return Array.from(new Set(domains));
 }
 
 function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActions {

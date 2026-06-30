@@ -163,6 +163,46 @@ def test_ai_search_deterministic_fallback_answers_without_provider() -> None:
     assert "Concord" in response.answer
 
 
+def test_ai_search_follow_up_combines_previous_permit_and_school_context() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            conversation_context=[
+                {
+                    "focused_domain": "permits",
+                    "query": "What are the main permit trends?",
+                    "related_layers": ["Development Hotspots"],
+                },
+            ],
+            query="What about schools?",
+        ),
+        _context(),
+    )
+
+    assert response.domains[:2] == ["schools", "permits"]
+    assert "School Utilization + Permit Pressure" in response.related_layers
+    assert "Development Hotspots" in response.related_layers
+
+
+def test_ai_search_follow_up_layers_use_previous_focus() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            conversation_context=[
+                {
+                    "focused_domain": "schools",
+                    "query": "Which school areas need review?",
+                    "related_layers": ["School Utilization + Permit Pressure"],
+                },
+            ],
+            query="Which layers should I inspect?",
+        ),
+        _context(),
+    )
+
+    assert response.domains[0] == "schools"
+    assert "School Utilization + Permit Pressure" in response.related_layers
+    assert "Development Hotspots" in response.related_layers
+
+
 def test_ai_search_school_answer_includes_pressure_context() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(query="Which school areas need review?"),

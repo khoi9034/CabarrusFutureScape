@@ -7,7 +7,7 @@ import {
   searchCfsAi,
 } from "@/lib/aiSearchService";
 import { getApiErrorDisplayMessage, USE_DEMO_DATA } from "@/lib/api/client";
-import type { CfsAiSearchResponse } from "@/types/api";
+import type { CfsAiConversationTurn, CfsAiSearchResponse } from "@/types/api";
 
 export function AskCfsPanel({
   onResponse,
@@ -16,8 +16,10 @@ export function AskCfsPanel({
 }) {
   const [answer, setAnswer] = useState<CfsAiSearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [turns, setTurns] = useState<CfsAiConversationTurn[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
+  const lastTurn = turns.at(-1);
 
   async function submit(nextQuery = query) {
     const trimmedQuery = nextQuery.trim();
@@ -27,10 +29,12 @@ export function AskCfsPanel({
     setIsLoading(true);
     try {
       const response = await searchCfsAi({
+        conversation_context: turns,
         mode: USE_DEMO_DATA ? "demo" : "live",
         query: trimmedQuery,
       });
       setAnswer(response);
+      setTurns((current) => [...current, toConversationTurn(trimmedQuery, response)].slice(-5));
       onResponse?.(response);
     } catch (requestError) {
       setAnswer(null);
@@ -92,6 +96,25 @@ export function AskCfsPanel({
         </button>
       </form>
 
+      {lastTurn ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs text-slate-300">
+          <span className="font-semibold text-[#9be9ff]">Follow-up mode</span>
+          <span>
+            Using previous Ask CFS context:{" "}
+            {labelForTurn(lastTurn)}
+          </span>
+          <button
+            className="ml-auto rounded border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-300 transition hover:border-[#68d8ff]/35 hover:text-white"
+            onClick={() => {
+              setTurns([]);
+            }}
+            type="button"
+          >
+            Clear Ask CFS context
+          </button>
+        </div>
+      ) : null}
+
       <div className="mt-3 flex flex-wrap gap-2">
         {askCfsSuggestedPrompts.map((prompt) => (
           <button
@@ -118,6 +141,26 @@ export function AskCfsPanel({
       {answer ? <AskCfsAnswer response={answer} /> : null}
     </section>
   );
+}
+
+function toConversationTurn(
+  query: string,
+  response: CfsAiSearchResponse,
+): CfsAiConversationTurn {
+  return {
+    answer_summary: response.answer.split("\n").find(Boolean)?.slice(0, 280) ?? "",
+    dashboard_actions: response.dashboard_actions,
+    focused_domain:
+      response.dashboard_actions.focus_domain ?? response.domains[0] ?? null,
+    query,
+    related_layers: response.related_layers.slice(0, 6),
+  };
+}
+
+function labelForTurn(turn: CfsAiConversationTurn) {
+  return turn.focused_domain
+    ? `${turn.focused_domain.replaceAll("_", " ")} / "${turn.query}"`
+    : `"${turn.query}"`;
 }
 
 function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {

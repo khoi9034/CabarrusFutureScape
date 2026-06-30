@@ -11,6 +11,7 @@ export type CfsAiDomain =
   | "zoning";
 
 export interface CfsAiSearchRequest {
+  conversation_context?: CfsAiConversationTurn[];
   filters?: {
     domains?: CfsAiDomain[];
     year_end?: number | null;
@@ -18,6 +19,14 @@ export interface CfsAiSearchRequest {
   };
   mode?: "demo" | "live";
   query: string;
+}
+
+export interface CfsAiConversationTurn {
+  answer_summary?: string | null;
+  dashboard_actions?: CfsAiDashboardActions;
+  focused_domain?: string | null;
+  query: string;
+  related_layers?: string[];
 }
 
 export interface CfsAiEvidenceItem {

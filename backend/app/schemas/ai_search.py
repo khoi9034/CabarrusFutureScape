@@ -35,7 +35,16 @@ class CfsAiSearchFilters(BaseModel):
     year_start: int | None = None
 
 
+class CfsAiConversationTurn(BaseModel):
+    answer_summary: str | None = Field(default=None, max_length=500)
+    dashboard_actions: dict[str, Any] = Field(default_factory=dict)
+    focused_domain: str | None = Field(default=None, max_length=50)
+    query: str = Field(max_length=500)
+    related_layers: list[str] = Field(default_factory=list, max_length=8)
+
+
 class CfsAiSearchRequest(BaseModel):
+    conversation_context: list[CfsAiConversationTurn] = Field(default_factory=list, max_length=5)
     filters: CfsAiSearchFilters = Field(default_factory=CfsAiSearchFilters)
     mode: Literal["demo", "live"] = "live"
     query: str = Field(min_length=1, max_length=500)

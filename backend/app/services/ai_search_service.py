@@ -138,7 +138,7 @@ class CfsAiSearchService:
         request: CfsAiSearchRequest,
         context: CfsAiContext,
     ) -> CfsAiSearchResponse:
-        domains = request.filters.domains or classify_query_domains(request.query)
+        domains = request.filters.domains or resolve_query_domains(request)
         fallback = deterministic_answer(request, context, domains)
         provider = self._settings.cfs_ai_provider
 
@@ -217,6 +217,10 @@ class CfsAiSearchService:
                         {
                             "domains": domains,
                             "query": request.query,
+                            "conversation_context": [
+                                turn.model_dump(exclude_none=True)
+                                for turn in request.conversation_context[-5:]
+                            ],
                             "cfs_context": compact_context(context),
                             "deterministic_dashboard_actions": dashboard_actions_for_domains(
                                 domains,
@@ -247,6 +251,46 @@ def classify_query_domains(query: str) -> list[CfsAiDomain]:
         if any(keyword in normalized for keyword in keywords)
     ]
     return matches[:3] or ["general"]
+
+
+FOLLOW_UP_TERMS = (
+    "those",
+    "that",
+    "them",
+    "which ones",
+    "what about",
+    "what layers",
+    "which layers",
+    "inspect next",
+    "why",
+    "show me more",
+    "explain more",
+)
+
+
+def resolve_query_domains(request: CfsAiSearchRequest) -> list[CfsAiDomain]:
+    domains = classify_query_domains(request.query)
+    previous = _previous_domains(request)
+    is_follow_up = any(term in request.query.lower() for term in FOLLOW_UP_TERMS)
+
+    if is_follow_up and domains == ["general"] and previous:
+        domains = previous
+    elif is_follow_up:
+        domains = list(dict.fromkeys([*domains, *previous]))
+
+    return domains[:3] or ["general"]
+
+
+def _previous_domains(request: CfsAiSearchRequest) -> list[CfsAiDomain]:
+    domains: list[CfsAiDomain] = []
+    allowed = set(DASHBOARD_ACTIONS)
+    for turn in reversed(request.conversation_context[-5:]):
+        focus = turn.focused_domain
+        if focus in allowed and focus != "general":
+            domains.append(focus)  # type: ignore[arg-type]
+        for layer in turn.related_layers:
+            domains.extend(classify_query_domains(layer))
+    return list(dict.fromkeys(domain for domain in domains if domain != "general"))
 
 
 def deterministic_answer(
@@ -923,6 +967,8 @@ def _provider_system_prompt() -> str:
         "exact probabilities, raw model scores, official prediction classes, official school overcrowding claims, "
         "or database connection details. Use safe planning language. Distinguish observed permit activity from "
         "prediction. Distinguish preliminary school capacity watch from official school capacity findings. "
+        "Use conversation_context only to resolve references like 'those areas' or 'that signal'; do not invent "
+        "new data from it. "
         "dashboard_actions are UI suggestions only and do not create official claims. Return JSON with answer, "
         "evidence, related_layers, caveats, suggested_actions, and dashboard_actions."
     )
