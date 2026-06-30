@@ -47,7 +47,7 @@ const commandWorkflows = [
 const economicsWorkflows = [
   {
     accent: "primary",
-    actionLabel: "Economic Workspace",
+    actionLabel: "Economic Dashboard",
     icon: Layers3,
     id: "explore-intelligence",
     helper:
@@ -55,7 +55,7 @@ const economicsWorkflows = [
   },
   {
     accent: "secondary",
-    actionLabel: "Economic Mission Control",
+    actionLabel: "Economic Dashboard",
     icon: Gauge,
     id: "indicator-center",
     helper:

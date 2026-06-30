@@ -209,6 +209,9 @@ def test_portfolio_demo_mode_is_documented() -> None:
 def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     top_nav = read("src/components/layout/TopNav.tsx")
     dashboard_state = read("src/hooks/useDashboardState.tsx")
+    app_shell = read("src/components/layout/AppShell.tsx")
+    economics_shell = read("src/components/economics/EconomicsShell.tsx")
+    economics_types = read("src/types/index.ts")
     economic_mission_control = read("src/components/dashboard/EconomicMissionControl.tsx")
     indicator_center = read("src/components/dashboard/IndicatorCenterWorkspace.tsx")
     methodology = read("src/components/dashboard/MethodologyWorkspace.tsx")
@@ -219,9 +222,30 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
 
     assert "Planning Intelligence" in top_nav
     assert "Economic Intelligence" in top_nav
+    assert "Executive Brief" in top_nav
+    assert "Economic Dashboard" in top_nav
+    assert "Parcel Screen" in top_nav
+    assert "Scenario Lab" in top_nav
+    assert "Enterprise Tools" in top_nav
+    assert "economicsProductModes" in top_nav
     assert "setCfsAppMode" in top_nav
     assert "CfsAppMode" in dashboard_state
+    assert "EconomicsSection" in economics_types
+    assert "economicsSection" in dashboard_state
+    assert "setEconomicsSection" in dashboard_state
     assert "localStorage.setItem(CFS_APP_MODE_STORAGE_KEY" in dashboard_state
+    assert "<EconomicsShell />" in app_shell
+    assert "econ-app-backdrop" in app_shell
+    assert "ExecutiveBriefPage" in economics_shell
+    assert "EconomicDashboardPage" in economics_shell
+    assert "ParcelScreenPage" in economics_shell
+    assert "ScenarioLabPage" in economics_shell
+    assert "EnterpriseToolsPage" in economics_shell
+    assert "EconomicsMethodologyPage" in economics_shell
+    assert "Location Context" in economics_shell
+    assert "Power BI-style Dataset Preview" in economics_shell
+    assert "Planning Model Schema" in economics_shell
+    assert "Ask CFS Economics" in economics_shell
     assert "EconomicMissionControl" in indicator_center
     assert "getDemoEconomicsIntelligence" in economics_service
     assert '"/economics/intelligence"' in economics_service

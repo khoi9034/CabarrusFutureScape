@@ -14,6 +14,8 @@ import {
   RadioTower,
   Search,
   BarChart3,
+  BriefcaseBusiness,
+  Calculator,
   UserRound,
   XCircle,
 } from "lucide-react";
@@ -41,7 +43,7 @@ import { searchDemoParcels } from "@/lib/demo-data/client";
 import { getDemoParcelMapFocus } from "@/lib/demo-data/mapLayerClient";
 import { dispatchParcelMapFocusRequest } from "@/lib/map/parcelMapFocus";
 import { cn } from "@/lib/utils";
-import type { ProductMode } from "@/types";
+import type { EconomicsSection, ProductMode } from "@/types";
 import type { DashboardRoleId } from "@/types/userRoles";
 import type { DashboardViewMode } from "@/types/workspace";
 import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
@@ -88,6 +90,64 @@ const productModes: Array<{
   },
 ];
 
+const economicsProductModes: Array<{
+  description: string;
+  id: EconomicsSection;
+  label: string;
+  shortLabel: string;
+  title: string;
+  icon: typeof LayoutDashboard;
+}> = [
+  {
+    description: "Consulting-style opening brief",
+    icon: BriefcaseBusiness,
+    id: "executive",
+    label: "Executive Brief",
+    shortLabel: "Brief",
+    title: "CFS Economics executive brief",
+  },
+  {
+    description: "Growth and tax-base intelligence",
+    icon: BarChart3,
+    id: "dashboard",
+    label: "Economic Dashboard",
+    shortLabel: "Dashboard",
+    title: "Economic KPI dashboard and scorecards",
+  },
+  {
+    description: "Parcel and site screening",
+    icon: Search,
+    id: "parcel_screen",
+    label: "Parcel Screen",
+    shortLabel: "Parcels",
+    title: "Parcel economic screen and underbuilt watchlist",
+  },
+  {
+    description: "Scenario planning model",
+    icon: Calculator,
+    id: "scenario_lab",
+    label: "Scenario Lab",
+    shortLabel: "Scenarios",
+    title: "Economic scenario lab",
+  },
+  {
+    description: "BI and planning model exports",
+    icon: FileSearch,
+    id: "enterprise_tools",
+    label: "Enterprise Tools",
+    shortLabel: "Tools",
+    title: "Enterprise consulting toolkit and export previews",
+  },
+  {
+    description: "Methods and caveats",
+    icon: BookOpen,
+    id: "methodology",
+    label: "Methodology",
+    shortLabel: "Method",
+    title: "CFS Economics methodology",
+  },
+];
+
 const QUICK_SEARCH_LIMIT = 8;
 const QUICK_SEARCH_MIN_LENGTH = 3;
 const DEMO_QUICK_SEARCH_SUGGESTION_LIMIT = 5;
@@ -121,6 +181,7 @@ export function TopNav() {
     applyRolePreset,
     applyWorkspacePreset,
     cfsAppMode,
+    economicsSection,
     mapStatus,
     roleId,
     scenarioName,
@@ -130,6 +191,7 @@ export function TopNav() {
     setPlanningSnapshotView,
     setProductMode,
     setCfsAppMode,
+    setEconomicsSection,
     setSelectedParcelIntelligence,
     viewMode,
   } = useDashboardState();
@@ -447,7 +509,14 @@ export function TopNav() {
         open={commandPaletteOpen}
       />
 
-      <header className="cfs-command-bar relative z-30 flex min-h-[4.5rem] shrink-0 flex-wrap items-center gap-2 overflow-visible border-b border-[#68d8ff]/14 bg-[#03070d]/94 px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4">
+      <header
+        className={cn(
+          "relative z-30 flex min-h-[4.5rem] shrink-0 flex-wrap items-center gap-2 overflow-visible px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4",
+          cfsAppMode === "economics"
+            ? "econ-command-bar"
+            : "cfs-command-bar border-b border-[#68d8ff]/14 bg-[#03070d]/94",
+        )}
+      >
         <div className="order-1 relative flex min-w-[13.5rem] max-w-[18rem] shrink-0 items-center gap-3">
           <button
             aria-expanded={modeMenuOpen}
@@ -517,73 +586,114 @@ export function TopNav() {
           ) : null}
         </div>
 
-        <nav
-          aria-label="CFS product mode"
-          className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-4 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
-        >
-          {productModes.map((mode) => {
-            const Icon = mode.icon;
-            const active =
-              mode.id === "due_diligence"
-                ? productMode === "due_diligence" ||
-                  productMode === "executive_print"
-                : productMode === mode.id;
+        {cfsAppMode === "economics" ? (
+          <nav
+            aria-label="CFS Economics sections"
+            className="econ-product-nav order-3 grid w-full min-w-0 grid-cols-2 gap-1 rounded-2xl p-1.5 lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
+          >
+            {economicsProductModes.map((mode) => {
+              const Icon = mode.icon;
+              const active = economicsSection === mode.id;
 
-            return (
-              <button
-                aria-label={`${mode.label}: ${mode.title}`}
-                aria-pressed={active}
-                className={cn(
-                  "group relative inline-flex h-10 min-w-0 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-xl border px-2.5 text-[11px] font-semibold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75 sm:px-3 lg:justify-start lg:px-3.5 lg:text-xs xl:text-[13px]",
-                  active
-                    ? "border-[#68d8ff]/54 bg-[#102235]/95 text-[#e7fbff] shadow-[0_0_34px_rgba(104,216,255,0.25),inset_0_1px_0_rgba(255,255,255,0.1)]"
-                    : "border-transparent bg-transparent text-slate-400 hover:border-[#68d8ff]/18 hover:bg-white/[0.055] hover:text-white",
-                )}
-                key={mode.id}
-                onClick={() => {
-                  if (mode.id === "due_diligence") {
-                    setParcelReviewView("review");
-                    setPlanningSnapshotView("overview");
-                  }
+              return (
+                <button
+                  aria-label={`${mode.label}: ${mode.title}`}
+                  aria-pressed={active}
+                  className={cn(
+                    "group relative inline-flex h-10 min-w-0 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-xl border px-2.5 text-[11px] font-semibold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/75 sm:px-3 lg:justify-start lg:px-3.5 lg:text-xs xl:text-[13px]",
+                    active
+                      ? "border-[#d8b86a]/58 bg-[#2b2315]/95 text-[#fff4d2] shadow-[0_0_26px_rgba(216,184,106,0.18),inset_0_1px_0_rgba(255,255,255,0.08)]"
+                      : "border-transparent bg-transparent text-[#b8b1a3] hover:border-[#d8b86a]/22 hover:bg-white/[0.045] hover:text-white",
+                  )}
+                  key={mode.id}
+                  onClick={() => setEconomicsSection(mode.id)}
+                  title={mode.title}
+                  type="button"
+                >
+                  <Icon
+                    className={cn(
+                      "h-4 w-4 shrink-0 transition-transform duration-150 group-hover:scale-105",
+                      active ? "text-[#d8b86a]" : "text-[#8fa4b8] group-hover:text-[#f0cd79]",
+                    )}
+                  />
+                  <span className="min-w-0 truncate">
+                    <span className="hidden xl:inline">{mode.label}</span>
+                    <span className="inline xl:hidden">{mode.shortLabel}</span>
+                  </span>
+                  <span className="sr-only">{mode.description}</span>
+                </button>
+              );
+            })}
+          </nav>
+        ) : (
+          <nav
+            aria-label="CFS product mode"
+            className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-4 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
+          >
+            {productModes.map((mode) => {
+              const Icon = mode.icon;
+              const active =
+                mode.id === "due_diligence"
+                  ? productMode === "due_diligence" ||
+                    productMode === "executive_print"
+                  : productMode === mode.id;
 
-                  if (mode.id === "workspace" && productMode !== "workspace") {
-                    setOverviewCommandMode("countywide");
-                  }
+              return (
+                <button
+                  aria-label={`${mode.label}: ${mode.title}`}
+                  aria-pressed={active}
+                  className={cn(
+                    "group relative inline-flex h-10 min-w-0 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-xl border px-2.5 text-[11px] font-semibold transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75 sm:px-3 lg:justify-start lg:px-3.5 lg:text-xs xl:text-[13px]",
+                    active
+                      ? "border-[#68d8ff]/54 bg-[#102235]/95 text-[#e7fbff] shadow-[0_0_34px_rgba(104,216,255,0.25),inset_0_1px_0_rgba(255,255,255,0.1)]"
+                      : "border-transparent bg-transparent text-slate-400 hover:border-[#68d8ff]/18 hover:bg-white/[0.055] hover:text-white",
+                  )}
+                  key={mode.id}
+                  onClick={() => {
+                    if (mode.id === "due_diligence") {
+                      setParcelReviewView("review");
+                      setPlanningSnapshotView("overview");
+                    }
 
-                  setProductMode(mode.id);
-                }}
-                title={mode.title}
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute inset-x-3 top-0 h-px bg-[#68d8ff] opacity-0 transition-opacity",
-                    active && "opacity-90",
-                  )}
-                />
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute bottom-0 left-1/2 h-px w-8 -translate-x-1/2 bg-[#d8b86a] opacity-0 transition-opacity",
-                    active && "opacity-85",
-                  )}
-                />
-                <Icon
-                  className={cn(
-                    "h-4 w-4 shrink-0 transition-transform duration-150 group-hover:scale-105",
-                    active ? "text-[#8fe7ff]" : "text-slate-500 group-hover:text-[#b7f0ff]",
-                  )}
-                />
-                <span className="min-w-0 truncate">
-                  <span className="hidden xl:inline">{mode.label}</span>
-                  <span className="inline xl:hidden">{mode.shortLabel}</span>
-                </span>
-                <span className="sr-only">{mode.description}</span>
-              </button>
-            );
-          })}
-        </nav>
+                    if (mode.id === "workspace" && productMode !== "workspace") {
+                      setOverviewCommandMode("countywide");
+                    }
+
+                    setProductMode(mode.id);
+                  }}
+                  title={mode.title}
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "absolute inset-x-3 top-0 h-px bg-[#68d8ff] opacity-0 transition-opacity",
+                      active && "opacity-90",
+                    )}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "absolute bottom-0 left-1/2 h-px w-8 -translate-x-1/2 bg-[#d8b86a] opacity-0 transition-opacity",
+                      active && "opacity-85",
+                    )}
+                  />
+                  <Icon
+                    className={cn(
+                      "h-4 w-4 shrink-0 transition-transform duration-150 group-hover:scale-105",
+                      active ? "text-[#8fe7ff]" : "text-slate-500 group-hover:text-[#b7f0ff]",
+                    )}
+                  />
+                  <span className="min-w-0 truncate">
+                    <span className="hidden xl:inline">{mode.label}</span>
+                    <span className="inline xl:hidden">{mode.shortLabel}</span>
+                  </span>
+                  <span className="sr-only">{mode.description}</span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
 
         <div className="order-4 flex w-full min-w-0 items-center gap-2 md:order-2 md:w-auto md:flex-1 lg:order-3">
           <div
@@ -722,7 +832,9 @@ export function TopNav() {
                             </p>
                             <p className="mt-0.5 truncate text-[11px] text-slate-400">
                               {record.pin14 ?? "PIN unavailable"}
-                              {record.ownerName ? ` / ${record.ownerName}` : ""}
+                              {cfsAppMode !== "economics" && record.ownerName
+                                ? ` / ${record.ownerName}`
+                                : ""}
                             </p>
                           </div>
                           <span className="shrink-0 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/10 px-2 py-1 text-[10px] font-semibold text-[#f0cd79]">
@@ -730,13 +842,16 @@ export function TopNav() {
                           </span>
                         </div>
                         <p className="mt-1 truncate text-[11px] text-slate-500">
-                          {[
-                            record.mailingAddress,
-                            record.neighborhood,
-                            record.subdivision,
-                          ]
+                          {(cfsAppMode === "economics"
+                            ? [record.neighborhood, record.subdivision]
+                            : [
+                                record.mailingAddress,
+                                record.neighborhood,
+                                record.subdivision,
+                              ]
+                          )
                             .filter(Boolean)
-                            .join(" / ") || "No address or neighborhood context"}
+                            .join(" / ") || "No area context"}
                         </p>
                         <p className="mt-1 truncate text-[10px] uppercase tracking-[0.08em] text-slate-600">
                           {[record.zoningJurisdiction, record.zoningCategory]
@@ -783,10 +898,18 @@ export function TopNav() {
           </button>
           <button
             aria-expanded={moreOpen}
-            aria-label="Open dashboard controls"
+            aria-label={
+              cfsAppMode === "economics"
+                ? "Open economics controls"
+                : "Open dashboard controls"
+            }
             className="flex h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:text-white"
             onClick={() => setMoreOpen((open) => !open)}
-            title="Role, workspace, and scenario controls"
+            title={
+              cfsAppMode === "economics"
+                ? "Economics status and mode controls"
+                : "Role, workspace, and scenario controls"
+            }
             type="button"
           >
             <MoreHorizontal className="h-4 w-4" />
@@ -801,72 +924,99 @@ export function TopNav() {
 
           {moreOpen ? (
             <div className="absolute right-0 top-11 z-50 w-[min(24rem,calc(100vw-1.5rem))] rounded-lg border border-white/10 bg-[#08111d]/98 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-              <div className="grid gap-3">
-                <label className="relative block min-w-0">
-                  <UserRound className="pointer-events-none absolute left-3 top-[2.05rem] h-4 w-4 -translate-y-1/2 text-[#d8b86a]" />
-                  <span className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
-                    Role
-                  </span>
-                  <select
-                    aria-label="Active stakeholder role"
-                    className="h-10 w-full appearance-none rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-8 text-sm text-white outline-none transition focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
-                    onChange={(event) =>
-                      applyRolePreset(event.target.value as DashboardRoleId)
-                    }
-                    title={activeRole.description}
-                    value={roleId}
-                  >
-                    {dashboardRoleRegistry.map((role) => (
-                      <option
-                        className="bg-[#08111d] text-white"
-                        key={role.id}
-                        value={role.id}
-                      >
-                        {role.displayName}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="relative block min-w-0">
-                  <LayoutDashboard className="pointer-events-none absolute left-3 top-[2.05rem] h-4 w-4 -translate-y-1/2 text-[#d8b86a]" />
-                  <span className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
-                    Workspace
-                  </span>
-                  <select
-                    aria-label="Active workspace view mode"
-                    className="h-10 w-full appearance-none rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-8 text-sm text-white outline-none transition focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
-                    onChange={(event) =>
-                      applyWorkspacePreset(event.target.value as DashboardViewMode)
-                    }
-                    title={activeWorkspacePreset.description}
-                    value={viewMode}
-                  >
-                    {workspaceLayoutPresets.map((preset) => (
-                      <option
-                        className="bg-[#08111d] text-white"
-                        key={preset.id}
-                        value={preset.id}
-                      >
-                        {preset.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <CompactStatusChip
-                    icon={RadioTower}
-                    label={dashboardStatusLabels[mapStatus]}
-                    tone={mapStatus === "online" ? "green" : mapStatus === "degraded" ? "red" : "gold"}
-                  />
-                  <CompactStatusChip
-                    icon={Activity}
-                    label={scenarioName}
-                    tone="blue"
-                  />
+              {cfsAppMode === "economics" ? (
+                <div className="grid gap-3">
+                  <div className="rounded-lg border border-[#d8b86a]/20 bg-[#d8b86a]/10 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
+                      Economic Intelligence
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-slate-300">
+                      Use the top navigation for Executive Brief, Dashboard,
+                      Parcel Screen, Scenario Lab, Enterprise Tools, and
+                      Methodology.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <CompactStatusChip
+                      icon={RadioTower}
+                      label={dashboardStatusLabels[mapStatus]}
+                      tone={mapStatus === "online" ? "green" : mapStatus === "degraded" ? "red" : "gold"}
+                    />
+                    <CompactStatusChip
+                      icon={Activity}
+                      label={runtimeStatusLabel}
+                      tone={runtimeStatusTone}
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="grid gap-3">
+                  <label className="relative block min-w-0">
+                    <UserRound className="pointer-events-none absolute left-3 top-[2.05rem] h-4 w-4 -translate-y-1/2 text-[#d8b86a]" />
+                    <span className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
+                      Role
+                    </span>
+                    <select
+                      aria-label="Active stakeholder role"
+                      className="h-10 w-full appearance-none rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-8 text-sm text-white outline-none transition focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
+                      onChange={(event) =>
+                        applyRolePreset(event.target.value as DashboardRoleId)
+                      }
+                      title={activeRole.description}
+                      value={roleId}
+                    >
+                      {dashboardRoleRegistry.map((role) => (
+                        <option
+                          className="bg-[#08111d] text-white"
+                          key={role.id}
+                          value={role.id}
+                        >
+                          {role.displayName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="relative block min-w-0">
+                    <LayoutDashboard className="pointer-events-none absolute left-3 top-[2.05rem] h-4 w-4 -translate-y-1/2 text-[#d8b86a]" />
+                    <span className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
+                      Workspace
+                    </span>
+                    <select
+                      aria-label="Active workspace view mode"
+                      className="h-10 w-full appearance-none rounded-lg border border-white/10 bg-white/[0.045] pl-9 pr-8 text-sm text-white outline-none transition focus:border-[#d8b86a]/50 focus:bg-white/[0.07]"
+                      onChange={(event) =>
+                        applyWorkspacePreset(event.target.value as DashboardViewMode)
+                      }
+                      title={activeWorkspacePreset.description}
+                      value={viewMode}
+                    >
+                      {workspaceLayoutPresets.map((preset) => (
+                        <option
+                          className="bg-[#08111d] text-white"
+                          key={preset.id}
+                          value={preset.id}
+                        >
+                          {preset.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <CompactStatusChip
+                      icon={RadioTower}
+                      label={dashboardStatusLabels[mapStatus]}
+                      tone={mapStatus === "online" ? "green" : mapStatus === "degraded" ? "red" : "gold"}
+                    />
+                    <CompactStatusChip
+                      icon={Activity}
+                      label={scenarioName}
+                      tone="blue"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           ) : null}
         </div>

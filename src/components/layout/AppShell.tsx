@@ -34,6 +34,7 @@ import { IndicatorCenterWorkspace } from "@/components/dashboard/IndicatorCenter
 import { IntelligencePanel } from "@/components/dashboard/IntelligencePanel";
 import { MethodologyWorkspace } from "@/components/dashboard/MethodologyWorkspace";
 import { OverviewCommandCenter } from "@/components/dashboard/OverviewCommandCenter";
+import { EconomicsShell } from "@/components/economics/EconomicsShell";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
@@ -133,15 +134,31 @@ function ProductShell() {
   }, [isMapFocusMode, setMapFocusMode]);
 
   return (
-    <div className="cfs-command-backdrop metric-grid relative flex min-h-screen flex-col overflow-x-hidden text-slate-100 lg:h-screen lg:overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,13,0.08),rgba(3,7,13,0.88))]" />
+    <div
+      className={cn(
+        "relative flex min-h-screen flex-col overflow-x-hidden text-slate-100 lg:h-screen lg:overflow-hidden",
+        cfsAppMode === "economics"
+          ? "econ-app-backdrop"
+          : "cfs-command-backdrop metric-grid",
+      )}
+    >
+      {cfsAppMode === "economics" ? null : (
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,13,0.08),rgba(3,7,13,0.88))]" />
+      )}
       <div className="pointer-events-none absolute left-0 right-0 top-[4.5rem] z-10 h-px gold-line opacity-70" />
 
       <div className="app-chrome">
         <TopNav />
       </div>
 
-      {parcelReviewMode ? (
+      {cfsAppMode === "economics" ? (
+        <EnterpriseErrorBoundary
+          moduleName="CFS Economics"
+          resetKey="economics"
+        >
+          <EconomicsShell />
+        </EnterpriseErrorBoundary>
+      ) : parcelReviewMode ? (
         <main className="relative z-10 min-h-0 flex-1 overflow-auto p-3 lg:p-4">
           <EnterpriseErrorBoundary
             moduleName="Planning Snapshot"
@@ -317,7 +334,7 @@ function OverviewLandingPage({
         },
         {
           icon: Gauge,
-          text: "Open Economic Mission Control",
+          text: "Open Economic Dashboard",
         },
         {
           icon: FlaskConical,
@@ -468,7 +485,7 @@ function OverviewLandingPage({
                   onClick={onGoWorkspace}
                   type="button"
                 >
-                  {economicsMode ? "Go to Economic Workspace" : "Go to Workspace"}
+                  {economicsMode ? "Go to Economic Dashboard" : "Go to Workspace"}
                   <ArrowRight className="h-4 w-4" />
                 </button>
                 <button
@@ -757,11 +774,13 @@ function OverviewLandingPage({
         <section className="cfs-command-card mb-2 flex flex-col gap-3 rounded-2xl p-4 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white">
-              Ready to work inside the live planning workspace?
+              {economicsMode
+                ? "Ready to review the economic dashboard?"
+                : "Ready to work inside the live planning workspace?"}
             </p>
             <p className="mt-1 text-xs text-slate-500">
               {economicsMode
-                ? "Workspace opens the Economic Workspace with screening layers."
+                ? "Economic Dashboard opens screening scorecards and scenario context."
                 : "Workspace opens Explore Countywide by default."}
             </p>
           </div>
@@ -770,7 +789,7 @@ function OverviewLandingPage({
             onClick={onGoWorkspace}
             type="button"
           >
-            {economicsMode ? "Enter Economic Workspace" : "Enter Workspace"}
+            {economicsMode ? "Enter Economic Dashboard" : "Enter Workspace"}
             <Route className="h-4 w-4" />
           </button>
         </section>

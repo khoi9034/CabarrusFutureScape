@@ -671,7 +671,7 @@ def _economics_answer(
             ),
         ],
         [
-            "Open Economic Workspace and compare Revenue per Acre Dashboard with Underbuilt Redevelopment Watchlist.",
+            "Open Economic Dashboard and compare Revenue per Acre Dashboard with the Underbuilt Redevelopment Watchlist.",
             "Use Economic Scenario Lab only as screening-level fiscal context.",
             "Ask: Where is economic data confidence weak?",
             "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",

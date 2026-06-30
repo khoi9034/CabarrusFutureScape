@@ -242,7 +242,7 @@ function EconomicsLayerControlsPanel({
           <Layers3 className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
-              Economic Workspace
+              Economic Dashboard
             </p>
             <h3 className="mt-1 text-sm font-semibold text-white">
               Parcel-based economic intelligence

@@ -162,7 +162,7 @@ export function EconomicMissionControl() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f0cd79]">
-              Economic Mission Control
+              Economic Dashboard
             </p>
             <h1 className="mt-1 text-2xl font-semibold text-white">
               CFS Economics

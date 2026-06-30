@@ -49,6 +49,7 @@ import { defaultIndicatorCenterGroupIds } from "@/data/intelligence/indicatorCen
 import type {
   CfsAppMode,
   DashboardStatus,
+  EconomicsSection,
   IndicatorCenterDisplayMode,
   IndicatorCenterGroupId,
   IndicatorCenterContext,
@@ -138,6 +139,7 @@ interface DashboardContextValue {
   briefingMode: ExecutiveBriefingMode;
   briefingSections: ExecutiveBriefingSection[];
   cfsAppMode: CfsAppMode;
+  economicsSection: EconomicsSection;
   comparisonMetrics: ScenarioComparisonMetric[];
   comparisonPair: ScenarioComparisonPair;
   dashboardUrlState: DashboardUrlState;
@@ -231,6 +233,7 @@ interface DashboardContextValue {
   ) => void;
   setProductMode: (mode: ProductMode) => void;
   setCfsAppMode: (mode: CfsAppMode) => void;
+  setEconomicsSection: (section: EconomicsSection) => void;
   setReportIntent: (intent: ReportExportIntent) => void;
   setLayerVisibility: (layerId: string, visible: boolean) => void;
   toggleLayer: (layerId: string) => void;
@@ -641,6 +644,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setSelectedSchoolUtilizationZone,
   ] = useState<SelectedSchoolUtilizationZone | null>(null);
   const [productMode, setProductMode] = useState<ProductMode>("overview");
+  const [economicsSection, setEconomicsSection] =
+    useState<EconomicsSection>("executive");
   const [overviewCommandMode, setOverviewCommandModeState] =
     useState<OverviewCommandMode>("countywide");
   const overviewCommandModeRef = useRef<OverviewCommandMode>("countywide");
@@ -807,6 +812,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const setCfsAppMode = useCallback((mode: CfsAppMode) => {
     setCfsAppModeState(mode);
     writeStoredCfsAppMode(mode);
+    setEconomicsSection("executive");
+    setProductMode("overview");
     setSelectedDevelopmentHotspotContext(null);
     setSelectedModelResearchContext(null);
     setSelectedIndicatorCenterContext(null);
@@ -1189,6 +1196,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       briefingMode,
       briefingSections,
       cfsAppMode,
+      economicsSection,
       clearMapError,
       clearParcelSelectionContext,
       clearSelectedParcel,
@@ -1294,6 +1302,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setPlanningReviewFocusMode,
       savePlanningSnapshot,
       setCfsAppMode,
+      setEconomicsSection,
       setActivePlanningSnapshot,
       deletePlanningSnapshot,
       renamePlanningSnapshot,
@@ -1329,6 +1338,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       briefingMode,
       briefingSections,
       cfsAppMode,
+      economicsSection,
       clearMapError,
       clearParcelSelectionContext,
       clearSelectedParcel,
@@ -1433,6 +1443,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setPlanningReviewFocusMode,
       savePlanningSnapshot,
       setCfsAppMode,
+      setEconomicsSection,
       setActivePlanningSnapshot,
       deletePlanningSnapshot,
       renamePlanningSnapshot,
