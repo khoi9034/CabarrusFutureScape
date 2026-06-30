@@ -1,3 +1,4 @@
+import time
 from types import SimpleNamespace
 
 from fastapi.testclient import TestClient
@@ -161,6 +162,10 @@ def test_ai_search_deterministic_fallback_answers_without_provider() -> None:
     assert "Key findings" in response.answer
     assert "Planning interpretation" in response.answer
     assert "Concord" in response.answer
+    evidence_text = " ".join(item.detail for item in response.evidence)
+    assert "18 permit records across 7 active parcels" in evidence_text
+    assert "2023: 12; 2024: 18" in evidence_text
+    assert "not available permit records" not in evidence_text
 
 
 def test_ai_search_follow_up_combines_previous_permit_and_school_context() -> None:
@@ -264,6 +269,43 @@ def test_ai_search_selected_signal_templates_cover_major_domains() -> None:
         assert expected.lower() in response.answer.lower()
         assert response.dashboard_actions.focus_domain
         assert response.evidence
+
+
+def test_ai_search_permit_answer_uses_legacy_summary_when_detail_is_missing() -> None:
+    context = _context()
+    context["indicator_intelligence"] = {}
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(query="What are the main permit trends?"),
+        context,
+    )
+
+    text = response.answer + " " + " ".join(item.detail for item in response.evidence)
+    assert "18 observed permit records across 7 active parcels" in text
+    assert "2023: 12; 2024: 18" in text
+    assert "not available observed permit records" not in text
+    assert response.dashboard_actions.focus_domain == "permits"
+
+
+def test_ai_search_permit_answer_keeps_totals_when_type_fields_missing() -> None:
+    context = _context()
+    context["indicator_intelligence"]["development_activity_detail"] = {
+        "active_parcels": 43474,
+        "total_records": 64426,
+        "yearly_counts": [
+            {"count": 3821, "year": 2020},
+            {"count": 3642, "year": 2025},
+        ],
+    }
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(query="What are the main permit trends?"),
+        context,
+    )
+
+    text = response.answer + " " + " ".join(item.detail for item in response.evidence)
+    assert "64,426 observed permit records across 43,474 active parcels" in text
+    assert "2020: 3,821; 2025: 3,642" in text
+    assert "permit type fields are not currently exposed" in text
+    assert "not available permit records" not in text
 
 
 def test_ai_search_school_answer_includes_pressure_context() -> None:
@@ -383,6 +425,32 @@ def test_ai_search_openai_429_falls_back_with_safe_caveat(monkeypatch) -> None:
     assert "rate limit or quota" in text
     assert "raw" not in text
     assert response.dashboard_actions.focus_domain == "schools"
+
+
+def test_ai_search_provider_timeout_returns_detailed_fallback(monkeypatch) -> None:
+    def slow_provider(*_args, **_kwargs):
+        time.sleep(0.05)
+        return {"answer": "late provider answer"}
+
+    monkeypatch.setattr(ai_search_service, "_PROVIDER_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr(ai_search_service, "_post_provider_json", slow_provider)
+    service = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="gpt-4o-mini",
+            cfs_ai_provider="openai",
+            openai_api_key="test-key",
+        ),
+    )
+    response = service.search(
+        CfsAiSearchRequest(query="What are the main permit trends?"),
+        _context(),
+    )
+
+    assert response.provider == "none"
+    assert "Key findings" in response.answer
+    assert "presentation timeout" in " ".join(response.caveats)
+    assert response.dashboard_actions.focus_domain == "permits"
 
 
 def test_ai_search_sparse_provider_answer_keeps_detailed_fallback(monkeypatch) -> None:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import concurrent.futures
 import json
 import re
 import urllib.error
@@ -38,6 +39,12 @@ RELATED_LAYERS = {
     "utilities": ["Utility Readiness"],
     "zoning": ["Zoning / Land Use"],
 }
+
+_PROVIDER_TIMEOUT_SECONDS = 2.5
+_PROVIDER_EXECUTOR = concurrent.futures.ThreadPoolExecutor(
+    max_workers=2,
+    thread_name_prefix="cfs-ai-provider",
+)
 
 DASHBOARD_ACTIONS: dict[CfsAiDomain, dict[str, Any]] = {
     "data_readiness": {
@@ -152,7 +159,12 @@ class CfsAiSearchService:
             return fallback
 
         try:
-            provider_payload = self._provider_answer(request, context, domains)
+            provider_payload = self._provider_answer_with_timeout(request, context, domains)
+        except concurrent.futures.TimeoutError:
+            fallback.caveats.append(
+                "OpenAI provider did not respond within the presentation timeout, so CFS used grounded deterministic analysis.",
+            )
+            return sanitize_response(fallback)
         except Exception:
             fallback.caveats.append(
                 "AI provider was unavailable; deterministic CFS answer returned.",
@@ -206,6 +218,19 @@ class CfsAiSearchService:
                 ),
             )[:6]
         return sanitize_response(response)
+
+    def _provider_answer_with_timeout(
+        self,
+        request: CfsAiSearchRequest,
+        context: CfsAiContext,
+        domains: list[CfsAiDomain],
+    ) -> dict[str, Any] | None:
+        future = _PROVIDER_EXECUTOR.submit(self._provider_answer, request, context, domains)
+        try:
+            return future.result(timeout=_PROVIDER_TIMEOUT_SECONDS)
+        except concurrent.futures.TimeoutError:
+            future.cancel()
+            raise
 
     def _provider_answer(
         self,
@@ -401,6 +426,51 @@ def compact_context(context: CfsAiContext) -> CfsAiContext:
     }
 
 
+def extract_development_activity_detail(context: CfsAiContext) -> dict[str, Any]:
+    intelligence = context.get("indicator_intelligence", {})
+    summary = context.get("indicator_summary", {})
+    detail: dict[str, Any] = {}
+    if isinstance(intelligence, dict):
+        source = intelligence.get("development_activity_detail")
+        if isinstance(source, dict):
+            detail.update(source)
+        nested = intelligence.get("details")
+        if isinstance(nested, dict) and isinstance(nested.get("development_activity"), dict):
+            detail = {**nested["development_activity"], **detail}
+
+    growth = _monitor_metrics(summary, "growth_monitor") if isinstance(summary, dict) else {}
+    trend = _chart(summary, "development_permit_trend") if isinstance(summary, dict) else []
+    signal = _first_signal(intelligence, "development_activity") if isinstance(intelligence, dict) else {}
+
+    evidence_text = " ".join(str(item) for item in signal.get("evidence", []))
+    records, parcels = _parse_permit_totals(evidence_text)
+    detail.setdefault("total_records", growth.get("permit_records") or records)
+    detail.setdefault("active_parcels", growth.get("active_parcels") or parcels)
+
+    yearly_counts = _normalize_yearly_counts(detail.get("yearly_counts") or trend)
+    if yearly_counts:
+        detail["yearly_counts"] = yearly_counts
+        detail.setdefault("years_available", [row["year"] for row in yearly_counts])
+        detail.setdefault("strongest_year", max(yearly_counts, key=lambda row: row["count"]))
+        detail.setdefault("weakest_year", min(yearly_counts, key=lambda row: row["count"]))
+        previous, latest = yearly_counts[-2], yearly_counts[-1]
+        detail.setdefault("previous_window", previous["year"])
+        detail.setdefault("recent_window", latest["year"])
+        detail.setdefault("previous_count", previous["count"])
+        detail.setdefault("recent_count", latest["count"])
+        if detail.get("delta") is None:
+            detail["delta"] = latest["count"] - previous["count"]
+        if detail.get("pct_change") is None and previous["count"]:
+            detail["pct_change"] = detail["delta"] / previous["count"] * 100
+
+    if not detail.get("top_segments") and growth.get("top_permit_segment"):
+        detail["top_segments"] = [_label_count_from_text(str(growth["top_permit_segment"]))]
+    detail.setdefault("top_permit_types", [])
+    detail.setdefault("top_segments", [])
+    detail.setdefault("top_geographies", [])
+    return detail
+
+
 def _selected_signal_answer(
     request: CfsAiSearchRequest,
     context: CfsAiContext,
@@ -514,21 +584,23 @@ def _permit_answer(
     context: CfsAiContext,
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
-    summary = context.get("indicator_summary", {})
-    intelligence = context.get("indicator_intelligence", {})
-    detail = intelligence.get("development_activity_detail", {}) if isinstance(intelligence, dict) else {}
-    growth = _monitor_metrics(summary, "growth_monitor")
-    trend = _chart(summary, "development_permit_trend")
-    top_segment = growth.get("top_permit_segment") or "Not available"
+    detail = extract_development_activity_detail(context)
     top_types = _named_counts(detail.get("top_permit_types") or [])
     top_segments = _named_counts(detail.get("top_segments") or [])
     top_geographies = _named_counts(detail.get("top_geographies") or [])
+    total_records = detail.get("total_records")
+    active_parcels = detail.get("active_parcels")
+    total_sentence = (
+        f"CFS analyzed {_fmt(total_records)} observed permit records "
+        f"across {_fmt(active_parcels)} active parcels."
+        if total_records or active_parcels
+        else "CFS does not have permit totals in the current compact context."
+    )
     answer = _briefing(
         (
             "Executive summary",
             (
-                f"CFS analyzed {_fmt(detail.get('total_records') or growth.get('permit_records'))} observed permit records "
-                f"across {_fmt(detail.get('active_parcels') or growth.get('active_parcels'))} active parcels. "
+                f"{total_sentence} "
                 f"{_recent_change_text(detail)} This is a planning review signal, not a prediction."
             ),
         ),
@@ -536,11 +608,11 @@ def _permit_answer(
             "Key findings",
             _bullets(
                 [
-                    f"Years available: {_range_text(detail.get('years_available') or [row.get('label') for row in trend])}.",
+                    f"Years available: {_range_text(detail.get('years_available') or [])}.",
                     f"Strongest year: {_year_point(detail.get('strongest_year'))}; weakest year: {_year_point(detail.get('weakest_year'))}.",
-                    f"Top permit types: {top_types or 'not available from current fields'}.",
-                    f"Top permit segments: {top_segments or top_segment}.",
-                    f"Top geography bucket ({detail.get('top_geography_type') or 'source geography'}): {top_geographies or 'not available from current fields'}.",
+                    f"Top permit types: {top_types or 'permit type fields are not currently exposed in the compact context'}.",
+                    f"Top permit segments: {top_segments or 'permit segment fields are not currently exposed in the compact context'}.",
+                    f"Top geography bucket ({detail.get('top_geography_type') or 'source geography'}): {top_geographies or 'geography fields are not currently exposed in the compact context'}.",
                 ]
             ),
         ),
@@ -570,18 +642,19 @@ def _permit_answer(
         [
             _evidence(
                 "Observed permit activity",
-                f"{_fmt(growth.get('permit_records'))} permit records across {_fmt(growth.get('active_parcels'))} active parcels.",
-                "indicator_summary.growth_monitor",
+                f"{_fmt(total_records)} permit records across {_fmt(active_parcels)} active parcels.",
+                "indicator_intelligence.development_activity_detail",
+                "available" if total_records or active_parcels else "limited",
             ),
             _evidence(
                 "Permit activity trend",
-                _trend_detail(trend),
-                "development_permit_trend",
-                "available" if trend else "not_available",
+                _trend_detail_from_detail(detail),
+                "indicator_intelligence.development_activity_detail.yearly_counts",
+                "available" if detail.get("yearly_counts") else "limited",
             ),
             _evidence(
                 "Permit categories and geography",
-                f"Top types: {top_types or 'not available'}; top geographies: {top_geographies or 'not available'}.",
+                f"Top types: {top_types or 'not currently exposed'}; top geographies: {top_geographies or 'not currently exposed'}.",
                 "indicator_intelligence.development_activity_detail",
                 "available" if detail else "limited",
             ),
@@ -959,6 +1032,49 @@ def _named_counts(rows: list[dict[str, Any]]) -> str:
     )
 
 
+def _normalize_yearly_counts(rows: Any) -> list[dict[str, int]]:
+    if not isinstance(rows, list):
+        return []
+    normalized: list[dict[str, int]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        year = _as_int(row.get("year") or row.get("label"))
+        count = _as_int(row.get("count") or row.get("value") or row.get("permit_count"))
+        if year is not None and count is not None:
+            normalized.append({"year": year, "count": count})
+    return sorted(normalized, key=lambda item: item["year"])
+
+
+def _parse_permit_totals(text: str) -> tuple[int | None, int | None]:
+    match = re.search(
+        r"([\d,]+)\s+permit records\s+across\s+([\d,]+)\s+active parcels",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if not match:
+        return None, None
+    return _as_int(match.group(1)), _as_int(match.group(2))
+
+
+def _label_count_from_text(text: str) -> dict[str, Any]:
+    match = re.match(r"(.+?)\s+\(([\d,]+)\)", text)
+    if not match:
+        return {"count": None, "label": text}
+    return {"count": _as_int(match.group(2)), "label": match.group(1)}
+
+
+def _as_int(value: Any) -> int | None:
+    if value is None or value == "":
+        return None
+    if isinstance(value, (int, float)):
+        return int(value)
+    try:
+        return int(str(value).replace(",", ""))
+    except ValueError:
+        return None
+
+
 def _recent_change_text(detail: dict[str, Any]) -> str:
     recent = detail.get("recent_window")
     previous = detail.get("previous_window")
@@ -1065,6 +1181,21 @@ def _trend_detail(trend: list[dict[str, Any]]) -> str:
     return (
         f"{first.get('label', 'First available')}: {_fmt(first.get('value'))}; "
         f"{latest.get('label', 'latest')}: {_fmt(latest.get('value'))}."
+    )
+
+
+def _trend_detail_from_detail(detail: dict[str, Any]) -> str:
+    yearly_counts = detail.get("yearly_counts")
+    if not isinstance(yearly_counts, list) or not yearly_counts:
+        return "Yearly trend fields are not currently exposed in the compact context."
+    first = next(
+        (row for row in yearly_counts if isinstance(row, dict) and _as_int(row.get("year")) and _as_int(row.get("year")) >= 2020),
+        yearly_counts[0],
+    )
+    latest = yearly_counts[-1]
+    return (
+        f"{first.get('year', 'First available')}: {_fmt(first.get('count'))}; "
+        f"{latest.get('year', 'latest')}: {_fmt(latest.get('count'))}."
     )
 
 
