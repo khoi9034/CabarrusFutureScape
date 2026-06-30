@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.dependencies.database import get_read_only_db
 from app.repositories.school_constraints_repository import SchoolConstraintsRepository
-from app.routers.indicators_router import get_indicator_summary
+from app.routers.indicators_router import get_indicator_intelligence, get_indicator_summary
 from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchResponse
 from app.services.ai_search_service import CfsAiSearchService
 from app.services.school_constraints_service import SchoolConstraintsService
@@ -49,6 +49,13 @@ def gather_cfs_ai_context(db: Session) -> CfsAiContext:
         context,
     )
     context["indicator_summary"] = indicator_summary or {}
+
+    indicator_intelligence = _safe_context(
+        lambda: get_indicator_intelligence(db=db),
+        "Indicator intelligence signals are not available from the current backend.",
+        context,
+    )
+    context["indicator_intelligence"] = indicator_intelligence or {}
 
     school_pressure = _safe_context(
         lambda: _school_pressure_context(db),

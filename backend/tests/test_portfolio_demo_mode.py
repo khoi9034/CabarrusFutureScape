@@ -40,6 +40,7 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
         "demo_manifest.json",
         "development_years.json",
         "indicator_summary.json",
+        "indicator_intelligence.json",
         "development_trends.json",
         "flood_summary.json",
         "school_capacity_watch.json",

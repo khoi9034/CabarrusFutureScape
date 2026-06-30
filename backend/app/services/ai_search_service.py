@@ -293,6 +293,7 @@ def dashboard_actions_for_domains(
 
 def compact_context(context: CfsAiContext) -> CfsAiContext:
     return {
+        "indicator_intelligence": context.get("indicator_intelligence"),
         "indicator_summary": context.get("indicator_summary"),
         "school_pressure": context.get("school_pressure"),
         "methodology": context.get("methodology"),
@@ -305,14 +306,22 @@ def _permit_answer(
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
     summary = context.get("indicator_summary", {})
+    intelligence = context.get("indicator_intelligence", {})
+    permit_signal = _first_signal(intelligence, "development_activity")
     growth = _monitor_metrics(summary, "growth_monitor")
     trend = _chart(summary, "development_permit_trend")
     top_segment = growth.get("top_permit_segment") or "Not available"
     latest = trend[-1] if trend else {}
+    signal_evidence = permit_signal.get("evidence", []) if permit_signal else []
+    answer = signal_evidence[0] if signal_evidence else None
     answer = (
-        "Observed permit activity is the strongest growth signal in CFS. "
-        f"The top available permit segment is {top_segment}, and the latest trend point "
-        f"shows {_fmt(latest.get('value'))} permits for {latest.get('label', 'the latest available year')}."
+        f"{permit_signal['title']}: {answer}"
+        if permit_signal and answer
+        else (
+            "Observed permit activity is the strongest growth signal in CFS. "
+            f"The top available permit segment is {top_segment}, and the latest trend point "
+            f"shows {_fmt(latest.get('value'))} permits for {latest.get('label', 'the latest available year')}."
+        )
     )
     return _response(
         answer,
@@ -434,9 +443,17 @@ def _data_readiness_answer(
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
     readiness = context.get("indicator_summary", {}).get("data_readiness", [])
+    intelligence = context.get("indicator_intelligence", {})
+    readiness_rows = intelligence.get("domain_readiness", []) if isinstance(intelligence, dict) else []
     labels = [item.get("dataset", "Unknown dataset") for item in readiness[:4]]
+    if readiness_rows:
+        labels = [
+            row.get("domain", "Unknown domain")
+            for row in readiness_rows
+            if row.get("data_available") != "yes"
+        ][:4]
     answer = (
-        "The main data readiness gaps are official datasets that would make CFS stronger for production review. "
+        "The main data readiness gaps are official datasets or domains that would make CFS stronger for production review. "
         f"Priority gaps include {', '.join(labels) if labels else 'not available from current context'}."
     )
     return _response(
@@ -505,9 +522,17 @@ def _general_answer(
     context: CfsAiContext,
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
+    intelligence = context.get("indicator_intelligence", {})
+    watchlist = intelligence.get("watchlist", []) if isinstance(intelligence, dict) else []
+    top = [item.get("title", "review signal") for item in watchlist[:3]]
     answer = (
-        "Start with Development Activity, School Utilization + Permit Pressure, Floodplain Review, and Data Still Needed. "
-        "Those signals cover observed growth, constraints, capacity context, and missing official data."
+        f"Inspect first: {', '.join(top)}. "
+        "These are the highest-priority planning review signals currently available."
+        if top
+        else (
+            "Start with Development Activity, School Utilization + Permit Pressure, Floodplain Review, and Data Still Needed. "
+            "Those signals cover observed growth, constraints, capacity context, and missing official data."
+        )
     )
     return _response(
         answer,
@@ -592,6 +617,14 @@ def _chart(summary: dict[str, Any], chart_id: str) -> list[dict[str, Any]]:
     chart_data = summary.get("chart_data", {})
     value = chart_data.get(chart_id, [])
     return value if isinstance(value, list) else []
+
+
+def _first_signal(context: dict[str, Any], domain: str) -> dict[str, Any]:
+    signals = context.get("signals", []) if isinstance(context, dict) else []
+    for signal in signals:
+        if isinstance(signal, dict) and signal.get("domain") == domain:
+            return signal
+    return {}
 
 
 def _trend_detail(trend: list[dict[str, Any]]) -> str:

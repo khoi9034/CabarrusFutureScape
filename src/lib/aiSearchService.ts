@@ -2,6 +2,7 @@
 import {
   getDemoDevelopmentTrends,
   getDemoFloodSummary,
+  getDemoIndicatorIntelligence,
   getDemoIndicatorSummary,
   getDemoManifest,
   getDemoModelStatus,
@@ -14,6 +15,7 @@ import type {
   CfsAiEvidenceItem,
   CfsAiSearchRequest,
   CfsAiSearchResponse,
+  IndicatorDomain,
 } from "@/types/api";
 
 export const askCfsSuggestedPrompts = [
@@ -102,12 +104,14 @@ async function searchDemoCfsAi(
 }
 
 function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
+  const permitSignal = firstDemoSignal(context, "development_activity");
   const annual = context.trends.trends.annual_trends ?? [];
   const latest = annual.at(-1);
   const first = annual[0];
   const stats = context.indicator.development_activity.statistics;
   return baseDemoResponse(
-    `Based on the cached demo extract, observed permit activity is the main growth signal. ${
+    permitSignal?.recommended_followup ??
+      `Based on the cached demo extract, observed permit activity is the main growth signal. ${
       latest
         ? `The latest available year shows ${format(latest.permit_count)} permit records.`
         : "Yearly permit trend data is not available in this extract."
@@ -115,6 +119,16 @@ function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
     domains,
     context.manifest.generated_at,
     [
+      ...(permitSignal
+        ? [
+            evidence(
+              permitSignal.title,
+              permitSignal.evidence[0] ?? "Observed permit activity signal is available.",
+              "public/demo-data/indicator_intelligence.json",
+              permitSignal.confidence === "unknown" ? "not_available" : "available",
+            ),
+          ]
+        : []),
       evidence(
         "Observed development activity",
         `${format(stats.total_permits)} permit records and ${format(stats.parcels_with_activity)} active parcels in the demo extract.`,
@@ -134,12 +148,26 @@ function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
 }
 
 function demoSchoolAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
+  const schoolSignals = context.intelligence.signals.filter(
+    (signal) => signal.domain === "school_pressure",
+  );
   const summary = context.schoolPressure.summary;
   return baseDemoResponse(
     `The strongest school review signal is where preliminary utilization context overlaps observed permit activity. The cached demo extract includes ${format(summary.areas_analyzed)} attendance areas and ${format(summary.elevated_review_count)} elevated review signals.`,
     domains,
     context.manifest.generated_at,
     [
+      ...(schoolSignals[0]
+        ? [
+            evidence(
+              schoolSignals[0].title,
+              schoolSignals[0].evidence[0] ??
+                "Preliminary school capacity watch signal is available.",
+              "public/demo-data/indicator_intelligence.json",
+              schoolSignals[0].confidence === "unknown" ? "not_available" : "available",
+            ),
+          ]
+        : []),
       evidence(
         "School Utilization + Permit Pressure",
         `${format(summary.areas_with_utilization)} areas include utilization context; ${format(summary.areas_with_recent_permits)} include recent permit activity.`,
@@ -189,12 +217,26 @@ function demoModelAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
 }
 
 function demoDataReadinessAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
+  const readinessRows = context.intelligence.domain_readiness ?? [];
   const missing = context.indicator.data_still_needed ?? [];
   return baseDemoResponse(
-    `Data coverage is incomplete where official datasets are still needed. The demo extract tracks ${missing.length} priority data requests.`,
+    `Data coverage is incomplete where official datasets are still needed. The demo extract tracks ${readinessRows.length || missing.length} readiness items.`,
     domains,
     context.manifest.generated_at,
     [
+      ...(readinessRows.length
+        ? [
+            evidence(
+              "Domain readiness",
+              readinessRows
+                .filter((row) => row.data_available !== "yes")
+                .slice(0, 4)
+                .map((row) => `${row.domain}: ${row.next_data_need}`)
+                .join("; ") || "Domain readiness rows are available.",
+              "public/demo-data/indicator_intelligence.json",
+            ),
+          ]
+        : []),
       evidence(
         "Data Still Needed",
         missing
@@ -226,8 +268,14 @@ function demoSimpleAnswer(
 }
 
 function demoGeneralAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
+  const watchlist = context.intelligence.watchlist ?? [];
   return baseDemoResponse(
-    "Start with observed permit activity, School Utilization + Permit Pressure, Floodplain Review, and Data Still Needed. Those panels show growth, constraints, capacity context, and missing official data.",
+    watchlist.length
+      ? `Start with the Operational Watchlist. The top cached demo signals are ${watchlist
+          .slice(0, 3)
+          .map((signal) => signal.title)
+          .join(", ")}.`
+      : "Start with observed permit activity, School Utilization + Permit Pressure, Floodplain Review, and Data Still Needed. Those panels show growth, constraints, capacity context, and missing official data.",
     domains,
     context.manifest.generated_at,
     [
@@ -394,19 +442,45 @@ function format(value: unknown) {
   return typeof value === "number" ? value.toLocaleString("en-US") : "not available";
 }
 
+function firstDemoSignal(
+  context: DemoAiContext,
+  domain: IndicatorDomain,
+) {
+  return context.intelligence.signals.find((signal) => signal.domain === domain);
+}
+
 type DemoAiContext = Awaited<ReturnType<typeof buildDemoAiContext>>;
 
 async function buildDemoAiContext() {
-  const [manifest, indicator, trends, flood, school, model, schoolPressure] =
+  const [
+    manifest,
+    indicator,
+    intelligence,
+    trends,
+    flood,
+    school,
+    model,
+    schoolPressure,
+  ] =
     await Promise.all([
       getDemoManifest(),
       getDemoIndicatorSummary(),
+      getDemoIndicatorIntelligence(),
       getDemoDevelopmentTrends(),
       getDemoFloodSummary(),
       getDemoSchoolCapacityWatch(),
       getDemoModelStatus(),
       getDemoSchoolPressureResponse(),
     ]);
-  return { flood, indicator, manifest, model, school, schoolPressure, trends };
+  return {
+    flood,
+    indicator,
+    intelligence,
+    manifest,
+    model,
+    school,
+    schoolPressure,
+    trends,
+  };
 }
 

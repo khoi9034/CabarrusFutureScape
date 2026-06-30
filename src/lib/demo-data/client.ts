@@ -9,6 +9,7 @@ import type {
   DevelopmentStatisticsResponse,
   DevelopmentTrendsResponse,
   FloodConstraintSummaryResponse,
+  IndicatorIntelligenceResponse,
   PermitSegmentStatisticsResponse,
   SchoolConstraintStatisticsResponse,
   SchoolQaSummaryResponse,
@@ -133,6 +134,13 @@ export function getDemoManifest() {
 
 export function getDemoIndicatorSummary() {
   return loadDemoJson("indicator_summary.json", getUnavailableIndicatorSummary);
+}
+
+export function getDemoIndicatorIntelligence() {
+  return loadDemoJson(
+    "indicator_intelligence.json",
+    getUnavailableIndicatorIntelligence,
+  );
 }
 
 export function getDemoDevelopmentTrends() {
@@ -543,6 +551,25 @@ function getUnavailableIndicatorSummary(): DemoIndicatorSummary {
       status: "Data still needed",
       true_capacity_available: false,
     },
+  };
+}
+
+function getUnavailableIndicatorIntelligence(): IndicatorIntelligenceResponse {
+  return {
+    as_of: null,
+    caveats: ["Demo indicator intelligence is not available."],
+    domain_readiness: [],
+    kpis: [],
+    mode: "demo",
+    signals: [],
+    summary: {
+      data_needed_count: 0,
+      elevated_review_count: 0,
+      review_count: 0,
+      total_signals: 0,
+      unavailable_count: 0,
+    },
+    watchlist: [],
   };
 }
 

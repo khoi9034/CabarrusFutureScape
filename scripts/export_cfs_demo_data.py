@@ -141,6 +141,14 @@ def main() -> int:
             "true_capacity_available": False,
         },
     }
+    indicator_intelligence = build_indicator_intelligence_demo(
+        generated_at=generated_at,
+        development_statistics=development_statistics,
+        development_trends=development_trends,
+        flood_summary=flood_summary,
+        permit_segments=permit_segments,
+        school_pressure_summary=school_pressure_summary,
+    )
 
     files = {
         "demo_manifest.json": {
@@ -156,6 +164,7 @@ def main() -> int:
             },
             "source_label": "Local CFS PostGIS cached extract",
         },
+        "indicator_intelligence.json": indicator_intelligence,
         "indicator_summary.json": indicator_summary,
         "development_trends.json": {
             "available": bool(development_trends["annual_trends"]),
@@ -218,6 +227,214 @@ def get_local_connection_string() -> str:
 
 def normalize_psycopg_url(url: str) -> str:
     return url.replace("postgresql+psycopg://", "postgresql://", 1)
+
+
+STATUS_SEVERITY = {
+    "normal": 0,
+    "monitor": 1,
+    "review": 2,
+    "data_needed": 2,
+    "unavailable": 2,
+    "elevated_review": 4,
+}
+
+WATCHLIST_SORT = {
+    "elevated_review": 0,
+    "review": 1,
+    "data_needed": 2,
+    "monitor": 3,
+    "unavailable": 4,
+    "normal": 5,
+}
+
+
+def build_indicator_intelligence_demo(
+    *,
+    generated_at: str,
+    development_statistics: dict[str, Any],
+    development_trends: dict[str, Any],
+    flood_summary: dict[str, Any],
+    permit_segments: dict[str, Any],
+    school_pressure_summary: dict[str, Any],
+) -> dict[str, Any]:
+    annual = development_trends.get("annual_trends", [])
+    latest = annual[-1] if annual else {}
+    previous = annual[-2] if len(annual) > 1 else {}
+    latest_count = int(latest.get("permit_count") or 0)
+    previous_count = int(previous.get("permit_count") or 0)
+    delta = latest_count - previous_count if latest and previous else 0
+    pct = (delta / previous_count * 100) if previous_count else None
+    school_summary = school_pressure_summary.get("summary", {})
+    school_elevated = int(school_summary.get("elevated_review_count") or 0)
+    school_data_needed = int(school_summary.get("data_needed_count") or 0)
+    flood_review = int(flood_summary.get("review_required_parcels") or 0)
+    flood_high = int(flood_summary.get("high_severe_buildability_parcels") or 0)
+    top_segment = _top_demo_segment(permit_segments.get("by_permit_segment", []))
+
+    signals = [
+        _demo_signal(
+            "observed_development_activity",
+            "development_activity",
+            "Observed Development Activity",
+            "elevated_review" if pct is not None and pct >= 15 else "review" if delta > 0 else "monitor",
+            latest_count or development_statistics.get("total_permits"),
+            "permits",
+            f"{delta:+,} permits" + (f" ({pct:+.1f}%)" if pct is not None else "") if latest and previous else "Trend comparison not available",
+            "Countywide",
+            [
+                f"{development_statistics.get('total_permits', 0):,} permit records across {development_statistics.get('parcels_with_activity', 0):,} active parcels.",
+                f"Dominant permit segment: {top_segment}.",
+            ],
+            ["Observed permit activity only; not a prediction."],
+            "Review Development Hotspots by permit segment and year range.",
+            ["Development Hotspots"],
+            generated_at,
+            confidence="high" if annual else "medium",
+            trend_direction="up" if delta > 0 else "down" if delta < 0 else "flat",
+        ),
+        _demo_signal(
+            "school_pressure",
+            "school_pressure",
+            "School Utilization + Growth Pressure",
+            "elevated_review" if school_elevated else "data_needed" if school_data_needed else "review",
+            school_elevated,
+            "areas",
+            None,
+            "Attendance areas",
+            [
+                f"{school_summary.get('areas_analyzed', 0):,} attendance areas reviewed.",
+                f"{school_elevated:,} areas have elevated review signal.",
+                f"{school_data_needed:,} areas need utilization data follow-up.",
+            ],
+            school_pressure_summary.get("caveats", []),
+            "Compare school utilization context with observed residential permit activity.",
+            ["School Utilization + Permit Pressure", "Development Hotspots"],
+            generated_at,
+            confidence="medium",
+        ),
+        _demo_signal(
+            "floodplain_review",
+            "floodplain_review",
+            "Floodplain Review",
+            "elevated_review" if flood_high else "review" if flood_review else "monitor",
+            flood_review,
+            "parcels",
+            None,
+            "Countywide",
+            [
+                f"{flood_review:,} parcels need floodplain review.",
+                f"{flood_summary.get('sfha_parcels', 0):,} Special Flood Hazard Area parcels; {flood_summary.get('floodway_parcels', 0):,} floodway parcels.",
+            ],
+            ["Floodplain Review is planning context, not a permitting determination."],
+            "Confirm floodway, Special Flood Hazard Area, and local review requirements.",
+            ["Floodplain Review"],
+            generated_at,
+        ),
+        _demo_signal("utility_readiness", "utility_readiness", "Utility Readiness Coverage", "data_needed", "Data needed", None, None, "Countywide", ["True utility capacity and service readiness data are not available in CFS yet."], ["Utility proxy does not confirm available capacity."], "Request WSACC capacity and service readiness fields.", ["Utility Proxy"], generated_at, confidence="low"),
+        _demo_signal("transportation_context", "transportation_context", "Transportation Project Context", "monitor", "Context available", None, None, "Countywide", ["Transportation context can be reviewed with observed permit activity."], ["Transportation Context is a coordination signal, not project approval."], "Review transportation context near active development areas.", ["Transportation Context", "Development Hotspots"], generated_at, confidence="medium"),
+        _demo_signal("zoning_land_use_readiness", "zoning_land_use", "Zoning / Land Use Readiness", "data_needed", "Partial", None, None, "Countywide", ["Parcel zoning context is available; official rezoning and future land use data are still needed."], ["Official rezoning case records and future land use GIS remain data needs where unavailable."], "Request rezoning case records and future land use layers.", ["Parcel Intelligence"], generated_at, confidence="low"),
+        _demo_signal("model_research_status", "model_research", "Model Research Status", "monitor", "Internal only", None, None, "Countywide", ["Model Lab exposes relative research signal context only."], ["Internal model research only; no exact probabilities or raw values are shown."], "Use Model Lab to guide questions, then verify source records.", ["Model Lab Research Signals"], generated_at, confidence="medium"),
+        _demo_signal("data_readiness", "data_readiness", "Data Readiness", "data_needed", len(DATA_STILL_NEEDED), "data needs", None, "Countywide", [f"{len(DATA_STILL_NEEDED)} priority data needs are tracked."] + [item["label"] for item in DATA_STILL_NEEDED[:3]], ["Missing official data limits how far CFS can go beyond review signals."], "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.", [], generated_at, confidence="high"),
+    ]
+    watchlist = sorted(
+        [signal for signal in signals if signal["status_band"] != "normal"],
+        key=lambda item: (-int(item["severity"]), WATCHLIST_SORT[item["status_band"]], item["title"]),
+    )
+    return {
+        "as_of": generated_at,
+        "caveats": [
+            "Portfolio Demo uses a cached CFS demo extract.",
+            "CFS indicators are planning review signals, not official determinations.",
+            "Observed permit activity is not a prediction.",
+        ],
+        "domain_readiness": build_demo_domain_readiness(generated_at),
+        "kpis": signals[:8],
+        "mode": "demo",
+        "signals": signals,
+        "summary": {
+            "total_signals": len(signals),
+            "elevated_review_count": sum(1 for signal in signals if signal["status_band"] == "elevated_review"),
+            "review_count": sum(1 for signal in signals if signal["status_band"] == "review"),
+            "data_needed_count": sum(1 for signal in signals if signal["status_band"] == "data_needed"),
+            "unavailable_count": sum(1 for signal in signals if signal["status_band"] == "unavailable"),
+        },
+        "watchlist": watchlist,
+    }
+
+
+def _demo_signal(
+    id: str,
+    domain: str,
+    title: str,
+    status_band: str,
+    value: int | str | None,
+    unit: str | None,
+    trend_label: str | None,
+    geography_label: str,
+    evidence: list[str],
+    caveats: list[str],
+    recommended_followup: str,
+    related_layers: list[str],
+    generated_at: str,
+    *,
+    confidence: str = "high",
+    trend_direction: str = "not_available",
+) -> dict[str, Any]:
+    return {
+        "id": id,
+        "domain": domain,
+        "title": title,
+        "status_band": status_band,
+        "severity": STATUS_SEVERITY[status_band],
+        "confidence": confidence,
+        "value": value,
+        "unit": unit,
+        "trend_direction": trend_direction,
+        "trend_label": trend_label,
+        "geography_label": geography_label,
+        "evidence": evidence,
+        "caveats": caveats,
+        "recommended_followup": recommended_followup,
+        "related_layers": related_layers,
+        "data_freshness": generated_at,
+        "source_mode": "demo",
+    }
+
+
+def build_demo_domain_readiness(generated_at: str) -> list[dict[str, Any]]:
+    return [
+        _demo_readiness("Development Activity", True, True, True, "Observed permit and activity monitoring", "Permit record updates and segment normalization.", generated_at),
+        _demo_readiness("Schools", True, True, True, "Preliminary school capacity watch plus permit pressure", "Official enrollment/capacity and student generation assumptions.", generated_at),
+        _demo_readiness("Floodplain", True, True, False, "Floodplain review context", "Local floodplain review status and update cadence.", generated_at),
+        _demo_readiness("Utilities", False, False, False, "Proxy context only", "True capacity and service readiness data.", generated_at),
+        _demo_readiness("Transportation", True, True, False, "Transportation context with growth review", "Planned local project status and dated geometry.", generated_at),
+        _demo_readiness("Zoning / Land Use", True, True, False, "Parcel zoning context", "Official rezoning case records and future land use layers.", generated_at),
+        _demo_readiness("Model Research", True, True, False, "Internal relative research signal", "Governed model release criteria before production use.", generated_at),
+    ]
+
+
+def _demo_readiness(domain: str, available: bool, geometry: bool, temporal: bool, current_use: str, next_need: str, generated_at: str) -> dict[str, Any]:
+    return {
+        "domain": domain,
+        "data_available": "yes" if available else "no",
+        "geometry_available": geometry,
+        "temporal_fields_available": temporal,
+        "update_cadence_known": False,
+        "source_freshness": generated_at,
+        "local_live_status": "available" if available else "data needed",
+        "demo_extract_status": "cached extract" if available else "not included",
+        "coverage": "available" if available else "data needed",
+        "current_use": current_use,
+        "caveat": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+        "next_data_need": next_need,
+    }
+
+
+def _top_demo_segment(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "Not available from current source"
+    first = rows[0]
+    return f"{first.get('value', 'Unknown')} ({int(first.get('count') or 0):,})"
 
 
 def build_development_statistics(conn: psycopg.Connection) -> dict[str, Any]:

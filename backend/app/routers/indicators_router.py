@@ -34,6 +34,100 @@ MISSING_DATASETS = [
     "planned utility extensions",
 ]
 
+STATUS_SEVERITY = {
+    "normal": 0,
+    "monitor": 1,
+    "review": 2,
+    "data_needed": 2,
+    "unavailable": 2,
+    "elevated_review": 4,
+}
+
+WATCHLIST_SORT = {
+    "elevated_review": 0,
+    "review": 1,
+    "data_needed": 2,
+    "monitor": 3,
+    "unavailable": 4,
+    "normal": 5,
+}
+
+
+@router.get("/intelligence")
+def get_indicator_intelligence(
+    db: Session = Depends(get_read_only_db),
+) -> dict[str, Any]:
+    """Return normalized planning intelligence signals for Indicator Center."""
+
+    as_of = datetime.now(UTC).isoformat()
+    caveats: list[str] = [
+        "CFS indicators are planning review signals, not official determinations.",
+        "Observed permit activity is not a prediction.",
+        "Preliminary school capacity watch is not an official enrollment forecast.",
+    ]
+    development = DevelopmentService(DevelopmentRepository(db))
+    flood = ConstraintsService(ConstraintsRepository(db))
+    schools = SchoolConstraintsService(SchoolConstraintsRepository(db))
+
+    development_stats = _safe_load(
+        lambda: development.get_statistics(filters=DevelopmentStatisticsFilters()),
+        "Development activity statistics are unavailable.",
+        caveats,
+    )
+    development_trends = _safe_load(
+        lambda: development.get_trends(filters=DevelopmentTrendsFilters()),
+        "Development trend data is unavailable.",
+        caveats,
+    )
+    permit_segments = _safe_load(
+        development.get_permit_segment_statistics,
+        "Permit segment statistics are unavailable.",
+        caveats,
+    )
+    flood_summary = _safe_load(
+        flood.get_flood_summary,
+        "Floodplain review summary is unavailable.",
+        caveats,
+    )
+    school_pressure = _safe_load(
+        lambda: schools.get_school_pressure(limit=50),
+        "School utilization plus permit pressure is unavailable.",
+        caveats,
+    )
+
+    signals = [
+        _development_signal(development_stats, development_trends, permit_segments, as_of),
+        *_school_pressure_signals(school_pressure, as_of),
+        _flood_signal(flood_summary, as_of),
+        _utility_signal(as_of),
+        _transportation_signal(development_stats, as_of),
+        _zoning_signal(as_of),
+        _model_signal(as_of),
+        _data_readiness_signal(as_of),
+    ]
+    signals = [signal for signal in signals if signal is not None]
+    watchlist = sorted(
+        [signal for signal in signals if signal["status_band"] != "normal"],
+        key=lambda item: (-int(item["severity"]), WATCHLIST_SORT[item["status_band"]], item["title"]),
+    )
+
+    return {
+        "mode": "live",
+        "as_of": as_of,
+        "summary": _signal_summary(signals),
+        "kpis": signals[:8],
+        "signals": signals,
+        "watchlist": watchlist,
+        "domain_readiness": _domain_readiness(
+            development_stats=development_stats,
+            development_trends=development_trends,
+            flood_summary=flood_summary,
+            school_pressure=school_pressure,
+            as_of=as_of,
+        ),
+        "caveats": list(dict.fromkeys(caveats)),
+    }
+
 
 @router.get("/summary")
 def get_indicator_summary(
@@ -293,6 +387,382 @@ def _school_class_counts(
 ) -> dict[str, int]:
     counts = Counter(row.utilization_class or "not_available" for row in rows)
     return dict(counts)
+
+
+def _safe_load(loader, caveat: str, caveats: list[str]) -> Any:
+    try:
+        return loader()
+    except Exception:
+        caveats.append(caveat)
+        return None
+
+
+def _signal(
+    *,
+    caveats: list[str],
+    confidence: str,
+    data_freshness: str | None,
+    domain: str,
+    evidence: list[str],
+    geography_label: str | None,
+    id: str,
+    recommended_followup: str,
+    related_layers: list[str],
+    status_band: str,
+    title: str,
+    value: int | float | str | None,
+    unit: str | None = None,
+    trend_direction: str = "not_available",
+    trend_label: str | None = None,
+) -> dict[str, Any]:
+    return {
+        "id": id,
+        "domain": domain,
+        "title": title,
+        "status_band": status_band,
+        "severity": STATUS_SEVERITY[status_band],
+        "confidence": confidence,
+        "value": value,
+        "unit": unit,
+        "trend_direction": trend_direction,
+        "trend_label": trend_label,
+        "geography_label": geography_label,
+        "evidence": evidence,
+        "caveats": caveats,
+        "recommended_followup": recommended_followup,
+        "related_layers": related_layers,
+        "data_freshness": data_freshness,
+        "source_mode": "live",
+    }
+
+
+def _development_signal(stats: Any, trends: Any, segments: Any, as_of: str) -> dict[str, Any]:
+    if stats is None:
+        return _signal(
+            caveats=["Development activity source data is unavailable."],
+            confidence="unknown",
+            data_freshness=as_of,
+            domain="development_activity",
+            evidence=["Permit statistics could not be loaded from the current backend."],
+            geography_label="Countywide",
+            id="development_activity_unavailable",
+            recommended_followup="Confirm local permit summary tables and backend health.",
+            related_layers=["Development Hotspots"],
+            status_band="unavailable",
+            title="Observed Development Activity",
+            value=None,
+        )
+
+    annual = list(getattr(trends, "annual_trends", []) or [])
+    latest = annual[-1] if annual else None
+    previous = annual[-2] if len(annual) > 1 else None
+    latest_count = int(getattr(latest, "permit_count", 0) or 0) if latest else 0
+    previous_count = int(getattr(previous, "permit_count", 0) or 0) if previous else 0
+    delta = latest_count - previous_count if latest and previous else 0
+    pct = (delta / previous_count * 100) if previous_count else None
+    top_segment = _top_bucket(getattr(segments, "by_permit_segment", []) if segments else [])
+    status_band = "elevated_review" if pct is not None and pct >= 15 else "review" if delta > 0 else "monitor"
+
+    return _signal(
+        caveats=["Observed permit activity only; not a prediction."],
+        confidence="high" if annual else "medium",
+        data_freshness=as_of,
+        domain="development_activity",
+        evidence=[
+            f"{int(stats.total_permits):,} permit records across {int(stats.parcels_with_activity):,} active parcels.",
+            f"Latest yearly permit count: {latest_count:,}; prior comparable year: {previous_count:,}.",
+            f"Dominant permit segment: {top_segment}.",
+        ],
+        geography_label="Countywide",
+        id="observed_development_activity",
+        recommended_followup="Review Development Hotspots by permit segment and year range.",
+        related_layers=["Development Hotspots"],
+        status_band=status_band,
+        title="Observed Development Activity",
+        trend_direction="up" if delta > 0 else "down" if delta < 0 else "flat",
+        trend_label=(
+            f"{delta:+,} permits"
+            + (f" ({pct:+.1f}%)" if pct is not None else "")
+            if latest and previous
+            else "Trend comparison not available"
+        ),
+        unit="permits",
+        value=latest_count or int(stats.total_permits),
+    )
+
+
+def _school_pressure_signals(pressure: Any, as_of: str) -> list[dict[str, Any]]:
+    if pressure is None:
+        return [
+            _signal(
+                caveats=["School pressure source data is unavailable."],
+                confidence="unknown",
+                data_freshness=as_of,
+                domain="school_pressure",
+                evidence=["School utilization plus permit pressure could not be loaded."],
+                geography_label="Attendance areas",
+                id="school_pressure_unavailable",
+                recommended_followup="Confirm school pressure endpoint and source tables.",
+                related_layers=["School Utilization + Permit Pressure"],
+                status_band="unavailable",
+                title="School Utilization + Growth Pressure",
+                value=None,
+            )
+        ]
+
+    summary = pressure.summary
+    status_band = (
+        "elevated_review"
+        if summary.elevated_review_count
+        else "data_needed"
+        if summary.data_needed_count
+        else "review"
+        if summary.areas_with_recent_permits
+        else "monitor"
+    )
+    signals = [
+        _signal(
+            caveats=list(pressure.caveats),
+            confidence="medium" if summary.areas_with_utilization else "low",
+            data_freshness=pressure.as_of or as_of,
+            domain="school_pressure",
+            evidence=[
+                f"{summary.areas_analyzed:,} attendance areas reviewed.",
+                f"{summary.elevated_review_count:,} areas have elevated review signal.",
+                f"{summary.data_needed_count:,} areas need utilization data follow-up.",
+            ],
+            geography_label="Attendance areas",
+            id="school_pressure",
+            recommended_followup="Compare school utilization context with observed residential permit activity.",
+            related_layers=["School Utilization + Permit Pressure", "Development Hotspots"],
+            status_band=status_band,
+            title="School Utilization + Growth Pressure",
+            unit="areas",
+            value=summary.elevated_review_count,
+        )
+    ]
+
+    for feature in pressure.features[:6]:
+        props = feature.properties
+        band = _school_band_to_status(props.school_pressure_watch_band)
+        signals.append(
+            _signal(
+                caveats=list(props.caveats or pressure.caveats),
+                confidence="medium" if props.utilization_pct is not None else "low",
+                data_freshness=pressure.as_of or as_of,
+                domain="school_pressure",
+                evidence=list(props.top_reasons)
+                or [
+                    f"Recent permits: {props.permit_count_recent if props.permit_count_recent is not None else 'not available'}.",
+                    f"Utilization context: {props.utilization_status or 'not available'}.",
+                ],
+                geography_label=props.school_name or "Attendance area",
+                id=f"school_pressure_{props.attendance_area_id or props.school_name or len(signals)}",
+                recommended_followup=props.recommended_followup,
+                related_layers=["School Utilization + Permit Pressure", "Development Hotspots"],
+                status_band=band,
+                title=f"{props.school_name or 'Attendance Area'} Capacity + Permit Context",
+                trend_direction="up" if (props.permit_growth_delta or 0) > 0 else "flat",
+                trend_label=(
+                    f"{props.permit_growth_delta:+,} permits"
+                    if props.permit_growth_delta is not None
+                    else "Permit growth comparison not available"
+                ),
+                unit="recent permits",
+                value=props.permit_count_recent,
+            )
+        )
+    return signals
+
+
+def _school_band_to_status(band: str | None) -> str:
+    normalized = (band or "").lower()
+    if normalized == "elevated review":
+        return "elevated_review"
+    if normalized == "review":
+        return "review"
+    if normalized == "data needed":
+        return "data_needed"
+    return "monitor"
+
+
+def _flood_signal(summary: Any, as_of: str) -> dict[str, Any]:
+    if summary is None:
+        return _signal(
+            caveats=["Floodplain review source data is unavailable."],
+            confidence="unknown",
+            data_freshness=as_of,
+            domain="floodplain_review",
+            evidence=["Floodplain summary could not be loaded."],
+            geography_label="Countywide",
+            id="floodplain_review_unavailable",
+            recommended_followup="Confirm flood overlay tables and backend health.",
+            related_layers=["Floodplain Review"],
+            status_band="unavailable",
+            title="Floodplain Review",
+            value=None,
+        )
+    status_band = "elevated_review" if summary.high_severe_buildability_parcels else "review" if summary.review_required_parcels else "monitor"
+    return _signal(
+        caveats=["Floodplain Review is planning context, not a permitting determination."],
+        confidence="high",
+        data_freshness=as_of,
+        domain="floodplain_review",
+        evidence=[
+            f"{summary.review_required_parcels:,} parcels need floodplain review.",
+            f"{summary.sfha_parcels:,} Special Flood Hazard Area parcels; {summary.floodway_parcels:,} floodway parcels.",
+        ],
+        geography_label="Countywide",
+        id="floodplain_review",
+        recommended_followup="Confirm floodway, Special Flood Hazard Area, and local review requirements.",
+        related_layers=["Floodplain Review"],
+        status_band=status_band,
+        title="Floodplain Review",
+        unit="parcels",
+        value=summary.review_required_parcels,
+    )
+
+
+def _utility_signal(as_of: str) -> dict[str, Any]:
+    return _signal(
+        caveats=["Utility proxy does not confirm available capacity."],
+        confidence="low",
+        data_freshness=as_of,
+        domain="utility_readiness",
+        evidence=["True utility capacity, allocation, and service readiness data are not available in CFS yet."],
+        geography_label="Countywide",
+        id="utility_readiness",
+        recommended_followup="Request WSACC service area, capacity, committed capacity, and update date fields.",
+        related_layers=["Utility Proxy"],
+        status_band="data_needed",
+        title="Utility Readiness Coverage",
+        value="Data needed",
+    )
+
+
+def _transportation_signal(stats: Any, as_of: str) -> dict[str, Any]:
+    return _signal(
+        caveats=["Transportation Context is a coordination signal, not project approval."],
+        confidence="medium" if stats is not None else "low",
+        data_freshness=as_of,
+        domain="transportation_context",
+        evidence=[
+            "STIP, AADT, accessibility, and corridor context can be reviewed with observed permit activity.",
+            "Planned local road project status remains a data need.",
+        ],
+        geography_label="Countywide",
+        id="transportation_context",
+        recommended_followup="Review transportation context near active development areas.",
+        related_layers=["Transportation Context", "Development Hotspots"],
+        status_band="monitor" if stats is not None else "data_needed",
+        title="Transportation Project Context",
+        value="Context available" if stats is not None else "Data needed",
+    )
+
+
+def _zoning_signal(as_of: str) -> dict[str, Any]:
+    return _signal(
+        caveats=["Official rezoning case records and future land use GIS remain data needs where unavailable."],
+        confidence="low",
+        data_freshness=as_of,
+        domain="zoning_land_use",
+        evidence=["Parcel zoning context is available; official rezoning records and future land use context need source data."],
+        geography_label="Countywide",
+        id="zoning_land_use_readiness",
+        recommended_followup="Request rezoning case IDs, dates, status, geometry, and future land use layers.",
+        related_layers=["Parcel Intelligence"],
+        status_band="data_needed",
+        title="Zoning / Land Use Readiness",
+        value="Partial",
+    )
+
+
+def _model_signal(as_of: str) -> dict[str, Any]:
+    return _signal(
+        caveats=["Internal model research only; no exact probabilities or raw values are shown."],
+        confidence="medium",
+        data_freshness=as_of,
+        domain="model_research",
+        evidence=["Model Lab exposes relative research signal context only."],
+        geography_label="Countywide",
+        id="model_research_status",
+        recommended_followup="Use Model Lab to guide questions, then verify source records.",
+        related_layers=["Model Lab Research Signals"],
+        status_band="monitor",
+        title="Model Research Status",
+        value="Internal only",
+    )
+
+
+def _data_readiness_signal(as_of: str) -> dict[str, Any]:
+    return _signal(
+        caveats=["Missing official data limits how far CFS can go beyond review signals."],
+        confidence="high",
+        data_freshness=as_of,
+        domain="data_readiness",
+        evidence=[f"{len(MISSING_DATASETS)} priority data needs are tracked.", *MISSING_DATASETS[:3]],
+        geography_label="Countywide",
+        id="data_readiness",
+        recommended_followup="Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
+        related_layers=[],
+        status_band="data_needed",
+        title="Data Readiness",
+        unit="data needs",
+        value=len(MISSING_DATASETS),
+    )
+
+
+def _domain_readiness(
+    *,
+    development_stats: Any,
+    development_trends: Any,
+    flood_summary: Any,
+    school_pressure: Any,
+    as_of: str,
+) -> list[dict[str, Any]]:
+    return [
+        _readiness("Development Activity", development_stats is not None, True, development_trends is not None, "Observed permit and activity monitoring", "Permit record updates and segment normalization."),
+        _readiness("Schools", school_pressure is not None, True, True, "Preliminary school capacity watch plus permit pressure", "Official enrollment/capacity and student generation assumptions."),
+        _readiness("Floodplain", flood_summary is not None, True, False, "Floodplain review context", "Local floodplain review status and update cadence."),
+        _readiness("Utilities", False, False, False, "Proxy context only", "True capacity, allocation, service areas, and update date."),
+        _readiness("Transportation", True, True, False, "Transportation context with growth review", "Planned local project status and dated geometry."),
+        _readiness("Zoning / Land Use", True, True, False, "Parcel zoning context", "Official rezoning case records and future land use layers."),
+        _readiness("Model Research", True, True, False, "Internal relative research signal", "Governed model release criteria before production use."),
+    ]
+
+
+def _readiness(
+    domain: str,
+    available: bool,
+    geometry: bool,
+    temporal: bool,
+    current_use: str,
+    next_need: str,
+) -> dict[str, Any]:
+    return {
+        "domain": domain,
+        "data_available": "yes" if available else "no",
+        "geometry_available": geometry,
+        "temporal_fields_available": temporal,
+        "update_cadence_known": False,
+        "source_freshness": None,
+        "local_live_status": "available" if available else "data needed",
+        "demo_extract_status": "cached extract" if available else "not included",
+        "coverage": "available" if available else "data needed",
+        "current_use": current_use,
+        "caveat": "Use as planning context; verify official source data before final decisions.",
+        "next_data_need": next_need,
+    }
+
+
+def _signal_summary(signals: list[dict[str, Any]]) -> dict[str, int]:
+    return {
+        "total_signals": len(signals),
+        "elevated_review_count": sum(1 for signal in signals if signal["status_band"] == "elevated_review"),
+        "review_count": sum(1 for signal in signals if signal["status_band"] == "review"),
+        "data_needed_count": sum(1 for signal in signals if signal["status_band"] == "data_needed"),
+        "unavailable_count": sum(1 for signal in signals if signal["status_band"] == "unavailable"),
+    }
 
 
 def _seed_rows(

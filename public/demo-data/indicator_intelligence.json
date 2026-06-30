@@ -1,0 +1,749 @@
+{
+  "as_of": "2026-06-30T00:46:25Z",
+  "caveats": [
+    "Portfolio Demo uses a cached CFS demo extract.",
+    "CFS indicators are planning review signals, not official determinations.",
+    "Observed permit activity is not a prediction."
+  ],
+  "domain_readiness": [
+    {
+      "domain": "Development Activity",
+      "data_available": "yes",
+      "geometry_available": true,
+      "temporal_fields_available": true,
+      "update_cadence_known": false,
+      "source_freshness": "2026-06-30T00:46:25Z",
+      "local_live_status": "available",
+      "demo_extract_status": "cached extract",
+      "coverage": "available",
+      "current_use": "Observed permit and activity monitoring",
+      "caveat": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Permit record updates and segment normalization."
+    },
+    {
+      "domain": "Schools",
+      "data_available": "yes",
+      "geometry_available": true,
+      "temporal_fields_available": true,
+      "update_cadence_known": false,
+      "source_freshness": "2026-06-30T00:46:25Z",
+      "local_live_status": "available",
+      "demo_extract_status": "cached extract",
+      "coverage": "available",
+      "current_use": "Preliminary school capacity watch plus permit pressure",
+      "caveat": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Official enrollment/capacity and student generation assumptions."
+    },
+    {
+      "domain": "Floodplain",
+      "data_available": "yes",
+      "geometry_available": true,
+      "temporal_fields_available": false,
+      "update_cadence_known": false,
+      "source_freshness": "2026-06-30T00:46:25Z",
+      "local_live_status": "available",
+      "demo_extract_status": "cached extract",
+      "coverage": "available",
+      "current_use": "Floodplain review context",
+      "caveat": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Local floodplain review status and update cadence."
+    },
+    {
+      "domain": "Utilities",
+      "data_available": "no",
+      "geometry_available": false,
+      "temporal_fields_available": false,
+      "update_cadence_known": false,
+      "source_freshness": "2026-06-30T00:46:25Z",
+      "local_live_status": "data needed",
+      "demo_extract_status": "not included",
+      "coverage": "data needed",
+      "current_use": "Proxy context only",
+      "caveat": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "True capacity and service readiness data."
+    },
+    {
+      "domain": "Transportation",
+      "data_available": "yes",
+      "geometry_available": true,
+      "temporal_fields_available": false,
+      "update_cadence_known": false,
+      "source_freshness": "2026-06-30T00:46:25Z",
+      "local_live_status": "available",
+      "demo_extract_status": "cached extract",
+      "coverage": "available",
+      "current_use": "Transportation context with growth review",
+      "caveat": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Planned local project status and dated geometry."
+    },
+    {
+      "domain": "Zoning / Land Use",
+      "data_available": "yes",
+      "geometry_available": true,
+      "temporal_fields_available": false,
+      "update_cadence_known": false,
+      "source_freshness": "2026-06-30T00:46:25Z",
+      "local_live_status": "available",
+      "demo_extract_status": "cached extract",
+      "coverage": "available",
+      "current_use": "Parcel zoning context",
+      "caveat": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Official rezoning case records and future land use layers."
+    },
+    {
+      "domain": "Model Research",
+      "data_available": "yes",
+      "geometry_available": true,
+      "temporal_fields_available": false,
+      "update_cadence_known": false,
+      "source_freshness": "2026-06-30T00:46:25Z",
+      "local_live_status": "available",
+      "demo_extract_status": "cached extract",
+      "coverage": "available",
+      "current_use": "Internal relative research signal",
+      "caveat": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Governed model release criteria before production use."
+    }
+  ],
+  "kpis": [
+    {
+      "id": "observed_development_activity",
+      "domain": "development_activity",
+      "title": "Observed Development Activity",
+      "status_band": "monitor",
+      "severity": 1,
+      "confidence": "high",
+      "value": 3642,
+      "unit": "permits",
+      "trend_direction": "down",
+      "trend_label": "-526 permits (-12.6%)",
+      "geography_label": "Countywide",
+      "evidence": [
+        "64,426 permit records across 43,474 active parcels.",
+        "Dominant permit segment: residential_growth (42,206)."
+      ],
+      "caveats": [
+        "Observed permit activity only; not a prediction."
+      ],
+      "recommended_followup": "Review Development Hotspots by permit segment and year range.",
+      "related_layers": [
+        "Development Hotspots"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "school_pressure",
+      "domain": "school_pressure",
+      "title": "School Utilization + Growth Pressure",
+      "status_band": "elevated_review",
+      "severity": 4,
+      "confidence": "medium",
+      "value": 13,
+      "unit": "areas",
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Attendance areas",
+      "evidence": [
+        "35 attendance areas reviewed.",
+        "13 areas have elevated review signal.",
+        "0 areas need utilization data follow-up."
+      ],
+      "caveats": [
+        "Portfolio demo uses a cached CFS demo extract.",
+        "Permit activity is not the same as student generation.",
+        "This is not an official enrollment forecast."
+      ],
+      "recommended_followup": "Compare school utilization context with observed residential permit activity.",
+      "related_layers": [
+        "School Utilization + Permit Pressure",
+        "Development Hotspots"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "floodplain_review",
+      "domain": "floodplain_review",
+      "title": "Floodplain Review",
+      "status_band": "elevated_review",
+      "severity": 4,
+      "confidence": "high",
+      "value": 7989,
+      "unit": "parcels",
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "7,989 parcels need floodplain review.",
+        "7,254 Special Flood Hazard Area parcels; 3,229 floodway parcels."
+      ],
+      "caveats": [
+        "Floodplain Review is planning context, not a permitting determination."
+      ],
+      "recommended_followup": "Confirm floodway, Special Flood Hazard Area, and local review requirements.",
+      "related_layers": [
+        "Floodplain Review"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "utility_readiness",
+      "domain": "utility_readiness",
+      "title": "Utility Readiness Coverage",
+      "status_band": "data_needed",
+      "severity": 2,
+      "confidence": "low",
+      "value": "Data needed",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "True utility capacity and service readiness data are not available in CFS yet."
+      ],
+      "caveats": [
+        "Utility proxy does not confirm available capacity."
+      ],
+      "recommended_followup": "Request WSACC capacity and service readiness fields.",
+      "related_layers": [
+        "Utility Proxy"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "transportation_context",
+      "domain": "transportation_context",
+      "title": "Transportation Project Context",
+      "status_band": "monitor",
+      "severity": 1,
+      "confidence": "medium",
+      "value": "Context available",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "Transportation context can be reviewed with observed permit activity."
+      ],
+      "caveats": [
+        "Transportation Context is a coordination signal, not project approval."
+      ],
+      "recommended_followup": "Review transportation context near active development areas.",
+      "related_layers": [
+        "Transportation Context",
+        "Development Hotspots"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "zoning_land_use_readiness",
+      "domain": "zoning_land_use",
+      "title": "Zoning / Land Use Readiness",
+      "status_band": "data_needed",
+      "severity": 2,
+      "confidence": "low",
+      "value": "Partial",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "Parcel zoning context is available; official rezoning and future land use data are still needed."
+      ],
+      "caveats": [
+        "Official rezoning case records and future land use GIS remain data needs where unavailable."
+      ],
+      "recommended_followup": "Request rezoning case records and future land use layers.",
+      "related_layers": [
+        "Parcel Intelligence"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "model_research_status",
+      "domain": "model_research",
+      "title": "Model Research Status",
+      "status_band": "monitor",
+      "severity": 1,
+      "confidence": "medium",
+      "value": "Internal only",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "Model Lab exposes relative research signal context only."
+      ],
+      "caveats": [
+        "Internal model research only; no exact probabilities or raw values are shown."
+      ],
+      "recommended_followup": "Use Model Lab to guide questions, then verify source records.",
+      "related_layers": [
+        "Model Lab Research Signals"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "data_readiness",
+      "domain": "data_readiness",
+      "title": "Data Readiness",
+      "status_band": "data_needed",
+      "severity": 2,
+      "confidence": "high",
+      "value": 7,
+      "unit": "data needs",
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "7 priority data needs are tracked.",
+        "WSACC true utility capacity",
+        "Official school enrollment/capacity",
+        "Official rezoning records"
+      ],
+      "caveats": [
+        "Missing official data limits how far CFS can go beyond review signals."
+      ],
+      "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
+      "related_layers": [],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    }
+  ],
+  "mode": "demo",
+  "signals": [
+    {
+      "id": "observed_development_activity",
+      "domain": "development_activity",
+      "title": "Observed Development Activity",
+      "status_band": "monitor",
+      "severity": 1,
+      "confidence": "high",
+      "value": 3642,
+      "unit": "permits",
+      "trend_direction": "down",
+      "trend_label": "-526 permits (-12.6%)",
+      "geography_label": "Countywide",
+      "evidence": [
+        "64,426 permit records across 43,474 active parcels.",
+        "Dominant permit segment: residential_growth (42,206)."
+      ],
+      "caveats": [
+        "Observed permit activity only; not a prediction."
+      ],
+      "recommended_followup": "Review Development Hotspots by permit segment and year range.",
+      "related_layers": [
+        "Development Hotspots"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "school_pressure",
+      "domain": "school_pressure",
+      "title": "School Utilization + Growth Pressure",
+      "status_band": "elevated_review",
+      "severity": 4,
+      "confidence": "medium",
+      "value": 13,
+      "unit": "areas",
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Attendance areas",
+      "evidence": [
+        "35 attendance areas reviewed.",
+        "13 areas have elevated review signal.",
+        "0 areas need utilization data follow-up."
+      ],
+      "caveats": [
+        "Portfolio demo uses a cached CFS demo extract.",
+        "Permit activity is not the same as student generation.",
+        "This is not an official enrollment forecast."
+      ],
+      "recommended_followup": "Compare school utilization context with observed residential permit activity.",
+      "related_layers": [
+        "School Utilization + Permit Pressure",
+        "Development Hotspots"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "floodplain_review",
+      "domain": "floodplain_review",
+      "title": "Floodplain Review",
+      "status_band": "elevated_review",
+      "severity": 4,
+      "confidence": "high",
+      "value": 7989,
+      "unit": "parcels",
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "7,989 parcels need floodplain review.",
+        "7,254 Special Flood Hazard Area parcels; 3,229 floodway parcels."
+      ],
+      "caveats": [
+        "Floodplain Review is planning context, not a permitting determination."
+      ],
+      "recommended_followup": "Confirm floodway, Special Flood Hazard Area, and local review requirements.",
+      "related_layers": [
+        "Floodplain Review"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "utility_readiness",
+      "domain": "utility_readiness",
+      "title": "Utility Readiness Coverage",
+      "status_band": "data_needed",
+      "severity": 2,
+      "confidence": "low",
+      "value": "Data needed",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "True utility capacity and service readiness data are not available in CFS yet."
+      ],
+      "caveats": [
+        "Utility proxy does not confirm available capacity."
+      ],
+      "recommended_followup": "Request WSACC capacity and service readiness fields.",
+      "related_layers": [
+        "Utility Proxy"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "transportation_context",
+      "domain": "transportation_context",
+      "title": "Transportation Project Context",
+      "status_band": "monitor",
+      "severity": 1,
+      "confidence": "medium",
+      "value": "Context available",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "Transportation context can be reviewed with observed permit activity."
+      ],
+      "caveats": [
+        "Transportation Context is a coordination signal, not project approval."
+      ],
+      "recommended_followup": "Review transportation context near active development areas.",
+      "related_layers": [
+        "Transportation Context",
+        "Development Hotspots"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "zoning_land_use_readiness",
+      "domain": "zoning_land_use",
+      "title": "Zoning / Land Use Readiness",
+      "status_band": "data_needed",
+      "severity": 2,
+      "confidence": "low",
+      "value": "Partial",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "Parcel zoning context is available; official rezoning and future land use data are still needed."
+      ],
+      "caveats": [
+        "Official rezoning case records and future land use GIS remain data needs where unavailable."
+      ],
+      "recommended_followup": "Request rezoning case records and future land use layers.",
+      "related_layers": [
+        "Parcel Intelligence"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "model_research_status",
+      "domain": "model_research",
+      "title": "Model Research Status",
+      "status_band": "monitor",
+      "severity": 1,
+      "confidence": "medium",
+      "value": "Internal only",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "Model Lab exposes relative research signal context only."
+      ],
+      "caveats": [
+        "Internal model research only; no exact probabilities or raw values are shown."
+      ],
+      "recommended_followup": "Use Model Lab to guide questions, then verify source records.",
+      "related_layers": [
+        "Model Lab Research Signals"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "data_readiness",
+      "domain": "data_readiness",
+      "title": "Data Readiness",
+      "status_band": "data_needed",
+      "severity": 2,
+      "confidence": "high",
+      "value": 7,
+      "unit": "data needs",
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "7 priority data needs are tracked.",
+        "WSACC true utility capacity",
+        "Official school enrollment/capacity",
+        "Official rezoning records"
+      ],
+      "caveats": [
+        "Missing official data limits how far CFS can go beyond review signals."
+      ],
+      "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
+      "related_layers": [],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    }
+  ],
+  "summary": {
+    "total_signals": 8,
+    "elevated_review_count": 2,
+    "review_count": 0,
+    "data_needed_count": 3,
+    "unavailable_count": 0
+  },
+  "watchlist": [
+    {
+      "id": "floodplain_review",
+      "domain": "floodplain_review",
+      "title": "Floodplain Review",
+      "status_band": "elevated_review",
+      "severity": 4,
+      "confidence": "high",
+      "value": 7989,
+      "unit": "parcels",
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "7,989 parcels need floodplain review.",
+        "7,254 Special Flood Hazard Area parcels; 3,229 floodway parcels."
+      ],
+      "caveats": [
+        "Floodplain Review is planning context, not a permitting determination."
+      ],
+      "recommended_followup": "Confirm floodway, Special Flood Hazard Area, and local review requirements.",
+      "related_layers": [
+        "Floodplain Review"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "school_pressure",
+      "domain": "school_pressure",
+      "title": "School Utilization + Growth Pressure",
+      "status_band": "elevated_review",
+      "severity": 4,
+      "confidence": "medium",
+      "value": 13,
+      "unit": "areas",
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Attendance areas",
+      "evidence": [
+        "35 attendance areas reviewed.",
+        "13 areas have elevated review signal.",
+        "0 areas need utilization data follow-up."
+      ],
+      "caveats": [
+        "Portfolio demo uses a cached CFS demo extract.",
+        "Permit activity is not the same as student generation.",
+        "This is not an official enrollment forecast."
+      ],
+      "recommended_followup": "Compare school utilization context with observed residential permit activity.",
+      "related_layers": [
+        "School Utilization + Permit Pressure",
+        "Development Hotspots"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "data_readiness",
+      "domain": "data_readiness",
+      "title": "Data Readiness",
+      "status_band": "data_needed",
+      "severity": 2,
+      "confidence": "high",
+      "value": 7,
+      "unit": "data needs",
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "7 priority data needs are tracked.",
+        "WSACC true utility capacity",
+        "Official school enrollment/capacity",
+        "Official rezoning records"
+      ],
+      "caveats": [
+        "Missing official data limits how far CFS can go beyond review signals."
+      ],
+      "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
+      "related_layers": [],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "utility_readiness",
+      "domain": "utility_readiness",
+      "title": "Utility Readiness Coverage",
+      "status_band": "data_needed",
+      "severity": 2,
+      "confidence": "low",
+      "value": "Data needed",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "True utility capacity and service readiness data are not available in CFS yet."
+      ],
+      "caveats": [
+        "Utility proxy does not confirm available capacity."
+      ],
+      "recommended_followup": "Request WSACC capacity and service readiness fields.",
+      "related_layers": [
+        "Utility Proxy"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "zoning_land_use_readiness",
+      "domain": "zoning_land_use",
+      "title": "Zoning / Land Use Readiness",
+      "status_band": "data_needed",
+      "severity": 2,
+      "confidence": "low",
+      "value": "Partial",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "Parcel zoning context is available; official rezoning and future land use data are still needed."
+      ],
+      "caveats": [
+        "Official rezoning case records and future land use GIS remain data needs where unavailable."
+      ],
+      "recommended_followup": "Request rezoning case records and future land use layers.",
+      "related_layers": [
+        "Parcel Intelligence"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "model_research_status",
+      "domain": "model_research",
+      "title": "Model Research Status",
+      "status_band": "monitor",
+      "severity": 1,
+      "confidence": "medium",
+      "value": "Internal only",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "Model Lab exposes relative research signal context only."
+      ],
+      "caveats": [
+        "Internal model research only; no exact probabilities or raw values are shown."
+      ],
+      "recommended_followup": "Use Model Lab to guide questions, then verify source records.",
+      "related_layers": [
+        "Model Lab Research Signals"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "observed_development_activity",
+      "domain": "development_activity",
+      "title": "Observed Development Activity",
+      "status_band": "monitor",
+      "severity": 1,
+      "confidence": "high",
+      "value": 3642,
+      "unit": "permits",
+      "trend_direction": "down",
+      "trend_label": "-526 permits (-12.6%)",
+      "geography_label": "Countywide",
+      "evidence": [
+        "64,426 permit records across 43,474 active parcels.",
+        "Dominant permit segment: residential_growth (42,206)."
+      ],
+      "caveats": [
+        "Observed permit activity only; not a prediction."
+      ],
+      "recommended_followup": "Review Development Hotspots by permit segment and year range.",
+      "related_layers": [
+        "Development Hotspots"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "transportation_context",
+      "domain": "transportation_context",
+      "title": "Transportation Project Context",
+      "status_band": "monitor",
+      "severity": 1,
+      "confidence": "medium",
+      "value": "Context available",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "Transportation context can be reviewed with observed permit activity."
+      ],
+      "caveats": [
+        "Transportation Context is a coordination signal, not project approval."
+      ],
+      "recommended_followup": "Review transportation context near active development areas.",
+      "related_layers": [
+        "Transportation Context",
+        "Development Hotspots"
+      ],
+      "data_freshness": "2026-06-30T00:46:25Z",
+      "source_mode": "demo"
+    }
+  ]
+}

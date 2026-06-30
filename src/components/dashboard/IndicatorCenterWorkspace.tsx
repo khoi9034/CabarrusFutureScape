@@ -50,14 +50,21 @@ import { useSchoolConstraintSummary } from "@/hooks/useSchoolConstraintSummary";
 import { useSchoolPressureLayer } from "@/hooks/useSchoolPressureLayer";
 import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDemoManifest } from "@/lib/demo-data/client";
+import { getIndicatorIntelligence } from "@/lib/indicatorIntelligenceService";
 import { cn } from "@/lib/utils";
 import type {
   IndicatorCenterContext,
   IndicatorCenterGroupId,
+  IndicatorCenterPriorityLabel,
   PlanningSnapshot,
   PlanningSnapshotSectionKey,
 } from "@/types";
 import type { CfsAiDashboardActions, CfsAiSearchResponse } from "@/types/api";
+import type {
+  IndicatorDomainReadiness,
+  IndicatorIntelligenceResponse,
+  IndicatorSignal,
+} from "@/types/api";
 import type {
   SchoolPressureFeature,
   SchoolPressureLayerState,
@@ -414,6 +421,10 @@ export function IndicatorCenterWorkspace() {
   const [askCfsActions, setAskCfsActions] =
     useState<CfsAiDashboardActions | null>(null);
   const [demoGeneratedAt, setDemoGeneratedAt] = useState<string | null>(null);
+  const [indicatorIntelligence, setIndicatorIntelligence] =
+    useState<IndicatorIntelligenceResponse | null>(null);
+  const [indicatorIntelligenceError, setIndicatorIntelligenceError] =
+    useState<string | null>(null);
   const [showHowIndicatorsWork, setShowHowIndicatorsWork] = useState(false);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
 
@@ -452,6 +463,29 @@ export function IndicatorCenterWorkspace() {
     };
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    getIndicatorIntelligence()
+      .then((response) => {
+        if (!mounted) return;
+        setIndicatorIntelligence(response);
+        setIndicatorIntelligenceError(null);
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        setIndicatorIntelligence(null);
+        setIndicatorIntelligenceError(
+          error instanceof Error
+            ? error.message
+            : "Indicator intelligence is unavailable.",
+        );
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const cards = buildIndicatorCenterSummaryCards({
     developmentStatistics,
     floodSummary,
@@ -472,19 +506,28 @@ export function IndicatorCenterWorkspace() {
     visibleDefinitionIds.has(card.indicator.indicatorId),
   );
   const reviewThemes = buildIndicatorCenterReviewThemes(visibleDefinitions);
-  const executiveSignals = buildExecutiveSignalCards({
-    developmentStatistics,
-    developmentTrends,
-    floodSummary,
-    schoolCounts,
-    schoolSummary,
-  });
-  const attentionQueue = buildAttentionQueue({
-    developmentStatistics,
-    floodSummary,
-    schoolCounts,
-    visibleDefinitions,
-  });
+  const executiveSignals =
+    indicatorIntelligence?.kpis.length
+      ? buildExecutiveSignalCardsFromIntelligence(indicatorIntelligence.kpis)
+      : buildExecutiveSignalCards({
+          developmentStatistics,
+          developmentTrends,
+          floodSummary,
+          schoolCounts,
+          schoolSummary,
+        });
+  const attentionQueue =
+    indicatorIntelligence?.watchlist.length
+      ? buildAttentionQueueFromIntelligence(
+          indicatorIntelligence.watchlist,
+          visibleDefinitions,
+        )
+      : buildAttentionQueue({
+          developmentStatistics,
+          floodSummary,
+          schoolCounts,
+          visibleDefinitions,
+        });
   const visibleAttentionQueue = applyAskCfsWatchlistActions(
     attentionQueue,
     askCfsActions,
@@ -500,12 +543,16 @@ export function IndicatorCenterWorkspace() {
   const drilldownSections = allDrilldownSections.filter((section) =>
     visibleDefinitionIds.has(section.indicator.indicatorId),
   );
-  const domainReadinessRows = buildDomainReadinessRows({
-    developmentStatistics,
-    floodSummary,
-    schoolCounts,
-    schoolSummary,
-  });
+  const domainReadinessRows = indicatorIntelligence?.domain_readiness.length
+    ? buildDomainReadinessRowsFromIntelligence(
+        indicatorIntelligence.domain_readiness,
+      )
+    : buildDomainReadinessRows({
+        developmentStatistics,
+        floodSummary,
+        schoolCounts,
+        schoolSummary,
+      });
   const visibleDomainReadinessRows = domainReadinessRows.filter((row) =>
     shouldShowGroupForReadinessTab(row.groupId, activeReadinessTab),
   );
@@ -748,6 +795,13 @@ export function IndicatorCenterWorkspace() {
       <div className="mt-4">
         <AskCfsPanel onResponse={handleAskCfsResponse} />
       </div>
+
+      {indicatorIntelligenceError ? (
+        <div className="mt-3 rounded-lg border border-[#f6d98e]/25 bg-[#f6d98e]/10 px-3 py-2 text-xs leading-5 text-[#f6d98e]">
+          Indicator intelligence endpoint unavailable in live mode:{" "}
+          {indicatorIntelligenceError}
+        </div>
+      ) : null}
 
       {askCfsActions ? (
         <AskCfsActionStrip
@@ -1178,6 +1232,192 @@ function buildExecutiveSignalCards({
       value: "Available",
     },
   ];
+}
+
+function buildExecutiveSignalCardsFromIntelligence(
+  signals: IndicatorSignal[],
+): ExecutiveSignalCardModel[] {
+  return signals.map((signal) => ({
+    caveat: signal.caveats[0] ?? "Planning review signal only.",
+    confidence: `Coverage: ${signal.confidence}`,
+    groupId: groupIdForIndicatorDomain(signal.domain),
+    icon: iconForIndicatorDomain(signal.domain),
+    label: signal.title,
+    status: statusBandLabel(signal.status_band),
+    subvalue:
+      signal.trend_label ??
+      signal.evidence[0] ??
+      "Evidence available in detail drawer",
+    tone: toneForStatusBand(signal.status_band),
+    value: formatSignalValue(signal),
+  }));
+}
+
+function buildAttentionQueueFromIntelligence(
+  signals: IndicatorSignal[],
+  visibleDefinitions: IndicatorCenterContext[],
+): AttentionQueueRow[] {
+  const visibleGroups = new Set(
+    visibleDefinitions.map((indicator) => indicator.groupId),
+  );
+
+  return signals
+    .map((signal) => ({
+      caveat: signal.caveats[0] ?? "Planning review signal only.",
+      category: domainLabel(signal.domain),
+      currentEvidence: signal.evidence[0] ?? "Evidence unavailable",
+      dataBasis: [
+        signal.source_mode === "demo"
+          ? "Portfolio Demo cached extract"
+          : "Local Live Data",
+        signal.data_freshness,
+      ]
+        .filter(Boolean)
+        .join(" / "),
+      indicator: indicatorContextFromSignal(signal),
+      indicatorName: signal.title,
+      priorityLabel: statusBandLabel(signal.status_band),
+      recommendedFollowUp: signal.recommended_followup,
+      whyItMatters:
+        signal.evidence[1] ??
+        "This signal helps staff decide what to review first.",
+    }))
+    .filter((row) => visibleGroups.has(row.indicator.groupId));
+}
+
+function buildDomainReadinessRowsFromIntelligence(
+  rows: IndicatorDomainReadiness[],
+): DomainReadinessRow[] {
+  return rows.map((row) => ({
+    caveat: row.caveat,
+    coverage: row.coverage,
+    currentUse: row.current_use,
+    dataStatus:
+      row.data_available === "yes"
+        ? "Available"
+        : row.data_available === "partial"
+          ? "Partial"
+          : "Data needed",
+    domain: row.domain,
+    groupId: groupIdForReadinessDomain(row.domain),
+    updateCadence: row.update_cadence_known ? "Known" : "Needs update cadence",
+  }));
+}
+
+function indicatorContextFromSignal(signal: IndicatorSignal): IndicatorCenterContext {
+  const groupId = groupIdForIndicatorDomain(signal.domain);
+  return {
+    caveat: signal.caveats.join(" "),
+    category: domainLabel(signal.domain),
+    dataUsed: signal.evidence,
+    groupId,
+    indicatorId: signal.id,
+    mapSupported: signal.related_layers.length > 0,
+    name: signal.title,
+    officialDataNeeded: signal.status_band === "data_needed",
+    priority: statusBandLabel(signal.status_band),
+    priorityLabel: statusBandLabel(signal.status_band),
+    recommendedFollowUp: signal.recommended_followup,
+    snapshotIncluded: true,
+    source:
+      signal.source_mode === "demo"
+        ? "Portfolio Demo cached extract"
+        : "Local Live Data",
+    status: statusBandLabel(signal.status_band),
+    title: signal.title,
+    whatItMeans: signal.evidence.join(" "),
+  };
+}
+
+function groupIdForIndicatorDomain(domain: IndicatorSignal["domain"]): IndicatorCenterGroupId {
+  switch (domain) {
+    case "development_activity":
+      return "development-activity";
+    case "floodplain_review":
+      return "flood-review";
+    case "model_research":
+      return "model-research";
+    case "school_pressure":
+      return "school-context";
+    case "transportation_context":
+    case "utility_readiness":
+      return "utility-infrastructure";
+    case "data_readiness":
+    case "zoning_land_use":
+      return "data-gaps";
+  }
+}
+
+function groupIdForReadinessDomain(domain: string): IndicatorCenterGroupId {
+  const normalized = domain.toLowerCase();
+  if (normalized.includes("development")) return "development-activity";
+  if (normalized.includes("school")) return "school-context";
+  if (normalized.includes("flood")) return "flood-review";
+  if (normalized.includes("model")) return "model-research";
+  if (normalized.includes("transport") || normalized.includes("utilit")) {
+    return "utility-infrastructure";
+  }
+  return "data-gaps";
+}
+
+function statusBandLabel(
+  statusBand: IndicatorSignal["status_band"],
+): IndicatorCenterPriorityLabel {
+  switch (statusBand) {
+    case "elevated_review":
+      return "High Attention";
+    case "review":
+      return "Review Needed";
+    case "data_needed":
+      return "Data Needed";
+    case "unavailable":
+      return "Data needed";
+    case "monitor":
+    case "normal":
+      return "Context Available";
+  }
+}
+
+function toneForStatusBand(
+  statusBand: IndicatorSignal["status_band"],
+): ExecutiveSignalCardModel["tone"] {
+  if (statusBand === "elevated_review") return "attention";
+  if (statusBand === "review") return "review";
+  if (statusBand === "data_needed" || statusBand === "unavailable") return "data";
+  return "neutral";
+}
+
+function iconForIndicatorDomain(domain: IndicatorSignal["domain"]) {
+  switch (domain) {
+    case "development_activity":
+      return <TrendingUp className="h-4 w-4" />;
+    case "floodplain_review":
+      return <Waves className="h-4 w-4" />;
+    case "school_pressure":
+      return <GraduationCap className="h-4 w-4" />;
+    case "utility_readiness":
+      return <Wrench className="h-4 w-4" />;
+    case "transportation_context":
+      return <Gauge className="h-4 w-4" />;
+    case "model_research":
+      return <FileSearch className="h-4 w-4" />;
+    default:
+      return <ClipboardList className="h-4 w-4" />;
+  }
+}
+
+function domainLabel(domain: IndicatorSignal["domain"]) {
+  return domain
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatSignalValue(signal: IndicatorSignal) {
+  if (typeof signal.value === "number") {
+    return `${formatCount(signal.value)}${signal.unit ? ` ${signal.unit}` : ""}`;
+  }
+  return signal.value ?? "Not available";
 }
 
 function buildAttentionQueue({
