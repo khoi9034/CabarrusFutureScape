@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.dependencies.database import get_read_only_db
+from app.services.enterprise_export_service import build_enterprise_export_payload
 
 router = APIRouter(prefix="/economics", tags=["CFS Economics"])
 
@@ -24,6 +25,19 @@ def get_economics_intelligence(
 ) -> dict[str, Any]:
     """Return parcel economics screening signals for dashboard use."""
 
+    return _cached_economics_intelligence(db)
+
+
+@router.get("/enterprise-export")
+def get_economics_enterprise_export(
+    db: Session = Depends(get_read_only_db),
+) -> dict[str, Any]:
+    """Return connector-ready economics facts, dimensions, and decision pack."""
+
+    return build_enterprise_export_payload(_cached_economics_intelligence(db), mode="live")
+
+
+def _cached_economics_intelligence(db: Session) -> dict[str, Any]:
     cached_payload = _ECONOMICS_CACHE.get("payload")
     expires_at = _ECONOMICS_CACHE.get("expires_at")
     if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached_payload:

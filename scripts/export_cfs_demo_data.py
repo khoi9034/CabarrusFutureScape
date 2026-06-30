@@ -22,6 +22,10 @@ from psycopg.rows import dict_row
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "backend"))
+
+from app.services.enterprise_export_service import build_enterprise_export_payload
+
 DEMO_DATA_DIR = REPO_ROOT / "public" / "demo-data"
 DEMO_MAP_LAYER_DIR = DEMO_DATA_DIR / "map_layers"
 SAMPLE_PARCEL_LIMIT = 300
@@ -105,6 +109,10 @@ def main() -> int:
         model_status = build_model_status(generated_at)
         model_lab_demo_clusters = build_model_lab_demo_clusters(conn, generated_at)
         economics_intelligence = build_economics_intelligence_demo(conn, generated_at)
+        economics_enterprise_export = build_enterprise_export_payload(
+            economics_intelligence,
+            mode="demo",
+        )
         sample_parcels = build_sample_parcels(conn, generated_at)
         map_layer_manifest = export_demo_map_layers(
             conn,
@@ -167,6 +175,7 @@ def main() -> int:
             "source_label": "Local CFS PostGIS cached extract",
         },
         "indicator_intelligence.json": indicator_intelligence,
+        "economics_enterprise_export.json": economics_enterprise_export,
         "economics_intelligence.json": economics_intelligence,
         "indicator_summary.json": indicator_summary,
         "development_trends.json": {

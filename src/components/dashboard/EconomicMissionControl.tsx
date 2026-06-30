@@ -14,12 +14,22 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import { USE_DEMO_DATA } from "@/lib/api/client";
-import { getEconomicsIntelligence } from "@/lib/economicsIntelligenceService";
+import {
+  getEconomicsEnterpriseExport,
+  getEconomicsIntelligence,
+} from "@/lib/economicsIntelligenceService";
+import type { EnterpriseExportPreviewKind } from "@/lib/enterpriseAdapters/enterpriseExportTypes";
+import { buildPowerBiDatasetPayload } from "@/lib/enterpriseAdapters/powerBiAdapter";
+import {
+  buildDecisionPackExport,
+  buildPlanningModelCubePayload,
+} from "@/lib/enterpriseAdapters/planningAnalyticsAdapter";
 import { cn } from "@/lib/utils";
 import type {
   CfsAiDashboardActions,
   CfsAiSearchRequest,
   CfsAiSelectedSignal,
+  EconomicsEnterpriseExportResponse,
   EconomicsIntelligenceResponse,
   EconomicsKpi,
   EconomicsReadinessRow,
@@ -30,6 +40,11 @@ export function EconomicMissionControl() {
   const [intelligence, setIntelligence] =
     useState<EconomicsIntelligenceResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [enterpriseExport, setEnterpriseExport] =
+    useState<EconomicsEnterpriseExportResponse | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [previewKind, setPreviewKind] =
+    useState<EnterpriseExportPreviewKind>("power_bi");
   const [askActions, setAskActions] = useState<CfsAiDashboardActions | null>(null);
   const [askRequest, setAskRequest] =
     useState<{ request: CfsAiSearchRequest; requestId: number } | null>(null);
@@ -49,6 +64,22 @@ export function EconomicMissionControl() {
           requestError instanceof Error
             ? requestError.message
             : "Economics intelligence is unavailable.",
+        );
+      });
+
+    getEconomicsEnterpriseExport()
+      .then((response) => {
+        if (!mounted) return;
+        setEnterpriseExport(response);
+        setExportError(null);
+      })
+      .catch((requestError) => {
+        if (!mounted) return;
+        setEnterpriseExport(null);
+        setExportError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Enterprise export preview is unavailable.",
         );
       });
 
@@ -148,6 +179,47 @@ export function EconomicMissionControl() {
           </article>
         ))}
       </section>
+
+      <section className="mt-4 cfs-command-surface rounded-xl border-[#a8f3c4]/18 p-4">
+        <SectionHeader
+          icon={<FileSearch className="h-4 w-4" />}
+          kicker="Enterprise Consulting Toolkit"
+          title="Planning model, BI dashboard, location intelligence, and decision pack"
+        />
+        <div className="mt-4 grid gap-3 lg:grid-cols-4">
+          {enterpriseToolkit.map((tool) => (
+            <article
+              className="rounded-xl border border-white/10 bg-white/[0.035] p-4"
+              key={tool.title}
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#a8f3c4]">
+                {tool.kicker}
+              </p>
+              <h3 className="mt-2 text-sm font-semibold text-white">
+                {tool.title}
+              </h3>
+              <p className="mt-2 text-xs leading-5 text-slate-400">
+                {tool.text}
+              </p>
+              <ul className="mt-3 space-y-1 text-[11px] leading-5 text-slate-500">
+                {tool.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <PlanningModelSchemaPanel />
+        <EnterpriseExportPanel
+          exportPayload={enterpriseExport}
+          error={exportError}
+          previewKind={previewKind}
+          setPreviewKind={setPreviewKind}
+        />
+      </div>
 
       <section className="mt-4 cfs-command-surface rounded-xl border-[#68d8ff]/18 p-4">
         <SectionHeader
@@ -350,6 +422,88 @@ const consultingPanels = [
   },
 ];
 
+const enterpriseToolkit = [
+  {
+    items: [
+      "Dimensions: Geography, Parcel, Jurisdiction, Land Use, Scenario, Time",
+      "Measures: assessed value, revenue per acre band, service burden band",
+      "Outputs: opportunity class, next diligence, executive memo",
+    ],
+    kicker: "Planning model",
+    text: "Multidimensional planning model pattern for assumptions, scenarios, measures, and outputs.",
+    title: "Planning Model Workspace",
+  },
+  {
+    items: [
+      "KPI cards and slicer-ready facts",
+      "Value distribution and opportunity breakdowns",
+      "Watchlists, drilldowns, and executive summary",
+    ],
+    kicker: "BI dashboard",
+    text: "Embedded analytics pattern for KPI facts, signal facts, scenario facts, and dimensions.",
+    title: "BI Dashboard Workspace",
+  },
+  {
+    items: [
+      "Parcel selection and spatial joins",
+      "Constraint overlays and scenario geography",
+      "Related layers for diligence review",
+    ],
+    kicker: "Location intelligence",
+    text: "Map-driven workflow for connecting economics with parcels, constraints, and service context.",
+    title: "Location Intelligence Workspace",
+  },
+  {
+    items: [
+      "Executive takeaway",
+      "Evidence pack and assumptions",
+      "Risk flags, caveats, and next diligence",
+    ],
+    kicker: "Consulting deliverable",
+    text: "Decision-pack pattern for turning indicators into a presentation-ready consulting artifact.",
+    title: "Consulting Decision Pack",
+  },
+];
+
+const planningModelSchema = {
+  dimensions: [
+    "Geography",
+    "Parcel",
+    "Jurisdiction",
+    "Land Use / Zoning",
+    "Time",
+    "Scenario",
+    "Constraint Domain",
+  ],
+  measures: [
+    "Assessed Value",
+    "Land Value",
+    "Improvement Value",
+    "Value per Acre",
+    "Estimated County Tax",
+    "Tax-Base Lift Band",
+    "Revenue per Acre Band",
+    "Public Cost Risk Band",
+    "Data Confidence",
+  ],
+  outputs: [
+    "Opportunity class",
+    "Constraint-adjusted opportunity band",
+    "Fiscal attractiveness band",
+    "Recommended next diligence",
+    "Executive memo",
+  ],
+};
+
+const analyticsReadiness = [
+  "export-ready economics_enterprise_export.json",
+  "normalized KPI table",
+  "normalized signal table",
+  "normalized scenario table",
+  "normalized watchlist table",
+  "map layer GeoJSON",
+];
+
 function StatusPill({ label, tone = "cyan" }: { label: string; tone?: "amber" | "cyan" }) {
   return (
     <span
@@ -362,6 +516,140 @@ function StatusPill({ label, tone = "cyan" }: { label: string; tone?: "amber" | 
     >
       {label}
     </span>
+  );
+}
+
+function PlanningModelSchemaPanel() {
+  return (
+    <section className="cfs-command-surface rounded-xl border-[#68d8ff]/18 p-4">
+      <SectionHeader
+        icon={<Calculator className="h-4 w-4" />}
+        kicker="Planning Model Schema"
+        title="Dimensions, measures, assumptions, and outputs"
+      />
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <SchemaColumn title="Dimensions" values={planningModelSchema.dimensions} />
+        <SchemaColumn title="Measures" values={planningModelSchema.measures} />
+        <SchemaColumn title="Outputs" values={planningModelSchema.outputs} />
+      </div>
+      <p className="mt-3 text-xs leading-5 text-slate-500">
+        Scenario assumptions include development type, intensity band,
+        value-per-acre assumption, infrastructure burden, school burden,
+        utility readiness confidence, and transportation access confidence.
+      </p>
+    </section>
+  );
+}
+
+function EnterpriseExportPanel({
+  error,
+  exportPayload,
+  previewKind,
+  setPreviewKind,
+}: {
+  error: string | null;
+  exportPayload: EconomicsEnterpriseExportResponse | null;
+  previewKind: EnterpriseExportPreviewKind;
+  setPreviewKind: (kind: EnterpriseExportPreviewKind) => void;
+}) {
+  const preview =
+    exportPayload && previewKind === "power_bi"
+      ? buildPowerBiDatasetPayload(exportPayload)
+      : exportPayload && previewKind === "planning_model"
+        ? buildPlanningModelCubePayload(exportPayload)
+        : exportPayload
+          ? buildDecisionPackExport(exportPayload)
+          : null;
+  const prettyPreview = JSON.stringify(preview ?? { status: "Loading enterprise export preview" }, null, 2);
+
+  return (
+    <section className="cfs-command-surface rounded-xl border-[#d8b86a]/18 p-4">
+      <SectionHeader
+        icon={<BarChart3 className="h-4 w-4" />}
+        kicker="BI / Embedded Analytics Readiness"
+        title="Enterprise Export"
+      />
+      <p className="mt-3 text-xs leading-5 text-slate-400">
+        CFS exports connector-ready facts, dimensions, planning-model cells,
+        and a decision pack. No external account or embedded report is connected
+        in this phase.
+      </p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <PreviewButton
+          active={previewKind === "power_bi"}
+          label="Preview Power BI-style dataset"
+          onClick={() => setPreviewKind("power_bi")}
+        />
+        <PreviewButton
+          active={previewKind === "planning_model"}
+          label="Preview Planning Model payload"
+          onClick={() => setPreviewKind("planning_model")}
+        />
+        <PreviewButton
+          active={previewKind === "decision_pack"}
+          label="Preview Decision Pack JSON"
+          onClick={() => setPreviewKind("decision_pack")}
+        />
+      </div>
+      {error ? (
+        <p className="mt-3 rounded-lg border border-[#f6d98e]/25 bg-[#f6d98e]/10 px-3 py-2 text-xs text-[#f6d98e]">
+          {error}
+        </p>
+      ) : null}
+      <div className="mt-3 grid gap-3 lg:grid-cols-[0.8fr_1.2fr]">
+        <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+          <h3 className="text-sm font-semibold text-white">
+            Export-ready datasets
+          </h3>
+          <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-400">
+            {analyticsReadiness.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+        <pre className="max-h-72 overflow-auto rounded-lg border border-white/10 bg-black/40 p-3 text-[11px] leading-5 text-slate-300">
+          {prettyPreview}
+        </pre>
+      </div>
+    </section>
+  );
+}
+
+function SchemaColumn({ title, values }: { title: string; values: string[] }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+      <h3 className="text-sm font-semibold text-white">{title}</h3>
+      <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-400">
+        {values.map((value) => (
+          <li key={value}>{value}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function PreviewButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={cn(
+        "rounded-lg border px-3 py-2 text-left text-xs font-semibold transition",
+        active
+          ? "border-[#68d8ff]/60 bg-[#68d8ff]/12 text-[#c8f6ff]"
+          : "border-white/10 bg-white/[0.035] text-slate-300 hover:border-[#68d8ff]/30",
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {label}
+    </button>
   );
 }
 

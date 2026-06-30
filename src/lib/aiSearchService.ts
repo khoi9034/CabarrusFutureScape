@@ -42,6 +42,13 @@ export const askCfsEconomicsSuggestedPrompts = [
   "Where is economic data confidence weak?",
   "What scenario should I inspect first?",
   "Summarize public cost risk.",
+  "How would this become a Power BI dataset?",
+  "Explain the planning model dimensions.",
+  "What scenario assumptions should I test?",
+  "Build a consulting decision pack.",
+  "What would go into a fiscal impact lens?",
+  "Which CFS Economics fields are measures vs dimensions?",
+  "How would IBM Planning Analytics model this?",
 ] as const;
 
 export async function searchCfsAi(
@@ -186,6 +193,16 @@ async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
         "Consulting takeaway",
         "Traditional GIS can show where things are. CFS Economics helps explain what those places mean economically by turning parcel, tax, zoning, permit, infrastructure, and constraint data into a decision-support workflow.",
       ],
+      [
+        "Enterprise tool alignment",
+        bullets([
+          "Planning model: dimensions include Geography, Parcel, Jurisdiction, Land Use, Scenario, Time, and Constraint Domain.",
+          "Measures include assessed value, land value, improvement value, value per acre, estimated county tax, tax-base lift band, revenue per acre band, public cost risk band, and data confidence.",
+          "BI dataset: KPI fact, parcel economic signal fact, scenario output fact, domain readiness dimension, geography dimension, and time dimension.",
+          "Decision pack: executive takeaway, evidence pack, assumptions, risk flags, caveats, and recommended next diligence.",
+          "This is export-ready and connector-ready only; no live enterprise platform integration is configured.",
+        ]),
+      ],
     ),
     as_of: economics.as_of,
     caveats: [
@@ -230,6 +247,7 @@ async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
       "Open Economic Workspace and compare Revenue per Acre Dashboard with Underbuilt Redevelopment Watchlist.",
       "Use Economic Scenario Lab as screening-level fiscal context only.",
       "Ask: Where is economic data confidence weak?",
+      "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",
     ],
   };
 }
@@ -655,7 +673,25 @@ function classifyDemoDomains(query: string): CfsAiDomain[] {
     if (terms.some((term) => normalized.includes(term))) domains.push(domain);
   };
   add("schools", ["school", "attendance", "capacity", "utilization"]);
-  add("economics", ["economic", "economics", "tax", "value", "acre", "underbuilt", "redevelopment", "fiscal", "scenario"]);
+  add("economics", [
+    "economic",
+    "economics",
+    "tax",
+    "value",
+    "acre",
+    "underbuilt",
+    "redevelopment",
+    "fiscal",
+    "scenario",
+    "power bi",
+    "planning analytics",
+    "tm1",
+    "planning model",
+    "measures",
+    "dimensions",
+    "decision pack",
+    "dataset",
+  ]);
   add("flood", ["flood", "fema", "floodplain", "floodway"]);
   add("permits", ["permit", "development", "growth", "trend", "activity"]);
   add("transportation", ["transportation", "traffic", "road", "stip", "aadt"]);

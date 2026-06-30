@@ -1,0 +1,1980 @@
+{
+  "as_of": "2026-06-30T17:04:39Z",
+  "caveats": [
+    "Connector-ready export only; no external platform account is connected.",
+    "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
+    "Facts and dimensions exclude contact fields and credential fields."
+  ],
+  "exports": {
+    "power_bi": {
+      "dimensions": {
+        "domain_readiness": [
+          {
+            "current_use": "Assessed/market value baseline",
+            "data_status": "available",
+            "domain": "Parcel Value",
+            "gap_or_next_need": "Add current appraisal extract if missing."
+          },
+          {
+            "current_use": "Value-per-acre denominator",
+            "data_status": "available",
+            "domain": "Acreage",
+            "gap_or_next_need": "Add reliable parcel acreage."
+          },
+          {
+            "current_use": "Improvement-to-land ratio",
+            "data_status": "available",
+            "domain": "Land / Improvement Split",
+            "gap_or_next_need": "Add land and improvement values."
+          },
+          {
+            "current_use": "Constraint-adjusted opportunity",
+            "data_status": "data_needed",
+            "domain": "Service Burden",
+            "gap_or_next_need": "Add official utility, school, and transportation service assumptions."
+          }
+        ],
+        "geography": [
+          {
+            "geography_label": "26.890 AC - NC HWY 49 & N MAIN STREET"
+          },
+          {
+            "geography_label": "85 EXCHANGE PHASE II"
+          },
+          {
+            "geography_label": "AIRPORT"
+          },
+          {
+            "geography_label": "AQUAMARINE"
+          },
+          {
+            "geography_label": "BISCAYNE / TRINITY CHURCH"
+          },
+          {
+            "geography_label": "BONDS QUARRY"
+          },
+          {
+            "geography_label": "CABARRUS COUNTRY CLUB"
+          },
+          {
+            "geography_label": "CABARRUS COUNTY"
+          },
+          {
+            "geography_label": "CABARRUS/MCGILL"
+          },
+          {
+            "geography_label": "CAROLINA MALL COMPANY"
+          },
+          {
+            "geography_label": "CAROLINA VILLAGE"
+          },
+          {
+            "geography_label": "CATAWBA LANDS CONSERVANCY"
+          },
+          {
+            "geography_label": "CEDAR PARK ESTATES"
+          },
+          {
+            "geography_label": "CHARLOTTE MOTOR SPEEDWAY"
+          },
+          {
+            "geography_label": "CHRISTENBURY CORNERS NE QUADRANT PH 1"
+          },
+          {
+            "geography_label": "CHRISTENBURY SE CORNER"
+          },
+          {
+            "geography_label": "CHRISTENBURY SW CORNER"
+          },
+          {
+            "geography_label": "CK AFTON RIDGE LAND LLC"
+          },
+          {
+            "geography_label": "CK LAKE POINTE CORP CENTER, LLC"
+          },
+          {
+            "geography_label": "CONCORD MILLS"
+          },
+          {
+            "geography_label": "CONCORD MILLS OUTPARCEL"
+          },
+          {
+            "geography_label": "CONCORD PARKWAY SOUTH"
+          },
+          {
+            "geography_label": "COPPERFIELD PLACE"
+          },
+          {
+            "geography_label": "COUNTRY VIEW MHP"
+          },
+          {
+            "geography_label": "FUTURE ROYCROFT SD"
+          },
+          {
+            "geography_label": "HARRISBURG"
+          },
+          {
+            "geography_label": "HARRISBURG PROPERTIES"
+          },
+          {
+            "geography_label": "HARRISBURG TOWN CENTER"
+          },
+          {
+            "geography_label": "HSREI LLC AT AMC"
+          },
+          {
+            "geography_label": "HWY 24 / 27"
+          },
+          {
+            "geography_label": "HWY 601 / 49"
+          },
+          {
+            "geography_label": "I-85 AT LANE STREET"
+          },
+          {
+            "geography_label": "LAKE DON T. HOWELL"
+          },
+          {
+            "geography_label": "LT 4 AND LT 5 MB 71/41-45"
+          },
+          {
+            "geography_label": "MIAMI CHURCH RD"
+          },
+          {
+            "geography_label": "MIDLAND COMMERCIAL"
+          },
+          {
+            "geography_label": "MORRISON RIDGE LLC"
+          },
+          {
+            "geography_label": "MT PLEASANT OUTSIDE"
+          },
+          {
+            "geography_label": "NE MEDICAL CENTER"
+          },
+          {
+            "geography_label": "NO SUBDIVISION"
+          },
+          {
+            "geography_label": "NORTH CAROLINA RAILROAD"
+          },
+          {
+            "geography_label": "NORTH CAROLINA RESEARCH CAMPUS"
+          },
+          {
+            "geography_label": "NORTHLIGHT"
+          },
+          {
+            "geography_label": "PARADISE ESTATES"
+          },
+          {
+            "geography_label": "PLAT 103.590 AC - KANNAPOLIS PKWY"
+          },
+          {
+            "geography_label": "PROJECT GRAND AT THE GROUNDS AT CONCORD"
+          },
+          {
+            "geography_label": "QUIKTRIP NO 1021"
+          },
+          {
+            "geography_label": "REED GOLD MINE"
+          },
+          {
+            "geography_label": "SHOPS ON DERITA"
+          },
+          {
+            "geography_label": "SOUTH CANNON BLVD"
+          }
+        ],
+        "time": [
+          {
+            "as_of": "2026-06-30T17:04:39Z",
+            "period_type": "extract"
+          }
+        ]
+      },
+      "kpi_fact": [
+        {
+          "kpi_id": "parcels_analyzed",
+          "label": "Parcels analyzed",
+          "status_band": "stable_high_value",
+          "unit": "parcels",
+          "value": 120
+        },
+        {
+          "kpi_id": "assessed_value_coverage",
+          "label": "Assessed value coverage",
+          "status_band": "stable_high_value",
+          "unit": "dollars",
+          "value": 1275145150.0
+        },
+        {
+          "kpi_id": "median_value_per_acre",
+          "label": "Median value per acre",
+          "status_band": "redevelopment_opportunity",
+          "unit": "dollars_per_acre",
+          "value": 224767.4095257441
+        },
+        {
+          "kpi_id": "underbuilt_candidates",
+          "label": "Underbuilt candidates",
+          "status_band": "underbuilt_watch",
+          "unit": "parcels",
+          "value": 120
+        },
+        {
+          "kpi_id": "tax_base_opportunity",
+          "label": "Tax-base opportunity signals",
+          "status_band": "tax_base_opportunity",
+          "unit": "signals",
+          "value": 0
+        },
+        {
+          "kpi_id": "data_needed",
+          "label": "Economic data needed",
+          "status_band": "data_needed",
+          "unit": "parcels",
+          "value": 0
+        }
+      ],
+      "scenario_fact": [
+        {
+          "data_confidence": "screening",
+          "scenario_id": "current_conditions",
+          "title": "Current Conditions",
+          "what_it_tests": "Shows current value, acreage, constraints, and data confidence before scenario assumptions."
+        },
+        {
+          "data_confidence": "screening",
+          "scenario_id": "growth_continues",
+          "title": "Growth Continues As-Is",
+          "what_it_tests": "Tests whether current observed permit pressure reinforces existing fiscal/service tradeoffs."
+        },
+        {
+          "data_confidence": "screening",
+          "scenario_id": "infrastructure_constrained_growth",
+          "title": "Infrastructure-Constrained Growth",
+          "what_it_tests": "Tests where tax-base opportunity may be limited by utility, school, floodplain, or transportation burden."
+        },
+        {
+          "data_confidence": "screening",
+          "scenario_id": "targeted_investment",
+          "title": "Targeted Investment Scenario",
+          "what_it_tests": "Tests whether infrastructure investment could unlock future value in underbuilt or corridor parcels."
+        },
+        {
+          "data_confidence": "screening",
+          "scenario_id": "higher_density_redevelopment",
+          "title": "Higher-Density Redevelopment Scenario",
+          "what_it_tests": "Tests modeled tax-base lift against public cost risk under redevelopment assumptions."
+        },
+        {
+          "data_confidence": "screening",
+          "scenario_id": "industrial_employment",
+          "title": "Employment / Industrial Scenario",
+          "what_it_tests": "Tests employment land opportunity against road access, flood exposure, and service readiness."
+        },
+        {
+          "data_confidence": "screening",
+          "scenario_id": "mixed_use_corridor",
+          "title": "Mixed-Use Corridor Scenario",
+          "what_it_tests": "Tests corridor investment readiness and market + planning alignment."
+        }
+      ],
+      "signal_fact": [
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727442",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 243974.8879794015
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727441",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 243974.8879794015
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "AQUAMARINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149758869",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 141167.71969832937
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "LAKE DON T. HOWELL",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149751011",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 29542.82812440931
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD PARKWAY SOUTH",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149749657",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 32858.237742129575
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727653",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 50111.00618833594
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "BONDS QUARRY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149736050",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 58642.88090296917
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "STOUGH ROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149758945",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 59216.870060703266
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149749607",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 86482.96222313064
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149749606",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 86482.96222313064
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CK AFTON RIDGE LAND LLC",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149750868",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 93496.41170692255
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CAROLINA MALL COMPANY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149807384",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 260865.30491085546
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "PROJECT GRAND AT THE GROUNDS AT CONCORD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149758512",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 158601.10454009788
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149778854",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18421.01050239233
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "QUIKTRIP NO 1021",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726304",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2851033.263061343
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HARRISBURG",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149747547",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 510110.00656702026
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HARRISBURG",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149747546",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 510110.00656702026
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "STOUGH ROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765257",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 294405.303500961
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "STOUGH ROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765258",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 1683745.2795869752
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "STOUGH ROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765259",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 257700.4717022654
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NORTH CAROLINA RAILROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765260",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 364371.08630705206
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CAROLINA VILLAGE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149729262",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 164402.4069685285
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149777876",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18865.37772223866
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149777845",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18865.37772223866
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "SOUTH CANNON BLVD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149812981",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 587180.6968951045
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NO SUBDIVISION",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149755575",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 88741.81886846106
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "BISCAYNE / TRINITY CHURCH",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149794476",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 65580.45812655111
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "AIRPORT",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727291",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 132741.51185289453
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHRISTENBURY CORNERS NE QUADRANT PH 1",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726315",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 3742866.31067674
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149778673",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18820.83626780607
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149778674",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18820.83626780607
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149778663",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18820.83626780607
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149778672",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18820.83626780607
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "85 EXCHANGE PHASE II",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149741520",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 114593.24854409682
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "PLAT 103.590 AC - KANNAPOLIS PKWY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149786773",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 67042.66623498537
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "PLAT 103.590 AC - KANNAPOLIS PKWY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149786752",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 67042.66623498537
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHRISTENBURY SE CORNER",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726775",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 3877346.4300090014
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHRISTENBURY SE CORNER",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726774",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 3877346.4300090014
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "LT 4 AND LT 5 MB 71/41-45",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149725986",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 3622070.6220455207
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HARRISBURG",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727047",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 317364.64233633707
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "AIRPORT",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149728144",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 251663.81403624706
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "MT PLEASANT OUTSIDE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149780704",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 19224.335158420967
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "MT PLEASANT OUTSIDE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149780702",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 19224.335158420967
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "MT PLEASANT OUTSIDE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149780703",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 19224.335158420967
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HARRISBURG TOWN CENTER",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149749170",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 414175.87936413893
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "THE GROUNDS AT CONCORD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149757764",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 153509.8949594736
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NORTHLIGHT",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149812044",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 272895.07268108946
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NORTHLIGHT",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149812043",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 250877.08048402244
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CABARRUS/MCGILL",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149802688",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 249452.71297743477
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CABARRUS/MCGILL",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149802714",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 226044.74942180488
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CABARRUS/MCGILL",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149802687",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 240861.179870916
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CABARRUS COUNTY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149763216",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 64293.38758023116
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "I-85 AT LANE STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149820804",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 671589.6866502163
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "I-85 AT LANE STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149820816",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 438264.1236620246
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "I-85 AT LANE STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149820807",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 71621.73848499349
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "I-85 AT LANE STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149820806",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 164507.34443112926
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "I-85 AT LANE STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149815369",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 79065.79501730292
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "I-85 AT LANE STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149815395",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 54454.88124862696
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "I-85 AT LANE STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149815370",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 511459.2283954357
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727311",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 114335.24202217584
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "MORRISON RIDGE LLC",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149762642",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 51752.78147154734
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727402",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 291466.2674836166
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "UTILITY PRECAST OF CONCORD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149740592",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 178506.61869793793
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "PARADISE ESTATES",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149728135",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 139850.5370253728
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "MIAMI CHURCH RD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149777974",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 8985.844504766648
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HWY 601 / 49",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149772501",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 106201.93938831269
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "MIDLAND COMMERCIAL",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149773084",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 60116.305319163046
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "AIRPORT",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149740386",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 141991.30113022856
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NO SUBDIVISION",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149741259",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 45865.80444670597
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726932",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2424889.9272912475
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CK LAKE POINTE CORP CENTER, LLC",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149742044",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 514682.1111839887
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CK LAKE POINTE CORP CENTER, LLC",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149742045",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 514682.1111839887
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HARRISBURG PROPERTIES",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149749222",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 775289.9280408974
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "THE MARKETPLACE AT CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726703",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2138533.4650575547
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHRISTENBURY CORNERS NE QUADRANT PH 1",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726777",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2982645.4126771763
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD PARKWAY SOUTH",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149799175",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 409477.44308827753
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HWY 601 / 49",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149772039",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 29021.4886792089
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "WATTS CROSSROADS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149828946",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 8144.880908382638
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726810",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2331040.1386084678
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NE MEDICAL CENTER",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149810396",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 501419.37786880514
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CATAWBA LANDS CONSERVANCY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149780858",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 12420.698112668213
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "VER-EL MHP",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149736000",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 179942.40951398094
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "VER-EL MHP",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149736001",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 179942.40951398094
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NO SUBDIVISION",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149783527",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 17428.486473883997
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CABARRUS COUNTRY CLUB",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149788886",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 22011.483308193678
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "TRI-STAR PROPERTIES OF N.C.,LLC",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149802397",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2147153.5721607977
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHRISTENBURY SW CORNER",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726261",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2872864.017298228
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726660",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2413032.2460158234
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726661",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2413032.2460158234
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726659",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2413032.2460158234
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726658",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2413032.2460158234
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726662",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2413032.2460158234
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149778403",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 15353.453756200808
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "SHOPS ON DERITA",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149725985",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 3407434.2711567376
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "26.890 AC - NC HWY 49 & N MAIN STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149826714",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 224767.4095257441
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "26.890 AC - NC HWY 49 & N MAIN STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149826731",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 224767.4095257441
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "26.890 AC - NC HWY 49 & N MAIN STREET",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149826715",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 224767.4095257441
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "FUTURE ROYCROFT SD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149777957",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 17130.366226784277
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "FUTURE ROYCROFT SD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149777956",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 17130.366226784277
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "COUNTRY VIEW MHP",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149780354",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 95912.8382620207
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS OUTPARCEL",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727092",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2524202.5990707004
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "THE VILLAGES AT REDBRIDGE GLENWOOD VILLAGE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149778605",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 13043.042743985676
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "WOODRIDGE PARK",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149776007",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 108736.86692371585
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "THE MARKETPLACE AT CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726702",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 1613316.6209082582
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "COPPERFIELD PLACE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149811913",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 1309625.1289304588
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HWY 601 / 49",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149771832",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 134459.62712221727
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726811",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2528903.1754213893
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HSREI LLC AT AMC",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727546",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 1125569.7824715627
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NORTH CAROLINA RESEARCH CAMPUS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149802128",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 211441.0592281252
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NORTH CAROLINA RESEARCH CAMPUS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149802129",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 211441.0592281252
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "QUIKTRIP NO 1021",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726517",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 3092883.0250076447
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726749",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2892583.726034234
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CEDAR PARK ESTATES",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149761259",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 97392.31361559668
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "VILLAGE PARK",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149802108",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 354344.18575227563
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "QUIKTRIP NO 1021",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726516",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 3079961.4063748242
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHRISTENBURY SW CORNER",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726097",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 3177734.0896644904
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HWY 24 / 27",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149775591",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 56983.703150546935
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727100",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 1854484.3747451927
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727129",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2824241.4144331627
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "WEDDINGTON ROAD COMMONS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727664",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 1310497.788059449
+        }
+      ],
+      "watchlist_fact": [
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727442",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 243974.8879794015
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727441",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 243974.8879794015
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "AQUAMARINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149758869",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 141167.71969832937
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "LAKE DON T. HOWELL",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149751011",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 29542.82812440931
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD PARKWAY SOUTH",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149749657",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 32858.237742129575
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CONCORD MILLS",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149727653",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 50111.00618833594
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "BONDS QUARRY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149736050",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 58642.88090296917
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "STOUGH ROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149758945",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 59216.870060703266
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149749607",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 86482.96222313064
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149749606",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 86482.96222313064
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CK AFTON RIDGE LAND LLC",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149750868",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 93496.41170692255
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CAROLINA MALL COMPANY",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149807384",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 260865.30491085546
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "PROJECT GRAND AT THE GROUNDS AT CONCORD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149758512",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 158601.10454009788
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149778854",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18421.01050239233
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "QUIKTRIP NO 1021",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149726304",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 2851033.263061343
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HARRISBURG",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149747547",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 510110.00656702026
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "HARRISBURG",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149747546",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 510110.00656702026
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "STOUGH ROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765257",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 294405.303500961
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "STOUGH ROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765258",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 1683745.2795869752
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "STOUGH ROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765259",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 257700.4717022654
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "NORTH CAROLINA RAILROAD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765260",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 364371.08630705206
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "CAROLINA VILLAGE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149729262",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 164402.4069685285
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149777876",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18865.37772223866
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "REED GOLD MINE",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149777845",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18865.37772223866
+        },
+        {
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": null,
+          "geography_label": "SOUTH CANNON BLVD",
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149812981",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 587180.6968951045
+        }
+      ]
+    },
+    "planning_model": {
+      "cells": [
+        {
+          "measure": "Assessed Value",
+          "scenario": "Current Conditions",
+          "value": 1275145150.0
+        },
+        {
+          "measure": "Value per Acre",
+          "scenario": "Current Conditions",
+          "value": 224767.4095257441
+        },
+        {
+          "measure": "Data Confidence",
+          "scenario": "Current Conditions",
+          "value": "screening"
+        }
+      ],
+      "dimensions": [
+        {
+          "name": "Geography",
+          "members": [
+            "26.890 AC - NC HWY 49 & N MAIN STREET",
+            "85 EXCHANGE PHASE II",
+            "AIRPORT",
+            "AQUAMARINE",
+            "BISCAYNE / TRINITY CHURCH",
+            "BONDS QUARRY",
+            "CABARRUS COUNTRY CLUB",
+            "CABARRUS COUNTY",
+            "CABARRUS/MCGILL",
+            "CAROLINA MALL COMPANY",
+            "CAROLINA VILLAGE",
+            "CATAWBA LANDS CONSERVANCY",
+            "CEDAR PARK ESTATES",
+            "CHARLOTTE MOTOR SPEEDWAY",
+            "CHRISTENBURY CORNERS NE QUADRANT PH 1",
+            "CHRISTENBURY SE CORNER",
+            "CHRISTENBURY SW CORNER",
+            "CK AFTON RIDGE LAND LLC",
+            "CK LAKE POINTE CORP CENTER, LLC",
+            "CONCORD MILLS",
+            "CONCORD MILLS OUTPARCEL",
+            "CONCORD PARKWAY SOUTH",
+            "COPPERFIELD PLACE",
+            "COUNTRY VIEW MHP",
+            "FUTURE ROYCROFT SD",
+            "HARRISBURG",
+            "HARRISBURG PROPERTIES",
+            "HARRISBURG TOWN CENTER",
+            "HSREI LLC AT AMC",
+            "HWY 24 / 27",
+            "HWY 601 / 49",
+            "I-85 AT LANE STREET",
+            "LAKE DON T. HOWELL",
+            "LT 4 AND LT 5 MB 71/41-45",
+            "MIAMI CHURCH RD",
+            "MIDLAND COMMERCIAL",
+            "MORRISON RIDGE LLC",
+            "MT PLEASANT OUTSIDE",
+            "NE MEDICAL CENTER",
+            "NO SUBDIVISION",
+            "NORTH CAROLINA RAILROAD",
+            "NORTH CAROLINA RESEARCH CAMPUS",
+            "NORTHLIGHT",
+            "PARADISE ESTATES",
+            "PLAT 103.590 AC - KANNAPOLIS PKWY",
+            "PROJECT GRAND AT THE GROUNDS AT CONCORD",
+            "QUIKTRIP NO 1021",
+            "REED GOLD MINE",
+            "SHOPS ON DERITA",
+            "SOUTH CANNON BLVD"
+          ]
+        },
+        {
+          "name": "Parcel",
+          "members": [
+            "CFS-PARCEL-0149727442",
+            "CFS-PARCEL-0149727441",
+            "CFS-PARCEL-0149758869",
+            "CFS-PARCEL-0149751011",
+            "CFS-PARCEL-0149749657",
+            "CFS-PARCEL-0149727653",
+            "CFS-PARCEL-0149736050",
+            "CFS-PARCEL-0149758945",
+            "CFS-PARCEL-0149749607",
+            "CFS-PARCEL-0149749606",
+            "CFS-PARCEL-0149750868",
+            "CFS-PARCEL-0149807384",
+            "CFS-PARCEL-0149758512",
+            "CFS-PARCEL-0149778854",
+            "CFS-PARCEL-0149726304",
+            "CFS-PARCEL-0149747547",
+            "CFS-PARCEL-0149747546",
+            "CFS-PARCEL-0149765257",
+            "CFS-PARCEL-0149765258",
+            "CFS-PARCEL-0149765259",
+            "CFS-PARCEL-0149765260",
+            "CFS-PARCEL-0149729262",
+            "CFS-PARCEL-0149777876",
+            "CFS-PARCEL-0149777845",
+            "CFS-PARCEL-0149812981",
+            "CFS-PARCEL-0149755575",
+            "CFS-PARCEL-0149794476",
+            "CFS-PARCEL-0149727291",
+            "CFS-PARCEL-0149726315",
+            "CFS-PARCEL-0149778673",
+            "CFS-PARCEL-0149778674",
+            "CFS-PARCEL-0149778663",
+            "CFS-PARCEL-0149778672",
+            "CFS-PARCEL-0149741520",
+            "CFS-PARCEL-0149786773",
+            "CFS-PARCEL-0149786752",
+            "CFS-PARCEL-0149726775",
+            "CFS-PARCEL-0149726774",
+            "CFS-PARCEL-0149725986",
+            "CFS-PARCEL-0149727047",
+            "CFS-PARCEL-0149728144",
+            "CFS-PARCEL-0149780704",
+            "CFS-PARCEL-0149780702",
+            "CFS-PARCEL-0149780703",
+            "CFS-PARCEL-0149749170",
+            "CFS-PARCEL-0149757764",
+            "CFS-PARCEL-0149812044",
+            "CFS-PARCEL-0149812043",
+            "CFS-PARCEL-0149802688",
+            "CFS-PARCEL-0149802714"
+          ]
+        },
+        {
+          "name": "Jurisdiction",
+          "members": [
+            "Data needed"
+          ]
+        },
+        {
+          "name": "Land Use / Zoning",
+          "members": [
+            "Data needed"
+          ]
+        },
+        {
+          "name": "Time",
+          "members": [
+            "Current extract"
+          ]
+        },
+        {
+          "name": "Scenario",
+          "members": [
+            "Current Conditions",
+            "Growth Continues As-Is",
+            "Infrastructure-Constrained Growth",
+            "Targeted Investment Scenario",
+            "Higher-Density Redevelopment Scenario",
+            "Employment / Industrial Scenario",
+            "Mixed-Use Corridor Scenario"
+          ]
+        },
+        {
+          "name": "Constraint Domain",
+          "members": [
+            "Parcel Value",
+            "Acreage",
+            "Land / Improvement Split",
+            "Service Burden"
+          ]
+        }
+      ],
+      "measures": [
+        "Assessed Value",
+        "Land Value",
+        "Improvement Value",
+        "Value per Acre",
+        "Estimated County Tax",
+        "Tax-Base Lift Band",
+        "Revenue per Acre Band",
+        "Public Cost Risk Band",
+        "Data Confidence"
+      ],
+      "scenarios": [
+        "Current Conditions",
+        "Growth Continues As-Is",
+        "Infrastructure-Constrained Growth",
+        "Targeted Investment Scenario",
+        "Higher-Density Redevelopment Scenario",
+        "Employment / Industrial Scenario",
+        "Mixed-Use Corridor Scenario"
+      ]
+    },
+    "decision_pack": {
+      "assumptions": [
+        "Scenario values depend on local assumptions.",
+        "Utility, school, and transportation burden can be incomplete.",
+        "Opportunity classes are review bands, not recommendations."
+      ],
+      "caveats": [
+        "Portfolio Demo uses a cached CFS demo extract.",
+        "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
+        "Opportunity classes are review bands, not approval recommendations."
+      ],
+      "evidence_pack": [
+        {
+          "section": "kpis",
+          "items": [
+            {
+              "kpi_id": "parcels_analyzed",
+              "label": "Parcels analyzed",
+              "status_band": "stable_high_value",
+              "unit": "parcels",
+              "value": 120
+            },
+            {
+              "kpi_id": "assessed_value_coverage",
+              "label": "Assessed value coverage",
+              "status_band": "stable_high_value",
+              "unit": "dollars",
+              "value": 1275145150.0
+            },
+            {
+              "kpi_id": "median_value_per_acre",
+              "label": "Median value per acre",
+              "status_band": "redevelopment_opportunity",
+              "unit": "dollars_per_acre",
+              "value": 224767.4095257441
+            },
+            {
+              "kpi_id": "underbuilt_candidates",
+              "label": "Underbuilt candidates",
+              "status_band": "underbuilt_watch",
+              "unit": "parcels",
+              "value": 120
+            },
+            {
+              "kpi_id": "tax_base_opportunity",
+              "label": "Tax-base opportunity signals",
+              "status_band": "tax_base_opportunity",
+              "unit": "signals",
+              "value": 0
+            },
+            {
+              "kpi_id": "data_needed",
+              "label": "Economic data needed",
+              "status_band": "data_needed",
+              "unit": "parcels",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "section": "watchlist",
+          "items": [
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149727442",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 243974.8879794015
+            },
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149727441",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 243974.8879794015
+            },
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "AQUAMARINE",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149758869",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 141167.71969832937
+            },
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "LAKE DON T. HOWELL",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149751011",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 29542.82812440931
+            },
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "CONCORD PARKWAY SOUTH",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149749657",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 32858.237742129575
+            },
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "CONCORD MILLS",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149727653",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 50111.00618833594
+            },
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "BONDS QUARRY",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149736050",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 58642.88090296917
+            },
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "STOUGH ROAD",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149758945",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 59216.870060703266
+            },
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149749607",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 86482.96222313064
+            },
+            {
+              "economic_status_band": "underbuilt_watch",
+              "estimated_county_tax": null,
+              "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+              "opportunity_class": "Underbuilt Redevelopment Candidate",
+              "parcel_id": "CFS-PARCEL-0149749606",
+              "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+              "value_per_acre": 86482.96222313064
+            }
+          ]
+        },
+        {
+          "section": "data_readiness",
+          "items": [
+            {
+              "current_use": "Assessed/market value baseline",
+              "data_status": "available",
+              "domain": "Parcel Value",
+              "gap_or_next_need": "Add current appraisal extract if missing."
+            },
+            {
+              "current_use": "Value-per-acre denominator",
+              "data_status": "available",
+              "domain": "Acreage",
+              "gap_or_next_need": "Add reliable parcel acreage."
+            },
+            {
+              "current_use": "Improvement-to-land ratio",
+              "data_status": "available",
+              "domain": "Land / Improvement Split",
+              "gap_or_next_need": "Add land and improvement values."
+            },
+            {
+              "current_use": "Constraint-adjusted opportunity",
+              "data_status": "data_needed",
+              "domain": "Service Burden",
+              "gap_or_next_need": "Add official utility, school, and transportation service assumptions."
+            }
+          ]
+        }
+      ],
+      "executive_takeaway": "CFS Economics connects parcel value, growth pressure, constraints, and service burden into a screening-level decision pack.",
+      "recommended_next_diligence": [
+        "Verify parcel value and acreage fields.",
+        "Compare opportunity bands with floodplain, school, utility, and transportation context.",
+        "Document scenario assumptions before using tax-base lift bands."
+      ],
+      "risk_flags": [
+        "Service Burden: Add official utility, school, and transportation service assumptions."
+      ]
+    }
+  },
+  "mode": "demo"
+}

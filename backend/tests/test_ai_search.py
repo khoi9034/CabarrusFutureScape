@@ -622,7 +622,9 @@ def test_ai_search_economics_mode_returns_economic_answer() -> None:
     assert response.dashboard_actions.focus_domain == "economics"
     assert "CFS Economics reviewed 12 parcels" in response.answer
     assert "Consulting takeaway" in response.answer
+    assert "Enterprise tool alignment" in response.answer
     assert "Traditional GIS can show where things are" in response.answer
+    assert "dimensions include Geography" in response.answer
     assert "Underbuilt Redevelopment Candidate" in response.answer
     assert "Revenue per Acre Dashboard" in response.related_layers
 

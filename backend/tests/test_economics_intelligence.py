@@ -1,3 +1,8 @@
+from fastapi.testclient import TestClient
+
+from app.dependencies.database import get_read_only_db
+from app.main import app
+from app.routers import economics_router
 from app.routers.economics_router import (
     _economics_signal,
     _unavailable_payload,
@@ -5,6 +10,10 @@ from app.routers.economics_router import (
     calculate_value_per_acre,
     estimate_county_tax,
 )
+from app.services.enterprise_export_service import build_enterprise_export_payload
+
+
+client = TestClient(app)
 
 
 def test_economics_screening_calculations_are_transparent() -> None:
@@ -47,3 +56,94 @@ def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:
     assert signal["opportunity_class"] == "Underbuilt Redevelopment Candidate"
     assert "owner" not in str(signal).lower()
     assert "mailing" not in str(signal).lower()
+
+
+def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> None:
+    payload = build_enterprise_export_payload(
+        {
+            "as_of": "2026-01-01T00:00:00+00:00",
+            "caveats": ["Screening-level context."],
+            "data_readiness": [
+                {
+                    "current_use": "Value baseline",
+                    "data_status": "available",
+                    "domain": "Parcel Value",
+                    "gap_or_next_need": "None",
+                }
+            ],
+            "kpis": [
+                {
+                    "id": "parcels_analyzed",
+                    "label": "Parcels analyzed",
+                    "status_band": "stable_high_value",
+                    "unit": "parcels",
+                    "value": 12,
+                }
+            ],
+            "mode": "live",
+            "scenario_templates": [
+                {
+                    "data_confidence": "screening",
+                    "id": "current_conditions",
+                    "title": "Current Conditions",
+                    "what_it_tests": "Baseline",
+                }
+            ],
+            "signals": [
+                {
+                    "economic_status_band": "underbuilt_watch",
+                    "estimated_county_tax": 1200,
+                    "geography_label": "Demo corridor",
+                    "opportunity_class": "Underbuilt Redevelopment Candidate",
+                    "parcel_id": "demo-1",
+                    "recommended_followup": "Review records.",
+                    "value_per_acre": 100000,
+                }
+            ],
+            "summary": {
+                "median_value_per_acre": 100000,
+                "source_mode": "live",
+                "total_assessed_value": 500000,
+            },
+            "watchlist": [],
+        }
+    )
+
+    exports = payload["exports"]
+    assert exports["power_bi"]["kpi_fact"][0]["kpi_id"] == "parcels_analyzed"
+    assert exports["power_bi"]["dimensions"]["geography"][0]["geography_label"] == "Demo corridor"
+    assert "Assessed Value" in exports["planning_model"]["measures"]
+    assert exports["planning_model"]["scenarios"] == ["Current Conditions"]
+    assert "executive_takeaway" in exports["decision_pack"]
+    assert "owner" not in str(payload).lower()
+    assert "mailing" not in str(payload).lower()
+
+
+def test_enterprise_export_endpoint_returns_stable_schema(monkeypatch) -> None:
+    app.dependency_overrides[get_read_only_db] = lambda: object()
+    monkeypatch.setattr(
+        economics_router,
+        "_cached_economics_intelligence",
+        lambda _db: {
+            "as_of": "2026-01-01T00:00:00+00:00",
+            "data_readiness": [],
+            "kpis": [],
+            "mode": "live",
+            "scenario_templates": [],
+            "signals": [],
+            "summary": {"source_mode": "live"},
+            "watchlist": [],
+        },
+    )
+
+    try:
+        response = client.get("/economics/enterprise-export")
+    finally:
+        app.dependency_overrides.pop(get_read_only_db, None)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "live"
+    assert set(body["exports"]) == {"decision_pack", "planning_model", "power_bi"}
+    assert "kpi_fact" in body["exports"]["power_bi"]
+    assert "dimensions" in body["exports"]["planning_model"]

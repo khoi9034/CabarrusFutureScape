@@ -82,3 +82,32 @@ export interface EconomicsIntelligenceResponse {
   summary: EconomicsSummary;
   watchlist: EconomicsParcelSignal[];
 }
+
+export interface EconomicsEnterpriseExportResponse {
+  as_of: string | null;
+  caveats: string[];
+  exports: {
+    decision_pack: {
+      assumptions: string[];
+      caveats: string[];
+      evidence_pack: Array<{ items: unknown[]; section: string }>;
+      executive_takeaway: string;
+      recommended_next_diligence: string[];
+      risk_flags: string[];
+    };
+    planning_model: {
+      cells: Array<Record<string, unknown>>;
+      dimensions: Array<{ members: unknown[]; name: string }>;
+      measures: string[];
+      scenarios: string[];
+    };
+    power_bi: {
+      dimensions: Record<string, unknown[]>;
+      kpi_fact: Array<Record<string, unknown>>;
+      scenario_fact: Array<Record<string, unknown>>;
+      signal_fact: Array<Record<string, unknown>>;
+      watchlist_fact: Array<Record<string, unknown>>;
+    };
+  };
+  mode: "demo" | "live";
+}

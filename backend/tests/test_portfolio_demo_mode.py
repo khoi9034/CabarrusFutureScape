@@ -39,6 +39,7 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
     expected_files = {
         "demo_manifest.json",
         "development_years.json",
+        "economics_enterprise_export.json",
         "economics_intelligence.json",
         "indicator_summary.json",
         "indicator_intelligence.json",
@@ -213,6 +214,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     methodology = read("src/components/dashboard/MethodologyWorkspace.tsx")
     overview = read("src/components/layout/AppShell.tsx")
     economics_service = read("src/lib/economicsIntelligenceService.ts")
+    enterprise_export_types = read("src/lib/enterpriseAdapters/enterpriseExportTypes.ts")
     ask_service = read("src/lib/aiSearchService.ts")
 
     assert "Planning Intelligence" in top_nav
@@ -223,6 +225,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "EconomicMissionControl" in indicator_center
     assert "getDemoEconomicsIntelligence" in economics_service
     assert '"/economics/intelligence"' in economics_service
+    assert '"/economics/enterprise-export"' in economics_service
+    assert "EnterpriseExportPreviewKind" in enterprise_export_types
     assert "askCfsEconomicsSuggestedPrompts" in ask_service
     assert 'app_mode === "economics"' in ask_service
     assert "Traditional GIS can show where things are" in overview
@@ -235,3 +239,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Confidence tiers" in methodology
     assert "Which areas create fiscal upside but service burden?" in ask_service
     assert "What corridors look investment-ready?" in ask_service
+    assert "How would this become a Power BI dataset?" in ask_service
+    assert "Enterprise Consulting Toolkit" in economic_mission_control
+    assert "Planning Model Schema" in economic_mission_control
+    assert "BI / Embedded Analytics Readiness" in economic_mission_control
+    assert "Enterprise Tools Learning Map" in methodology

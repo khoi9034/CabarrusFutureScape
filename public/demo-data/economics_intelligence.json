@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-30T16:23:51Z",
+  "as_of": "2026-06-30T17:04:39Z",
   "caveats": [
     "Portfolio Demo uses a cached CFS demo extract.",
     "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
@@ -216,7 +216,7 @@
       "land_value": 91897890.0,
       "land_value_per_acre": 109460.1668311036,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149727441",
+      "parcel_id": "CFS-PARCEL-0149727442",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -251,7 +251,7 @@
       "land_value": 91897890.0,
       "land_value_per_acre": 109460.1668311036,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149727442",
+      "parcel_id": "CFS-PARCEL-0149727441",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -496,7 +496,7 @@
       "land_value": 13397050.0,
       "land_value_per_acre": 86421.67963058299,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149749606",
+      "parcel_id": "CFS-PARCEL-0149749607",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -531,7 +531,7 @@
       "land_value": 13397050.0,
       "land_value_per_acre": 86421.67963058299,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149749607",
+      "parcel_id": "CFS-PARCEL-0149749606",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -825,6 +825,41 @@
       "value_per_acre": 294405.303500961
     },
     {
+      "acreage": 5.239771185677299,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 1683745.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "STOUGH ROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 1683745.2795869752,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765258",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 1683745.2795869752
+    },
+    {
       "acreage": 34.235249713446464,
       "assessed_value": 8822440.0,
       "caveats": [
@@ -893,41 +928,6 @@
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
       "value_per_acre": 364371.08630705206
-    },
-    {
-      "acreage": 5.239771185677299,
-      "assessed_value": 8822440.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 1683745.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "STOUGH ROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 1683745.2795869752,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765258",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 1683745.2795869752
     },
     {
       "acreage": 52.125149248213,
@@ -1266,7 +1266,7 @@
       "land_value": 7177240.0,
       "land_value_per_acre": 18814.046975311176,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149778672",
+      "parcel_id": "CFS-PARCEL-0149778674",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -1336,7 +1336,7 @@
       "land_value": 7177240.0,
       "land_value_per_acre": 18814.046975311176,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149778674",
+      "parcel_id": "CFS-PARCEL-0149778672",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -1686,7 +1686,7 @@
       "land_value": 6623200.0,
       "land_value_per_acre": 19224.335158420967,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149780703",
+      "parcel_id": "CFS-PARCEL-0149780702",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -1721,7 +1721,7 @@
       "land_value": 6623200.0,
       "land_value_per_acre": 19224.335158420967,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149780702",
+      "parcel_id": "CFS-PARCEL-0149780703",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -1910,41 +1910,6 @@
       "value_per_acre": 249452.71297743477
     },
     {
-      "acreage": 24.9369782345954,
-      "assessed_value": 6006350.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 240861.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "CABARRUS/MCGILL",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 6006350.0,
-      "land_value_per_acre": 240861.179870916,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149802687",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 240861.179870916
-    },
-    {
       "acreage": 26.571508585638536,
       "assessed_value": 6006350.0,
       "caveats": [
@@ -1980,6 +1945,41 @@
       "value_per_acre": 226044.74942180488
     },
     {
+      "acreage": 24.9369782345954,
+      "assessed_value": 6006350.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 240861.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "CABARRUS/MCGILL",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 6006350.0,
+      "land_value_per_acre": 240861.179870916,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149802687",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 240861.179870916
+    },
+    {
       "acreage": 92.5516639261615,
       "assessed_value": 5950460.0,
       "caveats": [
@@ -2013,76 +2013,6 @@
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
       "value_per_acre": 64293.38758023116
-    },
-    {
-      "acreage": 82.92761563229095,
-      "assessed_value": 5939420.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 71622.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "I-85 AT LANE STREET",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 5939420.0,
-      "land_value_per_acre": 71621.73848499349,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149820807",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 71621.73848499349
-    },
-    {
-      "acreage": 36.10428470861694,
-      "assessed_value": 5939420.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 164507.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "I-85 AT LANE STREET",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 5939420.0,
-      "land_value_per_acre": 164507.34443112926,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149820806",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 164507.34443112926
     },
     {
       "acreage": 8.843822527449598,
@@ -2155,6 +2085,76 @@
       "value_per_acre": 438264.1236620246
     },
     {
+      "acreage": 82.92761563229095,
+      "assessed_value": 5939420.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 71622.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "I-85 AT LANE STREET",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 5939420.0,
+      "land_value_per_acre": 71621.73848499349,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149820807",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 71621.73848499349
+    },
+    {
+      "acreage": 36.10428470861694,
+      "assessed_value": 5939420.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 164507.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "I-85 AT LANE STREET",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 5939420.0,
+      "land_value_per_acre": 164507.34443112926,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149820806",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 164507.34443112926
+    },
+    {
       "acreage": 74.9502360496488,
       "assessed_value": 5926000.0,
       "caveats": [
@@ -2190,41 +2190,6 @@
       "value_per_acre": 79065.79501730292
     },
     {
-      "acreage": 11.586456301885907,
-      "assessed_value": 5926000.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 511459.",
-        "Improvement-to-land ratio: 0.02"
-      ],
-      "floodplain_context": null,
-      "geography_label": "I-85 AT LANE STREET",
-      "improvement_to_land_ratio": 0.02026783045582318,
-      "improvement_value": 117310.0,
-      "improvement_value_per_acre": 10124.75229211417,
-      "land_value": 5787990.0,
-      "land_value_per_acre": 499547.9074182413,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149815370",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 511459.2283954357
-    },
-    {
       "acreage": 108.82403678273414,
       "assessed_value": 5926000.0,
       "caveats": [
@@ -2258,6 +2223,41 @@
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
       "value_per_acre": 54454.88124862696
+    },
+    {
+      "acreage": 11.586456301885907,
+      "assessed_value": 5926000.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 511459.",
+        "Improvement-to-land ratio: 0.02"
+      ],
+      "floodplain_context": null,
+      "geography_label": "I-85 AT LANE STREET",
+      "improvement_to_land_ratio": 0.02026783045582318,
+      "improvement_value": 117310.0,
+      "improvement_value_per_acre": 10124.75229211417,
+      "land_value": 5787990.0,
+      "land_value_per_acre": 499547.9074182413,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149815370",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 511459.2283954357
     },
     {
       "acreage": 51.37593532937723,
@@ -2666,7 +2666,7 @@
       "land_value": 5352480.0,
       "land_value_per_acre": 514682.1111839887,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149742045",
+      "parcel_id": "CFS-PARCEL-0149742044",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -2701,7 +2701,7 @@
       "land_value": 5352480.0,
       "land_value_per_acre": 514682.1111839887,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149742044",
+      "parcel_id": "CFS-PARCEL-0149742045",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3296,7 +3296,7 @@
       "land_value": 3387230.0,
       "land_value_per_acre": 1774697.8581743797,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149726658",
+      "parcel_id": "CFS-PARCEL-0149726661",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3366,7 +3366,7 @@
       "land_value": 3387230.0,
       "land_value_per_acre": 1774697.8581743797,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149726661",
+      "parcel_id": "CFS-PARCEL-0149726658",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3541,7 +3541,7 @@
       "land_value": 4035990.0,
       "land_value_per_acre": 201624.49678764414,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149826715",
+      "parcel_id": "CFS-PARCEL-0149826731",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3576,7 +3576,7 @@
       "land_value": 4035990.0,
       "land_value_per_acre": 201624.49678764414,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149826731",
+      "parcel_id": "CFS-PARCEL-0149826715",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3611,7 +3611,7 @@
       "land_value": 4453520.0,
       "land_value_per_acre": 17130.366226784277,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149777956",
+      "parcel_id": "CFS-PARCEL-0149777957",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3646,7 +3646,7 @@
       "land_value": 4453520.0,
       "land_value_per_acre": 17130.366226784277,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149777957",
+      "parcel_id": "CFS-PARCEL-0149777956",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -4396,7 +4396,7 @@
     }
   ],
   "summary": {
-    "as_of": "2026-06-30T16:23:51Z",
+    "as_of": "2026-06-30T17:04:39Z",
     "data_needed_count": 0,
     "high_opportunity_count": 0,
     "median_value_per_acre": 224767.4095257441,
@@ -4430,7 +4430,7 @@
       "land_value": 91897890.0,
       "land_value_per_acre": 109460.1668311036,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149727441",
+      "parcel_id": "CFS-PARCEL-0149727442",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -4465,7 +4465,7 @@
       "land_value": 91897890.0,
       "land_value_per_acre": 109460.1668311036,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149727442",
+      "parcel_id": "CFS-PARCEL-0149727441",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -4710,7 +4710,7 @@
       "land_value": 13397050.0,
       "land_value_per_acre": 86421.67963058299,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149749606",
+      "parcel_id": "CFS-PARCEL-0149749607",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -4745,7 +4745,7 @@
       "land_value": 13397050.0,
       "land_value_per_acre": 86421.67963058299,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149749607",
+      "parcel_id": "CFS-PARCEL-0149749606",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -5039,6 +5039,41 @@
       "value_per_acre": 294405.303500961
     },
     {
+      "acreage": 5.239771185677299,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 1683745.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "STOUGH ROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 1683745.2795869752,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765258",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 1683745.2795869752
+    },
+    {
       "acreage": 34.235249713446464,
       "assessed_value": 8822440.0,
       "caveats": [
@@ -5107,41 +5142,6 @@
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
       "value_per_acre": 364371.08630705206
-    },
-    {
-      "acreage": 5.239771185677299,
-      "assessed_value": 8822440.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 1683745.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "STOUGH ROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 1683745.2795869752,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765258",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 1683745.2795869752
     },
     {
       "acreage": 52.125149248213,

@@ -819,6 +819,28 @@ function EconomicsMethodologyWorkspace() {
     "Before an economic development discussion: compare site size, road access, flood exposure, utility confidence, and tax-base upside.",
     "Before a planning snapshot: summarize what growth means for tax base and service burden.",
   ];
+  const learningMap = [
+    {
+      concept: "Planning Analytics / TM1-style model",
+      detail:
+        "CFS mirrors cube/model thinking: dimensions, measures, scenarios, assumptions, writeback-style planning workflow, and variance comparison. It is model-ready, not connected to an external planning system.",
+    },
+    {
+      concept: "Power BI / Tableau-style analytics",
+      detail:
+        "CFS exports facts, dimensions, measures, slicer-ready fields, dashboards, and drillthrough-style evidence for a future semantic model.",
+    },
+    {
+      concept: "GIS / location intelligence",
+      detail:
+        "CFS uses spatial layers, parcel selection, overlays, spatial joins, and map-driven decision support to connect economics with place.",
+    },
+    {
+      concept: "Consulting deliverable",
+      detail:
+        "CFS structures scorecards, evidence packs, executive memo content, recommendation caveats, and next diligence steps.",
+    },
+  ];
   const caveats = [
     "CFS Economics is not a formal appraisal.",
     "CFS Economics is not an official fiscal impact study.",
@@ -929,6 +951,32 @@ function EconomicsMethodologyWorkspace() {
                 </p>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="cfs-command-surface rounded-2xl border-[#ec5cff]/20 p-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f0a7ff]">
+            Enterprise Tools Learning Map
+          </p>
+          <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-400">
+            CFS Economics mirrors common enterprise planning, BI, and
+            location-intelligence workflows. These are export-ready and
+            future connector-ready patterns, not live vendor integrations.
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {learningMap.map((item) => (
+              <article
+                className="rounded-xl border border-white/10 bg-white/[0.035] p-4"
+                key={item.concept}
+              >
+                <h2 className="text-sm font-semibold text-white">
+                  {item.concept}
+                </h2>
+                <p className="mt-2 text-xs leading-6 text-slate-400">
+                  {item.detail}
+                </p>
+              </article>
+            ))}
           </div>
         </section>
 

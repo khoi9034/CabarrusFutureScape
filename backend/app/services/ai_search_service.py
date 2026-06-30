@@ -126,7 +126,28 @@ DASHBOARD_ACTIONS: dict[CfsAiDomain, dict[str, Any]] = {
 }
 
 DOMAIN_KEYWORDS: list[tuple[CfsAiDomain, tuple[str, ...]]] = [
-    ("economics", ("economic", "economics", "tax", "value", "acre", "underbuilt", "redevelopment", "fiscal", "scenario")),
+    (
+        "economics",
+        (
+            "economic",
+            "economics",
+            "tax",
+            "value",
+            "acre",
+            "underbuilt",
+            "redevelopment",
+            "fiscal",
+            "scenario",
+            "power bi",
+            "planning analytics",
+            "tm1",
+            "planning model",
+            "measures",
+            "dimensions",
+            "decision pack",
+            "dataset",
+        ),
+    ),
     ("schools", ("school", "attendance", "capacity", "utilization", "student")),
     ("flood", ("flood", "fema", "floodplain", "floodway", "hazard")),
     ("permits", ("permit", "development", "growth", "activity", "trend")),
@@ -603,6 +624,18 @@ def _economics_answer(
             "Consulting takeaway",
             "Traditional GIS can show where things are. CFS Economics helps explain what those places mean economically by turning parcel, tax, zoning, permit, infrastructure, and constraint data into a decision-support workflow.",
         ),
+        (
+            "Enterprise tool alignment",
+            _bullets(
+                [
+                    "Planning model: dimensions include Geography, Parcel, Jurisdiction, Land Use, Scenario, Time, and Constraint Domain.",
+                    "Measures include assessed value, land value, improvement value, value per acre, estimated county tax, tax-base lift band, revenue per acre band, public cost risk band, and data confidence.",
+                    "BI dataset: KPI fact, parcel economic signal fact, scenario output fact, domain readiness dimension, geography dimension, and time dimension.",
+                    "Decision pack: executive takeaway, evidence pack, assumptions, risk flags, caveats, and recommended next diligence.",
+                    "This is export-ready and connector-ready only; no live enterprise platform integration is configured.",
+                ]
+            ),
+        ),
     )
     return _response(
         answer,
@@ -627,6 +660,7 @@ def _economics_answer(
             "Open Economic Workspace and compare Revenue per Acre Dashboard with Underbuilt Redevelopment Watchlist.",
             "Use Economic Scenario Lab only as screening-level fiscal context.",
             "Ask: Where is economic data confidence weak?",
+            "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",
         ],
     )
 

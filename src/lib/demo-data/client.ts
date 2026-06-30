@@ -15,6 +15,7 @@ import type {
   SchoolQaSummaryResponse,
   SchoolUtilizationSeedPageResponse,
   EconomicsIntelligenceResponse,
+  EconomicsEnterpriseExportResponse,
 } from "@/types/api";
 
 const DEMO_DATA_BASE_URL = "/demo-data";
@@ -148,6 +149,13 @@ export function getDemoEconomicsIntelligence() {
   return loadDemoJson(
     "economics_intelligence.json",
     getUnavailableEconomicsIntelligence,
+  );
+}
+
+export function getDemoEconomicsEnterpriseExport() {
+  return loadDemoJson(
+    "economics_enterprise_export.json",
+    getUnavailableEconomicsEnterpriseExport,
   );
 }
 
@@ -614,6 +622,40 @@ function getUnavailableEconomicsIntelligence(): EconomicsIntelligenceResponse {
       underbuilt_candidate_count: 0,
     },
     watchlist: [],
+  };
+}
+
+function getUnavailableEconomicsEnterpriseExport(): EconomicsEnterpriseExportResponse {
+  return {
+    as_of: null,
+    caveats: [
+      "Portfolio Demo economics enterprise export is not available.",
+      "Connector-ready export only; no external platform account is connected.",
+    ],
+    exports: {
+      decision_pack: {
+        assumptions: [],
+        caveats: [],
+        evidence_pack: [],
+        executive_takeaway: "Economics enterprise export is unavailable.",
+        recommended_next_diligence: [],
+        risk_flags: ["Demo export file is missing."],
+      },
+      planning_model: {
+        cells: [],
+        dimensions: [],
+        measures: [],
+        scenarios: [],
+      },
+      power_bi: {
+        dimensions: {},
+        kpi_fact: [],
+        scenario_fact: [],
+        signal_fact: [],
+        watchlist_fact: [],
+      },
+    },
+    mode: "demo",
   };
 }
 

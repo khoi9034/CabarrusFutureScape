@@ -143,6 +143,29 @@ Do not add AI keys to frontend env, `NEXT_PUBLIC_*`, or Vercel portfolio demo
 env. Public demo mode uses static cached demo answers and does not call the
 backend or external AI.
 
+### Enterprise Consulting Tool Alignment
+
+CFS Economics mirrors enterprise planning and BI workflows without requiring
+vendor accounts. It is connector-ready, not credential-connected.
+
+- Planning model path: map CFS Geography, Parcel, Jurisdiction, Land Use,
+  Time, Scenario, and Constraint Domain dimensions to measures such as assessed
+  value, value per acre, estimated county tax, revenue per acre band, public
+  cost risk band, and data confidence.
+- BI reporting path: export normalized KPI, parcel economic signal, scenario,
+  watchlist, geography, time, and domain-readiness tables for a future semantic
+  model/report.
+- Location-intelligence path: pair map layers, parcel selection, spatial joins,
+  constraint overlays, and scenario geography with economics facts.
+- Consulting deliverable path: build an executive takeaway, evidence pack,
+  assumptions, risk flags, caveats, and recommended next diligence.
+
+Current implementation exposes `/economics/enterprise-export` locally and
+`public/demo-data/economics_enterprise_export.json` in portfolio demo mode. Real
+Power BI embedding or IBM Planning Analytics / TM1 REST integration should be
+added later only after an approved enterprise account and credential strategy
+exist.
+
 Regenerate the static portfolio data locally with:
 
 ```powershell
@@ -155,6 +178,8 @@ The exporter reads clean/summary local CFS tables only and writes:
 - `public/demo-data/indicator_summary.json`
 - `public/demo-data/development_trends.json`
 - `public/demo-data/development_years.json`
+- `public/demo-data/economics_enterprise_export.json`
+- `public/demo-data/economics_intelligence.json`
 - `public/demo-data/flood_summary.json`
 - `public/demo-data/school_capacity_watch.json`
 - `public/demo-data/model_status.json`
