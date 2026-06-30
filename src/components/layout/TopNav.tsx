@@ -99,7 +99,7 @@ const appModeOptions = [
     shortLabel: "CFS Planning",
   },
   {
-    description: "Parcel value, underbuilt watch, tax-base opportunity, and scenarios.",
+    description: "Parcel economics, tax-base opportunity, public cost risk, and scenarios.",
     id: "economics",
     label: "Economic Intelligence",
     shortLabel: "CFS Economics",

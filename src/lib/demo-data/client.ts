@@ -586,7 +586,7 @@ function getUnavailableEconomicsIntelligence(): EconomicsIntelligenceResponse {
     as_of: null,
     caveats: [
       "Portfolio Demo economics extract is not available.",
-      "CFS Economics is screening-level context, not an official appraisal or tax bill.",
+      "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
     ],
     data_readiness: [
       {

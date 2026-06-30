@@ -102,8 +102,10 @@ export function EconomicMissionControl() {
               CFS Economics
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
-              Parcel-level economic intelligence for value efficiency, tax-base
-              opportunity, redevelopment screening, and service-burden context.
+              CFS Economics turns parcel, tax, zoning, permit, infrastructure,
+              and constraint data into screening-level economic intelligence
+              for growth value, public cost risk, investment readiness, and
+              deeper review.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -128,11 +130,30 @@ export function EconomicMissionControl() {
         </div>
       ) : null}
 
+      <section className="mt-4 grid gap-3 lg:grid-cols-4">
+        {consultingPanels.map((panel) => (
+          <article
+            className="cfs-command-card rounded-xl border-[#d8b86a]/18 p-4"
+            key={panel.title}
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f0cd79]">
+              {panel.kicker}
+            </p>
+            <h2 className="mt-2 text-base font-semibold text-white">
+              {panel.title}
+            </h2>
+            <p className="mt-2 text-xs leading-5 text-slate-400">
+              {panel.text}
+            </p>
+          </article>
+        ))}
+      </section>
+
       <section className="mt-4 cfs-command-surface rounded-xl border-[#68d8ff]/18 p-4">
         <SectionHeader
           icon={<Gauge className="h-4 w-4" />}
-          kicker="Economic KPI Strip"
-          title="Screening-Level Economic Posture"
+          kicker="Economic Snapshot"
+          title="Growth & Tax Base Intelligence"
         />
         <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
           {(intelligence?.kpis ?? fallbackEconomicsKpis()).map((kpi) => (
@@ -145,7 +166,7 @@ export function EconomicMissionControl() {
                   domain: "economics",
                   evidence: [kpi.caveat],
                   id: kpi.id,
-                  related_layers: askActions?.recommended_layers ?? ["Value per Acre"],
+                  related_layers: askActions?.recommended_layers ?? ["Revenue per Acre Dashboard"],
                   status_band: kpi.status_band,
                   title: kpi.label,
                 })
@@ -159,15 +180,15 @@ export function EconomicMissionControl() {
         <section className="cfs-command-surface rounded-xl p-4">
           <SectionHeader
             icon={<BarChart3 className="h-4 w-4" />}
-            kicker="Parcel Value Intelligence"
-            title="Value Efficiency + Opportunity Classes"
+            kicker="Parcel / Area Economic Profile"
+            title="Revenue Per Acre + Opportunity Classes"
           />
           <div className="mt-4 grid gap-3 xl:grid-cols-2">
             <HorizontalBarPanel
               empty="Value per acre rows are not available."
               formatValue={currency}
               rows={valueBars}
-              title="Value per acre watchlist"
+              title="Revenue per acre dashboard"
             />
             <HorizontalBarPanel
               empty="Opportunity classes are not available."
@@ -185,14 +206,14 @@ export function EconomicMissionControl() {
         <section className="cfs-command-surface rounded-xl p-4">
           <SectionHeader
             icon={<FileSearch className="h-4 w-4" />}
-            kicker="Underbuilt Watchlist"
-            title="Parcel Signals Requiring Source Review"
+            kicker="Underbuilt Redevelopment Watchlist"
+            title="Site Readiness / Investment Candidates"
           />
           <div className="mt-3 overflow-hidden rounded-lg border border-white/10">
             <div className="grid grid-cols-[minmax(8rem,1fr)_8rem_8rem] gap-2 border-b border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-              <span>Area / parcel</span>
-              <span>Value / acre</span>
-              <span>Class</span>
+                <span>Area / parcel</span>
+                <span>Value / acre</span>
+                <span>Opportunity</span>
             </div>
             {(watchlist.length ? watchlist : []).slice(0, 8).map((signal) => (
               <button
@@ -230,8 +251,8 @@ export function EconomicMissionControl() {
         <section className="cfs-command-surface rounded-xl p-4">
           <SectionHeader
             icon={<ShieldAlert className="h-4 w-4" />}
-            kicker="Fiscal / Service Burden"
-            title="Constraint-Adjusted Opportunity"
+            kicker="Fiscal Impact / Tax Lift"
+            title="Fiscal Opportunity Score + Public Cost Risk Flag"
           />
           <div className="mt-3 grid gap-2">
             {constraintRows.map((row) => (
@@ -249,8 +270,8 @@ export function EconomicMissionControl() {
         <section className="cfs-command-surface rounded-xl p-4">
           <SectionHeader
             icon={<PlayCircle className="h-4 w-4" />}
-            kicker="Scenario Templates"
-            title="Screening Questions to Test"
+            kicker="Scenario Comparison"
+            title="Growth, Investment, and Redevelopment Scenarios"
           />
           <div className="mt-3 grid gap-2">
             {(intelligence?.scenario_templates ?? []).slice(0, 5).map((scenario) => (
@@ -261,15 +282,16 @@ export function EconomicMissionControl() {
       </div>
 
       <section className="mt-4 cfs-command-surface rounded-xl p-4">
-        <SectionHeader
-          icon={<LineChart className="h-4 w-4" />}
+          <SectionHeader
+            icon={<LineChart className="h-4 w-4" />}
           kicker="Economic Data Readiness"
-          title="Fields Needed Before Stronger Fiscal Claims"
+          title="Confidence Tiers Before Stronger Fiscal Claims"
         />
         <div className="mt-3 overflow-hidden rounded-lg border border-white/10">
-          <div className="grid grid-cols-[10rem_8rem_minmax(0,1fr)_minmax(0,1fr)] gap-2 border-b border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          <div className="hidden gap-2 border-b border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 md:grid md:grid-cols-[9rem_8rem_8rem_minmax(0,1fr)_minmax(0,1fr)]">
             <span>Domain</span>
             <span>Status</span>
+            <span>Confidence</span>
             <span>Current use</span>
             <span>Gap / next need</span>
           </div>
@@ -285,23 +307,46 @@ export function EconomicMissionControl() {
 const constraintRows = [
   {
     label: "Growth pressure",
-    text: "Observed permit activity helps separate stable value from places where review workload or growth context is rising.",
+    text: "Development Pressure Monitor compares observed permit activity with economic baseline to show where growth may affect review workload and tax-base opportunity.",
   },
   {
     label: "School pressure",
-    text: "Preliminary school capacity watch can reduce confidence in near-term scenario screening until official assumptions are checked.",
+    text: "Preliminary school capacity watch informs the fiscal/service tradeoff before a parcel or corridor is treated as investment-ready.",
   },
   {
     label: "Floodplain review",
-    text: "Floodplain context can turn a high-value opportunity into an infrastructure-constrained review item.",
+    text: "Floodplain context can turn a high-value opportunity into a high-value / high-risk parcel requiring deeper review.",
   },
   {
     label: "Utility readiness",
-    text: "Official service and capacity fields are needed before CFS can treat value opportunity as service-ready.",
+    text: "Utility readiness remains a proxy until official capacity and service-extension data are available.",
   },
   {
     label: "Transportation",
-    text: "Corridor and project context helps identify where coordination is needed before scenario assumptions are useful.",
+    text: "Corridor context supports market + planning alignment review before scenario assumptions are useful.",
+  },
+];
+
+const consultingPanels = [
+  {
+    kicker: "Panel 1",
+    title: "Economic Snapshot",
+    text: "Countywide or selected-area view of assessed value coverage, tax-base concentration, growth pressure, high-value parcels, redevelopment candidates, and data readiness.",
+  },
+  {
+    kicker: "Panel 2",
+    title: "Parcel Economic Profile",
+    text: "Parcel/area profile for value per acre, land vs improvement value, zoning context, permits, road access, constraints, opportunity class, and recommended follow-up.",
+  },
+  {
+    kicker: "Panel 3",
+    title: "Fiscal Impact / Tax Lift",
+    text: "Transparent proxy path from current tax value to scenario development type, modeled tax-base lift, and public constraint burden.",
+  },
+  {
+    kicker: "Panel 4",
+    title: "Scenario Comparison",
+    text: "Screen Current Conditions, Growth Continues As-Is, Infrastructure-Constrained Growth, Targeted Investment, Higher-Density Redevelopment, Employment, and Mixed-Use Corridor scenarios.",
   },
 ];
 
@@ -455,13 +500,20 @@ function ScenarioCard({ scenario }: { scenario: EconomicsScenarioTemplate }) {
 
 function ReadinessRow({ row }: { row: EconomicsReadinessRow }) {
   return (
-    <div className="grid grid-cols-[10rem_8rem_minmax(0,1fr)_minmax(0,1fr)] gap-2 border-b border-white/5 px-3 py-2 text-xs text-slate-300 last:border-b-0">
+    <div className="grid gap-1 border-b border-white/5 px-3 py-2 text-xs text-slate-300 last:border-b-0 md:grid-cols-[9rem_8rem_8rem_minmax(0,1fr)_minmax(0,1fr)] md:gap-2">
       <span className="font-semibold text-white">{row.domain}</span>
       <span>{row.data_status.replaceAll("_", " ")}</span>
+      <span>{confidenceTier(row.data_status)}</span>
       <span>{row.current_use}</span>
       <span>{row.gap_or_next_need}</span>
     </div>
   );
+}
+
+function confidenceTier(status: string) {
+  if (status === "available") return "Strong";
+  if (status === "partial") return "Medium";
+  return "Proxy / low";
 }
 
 function fallbackEconomicsKpis(): EconomicsKpi[] {

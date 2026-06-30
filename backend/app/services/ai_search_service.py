@@ -29,7 +29,11 @@ SAFE_CAVEATS = [
 
 RELATED_LAYERS = {
     "data_readiness": ["Data Still Needed", "Methodology"],
-    "economics": ["Value per Acre", "Underbuilt Parcel Watch", "Constraint-Adjusted Opportunity"],
+    "economics": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential",
+    ],
     "flood": ["Floodplain Review"],
     "general": ["Development Hotspots", "Floodplain Review", "School Utilization + Permit Pressure"],
     "methodology": ["Methodology"],
@@ -62,10 +66,10 @@ DASHBOARD_ACTIONS: dict[CfsAiDomain, dict[str, Any]] = {
         "focus_domain": "economics",
         "highlight_kpis": ["underbuilt_candidates", "tax_base_opportunity"],
         "recommended_layers": [
-            "Value per Acre",
-            "Underbuilt Parcel Watch",
-            "Tax-Base Opportunity",
-            "Constraint-Adjusted Opportunity",
+            "Revenue per Acre Dashboard",
+            "Underbuilt Redevelopment Watchlist",
+            "Fiscal Opportunity Score",
+            "Constraint-Adjusted Development Potential",
         ],
         "sort_watchlist_by": "severity",
     },
@@ -544,10 +548,11 @@ def _economics_answer(
         (
             "Executive summary",
             (
-                f"CFS Economics reviewed {_fmt(summary.get('total_parcels_analyzed'))} parcels for screening-level value and opportunity context. "
+                f"CFS Economics reviewed {_fmt(summary.get('total_parcels_analyzed'))} parcels as a parcel-based economic intelligence system. "
+                "It connects parcel, tax, zoning, permit, infrastructure, and constraint data so counties can screen where growth creates value, where it creates burden, and where deeper review is needed. "
                 f"The current extract shows {_fmt(summary.get('underbuilt_candidate_count'))} underbuilt watch candidates and "
                 f"{_fmt(summary.get('high_opportunity_count'))} tax-base opportunity signals. "
-                "This is parcel economic intelligence for review, not an approval recommendation, official appraisal, or official tax bill."
+                "This is decision-support context for review, not an approval recommendation, formal appraisal, or tax bill."
             ),
         ),
         (
@@ -557,6 +562,7 @@ def _economics_answer(
                     f"Total assessed value coverage: {_currency(summary.get('total_assessed_value'))}.",
                     f"Median value per acre: {_currency(summary.get('median_value_per_acre'))}.",
                     f"Underbuilt watch: {_fmt(summary.get('underbuilt_candidate_count'))} parcels where land and improvement context support review.",
+                    "Revenue per acre, fiscal opportunity, and infrastructure readiness are shown as screening bands rather than numeric scores.",
                     f"Data-needed records: {_fmt(summary.get('data_needed_count'))}.",
                 ]
             ),
@@ -567,16 +573,16 @@ def _economics_answer(
         ),
         (
             "Fiscal / service interpretation",
-            "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as a scenario candidate.",
+            "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as an investment-ready candidate.",
         ),
         (
             "Inspect next",
             _bullets(
                 [
-                    "Value per Acre.",
-                    "Underbuilt Parcel Watch.",
-                    "Tax-Base Opportunity.",
-                    "Constraint-Adjusted Opportunity.",
+                    "Revenue per Acre Dashboard.",
+                    "Underbuilt Redevelopment Watchlist.",
+                    "Fiscal Opportunity Score.",
+                    "Constraint-Adjusted Development Potential.",
                     "Economic Scenario Lab.",
                 ]
             ),
@@ -586,12 +592,16 @@ def _economics_answer(
             _bullets(
                 [
                     "Screening-level economic context only.",
-                    "Estimated tax context is not an official tax bill.",
+                    "Estimated tax context is not a formal tax bill.",
                     "Scenario values depend on assumptions.",
                     "Missing utility, school, transportation, or value fields reduce confidence.",
                     *missing,
                 ]
             ),
+        ),
+        (
+            "Consulting takeaway",
+            "Traditional GIS can show where things are. CFS Economics helps explain what those places mean economically by turning parcel, tax, zoning, permit, infrastructure, and constraint data into a decision-support workflow.",
         ),
     )
     return _response(
@@ -614,9 +624,9 @@ def _economics_answer(
             ),
         ],
         [
-            "Open Economic Workspace and compare Value per Acre with Underbuilt Parcel Watch.",
-            "Use Economic Scenario Lab only as screening context.",
-            "Ask: Where is economic data incomplete?",
+            "Open Economic Workspace and compare Revenue per Acre Dashboard with Underbuilt Redevelopment Watchlist.",
+            "Use Economic Scenario Lab only as screening-level fiscal context.",
+            "Ask: Where is economic data confidence weak?",
         ],
     )
 
@@ -712,9 +722,9 @@ def _selected_signal_meaning(domain: str) -> tuple[str, str, str]:
         )
     if normalized in {"economics", "tax_base_opportunity", "underbuilt_watch"}:
         return (
-            "This is screening-level parcel economic context assembled from value, acreage, and constraint fields where available.",
-            "It helps staff decide what to inspect next before scenario assumptions or fiscal interpretation.",
-            "This is not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+            "This is screening-level parcel economic context assembled from value, acreage, growth pressure, infrastructure burden, and constraint fields where available.",
+            "It helps staff decide what to inspect next before scenario assumptions, fiscal/service interpretation, or investment-readiness discussion.",
+            "This is not a formal appraisal, tax bill, fiscal impact study, or approval recommendation.",
         )
     return (
         "This is a CFS planning signal assembled from available indicator context.",

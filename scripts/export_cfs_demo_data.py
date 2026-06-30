@@ -570,11 +570,11 @@ def build_economics_intelligence_demo(
         "as_of": generated_at,
         "caveats": [
             "Portfolio Demo uses a cached CFS demo extract.",
-            "CFS Economics is screening-level context, not an official appraisal or tax bill.",
+            "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
             "Opportunity classes are review bands, not approval recommendations.",
         ],
         "data_readiness": [
-            economics_readiness("Parcel Value", bool(columns.intersection({"assessedvalue_numeric", "marketvalue_numeric"})), "Assessed/market value baseline", "Add current official appraisal extract if missing."),
+            economics_readiness("Parcel Value", bool(columns.intersection({"assessedvalue_numeric", "marketvalue_numeric"})), "Assessed/market value baseline", "Add current appraisal extract if missing."),
             economics_readiness("Acreage", bool(columns.intersection({"parcel_area_acres_calc", "acreage"})), "Value-per-acre denominator", "Add reliable parcel acreage."),
             economics_readiness("Land / Improvement Split", bool(columns.intersection({"landvalue_numeric", "buildingvalue_numeric", "improvementvalue_numeric"})), "Improvement-to-land ratio", "Add land and improvement values."),
             economics_readiness("Service Burden", False, "Constraint-adjusted opportunity", "Add official utility, school, and transportation service assumptions."),
@@ -608,7 +608,7 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
         "assessed_value": as_number(row.get("assessed_value")),
         "caveats": [
             "Screening-level economic context only.",
-            "Estimated tax context is not an official tax bill.",
+            "Estimated tax context is not a formal tax bill.",
             "Contact fields are excluded.",
         ],
         "economic_status_band": status,
@@ -628,7 +628,11 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
         "parcel_id": row.get("official_parcel_id"),
         "permit_activity_context": None,
         "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-        "related_layers": ["Value per Acre", "Underbuilt Parcel Watch", "Constraint-Adjusted Opportunity"],
+        "related_layers": [
+            "Revenue per Acre Dashboard",
+            "Underbuilt Redevelopment Watchlist",
+            "Constraint-Adjusted Development Potential",
+        ],
         "school_pressure_context": None,
         "transportation_context": None,
         "utility_readiness_context": "Official utility capacity remains a data need.",
@@ -683,11 +687,13 @@ def economics_readiness(domain: str, available: bool, current_use: str, next_nee
 
 def economics_scenario_templates() -> list[dict[str, Any]]:
     return [
-        economics_scenario("residential_growth", "Residential Growth Scenario", "Tests housing-oriented value lift against school, utility, and transportation burden."),
-        economics_scenario("commercial_corridor", "Commercial Corridor Scenario", "Tests corridor tax-base opportunity where access and zoning context support review."),
-        economics_scenario("industrial_employment", "Industrial / Employment Scenario", "Tests employment land opportunity against infrastructure and constraint context."),
-        economics_scenario("mixed_use", "Mixed-Use Scenario", "Tests blended value and service-burden assumptions."),
-        economics_scenario("conservation_low_intensity", "Conservation / Low-Intensity Scenario", "Tests low-intensity alternatives where constraints dominate."),
+        economics_scenario("current_conditions", "Current Conditions", "Shows current value, acreage, constraints, and data confidence before scenario assumptions."),
+        economics_scenario("growth_continues", "Growth Continues As-Is", "Tests whether current observed permit pressure reinforces existing fiscal/service tradeoffs."),
+        economics_scenario("infrastructure_constrained_growth", "Infrastructure-Constrained Growth", "Tests where tax-base opportunity may be limited by utility, school, floodplain, or transportation burden."),
+        economics_scenario("targeted_investment", "Targeted Investment Scenario", "Tests whether infrastructure investment could unlock future value in underbuilt or corridor parcels."),
+        economics_scenario("higher_density_redevelopment", "Higher-Density Redevelopment Scenario", "Tests modeled tax-base lift against public cost risk under redevelopment assumptions."),
+        economics_scenario("industrial_employment", "Employment / Industrial Scenario", "Tests employment land opportunity against road access, flood exposure, and service readiness."),
+        economics_scenario("mixed_use_corridor", "Mixed-Use Corridor Scenario", "Tests corridor investment readiness and market + planning alignment."),
     ]
 
 
@@ -720,7 +726,7 @@ def unavailable_economics_demo(generated_at: str, reason: str) -> dict[str, Any]
     }
     return {
         "as_of": generated_at,
-        "caveats": [reason, "CFS Economics is screening-level context, not an official appraisal or tax bill."],
+        "caveats": [reason, "CFS Economics is screening-level context, not a formal appraisal or tax bill."],
         "data_readiness": [economics_readiness("Parcel Economics", False, "Economics mode unavailable state", reason)],
         "kpis": economics_demo_kpis(summary),
         "mode": "demo",

@@ -23,7 +23,7 @@ def test_economics_missing_fields_return_data_needed_schema() -> None:
     assert payload["summary"]["data_needed_count"] == 1
     assert payload["kpis"]
     assert payload["watchlist"] == []
-    assert "official appraisal" in " ".join(payload["caveats"])
+    assert "formal appraisal" in " ".join(payload["caveats"])
 
 
 def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:

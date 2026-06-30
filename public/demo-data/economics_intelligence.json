@@ -1,8 +1,8 @@
 {
-  "as_of": "2026-06-30T15:29:40Z",
+  "as_of": "2026-06-30T16:23:51Z",
   "caveats": [
     "Portfolio Demo uses a cached CFS demo extract.",
-    "CFS Economics is screening-level context, not an official appraisal or tax bill.",
+    "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
     "Opportunity classes are review bands, not approval recommendations."
   ],
   "data_readiness": [
@@ -11,7 +11,7 @@
       "current_use": "Assessed/market value baseline",
       "data_status": "available",
       "domain": "Parcel Value",
-      "gap_or_next_need": "Add current official appraisal extract if missing."
+      "gap_or_next_need": "Add current appraisal extract if missing."
     },
     {
       "caveat": "Available for screening-level use.",
@@ -93,14 +93,14 @@
         "This is not an approval recommendation or official fiscal impact study."
       ],
       "data_confidence": "screening",
-      "id": "residential_growth",
+      "id": "current_conditions",
       "required_assumptions": [
         "future use intensity",
         "service burden",
         "infrastructure constraints"
       ],
-      "title": "Residential Growth Scenario",
-      "what_it_tests": "Tests housing-oriented value lift against school, utility, and transportation burden."
+      "title": "Current Conditions",
+      "what_it_tests": "Shows current value, acreage, constraints, and data confidence before scenario assumptions."
     },
     {
       "caveats": [
@@ -108,14 +108,59 @@
         "This is not an approval recommendation or official fiscal impact study."
       ],
       "data_confidence": "screening",
-      "id": "commercial_corridor",
+      "id": "growth_continues",
       "required_assumptions": [
         "future use intensity",
         "service burden",
         "infrastructure constraints"
       ],
-      "title": "Commercial Corridor Scenario",
-      "what_it_tests": "Tests corridor tax-base opportunity where access and zoning context support review."
+      "title": "Growth Continues As-Is",
+      "what_it_tests": "Tests whether current observed permit pressure reinforces existing fiscal/service tradeoffs."
+    },
+    {
+      "caveats": [
+        "Scenario values depend on assumptions.",
+        "This is not an approval recommendation or official fiscal impact study."
+      ],
+      "data_confidence": "screening",
+      "id": "infrastructure_constrained_growth",
+      "required_assumptions": [
+        "future use intensity",
+        "service burden",
+        "infrastructure constraints"
+      ],
+      "title": "Infrastructure-Constrained Growth",
+      "what_it_tests": "Tests where tax-base opportunity may be limited by utility, school, floodplain, or transportation burden."
+    },
+    {
+      "caveats": [
+        "Scenario values depend on assumptions.",
+        "This is not an approval recommendation or official fiscal impact study."
+      ],
+      "data_confidence": "screening",
+      "id": "targeted_investment",
+      "required_assumptions": [
+        "future use intensity",
+        "service burden",
+        "infrastructure constraints"
+      ],
+      "title": "Targeted Investment Scenario",
+      "what_it_tests": "Tests whether infrastructure investment could unlock future value in underbuilt or corridor parcels."
+    },
+    {
+      "caveats": [
+        "Scenario values depend on assumptions.",
+        "This is not an approval recommendation or official fiscal impact study."
+      ],
+      "data_confidence": "screening",
+      "id": "higher_density_redevelopment",
+      "required_assumptions": [
+        "future use intensity",
+        "service burden",
+        "infrastructure constraints"
+      ],
+      "title": "Higher-Density Redevelopment Scenario",
+      "what_it_tests": "Tests modeled tax-base lift against public cost risk under redevelopment assumptions."
     },
     {
       "caveats": [
@@ -129,8 +174,8 @@
         "service burden",
         "infrastructure constraints"
       ],
-      "title": "Industrial / Employment Scenario",
-      "what_it_tests": "Tests employment land opportunity against infrastructure and constraint context."
+      "title": "Employment / Industrial Scenario",
+      "what_it_tests": "Tests employment land opportunity against road access, flood exposure, and service readiness."
     },
     {
       "caveats": [
@@ -138,29 +183,14 @@
         "This is not an approval recommendation or official fiscal impact study."
       ],
       "data_confidence": "screening",
-      "id": "mixed_use",
+      "id": "mixed_use_corridor",
       "required_assumptions": [
         "future use intensity",
         "service burden",
         "infrastructure constraints"
       ],
-      "title": "Mixed-Use Scenario",
-      "what_it_tests": "Tests blended value and service-burden assumptions."
-    },
-    {
-      "caveats": [
-        "Scenario values depend on assumptions.",
-        "This is not an approval recommendation or official fiscal impact study."
-      ],
-      "data_confidence": "screening",
-      "id": "conservation_low_intensity",
-      "required_assumptions": [
-        "future use intensity",
-        "service burden",
-        "infrastructure constraints"
-      ],
-      "title": "Conservation / Low-Intensity Scenario",
-      "what_it_tests": "Tests low-intensity alternatives where constraints dominate."
+      "title": "Mixed-Use Corridor Scenario",
+      "what_it_tests": "Tests corridor investment readiness and market + planning alignment."
     }
   ],
   "signals": [
@@ -169,7 +199,7 @@
       "assessed_value": 204830470.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -190,9 +220,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -204,7 +234,7 @@
       "assessed_value": 204830470.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -225,9 +255,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -239,7 +269,7 @@
       "assessed_value": 69091960.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -260,9 +290,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -274,7 +304,7 @@
       "assessed_value": 55034560.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -295,9 +325,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -309,7 +339,7 @@
       "assessed_value": 18850570.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -330,9 +360,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -344,7 +374,7 @@
       "assessed_value": 15804920.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -365,9 +395,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -379,7 +409,7 @@
       "assessed_value": 13911020.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -400,9 +430,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -414,7 +444,7 @@
       "assessed_value": 13744550.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -435,9 +465,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -449,42 +479,7 @@
       "assessed_value": 13406550.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 86483.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 13397050.0,
-      "land_value_per_acre": 86421.67963058299,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149749607",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 86482.96222313064
-    },
-    {
-      "acreage": 155.01955131243525,
-      "assessed_value": 13406550.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -505,9 +500,44 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 86482.96222313064
+    },
+    {
+      "acreage": 155.01955131243525,
+      "assessed_value": 13406550.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 86483.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 13397050.0,
+      "land_value_per_acre": 86421.67963058299,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149749607",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -519,7 +549,7 @@
       "assessed_value": 12057530.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -540,9 +570,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -554,7 +584,7 @@
       "assessed_value": 9950000.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -575,9 +605,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -589,7 +619,7 @@
       "assessed_value": 9568890.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -610,9 +640,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -624,7 +654,7 @@
       "assessed_value": 9523350.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -645,9 +675,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -659,7 +689,7 @@
       "assessed_value": 9099120.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -680,9 +710,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -694,42 +724,7 @@
       "assessed_value": 8828310.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 510110.",
-        "Improvement-to-land ratio: 0.45"
-      ],
-      "floodplain_context": null,
-      "geography_label": "HARRISBURG",
-      "improvement_to_land_ratio": 0.4483963753248992,
-      "improvement_value": 2653260.0,
-      "improvement_value_per_acre": 153308.44476734643,
-      "land_value": 5917220.0,
-      "land_value_per_acre": 341903.8449101248,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149747546",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 510110.00656702026
-    },
-    {
-      "acreage": 17.306678728797102,
-      "assessed_value": 8828310.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -750,9 +745,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -760,46 +755,46 @@
       "value_per_acre": 510110.00656702026
     },
     {
-      "acreage": 5.239771185677299,
-      "assessed_value": 8822440.0,
+      "acreage": 17.306678728797102,
+      "assessed_value": 8828310.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
       "estimated_county_tax": null,
       "evidence": [
-        "Value per acre: 1683745.",
-        "Improvement-to-land ratio: 0.0"
+        "Value per acre: 510110.",
+        "Improvement-to-land ratio: 0.45"
       ],
       "floodplain_context": null,
-      "geography_label": "STOUGH ROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 1683745.2795869752,
+      "geography_label": "HARRISBURG",
+      "improvement_to_land_ratio": 0.4483963753248992,
+      "improvement_value": 2653260.0,
+      "improvement_value_per_acre": 153308.44476734643,
+      "land_value": 5917220.0,
+      "land_value_per_acre": 341903.8449101248,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765258",
+      "parcel_id": "CFS-PARCEL-0149747546",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 1683745.2795869752
+      "value_per_acre": 510110.00656702026
     },
     {
       "acreage": 29.966987330346115,
       "assessed_value": 8822440.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -820,9 +815,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -830,46 +825,11 @@
       "value_per_acre": 294405.303500961
     },
     {
-      "acreage": 24.212788367530933,
-      "assessed_value": 8822440.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 364371.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "NORTH CAROLINA RAILROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 364371.08630705206,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765260",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 364371.08630705206
-    },
-    {
       "acreage": 34.235249713446464,
       "assessed_value": 8822440.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -890,9 +850,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -900,11 +860,81 @@
       "value_per_acre": 257700.4717022654
     },
     {
+      "acreage": 24.212788367530933,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 364371.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "NORTH CAROLINA RAILROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 364371.08630705206,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765260",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 364371.08630705206
+    },
+    {
+      "acreage": 5.239771185677299,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 1683745.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "STOUGH ROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 1683745.2795869752,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765258",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 1683745.2795869752
+    },
+    {
       "acreage": 52.125149248213,
       "assessed_value": 8569500.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -925,9 +955,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -939,7 +969,7 @@
       "assessed_value": 8504740.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -960,9 +990,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -974,7 +1004,7 @@
       "assessed_value": 8504740.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -995,9 +1025,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1009,7 +1039,7 @@
       "assessed_value": 8015170.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1030,9 +1060,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1044,7 +1074,7 @@
       "assessed_value": 7848420.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1065,9 +1095,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1079,7 +1109,7 @@
       "assessed_value": 7807560.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1100,9 +1130,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1114,7 +1144,7 @@
       "assessed_value": 7498500.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1135,9 +1165,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1149,7 +1179,7 @@
       "assessed_value": 7331200.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1170,9 +1200,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1184,42 +1214,7 @@
       "assessed_value": 7179830.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 18821.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "REED GOLD MINE",
-      "improvement_to_land_ratio": 0.00036086295010338235,
-      "improvement_value": 2590.0,
-      "improvement_value_per_acre": 6.789292494894409,
-      "land_value": 7177240.0,
-      "land_value_per_acre": 18814.046975311176,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149778672",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 18820.83626780607
-    },
-    {
-      "acreage": 381.4830487783074,
-      "assessed_value": 7179830.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1240,9 +1235,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1254,7 +1249,7 @@
       "assessed_value": 7179830.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1271,13 +1266,13 @@
       "land_value": 7177240.0,
       "land_value_per_acre": 18814.046975311176,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149778674",
+      "parcel_id": "CFS-PARCEL-0149778672",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1289,7 +1284,7 @@
       "assessed_value": 7179830.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1310,9 +1305,44 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 18820.83626780607
+    },
+    {
+      "acreage": 381.4830487783074,
+      "assessed_value": 7179830.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 18821.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "REED GOLD MINE",
+      "improvement_to_land_ratio": 0.00036086295010338235,
+      "improvement_value": 2590.0,
+      "improvement_value_per_acre": 6.789292494894409,
+      "land_value": 7177240.0,
+      "land_value_per_acre": 18814.046975311176,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149778674",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1324,7 +1354,7 @@
       "assessed_value": 7154660.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1345,9 +1375,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1359,7 +1389,7 @@
       "assessed_value": 6953470.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1380,9 +1410,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1394,7 +1424,7 @@
       "assessed_value": 6953470.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1415,9 +1445,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1429,7 +1459,7 @@
       "assessed_value": 6856630.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1450,9 +1480,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1464,7 +1494,7 @@
       "assessed_value": 6856630.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1485,9 +1515,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1499,7 +1529,7 @@
       "assessed_value": 6851660.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1520,9 +1550,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1534,7 +1564,7 @@
       "assessed_value": 6724440.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1555,9 +1585,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1569,7 +1599,7 @@
       "assessed_value": 6682090.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1590,9 +1620,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1604,42 +1634,7 @@
       "assessed_value": 6623200.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 19224.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "MT PLEASANT OUTSIDE",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 6623200.0,
-      "land_value_per_acre": 19224.335158420967,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149780703",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 19224.335158420967
-    },
-    {
-      "acreage": 344.5216672212872,
-      "assessed_value": 6623200.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1660,9 +1655,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1674,7 +1669,42 @@
       "assessed_value": 6623200.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 19224.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "MT PLEASANT OUTSIDE",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 6623200.0,
+      "land_value_per_acre": 19224.335158420967,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149780703",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 19224.335158420967
+    },
+    {
+      "acreage": 344.5216672212872,
+      "assessed_value": 6623200.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1695,9 +1725,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1709,7 +1739,7 @@
       "assessed_value": 6158420.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1730,9 +1760,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1744,7 +1774,7 @@
       "assessed_value": 6117720.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1765,9 +1795,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1779,7 +1809,7 @@
       "assessed_value": 6115370.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1800,9 +1830,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1814,7 +1844,7 @@
       "assessed_value": 6115370.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1835,9 +1865,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1845,46 +1875,11 @@
       "value_per_acre": 250877.08048402244
     },
     {
-      "acreage": 26.571508585638536,
-      "assessed_value": 6006350.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 226045.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "CABARRUS/MCGILL",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 6006350.0,
-      "land_value_per_acre": 226044.74942180488,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149802714",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 226044.74942180488
-    },
-    {
       "acreage": 24.078110549727025,
       "assessed_value": 6006350.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1905,9 +1900,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1919,7 +1914,7 @@
       "assessed_value": 6006350.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1940,9 +1935,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1950,11 +1945,46 @@
       "value_per_acre": 240861.179870916
     },
     {
+      "acreage": 26.571508585638536,
+      "assessed_value": 6006350.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 226045.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "CABARRUS/MCGILL",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 6006350.0,
+      "land_value_per_acre": 226044.74942180488,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149802714",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 226044.74942180488
+    },
+    {
       "acreage": 92.5516639261615,
       "assessed_value": 5950460.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -1975,9 +2005,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -1989,7 +2019,7 @@
       "assessed_value": 5939420.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2010,9 +2040,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2020,81 +2050,11 @@
       "value_per_acre": 71621.73848499349
     },
     {
-      "acreage": 13.55214739087403,
-      "assessed_value": 5939420.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 438264.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "I-85 AT LANE STREET",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 5939420.0,
-      "land_value_per_acre": 438264.1236620246,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149820816",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 438264.1236620246
-    },
-    {
-      "acreage": 8.843822527449598,
-      "assessed_value": 5939420.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 671590.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "I-85 AT LANE STREET",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 5939420.0,
-      "land_value_per_acre": 671589.6866502163,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149820804",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 671589.6866502163
-    },
-    {
       "acreage": 36.10428470861694,
       "assessed_value": 5939420.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2115,9 +2075,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2125,81 +2085,81 @@
       "value_per_acre": 164507.34443112926
     },
     {
-      "acreage": 11.586456301885907,
-      "assessed_value": 5926000.0,
+      "acreage": 8.843822527449598,
+      "assessed_value": 5939420.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
       "estimated_county_tax": null,
       "evidence": [
-        "Value per acre: 511459.",
-        "Improvement-to-land ratio: 0.02"
+        "Value per acre: 671590.",
+        "Improvement-to-land ratio: 0.0"
       ],
       "floodplain_context": null,
       "geography_label": "I-85 AT LANE STREET",
-      "improvement_to_land_ratio": 0.02026783045582318,
-      "improvement_value": 117310.0,
-      "improvement_value_per_acre": 10124.75229211417,
-      "land_value": 5787990.0,
-      "land_value_per_acre": 499547.9074182413,
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 5939420.0,
+      "land_value_per_acre": 671589.6866502163,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149815370",
+      "parcel_id": "CFS-PARCEL-0149820804",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 511459.2283954357
+      "value_per_acre": 671589.6866502163
     },
     {
-      "acreage": 108.82403678273414,
-      "assessed_value": 5926000.0,
+      "acreage": 13.55214739087403,
+      "assessed_value": 5939420.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
       "estimated_county_tax": null,
       "evidence": [
-        "Value per acre: 54455.",
-        "Improvement-to-land ratio: 0.02"
+        "Value per acre: 438264.",
+        "Improvement-to-land ratio: 0.0"
       ],
       "floodplain_context": null,
       "geography_label": "I-85 AT LANE STREET",
-      "improvement_to_land_ratio": 0.02026783045582318,
-      "improvement_value": 117310.0,
-      "improvement_value_per_acre": 1077.9787578934238,
-      "land_value": 5787990.0,
-      "land_value_per_acre": 53186.687161363545,
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 5939420.0,
+      "land_value_per_acre": 438264.1236620246,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149815395",
+      "parcel_id": "CFS-PARCEL-0149820816",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 54454.88124862696
+      "value_per_acre": 438264.1236620246
     },
     {
       "acreage": 74.9502360496488,
       "assessed_value": 5926000.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2220,9 +2180,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2230,11 +2190,81 @@
       "value_per_acre": 79065.79501730292
     },
     {
+      "acreage": 11.586456301885907,
+      "assessed_value": 5926000.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 511459.",
+        "Improvement-to-land ratio: 0.02"
+      ],
+      "floodplain_context": null,
+      "geography_label": "I-85 AT LANE STREET",
+      "improvement_to_land_ratio": 0.02026783045582318,
+      "improvement_value": 117310.0,
+      "improvement_value_per_acre": 10124.75229211417,
+      "land_value": 5787990.0,
+      "land_value_per_acre": 499547.9074182413,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149815370",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 511459.2283954357
+    },
+    {
+      "acreage": 108.82403678273414,
+      "assessed_value": 5926000.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 54455.",
+        "Improvement-to-land ratio: 0.02"
+      ],
+      "floodplain_context": null,
+      "geography_label": "I-85 AT LANE STREET",
+      "improvement_to_land_ratio": 0.02026783045582318,
+      "improvement_value": 117310.0,
+      "improvement_value_per_acre": 1077.9787578934238,
+      "land_value": 5787990.0,
+      "land_value_per_acre": 53186.687161363545,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149815395",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 54454.88124862696
+    },
+    {
       "acreage": 51.37593532937723,
       "assessed_value": 5874080.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2255,9 +2285,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2269,7 +2299,7 @@
       "assessed_value": 5858120.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2290,9 +2320,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2304,7 +2334,7 @@
       "assessed_value": 5854420.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2325,9 +2355,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2339,7 +2369,7 @@
       "assessed_value": 5833890.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2360,9 +2390,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2374,7 +2404,7 @@
       "assessed_value": 5784960.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2395,9 +2425,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2409,7 +2439,7 @@
       "assessed_value": 5768980.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2430,9 +2460,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2444,7 +2474,7 @@
       "assessed_value": 5702520.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2465,9 +2495,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2479,7 +2509,7 @@
       "assessed_value": 5638580.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2500,9 +2530,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2514,7 +2544,7 @@
       "assessed_value": 5538760.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2535,9 +2565,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2549,7 +2579,7 @@
       "assessed_value": 5484860.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2570,9 +2600,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2584,7 +2614,7 @@
       "assessed_value": 5359160.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2605,9 +2635,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2619,42 +2649,7 @@
       "assessed_value": 5352480.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 514682.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "CK LAKE POINTE CORP CENTER, LLC",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 5352480.0,
-      "land_value_per_acre": 514682.1111839887,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149742044",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 514682.1111839887
-    },
-    {
-      "acreage": 10.399584294249143,
-      "assessed_value": 5352480.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2675,9 +2670,44 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 514682.1111839887
+    },
+    {
+      "acreage": 10.399584294249143,
+      "assessed_value": 5352480.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 514682.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "CK LAKE POINTE CORP CENTER, LLC",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 5352480.0,
+      "land_value_per_acre": 514682.1111839887,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149742044",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2689,7 +2719,7 @@
       "assessed_value": 5344450.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2710,9 +2740,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2724,7 +2754,7 @@
       "assessed_value": 5260330.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2745,9 +2775,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2759,7 +2789,7 @@
       "assessed_value": 5159670.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2780,9 +2810,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2794,7 +2824,7 @@
       "assessed_value": 5153700.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2815,9 +2845,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2829,7 +2859,7 @@
       "assessed_value": 5047170.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2850,9 +2880,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2864,7 +2894,7 @@
       "assessed_value": 5000980.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2885,9 +2915,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2899,7 +2929,7 @@
       "assessed_value": 4920270.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2920,9 +2950,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2934,7 +2964,7 @@
       "assessed_value": 4912080.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2955,9 +2985,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -2969,7 +2999,7 @@
       "assessed_value": 4879080.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -2990,9 +3020,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3004,42 +3034,7 @@
       "assessed_value": 4871610.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 179942.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "VER-EL MHP",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 4042370.0,
-      "land_value_per_acre": 149312.81402801766,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149736001",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 179942.40951398094
-    },
-    {
-      "acreage": 27.07316198086973,
-      "assessed_value": 4871610.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3060,9 +3055,44 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 179942.40951398094
+    },
+    {
+      "acreage": 27.07316198086973,
+      "assessed_value": 4871610.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 179942.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "VER-EL MHP",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 4042370.0,
+      "land_value_per_acre": 149312.81402801766,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149736001",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3074,7 +3104,7 @@
       "assessed_value": 4743680.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3095,9 +3125,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3109,7 +3139,7 @@
       "assessed_value": 4706640.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3130,9 +3160,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3144,7 +3174,7 @@
       "assessed_value": 4695210.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3165,9 +3195,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3179,7 +3209,7 @@
       "assessed_value": 4617980.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3200,9 +3230,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3214,42 +3244,7 @@
       "assessed_value": 4605570.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 2413032.",
-        "Improvement-to-land ratio: 0.32"
-      ],
-      "floodplain_context": null,
-      "geography_label": "CONCORD MILLS",
-      "improvement_to_land_ratio": 0.32477570167954345,
-      "improvement_value": 1100090.0,
-      "improvement_value_per_acre": 576378.7421577671,
-      "land_value": 3387230.0,
-      "land_value_per_acre": 1774697.8581743797,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149726658",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 2413032.2460158234
-    },
-    {
-      "acreage": 1.9086234788632819,
-      "assessed_value": 4605570.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3270,9 +3265,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3284,7 +3279,7 @@
       "assessed_value": 4605570.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3301,13 +3296,13 @@
       "land_value": 3387230.0,
       "land_value_per_acre": 1774697.8581743797,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149726662",
+      "parcel_id": "CFS-PARCEL-0149726658",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3319,42 +3314,7 @@
       "assessed_value": 4605570.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 2413032.",
-        "Improvement-to-land ratio: 0.32"
-      ],
-      "floodplain_context": null,
-      "geography_label": "CONCORD MILLS",
-      "improvement_to_land_ratio": 0.32477570167954345,
-      "improvement_value": 1100090.0,
-      "improvement_value_per_acre": 576378.7421577671,
-      "land_value": 3387230.0,
-      "land_value_per_acre": 1774697.8581743797,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149726661",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 2413032.2460158234
-    },
-    {
-      "acreage": 1.9086234788632819,
-      "assessed_value": 4605570.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3375,9 +3335,79 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 2413032.2460158234
+    },
+    {
+      "acreage": 1.9086234788632819,
+      "assessed_value": 4605570.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 2413032.",
+        "Improvement-to-land ratio: 0.32"
+      ],
+      "floodplain_context": null,
+      "geography_label": "CONCORD MILLS",
+      "improvement_to_land_ratio": 0.32477570167954345,
+      "improvement_value": 1100090.0,
+      "improvement_value_per_acre": 576378.7421577671,
+      "land_value": 3387230.0,
+      "land_value_per_acre": 1774697.8581743797,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149726661",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 2413032.2460158234
+    },
+    {
+      "acreage": 1.9086234788632819,
+      "assessed_value": 4605570.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 2413032.",
+        "Improvement-to-land ratio: 0.32"
+      ],
+      "floodplain_context": null,
+      "geography_label": "CONCORD MILLS",
+      "improvement_to_land_ratio": 0.32477570167954345,
+      "improvement_value": 1100090.0,
+      "improvement_value_per_acre": 576378.7421577671,
+      "land_value": 3387230.0,
+      "land_value_per_acre": 1774697.8581743797,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149726662",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3389,7 +3419,7 @@
       "assessed_value": 4569810.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3410,9 +3440,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3424,7 +3454,7 @@
       "assessed_value": 4502840.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3445,9 +3475,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3459,77 +3489,7 @@
       "assessed_value": 4499250.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 224767.",
-        "Improvement-to-land ratio: 0.03"
-      ],
-      "floodplain_context": null,
-      "geography_label": "26.890 AC - NC HWY 49 & N MAIN STREET",
-      "improvement_to_land_ratio": 0.034241908428910874,
-      "improvement_value": 138200.0,
-      "improvement_value_per_acre": 6904.0075560277455,
-      "land_value": 4035990.0,
-      "land_value_per_acre": 201624.49678764414,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149826715",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 224767.4095257441
-    },
-    {
-      "acreage": 20.01735932043418,
-      "assessed_value": 4499250.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 224767.",
-        "Improvement-to-land ratio: 0.03"
-      ],
-      "floodplain_context": null,
-      "geography_label": "26.890 AC - NC HWY 49 & N MAIN STREET",
-      "improvement_to_land_ratio": 0.034241908428910874,
-      "improvement_value": 138200.0,
-      "improvement_value_per_acre": 6904.0075560277455,
-      "land_value": 4035990.0,
-      "land_value_per_acre": 201624.49678764414,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149826731",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 224767.4095257441
-    },
-    {
-      "acreage": 20.01735932043418,
-      "assessed_value": 4499250.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3550,9 +3510,79 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 224767.4095257441
+    },
+    {
+      "acreage": 20.01735932043418,
+      "assessed_value": 4499250.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 224767.",
+        "Improvement-to-land ratio: 0.03"
+      ],
+      "floodplain_context": null,
+      "geography_label": "26.890 AC - NC HWY 49 & N MAIN STREET",
+      "improvement_to_land_ratio": 0.034241908428910874,
+      "improvement_value": 138200.0,
+      "improvement_value_per_acre": 6904.0075560277455,
+      "land_value": 4035990.0,
+      "land_value_per_acre": 201624.49678764414,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149826715",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 224767.4095257441
+    },
+    {
+      "acreage": 20.01735932043418,
+      "assessed_value": 4499250.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 224767.",
+        "Improvement-to-land ratio: 0.03"
+      ],
+      "floodplain_context": null,
+      "geography_label": "26.890 AC - NC HWY 49 & N MAIN STREET",
+      "improvement_to_land_ratio": 0.034241908428910874,
+      "improvement_value": 138200.0,
+      "improvement_value_per_acre": 6904.0075560277455,
+      "land_value": 4035990.0,
+      "land_value_per_acre": 201624.49678764414,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149826731",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3564,7 +3594,7 @@
       "assessed_value": 4453520.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3585,9 +3615,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3599,7 +3629,7 @@
       "assessed_value": 4453520.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3620,9 +3650,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3634,7 +3664,7 @@
       "assessed_value": 4453430.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3655,9 +3685,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3669,7 +3699,7 @@
       "assessed_value": 4443840.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3690,9 +3720,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3704,7 +3734,7 @@
       "assessed_value": 4443380.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3725,9 +3755,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3739,7 +3769,7 @@
       "assessed_value": 4421570.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3760,9 +3790,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3774,7 +3804,7 @@
       "assessed_value": 4317970.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3795,9 +3825,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3809,7 +3839,7 @@
       "assessed_value": 4313810.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3830,9 +3860,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3844,7 +3874,7 @@
       "assessed_value": 4303140.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3865,9 +3895,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3879,7 +3909,7 @@
       "assessed_value": 4259000.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3900,9 +3930,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3914,7 +3944,7 @@
       "assessed_value": 4257520.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3935,9 +3965,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3949,7 +3979,7 @@
       "assessed_value": 4240230.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -3970,9 +4000,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -3984,7 +4014,7 @@
       "assessed_value": 4240230.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4005,9 +4035,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4019,7 +4049,7 @@
       "assessed_value": 4231600.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4040,9 +4070,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4054,7 +4084,7 @@
       "assessed_value": 4182240.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4075,9 +4105,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4089,7 +4119,7 @@
       "assessed_value": 4181320.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4110,9 +4140,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4124,7 +4154,7 @@
       "assessed_value": 4172760.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4145,9 +4175,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4159,7 +4189,7 @@
       "assessed_value": 4156380.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4180,9 +4210,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4194,7 +4224,7 @@
       "assessed_value": 4143970.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4215,9 +4245,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4229,7 +4259,7 @@
       "assessed_value": 4140310.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4250,9 +4280,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4264,7 +4294,7 @@
       "assessed_value": 4133960.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4285,9 +4315,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4299,7 +4329,7 @@
       "assessed_value": 4124280.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4320,9 +4350,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4334,7 +4364,7 @@
       "assessed_value": 4120410.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4355,9 +4385,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4366,7 +4396,7 @@
     }
   ],
   "summary": {
-    "as_of": "2026-06-30T15:29:40Z",
+    "as_of": "2026-06-30T16:23:51Z",
     "data_needed_count": 0,
     "high_opportunity_count": 0,
     "median_value_per_acre": 224767.4095257441,
@@ -4383,7 +4413,7 @@
       "assessed_value": 204830470.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4404,9 +4434,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4418,7 +4448,7 @@
       "assessed_value": 204830470.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4439,9 +4469,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4453,7 +4483,7 @@
       "assessed_value": 69091960.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4474,9 +4504,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4488,7 +4518,7 @@
       "assessed_value": 55034560.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4509,9 +4539,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4523,7 +4553,7 @@
       "assessed_value": 18850570.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4544,9 +4574,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4558,7 +4588,7 @@
       "assessed_value": 15804920.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4579,9 +4609,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4593,7 +4623,7 @@
       "assessed_value": 13911020.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4614,9 +4644,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4628,7 +4658,7 @@
       "assessed_value": 13744550.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4649,9 +4679,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4663,42 +4693,7 @@
       "assessed_value": 13406550.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 86483.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 13397050.0,
-      "land_value_per_acre": 86421.67963058299,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149749607",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 86482.96222313064
-    },
-    {
-      "acreage": 155.01955131243525,
-      "assessed_value": 13406550.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4719,9 +4714,44 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 86482.96222313064
+    },
+    {
+      "acreage": 155.01955131243525,
+      "assessed_value": 13406550.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 86483.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 13397050.0,
+      "land_value_per_acre": 86421.67963058299,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149749607",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4733,7 +4763,7 @@
       "assessed_value": 12057530.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4754,9 +4784,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4768,7 +4798,7 @@
       "assessed_value": 9950000.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4789,9 +4819,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4803,7 +4833,7 @@
       "assessed_value": 9568890.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4824,9 +4854,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4838,7 +4868,7 @@
       "assessed_value": 9523350.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4859,9 +4889,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4873,7 +4903,7 @@
       "assessed_value": 9099120.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4894,9 +4924,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4908,42 +4938,7 @@
       "assessed_value": 8828310.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 510110.",
-        "Improvement-to-land ratio: 0.45"
-      ],
-      "floodplain_context": null,
-      "geography_label": "HARRISBURG",
-      "improvement_to_land_ratio": 0.4483963753248992,
-      "improvement_value": 2653260.0,
-      "improvement_value_per_acre": 153308.44476734643,
-      "land_value": 5917220.0,
-      "land_value_per_acre": 341903.8449101248,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149747546",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 510110.00656702026
-    },
-    {
-      "acreage": 17.306678728797102,
-      "assessed_value": 8828310.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -4964,9 +4959,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -4974,46 +4969,46 @@
       "value_per_acre": 510110.00656702026
     },
     {
-      "acreage": 5.239771185677299,
-      "assessed_value": 8822440.0,
+      "acreage": 17.306678728797102,
+      "assessed_value": 8828310.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
       "estimated_county_tax": null,
       "evidence": [
-        "Value per acre: 1683745.",
-        "Improvement-to-land ratio: 0.0"
+        "Value per acre: 510110.",
+        "Improvement-to-land ratio: 0.45"
       ],
       "floodplain_context": null,
-      "geography_label": "STOUGH ROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 1683745.2795869752,
+      "geography_label": "HARRISBURG",
+      "improvement_to_land_ratio": 0.4483963753248992,
+      "improvement_value": 2653260.0,
+      "improvement_value_per_acre": 153308.44476734643,
+      "land_value": 5917220.0,
+      "land_value_per_acre": 341903.8449101248,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765258",
+      "parcel_id": "CFS-PARCEL-0149747546",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 1683745.2795869752
+      "value_per_acre": 510110.00656702026
     },
     {
       "acreage": 29.966987330346115,
       "assessed_value": 8822440.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -5034,9 +5029,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -5044,46 +5039,11 @@
       "value_per_acre": 294405.303500961
     },
     {
-      "acreage": 24.212788367530933,
-      "assessed_value": 8822440.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": null,
-      "evidence": [
-        "Value per acre: 364371.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "NORTH CAROLINA RAILROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 364371.08630705206,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765260",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 364371.08630705206
-    },
-    {
       "acreage": 34.235249713446464,
       "assessed_value": 8822440.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -5104,9 +5064,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -5114,11 +5074,81 @@
       "value_per_acre": 257700.4717022654
     },
     {
+      "acreage": 24.212788367530933,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 364371.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "NORTH CAROLINA RAILROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 364371.08630705206,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765260",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 364371.08630705206
+    },
+    {
+      "acreage": 5.239771185677299,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": null,
+      "evidence": [
+        "Value per acre: 1683745.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "STOUGH ROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 1683745.2795869752,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765258",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 1683745.2795869752
+    },
+    {
       "acreage": 52.125149248213,
       "assessed_value": 8569500.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -5139,9 +5169,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -5153,7 +5183,7 @@
       "assessed_value": 8504740.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -5174,9 +5204,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -5188,7 +5218,7 @@
       "assessed_value": 8504740.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -5209,9 +5239,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,
@@ -5223,7 +5253,7 @@
       "assessed_value": 8015170.0,
       "caveats": [
         "Screening-level economic context only.",
-        "Estimated tax context is not an official tax bill.",
+        "Estimated tax context is not a formal tax bill.",
         "Contact fields are excluded."
       ],
       "economic_status_band": "underbuilt_watch",
@@ -5244,9 +5274,9 @@
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Constraint-Adjusted Opportunity"
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
       ],
       "school_pressure_context": null,
       "transportation_context": null,

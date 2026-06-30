@@ -205,15 +205,15 @@ function OverviewLandingPage({
     ? [
         {
           icon: Gauge,
-          purpose: "Assessed value, value per acre, and baseline coverage.",
+          purpose: "Assessed value, revenue per acre, and baseline coverage.",
           status: "Baseline",
           title: "Parcel Economic Baseline",
         },
         {
           icon: BarChart3,
-          purpose: "Value per acre and land efficiency screening.",
+          purpose: "Growth and tax-base intelligence by parcel or area.",
           status: "Screening",
-          title: "Value Per Acre",
+          title: "Revenue per Acre Dashboard",
         },
         {
           icon: Building2,
@@ -229,13 +229,13 @@ function OverviewLandingPage({
         },
         {
           icon: Network,
-          purpose: "Tax-base opportunity adjusted by constraints.",
+          purpose: "Fiscal opportunity adjusted by public cost risk.",
           status: "Opportunity",
-          title: "Constraint-Adjusted Opportunity",
+          title: "Constraint-Adjusted Development Potential",
         },
         {
           icon: FlaskConical,
-          purpose: "Scenario screening for fiscal and service-burden context.",
+          purpose: "Scenario comparison for modeled tax-base lift and burden.",
           status: "Scenario",
           title: "Economic Scenario Lab",
         },
@@ -292,10 +292,10 @@ function OverviewLandingPage({
       ];
   const operatingFlow = economicsMode
     ? [
-        { icon: Database, label: "Parcel / Tax Context" },
-        { icon: BarChart3, label: "Value Efficiency" },
-        { icon: Binoculars, label: "Opportunity Watch" },
-        { icon: ShieldAlert, label: "Constraint Adjustment" },
+        { icon: Database, label: "Raw Data" },
+        { icon: BarChart3, label: "Derived Metrics" },
+        { icon: Binoculars, label: "Intelligence Bands" },
+        { icon: ShieldAlert, label: "Human Output" },
         { icon: Printer, label: "Economic Snapshot" },
       ]
     : [
@@ -313,7 +313,7 @@ function OverviewLandingPage({
         },
         {
           icon: Layers3,
-          text: "Review value per acre and underbuilt watch layers",
+          text: "Review revenue per acre and underbuilt watch layers",
         },
         {
           icon: Gauge,
@@ -374,7 +374,7 @@ function OverviewLandingPage({
   const trustCaveats = [
     ...(economicsMode
       ? [
-          "CFS Economics is not an official appraisal.",
+          "CFS Economics is not a formal appraisal.",
           "Estimated tax context is screening-level only.",
           "Opportunity classes are not approval recommendations.",
           "Scenario values depend on assumptions.",
@@ -387,6 +387,47 @@ function OverviewLandingPage({
           "Utility proxy does not confirm capacity.",
           "Preliminary school capacity indicators need official verification.",
         ]),
+  ];
+  const economicsUseCases = [
+    "Rezoning review: economic baseline, development pressure, service burden, and constraint-adjusted opportunity.",
+    "CIP prioritization: where infrastructure is only a cost versus where it may unlock future value.",
+    "Economic development: sites with road access, low flood exposure, low residential conflict, and tax-base upside.",
+    "Planning snapshot: what growth means for tax base, service burden, and deeper review.",
+  ];
+  const economicsExampleCards = [
+    {
+      fields: [
+        "Current economic baseline",
+        "Development pressure",
+        "School and utility burden",
+        "Scenario tax-base lift",
+        "Opportunity classification",
+      ],
+      takeaway:
+        "This is not just a land-use change. It is a fiscal/service tradeoff.",
+      title: "Rezoning Review Context",
+    },
+    {
+      fields: [
+        "Site size",
+        "Road access",
+        "Flood exposure",
+        "Utility confidence",
+        "Tax-base upside",
+      ],
+      takeaway: "Final class: Industrial / Economic Development Candidate.",
+      title: "Industrial Site Readiness",
+    },
+    {
+      fields: [
+        "Growth pressure",
+        "Underbuilt parcels",
+        "Service uncertainty",
+        "Potential value unlocked",
+      ],
+      takeaway: "Could this infrastructure unlock future value?",
+      title: "CIP / Infrastructure Prioritization",
+    },
   ];
 
   return (
@@ -410,9 +451,17 @@ function OverviewLandingPage({
               </h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
                 {economicsMode
-                  ? "Parcel-level economic intelligence for growth, tax-base opportunity, redevelopment potential, and infrastructure burden."
+                  ? "Parcel-based economic intelligence for growth, tax-base opportunity, redevelopment potential, infrastructure burden, and fiscal/service tradeoffs."
                   : "Parcel-centered planning intelligence for growth, constraints, infrastructure, and executive reporting."}
               </p>
+              {economicsMode ? (
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+                  CFS Economics extends Cabarrus FutureScape from a
+                  planning-constraints platform into a decision-support
+                  workflow. Traditional GIS can show where things are. CFS
+                  Economics helps explain what those places mean economically.
+                </p>
+              ) : null}
               <div className="mt-7 flex flex-wrap gap-3">
                 <button
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#d8b86a]/40 bg-[#d8b86a]/14 px-4 py-3 text-sm font-semibold text-[#f9dd91] shadow-[0_0_30px_rgba(216,184,106,0.12)] transition hover:border-[#d8b86a]/60 hover:bg-[#d8b86a]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/70"
@@ -473,7 +522,7 @@ function OverviewLandingPage({
                   [
                     "Snapshot",
                     economicsMode
-                      ? "Capture economic baseline context"
+                      ? "Capture fiscal/service tradeoff context"
                       : "Capture report-ready context",
                   ],
                   ["Governance", "Keep caveats attached"],
@@ -534,7 +583,7 @@ function OverviewLandingPage({
               </p>
               <h2 className="text-xl font-semibold text-white">
                 {economicsMode
-                  ? "From parcel value to scenario snapshot"
+                  ? "From parcel value to fiscal/service decision support"
                   : "From source context to executive snapshot"}
               </h2>
             </div>
@@ -634,6 +683,52 @@ function OverviewLandingPage({
             </div>
           </section>
         </div>
+
+        {economicsMode ? (
+          <section className="cfs-command-surface rounded-2xl p-4 md:p-5">
+            <div className="flex items-center gap-3">
+              <ShieldAlert className="h-5 w-5 text-[#d8b86a]" />
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d8b86a]">
+                  Consulting Decision Workflows
+                </p>
+                <h2 className="text-xl font-semibold text-white">
+                  Growth value, public cost risk, and investment readiness
+                </h2>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {economicsUseCases.map((item) => (
+                <p
+                  className="rounded-xl border border-white/10 bg-white/[0.035] px-3 py-3 text-sm leading-6 text-slate-300"
+                  key={item}
+                >
+                  {item}
+                </p>
+              ))}
+            </div>
+            <div className="mt-4 grid gap-3 lg:grid-cols-3">
+              {economicsExampleCards.map((card) => (
+                <article
+                  className="cfs-command-card rounded-xl border-[#d8b86a]/15 p-4"
+                  key={card.title}
+                >
+                  <h3 className="text-sm font-semibold text-white">
+                    {card.title}
+                  </h3>
+                  <ul className="mt-3 space-y-1 text-xs leading-5 text-slate-400">
+                    {card.fields.map((field) => (
+                      <li key={field}>{field}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 text-xs font-semibold leading-5 text-[#f0cd79]">
+                    {card.takeaway}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="cfs-command-surface cfs-overview-trust rounded-2xl p-4 md:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

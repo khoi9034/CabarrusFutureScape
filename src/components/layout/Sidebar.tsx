@@ -210,27 +210,27 @@ function EconomicsLayerControlsPanel({
   const layers = [
     {
       caveat: "Assessed value divided by acreage where fields are available.",
-      label: "Value per Acre",
+      label: "Revenue per Acre Dashboard",
       status: "Screening",
     },
     {
       caveat: "High land value plus low improvement-to-land ratio.",
-      label: "Underbuilt Parcel Watch",
+      label: "Underbuilt Redevelopment Watchlist",
       status: "Watchlist",
     },
     {
       caveat: "Low current value per acre plus growth context where available.",
-      label: "Tax-Base Opportunity",
+      label: "Fiscal Opportunity Score",
       status: "Opportunity",
     },
     {
       caveat: "Opportunity reduced by floodplain, schools, utilities, and transportation uncertainty.",
-      label: "Constraint-Adjusted Opportunity",
+      label: "Constraint-Adjusted Development Potential",
       status: "Caveated",
     },
     {
       caveat: "Scenario candidates require assumptions before fiscal interpretation.",
-      label: "Scenario Candidates",
+      label: "Site Readiness / Investment Candidate",
       status: "Scenario",
     },
   ];
@@ -245,11 +245,12 @@ function EconomicsLayerControlsPanel({
               Economic Workspace
             </p>
             <h3 className="mt-1 text-sm font-semibold text-white">
-              Parcel economic screening
+              Parcel-based economic intelligence
             </h3>
             <p className="mt-2 text-xs leading-5 text-slate-400">
-              Review value efficiency, underbuilt watch, tax-base opportunity,
-              and constraints without exposing contact fields.
+              Review revenue per acre, fiscal opportunity, investment
+              readiness, public cost risk, and constraints without exposing
+              contact fields.
             </p>
           </div>
         </div>
@@ -291,11 +292,13 @@ function EconomicScenarioControlsPanel({
   onCollapseDrawer?: () => void;
 }) {
   const scenarios = [
-    "Residential Growth Scenario",
-    "Commercial Corridor Scenario",
-    "Industrial / Employment Scenario",
-    "Mixed-Use Scenario",
-    "Conservation / Low-Intensity Scenario",
+    "Current Conditions",
+    "Growth Continues As-Is",
+    "Infrastructure-Constrained Growth",
+    "Targeted Investment Scenario",
+    "Higher-Density Redevelopment Scenario",
+    "Employment / Industrial Scenario",
+    "Mixed-Use Corridor Scenario",
   ];
 
   return (
@@ -308,11 +311,11 @@ function EconomicScenarioControlsPanel({
               Economic Scenario Lab
             </p>
             <h3 className="mt-1 text-sm font-semibold text-white">
-              Scenario screening
+              Scenario comparison
             </h3>
             <p className="mt-2 text-xs leading-5 text-slate-400">
-              Compare current value context with scenario assumptions,
-              tax-base lift, constraint burden, and data caveats.
+              Compare current conditions, modeled tax-base lift, public
+              cost risk, infrastructure burden, and data caveats.
             </p>
           </div>
         </div>

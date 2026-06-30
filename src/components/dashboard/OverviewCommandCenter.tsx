@@ -51,7 +51,7 @@ const economicsWorkflows = [
     icon: Layers3,
     id: "explore-intelligence",
     helper:
-      "Review value per acre, underbuilt watch, tax-base opportunity, and constraint-adjusted parcels.",
+      "Review revenue per acre, underbuilt watch, public cost risk, investment readiness, and constraint-adjusted parcels.",
   },
   {
     accent: "secondary",
@@ -59,7 +59,7 @@ const economicsWorkflows = [
     icon: Gauge,
     id: "indicator-center",
     helper:
-      "Monitor parcel value coverage, opportunity classes, data gaps, and fiscal/service burden context.",
+      "Monitor growth and tax-base intelligence, opportunity classes, confidence tiers, and fiscal/service burden context.",
   },
   {
     accent: "secondary",
@@ -67,7 +67,7 @@ const economicsWorkflows = [
     icon: FlaskConical,
     id: "model-lab",
     helper:
-      "Screen residential, commercial, industrial, mixed-use, and low-intensity scenarios.",
+      "Compare current conditions, targeted investment, higher-density redevelopment, employment, and mixed-use corridor scenarios.",
   },
 ] as const;
 
@@ -190,7 +190,7 @@ export function OverviewCommandCenter() {
             </p>
             <h1 className="mt-0.5 text-sm font-semibold leading-5 text-white md:text-base">
               {economicsMode
-                ? "Review economic layers, monitor opportunity, or screen scenarios."
+                ? "Review economic layers, monitor fiscal opportunity, or compare scenario tradeoffs."
                 : "Explore countywide, review indicators, or open internal research."}
             </h1>
             {selectedParcelId ? (
@@ -345,7 +345,7 @@ export function OverviewCommandCenter() {
       ) : (
         <p className="mt-2 text-[11px] leading-5 text-slate-600">
           {economicsMode
-            ? "Use the global search bar for parcel lookup. Planning Snapshot can capture economic screening context."
+            ? "Use the global search bar for parcel lookup. Planning Snapshot can capture screening-level economic, fiscal/service, and scenario context."
             : "Use the global search bar for parcel search. Planning Snapshot remains the top-level report builder."}
         </p>
       )}

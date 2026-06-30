@@ -34,11 +34,14 @@ export const askCfsSuggestedPrompts = [
 export const askCfsEconomicsSuggestedPrompts = [
   "Where are the strongest underbuilt parcel signals?",
   "Which areas have high tax-base opportunity?",
-  "What parcels look economically constrained?",
+  "Which areas create fiscal upside but service burden?",
+  "What corridors look investment-ready?",
   "Explain value per acre.",
-  "Which scenario should I inspect first?",
-  "Where is economic data incomplete?",
   "How should I interpret improvement-to-land ratio?",
+  "Which sites look like industrial or employment candidates?",
+  "Where is economic data confidence weak?",
+  "What scenario should I inspect first?",
+  "Summarize public cost risk.",
 ] as const;
 
 export async function searchCfsAi(
@@ -138,7 +141,7 @@ async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
     answer: briefing(
       [
         "Executive summary",
-        `Based on the cached demo extract, CFS Economics reviewed ${format(summary.total_parcels_analyzed)} parcels for screening-level value and opportunity context. It shows ${format(summary.underbuilt_candidate_count)} underbuilt watch candidates and ${format(summary.high_opportunity_count)} tax-base opportunity signals. This is not an official appraisal, tax bill, fiscal impact study, or approval recommendation.`,
+        `Based on the cached demo extract, CFS Economics reviewed ${format(summary.total_parcels_analyzed)} parcels as a parcel-based economic intelligence system. It connects value, acreage, growth pressure, infrastructure burden, and constraint context so counties can screen where growth creates value, where it creates public cost risk, and where deeper review is needed. The extract shows ${format(summary.underbuilt_candidate_count)} underbuilt watch candidates and ${format(summary.high_opportunity_count)} tax-base opportunity signals.`,
       ],
       [
         "Economic signal",
@@ -146,6 +149,7 @@ async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
           `Total assessed value coverage: ${currency(summary.total_assessed_value)}.`,
           `Median value per acre: ${currency(summary.median_value_per_acre)}.`,
           `Underbuilt watch candidates: ${format(summary.underbuilt_candidate_count)}.`,
+          "Revenue per acre, fiscal opportunity, and infrastructure readiness are shown as screening bands rather than numeric scores.",
           `Data-needed records: ${format(summary.data_needed_count)}.`,
         ]),
       ],
@@ -155,15 +159,16 @@ async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
       ],
       [
         "Fiscal / service interpretation",
-        "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as a scenario candidate.",
+        "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as an investment-ready candidate.",
       ],
       [
         "Inspect next",
         bullets([
-          "Value per Acre.",
-          "Underbuilt Parcel Watch.",
-          "Tax-Base Opportunity.",
-          "Constraint-Adjusted Opportunity.",
+          "Revenue per Acre Dashboard.",
+          "Underbuilt Redevelopment Watchlist.",
+          "Fiscal Opportunity Score.",
+          "Constraint-Adjusted Development Potential.",
+          "Revenue per Acre Dashboard.",
           "Economic Scenario Lab.",
         ]),
       ],
@@ -177,21 +182,25 @@ async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
           ...missing,
         ]),
       ],
+      [
+        "Consulting takeaway",
+        "Traditional GIS can show where things are. CFS Economics helps explain what those places mean economically by turning parcel, tax, zoning, permit, infrastructure, and constraint data into a decision-support workflow.",
+      ],
     ),
     as_of: economics.as_of,
     caveats: [
       "Portfolio Demo uses a cached demo extract.",
-      "CFS Economics is screening-level context, not an official appraisal or tax bill.",
+      "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
       "Opportunity classes are review bands, not approval recommendations.",
     ],
     dashboard_actions: {
       focus_domain: "economics",
       highlight_kpis: ["underbuilt_candidates", "tax_base_opportunity"],
       recommended_layers: [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Tax-Base Opportunity",
-        "Constraint-Adjusted Opportunity",
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Fiscal Opportunity Score",
+        "Constraint-Adjusted Development Potential",
       ],
       sort_watchlist_by: "severity",
     },
@@ -213,14 +222,14 @@ async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
     ],
     provider: "none",
     related_layers: [
-      "Value per Acre",
-      "Underbuilt Parcel Watch",
-      "Constraint-Adjusted Opportunity",
+      "Revenue per Acre Dashboard",
+      "Underbuilt Redevelopment Watchlist",
+      "Constraint-Adjusted Development Potential",
     ],
     suggested_actions: [
-      "Open Economic Workspace and compare Value per Acre with Underbuilt Parcel Watch.",
-      "Use Economic Scenario Lab as screening context only.",
-      "Ask: Where is economic data incomplete?",
+      "Open Economic Workspace and compare Revenue per Acre Dashboard with Underbuilt Redevelopment Watchlist.",
+      "Use Economic Scenario Lab as screening-level fiscal context only.",
+      "Ask: Where is economic data confidence weak?",
     ],
   };
 }
@@ -823,10 +832,10 @@ function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActio
       focus_domain: "economics",
       highlight_kpis: ["underbuilt_candidates", "tax_base_opportunity"],
       recommended_layers: [
-        "Value per Acre",
-        "Underbuilt Parcel Watch",
-        "Tax-Base Opportunity",
-        "Constraint-Adjusted Opportunity",
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Fiscal Opportunity Score",
+        "Constraint-Adjusted Development Potential",
       ],
       sort_watchlist_by: "severity",
     },
@@ -888,7 +897,11 @@ function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActio
 function relatedLayers(domains: CfsAiDomain[]) {
   const layerMap: Record<CfsAiDomain, string[]> = {
     data_readiness: ["Data Still Needed"],
-    economics: ["Value per Acre", "Underbuilt Parcel Watch", "Constraint-Adjusted Opportunity"],
+    economics: [
+      "Revenue per Acre Dashboard",
+      "Underbuilt Redevelopment Watchlist",
+      "Constraint-Adjusted Development Potential",
+    ],
     flood: ["Floodplain Review"],
     general: ["Development Hotspots", "Floodplain Review", "School Utilization + Permit Pressure"],
     methodology: ["Methodology"],

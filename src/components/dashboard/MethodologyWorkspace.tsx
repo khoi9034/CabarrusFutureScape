@@ -774,8 +774,53 @@ function EconomicsMethodologyWorkspace() {
         "Residential, commercial, industrial, mixed-use, and low-intensity scenarios test assumptions. Scenario values depend on inputs.",
     },
   ];
+  const modelLevels = [
+    {
+      detail:
+        "Parcel geometry, parcel ID, acreage, total value, land value, improvement value, zoning, future land use where available, permits, plan reviews, flood, school zones, roads, utility proxy, and growth pressure.",
+      title: "Level 1 - Raw Data",
+    },
+    {
+      detail:
+        "Value per acre, land value per acre, improvement value per acre, improvement-to-land ratio, estimated county tax, nearby permit activity, growth pressure band, and constraint burden band.",
+      title: "Level 2 - Derived Metrics",
+    },
+    {
+      detail:
+        "Underbuilt watch, redevelopment opportunity, tax-base potential, constraint-adjusted opportunity, investment readiness, and public cost risk bands.",
+      title: "Level 3 - Intelligence Bands",
+    },
+    {
+      detail:
+        "High-Value Stable Parcel, Underbuilt Redevelopment Candidate, Commercial Corridor Opportunity, Industrial / Economic Development Candidate, High Value but Infrastructure-Constrained, Residential Growth Pressure Area, Low Fiscal Upside / High Public Burden, or Needs More Data Before Recommendation.",
+      title: "Level 4 - Human Output",
+    },
+  ];
+  const confidenceTiers = [
+    {
+      detail:
+        "Parcel acreage, parcel value, land value, improvement value, zoning, flood overlay, municipality/ETJ, and tax district where available.",
+      title: "Strong / high-confidence data",
+    },
+    {
+      detail:
+        "Growth pressure, nearby permits, school burden proxy, transportation access, redevelopment classification, and scenario assumptions.",
+      title: "Medium-confidence data",
+    },
+    {
+      detail:
+        "Utility capacity, road capacity, exact service cost, exact school seat cost, and long-term fiscal impact.",
+      title: "Low-confidence / proxy data",
+    },
+  ];
+  const decisionUseCases = [
+    "Before a rezoning: screen economic/context risk, underbuilt status, and whether tax-base lift creates service burden.",
+    "Before a CIP decision: test whether infrastructure is only a cost or could unlock future value.",
+    "Before an economic development discussion: compare site size, road access, flood exposure, utility confidence, and tax-base upside.",
+    "Before a planning snapshot: summarize what growth means for tax base and service burden.",
+  ];
   const caveats = [
-    "CFS Economics is not an official appraisal.",
+    "CFS Economics is not a formal appraisal.",
     "CFS Economics is not an official fiscal impact study.",
     "CFS Economics is not a project approval recommendation.",
     "Estimated tax context is screening-level and must be verified.",
@@ -798,6 +843,12 @@ function EconomicsMethodologyWorkspace() {
             economic opportunity may need deeper review. It does not make
             approval decisions or replace official fiscal analysis.
           </p>
+          <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-400">
+            Traditional GIS can show where things are. CFS Economics helps
+            explain what those places mean economically by connecting growth
+            value, infrastructure burden, public cost risk, and investment
+            readiness.
+          </p>
         </section>
 
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -819,6 +870,66 @@ function EconomicsMethodologyWorkspace() {
               </div>
             </article>
           ))}
+        </section>
+
+        <section className="cfs-command-surface rounded-2xl border-[#68d8ff]/20 p-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
+            Four-level economics engine
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {modelLevels.map((level) => (
+              <article
+                className="cfs-command-card rounded-xl border-white/10 p-4"
+                key={level.title}
+              >
+                <h2 className="text-sm font-semibold text-white">
+                  {level.title}
+                </h2>
+                <p className="mt-2 text-xs leading-6 text-slate-400">
+                  {level.detail}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="cfs-command-surface rounded-2xl border-[#a8f3c4]/20 p-5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a8f3c4]">
+              Confidence tiers
+            </p>
+            <div className="mt-4 grid gap-3">
+              {confidenceTiers.map((tier) => (
+                <article
+                  className="rounded-xl border border-white/10 bg-white/[0.035] p-3"
+                  key={tier.title}
+                >
+                  <h2 className="text-sm font-semibold text-white">
+                    {tier.title}
+                  </h2>
+                  <p className="mt-2 text-xs leading-6 text-slate-400">
+                    {tier.detail}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="cfs-command-surface rounded-2xl border-[#d8b86a]/20 p-5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f0cd79]">
+              Decision-use cases
+            </p>
+            <div className="mt-4 grid gap-2">
+              {decisionUseCases.map((useCase) => (
+                <p
+                  className="rounded-xl border border-[#d8b86a]/15 bg-[#d8b86a]/[0.045] px-3 py-2 text-xs leading-5 text-[#ffe8a6]"
+                  key={useCase}
+                >
+                  {useCase}
+                </p>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section className="cfs-command-surface rounded-2xl border-[#f0cd79]/20 p-5">

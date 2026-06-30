@@ -208,7 +208,10 @@ def test_portfolio_demo_mode_is_documented() -> None:
 def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     top_nav = read("src/components/layout/TopNav.tsx")
     dashboard_state = read("src/hooks/useDashboardState.tsx")
+    economic_mission_control = read("src/components/dashboard/EconomicMissionControl.tsx")
     indicator_center = read("src/components/dashboard/IndicatorCenterWorkspace.tsx")
+    methodology = read("src/components/dashboard/MethodologyWorkspace.tsx")
+    overview = read("src/components/layout/AppShell.tsx")
     economics_service = read("src/lib/economicsIntelligenceService.ts")
     ask_service = read("src/lib/aiSearchService.ts")
 
@@ -222,3 +225,13 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert '"/economics/intelligence"' in economics_service
     assert "askCfsEconomicsSuggestedPrompts" in ask_service
     assert 'app_mode === "economics"' in ask_service
+    assert "Traditional GIS can show where things are" in overview
+    assert "Consulting Decision Workflows" in overview
+    assert "Economic Snapshot" in economic_mission_control
+    assert "Parcel / Area Economic Profile" in economic_mission_control
+    assert "Fiscal Impact / Tax Lift" in economic_mission_control
+    assert "Scenario Comparison" in economic_mission_control
+    assert "Four-level economics engine" in methodology
+    assert "Confidence tiers" in methodology
+    assert "Which areas create fiscal upside but service burden?" in ask_service
+    assert "What corridors look investment-ready?" in ask_service

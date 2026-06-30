@@ -142,7 +142,7 @@ def _context():
         "economics_intelligence": {
             "as_of": "2026-01-01T00:00:00+00:00",
             "caveats": [
-                "CFS Economics is screening-level context, not an official appraisal or tax bill.",
+                "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
             ],
             "data_readiness": [
                 {
@@ -621,8 +621,10 @@ def test_ai_search_economics_mode_returns_economic_answer() -> None:
     assert response.domains == ["economics"]
     assert response.dashboard_actions.focus_domain == "economics"
     assert "CFS Economics reviewed 12 parcels" in response.answer
+    assert "Consulting takeaway" in response.answer
+    assert "Traditional GIS can show where things are" in response.answer
     assert "Underbuilt Redevelopment Candidate" in response.answer
-    assert "Value per Acre" in response.related_layers
+    assert "Revenue per Acre Dashboard" in response.related_layers
 
 
 def test_ai_search_selected_economics_signal_returns_focused_explanation() -> None:
@@ -634,9 +636,9 @@ def test_ai_search_selected_economics_signal_returns_focused_explanation() -> No
                 "domain": "economics",
                 "evidence": ["Value per acre: $125,000."],
                 "id": "underbuilt_watch",
-                "related_layers": ["Value per Acre", "Underbuilt Parcel Watch"],
+                "related_layers": ["Revenue per Acre Dashboard", "Underbuilt Redevelopment Watchlist"],
                 "status_band": "underbuilt_watch",
-                "title": "Underbuilt Parcel Watch",
+                "title": "Underbuilt Redevelopment Watchlist",
             },
         ),
         _context(),
