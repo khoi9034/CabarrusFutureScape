@@ -16,6 +16,7 @@ import type {
   CfsAiEvidenceItem,
   CfsAiSearchRequest,
   CfsAiSearchResponse,
+  CfsAiSelectedSignal,
   IndicatorDomain,
 } from "@/types/api";
 
@@ -56,7 +57,9 @@ async function searchDemoCfsAi(
     ? request.filters.domains
     : resolveDemoDomains(request);
   const primaryDomain = domains[0] ?? "general";
-  const response =
+  const response = request.selected_signal
+    ? demoSelectedSignalAnswer(context, domains, request.selected_signal)
+    :
     primaryDomain === "schools"
       ? demoSchoolAnswer(context, domains)
       : primaryDomain === "flood"
@@ -102,6 +105,44 @@ async function searchDemoCfsAi(
               : demoGeneralAnswer(context, domains);
 
   return sanitizeDemoResponse(response);
+}
+
+function demoSelectedSignalAnswer(
+  context: DemoAiContext,
+  domains: CfsAiDomain[],
+  signal: CfsAiSelectedSignal,
+) {
+  const activeDomains = domains.length ? domains : selectedSignalDemoDomains(signal);
+  const evidenceItems = signal.evidence?.slice(0, 4) ?? [];
+  const layers = signal.related_layers?.slice(0, 4) ?? relatedLayers(activeDomains);
+  const [meaning, whyItMatters, caveat] = selectedSignalMeaning(signal.domain);
+  const response = baseDemoResponse(
+    briefing(
+      ["What this signal means", `${signal.title}: ${meaning} Current status band: ${signal.status_band ?? "review signal"}.`],
+      ["Evidence", bullets(evidenceItems.length ? evidenceItems : ["Evidence is limited in this cached demo item."])],
+      ["Why it matters", whyItMatters],
+      ["What to inspect next", bullets(layers.length ? layers : ["Operational Watchlist", "Methodology"])],
+      ["Caveats", caveat],
+    ),
+    activeDomains,
+    context.manifest.generated_at,
+    [
+      evidence(
+        signal.title,
+        evidenceItems.join("; ") || "Cached demo signal evidence is limited.",
+        `selected_signal.${signal.id}`,
+        evidenceItems.length ? "available" : "limited",
+      ),
+    ],
+    [
+      `Open the detail drawer for ${signal.title}.`,
+      "Compare the signal with recommended Explore Countywide layers.",
+      "Review Methodology before using this as decision support.",
+    ],
+  );
+  response.dashboard_actions = selectedSignalDashboardActions(signal, activeDomains);
+  response.related_layers = Array.from(new Set([...response.related_layers, ...layers])).slice(0, 6);
+  return response;
 }
 
 function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
@@ -496,6 +537,10 @@ const followUpTerms = [
 ];
 
 function resolveDemoDomains(request: CfsAiSearchRequest): CfsAiDomain[] {
+  if (request.selected_signal) {
+    return selectedSignalDemoDomains(request.selected_signal);
+  }
+
   const domains = classifyDemoDomains(request.query);
   const previous = previousDemoDomains(request.conversation_context ?? []);
   const isFollowUp = followUpTerms.some((term) =>
@@ -539,6 +584,93 @@ function previousDemoDomains(turns: CfsAiConversationTurn[]): CfsAiDomain[] {
     });
 
   return Array.from(new Set(domains));
+}
+
+function selectedSignalDemoDomains(signal: CfsAiSelectedSignal): CfsAiDomain[] {
+  const normalized = signal.domain.toLowerCase().replaceAll("-", "_").replaceAll(" ", "_");
+  const direct: Record<string, CfsAiDomain> = {
+    data_readiness: "data_readiness",
+    development_activity: "permits",
+    flood: "flood",
+    floodplain_review: "flood",
+    model_lab: "model_lab",
+    model_research: "model_lab",
+    permits: "permits",
+    school_pressure: "schools",
+    schools: "schools",
+    transportation: "transportation",
+    transportation_context: "transportation",
+    utilities: "utilities",
+    utility_readiness: "utilities",
+    zoning: "zoning",
+    zoning_land_use: "zoning",
+  };
+  return [direct[normalized] ?? classifyDemoDomains(signal.domain)[0] ?? "general"];
+}
+
+function selectedSignalMeaning(domain: string): [string, string, string] {
+  const normalized = domain.toLowerCase().replaceAll("-", "_").replaceAll(" ", "_");
+  if (normalized === "development_activity" || normalized === "permits") {
+    return [
+      "Observed permit activity is showing where review workload or development attention may be concentrated.",
+      "Permit activity helps staff compare growth signals against schools, floodplain review, utilities, transportation, and zoning context.",
+      "Permit records are observed activity only; they are not predictions and do not confirm completed construction.",
+    ];
+  }
+  if (normalized === "school_pressure" || normalized === "schools") {
+    return [
+      "This combines utilization context with observed permit activity inside attendance areas.",
+      "Areas where utilization context and recent permits overlap may deserve planning review before stronger conclusions are made.",
+      "This is not an official enrollment forecast and does not claim school capacity findings.",
+    ];
+  }
+  if (normalized === "flood" || normalized === "floodplain_review") {
+    return [
+      "Floodplain Review flags mapped floodplain context that should be checked during planning review.",
+      "Overlap with active areas can change what staff inspect before planning around a parcel or district.",
+      "This is a planning screen, not a permitting determination.",
+    ];
+  }
+  if (normalized === "utility_readiness" || normalized === "utilities") {
+    return [
+      "Utility readiness shows where CFS has only proxy context or where official capacity data is still needed.",
+      "Missing service, committed capacity, and update-date fields limit infrastructure readiness conclusions.",
+      "Proxy proximity does not confirm available capacity.",
+    ];
+  }
+  if (normalized === "transportation" || normalized === "transportation_context") {
+    return [
+      "Transportation context highlights road, traffic, or project context that can affect planning coordination.",
+      "Comparing corridor context with permit activity helps identify places that need transportation follow-up.",
+      "Project status, funding, and timing can be incomplete in the current CFS context.",
+    ];
+  }
+  if (normalized === "model_lab" || normalized === "model_research") {
+    return [
+      "Model Lab shows relative research signal only and remains internal research context.",
+      "It can help prioritize questions, but source records and staff review remain the evidence base.",
+      "No exact probabilities, raw model values, or official prediction classes are shown.",
+    ];
+  }
+  return [
+    "Data readiness identifies missing or incomplete source data that limits stronger analysis.",
+    "These gaps tell staff what to request before turning exploratory signals into formal review support.",
+    "CFS labels missing data instead of inventing values.",
+  ];
+}
+
+function selectedSignalDashboardActions(
+  signal: CfsAiSelectedSignal,
+  domains: CfsAiDomain[],
+): CfsAiDashboardActions {
+  const actions = dashboardActionsForDomains(domains);
+  return {
+    ...actions,
+    open_detail: { type: "kpi", id: signal.id },
+    recommended_layers: Array.from(
+      new Set([...(actions.recommended_layers ?? []), ...(signal.related_layers ?? [])]),
+    ).slice(0, 6),
+  };
 }
 
 function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActions {

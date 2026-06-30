@@ -59,7 +59,12 @@ import type {
   PlanningSnapshot,
   PlanningSnapshotSectionKey,
 } from "@/types";
-import type { CfsAiDashboardActions, CfsAiSearchResponse } from "@/types/api";
+import type {
+  CfsAiDashboardActions,
+  CfsAiSearchRequest,
+  CfsAiSearchResponse,
+  CfsAiSelectedSignal,
+} from "@/types/api";
 import type {
   IndicatorDomainReadiness,
   IndicatorIntelligenceResponse,
@@ -187,6 +192,15 @@ interface DomainReadinessRow {
   domain: string;
   groupId: IndicatorCenterGroupId;
   updateCadence: string;
+}
+
+interface IndicatorExplainSignal {
+  domain: string;
+  evidence?: string[];
+  id: string;
+  relatedLayers?: string[];
+  statusBand?: string | null;
+  title: string;
 }
 
 interface SchoolUtilizationCounts {
@@ -420,6 +434,8 @@ export function IndicatorCenterWorkspace() {
     useState<IndicatorReadinessTabId>("all");
   const [askCfsActions, setAskCfsActions] =
     useState<CfsAiDashboardActions | null>(null);
+  const [askCfsExternalRequest, setAskCfsExternalRequest] =
+    useState<{ request: CfsAiSearchRequest; requestId: number } | null>(null);
   const [demoGeneratedAt, setDemoGeneratedAt] = useState<string | null>(null);
   const [indicatorIntelligence, setIndicatorIntelligence] =
     useState<IndicatorIntelligenceResponse | null>(null);
@@ -776,6 +792,32 @@ export function IndicatorCenterWorkspace() {
     [setSelectedIndicatorCenterContext],
   );
 
+  const explainSignal = useCallback(
+    (
+      signal: IndicatorExplainSignal,
+      drawerContext = getIndicatorForExplainSignal(signal),
+    ) => {
+      const selectedSignal: CfsAiSelectedSignal = {
+        domain: signal.domain,
+        evidence: signal.evidence?.filter(Boolean).slice(0, 6) ?? [],
+        id: signal.id,
+        related_layers: signal.relatedLayers?.filter(Boolean).slice(0, 6) ?? [],
+        status_band: signal.statusBand ?? null,
+        title: signal.title,
+      };
+
+      setSelectedIndicatorCenterContext(drawerContext);
+      setAskCfsExternalRequest({
+        request: {
+          query: `Explain the ${signal.title} signal. Include evidence, why it matters, caveats, and what to inspect next.`,
+          selected_signal: selectedSignal,
+        },
+        requestId: Date.now(),
+      });
+    },
+    [setSelectedIndicatorCenterContext],
+  );
+
   return (
     <div
       className="h-full overflow-y-auto overflow-x-hidden bg-[linear-gradient(90deg,rgba(104,216,255,0.045)_1px,transparent_1px),linear-gradient(rgba(104,216,255,0.035)_1px,transparent_1px),radial-gradient(circle_at_top_left,rgba(104,216,255,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(236,92,255,0.08),transparent_32%),#02050b] bg-[length:42px_42px,42px_42px,100%_100%,100%_100%,100%_100%] p-4"
@@ -793,7 +835,10 @@ export function IndicatorCenterWorkspace() {
       />
 
       <div className="mt-4">
-        <AskCfsPanel onResponse={handleAskCfsResponse} />
+        <AskCfsPanel
+          externalRequest={askCfsExternalRequest}
+          onResponse={handleAskCfsResponse}
+        />
       </div>
 
       {indicatorIntelligenceError ? (
@@ -835,6 +880,7 @@ export function IndicatorCenterWorkspace() {
               <ExecutiveSignalCard
                 highlighted={isAskCfsKpiHighlighted(signal, askCfsActions)}
                 key={signal.label}
+                onExplain={() => explainSignal(explainSignalFromExecutiveSignal(signal))}
                 onInspect={() =>
                   setSelectedIndicatorCenterContext(
                     getIndicatorByGroup(signal.groupId),
@@ -883,6 +929,16 @@ export function IndicatorCenterWorkspace() {
           />
           <SchoolPressureMissionPanel
             features={schoolPressureLayer.features}
+            onExplain={(feature) =>
+              explainSignal(
+                feature
+                  ? explainSignalFromSchoolPressureFeature(feature)
+                  : explainSignalFromIndicatorContext(schoolPressureIndicator),
+                feature
+                  ? buildSchoolPressureFeatureContext(feature)
+                  : schoolPressureIndicator,
+              )
+            }
             onInspect={(feature) =>
               setSelectedIndicatorCenterContext(
                 feature
@@ -903,17 +959,18 @@ export function IndicatorCenterWorkspace() {
           value={`${visibleAttentionQueue.length} rows`}
         />
         <div className="cfs-op-queue mt-3 overflow-hidden rounded-xl border border-white/10">
-          <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 lg:grid lg:grid-cols-[8.5rem_minmax(12rem,1fr)_12rem_7rem_minmax(10rem,1fr)_5rem] lg:items-center lg:gap-2">
+          <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 lg:grid lg:grid-cols-[8.5rem_minmax(12rem,1fr)_12rem_7rem_minmax(10rem,1fr)_8rem] lg:items-center lg:gap-2">
             <span>Priority</span>
             <span>Signal</span>
             <span>Evidence</span>
             <span>Status</span>
             <span>Next Action</span>
-            <span>Inspect</span>
+            <span>Actions</span>
           </div>
           {visibleAttentionQueue.map((row) => (
             <AttentionRow
               key={`${row.indicator.indicatorId}-${row.indicatorName}-${row.currentEvidence}`}
+              onExplain={() => explainSignal(explainSignalFromAttentionRow(row), row.indicator)}
               onInspect={() => setSelectedIndicatorCenterContext(row.indicator)}
               row={row}
             />
@@ -929,6 +986,12 @@ export function IndicatorCenterWorkspace() {
           value={`${visibleDomainReadinessRows.length} domains`}
         />
         <DomainReadinessMatrix
+          onExplain={(row) =>
+            explainSignal(
+              explainSignalFromDomainReadinessRow(row),
+              getIndicatorByGroup(row.groupId),
+            )
+          }
           onInspect={(groupId) =>
             setSelectedIndicatorCenterContext(getIndicatorByGroup(groupId))
           }
@@ -997,6 +1060,12 @@ export function IndicatorCenterWorkspace() {
           currentValue={selectedIndicatorCard?.value ?? "Not available"}
           indicator={selectedIndicatorCenterContext}
           onClose={() => setSelectedIndicatorCenterContext(null)}
+          onExplain={() =>
+            explainSignal(
+              explainSignalFromIndicatorContext(selectedIndicatorCenterContext),
+              selectedIndicatorCenterContext,
+            )
+          }
           onIncludeInSnapshot={saveSnapshot}
           onOpenMethodology={openMethodology}
           schoolCounts={schoolCounts}
@@ -1898,17 +1967,186 @@ function mapAskCfsFocusToTab(
   }
 }
 
+function explainSignalFromExecutiveSignal(
+  signal: ExecutiveSignalCardModel,
+): IndicatorExplainSignal {
+  return {
+    domain: domainForGroupId(signal.groupId, signal.label),
+    evidence: [signal.value, signal.subvalue, signal.confidence, signal.caveat],
+    id: kpiIdForGroup(signal.groupId, signal.label),
+    relatedLayers: relatedLayersForGroup(signal.groupId, signal.label),
+    statusBand: signal.status,
+    title: signal.label,
+  };
+}
+
+function explainSignalFromAttentionRow(row: AttentionQueueRow): IndicatorExplainSignal {
+  return {
+    domain: domainForGroupId(row.indicator.groupId, row.category),
+    evidence: [
+      row.currentEvidence,
+      row.whyItMatters,
+      row.recommendedFollowUp,
+      row.caveat,
+    ],
+    id: row.indicator.indicatorId,
+    relatedLayers: relatedLayersForGroup(row.indicator.groupId, row.indicatorName),
+    statusBand: row.priorityLabel,
+    title: row.indicatorName,
+  };
+}
+
+function explainSignalFromDomainReadinessRow(
+  row: DomainReadinessRow,
+): IndicatorExplainSignal {
+  return {
+    domain: domainForGroupId(row.groupId, row.domain),
+    evidence: [
+      `Data status: ${row.dataStatus}`,
+      `Coverage: ${row.coverage}`,
+      row.currentUse,
+      row.caveat,
+    ],
+    id: `domain-${slugify(row.domain)}`,
+    relatedLayers: relatedLayersForGroup(row.groupId, row.domain),
+    statusBand: row.dataStatus,
+    title: row.domain,
+  };
+}
+
+function explainSignalFromIndicatorContext(
+  indicator: IndicatorCenterContext,
+): IndicatorExplainSignal {
+  return {
+    domain: domainForGroupId(indicator.groupId, indicator.name),
+    evidence: [
+      indicator.whatItMeans,
+      indicator.recommendedFollowUp,
+      indicator.caveat,
+      indicator.source,
+    ],
+    id: indicator.indicatorId,
+    relatedLayers: relatedLayersForGroup(indicator.groupId, indicator.name),
+    statusBand: indicator.status,
+    title: indicator.title ?? indicator.name,
+  };
+}
+
+function explainSignalFromSchoolPressureFeature(
+  feature: SchoolPressureFeature,
+): IndicatorExplainSignal {
+  const properties = feature.properties;
+  return {
+    domain: "school_pressure",
+    evidence: [
+      `Watch band: ${properties.school_pressure_watch_band}`,
+      `Recent permits: ${formatNullableCount(properties.permit_count_recent)}`,
+      properties.utilization_pct === null
+        ? "Utilization percent is not available."
+        : `Utilization context: ${properties.utilization_pct.toFixed(1)}%`,
+      ...(properties.top_reasons ?? []),
+    ],
+    id: `school-pressure-${slugify(
+      String(properties.attendance_area_id ?? properties.school_name ?? "area"),
+    )}`,
+    relatedLayers: ["School Utilization + Permit Pressure", "Development Hotspots"],
+    statusBand: properties.school_pressure_watch_band,
+    title: properties.school_name ?? "Attendance-Area Development Pressure",
+  };
+}
+
+function getIndicatorForExplainSignal(signal: IndicatorExplainSignal) {
+  return getIndicatorByGroup(groupIdForExplainSignal(signal));
+}
+
+function groupIdForExplainSignal(signal: IndicatorExplainSignal): IndicatorCenterGroupId {
+  const domain = signal.domain.toLowerCase();
+  if (domain.includes("school")) return "school-context";
+  if (domain.includes("flood")) return "flood-review";
+  if (domain.includes("model")) return "model-research";
+  if (domain.includes("permit") || domain.includes("development")) return "development-activity";
+  if (domain.includes("transport") || domain.includes("utilit")) return "utility-infrastructure";
+  return "data-gaps";
+}
+
+function domainForGroupId(groupId: IndicatorCenterGroupId, label = "") {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("transport")) return "transportation_context";
+  if (normalized.includes("utilit")) return "utility_readiness";
+  if (normalized.includes("zoning") || normalized.includes("data")) return "data_readiness";
+  switch (groupId) {
+    case "development-activity":
+      return "development_activity";
+    case "flood-review":
+      return "floodplain_review";
+    case "model-research":
+      return "model_research";
+    case "school-context":
+      return "school_pressure";
+    case "utility-infrastructure":
+      return "utility_readiness";
+    case "data-gaps":
+      return "data_readiness";
+  }
+}
+
+function kpiIdForGroup(groupId: IndicatorCenterGroupId, label = "") {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("transport")) return "transportation_context";
+  if (normalized.includes("utilit")) return "utility_readiness";
+  const ids: Record<IndicatorCenterGroupId, string> = {
+    "data-gaps": "data_readiness",
+    "development-activity": "observed_development_activity",
+    "flood-review": "floodplain_review",
+    "model-research": "model_research_status",
+    "school-context": "school_pressure",
+    "utility-infrastructure": "utility_readiness",
+  };
+  return ids[groupId];
+}
+
+function relatedLayersForGroup(groupId: IndicatorCenterGroupId, label = "") {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("transport")) return ["Transportation Context"];
+  if (normalized.includes("utilit")) return ["Utility Readiness"];
+  const layers: Record<IndicatorCenterGroupId, string[]> = {
+    "data-gaps": ["Data Still Needed", "Methodology"],
+    "development-activity": ["Development Hotspots"],
+    "flood-review": ["Floodplain Review"],
+    "model-research": ["Model Lab Research Signals"],
+    "school-context": ["School Utilization + Permit Pressure", "Development Hotspots"],
+    "utility-infrastructure": ["Utility Readiness", "Transportation Context"],
+  };
+  return layers[groupId] ?? ["Methodology"];
+}
+
 function getAskCfsActionIndicator(id: string | undefined) {
   const groupMap: Record<string, IndicatorCenterGroupId> = {
     data_readiness: "data-gaps",
+    "domain-data-readiness": "data-gaps",
+    "domain-development-activity": "development-activity",
+    "domain-floodplain-review": "flood-review",
+    "domain-model-research": "model-research",
+    "domain-schools": "school-context",
+    "domain-transportation": "utility-infrastructure",
+    "domain-utilities": "utility-infrastructure",
+    "domain-zoning-land-use": "data-gaps",
     floodplain_review: "flood-review",
     model_lab: "model-research",
     model_research_status: "model-research",
     observed_development_activity: "development-activity",
     school_pressure: "school-context",
+    transportation_context: "utility-infrastructure",
+    utility_readiness: "utility-infrastructure",
   };
   const groupId = id ? groupMap[id] : null;
-  return groupId ? getIndicatorByGroup(groupId) : null;
+  if (groupId) {
+    return getIndicatorByGroup(groupId);
+  }
+  if (id?.startsWith("school-pressure-")) {
+    return getIndicatorByGroup("school-context");
+  }
+  return null;
 }
 
 function isAskCfsKpiHighlighted(
@@ -1996,6 +2234,13 @@ function watchlistMatchesStatus(row: AttentionQueueRow, status: string) {
 
 function formatAskCfsLabel(value: string) {
   return value.replaceAll("_", " ");
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 function buildDomainReadinessRows({
@@ -2318,28 +2563,29 @@ function MissionSectionHeader({
 }
 
 function DomainReadinessMatrix({
+  onExplain,
   onInspect,
   rows,
 }: {
+  onExplain: (row: DomainReadinessRow) => void;
   onInspect: (groupId: IndicatorCenterGroupId) => void;
   rows: DomainReadinessRow[];
 }) {
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-black/20">
-      <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 xl:grid xl:grid-cols-[minmax(10rem,1fr)_8rem_8rem_9rem_minmax(12rem,1.2fr)_minmax(12rem,1.4fr)] xl:gap-3">
+      <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 xl:grid xl:grid-cols-[minmax(10rem,1fr)_8rem_8rem_9rem_minmax(12rem,1.2fr)_minmax(12rem,1.4fr)_8rem] xl:gap-3">
         <span>Domain</span>
         <span>Data Status</span>
         <span>Coverage</span>
         <span>Cadence</span>
         <span>Current Use</span>
         <span>Caveat</span>
+        <span>Actions</span>
       </div>
       {rows.map((row) => (
-        <button
-          className="grid w-full min-w-0 gap-2 border-b border-white/10 px-3 py-3 text-left transition last:border-b-0 hover:bg-white/[0.045] xl:grid-cols-[minmax(10rem,1fr)_8rem_8rem_9rem_minmax(12rem,1.2fr)_minmax(12rem,1.4fr)] xl:items-center xl:gap-3"
+        <div
+          className="grid w-full min-w-0 gap-2 border-b border-white/10 px-3 py-3 text-left transition last:border-b-0 hover:bg-white/[0.045] xl:grid-cols-[minmax(10rem,1fr)_8rem_8rem_9rem_minmax(12rem,1.2fr)_minmax(12rem,1.4fr)_8rem] xl:items-center xl:gap-3"
           key={row.domain}
-          onClick={() => onInspect(row.groupId)}
-          type="button"
         >
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold text-white">
@@ -2360,7 +2606,23 @@ function DomainReadinessMatrix({
           <span className="text-xs leading-5 text-slate-500">
             {row.caveat}
           </span>
-        </button>
+          <span className="flex flex-wrap items-center gap-1.5">
+            <button
+              className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#8fe7ff] transition hover:border-[#68d8ff]/40 hover:bg-[#68d8ff]/15"
+              onClick={() => onInspect(row.groupId)}
+              type="button"
+            >
+              Inspect
+            </button>
+            <button
+              className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-200 transition hover:border-[#68d8ff]/35 hover:text-[#b7f0ff]"
+              onClick={() => onExplain(row)}
+              type="button"
+            >
+              Explain signal
+            </button>
+          </span>
+        </div>
       ))}
     </div>
   );
@@ -2431,6 +2693,7 @@ function IndicatorDetailDrawer({
   currentValue,
   indicator,
   onClose,
+  onExplain,
   onIncludeInSnapshot,
   onOpenMethodology,
   schoolCounts,
@@ -2441,6 +2704,7 @@ function IndicatorDetailDrawer({
   currentValue: string;
   indicator: IndicatorCenterContext;
   onClose: () => void;
+  onExplain: () => void;
   onIncludeInSnapshot: () => void | Promise<void>;
   onOpenMethodology: () => void;
   schoolCounts: SchoolUtilizationCounts;
@@ -2629,6 +2893,13 @@ function IndicatorDetailDrawer({
             label={indicator.snapshotIncluded ? "Snapshot-ready" : "Optional snapshot context"}
             tone="slate"
           />
+          <button
+            className="rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#b7f0ff] transition hover:border-[#68d8ff]/45 hover:bg-[#68d8ff]/15"
+            onClick={onExplain}
+            type="button"
+          >
+            Explain signal
+          </button>
         </div>
       </div>
 
@@ -3221,25 +3492,30 @@ function DataStillNeededStrip({ onInspect }: { onInspect: () => void }) {
 
 function ExecutiveSignalCard({
   highlighted,
+  onExplain,
   onInspect,
   signal,
 }: {
   highlighted?: boolean;
+  onExplain: () => void;
   onInspect: () => void;
   signal: ExecutiveSignalCardModel;
 }) {
   return (
-    <button
+    <article
       className={cn(
         "cfs-command-card min-h-[10rem] rounded-lg p-3 text-left transition hover:-translate-y-0.5 hover:border-[#68d8ff]/30 hover:bg-white/[0.055] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/60",
         highlighted &&
           "border-[#f6d98e]/60 bg-[#f6d98e]/[0.08] shadow-[0_0_28px_rgba(246,217,142,0.18)]",
         getSignalToneClass(signal.tone),
       )}
-      onClick={onInspect}
-      type="button"
     >
-      <div className="flex items-start justify-between gap-2">
+      <button
+        className="block w-full text-left"
+        onClick={onInspect}
+        type="button"
+      >
+        <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/12 bg-white/[0.055] text-slate-100">
             {signal.icon}
@@ -3251,12 +3527,12 @@ function ExecutiveSignalCard({
         <span className="rounded border border-white/14 bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-semibold text-slate-200">
           {signal.status}
         </span>
-      </div>
-      <p className="mt-4 text-2xl font-semibold tracking-tight text-white">
+        </div>
+        <p className="mt-4 text-2xl font-semibold tracking-tight text-white">
         {signal.value}
-      </p>
-      <p className="mt-1 truncate text-xs text-slate-300">{signal.subvalue}</p>
-      <div className="mt-3 grid gap-1.5">
+        </p>
+        <p className="mt-1 truncate text-xs text-slate-300">{signal.subvalue}</p>
+        <div className="mt-3 grid gap-1.5">
         {signal.sparkline?.length ? (
           <TinySparkline data={signal.sparkline} />
         ) : null}
@@ -3266,8 +3542,16 @@ function ExecutiveSignalCard({
         <p className="text-[10px] leading-4 text-slate-500">
           {signal.caveat}
         </p>
-      </div>
-    </button>
+        </div>
+      </button>
+      <button
+        className="mt-3 inline-flex rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#b7f0ff] transition hover:border-[#68d8ff]/45 hover:bg-[#68d8ff]/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/60"
+        onClick={onExplain}
+        type="button"
+      >
+        Explain signal
+      </button>
+    </article>
   );
 }
 
@@ -3294,18 +3578,16 @@ function TinySparkline({ data }: { data: ChartDatum[] }) {
 }
 
 function AttentionRow({
+  onExplain,
   onInspect,
   row,
 }: {
+  onExplain: () => void;
   onInspect: () => void;
   row: AttentionQueueRow;
 }) {
   return (
-    <button
-      className="grid w-full gap-2 border-b border-white/10 px-3 py-2.5 text-left transition last:border-b-0 hover:bg-white/[0.045] lg:grid-cols-[8.5rem_minmax(12rem,1fr)_12rem_7rem_minmax(10rem,1fr)_5rem] lg:items-center"
-      onClick={onInspect}
-      type="button"
-    >
+    <div className="grid w-full gap-2 border-b border-white/10 px-3 py-2.5 text-left transition last:border-b-0 hover:bg-white/[0.045] lg:grid-cols-[8.5rem_minmax(12rem,1fr)_12rem_7rem_minmax(10rem,1fr)_8rem] lg:items-center">
       <span className="w-fit rounded border border-[#68d8ff]/18 bg-[#68d8ff]/10 px-1.5 py-0.5 text-[9px] font-semibold text-[#b7f0ff]">
         {row.priorityLabel}
       </span>
@@ -3324,11 +3606,24 @@ function AttentionRow({
       <span className="text-xs text-slate-300">
         {shortAction(row.recommendedFollowUp)}
       </span>
-      <span className="inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#8fe7ff]">
+      <span className="flex flex-wrap items-center gap-1.5">
+        <button
+          className="inline-flex shrink-0 items-center gap-1 rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#8fe7ff] transition hover:border-[#68d8ff]/40 hover:bg-[#68d8ff]/15"
+          onClick={onInspect}
+          type="button"
+        >
           Inspect
           <ArrowRight className="h-3 w-3" />
+        </button>
+        <button
+          className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-200 transition hover:border-[#68d8ff]/35 hover:text-[#b7f0ff]"
+          onClick={onExplain}
+          type="button"
+        >
+          Explain signal
+        </button>
       </span>
-    </button>
+    </div>
   );
 }
 
@@ -3395,10 +3690,12 @@ function MiniChartCard({
 
 function SchoolPressureMissionPanel({
   features,
+  onExplain,
   onInspect,
   state,
 }: {
   features: SchoolPressureFeature[];
+  onExplain: (feature: SchoolPressureFeature | null) => void;
   onInspect: (feature: SchoolPressureFeature | null) => void;
   state: SchoolPressureLayerState;
 }) {
@@ -3415,6 +3712,7 @@ function SchoolPressureMissionPanel({
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
         <SchoolPressureKpi
           label="Attendance areas reviewed"
+          onExplain={() => onExplain(null)}
           value={
             state.status === "loading"
               ? "Loading"
@@ -3423,14 +3721,17 @@ function SchoolPressureMissionPanel({
         />
         <SchoolPressureKpi
           label="Elevated review signal"
+          onExplain={() => onExplain(null)}
           value={formatCount(state.summary.elevated_review_count)}
         />
         <SchoolPressureKpi
           label="Missing utilization data"
+          onExplain={() => onExplain(null)}
           value={formatCount(state.summary.data_needed_count)}
         />
         <SchoolPressureKpi
           label="Watched-area residential permits"
+          onExplain={() => onExplain(null)}
           value={formatCount(
             state.summary.recent_residential_permits_in_watched_areas,
           )}
@@ -3444,19 +3745,17 @@ function SchoolPressureMissionPanel({
       ) : null}
 
       <div className="mt-4 overflow-hidden rounded-lg border border-white/10">
-        <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 lg:grid lg:grid-cols-[minmax(12rem,1fr)_6rem_8rem_8rem_5rem] lg:gap-2">
+        <div className="hidden border-b border-white/10 bg-white/[0.035] px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500 lg:grid lg:grid-cols-[minmax(12rem,1fr)_6rem_8rem_8rem_8rem] lg:gap-2">
           <span>School / Area</span>
           <span>Level</span>
           <span>Watch Band</span>
           <span>Recent Permits</span>
-          <span>Inspect</span>
+          <span>Actions</span>
         </div>
         {(watchRows.length ? watchRows : features.slice(0, 3)).map((feature) => (
-          <button
-            className="grid w-full min-w-0 gap-2 border-b border-white/10 px-3 py-3 text-left transition last:border-b-0 hover:bg-white/[0.045] lg:grid-cols-[minmax(12rem,1fr)_6rem_8rem_8rem_5rem] lg:items-center lg:gap-2"
+          <div
+            className="grid w-full min-w-0 gap-2 border-b border-white/10 px-3 py-3 text-left transition last:border-b-0 hover:bg-white/[0.045] lg:grid-cols-[minmax(12rem,1fr)_6rem_8rem_8rem_8rem] lg:items-center lg:gap-2"
             key={`${feature.properties.attendance_area_id ?? feature.properties.school_name ?? "school-pressure"}-${feature.properties.school_level ?? "level"}`}
-            onClick={() => onInspect(feature)}
-            type="button"
           >
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold text-white">
@@ -3475,10 +3774,23 @@ function SchoolPressureMissionPanel({
             <span className="text-xs font-semibold text-slate-200">
               {formatNullableCount(feature.properties.permit_count_recent)}
             </span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8fe7ff]">
-              Inspect
+            <span className="flex flex-wrap items-center gap-1.5">
+              <button
+                className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#8fe7ff] transition hover:border-[#68d8ff]/40 hover:bg-[#68d8ff]/15"
+                onClick={() => onInspect(feature)}
+                type="button"
+              >
+                Inspect
+              </button>
+              <button
+                className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-200 transition hover:border-[#68d8ff]/35 hover:text-[#b7f0ff]"
+                onClick={() => onExplain(feature)}
+                type="button"
+              >
+                Explain signal
+              </button>
             </span>
-          </button>
+          </div>
         ))}
       </div>
 
@@ -3499,13 +3811,28 @@ function SchoolPressureMissionPanel({
   );
 }
 
-function SchoolPressureKpi({ label, value }: { label: string; value: string }) {
+function SchoolPressureKpi({
+  label,
+  onExplain,
+  value,
+}: {
+  label: string;
+  onExplain: () => void;
+  value: string;
+}) {
   return (
     <div className="rounded-lg border border-white/10 bg-black/24 px-3 py-3">
       <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
         {label}
       </p>
       <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+      <button
+        className="mt-3 rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-200 transition hover:border-[#68d8ff]/35 hover:text-[#b7f0ff]"
+        onClick={onExplain}
+        type="button"
+      >
+        Explain signal
+      </button>
     </div>
   );
 }

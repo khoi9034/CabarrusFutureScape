@@ -13,8 +13,10 @@ from app.schemas.ai_search import (
     CfsAiDashboardActions,
     CfsAiDomain,
     CfsAiEvidenceItem,
+    CfsAiOpenDetailAction,
     CfsAiSearchRequest,
     CfsAiSearchResponse,
+    CfsAiSelectedSignal,
 )
 
 SAFE_CAVEATS = [
@@ -138,7 +140,7 @@ class CfsAiSearchService:
         request: CfsAiSearchRequest,
         context: CfsAiContext,
     ) -> CfsAiSearchResponse:
-        domains = request.filters.domains or resolve_query_domains(request)
+        domains = request.filters.domains or selected_signal_domains(request) or resolve_query_domains(request)
         fallback = deterministic_answer(request, context, domains)
         provider = self._settings.cfs_ai_provider
 
@@ -193,6 +195,16 @@ class CfsAiSearchService:
             suggested_actions=_string_list(provider_payload.get("suggested_actions"))
             or fallback.suggested_actions,
         )
+        if request.selected_signal:
+            response.dashboard_actions = _selected_signal_actions(request.selected_signal, domains)
+            response.related_layers = list(
+                dict.fromkeys(
+                    [
+                        *response.related_layers,
+                        *request.selected_signal.related_layers,
+                    ],
+                ),
+            )[:6]
         return sanitize_response(response)
 
     def _provider_answer(
@@ -221,6 +233,9 @@ class CfsAiSearchService:
                                 turn.model_dump(exclude_none=True)
                                 for turn in request.conversation_context[-5:]
                             ],
+                            "selected_signal": request.selected_signal.model_dump(exclude_none=True)
+                            if request.selected_signal
+                            else None,
                             "cfs_context": compact_context(context),
                             "deterministic_dashboard_actions": dashboard_actions_for_domains(
                                 domains,
@@ -281,6 +296,38 @@ def resolve_query_domains(request: CfsAiSearchRequest) -> list[CfsAiDomain]:
     return domains[:3] or ["general"]
 
 
+def selected_signal_domains(request: CfsAiSearchRequest) -> list[CfsAiDomain]:
+    if not request.selected_signal:
+        return []
+    domain = _domain_from_selected_signal(request.selected_signal.domain)
+    return [domain] if domain else []
+
+
+def _domain_from_selected_signal(domain: str) -> CfsAiDomain | None:
+    normalized = domain.lower().replace("-", "_").replace(" ", "_")
+    direct: dict[str, CfsAiDomain] = {
+        "data_readiness": "data_readiness",
+        "development_activity": "permits",
+        "flood": "flood",
+        "floodplain_review": "flood",
+        "model_lab": "model_lab",
+        "model_research": "model_lab",
+        "permits": "permits",
+        "school_pressure": "schools",
+        "schools": "schools",
+        "transportation": "transportation",
+        "transportation_context": "transportation",
+        "utilities": "utilities",
+        "utility_readiness": "utilities",
+        "zoning": "zoning",
+        "zoning_land_use": "zoning",
+    }
+    if normalized in direct:
+        return direct[normalized]
+    matches = classify_query_domains(domain)
+    return matches[0] if matches and matches[0] != "general" else None
+
+
 def _previous_domains(request: CfsAiSearchRequest) -> list[CfsAiDomain]:
     domains: list[CfsAiDomain] = []
     allowed = set(DASHBOARD_ACTIONS)
@@ -298,6 +345,9 @@ def deterministic_answer(
     context: CfsAiContext,
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
+    if request.selected_signal:
+        return _selected_signal_answer(request, context, domains)
+
     primary_domain = domains[0] if domains else "general"
     builders = {
         "data_readiness": _data_readiness_answer,
@@ -349,6 +399,114 @@ def compact_context(context: CfsAiContext) -> CfsAiContext:
         "school_pressure": context.get("school_pressure"),
         "methodology": context.get("methodology"),
     }
+
+
+def _selected_signal_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse:
+    signal = request.selected_signal
+    if signal is None:
+        return _general_answer(request, context, domains)
+
+    active_domains = domains or selected_signal_domains(request) or ["general"]
+    safe_evidence = signal.evidence[:4] or ["Evidence is limited in the selected dashboard item."]
+    safe_layers = signal.related_layers[:4] or _related_layers(active_domains)
+    status = signal.status_band or "review signal"
+    meaning, why_it_matters, caveat = _selected_signal_meaning(signal.domain)
+    answer = _briefing(
+        ("What this signal means", f"{signal.title}: {meaning} Current status band: {status}."),
+        ("Evidence", _bullets(safe_evidence)),
+        ("Why it matters", why_it_matters),
+        ("What to inspect next", _bullets(safe_layers or ["Operational Watchlist", "Methodology"])),
+        ("Caveats", caveat),
+    )
+    response = _response(
+        answer,
+        context,
+        active_domains,
+        request.mode,
+        [
+            _evidence(
+                signal.title,
+                "; ".join(safe_evidence),
+                f"selected_signal.{signal.id}",
+                "available" if signal.evidence else "limited",
+            ),
+        ],
+        [
+            f"Open the detail drawer for {signal.title}.",
+            "Compare the signal with recommended Explore Countywide layers.",
+            "Review Methodology before using this as decision support.",
+        ],
+    )
+    response.dashboard_actions = _selected_signal_actions(signal, active_domains)
+    response.related_layers = list(dict.fromkeys([*response.related_layers, *safe_layers]))[:6]
+    return response
+
+
+def _selected_signal_meaning(domain: str) -> tuple[str, str, str]:
+    normalized = domain.lower().replace("-", "_").replace(" ", "_")
+    if normalized in {"development_activity", "permits"}:
+        return (
+            "Observed permit activity is showing where review workload or development attention may be concentrated.",
+            "Permit activity helps staff compare growth signals against schools, floodplain review, utilities, transportation, and zoning context.",
+            "Permit records are observed activity only; they are not predictions and do not confirm completed construction.",
+        )
+    if normalized in {"school_pressure", "schools"}:
+        return (
+            "This combines utilization context with observed permit activity inside attendance areas.",
+            "Areas where utilization context and recent permits overlap may deserve planning review before stronger conclusions are made.",
+            "This is not an official enrollment forecast and does not claim school capacity findings.",
+        )
+    if normalized in {"flood", "floodplain_review"}:
+        return (
+            "Floodplain Review flags mapped floodplain context that should be checked during planning review.",
+            "Overlap with active areas can change what staff inspect before planning around a parcel or district.",
+            "This is a planning screen, not a permitting determination.",
+        )
+    if normalized in {"utility_readiness", "utilities"}:
+        return (
+            "Utility readiness shows where CFS has only proxy context or where official capacity data is still needed.",
+            "Missing service, committed capacity, and update-date fields limit infrastructure readiness conclusions.",
+            "Proxy proximity does not confirm available capacity.",
+        )
+    if normalized in {"transportation", "transportation_context"}:
+        return (
+            "Transportation context highlights road, traffic, or project context that can affect planning coordination.",
+            "Comparing corridor context with permit activity helps identify places that need transportation follow-up.",
+            "Project status, funding, and timing can be incomplete in the current CFS context.",
+        )
+    if normalized in {"model_lab", "model_research"}:
+        return (
+            "Model Lab shows relative research signal only and remains internal research context.",
+            "It can help prioritize questions, but source records and staff review remain the evidence base.",
+            "No exact probabilities, raw model values, or official prediction classes are shown.",
+        )
+    if normalized in {"data_readiness", "zoning_land_use", "zoning"}:
+        return (
+            "Data readiness identifies missing or incomplete source data that limits stronger analysis.",
+            "These gaps tell staff what to request before turning exploratory signals into formal review support.",
+            "CFS labels missing data instead of inventing values.",
+        )
+    return (
+        "This is a CFS planning signal assembled from available indicator context.",
+        "It helps staff choose what to inspect next without turning the dashboard into an official scoring system.",
+        "Answers use available CFS summaries only and preserve source caveats.",
+    )
+
+
+def _selected_signal_actions(
+    signal: CfsAiSelectedSignal,
+    domains: list[CfsAiDomain],
+) -> CfsAiDashboardActions:
+    actions = dashboard_actions_for_domains(domains)
+    actions.open_detail = CfsAiOpenDetailAction(type="kpi", id=signal.id)
+    actions.recommended_layers = list(
+        dict.fromkeys([*actions.recommended_layers, *signal.related_layers]),
+    )[:6]
+    return actions
 
 
 def _permit_answer(
@@ -968,7 +1126,8 @@ def _provider_system_prompt() -> str:
         "or database connection details. Use safe planning language. Distinguish observed permit activity from "
         "prediction. Distinguish preliminary school capacity watch from official school capacity findings. "
         "Use conversation_context only to resolve references like 'those areas' or 'that signal'; do not invent "
-        "new data from it. "
+        "new data from it. If selected_signal is supplied, prioritize explaining that signal with evidence, "
+        "why it matters, caveats, and what to inspect next. "
         "dashboard_actions are UI suggestions only and do not create official claims. Return JSON with answer, "
         "evidence, related_layers, caveats, suggested_actions, and dashboard_actions."
     )

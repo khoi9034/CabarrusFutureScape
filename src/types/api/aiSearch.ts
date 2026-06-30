@@ -19,6 +19,16 @@ export interface CfsAiSearchRequest {
   };
   mode?: "demo" | "live";
   query: string;
+  selected_signal?: CfsAiSelectedSignal | null;
+}
+
+export interface CfsAiSelectedSignal {
+  domain: string;
+  evidence?: string[];
+  id: string;
+  related_layers?: string[];
+  status_band?: string | null;
+  title: string;
 }
 
 export interface CfsAiConversationTurn {

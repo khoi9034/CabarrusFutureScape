@@ -1,17 +1,28 @@
 "use client";
 
 import { AlertTriangle, FileSearch, Loader2, Send, Sparkles } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import {
   askCfsSuggestedPrompts,
   searchCfsAi,
 } from "@/lib/aiSearchService";
 import { getApiErrorDisplayMessage, USE_DEMO_DATA } from "@/lib/api/client";
-import type { CfsAiConversationTurn, CfsAiSearchResponse } from "@/types/api";
+import type {
+  CfsAiConversationTurn,
+  CfsAiSearchRequest,
+  CfsAiSearchResponse,
+} from "@/types/api";
+
+export interface AskCfsExternalRequest {
+  request: CfsAiSearchRequest;
+  requestId: number;
+}
 
 export function AskCfsPanel({
+  externalRequest,
   onResponse,
 }: {
+  externalRequest?: AskCfsExternalRequest | null;
   onResponse?: (response: CfsAiSearchResponse) => void;
 }) {
   const [answer, setAnswer] = useState<CfsAiSearchResponse | null>(null);
@@ -19,9 +30,13 @@ export function AskCfsPanel({
   const [turns, setTurns] = useState<CfsAiConversationTurn[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
+  const lastExternalRequestId = useRef<number | null>(null);
   const lastTurn = turns.at(-1);
 
-  async function submit(nextQuery = query) {
+  const submit = useCallback(async (
+    nextQuery = query,
+    requestOverrides: Partial<CfsAiSearchRequest> = {},
+  ) => {
     const trimmedQuery = nextQuery.trim();
     if (!trimmedQuery || isLoading) return;
 
@@ -29,6 +44,7 @@ export function AskCfsPanel({
     setIsLoading(true);
     try {
       const response = await searchCfsAi({
+        ...requestOverrides,
         conversation_context: turns,
         mode: USE_DEMO_DATA ? "demo" : "live",
         query: trimmedQuery,
@@ -47,7 +63,20 @@ export function AskCfsPanel({
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [isLoading, onResponse, query, turns]);
+
+  useEffect(() => {
+    if (
+      !externalRequest ||
+      lastExternalRequestId.current === externalRequest.requestId
+    ) {
+      return;
+    }
+
+    lastExternalRequestId.current = externalRequest.requestId;
+    setQuery(externalRequest.request.query);
+    void submit(externalRequest.request.query, externalRequest.request);
+  }, [externalRequest, submit]);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

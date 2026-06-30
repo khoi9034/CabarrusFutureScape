@@ -43,11 +43,21 @@ class CfsAiConversationTurn(BaseModel):
     related_layers: list[str] = Field(default_factory=list, max_length=8)
 
 
+class CfsAiSelectedSignal(BaseModel):
+    domain: str = Field(max_length=80)
+    evidence: list[str] = Field(default_factory=list, max_length=8)
+    id: str = Field(max_length=120)
+    related_layers: list[str] = Field(default_factory=list, max_length=8)
+    status_band: str | None = Field(default=None, max_length=80)
+    title: str = Field(max_length=200)
+
+
 class CfsAiSearchRequest(BaseModel):
     conversation_context: list[CfsAiConversationTurn] = Field(default_factory=list, max_length=5)
     filters: CfsAiSearchFilters = Field(default_factory=CfsAiSearchFilters)
     mode: Literal["demo", "live"] = "live"
     query: str = Field(min_length=1, max_length=500)
+    selected_signal: CfsAiSelectedSignal | None = None
 
 
 class CfsAiEvidenceItem(BaseModel):

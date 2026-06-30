@@ -203,6 +203,69 @@ def test_ai_search_follow_up_layers_use_previous_focus() -> None:
     assert "Development Hotspots" in response.related_layers
 
 
+def test_ai_search_selected_signal_returns_focused_explanation() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            query="Explain this signal.",
+            selected_signal={
+                "domain": "school_pressure",
+                "evidence": [
+                    "Watch band: elevated review",
+                    "Recent permits: 11",
+                ],
+                "id": "school_pressure",
+                "related_layers": [
+                    "School Utilization + Permit Pressure",
+                    "Development Hotspots",
+                ],
+                "status_band": "elevated review",
+                "title": "Demo ES Capacity + Permit Context",
+            },
+        ),
+        _context(),
+    )
+
+    assert response.domains == ["schools"]
+    assert "What this signal means" in response.answer
+    assert "Why it matters" in response.answer
+    assert "What to inspect next" in response.answer
+    assert response.dashboard_actions.focus_domain == "schools"
+    assert response.dashboard_actions.open_detail
+    assert response.dashboard_actions.open_detail.id == "school_pressure"
+    assert "School Utilization + Permit Pressure" in response.related_layers
+
+
+def test_ai_search_selected_signal_templates_cover_major_domains() -> None:
+    service = CfsAiSearchService(_settings())
+    cases = [
+        ("development_activity", "Observed permit activity"),
+        ("school_pressure", "not an official enrollment forecast"),
+        ("floodplain_review", "not a permitting determination"),
+        ("utility_readiness", "Proxy proximity does not confirm"),
+        ("transportation_context", "transportation follow-up"),
+        ("model_research", "No exact probabilities"),
+        ("data_readiness", "missing or incomplete source data"),
+    ]
+
+    for domain, expected in cases:
+        response = service.search(
+            CfsAiSearchRequest(
+                query="Explain this signal.",
+                selected_signal={
+                    "domain": domain,
+                    "evidence": ["Evidence row"],
+                    "id": domain,
+                    "title": f"{domain} signal",
+                },
+            ),
+            _context(),
+        )
+
+        assert expected.lower() in response.answer.lower()
+        assert response.dashboard_actions.focus_domain
+        assert response.evidence
+
+
 def test_ai_search_school_answer_includes_pressure_context() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(query="Which school areas need review?"),
