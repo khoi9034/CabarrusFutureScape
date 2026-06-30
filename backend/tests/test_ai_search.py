@@ -623,6 +623,9 @@ def test_ai_search_economics_mode_returns_economic_answer() -> None:
     assert "CFS Economics reviewed 12 parcels" in response.answer
     assert "Consulting takeaway" in response.answer
     assert "Enterprise tool alignment" in response.answer
+    assert "Underbuilt / redevelopment logic" in response.answer
+    assert "improvement-to-land ratio" in response.answer
+    assert "Needs More Data Before Recommendation" in response.answer
     assert "Traditional GIS can show where things are" in response.answer
     assert "dimensions include Geography" in response.answer
     assert "Underbuilt Redevelopment Candidate" in response.answer

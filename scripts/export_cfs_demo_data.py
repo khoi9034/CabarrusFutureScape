@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+from collections import Counter
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from pathlib import Path
@@ -35,6 +36,7 @@ DEMO_FLOOD_LAYER_LIMIT = 160
 DEMO_SCHOOL_LAYER_LIMIT = 120
 DEMO_TRANSPORTATION_LAYER_LIMIT = 80
 DEMO_MODEL_LAB_MARKER_LIMIT = 180
+DEMO_COUNTY_TAX_RATE_PER_100 = 0.57
 
 DATA_STILL_NEEDED = [
     {
@@ -575,6 +577,15 @@ def build_economics_intelligence_demo(
     )
     signals = [economics_demo_signal(row) for row in rows]
     summary = economics_demo_summary(signals, generated_at)
+    underbuilt_watchlist = [
+        signal for signal in signals if signal["economic_status_band"] == "underbuilt_watch"
+    ][:25]
+    watchlist = [
+        signal
+        for signal in signals
+        if signal["economic_status_band"]
+        in {"underbuilt_watch", "redevelopment_opportunity", "tax_base_opportunity", "infrastructure_constrained", "data_needed"}
+    ][:25]
     return {
         "as_of": generated_at,
         "caveats": [
@@ -589,39 +600,39 @@ def build_economics_intelligence_demo(
             economics_readiness("Service Burden", False, "Constraint-adjusted opportunity", "Add official utility, school, and transportation service assumptions."),
         ],
         "kpis": economics_demo_kpis(summary),
+        "jurisdiction_value_summary": economics_jurisdiction_value_summary(signals),
         "mode": "demo",
+        "opportunity_class_breakdown": economics_opportunity_class_breakdown(signals),
+        "parcel_economic_signals": signals,
         "scenario_templates": economics_scenario_templates(),
         "signals": signals,
         "summary": summary,
-        "watchlist": signals[:25],
+        "underbuilt_watchlist": underbuilt_watchlist,
+        "watchlist": watchlist,
     }
 
 
 def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
+    assessed_value = as_number(row.get("assessed_value"))
     value_per_acre = as_number(row.get("value_per_acre"))
     ratio = as_number(row.get("improvement_to_land_ratio"))
     land_value = as_number(row.get("land_value"))
+    improvement_value = as_number(row.get("improvement_value"))
     acreage = as_number(row.get("acreage"))
-    if value_per_acre is None or acreage is None:
-        status, opportunity = "data_needed", "Needs More Data Before Recommendation"
-    elif ratio is not None and ratio < 0.65 and (land_value or 0) >= 100000 and acreage >= 0.5:
-        status, opportunity = "underbuilt_watch", "Underbuilt Redevelopment Candidate"
-    elif value_per_acre < 150000 and acreage >= 1.0:
-        status, opportunity = "tax_base_opportunity", "Underbuilt Redevelopment Candidate"
-    elif value_per_acre >= 500000:
-        status, opportunity = "stable_high_value", "High-Value Stable Parcel"
-    else:
-        status, opportunity = "redevelopment_opportunity", "Needs More Data Before Recommendation"
+    status, opportunity = economics_status_band(value_per_acre, ratio, land_value, acreage)
+    estimated_tax = estimate_demo_county_tax(assessed_value)
     return {
         "acreage": acreage,
-        "assessed_value": as_number(row.get("assessed_value")),
+        "assessed_value": assessed_value,
         "caveats": [
             "Screening-level economic context only.",
             "Estimated tax context is not a formal tax bill.",
             "Contact fields are excluded.",
         ],
+        "economic_data_confidence": economics_data_confidence(assessed_value, acreage, land_value, improvement_value),
         "economic_status_band": status,
-        "estimated_county_tax": None,
+        "estimated_county_tax": estimated_tax,
+        "estimated_county_tax_screening": estimated_tax,
         "evidence": [
             f"Value per acre: {round(value_per_acre) if value_per_acre is not None else 'data needed'}.",
             f"Improvement-to-land ratio: {round(ratio, 2)}" if ratio is not None else "Improvement-to-land ratio needs land and improvement values.",
@@ -629,7 +640,7 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
         "floodplain_context": None,
         "geography_label": row.get("geography_label"),
         "improvement_to_land_ratio": ratio,
-        "improvement_value": as_number(row.get("improvement_value")),
+        "improvement_value": improvement_value,
         "improvement_value_per_acre": as_number(row.get("improvement_value_per_acre")),
         "land_value": land_value,
         "land_value_per_acre": as_number(row.get("land_value_per_acre")),
@@ -647,6 +658,74 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
         "utility_readiness_context": "Official utility capacity remains a data need.",
         "value_per_acre": value_per_acre,
     }
+
+
+def economics_status_band(
+    value_per_acre: float | None,
+    ratio: float | None,
+    land_value: float | None,
+    acreage: float | None,
+) -> tuple[str, str]:
+    if value_per_acre is None or acreage is None:
+        return "data_needed", "Needs More Data Before Recommendation"
+    if ratio is not None and ratio < 0.65 and (land_value or 0) >= 100000 and acreage >= 0.5:
+        return "underbuilt_watch", "Underbuilt Redevelopment Candidate"
+    if value_per_acre < 150000 and acreage >= 1.0:
+        return "tax_base_opportunity", "Tax-Base Opportunity"
+    if value_per_acre >= 500000:
+        return "stable_high_value", "High-Value Stable Parcel"
+    return "redevelopment_opportunity", "Tax-Base Opportunity"
+
+
+def economics_data_confidence(
+    assessed: float | None,
+    acreage: float | None,
+    land: float | None,
+    improvement: float | None,
+) -> str:
+    if assessed is not None and acreage and land is not None and improvement is not None:
+        return "strong"
+    if assessed is not None and acreage:
+        return "medium"
+    return "data_needed"
+
+
+def estimate_demo_county_tax(assessed_value: float | None) -> float | None:
+    return assessed_value * DEMO_COUNTY_TAX_RATE_PER_100 / 100 if assessed_value is not None else None
+
+
+def economics_opportunity_class_breakdown(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    counts = Counter(signal.get("opportunity_class") or "Needs More Data Before Recommendation" for signal in signals)
+    return [
+        {"count": count, "opportunity_class": opportunity_class}
+        for opportunity_class, count in counts.most_common()
+    ]
+
+
+def economics_jurisdiction_value_summary(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_geography: dict[str, list[dict[str, Any]]] = {}
+    for signal in signals:
+        label = str(signal.get("geography_label") or "Parcel context")
+        by_geography.setdefault(label, []).append(signal)
+
+    rows = []
+    for label, group in by_geography.items():
+        values = sorted(
+            value for value in (signal.get("value_per_acre") for signal in group)
+            if isinstance(value, (int, float))
+        )
+        rows.append(
+            {
+                "geography_label": label,
+                "median_value_per_acre": values[len(values) // 2] if values else None,
+                "parcel_count": len(group),
+                "total_assessed_value": sum(signal.get("assessed_value") or 0 for signal in group) or None,
+                "underbuilt_candidate_count": sum(
+                    1 for signal in group if signal.get("economic_status_band") == "underbuilt_watch"
+                ),
+            }
+        )
+    return sorted(rows, key=lambda row: row["total_assessed_value"] or 0, reverse=True)[:12]
 
 
 def economics_demo_summary(signals: list[dict[str, Any]], generated_at: str) -> dict[str, Any]:
@@ -738,10 +817,14 @@ def unavailable_economics_demo(generated_at: str, reason: str) -> dict[str, Any]
         "caveats": [reason, "CFS Economics is screening-level context, not a formal appraisal or tax bill."],
         "data_readiness": [economics_readiness("Parcel Economics", False, "Economics mode unavailable state", reason)],
         "kpis": economics_demo_kpis(summary),
+        "jurisdiction_value_summary": [],
         "mode": "demo",
+        "opportunity_class_breakdown": [],
+        "parcel_economic_signals": [],
         "scenario_templates": economics_scenario_templates(),
         "signals": [],
         "summary": summary,
+        "underbuilt_watchlist": [],
         "watchlist": [],
     }
 

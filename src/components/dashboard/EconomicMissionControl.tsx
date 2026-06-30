@@ -30,6 +30,7 @@ import type {
   CfsAiSearchRequest,
   CfsAiSelectedSignal,
   EconomicsEnterpriseExportResponse,
+  EconomicsParcelSignal,
   EconomicsIntelligenceResponse,
   EconomicsKpi,
   EconomicsReadinessRow,
@@ -89,22 +90,56 @@ export function EconomicMissionControl() {
   }, []);
 
   const summary = intelligence?.summary;
-  const watchlist = useMemo(() => intelligence?.watchlist ?? [], [intelligence]);
+  const signals = useMemo(
+    () => intelligence?.parcel_economic_signals ?? intelligence?.signals ?? [],
+    [intelligence],
+  );
+  const watchlist = useMemo(
+    () =>
+      intelligence?.underbuilt_watchlist?.length
+        ? intelligence.underbuilt_watchlist
+        : (intelligence?.watchlist ?? []),
+    [intelligence],
+  );
   const valueBars = useMemo(
     () =>
-      watchlist.slice(0, 8).map((signal) => ({
+      topNumericSignals(signals, "value_per_acre").map((signal) => ({
         label: signal.geography_label ?? signal.parcel_id,
         value: signal.value_per_acre ?? 0,
       })),
-    [watchlist],
+    [signals],
   );
   const classBars = useMemo(() => {
+    if (intelligence?.opportunity_class_breakdown?.length) {
+      return intelligence.opportunity_class_breakdown
+        .map((row) => ({ label: row.opportunity_class, value: row.count }))
+        .slice(0, 6);
+    }
     const counts = new Map<string, number>();
-    watchlist.forEach((signal) => {
+    signals.forEach((signal) => {
       counts.set(signal.opportunity_class, (counts.get(signal.opportunity_class) ?? 0) + 1);
     });
     return Array.from(counts, ([label, value]) => ({ label, value })).slice(0, 6);
-  }, [watchlist]);
+  }, [intelligence, signals]);
+  const ratioBars = useMemo(
+    () =>
+      topNumericSignals(signals, "improvement_to_land_ratio").map((signal) => ({
+        label: signal.geography_label ?? signal.parcel_id,
+        value: signal.improvement_to_land_ratio ?? 0,
+      })),
+    [signals],
+  );
+  const jurisdictionBars = useMemo(
+    () =>
+      (intelligence?.jurisdiction_value_summary ?? [])
+        .filter((row) => typeof row.median_value_per_acre === "number")
+        .slice(0, 8)
+        .map((row) => ({
+          label: row.geography_label ?? "Parcel context",
+          value: row.median_value_per_acre ?? 0,
+        })),
+    [intelligence],
+  );
 
   const explainSignal = useCallback((signal: CfsAiSelectedSignal) => {
     setAskRequest({
@@ -252,20 +287,34 @@ export function EconomicMissionControl() {
         <section className="cfs-command-surface rounded-xl p-4">
           <SectionHeader
             icon={<BarChart3 className="h-4 w-4" />}
-            kicker="Parcel / Area Economic Profile"
-            title="Revenue Per Acre + Opportunity Classes"
+            kicker="Parcel Economic Baseline"
+            title="Value Per Acre + Opportunity Classes"
           />
           <div className="mt-4 grid gap-3 xl:grid-cols-2">
             <HorizontalBarPanel
               empty="Value per acre rows are not available."
               formatValue={currency}
               rows={valueBars}
-              title="Revenue per acre dashboard"
+              title="Value per acre distribution"
             />
             <HorizontalBarPanel
               empty="Opportunity classes are not available."
               rows={classBars}
-              title="Opportunity class mix"
+              title="Opportunity Class Breakdown"
+            />
+            <HorizontalBarPanel
+              empty="Improvement-to-land ratio rows are not available."
+              formatValue={(value) =>
+                typeof value === "number" ? value.toFixed(2) : "Not available"
+              }
+              rows={ratioBars}
+              title="Improvement-to-Land Ratio"
+            />
+            <HorizontalBarPanel
+              empty="Jurisdiction value summary is not available."
+              formatValue={currency}
+              rows={jurisdictionBars}
+              title="Jurisdiction / geography value summary"
             />
           </div>
           <div className="mt-4 grid gap-2 md:grid-cols-3">
@@ -273,6 +322,11 @@ export function EconomicMissionControl() {
             <MicroMetric label="Land value" value={currency(summary?.total_land_value)} />
             <MicroMetric label="Improvement value" value={currency(summary?.total_improvement_value)} />
           </div>
+          <p className="mt-3 text-xs leading-5 text-slate-500">
+            Improvement-to-land ratio compares improvement value to land value.
+            Low ratios can indicate underbuilt review candidates when acreage,
+            land value, and constraint context support deeper diligence.
+          </p>
         </section>
 
         <section className="cfs-command-surface rounded-xl p-4">
@@ -717,6 +771,16 @@ function EconomicsKpiCard({
       </button>
     </article>
   );
+}
+
+function topNumericSignals(
+  signals: EconomicsParcelSignal[],
+  key: "improvement_to_land_ratio" | "value_per_acre",
+) {
+  return [...signals]
+    .filter((signal) => typeof signal[key] === "number")
+    .sort((a, b) => (b[key] ?? 0) - (a[key] ?? 0))
+    .slice(0, 8);
 }
 
 function HorizontalBarPanel({

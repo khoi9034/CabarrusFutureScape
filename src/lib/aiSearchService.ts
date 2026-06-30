@@ -32,8 +32,11 @@ export const askCfsSuggestedPrompts = [
 ] as const;
 
 export const askCfsEconomicsSuggestedPrompts = [
+  "Which parcels look underbuilt?",
   "Where are the strongest underbuilt parcel signals?",
+  "Where is tax-base opportunity high?",
   "Which areas have high tax-base opportunity?",
+  "Which areas need more data before a recommendation?",
   "Which areas create fiscal upside but service burden?",
   "What corridors look investment-ready?",
   "Explain value per acre.",
@@ -158,6 +161,15 @@ async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
           `Underbuilt watch candidates: ${format(summary.underbuilt_candidate_count)}.`,
           "Revenue per acre, fiscal opportunity, and infrastructure readiness are shown as screening bands rather than numeric scores.",
           `Data-needed records: ${format(summary.data_needed_count)}.`,
+        ]),
+      ],
+      [
+        "Underbuilt / redevelopment logic",
+        bullets([
+          "Low improvement-to-land ratio plus meaningful acreage can indicate an underbuilt redevelopment candidate.",
+          "Low value per acre with observed growth context can indicate tax-base opportunity, subject to constraints.",
+          "Missing acreage, assessed value, land value, or improvement value is labeled Needs More Data Before Recommendation.",
+          "Estimated tax context is screening-level only and should be verified before fiscal analysis.",
         ]),
       ],
       [
@@ -681,6 +693,9 @@ function classifyDemoDomains(query: string): CfsAiDomain[] {
     "acre",
     "underbuilt",
     "redevelopment",
+    "tax-base",
+    "improvement-to-land",
+    "more data before recommendation",
     "fiscal",
     "scenario",
     "power bi",

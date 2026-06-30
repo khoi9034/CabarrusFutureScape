@@ -605,8 +605,11 @@ function getUnavailableEconomicsIntelligence(): EconomicsIntelligenceResponse {
         gap_or_next_need: "Export sanitized assessed value, acreage, land value, and improvement value fields.",
       },
     ],
+    jurisdiction_value_summary: [],
     kpis: [],
     mode: "demo",
+    opportunity_class_breakdown: [],
+    parcel_economic_signals: [],
     scenario_templates: [],
     signals: [],
     summary: {
@@ -621,6 +624,7 @@ function getUnavailableEconomicsIntelligence(): EconomicsIntelligenceResponse {
       total_parcels_analyzed: 0,
       underbuilt_candidate_count: 0,
     },
+    underbuilt_watchlist: [],
     watchlist: [],
   };
 }

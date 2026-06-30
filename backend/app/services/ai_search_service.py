@@ -136,6 +136,9 @@ DOMAIN_KEYWORDS: list[tuple[CfsAiDomain, tuple[str, ...]]] = [
             "acre",
             "underbuilt",
             "redevelopment",
+            "tax-base",
+            "improvement-to-land",
+            "more data before recommendation",
             "fiscal",
             "scenario",
             "power bi",
@@ -585,6 +588,17 @@ def _economics_answer(
                     f"Underbuilt watch: {_fmt(summary.get('underbuilt_candidate_count'))} parcels where land and improvement context support review.",
                     "Revenue per acre, fiscal opportunity, and infrastructure readiness are shown as screening bands rather than numeric scores.",
                     f"Data-needed records: {_fmt(summary.get('data_needed_count'))}.",
+                ]
+            ),
+        ),
+        (
+            "Underbuilt / redevelopment logic",
+            _bullets(
+                [
+                    "Low improvement-to-land ratio plus meaningful acreage can indicate an underbuilt redevelopment candidate.",
+                    "Low value per acre with observed growth context can indicate tax-base opportunity, subject to constraints.",
+                    "Missing acreage, assessed value, land value, or improvement value is labeled Needs More Data Before Recommendation.",
+                    "Estimated tax context is screening-level only and should be verified before fiscal analysis.",
                 ]
             ),
         ),

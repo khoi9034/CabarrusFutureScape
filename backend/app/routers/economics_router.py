@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -189,6 +190,25 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
             """
         ),
     ).mappings().all()
+    jurisdiction_rows = db.execute(
+        text(
+            base_sql
+            + """
+            SELECT
+              geography_label,
+              COUNT(*) AS parcel_count,
+              SUM(assessed_value) AS total_assessed_value,
+              percentile_cont(0.5) WITHIN GROUP (ORDER BY value_per_acre)
+                FILTER (WHERE value_per_acre IS NOT NULL) AS median_value_per_acre,
+              COUNT(*) FILTER (WHERE improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5) AS underbuilt_candidate_count
+            FROM calculated
+            WHERE geography_label IS NOT NULL
+            GROUP BY geography_label
+            ORDER BY SUM(assessed_value) DESC NULLS LAST
+            LIMIT 12
+            """
+        ),
+    ).mappings().all()
 
     signals = [
         _economics_signal(dict(row), settings.county_tax_rate_per_100)
@@ -212,15 +232,26 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         "total_parcels_analyzed": _int(summary_row.get("total_parcels_analyzed")),
         "underbuilt_candidate_count": _int(summary_row.get("underbuilt_candidate_count")),
     }
+    underbuilt_watchlist = [
+        signal
+        for signal in signals
+        if signal["economic_status_band"] == "underbuilt_watch"
+    ][:25]
     return {
         "as_of": as_of,
         "caveats": caveats,
         "data_readiness": _economics_data_readiness(columns, dev_join, flood_join, school_join),
         "kpis": _economics_kpis(summary),
+        "jurisdiction_value_summary": [
+            _jurisdiction_summary(dict(row)) for row in jurisdiction_rows
+        ],
         "mode": "live",
+        "opportunity_class_breakdown": _opportunity_class_breakdown(signals),
+        "parcel_economic_signals": signals,
         "scenario_templates": _scenario_templates(),
         "signals": signals,
         "summary": summary,
+        "underbuilt_watchlist": underbuilt_watchlist,
         "watchlist": watchlist,
     }
 
@@ -267,8 +298,10 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
             "Estimated county tax is not a formal tax bill.",
             "Contact fields are excluded.",
         ],
+        "economic_data_confidence": _economic_data_confidence(row, assessed, acreage, land, improvement),
         "economic_status_band": status,
         "estimated_county_tax": estimate_county_tax(assessed, rate_per_100),
+        "estimated_county_tax_screening": estimate_county_tax(assessed, rate_per_100),
         "evidence": evidence,
         "floodplain_context": row.get("floodplain_context"),
         "geography_label": row.get("geography_label"),
@@ -300,17 +333,32 @@ def _status_band(
     acreage: float | None,
     row: dict[str, Any],
 ) -> tuple[str, str]:
+    context = " ".join(
+        str(row.get(key) or "")
+        for key in ("geography_label", "permit_activity_context", "floodplain_context", "school_pressure_context")
+    ).lower()
+    has_growth = any(term in context for term in ("permit", "growth", "recent", "residential", "new construction"))
+    has_constraint = any(term in context for term in ("flood", "review", "capacity", "school", "constraint"))
+    employment_context = any(term in context for term in ("industrial", "employment", "airport", "business", "commercial", "corridor"))
+    residential_context = any(term in context for term in ("residential", "subdivision", "single", "multi", "housing"))
+
     if value_per_acre is None or acreage is None:
         return "data_needed", "Needs More Data Before Recommendation"
-    if row.get("floodplain_context") and "review" in str(row["floodplain_context"]).lower():
+    if value_per_acre < 150000 and has_constraint and not has_growth:
+        return "low_fiscal_high_burden", "Low Fiscal Upside / High Public Burden"
+    if has_constraint and (value_per_acre >= 300000 or (land_value or 0) >= 100000):
         return "infrastructure_constrained", "High Value but Infrastructure-Constrained"
     if ratio is not None and ratio < 0.65 and (land_value or 0) >= 100000 and acreage >= 0.5:
         return "underbuilt_watch", "Underbuilt Redevelopment Candidate"
-    if value_per_acre < 150000 and acreage >= 1.0:
-        return "tax_base_opportunity", "Underbuilt Redevelopment Candidate"
+    if employment_context and acreage >= 2 and value_per_acre < 250000:
+        return "industrial_employment_candidate", "Industrial / Employment Candidate"
+    if residential_context and has_growth:
+        return "residential_growth_pressure", "Residential Growth Pressure Area"
+    if value_per_acre < 150000 and acreage >= 1.0 and has_growth:
+        return "tax_base_opportunity", "Tax-Base Opportunity"
     if value_per_acre >= 500000:
         return "stable_high_value", "High-Value Stable Parcel"
-    return "redevelopment_opportunity", "Needs More Data Before Recommendation"
+    return "redevelopment_opportunity", "Tax-Base Opportunity"
 
 
 def _recommended_followup(status: str) -> str:
@@ -320,7 +368,44 @@ def _recommended_followup(status: str) -> str:
         "stable_high_value": "Monitor as part of the parcel economic baseline.",
         "tax_base_opportunity": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
         "underbuilt_watch": "Review parcel context, zoning, constraints, and recent permits before any redevelopment scenario.",
+        "industrial_employment_candidate": "Review road access, utility readiness, constraints, and employment-site assumptions.",
+        "low_fiscal_high_burden": "Verify public service burden before treating this as a fiscal opportunity.",
+        "residential_growth_pressure": "Compare residential permit context with school, utility, and transportation burden.",
     }.get(status, "Review source records before drawing conclusions.")
+
+
+def _economic_data_confidence(
+    row: dict[str, Any],
+    assessed: float | None,
+    acreage: float | None,
+    land: float | None,
+    improvement: float | None,
+) -> str:
+    if assessed is not None and acreage and land is not None and improvement is not None:
+        return "strong"
+    if assessed is not None and acreage:
+        return "medium"
+    if row.get("permit_activity_context") or row.get("floodplain_context") or row.get("school_pressure_context"):
+        return "proxy"
+    return "data_needed"
+
+
+def _opportunity_class_breakdown(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    counts = Counter(str(signal.get("opportunity_class") or "Needs More Data Before Recommendation") for signal in signals)
+    return [
+        {"count": count, "opportunity_class": opportunity_class}
+        for opportunity_class, count in counts.most_common()
+    ]
+
+
+def _jurisdiction_summary(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "geography_label": row.get("geography_label"),
+        "median_value_per_acre": _float(row.get("median_value_per_acre")),
+        "parcel_count": _int(row.get("parcel_count")),
+        "total_assessed_value": _float(row.get("total_assessed_value")),
+        "underbuilt_candidate_count": _int(row.get("underbuilt_candidate_count")),
+    }
 
 
 def _parcel_economics_expressions(
@@ -508,10 +593,14 @@ def _unavailable_payload(as_of: str, reason: str) -> dict[str, Any]:
         ],
         "data_readiness": [_readiness("Parcel Economics", False, "Economics mode unavailable state", reason)],
         "kpis": _economics_kpis(summary),
+        "jurisdiction_value_summary": [],
         "mode": "live",
+        "opportunity_class_breakdown": [],
+        "parcel_economic_signals": [],
         "scenario_templates": _scenario_templates(),
         "signals": [],
         "summary": summary,
+        "underbuilt_watchlist": [],
         "watchlist": [],
     }
 

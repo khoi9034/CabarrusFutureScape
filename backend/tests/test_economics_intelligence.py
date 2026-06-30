@@ -5,6 +5,7 @@ from app.main import app
 from app.routers import economics_router
 from app.routers.economics_router import (
     _economics_signal,
+    _opportunity_class_breakdown,
     _unavailable_payload,
     calculate_improvement_to_land_ratio,
     calculate_value_per_acre,
@@ -31,6 +32,10 @@ def test_economics_missing_fields_return_data_needed_schema() -> None:
     assert payload["summary"]["total_parcels_analyzed"] == 0
     assert payload["summary"]["data_needed_count"] == 1
     assert payload["kpis"]
+    assert payload["parcel_economic_signals"] == []
+    assert payload["underbuilt_watchlist"] == []
+    assert payload["opportunity_class_breakdown"] == []
+    assert payload["jurisdiction_value_summary"] == []
     assert payload["watchlist"] == []
     assert "formal appraisal" in " ".join(payload["caveats"])
 
@@ -52,10 +57,50 @@ def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:
     )
 
     assert signal["estimated_county_tax"] == 2850
+    assert signal["estimated_county_tax_screening"] == 2850
+    assert signal["economic_data_confidence"] == "strong"
     assert signal["economic_status_band"] == "underbuilt_watch"
     assert signal["opportunity_class"] == "Underbuilt Redevelopment Candidate"
     assert "owner" not in str(signal).lower()
     assert "mailing" not in str(signal).lower()
+
+
+def test_economics_signal_handles_missing_denominators_and_class_bands() -> None:
+    data_needed = _economics_signal(
+        {
+            "acreage": None,
+            "assessed_value": 500_000,
+            "geography_label": "Incomplete parcel",
+            "improvement_value": None,
+            "land_value": None,
+            "official_parcel_id": "demo-missing",
+            "value_per_acre": None,
+        },
+        0.57,
+    )
+    tax_base = _economics_signal(
+            {
+                "acreage": 2,
+                "assessed_value": 200_000,
+                "geography_label": "Growth area",
+            "improvement_value": 125_000,
+            "land_value": 75_000,
+            "official_parcel_id": "demo-tax",
+            "permit_activity_context": "Recent observed permit activity",
+            "value_per_acre": 100_000,
+        },
+        0.57,
+    )
+
+    assert data_needed["economic_status_band"] == "data_needed"
+    assert data_needed["opportunity_class"] == "Needs More Data Before Recommendation"
+    assert data_needed["improvement_to_land_ratio"] is None
+    assert tax_base["economic_status_band"] == "tax_base_opportunity"
+    assert tax_base["opportunity_class"] == "Tax-Base Opportunity"
+    assert _opportunity_class_breakdown([data_needed, tax_base]) == [
+        {"count": 1, "opportunity_class": "Needs More Data Before Recommendation"},
+        {"count": 1, "opportunity_class": "Tax-Base Opportunity"},
+    ]
 
 
 def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> None:

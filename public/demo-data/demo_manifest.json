@@ -1,6 +1,6 @@
 {
   "caveat": "Portfolio demo uses cached CFS demo data, not a live production database.",
-  "generated_at": "2026-06-30T17:04:39Z",
+  "generated_at": "2026-06-30T17:29:19Z",
   "mode": "portfolio_demo",
   "record_counts": {
     "demo_map_layers": 8,

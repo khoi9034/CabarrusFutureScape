@@ -232,12 +232,18 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Traditional GIS can show where things are" in overview
     assert "Consulting Decision Workflows" in overview
     assert "Economic Snapshot" in economic_mission_control
-    assert "Parcel / Area Economic Profile" in economic_mission_control
+    assert "Parcel Economic Baseline" in economic_mission_control
+    assert "Underbuilt Redevelopment Watchlist" in economic_mission_control
+    assert "Opportunity Class Breakdown" in economic_mission_control
+    assert "Improvement-to-Land Ratio" in economic_mission_control
     assert "Fiscal Impact / Tax Lift" in economic_mission_control
     assert "Scenario Comparison" in economic_mission_control
     assert "Four-level economics engine" in methodology
     assert "Confidence tiers" in methodology
     assert "Which areas create fiscal upside but service burden?" in ask_service
+    assert "Which parcels look underbuilt?" in ask_service
+    assert "Where is tax-base opportunity high?" in ask_service
+    assert "Which areas need more data before a recommendation?" in ask_service
     assert "What corridors look investment-ready?" in ask_service
     assert "How would this become a Power BI dataset?" in ask_service
     assert "Enterprise Consulting Toolkit" in economic_mission_control

@@ -1,7 +1,10 @@
 export type EconomicsStatusBand =
   | "data_needed"
+  | "industrial_employment_candidate"
   | "infrastructure_constrained"
+  | "low_fiscal_high_burden"
   | "redevelopment_opportunity"
+  | "residential_growth_pressure"
   | "stable_high_value"
   | "tax_base_opportunity"
   | "underbuilt_watch"
@@ -24,8 +27,10 @@ export interface EconomicsParcelSignal {
   acreage: number | null;
   assessed_value: number | null;
   caveats: string[];
+  economic_data_confidence: "strong" | "medium" | "proxy" | "data_needed" | string;
   economic_status_band: EconomicsStatusBand;
   estimated_county_tax: number | null;
+  estimated_county_tax_screening: number | null;
   evidence: string[];
   floodplain_context: string | null;
   geography_label: string | null;
@@ -71,15 +76,32 @@ export interface EconomicsScenarioTemplate {
   what_it_tests: string;
 }
 
+export interface EconomicsOpportunityClassBreakdown {
+  count: number;
+  opportunity_class: string;
+}
+
+export interface EconomicsJurisdictionValueSummary {
+  geography_label: string | null;
+  median_value_per_acre: number | null;
+  parcel_count: number;
+  total_assessed_value: number | null;
+  underbuilt_candidate_count: number;
+}
+
 export interface EconomicsIntelligenceResponse {
   as_of: string | null;
   caveats: string[];
   data_readiness: EconomicsReadinessRow[];
+  jurisdiction_value_summary: EconomicsJurisdictionValueSummary[];
   kpis: EconomicsKpi[];
   mode: "demo" | "live";
+  opportunity_class_breakdown: EconomicsOpportunityClassBreakdown[];
+  parcel_economic_signals: EconomicsParcelSignal[];
   scenario_templates: EconomicsScenarioTemplate[];
   signals: EconomicsParcelSignal[];
   summary: EconomicsSummary;
+  underbuilt_watchlist: EconomicsParcelSignal[];
   watchlist: EconomicsParcelSignal[];
 }
 

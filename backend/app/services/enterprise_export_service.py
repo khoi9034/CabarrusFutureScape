@@ -106,9 +106,12 @@ def _kpi_fact(kpis: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
+            "economic_data_confidence": row.get("economic_data_confidence"),
             "economic_status_band": row.get("economic_status_band"),
-            "estimated_county_tax": row.get("estimated_county_tax"),
+            "estimated_county_tax": row.get("estimated_county_tax_screening")
+            or row.get("estimated_county_tax"),
             "geography_label": row.get("geography_label"),
+            "improvement_to_land_ratio": row.get("improvement_to_land_ratio"),
             "opportunity_class": row.get("opportunity_class"),
             "parcel_id": row.get("parcel_id"),
             "recommended_followup": row.get("recommended_followup"),
