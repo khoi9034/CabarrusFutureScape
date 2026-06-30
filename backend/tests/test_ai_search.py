@@ -176,7 +176,10 @@ def test_ai_search_deterministic_fallback_answers_without_provider() -> None:
     assert "observed_development_activity" in response.dashboard_actions.highlight_kpis
     assert "Residential additions" in response.answer
     assert "Key findings" in response.answer
-    assert "Planning interpretation" in response.answer
+    assert "What changed" in response.answer
+    assert "What is driving activity" in response.answer
+    assert "Why it matters" in response.answer
+    assert "What to inspect next" in response.answer
     assert "Concord" in response.answer
     evidence_text = " ".join(item.detail for item in response.evidence)
     assert "18 permit records across 7 active parcels" in evidence_text
@@ -251,8 +254,7 @@ def test_ai_search_selected_signal_returns_focused_explanation() -> None:
     assert "Why it matters" in response.answer
     assert "What to inspect next" in response.answer
     assert response.dashboard_actions.focus_domain == "schools"
-    assert response.dashboard_actions.open_detail
-    assert response.dashboard_actions.open_detail.id == "school_pressure"
+    assert response.dashboard_actions.open_detail is None
     assert "School Utilization + Permit Pressure" in response.related_layers
 
 

@@ -15,7 +15,6 @@ from app.schemas.ai_search import (
     CfsAiDashboardActions,
     CfsAiDomain,
     CfsAiEvidenceItem,
-    CfsAiOpenDetailAction,
     CfsAiSearchRequest,
     CfsAiSearchResponse,
     CfsAiSelectedSignal,
@@ -56,13 +55,11 @@ DASHBOARD_ACTIONS: dict[CfsAiDomain, dict[str, Any]] = {
         "filter_watchlist": {"domain": "data_readiness", "status": "data needed"},
         "focus_domain": "data_readiness",
         "highlight_kpis": ["data_readiness"],
-        "open_detail": {"type": "domain", "id": "data_readiness"},
         "sort_watchlist_by": "data_gap",
     },
     "flood": {
         "focus_domain": "flood",
         "highlight_kpis": ["floodplain_review"],
-        "open_detail": {"type": "kpi", "id": "floodplain_review"},
         "recommended_layers": ["Floodplain Review"],
     },
     "general": {
@@ -77,13 +74,11 @@ DASHBOARD_ACTIONS: dict[CfsAiDomain, dict[str, Any]] = {
     "model_lab": {
         "focus_domain": "model_lab",
         "highlight_kpis": ["model_research_status"],
-        "open_detail": {"type": "domain", "id": "model_lab"},
         "recommended_layers": ["Model Lab Research Signals"],
     },
     "permits": {
         "focus_domain": "permits",
         "highlight_kpis": ["observed_development_activity"],
-        "open_detail": {"type": "kpi", "id": "observed_development_activity"},
         "recommended_layers": ["Development Hotspots"],
         "sort_watchlist_by": "recent_activity",
     },
@@ -91,7 +86,6 @@ DASHBOARD_ACTIONS: dict[CfsAiDomain, dict[str, Any]] = {
         "filter_watchlist": {"domain": "schools", "status": "elevated review"},
         "focus_domain": "schools",
         "highlight_kpis": ["school_pressure"],
-        "open_detail": {"type": "kpi", "id": "school_pressure"},
         "recommended_layers": [
             "School Utilization + Permit Pressure",
             "Development Hotspots",
@@ -542,7 +536,7 @@ def _selected_signal_answer(
             ),
         ],
         [
-            f"Open the detail drawer for {signal.title}.",
+            f"Review {signal.title} in the Indicator Center dashboard.",
             "Compare the signal with recommended Explore Countywide layers.",
             "Review Methodology before using this as decision support.",
         ],
@@ -608,7 +602,6 @@ def _selected_signal_actions(
     domains: list[CfsAiDomain],
 ) -> CfsAiDashboardActions:
     actions = dashboard_actions_for_domains(domains)
-    actions.open_detail = CfsAiOpenDetailAction(type="kpi", id=signal.id)
     actions.recommended_layers = list(
         dict.fromkeys([*actions.recommended_layers, *signal.related_layers]),
     )[:6]
@@ -636,8 +629,10 @@ def _permit_answer(
         (
             "Executive summary",
             (
-                f"{total_sentence} "
-                f"{_recent_change_text(detail)} This is a planning review signal, not a prediction."
+                f"{total_sentence} Permit activity remains a broad countywide planning workload signal, "
+                "with the strongest available drivers tied to new construction, residential growth, remodeling, and additions where those fields are exposed. "
+                f"{_recent_change_text(detail)} The long-term record still shows a large active development footprint. "
+                "This is a planning review signal, not a prediction."
             ),
         ),
         (
@@ -653,19 +648,45 @@ def _permit_answer(
             ),
         ),
         (
-            "Planning interpretation",
+            "What changed",
             (
-                "Rising or concentrated permit activity points to review workload and coordination needs. "
+                f"{_recent_change_text(detail)} "
+                "Use this change as a workload and coordination indicator, not as evidence that construction was completed."
+            ),
+        ),
+        (
+            "What is driving activity",
+            (
+                f"Top permit types are {top_types or 'not currently exposed'}, and top permit segments are "
+                f"{top_segments or 'not currently exposed'}. New construction usually points to direct growth pressure; "
+                "remodel and addition categories can signal reinvestment or smaller-scale residential change; other categories may include administrative or mixed records."
+            ),
+        ),
+        (
+            "Why it matters",
+            (
+                "Sustained or concentrated permit activity points to review workload, infrastructure coordination, and policy follow-up. "
                 "Compare active areas with school pressure, floodplain review, utility readiness, transportation context, and zoning/land-use context."
             ),
         ),
         (
-            "Inspect next",
+            "What to inspect next",
             _bullets(
                 [
                     "Development Hotspots by permit segment and year range.",
                     "School Utilization + Permit Pressure for attendance-area overlap.",
                     "Floodplain Review, Utility Readiness, and Transportation Context around active areas.",
+                ]
+            ),
+        ),
+        (
+            "Caveats",
+            _bullets(
+                [
+                    "Observed permit records are not completed construction.",
+                    "Permit categories can include administrative or noisy source records.",
+                    "This is not a prediction or official determination.",
+                    "Field availability affects type, segment, and geography interpretation.",
                 ]
             ),
         ),

@@ -135,7 +135,7 @@ function demoSelectedSignalAnswer(
       ),
     ],
     [
-      `Open the detail drawer for ${signal.title}.`,
+      `Review ${signal.title} in the Indicator Center dashboard.`,
       "Compare the signal with recommended Explore Countywide layers.",
       "Review Methodology before using this as decision support.",
     ],
@@ -159,7 +159,7 @@ function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
     briefing(
       [
         "Executive summary",
-        `Based on the cached demo extract, CFS analyzed ${format(detail?.total_records ?? stats.total_permits)} observed permit records across ${format(detail?.active_parcels ?? stats.parcels_with_activity)} active parcels. ${recentChangeText(detail)} This is observed permit activity, not a prediction.`,
+        `Based on the cached demo extract, CFS analyzed ${format(detail?.total_records ?? stats.total_permits)} observed permit records across ${format(detail?.active_parcels ?? stats.parcels_with_activity)} active parcels. Permit activity remains a broad planning workload signal, with the strongest available drivers tied to new construction, residential growth, remodeling, and additions where those fields are exposed. ${recentChangeText(detail)} This is observed permit activity, not a prediction.`,
       ],
       [
         "Key findings",
@@ -172,15 +172,32 @@ function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
         ]),
       ],
       [
-        "Planning interpretation",
+        "What changed",
+        `${recentChangeText(detail)} Use this change as a workload and coordination indicator, not as evidence that construction was completed.`,
+      ],
+      [
+        "What is driving activity",
+        `Top permit types are ${topTypes || "not available"}, and top permit segments are ${topSegments || "not available"}. New construction usually points to direct growth pressure; remodel and addition categories can signal reinvestment or smaller-scale residential change; other categories may include administrative or mixed records.`,
+      ],
+      [
+        "Why it matters",
         "Use this as a review workload signal. Compare active permit areas with school pressure, floodplain review, utility readiness, transportation context, and zoning/land-use context.",
       ],
       [
-        "Inspect next",
+        "What to inspect next",
         bullets([
           "Development Hotspots by permit segment and year range.",
           "School Utilization + Permit Pressure for attendance-area overlap.",
           "Floodplain Review, Utility Readiness, and Transportation Context around active areas.",
+        ]),
+      ],
+      [
+        "Caveats",
+        bullets([
+          "Observed permit records are not completed construction.",
+          "Permit categories can include administrative or noisy source records.",
+          "This is not a prediction or official determination.",
+          "Field availability affects type, segment, and geography interpretation.",
         ]),
       ],
     ),
@@ -666,7 +683,6 @@ function selectedSignalDashboardActions(
   const actions = dashboardActionsForDomains(domains);
   return {
     ...actions,
-    open_detail: { type: "kpi", id: signal.id },
     recommended_layers: Array.from(
       new Set([...(actions.recommended_layers ?? []), ...(signal.related_layers ?? [])]),
     ).slice(0, 6),
@@ -680,13 +696,11 @@ function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActio
       filter_watchlist: { domain: "data_readiness", status: "data needed" },
       focus_domain: "data_readiness",
       highlight_kpis: ["data_readiness"],
-      open_detail: { type: "domain", id: "data_readiness" },
       sort_watchlist_by: "data_gap",
     },
     flood: {
       focus_domain: "flood",
       highlight_kpis: ["floodplain_review"],
-      open_detail: { type: "kpi", id: "floodplain_review" },
       recommended_layers: ["Floodplain Review"],
     },
     general: {
@@ -701,13 +715,11 @@ function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActio
     model_lab: {
       focus_domain: "model_lab",
       highlight_kpis: ["model_research_status"],
-      open_detail: { type: "domain", id: "model_lab" },
       recommended_layers: ["Model Lab Research Signals"],
     },
     permits: {
       focus_domain: "permits",
       highlight_kpis: ["observed_development_activity"],
-      open_detail: { type: "kpi", id: "observed_development_activity" },
       recommended_layers: ["Development Hotspots"],
       sort_watchlist_by: "recent_activity",
     },
@@ -715,7 +727,6 @@ function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActio
       filter_watchlist: { domain: "schools", status: "elevated review" },
       focus_domain: "schools",
       highlight_kpis: ["school_pressure"],
-      open_detail: { type: "kpi", id: "school_pressure" },
       recommended_layers: [
         "School Utilization + Permit Pressure",
         "Development Hotspots",

@@ -5,15 +5,12 @@ import {
   ArrowRight,
   BarChart3,
   BookOpen,
-  CheckCircle2,
   ClipboardList,
   FileSearch,
   Gauge,
   GraduationCap,
   HelpCircle,
   ListChecks,
-  Move,
-  RotateCcw,
   Save,
   ShieldAlert,
   TrendingUp,
@@ -27,8 +24,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
-  type PointerEvent,
   type ReactNode,
 } from "react";
 import {
@@ -129,31 +124,6 @@ interface ChartDatum {
   value: number;
 }
 
-interface DrawerGeometry {
-  height: number;
-  left: number;
-  top: number;
-  width: number;
-}
-
-interface DrawerInteraction {
-  resizeHandle?: DrawerResizeHandle;
-  startHeight: number;
-  startLeft: number;
-  startTop: number;
-  startWidth: number;
-  startX: number;
-  startY: number;
-  type: "drag" | "resize";
-}
-
-type DrawerResizeHandle =
-  | "bottom"
-  | "bottom-left"
-  | "bottom-right"
-  | "left"
-  | "right";
-
 interface DrilldownStat {
   caveat?: string;
   label: string;
@@ -214,12 +184,6 @@ interface SchoolUtilizationCounts {
 }
 
 const numberFormatter = new Intl.NumberFormat("en-US");
-const DRAWER_MARGIN = 24;
-const DRAWER_TOP_MARGIN = 72;
-const DRAWER_DEFAULT_WIDTH = 640;
-const DRAWER_DEFAULT_HEIGHT = 660;
-const DRAWER_MIN_WIDTH = 420;
-const DRAWER_MIN_HEIGHT = 360;
 const INDICATOR_DASHBOARD_CAPTURE_SECTIONS = [
   "critical_signals",
   "monitoring_charts",
@@ -395,7 +359,6 @@ async function captureIndicatorDashboardSnapshot(
     );
   }
 }
-
 function inlineSnapshotStyles(source: Element, target: Element) {
   if (source instanceof HTMLElement && target instanceof HTMLElement) {
     const computedStyle = window.getComputedStyle(source);
@@ -619,21 +582,6 @@ export function IndicatorCenterWorkspace() {
       title: section.chart?.title ?? section.title,
     })),
   ];
-  const selectedIndicatorCard =
-    selectedIndicatorCenterContext
-      ? cards.find(
-          (card) =>
-            card.indicator.indicatorId ===
-            selectedIndicatorCenterContext.indicatorId,
-        ) ?? null
-      : null;
-  const selectedDrilldownSection = selectedIndicatorCenterContext
-    ? getDrilldownById(
-        allDrilldownSections,
-        selectedIndicatorCenterContext.groupId,
-      )
-    : null;
-
   async function saveSnapshot() {
     if (snapshotSaving) {
       return;
@@ -783,20 +731,29 @@ export function IndicatorCenterWorkspace() {
       if (nextTab) {
         setActiveReadinessTab(nextTab);
       }
+    },
+    [],
+  );
 
-      const detailIndicator = getAskCfsActionIndicator(actions.open_detail?.id);
-      if (detailIndicator) {
-        setSelectedIndicatorCenterContext(detailIndicator);
+  const focusIndicator = useCallback(
+    (groupId: IndicatorCenterGroupId, label = "") => {
+      setSelectedIndicatorCenterContext(getIndicatorByGroup(groupId));
+      const actions: CfsAiDashboardActions = {
+        focus_domain: focusDomainForGroup(groupId, label),
+        highlight_kpis: [kpiIdForGroup(groupId, label)],
+        recommended_layers: relatedLayersForGroup(groupId, label),
+      };
+      setAskCfsActions(actions);
+      const nextTab = mapAskCfsFocusToTab(actions.focus_domain);
+      if (nextTab) {
+        setActiveReadinessTab(nextTab);
       }
     },
     [setSelectedIndicatorCenterContext],
   );
 
   const explainSignal = useCallback(
-    (
-      signal: IndicatorExplainSignal,
-      drawerContext = getIndicatorForExplainSignal(signal),
-    ) => {
+    (signal: IndicatorExplainSignal) => {
       const selectedSignal: CfsAiSelectedSignal = {
         domain: signal.domain,
         evidence: signal.evidence?.filter(Boolean).slice(0, 6) ?? [],
@@ -806,7 +763,7 @@ export function IndicatorCenterWorkspace() {
         title: signal.title,
       };
 
-      setSelectedIndicatorCenterContext(drawerContext);
+      focusIndicator(groupIdForExplainSignal(signal), signal.title);
       setAskCfsExternalRequest({
         request: {
           query: `Explain the ${signal.title} signal. Include evidence, why it matters, caveats, and what to inspect next.`,
@@ -815,7 +772,7 @@ export function IndicatorCenterWorkspace() {
         requestId: Date.now(),
       });
     },
-    [setSelectedIndicatorCenterContext],
+    [focusIndicator],
   );
 
   return (
@@ -881,16 +838,31 @@ export function IndicatorCenterWorkspace() {
                 highlighted={isAskCfsKpiHighlighted(signal, askCfsActions)}
                 key={signal.label}
                 onExplain={() => explainSignal(explainSignalFromExecutiveSignal(signal))}
-                onInspect={() =>
-                  setSelectedIndicatorCenterContext(
-                    getIndicatorByGroup(signal.groupId),
-                  )
-                }
+                onInspect={() => focusIndicator(signal.groupId, signal.label)}
                 signal={signal}
               />
             ))}
           </div>
         </section>
+
+        {shouldShowGroupForReadinessTab("development-activity", activeReadinessTab) ? (
+          <PermitIntelligencePanel
+            detail={indicatorIntelligence?.development_activity_detail ?? null}
+            onExplain={() =>
+              explainSignal({
+                domain: "development_activity",
+                evidence: permitEvidenceForDetail(
+                  indicatorIntelligence?.development_activity_detail,
+                ),
+                id: "observed_development_activity",
+                relatedLayers: ["Development Hotspots"],
+                statusBand: "monitor",
+                title: "Observed Development Activity",
+              })
+            }
+            onInspect={() => focusIndicator("development-activity")}
+          />
+        ) : null}
 
         <section data-cfs-snapshot-section="monitoring_charts">
           <MissionSectionHeader
@@ -934,16 +906,12 @@ export function IndicatorCenterWorkspace() {
                 feature
                   ? explainSignalFromSchoolPressureFeature(feature)
                   : explainSignalFromIndicatorContext(schoolPressureIndicator),
-                feature
-                  ? buildSchoolPressureFeatureContext(feature)
-                  : schoolPressureIndicator,
               )
             }
             onInspect={(feature) =>
-              setSelectedIndicatorCenterContext(
-                feature
-                  ? buildSchoolPressureFeatureContext(feature)
-                  : schoolPressureIndicator,
+              focusIndicator(
+                "school-context",
+                feature?.properties.school_name ?? schoolPressureIndicator.name,
               )
             }
             state={schoolPressureLayer}
@@ -970,13 +938,19 @@ export function IndicatorCenterWorkspace() {
           {visibleAttentionQueue.map((row) => (
             <AttentionRow
               key={`${row.indicator.indicatorId}-${row.indicatorName}-${row.currentEvidence}`}
-              onExplain={() => explainSignal(explainSignalFromAttentionRow(row), row.indicator)}
-              onInspect={() => setSelectedIndicatorCenterContext(row.indicator)}
+              onExplain={() => explainSignal(explainSignalFromAttentionRow(row))}
+              onInspect={() => focusIndicator(row.indicator.groupId, row.indicatorName)}
               row={row}
             />
           ))}
         </div>
       </section>
+
+      <ConstraintReviewPanel
+        onExplain={(row) => explainSignal(explainSignalFromDomainReadinessRow(row))}
+        onInspect={(row) => focusIndicator(row.groupId, row.domain)}
+        rows={visibleDomainReadinessRows}
+      />
 
       <section className="mt-4">
         <MissionSectionHeader
@@ -989,12 +963,9 @@ export function IndicatorCenterWorkspace() {
           onExplain={(row) =>
             explainSignal(
               explainSignalFromDomainReadinessRow(row),
-              getIndicatorByGroup(row.groupId),
             )
           }
-          onInspect={(groupId) =>
-            setSelectedIndicatorCenterContext(getIndicatorByGroup(groupId))
-          }
+          onInspect={(groupId) => focusIndicator(groupId)}
           rows={visibleDomainReadinessRows}
         />
       </section>
@@ -1007,9 +978,7 @@ export function IndicatorCenterWorkspace() {
           value={`${indicatorCenterMissingDataItems.length} requests`}
         />
         <DataStillNeededStrip
-          onInspect={() =>
-            setSelectedIndicatorCenterContext(getIndicatorByGroup("data-gaps"))
-          }
+          onInspect={() => focusIndicator("data-gaps")}
         />
       </section>
 
@@ -1055,25 +1024,6 @@ export function IndicatorCenterWorkspace() {
         <HowIndicatorsWorkPanel onOpenMethodology={openMethodology} />
       ) : null}
 
-      {selectedIndicatorCenterContext ? (
-        <IndicatorDetailDrawer
-          currentValue={selectedIndicatorCard?.value ?? "Not available"}
-          indicator={selectedIndicatorCenterContext}
-          onClose={() => setSelectedIndicatorCenterContext(null)}
-          onExplain={() =>
-            explainSignal(
-              explainSignalFromIndicatorContext(selectedIndicatorCenterContext),
-              selectedIndicatorCenterContext,
-            )
-          }
-          onIncludeInSnapshot={saveSnapshot}
-          onOpenMethodology={openMethodology}
-          schoolCounts={schoolCounts}
-          schoolSummary={schoolSummary}
-          secondaryValue={selectedIndicatorCard?.secondaryValue}
-          section={selectedDrilldownSection}
-        />
-      ) : null}
     </div>
   );
 }
@@ -1316,7 +1266,7 @@ function buildExecutiveSignalCardsFromIntelligence(
     subvalue:
       signal.trend_label ??
       signal.evidence[0] ??
-      "Evidence available in detail drawer",
+      "Evidence available in Indicator Center",
     tone: toneForStatusBand(signal.status_band),
     value: formatSignalValue(signal),
   }));
@@ -2055,10 +2005,6 @@ function explainSignalFromSchoolPressureFeature(
   };
 }
 
-function getIndicatorForExplainSignal(signal: IndicatorExplainSignal) {
-  return getIndicatorByGroup(groupIdForExplainSignal(signal));
-}
-
 function groupIdForExplainSignal(signal: IndicatorExplainSignal): IndicatorCenterGroupId {
   const domain = signal.domain.toLowerCase();
   if (domain.includes("school")) return "school-context";
@@ -2120,33 +2066,26 @@ function relatedLayersForGroup(groupId: IndicatorCenterGroupId, label = "") {
   return layers[groupId] ?? ["Methodology"];
 }
 
-function getAskCfsActionIndicator(id: string | undefined) {
-  const groupMap: Record<string, IndicatorCenterGroupId> = {
-    data_readiness: "data-gaps",
-    "domain-data-readiness": "data-gaps",
-    "domain-development-activity": "development-activity",
-    "domain-floodplain-review": "flood-review",
-    "domain-model-research": "model-research",
-    "domain-schools": "school-context",
-    "domain-transportation": "utility-infrastructure",
-    "domain-utilities": "utility-infrastructure",
-    "domain-zoning-land-use": "data-gaps",
-    floodplain_review: "flood-review",
-    model_lab: "model-research",
-    model_research_status: "model-research",
-    observed_development_activity: "development-activity",
-    school_pressure: "school-context",
-    transportation_context: "utility-infrastructure",
-    utility_readiness: "utility-infrastructure",
+function focusDomainForGroup(
+  groupId: IndicatorCenterGroupId,
+  label = "",
+): CfsAiDashboardActions["focus_domain"] {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("transport")) return "transportation";
+  if (normalized.includes("utilit")) return "utilities";
+  if (normalized.includes("zoning")) return "zoning";
+  const domains: Record<
+    IndicatorCenterGroupId,
+    NonNullable<CfsAiDashboardActions["focus_domain"]>
+  > = {
+    "data-gaps": "data_readiness",
+    "development-activity": "permits",
+    "flood-review": "flood",
+    "model-research": "model_lab",
+    "school-context": "schools",
+    "utility-infrastructure": "utilities",
   };
-  const groupId = id ? groupMap[id] : null;
-  if (groupId) {
-    return getIndicatorByGroup(groupId);
-  }
-  if (id?.startsWith("school-pressure-")) {
-    return getIndicatorByGroup("school-context");
-  }
-  return null;
+  return domains[groupId];
 }
 
 function isAskCfsKpiHighlighted(
@@ -2562,6 +2501,165 @@ function MissionSectionHeader({
   );
 }
 
+function PermitIntelligencePanel({
+  detail,
+  onExplain,
+  onInspect,
+}: {
+  detail: IndicatorIntelligenceResponse["development_activity_detail"] | null;
+  onExplain: () => void;
+  onInspect: () => void;
+}) {
+  const yearly = (detail?.yearly_counts ?? []).slice(-8);
+  const latestChange =
+    detail?.delta === null || detail?.delta === undefined
+      ? "Trend change unavailable"
+      : `${detail.delta >= 0 ? "+" : ""}${formatCount(detail.delta)} permits`;
+
+  return (
+    <section className="rounded-xl border border-[#68d8ff]/18 bg-black/24 p-4">
+      <MissionSectionHeader
+        eyebrow="Permit Intelligence Panel"
+        icon={<TrendingUp className="h-4 w-4" />}
+        title="Observed Development Activity"
+        value={detail ? `${formatCount(detail.total_records)} permits` : "Loading"}
+      />
+      <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+        <PermitMetric label="Observed permit records" value={formatNullableCount(detail?.total_records)} />
+        <PermitMetric label="Development-active parcels" value={formatNullableCount(detail?.active_parcels)} />
+        <PermitMetric label="Latest year change" value={latestChange} />
+        <PermitMetric label="Strongest year" value={formatYearPoint(detail?.strongest_year)} />
+      </div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-4">
+        <MiniChartCard
+          caveat="Observed permit records by year; not a forecast."
+          data={yearly.map((row) => ({ label: String(row.year), value: row.count }))}
+          emptyLabel="Yearly permit trend is unavailable."
+          title="Yearly Permit Trend"
+        />
+        <MiniChartCard
+          caveat="Permit categories can include administrative or noisy source records."
+          data={bucketRowsToChartData(detail?.top_permit_types)}
+          emptyLabel="Permit type breakdown is unavailable."
+          title="Permit Type Breakdown"
+        />
+        <MiniChartCard
+          caveat="Segments are observed permit activity categories."
+          data={bucketRowsToChartData(detail?.top_segments)}
+          emptyLabel="Permit segment breakdown is unavailable."
+          title="Permit Segment Breakdown"
+        />
+        <MiniChartCard
+          caveat={`${detail?.top_geography_type ?? "Geography"} bucket from normalized CFS context.`}
+          data={bucketRowsToChartData(detail?.top_geographies)}
+          emptyLabel="Top geography breakdown is unavailable."
+          title="Top Jurisdictions / Geographies"
+        />
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-slate-300">
+        <span>
+          Review workload signal. Compare active permit areas with schools,
+          floodplain review, utility readiness, transportation, and zoning context.
+        </span>
+        <span className="flex flex-wrap gap-1.5">
+          <button
+            className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#8fe7ff] transition hover:border-[#68d8ff]/40"
+            onClick={onInspect}
+            type="button"
+          >
+            Focus permits
+          </button>
+          <button
+            className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-200 transition hover:border-[#68d8ff]/35"
+            onClick={onExplain}
+            type="button"
+          >
+            Explain signal
+          </button>
+        </span>
+      </div>
+    </section>
+  );
+}
+
+function PermitMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-2 text-xl font-semibold text-white">{value}</p>
+    </div>
+  );
+}
+
+function ConstraintReviewPanel({
+  onExplain,
+  onInspect,
+  rows,
+}: {
+  onExplain: (row: DomainReadinessRow) => void;
+  onInspect: (row: DomainReadinessRow) => void;
+  rows: DomainReadinessRow[];
+}) {
+  const reviewRows = rows.filter(
+    (row) => !["development-activity", "school-context"].includes(row.groupId),
+  );
+
+  return (
+    <section className="mt-4">
+      <MissionSectionHeader
+        eyebrow="Constraint Review Panel"
+        icon={<ShieldAlert className="h-4 w-4" />}
+        title="Constraints, Infrastructure, and Governance"
+        value={`${reviewRows.length} domains`}
+      />
+      <div className="mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-4">
+        {reviewRows.map((row) => (
+          <article
+            className="rounded-xl border border-white/10 bg-black/24 p-3"
+            key={`${row.domain}-${row.groupId}`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-white">{row.domain}</p>
+                <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+                  {row.coverage}
+                </p>
+              </div>
+              <span className="rounded border border-[#f6d98e]/20 bg-[#f6d98e]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#f6d98e]">
+                {row.dataStatus}
+              </span>
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-300">
+              {row.currentUse}
+            </p>
+            <p className="mt-2 text-[11px] leading-4 text-slate-500">
+              {row.caveat}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <button
+                className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#8fe7ff]"
+                onClick={() => onInspect(row)}
+                type="button"
+              >
+                Focus
+              </button>
+              <button
+                className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-200"
+                onClick={() => onExplain(row)}
+                type="button"
+              >
+                Explain signal
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function DomainReadinessMatrix({
   onExplain,
   onInspect,
@@ -2685,732 +2783,6 @@ function HowIndicatorsWorkPanel({
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function IndicatorDetailDrawer({
-  currentValue,
-  indicator,
-  onClose,
-  onExplain,
-  onIncludeInSnapshot,
-  onOpenMethodology,
-  schoolCounts,
-  schoolSummary,
-  secondaryValue,
-  section,
-}: {
-  currentValue: string;
-  indicator: IndicatorCenterContext;
-  onClose: () => void;
-  onExplain: () => void;
-  onIncludeInSnapshot: () => void | Promise<void>;
-  onOpenMethodology: () => void;
-  schoolCounts: SchoolUtilizationCounts;
-  schoolSummary: ReturnType<typeof useSchoolConstraintSummary>;
-  secondaryValue?: string;
-  section: DrilldownSectionModel | null;
-}) {
-  const [geometry, setGeometry] = useState<DrawerGeometry>(() =>
-    getDefaultDrawerGeometry(),
-  );
-  const [interaction, setInteraction] = useState<DrawerInteraction | null>(
-    null,
-  );
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setGeometry((currentGeometry) =>
-        clampDrawerGeometry(currentGeometry),
-      );
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    if (!interaction) {
-      return;
-    }
-
-    const handlePointerMove = (event: globalThis.PointerEvent) => {
-      event.preventDefault();
-      const deltaX = event.clientX - interaction.startX;
-      const deltaY = event.clientY - interaction.startY;
-
-      if (interaction.type === "drag") {
-        setGeometry(
-          clampDrawerGeometry({
-            height: interaction.startHeight,
-            left: interaction.startLeft + deltaX,
-            top: interaction.startTop + deltaY,
-            width: interaction.startWidth,
-          }),
-        );
-        return;
-      }
-
-      setGeometry(resizeDrawerGeometry(interaction, deltaX, deltaY));
-    };
-
-    const handlePointerUp = () => setInteraction(null);
-
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp, { once: true });
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", handlePointerUp);
-    };
-  }, [interaction]);
-
-  const startDrag = useCallback(
-    (event: PointerEvent<HTMLElement>) => {
-      const target = event.target;
-
-      if (
-        target instanceof HTMLElement &&
-        target.closest("button,a,input,select,textarea")
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-      setInteraction({
-        startHeight: geometry.height,
-        startLeft: geometry.left,
-        startTop: geometry.top,
-        startWidth: geometry.width,
-        startX: event.clientX,
-        startY: event.clientY,
-        type: "drag",
-      });
-    },
-    [geometry],
-  );
-
-  const startResize = useCallback(
-    (event: PointerEvent<HTMLDivElement>, resizeHandle: DrawerResizeHandle) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setInteraction({
-        resizeHandle,
-        startHeight: geometry.height,
-        startLeft: geometry.left,
-        startTop: geometry.top,
-        startWidth: geometry.width,
-        startX: event.clientX,
-        startY: event.clientY,
-        type: "resize",
-      });
-    },
-    [geometry],
-  );
-
-  const resetDrawer = () => {
-    setGeometry(getDefaultDrawerGeometry());
-  };
-
-  const drawerStyle: CSSProperties = {
-    height: geometry.height,
-    left: geometry.left,
-    top: geometry.top,
-    width: geometry.width,
-  };
-
-  return (
-    <aside
-      aria-label="Indicator Detail Drawer"
-      className="cfs-drawer-command fixed z-50 flex max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-xl backdrop-blur-xl"
-      role="dialog"
-      style={drawerStyle}
-    >
-      <div
-        className={cn(
-          "cursor-move select-none border-b border-white/10 p-4",
-          interaction?.type === "drag" && "bg-white/[0.035]",
-        )}
-        onPointerDown={startDrag}
-        title="Drag to move drawer"
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-2">
-            <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[#68d8ff]/18 bg-[#68d8ff]/10 text-[#8fe7ff]">
-              <Move className="h-3.5 w-3.5" />
-            </span>
-            <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
-              Indicator Detail Drawer
-            </p>
-            <h3 className="mt-1 text-lg font-semibold text-white">
-              {indicator.title ?? indicator.name}
-            </h3>
-            <p className="mt-1 text-xs leading-5 text-slate-400">
-              {indicator.category}
-            </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-1">
-          <button
-            aria-label="Reset drawer position"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
-            onClick={resetDrawer}
-            title="Reset drawer position"
-            type="button"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </button>
-          <button
-            aria-label="Close details"
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
-            onClick={onClose}
-            title="Close details"
-            type="button"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          </div>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <StatusPill label={indicator.status} tone="cyan" />
-          <StatusPill
-            label={indicator.officialDataNeeded ? "Official data needed" : "Existing CFS context"}
-            tone={indicator.officialDataNeeded ? "gold" : "slate"}
-          />
-          <StatusPill
-            label={indicator.snapshotIncluded ? "Snapshot-ready" : "Optional snapshot context"}
-            tone="slate"
-          />
-          <button
-            className="rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#b7f0ff] transition hover:border-[#68d8ff]/45 hover:bg-[#68d8ff]/15"
-            onClick={onExplain}
-            type="button"
-          >
-            Explain signal
-          </button>
-        </div>
-      </div>
-
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4">
-        <div className="grid gap-3">
-          <DetailFact label="Current value / count" value={currentValue} />
-          {secondaryValue ? (
-            <DetailFact label="Supporting evidence" value={secondaryValue} />
-          ) : null}
-          <IndicatorDeepDive
-            indicator={indicator}
-            schoolCounts={schoolCounts}
-            schoolSummary={schoolSummary}
-            section={section}
-          />
-        </div>
-      </div>
-
-      <div className="border-t border-white/10 p-4">
-        <div className="grid gap-2 sm:grid-cols-2">
-          <button
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-[#55d38f]/25 bg-[#55d38f]/10 px-3 py-2 text-xs font-semibold text-[#a8f3c4] transition hover:border-[#55d38f]/45 hover:bg-[#55d38f]/15"
-            onClick={() => {
-              void onIncludeInSnapshot();
-            }}
-            type="button"
-          >
-            <Save className="h-3.5 w-3.5" />
-            Include in Snapshot
-          </button>
-          <button
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:border-[#68d8ff]/45 hover:bg-[#68d8ff]/15"
-            onClick={onOpenMethodology}
-            type="button"
-          >
-            <BookOpen className="h-3.5 w-3.5" />
-            Open Methodology
-          </button>
-        </div>
-        <p className="mt-2 text-[11px] leading-4 text-slate-500">
-          Detail drawer content is dashboard context only. It is not an
-          official scoring system.
-        </p>
-      </div>
-      <DrawerResizeHandleElement
-        className="left-0 top-3 h-[calc(100%-1.5rem)] w-2 cursor-ew-resize"
-        label="Resize details drawer from left edge"
-        onPointerDown={(event) => startResize(event, "left")}
-      />
-      <DrawerResizeHandleElement
-        className="right-0 top-3 h-[calc(100%-1.5rem)] w-2 cursor-ew-resize"
-        label="Resize details drawer from right edge"
-        onPointerDown={(event) => startResize(event, "right")}
-      />
-      <DrawerResizeHandleElement
-        className="bottom-0 left-5 h-2 w-[calc(100%-2.5rem)] cursor-ns-resize"
-        label="Resize details drawer from bottom edge"
-        onPointerDown={(event) => startResize(event, "bottom")}
-      />
-      <DrawerResizeHandleElement
-        className="bottom-0 left-0 h-5 w-5 cursor-nesw-resize rounded-bl-lg border-b-2 border-l-2 border-[#68d8ff]/45"
-        label="Resize details drawer from bottom left corner"
-        onPointerDown={(event) => startResize(event, "bottom-left")}
-      />
-      <DrawerResizeHandleElement
-        className="bottom-0 right-0 h-5 w-5 cursor-nwse-resize rounded-br-lg border-b-2 border-r-2 border-[#68d8ff]/45"
-        label="Resize details drawer from bottom right corner"
-        onPointerDown={(event) => startResize(event, "bottom-right")}
-      />
-    </aside>
-  );
-}
-
-function DrawerResizeHandleElement({
-  className,
-  label,
-  onPointerDown,
-}: {
-  className: string;
-  label: string;
-  onPointerDown: (event: PointerEvent<HTMLDivElement>) => void;
-}) {
-  return (
-    <div
-      aria-label={label}
-      className={cn(
-        "absolute opacity-70 transition hover:bg-[#68d8ff]/10 hover:opacity-100",
-        className,
-      )}
-      onPointerDown={onPointerDown}
-      role="separator"
-      title={label}
-    />
-  );
-}
-
-function IndicatorDeepDive({
-  indicator,
-  schoolCounts,
-  schoolSummary,
-  section,
-}: {
-  indicator: IndicatorCenterContext;
-  schoolCounts: SchoolUtilizationCounts;
-  schoolSummary: ReturnType<typeof useSchoolConstraintSummary>;
-  section: DrilldownSectionModel | null;
-}) {
-  const stats = section?.stats ?? [];
-
-  switch (indicator.groupId) {
-    case "school-context":
-      const overVeryHighRows = sortSchoolSeedRows(
-        schoolSummary.utilizationSeedRows.filter((row) =>
-          ["over_capacity", "severely_over_capacity", "very_high"].some(
-            (className) => row.utilizationClass.includes(className),
-          ),
-        ),
-      );
-      const approachingRows = sortSchoolSeedRows(
-        schoolSummary.utilizationSeedRows.filter((row) =>
-          row.utilizationClass.includes("approaching"),
-        ),
-      );
-
-      return (
-        <div className="grid gap-3">
-          <DeepDiveBlock title="School capacity summary">
-            <div className="grid gap-2 sm:grid-cols-2">
-              <DetailFact
-                label="Total preliminary records"
-                value={schoolCounts.available ? formatCount(schoolCounts.total) : "Needs official data"}
-              />
-              <DetailFact
-                label="Above capacity / very high"
-                value={
-                  schoolCounts.available
-                    ? `${formatCount(schoolCounts.over)} above capacity / ${formatCount(
-                        schoolCounts.severe,
-                      )} very high`
-                    : "Needs official data"
-                }
-              />
-              <DetailFact
-                label="Under / approaching"
-                value={
-                  schoolCounts.available
-                    ? `${formatCount(schoolCounts.under)} under / ${formatCount(
-                        schoolCounts.approaching,
-                      )} approaching`
-                    : "Needs official data"
-                }
-              />
-              <DetailFact
-                label="Unmatched references"
-                value={
-                  schoolCounts.available
-                    ? formatCount(schoolCounts.unmatched)
-                    : "Not available"
-                }
-              />
-            </div>
-          </DeepDiveBlock>
-          {section?.chart ? (
-            <MiniChartCard
-              caveat={section.chart.caveat}
-              data={section.chart.data}
-              emptyLabel={section.chart.emptyLabel}
-              title={section.chart.title}
-            />
-          ) : null}
-          <DeepDiveBlock title="Above capacity / very high list">
-            {overVeryHighRows.length ? (
-              <SchoolSeedTable rows={overVeryHighRows.slice(0, 12)} />
-            ) : (
-              <p className="rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.055] px-3 py-2 text-xs leading-5 text-[#f6d98e]">
-                School-level list is not available from the current source.
-                Official school capacity/enrollment data is needed.
-              </p>
-            )}
-          </DeepDiveBlock>
-          <DeepDiveBlock title="Approaching capacity list">
-            {approachingRows.length ? (
-              <SchoolSeedTable rows={approachingRows.slice(0, 8)} />
-            ) : (
-              <p className="text-xs text-slate-400">
-                Not available from current source.
-              </p>
-            )}
-          </DeepDiveBlock>
-          {schoolSummary.unmatchedPresentationSeedRows.length ? (
-            <DeepDiveBlock title="Schools needing verification">
-              <div className="grid gap-1.5">
-                {schoolSummary.unmatchedPresentationSeedRows
-                  .slice(0, 8)
-                  .map((row) => (
-                    <div
-                      className="flex items-center justify-between gap-3 rounded border border-white/10 bg-white/[0.025] px-2 py-1.5 text-xs"
-                      key={`${row.label}-${row.matchLabel}`}
-                    >
-                      <span className="min-w-0 text-slate-300">
-                        {row.label}
-                      </span>
-                      <span className="shrink-0 text-[10px] uppercase text-slate-500">
-                        {row.matchLabel}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </DeepDiveBlock>
-          ) : null}
-          <ChecklistBlock
-            title="Official fields needed"
-            items={[
-              "school name",
-              "school id",
-              "school level",
-              "enrollment",
-              "functional capacity",
-              "utilization percent",
-              "source year",
-              "projection year if available",
-              "attendance zone id if available",
-            ]}
-          />
-          <DetailFact
-            label="Recommended action"
-            value="Request official enrollment and functional capacity by school."
-          />
-        </div>
-      );
-    case "development-activity":
-      return (
-        <div className="grid gap-3">
-          <GenericDeepDive
-            caveat="Observed activity only. Not prediction."
-            chart={section?.chart}
-            fields={[
-              ...stats,
-              {
-                label: "Recommended action",
-                value: "Review permit records and new construction context.",
-              },
-            ]}
-            title="Development activity drilldown"
-          />
-          {section?.additionalCharts?.map((chart) => (
-            <MiniChartCard
-              caveat={chart.caveat}
-              data={chart.data}
-              emptyLabel={chart.emptyLabel}
-              key={chart.title}
-              title={chart.title}
-            />
-          ))}
-        </div>
-      );
-    case "flood-review":
-      return (
-          <GenericDeepDive
-            caveat="Based on FEMA floodplain data."
-            chart={section?.chart}
-            fields={[
-              ...stats,
-              {
-                label: "Recommended action",
-                value:
-                "Confirm Floodway, Special Flood Hazard Area, and local floodplain requirements during formal review.",
-              },
-            ]}
-          title="Floodplain Review details"
-        />
-      );
-    case "utility-infrastructure":
-      return (
-        <div className="grid gap-3">
-          <GenericDeepDive
-            caveat="Utility proxy does not confirm available capacity."
-            fields={stats}
-            title="Utility / infrastructure drilldown"
-          />
-          <ChecklistBlock
-            title="WSACC request fields"
-            items={[
-              "service area geometry",
-              "available capacity",
-              "committed capacity",
-              "service / pressure zone",
-              "sewer basin",
-              "pump station capacity if available",
-              "planned extensions",
-              "update date",
-            ]}
-          />
-        </div>
-      );
-    case "model-research":
-      return (
-        <div className="grid gap-3">
-          <GenericDeepDive
-            caveat="Internal only. No exact parcel probabilities."
-            fields={[
-              ...stats,
-              { label: "Feature rows", value: developmentModelLabSummary.featureRows },
-              { label: "Target", value: developmentModelLabSummary.target },
-            ]}
-            title="Model research drilldown"
-          />
-          <details className="rounded-md border border-white/10 bg-white/[0.025] p-3">
-            <summary className="cursor-pointer text-xs font-semibold text-white">
-              Model QA Details
-            </summary>
-            <p className="mt-2 text-xs leading-5 text-slate-400">
-              Aggregate QA metrics remain explanatory context only. They are
-              not parcel-level scores and are available through Model Lab
-              explanations when needed.
-            </p>
-          </details>
-        </div>
-      );
-    case "data-gaps":
-      return (
-        <div className="grid gap-3">
-          <DeepDiveBlock title="Priority missing dataset table">
-            <div className="overflow-hidden rounded-md border border-white/10">
-              {indicatorCenterMissingDataItems.map((item) => (
-                <div
-                  className="grid gap-1 border-b border-white/10 px-3 py-2 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_8rem_8rem]"
-                  key={item}
-                >
-                  <span className="text-xs font-semibold text-white">
-                    {item}
-                  </span>
-                  <span className="text-[11px] text-[#f6d98e]">
-                    Needs official data
-                  </span>
-                  <span className="text-[11px] text-slate-400">
-                    REST/GIS/table
-                  </span>
-                </div>
-              ))}
-            </div>
-          </DeepDiveBlock>
-          <DetailFact
-            label="What it unlocks"
-            value="Stronger operational conclusions, better validation, and less manual caveat handling."
-          />
-          <DetailFact
-            label="Suggested request action"
-            value="Request authoritative source tables or GIS services; PDF-only files are useful for reference but weaker for automated integration."
-          />
-        </div>
-      );
-    default:
-      return (
-        <GenericDeepDive
-          caveat={indicator.caveat}
-          fields={[
-            { label: "Why it matters", value: indicator.whatItMeans },
-            { label: "Data source basis", value: indicator.source },
-            { label: "Recommended follow-up", value: indicator.recommendedFollowUp },
-          ]}
-          title={indicator.title ?? indicator.name}
-        />
-      );
-  }
-}
-
-function GenericDeepDive({
-  caveat,
-  chart,
-  fields,
-  title,
-}: {
-  caveat: string;
-  chart?: DrilldownSectionModel["chart"];
-  fields: DrilldownStat[];
-  title: string;
-}) {
-  return (
-    <div className="grid gap-3">
-      <DeepDiveBlock title={title}>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {fields.map((field) => (
-            <DetailFact
-              key={`${title}-${field.label}`}
-              label={field.label}
-              value={field.value}
-            />
-          ))}
-        </div>
-      </DeepDiveBlock>
-      {chart ? (
-        <MiniChartCard
-          caveat={chart.caveat}
-          data={chart.data}
-          emptyLabel={chart.emptyLabel}
-          title={chart.title}
-        />
-      ) : null}
-      <DetailFact label="Caveat" value={caveat} />
-    </div>
-  );
-}
-
-function SchoolSeedTable({
-  rows,
-}: {
-  rows: ReturnType<typeof useSchoolConstraintSummary>["utilizationSeedRows"];
-}) {
-  return (
-    <div className="grid min-w-0 gap-2">
-      {rows.map((row) => (
-        <article
-          className="min-w-0 rounded-md border border-white/10 bg-white/[0.025] p-2.5"
-          key={`${row.schoolName}-${row.schoolLevel}-${row.utilizationPctLabel}`}
-        >
-          <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white" title={row.schoolName}>
-                {row.schoolName}
-              </p>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                {row.schoolLevel}
-              </p>
-            </div>
-            <span className="rounded border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-xs font-semibold text-[#f6d98e]">
-              {row.utilizationPctLabel}
-            </span>
-          </div>
-          <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-            <CompactField label="Class" value={row.utilizationClassLabel} />
-            <CompactField label="Utilization %" value={row.utilizationPctLabel} />
-            <CompactField
-              label="Enrollment"
-              value="Not available from current source"
-            />
-            <CompactField
-              label="Capacity"
-              value="Not available from current source"
-            />
-            <CompactField
-              label="Verification"
-              value={
-                row.needsVerification
-                  ? "Needs verification"
-                  : "Context available"
-              }
-            />
-            <CompactField label="Match status" value={row.matchStatus} />
-          </div>
-        </article>
-      ))}
-    </div>
-  );
-}
-
-function CompactField({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded border border-white/10 bg-black/16 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-600">
-        {label}
-      </p>
-      <p className="mt-0.5 truncate text-[11px] text-slate-300" title={value}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function DeepDiveBlock({
-  children,
-  title,
-}: {
-  children: ReactNode;
-  title: string;
-}) {
-  return (
-    <section className="rounded-md border border-white/10 bg-white/[0.025] p-3">
-      <p className="mb-2 text-xs font-semibold text-white">{title}</p>
-      {children}
-    </section>
-  );
-}
-
-function ChecklistBlock({ items, title }: { items: string[]; title: string }) {
-  return (
-    <DeepDiveBlock title={title}>
-      <div className="grid gap-1.5">
-        {items.map((item) => (
-          <div
-            className="flex items-center gap-2 text-xs text-slate-300"
-            key={item}
-          >
-            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[#55d38f]" />
-            <span>{item}</span>
-          </div>
-        ))}
-      </div>
-    </DeepDiveBlock>
-  );
-}
-
-function DetailFact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0 rounded-md border border-white/10 bg-white/[0.035] px-3 py-2">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-        {label}
-      </p>
-      <p className="mt-1 break-words text-xs leading-5 text-slate-200">
-        {value}
-      </p>
     </div>
   );
 }
@@ -3880,45 +3252,6 @@ function buildSchoolPressureIndicatorContext(
   };
 }
 
-function buildSchoolPressureFeatureContext(
-  feature: SchoolPressureFeature,
-): IndicatorCenterContext {
-  const properties = feature.properties;
-  return {
-    ...buildSchoolPressureIndicatorContext({
-      areas_analyzed: 1,
-      areas_with_recent_permits:
-        (properties.permit_count_recent ?? 0) > 0 ? 1 : 0,
-      areas_with_utilization:
-        typeof properties.utilization_pct === "number" ? 1 : 0,
-      data_needed_count:
-        properties.school_pressure_watch_band === "data needed" ? 1 : 0,
-      elevated_review_count:
-        properties.school_pressure_watch_band === "elevated review" ? 1 : 0,
-      recent_residential_permits_in_watched_areas:
-        properties.residential_permit_count_recent ?? 0,
-    }),
-    indicatorId: `school-pressure-${properties.attendance_area_id ?? properties.school_name ?? "area"}`,
-    name: properties.school_name ?? "Attendance-area development pressure",
-    title: properties.school_name ?? "Attendance-Area Development Pressure",
-    status: properties.school_pressure_watch_band,
-    whatItMeans: [
-      `Watch band: ${properties.school_pressure_watch_band}.`,
-      `Recent permits: ${formatNullableCount(properties.permit_count_recent)}.`,
-      properties.utilization_pct === null
-        ? "Utilization percent is not available from current source."
-        : `Utilization context: ${properties.utilization_pct.toFixed(1)}%.`,
-    ].join(" "),
-  };
-}
-
-function getDrilldownById(
-  sections: DrilldownSectionModel[],
-  id: IndicatorCenterGroupId,
-) {
-  return sections.find((section) => section.id === id) ?? null;
-}
-
 function getDevelopmentMetric(
   developmentStatistics: ReturnType<typeof useDevelopmentStatistics>,
   id: string,
@@ -3961,6 +3294,34 @@ function formatCount(value: number) {
 
 function formatNullableCount(value: number | null | undefined) {
   return typeof value === "number" ? formatCount(value) : "Not available";
+}
+
+function formatYearPoint(value?: { count?: number; year?: number } | null) {
+  return value?.year
+    ? `${value.year} / ${formatNullableCount(value.count)}`
+    : "Not available";
+}
+
+function bucketRowsToChartData(
+  rows?: Array<{ count: number; label: string }> | null,
+): ChartDatum[] {
+  return (rows ?? []).map((row) => ({ label: row.label, value: row.count }));
+}
+
+function permitEvidenceForDetail(
+  detail?: IndicatorIntelligenceResponse["development_activity_detail"] | null,
+) {
+  if (!detail) return ["Permit intelligence detail is loading or unavailable."];
+  return [
+    `${formatCount(detail.total_records)} permit records across ${formatCount(detail.active_parcels)} active parcels.`,
+    detail.delta === null || detail.delta === undefined
+      ? "Recent year change is unavailable."
+      : `Latest change: ${detail.delta >= 0 ? "+" : ""}${formatCount(detail.delta)} permits.`,
+    `Top permit types: ${detail.top_permit_types
+      .slice(0, 3)
+      .map((row) => `${row.label} (${formatCount(row.count)})`)
+      .join(", ") || "not available"}.`,
+  ];
 }
 
 function formatSchoolPressureLevel(value: string | null | undefined) {
@@ -4176,122 +3537,6 @@ function shortAction(action: string) {
 
   return action.length > 42 ? `${action.slice(0, 39)}...` : action;
 }
-
-function getViewportSize() {
-  if (typeof window === "undefined") {
-    return {
-      height: 900,
-      width: 1440,
-    };
-  }
-
-  return {
-    height: window.innerHeight,
-    width: window.innerWidth,
-  };
-}
-
-function getDrawerAvailableSize() {
-  const viewport = getViewportSize();
-  const availableWidth = Math.max(320, viewport.width - DRAWER_MARGIN * 2);
-  const availableHeight = Math.max(
-    320,
-    viewport.height - DRAWER_TOP_MARGIN - DRAWER_MARGIN,
-  );
-
-  return {
-    availableHeight,
-    availableWidth,
-    minHeight: Math.min(DRAWER_MIN_HEIGHT, availableHeight),
-    minWidth: Math.min(DRAWER_MIN_WIDTH, availableWidth),
-    viewport,
-  };
-}
-
-function clampValue(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function clampDrawerGeometry(geometry: DrawerGeometry): DrawerGeometry {
-  const {
-    availableHeight,
-    availableWidth,
-    minHeight,
-    minWidth,
-    viewport,
-  } = getDrawerAvailableSize();
-  const width = clampValue(geometry.width, minWidth, availableWidth);
-  const height = clampValue(geometry.height, minHeight, availableHeight);
-
-  return {
-    height,
-    left: clampValue(
-      geometry.left,
-      DRAWER_MARGIN,
-      Math.max(DRAWER_MARGIN, viewport.width - width - DRAWER_MARGIN),
-    ),
-    top: clampValue(
-      geometry.top,
-      Math.min(DRAWER_TOP_MARGIN, viewport.height - height - DRAWER_MARGIN),
-      Math.max(DRAWER_MARGIN, viewport.height - height - DRAWER_MARGIN),
-    ),
-    width,
-  };
-}
-
-function resizeDrawerGeometry(
-  interaction: DrawerInteraction,
-  deltaX: number,
-  deltaY: number,
-): DrawerGeometry {
-  const handle = interaction.resizeHandle ?? "bottom-right";
-  const startRight = interaction.startLeft + interaction.startWidth;
-  const next: DrawerGeometry = {
-    height: interaction.startHeight,
-    left: interaction.startLeft,
-    top: interaction.startTop,
-    width: interaction.startWidth,
-  };
-
-  if (handle.includes("left")) {
-    const { availableWidth, minWidth } = getDrawerAvailableSize();
-    const width = clampValue(
-      interaction.startWidth - deltaX,
-      minWidth,
-      availableWidth,
-    );
-    next.width = width;
-    next.left = startRight - width;
-  } else if (handle.includes("right")) {
-    next.width = interaction.startWidth + deltaX;
-  }
-
-  if (handle.includes("bottom")) {
-    next.height = interaction.startHeight + deltaY;
-  }
-
-  return clampDrawerGeometry(next);
-}
-
-function getDefaultDrawerGeometry(): DrawerGeometry {
-  const viewport = getViewportSize();
-  const width = Math.min(
-    DRAWER_DEFAULT_WIDTH,
-    viewport.width - DRAWER_MARGIN * 2,
-  );
-  const height = Math.min(
-    DRAWER_DEFAULT_HEIGHT,
-    viewport.height - DRAWER_MARGIN * 2,
-  );
-
-  return clampDrawerGeometry({
-    height,
-    left: viewport.width - width - DRAWER_MARGIN,
-    top: DRAWER_TOP_MARGIN,
-    width,
-  });
-}
-
 function getSignalToneClass(tone: ExecutiveSignalCardModel["tone"]) {
   switch (tone) {
     case "attention":
