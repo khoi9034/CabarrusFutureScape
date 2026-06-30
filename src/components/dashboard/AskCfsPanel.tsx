@@ -125,6 +125,17 @@ export function AskCfsPanel({
         </button>
       </form>
 
+      {isLoading ? (
+        <div className="mt-3 rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs leading-5 text-slate-300">
+          <span className="font-semibold text-[#9be9ff]">
+            Preparing grounded CFS briefing...
+          </span>{" "}
+          {USE_DEMO_DATA
+            ? "Using cached demo intelligence context."
+            : "Using cached intelligence context when available; fast fallback is enabled."}
+        </div>
+      ) : null}
+
       {lastTurn ? (
         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-[#68d8ff]/15 bg-[#68d8ff]/10 px-3 py-2 text-xs text-slate-300">
           <span className="font-semibold text-[#9be9ff]">Follow-up mode</span>

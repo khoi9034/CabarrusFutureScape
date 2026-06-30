@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any, Callable
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.dependencies.database import get_read_only_db
-from app.routers.indicators_router import get_indicator_intelligence
+from app.routers.indicators_router import get_cached_indicator_intelligence
 from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchResponse
 from app.services.ai_search_service import CfsAiSearchService
 
@@ -28,7 +27,7 @@ def search_cfs(
     return CfsAiSearchService(get_settings()).search(request, context)
 
 
-def gather_cfs_ai_context(db: Session) -> CfsAiContext:
+def gather_cfs_ai_context(_db: Session) -> CfsAiContext:
     context: CfsAiContext = {
         "as_of": datetime.now(UTC).isoformat(),
         "caveats": [],
@@ -41,29 +40,13 @@ def gather_cfs_ai_context(db: Session) -> CfsAiContext:
         },
     }
 
-    indicator_intelligence = _safe_context(
-        lambda: get_indicator_intelligence(db=db),
-        "Indicator intelligence signals are not available from the current backend.",
-        context,
-    )
+    indicator_intelligence = get_cached_indicator_intelligence()
+    if indicator_intelligence is None:
+        context["caveats"].append(
+            "Live indicator context is still warming, so CFS used available grounded summary context.",
+        )
     context["indicator_intelligence"] = indicator_intelligence or {}
     context["indicator_summary"] = {}
     context["school_pressure"] = {"features": [], "summary": {}, "total_count": 0}
 
     return context
-
-
-def _safe_context(
-    loader: Callable[[], Any],
-    caveat: str,
-    context: CfsAiContext,
-) -> Any:
-    try:
-        value = loader()
-    except Exception:
-        context.setdefault("caveats", []).append(caveat)
-        return None
-
-    if hasattr(value, "model_dump"):
-        return value.model_dump(mode="json")
-    return value

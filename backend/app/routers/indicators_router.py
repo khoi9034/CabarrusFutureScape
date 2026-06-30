@@ -56,6 +56,14 @@ INTELLIGENCE_CACHE_TTL = timedelta(minutes=5)
 _INTELLIGENCE_CACHE: dict[str, Any] = {"expires_at": None, "payload": None}
 
 
+def get_cached_indicator_intelligence() -> dict[str, Any] | None:
+    cached_payload = _INTELLIGENCE_CACHE.get("payload")
+    expires_at = _INTELLIGENCE_CACHE.get("expires_at")
+    if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached_payload:
+        return cached_payload
+    return None
+
+
 @router.get("/intelligence")
 def get_indicator_intelligence(
     db: Session = Depends(get_read_only_db),
@@ -63,9 +71,8 @@ def get_indicator_intelligence(
     """Return normalized planning intelligence signals for Indicator Center."""
 
     as_of = datetime.now(UTC).isoformat()
-    cached_payload = _INTELLIGENCE_CACHE.get("payload")
-    expires_at = _INTELLIGENCE_CACHE.get("expires_at")
-    if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached_payload:
+    cached_payload = get_cached_indicator_intelligence()
+    if cached_payload:
         return cached_payload
 
     caveats: list[str] = [

@@ -432,3 +432,20 @@ def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
     assert "prediction_probability" not in text
     assert "raw_score" not in text
     assert "will develop" not in text
+
+
+def test_ai_search_endpoint_returns_fast_fallback_when_intelligence_cache_empty(monkeypatch) -> None:
+    app.dependency_overrides[get_read_only_db] = lambda: object()
+    monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: None)
+    try:
+        response = TestClient(app).post(
+            "/ai/search",
+            json={"query": "What are the main permit trends?", "mode": "live"},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["dashboard_actions"]["focus_domain"] == "permits"
+    assert "still warming" in " ".join(body["caveats"]).lower()
