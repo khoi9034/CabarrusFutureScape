@@ -169,8 +169,15 @@ class CfsAiSearchService:
             )
             return sanitize_response(fallback)
 
+        provider_answer = str(provider_payload.get("answer") or "")
+        if not _provider_answer_is_useful(provider_answer, fallback.answer):
+            fallback.caveats.append(
+                "AI provider response was too sparse for the presentation view, so CFS used grounded deterministic analysis.",
+            )
+            return sanitize_response(fallback)
+
         response = CfsAiSearchResponse(
-            answer=str(provider_payload.get("answer") or fallback.answer),
+            answer=provider_answer,
             as_of=fallback.as_of,
             caveats=_string_list(provider_payload.get("caveats")) or fallback.caveats,
             data_mode=request.mode,
@@ -307,21 +314,51 @@ def _permit_answer(
 ) -> CfsAiSearchResponse:
     summary = context.get("indicator_summary", {})
     intelligence = context.get("indicator_intelligence", {})
-    permit_signal = _first_signal(intelligence, "development_activity")
+    detail = intelligence.get("development_activity_detail", {}) if isinstance(intelligence, dict) else {}
     growth = _monitor_metrics(summary, "growth_monitor")
     trend = _chart(summary, "development_permit_trend")
     top_segment = growth.get("top_permit_segment") or "Not available"
-    latest = trend[-1] if trend else {}
-    signal_evidence = permit_signal.get("evidence", []) if permit_signal else []
-    answer = signal_evidence[0] if signal_evidence else None
-    answer = (
-        f"{permit_signal['title']}: {answer}"
-        if permit_signal and answer
-        else (
-            "Observed permit activity is the strongest growth signal in CFS. "
-            f"The top available permit segment is {top_segment}, and the latest trend point "
-            f"shows {_fmt(latest.get('value'))} permits for {latest.get('label', 'the latest available year')}."
-        )
+    top_types = _named_counts(detail.get("top_permit_types") or [])
+    top_segments = _named_counts(detail.get("top_segments") or [])
+    top_geographies = _named_counts(detail.get("top_geographies") or [])
+    answer = _briefing(
+        (
+            "Executive summary",
+            (
+                f"CFS analyzed {_fmt(detail.get('total_records') or growth.get('permit_records'))} observed permit records "
+                f"across {_fmt(detail.get('active_parcels') or growth.get('active_parcels'))} active parcels. "
+                f"{_recent_change_text(detail)} This is a planning review signal, not a prediction."
+            ),
+        ),
+        (
+            "Key findings",
+            _bullets(
+                [
+                    f"Years available: {_range_text(detail.get('years_available') or [row.get('label') for row in trend])}.",
+                    f"Strongest year: {_year_point(detail.get('strongest_year'))}; weakest year: {_year_point(detail.get('weakest_year'))}.",
+                    f"Top permit types: {top_types or 'not available from current fields'}.",
+                    f"Top permit segments: {top_segments or top_segment}.",
+                    f"Top geography bucket ({detail.get('top_geography_type') or 'source geography'}): {top_geographies or 'not available from current fields'}.",
+                ]
+            ),
+        ),
+        (
+            "Planning interpretation",
+            (
+                "Rising or concentrated permit activity points to review workload and coordination needs. "
+                "Compare active areas with school pressure, floodplain review, utility readiness, transportation context, and zoning/land-use context."
+            ),
+        ),
+        (
+            "Inspect next",
+            _bullets(
+                [
+                    "Development Hotspots by permit segment and year range.",
+                    "School Utilization + Permit Pressure for attendance-area overlap.",
+                    "Floodplain Review, Utility Readiness, and Transportation Context around active areas.",
+                ]
+            ),
+        ),
     )
     return _response(
         answer,
@@ -340,8 +377,18 @@ def _permit_answer(
                 "development_permit_trend",
                 "available" if trend else "not_available",
             ),
+            _evidence(
+                "Permit categories and geography",
+                f"Top types: {top_types or 'not available'}; top geographies: {top_geographies or 'not available'}.",
+                "indicator_intelligence.development_activity_detail",
+                "available" if detail else "limited",
+            ),
         ],
-        ["Review Development Hotspots by permit segment and year range."],
+        [
+            "Review Development Hotspots by permit segment and year range.",
+            "Ask: Which school areas overlap recent permit activity?",
+            "Ask: Where is data coverage incomplete for development review?",
+        ],
     )
 
 
@@ -352,10 +399,44 @@ def _school_answer(
 ) -> CfsAiSearchResponse:
     pressure = context.get("school_pressure", {})
     summary = pressure.get("summary", {})
-    answer = (
-        "School review should start where preliminary utilization context and observed permit activity overlap. "
-        f"CFS has {_fmt(summary.get('areas_analyzed'))} attendance areas in the school pressure extract, "
-        f"with {_fmt(summary.get('elevated_review_count'))} elevated review signals."
+    intelligence = context.get("indicator_intelligence", {})
+    detail = intelligence.get("school_pressure_detail", {}) if isinstance(intelligence, dict) else {}
+    answer = _briefing(
+        (
+            "Executive summary",
+            (
+                "Start with attendance areas where preliminary utilization context overlaps observed permit activity. "
+                f"CFS reviewed {_fmt(detail.get('areas_reviewed') or summary.get('areas_analyzed'))} areas and found "
+                f"{_fmt(detail.get('elevated_review_count') or summary.get('elevated_review_count'))} elevated review signals."
+            ),
+        ),
+        (
+            "Key findings",
+            _bullets(
+                [
+                    f"Utilization coverage: {detail.get('utilization_data_coverage') or _fmt(summary.get('areas_with_utilization')) + ' areas include utilization context'}.",
+                    f"Permit pressure overlap: {detail.get('permit_pressure_overlap') or _fmt(summary.get('areas_with_recent_permits')) + ' areas include recent permit activity'}.",
+                    f"Top watch areas: {_school_area_list(detail.get('top_areas') or []) or 'top attendance-area rows are not available in the compact context'}.",
+                ]
+            ),
+        ),
+        (
+            "Planning interpretation",
+            (
+                "This is a preliminary school capacity watch. It helps staff decide where to compare enrollment/capacity, "
+                "approved subdivisions, housing mix, and permit activity. It is not an official enrollment forecast."
+            ),
+        ),
+        (
+            "Inspect next",
+            _bullets(
+                [
+                    "School Utilization + Permit Pressure.",
+                    "Development Hotspots filtered to recent residential permit segments.",
+                    "Data Still Needed for official enrollment, capacity, and student-generation assumptions.",
+                ]
+            ),
+        ),
     )
     return _response(
         answer,
@@ -379,7 +460,11 @@ def _school_answer(
                 "available" if summary else "not_available",
             ),
         ],
-        ["Open Explore Countywide → School Utilization + Permit Pressure."],
+        [
+            "Open Explore Countywide -> School Utilization + Permit Pressure.",
+            "Ask: What changed in observed development activity?",
+            "Ask: Where is data coverage incomplete?",
+        ],
     )
 
 
@@ -389,12 +474,35 @@ def _flood_answer(
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
     summary = context.get("indicator_summary", {})
+    intelligence = context.get("indicator_intelligence", {})
+    detail = intelligence.get("floodplain_detail", {}) if isinstance(intelligence, dict) else {}
     constraint = _monitor_metrics(summary, "constraint_monitor")
-    answer = (
-        "Floodplain Review summarizes parcels with mapped FEMA floodplain context. "
-        f"CFS currently shows {_fmt(constraint.get('review_parcels'))} review parcels, including "
-        f"{_fmt(constraint.get('special_flood_hazard_area_parcels'))} Special Flood Hazard Area parcels "
-        f"and {_fmt(constraint.get('floodway_parcels'))} floodway parcels where available."
+    answer = _briefing(
+        (
+            "Executive summary",
+            (
+                "Floodplain Review flags parcels that need planning review against mapped floodplain context. "
+                f"CFS shows {_fmt(detail.get('review_required_count') or constraint.get('review_parcels'))} review parcels."
+            ),
+        ),
+        (
+            "Key findings",
+            _bullets(
+                [
+                    f"Special Flood Hazard Area parcels: {_fmt(detail.get('special_flood_hazard_area_count') or constraint.get('special_flood_hazard_area_parcels'))}.",
+                    f"Floodway parcels: {_fmt(detail.get('floodway_count') or constraint.get('floodway_parcels'))}.",
+                    f"Permit overlap count: {_fmt(detail.get('permit_overlap_count'))}.",
+                ]
+            ),
+        ),
+        (
+            "Planning interpretation",
+            "Use floodplain review before evaluating active development areas. This is a planning screen, not a permitting determination.",
+        ),
+        (
+            "Inspect next",
+            _bullets(["Floodplain Review.", "Development Hotspots near constrained parcels.", "Methodology for floodplain caveats."]),
+        ),
     )
     return _response(
         answer,
@@ -408,7 +516,10 @@ def _flood_answer(
                 "indicator_summary.constraint_monitor",
             ),
         ],
-        ["Review Floodplain Review before planning around constrained parcels."],
+        [
+            "Review Floodplain Review before planning around constrained parcels.",
+            "Ask: What layers should I review before planning around this area?",
+        ],
     )
 
 
@@ -417,9 +528,29 @@ def _model_answer(
     context: CfsAiContext,
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
-    answer = (
-        "Model Lab is internal research context only. It can describe relative research signals and helpful feature groups, "
-        "but it does not expose exact probabilities, raw model values, or official classifications."
+    answer = _briefing(
+        (
+            "Executive summary",
+            "Model Lab is internal research context. It compares relative research signals and planning features; it does not make official determinations.",
+        ),
+        (
+            "Key findings",
+            _bullets(
+                [
+                    "Use bands such as Very Strong Research Signal or Moderate Research Signal as review prompts.",
+                    "Factors can include zoning context, transportation access, observed permit activity, parcel context, and data readiness.",
+                    "No exact probabilities, raw model values, or official classifications are shown.",
+                ]
+            ),
+        ),
+        (
+            "Planning interpretation",
+            "Treat Model Lab as a way to prioritize questions, not as a decision engine. Always verify source records before drawing conclusions.",
+        ),
+        (
+            "Inspect next",
+            _bullets(["Model Lab Research Signals.", "Methodology.", "Related parcel, zoning, transportation, and permit layers."]),
+        ),
     )
     return _response(
         answer,
@@ -445,6 +576,7 @@ def _data_readiness_answer(
     readiness = context.get("indicator_summary", {}).get("data_readiness", [])
     intelligence = context.get("indicator_intelligence", {})
     readiness_rows = intelligence.get("domain_readiness", []) if isinstance(intelligence, dict) else []
+    readiness_detail = intelligence.get("data_readiness_detail", []) if isinstance(intelligence, dict) else []
     labels = [item.get("dataset", "Unknown dataset") for item in readiness[:4]]
     if readiness_rows:
         labels = [
@@ -452,9 +584,32 @@ def _data_readiness_answer(
             for row in readiness_rows
             if row.get("data_available") != "yes"
         ][:4]
-    answer = (
-        "The main data readiness gaps are official datasets or domains that would make CFS stronger for production review. "
-        f"Priority gaps include {', '.join(labels) if labels else 'not available from current context'}."
+    detail_lines = [
+        f"{row.get('domain')}: needs {row.get('next_data_need')}"
+        for row in readiness_detail[:5]
+    ]
+    answer = _briefing(
+        (
+            "Executive summary",
+            "Data coverage gaps are the items that most limit confidence beyond planning review signals.",
+        ),
+        (
+            "Key findings",
+            _bullets(
+                [
+                    f"Priority domains: {', '.join(labels) if labels else 'not available from current context'}.",
+                    *(detail_lines or ["Detailed next-data-need rows are not available in the current context."]),
+                ]
+            ),
+        ),
+        (
+            "Planning interpretation",
+            "Use data readiness to decide what to request before moving from exploratory monitoring to official review support.",
+        ),
+        (
+            "Inspect next",
+            _bullets(["Data Still Needed.", "Methodology.", "Utility Readiness, Schools, Zoning / Land Use, and Transportation Context."]),
+        ),
     )
     return _response(
         answer,
@@ -469,7 +624,10 @@ def _data_readiness_answer(
                 "available" if readiness else "not_available",
             ),
         ],
-        ["Request official data sources listed in the Data Still Needed board."],
+        [
+            "Request official data sources listed in the Data Still Needed board.",
+            "Ask: What should I inspect first?",
+        ],
     )
 
 
@@ -524,15 +682,35 @@ def _general_answer(
 ) -> CfsAiSearchResponse:
     intelligence = context.get("indicator_intelligence", {})
     watchlist = intelligence.get("watchlist", []) if isinstance(intelligence, dict) else []
-    top = [item.get("title", "review signal") for item in watchlist[:3]]
-    answer = (
-        f"Inspect first: {', '.join(top)}. "
-        "These are the highest-priority planning review signals currently available."
-        if top
-        else (
-            "Start with Development Activity, School Utilization + Permit Pressure, Floodplain Review, and Data Still Needed. "
-            "Those signals cover observed growth, constraints, capacity context, and missing official data."
-        )
+    top = [
+        f"{item.get('title', 'review signal')} ({str(item.get('status_band', 'review')).replace('_', ' ')})"
+        for item in watchlist[:5]
+    ]
+    answer = _briefing(
+        (
+            "Executive summary",
+            "Inspect the highest-priority watchlist items first, then move to data-needed blockers that limit confidence.",
+        ),
+        (
+            "Priority order",
+            _bullets(
+                top
+                or [
+                    "Development Activity.",
+                    "School Utilization + Permit Pressure.",
+                    "Floodplain Review.",
+                    "Data Still Needed.",
+                ]
+            ),
+        ),
+        (
+            "Planning interpretation",
+            "This order puts elevated review and review signals ahead of lower-intensity monitoring, while keeping missing official data visible.",
+        ),
+        (
+            "Inspect next",
+            _bullets(["Operational Watchlist.", "Development Hotspots.", "School Utilization + Permit Pressure.", "Floodplain Review.", "Data Still Needed."]),
+        ),
     )
     return _response(
         answer,
@@ -562,6 +740,56 @@ def _simple_domain_answer(title, answer, action, request, context, domains):
         [_evidence(title, answer, title.lower().replace(" ", "_"))],
         [action],
     )
+
+
+def _briefing(*sections: tuple[str, str]) -> str:
+    return "\n\n".join(f"{title}\n{body}" for title, body in sections if body)
+
+
+def _bullets(items: list[str]) -> str:
+    return "\n".join(f"- {item}" for item in items if item)
+
+
+def _named_counts(rows: list[dict[str, Any]]) -> str:
+    return ", ".join(
+        f"{row.get('label') or row.get('value') or 'Unknown'} ({_fmt(row.get('count'))})"
+        for row in rows[:4]
+    )
+
+
+def _recent_change_text(detail: dict[str, Any]) -> str:
+    recent = detail.get("recent_window")
+    previous = detail.get("previous_window")
+    delta = detail.get("delta")
+    pct = detail.get("pct_change")
+    if recent and previous and delta is not None:
+        pct_text = f" ({pct:+.1f}%)" if isinstance(pct, (int, float)) else ""
+        return f"The latest comparison is {previous} to {recent}: {_fmt(detail.get('previous_count'))} to {_fmt(detail.get('recent_count'))} permits, a {delta:+,} permit change{pct_text}."
+    return "Recent year comparison is not available from the current context."
+
+
+def _range_text(values: list[Any]) -> str:
+    cleaned = [value for value in values if value not in (None, "")]
+    if not cleaned:
+        return "not available"
+    return f"{cleaned[0]}-{cleaned[-1]}" if len(cleaned) > 1 else str(cleaned[0])
+
+
+def _year_point(value: Any) -> str:
+    if not isinstance(value, dict) or not value:
+        return "not available"
+    return f"{value.get('year', 'year not available')} ({_fmt(value.get('count'))} permits)"
+
+
+def _school_area_list(rows: list[dict[str, Any]]) -> str:
+    return "; ".join(
+        f"{row.get('school_name') or 'Attendance area'} - {row.get('watch_band') or 'review'} with {_fmt(row.get('recent_permits'))} recent permits"
+        for row in rows[:4]
+    )
+
+
+def _provider_answer_is_useful(provider_answer: str, fallback_answer: str) -> bool:
+    return len(provider_answer.strip()) >= min(500, max(240, len(fallback_answer) // 3))
 
 
 def _response(
@@ -709,7 +937,7 @@ def _post_provider_json(
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(url, data=data, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(request, timeout=8) as response:
+        with urllib.request.urlopen(request, timeout=3) as response:
             provider_payload = json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
         if error.code == 429:

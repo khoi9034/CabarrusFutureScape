@@ -10,11 +10,9 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.dependencies.database import get_read_only_db
-from app.repositories.school_constraints_repository import SchoolConstraintsRepository
-from app.routers.indicators_router import get_indicator_intelligence, get_indicator_summary
+from app.routers.indicators_router import get_indicator_intelligence
 from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchResponse
 from app.services.ai_search_service import CfsAiSearchService
-from app.services.school_constraints_service import SchoolConstraintsService
 
 router = APIRouter(prefix="/ai", tags=["CFS AI Search"])
 
@@ -43,46 +41,16 @@ def gather_cfs_ai_context(db: Session) -> CfsAiContext:
         },
     }
 
-    indicator_summary = _safe_context(
-        lambda: get_indicator_summary(db=db),
-        "Indicator Center summary is not available from the current backend.",
-        context,
-    )
-    context["indicator_summary"] = indicator_summary or {}
-
     indicator_intelligence = _safe_context(
         lambda: get_indicator_intelligence(db=db),
         "Indicator intelligence signals are not available from the current backend.",
         context,
     )
     context["indicator_intelligence"] = indicator_intelligence or {}
-
-    school_pressure = _safe_context(
-        lambda: _school_pressure_context(db),
-        "School utilization plus permit pressure context is not available.",
-        context,
-    )
-    context["school_pressure"] = school_pressure or {
-        "features": [],
-        "summary": {},
-        "total_count": 0,
-    }
+    context["indicator_summary"] = {}
+    context["school_pressure"] = {"features": [], "summary": {}, "total_count": 0}
 
     return context
-
-
-def _school_pressure_context(db: Session) -> dict[str, Any]:
-    service = SchoolConstraintsService(SchoolConstraintsRepository(db))
-    response = service.get_school_pressure(limit=8)
-    payload = response.model_dump(mode="json")
-    payload["features"] = [
-        {
-            "properties": feature["properties"],
-            "type": feature["type"],
-        }
-        for feature in payload.get("features", [])
-    ]
-    return payload
 
 
 def _safe_context(

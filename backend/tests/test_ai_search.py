@@ -68,6 +68,62 @@ def _context():
                 "recent_residential_permits_in_watched_areas": 11,
             },
         },
+        "indicator_intelligence": {
+            "data_readiness_detail": [
+                {
+                    "domain": "Utilities",
+                    "next_data_need": "WSACC true utility capacity",
+                },
+                {
+                    "domain": "Schools",
+                    "next_data_need": "Official enrollment/capacity",
+                },
+            ],
+            "development_activity_detail": {
+                "active_parcels": 7,
+                "delta": 6,
+                "pct_change": 50.0,
+                "previous_count": 12,
+                "previous_window": 2023,
+                "recent_count": 18,
+                "recent_window": 2024,
+                "strongest_year": {"count": 18, "year": 2024},
+                "top_geographies": [{"count": 9, "label": "Concord"}],
+                "top_geography_type": "zoning jurisdiction",
+                "top_permit_types": [{"count": 10, "label": "Residential"}],
+                "top_segments": [{"count": 8, "label": "Residential additions"}],
+                "total_records": 18,
+                "weakest_year": {"count": 12, "year": 2023},
+                "years_available": [2023, 2024],
+            },
+            "domain_readiness": [
+                {"data_available": "no", "domain": "Utilities"},
+                {"data_available": "partial", "domain": "Schools"},
+            ],
+            "floodplain_detail": {
+                "floodway_count": 2,
+                "permit_overlap_count": None,
+                "review_required_count": 9,
+                "special_flood_hazard_area_count": 4,
+            },
+            "school_pressure_detail": {
+                "areas_reviewed": 5,
+                "elevated_review_count": 2,
+                "permit_pressure_overlap": "3 areas include recent permit activity",
+                "top_areas": [
+                    {
+                        "recent_permits": 11,
+                        "school_name": "Demo ES",
+                        "watch_band": "elevated review",
+                    },
+                ],
+                "utilization_data_coverage": "4 of 5 areas",
+            },
+            "watchlist": [
+                {"status_band": "elevated_review", "title": "Demo ES Capacity + Permit Context"},
+                {"status_band": "data_needed", "title": "Utility Readiness Coverage"},
+            ],
+        },
     }
 
 
@@ -102,6 +158,50 @@ def test_ai_search_deterministic_fallback_answers_without_provider() -> None:
     assert response.dashboard_actions.focus_domain == "permits"
     assert "observed_development_activity" in response.dashboard_actions.highlight_kpis
     assert "Residential additions" in response.answer
+    assert "Key findings" in response.answer
+    assert "Planning interpretation" in response.answer
+    assert "Concord" in response.answer
+
+
+def test_ai_search_school_answer_includes_pressure_context() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(query="Which school areas need review?"),
+        _context(),
+    )
+
+    assert "preliminary school capacity watch" in response.answer.lower()
+    assert "permit pressure overlap" in response.answer.lower()
+    assert "Demo ES" in response.answer
+
+
+def test_ai_search_flood_answer_includes_review_caveat() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(query="Summarize floodplain review signals."),
+        _context(),
+    )
+
+    assert "Floodway parcels" in response.answer
+    assert "not a permitting determination" in response.answer
+
+
+def test_ai_search_data_readiness_answer_includes_next_need() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(query="Where is data coverage incomplete?"),
+        _context(),
+    )
+
+    assert "WSACC true utility capacity" in response.answer
+    assert "Official enrollment/capacity" in response.answer
+
+
+def test_ai_search_inspect_first_prioritizes_watchlist() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(query="What should I inspect first?"),
+        _context(),
+    )
+
+    assert "Priority order" in response.answer
+    assert "Demo ES Capacity + Permit Context" in response.answer
 
 
 def test_ai_search_dashboard_action_mappings() -> None:
@@ -180,6 +280,30 @@ def test_ai_search_openai_429_falls_back_with_safe_caveat(monkeypatch) -> None:
     assert "rate limit or quota" in text
     assert "raw" not in text
     assert response.dashboard_actions.focus_domain == "schools"
+
+
+def test_ai_search_sparse_provider_answer_keeps_detailed_fallback(monkeypatch) -> None:
+    monkeypatch.setattr(
+        ai_search_service,
+        "_post_provider_json",
+        lambda *_args, **_kwargs: {"answer": "Too short."},
+    )
+    service = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="gpt-4o-mini",
+            cfs_ai_provider="openai",
+            openai_api_key="test-key",
+        ),
+    )
+    response = service.search(
+        CfsAiSearchRequest(query="What are the main permit trends?"),
+        _context(),
+    )
+
+    assert response.provider == "none"
+    assert "Key findings" in response.answer
+    assert "too sparse" in " ".join(response.caveats)
 
 
 def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:

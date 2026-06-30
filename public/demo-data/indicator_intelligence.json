@@ -1,10 +1,392 @@
 {
-  "as_of": "2026-06-30T00:46:25Z",
+  "as_of": "2026-06-30T02:39:29Z",
   "caveats": [
     "Portfolio Demo uses a cached CFS demo extract.",
     "CFS indicators are planning review signals, not official determinations.",
     "Observed permit activity is not a prediction."
   ],
+  "data_readiness_detail": [
+    {
+      "domain": "Development Activity",
+      "available_fields": [
+        "geometry",
+        "temporal fields",
+        "source freshness"
+      ],
+      "missing_fields": [
+        "official update cadence"
+      ],
+      "current_use": "Observed permit and activity monitoring",
+      "limitation": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Permit record updates and segment normalization."
+    },
+    {
+      "domain": "Schools",
+      "available_fields": [
+        "geometry",
+        "temporal fields",
+        "source freshness"
+      ],
+      "missing_fields": [
+        "official update cadence"
+      ],
+      "current_use": "Preliminary school capacity watch plus permit pressure",
+      "limitation": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Official enrollment/capacity and student generation assumptions."
+    },
+    {
+      "domain": "Floodplain",
+      "available_fields": [
+        "geometry",
+        "source freshness"
+      ],
+      "missing_fields": [
+        "official update cadence"
+      ],
+      "current_use": "Floodplain review context",
+      "limitation": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Local floodplain review status and update cadence."
+    },
+    {
+      "domain": "Utilities",
+      "available_fields": [
+        "source freshness"
+      ],
+      "missing_fields": [
+        "official update cadence"
+      ],
+      "current_use": "Proxy context only",
+      "limitation": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "True capacity and service readiness data."
+    },
+    {
+      "domain": "Transportation",
+      "available_fields": [
+        "geometry",
+        "source freshness"
+      ],
+      "missing_fields": [
+        "official update cadence"
+      ],
+      "current_use": "Transportation context with growth review",
+      "limitation": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Planned local project status and dated geometry."
+    },
+    {
+      "domain": "Zoning / Land Use",
+      "available_fields": [
+        "geometry",
+        "source freshness"
+      ],
+      "missing_fields": [
+        "official update cadence"
+      ],
+      "current_use": "Parcel zoning context",
+      "limitation": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Official rezoning case records and future land use layers."
+    },
+    {
+      "domain": "Model Research",
+      "available_fields": [
+        "geometry",
+        "source freshness"
+      ],
+      "missing_fields": [
+        "official update cadence"
+      ],
+      "current_use": "Internal relative research signal",
+      "limitation": "Portfolio demo uses cached extract values; verify official source data before final decisions.",
+      "next_data_need": "Governed model release criteria before production use."
+    }
+  ],
+  "development_activity_detail": {
+    "total_records": 64426,
+    "active_parcels": 43474,
+    "years_available": [
+      1986,
+      1989,
+      1991,
+      1998,
+      1999,
+      2000,
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "yearly_counts": [
+      {
+        "year": 1986,
+        "count": 1
+      },
+      {
+        "year": 1989,
+        "count": 1
+      },
+      {
+        "year": 1991,
+        "count": 1
+      },
+      {
+        "year": 1998,
+        "count": 1
+      },
+      {
+        "year": 1999,
+        "count": 1
+      },
+      {
+        "year": 2000,
+        "count": 5
+      },
+      {
+        "year": 2001,
+        "count": 11
+      },
+      {
+        "year": 2002,
+        "count": 27
+      },
+      {
+        "year": 2003,
+        "count": 1864
+      },
+      {
+        "year": 2004,
+        "count": 1979
+      },
+      {
+        "year": 2005,
+        "count": 862
+      },
+      {
+        "year": 2006,
+        "count": 1396
+      },
+      {
+        "year": 2007,
+        "count": 3172
+      },
+      {
+        "year": 2008,
+        "count": 2243
+      },
+      {
+        "year": 2009,
+        "count": 1690
+      },
+      {
+        "year": 2010,
+        "count": 1495
+      },
+      {
+        "year": 2011,
+        "count": 1663
+      },
+      {
+        "year": 2012,
+        "count": 1806
+      },
+      {
+        "year": 2013,
+        "count": 2068
+      },
+      {
+        "year": 2014,
+        "count": 2787
+      },
+      {
+        "year": 2015,
+        "count": 3141
+      },
+      {
+        "year": 2016,
+        "count": 3310
+      },
+      {
+        "year": 2017,
+        "count": 3382
+      },
+      {
+        "year": 2018,
+        "count": 3593
+      },
+      {
+        "year": 2019,
+        "count": 3720
+      },
+      {
+        "year": 2020,
+        "count": 3821
+      },
+      {
+        "year": 2021,
+        "count": 4304
+      },
+      {
+        "year": 2022,
+        "count": 4202
+      },
+      {
+        "year": 2023,
+        "count": 4044
+      },
+      {
+        "year": 2024,
+        "count": 4168
+      },
+      {
+        "year": 2025,
+        "count": 3642
+      }
+    ],
+    "recent_window": 2025,
+    "previous_window": 2024,
+    "recent_count": 3642,
+    "previous_count": 4168,
+    "delta": -526,
+    "pct_change": -12.619961612284069,
+    "strongest_year": {
+      "year": 2021,
+      "count": 4304
+    },
+    "weakest_year": {
+      "year": 1986,
+      "count": 1
+    },
+    "top_permit_types": [
+      {
+        "label": "NEW CONSTRUCTION",
+        "count": 29031
+      },
+      {
+        "label": "OTHER",
+        "count": 12880
+      },
+      {
+        "label": "REMODEL",
+        "count": 6250
+      },
+      {
+        "label": "ADDITION RESIDENTIAL",
+        "count": 4722
+      },
+      {
+        "label": "EXTRA FEATURE",
+        "count": 4497
+      },
+      {
+        "label": "COMMERCIAL NEW CONSTRUCTION",
+        "count": 4364
+      }
+    ],
+    "top_work_types": [
+      {
+        "label": "unknown",
+        "count": 51825
+      },
+      {
+        "label": "Residential New",
+        "count": 5629
+      },
+      {
+        "label": "Residential Repair",
+        "count": 1985
+      },
+      {
+        "label": "Residential Addition",
+        "count": 1666
+      },
+      {
+        "label": "Commercial Upfit",
+        "count": 1208
+      },
+      {
+        "label": "Residential Accessory Structure",
+        "count": 1128
+      }
+    ],
+    "top_segments": [
+      {
+        "label": "residential_growth",
+        "count": 42206
+      },
+      {
+        "label": "redevelopment_signal",
+        "count": 7866
+      },
+      {
+        "label": "administrative_or_unknown",
+        "count": 5792
+      },
+      {
+        "label": "commercial_activity",
+        "count": 2993
+      },
+      {
+        "label": "accessory_or_misc",
+        "count": 2251
+      },
+      {
+        "label": "minor_maintenance",
+        "count": 1866
+      }
+    ],
+    "top_geographies": [
+      {
+        "label": "Concord",
+        "count": 31975
+      },
+      {
+        "label": "Cabarrus County / Unincorporated",
+        "count": 12078
+      },
+      {
+        "label": "Kannapolis",
+        "count": 11905
+      },
+      {
+        "label": "Harrisburg",
+        "count": 8026
+      },
+      {
+        "label": "Midland",
+        "count": 1902
+      },
+      {
+        "label": "Mt. Pleasant",
+        "count": 817
+      }
+    ],
+    "top_geography_type": "zoning jurisdiction",
+    "top_increasing_permit_types": [],
+    "caveats": [
+      "Observed permit activity only; not a prediction.",
+      "Permit type year-over-year change is unavailable unless source rows include both year and type.",
+      "Permit records do not always equal completed construction."
+    ]
+  },
   "domain_readiness": [
     {
       "domain": "Development Activity",
@@ -12,7 +394,7 @@
       "geometry_available": true,
       "temporal_fields_available": true,
       "update_cadence_known": false,
-      "source_freshness": "2026-06-30T00:46:25Z",
+      "source_freshness": "2026-06-30T02:39:29Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -26,7 +408,7 @@
       "geometry_available": true,
       "temporal_fields_available": true,
       "update_cadence_known": false,
-      "source_freshness": "2026-06-30T00:46:25Z",
+      "source_freshness": "2026-06-30T02:39:29Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -40,7 +422,7 @@
       "geometry_available": true,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-06-30T00:46:25Z",
+      "source_freshness": "2026-06-30T02:39:29Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -54,7 +436,7 @@
       "geometry_available": false,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-06-30T00:46:25Z",
+      "source_freshness": "2026-06-30T02:39:29Z",
       "local_live_status": "data needed",
       "demo_extract_status": "not included",
       "coverage": "data needed",
@@ -68,7 +450,7 @@
       "geometry_available": true,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-06-30T00:46:25Z",
+      "source_freshness": "2026-06-30T02:39:29Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -82,7 +464,7 @@
       "geometry_available": true,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-06-30T00:46:25Z",
+      "source_freshness": "2026-06-30T02:39:29Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -96,7 +478,7 @@
       "geometry_available": true,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-06-30T00:46:25Z",
+      "source_freshness": "2026-06-30T02:39:29Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -105,6 +487,17 @@
       "next_data_need": "Governed model release criteria before production use."
     }
   ],
+  "floodplain_detail": {
+    "review_required_count": 7989,
+    "floodway_count": 3229,
+    "special_flood_hazard_area_count": 7254,
+    "five_hundred_year_count": null,
+    "permit_overlap_count": null,
+    "caveats": [
+      "Floodplain Review is planning context, not a permitting determination.",
+      "Permit overlap with floodplain is not included in this compact demo summary."
+    ]
+  },
   "kpis": [
     {
       "id": "observed_development_activity",
@@ -129,7 +522,7 @@
       "related_layers": [
         "Development Hotspots"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -159,7 +552,7 @@
         "School Utilization + Permit Pressure",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -185,7 +578,7 @@
       "related_layers": [
         "Floodplain Review"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -210,7 +603,7 @@
       "related_layers": [
         "Utility Proxy"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -236,7 +629,7 @@
         "Transportation Context",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -261,7 +654,7 @@
       "related_layers": [
         "Parcel Intelligence"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -286,7 +679,7 @@
       "related_layers": [
         "Model Lab Research Signals"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -312,11 +705,19 @@
       ],
       "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
       "related_layers": [],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     }
   ],
   "mode": "demo",
+  "school_pressure_detail": {
+    "areas_reviewed": 35,
+    "elevated_review_count": 13,
+    "data_needed_count": 0,
+    "top_areas": [],
+    "utilization_data_coverage": "35 of 35 areas",
+    "permit_pressure_overlap": "35 areas include recent permit activity"
+  },
   "signals": [
     {
       "id": "observed_development_activity",
@@ -341,7 +742,7 @@
       "related_layers": [
         "Development Hotspots"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -371,7 +772,7 @@
         "School Utilization + Permit Pressure",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -397,7 +798,7 @@
       "related_layers": [
         "Floodplain Review"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -422,7 +823,7 @@
       "related_layers": [
         "Utility Proxy"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -448,7 +849,7 @@
         "Transportation Context",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -473,7 +874,7 @@
       "related_layers": [
         "Parcel Intelligence"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -498,7 +899,7 @@
       "related_layers": [
         "Model Lab Research Signals"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -524,7 +925,7 @@
       ],
       "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
       "related_layers": [],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     }
   ],
@@ -559,7 +960,7 @@
       "related_layers": [
         "Floodplain Review"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -589,7 +990,7 @@
         "School Utilization + Permit Pressure",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -615,7 +1016,7 @@
       ],
       "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
       "related_layers": [],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -640,7 +1041,7 @@
       "related_layers": [
         "Utility Proxy"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -665,7 +1066,7 @@
       "related_layers": [
         "Parcel Intelligence"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -690,7 +1091,7 @@
       "related_layers": [
         "Model Lab Research Signals"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -716,7 +1117,7 @@
       "related_layers": [
         "Development Hotspots"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     },
     {
@@ -742,7 +1143,7 @@
         "Transportation Context",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-06-30T00:46:25Z",
+      "data_freshness": "2026-06-30T02:39:29Z",
       "source_mode": "demo"
     }
   ]

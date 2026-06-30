@@ -8355,7 +8355,7 @@
   ],
   "metadata": {
     "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
-    "generated_at": "2026-06-30T00:46:25Z",
+    "generated_at": "2026-06-30T02:39:29Z",
     "layer_id": "floodplain_review",
     "layer_label": "Demo Floodplain Review",
     "mode": "portfolio_demo",

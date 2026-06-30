@@ -56,9 +56,61 @@ export interface IndicatorDomainReadiness {
 export interface IndicatorIntelligenceResponse {
   as_of: string | null;
   caveats: string[];
+  data_readiness_detail?: Array<{
+    available_fields: string[];
+    current_use: string;
+    domain: string;
+    limitation: string;
+    missing_fields: string[];
+    next_data_need: string;
+  }>;
+  development_activity_detail?: {
+    active_parcels: number;
+    caveats: string[];
+    delta: number | null;
+    pct_change: number | null;
+    previous_count: number;
+    previous_window: number | null;
+    recent_count: number;
+    recent_window: number | null;
+    strongest_year: { count?: number; year?: number };
+    top_geographies: Array<{ count: number; label: string }>;
+    top_geography_type: string;
+    top_increasing_permit_types: Array<{ count: number; label: string }>;
+    top_permit_types: Array<{ count: number; label: string }>;
+    top_segments: Array<{ count: number; label: string }>;
+    top_work_types: Array<{ count: number; label: string }>;
+    total_records: number;
+    weakest_year: { count?: number; year?: number };
+    yearly_counts: Array<{ count: number; year: number }>;
+    years_available: number[];
+  };
   domain_readiness: IndicatorDomainReadiness[];
+  floodplain_detail?: {
+    caveats: string[];
+    five_hundred_year_count: number | null;
+    floodway_count: number;
+    permit_overlap_count: number | null;
+    review_required_count: number;
+    special_flood_hazard_area_count: number;
+  };
   kpis: IndicatorSignal[];
   mode: "demo" | "live";
+  school_pressure_detail?: {
+    areas_reviewed: number;
+    data_needed_count?: number;
+    elevated_review_count: number;
+    permit_pressure_overlap: string;
+    top_areas: Array<{
+      recent_permits: number | null;
+      school_level: string | null;
+      school_name: string | null;
+      top_reasons: string[];
+      utilization_pct: number | null;
+      watch_band: string | null;
+    }>;
+    utilization_data_coverage: string;
+  };
   signals: IndicatorSignal[];
   summary: {
     data_needed_count: number;

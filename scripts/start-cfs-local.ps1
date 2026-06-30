@@ -31,7 +31,8 @@ $ApiChecks = @(
   "/constraints/flood/zones?limit=1",
   "/constraints/schools/statistics",
   "/constraints/schools/CFS-PARCEL-0149726579",
-  "/constraints/schools/qa-summary"
+  "/constraints/schools/qa-summary",
+  "/indicators/intelligence"
 )
 
 function Write-Step {

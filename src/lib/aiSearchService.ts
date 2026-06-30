@@ -43,7 +43,7 @@ export async function searchCfsAi(
   return apiPost<CfsAiSearchResponse>(
     "/ai/search",
     { ...request, mode: "live" },
-    { signal: options.signal, timeoutMs: 60000 },
+    { signal: options.signal, timeoutMs: 15000 },
   );
 }
 
@@ -109,13 +109,39 @@ function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
   const latest = annual.at(-1);
   const first = annual[0];
   const stats = context.indicator.development_activity.statistics;
+  const detail = context.intelligence.development_activity_detail;
+  const topTypes = namedCounts(detail?.top_permit_types ?? []);
+  const topSegments = namedCounts(detail?.top_segments ?? []);
+  const topGeographies = namedCounts(detail?.top_geographies ?? []);
   return baseDemoResponse(
-    permitSignal?.recommended_followup ??
-      `Based on the cached demo extract, observed permit activity is the main growth signal. ${
-      latest
-        ? `The latest available year shows ${format(latest.permit_count)} permit records.`
-        : "Yearly permit trend data is not available in this extract."
-    }`,
+    briefing(
+      [
+        "Executive summary",
+        `Based on the cached demo extract, CFS analyzed ${format(detail?.total_records ?? stats.total_permits)} observed permit records across ${format(detail?.active_parcels ?? stats.parcels_with_activity)} active parcels. ${recentChangeText(detail)} This is observed permit activity, not a prediction.`,
+      ],
+      [
+        "Key findings",
+        bullets([
+          `Years available: ${rangeText(detail?.years_available ?? annual.map((row) => row.year))}.`,
+          `Strongest year: ${yearPoint(detail?.strongest_year)}; weakest year: ${yearPoint(detail?.weakest_year)}.`,
+          `Top permit types: ${topTypes || "not available from current fields"}.`,
+          `Top permit segments: ${topSegments || permitSignal?.evidence[1] || "not available"}.`,
+          `Top geography bucket: ${topGeographies || "not available from current fields"}.`,
+        ]),
+      ],
+      [
+        "Planning interpretation",
+        "Use this as a review workload signal. Compare active permit areas with school pressure, floodplain review, utility readiness, transportation context, and zoning/land-use context.",
+      ],
+      [
+        "Inspect next",
+        bullets([
+          "Development Hotspots by permit segment and year range.",
+          "School Utilization + Permit Pressure for attendance-area overlap.",
+          "Floodplain Review, Utility Readiness, and Transportation Context around active areas.",
+        ]),
+      ],
+    ),
     domains,
     context.manifest.generated_at,
     [
@@ -142,8 +168,18 @@ function demoPermitAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
         "public/demo-data/development_trends.json",
         annual.length ? "available" : "not_available",
       ),
+      evidence(
+        "Permit categories and geography",
+        `Top types: ${topTypes || "not available"}; top geographies: ${topGeographies || "not available"}.`,
+        "public/demo-data/indicator_intelligence.json",
+        detail ? "available" : "limited",
+      ),
     ],
-    ["Open Explore Countywide â†’ Development Hotspots and choose a permit segment."],
+    [
+      "Open Explore Countywide -> Development Hotspots and choose a permit segment.",
+      "Ask: Which school areas overlap recent permit activity?",
+      "Ask: Where is data coverage incomplete for development review?",
+    ],
   );
 }
 
@@ -152,8 +188,34 @@ function demoSchoolAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
     (signal) => signal.domain === "school_pressure",
   );
   const summary = context.schoolPressure.summary;
+  const detail = context.intelligence.school_pressure_detail;
   return baseDemoResponse(
-    `The strongest school review signal is where preliminary utilization context overlaps observed permit activity. The cached demo extract includes ${format(summary.areas_analyzed)} attendance areas and ${format(summary.elevated_review_count)} elevated review signals.`,
+    briefing(
+      [
+        "Executive summary",
+        `The strongest school review signal is where preliminary utilization context overlaps observed permit activity. The cached demo extract includes ${format(detail?.areas_reviewed ?? summary.areas_analyzed)} attendance areas and ${format(detail?.elevated_review_count ?? summary.elevated_review_count)} elevated review signals.`,
+      ],
+      [
+        "Key findings",
+        bullets([
+          `Utilization coverage: ${detail?.utilization_data_coverage ?? `${format(summary.areas_with_utilization)} areas include utilization context`}.`,
+          `Permit pressure overlap: ${detail?.permit_pressure_overlap ?? `${format(summary.areas_with_recent_permits)} areas include recent permit activity`}.`,
+          `Top watch areas: ${schoolAreaList(detail?.top_areas ?? []) || "top attendance-area rows are not available in the compact demo context"}.`,
+        ]),
+      ],
+      [
+        "Planning interpretation",
+        "This is a preliminary school capacity watch. It helps staff decide where to compare official enrollment/capacity, approved subdivisions, housing mix, and observed permits.",
+      ],
+      [
+        "Inspect next",
+        bullets([
+          "School Utilization + Permit Pressure.",
+          "Development Hotspots filtered to recent residential permit segments.",
+          "Data Still Needed for official enrollment, capacity, and student-generation assumptions.",
+        ]),
+      ],
+    ),
     domains,
     context.manifest.generated_at,
     [
@@ -179,14 +241,40 @@ function demoSchoolAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
         "public/demo-data/school_capacity_watch.json",
       ),
     ],
-    ["Open Explore Countywide â†’ School Utilization + Permit Pressure."],
+    [
+      "Open Explore Countywide -> School Utilization + Permit Pressure.",
+      "Ask: What changed in observed development activity?",
+      "Ask: Where is data coverage incomplete?",
+    ],
   );
 }
 
 function demoFloodAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
   const summary = context.flood.summary;
+  const detail = context.intelligence.floodplain_detail;
   return baseDemoResponse(
-    `Floodplain Review uses FEMA floodplain context from the cached demo extract. It shows ${format(summary.review_required_parcels)} review parcels where available.`,
+    briefing(
+      [
+        "Executive summary",
+        `Floodplain Review uses floodplain context from the cached demo extract. It shows ${format(detail?.review_required_count ?? summary.review_required_parcels)} review parcels where available.`,
+      ],
+      [
+        "Key findings",
+        bullets([
+          `Special Flood Hazard Area parcels: ${format(detail?.special_flood_hazard_area_count ?? summary.sfha_parcels)}.`,
+          `Floodway parcels: ${format(detail?.floodway_count ?? summary.floodway_parcels)}.`,
+          `Permit overlap count: ${format(detail?.permit_overlap_count)}.`,
+        ]),
+      ],
+      [
+        "Planning interpretation",
+        "Use floodplain review before evaluating active development areas. This is a planning screen, not a permitting determination.",
+      ],
+      [
+        "Inspect next",
+        bullets(["Floodplain Review.", "Development Hotspots near constrained parcels.", "Methodology for floodplain caveats."]),
+      ],
+    ),
     domains,
     context.manifest.generated_at,
     [
@@ -202,7 +290,25 @@ function demoFloodAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
 
 function demoModelAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
   return baseDemoResponse(
-    "Model Lab is internal research context only. The public demo shows relative research signals and hides exact probabilities, raw model values, and official classifications.",
+    briefing(
+      [
+        "Executive summary",
+        "Model Lab is internal research context. The public demo shows relative research signals and hides exact probabilities, raw model values, and official classifications.",
+      ],
+      [
+        "Key findings",
+        bullets([
+          "Use research bands as review prompts, not decisions.",
+          "Factors can include zoning context, transportation access, observed permit activity, parcel context, and data readiness.",
+          "Production ready remains false in the cached demo extract.",
+        ]),
+      ],
+      [
+        "Planning interpretation",
+        "Use Model Lab to prioritize questions, then verify source records before drawing conclusions.",
+      ],
+      ["Inspect next", bullets(["Model Lab Research Signals.", "Methodology.", "Related parcel and permit layers."])],
+    ),
     domains,
     context.manifest.generated_at,
     [
@@ -218,9 +324,30 @@ function demoModelAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
 
 function demoDataReadinessAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
   const readinessRows = context.intelligence.domain_readiness ?? [];
+  const readinessDetail = context.intelligence.data_readiness_detail ?? [];
   const missing = context.indicator.data_still_needed ?? [];
   return baseDemoResponse(
-    `Data coverage is incomplete where official datasets are still needed. The demo extract tracks ${readinessRows.length || missing.length} readiness items.`,
+    briefing(
+      [
+        "Executive summary",
+        `Data coverage is incomplete where official datasets are still needed. The demo extract tracks ${readinessRows.length || missing.length} readiness items.`,
+      ],
+      [
+        "Key findings",
+        bullets(
+          readinessDetail.length
+            ? readinessDetail
+                .slice(0, 5)
+                .map((row) => `${row.domain}: needs ${row.next_data_need}`)
+            : missing.slice(0, 5).map((item) => item.label),
+        ),
+      ],
+      [
+        "Planning interpretation",
+        "Use data readiness to decide what to request before moving from exploratory monitoring to official review support.",
+      ],
+      ["Inspect next", bullets(["Data Still Needed.", "Methodology.", "Utility Readiness, Schools, Zoning / Land Use, and Transportation Context."])],
+    ),
     domains,
     context.manifest.generated_at,
     [
@@ -270,12 +397,32 @@ function demoSimpleAnswer(
 function demoGeneralAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
   const watchlist = context.intelligence.watchlist ?? [];
   return baseDemoResponse(
-    watchlist.length
-      ? `Start with the Operational Watchlist. The top cached demo signals are ${watchlist
-          .slice(0, 3)
-          .map((signal) => signal.title)
-          .join(", ")}.`
-      : "Start with observed permit activity, School Utilization + Permit Pressure, Floodplain Review, and Data Still Needed. Those panels show growth, constraints, capacity context, and missing official data.",
+    briefing(
+      [
+        "Executive summary",
+        "Inspect the highest-priority watchlist items first, then move to data-needed blockers that limit confidence.",
+      ],
+      [
+        "Priority order",
+        bullets(
+          watchlist.length
+            ? watchlist
+                .slice(0, 5)
+                .map((signal) => `${signal.title} (${signal.status_band.replaceAll("_", " ")})`)
+            : [
+                "Development Activity.",
+                "School Utilization + Permit Pressure.",
+                "Floodplain Review.",
+                "Data Still Needed.",
+              ],
+        ),
+      ],
+      [
+        "Planning interpretation",
+        "This order puts elevated review and review signals ahead of lower-intensity monitoring, while keeping missing official data visible.",
+      ],
+      ["Inspect next", bullets(["Operational Watchlist.", "Development Hotspots.", "School Utilization + Permit Pressure.", "Floodplain Review.", "Data Still Needed."])],
+    ),
     domains,
     context.manifest.generated_at,
     [
@@ -440,6 +587,61 @@ function sanitizeDemoResponse(response: CfsAiSearchResponse) {
 
 function format(value: unknown) {
   return typeof value === "number" ? value.toLocaleString("en-US") : "not available";
+}
+
+function briefing(...sections: Array<[string, string]>) {
+  return sections
+    .filter(([, body]) => body)
+    .map(([title, body]) => `${title}\n${body}`)
+    .join("\n\n");
+}
+
+function bullets(items: string[]) {
+  return items.filter(Boolean).map((item) => `- ${item}`).join("\n");
+}
+
+function namedCounts(rows: Array<{ count: number; label: string }>) {
+  return rows
+    .slice(0, 4)
+    .map((row) => `${row.label} (${format(row.count)})`)
+    .join(", ");
+}
+
+function recentChangeText(
+  detail: DemoAiContext["intelligence"]["development_activity_detail"],
+) {
+  if (detail?.recent_window && detail.previous_window && detail.delta !== null) {
+    const pct =
+      typeof detail.pct_change === "number"
+        ? ` (${detail.pct_change >= 0 ? "+" : ""}${detail.pct_change.toFixed(1)}%)`
+        : "";
+    const delta = detail.delta >= 0 ? `+${format(detail.delta)}` : format(detail.delta);
+    return `The latest comparison is ${detail.previous_window} to ${detail.recent_window}: ${format(detail.previous_count)} to ${format(detail.recent_count)} permits, a ${delta} permit change${pct}.`;
+  }
+  return "Recent year comparison is not available from the current context.";
+}
+
+function rangeText(values: Array<number | string | null | undefined>) {
+  const clean = values.filter((value) => value !== null && value !== undefined && value !== "");
+  if (!clean.length) return "not available";
+  return clean.length > 1 ? `${clean[0]}-${clean[clean.length - 1]}` : String(clean[0]);
+}
+
+function yearPoint(value?: { count?: number; year?: number }) {
+  if (!value?.year) return "not available";
+  return `${value.year} (${format(value.count)} permits)`;
+}
+
+function schoolAreaList(
+  rows: NonNullable<DemoAiContext["intelligence"]["school_pressure_detail"]>["top_areas"],
+) {
+  return rows
+    .slice(0, 4)
+    .map(
+      (row) =>
+        `${row.school_name ?? "Attendance area"} - ${row.watch_band ?? "review"} with ${format(row.recent_permits)} recent permits`,
+    )
+    .join("; ");
 }
 
 function firstDemoSignal(

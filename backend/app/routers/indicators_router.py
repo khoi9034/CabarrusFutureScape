@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query
@@ -52,6 +52,9 @@ WATCHLIST_SORT = {
     "normal": 5,
 }
 
+INTELLIGENCE_CACHE_TTL = timedelta(minutes=5)
+_INTELLIGENCE_CACHE: dict[str, Any] = {"expires_at": None, "payload": None}
+
 
 @router.get("/intelligence")
 def get_indicator_intelligence(
@@ -60,6 +63,11 @@ def get_indicator_intelligence(
     """Return normalized planning intelligence signals for Indicator Center."""
 
     as_of = datetime.now(UTC).isoformat()
+    cached_payload = _INTELLIGENCE_CACHE.get("payload")
+    expires_at = _INTELLIGENCE_CACHE.get("expires_at")
+    if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached_payload:
+        return cached_payload
+
     caveats: list[str] = [
         "CFS indicators are planning review signals, not official determinations.",
         "Observed permit activity is not a prediction.",
@@ -110,23 +118,36 @@ def get_indicator_intelligence(
         [signal for signal in signals if signal["status_band"] != "normal"],
         key=lambda item: (-int(item["severity"]), WATCHLIST_SORT[item["status_band"]], item["title"]),
     )
+    readiness = _domain_readiness(
+        development_stats=development_stats,
+        development_trends=development_trends,
+        flood_summary=flood_summary,
+        school_pressure=school_pressure,
+        as_of=as_of,
+    )
 
-    return {
+    payload = {
         "mode": "live",
         "as_of": as_of,
         "summary": _signal_summary(signals),
         "kpis": signals[:8],
         "signals": signals,
         "watchlist": watchlist,
-        "domain_readiness": _domain_readiness(
-            development_stats=development_stats,
-            development_trends=development_trends,
-            flood_summary=flood_summary,
-            school_pressure=school_pressure,
-            as_of=as_of,
+        "domain_readiness": readiness,
+        "development_activity_detail": _development_activity_detail(
+            development_stats,
+            development_trends,
+            permit_segments,
         ),
+        "school_pressure_detail": _school_pressure_detail(school_pressure),
+        "floodplain_detail": _floodplain_detail(flood_summary),
+        "data_readiness_detail": _data_readiness_detail(readiness),
         "caveats": list(dict.fromkeys(caveats)),
     }
+    # ponytail: in-process cache; use a shared cache if multi-worker freshness matters.
+    _INTELLIGENCE_CACHE["payload"] = payload
+    _INTELLIGENCE_CACHE["expires_at"] = datetime.now(UTC) + INTELLIGENCE_CACHE_TTL
+    return payload
 
 
 @router.get("/summary")
@@ -712,6 +733,133 @@ def _data_readiness_signal(as_of: str) -> dict[str, Any]:
     )
 
 
+def _development_activity_detail(stats: Any, trends: Any, segments: Any) -> dict[str, Any]:
+    annual = list(getattr(trends, "annual_trends", []) or [])
+    yearly_counts = [
+        {"year": int(getattr(row, "year", 0) or 0), "count": int(getattr(row, "permit_count", 0) or 0)}
+        for row in annual
+    ]
+    latest = yearly_counts[-1] if yearly_counts else {}
+    previous = yearly_counts[-2] if len(yearly_counts) > 1 else {}
+    recent_count = int(latest.get("count") or 0)
+    previous_count = int(previous.get("count") or 0)
+    delta = recent_count - previous_count if latest and previous else None
+    pct = (delta / previous_count * 100) if delta is not None and previous_count else None
+    strongest = max(yearly_counts, key=lambda item: item["count"], default={})
+    weakest = min(yearly_counts, key=lambda item: item["count"], default={})
+
+    return {
+        "total_records": int(getattr(stats, "total_permits", 0) or 0) if stats else 0,
+        "active_parcels": int(getattr(stats, "parcels_with_activity", 0) or 0) if stats else 0,
+        "years_available": [row["year"] for row in yearly_counts if row["year"]],
+        "yearly_counts": yearly_counts,
+        "recent_window": latest.get("year"),
+        "previous_window": previous.get("year"),
+        "recent_count": recent_count,
+        "previous_count": previous_count,
+        "delta": delta,
+        "pct_change": pct,
+        "strongest_year": strongest,
+        "weakest_year": weakest,
+        "top_permit_types": _bucket_rows(getattr(stats, "by_permit_type", []) if stats else []),
+        "top_work_types": _bucket_rows(getattr(stats, "by_work_type", []) if stats else []),
+        "top_segments": _bucket_rows(getattr(segments, "by_permit_segment", []) if segments else []),
+        "top_geographies": _bucket_rows(getattr(stats, "by_zoning_jurisdiction", []) if stats else []),
+        "top_geography_type": "zoning jurisdiction",
+        "top_increasing_permit_types": [],
+        "caveats": [
+            "Observed permit activity only; not a prediction.",
+            "Permit type year-over-year change is unavailable unless source rows include both year and type.",
+            "Permit records do not always equal completed construction.",
+        ],
+    }
+
+
+def _school_pressure_detail(pressure: Any) -> dict[str, Any]:
+    if pressure is None:
+        return {
+            "areas_reviewed": 0,
+            "elevated_review_count": 0,
+            "top_areas": [],
+            "utilization_data_coverage": "not available",
+            "permit_pressure_overlap": "not available",
+        }
+    summary = pressure.summary
+    top_areas = []
+    for feature in pressure.features[:6]:
+        props = feature.properties
+        top_areas.append(
+            {
+                "school_name": props.school_name,
+                "school_level": props.school_level,
+                "watch_band": props.school_pressure_watch_band,
+                "utilization_pct": props.utilization_pct,
+                "recent_permits": props.permit_count_recent,
+                "top_reasons": list(props.top_reasons or [])[:3],
+            }
+        )
+    return {
+        "areas_reviewed": summary.areas_analyzed,
+        "elevated_review_count": summary.elevated_review_count,
+        "data_needed_count": summary.data_needed_count,
+        "top_areas": top_areas,
+        "utilization_data_coverage": f"{summary.areas_with_utilization:,} of {summary.areas_analyzed:,} areas",
+        "permit_pressure_overlap": f"{summary.areas_with_recent_permits:,} areas include recent permit activity",
+    }
+
+
+def _floodplain_detail(summary: Any) -> dict[str, Any]:
+    if summary is None:
+        return {
+            "review_required_count": 0,
+            "floodway_count": 0,
+            "special_flood_hazard_area_count": 0,
+            "five_hundred_year_count": None,
+            "permit_overlap_count": None,
+            "caveats": ["Floodplain source data is unavailable."],
+        }
+    return {
+        "review_required_count": summary.review_required_parcels,
+        "floodway_count": summary.floodway_parcels,
+        "special_flood_hazard_area_count": summary.sfha_parcels,
+        "five_hundred_year_count": None,
+        "permit_overlap_count": None,
+        "caveats": [
+            "Floodplain Review is planning context, not a permitting determination.",
+            "Permit overlap with floodplain is not included in this compact summary.",
+        ],
+    }
+
+
+def _data_readiness_detail(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "domain": row["domain"],
+            "available_fields": [
+                field
+                for field, available in (
+                    ("geometry", row["geometry_available"]),
+                    ("temporal fields", row["temporal_fields_available"]),
+                    ("source freshness", bool(row["source_freshness"])),
+                )
+                if available
+            ],
+            "missing_fields": [
+                field
+                for field, missing in (
+                    ("official update cadence", not row["update_cadence_known"]),
+                    ("source freshness", not row["source_freshness"]),
+                )
+                if missing
+            ],
+            "current_use": row["current_use"],
+            "limitation": row["caveat"],
+            "next_data_need": row["next_data_need"],
+        }
+        for row in rows
+    ]
+
+
 def _domain_readiness(
     *,
     development_stats: Any,
@@ -763,6 +911,13 @@ def _signal_summary(signals: list[dict[str, Any]]) -> dict[str, int]:
         "data_needed_count": sum(1 for signal in signals if signal["status_band"] == "data_needed"),
         "unavailable_count": sum(1 for signal in signals if signal["status_band"] == "unavailable"),
     }
+
+
+def _bucket_rows(rows: list[Any], limit: int = 6) -> list[dict[str, Any]]:
+    return [
+        {"label": getattr(row, "value", "Unknown"), "count": int(getattr(row, "count", 0) or 0)}
+        for row in rows[:limit]
+    ]
 
 
 def _seed_rows(

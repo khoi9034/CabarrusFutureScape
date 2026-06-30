@@ -140,7 +140,9 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
             Provider: OpenAI configured / Status: fallback active / Reason: rate limit/quota
           </p>
         ) : null}
-        <p className="text-sm leading-6 text-slate-100">{response.answer}</p>
+        <div className="whitespace-pre-line text-sm leading-6 text-slate-100">
+          {response.answer}
+        </div>
         <div className="mt-4 grid gap-2 md:grid-cols-2">
           {response.evidence.map((item) => (
             <article

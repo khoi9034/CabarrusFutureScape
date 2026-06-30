@@ -347,9 +347,34 @@ def build_indicator_intelligence_demo(
             "CFS indicators are planning review signals, not official determinations.",
             "Observed permit activity is not a prediction.",
         ],
+        "data_readiness_detail": build_demo_data_readiness_detail(generated_at),
+        "development_activity_detail": build_demo_development_activity_detail(
+            development_statistics,
+            development_trends,
+            permit_segments,
+        ),
         "domain_readiness": build_demo_domain_readiness(generated_at),
+        "floodplain_detail": {
+            "review_required_count": flood_review,
+            "floodway_count": int(flood_summary.get("floodway_parcels") or 0),
+            "special_flood_hazard_area_count": int(flood_summary.get("sfha_parcels") or 0),
+            "five_hundred_year_count": None,
+            "permit_overlap_count": None,
+            "caveats": [
+                "Floodplain Review is planning context, not a permitting determination.",
+                "Permit overlap with floodplain is not included in this compact demo summary.",
+            ],
+        },
         "kpis": signals[:8],
         "mode": "demo",
+        "school_pressure_detail": {
+            "areas_reviewed": int(school_summary.get("areas_analyzed") or 0),
+            "elevated_review_count": school_elevated,
+            "data_needed_count": school_data_needed,
+            "top_areas": [],
+            "utilization_data_coverage": f"{int(school_summary.get('areas_with_utilization') or 0):,} of {int(school_summary.get('areas_analyzed') or 0):,} areas",
+            "permit_pressure_overlap": f"{int(school_summary.get('areas_with_recent_permits') or 0):,} areas include recent permit activity",
+        },
         "signals": signals,
         "summary": {
             "total_signals": len(signals),
@@ -360,6 +385,85 @@ def build_indicator_intelligence_demo(
         },
         "watchlist": watchlist,
     }
+
+
+def build_demo_development_activity_detail(
+    development_statistics: dict[str, Any],
+    development_trends: dict[str, Any],
+    permit_segments: dict[str, Any],
+) -> dict[str, Any]:
+    yearly_counts = [
+        {"year": int(row.get("year") or 0), "count": int(row.get("permit_count") or 0)}
+        for row in development_trends.get("annual_trends", [])
+    ]
+    latest = yearly_counts[-1] if yearly_counts else {}
+    previous = yearly_counts[-2] if len(yearly_counts) > 1 else {}
+    recent_count = int(latest.get("count") or 0)
+    previous_count = int(previous.get("count") or 0)
+    delta = recent_count - previous_count if latest and previous else None
+    pct = (delta / previous_count * 100) if delta is not None and previous_count else None
+    return {
+        "total_records": int(development_statistics.get("total_permits") or 0),
+        "active_parcels": int(development_statistics.get("parcels_with_activity") or 0),
+        "years_available": [row["year"] for row in yearly_counts if row["year"]],
+        "yearly_counts": yearly_counts,
+        "recent_window": latest.get("year"),
+        "previous_window": previous.get("year"),
+        "recent_count": recent_count,
+        "previous_count": previous_count,
+        "delta": delta,
+        "pct_change": pct,
+        "strongest_year": max(yearly_counts, key=lambda item: item["count"], default={}),
+        "weakest_year": min(yearly_counts, key=lambda item: item["count"], default={}),
+        "top_permit_types": _demo_bucket_rows(development_statistics.get("by_permit_type", [])),
+        "top_work_types": _demo_bucket_rows(development_statistics.get("by_work_type", [])),
+        "top_segments": _demo_bucket_rows(permit_segments.get("by_permit_segment", [])),
+        "top_geographies": _demo_bucket_rows(development_statistics.get("by_zoning_jurisdiction", [])),
+        "top_geography_type": "zoning jurisdiction",
+        "top_increasing_permit_types": [],
+        "caveats": [
+            "Observed permit activity only; not a prediction.",
+            "Permit type year-over-year change is unavailable unless source rows include both year and type.",
+            "Permit records do not always equal completed construction.",
+        ],
+    }
+
+
+def build_demo_data_readiness_detail(generated_at: str) -> list[dict[str, Any]]:
+    rows = build_demo_domain_readiness(generated_at)
+    return [
+        {
+            "domain": row["domain"],
+            "available_fields": [
+                field
+                for field, available in (
+                    ("geometry", row["geometry_available"]),
+                    ("temporal fields", row["temporal_fields_available"]),
+                    ("source freshness", bool(row["source_freshness"])),
+                )
+                if available
+            ],
+            "missing_fields": [
+                field
+                for field, missing in (
+                    ("official update cadence", not row["update_cadence_known"]),
+                    ("source freshness", not row["source_freshness"]),
+                )
+                if missing
+            ],
+            "current_use": row["current_use"],
+            "limitation": row["caveat"],
+            "next_data_need": row["next_data_need"],
+        }
+        for row in rows
+    ]
+
+
+def _demo_bucket_rows(rows: list[dict[str, Any]], limit: int = 6) -> list[dict[str, Any]]:
+    return [
+        {"label": str(row.get("value") or row.get("label") or "Unknown"), "count": int(row.get("count") or 0)}
+        for row in rows[:limit]
+    ]
 
 
 def _demo_signal(
