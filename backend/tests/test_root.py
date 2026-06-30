@@ -21,6 +21,7 @@ def test_root_endpoint_returns_api_status() -> None:
         "ai_search": "/ai/search",
         "constraints": "/constraints",
         "development": "/development",
+        "economics": "/economics",
         "indicators": "/indicators",
         "parcels": "/parcels",
     }

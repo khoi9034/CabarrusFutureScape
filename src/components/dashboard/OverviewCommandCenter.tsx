@@ -44,10 +44,38 @@ const commandWorkflows = [
   },
 ];
 
+const economicsWorkflows = [
+  {
+    accent: "primary",
+    actionLabel: "Economic Workspace",
+    icon: Layers3,
+    id: "explore-intelligence",
+    helper:
+      "Review value per acre, underbuilt watch, tax-base opportunity, and constraint-adjusted parcels.",
+  },
+  {
+    accent: "secondary",
+    actionLabel: "Economic Mission Control",
+    icon: Gauge,
+    id: "indicator-center",
+    helper:
+      "Monitor parcel value coverage, opportunity classes, data gaps, and fiscal/service burden context.",
+  },
+  {
+    accent: "secondary",
+    actionLabel: "Economic Scenario Lab",
+    icon: FlaskConical,
+    id: "model-lab",
+    helper:
+      "Screen residential, commercial, industrial, mixed-use, and low-intensity scenarios.",
+  },
+] as const;
+
 export function OverviewCommandCenter() {
   const {
     overviewCommandMode,
     overviewLayout,
+    cfsAppMode,
     planningSnapshot,
     savedPlanningSnapshots,
     selectedParcelId,
@@ -143,6 +171,8 @@ export function OverviewCommandCenter() {
       ? "Snapshot ready"
       : "No snapshots";
   const commandCenterCompact = overviewLayout.commandCenter === "compact";
+  const economicsMode = cfsAppMode === "economics";
+  const workflows = economicsMode ? economicsWorkflows : commandWorkflows;
 
   return (
     <section
@@ -156,10 +186,12 @@ export function OverviewCommandCenter() {
         <div className="flex min-w-0 flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8fe7ff]">
-              CFS Workspace Center
+              {economicsMode ? "CFS Economics Center" : "CFS Workspace Center"}
             </p>
             <h1 className="mt-0.5 text-sm font-semibold leading-5 text-white md:text-base">
-              Explore countywide, review indicators, or open internal research.
+              {economicsMode
+                ? "Review economic layers, monitor opportunity, or screen scenarios."
+                : "Explore countywide, review indicators, or open internal research."}
             </h1>
             {selectedParcelId ? (
               <p className="mt-0.5 text-[11px] leading-4 text-slate-500">
@@ -197,7 +229,7 @@ export function OverviewCommandCenter() {
         </div>
 
         <div className="grid min-w-0 grid-cols-1 gap-1.5 md:grid-cols-3">
-          {commandWorkflows.map((workflow) => {
+          {workflows.map((workflow) => {
             const Icon = workflow.icon;
             const primary = workflow.accent === "primary";
             const active =
@@ -312,8 +344,9 @@ export function OverviewCommandCenter() {
         </div>
       ) : (
         <p className="mt-2 text-[11px] leading-5 text-slate-600">
-          Use the global search bar for parcel search. Planning Snapshot remains
-          the top-level report builder.
+          {economicsMode
+            ? "Use the global search bar for parcel lookup. Planning Snapshot can capture economic screening context."
+            : "Use the global search bar for parcel search. Planning Snapshot remains the top-level report builder."}
         </p>
       )}
     </section>

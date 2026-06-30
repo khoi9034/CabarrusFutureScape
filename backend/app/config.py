@@ -94,6 +94,10 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("OPENAI_API_KEY"),
     )
+    county_tax_rate_per_100: float = Field(
+        default=0.57,
+        validation_alias=AliasChoices("CFS_COUNTY_TAX_RATE_PER_100"),
+    )
     model_config = SettingsConfigDict(
         env_file=(BACKEND_ENV_FILE, ROOT_BACKEND_ENV_FILE),
         env_file_encoding="utf-8",

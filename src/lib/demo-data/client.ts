@@ -14,6 +14,7 @@ import type {
   SchoolConstraintStatisticsResponse,
   SchoolQaSummaryResponse,
   SchoolUtilizationSeedPageResponse,
+  EconomicsIntelligenceResponse,
 } from "@/types/api";
 
 const DEMO_DATA_BASE_URL = "/demo-data";
@@ -140,6 +141,13 @@ export function getDemoIndicatorIntelligence() {
   return loadDemoJson(
     "indicator_intelligence.json",
     getUnavailableIndicatorIntelligence,
+  );
+}
+
+export function getDemoEconomicsIntelligence() {
+  return loadDemoJson(
+    "economics_intelligence.json",
+    getUnavailableEconomicsIntelligence,
   );
 }
 
@@ -568,6 +576,42 @@ function getUnavailableIndicatorIntelligence(): IndicatorIntelligenceResponse {
       review_count: 0,
       total_signals: 0,
       unavailable_count: 0,
+    },
+    watchlist: [],
+  };
+}
+
+function getUnavailableEconomicsIntelligence(): EconomicsIntelligenceResponse {
+  return {
+    as_of: null,
+    caveats: [
+      "Portfolio Demo economics extract is not available.",
+      "CFS Economics is screening-level context, not an official appraisal or tax bill.",
+    ],
+    data_readiness: [
+      {
+        caveat: "Parcel value fields were not available in the demo extract.",
+        current_use: "Show economics mode unavailable state.",
+        data_status: "unavailable",
+        domain: "Parcel Economics",
+        gap_or_next_need: "Export sanitized assessed value, acreage, land value, and improvement value fields.",
+      },
+    ],
+    kpis: [],
+    mode: "demo",
+    scenario_templates: [],
+    signals: [],
+    summary: {
+      as_of: null,
+      data_needed_count: 1,
+      high_opportunity_count: 0,
+      median_value_per_acre: null,
+      source_mode: "demo",
+      total_assessed_value: null,
+      total_improvement_value: null,
+      total_land_value: null,
+      total_parcels_analyzed: 0,
+      underbuilt_candidate_count: 0,
     },
     watchlist: [],
   };

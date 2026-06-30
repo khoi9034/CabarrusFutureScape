@@ -29,6 +29,7 @@ SAFE_CAVEATS = [
 
 RELATED_LAYERS = {
     "data_readiness": ["Data Still Needed", "Methodology"],
+    "economics": ["Value per Acre", "Underbuilt Parcel Watch", "Constraint-Adjusted Opportunity"],
     "flood": ["Floodplain Review"],
     "general": ["Development Hotspots", "Floodplain Review", "School Utilization + Permit Pressure"],
     "methodology": ["Methodology"],
@@ -56,6 +57,17 @@ DASHBOARD_ACTIONS: dict[CfsAiDomain, dict[str, Any]] = {
         "focus_domain": "data_readiness",
         "highlight_kpis": ["data_readiness"],
         "sort_watchlist_by": "data_gap",
+    },
+    "economics": {
+        "focus_domain": "economics",
+        "highlight_kpis": ["underbuilt_candidates", "tax_base_opportunity"],
+        "recommended_layers": [
+            "Value per Acre",
+            "Underbuilt Parcel Watch",
+            "Tax-Base Opportunity",
+            "Constraint-Adjusted Opportunity",
+        ],
+        "sort_watchlist_by": "severity",
     },
     "flood": {
         "focus_domain": "flood",
@@ -110,6 +122,7 @@ DASHBOARD_ACTIONS: dict[CfsAiDomain, dict[str, Any]] = {
 }
 
 DOMAIN_KEYWORDS: list[tuple[CfsAiDomain, tuple[str, ...]]] = [
+    ("economics", ("economic", "economics", "tax", "value", "acre", "underbuilt", "redevelopment", "fiscal", "scenario")),
     ("schools", ("school", "attendance", "capacity", "utilization", "student")),
     ("flood", ("flood", "fema", "floodplain", "floodway", "hazard")),
     ("permits", ("permit", "development", "growth", "activity", "trend")),
@@ -146,7 +159,11 @@ class CfsAiSearchService:
         request: CfsAiSearchRequest,
         context: CfsAiContext,
     ) -> CfsAiSearchResponse:
-        domains = request.filters.domains or selected_signal_domains(request) or resolve_query_domains(request)
+        domains = (
+            ["economics"]
+            if request.app_mode == "economics" and not request.filters.domains
+            else request.filters.domains or selected_signal_domains(request) or resolve_query_domains(request)
+        )
         fallback = deterministic_answer(request, context, domains)
         provider = self._settings.cfs_ai_provider
 
@@ -337,6 +354,7 @@ def _domain_from_selected_signal(domain: str) -> CfsAiDomain | None:
     normalized = domain.lower().replace("-", "_").replace(" ", "_")
     direct: dict[str, CfsAiDomain] = {
         "data_readiness": "data_readiness",
+        "economics": "economics",
         "development_activity": "permits",
         "flood": "flood",
         "floodplain_review": "flood",
@@ -381,6 +399,7 @@ def deterministic_answer(
     primary_domain = domains[0] if domains else "general"
     builders = {
         "data_readiness": _data_readiness_answer,
+        "economics": _economics_answer,
         "flood": _flood_answer,
         "general": _general_answer,
         "methodology": _methodology_answer,
@@ -424,6 +443,7 @@ def dashboard_actions_for_domains(
 
 def compact_context(context: CfsAiContext) -> CfsAiContext:
     return {
+        "economics_intelligence": context.get("economics_intelligence"),
         "indicator_intelligence": context.get("indicator_intelligence"),
         "indicator_summary": context.get("indicator_summary"),
         "school_pressure": context.get("school_pressure"),
@@ -499,6 +519,106 @@ def extract_development_activity_detail(context: CfsAiContext) -> dict[str, Any]
     detail.setdefault("top_segments", [])
     detail.setdefault("top_geographies", [])
     return detail
+
+
+def _economics_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    domains: list[CfsAiDomain],
+) -> CfsAiSearchResponse:
+    economics = context.get("economics_intelligence", {})
+    summary = economics.get("summary", {}) if isinstance(economics, dict) else {}
+    watchlist = economics.get("watchlist", []) if isinstance(economics, dict) else []
+    readiness = economics.get("data_readiness", []) if isinstance(economics, dict) else []
+    top_signals = [
+        f"{row.get('geography_label') or row.get('parcel_id')}: {row.get('opportunity_class')} ({str(row.get('economic_status_band') or 'review').replace('_', ' ')})"
+        for row in watchlist[:4]
+        if isinstance(row, dict)
+    ]
+    missing = [
+        f"{row.get('domain')}: {row.get('gap_or_next_need')}"
+        for row in readiness
+        if isinstance(row, dict) and row.get("data_status") != "available"
+    ][:4]
+    answer = _briefing(
+        (
+            "Executive summary",
+            (
+                f"CFS Economics reviewed {_fmt(summary.get('total_parcels_analyzed'))} parcels for screening-level value and opportunity context. "
+                f"The current extract shows {_fmt(summary.get('underbuilt_candidate_count'))} underbuilt watch candidates and "
+                f"{_fmt(summary.get('high_opportunity_count'))} tax-base opportunity signals. "
+                "This is parcel economic intelligence for review, not an approval recommendation, official appraisal, or official tax bill."
+            ),
+        ),
+        (
+            "Economic signal",
+            _bullets(
+                [
+                    f"Total assessed value coverage: {_currency(summary.get('total_assessed_value'))}.",
+                    f"Median value per acre: {_currency(summary.get('median_value_per_acre'))}.",
+                    f"Underbuilt watch: {_fmt(summary.get('underbuilt_candidate_count'))} parcels where land and improvement context support review.",
+                    f"Data-needed records: {_fmt(summary.get('data_needed_count'))}.",
+                ]
+            ),
+        ),
+        (
+            "Evidence",
+            _bullets(top_signals or ["No parcel-level economics watchlist rows are available from the current context."]),
+        ),
+        (
+            "Fiscal / service interpretation",
+            "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as a scenario candidate.",
+        ),
+        (
+            "Inspect next",
+            _bullets(
+                [
+                    "Value per Acre.",
+                    "Underbuilt Parcel Watch.",
+                    "Tax-Base Opportunity.",
+                    "Constraint-Adjusted Opportunity.",
+                    "Economic Scenario Lab.",
+                ]
+            ),
+        ),
+        (
+            "Caveats",
+            _bullets(
+                [
+                    "Screening-level economic context only.",
+                    "Estimated tax context is not an official tax bill.",
+                    "Scenario values depend on assumptions.",
+                    "Missing utility, school, transportation, or value fields reduce confidence.",
+                    *missing,
+                ]
+            ),
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "Economics summary",
+                f"{_fmt(summary.get('total_parcels_analyzed'))} parcels; {_fmt(summary.get('underbuilt_candidate_count'))} underbuilt candidates; {_fmt(summary.get('high_opportunity_count'))} opportunity signals.",
+                "economics_intelligence.summary",
+                "available" if summary.get("total_parcels_analyzed") else "limited",
+            ),
+            _evidence(
+                "Economic watchlist",
+                "; ".join(top_signals) or "No watchlist rows are available.",
+                "economics_intelligence.watchlist",
+                "available" if top_signals else "limited",
+            ),
+        ],
+        [
+            "Open Economic Workspace and compare Value per Acre with Underbuilt Parcel Watch.",
+            "Use Economic Scenario Lab only as screening context.",
+            "Ask: Where is economic data incomplete?",
+        ],
+    )
 
 
 def _selected_signal_answer(
@@ -589,6 +709,12 @@ def _selected_signal_meaning(domain: str) -> tuple[str, str, str]:
             "Data readiness identifies missing or incomplete source data that limits stronger analysis.",
             "These gaps tell staff what to request before turning exploratory signals into formal review support.",
             "CFS labels missing data instead of inventing values.",
+        )
+    if normalized in {"economics", "tax_base_opportunity", "underbuilt_watch"}:
+        return (
+            "This is screening-level parcel economic context assembled from value, acreage, and constraint fields where available.",
+            "It helps staff decide what to inspect next before scenario assumptions or fiscal interpretation.",
+            "This is not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
         )
     return (
         "This is a CFS planning signal assembled from available indicator context.",
@@ -1261,6 +1387,14 @@ def _fmt(value: Any) -> str:
         return "not available"
     if isinstance(value, (int, float)):
         return f"{value:,.0f}"
+    return str(value)
+
+
+def _currency(value: Any) -> str:
+    if value is None or value == "":
+        return "not available"
+    if isinstance(value, (int, float)):
+        return f"${value:,.0f}"
     return str(value)
 
 

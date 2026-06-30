@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.dependencies.database import get_read_only_db
+from app.routers.economics_router import build_economics_intelligence
 from app.routers.indicators_router import get_cached_indicator_intelligence
 from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchResponse
 from app.services.ai_search_service import CfsAiSearchService
@@ -81,13 +82,15 @@ def search_cfs(
 ) -> CfsAiSearchResponse:
     """Answer CFS indicator questions from compact server-side context."""
 
-    context = gather_cfs_ai_context(db)
+    context = gather_cfs_ai_context(db, request)
     return CfsAiSearchService(get_settings()).search(request, context)
 
 
-def gather_cfs_ai_context(_db: Session) -> CfsAiContext:
-    cached = _ASK_CFS_CONTEXT_CACHE.get("payload")
-    expires_at = _ASK_CFS_CONTEXT_CACHE.get("expires_at")
+def gather_cfs_ai_context(_db: Session, request: CfsAiSearchRequest | None = None) -> CfsAiContext:
+    cache_key = f"payload_{request.app_mode if request else 'planning'}"
+    expires_key = f"expires_at_{request.app_mode if request else 'planning'}"
+    cached = _ASK_CFS_CONTEXT_CACHE.get(cache_key)
+    expires_at = _ASK_CFS_CONTEXT_CACHE.get(expires_key)
     if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached:
         return copy.deepcopy(cached)
 
@@ -111,10 +114,16 @@ def gather_cfs_ai_context(_db: Session) -> CfsAiContext:
     context["indicator_intelligence"] = indicator_intelligence or _fast_development_context(_db, context)
     context["indicator_summary"] = {}
     context["school_pressure"] = {"features": [], "summary": {}, "total_count": 0}
+    if request and request.app_mode == "economics":
+        try:
+            context["economics_intelligence"] = build_economics_intelligence(_db)
+        except Exception:
+            context["caveats"].append("Economics context is unavailable, so CFS used data-needed economics guidance.")
+            context["economics_intelligence"] = {}
 
     # ponytail: in-process cache; switch to shared cache if API runs multi-worker locally.
-    _ASK_CFS_CONTEXT_CACHE["payload"] = copy.deepcopy(context)
-    _ASK_CFS_CONTEXT_CACHE["expires_at"] = datetime.now(UTC) + ASK_CFS_CONTEXT_CACHE_TTL
+    _ASK_CFS_CONTEXT_CACHE[cache_key] = copy.deepcopy(context)
+    _ASK_CFS_CONTEXT_CACHE[expires_key] = datetime.now(UTC) + ASK_CFS_CONTEXT_CACHE_TTL
     return context
 
 

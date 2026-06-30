@@ -104,6 +104,7 @@ def main() -> int:
         )
         model_status = build_model_status(generated_at)
         model_lab_demo_clusters = build_model_lab_demo_clusters(conn, generated_at)
+        economics_intelligence = build_economics_intelligence_demo(conn, generated_at)
         sample_parcels = build_sample_parcels(conn, generated_at)
         map_layer_manifest = export_demo_map_layers(
             conn,
@@ -158,6 +159,7 @@ def main() -> int:
             "record_counts": {
                 "demo_map_layers": map_layer_manifest["layer_count"],
                 "sample_parcels": sample_parcels["total_count"],
+                "economics_signals": len(economics_intelligence["signals"]),
                 "school_capacity_rows": school_watch["utilization_seed"]["total_count"],
                 "permit_segment_buckets": len(permit_segments["by_permit_segment"]),
                 "development_annual_trends": len(development_trends["annual_trends"]),
@@ -165,6 +167,7 @@ def main() -> int:
             "source_label": "Local CFS PostGIS cached extract",
         },
         "indicator_intelligence.json": indicator_intelligence,
+        "economics_intelligence.json": economics_intelligence,
         "indicator_summary.json": indicator_summary,
         "development_trends.json": {
             "available": bool(development_trends["annual_trends"]),
@@ -502,6 +505,229 @@ def _demo_signal(
         "related_layers": related_layers,
         "data_freshness": generated_at,
         "source_mode": "demo",
+    }
+
+
+def build_economics_intelligence_demo(
+    conn: psycopg.Connection,
+    generated_at: str,
+) -> dict[str, Any]:
+    if not table_exists(conn, "parcels_enriched"):
+        return unavailable_economics_demo(generated_at, "parcels_enriched is unavailable.")
+
+    columns = set(table_columns(conn, "parcels_enriched"))
+    if not columns.intersection({"assessedvalue_numeric", "marketvalue_numeric", "parcel_area_acres_calc"}):
+        return unavailable_economics_demo(
+            generated_at,
+            "Parcel value and acreage fields are unavailable in the local extract.",
+        )
+
+    acreage = coalesce_numeric("p", columns, ["parcel_area_acres_calc", "acreage"])
+    assessed = coalesce_numeric("p", columns, ["assessedvalue_numeric", "marketvalue_numeric", "total_value_numeric"])
+    land = numeric_column("p", columns, "landvalue_numeric")
+    improvement = coalesce_numeric("p", columns, ["buildingvalue_numeric", "improvementvalue_numeric"])
+    if improvement == "NULL::numeric" and land != "NULL::numeric" and assessed != "NULL::numeric":
+        improvement = f"GREATEST(({assessed}) - ({land}), 0)"
+    rows = fetch_all(
+        conn,
+        f"""
+        WITH base AS (
+          SELECT
+            p.official_parcel_id,
+            {acreage} AS acreage,
+            {assessed} AS assessed_value,
+            {land} AS land_value,
+            {improvement} AS improvement_value,
+            COALESCE(NULLIF(p.subdiv_name, ''), NULLIF(p.nbh_name, ''), NULLIF(p.parcel_size_category, ''), 'Parcel context') AS geography_label
+          FROM public.parcels_enriched p
+          WHERE p.official_parcel_id IS NOT NULL
+        ),
+        calculated AS (
+          SELECT
+            *,
+            CASE WHEN acreage > 0 AND assessed_value IS NOT NULL THEN assessed_value / acreage ELSE NULL END AS value_per_acre,
+            CASE WHEN acreage > 0 AND land_value IS NOT NULL THEN land_value / acreage ELSE NULL END AS land_value_per_acre,
+            CASE WHEN acreage > 0 AND improvement_value IS NOT NULL THEN improvement_value / acreage ELSE NULL END AS improvement_value_per_acre,
+            CASE WHEN land_value > 0 AND improvement_value IS NOT NULL THEN improvement_value / land_value ELSE NULL END AS improvement_to_land_ratio
+          FROM base
+        )
+        SELECT *
+        FROM calculated
+        WHERE assessed_value IS NOT NULL OR value_per_acre IS NOT NULL
+        ORDER BY
+          CASE
+            WHEN improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5 THEN 0
+            WHEN value_per_acre < 150000 AND acreage >= 1.0 THEN 1
+            ELSE 2
+          END,
+          assessed_value DESC NULLS LAST
+        LIMIT 120
+        """,
+    )
+    signals = [economics_demo_signal(row) for row in rows]
+    summary = economics_demo_summary(signals, generated_at)
+    return {
+        "as_of": generated_at,
+        "caveats": [
+            "Portfolio Demo uses a cached CFS demo extract.",
+            "CFS Economics is screening-level context, not an official appraisal or tax bill.",
+            "Opportunity classes are review bands, not approval recommendations.",
+        ],
+        "data_readiness": [
+            economics_readiness("Parcel Value", bool(columns.intersection({"assessedvalue_numeric", "marketvalue_numeric"})), "Assessed/market value baseline", "Add current official appraisal extract if missing."),
+            economics_readiness("Acreage", bool(columns.intersection({"parcel_area_acres_calc", "acreage"})), "Value-per-acre denominator", "Add reliable parcel acreage."),
+            economics_readiness("Land / Improvement Split", bool(columns.intersection({"landvalue_numeric", "buildingvalue_numeric", "improvementvalue_numeric"})), "Improvement-to-land ratio", "Add land and improvement values."),
+            economics_readiness("Service Burden", False, "Constraint-adjusted opportunity", "Add official utility, school, and transportation service assumptions."),
+        ],
+        "kpis": economics_demo_kpis(summary),
+        "mode": "demo",
+        "scenario_templates": economics_scenario_templates(),
+        "signals": signals,
+        "summary": summary,
+        "watchlist": signals[:25],
+    }
+
+
+def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
+    value_per_acre = as_number(row.get("value_per_acre"))
+    ratio = as_number(row.get("improvement_to_land_ratio"))
+    land_value = as_number(row.get("land_value"))
+    acreage = as_number(row.get("acreage"))
+    if value_per_acre is None or acreage is None:
+        status, opportunity = "data_needed", "Needs More Data Before Recommendation"
+    elif ratio is not None and ratio < 0.65 and (land_value or 0) >= 100000 and acreage >= 0.5:
+        status, opportunity = "underbuilt_watch", "Underbuilt Redevelopment Candidate"
+    elif value_per_acre < 150000 and acreage >= 1.0:
+        status, opportunity = "tax_base_opportunity", "Underbuilt Redevelopment Candidate"
+    elif value_per_acre >= 500000:
+        status, opportunity = "stable_high_value", "High-Value Stable Parcel"
+    else:
+        status, opportunity = "redevelopment_opportunity", "Needs More Data Before Recommendation"
+    return {
+        "acreage": acreage,
+        "assessed_value": as_number(row.get("assessed_value")),
+        "caveats": [
+            "Screening-level economic context only.",
+            "Estimated tax context is not an official tax bill.",
+            "Contact fields are excluded.",
+        ],
+        "economic_status_band": status,
+        "estimated_county_tax": None,
+        "evidence": [
+            f"Value per acre: {round(value_per_acre) if value_per_acre is not None else 'data needed'}.",
+            f"Improvement-to-land ratio: {round(ratio, 2)}" if ratio is not None else "Improvement-to-land ratio needs land and improvement values.",
+        ],
+        "floodplain_context": None,
+        "geography_label": row.get("geography_label"),
+        "improvement_to_land_ratio": ratio,
+        "improvement_value": as_number(row.get("improvement_value")),
+        "improvement_value_per_acre": as_number(row.get("improvement_value_per_acre")),
+        "land_value": land_value,
+        "land_value_per_acre": as_number(row.get("land_value_per_acre")),
+        "opportunity_class": opportunity,
+        "parcel_id": row.get("official_parcel_id"),
+        "permit_activity_context": None,
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "related_layers": ["Value per Acre", "Underbuilt Parcel Watch", "Constraint-Adjusted Opportunity"],
+        "school_pressure_context": None,
+        "transportation_context": None,
+        "utility_readiness_context": "Official utility capacity remains a data need.",
+        "value_per_acre": value_per_acre,
+    }
+
+
+def economics_demo_summary(signals: list[dict[str, Any]], generated_at: str) -> dict[str, Any]:
+    value_per_acre = sorted(
+        value for value in (signal.get("value_per_acre") for signal in signals)
+        if isinstance(value, (int, float))
+    )
+    median = value_per_acre[len(value_per_acre) // 2] if value_per_acre else None
+    return {
+        "as_of": generated_at,
+        "data_needed_count": sum(1 for signal in signals if signal["economic_status_band"] == "data_needed"),
+        "high_opportunity_count": sum(1 for signal in signals if signal["economic_status_band"] in {"tax_base_opportunity", "redevelopment_opportunity"}),
+        "median_value_per_acre": median,
+        "source_mode": "demo",
+        "total_assessed_value": sum(signal.get("assessed_value") or 0 for signal in signals) or None,
+        "total_improvement_value": sum(signal.get("improvement_value") or 0 for signal in signals) or None,
+        "total_land_value": sum(signal.get("land_value") or 0 for signal in signals) or None,
+        "total_parcels_analyzed": len(signals),
+        "underbuilt_candidate_count": sum(1 for signal in signals if signal["economic_status_band"] == "underbuilt_watch"),
+    }
+
+
+def economics_demo_kpis(summary: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        economics_kpi("parcels_analyzed", "Parcels analyzed", summary["total_parcels_analyzed"], "parcels", "stable_high_value", "Parcel count with economics screening context."),
+        economics_kpi("assessed_value_coverage", "Assessed value coverage", summary["total_assessed_value"], "dollars", "stable_high_value", "Screening-level assessed value total."),
+        economics_kpi("median_value_per_acre", "Median value per acre", summary["median_value_per_acre"], "dollars_per_acre", "redevelopment_opportunity", "Parcel land efficiency context."),
+        economics_kpi("underbuilt_candidates", "Underbuilt candidates", summary["underbuilt_candidate_count"], "parcels", "underbuilt_watch", "High land value plus low improvement-to-land ratio."),
+        economics_kpi("tax_base_opportunity", "Tax-base opportunity signals", summary["high_opportunity_count"], "signals", "tax_base_opportunity", "Low current value per acre with enough acreage for review."),
+        economics_kpi("data_needed", "Economic data needed", summary["data_needed_count"], "parcels", "data_needed", "Records missing key value or acreage fields."),
+    ]
+
+
+def economics_kpi(id: str, label: str, value: Any, unit: str | None, status: str, caveat: str) -> dict[str, Any]:
+    return {"caveat": caveat, "id": id, "label": label, "status_band": status, "unit": unit, "value": value}
+
+
+def economics_readiness(domain: str, available: bool, current_use: str, next_need: str) -> dict[str, Any]:
+    return {
+        "caveat": "Available for screening-level use." if available else "Missing fields reduce economics confidence.",
+        "current_use": current_use,
+        "data_status": "available" if available else "data_needed",
+        "domain": domain,
+        "gap_or_next_need": next_need,
+    }
+
+
+def economics_scenario_templates() -> list[dict[str, Any]]:
+    return [
+        economics_scenario("residential_growth", "Residential Growth Scenario", "Tests housing-oriented value lift against school, utility, and transportation burden."),
+        economics_scenario("commercial_corridor", "Commercial Corridor Scenario", "Tests corridor tax-base opportunity where access and zoning context support review."),
+        economics_scenario("industrial_employment", "Industrial / Employment Scenario", "Tests employment land opportunity against infrastructure and constraint context."),
+        economics_scenario("mixed_use", "Mixed-Use Scenario", "Tests blended value and service-burden assumptions."),
+        economics_scenario("conservation_low_intensity", "Conservation / Low-Intensity Scenario", "Tests low-intensity alternatives where constraints dominate."),
+    ]
+
+
+def economics_scenario(id: str, title: str, what_it_tests: str) -> dict[str, Any]:
+    return {
+        "caveats": [
+            "Scenario values depend on assumptions.",
+            "This is not an approval recommendation or official fiscal impact study.",
+        ],
+        "data_confidence": "screening",
+        "id": id,
+        "required_assumptions": ["future use intensity", "service burden", "infrastructure constraints"],
+        "title": title,
+        "what_it_tests": what_it_tests,
+    }
+
+
+def unavailable_economics_demo(generated_at: str, reason: str) -> dict[str, Any]:
+    summary = {
+        "as_of": generated_at,
+        "data_needed_count": 1,
+        "high_opportunity_count": 0,
+        "median_value_per_acre": None,
+        "source_mode": "demo",
+        "total_assessed_value": None,
+        "total_improvement_value": None,
+        "total_land_value": None,
+        "total_parcels_analyzed": 0,
+        "underbuilt_candidate_count": 0,
+    }
+    return {
+        "as_of": generated_at,
+        "caveats": [reason, "CFS Economics is screening-level context, not an official appraisal or tax bill."],
+        "data_readiness": [economics_readiness("Parcel Economics", False, "Economics mode unavailable state", reason)],
+        "kpis": economics_demo_kpis(summary),
+        "mode": "demo",
+        "scenario_templates": economics_scenario_templates(),
+        "signals": [],
+        "summary": summary,
+        "watchlist": [],
     }
 
 
@@ -2612,6 +2838,36 @@ def table_exists(conn: psycopg.Connection, table_name: str) -> bool:
             (f"public.{table_name}",),
         )["exists"],
     )
+
+
+def table_columns(conn: psycopg.Connection, table_name: str) -> list[str]:
+    return [
+        str(row["column_name"])
+        for row in fetch_all(
+            conn,
+            """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = %s
+            """,
+            (table_name,),
+        )
+    ]
+
+
+def numeric_column(alias: str, columns: set[str], name: str) -> str:
+    return (
+        f"NULLIF({alias}.{name}::text, '')::numeric"
+        if name in columns
+        else "NULL::numeric"
+    )
+
+
+def coalesce_numeric(alias: str, columns: set[str], names: list[str]) -> str:
+    expressions = [
+        numeric_column(alias, columns, name) for name in names if name in columns
+    ]
+    return f"COALESCE({', '.join(expressions)})" if expressions else "NULL::numeric"
 
 
 def relation_exists(conn: psycopg.Connection, relation_name: str) -> bool:

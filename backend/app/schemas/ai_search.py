@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 CfsAiDomain = Literal[
     "data_readiness",
+    "economics",
     "flood",
     "general",
     "methodology",
@@ -18,6 +19,7 @@ CfsAiDomain = Literal[
 CfsAiProvider = Literal["none", "openai"]
 CfsAiDashboardFocusDomain = Literal[
     "data_readiness",
+    "economics",
     "flood",
     "general",
     "model_lab",
@@ -53,6 +55,7 @@ class CfsAiSelectedSignal(BaseModel):
 
 
 class CfsAiSearchRequest(BaseModel):
+    app_mode: Literal["economics", "planning"] = "planning"
     conversation_context: list[CfsAiConversationTurn] = Field(default_factory=list, max_length=5)
     filters: CfsAiSearchFilters = Field(default_factory=CfsAiSearchFilters)
     mode: Literal["demo", "live"] = "live"

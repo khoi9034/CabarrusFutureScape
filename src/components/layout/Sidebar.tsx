@@ -53,12 +53,21 @@ export function Sidebar({
   onToggleCollapsed,
   overviewCommandMode = "parcel",
 }: SidebarProps) {
+  const { cfsAppMode } = useDashboardState();
+  const economicsMode = cfsAppMode === "economics";
   const collapsedLabel = getCollapsedRailLabel(overviewCommandMode);
+  const expandedTitle = getExpandedRailTitle(overviewCommandMode);
+  const modeAwareCollapsedLabel = economicsMode
+    ? getCollapsedRailLabel(overviewCommandMode, true)
+    : collapsedLabel;
+  const modeAwareExpandedTitle = economicsMode
+    ? getExpandedRailTitle(overviewCommandMode, true)
+    : expandedTitle;
 
   if (collapsed) {
     return (
       <aside
-        aria-label={`Collapsed ${collapsedLabel} controls`}
+        aria-label={`Collapsed ${modeAwareCollapsedLabel} controls`}
         className={cn(
           "app-chrome glass-panel cfs-layer-rail cfs-layer-rail--collapsed relative order-2 grid h-full min-h-[22rem] min-w-0 grid-rows-[auto_minmax(0,1fr)_auto] place-items-center overflow-visible rounded-lg p-2 md:max-h-none lg:order-1",
           embedded && "h-full order-none md:max-h-none lg:order-none",
@@ -73,23 +82,23 @@ export function Sidebar({
           />
         ) : null}
         <button
-          aria-label={`Expand ${collapsedLabel} panel`}
+          aria-label={`Expand ${modeAwareCollapsedLabel} panel`}
           className="flex h-10 w-10 items-center justify-center rounded-md border border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#9eeeff]"
           onClick={onToggleCollapsed}
-          title={`Expand ${collapsedLabel} panel`}
+          title={`Expand ${modeAwareCollapsedLabel} panel`}
           type="button"
         >
           <CollapsedRailGlyph mode={overviewCommandMode} />
         </button>
         <button
-          aria-label={`Expand ${collapsedLabel} panel`}
+          aria-label={`Expand ${modeAwareCollapsedLabel} panel`}
           className="flex h-full min-h-0 w-full items-center justify-center py-3"
           onClick={onToggleCollapsed}
-          title={`Expand ${collapsedLabel} panel`}
+          title={`Expand ${modeAwareCollapsedLabel} panel`}
           type="button"
         >
           <span className="[writing-mode:vertical-rl] rotate-180 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-            {collapsedLabel}
+            {modeAwareCollapsedLabel}
           </span>
         </button>
         <div
@@ -123,21 +132,21 @@ export function Sidebar({
               Advanced
             </p>
             <h2 className="mt-1 text-lg font-semibold leading-6 text-white">
-              {getExpandedRailTitle(overviewCommandMode)}
+              {modeAwareExpandedTitle}
             </h2>
           </div>
           <button
             aria-label={
               overviewCommandMode === "countywide"
                 ? "Collapse map controls"
-                : `Collapse ${getExpandedRailTitle(overviewCommandMode)}`
+                : `Collapse ${modeAwareExpandedTitle}`
             }
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-[#d8b86a]/35 hover:bg-[#d8b86a]/10 hover:text-[#f0cd79] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/60"
             onClick={onToggleCollapsed}
             title={
               overviewCommandMode === "countywide"
                 ? "Collapse map controls"
-                : `Collapse ${getExpandedRailTitle(overviewCommandMode)}`
+                : `Collapse ${modeAwareExpandedTitle}`
             }
             type="button"
           >
@@ -163,6 +172,17 @@ function ModeSpecificRailContent({
   mode: OverviewCommandMode;
   onCollapseDrawer?: () => void;
 }) {
+  const { cfsAppMode } = useDashboardState();
+  const economicsMode = cfsAppMode === "economics";
+
+  if (economicsMode && mode === "modelLab") {
+    return <EconomicScenarioControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+  }
+
+  if (economicsMode && mode === "countywide") {
+    return <EconomicsLayerControlsPanel onCollapseDrawer={onCollapseDrawer} />;
+  }
+
   if (mode === "modelLab") {
     return <ModelLabControlsPanel onCollapseDrawer={onCollapseDrawer} />;
   }
@@ -180,6 +200,141 @@ function ModeSpecificRailContent({
   }
 
   return <LayerToggle />;
+}
+
+function EconomicsLayerControlsPanel({
+  onCollapseDrawer,
+}: {
+  onCollapseDrawer?: () => void;
+}) {
+  const layers = [
+    {
+      caveat: "Assessed value divided by acreage where fields are available.",
+      label: "Value per Acre",
+      status: "Screening",
+    },
+    {
+      caveat: "High land value plus low improvement-to-land ratio.",
+      label: "Underbuilt Parcel Watch",
+      status: "Watchlist",
+    },
+    {
+      caveat: "Low current value per acre plus growth context where available.",
+      label: "Tax-Base Opportunity",
+      status: "Opportunity",
+    },
+    {
+      caveat: "Opportunity reduced by floodplain, schools, utilities, and transportation uncertainty.",
+      label: "Constraint-Adjusted Opportunity",
+      status: "Caveated",
+    },
+    {
+      caveat: "Scenario candidates require assumptions before fiscal interpretation.",
+      label: "Scenario Candidates",
+      status: "Scenario",
+    },
+  ];
+
+  return (
+    <div className="space-y-3">
+      <section className="cfs-command-card rounded-lg border-[#d8b86a]/20 bg-[#1b1506]/35 p-3">
+        <div className="flex items-start gap-3">
+          <Layers3 className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
+              Economic Workspace
+            </p>
+            <h3 className="mt-1 text-sm font-semibold text-white">
+              Parcel economic screening
+            </h3>
+            <p className="mt-2 text-xs leading-5 text-slate-400">
+              Review value efficiency, underbuilt watch, tax-base opportunity,
+              and constraints without exposing contact fields.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {layers.map((layer) => (
+        <section
+          className="cfs-command-card rounded-lg border-white/10 p-3"
+          key={layer.label}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold text-white">{layer.label}</p>
+              <p className="mt-1 text-[11px] leading-4 text-slate-400">
+                {layer.caveat}
+              </p>
+            </div>
+            <span className="rounded-full border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-[#b7f0ff]">
+              {layer.status}
+            </span>
+          </div>
+        </section>
+      ))}
+
+      <button
+        className="w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
+        onClick={onCollapseDrawer}
+        type="button"
+      >
+        Collapse economic controls
+      </button>
+    </div>
+  );
+}
+
+function EconomicScenarioControlsPanel({
+  onCollapseDrawer,
+}: {
+  onCollapseDrawer?: () => void;
+}) {
+  const scenarios = [
+    "Residential Growth Scenario",
+    "Commercial Corridor Scenario",
+    "Industrial / Employment Scenario",
+    "Mixed-Use Scenario",
+    "Conservation / Low-Intensity Scenario",
+  ];
+
+  return (
+    <div className="space-y-3">
+      <section className="cfs-command-card rounded-lg border-[#d8b86a]/20 bg-[#1b1506]/40 p-3">
+        <div className="flex items-start gap-3">
+          <FlaskConical className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
+              Economic Scenario Lab
+            </p>
+            <h3 className="mt-1 text-sm font-semibold text-white">
+              Scenario screening
+            </h3>
+            <p className="mt-2 text-xs leading-5 text-slate-400">
+              Compare current value context with scenario assumptions,
+              tax-base lift, constraint burden, and data caveats.
+            </p>
+          </div>
+        </div>
+      </section>
+      {scenarios.map((scenario) => (
+        <section className="cfs-command-card rounded-lg p-3" key={scenario}>
+          <p className="text-xs font-semibold text-white">{scenario}</p>
+          <p className="mt-1 text-[11px] leading-4 text-slate-400">
+            Screening template only. Values depend on assumptions and source
+            verification.
+          </p>
+        </section>
+      ))}
+      <button
+        className="w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.06]"
+        onClick={onCollapseDrawer}
+        type="button"
+      >
+        Collapse scenario controls
+      </button>
+    </div>
+  );
 }
 
 function CollapsedRailGlyph({ mode }: { mode: OverviewCommandMode }) {
@@ -707,9 +862,9 @@ function formatRailModeLabel(mode: OverviewCommandMode) {
   return "Search Parcel";
 }
 
-function getCollapsedRailLabel(mode: OverviewCommandMode) {
+function getCollapsedRailLabel(mode: OverviewCommandMode, economicsMode = false) {
   if (mode === "modelLab") {
-    return "Model Lab";
+    return economicsMode ? "Scenario Lab" : "Model Lab";
   }
 
   if (mode === "parcel") {
@@ -724,12 +879,12 @@ function getCollapsedRailLabel(mode: OverviewCommandMode) {
     return "Indicators";
   }
 
-  return "Layers";
+  return economicsMode ? "Economics" : "Layers";
 }
 
-function getExpandedRailTitle(mode: OverviewCommandMode) {
+function getExpandedRailTitle(mode: OverviewCommandMode, economicsMode = false) {
   if (mode === "modelLab") {
-    return "Model Lab";
+    return economicsMode ? "Economic Scenario Lab" : "Model Lab";
   }
 
   if (mode === "parcel") {
@@ -744,7 +899,7 @@ function getExpandedRailTitle(mode: OverviewCommandMode) {
     return "Indicator Center";
   }
 
-  return "Map Controls";
+  return economicsMode ? "Economic Layers" : "Map Controls";
 }
 
 function LayerRailEdgeHandle({

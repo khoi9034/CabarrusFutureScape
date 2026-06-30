@@ -37,6 +37,7 @@ import {
   type EnterpriseDiagnosticCheck,
   type EnterpriseDiagnosticStatus,
 } from "@/hooks/useEnterpriseDiagnostics";
+import { useDashboardState } from "@/hooks/useDashboardState";
 
 type ExplorerSection =
   | "overview"
@@ -731,6 +732,129 @@ const faqItems = [
 ];
 
 export function MethodologyWorkspace() {
+  const { cfsAppMode } = useDashboardState();
+
+  if (cfsAppMode === "economics") {
+    return <EconomicsMethodologyWorkspace />;
+  }
+
+  return <PlanningMethodologyWorkspace />;
+}
+
+function EconomicsMethodologyWorkspace() {
+  const methods = [
+    {
+      title: "Value per acre",
+      detail:
+        "Assessed value divided by parcel acreage. CFS uses it as a land-efficiency screen, not an appraisal conclusion.",
+    },
+    {
+      title: "Improvement-to-land ratio",
+      detail:
+        "Improvement value divided by land value where both fields exist. Low ratios can flag an underbuilt watch item for source review.",
+    },
+    {
+      title: "Underbuilt parcel watch",
+      detail:
+        "High land value, low improvement-to-land ratio, and meaningful acreage create a screening-level review signal.",
+    },
+    {
+      title: "Tax-base opportunity",
+      detail:
+        "CFS compares current value context with growth pressure, constraints, and service-burden caveats to identify places worth scenario review.",
+    },
+    {
+      title: "Constraint-adjusted opportunity",
+      detail:
+        "Floodplain review, preliminary school pressure, utility uncertainty, transportation context, and missing data reduce confidence.",
+    },
+    {
+      title: "Scenario screening",
+      detail:
+        "Residential, commercial, industrial, mixed-use, and low-intensity scenarios test assumptions. Scenario values depend on inputs.",
+    },
+  ];
+  const caveats = [
+    "CFS Economics is not an official appraisal.",
+    "CFS Economics is not an official fiscal impact study.",
+    "CFS Economics is not a project approval recommendation.",
+    "Estimated tax context is screening-level and must be verified.",
+    "Utility, school, transportation, and scenario assumptions may be incomplete.",
+  ];
+
+  return (
+    <main className="relative z-10 min-h-0 flex-1 overflow-auto p-3 lg:p-4">
+      <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-4">
+        <section className="cfs-command-surface rounded-2xl border-[#d8b86a]/20 p-5 md:p-7">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f0cd79]">
+            CFS Economics Methodology
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold text-white">
+            Screening-level parcel economic intelligence
+          </h1>
+          <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-300">
+            CFS Economics connects parcel/tax value, acreage, permit activity,
+            constraints, and service-burden caveats so users can screen where
+            economic opportunity may need deeper review. It does not make
+            approval decisions or replace official fiscal analysis.
+          </p>
+        </section>
+
+        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {methods.map((method) => (
+            <article
+              className="cfs-command-card rounded-xl border-white/10 p-4"
+              key={method.title}
+            >
+              <div className="flex items-start gap-3">
+                <CalculatorIcon />
+                <div>
+                  <h2 className="text-sm font-semibold text-white">
+                    {method.title}
+                  </h2>
+                  <p className="mt-2 text-xs leading-6 text-slate-400">
+                    {method.detail}
+                  </p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </section>
+
+        <section className="cfs-command-surface rounded-2xl border-[#f0cd79]/20 p-5">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-1 h-5 w-5 shrink-0 text-[#f0cd79]" />
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f0cd79]">
+                Safe-use caveats
+              </p>
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                {caveats.map((caveat) => (
+                  <p
+                    className="rounded-lg border border-[#f0cd79]/15 bg-[#f0cd79]/[0.055] px-3 py-2 text-xs leading-5 text-[#ffe8a6]"
+                    key={caveat}
+                  >
+                    {caveat}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+function CalculatorIcon() {
+  return (
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#68d8ff]/18 bg-[#68d8ff]/10 text-[#9be9ff]">
+      <Database className="h-4 w-4" />
+    </span>
+  );
+}
+
+function PlanningMethodologyWorkspace() {
   const [activeSection, setActiveSection] = useState<ExplorerSection>(() =>
     typeof window !== "undefined" &&
     window.location.hash === "#methodology-model-lab"

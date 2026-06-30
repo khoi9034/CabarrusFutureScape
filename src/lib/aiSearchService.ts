@@ -1,6 +1,7 @@
 ﻿import { apiPost, USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import {
   getDemoDevelopmentTrends,
+  getDemoEconomicsIntelligence,
   getDemoFloodSummary,
   getDemoIndicatorIntelligence,
   getDemoIndicatorSummary,
@@ -30,6 +31,16 @@ export const askCfsSuggestedPrompts = [
   "What should I inspect first?",
 ] as const;
 
+export const askCfsEconomicsSuggestedPrompts = [
+  "Where are the strongest underbuilt parcel signals?",
+  "Which areas have high tax-base opportunity?",
+  "What parcels look economically constrained?",
+  "Explain value per acre.",
+  "Which scenario should I inspect first?",
+  "Where is economic data incomplete?",
+  "How should I interpret improvement-to-land ratio?",
+] as const;
+
 export async function searchCfsAi(
   request: CfsAiSearchRequest,
   options: { signal?: AbortSignal } = {},
@@ -52,6 +63,10 @@ export async function searchCfsAi(
 async function searchDemoCfsAi(
   request: CfsAiSearchRequest,
 ): Promise<CfsAiSearchResponse> {
+  if (request.app_mode === "economics") {
+    return sanitizeDemoResponse(await demoEconomicsAnswer());
+  }
+
   const context = await buildDemoAiContext();
   const domains = request.filters?.domains?.length
     ? request.filters.domains
@@ -105,6 +120,109 @@ async function searchDemoCfsAi(
               : demoGeneralAnswer(context, domains);
 
   return sanitizeDemoResponse(response);
+}
+
+async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
+  const economics = await getDemoEconomicsIntelligence();
+  const summary = economics.summary;
+  const watchlist = economics.watchlist.slice(0, 4);
+  const missing = economics.data_readiness
+    .filter((row) => row.data_status !== "available")
+    .slice(0, 4)
+    .map((row) => `${row.domain}: ${row.gap_or_next_need}`);
+  const topSignals = watchlist.map(
+    (row) =>
+      `${row.geography_label ?? row.parcel_id}: ${row.opportunity_class} (${row.economic_status_band.replaceAll("_", " ")})`,
+  );
+  return {
+    answer: briefing(
+      [
+        "Executive summary",
+        `Based on the cached demo extract, CFS Economics reviewed ${format(summary.total_parcels_analyzed)} parcels for screening-level value and opportunity context. It shows ${format(summary.underbuilt_candidate_count)} underbuilt watch candidates and ${format(summary.high_opportunity_count)} tax-base opportunity signals. This is not an official appraisal, tax bill, fiscal impact study, or approval recommendation.`,
+      ],
+      [
+        "Economic signal",
+        bullets([
+          `Total assessed value coverage: ${currency(summary.total_assessed_value)}.`,
+          `Median value per acre: ${currency(summary.median_value_per_acre)}.`,
+          `Underbuilt watch candidates: ${format(summary.underbuilt_candidate_count)}.`,
+          `Data-needed records: ${format(summary.data_needed_count)}.`,
+        ]),
+      ],
+      [
+        "Evidence",
+        bullets(topSignals.length ? topSignals : ["No parcel-level economics watchlist rows are available in the cached demo extract."]),
+      ],
+      [
+        "Fiscal / service interpretation",
+        "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as a scenario candidate.",
+      ],
+      [
+        "Inspect next",
+        bullets([
+          "Value per Acre.",
+          "Underbuilt Parcel Watch.",
+          "Tax-Base Opportunity.",
+          "Constraint-Adjusted Opportunity.",
+          "Economic Scenario Lab.",
+        ]),
+      ],
+      [
+        "Caveats",
+        bullets([
+          "Portfolio Demo uses a cached demo extract.",
+          "Estimated tax context is screening-level only.",
+          "Scenario values depend on assumptions.",
+          "Missing utility, school, transportation, or value fields reduce confidence.",
+          ...missing,
+        ]),
+      ],
+    ),
+    as_of: economics.as_of,
+    caveats: [
+      "Portfolio Demo uses a cached demo extract.",
+      "CFS Economics is screening-level context, not an official appraisal or tax bill.",
+      "Opportunity classes are review bands, not approval recommendations.",
+    ],
+    dashboard_actions: {
+      focus_domain: "economics",
+      highlight_kpis: ["underbuilt_candidates", "tax_base_opportunity"],
+      recommended_layers: [
+        "Value per Acre",
+        "Underbuilt Parcel Watch",
+        "Tax-Base Opportunity",
+        "Constraint-Adjusted Opportunity",
+      ],
+      sort_watchlist_by: "severity",
+    },
+    data_mode: "demo",
+    domains: ["economics"],
+    evidence: [
+      evidence(
+        "Economics summary",
+        `${format(summary.total_parcels_analyzed)} parcels; ${format(summary.underbuilt_candidate_count)} underbuilt candidates; ${format(summary.high_opportunity_count)} opportunity signals.`,
+        "public/demo-data/economics_intelligence.json",
+        summary.total_parcels_analyzed ? "available" : "limited",
+      ),
+      evidence(
+        "Economic watchlist",
+        topSignals.join("; ") || "No watchlist rows are available.",
+        "public/demo-data/economics_intelligence.json",
+        topSignals.length ? "available" : "limited",
+      ),
+    ],
+    provider: "none",
+    related_layers: [
+      "Value per Acre",
+      "Underbuilt Parcel Watch",
+      "Constraint-Adjusted Opportunity",
+    ],
+    suggested_actions: [
+      "Open Economic Workspace and compare Value per Acre with Underbuilt Parcel Watch.",
+      "Use Economic Scenario Lab as screening context only.",
+      "Ask: Where is economic data incomplete?",
+    ],
+  };
 }
 
 function demoSelectedSignalAnswer(
@@ -528,6 +646,7 @@ function classifyDemoDomains(query: string): CfsAiDomain[] {
     if (terms.some((term) => normalized.includes(term))) domains.push(domain);
   };
   add("schools", ["school", "attendance", "capacity", "utilization"]);
+  add("economics", ["economic", "economics", "tax", "value", "acre", "underbuilt", "redevelopment", "fiscal", "scenario"]);
   add("flood", ["flood", "fema", "floodplain", "floodway"]);
   add("permits", ["permit", "development", "growth", "trend", "activity"]);
   add("transportation", ["transportation", "traffic", "road", "stip", "aadt"]);
@@ -577,6 +696,7 @@ function previousDemoDomains(turns: CfsAiConversationTurn[]): CfsAiDomain[] {
   const domains: CfsAiDomain[] = [];
   const allowed = new Set<CfsAiDomain>([
     "data_readiness",
+    "economics",
     "flood",
     "model_lab",
     "permits",
@@ -607,6 +727,7 @@ function selectedSignalDemoDomains(signal: CfsAiSelectedSignal): CfsAiDomain[] {
   const normalized = signal.domain.toLowerCase().replaceAll("-", "_").replaceAll(" ", "_");
   const direct: Record<string, CfsAiDomain> = {
     data_readiness: "data_readiness",
+    economics: "economics",
     development_activity: "permits",
     flood: "flood",
     floodplain_review: "flood",
@@ -698,6 +819,17 @@ function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActio
       highlight_kpis: ["data_readiness"],
       sort_watchlist_by: "data_gap",
     },
+    economics: {
+      focus_domain: "economics",
+      highlight_kpis: ["underbuilt_candidates", "tax_base_opportunity"],
+      recommended_layers: [
+        "Value per Acre",
+        "Underbuilt Parcel Watch",
+        "Tax-Base Opportunity",
+        "Constraint-Adjusted Opportunity",
+      ],
+      sort_watchlist_by: "severity",
+    },
     flood: {
       focus_domain: "flood",
       highlight_kpis: ["floodplain_review"],
@@ -756,6 +888,7 @@ function dashboardActionsForDomains(domains: CfsAiDomain[]): CfsAiDashboardActio
 function relatedLayers(domains: CfsAiDomain[]) {
   const layerMap: Record<CfsAiDomain, string[]> = {
     data_readiness: ["Data Still Needed"],
+    economics: ["Value per Acre", "Underbuilt Parcel Watch", "Constraint-Adjusted Opportunity"],
     flood: ["Floodplain Review"],
     general: ["Development Hotspots", "Floodplain Review", "School Utilization + Permit Pressure"],
     methodology: ["Methodology"],
@@ -791,6 +924,10 @@ function sanitizeDemoResponse(response: CfsAiSearchResponse) {
 
 function format(value: unknown) {
   return typeof value === "number" ? value.toLocaleString("en-US") : "not available";
+}
+
+function currency(value: unknown) {
+  return typeof value === "number" ? `$${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}` : "not available";
 }
 
 function briefing(...sections: Array<[string, string]>) {

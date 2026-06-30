@@ -39,6 +39,7 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
     expected_files = {
         "demo_manifest.json",
         "development_years.json",
+        "economics_intelligence.json",
         "indicator_summary.json",
         "indicator_intelligence.json",
         "development_trends.json",
@@ -202,3 +203,22 @@ def test_portfolio_demo_mode_is_documented() -> None:
     assert "NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo" in env_example
     assert "NEXT_PUBLIC_USE_BACKEND_API=false" in env_example
     assert "public/demo-data" in deployment_report
+
+
+def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
+    top_nav = read("src/components/layout/TopNav.tsx")
+    dashboard_state = read("src/hooks/useDashboardState.tsx")
+    indicator_center = read("src/components/dashboard/IndicatorCenterWorkspace.tsx")
+    economics_service = read("src/lib/economicsIntelligenceService.ts")
+    ask_service = read("src/lib/aiSearchService.ts")
+
+    assert "Planning Intelligence" in top_nav
+    assert "Economic Intelligence" in top_nav
+    assert "setCfsAppMode" in top_nav
+    assert "CfsAppMode" in dashboard_state
+    assert "localStorage.setItem(CFS_APP_MODE_STORAGE_KEY" in dashboard_state
+    assert "EconomicMissionControl" in indicator_center
+    assert "getDemoEconomicsIntelligence" in economics_service
+    assert '"/economics/intelligence"' in economics_service
+    assert "askCfsEconomicsSuggestedPrompts" in ask_service
+    assert 'app_mode === "economics"' in ask_service

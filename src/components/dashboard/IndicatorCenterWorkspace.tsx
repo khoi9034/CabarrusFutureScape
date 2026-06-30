@@ -30,6 +30,7 @@ import {
   CFS_PLANNING_SNAPSHOT_SAVED_EVENT,
 } from "@/components/dashboard/OverviewCommandCenter";
 import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
+import { EconomicMissionControl } from "@/components/dashboard/EconomicMissionControl";
 import {
   buildIndicatorCenterReviewThemes,
   indicatorCenterDefinitions,
@@ -385,6 +386,16 @@ function inlineSnapshotStyles(source: Element, target: Element) {
 }
 
 export function IndicatorCenterWorkspace() {
+  const { cfsAppMode } = useDashboardState();
+
+  if (cfsAppMode === "economics") {
+    return <EconomicMissionControl />;
+  }
+
+  return <PlanningIndicatorCenterWorkspace />;
+}
+
+function PlanningIndicatorCenterWorkspace() {
   const {
     selectedIndicatorCenterContext,
     savePlanningSnapshot,
@@ -793,6 +804,7 @@ export function IndicatorCenterWorkspace() {
 
       <div className="mt-4">
         <AskCfsPanel
+          appMode="planning"
           externalRequest={askCfsExternalRequest}
           onResponse={handleAskCfsResponse}
         />

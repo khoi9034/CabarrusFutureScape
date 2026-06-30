@@ -1,5 +1,6 @@
 export type CfsAiDomain =
   | "data_readiness"
+  | "economics"
   | "flood"
   | "general"
   | "methodology"
@@ -11,6 +12,7 @@ export type CfsAiDomain =
   | "zoning";
 
 export interface CfsAiSearchRequest {
+  app_mode?: "economics" | "planning";
   conversation_context?: CfsAiConversationTurn[];
   filters?: {
     domains?: CfsAiDomain[];
@@ -53,6 +55,7 @@ export interface CfsAiDashboardActions {
   } | null;
   focus_domain?:
     | "data_readiness"
+    | "economics"
     | "flood"
     | "general"
     | "model_lab"

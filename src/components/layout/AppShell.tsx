@@ -41,7 +41,7 @@ import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
-import type { OverviewPanelWidthPreset } from "@/types";
+import type { CfsAppMode, OverviewPanelWidthPreset } from "@/types";
 
 const LEFT_PANEL_WIDTHS: Record<OverviewPanelWidthPreset, number> = {
   compact: 320,
@@ -81,6 +81,7 @@ function ProductShell() {
     floodConstraintsEnabled,
     floodZonesEnabled,
     isMapFocusMode,
+    cfsAppMode,
     parcelReviewView,
     productMode,
     selectedParcelId,
@@ -166,6 +167,7 @@ function ProductShell() {
         </EnterpriseErrorBoundary>
       ) : overviewLandingMode ? (
         <OverviewLandingPage
+          cfsAppMode={cfsAppMode}
           onGoWorkspace={() => {
             setOverviewCommandMode("countywide");
             setOverviewLayoutPanel("left", "collapsed");
@@ -188,15 +190,63 @@ function ProductShell() {
 }
 
 function OverviewLandingPage({
+  cfsAppMode,
   onGoWorkspace,
   onOpenMethodology,
   onOpenPlanningSnapshot,
 }: {
+  cfsAppMode: CfsAppMode;
   onGoWorkspace: () => void;
   onOpenMethodology: () => void;
   onOpenPlanningSnapshot: () => void;
 }) {
-  const capabilityCards = [
+  const economicsMode = cfsAppMode === "economics";
+  const capabilityCards = economicsMode
+    ? [
+        {
+          icon: Gauge,
+          purpose: "Assessed value, value per acre, and baseline coverage.",
+          status: "Baseline",
+          title: "Parcel Economic Baseline",
+        },
+        {
+          icon: BarChart3,
+          purpose: "Value per acre and land efficiency screening.",
+          status: "Screening",
+          title: "Value Per Acre",
+        },
+        {
+          icon: Building2,
+          purpose: "Land value vs improvement value context.",
+          status: "Ratio",
+          title: "Improvement-to-Land",
+        },
+        {
+          icon: Binoculars,
+          purpose: "High land value plus low improvement context.",
+          status: "Watchlist",
+          title: "Underbuilt Watch",
+        },
+        {
+          icon: Network,
+          purpose: "Tax-base opportunity adjusted by constraints.",
+          status: "Opportunity",
+          title: "Constraint-Adjusted Opportunity",
+        },
+        {
+          icon: FlaskConical,
+          purpose: "Scenario screening for fiscal and service-burden context.",
+          status: "Scenario",
+          title: "Economic Scenario Lab",
+        },
+        {
+          icon: FileCheck2,
+          purpose: "Report-ready economic baseline snapshots.",
+          status: "Report-ready",
+          title: "Economic Snapshot",
+        },
+      ]
+    : [
     {
       icon: Search,
       purpose: "Search parcel, PIN, owner, address, subdivision.",
@@ -239,15 +289,50 @@ function OverviewLandingPage({
       status: "Report-ready",
       title: "Planning Snapshot",
     },
-  ];
-  const operatingFlow = [
+      ];
+  const operatingFlow = economicsMode
+    ? [
+        { icon: Database, label: "Parcel / Tax Context" },
+        { icon: BarChart3, label: "Value Efficiency" },
+        { icon: Binoculars, label: "Opportunity Watch" },
+        { icon: ShieldAlert, label: "Constraint Adjustment" },
+        { icon: Printer, label: "Economic Snapshot" },
+      ]
+    : [
     { icon: Database, label: "Data Sources" },
     { icon: MapPinned, label: "Parcel Intelligence" },
     { icon: BarChart3, label: "Monitoring Indicators" },
     { icon: FlaskConical, label: "Model Research" },
     { icon: Printer, label: "Planning Snapshot" },
-  ];
-  const todayCards = [
+      ];
+  const todayCards = economicsMode
+    ? [
+        {
+          icon: Search,
+          text: "Search parcels without exposing contact fields",
+        },
+        {
+          icon: Layers3,
+          text: "Review value per acre and underbuilt watch layers",
+        },
+        {
+          icon: Gauge,
+          text: "Open Economic Mission Control",
+        },
+        {
+          icon: FlaskConical,
+          text: "Screen economic scenarios",
+        },
+        {
+          icon: FileText,
+          text: "Save Economic Snapshots",
+        },
+        {
+          icon: Printer,
+          text: "Print screening-level summaries",
+        },
+      ]
+    : [
     {
       icon: Search,
       text: "Search and select parcels",
@@ -276,7 +361,7 @@ function OverviewLandingPage({
       icon: Printer,
       text: "Print executive summaries",
     },
-  ];
+      ];
   const officialDataNeeded = [
     "WSACC true utility capacity",
     "Official school enrollment/capacity",
@@ -287,11 +372,21 @@ function OverviewLandingPage({
     "Planned utility extensions",
   ];
   const trustCaveats = [
-    "Monitoring indicators are not official determinations.",
-    "Model Lab is internal research only.",
-    "No exact parcel probabilities are shown.",
-    "Utility proxy does not confirm capacity.",
-    "Preliminary school capacity indicators need official verification.",
+    ...(economicsMode
+      ? [
+          "CFS Economics is not an official appraisal.",
+          "Estimated tax context is screening-level only.",
+          "Opportunity classes are not approval recommendations.",
+          "Scenario values depend on assumptions.",
+          "Service burden data may be incomplete.",
+        ]
+      : [
+          "Monitoring indicators are not official determinations.",
+          "Model Lab is internal research only.",
+          "No exact parcel probabilities are shown.",
+          "Utility proxy does not confirm capacity.",
+          "Preliminary school capacity indicators need official verification.",
+        ]),
   ];
 
   return (
@@ -306,14 +401,17 @@ function OverviewLandingPage({
             <div className="min-w-0">
               <div className="cfs-status-chip inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]">
                 <Sparkles className="h-3.5 w-3.5" />
-                Enterprise planning intelligence
+                {economicsMode
+                  ? "Enterprise economic intelligence"
+                  : "Enterprise planning intelligence"}
               </div>
               <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-[1.03] text-white md:text-6xl">
-                Cabarrus FutureScape
+                {economicsMode ? "CFS Economics" : "Cabarrus FutureScape"}
               </h1>
               <p className="mt-5 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
-                Parcel-centered planning intelligence for growth, constraints,
-                infrastructure, and executive reporting.
+                {economicsMode
+                  ? "Parcel-level economic intelligence for growth, tax-base opportunity, redevelopment potential, and infrastructure burden."
+                  : "Parcel-centered planning intelligence for growth, constraints, infrastructure, and executive reporting."}
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <button
@@ -321,7 +419,7 @@ function OverviewLandingPage({
                   onClick={onGoWorkspace}
                   type="button"
                 >
-                  Go to Workspace
+                  {economicsMode ? "Go to Economic Workspace" : "Go to Workspace"}
                   <ArrowRight className="h-4 w-4" />
                 </button>
                 <button
@@ -329,7 +427,7 @@ function OverviewLandingPage({
                   onClick={onOpenPlanningSnapshot}
                   type="button"
                 >
-                  Open Planning Snapshot
+                  {economicsMode ? "Open Economic Snapshot" : "Open Planning Snapshot"}
                   <FileCheck2 className="h-4 w-4" />
                 </button>
                 <button
@@ -347,10 +445,10 @@ function OverviewLandingPage({
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
-                    Current posture
+                    {economicsMode ? "Economic posture" : "Current posture"}
                   </p>
                   <h2 className="mt-1 text-lg font-semibold text-white">
-                    Ready for guided review
+                    {economicsMode ? "Ready for scenario screening" : "Ready for guided review"}
                   </h2>
                 </div>
                 <span
@@ -366,8 +464,18 @@ function OverviewLandingPage({
               </div>
               <div className="grid gap-2">
                 {[
-                  ["Workspace", "Explore layers, indicators, and Model Lab"],
-                  ["Snapshot", "Capture report-ready context"],
+                  [
+                    "Workspace",
+                    economicsMode
+                      ? "Review economics layers and scenario context"
+                      : "Explore layers, indicators, and Model Lab",
+                  ],
+                  [
+                    "Snapshot",
+                    economicsMode
+                      ? "Capture economic baseline context"
+                      : "Capture report-ready context",
+                  ],
                   ["Governance", "Keep caveats attached"],
                 ].map(([label, value]) => (
                   <div
@@ -425,7 +533,9 @@ function OverviewLandingPage({
                 CFS Operating Model
               </p>
               <h2 className="text-xl font-semibold text-white">
-                From source context to executive snapshot
+                {economicsMode
+                  ? "From parcel value to scenario snapshot"
+                  : "From source context to executive snapshot"}
               </h2>
             </div>
             <span className="text-xs font-medium text-slate-500">
@@ -468,7 +578,9 @@ function OverviewLandingPage({
                   What CFS Can Do Today
                 </p>
                 <h2 className="text-xl font-semibold text-white">
-                  Operational review workflows
+                  {economicsMode
+                    ? "Economic screening workflows"
+                    : "Operational review workflows"}
                 </h2>
               </div>
             </div>
@@ -553,7 +665,9 @@ function OverviewLandingPage({
               Ready to work inside the live planning workspace?
             </p>
             <p className="mt-1 text-xs text-slate-500">
-              Workspace opens Explore Countywide by default.
+              {economicsMode
+                ? "Workspace opens the Economic Workspace with screening layers."
+                : "Workspace opens Explore Countywide by default."}
             </p>
           </div>
           <button
@@ -561,7 +675,7 @@ function OverviewLandingPage({
             onClick={onGoWorkspace}
             type="button"
           >
-            Enter Workspace
+            {economicsMode ? "Enter Economic Workspace" : "Enter Workspace"}
             <Route className="h-4 w-4" />
           </button>
         </section>

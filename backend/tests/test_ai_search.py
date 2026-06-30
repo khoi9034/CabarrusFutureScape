@@ -32,14 +32,12 @@ def _clear_ai_caches():
     with ai_search_service._PROVIDER_COOLDOWN_LOCK:
         ai_search_service._PROVIDER_COOLDOWN_REASON = None
         ai_search_service._PROVIDER_COOLDOWN_UNTIL = None
-    ai_search_router._ASK_CFS_CONTEXT_CACHE["expires_at"] = None
-    ai_search_router._ASK_CFS_CONTEXT_CACHE["payload"] = None
+    ai_search_router._ASK_CFS_CONTEXT_CACHE.clear()
     yield
     with ai_search_service._PROVIDER_COOLDOWN_LOCK:
         ai_search_service._PROVIDER_COOLDOWN_REASON = None
         ai_search_service._PROVIDER_COOLDOWN_UNTIL = None
-    ai_search_router._ASK_CFS_CONTEXT_CACHE["expires_at"] = None
-    ai_search_router._ASK_CFS_CONTEXT_CACHE["payload"] = None
+    ai_search_router._ASK_CFS_CONTEXT_CACHE.clear()
 
 
 def _context():
@@ -139,6 +137,35 @@ def _context():
             "watchlist": [
                 {"status_band": "elevated_review", "title": "Demo ES Capacity + Permit Context"},
                 {"status_band": "data_needed", "title": "Utility Readiness Coverage"},
+            ],
+        },
+        "economics_intelligence": {
+            "as_of": "2026-01-01T00:00:00+00:00",
+            "caveats": [
+                "CFS Economics is screening-level context, not an official appraisal or tax bill.",
+            ],
+            "data_readiness": [
+                {
+                    "data_status": "data_needed",
+                    "domain": "Service Burden",
+                    "gap_or_next_need": "Add official utility, school, and transportation service assumptions.",
+                },
+            ],
+            "summary": {
+                "data_needed_count": 1,
+                "high_opportunity_count": 3,
+                "median_value_per_acre": 225000,
+                "total_assessed_value": 12500000,
+                "total_parcels_analyzed": 12,
+                "underbuilt_candidate_count": 4,
+            },
+            "watchlist": [
+                {
+                    "evidence": ["Value per acre: $125,000.", "Improvement-to-land ratio: 0.42"],
+                    "geography_label": "Demo corridor",
+                    "opportunity_class": "Underbuilt Redevelopment Candidate",
+                    "parcel_id": "econ-1",
+                },
             ],
         },
     }
@@ -268,6 +295,7 @@ def test_ai_search_selected_signal_templates_cover_major_domains() -> None:
         ("transportation_context", "transportation follow-up"),
         ("model_research", "No exact probabilities"),
         ("data_readiness", "missing or incomplete source data"),
+        ("economics", "screening-level parcel economic context"),
     ]
 
     for domain, expected in cases:
@@ -523,7 +551,7 @@ def test_ai_search_sparse_provider_answer_keeps_detailed_fallback(monkeypatch) -
 
 
 def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
-    def fake_context(_db):
+    def fake_context(_db, _request=None):
         return _context()
 
     app.dependency_overrides[get_read_only_db] = lambda: object()
@@ -579,3 +607,41 @@ def test_ai_search_compact_context_cache_reuses_fast_context(monkeypatch) -> Non
 
     assert calls["count"] == 1
     assert first["indicator_intelligence"] == second["indicator_intelligence"]
+
+
+def test_ai_search_economics_mode_returns_economic_answer() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Where are the strongest underbuilt parcel signals?",
+        ),
+        _context(),
+    )
+
+    assert response.domains == ["economics"]
+    assert response.dashboard_actions.focus_domain == "economics"
+    assert "CFS Economics reviewed 12 parcels" in response.answer
+    assert "Underbuilt Redevelopment Candidate" in response.answer
+    assert "Value per Acre" in response.related_layers
+
+
+def test_ai_search_selected_economics_signal_returns_focused_explanation() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Explain this signal.",
+            selected_signal={
+                "domain": "economics",
+                "evidence": ["Value per acre: $125,000."],
+                "id": "underbuilt_watch",
+                "related_layers": ["Value per Acre", "Underbuilt Parcel Watch"],
+                "status_band": "underbuilt_watch",
+                "title": "Underbuilt Parcel Watch",
+            },
+        ),
+        _context(),
+    )
+
+    assert response.domains == ["economics"]
+    assert "screening-level parcel economic context" in response.answer
+    assert response.dashboard_actions.focus_domain == "economics"

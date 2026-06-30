@@ -14447,7 +14447,7 @@
         "official_parcel_id": "CFS-PARCEL-0149787750",
         "permit_segment": "residential_growth",
         "recent_permit_count_1yr": 1,
-        "recent_permit_count_3yr": 6,
+        "recent_permit_count_3yr": 5,
         "redevelopment_signal_permits": 1,
         "residential_growth_permits": 5,
         "segment_year_counts": {
@@ -15202,7 +15202,7 @@
   ],
   "metadata": {
     "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
-    "generated_at": "2026-06-30T02:39:29Z",
+    "generated_at": "2026-06-30T15:29:40Z",
     "layer_id": "development_hotspots",
     "layer_label": "Demo Development Hotspots",
     "mode": "portfolio_demo",

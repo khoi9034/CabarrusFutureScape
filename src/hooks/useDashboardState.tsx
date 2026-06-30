@@ -47,6 +47,7 @@ import { USE_DEMO_DATA } from "@/lib/api/client";
 import { isExploreCountywideMode } from "@/lib/gis/layerModeOwnership";
 import { defaultIndicatorCenterGroupIds } from "@/data/intelligence/indicatorCenter";
 import type {
+  CfsAppMode,
   DashboardStatus,
   IndicatorCenterDisplayMode,
   IndicatorCenterGroupId,
@@ -136,6 +137,7 @@ interface DashboardContextValue {
   briefingGenerationState: BriefingGenerationState;
   briefingMode: ExecutiveBriefingMode;
   briefingSections: ExecutiveBriefingSection[];
+  cfsAppMode: CfsAppMode;
   comparisonMetrics: ScenarioComparisonMetric[];
   comparisonPair: ScenarioComparisonPair;
   dashboardUrlState: DashboardUrlState;
@@ -228,6 +230,7 @@ interface DashboardContextValue {
     included: boolean,
   ) => void;
   setProductMode: (mode: ProductMode) => void;
+  setCfsAppMode: (mode: CfsAppMode) => void;
   setReportIntent: (intent: ReportExportIntent) => void;
   setLayerVisibility: (layerId: string, visible: boolean) => void;
   toggleLayer: (layerId: string) => void;
@@ -300,6 +303,7 @@ const DashboardContext = createContext<DashboardContextValue | null>(null);
 const PLANNING_SNAPSHOT_STORAGE_KEY = "cfs.planningSnapshot.phase22a.latest";
 const PLANNING_SNAPSHOT_LIBRARY_STORAGE_KEY =
   "cfs.planningSnapshots.phase22e.library";
+const CFS_APP_MODE_STORAGE_KEY = "cfs.appMode.v1";
 const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS = [
   "cfs.overview.layout.v2",
   "cfs.overview.layout.v1",
@@ -307,6 +311,35 @@ const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS = [
   "cfs.overview.customLayout.v1",
 ];
 const MAX_STORED_PLANNING_SNAPSHOTS = 8;
+
+function isCfsAppMode(value: unknown): value is CfsAppMode {
+  return value === "planning" || value === "economics";
+}
+
+function readStoredCfsAppMode(): CfsAppMode {
+  if (typeof window === "undefined") {
+    return "planning";
+  }
+
+  try {
+    const storedMode = window.localStorage.getItem(CFS_APP_MODE_STORAGE_KEY);
+    return isCfsAppMode(storedMode) ? storedMode : "planning";
+  } catch {
+    return "planning";
+  }
+}
+
+function writeStoredCfsAppMode(mode: CfsAppMode) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(CFS_APP_MODE_STORAGE_KEY, mode);
+  } catch {
+    // Local storage can be unavailable in hardened browser contexts.
+  }
+}
 
 const defaultOverviewLayout: OverviewLayoutPreference = {
   commandCenter: "visible",
@@ -639,6 +672,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedIndicatorCenterContext,
     setSelectedIndicatorCenterContext,
   ] = useState<IndicatorCenterContext | null>(null);
+  const [cfsAppMode, setCfsAppModeState] = useState<CfsAppMode>(() =>
+    readStoredCfsAppMode(),
+  );
   const [
     indicatorCenterDisplayMode,
     setIndicatorCenterDisplayMode,
@@ -767,6 +803,14 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  const setCfsAppMode = useCallback((mode: CfsAppMode) => {
+    setCfsAppModeState(mode);
+    writeStoredCfsAppMode(mode);
+    setSelectedDevelopmentHotspotContext(null);
+    setSelectedModelResearchContext(null);
+    setSelectedIndicatorCenterContext(null);
+  }, []);
   const {
     activeWorkspacePreset,
     setDashboardViewMode,
@@ -1144,6 +1188,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       briefingGenerationState,
       briefingMode,
       briefingSections,
+      cfsAppMode,
       clearMapError,
       clearParcelSelectionContext,
       clearSelectedParcel,
@@ -1248,6 +1293,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setPlanningSnapshotView,
       setPlanningReviewFocusMode,
       savePlanningSnapshot,
+      setCfsAppMode,
       setActivePlanningSnapshot,
       deletePlanningSnapshot,
       renamePlanningSnapshot,
@@ -1282,6 +1328,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       briefingGenerationState,
       briefingMode,
       briefingSections,
+      cfsAppMode,
       clearMapError,
       clearParcelSelectionContext,
       clearSelectedParcel,
@@ -1385,6 +1432,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       setPlanningSnapshotView,
       setPlanningReviewFocusMode,
       savePlanningSnapshot,
+      setCfsAppMode,
       setActivePlanningSnapshot,
       deletePlanningSnapshot,
       renamePlanningSnapshot,

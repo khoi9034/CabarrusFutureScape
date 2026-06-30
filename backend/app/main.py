@@ -8,6 +8,7 @@ from app.routers import (
     ai_search_router,
     constraints_router,
     development_router,
+    economics_router,
     indicators_router,
     parcel_router,
     school_constraints_router,
@@ -48,6 +49,7 @@ def root() -> dict[str, object]:
         "api_groups": {
             "parcels": "/parcels",
             "development": "/development",
+            "economics": "/economics",
             "constraints": "/constraints",
             "ai_search": "/ai/search",
             "indicators": "/indicators",
@@ -75,6 +77,7 @@ def health_database() -> dict[str, str]:
 
 app.include_router(parcel_router.router)
 app.include_router(development_router.router)
+app.include_router(economics_router.router)
 app.include_router(temporal_router.router)
 app.include_router(constraints_router.router)
 app.include_router(school_constraints_router.router)

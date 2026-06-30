@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
   RadioTower,
   Search,
+  BarChart3,
   UserRound,
   XCircle,
 } from "lucide-react";
@@ -90,6 +91,20 @@ const productModes: Array<{
 const QUICK_SEARCH_LIMIT = 8;
 const QUICK_SEARCH_MIN_LENGTH = 3;
 const DEMO_QUICK_SEARCH_SUGGESTION_LIMIT = 5;
+const appModeOptions = [
+  {
+    description: "Growth pressure, permits, constraints, schools, and Model Lab.",
+    id: "planning",
+    label: "Planning Intelligence",
+    shortLabel: "CFS Planning",
+  },
+  {
+    description: "Parcel value, underbuilt watch, tax-base opportunity, and scenarios.",
+    id: "economics",
+    label: "Economic Intelligence",
+    shortLabel: "CFS Economics",
+  },
+] as const;
 
 type QuickSearchStatus =
   | "empty"
@@ -105,6 +120,7 @@ export function TopNav() {
     activeWorkspacePreset,
     applyRolePreset,
     applyWorkspacePreset,
+    cfsAppMode,
     mapStatus,
     roleId,
     scenarioName,
@@ -113,11 +129,13 @@ export function TopNav() {
     setParcelReviewView,
     setPlanningSnapshotView,
     setProductMode,
+    setCfsAppMode,
     setSelectedParcelIntelligence,
     viewMode,
   } = useDashboardState();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [modeMenuOpen, setModeMenuOpen] = useState(false);
   const [quickSearchError, setQuickSearchError] = useState<string | null>(null);
   const [quickSearchOpen, setQuickSearchOpen] = useState(false);
   const [quickSearchQuery, setQuickSearchQuery] = useState("");
@@ -146,10 +164,17 @@ export function TopNav() {
   const runtimeStatusTone = USE_BACKEND_API ? "green" : "blue";
   const searchPlaceholder = USE_DEMO_DATA
     ? "Search demo parcel, PIN, zoning, subdivision"
-    : "Search parcel, PIN, owner, address, subdivision";
+    : cfsAppMode === "economics"
+      ? "Search parcel, PIN, zoning, subdivision"
+      : "Search parcel, PIN, owner, address, subdivision";
   const searchTitle = USE_DEMO_DATA
     ? "Search demo parcels, PINs, zoning, subdivisions, or neighborhoods"
-    : "Search parcels, PINs, owners, addresses, subdivisions, or neighborhoods";
+    : cfsAppMode === "economics"
+      ? "Search parcels, PINs, zoning, subdivisions, or neighborhoods"
+      : "Search parcels, PINs, owners, addresses, subdivisions, or neighborhoods";
+  const currentAppMode =
+    appModeOptions.find((option) => option.id === cfsAppMode) ??
+    appModeOptions[0];
 
   useEffect(() => {
     quickSearchQueryRef.current = trimmedQuickSearchQuery;
@@ -423,19 +448,73 @@ export function TopNav() {
       />
 
       <header className="cfs-command-bar relative z-30 flex min-h-[4.5rem] shrink-0 flex-wrap items-center gap-2 overflow-visible border-b border-[#68d8ff]/14 bg-[#03070d]/94 px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4">
-        <div className="order-1 flex min-w-[12.5rem] max-w-[16rem] shrink-0 items-center gap-3">
-          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#68d8ff]/28 bg-[#68d8ff]/[0.1] shadow-[0_0_28px_rgba(104,216,255,0.18)]">
-            <Map className="h-4 w-4 text-[#f0cd79]" />
-            <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border border-[#060b12] bg-[#55d38f]" />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-[#8fe7ff]">
-              {appIdentity.eyebrow}
-            </p>
-            <h1 className="truncate text-lg font-semibold leading-5 text-white">
-              {appIdentity.productName}
-            </h1>
-          </div>
+        <div className="order-1 relative flex min-w-[13.5rem] max-w-[18rem] shrink-0 items-center gap-3">
+          <button
+            aria-expanded={modeMenuOpen}
+            aria-haspopup="menu"
+            className="group flex min-w-0 items-center gap-3 rounded-xl border border-[#68d8ff]/18 bg-[#07111f]/88 px-2.5 py-2 text-left shadow-[0_0_28px_rgba(104,216,255,0.12)] transition hover:border-[#68d8ff]/36 hover:bg-[#102235]/86 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75"
+            onClick={() => setModeMenuOpen((open) => !open)}
+            type="button"
+          >
+            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#68d8ff]/28 bg-[#68d8ff]/[0.1]">
+              {cfsAppMode === "economics" ? (
+                <BarChart3 className="h-4 w-4 text-[#f0cd79]" />
+              ) : (
+                <Map className="h-4 w-4 text-[#f0cd79]" />
+              )}
+              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border border-[#060b12] bg-[#55d38f]" />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-[10px] font-medium uppercase tracking-[0.12em] text-[#8fe7ff]">
+                {appIdentity.eyebrow}
+              </span>
+              <span className="block truncate text-base font-semibold leading-5 text-white">
+                {currentAppMode.shortLabel}
+              </span>
+            </span>
+            <ChevronDown
+              className={cn(
+                "ml-auto h-4 w-4 shrink-0 text-slate-500 transition",
+                modeMenuOpen && "rotate-180 text-[#8fe7ff]",
+              )}
+            />
+          </button>
+
+          {modeMenuOpen ? (
+            <div
+              className="absolute left-0 top-[calc(100%+0.5rem)] z-50 w-[19rem] max-w-[calc(100vw-1.5rem)] rounded-xl border border-[#68d8ff]/20 bg-[#06101c]/98 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+              role="menu"
+            >
+              {appModeOptions.map((option) => {
+                const active = option.id === cfsAppMode;
+                return (
+                  <button
+                    aria-checked={active}
+                    className={cn(
+                      "flex w-full min-w-0 flex-col rounded-lg border px-3 py-2.5 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/70",
+                      active
+                        ? "border-[#68d8ff]/45 bg-[#68d8ff]/12 text-white"
+                        : "border-transparent text-slate-300 hover:border-white/10 hover:bg-white/[0.055] hover:text-white",
+                    )}
+                    key={option.id}
+                    onClick={() => {
+                      setCfsAppMode(option.id);
+                      setModeMenuOpen(false);
+                    }}
+                    role="menuitemradio"
+                    type="button"
+                  >
+                    <span className="text-sm font-semibold">
+                      {option.label}
+                    </span>
+                    <span className="mt-1 text-xs leading-5 text-slate-500">
+                      {option.description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
 
         <nav

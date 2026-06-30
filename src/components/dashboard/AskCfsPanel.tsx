@@ -3,10 +3,12 @@
 import { AlertTriangle, FileSearch, Loader2, Send, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import {
+  askCfsEconomicsSuggestedPrompts,
   askCfsSuggestedPrompts,
   searchCfsAi,
 } from "@/lib/aiSearchService";
 import { getApiErrorDisplayMessage, USE_DEMO_DATA } from "@/lib/api/client";
+import type { CfsAppMode } from "@/types";
 import type {
   CfsAiConversationTurn,
   CfsAiSearchRequest,
@@ -19,9 +21,11 @@ export interface AskCfsExternalRequest {
 }
 
 export function AskCfsPanel({
+  appMode = "planning",
   externalRequest,
   onResponse,
 }: {
+  appMode?: CfsAppMode;
   externalRequest?: AskCfsExternalRequest | null;
   onResponse?: (response: CfsAiSearchResponse) => void;
 }) {
@@ -33,6 +37,10 @@ export function AskCfsPanel({
   const [query, setQuery] = useState("");
   const lastExternalRequestId = useRef<number | null>(null);
   const lastTurn = turns.at(-1);
+  const suggestedPrompts =
+    appMode === "economics"
+      ? askCfsEconomicsSuggestedPrompts
+      : askCfsSuggestedPrompts;
 
   const submit = useCallback(async (
     nextQuery = query,
@@ -47,6 +55,7 @@ export function AskCfsPanel({
     try {
       const response = await searchCfsAi({
         ...requestOverrides,
+        app_mode: appMode,
         conversation_context: turns,
         mode: USE_DEMO_DATA ? "demo" : "live",
         query: trimmedQuery,
@@ -65,7 +74,7 @@ export function AskCfsPanel({
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, onResponse, query, turns]);
+  }, [appMode, isLoading, onResponse, query, turns]);
 
   useEffect(() => {
     if (
@@ -106,7 +115,9 @@ export function AskCfsPanel({
             <div>
               <h2 className="text-lg font-semibold text-white">Ask CFS</h2>
               <p className="text-xs text-slate-400">
-                Search across indicators, layers, methodology, and cached planning signals.
+                {appMode === "economics"
+                  ? "Search across parcel economics, tax-base opportunity, constraints, and scenario context."
+                  : "Search across indicators, layers, methodology, and cached planning signals."}
               </p>
             </div>
           </div>
@@ -124,7 +135,11 @@ export function AskCfsPanel({
           className="min-w-0 flex-1 rounded-lg border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-[#68d8ff]/55 focus:ring-2 focus:ring-[#68d8ff]/15"
           id="ask-cfs-query"
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Ask about permit trends, school pressure, floodplain review, Model Lab, or data readiness..."
+          placeholder={
+            appMode === "economics"
+              ? "Ask about underbuilt parcels, value per acre, tax-base opportunity, or scenarios..."
+              : "Ask about permit trends, school pressure, floodplain review, Model Lab, or data readiness..."
+          }
           value={query}
         />
         <button
@@ -166,7 +181,7 @@ export function AskCfsPanel({
       ) : null}
 
       <div className="mt-3 flex flex-wrap gap-2">
-        {askCfsSuggestedPrompts.map((prompt) => (
+        {suggestedPrompts.map((prompt) => (
           <button
             className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-[#68d8ff]/35 hover:text-[#b7f0ff]"
             key={prompt}

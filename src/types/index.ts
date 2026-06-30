@@ -70,6 +70,8 @@ export type ProductMode =
   | "overview"
   | "workspace";
 
+export type CfsAppMode = "economics" | "planning";
+
 export type ParcelReviewView = "actions" | "report" | "review";
 
 export type OverviewCommandMode =
