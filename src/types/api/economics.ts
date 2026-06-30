@@ -76,6 +76,25 @@ export interface EconomicsScenarioTemplate {
   what_it_tests: string;
 }
 
+export interface EconomicsScenarioInput {
+  assumption: string;
+  current_value: string;
+  data_confidence: string;
+  use: string;
+}
+
+export interface EconomicsScenarioOutput {
+  constraint_adjusted_opportunity_band: string;
+  data_confidence: string;
+  estimated_tax_base_lift_band: string;
+  infrastructure_burden_band: string;
+  recommended_next_diligence: string;
+  revenue_per_acre_band: string;
+  scenario_id: string;
+  service_burden_band: string;
+  title: string;
+}
+
 export interface EconomicsOpportunityClassBreakdown {
   count: number;
   opportunity_class: string;
@@ -98,6 +117,8 @@ export interface EconomicsIntelligenceResponse {
   mode: "demo" | "live";
   opportunity_class_breakdown: EconomicsOpportunityClassBreakdown[];
   parcel_economic_signals: EconomicsParcelSignal[];
+  scenario_inputs: EconomicsScenarioInput[];
+  scenario_outputs: EconomicsScenarioOutput[];
   scenario_templates: EconomicsScenarioTemplate[];
   signals: EconomicsParcelSignal[];
   summary: EconomicsSummary;

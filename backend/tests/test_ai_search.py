@@ -493,7 +493,7 @@ def test_ai_search_provider_timeout_returns_detailed_fallback(monkeypatch) -> No
 
     def slow_provider(*_args, **_kwargs):
         calls["count"] += 1
-        time.sleep(0.05)
+        time.sleep(0.2)
         return {"answer": "late provider answer"}
 
     monkeypatch.setattr(ai_search_service, "_PROVIDER_TIMEOUT_SECONDS", 0.01)

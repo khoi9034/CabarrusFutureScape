@@ -36,6 +36,16 @@ def test_economics_missing_fields_return_data_needed_schema() -> None:
     assert payload["underbuilt_watchlist"] == []
     assert payload["opportunity_class_breakdown"] == []
     assert payload["jurisdiction_value_summary"] == []
+    assert payload["scenario_inputs"]
+    assert payload["scenario_outputs"]
+    assert {
+        "estimated_tax_base_lift_band",
+        "revenue_per_acre_band",
+        "service_burden_band",
+        "infrastructure_burden_band",
+        "constraint_adjusted_opportunity_band",
+        "data_confidence",
+    }.issubset(payload["scenario_outputs"][0])
     assert payload["watchlist"] == []
     assert "formal appraisal" in " ".join(payload["caveats"])
 
@@ -134,6 +144,18 @@ def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> N
                     "what_it_tests": "Baseline",
                 }
             ],
+            "scenario_outputs": [
+                {
+                    "data_confidence": "screening",
+                    "estimated_tax_base_lift_band": "baseline",
+                    "infrastructure_burden_band": "medium",
+                    "recommended_next_diligence": "Document assumptions.",
+                    "revenue_per_acre_band": "moderate",
+                    "scenario_id": "current_conditions",
+                    "service_burden_band": "medium",
+                    "title": "Current Conditions",
+                }
+            ],
             "signals": [
                 {
                     "economic_status_band": "underbuilt_watch",
@@ -156,8 +178,15 @@ def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> N
 
     exports = payload["exports"]
     assert exports["power_bi"]["kpi_fact"][0]["kpi_id"] == "parcels_analyzed"
+    assert exports["power_bi"]["scenario_fact"][0]["estimated_tax_base_lift_band"] == "baseline"
+    assert exports["power_bi"]["scenario_fact"][0]["revenue_per_acre_band"] == "moderate"
     assert exports["power_bi"]["dimensions"]["geography"][0]["geography_label"] == "Demo corridor"
     assert "Assessed Value" in exports["planning_model"]["measures"]
+    assert {
+        "measure": "Tax-Base Lift Band",
+        "scenario": "Current Conditions",
+        "value": "baseline",
+    } in exports["planning_model"]["cells"]
     assert exports["planning_model"]["scenarios"] == ["Current Conditions"]
     assert "executive_takeaway" in exports["decision_pack"]
     assert "owner" not in str(payload).lower()

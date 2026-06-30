@@ -177,16 +177,41 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
               land_value_per_acre,
               improvement_value_per_acre,
               improvement_to_land_ratio
-            FROM calculated
-            WHERE assessed_value IS NOT NULL OR value_per_acre IS NOT NULL
+            FROM (
+              SELECT
+                *,
+                CASE
+                  WHEN assessed_value IS NULL OR acreage IS NULL OR acreage <= 0 THEN 'data_needed'
+                  WHEN improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5 THEN 'underbuilt'
+                  WHEN value_per_acre < 150000 AND acreage >= 1.0 THEN 'tax_base'
+                  ELSE 'baseline'
+                END AS signal_bucket,
+                ROW_NUMBER() OVER (
+                  PARTITION BY
+                    CASE
+                      WHEN assessed_value IS NULL OR acreage IS NULL OR acreage <= 0 THEN 'data_needed'
+                      WHEN improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5 THEN 'underbuilt'
+                      WHEN value_per_acre < 150000 AND acreage >= 1.0 THEN 'tax_base'
+                      ELSE 'baseline'
+                    END
+                  ORDER BY assessed_value DESC NULLS LAST
+                ) AS bucket_rank
+              FROM calculated
+            ) ranked
+            WHERE
+              (signal_bucket = 'underbuilt' AND bucket_rank <= 50)
+              OR (signal_bucket = 'tax_base' AND bucket_rank <= 25)
+              OR (signal_bucket = 'data_needed' AND bucket_rank <= 25)
+              OR (signal_bucket = 'baseline' AND bucket_rank <= 20)
             ORDER BY
               CASE
-                WHEN improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5 THEN 0
-                WHEN value_per_acre < 150000 AND acreage >= 1.0 THEN 1
-                ELSE 2
+                WHEN signal_bucket = 'underbuilt' THEN 0
+                WHEN signal_bucket = 'tax_base' THEN 1
+                WHEN signal_bucket = 'data_needed' THEN 2
+                ELSE 3
               END,
               assessed_value DESC NULLS LAST
-            LIMIT 80
+            LIMIT 120
             """
         ),
     ).mappings().all()
@@ -248,6 +273,8 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         "mode": "live",
         "opportunity_class_breakdown": _opportunity_class_breakdown(signals),
         "parcel_economic_signals": signals,
+        "scenario_inputs": _scenario_inputs(summary),
+        "scenario_outputs": _scenario_outputs(summary),
         "scenario_templates": _scenario_templates(),
         "signals": signals,
         "summary": summary,
@@ -554,6 +581,83 @@ def _scenario_templates() -> list[dict[str, Any]]:
     ]
 
 
+def _scenario_inputs(summary: dict[str, Any]) -> list[dict[str, Any]]:
+    median_value = summary.get("median_value_per_acre")
+    return [
+        {
+            "assumption": "Value-per-acre baseline",
+            "current_value": _money(_float(median_value)),
+            "data_confidence": "screening" if median_value is not None else "data_needed",
+            "use": "Revenue per acre and tax-base lift banding.",
+        },
+        {
+            "assumption": "Service burden",
+            "current_value": "Flood, school, utility, and transportation context bands",
+            "data_confidence": "proxy",
+            "use": "Constraint-adjusted opportunity and public cost risk review.",
+        },
+        {
+            "assumption": "Development intensity",
+            "current_value": "Scenario-specific low / medium / higher intensity",
+            "data_confidence": "screening",
+            "use": "Tests directional tax-base lift without claiming exact fiscal impact.",
+        },
+    ]
+
+
+def _scenario_outputs(summary: dict[str, Any]) -> list[dict[str, Any]]:
+    median = _float(summary.get("median_value_per_acre"))
+    underbuilt_count = _int(summary.get("underbuilt_candidate_count"))
+    opportunity_count = _int(summary.get("high_opportunity_count"))
+    data_needed = _int(summary.get("data_needed_count"))
+    base_revenue_band = _revenue_per_acre_band(median)
+    opportunity_band = "elevated" if underbuilt_count or opportunity_count else "monitor"
+    data_confidence = "screening" if median is not None else "data_needed"
+    burden_band = "medium" if data_needed else "low"
+    return [
+        _scenario_output("current_conditions", "Current Conditions", "baseline", base_revenue_band, burden_band, "current context", data_confidence, "Use as the reference before applying scenario assumptions."),
+        _scenario_output("growth_continues", "Growth Continues As-Is", "moderate", base_revenue_band, "medium", opportunity_band, data_confidence, "Compare observed permit activity with service burden bands."),
+        _scenario_output("infrastructure_constrained_growth", "Infrastructure-Constrained Growth", "limited", base_revenue_band, "high", "constrained", "proxy", "Prioritize utility, school, floodplain, and transportation diligence."),
+        _scenario_output("targeted_investment", "Targeted Investment Scenario", "moderate to elevated", "higher if served", "medium", opportunity_band, "screening", "Test whether infrastructure investment could unlock underbuilt or corridor value."),
+        _scenario_output("higher_density_redevelopment", "Higher-Density Redevelopment Scenario", "elevated", "higher", "medium to high", opportunity_band, "screening", "Document density, value-per-acre, and public service assumptions."),
+        _scenario_output("industrial_employment", "Employment / Industrial Scenario", "moderate to elevated", "higher", "medium", "site-readiness review", "proxy", "Verify road access, utility readiness, flood exposure, and employment-site assumptions."),
+        _scenario_output("mixed_use_corridor", "Mixed-Use Corridor Scenario", "moderate to elevated", "higher", "medium", "corridor review", "screening", "Compare market alignment, zoning context, and public cost risk."),
+    ]
+
+
+def _revenue_per_acre_band(median_value_per_acre: float | None) -> str:
+    if median_value_per_acre is None:
+        return "data needed"
+    if median_value_per_acre >= 500_000:
+        return "high"
+    if median_value_per_acre >= 150_000:
+        return "moderate"
+    return "lower"
+
+
+def _scenario_output(
+    scenario_id: str,
+    title: str,
+    tax_base_lift_band: str,
+    revenue_per_acre_band: str,
+    service_burden_band: str,
+    constraint_adjusted_opportunity_band: str,
+    data_confidence: str,
+    recommended_next_diligence: str,
+) -> dict[str, Any]:
+    return {
+        "constraint_adjusted_opportunity_band": constraint_adjusted_opportunity_band,
+        "data_confidence": data_confidence,
+        "estimated_tax_base_lift_band": tax_base_lift_band,
+        "infrastructure_burden_band": service_burden_band,
+        "recommended_next_diligence": recommended_next_diligence,
+        "revenue_per_acre_band": revenue_per_acre_band,
+        "scenario_id": scenario_id,
+        "service_burden_band": service_burden_band,
+        "title": title,
+    }
+
+
 def _scenario(id: str, title: str, what_it_tests: str) -> dict[str, Any]:
     return {
         "caveats": [
@@ -597,6 +701,8 @@ def _unavailable_payload(as_of: str, reason: str) -> dict[str, Any]:
         "mode": "live",
         "opportunity_class_breakdown": [],
         "parcel_economic_signals": [],
+        "scenario_inputs": _scenario_inputs(summary),
+        "scenario_outputs": _scenario_outputs(summary),
         "scenario_templates": _scenario_templates(),
         "signals": [],
         "summary": summary,

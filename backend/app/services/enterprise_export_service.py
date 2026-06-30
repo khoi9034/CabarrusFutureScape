@@ -37,6 +37,7 @@ def build_enterprise_export_payload(
     signals = [_dict(row) for row in economics.get("signals") or []]
     watchlist = [_dict(row) for row in economics.get("watchlist") or []]
     scenarios = [_dict(row) for row in economics.get("scenario_templates") or []]
+    scenario_outputs = [_dict(row) for row in economics.get("scenario_outputs") or []]
     readiness = [_dict(row) for row in economics.get("data_readiness") or []]
     output_mode = mode or str(economics.get("mode") or summary.get("source_mode") or "live")
 
@@ -55,12 +56,12 @@ def build_enterprise_export_payload(
                     "time": _time_dimension(economics.get("as_of") or summary.get("as_of")),
                 },
                 "kpi_fact": _kpi_fact(kpis),
-                "scenario_fact": _scenario_fact(scenarios),
+                "scenario_fact": _scenario_fact(scenario_outputs or scenarios),
                 "signal_fact": _signal_fact(signals),
                 "watchlist_fact": _signal_fact(watchlist),
             },
             "planning_model": {
-                "cells": _planning_cells(summary, scenarios),
+                "cells": _planning_cells(summary, scenario_outputs or scenarios),
                 "dimensions": _planning_dimensions(signals, scenarios, readiness),
                 "measures": PLANNING_MEASURES,
                 "scenarios": [row.get("title") for row in scenarios if row.get("title")],
@@ -125,9 +126,14 @@ def _scenario_fact(scenarios: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
             "data_confidence": row.get("data_confidence"),
-            "scenario_id": row.get("id"),
+            "estimated_tax_base_lift_band": row.get("estimated_tax_base_lift_band"),
+            "infrastructure_burden_band": row.get("infrastructure_burden_band"),
+            "recommended_next_diligence": row.get("recommended_next_diligence"),
+            "revenue_per_acre_band": row.get("revenue_per_acre_band"),
+            "scenario_id": row.get("scenario_id") or row.get("id"),
+            "service_burden_band": row.get("service_burden_band"),
             "title": row.get("title"),
-            "what_it_tests": row.get("what_it_tests"),
+            "what_it_tests": row.get("what_it_tests") or row.get("recommended_next_diligence"),
         }
         for row in scenarios
     ]
@@ -181,7 +187,7 @@ def _planning_cells(
     scenarios: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     scenario_names = [row.get("title") for row in scenarios if row.get("title")] or ["Current Conditions"]
-    return [
+    cells = [
         {
             "measure": "Assessed Value",
             "scenario": scenario_names[0],
@@ -198,6 +204,18 @@ def _planning_cells(
             "value": "screening",
         },
     ]
+    for row in scenarios:
+        title = row.get("title")
+        if not title:
+            continue
+        for measure, key in (
+            ("Tax-Base Lift Band", "estimated_tax_base_lift_band"),
+            ("Revenue per Acre Band", "revenue_per_acre_band"),
+            ("Public Cost Risk Band", "service_burden_band"),
+        ):
+            if row.get(key):
+                cells.append({"measure": measure, "scenario": title, "value": row.get(key)})
+    return cells
 
 
 def _decision_evidence(

@@ -1165,13 +1165,13 @@
     "sfha_parcels": 7254,
     "total_parcels": 110017
   },
-  "generated_at": "2026-06-30T17:29:19Z",
+  "generated_at": "2026-06-30T19:04:25Z",
   "model_status": {
     "caveat": "Internal research only. No exact probabilities or raw scores are shown.",
     "current_best_internal_model": "Zoning + Transportation + Tax/Value",
     "exact_probabilities_shown": false,
     "feature_rows": 1430221,
-    "generated_at": "2026-06-30T17:29:19Z",
+    "generated_at": "2026-06-30T19:04:25Z",
     "model_status": "Internal only",
     "production_ready": false,
     "public_exposure_allowed": false,
@@ -1825,7 +1825,7 @@
     }
   },
   "school_pressure": {
-    "as_of": "2026-06-30T17:29:19Z",
+    "as_of": "2026-06-30T19:04:25Z",
     "available": true,
     "caveats": [
       "Portfolio demo uses a cached CFS demo extract.",

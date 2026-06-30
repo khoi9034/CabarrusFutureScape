@@ -41,7 +41,7 @@
   ],
   "metadata": {
     "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
-    "generated_at": "2026-06-30T17:29:19Z",
+    "generated_at": "2026-06-30T19:04:25Z",
     "layer_id": "county_boundary",
     "layer_label": "Demo County Boundary",
     "mode": "portfolio_demo",

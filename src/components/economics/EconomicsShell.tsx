@@ -23,6 +23,9 @@ import type {
   EconomicsIntelligenceResponse,
   EconomicsKpi,
   EconomicsParcelSignal,
+  EconomicsReadinessRow,
+  EconomicsScenarioInput,
+  EconomicsScenarioOutput,
   EconomicsScenarioTemplate,
 } from "@/types/api";
 
@@ -90,7 +93,11 @@ export function EconomicsShell() {
           <ParcelScreenPage signals={signals} watchlist={watchlist} />
         ) : null}
         {economicsSection === "scenario_lab" ? (
-          <ScenarioLabPage scenarios={intelligence?.scenario_templates ?? []} />
+          <ScenarioLabPage
+            inputs={intelligence?.scenario_inputs ?? []}
+            outputs={intelligence?.scenario_outputs ?? []}
+            scenarios={intelligence?.scenario_templates ?? []}
+          />
         ) : null}
         {economicsSection === "enterprise_tools" ? (
           <EnterpriseToolsPage exportPayload={enterpriseExport} />
@@ -205,6 +212,7 @@ function EconomicDashboardPage({
       label: row.geography_label ?? "Parcel context",
       value: row.median_value_per_acre ?? 0,
     })) ?? [];
+  const summary = intelligence?.summary;
 
   return (
     <>
@@ -219,6 +227,16 @@ function EconomicDashboardPage({
         ))}
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
+        <EconPanel title="Parcel Economic Baseline" kicker="Current tax/value context">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <MiniMetric label="Parcels analyzed" value={formatNumber(summary?.total_parcels_analyzed)} />
+            <MiniMetric label="Assessed value coverage" value={currency(summary?.total_assessed_value)} />
+            <MiniMetric label="Land value" value={currency(summary?.total_land_value)} />
+            <MiniMetric label="Improvement value" value={currency(summary?.total_improvement_value)} />
+            <MiniMetric label="Median value / acre" value={currency(summary?.median_value_per_acre)} />
+            <MiniMetric label="Data-needed rows" value={formatNumber(summary?.data_needed_count)} />
+          </div>
+        </EconPanel>
         <EconPanel title="Value per acre distribution" kicker="Parcel baseline">
           <BarList rows={valueBars} formatValue={currency} />
         </EconPanel>
@@ -233,13 +251,16 @@ function EconomicDashboardPage({
         </EconPanel>
       </section>
       <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
-        <EconPanel title="Underbuilt Parcel Watchlist" kicker="Parcel screen">
+        <EconPanel title="Underbuilt Redevelopment Watchlist" kicker="Parcel screen">
           <SignalTable signals={watchlist.slice(0, 8)} />
         </EconPanel>
         <EconPanel title="Fiscal / Service Burden Panel" kicker="Constraint-adjusted opportunity">
           <BurdenRows />
         </EconPanel>
       </section>
+      <EconPanel title="Data Confidence Register" kicker="Readiness">
+        <ReadinessTable rows={intelligence?.data_readiness ?? []} />
+      </EconPanel>
       <EconPanel title="Ask CFS Economics" kicker="Analyst assistant">
         <AskCfsPanel appMode="economics" />
       </EconPanel>
@@ -255,6 +276,16 @@ function ParcelScreenPage({
   watchlist: EconomicsParcelSignal[];
 }) {
   const featured = watchlist[0] ?? signals[0] ?? null;
+  const taxBaseSignals = signals
+    .filter(
+      (signal) =>
+        signal.economic_status_band === "tax_base_opportunity" ||
+        signal.opportunity_class === "Tax-Base Opportunity",
+    )
+    .slice(0, 8);
+  const dataNeededSignals = signals
+    .filter((signal) => signal.economic_status_band === "data_needed")
+    .slice(0, 8);
   return (
     <>
       <PageHeader
@@ -263,14 +294,19 @@ function ParcelScreenPage({
         text="Consulting-style parcel screening for baseline value, improvement ratio, opportunity class, burden context, and next diligence."
       />
       <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-        <EconPanel title="Selected economic profile" kicker="Highest-priority signal">
+        <EconPanel title="Parcel Economic Baseline" kicker="Highest-priority signal">
           {featured ? (
             <div className="grid gap-3">
               <MiniMetric label="Area / parcel" value={featured.geography_label ?? featured.parcel_id} />
               <MiniMetric label="Value per acre" value={currency(featured.value_per_acre)} />
+              <MiniMetric label="Assessed value" value={currency(featured.assessed_value)} />
+              <MiniMetric label="Land value" value={currency(featured.land_value)} />
+              <MiniMetric label="Improvement value" value={currency(featured.improvement_value)} />
               <MiniMetric label="Improvement-to-land ratio" value={featured.improvement_to_land_ratio?.toFixed(2) ?? "Not available"} />
+              <MiniMetric label="Estimated county tax" value={currency(featured.estimated_county_tax_screening)} />
               <MiniMetric label="Opportunity class" value={featured.opportunity_class} />
               <MiniMetric label="Data confidence" value={featured.economic_data_confidence} />
+              <EvidenceList items={featured.evidence} />
               <p className="text-sm leading-7 text-[var(--econ-muted)]">
                 Recommended next diligence: {featured.recommended_followup}
               </p>
@@ -283,6 +319,14 @@ function ParcelScreenPage({
         </EconPanel>
         <EconPanel title="Underbuilt candidates" kicker="Screening table">
           <SignalTable signals={watchlist.slice(0, 10)} />
+        </EconPanel>
+      </section>
+      <section className="grid gap-4 xl:grid-cols-2">
+        <EconPanel title="Tax-base opportunity signals" kicker="Value screen">
+          <SignalTable signals={taxBaseSignals} />
+        </EconPanel>
+        <EconPanel title="Data-needed parcel / area signals" kicker="Confidence blockers">
+          <SignalTable signals={dataNeededSignals} />
         </EconPanel>
       </section>
       <section className="grid gap-4 xl:grid-cols-3">
@@ -309,11 +353,16 @@ function ParcelScreenPage({
 }
 
 function ScenarioLabPage({
+  inputs,
+  outputs,
   scenarios,
 }: {
+  inputs: EconomicsScenarioInput[];
+  outputs: EconomicsScenarioOutput[];
   scenarios: EconomicsScenarioTemplate[];
 }) {
   const scenarioRows = scenarios.length ? scenarios : fallbackScenarios;
+  const outputRows = outputs.length ? outputs : fallbackScenarioOutputs;
   return (
     <>
       <PageHeader
@@ -336,19 +385,31 @@ function ScenarioLabPage({
       </section>
       <section className="grid gap-4 xl:grid-cols-3">
         <EconPanel title="Assumption table" kicker="Inputs">
-          <Matrix rows={assumptionRows} />
+          <Matrix
+            rows={
+              inputs.length
+                ? inputs.map((row) => ({
+                    label: row.assumption,
+                    value: `${row.current_value} - ${row.use} (${row.data_confidence})`,
+                  }))
+                : assumptionRows
+            }
+          />
         </EconPanel>
         <EconPanel title="Measures table" kicker="Model measures">
           <Matrix rows={measureRows} />
         </EconPanel>
-        <EconPanel title="Decision memo" kicker="Output">
-          <p className="text-sm leading-7 text-[var(--econ-muted)]">
-            Compare current value, scenario type, estimated tax-base lift band,
-            and public burden flags before presenting a recommendation for
-            deeper diligence.
-          </p>
+        <EconPanel title="Scenario output bands" kicker="Outputs">
+          <ScenarioOutputList rows={outputRows} />
         </EconPanel>
       </section>
+      <EconPanel title="Decision memo" kicker="Consulting output">
+        <p className="text-sm leading-7 text-[var(--econ-muted)]">
+          Compare current value, scenario type, estimated tax-base lift band,
+          revenue-per-acre band, infrastructure burden, and public cost flags
+          before presenting a recommendation for deeper diligence.
+        </p>
+      </EconPanel>
     </>
   );
 }
@@ -578,6 +639,72 @@ function SignalTable({ signals }: { signals: EconomicsParcelSignal[] }) {
   );
 }
 
+function EvidenceList({ items }: { items: string[] }) {
+  return (
+    <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+        Evidence pack
+      </p>
+      <ul className="mt-2 space-y-1 text-xs leading-5 text-[var(--econ-muted)]">
+        {items.slice(0, 5).map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ReadinessTable({ rows }: { rows: EconomicsReadinessRow[] }) {
+  if (!rows.length) {
+    return <p className="text-sm text-[var(--econ-muted)]">Data readiness is not available.</p>;
+  }
+  return (
+    <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+      {rows.map((row) => (
+        <div
+          className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3"
+          key={row.domain}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm font-semibold text-[var(--econ-text)]">{row.domain}</p>
+            <span className="rounded border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/10 px-2 py-0.5 text-[10px] uppercase text-[#f7dc93]">
+              {row.data_status.replaceAll("_", " ")}
+            </span>
+          </div>
+          <p className="mt-2 text-xs leading-5 text-[var(--econ-muted)]">{row.current_use}</p>
+          <p className="mt-1 text-xs leading-5 text-[var(--econ-muted)]">{row.gap_or_next_need}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ScenarioOutputList({ rows }: { rows: EconomicsScenarioOutput[] }) {
+  return (
+    <div className="grid gap-2">
+      {rows.slice(0, 7).map((row) => (
+        <div
+          className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3"
+          key={row.scenario_id}
+        >
+          <p className="text-sm font-semibold text-[var(--econ-text)]">{row.title}</p>
+          <div className="mt-2 grid gap-2 text-xs text-[var(--econ-muted)] sm:grid-cols-2">
+            <span>Tax-base lift: {row.estimated_tax_base_lift_band}</span>
+            <span>Revenue / acre: {row.revenue_per_acre_band}</span>
+            <span>Service burden: {row.service_burden_band}</span>
+            <span>Infrastructure burden: {row.infrastructure_burden_band}</span>
+            <span>Opportunity: {row.constraint_adjusted_opportunity_band}</span>
+            <span>Confidence: {row.data_confidence}</span>
+          </div>
+          <p className="mt-2 text-xs leading-5 text-[var(--econ-muted)]">
+            {row.recommended_next_diligence}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function BurdenRows() {
   return (
     <div className="grid gap-2">
@@ -718,6 +845,20 @@ const fallbackScenarios: EconomicsScenarioTemplate[] = [
     required_assumptions: ["Growth intensity"],
     title: "Baseline Growth",
     what_it_tests: "Whether current growth patterns reinforce fiscal/service tradeoffs.",
+  },
+];
+
+const fallbackScenarioOutputs: EconomicsScenarioOutput[] = [
+  {
+    constraint_adjusted_opportunity_band: "current context",
+    data_confidence: "data_needed",
+    estimated_tax_base_lift_band: "baseline",
+    infrastructure_burden_band: "data needed",
+    recommended_next_diligence: "Load economics intelligence to compare scenario output bands.",
+    revenue_per_acre_band: "data needed",
+    scenario_id: "current_conditions",
+    service_burden_band: "data needed",
+    title: "Current Conditions",
   },
 ];
 

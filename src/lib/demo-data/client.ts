@@ -610,6 +610,8 @@ function getUnavailableEconomicsIntelligence(): EconomicsIntelligenceResponse {
     mode: "demo",
     opportunity_class_breakdown: [],
     parcel_economic_signals: [],
+    scenario_inputs: [],
+    scenario_outputs: [],
     scenario_templates: [],
     signals: [],
     summary: {
