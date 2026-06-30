@@ -1,6 +1,7 @@
 import time
 from types import SimpleNamespace
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.dependencies.database import get_read_only_db
@@ -24,6 +25,21 @@ def _settings(**overrides):
     }
     values.update(overrides)
     return SimpleNamespace(**values)
+
+
+@pytest.fixture(autouse=True)
+def _clear_ai_caches():
+    with ai_search_service._PROVIDER_COOLDOWN_LOCK:
+        ai_search_service._PROVIDER_COOLDOWN_REASON = None
+        ai_search_service._PROVIDER_COOLDOWN_UNTIL = None
+    ai_search_router._ASK_CFS_CONTEXT_CACHE["expires_at"] = None
+    ai_search_router._ASK_CFS_CONTEXT_CACHE["payload"] = None
+    yield
+    with ai_search_service._PROVIDER_COOLDOWN_LOCK:
+        ai_search_service._PROVIDER_COOLDOWN_REASON = None
+        ai_search_service._PROVIDER_COOLDOWN_UNTIL = None
+    ai_search_router._ASK_CFS_CONTEXT_CACHE["expires_at"] = None
+    ai_search_router._ASK_CFS_CONTEXT_CACHE["payload"] = None
 
 
 def _context():
@@ -402,10 +418,16 @@ def test_ai_search_provider_failure_falls_back(monkeypatch) -> None:
 
 
 def test_ai_search_openai_429_falls_back_with_safe_caveat(monkeypatch) -> None:
+    calls = {"count": 0}
+
+    def rate_limited_provider(*_args, **_kwargs):
+        calls["count"] += 1
+        return {"_provider_unavailable_reason": "rate_limit_quota"}
+
     monkeypatch.setattr(
         ai_search_service,
         "_post_provider_json",
-        lambda *_args, **_kwargs: {"_provider_unavailable_reason": "rate_limit_quota"},
+        rate_limited_provider,
     )
     service = CfsAiSearchService(
         _settings(
@@ -426,9 +448,21 @@ def test_ai_search_openai_429_falls_back_with_safe_caveat(monkeypatch) -> None:
     assert "raw" not in text
     assert response.dashboard_actions.focus_domain == "schools"
 
+    second = service.search(
+        CfsAiSearchRequest(query="Which school areas need review?"),
+        _context(),
+    )
+
+    assert calls["count"] == 1
+    assert second.provider == "none"
+    assert "temporarily unavailable" in " ".join(second.caveats)
+
 
 def test_ai_search_provider_timeout_returns_detailed_fallback(monkeypatch) -> None:
+    calls = {"count": 0}
+
     def slow_provider(*_args, **_kwargs):
+        calls["count"] += 1
         time.sleep(0.05)
         return {"answer": "late provider answer"}
 
@@ -451,6 +485,15 @@ def test_ai_search_provider_timeout_returns_detailed_fallback(monkeypatch) -> No
     assert "Key findings" in response.answer
     assert "presentation timeout" in " ".join(response.caveats)
     assert response.dashboard_actions.focus_domain == "permits"
+
+    second = service.search(
+        CfsAiSearchRequest(query="What are the main permit trends?"),
+        _context(),
+    )
+
+    assert calls["count"] == 1
+    assert second.provider == "none"
+    assert "temporarily unavailable" in " ".join(second.caveats)
 
 
 def test_ai_search_sparse_provider_answer_keeps_detailed_fallback(monkeypatch) -> None:
@@ -517,3 +560,20 @@ def test_ai_search_endpoint_returns_fast_fallback_when_intelligence_cache_empty(
     body = response.json()
     assert body["dashboard_actions"]["focus_domain"] == "permits"
     assert "still warming" in " ".join(body["caveats"]).lower()
+
+
+def test_ai_search_compact_context_cache_reuses_fast_context(monkeypatch) -> None:
+    calls = {"count": 0}
+
+    def fake_fast_context(_db, _context):
+        calls["count"] += 1
+        return {"development_activity_detail": {"total_records": 18, "active_parcels": 7}}
+
+    monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: None)
+    monkeypatch.setattr(ai_search_router, "_fast_development_context", fake_fast_context)
+
+    first = ai_search_router.gather_cfs_ai_context(object())
+    second = ai_search_router.gather_cfs_ai_context(object())
+
+    assert calls["count"] == 1
+    assert first["indicator_intelligence"] == second["indicator_intelligence"]

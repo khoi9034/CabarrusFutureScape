@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+import copy
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -17,6 +18,8 @@ from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchR
 from app.services.ai_search_service import CfsAiSearchService
 
 router = APIRouter(prefix="/ai", tags=["CFS AI Search"])
+ASK_CFS_CONTEXT_CACHE_TTL = timedelta(minutes=5)
+_ASK_CFS_CONTEXT_CACHE: dict[str, Any] = {"expires_at": None, "payload": None}
 
 _FAST_DEVELOPMENT_SQL = text(
     """
@@ -83,6 +86,11 @@ def search_cfs(
 
 
 def gather_cfs_ai_context(_db: Session) -> CfsAiContext:
+    cached = _ASK_CFS_CONTEXT_CACHE.get("payload")
+    expires_at = _ASK_CFS_CONTEXT_CACHE.get("expires_at")
+    if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached:
+        return copy.deepcopy(cached)
+
     context: CfsAiContext = {
         "as_of": datetime.now(UTC).isoformat(),
         "caveats": [],
@@ -104,6 +112,9 @@ def gather_cfs_ai_context(_db: Session) -> CfsAiContext:
     context["indicator_summary"] = {}
     context["school_pressure"] = {"features": [], "summary": {}, "total_count": 0}
 
+    # ponytail: in-process cache; switch to shared cache if API runs multi-worker locally.
+    _ASK_CFS_CONTEXT_CACHE["payload"] = copy.deepcopy(context)
+    _ASK_CFS_CONTEXT_CACHE["expires_at"] = datetime.now(UTC) + ASK_CFS_CONTEXT_CACHE_TTL
     return context
 
 

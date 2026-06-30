@@ -3,9 +3,10 @@ from __future__ import annotations
 import concurrent.futures
 import json
 import re
+import threading
 import urllib.error
 import urllib.request
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from app.config import Settings
@@ -40,7 +41,11 @@ RELATED_LAYERS = {
     "zoning": ["Zoning / Land Use"],
 }
 
-_PROVIDER_TIMEOUT_SECONDS = 2.5
+_PROVIDER_TIMEOUT_SECONDS = 1.25
+_PROVIDER_COOLDOWN_TTL = timedelta(minutes=5)
+_PROVIDER_COOLDOWN_LOCK = threading.Lock()
+_PROVIDER_COOLDOWN_UNTIL: datetime | None = None
+_PROVIDER_COOLDOWN_REASON: str | None = None
 _PROVIDER_EXECUTOR = concurrent.futures.ThreadPoolExecutor(
     max_workers=2,
     thread_name_prefix="cfs-ai-provider",
@@ -158,9 +163,14 @@ class CfsAiSearchService:
         ):
             return fallback
 
+        if cooldown_reason := _provider_cooldown_reason():
+            fallback.caveats.append(_provider_cooldown_caveat(cooldown_reason))
+            return sanitize_response(fallback)
+
         try:
             provider_payload = self._provider_answer_with_timeout(request, context, domains)
         except concurrent.futures.TimeoutError:
+            _mark_provider_unavailable("timeout")
             fallback.caveats.append(
                 "OpenAI provider did not respond within the presentation timeout, so CFS used grounded deterministic analysis.",
             )
@@ -172,6 +182,7 @@ class CfsAiSearchService:
             return sanitize_response(fallback)
 
         if provider_payload and provider_payload.get("_provider_unavailable_reason") == "rate_limit_quota":
+            _mark_provider_unavailable("rate_limit_quota")
             fallback.caveats.append(
                 "OpenAI provider was unavailable due to rate limit or quota status, so CFS used grounded deterministic analysis.",
             )
@@ -424,6 +435,31 @@ def compact_context(context: CfsAiContext) -> CfsAiContext:
         "school_pressure": context.get("school_pressure"),
         "methodology": context.get("methodology"),
     }
+
+
+def _mark_provider_unavailable(reason: str) -> None:
+    global _PROVIDER_COOLDOWN_REASON, _PROVIDER_COOLDOWN_UNTIL
+    with _PROVIDER_COOLDOWN_LOCK:
+        _PROVIDER_COOLDOWN_REASON = reason
+        _PROVIDER_COOLDOWN_UNTIL = datetime.now(UTC) + _PROVIDER_COOLDOWN_TTL
+
+
+def _provider_cooldown_reason() -> str | None:
+    global _PROVIDER_COOLDOWN_REASON, _PROVIDER_COOLDOWN_UNTIL
+    with _PROVIDER_COOLDOWN_LOCK:
+        if _PROVIDER_COOLDOWN_UNTIL and _PROVIDER_COOLDOWN_UNTIL > datetime.now(UTC):
+            return _PROVIDER_COOLDOWN_REASON or "unavailable"
+        _PROVIDER_COOLDOWN_REASON = None
+        _PROVIDER_COOLDOWN_UNTIL = None
+        return None
+
+
+def _provider_cooldown_caveat(reason: str) -> str:
+    if reason == "rate_limit_quota":
+        return "OpenAI provider is temporarily unavailable due to rate limit or quota status, so CFS used grounded deterministic analysis."
+    if reason == "timeout":
+        return "OpenAI provider is temporarily unavailable after a slow response, so CFS used grounded deterministic analysis."
+    return "OpenAI provider is temporarily unavailable, so CFS used grounded deterministic analysis."
 
 
 def extract_development_activity_detail(context: CfsAiContext) -> dict[str, Any]:

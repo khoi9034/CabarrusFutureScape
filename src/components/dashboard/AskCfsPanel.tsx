@@ -27,6 +27,7 @@ export function AskCfsPanel({
 }) {
   const [answer, setAnswer] = useState<CfsAiSearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadingStage, setLoadingStage] = useState(0);
   const [turns, setTurns] = useState<CfsAiConversationTurn[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -42,6 +43,7 @@ export function AskCfsPanel({
 
     setError(null);
     setIsLoading(true);
+    setLoadingStage(0);
     try {
       const response = await searchCfsAi({
         ...requestOverrides,
@@ -77,6 +79,16 @@ export function AskCfsPanel({
     setQuery(externalRequest.request.query);
     void submit(externalRequest.request.query, externalRequest.request);
   }, [externalRequest, submit]);
+
+  useEffect(() => {
+    if (!isLoading) return;
+    const cachedTimer = window.setTimeout(() => setLoadingStage(1), 2000);
+    const fallbackTimer = window.setTimeout(() => setLoadingStage(2), 5000);
+    return () => {
+      window.clearTimeout(cachedTimer);
+      window.clearTimeout(fallbackTimer);
+    };
+  }, [isLoading]);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -130,9 +142,7 @@ export function AskCfsPanel({
           <span className="font-semibold text-[#9be9ff]">
             Preparing grounded CFS briefing...
           </span>{" "}
-          {USE_DEMO_DATA
-            ? "Using cached demo intelligence context."
-            : "Using cached intelligence context when available; fast fallback is enabled."}
+          {loadingStageMessage(loadingStage)}
         </div>
       ) : null}
 
@@ -195,6 +205,13 @@ function toConversationTurn(
     query,
     related_layers: response.related_layers.slice(0, 6),
   };
+}
+
+function loadingStageMessage(stage: number) {
+  if (USE_DEMO_DATA) return "Using cached demo intelligence context.";
+  if (stage >= 2) return "Still working; fallback will return if provider is slow.";
+  if (stage >= 1) return "Using cached local intelligence context.";
+  return "Using cached intelligence context when available; fast fallback is enabled.";
 }
 
 function labelForTurn(turn: CfsAiConversationTurn) {
