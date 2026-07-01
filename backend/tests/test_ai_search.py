@@ -675,7 +675,7 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(
             app_mode="economics",
-            query="What CSV tables should I import first?",
+            query="How do I QA the Power BI export?",
         ),
         _context(),
     )
@@ -687,6 +687,9 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert "Relationships to build" in response.answer
     assert "Report pages to create" in response.answer
     assert "Suggested measures" in response.answer
+    assert "Quality checks" in response.answer
+    assert "scenario_id exists in scenario_output_fact" in response.answer
+    assert "Slicers are checked for blank or missing values" in response.answer
     assert "Do not connect every table" in response.answer
     assert "Power BI Embedded" in response.answer
     assert response.evidence[0].source == "economics_powerbi_export"

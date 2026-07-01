@@ -275,6 +275,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Power BI Desktop Practice Pack" in economics_shell
     assert "Flat CSV Tables" in economics_shell
     assert "Copy import order" in economics_shell
+    assert "Power BI Import QA Checklist" in economics_shell
+    assert "Copy QA Checklist" in economics_shell
     assert "Power BI Report Builder Guide" in economics_shell
     assert "Download Power BI JSON Pack" in economics_shell
     assert "Copy table relationship notes" in economics_shell
@@ -313,6 +315,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "What DAX measures should I create?" in ask_service
     assert "Should I use JSON or CSV for Power BI?" in ask_service
     assert "What CSV tables should I import first?" in ask_service
+    assert "How do I QA the Power BI export?" in ask_service
+    assert "Why are some slicers blank?" in ask_service
     assert "Why should I not connect every table?" in ask_service
     assert "What relationships should I build?" in ask_service
     assert "Enterprise Consulting Toolkit" in economic_mission_control

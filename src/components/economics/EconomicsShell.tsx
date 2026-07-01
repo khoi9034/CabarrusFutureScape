@@ -537,6 +537,7 @@ function EnterpriseToolsPage({
   const relationshipNotes = powerBiRelationshipNotes(powerBiPayload);
   const reportLayoutNotes = powerBiReportLayoutNotes(powerBiPayload);
   const importOrderNotes = powerBiCsvImportOrderNotes(csvRows);
+  const qaChecklistNotes = powerBiImportQaChecklist.join("\n");
   const copyText = async (label: string, text: string) => {
     if (!navigator.clipboard) {
       setCopyStatus("Clipboard unavailable in this browser");
@@ -716,6 +717,35 @@ function EnterpriseToolsPage({
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      </EconPanel>
+      <EconPanel title="Power BI Import QA Checklist" kicker="Final CSV check">
+        <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+          <div className="space-y-3">
+            <p className="text-sm leading-6 text-[var(--econ-muted)]">
+              Use this after importing the flat CSV tables into Power BI Desktop.
+              It catches the common beginner mistakes: missing headers, missing
+              join fields, unsafe fields, and slicers that filter to blanks.
+            </p>
+            <button
+              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+              onClick={() => void copyText("QA checklist", qaChecklistNotes)}
+              type="button"
+            >
+              Copy QA Checklist
+            </button>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {powerBiImportQaChecklist.map((item) => (
+              <div
+                className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2 text-sm text-[var(--econ-muted)]"
+                key={item}
+              >
+                <span className="mr-2 text-[var(--econ-green)]">OK</span>
+                {item}
+              </div>
+            ))}
           </div>
         </div>
       </EconPanel>
@@ -1679,6 +1709,21 @@ const scenarioCatalog: EconomicsScenarioTemplate[] = [
     title: "Infrastructure-Constrained Growth",
     what_it_tests: "How opportunity is limited when infrastructure readiness is weak.",
   },
+];
+
+const powerBiImportQaChecklist = [
+  "All 7 CSV tables downloaded.",
+  "Headers are present in each CSV.",
+  "No owner/mailing fields imported.",
+  "No raw scores imported.",
+  "No tax bill fields imported.",
+  "scenario_id exists in scenario_output_fact.",
+  "scenario_id exists in scenario_dim.",
+  "geography_label exists in parcel_economic_signal_fact.",
+  "geography_label exists in geography_dim.",
+  "Relationships are created in Power BI.",
+  "Report caveats are visible.",
+  "Slicers are checked for blank or missing values.",
 ];
 
 const executiveCards = [

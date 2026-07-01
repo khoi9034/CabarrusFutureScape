@@ -72,6 +72,10 @@ export const askCfsEconomicsSuggestedPrompts = [
   "How do I relate the CSV tables?",
   "Which CSV table powers the executive dashboard?",
   "Which CSV table powers Scenario Lab?",
+  "How do I QA the Power BI export?",
+  "What should I check after importing the CSVs?",
+  "Why are some slicers blank?",
+  "How do I know the relationships are correct?",
   "Explain the planning model dimensions.",
   "What scenario assumptions should I test?",
   "Build a consulting decision pack.",
@@ -313,6 +317,12 @@ function isEconomicsPowerBiQuery(query: string) {
     "dax",
     "page 1",
     "relationships",
+    "qa",
+    "quality check",
+    "check after importing",
+    "slicers blank",
+    "slicer blank",
+    "relationships correct",
     "connect every table",
     "scenario planning page",
     "data confidence register",
@@ -376,12 +386,11 @@ function demoEconomicsPowerBiAnswer(
       ],
       [
         "Quality checks",
-        bullets(guide?.quality_checks ?? [
-          "All 7 tables loaded.",
-          "Scenario relationship created.",
-          "Geography relationship created.",
-          "Report caveats visible.",
-        ]),
+        bullets(powerBiImportQaChecklist),
+      ],
+      [
+        "Blank slicer checks",
+        "If slicers show blanks, confirm the related key exists on both sides before connecting more tables. Start with scenario_output_fact.scenario_id -> scenario_dim.scenario_id and parcel_economic_signal_fact.geography_label -> geography_dim.geography_label; leave unrelated summary tables disconnected.",
       ],
       [
         "Next steps",
@@ -429,6 +438,21 @@ function demoEconomicsPowerBiAnswer(
     ],
   };
 }
+
+const powerBiImportQaChecklist = [
+  "All 7 CSV tables downloaded.",
+  "Headers are present in each CSV.",
+  "No owner/mailing fields imported.",
+  "No raw scores imported.",
+  "No tax bill fields imported.",
+  "scenario_id exists in scenario_output_fact.",
+  "scenario_id exists in scenario_dim.",
+  "geography_label exists in parcel_economic_signal_fact.",
+  "geography_label exists in geography_dim.",
+  "Relationships are created in Power BI.",
+  "Report caveats are visible.",
+  "Slicers are checked for blank or missing values.",
+];
 
 function isEconomicsScenarioQuery(query: string) {
   const normalized = query.toLowerCase();

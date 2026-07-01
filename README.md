@@ -215,6 +215,20 @@ turning the export into a Desktop report:
 This is Power BI Desktop practice only, not embedded Power BI. Field names may
 need small adjustments after Power BI expands the JSON.
 
+### Power BI Import QA Checklist
+
+After importing the CFS Economics CSV files into Power BI Desktop, verify:
+
+- All 7 CSV tables were downloaded and imported.
+- Headers are present in each table.
+- No owner/mailing fields, raw scores, or tax bill fields were imported.
+- `scenario_id` exists in both `scenario_output_fact` and `scenario_dim`.
+- `geography_label` exists in both `parcel_economic_signal_fact` and
+  `geography_dim`.
+- Relationships are created for scenario and geography tables.
+- Report caveats are visible.
+- Slicers have been checked for blank or missing values.
+
 Regenerate the static portfolio data locally with:
 
 ```powershell
