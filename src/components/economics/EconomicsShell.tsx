@@ -147,7 +147,6 @@ export function EconomicsShell() {
           <EconomicsPrintPage
             intelligence={intelligence}
             selectedSignals={selectedSignals}
-            watchlist={watchlist}
           />
         ) : null}
       </div>
@@ -186,6 +185,8 @@ function ExecutiveBriefPage({
         </div>
       </section>
 
+      <PageHelper text="Start here to understand the economics workflow." />
+
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {executiveCards.map((card) => (
           <EconCard key={card.title}>
@@ -201,6 +202,22 @@ function ExecutiveBriefPage({
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+        <EconPanel title="What CFS Economics does" kicker="Plain-language purpose">
+          <p className="text-sm leading-7 text-[var(--econ-muted)]">
+            CFS Economics provides screening-level economic intelligence. It
+            turns parcel value, acreage, permit context, constraints, and data
+            confidence into a parcel economic baseline, underbuilt
+            redevelopment watchlist, tax-base opportunity view, and
+            fiscal/service burden context.
+          </p>
+        </EconPanel>
+        <EconPanel title="What data it uses" kicker="Source context">
+          <p className="text-sm leading-7 text-[var(--econ-muted)]">
+            The workflow uses parcel/tax fields, acreage, jurisdiction or
+            geography labels, permit activity where available, constraint
+            context, scenario assumptions, and enterprise export-ready tables.
+          </p>
+        </EconPanel>
         <EconPanel title="How to use CFS Economics" kicker="Simple workflow">
           <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-[var(--econ-muted)]">
             <li>Start in Workspace.</li>
@@ -221,6 +238,22 @@ function ExecutiveBriefPage({
             constraint context into screening-level scorecards for consulting
             review. It is not an approval recommendation, formal appraisal, tax
             bill, or full fiscal impact study.
+          </p>
+        </EconPanel>
+        <EconPanel title="What outputs it creates" kicker="Presentation outputs">
+          <ul className="space-y-2 text-sm leading-6 text-[var(--econ-muted)]">
+            <li>Workspace tables for parcel economics and watchlists.</li>
+            <li>Economic Dashboard indicators and Ask CFS briefings.</li>
+            <li>Power BI-ready JSON and CSV table exports.</li>
+            <li>Planning-model dimensions, measures, scenarios, and decision-pack payloads.</li>
+            <li>Printable economic snapshot for presentation or review.</li>
+          </ul>
+        </EconPanel>
+        <EconPanel title="What it is not" kicker="Safe-use caveat">
+          <p className="text-sm leading-7 text-[var(--econ-muted)]">
+            CFS Economics is not an official appraisal, tax bill, fiscal impact
+            study, or approval recommendation. It is a decision-support workflow
+            for identifying where deeper diligence is needed.
           </p>
         </EconPanel>
         <EconPanel title="Decision questions" kicker="What it helps answer">
@@ -277,6 +310,7 @@ function EconomicDashboardPage({
         title="Growth & Tax Base Intelligence"
         text="Executive KPIs, scorecards, watchlists, and data confidence for parcel-based fiscal screening."
       />
+      <PageHelper text="Use this page to monitor economic indicators and ask CFS questions." />
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
         {kpis.map((kpi) => (
           <KpiCard key={kpi.id} kpi={kpi} />
@@ -362,37 +396,58 @@ function EconomicsWorkspacePage({
         title="Economic tables and watchlists"
         text="Select parcel and area economics rows, review opportunity signals, and send the useful set into the Enterprise Workspace for model/export work."
       />
+      <PageHelper text="Use tables to review parcel economics, select rows, and send them to Enterprise Workspace." />
       <SelectedRowsTray
         onClear={onClearSelection}
         onSend={onSendSelected}
         selectedSignals={selectedSignals}
       />
       <section className="grid gap-4">
-        <EconPanel title="Parcel Economic Baseline Table" kicker="Baseline">
+        <EconPanel
+          description="Starting table for parcel value, acreage, value-per-acre context, improvement ratio, geography, and confidence."
+          kicker="Baseline"
+          title="Parcel Economic Baseline"
+        >
           <SelectableSignalTable
             onToggle={onToggleSignal}
             selectedIds={selectedSignalIds}
             signals={signals.slice(0, 12)}
           />
         </EconPanel>
-        <EconPanel title="Underbuilt / Redevelopment Watchlist" kicker="Redevelopment">
+        <EconPanel
+          description="Rows where land value, acreage, and improvement context suggest a screening-level redevelopment review."
+          kicker="Redevelopment"
+          title="Underbuilt / Redevelopment Watchlist"
+        >
           <SelectableSignalTable
             onToggle={onToggleSignal}
             selectedIds={selectedSignalIds}
             signals={watchlist.slice(0, 12)}
           />
         </EconPanel>
-        <EconPanel title="Tax-base opportunity signals" kicker="Value screen">
+        <EconPanel
+          description="Areas where current value context and development pressure may justify deeper tax-base diligence."
+          kicker="Value screen"
+          title="Tax-Base Opportunity"
+        >
           <SelectableSignalTable
             onToggle={onToggleSignal}
             selectedIds={selectedSignalIds}
             signals={taxBaseSignals}
           />
         </EconPanel>
-        <EconPanel title="Scenario Candidate Table" kicker="Scenario fit">
+        <EconPanel
+          description="Scenario output bands that can be used as starting assumptions in the Enterprise Workspace."
+          kicker="Scenario fit"
+          title="Scenario Candidates"
+        >
           <ScenarioOutputList rows={scenarioOutputs} />
         </EconPanel>
-        <EconPanel title="Data Readiness Table" kicker="Confidence">
+        <EconPanel
+          description="Shows which economic inputs are strong, partial, or still data-needed before a recommendation."
+          kicker="Confidence"
+          title="Data Readiness"
+        >
           <ReadinessTable rows={dataReadiness} />
         </EconPanel>
       </section>
@@ -585,6 +640,19 @@ function EnterpriseWorkspacePage({
         title="Move selected economics rows into model and export work"
         text="Selected parcel economics rows become planning-model context, Power BI practice tables, scenario assumptions, and decision-pack evidence. No external credentials are required."
       />
+      <PageHelper text="Use selected rows to build scenario outputs, Power BI tables, and planning model exports." />
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        {enterpriseWorkspaceSteps.map((step) => (
+          <EconCard key={step.title}>
+            <h2 className="text-base font-semibold text-[var(--econ-text)]">
+              {step.title}
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
+              {step.text}
+            </p>
+          </EconCard>
+        ))}
+      </section>
       <SelectedRowsTray
         actions={false}
         onClear={() => undefined}
@@ -600,14 +668,12 @@ function EnterpriseWorkspacePage({
 function EconomicsPrintPage({
   intelligence,
   selectedSignals,
-  watchlist,
 }: {
   intelligence: EconomicsIntelligenceResponse | null;
   selectedSignals: EconomicsParcelSignal[];
-  watchlist: EconomicsParcelSignal[];
 }) {
   const summary = intelligence?.summary;
-  const snapshotRows = selectedSignals.length ? selectedSignals : watchlist.slice(0, 3);
+  const snapshotRows = selectedSignals;
   return (
     <>
       <PageHeader
@@ -615,6 +681,7 @@ function EconomicsPrintPage({
         title="Economic snapshot"
         text="Printable screening-level summary for selected rows, economic baseline, opportunity class, service burden, scenario context, confidence, caveats, and next diligence."
       />
+      <PageHelper text="Use this page to create a simple economic snapshot for presentation or review." />
       <section className="grid gap-4 xl:grid-cols-3">
         <EconPanel title="Economic baseline" kicker="Snapshot">
           <div className="grid gap-3">
@@ -631,7 +698,14 @@ function EconomicsPrintPage({
         </EconPanel>
       </section>
       <EconPanel title="Selected rows / selected area" kicker="Print queue">
-        <SignalTable signals={snapshotRows} />
+        {snapshotRows.length ? (
+          <SignalTable signals={snapshotRows} />
+        ) : (
+          <p className="text-sm leading-7 text-[var(--econ-muted)]">
+            Select rows in Workspace and send them to Enterprise Workspace or
+            Print to build an economic snapshot.
+          </p>
+        )}
       </EconPanel>
       <section className="grid gap-4 xl:grid-cols-2">
         <EconPanel title="Scenario summary" kicker="Output bands">
@@ -1084,12 +1158,23 @@ function PageHeader({
   );
 }
 
+function PageHelper({ text }: { text: string }) {
+  return (
+    <section className="rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
+      <span className="font-semibold text-[#ffe6a6]">How to use this page: </span>
+      {text}
+    </section>
+  );
+}
+
 function EconPanel({
   children,
+  description,
   kicker,
   title,
 }: {
   children: ReactNode;
+  description?: string;
   kicker: string;
   title: string;
 }) {
@@ -1099,6 +1184,11 @@ function EconPanel({
       <h2 className="mt-2 text-lg font-semibold text-[var(--econ-text)]">
         {title}
       </h2>
+      {description ? (
+        <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
+          {description}
+        </p>
+      ) : null}
       <div className="mt-4">{children}</div>
     </section>
   );
@@ -2049,5 +2139,28 @@ const enterpriseCards = [
     icon: FileJson,
     text: "Executive takeaway, evidence pack, assumptions, risk flags, caveats, and next diligence.",
     title: "Consulting Decision Pack",
+  },
+];
+
+const enterpriseWorkspaceSteps = [
+  {
+    text: "Rows selected in Workspace become the working set for exports, scenarios, and snapshots.",
+    title: "Selected Rows",
+  },
+  {
+    text: "Scenario controls test assumptions and return screening-level output bands.",
+    title: "Scenario Model",
+  },
+  {
+    text: "Flat CSV and JSON packs teach the Power BI Desktop import workflow.",
+    title: "Power BI Export",
+  },
+  {
+    text: "Dimensions, measures, scenarios, and outputs mirror enterprise planning models.",
+    title: "Planning Model",
+  },
+  {
+    text: "Decision-pack previews summarize evidence, caveats, and next diligence.",
+    title: "Decision Pack",
   },
 ];

@@ -263,10 +263,22 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "EconomicDashboardPage" in economics_shell
     assert "EnterpriseWorkspacePage" in economics_shell
     assert "EconomicsPrintPage" in economics_shell
-    assert "Parcel Economic Baseline Table" in economics_shell
-    assert "Scenario Candidate Table" in economics_shell
+    assert "Start here to understand the economics workflow." in economics_shell
+    assert "What CFS Economics does" in economics_shell
+    assert "What data it uses" in economics_shell
+    assert "What outputs it creates" in economics_shell
+    assert "What it is not" in economics_shell
+    assert "Parcel Economic Baseline" in economics_shell
+    assert "Tax-Base Opportunity" in economics_shell
+    assert "Scenario Candidates" in economics_shell
+    assert "Data Readiness" in economics_shell
     assert "Selected for Enterprise Workspace" in economics_shell
     assert "Send selected to Enterprise Workspace" in economics_shell
+    assert "Select rows from the workspace tables to move them into model and export work." in economics_shell
+    assert "Use selected rows to build scenario outputs, Power BI tables, and planning model exports." in economics_shell
+    assert "Selected Rows" in economics_shell
+    assert "Power BI Export" in economics_shell
+    assert "Decision Pack" in economics_shell
     assert "Assumption Controls" in economics_shell
     assert "Scenario Output" in economics_shell
     assert "Scenario Comparison Matrix" in economics_shell
@@ -294,6 +306,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Quality checks" in economics_shell
     assert "Planning Model Schema" in economics_shell
     assert "Economic snapshot" in economics_shell
+    assert "Select rows in Workspace and send them to Enterprise Workspace or" in economics_shell
     assert "Ask CFS Economics" in economics_shell
     assert "EconomicMissionControl" in indicator_center
     assert "getDemoEconomicsIntelligence" in economics_service
@@ -305,18 +318,15 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert 'app_mode === "economics"' in ask_service
     assert "Traditional GIS can show where things are" in overview
     assert "Consulting Decision Workflows" in overview
-    assert "Which areas create fiscal upside but service burden?" in ask_service
+    assert "What should I inspect first?" in ask_service
+    assert "Which rows should I send to Enterprise Workspace?" in ask_service
+    assert "How do I build this in Power BI?" in ask_service
+    assert "Which areas show underbuilt opportunity?" in ask_service
+    assert "Where is data confidence weak?" in ask_service
+    assert "Build a decision-pack summary." in ask_service
     assert "Which parcels look underbuilt?" in ask_service
     assert "Where is tax-base opportunity high?" in ask_service
-    assert "Which areas need more data before a recommendation?" in ask_service
-    assert "What corridors look investment-ready?" in ask_service
-    assert "How would this become a Power BI dataset?" in ask_service
-    assert "How do I build this in Power BI?" in ask_service
-    assert "How do I build page 1 in Power BI?" in ask_service
-    assert "What DAX measures should I create?" in ask_service
     assert "Should I use JSON or CSV for Power BI?" in ask_service
     assert "What CSV tables should I import first?" in ask_service
     assert "How do I QA the Power BI export?" in ask_service
-    assert "Why are some slicers blank?" in ask_service
-    assert "Why should I not connect every table?" in ask_service
     assert "What relationships should I build?" in ask_service

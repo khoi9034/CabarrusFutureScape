@@ -678,7 +678,7 @@ def _economics_answer(
             "Open Economic Dashboard and compare Revenue per Acre Dashboard with the Underbuilt Redevelopment Watchlist.",
             "Use Economic Scenario Model only as screening-level fiscal context.",
             "Ask: Where is economic data confidence weak?",
-            "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",
+            "Preview Enterprise Workspace for facts, dimensions, planning-model cells, and decision-pack JSON.",
         ],
     )
 
