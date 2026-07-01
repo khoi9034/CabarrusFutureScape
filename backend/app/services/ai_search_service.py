@@ -149,6 +149,8 @@ DOMAIN_KEYWORDS: list[tuple[CfsAiDomain, tuple[str, ...]]] = [
             "dimensions",
             "decision pack",
             "dataset",
+            "walk through",
+            "tour",
         ),
     ),
     ("schools", ("school", "attendance", "capacity", "utilization", "student")),
@@ -558,6 +560,8 @@ def _economics_answer(
     summary = economics.get("summary", {}) if isinstance(economics, dict) else {}
     watchlist = economics.get("watchlist", []) if isinstance(economics, dict) else []
     readiness = economics.get("data_readiness", []) if isinstance(economics, dict) else []
+    if _is_economics_walkthrough_query(request.query):
+        return _economics_walkthrough_answer(request, context)
     if _is_economics_powerbi_query(request.query):
         return _economics_powerbi_answer(request, context)
     if _is_economics_scenario_query(request.query):
@@ -679,6 +683,67 @@ def _economics_answer(
             "Use Economic Scenario Model only as screening-level fiscal context.",
             "Ask: Where is economic data confidence weak?",
             "Preview Enterprise Workspace for facts, dimensions, planning-model cells, and decision-pack JSON.",
+        ],
+    )
+
+
+def _is_economics_walkthrough_query(query: str) -> bool:
+    normalized = query.lower()
+    return "walk through" in normalized or "tour" in normalized
+
+
+def _economics_walkthrough_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+) -> CfsAiSearchResponse:
+    answer = _briefing(
+        (
+            "Executive takeaway",
+            "Walk through CFS Economics in five screens: Overview, Workspace, Economic Dashboard, Enterprise Workspace, then Print. Local live mode uses the FastAPI backend and local PostGIS economics data; portfolio demo mode uses a sanitized cached demo extract.",
+        ),
+        (
+            "Recommended sequence",
+            _bullets(
+                [
+                    "1. Overview - explain what CFS Economics is and how local live data differs from the portfolio demo cached demo extract.",
+                    "2. Workspace - review economic tables, select useful rows, and prepare them for enterprise workflows.",
+                    "3. Economic Dashboard - monitor KPIs, watchlists, charts, data confidence, and Ask CFS Economics.",
+                    "4. Enterprise Workspace - turn selected rows into scenario outputs, Power BI Desktop tables, planning-model structure, and decision-pack previews.",
+                    "5. Print - create a simple economic snapshot for presentation or review.",
+                ]
+            ),
+        ),
+        (
+            "Why it matters",
+            "This flow shows how parcel economics, permit activity, constraints, scenario logic, Power BI-ready tables, planning model schema, decision packs, and data confidence fit into one screening-level decision-support platform.",
+        ),
+        (
+            "Caveats",
+            _bullets(
+                [
+                    "CFS Economics is screening-level context, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+                    "Portfolio demo mode uses a cached demo extract.",
+                ]
+            ),
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "CFS Economics workflow",
+                "Overview -> Workspace -> Economic Dashboard -> Enterprise Workspace -> Print.",
+                "economics_intelligence",
+                "available",
+            )
+        ],
+        [
+            "Start in Overview, then select rows in Workspace.",
+            "Use Enterprise Workspace for Power BI exports, scenario outputs, planning model schema, and decision-pack previews.",
+            "Use Print for the final presentation snapshot.",
         ],
     )
 

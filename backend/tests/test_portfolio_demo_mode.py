@@ -263,11 +263,23 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "EconomicDashboardPage" in economics_shell
     assert "EnterpriseWorkspacePage" in economics_shell
     assert "EconomicsPrintPage" in economics_shell
-    assert "Start here to understand the economics workflow." in economics_shell
+    assert "Start Economics Tour" in economics_shell
+    assert "CFS Economics guided tour" in economics_shell
+    assert "Step ${tourStepIndex + 1} of ${economicsTourSteps.length}" in economics_shell
+    assert "Overview -> Workspace -> Economic Dashboard -> Enterprise Workspace -> Print" in ask_service
+    assert "Uses the local FastAPI backend and local PostGIS economics data." in economics_shell
+    assert "Uses a sanitized cached demo extract for portfolio review." in economics_shell
+    assert "You are here:" in economics_shell
+    assert "Understand the workflow." in economics_shell
+    assert "Select rows from economic tables." in economics_shell
+    assert "Review indicators and ask CFS." in economics_shell
+    assert "Turn selected rows into scenarios, exports, and decision packs." in economics_shell
+    assert "Prepare a simple snapshot for review." in economics_shell
     assert "What CFS Economics does" in economics_shell
     assert "What data it uses" in economics_shell
     assert "What outputs it creates" in economics_shell
     assert "What it is not" in economics_shell
+    assert "Why this matters" in economics_shell
     assert "Parcel Economic Baseline" in economics_shell
     assert "Tax-Base Opportunity" in economics_shell
     assert "Scenario Candidates" in economics_shell
@@ -275,7 +287,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Selected for Enterprise Workspace" in economics_shell
     assert "Send selected to Enterprise Workspace" in economics_shell
     assert "Select rows from the workspace tables to move them into model and export work." in economics_shell
-    assert "Use selected rows to build scenario outputs, Power BI tables, and planning model exports." in economics_shell
+    assert "Turn selected rows into scenarios, exports, and decision packs." in economics_shell
     assert "Selected Rows" in economics_shell
     assert "Power BI Export" in economics_shell
     assert "Decision Pack" in economics_shell
@@ -319,6 +331,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Traditional GIS can show where things are" in overview
     assert "Consulting Decision Workflows" in overview
     assert "What should I inspect first?" in ask_service
+    assert "How should I walk through CFS Economics?" in ask_service
     assert "Which rows should I send to Enterprise Workspace?" in ask_service
     assert "How do I build this in Power BI?" in ask_service
     assert "Which areas show underbuilt opportunity?" in ask_service

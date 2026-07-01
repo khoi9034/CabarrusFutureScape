@@ -35,6 +35,7 @@ export const askCfsSuggestedPrompts = [
 ] as const;
 
 export const askCfsEconomicsSuggestedPrompts = [
+  "How should I walk through CFS Economics?",
   "What should I inspect first?",
   "Which rows should I send to Enterprise Workspace?",
   "How do I build this in Power BI?",
@@ -138,6 +139,9 @@ async function demoEconomicsAnswer(
   request?: CfsAiSearchRequest,
 ): Promise<CfsAiSearchResponse> {
   const economics = await getDemoEconomicsIntelligence();
+  if (isEconomicsWalkthroughQuery(request?.query ?? "")) {
+    return demoEconomicsWalkthroughAnswer(economics.as_of);
+  }
   if (isEconomicsPowerBiQuery(request?.query ?? "")) {
     return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport());
   }
@@ -266,6 +270,69 @@ async function demoEconomicsAnswer(
       "Use Economic Scenario Model as screening-level fiscal context only.",
       "Ask: Where is economic data confidence weak?",
       "Preview Enterprise Workspace for facts, dimensions, planning-model cells, and decision-pack JSON.",
+    ],
+  };
+}
+
+function isEconomicsWalkthroughQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return normalized.includes("walk through") || normalized.includes("tour");
+}
+
+function demoEconomicsWalkthroughAnswer(asOf: string | null): CfsAiSearchResponse {
+  return {
+    answer: briefing(
+      [
+        "Executive takeaway",
+        "Walk through CFS Economics in five screens: Overview, Workspace, Economic Dashboard, Enterprise Workspace, then Print. The portfolio demo uses a sanitized cached demo extract; local live mode uses the FastAPI backend and local PostGIS economics data.",
+      ],
+      [
+        "Recommended sequence",
+        bullets([
+          "1. Overview - explain what CFS Economics is and how local live data differs from the portfolio demo cached demo extract.",
+          "2. Workspace - review economic tables, select useful rows, and prepare them for enterprise workflows.",
+          "3. Economic Dashboard - monitor KPIs, watchlists, charts, data confidence, and Ask CFS Economics.",
+          "4. Enterprise Workspace - turn selected rows into scenario outputs, Power BI Desktop tables, planning-model structure, and decision-pack previews.",
+          "5. Print - create a simple economic snapshot for presentation or review.",
+        ]),
+      ],
+      [
+        "Why it matters",
+        "This flow shows how parcel economics, permit activity, constraints, scenario logic, Power BI-ready tables, planning model schema, decision packs, and data confidence fit into one screening-level decision-support platform.",
+      ],
+      [
+        "Caveats",
+        bullets([
+          "Portfolio Demo uses a cached demo extract.",
+          "CFS Economics is screening-level context, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+        ]),
+      ],
+    ),
+    as_of: asOf ?? "",
+    caveats: [
+      "Portfolio Demo uses a cached demo extract.",
+      "Local live mode uses the FastAPI backend and local PostGIS economics data.",
+    ],
+    dashboard_actions: {
+      focus_domain: "economics",
+      recommended_layers: ["Overview", "Workspace", "Economic Dashboard", "Enterprise Workspace", "Print"],
+    },
+    data_mode: "demo",
+    domains: ["economics"],
+    evidence: [
+      evidence(
+        "CFS Economics workflow",
+        "Overview -> Workspace -> Economic Dashboard -> Enterprise Workspace -> Print.",
+        "public/demo-data/economics_intelligence.json",
+        "available",
+      ),
+    ],
+    provider: "none",
+    related_layers: ["Overview", "Workspace", "Economic Dashboard", "Enterprise Workspace", "Print"],
+    suggested_actions: [
+      "Start in Overview, then select rows in Workspace.",
+      "Use Enterprise Workspace for Power BI exports, scenario outputs, planning model schema, and decision-pack previews.",
+      "Use Print for the final presentation snapshot.",
     ],
   };
 }

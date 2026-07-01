@@ -160,6 +160,9 @@ function ExecutiveBriefPage({
   intelligence: EconomicsIntelligenceResponse | null;
 }) {
   const summary = intelligence?.summary;
+  const [tourOpen, setTourOpen] = useState(false);
+  const [tourStepIndex, setTourStepIndex] = useState(0);
+  const tourStep = economicsTourSteps[tourStepIndex] ?? economicsTourSteps[0];
   return (
     <>
       <section className="econ-hero rounded-2xl p-6 md:p-8">
@@ -177,6 +180,16 @@ function ExecutiveBriefPage({
               Traditional GIS can show where things are. CFS Economics helps
               explain what those places mean economically.
             </p>
+            <button
+              className="mt-5 rounded-xl border border-[var(--econ-gold)]/40 bg-[var(--econ-gold)]/15 px-4 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
+              onClick={() => {
+                setTourOpen(true);
+                setTourStepIndex(0);
+              }}
+              type="button"
+            >
+              Start Economics Tour
+            </button>
           </div>
           <div className="flex flex-wrap gap-2">
             <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
@@ -185,7 +198,76 @@ function ExecutiveBriefPage({
         </div>
       </section>
 
-      <PageHelper text="Start here to understand the economics workflow." />
+      <PageHelper text="Understand the workflow." />
+
+      {tourOpen ? (
+        <EconPanel title="CFS Economics guided tour" kicker={`Step ${tourStepIndex + 1} of ${economicsTourSteps.length}`}>
+          <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+            <div>
+              <h2 className="text-xl font-semibold text-[var(--econ-text)]">
+                {tourStep.title}
+              </h2>
+              <p className="mt-2 text-sm leading-7 text-[var(--econ-muted)]">
+                {tourStep.text}
+              </p>
+              <div className="mt-4 grid gap-2 text-sm leading-6 text-[var(--econ-muted)]">
+                <p>
+                  <span className="font-semibold text-[var(--econ-text)]">Local live data:</span>{" "}
+                  Uses the local FastAPI backend and local PostGIS economics data.
+                </p>
+                <p>
+                  <span className="font-semibold text-[var(--econ-text)]">Portfolio demo:</span>{" "}
+                  Uses a sanitized cached demo extract for portfolio review.
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              {economicsTourSteps.map((step, index) => (
+                <button
+                  className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
+                    index === tourStepIndex
+                      ? "border-[var(--econ-gold)] bg-[var(--econ-gold)]/12 text-[#ffe6a6]"
+                      : "border-[var(--econ-border)] bg-white/[0.025] text-[var(--econ-muted)] hover:border-[var(--econ-gold)]"
+                  }`}
+                  key={step.title}
+                  onClick={() => setTourStepIndex(index)}
+                  type="button"
+                >
+                  <span className="font-semibold">{index + 1}. {step.title}</span>
+                  <span className="mt-1 block text-xs leading-5">{step.short}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+              disabled={tourStepIndex === 0}
+              onClick={() => setTourStepIndex((index) => Math.max(0, index - 1))}
+              type="button"
+            >
+              Previous
+            </button>
+            <button
+              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+              disabled={tourStepIndex === economicsTourSteps.length - 1}
+              onClick={() =>
+                setTourStepIndex((index) => Math.min(economicsTourSteps.length - 1, index + 1))
+              }
+              type="button"
+            >
+              Next
+            </button>
+            <button
+              className="rounded-xl border border-[var(--econ-risk)]/40 px-3 py-2 text-sm font-semibold text-[#ffd1c2] transition hover:border-[var(--econ-risk)]"
+              onClick={() => setTourOpen(false)}
+              type="button"
+            >
+              Close tour
+            </button>
+          </div>
+        </EconPanel>
+      ) : null}
 
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {executiveCards.map((card) => (
@@ -217,6 +299,18 @@ function ExecutiveBriefPage({
             geography labels, permit activity where available, constraint
             context, scenario assumptions, and enterprise export-ready tables.
           </p>
+        </EconPanel>
+        <EconPanel title="Local live data vs portfolio demo" kicker="Data mode">
+          <div className="space-y-3 text-sm leading-7 text-[var(--econ-muted)]">
+            <p>
+              <span className="font-semibold text-[var(--econ-text)]">Local mode:</span>{" "}
+              Uses the local FastAPI backend and local PostGIS economics data.
+            </p>
+            <p>
+              <span className="font-semibold text-[var(--econ-text)]">Demo mode:</span>{" "}
+              Uses a sanitized cached demo extract for portfolio review.
+            </p>
+          </div>
         </EconPanel>
         <EconPanel title="How to use CFS Economics" kicker="Simple workflow">
           <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-[var(--econ-muted)]">
@@ -254,6 +348,14 @@ function ExecutiveBriefPage({
             CFS Economics is not an official appraisal, tax bill, fiscal impact
             study, or approval recommendation. It is a decision-support workflow
             for identifying where deeper diligence is needed.
+          </p>
+        </EconPanel>
+        <EconPanel title="Why this matters" kicker="Portfolio reviewer note">
+          <p className="text-sm leading-7 text-[var(--econ-muted)]">
+            CFS Economics connects parcel economics, permit activity,
+            constraints, scenario logic, data confidence, a Power BI Desktop
+            export pack, planning model schema, and decision-pack outputs into a
+            screening-level decision-support platform.
           </p>
         </EconPanel>
         <EconPanel title="Decision questions" kicker="What it helps answer">
@@ -310,7 +412,7 @@ function EconomicDashboardPage({
         title="Growth & Tax Base Intelligence"
         text="Executive KPIs, scorecards, watchlists, and data confidence for parcel-based fiscal screening."
       />
-      <PageHelper text="Use this page to monitor economic indicators and ask CFS questions." />
+      <PageHelper text="Review indicators and ask CFS." />
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
         {kpis.map((kpi) => (
           <KpiCard key={kpi.id} kpi={kpi} />
@@ -396,7 +498,7 @@ function EconomicsWorkspacePage({
         title="Economic tables and watchlists"
         text="Select parcel and area economics rows, review opportunity signals, and send the useful set into the Enterprise Workspace for model/export work."
       />
-      <PageHelper text="Use tables to review parcel economics, select rows, and send them to Enterprise Workspace." />
+      <PageHelper text="Select rows from economic tables." />
       <SelectedRowsTray
         onClear={onClearSelection}
         onSend={onSendSelected}
@@ -640,7 +742,7 @@ function EnterpriseWorkspacePage({
         title="Move selected economics rows into model and export work"
         text="Selected parcel economics rows become planning-model context, Power BI practice tables, scenario assumptions, and decision-pack evidence. No external credentials are required."
       />
-      <PageHelper text="Use selected rows to build scenario outputs, Power BI tables, and planning model exports." />
+      <PageHelper text="Turn selected rows into scenarios, exports, and decision packs." />
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {enterpriseWorkspaceSteps.map((step) => (
           <EconCard key={step.title}>
@@ -681,7 +783,7 @@ function EconomicsPrintPage({
         title="Economic snapshot"
         text="Printable screening-level summary for selected rows, economic baseline, opportunity class, service burden, scenario context, confidence, caveats, and next diligence."
       />
-      <PageHelper text="Use this page to create a simple economic snapshot for presentation or review." />
+      <PageHelper text="Prepare a simple snapshot for review." />
       <section className="grid gap-4 xl:grid-cols-3">
         <EconPanel title="Economic baseline" kicker="Snapshot">
           <div className="grid gap-3">
@@ -1161,7 +1263,7 @@ function PageHeader({
 function PageHelper({ text }: { text: string }) {
   return (
     <section className="rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
-      <span className="font-semibold text-[#ffe6a6]">How to use this page: </span>
+      <span className="font-semibold text-[#ffe6a6]">You are here: </span>
       {text}
     </section>
   );
@@ -2035,6 +2137,34 @@ const powerBiImportQaChecklist = [
   "Relationships are created in Power BI.",
   "Report caveats are visible.",
   "Slicers are checked for blank or missing values.",
+];
+
+const economicsTourSteps = [
+  {
+    short: "What CFS Economics does.",
+    text: "Start here to understand the workflow: parcel economic baseline, underbuilt redevelopment watchlist, tax-base opportunity, fiscal/service burden context, and enterprise export-ready tables.",
+    title: "Overview",
+  },
+  {
+    short: "Review and select economic rows.",
+    text: "Use Workspace tables to compare parcel economics, data confidence, watchlists, tax-base opportunity, and scenario candidates. Select useful rows before moving into enterprise outputs.",
+    title: "Workspace",
+  },
+  {
+    short: "Monitor indicators and Ask CFS.",
+    text: "Use Economic Dashboard for KPIs, charts, watchlist summaries, data confidence, and Ask CFS Economics questions.",
+    title: "Economic Dashboard",
+  },
+  {
+    short: "Send rows into scenario, BI, and model workflows.",
+    text: "Use Enterprise Workspace to turn selected rows into scenario outputs, Power BI Desktop tables, planning model schemas, and decision-pack previews.",
+    title: "Enterprise Workspace",
+  },
+  {
+    short: "Create a simple economic snapshot.",
+    text: "Use Print to assemble a presentation-ready economic snapshot with selected rows, baseline context, scenario summary, caveats, and next diligence.",
+    title: "Print",
+  },
 ];
 
 const executiveCards = [
