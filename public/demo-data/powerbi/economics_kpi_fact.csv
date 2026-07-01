@@ -1,7 +1,7 @@
 kpi_id,kpi_name,value,unit,status_band,source_mode,as_of
-parcels_analyzed,Parcels analyzed,120,parcels,stable_high_value,demo,2026-07-01T17:56:31Z
-assessed_value_coverage,Assessed value coverage,3759289980.0,dollars,stable_high_value,demo,2026-07-01T17:56:31Z
-median_value_per_acre,Median value per acre,146226.31400075994,dollars_per_acre,redevelopment_opportunity,demo,2026-07-01T17:56:31Z
-underbuilt_candidates,Underbuilt candidates,50,parcels,underbuilt_watch,demo,2026-07-01T17:56:31Z
-tax_base_opportunity,Tax-base opportunity signals,25,signals,tax_base_opportunity,demo,2026-07-01T17:56:31Z
-data_needed,Economic data needed,25,parcels,data_needed,demo,2026-07-01T17:56:31Z
+parcels_analyzed,Parcels analyzed,120,parcels,stable_high_value,demo,2026-07-01T19:57:14Z
+assessed_value_coverage,Assessed value coverage,3759289980.0,dollars,stable_high_value,demo,2026-07-01T19:57:14Z
+median_value_per_acre,Median value per acre,146226.31400075994,dollars_per_acre,redevelopment_opportunity,demo,2026-07-01T19:57:14Z
+underbuilt_candidates,Underbuilt candidates,50,parcels,underbuilt_watch,demo,2026-07-01T19:57:14Z
+tax_base_opportunity,Tax-base opportunity signals,25,signals,tax_base_opportunity,demo,2026-07-01T19:57:14Z
+data_needed,Economic data needed,25,parcels,data_needed,demo,2026-07-01T19:57:14Z

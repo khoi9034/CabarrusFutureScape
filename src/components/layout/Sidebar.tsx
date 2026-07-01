@@ -308,7 +308,7 @@ function EconomicScenarioControlsPanel({
           <FlaskConical className="mt-0.5 h-4 w-4 shrink-0 text-[#f0cd79]" />
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
-              Economic Scenario Lab
+              Economic Scenario Model
             </p>
             <h3 className="mt-1 text-sm font-semibold text-white">
               Scenario comparison
@@ -867,7 +867,7 @@ function formatRailModeLabel(mode: OverviewCommandMode) {
 
 function getCollapsedRailLabel(mode: OverviewCommandMode, economicsMode = false) {
   if (mode === "modelLab") {
-    return economicsMode ? "Scenario Lab" : "Model Lab";
+    return economicsMode ? "Scenario Model" : "Model Lab";
   }
 
   if (mode === "parcel") {
@@ -887,7 +887,7 @@ function getCollapsedRailLabel(mode: OverviewCommandMode, economicsMode = false)
 
 function getExpandedRailTitle(mode: OverviewCommandMode, economicsMode = false) {
   if (mode === "modelLab") {
-    return economicsMode ? "Economic Scenario Lab" : "Model Lab";
+    return economicsMode ? "Economic Scenario Model" : "Model Lab";
   }
 
   if (mode === "parcel") {

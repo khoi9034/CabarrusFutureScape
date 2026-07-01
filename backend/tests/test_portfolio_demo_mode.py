@@ -232,9 +232,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     app_shell = read("src/components/layout/AppShell.tsx")
     economics_shell = read("src/components/economics/EconomicsShell.tsx")
     economics_types = read("src/types/index.ts")
-    economic_mission_control = read("src/components/dashboard/EconomicMissionControl.tsx")
     indicator_center = read("src/components/dashboard/IndicatorCenterWorkspace.tsx")
-    methodology = read("src/components/dashboard/MethodologyWorkspace.tsx")
     overview = read("src/components/layout/AppShell.tsx")
     economics_service = read("src/lib/economicsIntelligenceService.ts")
     enterprise_export_types = read("src/lib/enterpriseAdapters/enterpriseExportTypes.ts")
@@ -242,11 +240,15 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
 
     assert "Planning Intelligence" in top_nav
     assert "Economic Intelligence" in top_nav
-    assert "Executive Brief" in top_nav
+    assert "Overview" in top_nav
+    assert "Workspace" in top_nav
     assert "Economic Dashboard" in top_nav
-    assert "Parcel Screen" in top_nav
-    assert "Scenario Lab" in top_nav
-    assert "Enterprise Tools" in top_nav
+    assert "Enterprise Workspace" in top_nav
+    assert "Print" in top_nav
+    assert "Executive Brief" not in top_nav
+    assert "Parcel Screen" not in top_nav
+    assert "Scenario Lab" not in top_nav
+    assert "Enterprise Tools" not in top_nav
     assert "economicsProductModes" in top_nav
     assert "setCfsAppMode" in top_nav
     assert "CfsAppMode" in dashboard_state
@@ -257,9 +259,14 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "<EconomicsShell />" in app_shell
     assert "econ-app-backdrop" in app_shell
     assert "ExecutiveBriefPage" in economics_shell
+    assert "EconomicsWorkspacePage" in economics_shell
     assert "EconomicDashboardPage" in economics_shell
-    assert "ParcelScreenPage" in economics_shell
-    assert "ScenarioLabPage" in economics_shell
+    assert "EnterpriseWorkspacePage" in economics_shell
+    assert "EconomicsPrintPage" in economics_shell
+    assert "Parcel Economic Baseline Table" in economics_shell
+    assert "Scenario Candidate Table" in economics_shell
+    assert "Selected for Enterprise Workspace" in economics_shell
+    assert "Send selected to Enterprise Workspace" in economics_shell
     assert "Assumption Controls" in economics_shell
     assert "Scenario Output" in economics_shell
     assert "Scenario Comparison Matrix" in economics_shell
@@ -269,8 +276,10 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "ScenarioSelect" in economics_shell
     assert "Data Needed" in economics_shell
     assert "EnterpriseToolsPage" in economics_shell
-    assert "EconomicsMethodologyPage" in economics_shell
-    assert "Location Context" in economics_shell
+    assert "Executive Brief" not in economics_shell
+    assert "Parcel Screen" not in economics_shell
+    assert "Scenario Lab" not in economics_shell
+    assert "Enterprise Tools" not in economics_shell
     assert "Power BI-style Dataset Preview" in economics_shell
     assert "Power BI Desktop Practice Pack" in economics_shell
     assert "Flat CSV Tables" in economics_shell
@@ -284,6 +293,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Power BI Concepts Used" in economics_shell
     assert "Quality checks" in economics_shell
     assert "Planning Model Schema" in economics_shell
+    assert "Economic snapshot" in economics_shell
     assert "Ask CFS Economics" in economics_shell
     assert "EconomicMissionControl" in indicator_center
     assert "getDemoEconomicsIntelligence" in economics_service
@@ -295,15 +305,6 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert 'app_mode === "economics"' in ask_service
     assert "Traditional GIS can show where things are" in overview
     assert "Consulting Decision Workflows" in overview
-    assert "Economic Snapshot" in economic_mission_control
-    assert "Parcel Economic Baseline" in economic_mission_control
-    assert "Underbuilt Redevelopment Watchlist" in economic_mission_control
-    assert "Opportunity Class Breakdown" in economic_mission_control
-    assert "Improvement-to-Land Ratio" in economic_mission_control
-    assert "Fiscal Impact / Tax Lift" in economic_mission_control
-    assert "Scenario Comparison" in economic_mission_control
-    assert "Four-level economics engine" in methodology
-    assert "Confidence tiers" in methodology
     assert "Which areas create fiscal upside but service burden?" in ask_service
     assert "Which parcels look underbuilt?" in ask_service
     assert "Where is tax-base opportunity high?" in ask_service
@@ -319,7 +320,3 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Why are some slicers blank?" in ask_service
     assert "Why should I not connect every table?" in ask_service
     assert "What relationships should I build?" in ask_service
-    assert "Enterprise Consulting Toolkit" in economic_mission_control
-    assert "Planning Model Schema" in economic_mission_control
-    assert "BI / Embedded Analytics Readiness" in economic_mission_control
-    assert "Enterprise Tools Learning Map" in methodology

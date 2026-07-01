@@ -588,7 +588,7 @@ def _economics_answer(
             _bullets(
                 [
                     f"Total assessed value coverage: {_currency(summary.get('total_assessed_value'))}.",
-                    f"Median value per acre: {_currency(summary.get('median_value_per_acre'))}.",
+                    f"Typical value per acre: {_currency(summary.get('median_value_per_acre'))}.",
                     f"Underbuilt watch: {_fmt(summary.get('underbuilt_candidate_count'))} parcels where land and improvement context support review.",
                     "Revenue per acre, fiscal opportunity, and infrastructure readiness are shown as screening bands rather than numeric scores.",
                     f"Data-needed records: {_fmt(summary.get('data_needed_count'))}.",
@@ -622,7 +622,7 @@ def _economics_answer(
                     "Underbuilt Redevelopment Watchlist.",
                     "Fiscal Opportunity Score.",
                     "Constraint-Adjusted Development Potential.",
-                    "Economic Scenario Lab.",
+                    "Economic Scenario Model.",
                 ]
             ),
         ),
@@ -676,7 +676,7 @@ def _economics_answer(
         ],
         [
             "Open Economic Dashboard and compare Revenue per Acre Dashboard with the Underbuilt Redevelopment Watchlist.",
-            "Use Economic Scenario Lab only as screening-level fiscal context.",
+            "Use Economic Scenario Model only as screening-level fiscal context.",
             "Ask: Where is economic data confidence weak?",
             "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",
         ],
@@ -770,7 +770,7 @@ def _economics_powerbi_answer(
                 [
                     "Executive dashboard: economics_kpi_fact and parcel_economic_signal_fact.",
                     "Parcel investment screen: parcel_economic_signal_fact and geography_dim.",
-                    "Scenario Lab page: scenario_output_fact and scenario_dim.",
+                    "Scenario Model page: scenario_output_fact and scenario_dim.",
                     "Data confidence register: domain_readiness_dim.",
                 ]
             ),
@@ -834,7 +834,7 @@ def _economics_powerbi_answer(
             ),
         ],
         [
-            "Open Economic Intelligence -> Enterprise Tools -> Power BI Desktop Practice Pack.",
+            "Open Economic Intelligence -> Enterprise Workspace -> Power BI Desktop Practice Pack.",
             "Use Flat CSV Tables first if you are learning Power BI Desktop.",
             "Download the JSON pack and import it into Power BI Desktop.",
             "Build the exported relationships before creating report visuals.",
@@ -911,7 +911,7 @@ def _economics_scenario_answer(
             "Recommended next diligence",
             _bullets(
                 [
-                    "Use Scenario Lab to compare Current Conditions against Residential Growth, Industrial / Employment, and Infrastructure-Constrained Growth.",
+                    "Use Scenario Model to compare Current Conditions against Residential Growth, Industrial / Employment, and Infrastructure-Constrained Growth.",
                     "Check the Evidence Pack for missing utility, school, transportation, and flood/environmental data.",
                     "Use the Decision Memo as a briefing draft, not as a formal fiscal finding.",
                 ]
@@ -949,7 +949,7 @@ def _economics_scenario_answer(
             ),
         ],
         [
-            "Open Economic Intelligence -> Scenario Lab.",
+            "Open Economic Intelligence -> Scenario Model.",
             "Adjust scenario assumptions and compare output bands before presenting a decision memo.",
             "Review missing utility, school, transportation, and environmental data before deeper review.",
         ],

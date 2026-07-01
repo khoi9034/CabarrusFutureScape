@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-07-01T17:56:31Z",
+  "as_of": "2026-07-01T19:57:14Z",
   "caveats": [
     "Connector-ready export only; no external platform account is connected.",
     "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
@@ -52,7 +52,7 @@
         ],
         "geography": [
           {
-            "geography_label": "1395 MARTIN LUTHER KING JR AVE"
+            "geography_label": "4575 ISENHOUR RD"
           },
           {
             "geography_label": "85 EXCHANGE PHASE II"
@@ -61,16 +61,16 @@
             "geography_label": "AIRPORT"
           },
           {
-            "geography_label": "AMDM INVESTMENTS LLC"
-          },
-          {
             "geography_label": "AMERICAN DEVELOPMENT INDUSTIES PROPERTY"
           },
           {
             "geography_label": "AQUAMARINE"
           },
           {
-            "geography_label": "ARTHUR REINDERS"
+            "geography_label": "ARCHIBALD HEIGHTS"
+          },
+          {
+            "geography_label": "ARCHIBALD HEIGHTS BLK A"
           },
           {
             "geography_label": "BETHEL ELEMENTARY SCHOOL"
@@ -83,6 +83,9 @@
           },
           {
             "geography_label": "CABARRUS/MCGILL"
+          },
+          {
+            "geography_label": "CAREMOOR COMMUNITY"
           },
           {
             "geography_label": "CAROLINA MALL COMPANY"
@@ -124,10 +127,7 @@
             "geography_label": "EMBASSY SUITES CONCORD CONVENTION CENTER"
           },
           {
-            "geography_label": "EMERSON GLEN"
-          },
-          {
-            "geography_label": "GENEVA H FURR PROPERTY"
+            "geography_label": "FUTURE HARRISBURG VILLAGE"
           },
           {
             "geography_label": "HARRISBURG"
@@ -160,9 +160,6 @@
             "geography_label": "LAKE DON T. HOWELL"
           },
           {
-            "geography_label": "LANE ST / I-85"
-          },
-          {
             "geography_label": "LEFLER ESTATE"
           },
           {
@@ -184,6 +181,9 @@
             "geography_label": "MIDLAND COMMERCIAL"
           },
           {
+            "geography_label": "MONTEROSA"
+          },
+          {
             "geography_label": "MT PLEASANT COMMERCIAL"
           },
           {
@@ -199,12 +199,12 @@
             "geography_label": "NE MEDICAL CENTER"
           },
           {
-            "geography_label": "NO SUBDIVISION"
+            "geography_label": "NEW GILEAD"
           }
         ],
         "time": [
           {
-            "as_of": "2026-07-01T17:56:31Z",
+            "as_of": "2026-07-01T19:57:14Z",
             "period_type": "extract"
           }
         ]
@@ -527,17 +527,6 @@
           "geography_label": "STOUGH ROAD",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149765259",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 257700.4717022654
-        },
-        {
-          "economic_data_confidence": "strong",
-          "economic_status_band": "underbuilt_watch",
-          "estimated_county_tax": 50287.907999999996,
-          "geography_label": "STOUGH ROAD",
-          "improvement_to_land_ratio": 0.0,
-          "opportunity_class": "Underbuilt Redevelopment Candidate",
           "parcel_id": "CFS-PARCEL-0149765257",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 294405.303500961
@@ -552,6 +541,17 @@
           "parcel_id": "CFS-PARCEL-0149765260",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 364371.08630705206
+        },
+        {
+          "economic_data_confidence": "strong",
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": 50287.907999999996,
+          "geography_label": "STOUGH ROAD",
+          "improvement_to_land_ratio": 0.0,
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765259",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 257700.4717022654
         },
         {
           "economic_data_confidence": "strong",
@@ -659,7 +659,7 @@
           "geography_label": "REED GOLD MINE",
           "improvement_to_land_ratio": 0.00036086295010338235,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149778673",
+          "parcel_id": "CFS-PARCEL-0149778663",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 18820.83626780607
         },
@@ -670,7 +670,7 @@
           "geography_label": "REED GOLD MINE",
           "improvement_to_land_ratio": 0.00036086295010338235,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149778672",
+          "parcel_id": "CFS-PARCEL-0149778673",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 18820.83626780607
         },
@@ -692,7 +692,7 @@
           "geography_label": "REED GOLD MINE",
           "improvement_to_land_ratio": 0.00036086295010338235,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149778663",
+          "parcel_id": "CFS-PARCEL-0149778672",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 18820.83626780607
         },
@@ -714,7 +714,7 @@
           "geography_label": "PLAT 103.590 AC - KANNAPOLIS PKWY",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149786752",
+          "parcel_id": "CFS-PARCEL-0149786773",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 67042.66623498537
         },
@@ -725,7 +725,7 @@
           "geography_label": "PLAT 103.590 AC - KANNAPOLIS PKWY",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149786773",
+          "parcel_id": "CFS-PARCEL-0149786752",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 67042.66623498537
         },
@@ -736,7 +736,7 @@
           "geography_label": "CHRISTENBURY SE CORNER",
           "improvement_to_land_ratio": 0.5150781686643969,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149726774",
+          "parcel_id": "CFS-PARCEL-0149726775",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 3877346.4300090014
         },
@@ -747,7 +747,7 @@
           "geography_label": "CHRISTENBURY SE CORNER",
           "improvement_to_land_ratio": 0.5150781686643969,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149726775",
+          "parcel_id": "CFS-PARCEL-0149726774",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 3877346.4300090014
         },
@@ -791,7 +791,7 @@
           "geography_label": "MT PLEASANT OUTSIDE",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149780703",
+          "parcel_id": "CFS-PARCEL-0149780702",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 19224.335158420967
         },
@@ -813,7 +813,7 @@
           "geography_label": "MT PLEASANT OUTSIDE",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149780702",
+          "parcel_id": "CFS-PARCEL-0149780703",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 19224.335158420967
         },
@@ -868,9 +868,9 @@
           "geography_label": "CABARRUS/MCGILL",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149802688",
+          "parcel_id": "CFS-PARCEL-0149802714",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 249452.71297743477
+          "value_per_acre": 226044.74942180488
         },
         {
           "economic_data_confidence": "strong",
@@ -879,9 +879,9 @@
           "geography_label": "CABARRUS/MCGILL",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149802687",
+          "parcel_id": "CFS-PARCEL-0149802688",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 240861.179870916
+          "value_per_acre": 249452.71297743477
         },
         {
           "economic_data_confidence": "strong",
@@ -890,7 +890,7 @@
           "geography_label": "AIRPORT",
           "improvement_to_land_ratio": 0.8301902188717237,
           "opportunity_class": "Tax-Base Opportunity",
-          "parcel_id": "CFS-PARCEL-0149749977",
+          "parcel_id": "CFS-PARCEL-0149749978",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 146226.31400075994
         },
@@ -901,7 +901,7 @@
           "geography_label": "AIRPORT",
           "improvement_to_land_ratio": 0.8301902188717237,
           "opportunity_class": "Tax-Base Opportunity",
-          "parcel_id": "CFS-PARCEL-0149749978",
+          "parcel_id": "CFS-PARCEL-0149749977",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 146226.31400075994
         },
@@ -1162,10 +1162,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "AMDM INVESTMENTS LLC",
+          "geography_label": "CAREMOOR COMMUNITY",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149775960",
+          "parcel_id": "CFS-PARCEL-0149788132",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1173,252 +1173,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
+          "geography_label": "FUTURE HARRISBURG VILLAGE",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149739016",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "SEARS STREET SUB",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149813340",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149739380",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149738993",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149739117",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149739119",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149739738",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149739174",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149739768",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149739301",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "EMERSON GLEN",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149748461",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "THE SMALL LIVING TRUST",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149734647",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "GENEVA H FURR PROPERTY",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149781840",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "MIAMI CHURCH RD",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149778504",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "ARTHUR REINDERS",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149734756",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149785562",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "MIAMI CHURCH RD",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149778502",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "PLAT FOR 5641 MT PLEASANT RD S",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149779583",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "MIAMI CHURCH RD",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149778505",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "STEVEN D & DONNA R DETAR",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149830287",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "LANE ST / I-85",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149816168",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "RECOMBINATION PLAT DRAKE FAMILY PROPERTY",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149773398",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "1395 MARTIN LUTHER KING JR AVE",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149812994",
+          "parcel_id": "CFS-PARCEL-0149754926",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1429,7 +1187,249 @@
           "geography_label": "RECOMB PLAT",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149749670",
+          "parcel_id": "CFS-PARCEL-0149749666",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "MONTEROSA",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149759842",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "PLAT FOR 550 SOUTH HALIFAX ST",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149825713",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "4575 ISENHOUR RD",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149787074",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "PLAT FOR 5641 MT PLEASANT RD S",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149780042",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "SHADYBROOK",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149798019",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB PLAT",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149749669",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB MPV KELLSWATER",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149785695",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "MONTEROSA",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149759790",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB MPV KELLSWATER",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149785587",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB MPV KELLSWATER",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149795949",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB MPV KELLSWATER",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149788140",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "MONTEROSA",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149759843",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB MPV KELLSWATER",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149785523",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "MIAMI CHURCH RD",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149778503",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB MPV KELLSWATER",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149793816",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB MPV KELLSWATER",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149785610",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB MPV KELLSWATER",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149785522",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "RECOMB MPV KELLSWATER",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149793500",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "NCRC/KANNAPOLIS DOWNTOWN",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149801927",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "ARCHIBALD HEIGHTS BLK A",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149819958",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "ARCHIBALD HEIGHTS",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149826683",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "NEW GILEAD",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149821656",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1849,17 +1849,6 @@
           "geography_label": "STOUGH ROAD",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149765259",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 257700.4717022654
-        },
-        {
-          "economic_data_confidence": "strong",
-          "economic_status_band": "underbuilt_watch",
-          "estimated_county_tax": 50287.907999999996,
-          "geography_label": "STOUGH ROAD",
-          "improvement_to_land_ratio": 0.0,
-          "opportunity_class": "Underbuilt Redevelopment Candidate",
           "parcel_id": "CFS-PARCEL-0149765257",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 294405.303500961
@@ -1874,6 +1863,17 @@
           "parcel_id": "CFS-PARCEL-0149765260",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 364371.08630705206
+        },
+        {
+          "economic_data_confidence": "strong",
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": 50287.907999999996,
+          "geography_label": "STOUGH ROAD",
+          "improvement_to_land_ratio": 0.0,
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149765259",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 257700.4717022654
         },
         {
           "economic_data_confidence": "strong",
@@ -2059,17 +2059,18 @@
         {
           "name": "Geography",
           "members": [
-            "1395 MARTIN LUTHER KING JR AVE",
+            "4575 ISENHOUR RD",
             "85 EXCHANGE PHASE II",
             "AIRPORT",
-            "AMDM INVESTMENTS LLC",
             "AMERICAN DEVELOPMENT INDUSTIES PROPERTY",
             "AQUAMARINE",
-            "ARTHUR REINDERS",
+            "ARCHIBALD HEIGHTS",
+            "ARCHIBALD HEIGHTS BLK A",
             "BETHEL ELEMENTARY SCHOOL",
             "BISCAYNE / TRINITY CHURCH",
             "BONDS QUARRY",
             "CABARRUS/MCGILL",
+            "CAREMOOR COMMUNITY",
             "CAROLINA MALL COMPANY",
             "CAROLINA VILLAGE",
             "CHARLOTTE MOTOR SPEEDWAY",
@@ -2083,8 +2084,7 @@
             "CRESCENT RESOURCES, LLC PROPERTY MAP 2",
             "DOWNTOWN CONCORD",
             "EMBASSY SUITES CONCORD CONVENTION CENTER",
-            "EMERSON GLEN",
-            "GENEVA H FURR PROPERTY",
+            "FUTURE HARRISBURG VILLAGE",
             "HARRISBURG",
             "HARRISBURG TOWN CENTER",
             "HWY 24 / 27",
@@ -2095,7 +2095,6 @@
             "KELLSWATER COMMONS APARTMENTS",
             "KINGS GRANT CORP",
             "LAKE DON T. HOWELL",
-            "LANE ST / I-85",
             "LEFLER ESTATE",
             "LEGACY CONCORD",
             "LILLY CONCORD",
@@ -2103,12 +2102,13 @@
             "LT 4 AND LT 5 MB 71/41-45",
             "MIAMI CHURCH RD",
             "MIDLAND COMMERCIAL",
+            "MONTEROSA",
             "MT PLEASANT COMMERCIAL",
             "MT PLEASANT HIGH SCHOOL",
             "MT PLEASANT OUTSIDE",
             "NCRC/KANNAPOLIS DOWNTOWN",
             "NE MEDICAL CENTER",
-            "NO SUBDIVISION"
+            "NEW GILEAD"
           ]
         },
         {
@@ -2131,9 +2131,9 @@
             "CFS-PARCEL-0149726304",
             "CFS-PARCEL-0149747547",
             "CFS-PARCEL-0149747546",
-            "CFS-PARCEL-0149765259",
             "CFS-PARCEL-0149765257",
             "CFS-PARCEL-0149765260",
+            "CFS-PARCEL-0149765259",
             "CFS-PARCEL-0149765258",
             "CFS-PARCEL-0149729262",
             "CFS-PARCEL-0149777845",
@@ -2143,27 +2143,27 @@
             "CFS-PARCEL-0149794476",
             "CFS-PARCEL-0149727291",
             "CFS-PARCEL-0149726315",
-            "CFS-PARCEL-0149778673",
-            "CFS-PARCEL-0149778672",
-            "CFS-PARCEL-0149778674",
             "CFS-PARCEL-0149778663",
+            "CFS-PARCEL-0149778673",
+            "CFS-PARCEL-0149778674",
+            "CFS-PARCEL-0149778672",
             "CFS-PARCEL-0149741520",
-            "CFS-PARCEL-0149786752",
             "CFS-PARCEL-0149786773",
-            "CFS-PARCEL-0149726774",
+            "CFS-PARCEL-0149786752",
             "CFS-PARCEL-0149726775",
+            "CFS-PARCEL-0149726774",
             "CFS-PARCEL-0149725986",
             "CFS-PARCEL-0149727047",
             "CFS-PARCEL-0149728144",
-            "CFS-PARCEL-0149780703",
-            "CFS-PARCEL-0149780704",
             "CFS-PARCEL-0149780702",
+            "CFS-PARCEL-0149780704",
+            "CFS-PARCEL-0149780703",
             "CFS-PARCEL-0149749170",
             "CFS-PARCEL-0149757764",
             "CFS-PARCEL-0149812043",
             "CFS-PARCEL-0149812044",
-            "CFS-PARCEL-0149802688",
-            "CFS-PARCEL-0149802687"
+            "CFS-PARCEL-0149802714",
+            "CFS-PARCEL-0149802688"
           ]
         },
         {

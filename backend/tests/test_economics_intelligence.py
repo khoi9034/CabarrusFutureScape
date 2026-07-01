@@ -56,6 +56,44 @@ def test_economics_missing_fields_return_data_needed_schema() -> None:
     }.issubset(payload["scenario_outputs"][0])
     assert payload["watchlist"] == []
     assert "formal appraisal" in " ".join(payload["caveats"])
+    assert set(payload["tables"]) == {
+        "data_readiness",
+        "parcel_economic_baseline",
+        "scenario_candidates",
+        "tax_base_opportunity",
+        "underbuilt_redevelopment",
+    }
+    assert set(payload["watchlists"]) == {
+        "data_needed",
+        "tax_base_opportunity",
+        "underbuilt_redevelopment",
+        "workspace",
+    }
+    assert set(payload["scenario_model"]) == {"inputs", "outputs", "templates"}
+    assert payload["enterprise_exports"]["power_bi_export"] == "/economics/powerbi-export"
+
+
+def test_economics_cache_returns_partial_payload_when_builder_fails(monkeypatch) -> None:
+    monkeypatch.setattr(
+        economics_router,
+        "build_economics_intelligence",
+        lambda _db: (_ for _ in ()).throw(RuntimeError("slow local database")),
+    )
+    economics_router._ECONOMICS_CACHE["payload"] = None
+    economics_router._ECONOMICS_CACHE["expires_at"] = None
+
+    class FakeDb:
+        def rollback(self) -> None:
+            self.rolled_back = True
+
+    payload = economics_router._cached_economics_intelligence(FakeDb())
+
+    assert payload["mode"] == "live"
+    assert payload["summary"]["data_needed_count"] == 1
+    assert "still warming" in " ".join(payload["caveats"])
+    assert payload["tables"]["parcel_economic_baseline"] == []
+    economics_router._ECONOMICS_CACHE["payload"] = None
+    economics_router._ECONOMICS_CACHE["expires_at"] = None
 
 
 def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:

@@ -112,18 +112,42 @@ export interface EconomicsIntelligenceResponse {
   as_of: string | null;
   caveats: string[];
   data_readiness: EconomicsReadinessRow[];
+  enterprise_exports?: {
+    csv_manifest: string;
+    csv_tables: string;
+    enterprise_export: string;
+    power_bi_export: string;
+  };
   jurisdiction_value_summary: EconomicsJurisdictionValueSummary[];
   kpis: EconomicsKpi[];
   mode: "demo" | "live";
   opportunity_class_breakdown: EconomicsOpportunityClassBreakdown[];
   parcel_economic_signals: EconomicsParcelSignal[];
+  scenario_model?: {
+    inputs: EconomicsScenarioInput[];
+    outputs: EconomicsScenarioOutput[];
+    templates: EconomicsScenarioTemplate[];
+  };
   scenario_inputs: EconomicsScenarioInput[];
   scenario_outputs: EconomicsScenarioOutput[];
   scenario_templates: EconomicsScenarioTemplate[];
   signals: EconomicsParcelSignal[];
   summary: EconomicsSummary;
+  tables?: {
+    data_readiness: EconomicsReadinessRow[];
+    parcel_economic_baseline: EconomicsParcelSignal[];
+    scenario_candidates: EconomicsScenarioOutput[];
+    tax_base_opportunity: EconomicsParcelSignal[];
+    underbuilt_redevelopment: EconomicsParcelSignal[];
+  };
   underbuilt_watchlist: EconomicsParcelSignal[];
   watchlist: EconomicsParcelSignal[];
+  watchlists?: {
+    data_needed: EconomicsParcelSignal[];
+    tax_base_opportunity: EconomicsParcelSignal[];
+    underbuilt_redevelopment: EconomicsParcelSignal[];
+    workspace: EconomicsParcelSignal[];
+  };
 }
 
 export interface EconomicsEnterpriseExportResponse {

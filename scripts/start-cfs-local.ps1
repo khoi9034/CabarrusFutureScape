@@ -167,7 +167,7 @@ function Start-Backend {
       "-ExecutionPolicy",
       "Bypass",
       "-Command",
-      "Set-Location -LiteralPath '$Backend'; Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue; `$env:POSTGRES_HOST='$PostgresHost'; `$env:POSTGRES_PORT='$PostgresPort'; `$env:POSTGRES_DB='$PostgresDb'; python -m uvicorn app.main:app --host 127.0.0.1 --port $BackendPort *> '$BackendLog'"
+      "Set-Location -LiteralPath '$Backend'; `$env:DATABASE_URL=''; `$env:POSTGRES_HOST='$PostgresHost'; `$env:POSTGRES_PORT='$PostgresPort'; `$env:POSTGRES_DB='$PostgresDb'; python -m uvicorn app.main:app --host 127.0.0.1 --port $BackendPort *> '$BackendLog'"
     ) `
     -WindowStyle Hidden
 }

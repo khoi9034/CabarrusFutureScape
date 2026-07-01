@@ -32,7 +32,7 @@ import type {
 } from "@/types/api";
 
 export function EconomicsShell() {
-  const { economicsSection } = useDashboardState();
+  const { economicsSection, setEconomicsSection } = useDashboardState();
   const [intelligence, setIntelligence] =
     useState<EconomicsIntelligenceResponse | null>(null);
   const [enterpriseExport, setEnterpriseExport] =
@@ -40,6 +40,7 @@ export function EconomicsShell() {
   const [powerBiExport, setPowerBiExport] =
     useState<EconomicsPowerBiExportResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSignalIds, setSelectedSignalIds] = useState<string[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -81,17 +82,49 @@ export function EconomicsShell() {
     intelligence?.underbuilt_watchlist?.length
       ? intelligence.underbuilt_watchlist
       : (intelligence?.watchlist ?? []);
+  const selectedSignals = signals.filter((signal) =>
+    selectedSignalIds.includes(signal.parcel_id),
+  );
+  const toggleSelectedSignal = (signal: EconomicsParcelSignal) => {
+    setSelectedSignalIds((current) =>
+      current.includes(signal.parcel_id)
+        ? current.filter((id) => id !== signal.parcel_id)
+        : [...current, signal.parcel_id],
+    );
+  };
 
   return (
     <main className="econ-shell relative z-10 min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-5">
       <div className="mx-auto flex w-full max-w-[96rem] flex-col gap-4">
         {error ? (
           <div className="rounded-xl border border-[var(--econ-risk)]/30 bg-[var(--econ-risk)]/10 px-4 py-3 text-sm text-[#ffd1c2]">
-            Economics data is unavailable in this mode: {error}
+            Local economics data is unavailable. Confirm FastAPI is running at
+            http://127.0.0.1:8000 and /economics/intelligence is returning.
+            {" "}
+            <button
+              className="font-semibold underline underline-offset-4"
+              onClick={() => window.location.reload()}
+              type="button"
+            >
+              Retry
+            </button>
           </div>
         ) : null}
-        {economicsSection === "executive" ? (
+        {economicsSection === "overview" ? (
           <ExecutiveBriefPage intelligence={intelligence} />
+        ) : null}
+        {economicsSection === "workspace" ? (
+          <EconomicsWorkspacePage
+            dataReadiness={intelligence?.data_readiness ?? []}
+            onClearSelection={() => setSelectedSignalIds([])}
+            onSendSelected={() => setEconomicsSection("enterprise")}
+            onToggleSignal={toggleSelectedSignal}
+            scenarioOutputs={intelligence?.scenario_outputs ?? []}
+            selectedSignalIds={selectedSignalIds}
+            selectedSignals={selectedSignals}
+            signals={signals}
+            watchlist={watchlist}
+          />
         ) : null}
         {economicsSection === "dashboard" ? (
           <EconomicDashboardPage
@@ -100,23 +133,23 @@ export function EconomicsShell() {
             watchlist={watchlist}
           />
         ) : null}
-        {economicsSection === "parcel_screen" ? (
-          <ParcelScreenPage signals={signals} watchlist={watchlist} />
-        ) : null}
-        {economicsSection === "scenario_lab" ? (
-          <ScenarioLabPage
+        {economicsSection === "enterprise" ? (
+          <EnterpriseWorkspacePage
+            exportPayload={enterpriseExport}
             inputs={intelligence?.scenario_inputs ?? []}
             outputs={intelligence?.scenario_outputs ?? []}
-            scenarios={intelligence?.scenario_templates ?? []}
-          />
-        ) : null}
-        {economicsSection === "enterprise_tools" ? (
-          <EnterpriseToolsPage
-            exportPayload={enterpriseExport}
             powerBiPayload={powerBiExport}
+            scenarios={intelligence?.scenario_templates ?? []}
+            selectedSignals={selectedSignals}
           />
         ) : null}
-        {economicsSection === "methodology" ? <EconomicsMethodologyPage /> : null}
+        {economicsSection === "print" ? (
+          <EconomicsPrintPage
+            intelligence={intelligence}
+            selectedSignals={selectedSignals}
+            watchlist={watchlist}
+          />
+        ) : null}
       </div>
     </main>
   );
@@ -133,7 +166,7 @@ function ExecutiveBriefPage({
       <section className="econ-hero rounded-2xl p-6 md:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="econ-eyebrow">Executive Brief</p>
+            <p className="econ-eyebrow">Overview</p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--econ-text)] md:text-5xl">
               CFS Economics
             </h1>
@@ -168,7 +201,16 @@ function ExecutiveBriefPage({
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-        <EconPanel title="Executive signal" kicker="County economics">
+        <EconPanel title="How to use CFS Economics" kicker="Simple workflow">
+          <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-[var(--econ-muted)]">
+            <li>Start in Workspace.</li>
+            <li>Review tables and watchlists.</li>
+            <li>Open Economic Dashboard for KPIs and charts.</li>
+            <li>Use Enterprise Workspace for Power BI and planning-model exports.</li>
+            <li>Print an economic snapshot.</li>
+          </ol>
+        </EconPanel>
+        <EconPanel title="County economics signal" kicker="Current baseline">
           <div className="grid gap-3 sm:grid-cols-3">
             <MiniMetric label="Parcels analyzed" value={formatNumber(summary?.total_parcels_analyzed)} />
             <MiniMetric label="Assessed value" value={currency(summary?.total_assessed_value)} />
@@ -181,7 +223,7 @@ function ExecutiveBriefPage({
             bill, or full fiscal impact study.
           </p>
         </EconPanel>
-        <EconPanel title="Decision questions" kicker="Use this first">
+        <EconPanel title="Decision questions" kicker="What it helps answer">
           <div className="grid gap-2">
             {decisionQuestions.map((question) => (
               <div
@@ -247,7 +289,7 @@ function EconomicDashboardPage({
             <MiniMetric label="Assessed value coverage" value={currency(summary?.total_assessed_value)} />
             <MiniMetric label="Land value" value={currency(summary?.total_land_value)} />
             <MiniMetric label="Improvement value" value={currency(summary?.total_improvement_value)} />
-            <MiniMetric label="Median value / acre" value={currency(summary?.median_value_per_acre)} />
+            <MiniMetric label="Typical value / acre" value={currency(summary?.median_value_per_acre)} />
             <MiniMetric label="Data-needed rows" value={formatNumber(summary?.data_needed_count)} />
           </div>
         </EconPanel>
@@ -282,14 +324,27 @@ function EconomicDashboardPage({
   );
 }
 
-function ParcelScreenPage({
+function EconomicsWorkspacePage({
+  dataReadiness,
+  onClearSelection,
+  onSendSelected,
+  onToggleSignal,
+  scenarioOutputs,
+  selectedSignalIds,
+  selectedSignals,
   signals,
   watchlist,
 }: {
+  dataReadiness: EconomicsReadinessRow[];
+  onClearSelection: () => void;
+  onSendSelected: () => void;
+  onToggleSignal: (signal: EconomicsParcelSignal) => void;
+  scenarioOutputs: EconomicsScenarioOutput[];
+  selectedSignalIds: string[];
+  selectedSignals: EconomicsParcelSignal[];
   signals: EconomicsParcelSignal[];
   watchlist: EconomicsParcelSignal[];
 }) {
-  const featured = watchlist[0] ?? signals[0] ?? null;
   const taxBaseSignals = signals
     .filter(
       (signal) =>
@@ -303,63 +358,57 @@ function ParcelScreenPage({
   return (
     <>
       <PageHeader
-        kicker="Parcel Screen"
-        title="Parcel / Area Economic Profile"
-        text="Consulting-style parcel screening for baseline value, improvement ratio, opportunity class, burden context, and next diligence."
+        kicker="Workspace"
+        title="Economic tables and watchlists"
+        text="Select parcel and area economics rows, review opportunity signals, and send the useful set into the Enterprise Workspace for model/export work."
       />
-      <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-        <EconPanel title="Parcel Economic Baseline" kicker="Highest-priority signal">
-          {featured ? (
-            <div className="grid gap-3">
-              <MiniMetric label="Area / parcel" value={featured.geography_label ?? featured.parcel_id} />
-              <MiniMetric label="Value per acre" value={currency(featured.value_per_acre)} />
-              <MiniMetric label="Assessed value" value={currency(featured.assessed_value)} />
-              <MiniMetric label="Land value" value={currency(featured.land_value)} />
-              <MiniMetric label="Improvement value" value={currency(featured.improvement_value)} />
-              <MiniMetric label="Improvement-to-land ratio" value={featured.improvement_to_land_ratio?.toFixed(2) ?? "Not available"} />
-              <MiniMetric label="Estimated county tax" value={currency(featured.estimated_county_tax_screening)} />
-              <MiniMetric label="Opportunity class" value={featured.opportunity_class} />
-              <MiniMetric label="Data confidence" value={featured.economic_data_confidence} />
-              <EvidenceList items={featured.evidence} />
-              <p className="text-sm leading-7 text-[var(--econ-muted)]">
-                Recommended next diligence: {featured.recommended_followup}
-              </p>
-            </div>
-          ) : (
-            <p className="text-sm text-[var(--econ-muted)]">
-              Select a watchlist row when parcel economics signals are available.
-            </p>
-          )}
+      <SelectedRowsTray
+        onClear={onClearSelection}
+        onSend={onSendSelected}
+        selectedSignals={selectedSignals}
+      />
+      <section className="grid gap-4">
+        <EconPanel title="Parcel Economic Baseline Table" kicker="Baseline">
+          <SelectableSignalTable
+            onToggle={onToggleSignal}
+            selectedIds={selectedSignalIds}
+            signals={signals.slice(0, 12)}
+          />
         </EconPanel>
-        <EconPanel title="Underbuilt candidates" kicker="Screening table">
-          <SignalTable signals={watchlist.slice(0, 10)} />
+        <EconPanel title="Underbuilt / Redevelopment Watchlist" kicker="Redevelopment">
+          <SelectableSignalTable
+            onToggle={onToggleSignal}
+            selectedIds={selectedSignalIds}
+            signals={watchlist.slice(0, 12)}
+          />
         </EconPanel>
-      </section>
-      <section className="grid gap-4 xl:grid-cols-2">
         <EconPanel title="Tax-base opportunity signals" kicker="Value screen">
-          <SignalTable signals={taxBaseSignals} />
+          <SelectableSignalTable
+            onToggle={onToggleSignal}
+            selectedIds={selectedSignalIds}
+            signals={taxBaseSignals}
+          />
         </EconPanel>
-        <EconPanel title="Data-needed parcel / area signals" kicker="Confidence blockers">
-          <SignalTable signals={dataNeededSignals} />
+        <EconPanel title="Scenario Candidate Table" kicker="Scenario fit">
+          <ScenarioOutputList rows={scenarioOutputs} />
+        </EconPanel>
+        <EconPanel title="Data Readiness Table" kicker="Confidence">
+          <ReadinessTable rows={dataReadiness} />
         </EconPanel>
       </section>
       <section className="grid gap-4 xl:grid-cols-3">
-        <EconPanel title="Location Context" kicker="Supporting, not map-first">
-          <div className="rounded-xl border border-[var(--econ-border)] bg-[linear-gradient(90deg,rgba(216,184,106,0.08)_1px,transparent_1px),linear-gradient(rgba(216,184,106,0.06)_1px,transparent_1px)] bg-[length:28px_28px] p-5 text-sm leading-7 text-[var(--econ-muted)]">
-            Location context belongs here as a compact supporting view. The
-            economics workflow starts from scorecards, tables, assumptions, and
-            evidence rather than the planning layer stack.
-          </div>
-        </EconPanel>
-        <EconPanel title="Public Cost Risk Flag" kicker="Service burden">
-          <BurdenRows />
-        </EconPanel>
         <EconPanel title="Recommended Next Diligence" kicker="Consulting checklist">
           <ul className="space-y-2 text-sm leading-6 text-[var(--econ-muted)]">
             <li>Verify parcel value, land value, improvement value, and acreage.</li>
             <li>Compare permit activity with floodplain, school, utility, and transportation context.</li>
             <li>Document scenario assumptions before using tax-base lift bands.</li>
           </ul>
+        </EconPanel>
+        <EconPanel title="Data-needed rows" kicker="Confidence blockers">
+          <SignalTable signals={dataNeededSignals} />
+        </EconPanel>
+        <EconPanel title="Public Cost Risk Flag" kicker="Service burden">
+          <BurdenRows />
         </EconPanel>
       </section>
     </>
@@ -407,8 +456,8 @@ function ScenarioLabPage({
   return (
     <>
       <PageHeader
-        kicker="Scenario Lab"
-        title="Economic planning model"
+        kicker="Scenario Model"
+        title="Economic scenario model"
         text="Select a scenario, adjust assumptions, review output bands, and generate a screening-level consulting memo."
       />
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -514,6 +563,93 @@ function ScenarioLabPage({
   );
 }
 
+function EnterpriseWorkspacePage({
+  exportPayload,
+  inputs,
+  outputs,
+  powerBiPayload,
+  scenarios,
+  selectedSignals,
+}: {
+  exportPayload: EconomicsEnterpriseExportResponse | null;
+  inputs: EconomicsScenarioInput[];
+  outputs: EconomicsScenarioOutput[];
+  powerBiPayload: EconomicsPowerBiExportResponse | null;
+  scenarios: EconomicsScenarioTemplate[];
+  selectedSignals: EconomicsParcelSignal[];
+}) {
+  return (
+    <>
+      <PageHeader
+        kicker="Enterprise Workspace"
+        title="Move selected economics rows into model and export work"
+        text="Selected parcel economics rows become planning-model context, Power BI practice tables, scenario assumptions, and decision-pack evidence. No external credentials are required."
+      />
+      <SelectedRowsTray
+        actions={false}
+        onClear={() => undefined}
+        onSend={() => undefined}
+        selectedSignals={selectedSignals}
+      />
+      <ScenarioLabPage inputs={inputs} outputs={outputs} scenarios={scenarios} />
+      <EnterpriseToolsPage exportPayload={exportPayload} powerBiPayload={powerBiPayload} />
+    </>
+  );
+}
+
+function EconomicsPrintPage({
+  intelligence,
+  selectedSignals,
+  watchlist,
+}: {
+  intelligence: EconomicsIntelligenceResponse | null;
+  selectedSignals: EconomicsParcelSignal[];
+  watchlist: EconomicsParcelSignal[];
+}) {
+  const summary = intelligence?.summary;
+  const snapshotRows = selectedSignals.length ? selectedSignals : watchlist.slice(0, 3);
+  return (
+    <>
+      <PageHeader
+        kicker="Print"
+        title="Economic snapshot"
+        text="Printable screening-level summary for selected rows, economic baseline, opportunity class, service burden, scenario context, confidence, caveats, and next diligence."
+      />
+      <section className="grid gap-4 xl:grid-cols-3">
+        <EconPanel title="Economic baseline" kicker="Snapshot">
+          <div className="grid gap-3">
+            <MiniMetric label="Parcels analyzed" value={formatNumber(summary?.total_parcels_analyzed)} />
+            <MiniMetric label="Assessed value coverage" value={currency(summary?.total_assessed_value)} />
+            <MiniMetric label="Typical value per acre" value={currency(summary?.median_value_per_acre)} />
+          </div>
+        </EconPanel>
+        <EconPanel title="Fiscal / service burden" kicker="Risk context">
+          <BurdenRows />
+        </EconPanel>
+        <EconPanel title="Data confidence" kicker="Caveats">
+          <ReadinessTable rows={intelligence?.data_readiness ?? []} />
+        </EconPanel>
+      </section>
+      <EconPanel title="Selected rows / selected area" kicker="Print queue">
+        <SignalTable signals={snapshotRows} />
+      </EconPanel>
+      <section className="grid gap-4 xl:grid-cols-2">
+        <EconPanel title="Scenario summary" kicker="Output bands">
+          <ScenarioOutputList rows={intelligence?.scenario_outputs ?? []} />
+        </EconPanel>
+        <EconPanel title="Recommended next diligence" kicker="Follow-up">
+          <ul className="space-y-2 text-sm leading-6 text-[var(--econ-muted)]">
+            <li>Verify source value, acreage, and land/improvement fields.</li>
+            <li>Compare opportunity class with service burden and data confidence.</li>
+            <li>Document assumptions before using scenario output bands.</li>
+            <li>Keep caveats visible on any printed stakeholder summary.</li>
+          </ul>
+        </EconPanel>
+      </section>
+    </>
+  );
+}
+
 function EnterpriseToolsPage({
   exportPayload,
   powerBiPayload,
@@ -561,7 +697,7 @@ function EnterpriseToolsPage({
   return (
     <>
       <PageHeader
-        kicker="Enterprise Tools"
+        kicker="Enterprise Workspace"
         title="Consulting toolkit and export-ready analytics"
         text="Facts, dimensions, measures, scenarios, evidence packs, and connector-ready payloads without external credentials."
       />
@@ -926,36 +1062,6 @@ function guideVisualDetails(visual: Record<string, unknown>) {
     .join(" | ");
 }
 
-function EconomicsMethodologyPage() {
-  return (
-    <>
-      <PageHeader
-        kicker="Methodology"
-        title="CFS Economics methodology"
-        text="Screening-level calculations, confidence tiers, enterprise workflow translation, and limitations."
-      />
-      <section className="grid gap-4 xl:grid-cols-2">
-        <EconPanel title="Economic model levels" kicker="Four-level engine">
-          <Matrix rows={modelLevelRows} />
-        </EconPanel>
-        <EconPanel title="Confidence tiers" kicker="Uncertainty labels">
-          <Matrix rows={confidenceRows} />
-        </EconPanel>
-        <EconPanel title="Calculation explanations" kicker="Transparent math">
-          <Matrix rows={calculationRows} />
-        </EconPanel>
-        <EconPanel title="Limitations" kicker="Safe use">
-          <ul className="space-y-2 text-sm leading-6 text-[var(--econ-muted)]">
-            <li>Not a formal appraisal, tax bill, fiscal impact study, or project approval recommendation.</li>
-            <li>Scenario values depend on assumptions and should be documented before use.</li>
-            <li>Utility, school, transportation, and service-cost burden may be incomplete.</li>
-          </ul>
-        </EconPanel>
-      </section>
-    </>
-  );
-}
-
 function PageHeader({
   kicker,
   text,
@@ -1104,18 +1210,133 @@ function SignalTable({ signals }: { signals: EconomicsParcelSignal[] }) {
   );
 }
 
-function EvidenceList({ items }: { items: string[] }) {
+function SelectableSignalTable({
+  onToggle,
+  selectedIds,
+  signals,
+}: {
+  onToggle: (signal: EconomicsParcelSignal) => void;
+  selectedIds: string[];
+  signals: EconomicsParcelSignal[];
+}) {
+  if (!signals.length) {
+    return <p className="text-sm text-[var(--econ-muted)]">No rows available.</p>;
+  }
   return (
-    <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
-        Evidence pack
-      </p>
-      <ul className="mt-2 space-y-1 text-xs leading-5 text-[var(--econ-muted)]">
-        {items.slice(0, 5).map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
+    <div className="overflow-x-auto rounded-xl border border-[var(--econ-border)]">
+      <table className="w-full min-w-[860px] border-separate border-spacing-0 text-left text-xs">
+        <thead className="bg-white/[0.035] text-[10px] uppercase tracking-[0.12em] text-[var(--econ-muted)]">
+          <tr>
+            <th className="px-3 py-2">Select</th>
+            <th className="px-3 py-2">Area / parcel label</th>
+            <th className="px-3 py-2">Acreage</th>
+            <th className="px-3 py-2">Value / acre band</th>
+            <th className="px-3 py-2">Improvement ratio</th>
+            <th className="px-3 py-2">Jurisdiction / geography</th>
+            <th className="px-3 py-2">Opportunity class</th>
+            <th className="px-3 py-2">Data confidence</th>
+            <th className="px-3 py-2">Recommended follow-up</th>
+          </tr>
+        </thead>
+        <tbody>
+          {signals.map((signal) => {
+            const selected = selectedIds.includes(signal.parcel_id);
+            return (
+              <tr
+                className={selected ? "bg-[var(--econ-gold)]/10" : "bg-transparent"}
+                key={signal.parcel_id}
+              >
+                <td className="border-t border-[var(--econ-border)] px-3 py-2">
+                  <button
+                    className="rounded-lg border border-[var(--econ-border)] px-2 py-1 text-xs font-semibold text-[var(--econ-text)] hover:border-[var(--econ-gold)]"
+                    onClick={() => onToggle(signal)}
+                    type="button"
+                  >
+                    {selected ? "Selected" : "Select"}
+                  </button>
+                </td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 font-semibold text-[var(--econ-text)]">
+                  {signal.geography_label ?? signal.parcel_id}
+                </td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">
+                  {signal.acreage?.toFixed(2) ?? "Not available"}
+                </td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">
+                  {currency(signal.value_per_acre)}
+                </td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">
+                  {signal.improvement_to_land_ratio?.toFixed(2) ?? "Not available"}
+                </td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">
+                  {signal.geography_label ?? "Parcel context"}
+                </td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">
+                  {signal.opportunity_class}
+                </td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">
+                  {signal.economic_data_confidence}
+                </td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">
+                  {signal.recommended_followup}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
+  );
+}
+
+function SelectedRowsTray({
+  actions = true,
+  onClear,
+  onSend,
+  selectedSignals,
+}: {
+  actions?: boolean;
+  onClear: () => void;
+  onSend: () => void;
+  selectedSignals: EconomicsParcelSignal[];
+}) {
+  return (
+    <EconPanel title="Selected for Enterprise Workspace" kicker="Row tray">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {selectedSignals.length ? (
+            selectedSignals.slice(0, 8).map((signal) => (
+              <EconChip key={signal.parcel_id}>
+                {signal.geography_label ?? signal.parcel_id}
+              </EconChip>
+            ))
+          ) : (
+            <p className="text-sm text-[var(--econ-muted)]">
+              Select rows from the workspace tables to move them into model and export work.
+            </p>
+          )}
+        </div>
+        {actions ? (
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+            disabled={!selectedSignals.length}
+            onClick={onSend}
+            type="button"
+          >
+            Send selected to Enterprise Workspace
+          </button>
+          <button
+            className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+            disabled={!selectedSignals.length}
+            onClick={onClear}
+            type="button"
+          >
+            Clear selection
+          </button>
+        </div>
+        ) : null}
+      </div>
+    </EconPanel>
   );
 }
 
@@ -1506,7 +1727,7 @@ function scenarioEvidencePack(
     {
       label: "Related CFS layers",
       value:
-        "Revenue per Acre Dashboard, Constraint-Adjusted Development Potential, Public Cost Risk Flag, Economic Scenario Lab.",
+        "Revenue per Acre Dashboard, Constraint-Adjusted Development Potential, Public Cost Risk Flag, Economic Scenario Model.",
     },
     { label: "Recommended next diligence", value: output.recommendedNextDiligence },
   ];
@@ -1829,24 +2050,4 @@ const enterpriseCards = [
     text: "Executive takeaway, evidence pack, assumptions, risk flags, caveats, and next diligence.",
     title: "Consulting Decision Pack",
   },
-];
-
-const modelLevelRows = [
-  { label: "Level 1 - Raw Data", value: "Parcel geometry, ID, acreage, value, zoning, permits, flood, school, roads, utility proxy, growth pressure." },
-  { label: "Level 2 - Derived Metrics", value: "Value per acre, land/improvement value per acre, improvement-to-land ratio, estimated tax, growth and burden bands." },
-  { label: "Level 3 - Intelligence Bands", value: "Underbuilt watch, tax-base potential, constraint-adjusted opportunity, public cost risk." },
-  { label: "Level 4 - Human Output", value: "High-value stable parcel, redevelopment candidate, employment candidate, data-needed recommendation." },
-];
-
-const confidenceRows = [
-  { label: "Strong", value: "Parcel acreage, value, land value, improvement value, zoning, flood overlay, geography where available." },
-  { label: "Medium", value: "Growth pressure, nearby permits, school burden proxy, transportation access, scenario assumptions." },
-  { label: "Proxy / low", value: "Utility capacity, exact road capacity, exact service cost, exact school seat cost, long-term fiscal impact." },
-];
-
-const calculationRows = [
-  { label: "Value per acre", value: "Assessed value divided by acreage." },
-  { label: "Improvement-to-land ratio", value: "Improvement value divided by land value where both fields exist." },
-  { label: "Estimated county tax", value: "Screening-level estimate from assessed value and configured rate; not a tax bill." },
-  { label: "Constraint-adjusted opportunity", value: "Opportunity class reduced by flood, school, utility, transportation, and missing-data burden." },
 ];

@@ -645,7 +645,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   ] = useState<SelectedSchoolUtilizationZone | null>(null);
   const [productMode, setProductMode] = useState<ProductMode>("overview");
   const [economicsSection, setEconomicsSection] =
-    useState<EconomicsSection>("executive");
+    useState<EconomicsSection>("overview");
   const [overviewCommandMode, setOverviewCommandModeState] =
     useState<OverviewCommandMode>("countywide");
   const overviewCommandModeRef = useRef<OverviewCommandMode>("countywide");
@@ -812,7 +812,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const setCfsAppMode = useCallback((mode: CfsAppMode) => {
     setCfsAppModeState(mode);
     writeStoredCfsAppMode(mode);
-    setEconomicsSection("executive");
+    setEconomicsSection("overview");
     setProductMode("overview");
     setSelectedDevelopmentHotspotContext(null);
     setSelectedModelResearchContext(null);

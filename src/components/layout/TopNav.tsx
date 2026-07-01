@@ -99,12 +99,20 @@ const economicsProductModes: Array<{
   icon: typeof LayoutDashboard;
 }> = [
   {
-    description: "Consulting-style opening brief",
+    description: "CFS Economics introduction",
     icon: BriefcaseBusiness,
-    id: "executive",
-    label: "Executive Brief",
-    shortLabel: "Brief",
-    title: "CFS Economics executive brief",
+    id: "overview",
+    label: "Overview",
+    shortLabel: "Overview",
+    title: "CFS Economics overview",
+  },
+  {
+    description: "Table-first parcel economics",
+    icon: Search,
+    id: "workspace",
+    label: "Workspace",
+    shortLabel: "Work",
+    title: "Economic tables and watchlists",
   },
   {
     description: "Growth and tax-base intelligence",
@@ -115,36 +123,20 @@ const economicsProductModes: Array<{
     title: "Economic KPI dashboard and scorecards",
   },
   {
-    description: "Parcel and site screening",
-    icon: Search,
-    id: "parcel_screen",
-    label: "Parcel Screen",
-    shortLabel: "Parcels",
-    title: "Parcel economic screen and underbuilt watchlist",
-  },
-  {
-    description: "Scenario planning model",
-    icon: Calculator,
-    id: "scenario_lab",
-    label: "Scenario Lab",
-    shortLabel: "Scenarios",
-    title: "Economic scenario lab",
-  },
-  {
-    description: "BI and planning model exports",
+    description: "BI exports and planning model",
     icon: FileSearch,
-    id: "enterprise_tools",
-    label: "Enterprise Tools",
-    shortLabel: "Tools",
-    title: "Enterprise consulting toolkit and export previews",
+    id: "enterprise",
+    label: "Enterprise Workspace",
+    shortLabel: "Enterprise",
+    title: "Enterprise exports, scenarios, and model payloads",
   },
   {
-    description: "Methods and caveats",
-    icon: BookOpen,
-    id: "methodology",
-    label: "Methodology",
-    shortLabel: "Method",
-    title: "CFS Economics methodology",
+    description: "Printable economic snapshot",
+    icon: Calculator,
+    id: "print",
+    label: "Print",
+    shortLabel: "Print",
+    title: "Economic snapshot and print view",
   },
 ];
 
@@ -931,9 +923,8 @@ export function TopNav() {
                       Economic Intelligence
                     </p>
                     <p className="mt-1 text-sm leading-6 text-slate-300">
-                      Use the top navigation for Executive Brief, Dashboard,
-                      Parcel Screen, Scenario Lab, Enterprise Tools, and
-                      Methodology.
+                      Use the top navigation for Overview, Workspace, Economic
+                      Dashboard, Enterprise Workspace, and Print.
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">

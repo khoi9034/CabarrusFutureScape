@@ -254,7 +254,7 @@ function OverviewLandingPage({
           icon: FlaskConical,
           purpose: "Scenario comparison for modeled tax-base lift and burden.",
           status: "Scenario",
-          title: "Economic Scenario Lab",
+          title: "Economic Scenario Model",
         },
         {
           icon: FileCheck2,

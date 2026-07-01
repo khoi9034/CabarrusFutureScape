@@ -171,7 +171,7 @@ exist.
 This phase is a practice/export workflow, not Power BI Embedded.
 
 1. Start local CFS with `npm run dev:cfs`.
-2. Open `Economic Intelligence -> Enterprise Tools`.
+2. Open `Economic Intelligence -> Enterprise Workspace`.
 3. Use the Power BI Desktop Practice Pack to preview or download
    `economics_powerbi_export.json`.
 4. Open Power BI Desktop.
@@ -191,11 +191,11 @@ embed tokens. Do not add BI credentials to frontend env or the portfolio demo.
 
 ### Power BI Report Builder Guide
 
-The Enterprise Tools page also includes a Power BI Report Builder Guide for
+The Enterprise Workspace page also includes a Power BI Report Builder Guide for
 turning the export into a Desktop report:
 
 - Download `economics_powerbi_export.json` from Economic Intelligence ->
-  Enterprise Tools.
+  Enterprise Workspace.
 - Load these tables: `economics_kpi_fact`,
   `parcel_economic_signal_fact`, `scenario_output_fact`,
   `domain_readiness_dim`, `geography_dim`, `time_dim`, and `scenario_dim`.

@@ -854,7 +854,7 @@ function EconomicsMethodologyWorkspace() {
       <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-4">
         <section className="cfs-command-surface rounded-2xl border-[#d8b86a]/20 p-5 md:p-7">
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f0cd79]">
-            CFS Economics Methodology
+            CFS Economics workflow notes
           </p>
           <h1 className="mt-2 text-3xl font-semibold text-white">
             Screening-level parcel economic intelligence
@@ -956,7 +956,7 @@ function EconomicsMethodologyWorkspace() {
 
         <section className="cfs-command-surface rounded-2xl border-[#ec5cff]/20 p-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f0a7ff]">
-            Enterprise Tools Learning Map
+            Enterprise Workspace Learning Map
           </p>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-400">
             CFS Economics mirrors common enterprise planning, BI, and

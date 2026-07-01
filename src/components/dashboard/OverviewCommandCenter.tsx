@@ -63,7 +63,7 @@ const economicsWorkflows = [
   },
   {
     accent: "secondary",
-    actionLabel: "Economic Scenario Lab",
+    actionLabel: "Economic Scenario Model",
     icon: FlaskConical,
     id: "model-lab",
     helper:

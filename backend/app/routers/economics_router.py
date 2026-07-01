@@ -88,7 +88,14 @@ def _cached_economics_intelligence(db: Session) -> dict[str, Any]:
     if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached_payload:
         return cached_payload
 
-    payload = build_economics_intelligence(db)
+    try:
+        payload = build_economics_intelligence(db)
+    except Exception:
+        db.rollback()
+        payload = _unavailable_payload(
+            datetime.now(UTC).isoformat(),
+            "Local economics context is still warming, so CFS used available parcel/economic summary fields.",
+        )
     # ponytail: process-local cache is enough for local presentation; use shared cache if multi-worker freshness matters.
     _ECONOMICS_CACHE["payload"] = payload
     _ECONOMICS_CACHE["expires_at"] = datetime.now(UTC) + ECONOMICS_CACHE_TTL
@@ -97,6 +104,7 @@ def _cached_economics_intelligence(db: Session) -> dict[str, Any]:
 
 def build_economics_intelligence(db: Session) -> dict[str, Any]:
     as_of = datetime.now(UTC).isoformat()
+    db.execute(text("SET LOCAL statement_timeout = '3000ms'"))
     caveats = [
         "CFS Economics is screening-level planning context, not a formal appraisal or tax bill.",
         "Estimated county tax uses a configurable rate and should be verified before fiscal analysis.",
@@ -117,29 +125,17 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
     dev_columns = set(_table_columns(db, "development_activity_parcel_summary")) if _table_exists(db, "development_activity_parcel_summary") else set()
     flood_columns = set(_table_columns(db, "parcel_flood_constraint_overlay")) if _table_exists(db, "parcel_flood_constraint_overlay") else set()
     school_columns = set(_table_columns(db, "parcel_school_summary")) if _table_exists(db, "parcel_school_summary") else set()
-    zoning_columns = set(_table_columns(db, "parcel_zoning_overlay_v2")) if _table_exists(db, "parcel_zoning_overlay_v2") else set()
     dev_join = bool(dev_columns & {"development_activity_class", "dominant_permit_segment", "permit_segment"})
     flood_join = bool(flood_columns & {"flood_review_required", "flood_review_status", "flood_summary", "constraint_status"})
     school_join = bool(school_columns & {"school_summary_status", "capacity_status", "utilization_status"})
-    zoning_join = bool(zoning_columns & {"zoning_jurisdiction_name", "zoning_district", "jurisdiction"})
     settings = get_settings()
 
     expressions = _parcel_economics_expressions(
         columns,
-        dev_columns=dev_columns,
-        flood_columns=flood_columns,
-        school_columns=school_columns,
-        zoning_columns=zoning_columns,
-    )
-    joins = "\n".join(
-        join
-        for join in [
-            _optional_join(zoning_join, "parcel_zoning_overlay_v2", "z"),
-            _optional_join(dev_join, "development_activity_parcel_summary", "d"),
-            _optional_join(flood_join, "parcel_flood_constraint_overlay", "f"),
-            _optional_join(school_join, "parcel_school_summary", "s"),
-        ]
-        if join
+        dev_columns=set(),
+        flood_columns=set(),
+        school_columns=set(),
+        zoning_columns=set(),
     )
     base_sql = f"""
       WITH base AS (
@@ -150,17 +146,13 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
           {expressions['land']} AS land_value,
           {expressions['improvement']} AS improvement_value,
           COALESCE(
-            NULLIF({expressions['zoning_geography']}, ''),
-            NULLIF(p.subdiv_name, ''),
-            NULLIF(p.nbh_name, ''),
-            NULLIF(p.parcel_size_category, ''),
+            NULLIF(({expressions['zoning_geography']})::text, ''),
             'Parcel context'
           ) AS geography_label,
           {expressions['permit_context']} AS permit_activity_context,
           {expressions['flood_context']} AS floodplain_context,
           {expressions['school_context']} AS school_pressure_context
         FROM public.parcels_enriched p
-        {joins}
         WHERE p.official_parcel_id IS NOT NULL
       ),
       calculated AS (
@@ -194,8 +186,7 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
               SUM(assessed_value) AS total_assessed_value,
               SUM(land_value) AS total_land_value,
               SUM(improvement_value) AS total_improvement_value,
-              percentile_cont(0.5) WITHIN GROUP (ORDER BY value_per_acre)
-                FILTER (WHERE value_per_acre IS NOT NULL) AS median_value_per_acre,
+              AVG(value_per_acre) FILTER (WHERE value_per_acre IS NOT NULL) AS median_value_per_acre,
               COUNT(*) FILTER (WHERE improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5) AS underbuilt_candidate_count,
               COUNT(*) FILTER (WHERE value_per_acre < 150000 AND acreage >= 1.0 AND assessed_value IS NOT NULL) AS high_opportunity_count,
               COUNT(*) FILTER (WHERE assessed_value IS NULL OR acreage IS NULL OR acreage <= 0) AS data_needed_count
@@ -222,63 +213,29 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
               improvement_value_per_acre,
               improvement_to_land_ratio
             FROM (
-              SELECT
-                *,
-                CASE
-                  WHEN assessed_value IS NULL OR acreage IS NULL OR acreage <= 0 THEN 'data_needed'
-                  WHEN improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5 THEN 'underbuilt'
-                  WHEN value_per_acre < 150000 AND acreage >= 1.0 THEN 'tax_base'
-                  ELSE 'baseline'
-                END AS signal_bucket,
-                ROW_NUMBER() OVER (
-                  PARTITION BY
-                    CASE
-                      WHEN assessed_value IS NULL OR acreage IS NULL OR acreage <= 0 THEN 'data_needed'
-                      WHEN improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5 THEN 'underbuilt'
-                      WHEN value_per_acre < 150000 AND acreage >= 1.0 THEN 'tax_base'
-                      ELSE 'baseline'
-                    END
-                  ORDER BY assessed_value DESC NULLS LAST
-                ) AS bucket_rank
-              FROM calculated
+              (SELECT *, 0 AS signal_priority FROM calculated
+                WHERE improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5
+                ORDER BY assessed_value DESC NULLS LAST LIMIT 50)
+              UNION ALL
+              (SELECT *, 1 AS signal_priority FROM calculated
+                WHERE value_per_acre < 150000 AND acreage >= 1.0
+                ORDER BY assessed_value DESC NULLS LAST LIMIT 25)
+              UNION ALL
+              (SELECT *, 2 AS signal_priority FROM calculated
+                WHERE assessed_value IS NULL OR acreage IS NULL OR acreage <= 0
+                ORDER BY official_parcel_id LIMIT 25)
+              UNION ALL
+              (SELECT *, 3 AS signal_priority FROM calculated
+                WHERE assessed_value IS NOT NULL AND acreage > 0
+                ORDER BY assessed_value DESC NULLS LAST LIMIT 20)
             ) ranked
-            WHERE
-              (signal_bucket = 'underbuilt' AND bucket_rank <= 50)
-              OR (signal_bucket = 'tax_base' AND bucket_rank <= 25)
-              OR (signal_bucket = 'data_needed' AND bucket_rank <= 25)
-              OR (signal_bucket = 'baseline' AND bucket_rank <= 20)
             ORDER BY
-              CASE
-                WHEN signal_bucket = 'underbuilt' THEN 0
-                WHEN signal_bucket = 'tax_base' THEN 1
-                WHEN signal_bucket = 'data_needed' THEN 2
-                ELSE 3
-              END,
+              signal_priority,
               assessed_value DESC NULLS LAST
             LIMIT 120
             """
         ),
     ).mappings().all()
-    jurisdiction_rows = db.execute(
-        text(
-            base_sql
-            + """
-            SELECT
-              geography_label,
-              COUNT(*) AS parcel_count,
-              SUM(assessed_value) AS total_assessed_value,
-              percentile_cont(0.5) WITHIN GROUP (ORDER BY value_per_acre)
-                FILTER (WHERE value_per_acre IS NOT NULL) AS median_value_per_acre,
-              COUNT(*) FILTER (WHERE improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5) AS underbuilt_candidate_count
-            FROM calculated
-            WHERE geography_label IS NOT NULL
-            GROUP BY geography_label
-            ORDER BY SUM(assessed_value) DESC NULLS LAST
-            LIMIT 12
-            """
-        ),
-    ).mappings().all()
-
     signals = [
         _economics_signal(dict(row), settings.county_tax_rate_per_100)
         for row in signal_rows
@@ -306,14 +263,14 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         for signal in signals
         if signal["economic_status_band"] == "underbuilt_watch"
     ][:25]
-    return {
+    return _with_economics_aliases({
         "as_of": as_of,
-        "caveats": caveats,
+        "caveats": caveats + [
+            "Local economics context uses parcel value and acreage fields first; heavier overlay context is summarized as data readiness so the dashboard stays responsive.",
+        ],
         "data_readiness": _economics_data_readiness(columns, dev_join, flood_join, school_join),
         "kpis": _economics_kpis(summary),
-        "jurisdiction_value_summary": [
-            _jurisdiction_summary(dict(row)) for row in jurisdiction_rows
-        ],
+        "jurisdiction_value_summary": [],
         "mode": "live",
         "opportunity_class_breakdown": _opportunity_class_breakdown(signals),
         "parcel_economic_signals": signals,
@@ -324,7 +281,7 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         "summary": summary,
         "underbuilt_watchlist": underbuilt_watchlist,
         "watchlist": watchlist,
-    }
+    })
 
 
 def calculate_value_per_acre(assessed_value: float | None, acreage: float | None) -> float | None:
@@ -506,7 +463,11 @@ def _parcel_economics_expressions(
         "assessed": assessed,
         "land": land,
         "improvement": improvement,
-        "zoning_geography": _coalesce_text("z", zoning_columns, ["zoning_jurisdiction_name", "zoning_district", "jurisdiction"]),
+        "zoning_geography": _coalesce_text(
+            "p",
+            columns,
+            ["jurisdiction", "municipality", "city", "subdiv_name", "nbh_name", "parcel_size_category"],
+        ) if not zoning_columns else _coalesce_text("z", zoning_columns, ["zoning_jurisdiction_name", "zoning_district", "jurisdiction"]),
         "permit_context": _coalesce_text("d", dev_columns, ["development_activity_class", "dominant_permit_segment", "permit_segment"]),
         "flood_context": _flood_context_expression(flood_columns),
         "school_context": _coalesce_text("s", school_columns, ["school_summary_status", "capacity_status", "utilization_status"]),
@@ -542,6 +503,44 @@ def _optional_join(enabled: bool, table_name: str, alias: str) -> str:
     )
 
 
+def _with_economics_aliases(payload: dict[str, Any]) -> dict[str, Any]:
+    signals = payload.get("signals") or payload.get("parcel_economic_signals") or []
+    watchlist = payload.get("watchlist") or []
+    underbuilt = payload.get("underbuilt_watchlist") or []
+    tax_base = [
+        signal for signal in signals
+        if _dict(signal).get("economic_status_band") == "tax_base_opportunity"
+    ][:25]
+    payload["tables"] = {
+        "data_readiness": payload.get("data_readiness") or [],
+        "parcel_economic_baseline": signals,
+        "scenario_candidates": payload.get("scenario_outputs") or [],
+        "tax_base_opportunity": tax_base,
+        "underbuilt_redevelopment": underbuilt,
+    }
+    payload["watchlists"] = {
+        "data_needed": [
+            signal for signal in signals
+            if _dict(signal).get("economic_status_band") == "data_needed"
+        ][:25],
+        "tax_base_opportunity": tax_base,
+        "underbuilt_redevelopment": underbuilt,
+        "workspace": watchlist,
+    }
+    payload["scenario_model"] = {
+        "inputs": payload.get("scenario_inputs") or [],
+        "outputs": payload.get("scenario_outputs") or [],
+        "templates": payload.get("scenario_templates") or [],
+    }
+    payload["enterprise_exports"] = {
+        "csv_manifest": "/economics/powerbi-export/csv-manifest",
+        "csv_tables": "/economics/powerbi-export/csv/{table_name}",
+        "enterprise_export": "/economics/enterprise-export",
+        "power_bi_export": "/economics/powerbi-export",
+    }
+    return payload
+
+
 def _table_exists(db: Session, table_name: str) -> bool:
     return bool(
         db.execute(
@@ -569,7 +568,7 @@ def _economics_kpis(summary: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         _kpi("parcels_analyzed", "Parcels analyzed", summary["total_parcels_analyzed"], "parcels", "stable_high_value", "Parcel count with economics screening context."),
         _kpi("assessed_value_coverage", "Assessed value coverage", summary["total_assessed_value"], "dollars", "stable_high_value", "Screening-level assessed value total."),
-        _kpi("median_value_per_acre", "Median value per acre", summary["median_value_per_acre"], "dollars_per_acre", "redevelopment_opportunity", "Parcel land efficiency context."),
+        _kpi("median_value_per_acre", "Typical value per acre", summary["median_value_per_acre"], "dollars_per_acre", "redevelopment_opportunity", "Parcel land efficiency context."),
         _kpi("underbuilt_candidates", "Underbuilt candidates", summary["underbuilt_candidate_count"], "parcels", "underbuilt_watch", "High land value plus low improvement-to-land ratio."),
         _kpi("tax_base_opportunity", "Tax-base opportunity signals", summary["high_opportunity_count"], "signals", "tax_base_opportunity", "Low current value per acre with enough acreage for review."),
         _kpi("data_needed", "Economic data needed", summary["data_needed_count"], "parcels", "data_needed", "Records missing key value or acreage fields."),
@@ -733,7 +732,7 @@ def _unavailable_payload(as_of: str, reason: str) -> dict[str, Any]:
         "total_parcels_analyzed": 0,
         "underbuilt_candidate_count": 0,
     }
-    return {
+    return _with_economics_aliases({
         "as_of": as_of,
         "caveats": [
             reason,
@@ -752,7 +751,7 @@ def _unavailable_payload(as_of: str, reason: str) -> dict[str, Any]:
         "summary": summary,
         "underbuilt_watchlist": [],
         "watchlist": [],
-    }
+    })
 
 
 def _float(value: Any) -> float | None:
@@ -761,6 +760,10 @@ def _float(value: Any) -> float | None:
 
 def _int(value: Any) -> int:
     return int(value or 0)
+
+
+def _dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
 
 
 def _money(value: float | None) -> str:

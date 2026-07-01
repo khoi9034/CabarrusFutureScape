@@ -1,4 +1,4 @@
-﻿import { apiPost, USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
+import { apiPost, USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import {
   getDemoDevelopmentTrends,
   getDemoEconomicsIntelligence,
@@ -71,7 +71,7 @@ export const askCfsEconomicsSuggestedPrompts = [
   "What is the import order?",
   "How do I relate the CSV tables?",
   "Which CSV table powers the executive dashboard?",
-  "Which CSV table powers Scenario Lab?",
+  "Which CSV table powers Scenario Model?",
   "How do I QA the Power BI export?",
   "What should I check after importing the CSVs?",
   "Why are some slicers blank?",
@@ -195,7 +195,7 @@ async function demoEconomicsAnswer(
         "Economic signal",
         bullets([
           `Total assessed value coverage: ${currency(summary.total_assessed_value)}.`,
-          `Median value per acre: ${currency(summary.median_value_per_acre)}.`,
+          `Typical value per acre: ${currency(summary.median_value_per_acre)}.`,
           `Underbuilt watch candidates: ${format(summary.underbuilt_candidate_count)}.`,
           "Revenue per acre, fiscal opportunity, and infrastructure readiness are shown as screening bands rather than numeric scores.",
           `Data-needed records: ${format(summary.data_needed_count)}.`,
@@ -226,7 +226,7 @@ async function demoEconomicsAnswer(
           "Fiscal Opportunity Score.",
           "Constraint-Adjusted Development Potential.",
           "Revenue per Acre Dashboard.",
-          "Economic Scenario Lab.",
+          "Economic Scenario Model.",
         ]),
       ],
       [
@@ -295,7 +295,7 @@ async function demoEconomicsAnswer(
     ],
     suggested_actions: [
       "Open Economic Dashboard and compare Revenue per Acre Dashboard with the Underbuilt Redevelopment Watchlist.",
-      "Use Economic Scenario Lab as screening-level fiscal context only.",
+      "Use Economic Scenario Model as screening-level fiscal context only.",
       "Ask: Where is economic data confidence weak?",
       "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",
     ],
@@ -376,7 +376,7 @@ function demoEconomicsPowerBiAnswer(
         bullets([
           "Executive dashboard: economics_kpi_fact and parcel_economic_signal_fact.",
           "Parcel investment screen: parcel_economic_signal_fact and geography_dim.",
-          "Scenario Lab page: scenario_output_fact and scenario_dim.",
+          "Scenario Model page: scenario_output_fact and scenario_dim.",
           "Data confidence register: domain_readiness_dim.",
         ]),
       ],
@@ -395,7 +395,7 @@ function demoEconomicsPowerBiAnswer(
       [
         "Next steps",
         bullets([
-          "Download economics_powerbi_export.json from Enterprise Tools.",
+          "Download economics_powerbi_export.json from Enterprise Workspace.",
           "For the beginner path, download the CSV files from Flat CSV Tables and import them with Get Data -> Text/CSV.",
           "Open Power BI Desktop and use Get Data -> JSON.",
           "Load facts and dimensions, then create KPI cards, charts, slicers, and matrices from the suggested layout.",
@@ -415,7 +415,7 @@ function demoEconomicsPowerBiAnswer(
     dashboard_actions: {
       focus_domain: "economics",
       highlight_kpis: ["tax_base_opportunity", "data_readiness"],
-      recommended_layers: ["Power BI Desktop Practice Pack", "Enterprise Tools"],
+      recommended_layers: ["Power BI Desktop Practice Pack", "Enterprise Workspace"],
     },
     data_mode: "demo",
     domains: ["economics"],
@@ -428,9 +428,9 @@ function demoEconomicsPowerBiAnswer(
       ),
     ],
     provider: "none",
-    related_layers: ["Power BI Desktop Practice Pack", "Enterprise Tools"],
+    related_layers: ["Power BI Desktop Practice Pack", "Enterprise Workspace"],
     suggested_actions: [
-      "Open Economic Intelligence -> Enterprise Tools.",
+      "Open Economic Intelligence -> Enterprise Workspace.",
       "Use Flat CSV Tables first if you are learning Power BI Desktop.",
       "Preview or download the Power BI JSON Pack.",
       "Build the suggested relationships before creating report visuals.",
@@ -510,7 +510,7 @@ function demoEconomicsScenarioAnswer(
       [
         "Recommended next diligence",
         bullets([
-          "Use Scenario Lab to compare Current Conditions against Residential Growth, Industrial / Employment, and Infrastructure-Constrained Growth.",
+          "Use Scenario Model to compare Current Conditions against Residential Growth, Industrial / Employment, and Infrastructure-Constrained Growth.",
           "Check the Evidence Pack for missing utility, school, transportation, and flood/environmental data.",
           "Use the Decision Memo as a briefing draft, not as a formal fiscal finding.",
         ]),
@@ -536,7 +536,7 @@ function demoEconomicsScenarioAnswer(
       focus_domain: "economics",
       highlight_kpis: ["tax_base_opportunity", "data_readiness"],
       recommended_layers: [
-        "Economic Scenario Lab",
+        "Economic Scenario Model",
         "Revenue per Acre Dashboard",
         "Constraint-Adjusted Development Potential",
       ],
@@ -559,12 +559,12 @@ function demoEconomicsScenarioAnswer(
     ],
     provider: "none",
     related_layers: [
-      "Economic Scenario Lab",
+      "Economic Scenario Model",
       "Revenue per Acre Dashboard",
       "Constraint-Adjusted Development Potential",
     ],
     suggested_actions: [
-      "Open Economic Intelligence -> Scenario Lab.",
+      "Open Economic Intelligence -> Scenario Model.",
       "Adjust intensity, value-per-acre, service burden, utility readiness, transportation, and flood/environmental assumptions.",
       "Review the generated Decision Memo and Evidence Pack before presenting scenario takeaways.",
     ],

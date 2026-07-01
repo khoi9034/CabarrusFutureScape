@@ -74,11 +74,10 @@ export type CfsAppMode = "economics" | "planning";
 
 export type EconomicsSection =
   | "dashboard"
-  | "enterprise_tools"
-  | "executive"
-  | "methodology"
-  | "parcel_screen"
-  | "scenario_lab";
+  | "enterprise"
+  | "overview"
+  | "print"
+  | "workspace";
 
 export type ParcelReviewView = "actions" | "report" | "review";
 
