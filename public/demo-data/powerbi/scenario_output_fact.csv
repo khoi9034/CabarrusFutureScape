@@ -1,0 +1,8 @@
+scenario_id,scenario_name,intensity_band,value_assumption_band,tax_base_lift_band,revenue_per_acre_band,service_burden_band,infrastructure_burden_band,fiscal_attractiveness_band,data_confidence
+current_conditions,Current Conditions,low,low,baseline,lower,medium,medium,baseline,screening
+growth_continues,Growth Continues As-Is,medium,low,moderate,lower,medium,medium,moderate,screening
+infrastructure_constrained_growth,Infrastructure-Constrained Growth,medium,low,limited,lower,high,high,baseline,proxy
+targeted_investment,Targeted Investment Scenario,medium,high,moderate to elevated,higher if served,medium,medium,strong,screening
+higher_density_redevelopment,Higher-Density Redevelopment Scenario,high,high,elevated,higher,medium to high,medium to high,elevated_review,screening
+industrial_employment,Employment / Industrial Scenario,medium,high,moderate to elevated,higher,medium,medium,strong,proxy
+mixed_use_corridor,Mixed-Use Corridor Scenario,high,high,moderate to elevated,higher,medium,medium,strong,screening

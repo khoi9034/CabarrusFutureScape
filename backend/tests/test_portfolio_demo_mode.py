@@ -61,10 +61,23 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
         "demo_school_capacity.geojson",
         "demo_transportation_context.geojson",
     }
+    expected_powerbi_files = {
+        "csv_manifest.json",
+        "domain_readiness_dim.csv",
+        "economics_kpi_fact.csv",
+        "geography_dim.csv",
+        "parcel_economic_signal_fact.csv",
+        "scenario_dim.csv",
+        "scenario_output_fact.csv",
+        "time_dim.csv",
+    }
 
     assert expected_files.issubset({path.name for path in demo_dir.glob("*.json")})
     assert expected_map_files.issubset(
         {path.name for path in (demo_dir / "map_layers").glob("*")}
+    )
+    assert expected_powerbi_files.issubset(
+        {path.name for path in (demo_dir / "powerbi").glob("*")}
     )
 
     demo_text = "\n".join(
@@ -260,6 +273,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Location Context" in economics_shell
     assert "Power BI-style Dataset Preview" in economics_shell
     assert "Power BI Desktop Practice Pack" in economics_shell
+    assert "Flat CSV Tables" in economics_shell
+    assert "Copy import order" in economics_shell
     assert "Power BI Report Builder Guide" in economics_shell
     assert "Download Power BI JSON Pack" in economics_shell
     assert "Copy table relationship notes" in economics_shell
@@ -296,6 +311,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "How do I build this in Power BI?" in ask_service
     assert "How do I build page 1 in Power BI?" in ask_service
     assert "What DAX measures should I create?" in ask_service
+    assert "Should I use JSON or CSV for Power BI?" in ask_service
+    assert "What CSV tables should I import first?" in ask_service
     assert "Why should I not connect every table?" in ask_service
     assert "What relationships should I build?" in ask_service
     assert "Enterprise Consulting Toolkit" in economic_mission_control

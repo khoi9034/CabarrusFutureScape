@@ -1,3 +1,6 @@
+import csv
+from io import StringIO
+
 from fastapi.testclient import TestClient
 
 from app.dependencies.database import get_read_only_db
@@ -13,7 +16,9 @@ from app.routers.economics_router import (
 )
 from app.services.enterprise_export_service import (
     build_enterprise_export_payload,
+    build_powerbi_csv_manifest,
     build_powerbi_export_payload,
+    powerbi_table_to_csv,
 )
 
 
@@ -330,6 +335,16 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
     table_text = str(payload["tables"]).lower()
     assert "owner" not in table_text
     assert "mailing" not in table_text
+    csv_text = powerbi_table_to_csv(payload, "economics_kpi_fact")
+    csv_rows = list(csv.DictReader(StringIO(csv_text)))
+    assert "kpi_id" in csv_text.splitlines()[0]
+    assert csv_rows[0]["kpi_name"] == "Parcels analyzed"
+    assert "owner" not in csv_text.lower()
+    assert "mailing" not in csv_text.lower()
+    manifest = build_powerbi_csv_manifest(payload)
+    assert len(manifest["tables"]) == 7
+    assert manifest["recommended_import_order"][0] == "economics_kpi_fact"
+    assert manifest["tables"][0]["download_url"] == "/economics/powerbi-export/csv/economics_kpi_fact"
 
 
 def test_powerbi_export_endpoint_returns_stable_schema(monkeypatch) -> None:
@@ -363,3 +378,19 @@ def test_powerbi_export_endpoint_returns_stable_schema(monkeypatch) -> None:
     assert len(body["report_builder_guide"]["pages"]) == 4
     assert body["report_builder_guide"]["suggested_measures"]
     assert "suggested_visuals" in body
+
+    manifest_response = client.get("/economics/powerbi-export/csv-manifest")
+    assert manifest_response.status_code == 200
+    manifest = manifest_response.json()
+    assert len(manifest["tables"]) == 7
+    assert manifest["relationships"]
+    for table_name in manifest["recommended_import_order"]:
+        csv_response = client.get(f"/economics/powerbi-export/csv/{table_name}")
+        assert csv_response.status_code == 200
+        assert csv_response.headers["content-type"].startswith("text/csv")
+        assert csv_response.text.splitlines()[0]
+        assert "owner" not in csv_response.text.lower()
+        assert "mailing" not in csv_response.text.lower()
+
+    missing_response = client.get("/economics/powerbi-export/csv/not_a_table")
+    assert missing_response.status_code == 404

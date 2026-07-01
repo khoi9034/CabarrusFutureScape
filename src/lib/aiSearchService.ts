@@ -66,6 +66,12 @@ export const askCfsEconomicsSuggestedPrompts = [
   "How do I build a data confidence register?",
   "What visuals should I make first?",
   "How would this become a semantic model?",
+  "Should I use JSON or CSV for Power BI?",
+  "What CSV tables should I import first?",
+  "What is the import order?",
+  "How do I relate the CSV tables?",
+  "Which CSV table powers the executive dashboard?",
+  "Which CSV table powers Scenario Lab?",
   "Explain the planning model dimensions.",
   "What scenario assumptions should I test?",
   "Build a consulting decision pack.",
@@ -296,6 +302,9 @@ function isEconomicsPowerBiQuery(query: string) {
   const normalized = query.toLowerCase();
   return [
     "power bi",
+    "csv",
+    "text/csv",
+    "import order",
     "semantic model",
     "facts and dimensions",
     "fact and dimension",
@@ -337,6 +346,10 @@ function demoEconomicsPowerBiAnswer(
       ],
       ["Tables to load", bullets(tableNames)],
       [
+        "CSV or JSON",
+        "Use CSV first for Power BI Desktop practice because each table imports like a normal BI source. Use the JSON pack later for app-to-app integration or semantic-model automation.",
+      ],
+      [
         "Relationships to build",
         bullets(relationshipLines.length ? relationshipLines : ["Relationship notes are not available in the cached demo export."]),
       ],
@@ -347,6 +360,15 @@ function demoEconomicsPowerBiAnswer(
       [
         "Report pages to create",
         bullets(pageLines),
+      ],
+      [
+        "Which table powers what",
+        bullets([
+          "Executive dashboard: economics_kpi_fact and parcel_economic_signal_fact.",
+          "Parcel investment screen: parcel_economic_signal_fact and geography_dim.",
+          "Scenario Lab page: scenario_output_fact and scenario_dim.",
+          "Data confidence register: domain_readiness_dim.",
+        ]),
       ],
       [
         "Suggested measures",
@@ -365,6 +387,7 @@ function demoEconomicsPowerBiAnswer(
         "Next steps",
         bullets([
           "Download economics_powerbi_export.json from Enterprise Tools.",
+          "For the beginner path, download the CSV files from Flat CSV Tables and import them with Get Data -> Text/CSV.",
           "Open Power BI Desktop and use Get Data -> JSON.",
           "Load facts and dimensions, then create KPI cards, charts, slicers, and matrices from the suggested layout.",
         ]),
@@ -399,6 +422,7 @@ function demoEconomicsPowerBiAnswer(
     related_layers: ["Power BI Desktop Practice Pack", "Enterprise Tools"],
     suggested_actions: [
       "Open Economic Intelligence -> Enterprise Tools.",
+      "Use Flat CSV Tables first if you are learning Power BI Desktop.",
       "Preview or download the Power BI JSON Pack.",
       "Build the suggested relationships before creating report visuals.",
       "Use the Power BI Report Builder Guide for page-by-page visual instructions.",

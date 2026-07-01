@@ -6,15 +6,18 @@ from collections import Counter
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.dependencies.database import get_read_only_db
 from app.services.enterprise_export_service import (
+    build_powerbi_csv_manifest,
     build_enterprise_export_payload,
     build_powerbi_export_payload,
+    powerbi_table_to_csv,
 )
 
 router = APIRouter(prefix="/economics", tags=["CFS Economics"])
@@ -48,6 +51,35 @@ def get_economics_powerbi_export(
     """Return Power BI Desktop practice facts, dimensions, and relationship notes."""
 
     return build_powerbi_export_payload(_cached_economics_intelligence(db), mode="live")
+
+
+@router.get("/powerbi-export/csv-manifest")
+def get_economics_powerbi_csv_manifest(
+    db: Session = Depends(get_read_only_db),
+) -> dict[str, Any]:
+    """Return flat CSV table download metadata for Power BI Desktop practice."""
+
+    payload = build_powerbi_export_payload(_cached_economics_intelligence(db), mode="live")
+    return build_powerbi_csv_manifest(payload)
+
+
+@router.get("/powerbi-export/csv/{table_name}")
+def get_economics_powerbi_csv(
+    table_name: str,
+    db: Session = Depends(get_read_only_db),
+) -> Response:
+    """Return one sanitized flat Power BI practice table as CSV."""
+
+    payload = build_powerbi_export_payload(_cached_economics_intelligence(db), mode="live")
+    try:
+        csv_text = powerbi_table_to_csv(payload, table_name)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Unsupported Power BI CSV table.") from exc
+    return Response(
+        content=csv_text,
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{table_name}.csv"'},
+    )
 
 
 def _cached_economics_intelligence(db: Session) -> dict[str, Any]:

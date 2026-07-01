@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import csv
 from datetime import datetime
+from io import StringIO
 from typing import Any
 
 PLANNING_DIMENSIONS = [
@@ -26,6 +28,75 @@ PLANNING_MEASURES = [
     "Public Cost Risk Band",
     "Data Confidence",
 ]
+
+POWERBI_CSV_TABLES = {
+    "economics_kpi_fact": {
+        "description": "Economics KPI fact table.",
+        "fields": ["kpi_id", "kpi_name", "value", "unit", "status_band", "source_mode", "as_of"],
+        "primary_use": "KPI cards",
+        "suggested_visual": "Executive Economic Dashboard KPI cards",
+    },
+    "parcel_economic_signal_fact": {
+        "description": "Parcel and area economic signal fact table.",
+        "fields": [
+            "signal_id",
+            "parcel_id",
+            "geography_label",
+            "opportunity_class",
+            "value_per_acre_band",
+            "improvement_to_land_ratio_band",
+            "tax_base_opportunity_band",
+            "constraint_burden_band",
+            "data_confidence",
+            "recommended_followup",
+        ],
+        "primary_use": "Parcel/site screening",
+        "suggested_visual": "Opportunity class bars and underbuilt watchlist",
+    },
+    "scenario_output_fact": {
+        "description": "Scenario output fact table.",
+        "fields": [
+            "scenario_id",
+            "scenario_name",
+            "intensity_band",
+            "value_assumption_band",
+            "tax_base_lift_band",
+            "revenue_per_acre_band",
+            "service_burden_band",
+            "infrastructure_burden_band",
+            "fiscal_attractiveness_band",
+            "data_confidence",
+        ],
+        "primary_use": "Scenario planning model",
+        "suggested_visual": "Scenario comparison matrix",
+    },
+    "domain_readiness_dim": {
+        "description": "Data readiness dimension table.",
+        "fields": ["domain_id", "domain_name", "data_status", "geometry_status", "temporal_status", "current_use", "next_data_need"],
+        "primary_use": "Data confidence register",
+        "suggested_visual": "Domain readiness matrix",
+    },
+    "geography_dim": {
+        "description": "Geography lookup dimension table.",
+        "fields": ["geography_id", "geography_label", "geography_type", "jurisdiction"],
+        "primary_use": "Geography slicers",
+        "suggested_visual": "Geography slicer",
+    },
+    "time_dim": {
+        "description": "Current extract time dimension table.",
+        "fields": ["year", "period_label", "data_available"],
+        "primary_use": "Extract freshness context",
+        "suggested_visual": "Data availability label",
+    },
+    "scenario_dim": {
+        "description": "Scenario lookup dimension table.",
+        "fields": ["scenario_id", "scenario_name", "scenario_family", "description", "caveat"],
+        "primary_use": "Scenario slicers",
+        "suggested_visual": "Scenario slicer",
+    },
+}
+
+POWERBI_CSV_IMPORT_ORDER = list(POWERBI_CSV_TABLES)
 
 
 def build_enterprise_export_payload(
@@ -148,8 +219,50 @@ def build_powerbi_export_payload(
     }
 
 
+def build_powerbi_csv_manifest(powerbi_payload: dict[str, Any]) -> dict[str, Any]:
+    tables = _dict(powerbi_payload.get("tables"))
+    return {
+        "recommended_import_order": POWERBI_CSV_IMPORT_ORDER,
+        "relationships": powerbi_payload.get("relationships") or [],
+        "tables": [
+            {
+                "description": details["description"],
+                "download_url": f"/economics/powerbi-export/csv/{table_name}",
+                "primary_use": details["primary_use"],
+                "row_count": len(tables.get(table_name) or []),
+                "suggested_visual": details["suggested_visual"],
+                "table_name": table_name,
+            }
+            for table_name, details in POWERBI_CSV_TABLES.items()
+        ],
+    }
+
+
+def powerbi_table_to_csv(powerbi_payload: dict[str, Any], table_name: str) -> str:
+    if table_name not in POWERBI_CSV_TABLES:
+        raise KeyError(table_name)
+    fields = POWERBI_CSV_TABLES[table_name]["fields"]
+    rows = _dict(powerbi_payload.get("tables")).get(table_name) or []
+    output = StringIO()
+    writer = csv.DictWriter(output, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({field: _csv_value(_dict(row).get(field)) for field in fields})
+    return output.getvalue()
+
+
 def _dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
+
+
+def _csv_value(value: Any) -> Any:
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float, str)):
+        return value
+    return str(value)
 
 
 def _kpi_fact(kpis: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -513,11 +626,13 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
             },
         ],
         "import_steps": [
-            "Download economics_powerbi_export.json from CFS Economics -> Enterprise Tools.",
-            "Open Power BI Desktop and choose Get Data -> JSON.",
-            "Load the tables under the tables object.",
+            "Beginner path: download the CSV files from CFS Economics -> Enterprise Tools.",
+            "Open Power BI Desktop and choose Get Data -> Text/CSV for each fact and dimension table.",
+            "Import economics_kpi_fact and parcel_economic_signal_fact first for Page 1.",
+            "Import scenario_output_fact and scenario_dim for the Scenario Planning Model page.",
             "Create the two starter relationships listed in this guide.",
             "Build the four report pages with the suggested visuals.",
+            "Use the JSON pack later for app-to-app integration or semantic-model automation.",
             "Add caveat text boxes so report viewers understand this is practice/export context.",
         ],
         "pages": [

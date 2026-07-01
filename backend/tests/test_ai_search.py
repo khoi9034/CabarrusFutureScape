@@ -675,7 +675,7 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(
             app_mode="economics",
-            query="How do I build this in Power BI?",
+            query="What CSV tables should I import first?",
         ),
         _context(),
     )
@@ -683,6 +683,7 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert response.domains == ["economics"]
     assert response.dashboard_actions.focus_domain == "economics"
     assert "Tables to load" in response.answer
+    assert "CSV or JSON" in response.answer
     assert "Relationships to build" in response.answer
     assert "Report pages to create" in response.answer
     assert "Suggested measures" in response.answer

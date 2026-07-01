@@ -1,0 +1,5 @@
+domain_id,domain_name,data_status,geometry_status,temporal_status,current_use,next_data_need
+parcel-value,Parcel Value,available,available,extract,Assessed/market value baseline,Add current appraisal extract if missing.
+acreage,Acreage,available,available,extract,Value-per-acre denominator,Add reliable parcel acreage.
+land-improvement-split,Land / Improvement Split,available,available,extract,Improvement-to-land ratio,Add land and improvement values.
+service-burden,Service Burden,data_needed,data needed,data needed,Constraint-adjusted opportunity,"Add official utility, school, and transportation service assumptions."

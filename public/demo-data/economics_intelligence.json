@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-07-01T05:13:55Z",
+  "as_of": "2026-07-01T17:56:31Z",
   "caveats": [
     "Portfolio Demo uses a cached CFS demo extract.",
     "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
@@ -858,43 +858,6 @@
       "value_per_acre": 257700.4717022654
     },
     {
-      "acreage": 24.212788367530933,
-      "assessed_value": 8822440.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "strong",
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": 50287.907999999996,
-      "estimated_county_tax_screening": 50287.907999999996,
-      "evidence": [
-        "Value per acre: 364371.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "NORTH CAROLINA RAILROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 364371.08630705206,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765260",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 364371.08630705206
-    },
-    {
       "acreage": 29.966987330346115,
       "assessed_value": 8822440.0,
       "caveats": [
@@ -930,6 +893,43 @@
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
       "value_per_acre": 294405.303500961
+    },
+    {
+      "acreage": 24.212788367530933,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "strong",
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": 50287.907999999996,
+      "estimated_county_tax_screening": 50287.907999999996,
+      "evidence": [
+        "Value per acre: 364371.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "NORTH CAROLINA RAILROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 364371.08630705206,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765260",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 364371.08630705206
     },
     {
       "acreage": 5.239771185677299,
@@ -1325,43 +1325,6 @@
       "land_value": 7177240.0,
       "land_value_per_acre": 18814.046975311176,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149778663",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 18820.83626780607
-    },
-    {
-      "acreage": 381.4830487783074,
-      "assessed_value": 7179830.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "strong",
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": 40925.030999999995,
-      "estimated_county_tax_screening": 40925.030999999995,
-      "evidence": [
-        "Value per acre: 18821.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "REED GOLD MINE",
-      "improvement_to_land_ratio": 0.00036086295010338235,
-      "improvement_value": 2590.0,
-      "improvement_value_per_acre": 6.789292494894409,
-      "land_value": 7177240.0,
-      "land_value_per_acre": 18814.046975311176,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
       "parcel_id": "CFS-PARCEL-0149778672",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
@@ -1400,6 +1363,43 @@
       "land_value_per_acre": 18814.046975311176,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
       "parcel_id": "CFS-PARCEL-0149778674",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 18820.83626780607
+    },
+    {
+      "acreage": 381.4830487783074,
+      "assessed_value": 7179830.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "strong",
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": 40925.030999999995,
+      "estimated_county_tax_screening": 40925.030999999995,
+      "evidence": [
+        "Value per acre: 18821.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "REED GOLD MINE",
+      "improvement_to_land_ratio": 0.00036086295010338235,
+      "improvement_value": 2590.0,
+      "improvement_value_per_acre": 6.789292494894409,
+      "land_value": 7177240.0,
+      "land_value_per_acre": 18814.046975311176,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149778663",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -1473,7 +1473,7 @@
       "land_value": 6953470.0,
       "land_value_per_acre": 67042.66623498537,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149786773",
+      "parcel_id": "CFS-PARCEL-0149786752",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -1510,7 +1510,7 @@
       "land_value": 6953470.0,
       "land_value_per_acre": 67042.66623498537,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149786752",
+      "parcel_id": "CFS-PARCEL-0149786773",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -1547,7 +1547,7 @@
       "land_value": 4490930.0,
       "land_value_per_acre": 2539569.9349272638,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149726775",
+      "parcel_id": "CFS-PARCEL-0149726774",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -1584,7 +1584,7 @@
       "land_value": 4490930.0,
       "land_value_per_acre": 2539569.9349272638,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149726774",
+      "parcel_id": "CFS-PARCEL-0149726775",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -1732,43 +1732,6 @@
       "land_value": 6623200.0,
       "land_value_per_acre": 19224.335158420967,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149780702",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 19224.335158420967
-    },
-    {
-      "acreage": 344.5216672212872,
-      "assessed_value": 6623200.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "strong",
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": 37752.24,
-      "estimated_county_tax_screening": 37752.24,
-      "evidence": [
-        "Value per acre: 19224.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "MT PLEASANT OUTSIDE",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 6623200.0,
-      "land_value_per_acre": 19224.335158420967,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
       "parcel_id": "CFS-PARCEL-0149780703",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
@@ -1807,6 +1770,43 @@
       "land_value_per_acre": 19224.335158420967,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
       "parcel_id": "CFS-PARCEL-0149780704",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 19224.335158420967
+    },
+    {
+      "acreage": 344.5216672212872,
+      "assessed_value": 6623200.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "strong",
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": 37752.24,
+      "estimated_county_tax_screening": 37752.24,
+      "evidence": [
+        "Value per acre: 19224.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "MT PLEASANT OUTSIDE",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 6623200.0,
+      "land_value_per_acre": 19224.335158420967,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149780702",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -2005,7 +2005,7 @@
       "value_per_acre": 249452.71297743477
     },
     {
-      "acreage": 26.571508585638536,
+      "acreage": 24.9369782345954,
       "assessed_value": 6006350.0,
       "caveats": [
         "Screening-level economic context only.",
@@ -2017,7 +2017,7 @@
       "estimated_county_tax": 34236.19499999999,
       "estimated_county_tax_screening": 34236.19499999999,
       "evidence": [
-        "Value per acre: 226045.",
+        "Value per acre: 240861.",
         "Improvement-to-land ratio: 0.0"
       ],
       "floodplain_context": null,
@@ -2026,9 +2026,9 @@
       "improvement_value": 0.0,
       "improvement_value_per_acre": 0.0,
       "land_value": 6006350.0,
-      "land_value_per_acre": 226044.74942180488,
+      "land_value_per_acre": 240861.179870916,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149802714",
+      "parcel_id": "CFS-PARCEL-0149802687",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -2039,7 +2039,7 @@
       "school_pressure_context": null,
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 226044.74942180488
+      "value_per_acre": 240861.179870916
     },
     {
       "acreage": 586.4664002920454,
@@ -2361,7 +2361,7 @@
       "land_value": 1652310.0,
       "land_value_per_acre": 30669.51479203083,
       "opportunity_class": "Tax-Base Opportunity",
-      "parcel_id": "CFS-PARCEL-0149740191",
+      "parcel_id": "CFS-PARCEL-0149740192",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -2398,7 +2398,7 @@
       "land_value": 1652310.0,
       "land_value_per_acre": 30669.51479203083,
       "opportunity_class": "Tax-Base Opportunity",
-      "parcel_id": "CFS-PARCEL-0149740192",
+      "parcel_id": "CFS-PARCEL-0149740191",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -2967,7 +2967,7 @@
       "value_per_acre": 93376.16240455057
     },
     {
-      "acreage": 0.1868641561404091,
+      "acreage": 0.9833012130816902,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -2983,14 +2983,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
+      "geography_label": "AMDM INVESTMENTS LLC",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748050",
+      "parcel_id": "CFS-PARCEL-0149775960",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3004,7 +3004,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 0.7427495933026098,
+      "acreage": 0.176963678883803,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3020,14 +3020,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LOUISE S IRVIN ESTATE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149739021",
+      "parcel_id": "CFS-PARCEL-0149739016",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3041,7 +3041,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 6.252294389633973,
+      "acreage": 10.884724557992385,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3057,14 +3057,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "RECOMB MARK N & AMY MICHELE JONES",
+      "geography_label": "SEARS STREET SUB",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149740410",
+      "parcel_id": "CFS-PARCEL-0149813340",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3078,7 +3078,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 16.561031721259557,
+      "acreage": 3.655007110581302,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3094,14 +3094,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "CUMBERLAND",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149790212",
+      "parcel_id": "CFS-PARCEL-0149739380",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3115,7 +3115,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 0.9776449972144752,
+      "acreage": 0.2822354298416368,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3131,14 +3131,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LOUISE S IRVIN ESTATE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149739718",
+      "parcel_id": "CFS-PARCEL-0149738993",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3152,7 +3152,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 4.316281893287018,
+      "acreage": 0.20733154241582427,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3168,14 +3168,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "COLDWATER RIDGE APARTMENTS II LLC",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149812048",
+      "parcel_id": "CFS-PARCEL-0149739117",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3189,7 +3189,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 6.717432398006377,
+      "acreage": 0.18988313727446415,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3205,14 +3205,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LOUISE S IRVIN ESTATE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149739322",
+      "parcel_id": "CFS-PARCEL-0149739119",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3226,7 +3226,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 7.283069981849785,
+      "acreage": 0.16532797614901912,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3242,14 +3242,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LOUISE S IRVIN ESTATE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149749489",
+      "parcel_id": "CFS-PARCEL-0149739738",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3263,7 +3263,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 0.4774068628153626,
+      "acreage": 0.17221918120670918,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3279,14 +3279,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "HARRISBURG ESTATES",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149750467",
+      "parcel_id": "CFS-PARCEL-0149739174",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3300,7 +3300,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 1.0585049449219657,
+      "acreage": 0.16530980797670364,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3316,14 +3316,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LAKE LYNN LODGE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149825348",
+      "parcel_id": "CFS-PARCEL-0149739768",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3337,7 +3337,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 2.912496304258491,
+      "acreage": 0.17206229379612947,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3353,14 +3353,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "4575 ISENHOUR RD",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149787074",
+      "parcel_id": "CFS-PARCEL-0149739301",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3374,7 +3374,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 0.27699128917858123,
+      "acreage": 0.09910523422744898,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3390,14 +3390,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "HARTSELL SCHOOL",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149804573",
+      "parcel_id": "CFS-PARCEL-0149748461",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3411,7 +3411,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 1.6698160857717055,
+      "acreage": 4.098242133132181,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -3427,14 +3427,421 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "OLD SOUTH",
+      "geography_label": "THE SMALL LIVING TRUST",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149759467",
+      "parcel_id": "CFS-PARCEL-0149734647",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.003573328851880723,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "GENEVA H FURR PROPERTY",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149781840",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.00016675911364755775,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "MIAMI CHURCH RD",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149778504",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 31.34976378813367,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "ARTHUR REINDERS",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149734756",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 1.7767643352968907,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "RECOMB MPV KELLSWATER",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149785562",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.00019726161213112236,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "MIAMI CHURCH RD",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149778502",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 5.584867464210638,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "PLAT FOR 5641 MT PLEASANT RD S",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149779583",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.00016675911364755775,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "MIAMI CHURCH RD",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149778505",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 4.692981152257387,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "STEVEN D & DONNA R DETAR",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149830287",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.30384932926918684,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "LANE ST / I-85",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149816168",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 2.7099930221861315,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "RECOMBINATION PLAT DRAKE FAMILY PROPERTY",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149773398",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.2564220609260765,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "1395 MARTIN LUTHER KING JR AVE",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149812994",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -3472,413 +3879,6 @@
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
       "parcel_id": "CFS-PARCEL-0149749670",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.1735855986376372,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149756077",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.17166117584457277,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748438",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.17618157658225378,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748407",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.2019825369717922,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149756097",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.18568586705766474,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748434",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.21015372633625265,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149747924",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.21409450392442061,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748808",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.021768737066410308,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "PROPST & PATTERSON",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149820954",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.17634604997017278,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149747775",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.2553944060104441,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149747776",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.7068318377472216,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "ROWAN COUNTY PARCEL",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149725975",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -5506,43 +5506,6 @@
       "value_per_acre": 257700.4717022654
     },
     {
-      "acreage": 24.212788367530933,
-      "assessed_value": 8822440.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "strong",
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": 50287.907999999996,
-      "estimated_county_tax_screening": 50287.907999999996,
-      "evidence": [
-        "Value per acre: 364371.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "NORTH CAROLINA RAILROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 364371.08630705206,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765260",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 364371.08630705206
-    },
-    {
       "acreage": 29.966987330346115,
       "assessed_value": 8822440.0,
       "caveats": [
@@ -5578,6 +5541,43 @@
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
       "value_per_acre": 294405.303500961
+    },
+    {
+      "acreage": 24.212788367530933,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "strong",
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": 50287.907999999996,
+      "estimated_county_tax_screening": 50287.907999999996,
+      "evidence": [
+        "Value per acre: 364371.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "NORTH CAROLINA RAILROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 364371.08630705206,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765260",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 364371.08630705206
     },
     {
       "acreage": 5.239771185677299,
@@ -5973,43 +5973,6 @@
       "land_value": 7177240.0,
       "land_value_per_acre": 18814.046975311176,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149778663",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 18820.83626780607
-    },
-    {
-      "acreage": 381.4830487783074,
-      "assessed_value": 7179830.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "strong",
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": 40925.030999999995,
-      "estimated_county_tax_screening": 40925.030999999995,
-      "evidence": [
-        "Value per acre: 18821.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "REED GOLD MINE",
-      "improvement_to_land_ratio": 0.00036086295010338235,
-      "improvement_value": 2590.0,
-      "improvement_value_per_acre": 6.789292494894409,
-      "land_value": 7177240.0,
-      "land_value_per_acre": 18814.046975311176,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
       "parcel_id": "CFS-PARCEL-0149778672",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
@@ -6048,6 +6011,43 @@
       "land_value_per_acre": 18814.046975311176,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
       "parcel_id": "CFS-PARCEL-0149778674",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 18820.83626780607
+    },
+    {
+      "acreage": 381.4830487783074,
+      "assessed_value": 7179830.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "strong",
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": 40925.030999999995,
+      "estimated_county_tax_screening": 40925.030999999995,
+      "evidence": [
+        "Value per acre: 18821.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "REED GOLD MINE",
+      "improvement_to_land_ratio": 0.00036086295010338235,
+      "improvement_value": 2590.0,
+      "improvement_value_per_acre": 6.789292494894409,
+      "land_value": 7177240.0,
+      "land_value_per_acre": 18814.046975311176,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149778663",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -6121,7 +6121,7 @@
       "land_value": 6953470.0,
       "land_value_per_acre": 67042.66623498537,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149786773",
+      "parcel_id": "CFS-PARCEL-0149786752",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -6158,7 +6158,7 @@
       "land_value": 6953470.0,
       "land_value_per_acre": 67042.66623498537,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149786752",
+      "parcel_id": "CFS-PARCEL-0149786773",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -6195,7 +6195,7 @@
       "land_value": 4490930.0,
       "land_value_per_acre": 2539569.9349272638,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149726775",
+      "parcel_id": "CFS-PARCEL-0149726774",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -6232,7 +6232,7 @@
       "land_value": 4490930.0,
       "land_value_per_acre": 2539569.9349272638,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149726774",
+      "parcel_id": "CFS-PARCEL-0149726775",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -6380,43 +6380,6 @@
       "land_value": 6623200.0,
       "land_value_per_acre": 19224.335158420967,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149780702",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 19224.335158420967
-    },
-    {
-      "acreage": 344.5216672212872,
-      "assessed_value": 6623200.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "strong",
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": 37752.24,
-      "estimated_county_tax_screening": 37752.24,
-      "evidence": [
-        "Value per acre: 19224.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "MT PLEASANT OUTSIDE",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 6623200.0,
-      "land_value_per_acre": 19224.335158420967,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
       "parcel_id": "CFS-PARCEL-0149780703",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
@@ -6455,6 +6418,43 @@
       "land_value_per_acre": 19224.335158420967,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
       "parcel_id": "CFS-PARCEL-0149780704",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 19224.335158420967
+    },
+    {
+      "acreage": 344.5216672212872,
+      "assessed_value": 6623200.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "strong",
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": 37752.24,
+      "estimated_county_tax_screening": 37752.24,
+      "evidence": [
+        "Value per acre: 19224.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "MT PLEASANT OUTSIDE",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 6623200.0,
+      "land_value_per_acre": 19224.335158420967,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149780702",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -6653,7 +6653,7 @@
       "value_per_acre": 249452.71297743477
     },
     {
-      "acreage": 26.571508585638536,
+      "acreage": 24.9369782345954,
       "assessed_value": 6006350.0,
       "caveats": [
         "Screening-level economic context only.",
@@ -6665,7 +6665,7 @@
       "estimated_county_tax": 34236.19499999999,
       "estimated_county_tax_screening": 34236.19499999999,
       "evidence": [
-        "Value per acre: 226045.",
+        "Value per acre: 240861.",
         "Improvement-to-land ratio: 0.0"
       ],
       "floodplain_context": null,
@@ -6674,9 +6674,9 @@
       "improvement_value": 0.0,
       "improvement_value_per_acre": 0.0,
       "land_value": 6006350.0,
-      "land_value_per_acre": 226044.74942180488,
+      "land_value_per_acre": 240861.179870916,
       "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149802714",
+      "parcel_id": "CFS-PARCEL-0149802687",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -6687,7 +6687,7 @@
       "school_pressure_context": null,
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 226044.74942180488
+      "value_per_acre": 240861.179870916
     },
     {
       "acreage": 586.4664002920454,
@@ -7009,7 +7009,7 @@
       "land_value": 1652310.0,
       "land_value_per_acre": 30669.51479203083,
       "opportunity_class": "Tax-Base Opportunity",
-      "parcel_id": "CFS-PARCEL-0149740191",
+      "parcel_id": "CFS-PARCEL-0149740192",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7046,7 +7046,7 @@
       "land_value": 1652310.0,
       "land_value_per_acre": 30669.51479203083,
       "opportunity_class": "Tax-Base Opportunity",
-      "parcel_id": "CFS-PARCEL-0149740192",
+      "parcel_id": "CFS-PARCEL-0149740191",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7615,7 +7615,7 @@
       "value_per_acre": 93376.16240455057
     },
     {
-      "acreage": 0.1868641561404091,
+      "acreage": 0.9833012130816902,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7631,14 +7631,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
+      "geography_label": "AMDM INVESTMENTS LLC",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748050",
+      "parcel_id": "CFS-PARCEL-0149775960",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7652,7 +7652,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 0.7427495933026098,
+      "acreage": 0.176963678883803,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7668,14 +7668,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LOUISE S IRVIN ESTATE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149739021",
+      "parcel_id": "CFS-PARCEL-0149739016",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7689,7 +7689,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 6.252294389633973,
+      "acreage": 10.884724557992385,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7705,14 +7705,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "RECOMB MARK N & AMY MICHELE JONES",
+      "geography_label": "SEARS STREET SUB",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149740410",
+      "parcel_id": "CFS-PARCEL-0149813340",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7726,7 +7726,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 16.561031721259557,
+      "acreage": 3.655007110581302,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7742,14 +7742,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "CUMBERLAND",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149790212",
+      "parcel_id": "CFS-PARCEL-0149739380",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7763,7 +7763,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 0.9776449972144752,
+      "acreage": 0.2822354298416368,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7779,14 +7779,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LOUISE S IRVIN ESTATE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149739718",
+      "parcel_id": "CFS-PARCEL-0149738993",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7800,7 +7800,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 4.316281893287018,
+      "acreage": 0.20733154241582427,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7816,14 +7816,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "COLDWATER RIDGE APARTMENTS II LLC",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149812048",
+      "parcel_id": "CFS-PARCEL-0149739117",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7837,7 +7837,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 6.717432398006377,
+      "acreage": 0.18988313727446415,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7853,14 +7853,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LOUISE S IRVIN ESTATE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149739322",
+      "parcel_id": "CFS-PARCEL-0149739119",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7874,7 +7874,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 7.283069981849785,
+      "acreage": 0.16532797614901912,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7890,14 +7890,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LOUISE S IRVIN ESTATE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149749489",
+      "parcel_id": "CFS-PARCEL-0149739738",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7911,7 +7911,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 0.4774068628153626,
+      "acreage": 0.17221918120670918,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7927,14 +7927,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "HARRISBURG ESTATES",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149750467",
+      "parcel_id": "CFS-PARCEL-0149739174",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7948,7 +7948,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 1.0585049449219657,
+      "acreage": 0.16530980797670364,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -7964,14 +7964,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "LAKE LYNN LODGE",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149825348",
+      "parcel_id": "CFS-PARCEL-0149739768",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -7985,7 +7985,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 2.912496304258491,
+      "acreage": 0.17206229379612947,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -8001,14 +8001,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "4575 ISENHOUR RD",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149787074",
+      "parcel_id": "CFS-PARCEL-0149739301",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -8022,7 +8022,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 0.27699128917858123,
+      "acreage": 0.09910523422744898,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -8038,14 +8038,14 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "HARTSELL SCHOOL",
+      "geography_label": "EMERSON GLEN",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149804573",
+      "parcel_id": "CFS-PARCEL-0149748461",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -8059,7 +8059,7 @@
       "value_per_acre": null
     },
     {
-      "acreage": 1.6698160857717055,
+      "acreage": 4.098242133132181,
       "assessed_value": null,
       "caveats": [
         "Screening-level economic context only.",
@@ -8075,14 +8075,421 @@
         "Improvement-to-land ratio needs land and improvement values."
       ],
       "floodplain_context": null,
-      "geography_label": "OLD SOUTH",
+      "geography_label": "THE SMALL LIVING TRUST",
       "improvement_to_land_ratio": null,
       "improvement_value": null,
       "improvement_value_per_acre": null,
       "land_value": null,
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149759467",
+      "parcel_id": "CFS-PARCEL-0149734647",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.003573328851880723,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "GENEVA H FURR PROPERTY",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149781840",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.00016675911364755775,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "MIAMI CHURCH RD",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149778504",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 31.34976378813367,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "ARTHUR REINDERS",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149734756",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 1.7767643352968907,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "RECOMB MPV KELLSWATER",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149785562",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.00019726161213112236,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "MIAMI CHURCH RD",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149778502",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 5.584867464210638,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "PLAT FOR 5641 MT PLEASANT RD S",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149779583",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.00016675911364755775,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "MIAMI CHURCH RD",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149778505",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 4.692981152257387,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "STEVEN D & DONNA R DETAR",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149830287",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.30384932926918684,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "LANE ST / I-85",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149816168",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 2.7099930221861315,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "RECOMBINATION PLAT DRAKE FAMILY PROPERTY",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149773398",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": null
+    },
+    {
+      "acreage": 0.2564220609260765,
+      "assessed_value": null,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "data_needed",
+      "economic_status_band": "data_needed",
+      "estimated_county_tax": null,
+      "estimated_county_tax_screening": null,
+      "evidence": [
+        "Value per acre: data needed.",
+        "Improvement-to-land ratio needs land and improvement values."
+      ],
+      "floodplain_context": null,
+      "geography_label": "1395 MARTIN LUTHER KING JR AVE",
+      "improvement_to_land_ratio": null,
+      "improvement_value": null,
+      "improvement_value_per_acre": null,
+      "land_value": null,
+      "land_value_per_acre": null,
+      "opportunity_class": "Needs More Data Before Recommendation",
+      "parcel_id": "CFS-PARCEL-0149812994",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -8120,413 +8527,6 @@
       "land_value_per_acre": null,
       "opportunity_class": "Needs More Data Before Recommendation",
       "parcel_id": "CFS-PARCEL-0149749670",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.1735855986376372,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149756077",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.17166117584457277,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748438",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.17618157658225378,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748407",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.2019825369717922,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149756097",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.18568586705766474,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748434",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.21015372633625265,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149747924",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.21409450392442061,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149748808",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.021768737066410308,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "PROPST & PATTERSON",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149820954",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.17634604997017278,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149747775",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.2553944060104441,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149747776",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": null
-    },
-    {
-      "acreage": 0.7068318377472216,
-      "assessed_value": null,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "data_needed",
-      "economic_status_band": "data_needed",
-      "estimated_county_tax": null,
-      "estimated_county_tax_screening": null,
-      "evidence": [
-        "Value per acre: data needed.",
-        "Improvement-to-land ratio needs land and improvement values."
-      ],
-      "floodplain_context": null,
-      "geography_label": "ROWAN COUNTY PARCEL",
-      "improvement_to_land_ratio": null,
-      "improvement_value": null,
-      "improvement_value_per_acre": null,
-      "land_value": null,
-      "land_value_per_acre": null,
-      "opportunity_class": "Needs More Data Before Recommendation",
-      "parcel_id": "CFS-PARCEL-0149725975",
       "permit_activity_context": null,
       "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
       "related_layers": [
@@ -9281,7 +9281,7 @@
     }
   ],
   "summary": {
-    "as_of": "2026-07-01T05:13:55Z",
+    "as_of": "2026-07-01T17:56:31Z",
     "data_needed_count": 25,
     "high_opportunity_count": 25,
     "median_value_per_acre": 146226.31400075994,
@@ -9960,43 +9960,6 @@
       "value_per_acre": 257700.4717022654
     },
     {
-      "acreage": 24.212788367530933,
-      "assessed_value": 8822440.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "strong",
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": 50287.907999999996,
-      "estimated_county_tax_screening": 50287.907999999996,
-      "evidence": [
-        "Value per acre: 364371.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "NORTH CAROLINA RAILROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 364371.08630705206,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765260",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 364371.08630705206
-    },
-    {
       "acreage": 29.966987330346115,
       "assessed_value": 8822440.0,
       "caveats": [
@@ -10032,6 +9995,43 @@
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
       "value_per_acre": 294405.303500961
+    },
+    {
+      "acreage": 24.212788367530933,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "strong",
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": 50287.907999999996,
+      "estimated_county_tax_screening": 50287.907999999996,
+      "evidence": [
+        "Value per acre: 364371.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "NORTH CAROLINA RAILROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 364371.08630705206,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765260",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 364371.08630705206
     },
     {
       "acreage": 5.239771185677299,
@@ -10887,43 +10887,6 @@
       "value_per_acre": 257700.4717022654
     },
     {
-      "acreage": 24.212788367530933,
-      "assessed_value": 8822440.0,
-      "caveats": [
-        "Screening-level economic context only.",
-        "Estimated tax context is not a formal tax bill.",
-        "Contact fields are excluded."
-      ],
-      "economic_data_confidence": "strong",
-      "economic_status_band": "underbuilt_watch",
-      "estimated_county_tax": 50287.907999999996,
-      "estimated_county_tax_screening": 50287.907999999996,
-      "evidence": [
-        "Value per acre: 364371.",
-        "Improvement-to-land ratio: 0.0"
-      ],
-      "floodplain_context": null,
-      "geography_label": "NORTH CAROLINA RAILROAD",
-      "improvement_to_land_ratio": 0.0,
-      "improvement_value": 0.0,
-      "improvement_value_per_acre": 0.0,
-      "land_value": 8822440.0,
-      "land_value_per_acre": 364371.08630705206,
-      "opportunity_class": "Underbuilt Redevelopment Candidate",
-      "parcel_id": "CFS-PARCEL-0149765260",
-      "permit_activity_context": null,
-      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-      "related_layers": [
-        "Revenue per Acre Dashboard",
-        "Underbuilt Redevelopment Watchlist",
-        "Constraint-Adjusted Development Potential"
-      ],
-      "school_pressure_context": null,
-      "transportation_context": null,
-      "utility_readiness_context": "Official utility capacity remains a data need.",
-      "value_per_acre": 364371.08630705206
-    },
-    {
       "acreage": 29.966987330346115,
       "assessed_value": 8822440.0,
       "caveats": [
@@ -10959,6 +10922,43 @@
       "transportation_context": null,
       "utility_readiness_context": "Official utility capacity remains a data need.",
       "value_per_acre": 294405.303500961
+    },
+    {
+      "acreage": 24.212788367530933,
+      "assessed_value": 8822440.0,
+      "caveats": [
+        "Screening-level economic context only.",
+        "Estimated tax context is not a formal tax bill.",
+        "Contact fields are excluded."
+      ],
+      "economic_data_confidence": "strong",
+      "economic_status_band": "underbuilt_watch",
+      "estimated_county_tax": 50287.907999999996,
+      "estimated_county_tax_screening": 50287.907999999996,
+      "evidence": [
+        "Value per acre: 364371.",
+        "Improvement-to-land ratio: 0.0"
+      ],
+      "floodplain_context": null,
+      "geography_label": "NORTH CAROLINA RAILROAD",
+      "improvement_to_land_ratio": 0.0,
+      "improvement_value": 0.0,
+      "improvement_value_per_acre": 0.0,
+      "land_value": 8822440.0,
+      "land_value_per_acre": 364371.08630705206,
+      "opportunity_class": "Underbuilt Redevelopment Candidate",
+      "parcel_id": "CFS-PARCEL-0149765260",
+      "permit_activity_context": null,
+      "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+      "related_layers": [
+        "Revenue per Acre Dashboard",
+        "Underbuilt Redevelopment Watchlist",
+        "Constraint-Adjusted Development Potential"
+      ],
+      "school_pressure_context": null,
+      "transportation_context": null,
+      "utility_readiness_context": "Official utility capacity remains a data need.",
+      "value_per_acre": 364371.08630705206
     },
     {
       "acreage": 5.239771185677299,

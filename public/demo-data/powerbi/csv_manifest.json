@@ -1,0 +1,83 @@
+{
+  "recommended_import_order": [
+    "economics_kpi_fact",
+    "parcel_economic_signal_fact",
+    "scenario_output_fact",
+    "domain_readiness_dim",
+    "geography_dim",
+    "time_dim",
+    "scenario_dim"
+  ],
+  "relationships": [
+    {
+      "from_column": "scenario_id",
+      "from_table": "scenario_output_fact",
+      "to_column": "scenario_id",
+      "to_table": "scenario_dim"
+    },
+    {
+      "from_column": "geography_label",
+      "from_table": "parcel_economic_signal_fact",
+      "to_column": "geography_label",
+      "to_table": "geography_dim"
+    }
+  ],
+  "tables": [
+    {
+      "description": "Economics KPI fact table.",
+      "download_url": "/demo-data/powerbi/economics_kpi_fact.csv",
+      "primary_use": "KPI cards",
+      "row_count": 6,
+      "suggested_visual": "Executive Economic Dashboard KPI cards",
+      "table_name": "economics_kpi_fact"
+    },
+    {
+      "description": "Parcel and area economic signal fact table.",
+      "download_url": "/demo-data/powerbi/parcel_economic_signal_fact.csv",
+      "primary_use": "Parcel/site screening",
+      "row_count": 120,
+      "suggested_visual": "Opportunity class bars and underbuilt watchlist",
+      "table_name": "parcel_economic_signal_fact"
+    },
+    {
+      "description": "Scenario output fact table.",
+      "download_url": "/demo-data/powerbi/scenario_output_fact.csv",
+      "primary_use": "Scenario planning model",
+      "row_count": 7,
+      "suggested_visual": "Scenario comparison matrix",
+      "table_name": "scenario_output_fact"
+    },
+    {
+      "description": "Data readiness dimension table.",
+      "download_url": "/demo-data/powerbi/domain_readiness_dim.csv",
+      "primary_use": "Data confidence register",
+      "row_count": 4,
+      "suggested_visual": "Domain readiness matrix",
+      "table_name": "domain_readiness_dim"
+    },
+    {
+      "description": "Geography lookup dimension table.",
+      "download_url": "/demo-data/powerbi/geography_dim.csv",
+      "primary_use": "Geography slicers",
+      "row_count": 50,
+      "suggested_visual": "Geography slicer",
+      "table_name": "geography_dim"
+    },
+    {
+      "description": "Current extract time dimension table.",
+      "download_url": "/demo-data/powerbi/time_dim.csv",
+      "primary_use": "Extract freshness context",
+      "row_count": 1,
+      "suggested_visual": "Data availability label",
+      "table_name": "time_dim"
+    },
+    {
+      "description": "Scenario lookup dimension table.",
+      "download_url": "/demo-data/powerbi/scenario_dim.csv",
+      "primary_use": "Scenario slicers",
+      "row_count": 7,
+      "suggested_visual": "Scenario slicer",
+      "table_name": "scenario_dim"
+    }
+  ]
+}

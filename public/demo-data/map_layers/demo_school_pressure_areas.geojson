@@ -30782,7 +30782,7 @@
   ],
   "metadata": {
     "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
-    "generated_at": "2026-07-01T05:13:55Z",
+    "generated_at": "2026-07-01T17:56:31Z",
     "layer_id": "school_pressure",
     "layer_label": "Demo School Utilization + Permit Pressure",
     "mode": "portfolio_demo",

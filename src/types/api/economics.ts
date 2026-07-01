@@ -208,3 +208,21 @@ export interface EconomicsPowerBiExportResponse {
     time_dim: Array<Record<string, unknown>>;
   };
 }
+
+export interface EconomicsPowerBiCsvManifest {
+  recommended_import_order: string[];
+  relationships: Array<{
+    from_column: string;
+    from_table: string;
+    to_column: string;
+    to_table: string;
+  }>;
+  tables: Array<{
+    description: string;
+    download_url: string;
+    primary_use: string;
+    row_count: number;
+    suggested_visual: string;
+    table_name: keyof EconomicsPowerBiExportResponse["tables"];
+  }>;
+}

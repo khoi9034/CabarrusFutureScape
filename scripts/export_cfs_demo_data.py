@@ -27,11 +27,14 @@ sys.path.insert(0, str(REPO_ROOT / "backend"))
 
 from app.services.enterprise_export_service import (
     build_enterprise_export_payload,
+    build_powerbi_csv_manifest,
     build_powerbi_export_payload,
+    powerbi_table_to_csv,
 )
 
 DEMO_DATA_DIR = REPO_ROOT / "public" / "demo-data"
 DEMO_MAP_LAYER_DIR = DEMO_DATA_DIR / "map_layers"
+DEMO_POWERBI_DIR = DEMO_DATA_DIR / "powerbi"
 SAMPLE_PARCEL_LIMIT = 300
 DEMO_PARCEL_LAYER_LIMIT = 300
 DEMO_HOTSPOT_LAYER_LIMIT = 220
@@ -97,6 +100,7 @@ DATA_STILL_NEEDED = [
 def main() -> int:
     DEMO_DATA_DIR.mkdir(parents=True, exist_ok=True)
     DEMO_MAP_LAYER_DIR.mkdir(parents=True, exist_ok=True)
+    DEMO_POWERBI_DIR.mkdir(parents=True, exist_ok=True)
     generated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
     with psycopg.connect(get_local_connection_string(), row_factory=dict_row) as conn:
@@ -214,12 +218,15 @@ def main() -> int:
     for filename, payload in files.items():
         write_json(DEMO_DATA_DIR / filename, payload)
 
+    export_powerbi_csv_files(economics_powerbi_export)
+
     total_bytes = sum(path.stat().st_size for path in DEMO_DATA_DIR.rglob("*") if path.is_file())
+    file_count = sum(1 for path in DEMO_DATA_DIR.rglob("*") if path.is_file())
     print(
         json.dumps(
             {
                 "demo_data_dir": str(DEMO_DATA_DIR),
-                "file_count": len(files) + map_layer_manifest["layer_count"] + 1,
+                "file_count": file_count,
                 "sample_parcels": sample_parcels["total_count"],
                 "total_bytes": total_bytes,
             },
@@ -227,6 +234,24 @@ def main() -> int:
         ),
     )
     return 0
+
+
+def export_powerbi_csv_files(powerbi_export: dict[str, Any]) -> None:
+    for stale_file in DEMO_POWERBI_DIR.glob("*.csv"):
+        stale_file.unlink()
+    manifest_path = DEMO_POWERBI_DIR / "csv_manifest.json"
+    if manifest_path.exists():
+        manifest_path.unlink()
+
+    manifest = build_powerbi_csv_manifest(powerbi_export)
+    for table in manifest["tables"]:
+        table_name = table["table_name"]
+        (DEMO_POWERBI_DIR / f"{table_name}.csv").write_text(
+            powerbi_table_to_csv(powerbi_export, table_name),
+            encoding="utf-8",
+        )
+        table["download_url"] = f"/demo-data/powerbi/{table_name}.csv"
+    write_json(manifest_path, manifest)
 
 
 def get_local_connection_string() -> str:

@@ -175,11 +175,14 @@ This phase is a practice/export workflow, not Power BI Embedded.
 3. Use the Power BI Desktop Practice Pack to preview or download
    `economics_powerbi_export.json`.
 4. Open Power BI Desktop.
-5. Use **Get Data -> JSON** and load the fact/dimension tables.
-6. Build the exported relationships, especially
+5. Beginner path: download the CSV files from **Flat CSV Tables** and use
+   **Get Data -> Text/CSV** for each fact/dimension table.
+6. JSON path: use **Get Data -> JSON** and load the fact/dimension tables
+   when you want app-to-app style integration practice.
+7. Build the exported relationships, especially
    `scenario_output_fact.scenario_id -> scenario_dim.scenario_id` and
    `parcel_economic_signal_fact.geography_label -> geography_dim.geography_label`.
-7. Create report pages for the executive dashboard, parcel investment screen,
+8. Create report pages for the executive dashboard, parcel investment screen,
    scenario planning model, and data confidence register.
 
 Future path: these tables can become a Power BI semantic model, then a Power BI
@@ -203,6 +206,8 @@ turning the export into a Desktop report:
   summary-level and should not be forced into incorrect relationships.
 - Build four pages: Executive Economic Dashboard, Parcel Investment Screen,
   Scenario Planning Model, and Data Confidence Register.
+- Beginner path: use the CSV files first because they import as normal flat
+  BI source tables. Use the JSON pack later for app-to-app integration.
 - Suggested starter measures include `Total Signals`,
   `Underbuilt Candidates`, `Data Needed Signals`, `Scenario Count`, and
   `Strong Fiscal Scenarios`.

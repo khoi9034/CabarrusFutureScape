@@ -13,7 +13,7 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import { useDashboardState } from "@/hooks/useDashboardState";
-import { USE_DEMO_DATA } from "@/lib/api/client";
+import { buildApiUrl, USE_DEMO_DATA } from "@/lib/api/client";
 import {
   getEconomicsEnterpriseExport,
   getEconomicsIntelligence,
@@ -533,8 +533,10 @@ function EnterpriseToolsPage({
       ? JSON.stringify(powerBiPayload ?? { status: "Loading Power BI export pack" }, null, 2)
       : JSON.stringify(powerBiTableSummary(powerBiPayload), null, 2);
   const reportBuilderGuide = powerBiPayload?.report_builder_guide;
+  const csvRows = powerBiCsvRows(powerBiPayload);
   const relationshipNotes = powerBiRelationshipNotes(powerBiPayload);
   const reportLayoutNotes = powerBiReportLayoutNotes(powerBiPayload);
+  const importOrderNotes = powerBiCsvImportOrderNotes(csvRows);
   const copyText = async (label: string, text: string) => {
     if (!navigator.clipboard) {
       setCopyStatus("Clipboard unavailable in this browser");
@@ -647,6 +649,74 @@ function EnterpriseToolsPage({
           <pre className="max-h-96 overflow-auto rounded-xl border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
             {powerBiPreview}
           </pre>
+        </div>
+      </EconPanel>
+      <EconPanel title="Flat CSV Tables" kicker="Beginner Power BI path">
+        <div className="space-y-4">
+          <p className="text-sm leading-6 text-[var(--econ-muted)]">
+            CSV is easier for learning in Power BI Desktop: download each flat
+            fact/dimension table, use Get Data -&gt; Text/CSV, then create the two
+            starter relationships. The JSON pack remains better for app-to-app
+            integration; embedded Power BI comes later.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+              disabled={!powerBiPayload}
+              onClick={() => void copyText("CSV import order", importOrderNotes)}
+              type="button"
+            >
+              Copy import order
+            </button>
+            <button
+              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+              disabled={!powerBiPayload}
+              onClick={() => void copyText("Relationship notes", relationshipNotes)}
+              type="button"
+            >
+              Copy relationship notes
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
+              <thead className="text-xs uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+                <tr>
+                  <th className="px-3 py-2">Table name</th>
+                  <th className="px-3 py-2">Purpose</th>
+                  <th className="px-3 py-2">Rows</th>
+                  <th className="px-3 py-2">Suggested visual</th>
+                  <th className="px-3 py-2">Download</th>
+                </tr>
+              </thead>
+              <tbody>
+                {csvRows.map((row) => (
+                  <tr className="rounded-xl bg-white/[0.025]" key={row.table_name}>
+                    <td className="rounded-l-xl border-y border-l border-[var(--econ-border)] px-3 py-3 font-mono text-xs text-[var(--econ-text)]">
+                      {row.table_name}
+                    </td>
+                    <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
+                      {row.primary_use}
+                    </td>
+                    <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-text)]">
+                      {row.row_count}
+                    </td>
+                    <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
+                      {row.suggested_visual}
+                    </td>
+                    <td className="rounded-r-xl border-y border-r border-[var(--econ-border)] px-3 py-3">
+                      <a
+                        className="inline-flex rounded-lg border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                        download={`${row.table_name}.csv`}
+                        href={row.download_url}
+                      >
+                        Download CSV
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </EconPanel>
       <EconPanel title="Power BI Report Builder Guide" kicker="Desktop report recipe">
@@ -803,6 +873,20 @@ function powerBiReportLayoutNotes(payload: EconomicsPowerBiExportResponse | null
   return (payload?.suggested_visuals ?? [])
     .map((page) => `${page.page}\n${page.visuals.map((visual) => `- ${visual}`).join("\n")}`)
     .join("\n\n");
+}
+
+function powerBiCsvRows(payload: EconomicsPowerBiExportResponse | null) {
+  return powerBiCsvTableMetadata.map((row) => ({
+    ...row,
+    download_url: USE_DEMO_DATA
+      ? `/demo-data/powerbi/${row.table_name}.csv`
+      : buildApiUrl(`/economics/powerbi-export/csv/${row.table_name}`),
+    row_count: payload?.tables[row.table_name]?.length ?? 0,
+  }));
+}
+
+function powerBiCsvImportOrderNotes(rows: ReturnType<typeof powerBiCsvRows>) {
+  return rows.map((row, index) => `${index + 1}. ${row.table_name} - ${row.primary_use}`).join("\n");
 }
 
 function guideVisualDetails(visual: Record<string, unknown>) {
@@ -1422,6 +1506,48 @@ const powerBiWorkflowSteps = [
   "Build an executive report page.",
   "Optionally publish or embed later.",
 ];
+
+const powerBiCsvTableMetadata = [
+  {
+    primary_use: "KPI cards",
+    suggested_visual: "Executive Economic Dashboard KPI cards",
+    table_name: "economics_kpi_fact",
+  },
+  {
+    primary_use: "Parcel/site screening",
+    suggested_visual: "Opportunity class bars and underbuilt watchlist",
+    table_name: "parcel_economic_signal_fact",
+  },
+  {
+    primary_use: "Scenario planning model",
+    suggested_visual: "Scenario comparison matrix",
+    table_name: "scenario_output_fact",
+  },
+  {
+    primary_use: "Data confidence register",
+    suggested_visual: "Domain readiness matrix",
+    table_name: "domain_readiness_dim",
+  },
+  {
+    primary_use: "Geography slicers",
+    suggested_visual: "Geography slicer",
+    table_name: "geography_dim",
+  },
+  {
+    primary_use: "Extract freshness context",
+    suggested_visual: "Data availability label",
+    table_name: "time_dim",
+  },
+  {
+    primary_use: "Scenario slicers",
+    suggested_visual: "Scenario slicer",
+    table_name: "scenario_dim",
+  },
+] as const satisfies ReadonlyArray<{
+  primary_use: string;
+  suggested_visual: string;
+  table_name: keyof EconomicsPowerBiExportResponse["tables"];
+}>;
 
 const initialScenarioAssumptions: ScenarioAssumptions = {
   developmentType: "Current Conditions",

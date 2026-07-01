@@ -689,6 +689,9 @@ def _is_economics_powerbi_query(query: str) -> bool:
         term in normalized
         for term in (
             "power bi",
+            "csv",
+            "text/csv",
+            "import order",
             "semantic model",
             "facts and dimensions",
             "fact and dimension",
@@ -719,12 +722,17 @@ def _economics_powerbi_answer(
             "Tables to load",
             _bullets(
                 [
+                    "Beginner CSV path: import economics_kpi_fact, parcel_economic_signal_fact, scenario_output_fact, domain_readiness_dim, geography_dim, time_dim, and scenario_dim as separate Text/CSV sources.",
                     "economics_kpi_fact for KPI cards.",
                     "parcel_economic_signal_fact for parcel and area screening tables.",
                     "scenario_output_fact for scenario comparison visuals.",
                     "domain_readiness_dim, geography_dim, time_dim, and scenario_dim for slicers and relationships.",
                 ]
             ),
+        ),
+        (
+            "CSV or JSON",
+            "Use CSV first for Power BI Desktop practice because each table imports like a normal BI source. Use the JSON pack later for app-to-app integration or semantic-model automation.",
         ),
         (
             "Relationships to build",
@@ -747,6 +755,17 @@ def _economics_powerbi_answer(
                     "Parcel Investment Screen: parcel table, value per acre band, improvement-to-land ratio band, constraint burden, recommended follow-up.",
                     "Scenario Planning Model: scenario comparison matrix, fiscal attractiveness by scenario, service burden vs tax-base lift.",
                     "Data Confidence Register: domain readiness matrix, missing data table, next data need list.",
+                ]
+            ),
+        ),
+        (
+            "Which table powers what",
+            _bullets(
+                [
+                    "Executive dashboard: economics_kpi_fact and parcel_economic_signal_fact.",
+                    "Parcel investment screen: parcel_economic_signal_fact and geography_dim.",
+                    "Scenario Lab page: scenario_output_fact and scenario_dim.",
+                    "Data confidence register: domain_readiness_dim.",
                 ]
             ),
         ),
@@ -800,6 +819,7 @@ def _economics_powerbi_answer(
         ],
         [
             "Open Economic Intelligence -> Enterprise Tools -> Power BI Desktop Practice Pack.",
+            "Use Flat CSV Tables first if you are learning Power BI Desktop.",
             "Download the JSON pack and import it into Power BI Desktop.",
             "Build the exported relationships before creating report visuals.",
             "Use the Power BI Report Builder Guide for page-by-page visual instructions.",
