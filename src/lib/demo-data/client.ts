@@ -16,6 +16,7 @@ import type {
   SchoolUtilizationSeedPageResponse,
   EconomicsIntelligenceResponse,
   EconomicsEnterpriseExportResponse,
+  EconomicsPowerBiExportResponse,
 } from "@/types/api";
 
 const DEMO_DATA_BASE_URL = "/demo-data";
@@ -156,6 +157,13 @@ export function getDemoEconomicsEnterpriseExport() {
   return loadDemoJson(
     "economics_enterprise_export.json",
     getUnavailableEconomicsEnterpriseExport,
+  );
+}
+
+export function getDemoEconomicsPowerBiExport() {
+  return loadDemoJson(
+    "economics_powerbi_export.json",
+    getUnavailableEconomicsPowerBiExport,
   );
 }
 
@@ -671,6 +679,28 @@ function getUnavailableEconomicsEnterpriseExport(): EconomicsEnterpriseExportRes
     scenario_assumptions: [],
     scenario_output_bands: [],
     scenario_templates: [],
+  };
+}
+
+function getUnavailableEconomicsPowerBiExport(): EconomicsPowerBiExportResponse {
+  return {
+    as_of: null,
+    caveats: [
+      "Portfolio Demo Power BI practice export is not available.",
+      "No external BI account or embedded report is connected.",
+    ],
+    mode: "demo",
+    relationships: [],
+    suggested_visuals: [],
+    tables: {
+      domain_readiness_dim: [],
+      economics_kpi_fact: [],
+      geography_dim: [],
+      parcel_economic_signal_fact: [],
+      scenario_dim: [],
+      scenario_output_fact: [],
+      time_dim: [],
+    },
   };
 }
 

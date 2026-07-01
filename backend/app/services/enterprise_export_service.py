@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 PLANNING_DIMENSIONS = [
@@ -92,6 +93,57 @@ def build_enterprise_export_payload(
         "scenario_assumptions": scenario_inputs,
         "scenario_output_bands": scenario_facts,
         "scenario_templates": scenarios,
+    }
+
+
+def build_powerbi_export_payload(
+    economics: dict[str, Any],
+    *,
+    mode: str | None = None,
+) -> dict[str, Any]:
+    summary = _dict(economics.get("summary"))
+    kpis = [_dict(row) for row in economics.get("kpis") or []]
+    signals = [_dict(row) for row in economics.get("signals") or economics.get("parcel_economic_signals") or []]
+    scenarios = [_dict(row) for row in economics.get("scenario_templates") or []]
+    scenario_outputs = [_dict(row) for row in economics.get("scenario_outputs") or []]
+    readiness = [_dict(row) for row in economics.get("data_readiness") or []]
+    as_of = economics.get("as_of") or summary.get("as_of")
+    output_mode = mode or str(economics.get("mode") or summary.get("source_mode") or "live")
+
+    geography_rows = _powerbi_geography_dim(signals)
+    scenario_rows = _powerbi_scenario_dim(scenarios)
+    return {
+        "as_of": as_of,
+        "caveats": [
+            "Power BI Desktop practice export only; no embedded report or external credential is connected.",
+            "CFS Economics is screening-level context, not a formal appraisal or billing determination.",
+            "Tables exclude contact fields, credential fields, model internals, and probability-style outputs.",
+        ],
+        "mode": output_mode,
+        "relationships": [
+            {
+                "from_column": "scenario_id",
+                "from_table": "scenario_output_fact",
+                "to_column": "scenario_id",
+                "to_table": "scenario_dim",
+            },
+            {
+                "from_column": "geography_label",
+                "from_table": "parcel_economic_signal_fact",
+                "to_column": "geography_label",
+                "to_table": "geography_dim",
+            },
+        ],
+        "suggested_visuals": _powerbi_suggested_visuals(),
+        "tables": {
+            "domain_readiness_dim": _powerbi_readiness_dim(readiness),
+            "economics_kpi_fact": _powerbi_kpi_fact(kpis, output_mode, as_of),
+            "geography_dim": geography_rows,
+            "parcel_economic_signal_fact": _powerbi_signal_fact(signals),
+            "scenario_dim": scenario_rows,
+            "scenario_output_fact": _powerbi_scenario_fact(scenario_outputs or scenarios),
+            "time_dim": _powerbi_time_dim(as_of),
+        },
     }
 
 
@@ -269,3 +321,264 @@ def _decision_pack_template() -> dict[str, Any]:
             "Utility, school, transportation, and environmental cost data can be incomplete.",
         ],
     }
+
+
+def _powerbi_kpi_fact(
+    kpis: list[dict[str, Any]],
+    mode: str,
+    as_of: Any,
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "as_of": as_of,
+            "kpi_id": row.get("id"),
+            "kpi_name": row.get("label"),
+            "source_mode": mode,
+            "status_band": row.get("status_band"),
+            "unit": row.get("unit"),
+            "value": row.get("value"),
+        }
+        for row in kpis
+    ]
+
+
+def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "constraint_burden_band": _constraint_burden_band(row),
+            "data_confidence": row.get("economic_data_confidence"),
+            "geography_label": row.get("geography_label"),
+            "improvement_to_land_ratio_band": _ratio_band(row.get("improvement_to_land_ratio")),
+            "opportunity_class": row.get("opportunity_class"),
+            "parcel_id": row.get("parcel_id"),
+            "recommended_followup": row.get("recommended_followup"),
+            "signal_id": row.get("parcel_id") or f"signal-{index + 1}",
+            "tax_base_opportunity_band": _tax_base_opportunity_band(row),
+            "value_per_acre_band": _value_per_acre_band(row.get("value_per_acre")),
+        }
+        for index, row in enumerate(signals)
+    ]
+
+
+def _powerbi_scenario_fact(scenarios: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "data_confidence": row.get("data_confidence"),
+            "fiscal_attractiveness_band": _fiscal_attractiveness_band(row),
+            "infrastructure_burden_band": row.get("infrastructure_burden_band"),
+            "intensity_band": _scenario_intensity_band(row),
+            "revenue_per_acre_band": row.get("revenue_per_acre_band"),
+            "scenario_id": row.get("scenario_id") or row.get("id"),
+            "scenario_name": row.get("title"),
+            "service_burden_band": row.get("service_burden_band"),
+            "tax_base_lift_band": row.get("estimated_tax_base_lift_band"),
+            "value_assumption_band": _scenario_value_assumption_band(row),
+        }
+        for row in scenarios
+    ]
+
+
+def _powerbi_readiness_dim(readiness: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "current_use": row.get("current_use"),
+            "data_status": row.get("data_status"),
+            "domain_id": _slug(row.get("domain")),
+            "domain_name": row.get("domain"),
+            "geometry_status": "available" if row.get("data_status") == "available" else "data needed",
+            "next_data_need": row.get("gap_or_next_need"),
+            "temporal_status": "extract" if row.get("data_status") == "available" else "data needed",
+        }
+        for row in readiness
+    ]
+
+
+def _powerbi_geography_dim(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    labels = sorted({str(row.get("geography_label")) for row in signals if row.get("geography_label")})
+    return [
+        {
+            "geography_id": _slug(label) or f"geography-{index + 1}",
+            "geography_label": label,
+            "geography_type": "screening area",
+            "jurisdiction": None,
+        }
+        for index, label in enumerate(labels[:50])
+    ]
+
+
+def _powerbi_time_dim(as_of: Any) -> list[dict[str, Any]]:
+    year = _year_from_as_of(as_of)
+    return [
+        {
+            "data_available": bool(as_of),
+            "period_label": "Current extract",
+            "year": year,
+        }
+    ]
+
+
+def _powerbi_scenario_dim(scenarios: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "caveat": "; ".join(str(item) for item in row.get("caveats") or []),
+            "description": row.get("what_it_tests"),
+            "scenario_family": _scenario_family(str(row.get("id") or row.get("scenario_id") or "")),
+            "scenario_id": row.get("id") or row.get("scenario_id"),
+            "scenario_name": row.get("title"),
+        }
+        for row in scenarios
+    ]
+
+
+def _powerbi_suggested_visuals() -> list[dict[str, Any]]:
+    return [
+        {
+            "page": "Executive Economic Dashboard",
+            "visuals": [
+                "KPI cards: assessed value coverage, underbuilt candidates, opportunity signals, data confidence",
+                "Bar chart: opportunity classes",
+                "Table: underbuilt watchlist",
+                "Slicer: geography / jurisdiction",
+                "Slicer: scenario",
+            ],
+        },
+        {
+            "page": "Parcel Investment Screen",
+            "visuals": [
+                "Parcel table",
+                "Value per acre band",
+                "Improvement-to-land ratio band",
+                "Constraint burden band",
+                "Recommended follow-up",
+            ],
+        },
+        {
+            "page": "Scenario Planning Model",
+            "visuals": [
+                "Scenario comparison matrix",
+                "Fiscal attractiveness by scenario",
+                "Service burden vs tax-base lift",
+                "Decision memo text box",
+            ],
+        },
+        {
+            "page": "Data Confidence Register",
+            "visuals": [
+                "Domain readiness matrix",
+                "Missing data table",
+                "Next data need list",
+            ],
+        },
+    ]
+
+
+def _value_per_acre_band(value: Any) -> str:
+    number = _number(value)
+    if number is None:
+        return "data_needed"
+    if number >= 500_000:
+        return "high"
+    if number >= 150_000:
+        return "moderate"
+    return "lower"
+
+
+def _ratio_band(value: Any) -> str:
+    number = _number(value)
+    if number is None:
+        return "data_needed"
+    if number < 0.5:
+        return "low"
+    if number < 1.5:
+        return "moderate"
+    return "high"
+
+
+def _tax_base_opportunity_band(row: dict[str, Any]) -> str:
+    status = str(row.get("economic_status_band") or "")
+    opportunity = str(row.get("opportunity_class") or "").lower()
+    if "data_needed" in status:
+        return "data_needed"
+    if "tax_base" in status or "opportunity" in opportunity:
+        return "elevated_review"
+    if "underbuilt" in status or "underbuilt" in opportunity:
+        return "review"
+    return "monitor"
+
+
+def _constraint_burden_band(row: dict[str, Any]) -> str:
+    text = " ".join(
+        str(row.get(key) or "")
+        for key in ("economic_status_band", "floodplain_context", "school_pressure_context", "utility_readiness_context", "transportation_context")
+    ).lower()
+    if "data" in text:
+        return "data_needed"
+    if "constrained" in text or "review" in text or "flood" in text:
+        return "elevated_review"
+    return "monitor"
+
+
+def _fiscal_attractiveness_band(row: dict[str, Any]) -> str:
+    lift = str(row.get("estimated_tax_base_lift_band") or "").lower()
+    burden = str(row.get("service_burden_band") or row.get("infrastructure_burden_band") or "").lower()
+    if "data" in lift or "data" in burden:
+        return "data_needed"
+    if "elevated" in lift or "higher" in lift:
+        return "elevated_review" if "high" in burden else "strong"
+    if "moderate" in lift:
+        return "moderate"
+    return "baseline"
+
+
+def _scenario_intensity_band(row: dict[str, Any]) -> str:
+    scenario_id = str(row.get("scenario_id") or row.get("id") or "").lower()
+    if "current" in scenario_id:
+        return "low"
+    if "density" in scenario_id or "mixed" in scenario_id:
+        return "high"
+    if "industrial" in scenario_id or "investment" in scenario_id:
+        return "medium"
+    return "medium"
+
+
+def _scenario_value_assumption_band(row: dict[str, Any]) -> str:
+    revenue = str(row.get("revenue_per_acre_band") or "").lower()
+    if "high" in revenue or "higher" in revenue:
+        return "high"
+    if "data" in revenue:
+        return "data_needed"
+    if "lower" in revenue:
+        return "low"
+    return "medium"
+
+
+def _scenario_family(scenario_id: str) -> str:
+    if "industrial" in scenario_id:
+        return "employment"
+    if "mixed" in scenario_id or "commercial" in scenario_id:
+        return "corridor"
+    if "infrastructure" in scenario_id or "investment" in scenario_id:
+        return "infrastructure"
+    if "residential" in scenario_id or "growth" in scenario_id:
+        return "growth"
+    return "baseline"
+
+
+def _slug(value: Any) -> str:
+    text = str(value or "").strip().lower()
+    return "-".join(part for part in "".join(char if char.isalnum() else " " for char in text).split() if part)
+
+
+def _number(value: Any) -> float | None:
+    if isinstance(value, (int, float)):
+        return float(value)
+    return None
+
+
+def _year_from_as_of(as_of: Any) -> int | None:
+    if not as_of:
+        return None
+    try:
+        return datetime.fromisoformat(str(as_of).replace("Z", "+00:00")).year
+    except ValueError:
+        return None

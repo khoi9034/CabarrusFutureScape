@@ -163,3 +163,28 @@ export interface EconomicsEnterpriseExportResponse {
   scenario_output_bands?: Array<Record<string, unknown>>;
   scenario_templates?: EconomicsScenarioTemplate[];
 }
+
+export interface EconomicsPowerBiExportResponse {
+  as_of: string | null;
+  caveats: string[];
+  mode: "demo" | "live";
+  relationships: Array<{
+    from_column: string;
+    from_table: string;
+    to_column: string;
+    to_table: string;
+  }>;
+  suggested_visuals: Array<{
+    page: string;
+    visuals: string[];
+  }>;
+  tables: {
+    domain_readiness_dim: Array<Record<string, unknown>>;
+    economics_kpi_fact: Array<Record<string, unknown>>;
+    geography_dim: Array<Record<string, unknown>>;
+    parcel_economic_signal_fact: Array<Record<string, unknown>>;
+    scenario_dim: Array<Record<string, unknown>>;
+    scenario_output_fact: Array<Record<string, unknown>>;
+    time_dim: Array<Record<string, unknown>>;
+  };
+}

@@ -2,10 +2,12 @@ import { apiGet, USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import {
   getDemoEconomicsEnterpriseExport,
   getDemoEconomicsIntelligence,
+  getDemoEconomicsPowerBiExport,
 } from "@/lib/demo-data/client";
 import type {
   EconomicsEnterpriseExportResponse,
   EconomicsIntelligenceResponse,
+  EconomicsPowerBiExportResponse,
 } from "@/types/api";
 
 export async function getEconomicsIntelligence() {
@@ -35,6 +37,22 @@ export async function getEconomicsEnterpriseExport() {
 
   return apiGet<EconomicsEnterpriseExportResponse>(
     "/economics/enterprise-export",
+    undefined,
+    { timeoutMs: 20000 },
+  );
+}
+
+export async function getEconomicsPowerBiExport() {
+  if (USE_DEMO_DATA) {
+    return getDemoEconomicsPowerBiExport();
+  }
+
+  if (!USE_BACKEND_API) {
+    throw new Error("Economics Power BI export requires the local FastAPI backend in live mode.");
+  }
+
+  return apiGet<EconomicsPowerBiExportResponse>(
+    "/economics/powerbi-export",
     undefined,
     { timeoutMs: 20000 },
   );

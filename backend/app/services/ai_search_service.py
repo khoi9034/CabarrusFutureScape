@@ -558,6 +558,8 @@ def _economics_answer(
     summary = economics.get("summary", {}) if isinstance(economics, dict) else {}
     watchlist = economics.get("watchlist", []) if isinstance(economics, dict) else []
     readiness = economics.get("data_readiness", []) if isinstance(economics, dict) else []
+    if _is_economics_powerbi_query(request.query):
+        return _economics_powerbi_answer(request, context)
     if _is_economics_scenario_query(request.query):
         return _economics_scenario_answer(request, context, economics if isinstance(economics, dict) else {})
     top_signals = [
@@ -677,6 +679,93 @@ def _economics_answer(
             "Use Economic Scenario Lab only as screening-level fiscal context.",
             "Ask: Where is economic data confidence weak?",
             "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",
+        ],
+    )
+
+
+def _is_economics_powerbi_query(query: str) -> bool:
+    normalized = query.lower()
+    return any(
+        term in normalized
+        for term in (
+            "power bi",
+            "semantic model",
+            "facts and dimensions",
+            "fact and dimension",
+            "relationships",
+            "report pages",
+            "visuals",
+        )
+    )
+
+
+def _economics_powerbi_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+) -> CfsAiSearchResponse:
+    answer = _briefing(
+        (
+            "Executive takeaway",
+            "Use the Power BI Desktop Practice Pack as a manual BI workflow: import CFS Economics facts and dimensions, relate the tables, then build an executive economics report before considering any embedded implementation.",
+        ),
+        (
+            "Tables to load",
+            _bullets(
+                [
+                    "economics_kpi_fact for KPI cards.",
+                    "parcel_economic_signal_fact for parcel and area screening tables.",
+                    "scenario_output_fact for scenario comparison visuals.",
+                    "domain_readiness_dim, geography_dim, time_dim, and scenario_dim for slicers and relationships.",
+                ]
+            ),
+        ),
+        (
+            "Relationships to build",
+            _bullets(
+                [
+                    "scenario_output_fact.scenario_id -> scenario_dim.scenario_id.",
+                    "parcel_economic_signal_fact.geography_label -> geography_dim.geography_label.",
+                ]
+            ),
+        ),
+        (
+            "Report pages to create",
+            _bullets(
+                [
+                    "Executive Economic Dashboard: KPI cards, opportunity class bar chart, underbuilt watchlist, geography and scenario slicers.",
+                    "Parcel Investment Screen: parcel table, value per acre band, improvement-to-land ratio band, constraint burden, recommended follow-up.",
+                    "Scenario Planning Model: scenario comparison matrix, fiscal attractiveness by scenario, service burden vs tax-base lift.",
+                    "Data Confidence Register: domain readiness matrix, missing data table, next data need list.",
+                ]
+            ),
+        ),
+        (
+            "Caveats",
+            _bullets(
+                [
+                    "This is Power BI Desktop practice, not Power BI Embedded.",
+                    "No tenant, workspace, report, client, or embed credentials are required.",
+                    "CFS Economics fields are screening-level context and do not include raw scores or contact fields.",
+                ]
+            ),
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "Power BI export pack",
+                "CFS exports economics_kpi_fact, parcel_economic_signal_fact, scenario_output_fact, domain_readiness_dim, geography_dim, time_dim, and scenario_dim.",
+                "economics_powerbi_export",
+            ),
+        ],
+        [
+            "Open Economic Intelligence -> Enterprise Tools -> Power BI Desktop Practice Pack.",
+            "Download the JSON pack and import it into Power BI Desktop.",
+            "Build the exported relationships before creating report visuals.",
         ],
     )
 

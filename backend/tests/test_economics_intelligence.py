@@ -11,7 +11,10 @@ from app.routers.economics_router import (
     calculate_value_per_acre,
     estimate_county_tax,
 )
-from app.services.enterprise_export_service import build_enterprise_export_payload
+from app.services.enterprise_export_service import (
+    build_enterprise_export_payload,
+    build_powerbi_export_payload,
+)
 
 
 client = TestClient(app)
@@ -237,3 +240,115 @@ def test_enterprise_export_endpoint_returns_stable_schema(monkeypatch) -> None:
     assert "dimensions" in body["exports"]["planning_model"]
     assert "scenario_templates" in body
     assert "scenario_output_bands" in body
+
+
+def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
+    payload = build_powerbi_export_payload(
+        {
+            "as_of": "2026-01-01T00:00:00+00:00",
+            "data_readiness": [
+                {
+                    "current_use": "Value baseline",
+                    "data_status": "available",
+                    "domain": "Parcel Value",
+                    "gap_or_next_need": "None",
+                }
+            ],
+            "kpis": [
+                {
+                    "id": "parcels_analyzed",
+                    "label": "Parcels analyzed",
+                    "status_band": "stable_high_value",
+                    "unit": "parcels",
+                    "value": 12,
+                }
+            ],
+            "mode": "live",
+            "scenario_outputs": [
+                {
+                    "data_confidence": "screening",
+                    "estimated_tax_base_lift_band": "baseline",
+                    "infrastructure_burden_band": "medium",
+                    "revenue_per_acre_band": "moderate",
+                    "scenario_id": "current_conditions",
+                    "service_burden_band": "medium",
+                    "title": "Current Conditions",
+                }
+            ],
+            "scenario_templates": [
+                {
+                    "caveats": ["Scenario values depend on assumptions."],
+                    "id": "current_conditions",
+                    "title": "Current Conditions",
+                    "what_it_tests": "Baseline",
+                }
+            ],
+            "signals": [
+                {
+                    "economic_data_confidence": "strong",
+                    "economic_status_band": "underbuilt_watch",
+                    "geography_label": "Demo corridor",
+                    "improvement_to_land_ratio": 0.4,
+                    "opportunity_class": "Underbuilt Redevelopment Candidate",
+                    "parcel_id": "demo-1",
+                    "recommended_followup": "Review records.",
+                    "value_per_acre": 100000,
+                }
+            ],
+            "summary": {"source_mode": "live"},
+        },
+        mode="live",
+    )
+
+    tables = payload["tables"]
+    assert set(tables) == {
+        "domain_readiness_dim",
+        "economics_kpi_fact",
+        "geography_dim",
+        "parcel_economic_signal_fact",
+        "scenario_dim",
+        "scenario_output_fact",
+        "time_dim",
+    }
+    assert tables["economics_kpi_fact"][0]["kpi_name"] == "Parcels analyzed"
+    assert tables["parcel_economic_signal_fact"][0]["improvement_to_land_ratio_band"] == "low"
+    assert tables["scenario_output_fact"][0]["scenario_id"] == "current_conditions"
+    assert tables["scenario_dim"][0]["scenario_id"] == "current_conditions"
+    assert {
+        "from_table": "scenario_output_fact",
+        "from_column": "scenario_id",
+        "to_table": "scenario_dim",
+        "to_column": "scenario_id",
+    } in payload["relationships"]
+    assert "owner" not in str(payload).lower()
+    assert "mailing" not in str(payload).lower()
+
+
+def test_powerbi_export_endpoint_returns_stable_schema(monkeypatch) -> None:
+    app.dependency_overrides[get_read_only_db] = lambda: object()
+    monkeypatch.setattr(
+        economics_router,
+        "_cached_economics_intelligence",
+        lambda _db: {
+            "as_of": "2026-01-01T00:00:00+00:00",
+            "data_readiness": [],
+            "kpis": [],
+            "mode": "live",
+            "scenario_outputs": [],
+            "scenario_templates": [],
+            "signals": [],
+            "summary": {"source_mode": "live"},
+        },
+    )
+
+    try:
+        response = client.get("/economics/powerbi-export")
+    finally:
+        app.dependency_overrides.pop(get_read_only_db, None)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "live"
+    assert "tables" in body
+    assert "relationships" in body
+    assert "suggested_visuals" in body

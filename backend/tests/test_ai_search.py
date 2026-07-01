@@ -671,6 +671,24 @@ def test_ai_search_economics_scenario_prompt_returns_model_answer() -> None:
     assert response.evidence[0].source == "economics_intelligence.scenario_outputs"
 
 
+def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="How do I build this in Power BI?",
+        ),
+        _context(),
+    )
+
+    assert response.domains == ["economics"]
+    assert response.dashboard_actions.focus_domain == "economics"
+    assert "Tables to load" in response.answer
+    assert "Relationships to build" in response.answer
+    assert "Report pages to create" in response.answer
+    assert "Power BI Embedded" in response.answer
+    assert response.evidence[0].source == "economics_powerbi_export"
+
+
 def test_ai_search_selected_economics_signal_returns_focused_explanation() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(

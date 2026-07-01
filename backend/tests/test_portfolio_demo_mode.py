@@ -252,12 +252,16 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "EconomicsMethodologyPage" in economics_shell
     assert "Location Context" in economics_shell
     assert "Power BI-style Dataset Preview" in economics_shell
+    assert "Power BI Desktop Practice Pack" in economics_shell
+    assert "Download Power BI JSON Pack" in economics_shell
+    assert "Copy table relationship notes" in economics_shell
     assert "Planning Model Schema" in economics_shell
     assert "Ask CFS Economics" in economics_shell
     assert "EconomicMissionControl" in indicator_center
     assert "getDemoEconomicsIntelligence" in economics_service
     assert '"/economics/intelligence"' in economics_service
     assert '"/economics/enterprise-export"' in economics_service
+    assert '"/economics/powerbi-export"' in economics_service
     assert "EnterpriseExportPreviewKind" in enterprise_export_types
     assert "askCfsEconomicsSuggestedPrompts" in ask_service
     assert 'app_mode === "economics"' in ask_service
@@ -278,6 +282,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Which areas need more data before a recommendation?" in ask_service
     assert "What corridors look investment-ready?" in ask_service
     assert "How would this become a Power BI dataset?" in ask_service
+    assert "How do I build this in Power BI?" in ask_service
+    assert "What relationships should I build?" in ask_service
     assert "Enterprise Consulting Toolkit" in economic_mission_control
     assert "Planning Model Schema" in economic_mission_control
     assert "BI / Embedded Analytics Readiness" in economic_mission_control

@@ -15202,7 +15202,7 @@
   ],
   "metadata": {
     "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
-    "generated_at": "2026-07-01T01:59:46Z",
+    "generated_at": "2026-07-01T02:57:21Z",
     "layer_id": "development_hotspots",
     "layer_label": "Demo Development Hotspots",
     "mode": "portfolio_demo",

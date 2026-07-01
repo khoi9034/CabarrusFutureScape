@@ -7,6 +7,7 @@ import {
   getDemoIndicatorSummary,
   getDemoManifest,
   getDemoModelStatus,
+  getDemoEconomicsPowerBiExport,
   getDemoSchoolCapacityWatch,
 } from "@/lib/demo-data/client";
 import { getDemoSchoolPressureResponse } from "@/lib/demo-data/mapLayerClient";
@@ -19,6 +20,7 @@ import type {
   CfsAiSearchResponse,
   CfsAiSelectedSignal,
   EconomicsIntelligenceResponse,
+  EconomicsPowerBiExportResponse,
   IndicatorDomain,
 } from "@/types/api";
 
@@ -52,6 +54,12 @@ export const askCfsEconomicsSuggestedPrompts = [
   "What public burden should I watch?",
   "Summarize public cost risk.",
   "How would this become a Power BI dataset?",
+  "How do I build this in Power BI?",
+  "Which tables are facts and dimensions?",
+  "What report pages should I create?",
+  "What relationships should I build?",
+  "What visuals should I make first?",
+  "How would this become a semantic model?",
   "Explain the planning model dimensions.",
   "What scenario assumptions should I test?",
   "Build a consulting decision pack.",
@@ -145,6 +153,9 @@ async function demoEconomicsAnswer(
   request?: CfsAiSearchRequest,
 ): Promise<CfsAiSearchResponse> {
   const economics = await getDemoEconomicsIntelligence();
+  if (isEconomicsPowerBiQuery(request?.query ?? "")) {
+    return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport());
+  }
   if (isEconomicsScenarioQuery(request?.query ?? "")) {
     return demoEconomicsScenarioAnswer(economics);
   }
@@ -271,6 +282,85 @@ async function demoEconomicsAnswer(
       "Use Economic Scenario Lab as screening-level fiscal context only.",
       "Ask: Where is economic data confidence weak?",
       "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",
+    ],
+  };
+}
+
+function isEconomicsPowerBiQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return [
+    "power bi",
+    "semantic model",
+    "facts and dimensions",
+    "fact and dimension",
+    "relationships",
+    "report pages",
+    "visuals",
+  ].some((term) => normalized.includes(term));
+}
+
+function demoEconomicsPowerBiAnswer(
+  pack: EconomicsPowerBiExportResponse,
+): CfsAiSearchResponse {
+  const tableNames = Object.keys(pack.tables);
+  const relationshipLines = pack.relationships.map(
+    (row) => `${row.from_table}.${row.from_column} -> ${row.to_table}.${row.to_column}`,
+  );
+  return {
+    answer: briefing(
+      [
+        "Executive takeaway",
+        "Use the cached Power BI Desktop Practice Pack as a manual BI workflow: import the JSON tables, build relationships, then create an executive economics report. This is not Power BI Embedded and does not require credentials.",
+      ],
+      ["Tables to load", bullets(tableNames)],
+      [
+        "Relationships to build",
+        bullets(relationshipLines.length ? relationshipLines : ["Relationship notes are not available in the cached demo export."]),
+      ],
+      [
+        "Report pages to create",
+        bullets(pack.suggested_visuals.map((page) => `${page.page}: ${page.visuals.join("; ")}`)),
+      ],
+      [
+        "Next steps",
+        bullets([
+          "Download economics_powerbi_export.json from Enterprise Tools.",
+          "Open Power BI Desktop and use Get Data -> JSON.",
+          "Load facts and dimensions, then create KPI cards, charts, slicers, and matrices from the suggested layout.",
+        ]),
+      ],
+      [
+        "Caveats",
+        bullets([
+          "Portfolio Demo uses a cached demo extract.",
+          "No embedded report, Azure registration, tenant, workspace, report, client, or embed credentials are connected.",
+          "Tables exclude contact fields, credential fields, model internals, and probability-style outputs.",
+        ]),
+      ],
+    ),
+    as_of: pack.as_of,
+    caveats: pack.caveats,
+    dashboard_actions: {
+      focus_domain: "economics",
+      highlight_kpis: ["tax_base_opportunity", "data_readiness"],
+      recommended_layers: ["Power BI Desktop Practice Pack", "Enterprise Tools"],
+    },
+    data_mode: "demo",
+    domains: ["economics"],
+    evidence: [
+      evidence(
+        "Power BI export pack",
+        `${tableNames.length} tables and ${pack.relationships.length} relationships in cached demo export.`,
+        "public/demo-data/economics_powerbi_export.json",
+        tableNames.length ? "available" : "limited",
+      ),
+    ],
+    provider: "none",
+    related_layers: ["Power BI Desktop Practice Pack", "Enterprise Tools"],
+    suggested_actions: [
+      "Open Economic Intelligence -> Enterprise Tools.",
+      "Preview or download the Power BI JSON Pack.",
+      "Build the suggested relationships before creating report visuals.",
     ],
   };
 }

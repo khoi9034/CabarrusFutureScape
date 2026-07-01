@@ -1,0 +1,2046 @@
+{
+  "as_of": "2026-07-01T02:57:21Z",
+  "caveats": [
+    "Power BI Desktop practice export only; no embedded report or external credential is connected.",
+    "CFS Economics is screening-level context, not a formal appraisal or billing determination.",
+    "Tables exclude contact fields, credential fields, model internals, and probability-style outputs."
+  ],
+  "mode": "demo",
+  "relationships": [
+    {
+      "from_column": "scenario_id",
+      "from_table": "scenario_output_fact",
+      "to_column": "scenario_id",
+      "to_table": "scenario_dim"
+    },
+    {
+      "from_column": "geography_label",
+      "from_table": "parcel_economic_signal_fact",
+      "to_column": "geography_label",
+      "to_table": "geography_dim"
+    }
+  ],
+  "suggested_visuals": [
+    {
+      "page": "Executive Economic Dashboard",
+      "visuals": [
+        "KPI cards: assessed value coverage, underbuilt candidates, opportunity signals, data confidence",
+        "Bar chart: opportunity classes",
+        "Table: underbuilt watchlist",
+        "Slicer: geography / jurisdiction",
+        "Slicer: scenario"
+      ]
+    },
+    {
+      "page": "Parcel Investment Screen",
+      "visuals": [
+        "Parcel table",
+        "Value per acre band",
+        "Improvement-to-land ratio band",
+        "Constraint burden band",
+        "Recommended follow-up"
+      ]
+    },
+    {
+      "page": "Scenario Planning Model",
+      "visuals": [
+        "Scenario comparison matrix",
+        "Fiscal attractiveness by scenario",
+        "Service burden vs tax-base lift",
+        "Decision memo text box"
+      ]
+    },
+    {
+      "page": "Data Confidence Register",
+      "visuals": [
+        "Domain readiness matrix",
+        "Missing data table",
+        "Next data need list"
+      ]
+    }
+  ],
+  "tables": {
+    "domain_readiness_dim": [
+      {
+        "current_use": "Assessed/market value baseline",
+        "data_status": "available",
+        "domain_id": "parcel-value",
+        "domain_name": "Parcel Value",
+        "geometry_status": "available",
+        "next_data_need": "Add current appraisal extract if missing.",
+        "temporal_status": "extract"
+      },
+      {
+        "current_use": "Value-per-acre denominator",
+        "data_status": "available",
+        "domain_id": "acreage",
+        "domain_name": "Acreage",
+        "geometry_status": "available",
+        "next_data_need": "Add reliable parcel acreage.",
+        "temporal_status": "extract"
+      },
+      {
+        "current_use": "Improvement-to-land ratio",
+        "data_status": "available",
+        "domain_id": "land-improvement-split",
+        "domain_name": "Land / Improvement Split",
+        "geometry_status": "available",
+        "next_data_need": "Add land and improvement values.",
+        "temporal_status": "extract"
+      },
+      {
+        "current_use": "Constraint-adjusted opportunity",
+        "data_status": "data_needed",
+        "domain_id": "service-burden",
+        "domain_name": "Service Burden",
+        "geometry_status": "data needed",
+        "next_data_need": "Add official utility, school, and transportation service assumptions.",
+        "temporal_status": "data needed"
+      }
+    ],
+    "economics_kpi_fact": [
+      {
+        "as_of": "2026-07-01T02:57:21Z",
+        "kpi_id": "parcels_analyzed",
+        "kpi_name": "Parcels analyzed",
+        "source_mode": "demo",
+        "status_band": "stable_high_value",
+        "unit": "parcels",
+        "value": 120
+      },
+      {
+        "as_of": "2026-07-01T02:57:21Z",
+        "kpi_id": "assessed_value_coverage",
+        "kpi_name": "Assessed value coverage",
+        "source_mode": "demo",
+        "status_band": "stable_high_value",
+        "unit": "dollars",
+        "value": 3759289980.0
+      },
+      {
+        "as_of": "2026-07-01T02:57:21Z",
+        "kpi_id": "median_value_per_acre",
+        "kpi_name": "Median value per acre",
+        "source_mode": "demo",
+        "status_band": "redevelopment_opportunity",
+        "unit": "dollars_per_acre",
+        "value": 146226.31400075994
+      },
+      {
+        "as_of": "2026-07-01T02:57:21Z",
+        "kpi_id": "underbuilt_candidates",
+        "kpi_name": "Underbuilt candidates",
+        "source_mode": "demo",
+        "status_band": "underbuilt_watch",
+        "unit": "parcels",
+        "value": 50
+      },
+      {
+        "as_of": "2026-07-01T02:57:21Z",
+        "kpi_id": "tax_base_opportunity",
+        "kpi_name": "Tax-base opportunity signals",
+        "source_mode": "demo",
+        "status_band": "tax_base_opportunity",
+        "unit": "signals",
+        "value": 25
+      },
+      {
+        "as_of": "2026-07-01T02:57:21Z",
+        "kpi_id": "data_needed",
+        "kpi_name": "Economic data needed",
+        "source_mode": "demo",
+        "status_band": "data_needed",
+        "unit": "parcels",
+        "value": 25
+      }
+    ],
+    "geography_dim": [
+      {
+        "geography_id": "1026-tennessee-st",
+        "geography_label": "1026 TENNESSEE ST",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "2801-pennsylvania-ave",
+        "geography_label": "2801 PENNSYLVANIA AVE",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "85-exchange-phase-ii",
+        "geography_label": "85 EXCHANGE PHASE II",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "airport",
+        "geography_label": "AIRPORT",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "american-development-industies-property",
+        "geography_label": "AMERICAN DEVELOPMENT INDUSTIES PROPERTY",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "aquamarine",
+        "geography_label": "AQUAMARINE",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "bethel-elementary-school",
+        "geography_label": "BETHEL ELEMENTARY SCHOOL",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "biscayne-trinity-church",
+        "geography_label": "BISCAYNE / TRINITY CHURCH",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "bonds-quarry",
+        "geography_label": "BONDS QUARRY",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "cabarrus-mcgill",
+        "geography_label": "CABARRUS/MCGILL",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "caremoor-community",
+        "geography_label": "CAREMOOR COMMUNITY",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "carolina-mall-company",
+        "geography_label": "CAROLINA MALL COMPANY",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "carolina-village",
+        "geography_label": "CAROLINA VILLAGE",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "charlotte-motor-speedway",
+        "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "christenbury-corners-ne-quadrant-ph-1",
+        "geography_label": "CHRISTENBURY CORNERS NE QUADRANT PH 1",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "christenbury-se-corner",
+        "geography_label": "CHRISTENBURY SE CORNER",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "ck-afton-ridge-land-llc",
+        "geography_label": "CK AFTON RIDGE LAND LLC",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "ck-lake-pointe-corp-center-llc",
+        "geography_label": "CK LAKE POINTE CORP CENTER, LLC",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "concord-mills",
+        "geography_label": "CONCORD MILLS",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "concord-parkway-south",
+        "geography_label": "CONCORD PARKWAY SOUTH",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "conservation-easement",
+        "geography_label": "CONSERVATION EASEMENT",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "crescent-resources-llc-property-map-2",
+        "geography_label": "CRESCENT RESOURCES, LLC PROPERTY MAP 2",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "downtown-concord",
+        "geography_label": "DOWNTOWN CONCORD",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "embassy-suites-concord-convention-center",
+        "geography_label": "EMBASSY SUITES CONCORD CONVENTION CENTER",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "future-harrisburg-village",
+        "geography_label": "FUTURE HARRISBURG VILLAGE",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "harrisburg",
+        "geography_label": "HARRISBURG",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "harrisburg-estates",
+        "geography_label": "HARRISBURG ESTATES",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "harrisburg-town-center",
+        "geography_label": "HARRISBURG TOWN CENTER",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "hickory-hills",
+        "geography_label": "HICKORY HILLS",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "hwy-24-27",
+        "geography_label": "HWY 24 / 27",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "hwy-601-49",
+        "geography_label": "HWY 601 / 49",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "i-85-at-lane-street",
+        "geography_label": "I-85 AT LANE STREET",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "international-bus-pk",
+        "geography_label": "INTERNATIONAL BUS PK",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "jamestown",
+        "geography_label": "JAMESTOWN",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "kannapolis-parkway",
+        "geography_label": "KANNAPOLIS PARKWAY",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "keith-wayne-properties",
+        "geography_label": "KEITH WAYNE PROPERTIES",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "kellswater-commons-apartments",
+        "geography_label": "KELLSWATER COMMONS APARTMENTS",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "kings-grant-corp",
+        "geography_label": "KINGS GRANT CORP",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "lake-don-t-howell",
+        "geography_label": "LAKE DON T. HOWELL",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "lefler-estate",
+        "geography_label": "LEFLER ESTATE",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "legacy-concord",
+        "geography_label": "LEGACY CONCORD",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "lilly-concord",
+        "geography_label": "LILLY CONCORD",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "little-est",
+        "geography_label": "LITTLE EST",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "louise-s-irvin-estate",
+        "geography_label": "LOUISE S IRVIN ESTATE",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "lt-4-and-lt-5-mb-71-41-45",
+        "geography_label": "LT 4 AND LT 5 MB 71/41-45",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "miami-church-rd",
+        "geography_label": "MIAMI CHURCH RD",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "midland-commercial",
+        "geography_label": "MIDLAND COMMERCIAL",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "mt-pleasant-commercial",
+        "geography_label": "MT PLEASANT COMMERCIAL",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "mt-pleasant-high-school",
+        "geography_label": "MT PLEASANT HIGH SCHOOL",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      },
+      {
+        "geography_id": "mt-pleasant-outside",
+        "geography_label": "MT PLEASANT OUTSIDE",
+        "geography_type": "screening area",
+        "jurisdiction": null
+      }
+    ],
+    "parcel_economic_signal_fact": [
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149727441",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149727441",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149727442",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149727442",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "AQUAMARINE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149758869",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149758869",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "LAKE DON T. HOWELL",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149751011",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149751011",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CONCORD PARKWAY SOUTH",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149749657",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149749657",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CONCORD MILLS",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149727653",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149727653",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "BONDS QUARRY",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149736050",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149736050",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "STOUGH ROAD",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149758945",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149758945",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149749606",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149749606",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149749607",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149749607",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CK AFTON RIDGE LAND LLC",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149750868",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149750868",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CAROLINA MALL COMPANY",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149807384",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149807384",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "PROJECT GRAND AT THE GROUNDS AT CONCORD",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149758512",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149758512",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "REED GOLD MINE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149778854",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149778854",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "QUIKTRIP NO 1021",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149726304",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149726304",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HARRISBURG",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149747546",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149747546",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HARRISBURG",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149747547",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149747547",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "STOUGH ROAD",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149765258",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149765258",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "NORTH CAROLINA RAILROAD",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149765260",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149765260",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "STOUGH ROAD",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149765259",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149765259",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "STOUGH ROAD",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149765257",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149765257",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CAROLINA VILLAGE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149729262",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149729262",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "REED GOLD MINE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149777876",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149777876",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "REED GOLD MINE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149777845",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149777845",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "SOUTH CANNON BLVD",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149812981",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149812981",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "NO SUBDIVISION",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149755575",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149755575",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "BISCAYNE / TRINITY CHURCH",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149794476",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149794476",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "AIRPORT",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149727291",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149727291",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CHRISTENBURY CORNERS NE QUADRANT PH 1",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149726315",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149726315",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "REED GOLD MINE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149778672",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149778672",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "REED GOLD MINE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149778674",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149778674",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "REED GOLD MINE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149778663",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149778663",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "REED GOLD MINE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149778673",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149778673",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "85 EXCHANGE PHASE II",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149741520",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149741520",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "PLAT 103.590 AC - KANNAPOLIS PKWY",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149786752",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149786752",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "PLAT 103.590 AC - KANNAPOLIS PKWY",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149786773",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149786773",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CHRISTENBURY SE CORNER",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149726774",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149726774",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CHRISTENBURY SE CORNER",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149726775",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149726775",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "LT 4 AND LT 5 MB 71/41-45",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149725986",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149725986",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HARRISBURG",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149727047",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149727047",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "AIRPORT",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149728144",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149728144",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "MT PLEASANT OUTSIDE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149780704",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149780704",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "MT PLEASANT OUTSIDE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149780702",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149780702",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "MT PLEASANT OUTSIDE",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149780703",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149780703",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HARRISBURG TOWN CENTER",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149749170",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149749170",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "THE GROUNDS AT CONCORD",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149757764",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149757764",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "NORTHLIGHT",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149812043",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149812043",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "NORTHLIGHT",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149812044",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149812044",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CABARRUS/MCGILL",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149802688",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149802688",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CABARRUS/MCGILL",
+        "improvement_to_land_ratio_band": "low",
+        "opportunity_class": "Underbuilt Redevelopment Candidate",
+        "parcel_id": "CFS-PARCEL-0149802714",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149802714",
+        "tax_base_opportunity_band": "review",
+        "value_per_acre_band": "moderate"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "AIRPORT",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149749977",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149749977",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "AIRPORT",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149749978",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149749978",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HWY 601 / 49",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149783695",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149783695",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "STOUGH ROAD",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149758473",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149758473",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CONCORD PARKWAY SOUTH",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149758954",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149758954",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "STOUGH ROAD",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149761691",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149761691",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "MIAMI CHURCH RD",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149777372",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149777372",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HWY 24 / 27",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149776843",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149776843",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "KEITH WAYNE PROPERTIES",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149740192",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149740192",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "KEITH WAYNE PROPERTIES",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149740191",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149740191",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "MT PLEASANT HIGH SCHOOL",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149824730",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149824730",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "LEFLER ESTATE",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149822408",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149822408",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "LITTLE EST",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149759856",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149759856",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "NCRC/KANNAPOLIS DOWNTOWN",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149788496",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149788496",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HWY 601 / 49",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149766651",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149766651",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HWY 601 / 49",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149766652",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149766652",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HWY 24 / 27",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149768857",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149768857",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "POPLAR TENT WEST",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149739191",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149739191",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "HWY 601 / 49",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149772424",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149772424",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "BETHEL ELEMENTARY SCHOOL",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149767094",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149767094",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "STOUGH ROAD",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149762674",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149762674",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "OVERBROOK",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149819976",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149819976",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "I-85 AT LANE STREET",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149825287",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149825287",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "RECOMBINATION PLAT OF ROBERT & TINA KINARD",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149735430",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149735430",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "MT PLEASANT COMMERCIAL",
+        "improvement_to_land_ratio_band": "moderate",
+        "opportunity_class": "Tax-Base Opportunity",
+        "parcel_id": "CFS-PARCEL-0149827577",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149827577",
+        "tax_base_opportunity_band": "elevated_review",
+        "value_per_acre_band": "lower"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "STONECRESS LLC",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149821026",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149821026",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "LOUISE S IRVIN ESTATE",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149739021",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149739021",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "LOUISE S IRVIN ESTATE",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149738854",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149738854",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "1026 TENNESSEE ST",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149819467",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149819467",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "1026 TENNESSEE ST",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149811267",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149811267",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "2801 PENNSYLVANIA AVE",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149810785",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149810785",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "HARRISBURG ESTATES",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149750467",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149750467",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "RECOMB MPV KELLSWATER",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149785695",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149785695",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "RECOMB MPV KELLSWATER",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149785587",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149785587",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "RECOMB MPV KELLSWATER",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149795949",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149795949",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "RECOMB MPV KELLSWATER",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149788140",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149788140",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "RECOMB MPV KELLSWATER",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149785523",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149785523",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "RECOMB MPV KELLSWATER",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149793816",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149793816",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "RECOMB MPV KELLSWATER",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149785610",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149785610",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "CAREMOOR COMMUNITY",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149788132",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149788132",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "RECOMB MPV KELLSWATER",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149785522",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149785522",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "RECOMB MPV KELLSWATER",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149793500",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149793500",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "JAMESTOWN",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149801568",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149801568",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "INTERNATIONAL BUS PK",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149784389",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149784389",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "PAUL B CLINE PROPERTY",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149821028",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149821028",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "FUTURE HARRISBURG VILLAGE",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149754924",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149754924",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "FUTURE HARRISBURG VILLAGE",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149754925",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149754925",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "WEST CONCORD BLK K",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149802969",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149802969",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "HICKORY HILLS",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149774724",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149774724",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "data_needed",
+        "geography_label": "ROWAN COUNTY PARCEL",
+        "improvement_to_land_ratio_band": "data_needed",
+        "opportunity_class": "Needs More Data Before Recommendation",
+        "parcel_id": "CFS-PARCEL-0149722765",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149722765",
+        "tax_base_opportunity_band": "data_needed",
+        "value_per_acre_band": "data_needed"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "LILLY CONCORD",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149789146",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149789146",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "NE MEDICAL CENTER",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149808150",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149808150",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CONCORD MILLS",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149726579",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149726579",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "KINGS GRANT CORP",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149735622",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149735622",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "RECOMBINATION SURVEY FOR CABARRUS COUNTY",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149816390",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149816390",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "DOWNTOWN CONCORD",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149806557",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149806557",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "PROJECT HERCULES",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149742039",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149742039",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "EMBASSY SUITES CONCORD CONVENTION CENTER",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149727290",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149727290",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "AMERICAN DEVELOPMENT INDUSTIES PROPERTY",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149742262",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149742262",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "MIDLAND COMMERCIAL",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149773228",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149773228",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CONCORD PARKWAY SOUTH",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149752131",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149752131",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "LEGACY CONCORD",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149781836",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149781836",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "AIRPORT",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149750051",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149750051",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CONSERVATION EASEMENT",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149737057",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149737057",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CK LAKE POINTE CORP CENTER, LLC",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149742043",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149742043",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CRESCENT RESOURCES, LLC PROPERTY MAP 2",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149735610",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149735610",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CRESCENT RESOURCES, LLC PROPERTY MAP 2",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149735609",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149735609",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "CRESCENT RESOURCES, LLC PROPERTY MAP 2",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149727093",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149727093",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "KELLSWATER COMMONS APARTMENTS",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149785805",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149785805",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      },
+      {
+        "constraint_burden_band": "data_needed",
+        "data_confidence": "strong",
+        "geography_label": "KANNAPOLIS PARKWAY",
+        "improvement_to_land_ratio_band": "high",
+        "opportunity_class": "High-Value Stable Parcel",
+        "parcel_id": "CFS-PARCEL-0149785588",
+        "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+        "signal_id": "CFS-PARCEL-0149785588",
+        "tax_base_opportunity_band": "monitor",
+        "value_per_acre_band": "high"
+      }
+    ],
+    "scenario_dim": [
+      {
+        "caveat": "Scenario values depend on assumptions.; This is not an approval recommendation or official fiscal impact study.",
+        "description": "Shows current value, acreage, constraints, and data confidence before scenario assumptions.",
+        "scenario_family": "baseline",
+        "scenario_id": "current_conditions",
+        "scenario_name": "Current Conditions"
+      },
+      {
+        "caveat": "Scenario values depend on assumptions.; This is not an approval recommendation or official fiscal impact study.",
+        "description": "Tests whether current observed permit pressure reinforces existing fiscal/service tradeoffs.",
+        "scenario_family": "growth",
+        "scenario_id": "growth_continues",
+        "scenario_name": "Growth Continues As-Is"
+      },
+      {
+        "caveat": "Scenario values depend on assumptions.; This is not an approval recommendation or official fiscal impact study.",
+        "description": "Tests where tax-base opportunity may be limited by utility, school, floodplain, or transportation burden.",
+        "scenario_family": "infrastructure",
+        "scenario_id": "infrastructure_constrained_growth",
+        "scenario_name": "Infrastructure-Constrained Growth"
+      },
+      {
+        "caveat": "Scenario values depend on assumptions.; This is not an approval recommendation or official fiscal impact study.",
+        "description": "Tests whether infrastructure investment could unlock future value in underbuilt or corridor parcels.",
+        "scenario_family": "infrastructure",
+        "scenario_id": "targeted_investment",
+        "scenario_name": "Targeted Investment Scenario"
+      },
+      {
+        "caveat": "Scenario values depend on assumptions.; This is not an approval recommendation or official fiscal impact study.",
+        "description": "Tests modeled tax-base lift against public cost risk under redevelopment assumptions.",
+        "scenario_family": "baseline",
+        "scenario_id": "higher_density_redevelopment",
+        "scenario_name": "Higher-Density Redevelopment Scenario"
+      },
+      {
+        "caveat": "Scenario values depend on assumptions.; This is not an approval recommendation or official fiscal impact study.",
+        "description": "Tests employment land opportunity against road access, flood exposure, and service readiness.",
+        "scenario_family": "employment",
+        "scenario_id": "industrial_employment",
+        "scenario_name": "Employment / Industrial Scenario"
+      },
+      {
+        "caveat": "Scenario values depend on assumptions.; This is not an approval recommendation or official fiscal impact study.",
+        "description": "Tests corridor investment readiness and market + planning alignment.",
+        "scenario_family": "corridor",
+        "scenario_id": "mixed_use_corridor",
+        "scenario_name": "Mixed-Use Corridor Scenario"
+      }
+    ],
+    "scenario_output_fact": [
+      {
+        "data_confidence": "screening",
+        "fiscal_attractiveness_band": "baseline",
+        "infrastructure_burden_band": "medium",
+        "intensity_band": "low",
+        "revenue_per_acre_band": "lower",
+        "scenario_id": "current_conditions",
+        "scenario_name": "Current Conditions",
+        "service_burden_band": "medium",
+        "tax_base_lift_band": "baseline",
+        "value_assumption_band": "low"
+      },
+      {
+        "data_confidence": "screening",
+        "fiscal_attractiveness_band": "moderate",
+        "infrastructure_burden_band": "medium",
+        "intensity_band": "medium",
+        "revenue_per_acre_band": "lower",
+        "scenario_id": "growth_continues",
+        "scenario_name": "Growth Continues As-Is",
+        "service_burden_band": "medium",
+        "tax_base_lift_band": "moderate",
+        "value_assumption_band": "low"
+      },
+      {
+        "data_confidence": "proxy",
+        "fiscal_attractiveness_band": "baseline",
+        "infrastructure_burden_band": "high",
+        "intensity_band": "medium",
+        "revenue_per_acre_band": "lower",
+        "scenario_id": "infrastructure_constrained_growth",
+        "scenario_name": "Infrastructure-Constrained Growth",
+        "service_burden_band": "high",
+        "tax_base_lift_band": "limited",
+        "value_assumption_band": "low"
+      },
+      {
+        "data_confidence": "screening",
+        "fiscal_attractiveness_band": "strong",
+        "infrastructure_burden_band": "medium",
+        "intensity_band": "medium",
+        "revenue_per_acre_band": "higher if served",
+        "scenario_id": "targeted_investment",
+        "scenario_name": "Targeted Investment Scenario",
+        "service_burden_band": "medium",
+        "tax_base_lift_band": "moderate to elevated",
+        "value_assumption_band": "high"
+      },
+      {
+        "data_confidence": "screening",
+        "fiscal_attractiveness_band": "elevated_review",
+        "infrastructure_burden_band": "medium to high",
+        "intensity_band": "high",
+        "revenue_per_acre_band": "higher",
+        "scenario_id": "higher_density_redevelopment",
+        "scenario_name": "Higher-Density Redevelopment Scenario",
+        "service_burden_band": "medium to high",
+        "tax_base_lift_band": "elevated",
+        "value_assumption_band": "high"
+      },
+      {
+        "data_confidence": "proxy",
+        "fiscal_attractiveness_band": "strong",
+        "infrastructure_burden_band": "medium",
+        "intensity_band": "medium",
+        "revenue_per_acre_band": "higher",
+        "scenario_id": "industrial_employment",
+        "scenario_name": "Employment / Industrial Scenario",
+        "service_burden_band": "medium",
+        "tax_base_lift_band": "moderate to elevated",
+        "value_assumption_band": "high"
+      },
+      {
+        "data_confidence": "screening",
+        "fiscal_attractiveness_band": "strong",
+        "infrastructure_burden_band": "medium",
+        "intensity_band": "high",
+        "revenue_per_acre_band": "higher",
+        "scenario_id": "mixed_use_corridor",
+        "scenario_name": "Mixed-Use Corridor Scenario",
+        "service_burden_band": "medium",
+        "tax_base_lift_band": "moderate to elevated",
+        "value_assumption_band": "high"
+      }
+    ],
+    "time_dim": [
+      {
+        "data_available": true,
+        "period_label": "Current extract",
+        "year": 2026
+      }
+    ]
+  }
+}

@@ -17,12 +17,14 @@ import { USE_DEMO_DATA } from "@/lib/api/client";
 import {
   getEconomicsEnterpriseExport,
   getEconomicsIntelligence,
+  getEconomicsPowerBiExport,
 } from "@/lib/economicsIntelligenceService";
 import type {
   EconomicsEnterpriseExportResponse,
   EconomicsIntelligenceResponse,
   EconomicsKpi,
   EconomicsParcelSignal,
+  EconomicsPowerBiExportResponse,
   EconomicsReadinessRow,
   EconomicsScenarioInput,
   EconomicsScenarioOutput,
@@ -35,6 +37,8 @@ export function EconomicsShell() {
     useState<EconomicsIntelligenceResponse | null>(null);
   const [enterpriseExport, setEnterpriseExport] =
     useState<EconomicsEnterpriseExportResponse | null>(null);
+  const [powerBiExport, setPowerBiExport] =
+    useState<EconomicsPowerBiExportResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,6 +63,13 @@ export function EconomicsShell() {
       })
       .catch(() => {
         if (mounted) setEnterpriseExport(null);
+      });
+    void getEconomicsPowerBiExport()
+      .then((response) => {
+        if (mounted) setPowerBiExport(response);
+      })
+      .catch(() => {
+        if (mounted) setPowerBiExport(null);
       });
     return () => {
       mounted = false;
@@ -100,7 +111,10 @@ export function EconomicsShell() {
           />
         ) : null}
         {economicsSection === "enterprise_tools" ? (
-          <EnterpriseToolsPage exportPayload={enterpriseExport} />
+          <EnterpriseToolsPage
+            exportPayload={enterpriseExport}
+            powerBiPayload={powerBiExport}
+          />
         ) : null}
         {economicsSection === "methodology" ? <EconomicsMethodologyPage /> : null}
       </div>
@@ -502,14 +516,44 @@ function ScenarioLabPage({
 
 function EnterpriseToolsPage({
   exportPayload,
+  powerBiPayload,
 }: {
   exportPayload: EconomicsEnterpriseExportResponse | null;
+  powerBiPayload: EconomicsPowerBiExportResponse | null;
 }) {
+  const [powerBiPreviewMode, setPowerBiPreviewMode] = useState<"summary" | "json">("summary");
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const preview = JSON.stringify(
     exportPayload?.exports?.power_bi ?? { status: "Loading export preview" },
     null,
     2,
   );
+  const powerBiPreview =
+    powerBiPreviewMode === "json"
+      ? JSON.stringify(powerBiPayload ?? { status: "Loading Power BI export pack" }, null, 2)
+      : JSON.stringify(powerBiTableSummary(powerBiPayload), null, 2);
+  const relationshipNotes = powerBiRelationshipNotes(powerBiPayload);
+  const reportLayoutNotes = powerBiReportLayoutNotes(powerBiPayload);
+  const copyText = async (label: string, text: string) => {
+    if (!navigator.clipboard) {
+      setCopyStatus("Clipboard unavailable in this browser");
+      return;
+    }
+    await navigator.clipboard.writeText(text);
+    setCopyStatus(`${label} copied`);
+  };
+  const downloadPowerBiPack = () => {
+    if (!powerBiPayload) return;
+    const blob = new Blob([JSON.stringify(powerBiPayload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "economics_powerbi_export.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
   return (
     <>
       <PageHeader
@@ -540,11 +584,103 @@ function EnterpriseToolsPage({
           </pre>
         </EconPanel>
       </section>
+      <EconPanel title="Power BI Desktop Practice Pack" kicker="Manual BI workflow">
+        <div className="grid gap-4 xl:grid-cols-[0.75fr_1.25fr]">
+          <div className="space-y-4 text-sm leading-6 text-[var(--econ-muted)]">
+            <p>
+              Export-ready tables for Power BI Desktop practice. This is not
+              Power BI Embedded, does not require credentials, and can later
+              become a semantic model.
+            </p>
+            <ol className="list-decimal space-y-1 pl-5">
+              {powerBiWorkflowSteps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+            <div className="grid gap-2">
+              <button
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                onClick={() => setPowerBiPreviewMode("summary")}
+                type="button"
+              >
+                Preview Power BI tables
+              </button>
+              <button
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+                disabled={!powerBiPayload}
+                onClick={downloadPowerBiPack}
+                type="button"
+              >
+                Download Power BI JSON Pack
+              </button>
+              <button
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+                disabled={!powerBiPayload}
+                onClick={() => void copyText("Relationship notes", relationshipNotes)}
+                type="button"
+              >
+                Copy table relationship notes
+              </button>
+              <button
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+                disabled={!powerBiPayload}
+                onClick={() => void copyText("Suggested report layout", reportLayoutNotes)}
+                type="button"
+              >
+                Copy suggested report layout
+              </button>
+              <button
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                onClick={() => setPowerBiPreviewMode("json")}
+                type="button"
+              >
+                Preview full JSON pack
+              </button>
+            </div>
+            {copyStatus ? (
+              <p className="rounded-lg border border-[var(--econ-green)]/30 bg-[var(--econ-green)]/10 px-3 py-2 text-xs text-[var(--econ-green)]">
+                {copyStatus}
+              </p>
+            ) : null}
+          </div>
+          <pre className="max-h-96 overflow-auto rounded-xl border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
+            {powerBiPreview}
+          </pre>
+        </div>
+      </EconPanel>
       <EconPanel title="Ask CFS Economics" kicker="Enterprise workflow assistant">
         <AskCfsPanel appMode="economics" />
       </EconPanel>
     </>
   );
+}
+
+function powerBiTableSummary(payload: EconomicsPowerBiExportResponse | null) {
+  if (!payload) return { status: "Loading Power BI export pack" };
+  return {
+    as_of: payload.as_of,
+    mode: payload.mode,
+    relationships: payload.relationships,
+    suggested_report_pages: payload.suggested_visuals.map((page) => page.page),
+    tables: Object.fromEntries(
+      Object.entries(payload.tables).map(([name, rows]) => [name, rows.length]),
+    ),
+  };
+}
+
+function powerBiRelationshipNotes(payload: EconomicsPowerBiExportResponse | null) {
+  return (payload?.relationships ?? [])
+    .map(
+      (row) =>
+        `${row.from_table}.${row.from_column} -> ${row.to_table}.${row.to_column}`,
+    )
+    .join("\n");
+}
+
+function powerBiReportLayoutNotes(payload: EconomicsPowerBiExportResponse | null) {
+  return (payload?.suggested_visuals ?? [])
+    .map((page) => `${page.page}\n${page.visuals.map((visual) => `- ${visual}`).join("\n")}`)
+    .join("\n\n");
 }
 
 function EconomicsMethodologyPage() {
@@ -1147,6 +1283,16 @@ const developmentTypeOptions = [
 const basicBandOptions = ["Low", "Medium", "High"];
 const burdenBandOptions = ["Low", "Medium", "High", "Data Needed"];
 const confidenceBandOptions = ["High", "Medium", "Low", "Data Needed"];
+
+const powerBiWorkflowSteps = [
+  "Export CFS Economics tables.",
+  "Open Power BI Desktop.",
+  "Import JSON or CSV tables.",
+  "Build relationships.",
+  "Create KPI cards and charts.",
+  "Build an executive report page.",
+  "Optionally publish or embed later.",
+];
 
 const initialScenarioAssumptions: ScenarioAssumptions = {
   developmentType: "Current Conditions",

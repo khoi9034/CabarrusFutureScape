@@ -25,7 +25,10 @@ from psycopg.rows import dict_row
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "backend"))
 
-from app.services.enterprise_export_service import build_enterprise_export_payload
+from app.services.enterprise_export_service import (
+    build_enterprise_export_payload,
+    build_powerbi_export_payload,
+)
 
 DEMO_DATA_DIR = REPO_ROOT / "public" / "demo-data"
 DEMO_MAP_LAYER_DIR = DEMO_DATA_DIR / "map_layers"
@@ -115,6 +118,10 @@ def main() -> int:
             economics_intelligence,
             mode="demo",
         )
+        economics_powerbi_export = build_powerbi_export_payload(
+            economics_intelligence,
+            mode="demo",
+        )
         sample_parcels = build_sample_parcels(conn, generated_at)
         map_layer_manifest = export_demo_map_layers(
             conn,
@@ -178,6 +185,7 @@ def main() -> int:
         },
         "indicator_intelligence.json": indicator_intelligence,
         "economics_enterprise_export.json": economics_enterprise_export,
+        "economics_powerbi_export.json": economics_powerbi_export,
         "economics_intelligence.json": economics_intelligence,
         "indicator_summary.json": indicator_summary,
         "development_trends.json": {

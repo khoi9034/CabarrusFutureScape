@@ -166,6 +166,26 @@ Power BI embedding or IBM Planning Analytics / TM1 REST integration should be
 added later only after an approved enterprise account and credential strategy
 exist.
 
+### Using CFS Economics with Power BI Desktop
+
+This phase is a practice/export workflow, not Power BI Embedded.
+
+1. Start local CFS with `npm run dev:cfs`.
+2. Open `Economic Intelligence -> Enterprise Tools`.
+3. Use the Power BI Desktop Practice Pack to preview or download
+   `economics_powerbi_export.json`.
+4. Open Power BI Desktop.
+5. Use **Get Data -> JSON** and load the fact/dimension tables.
+6. Build the exported relationships, especially
+   `scenario_output_fact.scenario_id -> scenario_dim.scenario_id` and
+   `parcel_economic_signal_fact.geography_label -> geography_dim.geography_label`.
+7. Create report pages for the executive dashboard, parcel investment screen,
+   scenario planning model, and data confidence register.
+
+Future path: these tables can become a Power BI semantic model, then a Power BI
+Service report, and later an embedded report using Azure app registration and
+embed tokens. Do not add BI credentials to frontend env or the portfolio demo.
+
 Regenerate the static portfolio data locally with:
 
 ```powershell
@@ -179,6 +199,7 @@ The exporter reads clean/summary local CFS tables only and writes:
 - `public/demo-data/development_trends.json`
 - `public/demo-data/development_years.json`
 - `public/demo-data/economics_enterprise_export.json`
+- `public/demo-data/economics_powerbi_export.json`
 - `public/demo-data/economics_intelligence.json`
 - `public/demo-data/flood_summary.json`
 - `public/demo-data/school_capacity_watch.json`
