@@ -186,6 +186,30 @@ Future path: these tables can become a Power BI semantic model, then a Power BI
 Service report, and later an embedded report using Azure app registration and
 embed tokens. Do not add BI credentials to frontend env or the portfolio demo.
 
+### Power BI Report Builder Guide
+
+The Enterprise Tools page also includes a Power BI Report Builder Guide for
+turning the export into a Desktop report:
+
+- Download `economics_powerbi_export.json` from Economic Intelligence ->
+  Enterprise Tools.
+- Load these tables: `economics_kpi_fact`,
+  `parcel_economic_signal_fact`, `scenario_output_fact`,
+  `domain_readiness_dim`, `geography_dim`, `time_dim`, and `scenario_dim`.
+- Start with two relationships:
+  `scenario_output_fact.scenario_id -> scenario_dim.scenario_id` and
+  `parcel_economic_signal_fact.geography_label -> geography_dim.geography_label`.
+- Keep remaining tables disconnected until a visual needs them; some tables are
+  summary-level and should not be forced into incorrect relationships.
+- Build four pages: Executive Economic Dashboard, Parcel Investment Screen,
+  Scenario Planning Model, and Data Confidence Register.
+- Suggested starter measures include `Total Signals`,
+  `Underbuilt Candidates`, `Data Needed Signals`, `Scenario Count`, and
+  `Strong Fiscal Scenarios`.
+
+This is Power BI Desktop practice only, not embedded Power BI. Field names may
+need small adjustments after Power BI expands the JSON.
+
 Regenerate the static portfolio data locally with:
 
 ```powershell

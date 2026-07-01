@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-07-01T02:57:21Z",
+  "as_of": "2026-07-01T05:13:55Z",
   "caveats": [
     "Connector-ready export only; no external platform account is connected.",
     "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
@@ -52,10 +52,7 @@
         ],
         "geography": [
           {
-            "geography_label": "1026 TENNESSEE ST"
-          },
-          {
-            "geography_label": "2801 PENNSYLVANIA AVE"
+            "geography_label": "4575 ISENHOUR RD"
           },
           {
             "geography_label": "85 EXCHANGE PHASE II"
@@ -82,9 +79,6 @@
             "geography_label": "CABARRUS/MCGILL"
           },
           {
-            "geography_label": "CAREMOOR COMMUNITY"
-          },
-          {
             "geography_label": "CAROLINA MALL COMPANY"
           },
           {
@@ -106,6 +100,9 @@
             "geography_label": "CK LAKE POINTE CORP CENTER, LLC"
           },
           {
+            "geography_label": "COLDWATER RIDGE APARTMENTS II LLC"
+          },
+          {
             "geography_label": "CONCORD MILLS"
           },
           {
@@ -118,13 +115,13 @@
             "geography_label": "CRESCENT RESOURCES, LLC PROPERTY MAP 2"
           },
           {
+            "geography_label": "CUMBERLAND"
+          },
+          {
             "geography_label": "DOWNTOWN CONCORD"
           },
           {
             "geography_label": "EMBASSY SUITES CONCORD CONVENTION CENTER"
-          },
-          {
-            "geography_label": "FUTURE HARRISBURG VILLAGE"
           },
           {
             "geography_label": "HARRISBURG"
@@ -136,7 +133,7 @@
             "geography_label": "HARRISBURG TOWN CENTER"
           },
           {
-            "geography_label": "HICKORY HILLS"
+            "geography_label": "HARTSELL SCHOOL"
           },
           {
             "geography_label": "HWY 24 / 27"
@@ -146,12 +143,6 @@
           },
           {
             "geography_label": "I-85 AT LANE STREET"
-          },
-          {
-            "geography_label": "INTERNATIONAL BUS PK"
-          },
-          {
-            "geography_label": "JAMESTOWN"
           },
           {
             "geography_label": "KANNAPOLIS PARKWAY"
@@ -167,6 +158,9 @@
           },
           {
             "geography_label": "LAKE DON T. HOWELL"
+          },
+          {
+            "geography_label": "LAKE LYNN LODGE"
           },
           {
             "geography_label": "LEFLER ESTATE"
@@ -200,11 +194,17 @@
           },
           {
             "geography_label": "MT PLEASANT OUTSIDE"
+          },
+          {
+            "geography_label": "NCRC/KANNAPOLIS DOWNTOWN"
+          },
+          {
+            "geography_label": "NE MEDICAL CENTER"
           }
         ],
         "time": [
           {
-            "as_of": "2026-07-01T02:57:21Z",
+            "as_of": "2026-07-01T05:13:55Z",
             "period_type": "extract"
           }
         ]
@@ -428,7 +428,7 @@
           "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149749606",
+          "parcel_id": "CFS-PARCEL-0149749607",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 86482.96222313064
         },
@@ -439,7 +439,7 @@
           "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149749607",
+          "parcel_id": "CFS-PARCEL-0149749606",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 86482.96222313064
         },
@@ -505,7 +505,7 @@
           "geography_label": "HARRISBURG",
           "improvement_to_land_ratio": 0.4483963753248992,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149747546",
+          "parcel_id": "CFS-PARCEL-0149747547",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 510110.00656702026
         },
@@ -516,7 +516,7 @@
           "geography_label": "HARRISBURG",
           "improvement_to_land_ratio": 0.4483963753248992,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149747547",
+          "parcel_id": "CFS-PARCEL-0149747546",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 510110.00656702026
         },
@@ -527,9 +527,9 @@
           "geography_label": "STOUGH ROAD",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149765258",
+          "parcel_id": "CFS-PARCEL-0149765259",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 1683745.2795869752
+          "value_per_acre": 257700.4717022654
         },
         {
           "economic_data_confidence": "strong",
@@ -549,9 +549,9 @@
           "geography_label": "STOUGH ROAD",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149765259",
+          "parcel_id": "CFS-PARCEL-0149765257",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 257700.4717022654
+          "value_per_acre": 294405.303500961
         },
         {
           "economic_data_confidence": "strong",
@@ -560,9 +560,9 @@
           "geography_label": "STOUGH ROAD",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149765257",
+          "parcel_id": "CFS-PARCEL-0149765258",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 294405.303500961
+          "value_per_acre": 1683745.2795869752
         },
         {
           "economic_data_confidence": "strong",
@@ -582,7 +582,7 @@
           "geography_label": "REED GOLD MINE",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149777876",
+          "parcel_id": "CFS-PARCEL-0149777845",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 18865.37772223866
         },
@@ -593,7 +593,7 @@
           "geography_label": "REED GOLD MINE",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149777845",
+          "parcel_id": "CFS-PARCEL-0149777876",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 18865.37772223866
         },
@@ -659,18 +659,7 @@
           "geography_label": "REED GOLD MINE",
           "improvement_to_land_ratio": 0.00036086295010338235,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149778672",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 18820.83626780607
-        },
-        {
-          "economic_data_confidence": "strong",
-          "economic_status_band": "underbuilt_watch",
-          "estimated_county_tax": 40925.030999999995,
-          "geography_label": "REED GOLD MINE",
-          "improvement_to_land_ratio": 0.00036086295010338235,
-          "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149778674",
+          "parcel_id": "CFS-PARCEL-0149778673",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 18820.83626780607
         },
@@ -692,7 +681,18 @@
           "geography_label": "REED GOLD MINE",
           "improvement_to_land_ratio": 0.00036086295010338235,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149778673",
+          "parcel_id": "CFS-PARCEL-0149778672",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 18820.83626780607
+        },
+        {
+          "economic_data_confidence": "strong",
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": 40925.030999999995,
+          "geography_label": "REED GOLD MINE",
+          "improvement_to_land_ratio": 0.00036086295010338235,
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149778674",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 18820.83626780607
         },
@@ -714,7 +714,7 @@
           "geography_label": "PLAT 103.590 AC - KANNAPOLIS PKWY",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149786752",
+          "parcel_id": "CFS-PARCEL-0149786773",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 67042.66623498537
         },
@@ -725,7 +725,7 @@
           "geography_label": "PLAT 103.590 AC - KANNAPOLIS PKWY",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149786773",
+          "parcel_id": "CFS-PARCEL-0149786752",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 67042.66623498537
         },
@@ -736,7 +736,7 @@
           "geography_label": "CHRISTENBURY SE CORNER",
           "improvement_to_land_ratio": 0.5150781686643969,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149726774",
+          "parcel_id": "CFS-PARCEL-0149726775",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 3877346.4300090014
         },
@@ -747,7 +747,7 @@
           "geography_label": "CHRISTENBURY SE CORNER",
           "improvement_to_land_ratio": 0.5150781686643969,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149726775",
+          "parcel_id": "CFS-PARCEL-0149726774",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 3877346.4300090014
         },
@@ -791,17 +791,6 @@
           "geography_label": "MT PLEASANT OUTSIDE",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149780704",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 19224.335158420967
-        },
-        {
-          "economic_data_confidence": "strong",
-          "economic_status_band": "underbuilt_watch",
-          "estimated_county_tax": 37752.24,
-          "geography_label": "MT PLEASANT OUTSIDE",
-          "improvement_to_land_ratio": 0.0,
-          "opportunity_class": "Underbuilt Redevelopment Candidate",
           "parcel_id": "CFS-PARCEL-0149780702",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 19224.335158420967
@@ -814,6 +803,17 @@
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
           "parcel_id": "CFS-PARCEL-0149780703",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": 19224.335158420967
+        },
+        {
+          "economic_data_confidence": "strong",
+          "economic_status_band": "underbuilt_watch",
+          "estimated_county_tax": 37752.24,
+          "geography_label": "MT PLEASANT OUTSIDE",
+          "improvement_to_land_ratio": 0.0,
+          "opportunity_class": "Underbuilt Redevelopment Candidate",
+          "parcel_id": "CFS-PARCEL-0149780704",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 19224.335158420967
         },
@@ -978,7 +978,7 @@
           "geography_label": "KEITH WAYNE PROPERTIES",
           "improvement_to_land_ratio": 1.9541248312967907,
           "opportunity_class": "Tax-Base Opportunity",
-          "parcel_id": "CFS-PARCEL-0149740192",
+          "parcel_id": "CFS-PARCEL-0149740191",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 66104.90561095845
         },
@@ -989,7 +989,7 @@
           "geography_label": "KEITH WAYNE PROPERTIES",
           "improvement_to_land_ratio": 1.9541248312967907,
           "opportunity_class": "Tax-Base Opportunity",
-          "parcel_id": "CFS-PARCEL-0149740191",
+          "parcel_id": "CFS-PARCEL-0149740192",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 66104.90561095845
         },
@@ -1162,10 +1162,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "STONECRESS LLC",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149821026",
+          "parcel_id": "CFS-PARCEL-0149748050",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1184,10 +1184,32 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
+          "geography_label": "RECOMB MARK N & AMY MICHELE JONES",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149740410",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
+          "geography_label": "CUMBERLAND",
+          "improvement_to_land_ratio": null,
+          "opportunity_class": "Needs More Data Before Recommendation",
+          "parcel_id": "CFS-PARCEL-0149790212",
+          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
+          "value_per_acre": null
+        },
+        {
+          "economic_data_confidence": "data_needed",
+          "economic_status_band": "data_needed",
+          "estimated_county_tax": null,
           "geography_label": "LOUISE S IRVIN ESTATE",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149738854",
+          "parcel_id": "CFS-PARCEL-0149739718",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1195,10 +1217,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "1026 TENNESSEE ST",
+          "geography_label": "COLDWATER RIDGE APARTMENTS II LLC",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149819467",
+          "parcel_id": "CFS-PARCEL-0149812048",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1206,10 +1228,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "1026 TENNESSEE ST",
+          "geography_label": "LOUISE S IRVIN ESTATE",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149811267",
+          "parcel_id": "CFS-PARCEL-0149739322",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1217,10 +1239,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "2801 PENNSYLVANIA AVE",
+          "geography_label": "LOUISE S IRVIN ESTATE",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149810785",
+          "parcel_id": "CFS-PARCEL-0149749489",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1239,10 +1261,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
+          "geography_label": "LAKE LYNN LODGE",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149785695",
+          "parcel_id": "CFS-PARCEL-0149825348",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1250,10 +1272,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
+          "geography_label": "4575 ISENHOUR RD",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149785587",
+          "parcel_id": "CFS-PARCEL-0149787074",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1261,10 +1283,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
+          "geography_label": "HARTSELL SCHOOL",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149795949",
+          "parcel_id": "CFS-PARCEL-0149804573",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1272,10 +1294,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
+          "geography_label": "OLD SOUTH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149788140",
+          "parcel_id": "CFS-PARCEL-0149759467",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1283,10 +1305,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
+          "geography_label": "RECOMB PLAT",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149785523",
+          "parcel_id": "CFS-PARCEL-0149749670",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1294,10 +1316,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149793816",
+          "parcel_id": "CFS-PARCEL-0149756077",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1305,10 +1327,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149785610",
+          "parcel_id": "CFS-PARCEL-0149748438",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1316,10 +1338,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "CAREMOOR COMMUNITY",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149788132",
+          "parcel_id": "CFS-PARCEL-0149748407",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1327,10 +1349,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149785522",
+          "parcel_id": "CFS-PARCEL-0149756097",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1338,10 +1360,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "RECOMB MPV KELLSWATER",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149793500",
+          "parcel_id": "CFS-PARCEL-0149748434",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1349,10 +1371,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "JAMESTOWN",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149801568",
+          "parcel_id": "CFS-PARCEL-0149747924",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1360,10 +1382,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "INTERNATIONAL BUS PK",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149784389",
+          "parcel_id": "CFS-PARCEL-0149748808",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1371,10 +1393,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "PAUL B CLINE PROPERTY",
+          "geography_label": "PROPST & PATTERSON",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149821028",
+          "parcel_id": "CFS-PARCEL-0149820954",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1382,10 +1404,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "FUTURE HARRISBURG VILLAGE",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149754924",
+          "parcel_id": "CFS-PARCEL-0149747775",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1393,32 +1415,10 @@
           "economic_data_confidence": "data_needed",
           "economic_status_band": "data_needed",
           "estimated_county_tax": null,
-          "geography_label": "FUTURE HARRISBURG VILLAGE",
+          "geography_label": "THE COURTYARDS ON ROBINSON CHURCH",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149754925",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "WEST CONCORD BLK K",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149802969",
-          "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": null
-        },
-        {
-          "economic_data_confidence": "data_needed",
-          "economic_status_band": "data_needed",
-          "estimated_county_tax": null,
-          "geography_label": "HICKORY HILLS",
-          "improvement_to_land_ratio": null,
-          "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149774724",
+          "parcel_id": "CFS-PARCEL-0149747776",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1429,7 +1429,7 @@
           "geography_label": "ROWAN COUNTY PARCEL",
           "improvement_to_land_ratio": null,
           "opportunity_class": "Needs More Data Before Recommendation",
-          "parcel_id": "CFS-PARCEL-0149722765",
+          "parcel_id": "CFS-PARCEL-0149725975",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": null
         },
@@ -1605,7 +1605,7 @@
           "geography_label": "CRESCENT RESOURCES, LLC PROPERTY MAP 2",
           "improvement_to_land_ratio": 5.7211587978436205,
           "opportunity_class": "High-Value Stable Parcel",
-          "parcel_id": "CFS-PARCEL-0149735610",
+          "parcel_id": "CFS-PARCEL-0149735609",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 1383655.8699787064
         },
@@ -1616,7 +1616,7 @@
           "geography_label": "CRESCENT RESOURCES, LLC PROPERTY MAP 2",
           "improvement_to_land_ratio": 5.7211587978436205,
           "opportunity_class": "High-Value Stable Parcel",
-          "parcel_id": "CFS-PARCEL-0149735609",
+          "parcel_id": "CFS-PARCEL-0149735610",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 1383655.8699787064
         },
@@ -1750,7 +1750,7 @@
           "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149749606",
+          "parcel_id": "CFS-PARCEL-0149749607",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 86482.96222313064
         },
@@ -1761,7 +1761,7 @@
           "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149749607",
+          "parcel_id": "CFS-PARCEL-0149749606",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 86482.96222313064
         },
@@ -1827,7 +1827,7 @@
           "geography_label": "HARRISBURG",
           "improvement_to_land_ratio": 0.4483963753248992,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149747546",
+          "parcel_id": "CFS-PARCEL-0149747547",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 510110.00656702026
         },
@@ -1838,7 +1838,7 @@
           "geography_label": "HARRISBURG",
           "improvement_to_land_ratio": 0.4483963753248992,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149747547",
+          "parcel_id": "CFS-PARCEL-0149747546",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 510110.00656702026
         },
@@ -1849,9 +1849,9 @@
           "geography_label": "STOUGH ROAD",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149765258",
+          "parcel_id": "CFS-PARCEL-0149765259",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 1683745.2795869752
+          "value_per_acre": 257700.4717022654
         },
         {
           "economic_data_confidence": "strong",
@@ -1871,9 +1871,9 @@
           "geography_label": "STOUGH ROAD",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149765259",
+          "parcel_id": "CFS-PARCEL-0149765257",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 257700.4717022654
+          "value_per_acre": 294405.303500961
         },
         {
           "economic_data_confidence": "strong",
@@ -1882,9 +1882,9 @@
           "geography_label": "STOUGH ROAD",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149765257",
+          "parcel_id": "CFS-PARCEL-0149765258",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
-          "value_per_acre": 294405.303500961
+          "value_per_acre": 1683745.2795869752
         },
         {
           "economic_data_confidence": "strong",
@@ -1904,7 +1904,7 @@
           "geography_label": "REED GOLD MINE",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149777876",
+          "parcel_id": "CFS-PARCEL-0149777845",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 18865.37772223866
         },
@@ -1915,7 +1915,7 @@
           "geography_label": "REED GOLD MINE",
           "improvement_to_land_ratio": 0.0,
           "opportunity_class": "Underbuilt Redevelopment Candidate",
-          "parcel_id": "CFS-PARCEL-0149777845",
+          "parcel_id": "CFS-PARCEL-0149777876",
           "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
           "value_per_acre": 18865.37772223866
         },
@@ -2059,8 +2059,7 @@
         {
           "name": "Geography",
           "members": [
-            "1026 TENNESSEE ST",
-            "2801 PENNSYLVANIA AVE",
+            "4575 ISENHOUR RD",
             "85 EXCHANGE PHASE II",
             "AIRPORT",
             "AMERICAN DEVELOPMENT INDUSTIES PROPERTY",
@@ -2069,7 +2068,6 @@
             "BISCAYNE / TRINITY CHURCH",
             "BONDS QUARRY",
             "CABARRUS/MCGILL",
-            "CAREMOOR COMMUNITY",
             "CAROLINA MALL COMPANY",
             "CAROLINA VILLAGE",
             "CHARLOTTE MOTOR SPEEDWAY",
@@ -2077,27 +2075,27 @@
             "CHRISTENBURY SE CORNER",
             "CK AFTON RIDGE LAND LLC",
             "CK LAKE POINTE CORP CENTER, LLC",
+            "COLDWATER RIDGE APARTMENTS II LLC",
             "CONCORD MILLS",
             "CONCORD PARKWAY SOUTH",
             "CONSERVATION EASEMENT",
             "CRESCENT RESOURCES, LLC PROPERTY MAP 2",
+            "CUMBERLAND",
             "DOWNTOWN CONCORD",
             "EMBASSY SUITES CONCORD CONVENTION CENTER",
-            "FUTURE HARRISBURG VILLAGE",
             "HARRISBURG",
             "HARRISBURG ESTATES",
             "HARRISBURG TOWN CENTER",
-            "HICKORY HILLS",
+            "HARTSELL SCHOOL",
             "HWY 24 / 27",
             "HWY 601 / 49",
             "I-85 AT LANE STREET",
-            "INTERNATIONAL BUS PK",
-            "JAMESTOWN",
             "KANNAPOLIS PARKWAY",
             "KEITH WAYNE PROPERTIES",
             "KELLSWATER COMMONS APARTMENTS",
             "KINGS GRANT CORP",
             "LAKE DON T. HOWELL",
+            "LAKE LYNN LODGE",
             "LEFLER ESTATE",
             "LEGACY CONCORD",
             "LILLY CONCORD",
@@ -2108,7 +2106,9 @@
             "MIDLAND COMMERCIAL",
             "MT PLEASANT COMMERCIAL",
             "MT PLEASANT HIGH SCHOOL",
-            "MT PLEASANT OUTSIDE"
+            "MT PLEASANT OUTSIDE",
+            "NCRC/KANNAPOLIS DOWNTOWN",
+            "NE MEDICAL CENTER"
           ]
         },
         {
@@ -2122,42 +2122,42 @@
             "CFS-PARCEL-0149727653",
             "CFS-PARCEL-0149736050",
             "CFS-PARCEL-0149758945",
-            "CFS-PARCEL-0149749606",
             "CFS-PARCEL-0149749607",
+            "CFS-PARCEL-0149749606",
             "CFS-PARCEL-0149750868",
             "CFS-PARCEL-0149807384",
             "CFS-PARCEL-0149758512",
             "CFS-PARCEL-0149778854",
             "CFS-PARCEL-0149726304",
-            "CFS-PARCEL-0149747546",
             "CFS-PARCEL-0149747547",
-            "CFS-PARCEL-0149765258",
-            "CFS-PARCEL-0149765260",
+            "CFS-PARCEL-0149747546",
             "CFS-PARCEL-0149765259",
+            "CFS-PARCEL-0149765260",
             "CFS-PARCEL-0149765257",
+            "CFS-PARCEL-0149765258",
             "CFS-PARCEL-0149729262",
-            "CFS-PARCEL-0149777876",
             "CFS-PARCEL-0149777845",
+            "CFS-PARCEL-0149777876",
             "CFS-PARCEL-0149812981",
             "CFS-PARCEL-0149755575",
             "CFS-PARCEL-0149794476",
             "CFS-PARCEL-0149727291",
             "CFS-PARCEL-0149726315",
+            "CFS-PARCEL-0149778673",
+            "CFS-PARCEL-0149778663",
             "CFS-PARCEL-0149778672",
             "CFS-PARCEL-0149778674",
-            "CFS-PARCEL-0149778663",
-            "CFS-PARCEL-0149778673",
             "CFS-PARCEL-0149741520",
-            "CFS-PARCEL-0149786752",
             "CFS-PARCEL-0149786773",
-            "CFS-PARCEL-0149726774",
+            "CFS-PARCEL-0149786752",
             "CFS-PARCEL-0149726775",
+            "CFS-PARCEL-0149726774",
             "CFS-PARCEL-0149725986",
             "CFS-PARCEL-0149727047",
             "CFS-PARCEL-0149728144",
-            "CFS-PARCEL-0149780704",
             "CFS-PARCEL-0149780702",
             "CFS-PARCEL-0149780703",
+            "CFS-PARCEL-0149780704",
             "CFS-PARCEL-0149749170",
             "CFS-PARCEL-0149757764",
             "CFS-PARCEL-0149812043",
@@ -2384,7 +2384,7 @@
               "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
               "improvement_to_land_ratio": 0.0,
               "opportunity_class": "Underbuilt Redevelopment Candidate",
-              "parcel_id": "CFS-PARCEL-0149749606",
+              "parcel_id": "CFS-PARCEL-0149749607",
               "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
               "value_per_acre": 86482.96222313064
             },
@@ -2395,7 +2395,7 @@
               "geography_label": "CHARLOTTE MOTOR SPEEDWAY",
               "improvement_to_land_ratio": 0.0,
               "opportunity_class": "Underbuilt Redevelopment Candidate",
-              "parcel_id": "CFS-PARCEL-0149749607",
+              "parcel_id": "CFS-PARCEL-0149749606",
               "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
               "value_per_acre": 86482.96222313064
             }

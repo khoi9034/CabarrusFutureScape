@@ -685,6 +685,8 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert "Tables to load" in response.answer
     assert "Relationships to build" in response.answer
     assert "Report pages to create" in response.answer
+    assert "Suggested measures" in response.answer
+    assert "Do not connect every table" in response.answer
     assert "Power BI Embedded" in response.answer
     assert response.evidence[0].source == "economics_powerbi_export"
 

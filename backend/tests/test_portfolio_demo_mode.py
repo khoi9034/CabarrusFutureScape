@@ -41,6 +41,7 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
         "development_years.json",
         "economics_enterprise_export.json",
         "economics_intelligence.json",
+        "economics_powerbi_export.json",
         "indicator_summary.json",
         "indicator_intelligence.json",
         "development_trends.json",
@@ -74,8 +75,8 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
     blocked_terms = [
         "acctname",
         "mailaddr",
-        "mailing",
-        "owner",
+        '"mailing"',
+        '"owner"',
         "password",
         "database_url",
         "token",
@@ -101,6 +102,12 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
     assert "segment_year_counts" in hotspot_text
     assert "research_band" in model_lab_text
     assert "top_drivers" in model_lab_text
+    powerbi_text = (demo_dir / "economics_powerbi_export.json").read_text(
+        encoding="utf-8",
+    )
+    assert "report_builder_guide" in powerbi_text
+    assert "suggested_measures" in powerbi_text
+    assert "No owner/mailing fields imported." in powerbi_text
 
 
 def test_demo_map_layers_are_wired_without_backend_calls() -> None:
@@ -253,8 +260,12 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Location Context" in economics_shell
     assert "Power BI-style Dataset Preview" in economics_shell
     assert "Power BI Desktop Practice Pack" in economics_shell
+    assert "Power BI Report Builder Guide" in economics_shell
     assert "Download Power BI JSON Pack" in economics_shell
     assert "Copy table relationship notes" in economics_shell
+    assert "Suggested DAX-style measures" in economics_shell
+    assert "Power BI Concepts Used" in economics_shell
+    assert "Quality checks" in economics_shell
     assert "Planning Model Schema" in economics_shell
     assert "Ask CFS Economics" in economics_shell
     assert "EconomicMissionControl" in indicator_center
@@ -283,6 +294,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "What corridors look investment-ready?" in ask_service
     assert "How would this become a Power BI dataset?" in ask_service
     assert "How do I build this in Power BI?" in ask_service
+    assert "How do I build page 1 in Power BI?" in ask_service
+    assert "What DAX measures should I create?" in ask_service
+    assert "Why should I not connect every table?" in ask_service
     assert "What relationships should I build?" in ask_service
     assert "Enterprise Consulting Toolkit" in economic_mission_control
     assert "Planning Model Schema" in economic_mission_control

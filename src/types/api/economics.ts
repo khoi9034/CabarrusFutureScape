@@ -174,6 +174,26 @@ export interface EconomicsPowerBiExportResponse {
     to_column: string;
     to_table: string;
   }>;
+  report_builder_guide?: {
+    concepts: Array<{ description: string; term: string }>;
+    import_steps: string[];
+    measure_caveat?: string;
+    pages: Array<{
+      page: string;
+      purpose: string;
+      visuals: Array<Record<string, unknown>>;
+    }>;
+    quality_checks: string[];
+    relationship_guidance: string[];
+    relationships: Array<{
+      from_column: string;
+      from_table: string;
+      guidance?: string;
+      to_column: string;
+      to_table: string;
+    }>;
+    suggested_measures: Array<{ expression: string; name: string }>;
+  };
   suggested_visuals: Array<{
     page: string;
     visuals: string[];

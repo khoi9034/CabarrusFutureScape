@@ -692,7 +692,14 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "semantic model",
             "facts and dimensions",
             "fact and dimension",
+            "fact table",
+            "dimension table",
+            "dax",
+            "page 1",
             "relationships",
+            "connect every table",
+            "scenario planning page",
+            "data confidence register",
             "report pages",
             "visuals",
         )
@@ -729,6 +736,10 @@ def _economics_powerbi_answer(
             ),
         ),
         (
+            "Do not connect every table",
+            "Start with the scenario and geography relationships. Keep summary-level tables disconnected until a visual needs them, because forcing unrelated summary tables into the model can create misleading blanks or filters.",
+        ),
+        (
             "Report pages to create",
             _bullets(
                 [
@@ -736,6 +747,31 @@ def _economics_powerbi_answer(
                     "Parcel Investment Screen: parcel table, value per acre band, improvement-to-land ratio band, constraint burden, recommended follow-up.",
                     "Scenario Planning Model: scenario comparison matrix, fiscal attractiveness by scenario, service burden vs tax-base lift.",
                     "Data Confidence Register: domain readiness matrix, missing data table, next data need list.",
+                ]
+            ),
+        ),
+        (
+            "Suggested measures",
+            _bullets(
+                [
+                    "Total Signals = COUNTROWS(parcel_economic_signal_fact).",
+                    "Underbuilt Candidates = COUNTROWS(FILTER(parcel_economic_signal_fact, parcel_economic_signal_fact[opportunity_class] = \"Underbuilt Redevelopment Candidate\")).",
+                    "Data Needed Signals = COUNTROWS(FILTER(parcel_economic_signal_fact, parcel_economic_signal_fact[data_confidence] = \"Data Needed\")).",
+                    "Scenario Count = COUNTROWS(scenario_output_fact).",
+                    "Strong Fiscal Scenarios = COUNTROWS(FILTER(scenario_output_fact, scenario_output_fact[fiscal_attractiveness_band] = \"Strong\")).",
+                ]
+            ),
+        ),
+        (
+            "Quality checks",
+            _bullets(
+                [
+                    "All 7 tables loaded.",
+                    "Scenario and geography relationships created.",
+                    "No owner/mailing fields imported.",
+                    "No raw scores used.",
+                    "Report caveats visible.",
+                    "Slicers do not create misleading blanks.",
                 ]
             ),
         ),
@@ -766,6 +802,7 @@ def _economics_powerbi_answer(
             "Open Economic Intelligence -> Enterprise Tools -> Power BI Desktop Practice Pack.",
             "Download the JSON pack and import it into Power BI Desktop.",
             "Build the exported relationships before creating report visuals.",
+            "Use the Power BI Report Builder Guide for page-by-page visual instructions.",
         ],
     )
 

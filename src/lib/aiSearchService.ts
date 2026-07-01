@@ -55,9 +55,15 @@ export const askCfsEconomicsSuggestedPrompts = [
   "Summarize public cost risk.",
   "How would this become a Power BI dataset?",
   "How do I build this in Power BI?",
+  "How do I build page 1 in Power BI?",
+  "What DAX measures should I create?",
+  "What is the difference between fact and dimension tables?",
   "Which tables are facts and dimensions?",
   "What report pages should I create?",
   "What relationships should I build?",
+  "Why should I not connect every table?",
+  "How do I build a scenario planning page?",
+  "How do I build a data confidence register?",
   "What visuals should I make first?",
   "How would this become a semantic model?",
   "Explain the planning model dimensions.",
@@ -293,7 +299,14 @@ function isEconomicsPowerBiQuery(query: string) {
     "semantic model",
     "facts and dimensions",
     "fact and dimension",
+    "fact table",
+    "dimension table",
+    "dax",
+    "page 1",
     "relationships",
+    "connect every table",
+    "scenario planning page",
+    "data confidence register",
     "report pages",
     "visuals",
   ].some((term) => normalized.includes(term));
@@ -306,6 +319,16 @@ function demoEconomicsPowerBiAnswer(
   const relationshipLines = pack.relationships.map(
     (row) => `${row.from_table}.${row.from_column} -> ${row.to_table}.${row.to_column}`,
   );
+  const guide = pack.report_builder_guide;
+  const pageLines =
+    guide?.pages.map(
+      (page) =>
+        `${page.page}: ${page.visuals.map((visual) => String(visual.title)).join(", ")}`,
+    ) ?? pack.suggested_visuals.map((page) => `${page.page}: ${page.visuals.join("; ")}`);
+  const measureLines =
+    guide?.suggested_measures.map((measure) => measure.expression) ?? [
+      "Total Signals = COUNTROWS(parcel_economic_signal_fact)",
+    ];
   return {
     answer: briefing(
       [
@@ -318,8 +341,25 @@ function demoEconomicsPowerBiAnswer(
         bullets(relationshipLines.length ? relationshipLines : ["Relationship notes are not available in the cached demo export."]),
       ],
       [
+        "Do not connect every table",
+        "Start with the scenario and geography relationships. Keep summary-level tables disconnected until a visual needs them, because forcing unrelated summary tables into the model can create misleading blanks or filters.",
+      ],
+      [
         "Report pages to create",
-        bullets(pack.suggested_visuals.map((page) => `${page.page}: ${page.visuals.join("; ")}`)),
+        bullets(pageLines),
+      ],
+      [
+        "Suggested measures",
+        bullets(measureLines),
+      ],
+      [
+        "Quality checks",
+        bullets(guide?.quality_checks ?? [
+          "All 7 tables loaded.",
+          "Scenario relationship created.",
+          "Geography relationship created.",
+          "Report caveats visible.",
+        ]),
       ],
       [
         "Next steps",
@@ -361,6 +401,7 @@ function demoEconomicsPowerBiAnswer(
       "Open Economic Intelligence -> Enterprise Tools.",
       "Preview or download the Power BI JSON Pack.",
       "Build the suggested relationships before creating report visuals.",
+      "Use the Power BI Report Builder Guide for page-by-page visual instructions.",
     ],
   };
 }

@@ -532,6 +532,7 @@ function EnterpriseToolsPage({
     powerBiPreviewMode === "json"
       ? JSON.stringify(powerBiPayload ?? { status: "Loading Power BI export pack" }, null, 2)
       : JSON.stringify(powerBiTableSummary(powerBiPayload), null, 2);
+  const reportBuilderGuide = powerBiPayload?.report_builder_guide;
   const relationshipNotes = powerBiRelationshipNotes(powerBiPayload);
   const reportLayoutNotes = powerBiReportLayoutNotes(powerBiPayload);
   const copyText = async (label: string, text: string) => {
@@ -648,6 +649,127 @@ function EnterpriseToolsPage({
           </pre>
         </div>
       </EconPanel>
+      <EconPanel title="Power BI Report Builder Guide" kicker="Desktop report recipe">
+        <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
+                Import steps
+              </h2>
+              <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm leading-6 text-[var(--econ-muted)]">
+                {(reportBuilderGuide?.import_steps ?? powerBiWorkflowSteps).map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
+                Relationship model
+              </h2>
+              <div className="mt-2 grid gap-2">
+                {(reportBuilderGuide?.relationships ?? powerBiPayload?.relationships ?? []).map((row) => (
+                  <div
+                    className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] p-3 text-sm text-[var(--econ-muted)]"
+                    key={`${row.from_table}-${row.from_column}-${row.to_table}`}
+                  >
+                    <span className="font-semibold text-[var(--econ-text)]">
+                      {row.from_table}.{row.from_column} -&gt; {row.to_table}.{row.to_column}
+                    </span>
+                    {"guidance" in row && row.guidance ? (
+                      <p className="mt-1 text-xs leading-5">{String(row.guidance)}</p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+              <ul className="mt-3 space-y-1 text-xs leading-5 text-[var(--econ-muted)]">
+                {(reportBuilderGuide?.relationship_guidance ?? [
+                  "Start with these two relationships.",
+                  "Keep remaining tables disconnected at first if needed.",
+                  "Do not force incorrect relationships just to connect everything.",
+                ]).map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
+                Power BI Concepts Used
+              </h2>
+              <div className="mt-2 grid gap-2">
+                {(reportBuilderGuide?.concepts ?? []).map((concept) => (
+                  <div
+                    className="rounded-lg border border-[var(--econ-border)] bg-black/20 p-3 text-xs leading-5 text-[var(--econ-muted)]"
+                    key={concept.term}
+                  >
+                    <span className="font-semibold text-[var(--econ-text)]">{concept.term}: </span>
+                    {concept.description}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="grid gap-3">
+              {(reportBuilderGuide?.pages ?? []).map((page) => (
+                <div className="econ-card rounded-xl p-4" key={page.page}>
+                  <h2 className="text-base font-semibold text-[var(--econ-text)]">
+                    {page.page}
+                  </h2>
+                  <p className="mt-1 text-sm text-[var(--econ-muted)]">{page.purpose}</p>
+                  <div className="mt-3 grid gap-2">
+                    {page.visuals.map((visual) => (
+                      <div
+                        className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] p-3 text-xs leading-5 text-[var(--econ-muted)]"
+                        key={String(visual.title)}
+                      >
+                        <p className="font-semibold text-[var(--econ-text)]">
+                          {String(visual.title)}
+                        </p>
+                        <p>{guideVisualDetails(visual)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
+                Suggested DAX-style measures
+              </h2>
+              <div className="mt-2 grid gap-2">
+                {(reportBuilderGuide?.suggested_measures ?? []).map((measure) => (
+                  <pre
+                    className="overflow-auto rounded-lg border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]"
+                    key={measure.name}
+                  >
+                    {measure.expression}
+                  </pre>
+                ))}
+              </div>
+              {reportBuilderGuide?.measure_caveat ? (
+                <p className="mt-2 text-xs leading-5 text-[var(--econ-muted)]">
+                  {reportBuilderGuide.measure_caveat}
+                </p>
+              ) : null}
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
+                Quality checks
+              </h2>
+              <ul className="mt-2 grid gap-2 text-xs leading-5 text-[var(--econ-muted)] sm:grid-cols-2">
+                {(reportBuilderGuide?.quality_checks ?? []).map((check) => (
+                  <li
+                    className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2"
+                    key={check}
+                  >
+                    {check}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </EconPanel>
       <EconPanel title="Ask CFS Economics" kicker="Enterprise workflow assistant">
         <AskCfsPanel appMode="economics" />
       </EconPanel>
@@ -681,6 +803,13 @@ function powerBiReportLayoutNotes(payload: EconomicsPowerBiExportResponse | null
   return (payload?.suggested_visuals ?? [])
     .map((page) => `${page.page}\n${page.visuals.map((visual) => `- ${visual}`).join("\n")}`)
     .join("\n\n");
+}
+
+function guideVisualDetails(visual: Record<string, unknown>) {
+  return Object.entries(visual)
+    .filter(([key]) => key !== "title")
+    .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : String(value)}`)
+    .join(" | ");
 }
 
 function EconomicsMethodologyPage() {

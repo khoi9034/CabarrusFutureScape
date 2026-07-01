@@ -206,8 +206,9 @@ def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> N
     assert "Scenario" in payload["planning_model_dimensions"]
     assert "Revenue per Acre Band" in payload["planning_model_measures"]
     assert "Executive takeaway" in payload["decision_pack_template"]["sections"]
-    assert "owner" not in str(payload).lower()
-    assert "mailing" not in str(payload).lower()
+    export_text = str(payload["exports"]).lower()
+    assert "owner" not in export_text
+    assert "mailing" not in export_text
 
 
 def test_enterprise_export_endpoint_returns_stable_schema(monkeypatch) -> None:
@@ -320,8 +321,15 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
         "to_table": "scenario_dim",
         "to_column": "scenario_id",
     } in payload["relationships"]
-    assert "owner" not in str(payload).lower()
-    assert "mailing" not in str(payload).lower()
+    guide = payload["report_builder_guide"]
+    assert len(guide["pages"]) == 4
+    assert guide["pages"][0]["page"] == "Executive Economic Dashboard"
+    assert any(measure["name"] == "Total Signals" for measure in guide["suggested_measures"])
+    assert any(concept["term"] == "Fact table" for concept in guide["concepts"])
+    assert "No owner/mailing fields imported." in guide["quality_checks"]
+    table_text = str(payload["tables"]).lower()
+    assert "owner" not in table_text
+    assert "mailing" not in table_text
 
 
 def test_powerbi_export_endpoint_returns_stable_schema(monkeypatch) -> None:
@@ -351,4 +359,7 @@ def test_powerbi_export_endpoint_returns_stable_schema(monkeypatch) -> None:
     assert body["mode"] == "live"
     assert "tables" in body
     assert "relationships" in body
+    assert "report_builder_guide" in body
+    assert len(body["report_builder_guide"]["pages"]) == 4
+    assert body["report_builder_guide"]["suggested_measures"]
     assert "suggested_visuals" in body

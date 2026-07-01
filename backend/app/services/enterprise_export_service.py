@@ -134,6 +134,7 @@ def build_powerbi_export_payload(
                 "to_table": "geography_dim",
             },
         ],
+        "report_builder_guide": _powerbi_report_builder_guide(),
         "suggested_visuals": _powerbi_suggested_visuals(),
         "tables": {
             "domain_readiness_dim": _powerbi_readiness_dim(readiness),
@@ -470,6 +471,216 @@ def _powerbi_suggested_visuals() -> list[dict[str, Any]]:
             ],
         },
     ]
+
+
+def _powerbi_report_builder_guide() -> dict[str, Any]:
+    relationships = [
+        {
+            "from_column": "scenario_id",
+            "from_table": "scenario_output_fact",
+            "guidance": "Use this first for Scenario Planning Model slicers and comparison visuals.",
+            "to_column": "scenario_id",
+            "to_table": "scenario_dim",
+        },
+        {
+            "from_column": "geography_label",
+            "from_table": "parcel_economic_signal_fact",
+            "guidance": "Use this for geography slicers on parcel/site screening visuals.",
+            "to_column": "geography_label",
+            "to_table": "geography_dim",
+        },
+    ]
+    return {
+        "concepts": [
+            {
+                "description": "Event or measurement table, such as scenario_output_fact or parcel_economic_signal_fact.",
+                "term": "Fact table",
+            },
+            {
+                "description": "Descriptive lookup table, such as scenario_dim or geography_dim.",
+                "term": "Dimension table",
+            },
+            {
+                "description": "Connection between matching fields in two tables.",
+                "term": "Relationship",
+            },
+            {"description": "Filter control for report users.", "term": "Slicer"},
+            {"description": "Calculated value used by cards, charts, or matrices.", "term": "Measure"},
+            {"description": "Pivot-table style visual.", "term": "Matrix"},
+            {
+                "description": "Reusable dataset, relationship, and measure layer behind a report.",
+                "term": "Semantic model",
+            },
+        ],
+        "import_steps": [
+            "Download economics_powerbi_export.json from CFS Economics -> Enterprise Tools.",
+            "Open Power BI Desktop and choose Get Data -> JSON.",
+            "Load the tables under the tables object.",
+            "Create the two starter relationships listed in this guide.",
+            "Build the four report pages with the suggested visuals.",
+            "Add caveat text boxes so report viewers understand this is practice/export context.",
+        ],
+        "pages": [
+            {
+                "page": "Executive Economic Dashboard",
+                "purpose": "High-level leadership view.",
+                "visuals": [
+                    {
+                        "fields": ["kpi_name", "value", "unit", "status_band"],
+                        "table": "economics_kpi_fact",
+                        "title": "KPI cards",
+                    },
+                    {
+                        "axis": "opportunity_class",
+                        "table": "parcel_economic_signal_fact",
+                        "title": "Opportunity class bar chart",
+                        "value": "Count of signal_id",
+                    },
+                    {
+                        "fields": [
+                            "geography_label",
+                            "opportunity_class",
+                            "value_per_acre_band",
+                            "improvement_to_land_ratio_band",
+                            "recommended_followup",
+                        ],
+                        "table": "parcel_economic_signal_fact",
+                        "title": "Underbuilt watchlist table",
+                    },
+                    {
+                        "field": "geography_label or jurisdiction",
+                        "table": "geography_dim",
+                        "title": "Geography slicer",
+                    },
+                ],
+            },
+            {
+                "page": "Parcel Investment Screen",
+                "purpose": "Parcel/site screening.",
+                "visuals": [
+                    {
+                        "fields": [
+                            "signal_id",
+                            "geography_label",
+                            "opportunity_class",
+                            "value_per_acre_band",
+                            "improvement_to_land_ratio_band",
+                            "tax_base_opportunity_band",
+                            "constraint_burden_band",
+                            "data_confidence",
+                        ],
+                        "table": "parcel_economic_signal_fact",
+                        "title": "Parcel signal table",
+                    },
+                    {
+                        "columns": "data_confidence",
+                        "rows": "opportunity_class",
+                        "table": "parcel_economic_signal_fact",
+                        "title": "Opportunity by confidence matrix",
+                        "values": "Count of signal_id",
+                    },
+                    {
+                        "field": "recommended_followup",
+                        "table": "parcel_economic_signal_fact",
+                        "title": "Recommended follow-up card/table",
+                    },
+                ],
+            },
+            {
+                "page": "Scenario Planning Model",
+                "purpose": "Compare assumptions and scenario outputs.",
+                "visuals": [
+                    {
+                        "fields": [
+                            "scenario_name",
+                            "intensity_band",
+                            "value_assumption_band",
+                            "tax_base_lift_band",
+                            "revenue_per_acre_band",
+                            "service_burden_band",
+                            "infrastructure_burden_band",
+                            "fiscal_attractiveness_band",
+                            "data_confidence",
+                        ],
+                        "table": "scenario_output_fact",
+                        "title": "Scenario comparison table",
+                    },
+                    {
+                        "field": "scenario_name",
+                        "table": "scenario_dim",
+                        "title": "Scenario slicer",
+                    },
+                    {
+                        "axis": "scenario_name",
+                        "table": "scenario_output_fact",
+                        "title": "Fiscal attractiveness chart",
+                        "value": "Count or categorized display of fiscal_attractiveness_band",
+                    },
+                ],
+            },
+            {
+                "page": "Data Confidence Register",
+                "purpose": "Show what data is strong versus incomplete.",
+                "visuals": [
+                    {
+                        "columns": "data_status, geometry_status, temporal_status",
+                        "rows": "domain_name",
+                        "table": "domain_readiness_dim",
+                        "title": "Domain readiness matrix",
+                    },
+                    {
+                        "fields": ["domain_name", "current_use", "next_data_need"],
+                        "table": "domain_readiness_dim",
+                        "title": "Next data need table",
+                    },
+                    {
+                        "field": "data_confidence if available",
+                        "table": "parcel_economic_signal_fact or scenario_output_fact",
+                        "title": "Data confidence slicer",
+                    },
+                ],
+            },
+        ],
+        "quality_checks": [
+            "All 7 tables loaded.",
+            "Scenario relationship created.",
+            "Geography relationship created.",
+            "No owner/mailing fields imported.",
+            "No raw scores used.",
+            "Report caveats visible.",
+            "Slicers do not create misleading blanks.",
+        ],
+        "relationship_guidance": [
+            "Start with the scenario and geography relationships.",
+            "Keep remaining tables disconnected at first if needed.",
+            "Use slicers carefully because some tables are summary-level rather than parcel-level.",
+            "Do not force incorrect relationships just to connect everything.",
+        ],
+        "relationships": relationships,
+        "suggested_measures": [
+            {
+                "expression": "Total Signals = COUNTROWS(parcel_economic_signal_fact)",
+                "name": "Total Signals",
+            },
+            {
+                "expression": 'Underbuilt Candidates = COUNTROWS(FILTER(parcel_economic_signal_fact, parcel_economic_signal_fact[opportunity_class] = "Underbuilt Redevelopment Candidate"))',
+                "name": "Underbuilt Candidates",
+            },
+            {
+                "expression": 'Data Needed Signals = COUNTROWS(FILTER(parcel_economic_signal_fact, parcel_economic_signal_fact[data_confidence] = "Data Needed"))',
+                "name": "Data Needed Signals",
+            },
+            {
+                "expression": "Scenario Count = COUNTROWS(scenario_output_fact)",
+                "name": "Scenario Count",
+            },
+            {
+                "expression": 'Strong Fiscal Scenarios = COUNTROWS(FILTER(scenario_output_fact, scenario_output_fact[fiscal_attractiveness_band] = "Strong"))',
+                "name": "Strong Fiscal Scenarios",
+            },
+        ],
+        "measure_caveat": "Field names may need small adjustments after import depending on how Power BI expands the JSON.",
+    }
 
 
 def _value_per_acre_band(value: Any) -> str:
