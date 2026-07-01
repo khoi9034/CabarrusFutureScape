@@ -361,18 +361,60 @@ function ScenarioLabPage({
   outputs: EconomicsScenarioOutput[];
   scenarios: EconomicsScenarioTemplate[];
 }) {
-  const scenarioRows = scenarios.length ? scenarios : fallbackScenarios;
-  const outputRows = outputs.length ? outputs : fallbackScenarioOutputs;
+  const [assumptions, setAssumptions] = useState<ScenarioAssumptions>(
+    initialScenarioAssumptions,
+  );
+  const scenarioRows = scenarioCatalog.map((scenario) => ({
+    ...scenario,
+    what_it_tests:
+      scenarios.find((row) => row.id === scenario.id)?.what_it_tests ??
+      scenario.what_it_tests,
+  }));
+  const selectedScenario =
+    scenarioRows.find((scenario) => scenario.id === assumptions.scenarioId) ??
+    scenarioRows[0];
+  const output = calculateScenarioOutput(assumptions);
+  const currentOutput = calculateScenarioOutput({
+    ...initialScenarioAssumptions,
+    scenarioId: "current_conditions",
+  });
+  const alternativeOutput = calculateScenarioOutput({
+    ...assumptions,
+    scenarioId:
+      assumptions.scenarioId === "industrial_employment"
+        ? "residential_growth"
+        : "industrial_employment",
+  });
+  const memo = scenarioDecisionMemo(selectedScenario.title, assumptions, output);
+  const evidencePack = scenarioEvidencePack(inputs, assumptions, output);
+  const updateAssumption = (key: keyof ScenarioAssumptions, value: string) => {
+    setAssumptions((current) => ({ ...current, [key]: value }));
+  };
   return (
     <>
       <PageHeader
         kicker="Scenario Lab"
         title="Economic planning model"
-        text="Scenario cards, assumptions, measures, output bands, and a decision memo in a planning-model style workflow."
+        text="Select a scenario, adjust assumptions, review output bands, and generate a screening-level consulting memo."
       />
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {scenarioRows.map((scenario) => (
-          <EconCard key={scenario.id}>
+          <button
+            className={`econ-card rounded-2xl p-4 text-left transition ${
+              assumptions.scenarioId === scenario.id
+                ? "border-[var(--econ-gold)]/60 bg-[var(--econ-gold)]/10"
+                : ""
+            }`}
+            key={scenario.id}
+            onClick={() =>
+              setAssumptions({
+                ...initialScenarioAssumptions,
+                ...scenarioDefaults[scenario.id],
+                scenarioId: scenario.id,
+              })
+            }
+            type="button"
+          >
             <Calculator className="h-5 w-5 text-[var(--econ-gold)]" />
             <h2 className="mt-3 text-base font-semibold text-[var(--econ-text)]">
               {scenario.title}
@@ -380,35 +422,79 @@ function ScenarioLabPage({
             <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
               {scenario.what_it_tests}
             </p>
-          </EconCard>
+          </button>
         ))}
       </section>
-      <section className="grid gap-4 xl:grid-cols-3">
-        <EconPanel title="Assumption table" kicker="Inputs">
-          <Matrix
-            rows={
-              inputs.length
-                ? inputs.map((row) => ({
-                    label: row.assumption,
-                    value: `${row.current_value} - ${row.use} (${row.data_confidence})`,
-                  }))
-                : assumptionRows
-            }
+      <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        <EconPanel title="Assumption Controls" kicker="Inputs">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ScenarioSelect
+              label="Development type"
+              onChange={(value) => updateAssumption("developmentType", value)}
+              options={developmentTypeOptions}
+              value={assumptions.developmentType}
+            />
+            <ScenarioSelect
+              label="Intensity band"
+              onChange={(value) => updateAssumption("intensityBand", value)}
+              options={basicBandOptions}
+              value={assumptions.intensityBand}
+            />
+            <ScenarioSelect
+              label="Value-per-acre assumption"
+              onChange={(value) => updateAssumption("valuePerAcreBand", value)}
+              options={basicBandOptions}
+              value={assumptions.valuePerAcreBand}
+            />
+            <ScenarioSelect
+              label="School / service burden"
+              onChange={(value) => updateAssumption("schoolServiceBurden", value)}
+              options={burdenBandOptions}
+              value={assumptions.schoolServiceBurden}
+            />
+            <ScenarioSelect
+              label="Utility readiness confidence"
+              onChange={(value) => updateAssumption("utilityReadiness", value)}
+              options={confidenceBandOptions}
+              value={assumptions.utilityReadiness}
+            />
+            <ScenarioSelect
+              label="Transportation access confidence"
+              onChange={(value) => updateAssumption("transportationAccess", value)}
+              options={confidenceBandOptions}
+              value={assumptions.transportationAccess}
+            />
+            <ScenarioSelect
+              label="Flood / environmental constraint"
+              onChange={(value) => updateAssumption("floodConstraint", value)}
+              options={burdenBandOptions}
+              value={assumptions.floodConstraint}
+            />
+          </div>
+        </EconPanel>
+        <EconPanel title="Scenario Output" kicker="Output bands">
+          <ScenarioBandGrid output={output} />
+        </EconPanel>
+      </section>
+      <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
+        <EconPanel title="Scenario Comparison Matrix" kicker="Comparison">
+          <ScenarioComparisonMatrix
+            rows={[
+              { label: "Current Conditions", output: currentOutput },
+              { label: selectedScenario.title, output },
+              { label: "Alternative scenario", output: alternativeOutput },
+            ]}
           />
         </EconPanel>
-        <EconPanel title="Measures table" kicker="Model measures">
-          <Matrix rows={measureRows} />
-        </EconPanel>
-        <EconPanel title="Scenario output bands" kicker="Outputs">
-          <ScenarioOutputList rows={outputRows} />
+        <EconPanel title="Evidence Pack" kicker="Evidence">
+          <Matrix rows={evidencePack} />
         </EconPanel>
       </section>
       <EconPanel title="Decision memo" kicker="Consulting output">
-        <p className="text-sm leading-7 text-[var(--econ-muted)]">
-          Compare current value, scenario type, estimated tax-base lift band,
-          revenue-per-acre band, infrastructure burden, and public cost flags
-          before presenting a recommendation for deeper diligence.
-        </p>
+        <Matrix rows={memo} />
+      </EconPanel>
+      <EconPanel title="Reference scenario bands" kicker="Export baseline">
+        <ScenarioOutputList rows={outputs.length ? outputs : fallbackScenarioOutputs} />
       </EconPanel>
     </>
   );
@@ -705,6 +791,85 @@ function ScenarioOutputList({ rows }: { rows: EconomicsScenarioOutput[] }) {
   );
 }
 
+function ScenarioSelect({
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  options: string[];
+  value: string;
+}) {
+  return (
+    <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+      <span className="font-semibold uppercase tracking-[0.12em]">{label}</span>
+      <select
+        className="rounded-xl border border-[var(--econ-border)] bg-[#11151b] px-3 py-2 text-sm text-[var(--econ-text)] outline-none focus:border-[var(--econ-gold)]"
+        onChange={(event) => onChange(event.target.value)}
+        value={value}
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function ScenarioBandGrid({ output }: { output: ScenarioModelOutput }) {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {[
+        ["Estimated tax-base lift", output.taxBaseLift],
+        ["Revenue per acre", output.revenuePerAcre],
+        ["Service burden", output.serviceBurden],
+        ["Infrastructure burden", output.infrastructureBurden],
+        ["Constraint-adjusted opportunity", output.constraintOpportunity],
+        ["Fiscal attractiveness", output.fiscalAttractiveness],
+        ["Data confidence", output.dataConfidence],
+      ].map(([label, value]) => (
+        <MiniMetric key={label} label={label} value={value} />
+      ))}
+    </div>
+  );
+}
+
+function ScenarioComparisonMatrix({
+  rows,
+}: {
+  rows: Array<{ label: string; output: ScenarioModelOutput }>;
+}) {
+  return (
+    <div className="overflow-hidden rounded-xl border border-[var(--econ-border)]">
+      <div className="grid grid-cols-[minmax(9rem,1fr)_7rem_7rem_7rem_7rem_minmax(12rem,1.2fr)] gap-2 bg-white/[0.035] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--econ-muted)]">
+        <span>Scenario</span>
+        <span>Upside</span>
+        <span>Service</span>
+        <span>Infra</span>
+        <span>Confidence</span>
+        <span>Next diligence</span>
+      </div>
+      {rows.map((row) => (
+        <div
+          className="grid grid-cols-[minmax(9rem,1fr)_7rem_7rem_7rem_7rem_minmax(12rem,1.2fr)] gap-2 border-t border-[var(--econ-border)] px-3 py-2 text-xs text-[var(--econ-muted)]"
+          key={row.label}
+        >
+          <span className="font-semibold text-[var(--econ-text)]">{row.label}</span>
+          <span>{row.output.fiscalAttractiveness}</span>
+          <span>{row.output.serviceBurden}</span>
+          <span>{row.output.infrastructureBurden}</span>
+          <span>{row.output.dataConfidence}</span>
+          <span>{row.output.recommendedNextDiligence}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function BurdenRows() {
   return (
     <div className="grid gap-2">
@@ -774,6 +939,347 @@ function formatDate(value: string | null | undefined) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("en-US");
 }
 
+type ScenarioAssumptions = {
+  developmentType: string;
+  floodConstraint: string;
+  intensityBand: string;
+  scenarioId: string;
+  schoolServiceBurden: string;
+  transportationAccess: string;
+  utilityReadiness: string;
+  valuePerAcreBand: string;
+};
+
+type ScenarioModelOutput = {
+  constraintOpportunity: string;
+  dataConfidence: string;
+  fiscalAttractiveness: string;
+  infrastructureBurden: string;
+  recommendedNextDiligence: string;
+  revenuePerAcre: string;
+  serviceBurden: string;
+  taxBaseLift: string;
+};
+
+function calculateScenarioOutput(assumptions: ScenarioAssumptions): ScenarioModelOutput {
+  const upside =
+    bandValue(assumptions.intensityBand) +
+    bandValue(assumptions.valuePerAcreBand) +
+    scenarioUpsideModifier(assumptions.scenarioId);
+  const publicBurden =
+    bandValue(assumptions.schoolServiceBurden) +
+    bandValue(assumptions.floodConstraint) +
+    scenarioBurdenModifier(assumptions.scenarioId);
+  const readiness =
+    confidenceValue(assumptions.utilityReadiness) +
+    confidenceValue(assumptions.transportationAccess);
+  const hasDataGap = [
+    assumptions.schoolServiceBurden,
+    assumptions.utilityReadiness,
+    assumptions.transportationAccess,
+    assumptions.floodConstraint,
+  ].includes("Data Needed");
+  const constraintRisk =
+    assumptions.floodConstraint === "High" ||
+    assumptions.scenarioId === "infrastructure_constrained_growth";
+  const confidence =
+    hasDataGap || readiness <= 2
+      ? "Data Needed"
+      : readiness >= 5
+        ? "Strong"
+        : "Moderate";
+
+  return {
+    constraintOpportunity: constraintRisk
+      ? "Elevated Review"
+      : bandFromScore(upside + readiness - publicBurden),
+    dataConfidence: confidence,
+    fiscalAttractiveness: hasDataGap
+      ? "Data Needed"
+      : bandFromScore(upside + readiness - publicBurden),
+    infrastructureBurden:
+      assumptions.utilityReadiness === "Low" ||
+      assumptions.utilityReadiness === "Data Needed" ||
+      assumptions.scenarioId === "infrastructure_constrained_growth"
+        ? "Elevated Review"
+        : bandFromScore(publicBurden - readiness + 3),
+    recommendedNextDiligence: nextDiligence(assumptions, confidence),
+    revenuePerAcre: bandFromScore(bandValue(assumptions.valuePerAcreBand) + scenarioRevenueModifier(assumptions.scenarioId)),
+    serviceBurden: bandFromScore(publicBurden),
+    taxBaseLift: hasDataGap && assumptions.valuePerAcreBand === "Low" ? "Data Needed" : bandFromScore(upside),
+  };
+}
+
+function bandValue(value: string) {
+  return value === "High" ? 3 : value === "Medium" ? 2 : value === "Low" ? 1 : 0;
+}
+
+function confidenceValue(value: string) {
+  return value === "High" ? 3 : value === "Medium" ? 2 : value === "Low" ? 1 : 0;
+}
+
+function bandFromScore(score: number) {
+  if (score <= 0) return "Data Needed";
+  if (score <= 2) return "Low";
+  if (score <= 4) return "Moderate";
+  if (score <= 6) return "Strong";
+  return "Elevated Review";
+}
+
+function scenarioUpsideModifier(id: string) {
+  if (id === "targeted_investment" || id === "higher_density_redevelopment") return 2;
+  if (id === "industrial_employment" || id === "mixed_use_corridor") return 1;
+  if (id === "current_conditions") return -1;
+  return 0;
+}
+
+function scenarioBurdenModifier(id: string) {
+  if (id === "residential_growth" || id === "higher_density_redevelopment") return 2;
+  if (id === "infrastructure_constrained_growth") return 3;
+  if (id === "industrial_employment") return -1;
+  return 0;
+}
+
+function scenarioRevenueModifier(id: string) {
+  if (id === "industrial_employment" || id === "commercial_corridor" || id === "mixed_use_corridor") return 2;
+  if (id === "targeted_investment" || id === "higher_density_redevelopment") return 1;
+  return 0;
+}
+
+function nextDiligence(assumptions: ScenarioAssumptions, confidence: string) {
+  if (confidence === "Data Needed") {
+    return "Fill utility, transportation, school/service, or flood constraint gaps before using this scenario.";
+  }
+  if (assumptions.scenarioId === "industrial_employment") {
+    return "Verify road access, utility readiness, flood exposure, and employment-site assumptions.";
+  }
+  if (assumptions.scenarioId === "residential_growth") {
+    return "Compare housing assumptions with school/service burden and observed permit activity.";
+  }
+  if (assumptions.scenarioId === "targeted_investment") {
+    return "Document public cost assumptions and test whether investment unlocks value.";
+  }
+  return "Document assumptions and compare output bands with parcel evidence before deeper review.";
+}
+
+function scenarioDecisionMemo(
+  title: string,
+  assumptions: ScenarioAssumptions,
+  output: ScenarioModelOutput,
+) {
+  return [
+    {
+      label: "Executive takeaway",
+      value: `${title} shows ${output.fiscalAttractiveness.toLowerCase()} fiscal attractiveness with ${output.infrastructureBurden.toLowerCase()} infrastructure burden.`,
+    },
+    {
+      label: "Economic upside",
+      value: `Tax-base lift is ${output.taxBaseLift.toLowerCase()} and revenue per acre is ${output.revenuePerAcre.toLowerCase()} under the selected assumptions.`,
+    },
+    {
+      label: "Public burden / constraint risk",
+      value: `Service burden is ${output.serviceBurden.toLowerCase()}; constraint-adjusted opportunity is ${output.constraintOpportunity.toLowerCase()}.`,
+    },
+    {
+      label: "Data confidence",
+      value: `${output.dataConfidence}. Scenario output depends on ${assumptions.utilityReadiness.toLowerCase()} utility readiness and ${assumptions.transportationAccess.toLowerCase()} transportation confidence.`,
+    },
+    { label: "Recommended next step", value: output.recommendedNextDiligence },
+    {
+      label: "Caveats",
+      value:
+        "Screening-level scenario only; not a formal appraisal, tax bill, fiscal impact study, or project approval recommendation.",
+    },
+  ];
+}
+
+function scenarioEvidencePack(
+  inputs: EconomicsScenarioInput[],
+  assumptions: ScenarioAssumptions,
+  output: ScenarioModelOutput,
+) {
+  const missing = [
+    assumptions.schoolServiceBurden === "Data Needed" ? "school/service burden" : null,
+    assumptions.utilityReadiness === "Data Needed" ? "utility readiness" : null,
+    assumptions.transportationAccess === "Data Needed" ? "transportation access" : null,
+    assumptions.floodConstraint === "Data Needed" ? "flood/environmental constraint" : null,
+  ].filter(Boolean);
+  return [
+    {
+      label: "Source layers used",
+      value:
+        "Parcel Economic Baseline, Underbuilt Redevelopment Watchlist, Development Pressure Monitor, Floodplain Review, School Utilization + Permit Pressure, Utility Readiness, Transportation Context.",
+    },
+    {
+      label: "Metrics used",
+      value:
+        inputs.map((input) => input.assumption).join(", ") ||
+        "Value per acre, improvement-to-land ratio, estimated county tax, service burden, infrastructure confidence.",
+    },
+    {
+      label: "Assumptions used",
+      value: `${assumptions.developmentType}; intensity ${assumptions.intensityBand}; value-per-acre ${assumptions.valuePerAcreBand}; utility ${assumptions.utilityReadiness}; transportation ${assumptions.transportationAccess}; flood constraint ${assumptions.floodConstraint}.`,
+    },
+    {
+      label: "Missing data",
+      value: missing.length ? missing.join(", ") : "No selected assumptions are marked Data Needed.",
+    },
+    {
+      label: "Related CFS layers",
+      value:
+        "Revenue per Acre Dashboard, Constraint-Adjusted Development Potential, Public Cost Risk Flag, Economic Scenario Lab.",
+    },
+    { label: "Recommended next diligence", value: output.recommendedNextDiligence },
+  ];
+}
+
+const developmentTypeOptions = [
+  "Current Conditions",
+  "Baseline Growth",
+  "Residential Growth",
+  "Commercial Corridor",
+  "Industrial / Employment",
+  "Mixed-Use Redevelopment",
+  "Targeted Infrastructure Investment",
+  "Infrastructure-Constrained Growth",
+];
+
+const basicBandOptions = ["Low", "Medium", "High"];
+const burdenBandOptions = ["Low", "Medium", "High", "Data Needed"];
+const confidenceBandOptions = ["High", "Medium", "Low", "Data Needed"];
+
+const initialScenarioAssumptions: ScenarioAssumptions = {
+  developmentType: "Current Conditions",
+  floodConstraint: "Medium",
+  intensityBand: "Low",
+  scenarioId: "current_conditions",
+  schoolServiceBurden: "Medium",
+  transportationAccess: "Medium",
+  utilityReadiness: "Medium",
+  valuePerAcreBand: "Medium",
+};
+
+const scenarioDefaults: Record<string, Partial<ScenarioAssumptions>> = {
+  baseline_growth: {
+    developmentType: "Baseline Growth",
+    intensityBand: "Medium",
+    valuePerAcreBand: "Medium",
+  },
+  commercial_corridor: {
+    developmentType: "Commercial Corridor",
+    floodConstraint: "Low",
+    intensityBand: "Medium",
+    schoolServiceBurden: "Low",
+    transportationAccess: "High",
+    valuePerAcreBand: "High",
+  },
+  current_conditions: initialScenarioAssumptions,
+  industrial_employment: {
+    developmentType: "Industrial / Employment",
+    floodConstraint: "Low",
+    intensityBand: "Medium",
+    schoolServiceBurden: "Low",
+    transportationAccess: "High",
+    valuePerAcreBand: "High",
+  },
+  infrastructure_constrained_growth: {
+    developmentType: "Infrastructure-Constrained Growth",
+    floodConstraint: "High",
+    intensityBand: "Medium",
+    schoolServiceBurden: "High",
+    transportationAccess: "Low",
+    utilityReadiness: "Low",
+    valuePerAcreBand: "High",
+  },
+  mixed_use_corridor: {
+    developmentType: "Mixed-Use Redevelopment",
+    intensityBand: "High",
+    schoolServiceBurden: "Medium",
+    transportationAccess: "High",
+    valuePerAcreBand: "High",
+  },
+  residential_growth: {
+    developmentType: "Residential Growth",
+    intensityBand: "High",
+    schoolServiceBurden: "High",
+    valuePerAcreBand: "Medium",
+  },
+  targeted_investment: {
+    developmentType: "Targeted Infrastructure Investment",
+    floodConstraint: "Low",
+    intensityBand: "Medium",
+    utilityReadiness: "High",
+    valuePerAcreBand: "High",
+  },
+};
+
+const scenarioCatalog: EconomicsScenarioTemplate[] = [
+  {
+    caveats: ["Baseline only; deeper fiscal review is required before decisions."],
+    data_confidence: "screening",
+    id: "current_conditions",
+    required_assumptions: ["parcel value", "acreage", "current service context"],
+    title: "Current Conditions",
+    what_it_tests: "Current tax-base and burden context without a new scenario assumption.",
+  },
+  {
+    caveats: ["Assumes growth continues without a major intervention."],
+    data_confidence: "screening",
+    id: "baseline_growth",
+    required_assumptions: ["observed permit activity", "current value per acre"],
+    title: "Baseline Growth",
+    what_it_tests: "How current development pressure carries through existing parcel economics.",
+  },
+  {
+    caveats: ["Residential growth should be compared with school and service burden."],
+    data_confidence: "screening",
+    id: "residential_growth",
+    required_assumptions: ["housing intensity", "school/service burden", "utility readiness"],
+    title: "Residential Growth",
+    what_it_tests: "Housing-oriented value lift against school and service burden.",
+  },
+  {
+    caveats: ["Corridor economics depend on access, parcel assembly, and market fit."],
+    data_confidence: "screening",
+    id: "commercial_corridor",
+    required_assumptions: ["corridor access", "commercial value band", "constraint burden"],
+    title: "Commercial Corridor",
+    what_it_tests: "Tax-base opportunity along access-oriented commercial corridors.",
+  },
+  {
+    caveats: ["Employment-site readiness depends on transportation and utility capacity."],
+    data_confidence: "screening",
+    id: "industrial_employment",
+    required_assumptions: ["site size", "road access", "utility readiness", "flood exposure"],
+    title: "Industrial / Employment",
+    what_it_tests: "Non-residential tax-base opportunity with lower school-burden emphasis.",
+  },
+  {
+    caveats: ["Mixed-use assumptions should be tested with land-use and service capacity."],
+    data_confidence: "screening",
+    id: "mixed_use_corridor",
+    required_assumptions: ["redevelopment intensity", "corridor access", "service burden"],
+    title: "Mixed-Use Redevelopment",
+    what_it_tests: "Higher-intensity redevelopment with both value upside and service needs.",
+  },
+  {
+    caveats: ["Public investment costs must be estimated outside this screening model."],
+    data_confidence: "screening",
+    id: "targeted_investment",
+    required_assumptions: ["public cost", "utility readiness", "tax-base lift band"],
+    title: "Targeted Infrastructure Investment",
+    what_it_tests: "Whether targeted infrastructure could unlock tax-base opportunity.",
+  },
+  {
+    caveats: ["Incomplete infrastructure data limits confidence."],
+    data_confidence: "proxy",
+    id: "infrastructure_constrained_growth",
+    required_assumptions: ["utility readiness", "transportation access", "constraint burden"],
+    title: "Infrastructure-Constrained Growth",
+    what_it_tests: "How opportunity is limited when infrastructure readiness is weak.",
+  },
+];
+
 const executiveCards = [
   {
     icon: Gauge,
@@ -829,25 +1335,6 @@ const burdenRows = [
   },
 ];
 
-const fallbackScenarios: EconomicsScenarioTemplate[] = [
-  {
-    caveats: ["Scenario values depend on assumptions."],
-    data_confidence: "screening",
-    id: "current_conditions",
-    required_assumptions: ["Current value baseline"],
-    title: "Current Conditions",
-    what_it_tests: "Current value, acreage, constraints, and confidence before assumptions.",
-  },
-  {
-    caveats: ["Scenario values depend on assumptions."],
-    data_confidence: "screening",
-    id: "baseline_growth",
-    required_assumptions: ["Growth intensity"],
-    title: "Baseline Growth",
-    what_it_tests: "Whether current growth patterns reinforce fiscal/service tradeoffs.",
-  },
-];
-
 const fallbackScenarioOutputs: EconomicsScenarioOutput[] = [
   {
     constraint_adjusted_opportunity_band: "current context",
@@ -860,12 +1347,6 @@ const fallbackScenarioOutputs: EconomicsScenarioOutput[] = [
     service_burden_band: "data needed",
     title: "Current Conditions",
   },
-];
-
-const assumptionRows = [
-  { label: "Development type", value: "Residential, commercial, industrial, mixed-use, or conservation / low intensity." },
-  { label: "Intensity band", value: "Screening-level density or value-per-acre assumption." },
-  { label: "Burden bands", value: "Infrastructure, school, utility, transportation, and flood context." },
 ];
 
 const measureRows = [

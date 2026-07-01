@@ -18,6 +18,7 @@ import type {
   CfsAiSearchRequest,
   CfsAiSearchResponse,
   CfsAiSelectedSignal,
+  EconomicsIntelligenceResponse,
   IndicatorDomain,
 } from "@/types/api";
 
@@ -43,7 +44,12 @@ export const askCfsEconomicsSuggestedPrompts = [
   "How should I interpret improvement-to-land ratio?",
   "Which sites look like industrial or employment candidates?",
   "Where is economic data confidence weak?",
+  "Compare residential and industrial scenarios.",
   "What scenario should I inspect first?",
+  "Build a decision memo for this scenario.",
+  "What assumptions drive this scenario?",
+  "Where is scenario confidence weak?",
+  "What public burden should I watch?",
   "Summarize public cost risk.",
   "How would this become a Power BI dataset?",
   "Explain the planning model dimensions.",
@@ -77,7 +83,7 @@ async function searchDemoCfsAi(
   request: CfsAiSearchRequest,
 ): Promise<CfsAiSearchResponse> {
   if (request.app_mode === "economics") {
-    return sanitizeDemoResponse(await demoEconomicsAnswer());
+    return sanitizeDemoResponse(await demoEconomicsAnswer(request));
   }
 
   const context = await buildDemoAiContext();
@@ -135,8 +141,13 @@ async function searchDemoCfsAi(
   return sanitizeDemoResponse(response);
 }
 
-async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
+async function demoEconomicsAnswer(
+  request?: CfsAiSearchRequest,
+): Promise<CfsAiSearchResponse> {
   const economics = await getDemoEconomicsIntelligence();
+  if (isEconomicsScenarioQuery(request?.query ?? "")) {
+    return demoEconomicsScenarioAnswer(economics);
+  }
   const summary = economics.summary;
   const watchlist = economics.watchlist.slice(0, 4);
   const missing = economics.data_readiness
@@ -260,6 +271,123 @@ async function demoEconomicsAnswer(): Promise<CfsAiSearchResponse> {
       "Use Economic Scenario Lab as screening-level fiscal context only.",
       "Ask: Where is economic data confidence weak?",
       "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",
+    ],
+  };
+}
+
+function isEconomicsScenarioQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return [
+    "scenario",
+    "residential",
+    "industrial",
+    "decision memo",
+    "assumption",
+    "public burden",
+    "fiscal impact",
+    "confidence weak",
+  ].some((term) => normalized.includes(term));
+}
+
+function demoEconomicsScenarioAnswer(
+  economics: EconomicsIntelligenceResponse,
+): CfsAiSearchResponse {
+  const scenarios = economics.scenario_outputs.slice(0, 4);
+  const assumptions = economics.scenario_inputs
+    .slice(0, 5)
+    .map((row) => `${row.assumption}: ${row.current_value} (${row.data_confidence})`);
+  const outputLines = scenarios.map(
+    (row) =>
+      `${row.title}: tax-base lift ${row.estimated_tax_base_lift_band}; service burden ${row.service_burden_band}; confidence ${row.data_confidence}.`,
+  );
+  return {
+    answer: briefing(
+      [
+        "Executive takeaway",
+        "CFS Economics treats scenarios as a screening-level planning model: assumptions go in, output bands come out, and the decision memo explains what needs deeper review before anyone uses the result for fiscal or infrastructure decisions.",
+      ],
+      [
+        "Scenario interpretation",
+        bullets(
+          outputLines.length
+            ? outputLines
+            : ["Scenario output bands are not available in the cached demo extract."],
+        ),
+      ],
+      [
+        "Fiscal / service burden tradeoff",
+        "Residential scenarios usually need closer school and service-burden review. Industrial or employment scenarios emphasize non-residential tax-base context, road access, utility readiness, and environmental constraints. Targeted infrastructure scenarios can improve readiness, but they need explicit public cost assumptions.",
+      ],
+      [
+        "Assumption sensitivity",
+        bullets(
+          assumptions.length
+            ? assumptions
+            : [
+                "Intensity band, value-per-acre band, school/service burden, utility readiness, transportation access, and flood/environmental constraint level drive the output bands.",
+              ],
+        ),
+      ],
+      [
+        "Recommended next diligence",
+        bullets([
+          "Use Scenario Lab to compare Current Conditions against Residential Growth, Industrial / Employment, and Infrastructure-Constrained Growth.",
+          "Check the Evidence Pack for missing utility, school, transportation, and flood/environmental data.",
+          "Use the Decision Memo as a briefing draft, not as a formal fiscal finding.",
+        ]),
+      ],
+      [
+        "Caveats",
+        bullets([
+          "Portfolio Demo uses a cached demo extract.",
+          "Screening-level scenario only; not a formal fiscal impact study.",
+          "Not a formal appraisal or tax bill.",
+          "Scenario output depends on assumptions.",
+          "Utility, school, transportation, and environmental cost data may be incomplete.",
+        ]),
+      ],
+    ),
+    as_of: economics.as_of,
+    caveats: [
+      "Portfolio Demo uses a cached demo extract.",
+      "Scenario outputs are screening-level bands, not a formal fiscal impact study.",
+      "Scenario values depend on assumptions.",
+    ],
+    dashboard_actions: {
+      focus_domain: "economics",
+      highlight_kpis: ["tax_base_opportunity", "data_readiness"],
+      recommended_layers: [
+        "Economic Scenario Lab",
+        "Revenue per Acre Dashboard",
+        "Constraint-Adjusted Development Potential",
+      ],
+    },
+    data_mode: "demo",
+    domains: ["economics"],
+    evidence: [
+      evidence(
+        "Scenario outputs",
+        outputLines.join("; ") || "Scenario output bands are unavailable.",
+        "public/demo-data/economics_intelligence.json",
+        outputLines.length ? "available" : "limited",
+      ),
+      evidence(
+        "Scenario assumptions",
+        assumptions.join("; ") || "Scenario assumptions are unavailable.",
+        "public/demo-data/economics_intelligence.json",
+        assumptions.length ? "available" : "limited",
+      ),
+    ],
+    provider: "none",
+    related_layers: [
+      "Economic Scenario Lab",
+      "Revenue per Acre Dashboard",
+      "Constraint-Adjusted Development Potential",
+    ],
+    suggested_actions: [
+      "Open Economic Intelligence -> Scenario Lab.",
+      "Adjust intensity, value-per-acre, service burden, utility readiness, transportation, and flood/environmental assumptions.",
+      "Review the generated Decision Memo and Evidence Pack before presenting scenario takeaways.",
     ],
   };
 }

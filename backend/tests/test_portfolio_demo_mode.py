@@ -240,6 +240,14 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "EconomicDashboardPage" in economics_shell
     assert "ParcelScreenPage" in economics_shell
     assert "ScenarioLabPage" in economics_shell
+    assert "Assumption Controls" in economics_shell
+    assert "Scenario Output" in economics_shell
+    assert "Scenario Comparison Matrix" in economics_shell
+    assert "Decision memo" in economics_shell
+    assert "Evidence Pack" in economics_shell
+    assert "calculateScenarioOutput" in economics_shell
+    assert "ScenarioSelect" in economics_shell
+    assert "Data Needed" in economics_shell
     assert "EnterpriseToolsPage" in economics_shell
     assert "EconomicsMethodologyPage" in economics_shell
     assert "Location Context" in economics_shell

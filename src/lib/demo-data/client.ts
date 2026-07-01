@@ -638,6 +638,10 @@ function getUnavailableEconomicsEnterpriseExport(): EconomicsEnterpriseExportRes
       "Portfolio Demo economics enterprise export is not available.",
       "Connector-ready export only; no external platform account is connected.",
     ],
+    decision_pack_template: {
+      required_caveats: [],
+      sections: [],
+    },
     exports: {
       decision_pack: {
         assumptions: [],
@@ -662,6 +666,11 @@ function getUnavailableEconomicsEnterpriseExport(): EconomicsEnterpriseExportRes
       },
     },
     mode: "demo",
+    planning_model_dimensions: [],
+    planning_model_measures: [],
+    scenario_assumptions: [],
+    scenario_output_bands: [],
+    scenario_templates: [],
   };
 }
 

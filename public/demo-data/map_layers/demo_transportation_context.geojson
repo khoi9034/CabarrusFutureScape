@@ -4615,7 +4615,7 @@
   ],
   "metadata": {
     "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
-    "generated_at": "2026-06-30T19:04:25Z",
+    "generated_at": "2026-07-01T01:59:46Z",
     "layer_id": "transportation_context",
     "layer_label": "Demo Transportation Context",
     "mode": "portfolio_demo",

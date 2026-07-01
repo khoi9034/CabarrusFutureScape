@@ -37,9 +37,11 @@ def build_enterprise_export_payload(
     signals = [_dict(row) for row in economics.get("signals") or []]
     watchlist = [_dict(row) for row in economics.get("watchlist") or []]
     scenarios = [_dict(row) for row in economics.get("scenario_templates") or []]
+    scenario_inputs = [_dict(row) for row in economics.get("scenario_inputs") or []]
     scenario_outputs = [_dict(row) for row in economics.get("scenario_outputs") or []]
     readiness = [_dict(row) for row in economics.get("data_readiness") or []]
     output_mode = mode or str(economics.get("mode") or summary.get("source_mode") or "live")
+    scenario_facts = _scenario_fact(scenario_outputs or scenarios)
 
     return {
         "as_of": economics.get("as_of") or summary.get("as_of"),
@@ -48,6 +50,7 @@ def build_enterprise_export_payload(
             "CFS Economics is screening-level context, not a formal appraisal or tax bill.",
             "Facts and dimensions exclude contact fields and credential fields.",
         ],
+        "decision_pack_template": _decision_pack_template(),
         "exports": {
             "power_bi": {
                 "dimensions": {
@@ -56,7 +59,7 @@ def build_enterprise_export_payload(
                     "time": _time_dimension(economics.get("as_of") or summary.get("as_of")),
                 },
                 "kpi_fact": _kpi_fact(kpis),
-                "scenario_fact": _scenario_fact(scenario_outputs or scenarios),
+                "scenario_fact": scenario_facts,
                 "signal_fact": _signal_fact(signals),
                 "watchlist_fact": _signal_fact(watchlist),
             },
@@ -84,6 +87,11 @@ def build_enterprise_export_payload(
             },
         },
         "mode": output_mode,
+        "planning_model_dimensions": PLANNING_DIMENSIONS,
+        "planning_model_measures": PLANNING_MEASURES,
+        "scenario_assumptions": scenario_inputs,
+        "scenario_output_bands": scenario_facts,
+        "scenario_templates": scenarios,
     }
 
 
@@ -242,3 +250,22 @@ def _risk_flags(
     if any(row.get("economic_status_band") == "infrastructure_constrained" for row in watchlist):
         flags.append("Infrastructure-constrained opportunity appears in the watchlist.")
     return flags or ["No elevated export risk flags in the current summary."]
+
+
+def _decision_pack_template() -> dict[str, Any]:
+    return {
+        "sections": [
+            "Executive takeaway",
+            "Economic upside",
+            "Public burden / constraint risk",
+            "Data confidence",
+            "Recommended next diligence",
+            "Caveats",
+        ],
+        "required_caveats": [
+            "Screening-level scenario, not a formal fiscal impact study.",
+            "Not a formal appraisal or tax bill.",
+            "Scenario output depends on assumptions.",
+            "Utility, school, transportation, and environmental cost data can be incomplete.",
+        ],
+    }

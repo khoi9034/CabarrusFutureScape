@@ -144,6 +144,14 @@ def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> N
                     "what_it_tests": "Baseline",
                 }
             ],
+            "scenario_inputs": [
+                {
+                    "assumption": "Intensity band",
+                    "current_value": "Medium",
+                    "data_confidence": "screening",
+                    "use": "Scenario model input",
+                }
+            ],
             "scenario_outputs": [
                 {
                     "data_confidence": "screening",
@@ -189,6 +197,12 @@ def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> N
     } in exports["planning_model"]["cells"]
     assert exports["planning_model"]["scenarios"] == ["Current Conditions"]
     assert "executive_takeaway" in exports["decision_pack"]
+    assert payload["scenario_templates"][0]["title"] == "Current Conditions"
+    assert payload["scenario_assumptions"][0]["assumption"] == "Intensity band"
+    assert payload["scenario_output_bands"][0]["estimated_tax_base_lift_band"] == "baseline"
+    assert "Scenario" in payload["planning_model_dimensions"]
+    assert "Revenue per Acre Band" in payload["planning_model_measures"]
+    assert "Executive takeaway" in payload["decision_pack_template"]["sections"]
     assert "owner" not in str(payload).lower()
     assert "mailing" not in str(payload).lower()
 
@@ -221,3 +235,5 @@ def test_enterprise_export_endpoint_returns_stable_schema(monkeypatch) -> None:
     assert set(body["exports"]) == {"decision_pack", "planning_model", "power_bi"}
     assert "kpi_fact" in body["exports"]["power_bi"]
     assert "dimensions" in body["exports"]["planning_model"]
+    assert "scenario_templates" in body
+    assert "scenario_output_bands" in body

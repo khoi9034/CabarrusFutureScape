@@ -600,7 +600,7 @@ def _scenario_inputs(summary: dict[str, Any]) -> list[dict[str, Any]]:
             "assumption": "Development intensity",
             "current_value": "Scenario-specific low / medium / higher intensity",
             "data_confidence": "screening",
-            "use": "Tests directional tax-base lift without claiming exact fiscal impact.",
+            "use": "Tests directional tax-base lift without making a formal fiscal impact claim.",
         },
     ]
 

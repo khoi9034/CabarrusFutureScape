@@ -558,6 +558,8 @@ def _economics_answer(
     summary = economics.get("summary", {}) if isinstance(economics, dict) else {}
     watchlist = economics.get("watchlist", []) if isinstance(economics, dict) else []
     readiness = economics.get("data_readiness", []) if isinstance(economics, dict) else []
+    if _is_economics_scenario_query(request.query):
+        return _economics_scenario_answer(request, context, economics if isinstance(economics, dict) else {})
     top_signals = [
         f"{row.get('geography_label') or row.get('parcel_id')}: {row.get('opportunity_class')} ({str(row.get('economic_status_band') or 'review').replace('_', ' ')})"
         for row in watchlist[:4]
@@ -675,6 +677,119 @@ def _economics_answer(
             "Use Economic Scenario Lab only as screening-level fiscal context.",
             "Ask: Where is economic data confidence weak?",
             "Preview the Enterprise Export card for facts, dimensions, planning-model cells, and decision-pack JSON.",
+        ],
+    )
+
+
+def _is_economics_scenario_query(query: str) -> bool:
+    normalized = query.lower()
+    return any(
+        term in normalized
+        for term in (
+            "scenario",
+            "residential",
+            "industrial",
+            "decision memo",
+            "assumption",
+            "public burden",
+            "fiscal impact",
+            "confidence weak",
+        )
+    )
+
+
+def _economics_scenario_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    economics: dict[str, Any],
+) -> CfsAiSearchResponse:
+    outputs = [row for row in economics.get("scenario_outputs") or [] if isinstance(row, dict)]
+    inputs = [row for row in economics.get("scenario_inputs") or [] if isinstance(row, dict)]
+    output_lines = [
+        (
+            f"{row.get('title')}: tax-base lift {row.get('estimated_tax_base_lift_band')}; "
+            f"service burden {row.get('service_burden_band')}; confidence {row.get('data_confidence')}."
+        )
+        for row in outputs[:5]
+    ]
+    assumption_lines = [
+        f"{row.get('assumption')}: {row.get('current_value')} ({row.get('data_confidence')})"
+        for row in inputs[:5]
+    ]
+    answer = _briefing(
+        (
+            "Executive takeaway",
+            (
+                "CFS Economics treats scenarios as a lightweight planning model: assumptions go in, output bands come out, "
+                "and the decision memo explains what needs deeper review before any fiscal or infrastructure decision."
+            ),
+        ),
+        (
+            "Scenario interpretation",
+            _bullets(output_lines or ["Scenario output bands are not available in the current economics context."]),
+        ),
+        (
+            "Fiscal / service burden tradeoff",
+            (
+                "Residential scenarios require closer school and service-burden review. Industrial or employment scenarios emphasize "
+                "non-residential tax-base context, road access, utility readiness, and environmental constraints. Targeted infrastructure "
+                "scenarios can improve readiness, but they need explicit public cost assumptions."
+            ),
+        ),
+        (
+            "Assumption sensitivity",
+            _bullets(
+                assumption_lines
+                or [
+                    "Intensity band, value-per-acre band, school/service burden, utility readiness, transportation access, and flood/environmental constraint level drive the output bands."
+                ]
+            ),
+        ),
+        (
+            "Recommended next diligence",
+            _bullets(
+                [
+                    "Use Scenario Lab to compare Current Conditions against Residential Growth, Industrial / Employment, and Infrastructure-Constrained Growth.",
+                    "Check the Evidence Pack for missing utility, school, transportation, and flood/environmental data.",
+                    "Use the Decision Memo as a briefing draft, not as a formal fiscal finding.",
+                ]
+            ),
+        ),
+        (
+            "Caveats",
+            _bullets(
+                [
+                    "Screening-level scenario only; not a formal fiscal impact study.",
+                    "Not a formal appraisal or tax bill.",
+                    "Scenario output depends on assumptions.",
+                    "Utility, school, transportation, and environmental cost data may be incomplete.",
+                ]
+            ),
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "Scenario outputs",
+                "; ".join(output_lines) or "Scenario output bands are unavailable.",
+                "economics_intelligence.scenario_outputs",
+                "available" if output_lines else "limited",
+            ),
+            _evidence(
+                "Scenario assumptions",
+                "; ".join(assumption_lines) or "Scenario assumptions are unavailable.",
+                "economics_intelligence.scenario_inputs",
+                "available" if assumption_lines else "limited",
+            ),
+        ],
+        [
+            "Open Economic Intelligence -> Scenario Lab.",
+            "Adjust scenario assumptions and compare output bands before presenting a decision memo.",
+            "Review missing utility, school, transportation, and environmental data before deeper review.",
         ],
     )
 

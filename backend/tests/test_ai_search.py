@@ -632,6 +632,45 @@ def test_ai_search_economics_mode_returns_economic_answer() -> None:
     assert "Revenue per Acre Dashboard" in response.related_layers
 
 
+def test_ai_search_economics_scenario_prompt_returns_model_answer() -> None:
+    context = _context()
+    context["economics_intelligence"]["scenario_inputs"] = [
+        {
+            "assumption": "Intensity band",
+            "current_value": "Medium",
+            "data_confidence": "screening",
+        }
+    ]
+    context["economics_intelligence"]["scenario_outputs"] = [
+        {
+            "data_confidence": "screening",
+            "estimated_tax_base_lift_band": "strong",
+            "infrastructure_burden_band": "medium",
+            "revenue_per_acre_band": "strong",
+            "scenario_id": "industrial_employment",
+            "service_burden_band": "low",
+            "title": "Industrial / Employment",
+        }
+    ]
+
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Compare residential and industrial scenarios.",
+        ),
+        context,
+    )
+
+    assert response.domains == ["economics"]
+    assert response.dashboard_actions.focus_domain == "economics"
+    assert "Scenario interpretation" in response.answer
+    assert "Fiscal / service burden tradeoff" in response.answer
+    assert "Assumption sensitivity" in response.answer
+    assert "Industrial / Employment" in response.answer
+    assert "formal fiscal impact study" in response.answer
+    assert response.evidence[0].source == "economics_intelligence.scenario_outputs"
+
+
 def test_ai_search_selected_economics_signal_returns_focused_explanation() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(

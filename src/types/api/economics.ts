@@ -129,6 +129,10 @@ export interface EconomicsIntelligenceResponse {
 export interface EconomicsEnterpriseExportResponse {
   as_of: string | null;
   caveats: string[];
+  decision_pack_template?: {
+    required_caveats: string[];
+    sections: string[];
+  };
   exports: {
     decision_pack: {
       assumptions: string[];
@@ -153,4 +157,9 @@ export interface EconomicsEnterpriseExportResponse {
     };
   };
   mode: "demo" | "live";
+  planning_model_dimensions?: string[];
+  planning_model_measures?: string[];
+  scenario_assumptions?: EconomicsScenarioInput[];
+  scenario_output_bands?: Array<Record<string, unknown>>;
+  scenario_templates?: EconomicsScenarioTemplate[];
 }
