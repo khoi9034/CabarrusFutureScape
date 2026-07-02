@@ -35,6 +35,12 @@ export const askCfsSuggestedPrompts = [
 ] as const;
 
 export const askCfsEconomicsSuggestedPrompts = [
+  "What does the opportunity class chart mean?",
+  "How do I recreate this dashboard in Power BI?",
+  "What should I filter first?",
+  "Explain the scenario comparison matrix.",
+  "What does the data confidence register show?",
+  "Which chart shows fiscal burden?",
   "What should I inspect first?",
   "Which rows should I send?",
   "How do I build this in Power BI?",
@@ -142,6 +148,9 @@ async function demoEconomicsAnswer(
   const economics = await getDemoEconomicsIntelligence();
   if (isEconomicsWalkthroughQuery(request?.query ?? "")) {
     return demoEconomicsWalkthroughAnswer(economics.as_of);
+  }
+  if (isEconomicsDashboardQuery(request?.query ?? "")) {
+    return demoEconomicsDashboardAnswer(economics);
   }
   if (isEconomicsPowerBiQuery(request?.query ?? "")) {
     return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport());
@@ -278,6 +287,87 @@ async function demoEconomicsAnswer(
 function isEconomicsWalkthroughQuery(query: string) {
   const normalized = query.toLowerCase();
   return normalized.includes("walk through") || normalized.includes("tour");
+}
+
+function isEconomicsDashboardQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return [
+    "opportunity class chart",
+    "dashboard in power bi",
+    "filter first",
+    "scenario comparison matrix",
+    "data confidence register",
+    "chart shows fiscal burden",
+    "visual should i build",
+  ].some((phrase) => normalized.includes(phrase));
+}
+
+function demoEconomicsDashboardAnswer(economics: EconomicsIntelligenceResponse): CfsAiSearchResponse {
+  const classRows = economics.opportunity_class_breakdown
+    .slice(0, 5)
+    .map((row) => `${row.opportunity_class}: ${format(row.count)} signals`);
+  return {
+    answer: briefing(
+      [
+        "Executive takeaway",
+        "Read the Economic Dashboard like a Power BI report: start with KPI cards, use slicers to narrow geography/opportunity/confidence, then compare opportunity class, land-efficiency, scenario, fiscal burden, and data-confidence visuals.",
+      ],
+      [
+        "Visual interpretation",
+        bullets([
+          "Opportunity Class Breakdown shows how screened parcels or areas distribute across economic opportunity classes.",
+          "Value per Acre / Land Efficiency ranks filtered areas for tax-base and underbuilt review.",
+          "Scenario Output Comparison compares tax-base lift, revenue per acre, burden, and confidence as bands.",
+          "Fiscal / Service Burden Matrix shows where upside may intersect public cost risk.",
+          "Data Confidence Register shows which domains are ready, partial, or data-needed.",
+        ]),
+      ],
+      [
+        "Power BI build path",
+        bullets([
+          "Use parcel_economic_signal_fact for opportunity class, value/acre, confidence, and watchlist visuals.",
+          "Use scenario_output_fact for scenario matrices and burden-band comparisons.",
+          "Use domain_readiness_dim for the data confidence register.",
+          "Use slicers for geography_label, opportunity_class, data_confidence, and scenario_name.",
+        ]),
+      ],
+      ["Evidence", bullets(classRows.length ? classRows : ["Opportunity class breakdown is unavailable in the cached demo extract."])],
+      [
+        "Caveats",
+        bullets([
+          "Portfolio Demo uses a cached demo extract.",
+          "CFS Economics is screening-level context, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+        ]),
+      ],
+    ),
+    as_of: economics.as_of,
+    caveats: [
+      "Portfolio Demo uses a cached demo extract.",
+      "Dashboard visuals use bands and counts, not raw scores.",
+    ],
+    dashboard_actions: {
+      focus_domain: "economics",
+      highlight_kpis: ["underbuilt_candidates", "tax_base_opportunity", "data_needed"],
+      recommended_layers: ["Economic Dashboard", "Enterprise Workspace"],
+    },
+    data_mode: "demo",
+    domains: ["economics"],
+    evidence: [
+      evidence(
+        "Opportunity class breakdown",
+        classRows.join("; ") || "No opportunity class rows are available.",
+        "public/demo-data/economics_intelligence.json",
+        classRows.length ? "available" : "limited",
+      ),
+    ],
+    provider: "none",
+    related_layers: ["Economic Dashboard", "Power BI Desktop Practice Pack"],
+    suggested_actions: [
+      "Filter by opportunity class or data confidence first.",
+      "Open Power BI recipe expanders on each visual for table/field mapping.",
+      "Use Enterprise Workspace when ready to export CSV tables.",
+    ],
+  };
 }
 
 function demoEconomicsWalkthroughAnswer(asOf: string | null): CfsAiSearchResponse {

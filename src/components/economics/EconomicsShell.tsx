@@ -382,35 +382,88 @@ function EconomicDashboardPage({
   signals: EconomicsParcelSignal[];
   watchlist: EconomicsParcelSignal[];
 }) {
+  const [selectedGeography, setSelectedGeography] = useState("All");
+  const [selectedOpportunityClass, setSelectedOpportunityClass] = useState("All");
+  const [selectedDataConfidence, setSelectedDataConfidence] = useState("All");
+  const [selectedScenario, setSelectedScenario] = useState("All");
   const kpis = intelligence?.kpis ?? [];
-  const valueBars = topSignals(signals, "value_per_acre").map((signal) => ({
+  const filteredSignals = filterEconomicSignals(signals, {
+    dataConfidence: selectedDataConfidence,
+    geography: selectedGeography,
+    opportunityClass: selectedOpportunityClass,
+  });
+  const filteredWatchlist = filterEconomicSignals(watchlist, {
+    dataConfidence: selectedDataConfidence,
+    geography: selectedGeography,
+    opportunityClass: selectedOpportunityClass,
+  });
+  const filteredScenarios =
+    selectedScenario === "All"
+      ? (intelligence?.scenario_outputs ?? [])
+      : (intelligence?.scenario_outputs ?? []).filter(
+          (scenario) => scenario.title === selectedScenario,
+        );
+  const valueBars = topSignals(filteredSignals, "value_per_acre").map((signal) => ({
     label: signal.geography_label ?? signal.parcel_id,
     value: signal.value_per_acre ?? 0,
   }));
-  const ratioBars = topSignals(signals, "improvement_to_land_ratio").map((signal) => ({
+  const ratioBars = topSignals(filteredSignals, "improvement_to_land_ratio").map((signal) => ({
     label: signal.geography_label ?? signal.parcel_id,
     value: signal.improvement_to_land_ratio ?? 0,
   }));
-  const classBars =
-    intelligence?.opportunity_class_breakdown?.map((row) => ({
-      label: row.opportunity_class,
-      value: row.count,
-    })) ?? [];
+  const classBars = filteredSignals.length
+    ? countRowsBy(filteredSignals, (signal) => signal.opportunity_class)
+    : (intelligence?.opportunity_class_breakdown?.map((row) => ({
+        label: row.opportunity_class,
+        value: row.count,
+      })) ?? []);
+  const confidenceBars = countRowsBy(filteredSignals, (signal) => signal.economic_data_confidence);
   const geographyBars =
-    intelligence?.jurisdiction_value_summary?.map((row) => ({
-      label: row.geography_label ?? "Parcel context",
-      value: row.median_value_per_acre ?? 0,
-    })) ?? [];
+    selectedGeography === "All"
+      ? (intelligence?.jurisdiction_value_summary?.map((row) => ({
+          label: row.geography_label ?? "Parcel context",
+          value: row.median_value_per_acre ?? 0,
+        })) ?? [])
+      : valueBars;
+  const scenarioRows = scenarioMatrixRows(filteredScenarios);
+  const burdenRows = fiscalBurdenRows(filteredSignals, filteredScenarios);
+  const geographyOptions = ["All", ...uniqueValues(signals.map((signal) => signal.geography_label).filter(Boolean))];
+  const opportunityOptions = ["All", ...uniqueValues(signals.map((signal) => signal.opportunity_class))];
+  const confidenceOptions = ["All", ...uniqueValues(signals.map((signal) => signal.economic_data_confidence))];
+  const scenarioOptions = ["All", ...uniqueValues((intelligence?.scenario_outputs ?? []).map((scenario) => scenario.title))];
   const summary = intelligence?.summary;
+  const resetFilters = () => {
+    setSelectedGeography("All");
+    setSelectedOpportunityClass("All");
+    setSelectedDataConfidence("All");
+    setSelectedScenario("All");
+  };
 
   return (
     <>
       <PageHeader
         kicker="Economic Dashboard"
-        title="Growth & Tax Base Intelligence"
-        text="Executive KPIs, scorecards, watchlists, and data confidence for parcel-based fiscal screening."
+        title="Economic Dashboard"
+        text="Growth and tax-base intelligence with Power BI-style visuals, slicers, and explainable screening context."
       />
       <PageHelper text="Review indicators and ask CFS." />
+      <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] px-4 py-3">
+        <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
+        <EconChip>Updated {formatDate(intelligence?.as_of ?? summary?.as_of)}</EconChip>
+        <span className="text-xs leading-5 text-[var(--econ-muted)]">
+          Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.
+        </span>
+      </section>
+      <EconomicsSlicerBar
+        filters={[
+          { label: "Geography / Jurisdiction", onChange: setSelectedGeography, options: geographyOptions, value: selectedGeography },
+          { label: "Opportunity Class", onChange: setSelectedOpportunityClass, options: opportunityOptions, value: selectedOpportunityClass },
+          { label: "Data Confidence", onChange: setSelectedDataConfidence, options: confidenceOptions, value: selectedDataConfidence },
+          { label: "Scenario", onChange: setSelectedScenario, options: scenarioOptions, value: selectedScenario },
+        ]}
+        onReset={resetFilters}
+        selected={[selectedGeography, selectedOpportunityClass, selectedDataConfidence, selectedScenario]}
+      />
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
         {kpis.map((kpi) => (
           <KpiCard key={kpi.id} kpi={kpi} />
@@ -427,32 +480,72 @@ function EconomicDashboardPage({
             <MiniMetric label="Data-needed rows" value={formatNumber(summary?.data_needed_count)} />
           </div>
         </EconPanel>
-        <EconPanel title="Value per acre distribution" kicker="Parcel baseline">
-          <BarList rows={valueBars} formatValue={currency} />
-        </EconPanel>
-        <EconPanel title="Opportunity Class Breakdown" kicker="Scorecard">
-          <BarList rows={classBars} />
-        </EconPanel>
-        <EconPanel title="Improvement-to-Land Ratio" kicker="Underbuilt screen">
-          <BarList rows={ratioBars} formatValue={(value) => value.toFixed(2)} />
-        </EconPanel>
-        <EconPanel title="Jurisdiction / geography value summary" kicker="Market context">
-          <BarList rows={geographyBars} formatValue={currency} />
-        </EconPanel>
+        <EconomicsVisualPanel
+          description="Shows how screened parcels/areas are distributed across economic opportunity classes."
+          recipe="Table: parcel_economic_signal_fact | Visual: Donut chart | Legend: opportunity_class | Values: Count of signal_id"
+          title="Opportunity Class Breakdown"
+        >
+          <EconomicsDonutChart rows={classBars} />
+        </EconomicsVisualPanel>
+        <EconomicsVisualPanel
+          description="Ranks filtered parcels/areas by value per acre for land-efficiency review."
+          recipe="Table: parcel_economic_signal_fact | Visual: Clustered bar chart | Axis: geography_label | Values: value_per_acre_band or value_per_acre"
+          title="Value per Acre / Land Efficiency"
+        >
+          <EconomicsBarChart formatValue={currency} rows={valueBars} />
+        </EconomicsVisualPanel>
+        <EconomicsVisualPanel
+          description="Compares improvement-to-land ratio bands to highlight underbuilt review candidates."
+          recipe="Table: parcel_economic_signal_fact | Visual: Horizontal bar chart | Axis: geography_label | Values: improvement_to_land_ratio_band"
+          title="Improvement-to-Land Ratio"
+        >
+          <EconomicsBarChart formatValue={(value) => value.toFixed(2)} rows={ratioBars} />
+        </EconomicsVisualPanel>
+        <EconomicsVisualPanel
+          description="Shows median value-per-acre by available jurisdiction or geography label."
+          recipe="Table: geography_dim + parcel_economic_signal_fact | Visual: Bar chart | Axis: geography_label | Values: median value per acre"
+          title="Jurisdiction / Geography Summary"
+        >
+          <EconomicsBarChart formatValue={currency} rows={geographyBars} />
+        </EconomicsVisualPanel>
       </section>
-      <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
-        <EconPanel title="Underbuilt Redevelopment Watchlist" kicker="Parcel screen">
-          <SignalTable signals={watchlist.slice(0, 8)} />
-        </EconPanel>
-        <EconPanel title="Fiscal / Service Burden Panel" kicker="Constraint-adjusted opportunity">
-          <BurdenRows />
-        </EconPanel>
+      <section className="grid gap-4 xl:grid-cols-2">
+        <EconomicsVisualPanel
+          description="Compares scenario output bands without exposing raw scores."
+          recipe="Table: scenario_output_fact | Visual: Matrix | Rows: scenario_name | Values: lift, revenue, burden, confidence bands"
+          title="Scenario Output Comparison"
+        >
+          <EconomicsTrendChart rows={filteredScenarios} />
+          <div className="mt-4" />
+          <EconomicsMatrixChart rows={scenarioRows} />
+        </EconomicsVisualPanel>
+        <EconomicsVisualPanel
+          description="Flags where fiscal upside intersects service, infrastructure, and constraint burden."
+          recipe="Table: parcel_economic_signal_fact + scenario_output_fact | Visual: Matrix heatmap | Rows: opportunity_class/scenario | Columns: burden bands"
+          title="Fiscal / Service Burden Matrix"
+        >
+          <EconomicsMatrixChart rows={burdenRows} />
+        </EconomicsVisualPanel>
+        <EconomicsVisualPanel
+          description="Shows confidence distribution for the currently filtered parcel signals."
+          recipe="Table: parcel_economic_signal_fact | Visual: Donut chart | Legend: data_confidence | Values: Count of signal_id"
+          title="Data Confidence Visual"
+        >
+          <EconomicsDonutChart rows={confidenceBars} />
+        </EconomicsVisualPanel>
+        <EconomicsVisualPanel
+          description="Shows domain readiness, current use, and next data need."
+          recipe="Table: domain_readiness_dim | Visual: Matrix | Rows: domain_name | Columns: data_status, current_use, next_data_need"
+          title="Data Confidence Register"
+        >
+          <EconomicsReadinessMatrix rows={intelligence?.data_readiness ?? []} />
+        </EconomicsVisualPanel>
       </section>
-      <EconPanel title="Data Confidence Register" kicker="Readiness">
-        <ReadinessTable rows={intelligence?.data_readiness ?? []} />
+      <EconPanel title="Underbuilt Redevelopment Watchlist" kicker="Filtered table">
+        <SignalTable signals={filteredWatchlist.slice(0, 8)} />
       </EconPanel>
       <EconPanel title="Ask CFS Economics" kicker="Analyst assistant">
-        <AskCfsPanel appMode="economics" />
+        <AskCfsPanel appMode="economics" visiblePromptCount={6} />
       </EconPanel>
     </>
   );
@@ -1514,7 +1607,7 @@ function MiniMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function BarList({
+function EconomicsBarChart({
   formatValue = formatNumber,
   rows,
 }: {
@@ -1546,6 +1639,220 @@ function BarList({
         </div>
       ))}
     </div>
+  );
+}
+
+function EconomicsDonutChart({ rows }: { rows: Array<{ label: string; value: number }> }) {
+  const total = rows.reduce((sum, row) => sum + row.value, 0);
+  if (!rows.length || !total) {
+    return <p className="text-sm text-[var(--econ-muted)]">Data not available.</p>;
+  }
+  const chartRows = rows.slice(0, 6);
+  const segments = chartRows.map((row, index) => ({
+    offset: chartRows.slice(0, index).reduce((sum, item) => sum + (item.value / total) * 100, 0),
+    percent: (row.value / total) * 100,
+    row,
+  }));
+  return (
+    <div className="grid gap-4 md:grid-cols-[10rem_minmax(0,1fr)]">
+      <svg aria-label="Donut chart" className="h-40 w-40" viewBox="0 0 42 42" role="img">
+        <circle cx="21" cy="21" fill="transparent" r="15.9" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
+        {segments.map(({ offset, percent, row }, index) => (
+          <circle
+            cx="21"
+            cy="21"
+            fill="transparent"
+            key={row.label}
+            r="15.9"
+            stroke={econChartColors[index % econChartColors.length]}
+            strokeDasharray={`${percent} ${100 - percent}`}
+            strokeDashoffset={-offset}
+            strokeWidth="7"
+            transform="rotate(-90 21 21)"
+          />
+        ))}
+        <text className="fill-[var(--econ-text)] text-[0.25rem] font-semibold" textAnchor="middle" x="21" y="20">
+          {formatNumber(total)}
+        </text>
+        <text className="fill-[var(--econ-muted)] text-[0.16rem]" textAnchor="middle" x="21" y="23">
+          signals
+        </text>
+      </svg>
+      <EconomicsLegend rows={chartRows} />
+    </div>
+  );
+}
+
+function EconomicsLegend({ rows }: { rows: Array<{ label: string; value: number }> }) {
+  return (
+    <div className="grid content-center gap-2">
+      {rows.map((row, index) => (
+        <div className="flex items-center justify-between gap-3 text-xs" key={row.label}>
+          <span className="flex min-w-0 items-center gap-2 text-[var(--econ-text)]">
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: econChartColors[index % econChartColors.length] }}
+            />
+            <span className="truncate">{row.label}</span>
+          </span>
+          <span className="text-[var(--econ-muted)]">{formatNumber(row.value)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EconomicsMatrixChart({
+  rows,
+}: {
+  rows: Array<{ cells: Array<{ label: string; value: string }>; label: string }>;
+}) {
+  if (!rows.length) {
+    return <p className="text-sm text-[var(--econ-muted)]">Data not available.</p>;
+  }
+  return (
+    <div className="grid gap-2">
+      {rows.slice(0, 8).map((row) => (
+        <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3" key={row.label}>
+          <p className="text-sm font-semibold text-[var(--econ-text)]">{row.label}</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            {row.cells.map((cell) => (
+              <div
+                className={`rounded-lg border px-2 py-1.5 text-xs ${bandClass(cell.value)}`}
+                key={`${row.label}-${cell.label}`}
+              >
+                <span className="block text-[10px] uppercase tracking-[0.12em] opacity-70">{cell.label}</span>
+                <span className="font-semibold">{cell.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EconomicsTrendChart({ rows }: { rows: EconomicsScenarioOutput[] }) {
+  if (!rows.length) {
+    return <p className="text-sm text-[var(--econ-muted)]">Scenario data not available.</p>;
+  }
+  return (
+    <div className="grid gap-2">
+      {rows.slice(0, 6).map((row, index) => (
+        <div className="grid grid-cols-[1.2rem_minmax(0,1fr)_8rem] items-center gap-2 text-xs" key={row.scenario_id}>
+          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: econChartColors[index % econChartColors.length] }} />
+          <span className="min-w-0 truncate text-[var(--econ-text)]">{row.title}</span>
+          <span className={`rounded-lg border px-2 py-1 text-center ${bandClass(row.constraint_adjusted_opportunity_band)}`}>
+            {row.constraint_adjusted_opportunity_band}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EconomicsReadinessMatrix({ rows }: { rows: EconomicsReadinessRow[] }) {
+  if (!rows.length) {
+    return <p className="text-sm text-[var(--econ-muted)]">Data readiness is not available.</p>;
+  }
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[680px] border-separate border-spacing-y-2 text-left text-xs">
+        <thead className="uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+          <tr>
+            <th className="px-3 py-2">Domain</th>
+            <th className="px-3 py-2">Data status</th>
+            <th className="px-3 py-2">Current use</th>
+            <th className="px-3 py-2">Next data need</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr className="bg-white/[0.025]" key={row.domain}>
+              <td className="rounded-l-xl border-y border-l border-[var(--econ-border)] px-3 py-3 font-semibold text-[var(--econ-text)]">
+                {row.domain}
+              </td>
+              <td className="border-y border-[var(--econ-border)] px-3 py-3">
+                <span className={`rounded-lg border px-2 py-1 ${bandClass(row.data_status)}`}>
+                  {row.data_status.replaceAll("_", " ")}
+                </span>
+              </td>
+              <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
+                {row.current_use}
+              </td>
+              <td className="rounded-r-xl border-y border-r border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
+                {row.gap_or_next_need}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function EconomicsSlicerBar({
+  filters,
+  onReset,
+  selected,
+}: {
+  filters: Array<{ label: string; onChange: (value: string) => void; options: string[]; value: string }>;
+  onReset: () => void;
+  selected: string[];
+}) {
+  const active = selected.filter((value) => value !== "All");
+  return (
+    <section className="rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] p-4">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        {filters.map((filter) => (
+          <label className="grid gap-1 text-xs text-[var(--econ-muted)]" key={filter.label}>
+            <span className="font-semibold uppercase tracking-[0.12em]">{filter.label}</span>
+            <select
+              className="rounded-xl border border-[var(--econ-border)] bg-[#11151b] px-3 py-2 text-sm text-[var(--econ-text)] outline-none focus:border-[var(--econ-gold)]"
+              onChange={(event) => filter.onChange(event.target.value)}
+              value={filter.value}
+            >
+              {filter.options.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
+        ))}
+        <button
+          className="self-end rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+          onClick={onReset}
+          type="button"
+        >
+          Reset filters
+        </button>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {active.length ? active.map((value) => <EconChip key={value}>{value}</EconChip>) : <span className="text-xs text-[var(--econ-muted)]">No slicers applied.</span>}
+      </div>
+    </section>
+  );
+}
+
+function EconomicsVisualPanel({
+  children,
+  description,
+  recipe,
+  title,
+}: {
+  children: ReactNode;
+  description: string;
+  recipe: string;
+  title: string;
+}) {
+  return (
+    <EconPanel description={description} kicker="Visual analytics" title={title}>
+      {children}
+      <DetailsBlock summary="Power BI recipe" hint="Source table, visual type, and fields.">
+        <p className="text-sm leading-6 text-[var(--econ-muted)]">{recipe}</p>
+      </DetailsBlock>
+    </EconPanel>
   );
 }
 
@@ -1844,6 +2151,101 @@ function matrixRowsToText(rows: Array<{ label: string; value: string }>) {
   return rows.map((row) => `${row.label}: ${row.value}`).join("\n");
 }
 
+function filterEconomicSignals(
+  signals: EconomicsParcelSignal[],
+  filters: { dataConfidence: string; geography: string; opportunityClass: string },
+) {
+  return signals.filter((signal) => {
+    const geography = signal.geography_label ?? "Parcel context";
+    return (
+      (filters.geography === "All" || geography === filters.geography) &&
+      (filters.opportunityClass === "All" || signal.opportunity_class === filters.opportunityClass) &&
+      (filters.dataConfidence === "All" || signal.economic_data_confidence === filters.dataConfidence)
+    );
+  });
+}
+
+function countRowsBy<T>(rows: T[], getLabel: (row: T) => string | null | undefined) {
+  const counts = new Map<string, number>();
+  rows.forEach((row) => {
+    const label = getLabel(row) || "Not available";
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  });
+  return [...counts.entries()]
+    .map(([label, value]) => ({ label, value }))
+    .sort((left, right) => right.value - left.value);
+}
+
+function uniqueValues(values: Array<string | null | undefined>) {
+  return [...new Set(values.filter((value): value is string => Boolean(value)))].sort();
+}
+
+function scenarioMatrixRows(rows: EconomicsScenarioOutput[]) {
+  return rows.map((row) => ({
+    cells: [
+      { label: "Tax-base lift", value: row.estimated_tax_base_lift_band },
+      { label: "Revenue / acre", value: row.revenue_per_acre_band },
+      { label: "Service burden", value: row.service_burden_band },
+      { label: "Infrastructure burden", value: row.infrastructure_burden_band },
+      { label: "Confidence", value: row.data_confidence },
+    ],
+    label: row.title,
+  }));
+}
+
+function fiscalBurdenRows(
+  signals: EconomicsParcelSignal[],
+  scenarios: EconomicsScenarioOutput[],
+) {
+  const classRows = countRowsBy(signals, (signal) => signal.opportunity_class)
+    .slice(0, 4)
+    .map((row) => ({
+      cells: [
+        { label: "Signals", value: formatNumber(row.value) },
+        { label: "Service burden", value: inferBurdenBand(row.label) },
+        { label: "Constraint risk", value: inferConstraintBand(row.label) },
+      ],
+      label: row.label,
+    }));
+  const scenarioRows = scenarios.slice(0, 4).map((row) => ({
+    cells: [
+      { label: "Service burden", value: row.service_burden_band },
+      { label: "Infrastructure burden", value: row.infrastructure_burden_band },
+      { label: "Constraint risk", value: row.constraint_adjusted_opportunity_band },
+    ],
+    label: row.title,
+  }));
+  return classRows.length ? classRows : scenarioRows;
+}
+
+function inferBurdenBand(label: string) {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("burden") || normalized.includes("constrained")) return "Elevated Review";
+  if (normalized.includes("data")) return "Data Needed";
+  return "Moderate";
+}
+
+function inferConstraintBand(label: string) {
+  const normalized = label.toLowerCase();
+  if (normalized.includes("constrained") || normalized.includes("risk")) return "Elevated Review";
+  if (normalized.includes("data")) return "Data Needed";
+  return "Review";
+}
+
+function bandClass(value: string) {
+  const normalized = value.toLowerCase();
+  if (normalized.includes("strong") || normalized.includes("available") || normalized.includes("stable")) {
+    return "border-[var(--econ-green)]/35 bg-[var(--econ-green)]/10 text-[#bff8d1]";
+  }
+  if (normalized.includes("elevated") || normalized.includes("high") || normalized.includes("constrained")) {
+    return "border-[var(--econ-risk)]/35 bg-[var(--econ-risk)]/10 text-[#ffd1c2]";
+  }
+  if (normalized.includes("data") || normalized.includes("unavailable")) {
+    return "border-[var(--econ-gold)]/35 bg-[var(--econ-gold)]/10 text-[#ffe6a6]";
+  }
+  return "border-[var(--econ-blue)]/35 bg-[var(--econ-blue)]/10 text-[#cfe5ff]";
+}
+
 function topSignals(
   signals: EconomicsParcelSignal[],
   key: "improvement_to_land_ratio" | "value_per_acre",
@@ -2137,6 +2539,8 @@ const powerBiCsvTableMetadata = [
   suggested_visual: string;
   table_name: keyof EconomicsPowerBiExportResponse["tables"];
 }>;
+
+const econChartColors = ["#f0cd79", "#55d38f", "#6d9de8", "#f47f5f", "#9b8cff", "#d9e2ef"];
 
 type EnterpriseOutputKind = "scenario" | "powerbi" | "planning" | "decision";
 

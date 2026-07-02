@@ -273,6 +273,17 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Understand the workflow." in economics_shell
     assert "Select rows from economic tables." in economics_shell
     assert "Review indicators and ask CFS." in economics_shell
+    assert "EconomicsSlicerBar" in economics_shell
+    assert "EconomicsDonutChart" in economics_shell
+    assert "EconomicsMatrixChart" in economics_shell
+    assert "EconomicsTrendChart" in economics_shell
+    assert "Opportunity Class Breakdown" in economics_shell
+    assert "Value per Acre / Land Efficiency" in economics_shell
+    assert "Scenario Output Comparison" in economics_shell
+    assert "Fiscal / Service Burden Matrix" in economics_shell
+    assert "Data Confidence Visual" in economics_shell
+    assert "Power BI recipe" in economics_shell
+    assert "Reset filters" in economics_shell
     assert "Follow the four steps: select data, choose an output, configure it, then export or print." in economics_shell
     assert "Prepare a simple snapshot for review." in economics_shell
     assert "What CFS Economics does" in economics_shell
@@ -339,6 +350,11 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Traditional GIS can show where things are" in overview
     assert "Consulting Decision Workflows" in overview
     assert "What should I inspect first?" in ask_service
+    assert "What does the opportunity class chart mean?" in ask_service
+    assert "How do I recreate this dashboard in Power BI?" in ask_service
+    assert "Explain the scenario comparison matrix." in ask_service
+    assert "What does the data confidence register show?" in ask_service
+    assert "Which chart shows fiscal burden?" in ask_service
     assert "How should I walk through CFS Economics?" in ask_service
     assert "Which rows should I send?" in ask_service
     assert "How do I build this in Power BI?" in ask_service

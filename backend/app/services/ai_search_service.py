@@ -562,6 +562,8 @@ def _economics_answer(
     readiness = economics.get("data_readiness", []) if isinstance(economics, dict) else []
     if _is_economics_walkthrough_query(request.query):
         return _economics_walkthrough_answer(request, context)
+    if _is_economics_dashboard_query(request.query):
+        return _economics_dashboard_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_powerbi_query(request.query):
         return _economics_powerbi_answer(request, context)
     if _is_economics_scenario_query(request.query):
@@ -690,6 +692,92 @@ def _economics_answer(
 def _is_economics_walkthrough_query(query: str) -> bool:
     normalized = query.lower()
     return "walk through" in normalized or "tour" in normalized
+
+
+def _is_economics_dashboard_query(query: str) -> bool:
+    normalized = query.lower()
+    return any(
+        phrase in normalized
+        for phrase in (
+            "opportunity class chart",
+            "dashboard in power bi",
+            "filter first",
+            "scenario comparison matrix",
+            "data confidence register",
+            "chart shows fiscal burden",
+            "visual should i build",
+        )
+    )
+
+
+def _economics_dashboard_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    economics: dict[str, Any],
+) -> CfsAiSearchResponse:
+    breakdown = [
+        f"{row.get('opportunity_class')}: {_fmt(row.get('count'))} signals"
+        for row in economics.get("opportunity_class_breakdown", [])[:5]
+        if isinstance(row, dict)
+    ]
+    answer = _briefing(
+        (
+            "Executive takeaway",
+            "Read the Economic Dashboard like a Power BI report: start with KPI cards, apply slicers, then compare opportunity class, land-efficiency, scenario, fiscal burden, and data-confidence visuals.",
+        ),
+        (
+            "Visual interpretation",
+            _bullets(
+                [
+                    "Opportunity Class Breakdown shows how screened parcels or areas distribute across economic opportunity classes.",
+                    "Value per Acre / Land Efficiency ranks filtered areas for tax-base and underbuilt review.",
+                    "Scenario Output Comparison compares tax-base lift, revenue per acre, burden, and confidence as bands.",
+                    "Fiscal / Service Burden Matrix shows where upside may intersect public cost risk.",
+                    "Data Confidence Register shows which domains are ready, partial, or data-needed.",
+                ]
+            ),
+        ),
+        (
+            "Power BI build path",
+            _bullets(
+                [
+                    "Use parcel_economic_signal_fact for opportunity class, value/acre, confidence, and watchlist visuals.",
+                    "Use scenario_output_fact for scenario matrices and burden-band comparisons.",
+                    "Use domain_readiness_dim for the data confidence register.",
+                    "Use slicers for geography_label, opportunity_class, data_confidence, and scenario_name.",
+                ]
+            ),
+        ),
+        ("Evidence", _bullets(breakdown or ["Opportunity class breakdown is not available from the current economics context."])),
+        (
+            "Caveats",
+            _bullets(
+                [
+                    "Dashboard visuals use bands and counts, not raw scores.",
+                    "CFS Economics is screening-level context, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+                ]
+            ),
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "Opportunity class breakdown",
+                "; ".join(breakdown) or "No opportunity class rows are available.",
+                "economics_intelligence.opportunity_class_breakdown",
+                "available" if breakdown else "limited",
+            )
+        ],
+        [
+            "Filter by opportunity class or data confidence first.",
+            "Open Power BI recipe expanders on each visual for table/field mapping.",
+            "Use Enterprise Workspace when ready to export CSV tables.",
+        ],
+    )
 
 
 def _economics_walkthrough_answer(
