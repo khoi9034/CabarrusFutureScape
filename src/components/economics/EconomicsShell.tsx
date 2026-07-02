@@ -42,6 +42,12 @@ export function EconomicsShell() {
   const [selectedSignalIds, setSelectedSignalIds] = useState<string[]>([]);
 
   useEffect(() => {
+    if (economicsSection === "workspace" || economicsSection === "enterprise") {
+      setEconomicsSection("tools");
+    }
+  }, [economicsSection, setEconomicsSection]);
+
+  useEffect(() => {
     let mounted = true;
     void getEconomicsIntelligence()
       .then((response) => {
@@ -91,6 +97,10 @@ export function EconomicsShell() {
         : [...current, signal.parcel_id],
     );
   };
+  const activeEconomicsSection =
+    economicsSection === "workspace" || economicsSection === "enterprise"
+      ? "tools"
+      : economicsSection;
 
   return (
     <main className="econ-shell relative z-10 min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-5">
@@ -109,42 +119,35 @@ export function EconomicsShell() {
             </button>
           </div>
         ) : null}
-        {economicsSection === "overview" ? (
+        {activeEconomicsSection === "overview" ? (
           <ExecutiveBriefPage intelligence={intelligence} />
         ) : null}
-        {economicsSection === "workspace" ? (
-          <EconomicsWorkspacePage
+        {activeEconomicsSection === "tools" ? (
+          <PowerBiToolsPage
             dataReadiness={intelligence?.data_readiness ?? []}
+            exportPayload={enterpriseExport}
+            inputs={intelligence?.scenario_inputs ?? []}
             onClearSelection={() => setSelectedSignalIds([])}
-            onSendSelectedToEnterprise={() => setEconomicsSection("enterprise")}
-            onSendSelectedToPrint={() => setEconomicsSection("print")}
+            onNavigate={setEconomicsSection}
             onToggleSignal={toggleSelectedSignal}
+            outputs={intelligence?.scenario_outputs ?? []}
+            powerBiPayload={powerBiExport}
             scenarioOutputs={intelligence?.scenario_outputs ?? []}
+            scenarios={intelligence?.scenario_templates ?? []}
             selectedSignalIds={selectedSignalIds}
             selectedSignals={selectedSignals}
             signals={signals}
             watchlist={watchlist}
           />
         ) : null}
-        {economicsSection === "dashboard" ? (
+        {activeEconomicsSection === "dashboard" ? (
           <EconomicDashboardPage
             intelligence={intelligence}
             signals={signals}
             watchlist={watchlist}
           />
         ) : null}
-        {economicsSection === "enterprise" ? (
-          <EnterpriseWorkspacePage
-            exportPayload={enterpriseExport}
-            inputs={intelligence?.scenario_inputs ?? []}
-            onNavigate={setEconomicsSection}
-            outputs={intelligence?.scenario_outputs ?? []}
-            powerBiPayload={powerBiExport}
-            scenarios={intelligence?.scenario_templates ?? []}
-            selectedSignals={selectedSignals}
-          />
-        ) : null}
-        {economicsSection === "print" ? (
+        {activeEconomicsSection === "print" ? (
           <EconomicsPrintPage
             intelligence={intelligence}
             onNavigate={setEconomicsSection}
@@ -153,6 +156,104 @@ export function EconomicsShell() {
         ) : null}
       </div>
     </main>
+  );
+}
+
+function PowerBiToolsPage({
+  dataReadiness,
+  exportPayload,
+  inputs,
+  onClearSelection,
+  onNavigate,
+  onToggleSignal,
+  outputs,
+  powerBiPayload,
+  scenarioOutputs,
+  scenarios,
+  selectedSignalIds,
+  selectedSignals,
+  signals,
+  watchlist,
+}: {
+  dataReadiness: EconomicsReadinessRow[];
+  exportPayload: EconomicsEnterpriseExportResponse | null;
+  inputs: EconomicsScenarioInput[];
+  onClearSelection: () => void;
+  onNavigate: (section: "tools" | "print") => void;
+  onToggleSignal: (signal: EconomicsParcelSignal) => void;
+  outputs: EconomicsScenarioOutput[];
+  powerBiPayload: EconomicsPowerBiExportResponse | null;
+  scenarioOutputs: EconomicsScenarioOutput[];
+  scenarios: EconomicsScenarioTemplate[];
+  selectedSignalIds: string[];
+  selectedSignals: EconomicsParcelSignal[];
+  signals: EconomicsParcelSignal[];
+  watchlist: EconomicsParcelSignal[];
+}) {
+  const focusTools = () =>
+    document
+      .getElementById("economics-tool-workspace")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  return (
+    <>
+      <PageHeader
+        kicker="Power BI & Tools"
+        title="Power BI & Tools"
+        text="Build export-ready Power BI tables, scenario models, and decision packs from CFS Economics rows."
+      />
+      <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <EconPanel title="Power BI Desktop Practice Pack" kicker="Default workflow">
+          <p className="text-sm leading-6 text-[var(--econ-muted)]">
+            Export CFS Economics as fact and dimension tables, then build a real Power BI report with KPI cards, slicers, charts, and scenario pages.
+          </p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricPill label="CSV tables" value="7" />
+            <MetricPill label="Starter relationships" value="2" />
+            <MetricPill label="Report pages" value="4" />
+            <MetricPill label="Suggested measures" value="5" />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={focusTools} type="button">
+              Download CSV tables
+            </button>
+            <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={focusTools} type="button">
+              Preview table schema
+            </button>
+          </div>
+        </EconPanel>
+        <EconPanel title="Screening caveat" kicker={USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}>
+          <p className="text-sm leading-6 text-[var(--econ-muted)]">
+            Screening-level economics only: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation. No credentials or embedded BI connection are required.
+          </p>
+        </EconPanel>
+      </section>
+      <EconomicsWorkspacePage
+        dataReadiness={dataReadiness}
+        embedded
+        onClearSelection={onClearSelection}
+        onUseSelectedInTools={focusTools}
+        onSendSelectedToPrint={() => onNavigate("print")}
+        onToggleSignal={onToggleSignal}
+        scenarioOutputs={scenarioOutputs}
+        selectedSignalIds={selectedSignalIds}
+        selectedSignals={selectedSignals}
+        signals={signals}
+        watchlist={watchlist}
+      />
+      <section id="economics-tool-workspace">
+        <EnterpriseWorkspacePage
+          embedded
+          exportPayload={exportPayload}
+          inputs={inputs}
+          onNavigate={onNavigate}
+          outputs={outputs}
+          powerBiPayload={powerBiPayload}
+          scenarios={scenarios}
+          selectedSignals={selectedSignals}
+          showSelectedRowsStep={false}
+        />
+      </section>
+    </>
   );
 }
 
@@ -316,10 +417,10 @@ function ExecutiveBriefPage({
         </EconPanel>
         <EconPanel title="How to use CFS Economics" kicker="Simple workflow">
           <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-[var(--econ-muted)]">
-            <li>Start in Workspace.</li>
-            <li>Review tables and watchlists.</li>
+            <li>Start in Power BI & Tools.</li>
+            <li>Review tables, select rows, and export CSVs.</li>
             <li>Open Economic Dashboard for KPIs and charts.</li>
-            <li>Use Enterprise Workspace for Power BI and planning-model exports.</li>
+            <li>Use Power BI & Tools for planning-model exports and decision packs.</li>
             <li>Print an economic snapshot.</li>
           </ol>
         </EconPanel>
@@ -338,7 +439,7 @@ function ExecutiveBriefPage({
         </EconPanel>
         <EconPanel title="What outputs it creates" kicker="Presentation outputs">
           <ul className="space-y-2 text-sm leading-6 text-[var(--econ-muted)]">
-            <li>Workspace tables for parcel economics and watchlists.</li>
+            <li>Power BI & Tools tables for parcel economics and watchlists.</li>
             <li>Economic Dashboard indicators and Ask CFS briefings.</li>
             <li>Power BI-ready JSON and CSV table exports.</li>
             <li>Planning-model dimensions, measures, scenarios, and decision-pack payloads.</li>
@@ -598,8 +699,9 @@ function EconomicDashboardPage({
 
 function EconomicsWorkspacePage({
   dataReadiness,
+  embedded = false,
   onClearSelection,
-  onSendSelectedToEnterprise,
+  onUseSelectedInTools,
   onSendSelectedToPrint,
   onToggleSignal,
   scenarioOutputs,
@@ -609,8 +711,9 @@ function EconomicsWorkspacePage({
   watchlist,
 }: {
   dataReadiness: EconomicsReadinessRow[];
+  embedded?: boolean;
   onClearSelection: () => void;
-  onSendSelectedToEnterprise: () => void;
+  onUseSelectedInTools: () => void;
   onSendSelectedToPrint: () => void;
   onToggleSignal: (signal: EconomicsParcelSignal) => void;
   scenarioOutputs: EconomicsScenarioOutput[];
@@ -658,15 +761,19 @@ function EconomicsWorkspacePage({
   };
   return (
     <>
-      <PageHeader
-        kicker="Workspace"
-        title="Economics Workspace"
-        text="Table-first parcel economics and opportunity screening."
-      />
-      <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
-        <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
-        <span>Screening-level economic context, not official appraisal, tax bill, or fiscal impact study.</span>
-      </section>
+      {embedded ? null : (
+        <>
+          <PageHeader
+            kicker="Power BI & Tools"
+            title="Power BI & Tools"
+            text="Table-first parcel economics, Power BI exports, and opportunity screening."
+          />
+          <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
+            <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
+            <span>Screening-level economic context, not official appraisal, tax bill, or fiscal impact study.</span>
+          </section>
+        </>
+      )}
       <EconomicsSlicerBar
         filters={[
           {
@@ -689,7 +796,7 @@ function EconomicsWorkspacePage({
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <EconPanel
           description={activeMeta.description}
-          kicker="Main table"
+          kicker="Section 1 - Select Economics Rows"
           title={activeMeta.label}
         >
           <WorkspaceTableTabs activeTable={activeTable} onChange={setActiveTable} />
@@ -710,13 +817,13 @@ function EconomicsWorkspacePage({
         </EconPanel>
         <SelectedRowsTray
           onClear={onClearSelection}
-          onSendEnterprise={onSendSelectedToEnterprise}
+          onUseSelectedInTools={onUseSelectedInTools}
           onSendPrint={onSendSelectedToPrint}
           selectedSignals={selectedSignals}
         />
       </section>
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
-        <EconPanel title="Workspace Ask CFS" kicker="Analyst prompts">
+        <EconPanel title="Power BI & Tools Ask CFS" kicker="Analyst prompts">
           <AskCfsPanel
             appMode="economics"
             suggestedPromptsOverride={askCfsEconomicsWorkspacePrompts}
@@ -734,6 +841,7 @@ function EconomicsWorkspacePage({
 }
 
 function EnterpriseWorkspacePage({
+  embedded = false,
   exportPayload,
   inputs,
   onNavigate,
@@ -741,47 +849,56 @@ function EnterpriseWorkspacePage({
   powerBiPayload,
   scenarios,
   selectedSignals,
+  showSelectedRowsStep = true,
 }: {
+  embedded?: boolean;
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
-  onNavigate: (section: "workspace" | "print") => void;
+  onNavigate: (section: "tools" | "print") => void;
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
   scenarios: EconomicsScenarioTemplate[];
   selectedSignals: EconomicsParcelSignal[];
+  showSelectedRowsStep?: boolean;
 }) {
   const [selectedOutput, setSelectedOutput] =
-    useState<EnterpriseOutputKind>("scenario");
+    useState<EnterpriseOutputKind>("powerbi");
   return (
     <>
-      <PageHeader
-        kicker="Enterprise Workspace"
-        title="Enterprise Workspace"
-        text="Turn selected economics rows into scenario outputs, BI exports, planning-model structures, and decision packs."
-      />
-      <PageHelper text="Follow the four steps: select data, choose an output, configure it, then export or print." />
-      <section className="rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
-        Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.
-      </section>
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {enterpriseGuidedSteps.map((step) => (
-          <EconCard key={step.title}>
-            <p className="econ-eyebrow">{step.kicker}</p>
-            <h2 className="mt-2 text-base font-semibold text-[var(--econ-text)]">
-              {step.title}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
-              {step.text}
-            </p>
-          </EconCard>
-        ))}
-      </section>
+      {embedded ? null : (
+        <>
+          <PageHeader
+            kicker="Power BI & Tools"
+            title="Power BI & Tools"
+            text="Turn selected economics rows into scenario outputs, BI exports, planning-model structures, and decision packs."
+          />
+          <PageHelper text="Follow the four steps: select data, choose an output, configure it, then export or print." />
+          <section className="rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
+            Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.
+          </section>
+          <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {enterpriseGuidedSteps.map((step) => (
+              <EconCard key={step.title}>
+                <p className="econ-eyebrow">{step.kicker}</p>
+                <h2 className="mt-2 text-base font-semibold text-[var(--econ-text)]">
+                  {step.title}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
+                  {step.text}
+                </p>
+              </EconCard>
+            ))}
+          </section>
+        </>
+      )}
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="grid gap-4">
-          <EnterpriseSelectedRowsPanel
-            onGoToWorkspace={() => onNavigate("workspace")}
-            selectedSignals={selectedSignals}
-          />
+          {showSelectedRowsStep ? (
+            <EnterpriseSelectedRowsPanel
+              onGoToTools={() => onNavigate("tools")}
+              selectedSignals={selectedSignals}
+            />
+          ) : null}
           <EconPanel title="Step 2 - Choose Output" kicker="Output type">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               {enterpriseOutputCards.map((card) => (
@@ -828,10 +945,10 @@ function EnterpriseWorkspacePage({
 }
 
 function EnterpriseSelectedRowsPanel({
-  onGoToWorkspace,
+  onGoToTools,
   selectedSignals,
 }: {
-  onGoToWorkspace: () => void;
+  onGoToTools: () => void;
   selectedSignals: EconomicsParcelSignal[];
 }) {
   return (
@@ -870,14 +987,14 @@ function EnterpriseSelectedRowsPanel({
       ) : (
         <div className="flex flex-col gap-3 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-6 text-[var(--econ-muted)]">
-            No rows selected yet. Start in Workspace, pick the useful rows, then return here.
+            No rows selected yet. Use the table section on this page to pick useful rows, then open a tool.
           </p>
           <button
             className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
-            onClick={onGoToWorkspace}
+            onClick={onGoToTools}
             type="button"
           >
-            Go to Workspace to select rows
+            Select rows on Power BI & Tools
           </button>
         </div>
       )}
@@ -891,7 +1008,7 @@ function EconomicsPrintPage({
   selectedSignals,
 }: {
   intelligence: EconomicsIntelligenceResponse | null;
-  onNavigate: (section: "enterprise" | "workspace") => void;
+  onNavigate: (section: "tools") => void;
   selectedSignals: EconomicsParcelSignal[];
 }) {
   const summary = intelligence?.summary;
@@ -943,11 +1060,8 @@ function EconomicsPrintPage({
         <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copySnapshot()} type="button">
           Copy snapshot summary
         </button>
-        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("workspace")} type="button">
-          Go to Workspace
-        </button>
-        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("enterprise")} type="button">
-          Go to Enterprise Workspace
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("tools")} type="button">
+          Go to Power BI & Tools
         </button>
         {copyStatus ? <span className="self-center text-xs text-[var(--econ-green)]">{copyStatus}</span> : null}
       </section>
@@ -983,7 +1097,7 @@ function EconomicsPrintPage({
           {snapshotRows.length ? (
             <>
               <p className="text-sm text-slate-700">
-                Based on selected Workspace rows: {snapshotRows.length} selected.
+                Based on selected Power BI & Tools rows: {snapshotRows.length} selected.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {snapshotRows.slice(0, 10).map((signal) => (
@@ -996,7 +1110,7 @@ function EconomicsPrintPage({
             </>
           ) : (
             <p className="rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm leading-6 text-slate-700">
-              No rows selected. This snapshot is using the current economics summary. Select rows in Workspace to create a focused parcel/area snapshot.
+              No rows selected. This snapshot is using the current economics summary. Select rows in Power BI & Tools to create a focused parcel/area snapshot.
             </p>
           )}
         </PrintSection>
@@ -1196,7 +1310,7 @@ function EnterpriseToolsPage({
 }: {
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
-  onNavigate: (section: "workspace" | "print") => void;
+  onNavigate: (section: "tools" | "print") => void;
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
   scenarios: EconomicsScenarioTemplate[];
@@ -1254,7 +1368,7 @@ function EnterpriseToolsPage({
   };
   return (
     <>
-      <EconPanel title="Step 3 - Configure" kicker={enterpriseOutputLabel(selectedOutput)}>
+      <EconPanel title="Section 3 - Tool Workspace" kicker={enterpriseOutputLabel(selectedOutput)}>
         {selectedOutput === "scenario" ? (
           <EnterpriseScenarioConfigurePanel
             inputs={inputs}
@@ -1390,7 +1504,7 @@ function EnterpriseToolsPage({
           </div>
         ) : null}
       </EconPanel>
-      <EconPanel title="Step 4 - Export / Next Step" kicker={enterpriseOutputLabel(selectedOutput)}>
+      <EconPanel title="Section 4 - Export / Next Step" kicker={enterpriseOutputLabel(selectedOutput)}>
         <div className="grid gap-3 sm:grid-cols-2">
           {selectedOutput === "scenario" ? (
             <>
@@ -1877,6 +1991,17 @@ function EconCard({ children }: { children: ReactNode }) {
   return <article className="econ-card rounded-2xl p-4">{children}</article>;
 }
 
+function MetricPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2">
+      <p className="text-lg font-semibold text-[var(--econ-text)]">{value}</p>
+      <p className="text-[11px] uppercase tracking-[0.12em] text-[var(--econ-muted)]">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 function EconChip({ children }: { children: ReactNode }) {
   return (
     <span className="max-w-full truncate rounded-full border border-[var(--econ-gold)]/30 bg-[var(--econ-gold)]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f7dc93]">
@@ -2346,18 +2471,18 @@ function SelectableSignalTable({
 function SelectedRowsTray({
   actions = true,
   onClear,
-  onSendEnterprise,
+  onUseSelectedInTools,
   onSendPrint,
   selectedSignals,
 }: {
   actions?: boolean;
   onClear: () => void;
-  onSendEnterprise: () => void;
+  onUseSelectedInTools: () => void;
   onSendPrint: () => void;
   selectedSignals: EconomicsParcelSignal[];
 }) {
   return (
-    <EconPanel title="Selected for Enterprise Workspace / Print" kicker={`${selectedSignals.length} selected`}>
+    <EconPanel title="Selected for Power BI & Tools / Print" kicker={`${selectedSignals.length} selected`}>
       <div className="flex flex-col gap-4">
         <div className="flex max-h-64 flex-wrap gap-2 overflow-auto">
           {selectedSignals.length ? (
@@ -2368,7 +2493,7 @@ function SelectedRowsTray({
             ))
           ) : (
             <p className="text-sm text-[var(--econ-muted)]">
-              Select rows from the workspace tables to move them into model, export, or print work.
+              Select rows from the economics tables to move them into model, export, or print work.
             </p>
           )}
         </div>
@@ -2380,10 +2505,10 @@ function SelectedRowsTray({
           <button
             className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
             disabled={!selectedSignals.length}
-            onClick={onSendEnterprise}
+            onClick={onUseSelectedInTools}
             type="button"
           >
-            Send selected to Enterprise Workspace
+            Use selected rows in tools
           </button>
           <button
             className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
@@ -2639,7 +2764,7 @@ const workspaceTableOptions: Array<{
     label: "Tax-Base Opportunity",
   },
   {
-    description: "Scenario output bands that can be used as starting assumptions in Enterprise Workspace.",
+    description: "Scenario output bands that can be used as starting assumptions in Power BI & Tools.",
     key: "scenario",
     label: "Scenario Candidates",
   },
@@ -3218,7 +3343,7 @@ type EnterpriseOutputKind = "scenario" | "powerbi" | "planning" | "decision";
 const enterpriseGuidedSteps = [
   {
     kicker: "Step 1",
-    text: "Review the rows selected from Economics Workspace.",
+    text: "Review selected rows from the Power BI & Tools tables.",
     title: "Select Data",
   },
   {
@@ -3244,14 +3369,14 @@ const enterpriseOutputCards: ReadonlyArray<{
   title: string;
 }> = [
   {
-    kind: "scenario",
-    text: "Adjust assumptions and review output bands.",
-    title: "Scenario Model",
-  },
-  {
     kind: "powerbi",
     text: "Download CSV tables or preview the JSON pack.",
     title: "Power BI Export",
+  },
+  {
+    kind: "scenario",
+    text: "Adjust assumptions and review output bands.",
+    title: "Scenario Model",
   },
   {
     kind: "planning",
@@ -3419,19 +3544,14 @@ const economicsTourSteps = [
     title: "Overview",
   },
   {
-    short: "Review and select economic rows.",
-    text: "Use Workspace tables to compare parcel economics, data confidence, watchlists, tax-base opportunity, and scenario candidates. Select useful rows before moving into enterprise outputs.",
-    title: "Workspace",
+    short: "Select rows and build exports.",
+    text: "Use Power BI & Tools to compare parcel economics, select useful rows, download CSV/JSON tables, and open scenario, planning-model, or decision-pack workflows.",
+    title: "Power BI & Tools",
   },
   {
     short: "Monitor indicators and Ask CFS.",
     text: "Use Economic Dashboard for KPIs, charts, watchlist summaries, data confidence, and Ask CFS Economics questions.",
     title: "Economic Dashboard",
-  },
-  {
-    short: "Send rows into scenario, BI, and model workflows.",
-    text: "Use Enterprise Workspace to turn selected rows into scenario outputs, Power BI Desktop tables, planning model schemas, and decision-pack previews.",
-    title: "Enterprise Workspace",
   },
   {
     short: "Create a simple economic snapshot.",

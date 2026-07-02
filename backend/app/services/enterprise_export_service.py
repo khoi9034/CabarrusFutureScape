@@ -638,7 +638,7 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
             },
         ],
         "import_steps": [
-            "Beginner path: download the CSV files from CFS Economics -> Enterprise Workspace.",
+            "Beginner path: download the CSV files from CFS Economics -> Power BI & Tools.",
             "Open Power BI Desktop and choose Get Data -> Text/CSV for each fact and dimension table.",
             "Import economics_kpi_fact and parcel_economic_signal_fact first for Page 1.",
             "Import scenario_output_fact and scenario_dim for the Scenario Planning Model page.",

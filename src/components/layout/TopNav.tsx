@@ -107,12 +107,12 @@ const economicsProductModes: Array<{
     title: "CFS Economics overview",
   },
   {
-    description: "Table-first parcel economics",
+    description: "Power BI exports and enterprise tools",
     icon: Search,
-    id: "workspace",
-    label: "Workspace",
-    shortLabel: "Work",
-    title: "Economic tables and watchlists",
+    id: "tools",
+    label: "Power BI & Tools",
+    shortLabel: "Tools",
+    title: "Power BI exports, selected rows, scenarios, and planning tools",
   },
   {
     description: "Growth and tax-base intelligence",
@@ -121,14 +121,6 @@ const economicsProductModes: Array<{
     label: "Economic Dashboard",
     shortLabel: "Dashboard",
     title: "Economic KPI dashboard and scorecards",
-  },
-  {
-    description: "BI exports and planning model",
-    icon: FileSearch,
-    id: "enterprise",
-    label: "Enterprise Workspace",
-    shortLabel: "Enterprise",
-    title: "Enterprise exports, scenarios, and model payloads",
   },
   {
     description: "Printable economic snapshot",
@@ -193,6 +185,10 @@ export function TopNav() {
   const [quickSearchError, setQuickSearchError] = useState<string | null>(null);
   const [quickSearchOpen, setQuickSearchOpen] = useState(false);
   const [quickSearchQuery, setQuickSearchQuery] = useState("");
+  const activeEconomicsSection =
+    economicsSection === "workspace" || economicsSection === "enterprise"
+      ? "tools"
+      : economicsSection;
   const [quickSearchResults, setQuickSearchResults] = useState<ParcelSearchRecord[]>([]);
   const [quickSearchStatus, setQuickSearchStatus] =
     useState<QuickSearchStatus>("idle");
@@ -585,7 +581,7 @@ export function TopNav() {
           >
             {economicsProductModes.map((mode) => {
               const Icon = mode.icon;
-              const active = economicsSection === mode.id;
+              const active = activeEconomicsSection === mode.id;
 
               return (
                 <button
@@ -923,8 +919,8 @@ export function TopNav() {
                       Economic Intelligence
                     </p>
                     <p className="mt-1 text-sm leading-6 text-slate-300">
-                      Use the top navigation for Overview, Workspace, Economic
-                      Dashboard, Enterprise Workspace, and Print.
+                      Use the top navigation for Overview, Power BI & Tools,
+                      Economic Dashboard, and Print.
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">

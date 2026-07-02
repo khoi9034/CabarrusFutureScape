@@ -77,6 +77,7 @@ export type EconomicsSection =
   | "enterprise"
   | "overview"
   | "print"
+  | "tools"
   | "workspace";
 
 export type ParcelReviewView = "actions" | "report" | "review";

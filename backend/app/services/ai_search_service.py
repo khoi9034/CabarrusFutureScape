@@ -690,7 +690,7 @@ def _economics_answer(
             "Open Economic Dashboard and compare Revenue per Acre Dashboard with the Underbuilt Redevelopment Watchlist.",
             "Use Economic Scenario Model only as screening-level fiscal context.",
             "Ask: Where is economic data confidence weak?",
-            "Preview Enterprise Workspace for facts, dimensions, planning-model cells, and decision-pack JSON.",
+            "Open Power BI & Tools for facts, dimensions, planning-model cells, and decision-pack JSON.",
         ],
     )
 
@@ -709,6 +709,11 @@ def _is_economics_workspace_query(query: str) -> bool:
             "what does this table mean",
             "underbuilt candidates need review",
             "rows should go to enterprise workspace",
+            "where did workspace go",
+            "what is power bi & tools",
+            "selected rows in power bi",
+            "use selected rows",
+            "send rows to print",
             "what should i send to print",
             "which rows should i send",
             "send to enterprise workspace",
@@ -742,10 +747,10 @@ def _economics_workspace_answer(
         (
             "Executive takeaway",
             (
-                "Use Workspace as the screening queue. "
+                "Use Power BI & Tools as the screening queue. "
                 f"The current context has {_fmt(summary.get('total_parcels_analyzed'))} parcels, "
                 f"{_fmt(summary.get('underbuilt_candidate_count'))} underbuilt candidates, and "
-                f"{_fmt(summary.get('high_opportunity_count'))} opportunity signals; select rows that need model/export work or a printable snapshot."
+                f"{_fmt(summary.get('high_opportunity_count'))} opportunity signals; select rows that need Power BI, scenario, decision-pack, or printable snapshot work."
             ),
         ),
         (
@@ -757,7 +762,7 @@ def _economics_workspace_answer(
             _bullets(
                 [
                     "Prioritize underbuilt or tax-base opportunity rows with medium-or-better confidence.",
-                    "Send rows to Enterprise Workspace for scenario modeling, Power BI export, or decision-pack evidence.",
+                    "Use selected rows in the Power BI Export, Scenario Model, Planning Model, or Decision Pack tools.",
                     "Send rows to Print when they are ready for a short economic snapshot with caveats and next diligence.",
                 ]
             ),
@@ -770,7 +775,7 @@ def _economics_workspace_answer(
             "Caveats",
             _bullets(
                 [
-                    "Workspace rows are screening-level economics, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+                    "Power BI & Tools rows are screening-level economics, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
                     "Missing value, acreage, constraint, or service fields should be resolved before recommendation.",
                 ]
             ),
@@ -783,7 +788,7 @@ def _economics_workspace_answer(
         request.mode,
         [
             _evidence(
-                "Workspace screening rows",
+                "Power BI & Tools screening rows",
                 f"{_fmt(summary.get('underbuilt_candidate_count'))} underbuilt candidates; {_fmt(summary.get('high_opportunity_count'))} opportunity signals; {_fmt(summary.get('data_needed_count'))} data-needed rows.",
                 "economics_intelligence",
                 "available" if summary else "limited",
@@ -791,7 +796,7 @@ def _economics_workspace_answer(
         ],
         [
             "Select high-priority underbuilt or tax-base opportunity rows.",
-            "Send model/export rows to Enterprise Workspace.",
+            "Use selected rows in Power BI Export, Scenario Model, Planning Model, or Decision Pack.",
             "Send presentation-ready rows to Print.",
             "Check data-needed rows before making a recommendation.",
         ],
@@ -823,7 +828,7 @@ def _economics_print_answer(
     answer = _briefing(
         (
             "Executive takeaway",
-            "Use the Print page as the final screening-level economic snapshot after Workspace selection, dashboard review, and enterprise/scenario setup.",
+            "Use the Print page as the final screening-level economic snapshot after Power BI & Tools selection, dashboard review, and scenario/model setup.",
         ),
         (
             "Snapshot sections",
@@ -889,7 +894,7 @@ def _economics_print_answer(
             )
         ],
         [
-            "Send selected rows from Workspace to Print.",
+            "Send selected rows from Power BI & Tools to Print.",
             "Use Print / Save as PDF for the browser-generated report.",
             "Keep the caveat strip visible.",
             "Copy the snapshot summary for a memo or slide.",
@@ -1072,7 +1077,7 @@ def _economics_dashboard_answer(
         [
             "Filter by opportunity class or data confidence first.",
             "Open Power BI recipe expanders on each visual for table/field mapping.",
-            "Use Enterprise Workspace when ready to export CSV tables.",
+            "Use Power BI & Tools when ready to export CSV tables.",
         ],
     )
 
@@ -1084,17 +1089,16 @@ def _economics_walkthrough_answer(
     answer = _briefing(
         (
             "Executive takeaway",
-            "Walk through CFS Economics in five screens: Overview, Workspace, Economic Dashboard, Enterprise Workspace, then Print. Local live mode uses the FastAPI backend and local PostGIS economics data; portfolio demo mode uses a sanitized cached demo extract.",
+            "Walk through CFS Economics in four screens: Overview, Power BI & Tools, Economic Dashboard, then Print. Local live mode uses the FastAPI backend and local PostGIS economics data; portfolio demo mode uses a sanitized cached demo extract.",
         ),
         (
             "Recommended sequence",
             _bullets(
                 [
                     "1. Overview - explain what CFS Economics is and how local live data differs from the portfolio demo cached demo extract.",
-                    "2. Workspace - review economic tables, select useful rows, and prepare them for enterprise workflows.",
+                    "2. Power BI & Tools - review economic tables, select useful rows, download CSV/JSON exports, and open scenario, planning-model, or decision-pack workflows.",
                     "3. Economic Dashboard - monitor KPIs, watchlists, charts, data confidence, and Ask CFS Economics.",
-                    "4. Enterprise Workspace - turn selected rows into scenario outputs, Power BI Desktop tables, planning-model structure, and decision-pack previews.",
-                    "5. Print - create a simple economic snapshot for presentation or review.",
+                    "4. Print - create a simple economic snapshot for presentation or review.",
                 ]
             ),
         ),
@@ -1120,14 +1124,14 @@ def _economics_walkthrough_answer(
         [
             _evidence(
                 "CFS Economics workflow",
-                "Overview -> Workspace -> Economic Dashboard -> Enterprise Workspace -> Print.",
+                "Overview -> Power BI & Tools -> Economic Dashboard -> Print.",
                 "economics_intelligence",
                 "available",
             )
         ],
         [
-            "Start in Overview, then select rows in Workspace.",
-            "Use Enterprise Workspace for Power BI exports, scenario outputs, planning model schema, and decision-pack previews.",
+            "Start in Overview, then select rows in Power BI & Tools.",
+            "Use Power BI & Tools for Power BI exports, scenario outputs, planning model schema, and decision-pack previews.",
             "Use Print for the final presentation snapshot.",
         ],
     )
@@ -1284,7 +1288,7 @@ def _economics_powerbi_answer(
             ),
         ],
         [
-            "Open Economic Intelligence -> Enterprise Workspace -> Power BI Desktop Practice Pack.",
+            "Open Economic Intelligence -> Power BI & Tools -> Power BI Desktop Practice Pack.",
             "Use Flat CSV Tables first if you are learning Power BI Desktop.",
             "Download the JSON pack and import it into Power BI Desktop.",
             "Build the exported relationships before creating report visuals.",
