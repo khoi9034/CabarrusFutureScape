@@ -1025,6 +1025,8 @@ function EconomicsPrintPage({
         value: row.count,
       }));
   const confidenceRows = countRowsBy(reportRows, (signal) => signal.economic_data_confidence);
+  const segmentRows = countRowsBy(reportRows, (signal) => signal.economic_segment ?? "Unknown / Needs Classification");
+  const hasSpecialAssets = reportRows.some((signal) => signal.special_asset_flag);
   const scenario = intelligence?.scenario_outputs?.[0] ?? fallbackScenarioOutputs[0];
   const snapshotSummary = economicSnapshotSummary(summary, snapshotRows);
   const followUps = nextDiligenceItems(snapshotRows);
@@ -1039,6 +1041,8 @@ function EconomicsPrintPage({
       "CFS Economics Snapshot",
       snapshotSummary,
       `Selected rows: ${snapshotRows.length || "none - using current economics summary"}`,
+      `Segment mix: ${segmentRows.map((row) => `${row.label}: ${row.value}`).join("; ") || "not available"}`,
+      hasSpecialAssets ? "Special asset caution: selected rows include non-comparable assets." : "Special asset caution: none in selected/report rows.",
       "Recommended next diligence:",
       ...followUps.map((item) => `- ${item}`),
       "Caveats:",
@@ -1137,7 +1141,24 @@ function EconomicsPrintPage({
           </div>
         </PrintSection>
 
-        <PrintSection title="5. Fiscal / Service Burden Context">
+        <PrintSection title="5. Segment Mix and Comparison Caveat">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] print:grid-cols-[minmax(0,1fr)_18rem]">
+            <EconomicsBarChart rows={segmentRows} />
+            <div className="rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm leading-6 text-slate-700">
+              <p>Value per acre is most meaningful when compared within similar land-use or property segments.</p>
+              {hasSpecialAssets ? (
+                <p className="mt-2 font-semibold text-amber-900">
+                  Special asset / compare with caution: selected rows include civic, institutional, infrastructure, or utility-style records.
+                </p>
+              ) : null}
+              {!snapshotRows.length ? (
+                <p className="mt-2">No rows are selected, so this countywide summary should be filtered by segment before using it in a decision memo.</p>
+              ) : null}
+            </div>
+          </div>
+        </PrintSection>
+
+        <PrintSection title="6. Fiscal / Service Burden Context">
           <div className="grid gap-2 md:grid-cols-2 print:grid-cols-2">
             {burdenContextRows(reportRows, scenario).map((row) => (
               <PrintKeyValue key={row.label} label={row.label} value={row.value} />
@@ -1145,7 +1166,7 @@ function EconomicsPrintPage({
           </div>
         </PrintSection>
 
-        <PrintSection title="6. Scenario Summary">
+        <PrintSection title="7. Scenario Summary">
           <div className="grid gap-2 md:grid-cols-2 print:grid-cols-2">
             <PrintKeyValue label="Selected/default scenario" value={scenario.title} />
             <PrintKeyValue label="Tax-base lift band" value={scenario.estimated_tax_base_lift_band} />
@@ -1158,20 +1179,20 @@ function EconomicsPrintPage({
           </div>
         </PrintSection>
 
-        <PrintSection title="7. Data Confidence">
+        <PrintSection title="8. Data Confidence">
           <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] print:grid-cols-[18rem_minmax(0,1fr)]">
             <EconomicsBarChart rows={confidenceRows} />
             <ReadinessPrintTable rows={intelligence?.data_readiness ?? []} />
           </div>
         </PrintSection>
 
-        <PrintSection title="8. Recommended Next Diligence">
+        <PrintSection title="9. Recommended Next Diligence">
           <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
             {followUps.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </PrintSection>
 
-        <PrintSection title="9. Caveats and Assumptions">
+        <PrintSection title="10. Caveats and Assumptions">
           <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
             {caveats.map((item) => <li key={item}>{item}</li>)}
           </ul>

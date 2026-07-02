@@ -137,16 +137,16 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
     dev_columns = set(_table_columns(db, "development_activity_parcel_summary")) if _table_exists(db, "development_activity_parcel_summary") else set()
     flood_columns = set(_table_columns(db, "parcel_flood_constraint_overlay")) if _table_exists(db, "parcel_flood_constraint_overlay") else set()
     school_columns = set(_table_columns(db, "parcel_school_summary")) if _table_exists(db, "parcel_school_summary") else set()
-    dev_join = bool(dev_columns & {"development_activity_class", "dominant_permit_segment", "permit_segment"})
-    flood_join = bool(flood_columns & {"flood_review_required", "flood_review_status", "flood_summary", "constraint_status"})
-    school_join = bool(school_columns & {"school_summary_status", "capacity_status", "utilization_status"})
+    dev_join = "official_parcel_id" in dev_columns and bool(dev_columns & {"development_activity_class", "dominant_permit_segment", "permit_segment"})
+    flood_join = "official_parcel_id" in flood_columns and bool(flood_columns & {"flood_review_required", "flood_review_status", "flood_summary", "constraint_status"})
+    school_join = "official_parcel_id" in school_columns and bool(school_columns & {"school_summary_status", "capacity_status", "utilization_status"})
     settings = get_settings()
 
     expressions = _parcel_economics_expressions(
         columns,
-        dev_columns=set(),
-        flood_columns=set(),
-        school_columns=set(),
+        dev_columns=dev_columns if dev_join else set(),
+        flood_columns=flood_columns if flood_join else set(),
+        school_columns=school_columns if school_join else set(),
         zoning_columns=set(),
     )
     base_sql = f"""
@@ -165,6 +165,9 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
           {expressions['flood_context']} AS floodplain_context,
           {expressions['school_context']} AS school_pressure_context
         FROM public.parcels_enriched p
+        {_optional_join(dev_join, "development_activity_parcel_summary", "d")}
+        {_optional_join(flood_join, "parcel_flood_constraint_overlay", "f")}
+        {_optional_join(school_join, "parcel_school_summary", "s")}
         WHERE p.official_parcel_id IS NOT NULL
       ),
       calculated AS (
@@ -286,6 +289,7 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         "jurisdiction_value_summary": [],
         "mode": "live",
         "opportunity_class_breakdown": _opportunity_class_breakdown(signals),
+        "parcel_economic_profiles": signals,
         "parcel_economic_signals": signals,
         "segment_data_confidence": _segment_data_confidence(signals),
         "segment_improvement_ratio": _segment_improvement_ratio(signals),
@@ -297,6 +301,9 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         "scenario_templates": _scenario_templates(),
         "signals": signals,
         "summary": summary,
+        "special_assets_watchlist": [signal for signal in signals if signal.get("special_asset_flag")][:25],
+        "tax_base_opportunity_watchlist": [signal for signal in signals if signal["economic_status_band"] == "tax_base_opportunity"][:25],
+        "top_rows_by_segment": _top_rows_by_segment(signals),
         "underbuilt_watchlist": underbuilt_watchlist,
         "watchlist": watchlist,
     })
@@ -333,37 +340,56 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
     status, opportunity = _status_band(value_per_acre, ratio, land, acreage, row)
     segment = _economic_segment(row, status, opportunity)
     special_asset = segment in {"Institutional / Civic", "Infrastructure / Utility"}
+    if special_asset:
+        status, opportunity = "special_asset", "Special Asset / Compare With Caution"
+    constraint_band = _constraint_burden_band(row, status)
+    tax_base_band = _tax_base_opportunity_band(status, value_per_acre, acreage)
+    public_cost_band = _public_cost_risk_band(constraint_band, status)
     evidence = [
         f"Value per acre: {_money(value_per_acre) if value_per_acre is not None else 'data needed'}.",
         f"Improvement-to-land ratio: {ratio:.2f}" if ratio is not None else "Improvement-to-land ratio needs land and improvement values.",
         row.get("permit_activity_context") or "Permit activity context is not linked for this parcel.",
     ]
+    parcel_id = str(row.get("official_parcel_id"))
+    display_label = _safe_display_label(row.get("geography_label"), parcel_id)
     return {
         "acreage": acreage,
+        "area_id": None,
         "assessed_value": assessed,
         "caveats": [
             "Screening-level economic context only.",
             "Estimated county tax is not a formal tax bill.",
             "Contact fields are excluded.",
+            "Value per acre is most meaningful when compared within similar land-use or property segments.",
         ],
+        "comparable_asset_flag": not special_asset,
+        "comparison_group": "Special asset / compare with caution" if special_asset else segment,
+        "constraint_burden_band": constraint_band,
+        "data_confidence": _economic_data_confidence(row, assessed, acreage, land, improvement),
+        "display_label": display_label,
         "economic_data_confidence": _economic_data_confidence(row, assessed, acreage, land, improvement),
         "economic_segment": segment,
         "economic_segment_order": ECONOMIC_SEGMENTS.index(segment),
         "economic_status_band": status,
-        "comparable_asset_flag": not special_asset,
         "estimated_county_tax": estimate_county_tax(assessed, rate_per_100),
         "estimated_county_tax_screening": estimate_county_tax(assessed, rate_per_100),
         "evidence": evidence,
+        "fiscal_attractiveness_band": _fiscal_attractiveness_band(tax_base_band, public_cost_band),
         "floodplain_context": row.get("floodplain_context"),
-        "geography_label": row.get("geography_label"),
+        "geography_label": display_label,
         "improvement_to_land_ratio": ratio,
+        "improvement_intensity_band": _improvement_intensity_band(ratio),
         "improvement_value": improvement,
         "improvement_value_per_acre": _float(row.get("improvement_value_per_acre")),
+        "jurisdiction": display_label,
+        "land_efficiency_band": _land_efficiency_band(value_per_acre, special_asset),
         "land_value": land,
         "land_value_per_acre": _float(row.get("land_value_per_acre")),
         "opportunity_class": opportunity,
-        "parcel_id": str(row.get("official_parcel_id")),
+        "parcel_id": parcel_id,
         "permit_activity_context": row.get("permit_activity_context"),
+        "profile_id": f"econ-{parcel_id}",
+        "public_cost_risk_band": public_cost_band,
         "recommended_followup": _recommended_followup(status),
         "related_layers": [
             "Revenue per Acre Dashboard",
@@ -373,10 +399,32 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
         "school_pressure_context": row.get("school_pressure_context"),
         "segment_caveat": _segment_caveat(segment),
         "special_asset_flag": special_asset,
+        "tax_base_opportunity_band": tax_base_band,
         "transportation_context": None,
         "utility_readiness_context": "Official utility capacity remains a data need.",
         "value_per_acre": value_per_acre,
     }
+
+
+def _safe_display_label(raw_label: Any, parcel_id: str) -> str:
+    label = str(raw_label or "").strip()
+    if not label or label.lower() == "parcel context":
+        return parcel_id
+    normalized = f" {label.lower().replace('.', ' ')} "
+    corporate_terms = (
+        " llc ",
+        " inc ",
+        " corp ",
+        " corporation ",
+        " company ",
+        " co ",
+        " properties ",
+        " resources ",
+        " development ",
+    )
+    if any(term in normalized for term in corporate_terms):
+        return f"Parcel context {parcel_id[-6:]}"
+    return label
 
 
 def _economic_segment(row: dict[str, Any], status: str, opportunity: str) -> str:
@@ -427,6 +475,7 @@ def _status_band(
     has_constraint = any(term in context for term in ("flood", "review", "capacity", "school", "constraint"))
     employment_context = any(term in context for term in ("industrial", "employment", "airport", "business", "commercial", "corridor"))
     residential_context = any(term in context for term in ("residential", "subdivision", "single", "multi", "housing"))
+    mixed_context = any(term in context for term in ("mixed", "corridor", "downtown", "center", "village"))
 
     if value_per_acre is None or acreage is None:
         return "data_needed", "Needs More Data Before Recommendation"
@@ -438,6 +487,8 @@ def _status_band(
         return "underbuilt_watch", "Underbuilt Redevelopment Candidate"
     if employment_context and acreage >= 2 and value_per_acre < 250000:
         return "industrial_employment_candidate", "Industrial / Employment Candidate"
+    if mixed_context and has_growth:
+        return "mixed_use_corridor_candidate", "Mixed-Use / Corridor Candidate"
     if residential_context and has_growth:
         return "residential_growth_pressure", "Residential Growth Pressure Area"
     if value_per_acre < 150000 and acreage >= 1.0 and has_growth:
@@ -450,14 +501,80 @@ def _status_band(
 def _recommended_followup(status: str) -> str:
     return {
         "data_needed": "Verify acreage, assessed value, land value, and improvement value fields.",
+        "special_asset": "Analyze separately from ordinary parcel peers; compare only with similar civic, institutional, or infrastructure assets.",
         "infrastructure_constrained": "Compare value context with floodplain, utility, transportation, and school pressure layers.",
         "stable_high_value": "Monitor as part of the parcel economic baseline.",
         "tax_base_opportunity": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
         "underbuilt_watch": "Review parcel context, zoning, constraints, and recent permits before any redevelopment scenario.",
         "industrial_employment_candidate": "Review road access, utility readiness, constraints, and employment-site assumptions.",
         "low_fiscal_high_burden": "Verify public service burden before treating this as a fiscal opportunity.",
+        "mixed_use_corridor_candidate": "Review corridor access, zoning/future land use, permits, and service burden before scenario screening.",
         "residential_growth_pressure": "Compare residential permit context with school, utility, and transportation burden.",
     }.get(status, "Review source records before drawing conclusions.")
+
+
+def _land_efficiency_band(value_per_acre: float | None, special_asset: bool = False) -> str:
+    if value_per_acre is None:
+        return "Data Needed"
+    if special_asset:
+        return "Elevated Review"
+    if value_per_acre >= 500_000:
+        return "Strong"
+    if value_per_acre >= 150_000:
+        return "Moderate"
+    return "Low"
+
+
+def _improvement_intensity_band(ratio: float | None) -> str:
+    if ratio is None:
+        return "Data Needed"
+    if ratio >= 1.5:
+        return "Strong"
+    if ratio >= 0.65:
+        return "Moderate"
+    return "Low"
+
+
+def _constraint_burden_band(row: dict[str, Any], status: str) -> str:
+    text_value = " ".join(
+        str(row.get(key) or "")
+        for key in ("floodplain_context", "school_pressure_context", "utility_readiness_context", "transportation_context")
+    ).lower()
+    if "data_needed" in status or "official utility capacity remains a data need" in text_value:
+        return "Data Needed"
+    if status in {"infrastructure_constrained", "low_fiscal_high_burden"} or any(term in text_value for term in ("flood", "capacity", "constraint", "review")):
+        return "Elevated Review"
+    return "Moderate"
+
+
+def _tax_base_opportunity_band(status: str, value_per_acre: float | None, acreage: float | None) -> str:
+    if value_per_acre is None or acreage is None:
+        return "Data Needed"
+    if status in {"tax_base_opportunity", "underbuilt_watch", "mixed_use_corridor_candidate", "industrial_employment_candidate"}:
+        return "Strong"
+    if value_per_acre < 150_000 and acreage >= 1:
+        return "Moderate"
+    return "Low"
+
+
+def _public_cost_risk_band(constraint_band: str, status: str) -> str:
+    if constraint_band == "Data Needed":
+        return "Data Needed"
+    if constraint_band == "Elevated Review" or status in {"infrastructure_constrained", "low_fiscal_high_burden", "residential_growth_pressure"}:
+        return "Elevated Review"
+    return "Moderate"
+
+
+def _fiscal_attractiveness_band(tax_base_band: str, public_cost_band: str) -> str:
+    if "Data Needed" in {tax_base_band, public_cost_band}:
+        return "Data Needed"
+    if public_cost_band == "Elevated Review":
+        return "Elevated Review"
+    if tax_base_band == "Strong":
+        return "Strong"
+    if tax_base_band == "Moderate":
+        return "Moderate"
+    return "Low"
 
 
 def _economic_data_confidence(
@@ -491,11 +608,16 @@ def _segment_summary(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not group:
             continue
         geographies = Counter(str(signal.get("geography_label") or "Parcel context") for signal in group)
+        opportunities = Counter(str(signal.get("opportunity_class") or "Needs More Data Before Recommendation") for signal in group)
+        dominant_opportunity = opportunities.most_common(1)[0][0] if opportunities else "Needs More Data Before Recommendation"
         rows.append({
+            "caveat": _segment_caveat(segment),
             "count": len(group),
             "data_needed_count": sum(1 for signal in group if signal.get("economic_data_confidence") == "data_needed"),
+            "dominant_opportunity_class": dominant_opportunity,
             "median_improvement_to_land_ratio": _median([signal.get("improvement_to_land_ratio") for signal in group]),
             "median_value_per_acre": _median([signal.get("value_per_acre") for signal in group]),
+            "parcel_count": len(group),
             "segment": segment,
             "segment_caveat": _segment_caveat(segment),
             "special_asset_count": sum(1 for signal in group if signal.get("special_asset_flag")),
@@ -509,7 +631,10 @@ def _segment_summary(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _segment_metric_rows(signals: list[dict[str, Any]], key: str) -> list[dict[str, Any]]:
     return [
         {
+            "caveat": row["segment_caveat"],
             "count": row["count"],
+            "median_improvement_to_land_ratio": row["median_improvement_to_land_ratio"],
+            "median_value_per_acre": row["median_value_per_acre"],
             "segment": row["segment"],
             "value": row["median_value_per_acre"] if key == "value_per_acre" else row["median_improvement_to_land_ratio"],
         }
@@ -545,6 +670,36 @@ def _segment_data_confidence(signals: list[dict[str, Any]]) -> list[dict[str, An
         {"count": count, "data_confidence": confidence, "economic_segment": segment}
         for (segment, confidence), count in counts.most_common()
     ]
+
+
+def _top_rows_by_segment(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows = []
+    for segment in ECONOMIC_SEGMENTS:
+        group = [signal for signal in signals if signal.get("economic_segment") == segment]
+        if not group:
+            continue
+        top_rows = sorted(
+            group,
+            key=lambda signal: (
+                bool(signal.get("special_asset_flag")),
+                -(float(signal.get("value_per_acre") or 0)),
+            ),
+        )[:5]
+        rows.append({
+            "profiles": [
+                {
+                    "display_label": signal.get("display_label") or signal.get("geography_label") or signal.get("parcel_id"),
+                    "opportunity_class": signal.get("opportunity_class"),
+                    "parcel_id": signal.get("parcel_id"),
+                    "special_asset_flag": bool(signal.get("special_asset_flag")),
+                    "value_per_acre": signal.get("value_per_acre"),
+                }
+                for signal in top_rows
+            ],
+            "segment": segment,
+            "segment_caveat": _segment_caveat(segment),
+        })
+    return rows
 
 
 def _median(values: list[Any]) -> float | None:
@@ -874,6 +1029,7 @@ def _unavailable_payload(as_of: str, reason: str) -> dict[str, Any]:
         "jurisdiction_value_summary": [],
         "mode": "live",
         "opportunity_class_breakdown": [],
+        "parcel_economic_profiles": [],
         "parcel_economic_signals": [],
         "segment_data_confidence": [],
         "segment_improvement_ratio": [],
@@ -884,7 +1040,10 @@ def _unavailable_payload(as_of: str, reason: str) -> dict[str, Any]:
         "scenario_outputs": _scenario_outputs(summary),
         "scenario_templates": _scenario_templates(),
         "signals": [],
+        "special_assets_watchlist": [],
         "summary": summary,
+        "tax_base_opportunity_watchlist": [],
+        "top_rows_by_segment": [],
         "underbuilt_watchlist": [],
         "watchlist": [],
     })

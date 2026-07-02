@@ -119,6 +119,12 @@ def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:
     assert signal["economic_segment"]
     assert "segment_caveat" in signal
     assert "special_asset_flag" in signal
+    assert signal["profile_id"] == "econ-demo-1"
+    assert signal["display_label"] == "Demo corridor"
+    assert signal["land_efficiency_band"] == "Moderate"
+    assert signal["improvement_intensity_band"] == "Low"
+    assert signal["tax_base_opportunity_band"] == "Strong"
+    assert signal["fiscal_attractiveness_band"] in {"Moderate", "Strong", "Elevated Review", "Data Needed", "Low"}
     assert signal["economic_status_band"] == "underbuilt_watch"
     assert signal["opportunity_class"] == "Underbuilt Redevelopment Candidate"
     assert "owner" not in str(signal).lower()
@@ -163,6 +169,25 @@ def test_economics_signal_handles_missing_denominators_and_class_bands() -> None
     ]
 
 
+def test_economics_signal_masks_corporate_like_display_labels() -> None:
+    signal = _economics_signal(
+        {
+            "acreage": 2,
+            "assessed_value": 500_000,
+            "geography_label": "Example Development LLC",
+            "improvement_value": 100_000,
+            "land_value": 250_000,
+            "official_parcel_id": "0149727442",
+            "value_per_acre": 250_000,
+        },
+        0.57,
+    )
+
+    assert signal["display_label"] == "Parcel context 727442"
+    assert signal["geography_label"] == "Parcel context 727442"
+    assert "Example Development LLC" not in str(signal)
+
+
 def test_economics_segment_summary_handles_unknown_and_special_assets() -> None:
     unknown = _economics_signal(
         {
@@ -193,7 +218,10 @@ def test_economics_segment_summary_handles_unknown_and_special_assets() -> None:
     assert "Unknown / Needs Classification" in segment_names
     assert "Infrastructure / Utility" in segment_names
     assert special["special_asset_flag"] is True
+    assert special["comparable_asset_flag"] is False
+    assert special["opportunity_class"] == "Special Asset / Compare With Caution"
     assert "non-comparable" in special["segment_caveat"]
+    assert any(row.get("dominant_opportunity_class") for row in summary)
 
 
 def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> None:
@@ -394,6 +422,11 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
     assert tables["economics_kpi_fact"][0]["kpi_name"] == "Parcels analyzed"
     signal_fact = tables["parcel_economic_signal_fact"][0]
     assert signal_fact["economic_segment"] == "Unknown / Needs Classification"
+    assert "comparable_asset_flag" in signal_fact
+    assert "comparison_group" in signal_fact
+    assert "land_efficiency_band" in signal_fact
+    assert "public_cost_risk_band" in signal_fact
+    assert "fiscal_attractiveness_band" in signal_fact
     assert "segment_caveat" in signal_fact
     assert "special_asset_flag" in signal_fact
     assert tables["parcel_economic_signal_fact"][0]["improvement_to_land_ratio_band"] == "low"
@@ -420,6 +453,10 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
     assert csv_rows[0]["kpi_name"] == "Parcels analyzed"
     assert "owner" not in csv_text.lower()
     assert "mailing" not in csv_text.lower()
+    signal_csv = powerbi_table_to_csv(payload, "parcel_economic_signal_fact")
+    assert "economic_segment" in signal_csv.splitlines()[0]
+    assert "comparable_asset_flag" in signal_csv.splitlines()[0]
+    assert "fiscal_attractiveness_band" in signal_csv.splitlines()[0]
     manifest = build_powerbi_csv_manifest(payload)
     assert len(manifest["tables"]) == 7
     assert manifest["recommended_import_order"][0] == "economics_kpi_fact"

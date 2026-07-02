@@ -44,13 +44,18 @@ POWERBI_CSV_TABLES = {
             "geography_label",
             "economic_segment",
             "economic_segment_order",
+            "comparable_asset_flag",
+            "comparison_group",
             "special_asset_flag",
             "segment_caveat",
             "opportunity_class",
             "value_per_acre_band",
             "improvement_to_land_ratio_band",
+            "land_efficiency_band",
             "tax_base_opportunity_band",
             "constraint_burden_band",
+            "public_cost_risk_band",
+            "fiscal_attractiveness_band",
             "data_confidence",
             "recommended_followup",
         ],
@@ -285,6 +290,9 @@ def _kpi_fact(kpis: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
+            "comparable_asset_flag": bool(row.get("comparable_asset_flag", not row.get("special_asset_flag"))),
+            "comparison_group": row.get("comparison_group"),
+            "constraint_burden_band": row.get("constraint_burden_band"),
             "economic_data_confidence": row.get("economic_data_confidence"),
             "economic_segment": row.get("economic_segment"),
             "economic_segment_order": row.get("economic_segment_order"),
@@ -293,11 +301,14 @@ def _signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
             or row.get("estimated_county_tax"),
             "geography_label": row.get("geography_label"),
             "improvement_to_land_ratio": row.get("improvement_to_land_ratio"),
+            "land_efficiency_band": row.get("land_efficiency_band"),
             "opportunity_class": row.get("opportunity_class"),
             "parcel_id": row.get("parcel_id"),
+            "public_cost_risk_band": row.get("public_cost_risk_band"),
             "recommended_followup": row.get("recommended_followup"),
             "segment_caveat": row.get("segment_caveat"),
             "special_asset_flag": bool(row.get("special_asset_flag")),
+            "tax_base_opportunity_band": row.get("tax_base_opportunity_band"),
             "value_per_acre": row.get("value_per_acre"),
         }
         for row in signals
@@ -467,19 +478,24 @@ def _powerbi_kpi_fact(
 def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
-            "constraint_burden_band": _constraint_burden_band(row),
+            "comparable_asset_flag": bool(row.get("comparable_asset_flag", not row.get("special_asset_flag"))),
+            "comparison_group": row.get("comparison_group") or row.get("economic_segment") or "Unknown / Needs Classification",
+            "constraint_burden_band": row.get("constraint_burden_band") or _constraint_burden_band(row),
             "data_confidence": row.get("economic_data_confidence"),
             "economic_segment": row.get("economic_segment") or "Unknown / Needs Classification",
             "economic_segment_order": row.get("economic_segment_order"),
+            "fiscal_attractiveness_band": row.get("fiscal_attractiveness_band"),
             "geography_label": row.get("geography_label"),
             "improvement_to_land_ratio_band": _ratio_band(row.get("improvement_to_land_ratio")),
+            "land_efficiency_band": row.get("land_efficiency_band"),
             "opportunity_class": row.get("opportunity_class"),
             "parcel_id": row.get("parcel_id"),
+            "public_cost_risk_band": row.get("public_cost_risk_band"),
             "recommended_followup": row.get("recommended_followup"),
             "segment_caveat": row.get("segment_caveat") or "Compare value per acre within similar land-use or property segments.",
             "signal_id": row.get("parcel_id") or f"signal-{index + 1}",
             "special_asset_flag": bool(row.get("special_asset_flag")),
-            "tax_base_opportunity_band": _tax_base_opportunity_band(row),
+            "tax_base_opportunity_band": row.get("tax_base_opportunity_band") or _tax_base_opportunity_band(row),
             "value_per_acre_band": _value_per_acre_band(row.get("value_per_acre")),
         }
         for index, row in enumerate(signals)

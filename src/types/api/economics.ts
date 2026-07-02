@@ -3,8 +3,10 @@ export type EconomicsStatusBand =
   | "industrial_employment_candidate"
   | "infrastructure_constrained"
   | "low_fiscal_high_burden"
+  | "mixed_use_corridor_candidate"
   | "redevelopment_opportunity"
   | "residential_growth_pressure"
+  | "special_asset"
   | "stable_high_value"
   | "tax_base_opportunity"
   | "underbuilt_watch"
@@ -27,29 +29,40 @@ export interface EconomicsParcelSignal {
   acreage: number | null;
   assessed_value: number | null;
   caveats: string[];
+  comparable_asset_flag?: boolean;
+  comparison_group?: string | null;
+  constraint_burden_band?: string | null;
+  data_confidence?: string;
+  display_label?: string | null;
   economic_data_confidence: "strong" | "medium" | "proxy" | "data_needed" | string;
   economic_segment?: string;
   economic_segment_order?: number | null;
   economic_status_band: EconomicsStatusBand;
-  comparable_asset_flag?: boolean;
   estimated_county_tax: number | null;
   estimated_county_tax_screening: number | null;
   evidence: string[];
+  fiscal_attractiveness_band?: string | null;
   floodplain_context: string | null;
   geography_label: string | null;
   improvement_to_land_ratio: number | null;
+  improvement_intensity_band?: string | null;
   improvement_value: number | null;
   improvement_value_per_acre: number | null;
+  jurisdiction?: string | null;
+  land_efficiency_band?: string | null;
   land_value: number | null;
   land_value_per_acre: number | null;
   opportunity_class: string;
   parcel_id: string;
   permit_activity_context: string | null;
+  profile_id?: string;
+  public_cost_risk_band?: string | null;
   recommended_followup: string;
   related_layers: string[];
   school_pressure_context: string | null;
   segment_caveat?: string | null;
   special_asset_flag?: boolean;
+  tax_base_opportunity_band?: string | null;
   transportation_context: string | null;
   utility_readiness_context: string | null;
   value_per_acre: number | null;
@@ -114,10 +127,13 @@ export interface EconomicsJurisdictionValueSummary {
 }
 
 export interface EconomicsSegmentSummary {
+  caveat?: string;
   count: number;
   data_needed_count: number;
+  dominant_opportunity_class?: string;
   median_improvement_to_land_ratio: number | null;
   median_value_per_acre: number | null;
+  parcel_count?: number;
   segment: string;
   segment_caveat: string;
   special_asset_count: number;
@@ -141,11 +157,15 @@ export interface EconomicsIntelligenceResponse {
   mode: "demo" | "live";
   opportunity_class_breakdown: EconomicsOpportunityClassBreakdown[];
   parcel_economic_signals: EconomicsParcelSignal[];
+  parcel_economic_profiles?: EconomicsParcelSignal[];
   segment_data_confidence?: Array<Record<string, unknown>>;
   segment_improvement_ratio?: Array<Record<string, unknown>>;
   segment_opportunity_breakdown?: Array<Record<string, unknown>>;
   segment_summary?: EconomicsSegmentSummary[];
   segment_value_per_acre?: Array<Record<string, unknown>>;
+  special_assets_watchlist?: EconomicsParcelSignal[];
+  tax_base_opportunity_watchlist?: EconomicsParcelSignal[];
+  top_rows_by_segment?: Array<Record<string, unknown>>;
   scenario_model?: {
     inputs: EconomicsScenarioInput[];
     outputs: EconomicsScenarioOutput[];
