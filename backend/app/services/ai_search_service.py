@@ -562,6 +562,8 @@ def _economics_answer(
     readiness = economics.get("data_readiness", []) if isinstance(economics, dict) else []
     if _is_economics_walkthrough_query(request.query):
         return _economics_walkthrough_answer(request, context)
+    if _is_economics_workspace_query(request.query):
+        return _economics_workspace_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_dashboard_query(request.query):
         return _economics_dashboard_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_powerbi_query(request.query):
@@ -692,6 +694,104 @@ def _economics_answer(
 def _is_economics_walkthrough_query(query: str) -> bool:
     normalized = query.lower()
     return "walk through" in normalized or "tour" in normalized
+
+
+def _is_economics_workspace_query(query: str) -> bool:
+    normalized = query.lower()
+    return any(
+        phrase in normalized
+        for phrase in (
+            "which rows should i select",
+            "what does this table mean",
+            "underbuilt candidates need review",
+            "rows should go to enterprise workspace",
+            "what should i send to print",
+            "which rows should i send",
+            "send to enterprise workspace",
+            "data confidence weak",
+        )
+    )
+
+
+def _economics_workspace_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    economics: dict[str, Any],
+) -> CfsAiSearchResponse:
+    summary = economics.get("summary", {})
+    watchlist = [row for row in economics.get("underbuilt_watchlist", [])[:3] if isinstance(row, dict)]
+    weak_confidence = [
+        row
+        for row in economics.get("parcel_economic_signals", [])
+        if isinstance(row, dict)
+        and row.get("economic_data_confidence") in {"data_needed", "proxy"}
+    ][:3]
+    watch_rows = [
+        f"{row.get('geography_label') or row.get('parcel_id')}: {row.get('opportunity_class')}; {row.get('recommended_followup')}"
+        for row in watchlist
+    ]
+    weak_rows = [
+        f"{row.get('geography_label') or row.get('parcel_id')}: {row.get('economic_data_confidence')}; verify value, acreage, constraint, or service context before recommendation."
+        for row in weak_confidence
+    ]
+    answer = _briefing(
+        (
+            "Executive takeaway",
+            (
+                "Use Workspace as the screening queue. "
+                f"The current context has {_fmt(summary.get('total_parcels_analyzed'))} parcels, "
+                f"{_fmt(summary.get('underbuilt_candidate_count'))} underbuilt candidates, and "
+                f"{_fmt(summary.get('high_opportunity_count'))} opportunity signals; select rows that need model/export work or a printable snapshot."
+            ),
+        ),
+        (
+            "Rows to select first",
+            _bullets(watch_rows or ["Underbuilt watch rows are not available in the current context."]),
+        ),
+        (
+            "How to use the table",
+            _bullets(
+                [
+                    "Prioritize underbuilt or tax-base opportunity rows with medium-or-better confidence.",
+                    "Send rows to Enterprise Workspace for scenario modeling, Power BI export, or decision-pack evidence.",
+                    "Send rows to Print when they are ready for a short economic snapshot with caveats and next diligence.",
+                ]
+            ),
+        ),
+        (
+            "Data confidence weak spots",
+            _bullets(weak_rows or ["No weak-confidence rows are visible in the current context."]),
+        ),
+        (
+            "Caveats",
+            _bullets(
+                [
+                    "Workspace rows are screening-level economics, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+                    "Missing value, acreage, constraint, or service fields should be resolved before recommendation.",
+                ]
+            ),
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "Workspace screening rows",
+                f"{_fmt(summary.get('underbuilt_candidate_count'))} underbuilt candidates; {_fmt(summary.get('high_opportunity_count'))} opportunity signals; {_fmt(summary.get('data_needed_count'))} data-needed rows.",
+                "economics_intelligence",
+                "available" if summary else "limited",
+            )
+        ],
+        [
+            "Select high-priority underbuilt or tax-base opportunity rows.",
+            "Send model/export rows to Enterprise Workspace.",
+            "Send presentation-ready rows to Print.",
+            "Check data-needed rows before making a recommendation.",
+        ],
+    )
 
 
 def _is_economics_dashboard_query(query: str) -> bool:

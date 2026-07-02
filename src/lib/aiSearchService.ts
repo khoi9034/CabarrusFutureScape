@@ -61,6 +61,15 @@ export const askCfsEconomicsSuggestedPrompts = [
   "Should I use JSON or CSV for Power BI?",
 ] as const;
 
+export const askCfsEconomicsWorkspacePrompts = [
+  "Which rows should I select first?",
+  "What does this table mean?",
+  "Which underbuilt candidates need review?",
+  "Which rows should go to Enterprise Workspace?",
+  "What should I send to Print?",
+  "Where is data confidence weak?",
+] as const;
+
 export async function searchCfsAi(
   request: CfsAiSearchRequest,
   options: { signal?: AbortSignal } = {},
@@ -148,6 +157,9 @@ async function demoEconomicsAnswer(
   const economics = await getDemoEconomicsIntelligence();
   if (isEconomicsWalkthroughQuery(request?.query ?? "")) {
     return demoEconomicsWalkthroughAnswer(economics.as_of);
+  }
+  if (isEconomicsWorkspaceQuery(request?.query ?? "")) {
+    return demoEconomicsWorkspaceAnswer(economics);
   }
   if (isEconomicsDashboardQuery(request?.query ?? "")) {
     return demoEconomicsDashboardAnswer(economics);
@@ -455,6 +467,98 @@ function isEconomicsPowerBiQuery(query: string) {
     "report pages",
     "visuals",
   ].some((term) => normalized.includes(term));
+}
+
+function isEconomicsWorkspaceQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return [
+    "which rows should i select",
+    "what does this table mean",
+    "underbuilt candidates need review",
+    "rows should go to enterprise workspace",
+    "what should i send to print",
+    "which rows should i send",
+    "send to enterprise workspace",
+    "data confidence weak",
+  ].some((term) => normalized.includes(term));
+}
+
+function demoEconomicsWorkspaceAnswer(
+  economics: EconomicsIntelligenceResponse,
+): CfsAiSearchResponse {
+  const summary = economics.summary;
+  const underbuilt = economics.underbuilt_watchlist.slice(0, 3);
+  const weakConfidence = economics.parcel_economic_signals
+    .filter((signal) =>
+      ["data_needed", "proxy"].includes(signal.economic_data_confidence),
+    )
+    .slice(0, 3);
+
+  return {
+    answer: briefing(
+      [
+        "Executive takeaway",
+        `Use Workspace as the screening queue. The cached demo extract has ${format(summary.total_parcels_analyzed)} parcels, ${format(summary.underbuilt_candidate_count)} underbuilt candidates, and ${format(summary.high_opportunity_count)} opportunity signals; select rows that need model/export work or a printable snapshot.`,
+      ],
+      [
+        "Rows to select first",
+        bullets(
+          underbuilt.length
+            ? underbuilt.map((signal) => `${signal.geography_label ?? signal.parcel_id}: ${signal.opportunity_class}; ${signal.recommended_followup}`)
+            : ["Underbuilt watch rows are not available in the cached demo extract."],
+        ),
+      ],
+      [
+        "How to use the table",
+        bullets([
+          "Prioritize underbuilt or tax-base opportunity rows with medium-or-better confidence.",
+          "Send rows to Enterprise Workspace for scenario modeling, Power BI export, or decision-pack evidence.",
+          "Send rows to Print when they are ready for a short economic snapshot with caveats and next diligence.",
+        ]),
+      ],
+      [
+        "Data confidence weak spots",
+        bullets(
+          weakConfidence.length
+            ? weakConfidence.map((signal) => `${signal.geography_label ?? signal.parcel_id}: ${signal.economic_data_confidence}; verify value, acreage, constraint, or service context before recommendation.`)
+            : ["No weak-confidence rows are visible in the current cached extract."],
+        ),
+      ],
+      [
+        "Caveats",
+        bullets([
+          "Portfolio Demo uses a cached demo extract.",
+          "Workspace rows are screening-level economics, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+        ]),
+      ],
+    ),
+    as_of: economics.as_of,
+    caveats: economics.caveats,
+    dashboard_actions: {
+      filter_watchlist: { domain: "economics", status: "underbuilt_watch" },
+      focus_domain: "economics",
+      highlight_kpis: ["underbuilt_candidates", "tax_base_opportunity", "data_needed"],
+      recommended_layers: ["Workspace", "Enterprise Workspace", "Print"],
+    },
+    data_mode: "demo",
+    domains: ["economics"],
+    evidence: [
+      evidence(
+        "Workspace screening rows",
+        `${format(summary.underbuilt_candidate_count)} underbuilt candidates; ${format(summary.high_opportunity_count)} opportunity signals; ${format(summary.data_needed_count)} data-needed rows.`,
+        "public/demo-data/economics_intelligence.json",
+        "available",
+      ),
+    ],
+    provider: "none",
+    related_layers: ["Workspace", "Enterprise Workspace", "Print"],
+    suggested_actions: [
+      "Select high-priority underbuilt or tax-base opportunity rows.",
+      "Send model/export rows to Enterprise Workspace.",
+      "Send presentation-ready rows to Print.",
+      "Check data-needed rows before making a recommendation.",
+    ],
+  };
 }
 
 function demoEconomicsPowerBiAnswer(

@@ -24,11 +24,13 @@ export function AskCfsPanel({
   appMode = "planning",
   externalRequest,
   onResponse,
+  suggestedPromptsOverride,
   visiblePromptCount,
 }: {
   appMode?: CfsAppMode;
   externalRequest?: AskCfsExternalRequest | null;
   onResponse?: (response: CfsAiSearchResponse) => void;
+  suggestedPromptsOverride?: readonly string[];
   visiblePromptCount?: number;
 }) {
   const [answer, setAnswer] = useState<CfsAiSearchResponse | null>(null);
@@ -39,10 +41,10 @@ export function AskCfsPanel({
   const [query, setQuery] = useState("");
   const lastExternalRequestId = useRef<number | null>(null);
   const lastTurn = turns.at(-1);
-  const suggestedPrompts =
-    appMode === "economics"
+  const suggestedPrompts = suggestedPromptsOverride ??
+    (appMode === "economics"
       ? askCfsEconomicsSuggestedPrompts
-      : askCfsSuggestedPrompts;
+      : askCfsSuggestedPrompts);
   const visiblePrompts = visiblePromptCount
     ? suggestedPrompts.slice(0, visiblePromptCount)
     : suggestedPrompts;

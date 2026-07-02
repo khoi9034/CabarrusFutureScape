@@ -271,7 +271,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Uses a sanitized cached demo extract for portfolio review." in economics_shell
     assert "You are here:" in economics_shell
     assert "Understand the workflow." in economics_shell
-    assert "Select rows from economic tables." in economics_shell
+    assert "Table-first parcel economics and opportunity screening." in economics_shell
+    assert "Screening-level economic context, not official appraisal, tax bill, or fiscal impact study." in economics_shell
     assert "Review indicators and ask CFS." in economics_shell
     assert "EconomicsSlicerBar" in economics_shell
     assert "EconomicsDonutChart" in economics_shell
@@ -292,12 +293,20 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "What it is not" in economics_shell
     assert "Why this matters" in economics_shell
     assert "Parcel Economic Baseline" in economics_shell
+    assert "WorkspaceTableTabs" in economics_shell
+    assert "Table type" in economics_shell
+    assert "Opportunity Class" in economics_shell
+    assert "Geography / Jurisdiction" in economics_shell
+    assert "Burden Band" in economics_shell
     assert "Tax-Base Opportunity" in economics_shell
     assert "Scenario Candidates" in economics_shell
     assert "Data Readiness" in economics_shell
     assert "Selected for Enterprise Workspace" in economics_shell
     assert "Send selected to Enterprise Workspace" in economics_shell
-    assert "Select rows from the workspace tables to move them into model and export work." in economics_shell
+    assert "Send selected to Print" in economics_shell
+    assert "Select rows from the workspace tables to move them into model, export, or print work." in economics_shell
+    assert "Selected rows can become Power BI table filters, scenario model context, or decision-pack evidence." in economics_shell
+    assert "Workspace Ask CFS" in economics_shell
     assert "Step 1 - Select Data" in economics_shell
     assert "Step 2 - Choose Output" in economics_shell
     assert "Step 3 - Configure" in economics_shell
@@ -346,6 +355,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert '"/economics/powerbi-export"' in economics_service
     assert "EnterpriseExportPreviewKind" in enterprise_export_types
     assert "askCfsEconomicsSuggestedPrompts" in ask_service
+    assert "askCfsEconomicsWorkspacePrompts" in ask_service
     assert 'app_mode === "economics"' in ask_service
     assert "Traditional GIS can show where things are" in overview
     assert "Consulting Decision Workflows" in overview
@@ -355,6 +365,11 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Explain the scenario comparison matrix." in ask_service
     assert "What does the data confidence register show?" in ask_service
     assert "Which chart shows fiscal burden?" in ask_service
+    assert "Which rows should I select first?" in ask_service
+    assert "What does this table mean?" in ask_service
+    assert "Which underbuilt candidates need review?" in ask_service
+    assert "Which rows should go to Enterprise Workspace?" in ask_service
+    assert "What should I send to Print?" in ask_service
     assert "How should I walk through CFS Economics?" in ask_service
     assert "Which rows should I send?" in ask_service
     assert "How do I build this in Power BI?" in ask_service
