@@ -1,12 +1,9 @@
 "use client";
 
 import {
-  BarChart3,
   Calculator,
   Database,
-  FileJson,
   Gauge,
-  Layers3,
   Search,
   ShieldAlert,
 } from "lucide-react";
@@ -137,6 +134,7 @@ export function EconomicsShell() {
           <EnterpriseWorkspacePage
             exportPayload={enterpriseExport}
             inputs={intelligence?.scenario_inputs ?? []}
+            onNavigate={setEconomicsSection}
             outputs={intelligence?.scenario_outputs ?? []}
             powerBiPayload={powerBiExport}
             scenarios={intelligence?.scenario_templates ?? []}
@@ -572,157 +570,10 @@ function EconomicsWorkspacePage({
   );
 }
 
-function ScenarioLabPage({
-  inputs,
-  outputs,
-  scenarios,
-}: {
-  inputs: EconomicsScenarioInput[];
-  outputs: EconomicsScenarioOutput[];
-  scenarios: EconomicsScenarioTemplate[];
-}) {
-  const [assumptions, setAssumptions] = useState<ScenarioAssumptions>(
-    initialScenarioAssumptions,
-  );
-  const scenarioRows = scenarioCatalog.map((scenario) => ({
-    ...scenario,
-    what_it_tests:
-      scenarios.find((row) => row.id === scenario.id)?.what_it_tests ??
-      scenario.what_it_tests,
-  }));
-  const selectedScenario =
-    scenarioRows.find((scenario) => scenario.id === assumptions.scenarioId) ??
-    scenarioRows[0];
-  const output = calculateScenarioOutput(assumptions);
-  const currentOutput = calculateScenarioOutput({
-    ...initialScenarioAssumptions,
-    scenarioId: "current_conditions",
-  });
-  const alternativeOutput = calculateScenarioOutput({
-    ...assumptions,
-    scenarioId:
-      assumptions.scenarioId === "industrial_employment"
-        ? "residential_growth"
-        : "industrial_employment",
-  });
-  const memo = scenarioDecisionMemo(selectedScenario.title, assumptions, output);
-  const evidencePack = scenarioEvidencePack(inputs, assumptions, output);
-  const updateAssumption = (key: keyof ScenarioAssumptions, value: string) => {
-    setAssumptions((current) => ({ ...current, [key]: value }));
-  };
-  return (
-    <>
-      <PageHeader
-        kicker="Scenario Model"
-        title="Economic scenario model"
-        text="Select a scenario, adjust assumptions, review output bands, and generate a screening-level consulting memo."
-      />
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {scenarioRows.map((scenario) => (
-          <button
-            className={`econ-card rounded-2xl p-4 text-left transition ${
-              assumptions.scenarioId === scenario.id
-                ? "border-[var(--econ-gold)]/60 bg-[var(--econ-gold)]/10"
-                : ""
-            }`}
-            key={scenario.id}
-            onClick={() =>
-              setAssumptions({
-                ...initialScenarioAssumptions,
-                ...scenarioDefaults[scenario.id],
-                scenarioId: scenario.id,
-              })
-            }
-            type="button"
-          >
-            <Calculator className="h-5 w-5 text-[var(--econ-gold)]" />
-            <h2 className="mt-3 text-base font-semibold text-[var(--econ-text)]">
-              {scenario.title}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
-              {scenario.what_it_tests}
-            </p>
-          </button>
-        ))}
-      </section>
-      <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-        <EconPanel title="Assumption Controls" kicker="Inputs">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <ScenarioSelect
-              label="Development type"
-              onChange={(value) => updateAssumption("developmentType", value)}
-              options={developmentTypeOptions}
-              value={assumptions.developmentType}
-            />
-            <ScenarioSelect
-              label="Intensity band"
-              onChange={(value) => updateAssumption("intensityBand", value)}
-              options={basicBandOptions}
-              value={assumptions.intensityBand}
-            />
-            <ScenarioSelect
-              label="Value-per-acre assumption"
-              onChange={(value) => updateAssumption("valuePerAcreBand", value)}
-              options={basicBandOptions}
-              value={assumptions.valuePerAcreBand}
-            />
-            <ScenarioSelect
-              label="School / service burden"
-              onChange={(value) => updateAssumption("schoolServiceBurden", value)}
-              options={burdenBandOptions}
-              value={assumptions.schoolServiceBurden}
-            />
-            <ScenarioSelect
-              label="Utility readiness confidence"
-              onChange={(value) => updateAssumption("utilityReadiness", value)}
-              options={confidenceBandOptions}
-              value={assumptions.utilityReadiness}
-            />
-            <ScenarioSelect
-              label="Transportation access confidence"
-              onChange={(value) => updateAssumption("transportationAccess", value)}
-              options={confidenceBandOptions}
-              value={assumptions.transportationAccess}
-            />
-            <ScenarioSelect
-              label="Flood / environmental constraint"
-              onChange={(value) => updateAssumption("floodConstraint", value)}
-              options={burdenBandOptions}
-              value={assumptions.floodConstraint}
-            />
-          </div>
-        </EconPanel>
-        <EconPanel title="Scenario Output" kicker="Output bands">
-          <ScenarioBandGrid output={output} />
-        </EconPanel>
-      </section>
-      <section className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
-        <EconPanel title="Scenario Comparison Matrix" kicker="Comparison">
-          <ScenarioComparisonMatrix
-            rows={[
-              { label: "Current Conditions", output: currentOutput },
-              { label: selectedScenario.title, output },
-              { label: "Alternative scenario", output: alternativeOutput },
-            ]}
-          />
-        </EconPanel>
-        <EconPanel title="Evidence Pack" kicker="Evidence">
-          <Matrix rows={evidencePack} />
-        </EconPanel>
-      </section>
-      <EconPanel title="Decision memo" kicker="Consulting output">
-        <Matrix rows={memo} />
-      </EconPanel>
-      <EconPanel title="Reference scenario bands" kicker="Export baseline">
-        <ScenarioOutputList rows={outputs.length ? outputs : fallbackScenarioOutputs} />
-      </EconPanel>
-    </>
-  );
-}
-
 function EnterpriseWorkspacePage({
   exportPayload,
   inputs,
+  onNavigate,
   outputs,
   powerBiPayload,
   scenarios,
@@ -730,23 +581,30 @@ function EnterpriseWorkspacePage({
 }: {
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
+  onNavigate: (section: "workspace" | "print") => void;
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
   scenarios: EconomicsScenarioTemplate[];
   selectedSignals: EconomicsParcelSignal[];
 }) {
+  const [selectedOutput, setSelectedOutput] =
+    useState<EnterpriseOutputKind>("scenario");
   return (
     <>
       <PageHeader
         kicker="Enterprise Workspace"
-        title="Move selected economics rows into model and export work"
-        text="Selected parcel economics rows become planning-model context, Power BI practice tables, scenario assumptions, and decision-pack evidence. No external credentials are required."
+        title="Enterprise Workspace"
+        text="Turn selected economics rows into scenario outputs, BI exports, planning-model structures, and decision packs."
       />
-      <PageHelper text="Turn selected rows into scenarios, exports, and decision packs." />
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        {enterpriseWorkspaceSteps.map((step) => (
+      <PageHelper text="Follow the four steps: select data, choose an output, configure it, then export or print." />
+      <section className="rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
+        Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.
+      </section>
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {enterpriseGuidedSteps.map((step) => (
           <EconCard key={step.title}>
-            <h2 className="text-base font-semibold text-[var(--econ-text)]">
+            <p className="econ-eyebrow">{step.kicker}</p>
+            <h2 className="mt-2 text-base font-semibold text-[var(--econ-text)]">
               {step.title}
             </h2>
             <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
@@ -755,15 +613,112 @@ function EnterpriseWorkspacePage({
           </EconCard>
         ))}
       </section>
-      <SelectedRowsTray
-        actions={false}
-        onClear={() => undefined}
-        onSend={() => undefined}
-        selectedSignals={selectedSignals}
-      />
-      <ScenarioLabPage inputs={inputs} outputs={outputs} scenarios={scenarios} />
-      <EnterpriseToolsPage exportPayload={exportPayload} powerBiPayload={powerBiPayload} />
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="grid gap-4">
+          <EnterpriseSelectedRowsPanel
+            onGoToWorkspace={() => onNavigate("workspace")}
+            selectedSignals={selectedSignals}
+          />
+          <EconPanel title="Step 2 - Choose Output" kicker="Output type">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {enterpriseOutputCards.map((card) => (
+                <button
+                  className={`econ-card rounded-2xl p-4 text-left transition ${
+                    selectedOutput === card.kind
+                      ? "border-[var(--econ-gold)]/60 bg-[var(--econ-gold)]/10"
+                      : ""
+                  }`}
+                  key={card.kind}
+                  onClick={() => setSelectedOutput(card.kind)}
+                  type="button"
+                >
+                  <h2 className="text-base font-semibold text-[var(--econ-text)]">
+                    {card.title}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
+                    {card.text}
+                  </p>
+                  <span className="mt-3 inline-flex rounded-lg border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)]">
+                    Open
+                  </span>
+                </button>
+              ))}
+            </div>
+          </EconPanel>
+          <EnterpriseToolsPage
+            exportPayload={exportPayload}
+            inputs={inputs}
+            onNavigate={onNavigate}
+            outputs={outputs}
+            powerBiPayload={powerBiPayload}
+            scenarios={scenarios}
+            selectedOutput={selectedOutput}
+            selectedSignals={selectedSignals}
+          />
+        </div>
+        <EconPanel title="Ask CFS Economics" kicker="Assistant">
+          <AskCfsPanel appMode="economics" visiblePromptCount={6} />
+        </EconPanel>
+      </section>
     </>
+  );
+}
+
+function EnterpriseSelectedRowsPanel({
+  onGoToWorkspace,
+  selectedSignals,
+}: {
+  onGoToWorkspace: () => void;
+  selectedSignals: EconomicsParcelSignal[];
+}) {
+  return (
+    <EconPanel title="Step 1 - Select Data" kicker={`${selectedSignals.length} selected rows`}>
+      {selectedSignals.length ? (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[620px] border-separate border-spacing-y-2 text-left text-sm">
+            <thead className="text-xs uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+              <tr>
+                <th className="px-3 py-2">Area / parcel</th>
+                <th className="px-3 py-2">Opportunity</th>
+                <th className="px-3 py-2">Value / acre</th>
+                <th className="px-3 py-2">Confidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedSignals.slice(0, 6).map((signal) => (
+                <tr className="bg-white/[0.025]" key={signal.parcel_id}>
+                  <td className="rounded-l-xl border-y border-l border-[var(--econ-border)] px-3 py-3 font-semibold text-[var(--econ-text)]">
+                    {signal.geography_label ?? signal.parcel_id}
+                  </td>
+                  <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
+                    {signal.opportunity_class}
+                  </td>
+                  <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
+                    {currency(signal.value_per_acre)}
+                  </td>
+                  <td className="rounded-r-xl border-y border-r border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
+                    {signal.economic_data_confidence}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-6 text-[var(--econ-muted)]">
+            No rows selected yet. Start in Workspace, pick the useful rows, then return here.
+          </p>
+          <button
+            className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+            onClick={onGoToWorkspace}
+            type="button"
+          >
+            Go to Workspace to select rows
+          </button>
+        </div>
+      )}
+    </EconPanel>
   );
 }
 
@@ -828,28 +783,52 @@ function EconomicsPrintPage({
 
 function EnterpriseToolsPage({
   exportPayload,
+  inputs,
+  onNavigate,
+  outputs,
   powerBiPayload,
+  scenarios,
+  selectedOutput,
+  selectedSignals,
 }: {
   exportPayload: EconomicsEnterpriseExportResponse | null;
+  inputs: EconomicsScenarioInput[];
+  onNavigate: (section: "workspace" | "print") => void;
+  outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
+  scenarios: EconomicsScenarioTemplate[];
+  selectedOutput: EnterpriseOutputKind;
+  selectedSignals: EconomicsParcelSignal[];
 }) {
   const [powerBiPreviewMode, setPowerBiPreviewMode] = useState<"summary" | "json">("summary");
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
-  const preview = JSON.stringify(
-    exportPayload?.exports?.power_bi ?? { status: "Loading export preview" },
-    null,
-    2,
-  );
+  const [scenarioMemoText, setScenarioMemoText] = useState("");
   const powerBiPreview =
     powerBiPreviewMode === "json"
       ? JSON.stringify(powerBiPayload ?? { status: "Loading Power BI export pack" }, null, 2)
       : JSON.stringify(powerBiTableSummary(powerBiPayload), null, 2);
+  const planningPayload = exportPayload?.exports.planning_model ?? null;
+  const decisionPack = exportPayload?.exports.decision_pack ?? null;
+  const planningPreview = JSON.stringify(planningPayload ?? { status: "Loading planning model payload" }, null, 2);
+  const decisionPackPreview = JSON.stringify(decisionPack ?? { status: "Loading decision pack" }, null, 2);
   const reportBuilderGuide = powerBiPayload?.report_builder_guide;
   const csvRows = powerBiCsvRows(powerBiPayload);
   const relationshipNotes = powerBiRelationshipNotes(powerBiPayload);
   const reportLayoutNotes = powerBiReportLayoutNotes(powerBiPayload);
   const importOrderNotes = powerBiCsvImportOrderNotes(csvRows);
   const qaChecklistNotes = powerBiImportQaChecklist.join("\n");
+  const planningStructureNotes = [
+    "Dimensions",
+    ...(planningPayload?.dimensions.map((row) => `- ${row.name}`) ?? []),
+    "Measures",
+    ...(planningPayload?.measures.map((measure) => `- ${measure}`) ?? []),
+    "Scenarios",
+    ...(planningPayload?.scenarios.map((scenario) => `- ${scenario}`) ?? []),
+  ].join("\n");
+  const decisionSummaryNotes = [
+    decisionPack?.executive_takeaway ?? "Decision pack is loading.",
+    ...(decisionPack?.recommended_next_diligence.map((item) => `- ${item}`) ?? []),
+  ].join("\n");
   const copyText = async (label: string, text: string) => {
     if (!navigator.clipboard) {
       setCopyStatus("Clipboard unavailable in this browser");
@@ -872,57 +851,27 @@ function EnterpriseToolsPage({
   };
   return (
     <>
-      <PageHeader
-        kicker="Enterprise Workspace"
-        title="Consulting toolkit and export-ready analytics"
-        text="Facts, dimensions, measures, scenarios, evidence packs, and connector-ready payloads without external credentials."
-      />
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {enterpriseCards.map((card) => (
-          <EconCard key={card.title}>
-            <card.icon className="h-5 w-5 text-[var(--econ-gold)]" />
-            <h2 className="mt-3 text-base font-semibold text-[var(--econ-text)]">
-              {card.title}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
-              {card.text}
-            </p>
-          </EconCard>
-        ))}
-      </section>
-      <section className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
-        <EconPanel title="Planning Model Schema" kicker="Dimensions and measures">
-          <Matrix rows={[...planningRows, ...measureRows]} />
-        </EconPanel>
-        <EconPanel title="Power BI-style Dataset Preview" kicker="Export-ready tables">
-          <pre className="max-h-96 overflow-auto rounded-xl border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
-            {preview}
-          </pre>
-        </EconPanel>
-      </section>
-      <EconPanel title="Power BI Desktop Practice Pack" kicker="Manual BI workflow">
-        <div className="grid gap-4 xl:grid-cols-[0.75fr_1.25fr]">
-          <div className="space-y-4 text-sm leading-6 text-[var(--econ-muted)]">
-            <p>
-              Export-ready tables for Power BI Desktop practice. This is not
-              Power BI Embedded, does not require credentials, and can later
-              become a semantic model.
-            </p>
-            <ol className="list-decimal space-y-1 pl-5">
-              {powerBiWorkflowSteps.map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-            <div className="grid gap-2">
+      <EconPanel title="Step 3 - Configure" kicker={enterpriseOutputLabel(selectedOutput)}>
+        {selectedOutput === "scenario" ? (
+          <EnterpriseScenarioConfigurePanel
+            inputs={inputs}
+            onMemoChange={setScenarioMemoText}
+            outputs={outputs}
+            scenarios={scenarios}
+          />
+        ) : null}
+        {selectedOutput === "powerbi" ? (
+          <div className="grid gap-4">
+            <div className="flex flex-wrap gap-2">
               <button
-                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
                 onClick={() => setPowerBiPreviewMode("summary")}
                 type="button"
               >
-                Preview Power BI tables
+                Preview tables
               </button>
               <button
-                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
                 disabled={!powerBiPayload}
                 onClick={downloadPowerBiPack}
                 type="button"
@@ -930,263 +879,488 @@ function EnterpriseToolsPage({
                 Download Power BI JSON Pack
               </button>
               <button
-                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+                disabled={!powerBiPayload}
+                onClick={() => void copyText("CSV import order", importOrderNotes)}
+                type="button"
+              >
+                Copy import order
+              </button>
+              <button
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
                 disabled={!powerBiPayload}
                 onClick={() => void copyText("Relationship notes", relationshipNotes)}
                 type="button"
               >
-                Copy table relationship notes
+                Copy relationships
               </button>
               <button
-                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
                 disabled={!powerBiPayload}
-                onClick={() => void copyText("Suggested report layout", reportLayoutNotes)}
+                onClick={() => void copyText("Report layout", reportLayoutNotes)}
                 type="button"
               >
-                Copy suggested report layout
-              </button>
-              <button
-                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
-                onClick={() => setPowerBiPreviewMode("json")}
-                type="button"
-              >
-                Preview full JSON pack
+                Copy report layout
               </button>
             </div>
-            {copyStatus ? (
-              <p className="rounded-lg border border-[var(--econ-green)]/30 bg-[var(--econ-green)]/10 px-3 py-2 text-xs text-[var(--econ-green)]">
-                {copyStatus}
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
+                Flat CSV Tables
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-[var(--econ-muted)]">
+                Download each flat fact/dimension table for the beginner Power BI Desktop path.
               </p>
-            ) : null}
+            </div>
+            <CsvDownloadTable rows={csvRows} />
+            <DetailsBlock summary="Show guide" hint="Power BI Report Builder Guide: 4 recommended report pages.">
+              <ReportBuilderGuide guide={reportBuilderGuide} payload={powerBiPayload} />
+            </DetailsBlock>
+            <DetailsBlock summary="Show measures" hint="Suggested DAX-style measures for Power BI Desktop.">
+              <DaxMeasureList guide={reportBuilderGuide} />
+            </DetailsBlock>
+            <DetailsBlock summary="Show concepts" hint="Power BI Concepts Used: fact tables, dimensions, slicers, measures, and semantic model basics.">
+              <ConceptList guide={reportBuilderGuide} />
+            </DetailsBlock>
+            <DetailsBlock summary="Show payload" hint="Full JSON preview for the Power BI export pack.">
+              <pre className="max-h-96 overflow-auto rounded-xl border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
+                {powerBiPreview}
+              </pre>
+            </DetailsBlock>
           </div>
-          <pre className="max-h-96 overflow-auto rounded-xl border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
-            {powerBiPreview}
-          </pre>
-        </div>
-      </EconPanel>
-      <EconPanel title="Flat CSV Tables" kicker="Beginner Power BI path">
-        <div className="space-y-4">
-          <p className="text-sm leading-6 text-[var(--econ-muted)]">
-            CSV is easier for learning in Power BI Desktop: download each flat
-            fact/dimension table, use Get Data -&gt; Text/CSV, then create the two
-            starter relationships. The JSON pack remains better for app-to-app
-            integration; embedded Power BI comes later.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
-              disabled={!powerBiPayload}
-              onClick={() => void copyText("CSV import order", importOrderNotes)}
-              type="button"
-            >
-              Copy import order
-            </button>
-            <button
-              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
-              disabled={!powerBiPayload}
-              onClick={() => void copyText("Relationship notes", relationshipNotes)}
-              type="button"
-            >
-              Copy relationship notes
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
-              <thead className="text-xs uppercase tracking-[0.14em] text-[var(--econ-muted)]">
-                <tr>
-                  <th className="px-3 py-2">Table name</th>
-                  <th className="px-3 py-2">Purpose</th>
-                  <th className="px-3 py-2">Rows</th>
-                  <th className="px-3 py-2">Suggested visual</th>
-                  <th className="px-3 py-2">Download</th>
-                </tr>
-              </thead>
-              <tbody>
-                {csvRows.map((row) => (
-                  <tr className="rounded-xl bg-white/[0.025]" key={row.table_name}>
-                    <td className="rounded-l-xl border-y border-l border-[var(--econ-border)] px-3 py-3 font-mono text-xs text-[var(--econ-text)]">
-                      {row.table_name}
-                    </td>
-                    <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
-                      {row.primary_use}
-                    </td>
-                    <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-text)]">
-                      {row.row_count}
-                    </td>
-                    <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
-                      {row.suggested_visual}
-                    </td>
-                    <td className="rounded-r-xl border-y border-r border-[var(--econ-border)] px-3 py-3">
-                      <a
-                        className="inline-flex rounded-lg border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
-                        download={`${row.table_name}.csv`}
-                        href={row.download_url}
-                      >
-                        Download CSV
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </EconPanel>
-      <EconPanel title="Power BI Import QA Checklist" kicker="Final CSV check">
-        <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
-          <div className="space-y-3">
-            <p className="text-sm leading-6 text-[var(--econ-muted)]">
-              Use this after importing the flat CSV tables into Power BI Desktop.
-              It catches the common beginner mistakes: missing headers, missing
-              join fields, unsafe fields, and slicers that filter to blanks.
-            </p>
-            <button
-              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
-              onClick={() => void copyText("QA checklist", qaChecklistNotes)}
-              type="button"
-            >
-              Copy QA Checklist
-            </button>
-          </div>
-          <div className="grid gap-2 md:grid-cols-2">
-            {powerBiImportQaChecklist.map((item) => (
-              <div
-                className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2 text-sm text-[var(--econ-muted)]"
-                key={item}
+        ) : null}
+        {selectedOutput === "planning" ? (
+          <div className="grid gap-4">
+            <Matrix rows={[...planningRows, ...measureRows]} />
+            <div className="flex flex-wrap gap-2">
+              <button
+                className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+                disabled={!planningPayload}
+                onClick={() => void copyText("Planning model structure", planningStructureNotes)}
+                type="button"
               >
-                <span className="mr-2 text-[var(--econ-green)]">OK</span>
-                {item}
+                Copy planning model structure
+              </button>
+            </div>
+            <DetailsBlock summary="Planning Model Schema" hint="Dimensions, measures, scenarios, assumptions, and outputs.">
+              <Matrix rows={[...planningRows, ...measureRows]} />
+            </DetailsBlock>
+            <DetailsBlock summary="Show payload" hint="Preview planning-model export JSON.">
+              <pre className="max-h-96 overflow-auto rounded-xl border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
+                {planningPreview}
+              </pre>
+            </DetailsBlock>
+          </div>
+        ) : null}
+        {selectedOutput === "decision" ? (
+          <div className="grid gap-4">
+            <Matrix
+              rows={[
+                {
+                  label: "Executive takeaway",
+                  value: decisionPack?.executive_takeaway ?? "Decision pack is loading.",
+                },
+                {
+                  label: "Recommended next diligence",
+                  value: decisionPack?.recommended_next_diligence.join("; ") ?? "Loading follow-up.",
+                },
+                {
+                  label: "Selected rows",
+                  value: selectedSignals.length
+                    ? selectedSignals.map((signal) => signal.geography_label ?? signal.parcel_id).join(", ")
+                    : "No rows selected.",
+                },
+              ]}
+            />
+            <button
+              className="w-fit rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+              disabled={!decisionPack}
+              onClick={() => void copyText("Decision pack", decisionSummaryNotes)}
+              type="button"
+            >
+              Copy decision pack
+            </button>
+            <DetailsBlock summary="Evidence Pack details" hint="Evidence sections, risk flags, assumptions, and caveats.">
+              <pre className="max-h-96 overflow-auto rounded-xl border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
+                {decisionPackPreview}
+              </pre>
+            </DetailsBlock>
+          </div>
+        ) : null}
+      </EconPanel>
+      <EconPanel title="Step 4 - Export / Next Step" kicker={enterpriseOutputLabel(selectedOutput)}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {selectedOutput === "scenario" ? (
+            <>
+              <ActionButton label="Copy decision memo" onClick={() => void copyText("Decision memo", scenarioMemoText)} />
+              <ActionButton label="Send to Print" onClick={() => onNavigate("print")} />
+            </>
+          ) : null}
+          {selectedOutput === "powerbi" ? (
+            <>
+              <ActionButton label="Download CSV tables" onClick={() => void copyText("CSV import order", importOrderNotes)} />
+              <ActionButton label="Open Power BI Desktop" onClick={() => void copyText("Power BI reminder", "Open Power BI Desktop, then Get Data -> Text/CSV.")} />
+              <ActionButton label="Copy import checklist" onClick={() => void copyText("QA checklist", qaChecklistNotes)} />
+            </>
+          ) : null}
+          {selectedOutput === "planning" ? (
+            <>
+              <ActionButton label="Copy planning model structure" onClick={() => void copyText("Planning model structure", planningStructureNotes)} />
+              <ActionButton label="Preview export payload" onClick={() => void copyText("Planning model payload", planningPreview)} />
+            </>
+          ) : null}
+          {selectedOutput === "decision" ? (
+            <>
+              <ActionButton label="Copy decision pack" onClick={() => void copyText("Decision pack", decisionSummaryNotes)} />
+              <ActionButton label="Open Print" onClick={() => onNavigate("print")} />
+            </>
+          ) : null}
+        </div>
+        <DetailsBlock summary="Power BI Import QA Checklist" hint="Quality checks before import and report build.">
+          <QaChecklist onCopy={() => void copyText("QA checklist", qaChecklistNotes)} />
+        </DetailsBlock>
+      </EconPanel>
+      {copyStatus ? (
+        <p className="rounded-lg border border-[var(--econ-green)]/30 bg-[var(--econ-green)]/10 px-3 py-2 text-xs text-[var(--econ-green)]">
+          {copyStatus}
+        </p>
+      ) : null}
+    </>
+  );
+}
+
+function EnterpriseScenarioConfigurePanel({
+  inputs,
+  onMemoChange,
+  outputs,
+  scenarios,
+}: {
+  inputs: EconomicsScenarioInput[];
+  onMemoChange: (memo: string) => void;
+  outputs: EconomicsScenarioOutput[];
+  scenarios: EconomicsScenarioTemplate[];
+}) {
+  const [assumptions, setAssumptions] = useState<ScenarioAssumptions>(
+    initialScenarioAssumptions,
+  );
+  const scenarioRows = scenarioCatalog.map((scenario) => ({
+    ...scenario,
+    what_it_tests:
+      scenarios.find((row) => row.id === scenario.id)?.what_it_tests ??
+      scenario.what_it_tests,
+  }));
+  const selectedScenario =
+    scenarioRows.find((scenario) => scenario.id === assumptions.scenarioId) ??
+    scenarioRows[0];
+  const output = calculateScenarioOutput(assumptions);
+  const memo = scenarioDecisionMemo(selectedScenario.title, assumptions, output);
+  const memoText = matrixRowsToText(memo);
+  const evidencePack = scenarioEvidencePack(inputs, assumptions, output);
+  const updateAssumption = (key: keyof ScenarioAssumptions, value: string) => {
+    setAssumptions((current) => ({ ...current, [key]: value }));
+  };
+  useEffect(() => {
+    onMemoChange(memoText);
+  }, [memoText, onMemoChange]);
+  return (
+    <div className="grid gap-4">
+      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+        {scenarioRows.map((scenario) => (
+          <button
+            className={`rounded-xl border p-3 text-left text-sm transition ${
+              assumptions.scenarioId === scenario.id
+                ? "border-[var(--econ-gold)] bg-[var(--econ-gold)]/10 text-[#ffe6a6]"
+                : "border-[var(--econ-border)] bg-white/[0.025] text-[var(--econ-muted)] hover:border-[var(--econ-gold)]"
+            }`}
+            key={scenario.id}
+            onClick={() =>
+              setAssumptions({
+                ...initialScenarioAssumptions,
+                ...scenarioDefaults[scenario.id],
+                scenarioId: scenario.id,
+              })
+            }
+            type="button"
+          >
+            <span className="font-semibold">{scenario.title}</span>
+          </button>
+        ))}
+      </div>
+      <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <ScenarioSelect
+            label="Development type"
+            onChange={(value) => updateAssumption("developmentType", value)}
+            options={developmentTypeOptions}
+            value={assumptions.developmentType}
+          />
+          <ScenarioSelect
+            label="Intensity band"
+            onChange={(value) => updateAssumption("intensityBand", value)}
+            options={basicBandOptions}
+            value={assumptions.intensityBand}
+          />
+          <ScenarioSelect
+            label="Value-per-acre assumption"
+            onChange={(value) => updateAssumption("valuePerAcreBand", value)}
+            options={basicBandOptions}
+            value={assumptions.valuePerAcreBand}
+          />
+          <ScenarioSelect
+            label="School / service burden"
+            onChange={(value) => updateAssumption("schoolServiceBurden", value)}
+            options={burdenBandOptions}
+            value={assumptions.schoolServiceBurden}
+          />
+          <ScenarioSelect
+            label="Utility readiness confidence"
+            onChange={(value) => updateAssumption("utilityReadiness", value)}
+            options={confidenceBandOptions}
+            value={assumptions.utilityReadiness}
+          />
+          <ScenarioSelect
+            label="Transportation access confidence"
+            onChange={(value) => updateAssumption("transportationAccess", value)}
+            options={confidenceBandOptions}
+            value={assumptions.transportationAccess}
+          />
+          <ScenarioSelect
+            label="Flood / environmental constraint"
+            onChange={(value) => updateAssumption("floodConstraint", value)}
+            options={burdenBandOptions}
+            value={assumptions.floodConstraint}
+          />
+        </div>
+        <div>
+          <h2 className="mb-3 text-sm font-semibold text-[var(--econ-text)]">
+            Scenario Output
+          </h2>
+          <ScenarioBandGrid output={output} />
+        </div>
+      </section>
+      <DetailsBlock summary="Decision memo preview" hint="Executive takeaway, burden tradeoff, confidence, and next diligence.">
+        <Matrix rows={memo} />
+      </DetailsBlock>
+      <DetailsBlock summary="Evidence Pack details" hint="Source layers, metrics, assumptions, missing data, and next diligence.">
+        <Matrix rows={evidencePack} />
+      </DetailsBlock>
+      <DetailsBlock summary="Reference scenario bands" hint="Baseline export scenario output bands.">
+        <ScenarioOutputList rows={outputs.length ? outputs : fallbackScenarioOutputs} />
+      </DetailsBlock>
+    </div>
+  );
+}
+
+function CsvDownloadTable({ rows }: { rows: ReturnType<typeof powerBiCsvRows> }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
+        <thead className="text-xs uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+          <tr>
+            <th className="px-3 py-2">Table name</th>
+            <th className="px-3 py-2">Purpose</th>
+            <th className="px-3 py-2">Rows</th>
+            <th className="px-3 py-2">Download</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr className="rounded-xl bg-white/[0.025]" key={row.table_name}>
+              <td className="rounded-l-xl border-y border-l border-[var(--econ-border)] px-3 py-3 font-mono text-xs text-[var(--econ-text)]">
+                {row.table_name}
+              </td>
+              <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)]">
+                {row.primary_use}
+              </td>
+              <td className="border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-text)]">
+                {row.row_count}
+              </td>
+              <td className="rounded-r-xl border-y border-r border-[var(--econ-border)] px-3 py-3">
+                <a
+                  className="inline-flex rounded-lg border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                  download={`${row.table_name}.csv`}
+                  href={row.download_url}
+                >
+                  Download CSV
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ReportBuilderGuide({
+  guide,
+  payload,
+}: {
+  guide: EconomicsPowerBiExportResponse["report_builder_guide"] | undefined;
+  payload: EconomicsPowerBiExportResponse | null;
+}) {
+  return (
+    <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-sm font-semibold text-[var(--econ-text)]">Import steps</h2>
+          <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm leading-6 text-[var(--econ-muted)]">
+            {(guide?.import_steps ?? powerBiWorkflowSteps).map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </div>
+        <div>
+          <h2 className="text-sm font-semibold text-[var(--econ-text)]">Relationship model</h2>
+          <div className="mt-2 grid gap-2">
+            {(guide?.relationships ?? payload?.relationships ?? []).map((row) => (
+              <div
+                className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] p-3 text-sm text-[var(--econ-muted)]"
+                key={`${row.from_table}-${row.from_column}-${row.to_table}`}
+              >
+                <span className="font-semibold text-[var(--econ-text)]">
+                  {row.from_table}.{row.from_column} -&gt; {row.to_table}.{row.to_column}
+                </span>
               </div>
             ))}
           </div>
         </div>
-      </EconPanel>
-      <EconPanel title="Power BI Report Builder Guide" kicker="Desktop report recipe">
-        <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
-                Import steps
-              </h2>
-              <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm leading-6 text-[var(--econ-muted)]">
-                {(reportBuilderGuide?.import_steps ?? powerBiWorkflowSteps).map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
-                Relationship model
-              </h2>
-              <div className="mt-2 grid gap-2">
-                {(reportBuilderGuide?.relationships ?? powerBiPayload?.relationships ?? []).map((row) => (
-                  <div
-                    className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] p-3 text-sm text-[var(--econ-muted)]"
-                    key={`${row.from_table}-${row.from_column}-${row.to_table}`}
-                  >
-                    <span className="font-semibold text-[var(--econ-text)]">
-                      {row.from_table}.{row.from_column} -&gt; {row.to_table}.{row.to_column}
-                    </span>
-                    {"guidance" in row && row.guidance ? (
-                      <p className="mt-1 text-xs leading-5">{String(row.guidance)}</p>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-              <ul className="mt-3 space-y-1 text-xs leading-5 text-[var(--econ-muted)]">
-                {(reportBuilderGuide?.relationship_guidance ?? [
-                  "Start with these two relationships.",
-                  "Keep remaining tables disconnected at first if needed.",
-                  "Do not force incorrect relationships just to connect everything.",
-                ]).map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
-                Power BI Concepts Used
-              </h2>
-              <div className="mt-2 grid gap-2">
-                {(reportBuilderGuide?.concepts ?? []).map((concept) => (
-                  <div
-                    className="rounded-lg border border-[var(--econ-border)] bg-black/20 p-3 text-xs leading-5 text-[var(--econ-muted)]"
-                    key={concept.term}
-                  >
-                    <span className="font-semibold text-[var(--econ-text)]">{concept.term}: </span>
-                    {concept.description}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div className="grid gap-3">
-              {(reportBuilderGuide?.pages ?? []).map((page) => (
-                <div className="econ-card rounded-xl p-4" key={page.page}>
-                  <h2 className="text-base font-semibold text-[var(--econ-text)]">
-                    {page.page}
-                  </h2>
-                  <p className="mt-1 text-sm text-[var(--econ-muted)]">{page.purpose}</p>
-                  <div className="mt-3 grid gap-2">
-                    {page.visuals.map((visual) => (
-                      <div
-                        className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] p-3 text-xs leading-5 text-[var(--econ-muted)]"
-                        key={String(visual.title)}
-                      >
-                        <p className="font-semibold text-[var(--econ-text)]">
-                          {String(visual.title)}
-                        </p>
-                        <p>{guideVisualDetails(visual)}</p>
-                      </div>
-                    ))}
-                  </div>
+      </div>
+      <div className="grid gap-3">
+        {(guide?.pages ?? []).map((page) => (
+          <div className="econ-card rounded-xl p-4" key={page.page}>
+            <h2 className="text-base font-semibold text-[var(--econ-text)]">
+              {page.page}
+            </h2>
+            <p className="mt-1 text-sm text-[var(--econ-muted)]">{page.purpose}</p>
+            <div className="mt-3 grid gap-2">
+              {page.visuals.slice(0, 2).map((visual) => (
+                <div
+                  className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] p-3 text-xs leading-5 text-[var(--econ-muted)]"
+                  key={String(visual.title)}
+                >
+                  <p className="font-semibold text-[var(--econ-text)]">
+                    {String(visual.title)}
+                  </p>
+                  <p>{guideVisualDetails(visual)}</p>
                 </div>
               ))}
             </div>
-            <div>
-              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
-                Suggested DAX-style measures
-              </h2>
-              <div className="mt-2 grid gap-2">
-                {(reportBuilderGuide?.suggested_measures ?? []).map((measure) => (
-                  <pre
-                    className="overflow-auto rounded-lg border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]"
-                    key={measure.name}
-                  >
-                    {measure.expression}
-                  </pre>
-                ))}
-              </div>
-              {reportBuilderGuide?.measure_caveat ? (
-                <p className="mt-2 text-xs leading-5 text-[var(--econ-muted)]">
-                  {reportBuilderGuide.measure_caveat}
-                </p>
-              ) : null}
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-[var(--econ-text)]">
-                Quality checks
-              </h2>
-              <ul className="mt-2 grid gap-2 text-xs leading-5 text-[var(--econ-muted)] sm:grid-cols-2">
-                {(reportBuilderGuide?.quality_checks ?? []).map((check) => (
-                  <li
-                    className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2"
-                    key={check}
-                  >
-                    {check}
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
-        </div>
-      </EconPanel>
-      <EconPanel title="Ask CFS Economics" kicker="Enterprise workflow assistant">
-        <AskCfsPanel appMode="economics" />
-      </EconPanel>
-    </>
+        ))}
+      </div>
+    </div>
   );
+}
+
+function DaxMeasureList({
+  guide,
+}: {
+  guide: EconomicsPowerBiExportResponse["report_builder_guide"] | undefined;
+}) {
+  return (
+    <div className="grid gap-2">
+      {(guide?.suggested_measures ?? []).map((measure) => (
+        <pre
+          className="overflow-auto rounded-lg border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]"
+          key={measure.name}
+        >
+          {measure.expression}
+        </pre>
+      ))}
+      {guide?.measure_caveat ? (
+        <p className="text-xs leading-5 text-[var(--econ-muted)]">
+          {guide.measure_caveat}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function ConceptList({
+  guide,
+}: {
+  guide: EconomicsPowerBiExportResponse["report_builder_guide"] | undefined;
+}) {
+  return (
+    <div className="grid gap-2 md:grid-cols-2">
+      {(guide?.concepts ?? []).map((concept) => (
+        <div
+          className="rounded-lg border border-[var(--econ-border)] bg-black/20 p-3 text-xs leading-5 text-[var(--econ-muted)]"
+          key={concept.term}
+        >
+          <span className="font-semibold text-[var(--econ-text)]">{concept.term}: </span>
+          {concept.description}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function QaChecklist({ onCopy }: { onCopy: () => void }) {
+  return (
+    <div className="grid gap-3">
+      <button
+        className="w-fit rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+        onClick={onCopy}
+        type="button"
+      >
+        Copy QA Checklist
+      </button>
+      <div className="grid gap-2 md:grid-cols-2">
+        {powerBiImportQaChecklist.map((item) => (
+          <div
+            className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2 text-sm text-[var(--econ-muted)]"
+            key={item}
+          >
+            <span className="mr-2 text-[var(--econ-green)]">OK</span>
+            {item}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DetailsBlock({
+  children,
+  hint,
+  summary,
+}: {
+  children: ReactNode;
+  hint: string;
+  summary: string;
+}) {
+  return (
+    <details className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-4">
+      <summary className="cursor-pointer text-sm font-semibold text-[var(--econ-text)]">
+        {summary}
+        <span className="ml-2 font-normal text-[var(--econ-muted)]">{hint}</span>
+      </summary>
+      <div className="mt-4">{children}</div>
+    </details>
+  );
+}
+
+function ActionButton({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+      onClick={onClick}
+      type="button"
+    >
+      {label}
+    </button>
+  );
+}
+
+function enterpriseOutputLabel(kind: EnterpriseOutputKind) {
+  return enterpriseOutputCards.find((card) => card.kind === kind)?.title ?? "Output";
 }
 
 function powerBiTableSummary(payload: EconomicsPowerBiExportResponse | null) {
@@ -1630,38 +1804,6 @@ function ScenarioBandGrid({ output }: { output: ScenarioModelOutput }) {
   );
 }
 
-function ScenarioComparisonMatrix({
-  rows,
-}: {
-  rows: Array<{ label: string; output: ScenarioModelOutput }>;
-}) {
-  return (
-    <div className="overflow-hidden rounded-xl border border-[var(--econ-border)]">
-      <div className="grid grid-cols-[minmax(9rem,1fr)_7rem_7rem_7rem_7rem_minmax(12rem,1.2fr)] gap-2 bg-white/[0.035] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--econ-muted)]">
-        <span>Scenario</span>
-        <span>Upside</span>
-        <span>Service</span>
-        <span>Infra</span>
-        <span>Confidence</span>
-        <span>Next diligence</span>
-      </div>
-      {rows.map((row) => (
-        <div
-          className="grid grid-cols-[minmax(9rem,1fr)_7rem_7rem_7rem_7rem_minmax(12rem,1.2fr)] gap-2 border-t border-[var(--econ-border)] px-3 py-2 text-xs text-[var(--econ-muted)]"
-          key={row.label}
-        >
-          <span className="font-semibold text-[var(--econ-text)]">{row.label}</span>
-          <span>{row.output.fiscalAttractiveness}</span>
-          <span>{row.output.serviceBurden}</span>
-          <span>{row.output.infrastructureBurden}</span>
-          <span>{row.output.dataConfidence}</span>
-          <span>{row.output.recommendedNextDiligence}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function BurdenRows() {
   return (
     <div className="grid gap-2">
@@ -1696,6 +1838,10 @@ function Matrix({ rows }: { rows: Array<{ label: string; value: string }> }) {
       ))}
     </div>
   );
+}
+
+function matrixRowsToText(rows: Array<{ label: string; value: string }>) {
+  return rows.map((row) => `${row.label}: ${row.value}`).join("\n");
 }
 
 function topSignals(
@@ -1992,6 +2138,58 @@ const powerBiCsvTableMetadata = [
   table_name: keyof EconomicsPowerBiExportResponse["tables"];
 }>;
 
+type EnterpriseOutputKind = "scenario" | "powerbi" | "planning" | "decision";
+
+const enterpriseGuidedSteps = [
+  {
+    kicker: "Step 1",
+    text: "Review the rows selected from Economics Workspace.",
+    title: "Select Data",
+  },
+  {
+    kicker: "Step 2",
+    text: "Pick one output path: scenario, BI export, planning model, or decision pack.",
+    title: "Choose Output",
+  },
+  {
+    kicker: "Step 3",
+    text: "Configure only the selected output instead of scanning every tool at once.",
+    title: "Configure",
+  },
+  {
+    kicker: "Step 4",
+    text: "Copy, download, or send the result to Print.",
+    title: "Export / Next Step",
+  },
+] as const;
+
+const enterpriseOutputCards: ReadonlyArray<{
+  kind: EnterpriseOutputKind;
+  text: string;
+  title: string;
+}> = [
+  {
+    kind: "scenario",
+    text: "Adjust assumptions and review output bands.",
+    title: "Scenario Model",
+  },
+  {
+    kind: "powerbi",
+    text: "Download CSV tables or preview the JSON pack.",
+    title: "Power BI Export",
+  },
+  {
+    kind: "planning",
+    text: "Review dimensions, measures, scenarios, and payload structure.",
+    title: "Planning Model",
+  },
+  {
+    kind: "decision",
+    text: "Create a concise memo, evidence pack, and caveats.",
+    title: "Decision Pack",
+  },
+] as const;
+
 const initialScenarioAssumptions: ScenarioAssumptions = {
   developmentType: "Current Conditions",
   floodConstraint: "Medium",
@@ -2247,50 +2445,4 @@ const planningRows = [
   { label: "Dimensions", value: "Geography, Parcel, Jurisdiction, Land Use / Zoning, Time, Scenario, Constraint Domain." },
   { label: "Measures", value: "Assessed value, land value, improvement value, value per acre, estimated tax, data confidence." },
   { label: "Outputs", value: "Opportunity class, constraint-adjusted opportunity band, recommended next diligence, executive memo." },
-];
-
-const enterpriseCards = [
-  {
-    icon: Calculator,
-    text: "Dimensions, measures, assumptions, scenario cards, and output bands.",
-    title: "Planning Model Workspace",
-  },
-  {
-    icon: BarChart3,
-    text: "KPI facts, signal facts, scenario facts, and dimensions for dashboard reporting.",
-    title: "BI Dashboard Workspace",
-  },
-  {
-    icon: Layers3,
-    text: "Location context and spatial joins support the economics evidence pack.",
-    title: "Location Intelligence Workspace",
-  },
-  {
-    icon: FileJson,
-    text: "Executive takeaway, evidence pack, assumptions, risk flags, caveats, and next diligence.",
-    title: "Consulting Decision Pack",
-  },
-];
-
-const enterpriseWorkspaceSteps = [
-  {
-    text: "Rows selected in Workspace become the working set for exports, scenarios, and snapshots.",
-    title: "Selected Rows",
-  },
-  {
-    text: "Scenario controls test assumptions and return screening-level output bands.",
-    title: "Scenario Model",
-  },
-  {
-    text: "Flat CSV and JSON packs teach the Power BI Desktop import workflow.",
-    title: "Power BI Export",
-  },
-  {
-    text: "Dimensions, measures, scenarios, and outputs mirror enterprise planning models.",
-    title: "Planning Model",
-  },
-  {
-    text: "Decision-pack previews summarize evidence, caveats, and next diligence.",
-    title: "Decision Pack",
-  },
 ];

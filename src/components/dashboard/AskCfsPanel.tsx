@@ -24,10 +24,12 @@ export function AskCfsPanel({
   appMode = "planning",
   externalRequest,
   onResponse,
+  visiblePromptCount,
 }: {
   appMode?: CfsAppMode;
   externalRequest?: AskCfsExternalRequest | null;
   onResponse?: (response: CfsAiSearchResponse) => void;
+  visiblePromptCount?: number;
 }) {
   const [answer, setAnswer] = useState<CfsAiSearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +43,12 @@ export function AskCfsPanel({
     appMode === "economics"
       ? askCfsEconomicsSuggestedPrompts
       : askCfsSuggestedPrompts;
+  const visiblePrompts = visiblePromptCount
+    ? suggestedPrompts.slice(0, visiblePromptCount)
+    : suggestedPrompts;
+  const hiddenPrompts = visiblePromptCount
+    ? suggestedPrompts.slice(visiblePromptCount)
+    : [];
 
   const submit = useCallback(async (
     nextQuery = query,
@@ -181,7 +189,7 @@ export function AskCfsPanel({
       ) : null}
 
       <div className="mt-3 flex flex-wrap gap-2">
-        {suggestedPrompts.map((prompt) => (
+        {visiblePrompts.map((prompt) => (
           <button
             className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-[#68d8ff]/35 hover:text-[#b7f0ff]"
             key={prompt}
@@ -195,6 +203,28 @@ export function AskCfsPanel({
           </button>
         ))}
       </div>
+      {hiddenPrompts.length ? (
+        <details className="mt-2 rounded-lg border border-white/10 bg-white/[0.025] p-3">
+          <summary className="cursor-pointer text-xs font-semibold text-slate-300">
+            More prompts
+          </summary>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {hiddenPrompts.map((prompt) => (
+              <button
+                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-[#68d8ff]/35 hover:text-[#b7f0ff]"
+                key={prompt}
+                onClick={() => {
+                  setQuery(prompt);
+                  void submit(prompt);
+                }}
+                type="button"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        </details>
+      ) : null}
 
       {error ? (
         <div className="mt-4 flex gap-2 rounded-lg border border-[#f87171]/25 bg-[#f87171]/10 p-3 text-xs text-[#fecaca]">

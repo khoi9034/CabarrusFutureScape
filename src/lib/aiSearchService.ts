@@ -35,13 +35,16 @@ export const askCfsSuggestedPrompts = [
 ] as const;
 
 export const askCfsEconomicsSuggestedPrompts = [
-  "How should I walk through CFS Economics?",
   "What should I inspect first?",
-  "Which rows should I send to Enterprise Workspace?",
+  "Which rows should I send?",
   "How do I build this in Power BI?",
+  "What CSV tables should I import first?",
+  "Build a decision-pack summary.",
+  "How do I QA the Power BI export?",
+  "How should I walk through CFS Economics?",
+  "Which rows should I send to Enterprise Workspace?",
   "Which areas show underbuilt opportunity?",
   "Where is data confidence weak?",
-  "Build a decision-pack summary.",
   "Which parcels look underbuilt?",
   "Where is tax-base opportunity high?",
   "Explain value per acre.",
@@ -50,8 +53,6 @@ export const askCfsEconomicsSuggestedPrompts = [
   "What is the difference between fact and dimension tables?",
   "What relationships should I build?",
   "Should I use JSON or CSV for Power BI?",
-  "What CSV tables should I import first?",
-  "How do I QA the Power BI export?",
 ] as const;
 
 export async function searchCfsAi(

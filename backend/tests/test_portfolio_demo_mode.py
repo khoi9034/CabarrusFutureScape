@@ -273,7 +273,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Understand the workflow." in economics_shell
     assert "Select rows from economic tables." in economics_shell
     assert "Review indicators and ask CFS." in economics_shell
-    assert "Turn selected rows into scenarios, exports, and decision packs." in economics_shell
+    assert "Follow the four steps: select data, choose an output, configure it, then export or print." in economics_shell
     assert "Prepare a simple snapshot for review." in economics_shell
     assert "What CFS Economics does" in economics_shell
     assert "What data it uses" in economics_shell
@@ -287,13 +287,18 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Selected for Enterprise Workspace" in economics_shell
     assert "Send selected to Enterprise Workspace" in economics_shell
     assert "Select rows from the workspace tables to move them into model and export work." in economics_shell
-    assert "Turn selected rows into scenarios, exports, and decision packs." in economics_shell
-    assert "Selected Rows" in economics_shell
+    assert "Step 1 - Select Data" in economics_shell
+    assert "Step 2 - Choose Output" in economics_shell
+    assert "Step 3 - Configure" in economics_shell
+    assert "Step 4 - Export / Next Step" in economics_shell
+    assert "Go to Workspace to select rows" in economics_shell
+    assert "enterpriseOutputCards" in economics_shell
+    assert "Select Data" in economics_shell
     assert "Power BI Export" in economics_shell
     assert "Decision Pack" in economics_shell
-    assert "Assumption Controls" in economics_shell
+    assert "Development type" in economics_shell
     assert "Scenario Output" in economics_shell
-    assert "Scenario Comparison Matrix" in economics_shell
+    assert "Reference scenario bands" in economics_shell
     assert "Decision memo" in economics_shell
     assert "Evidence Pack" in economics_shell
     assert "calculateScenarioOutput" in economics_shell
@@ -304,19 +309,22 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Parcel Screen" not in economics_shell
     assert "Scenario Lab" not in economics_shell
     assert "Enterprise Tools" not in economics_shell
-    assert "Power BI-style Dataset Preview" in economics_shell
-    assert "Power BI Desktop Practice Pack" in economics_shell
+    assert "Preview tables" in economics_shell
+    assert "Show payload" in economics_shell
     assert "Flat CSV Tables" in economics_shell
     assert "Copy import order" in economics_shell
     assert "Power BI Import QA Checklist" in economics_shell
     assert "Copy QA Checklist" in economics_shell
     assert "Power BI Report Builder Guide" in economics_shell
     assert "Download Power BI JSON Pack" in economics_shell
-    assert "Copy table relationship notes" in economics_shell
+    assert "Copy relationships" in economics_shell
     assert "Suggested DAX-style measures" in economics_shell
     assert "Power BI Concepts Used" in economics_shell
     assert "Quality checks" in economics_shell
     assert "Planning Model Schema" in economics_shell
+    assert "DetailsBlock" in economics_shell
+    assert "visiblePromptCount={6}" in economics_shell
+    assert "More prompts" in read("src/components/dashboard/AskCfsPanel.tsx")
     assert "Economic snapshot" in economics_shell
     assert "Select rows in Workspace and send them to Enterprise Workspace or" in economics_shell
     assert "Ask CFS Economics" in economics_shell
@@ -332,7 +340,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Consulting Decision Workflows" in overview
     assert "What should I inspect first?" in ask_service
     assert "How should I walk through CFS Economics?" in ask_service
-    assert "Which rows should I send to Enterprise Workspace?" in ask_service
+    assert "Which rows should I send?" in ask_service
     assert "How do I build this in Power BI?" in ask_service
     assert "Which areas show underbuilt opportunity?" in ask_service
     assert "Where is data confidence weak?" in ask_service
