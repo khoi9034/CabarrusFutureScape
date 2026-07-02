@@ -286,7 +286,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Power BI recipe" in economics_shell
     assert "Reset filters" in economics_shell
     assert "Follow the four steps: select data, choose an output, configure it, then export or print." in economics_shell
-    assert "Prepare a simple snapshot for review." in economics_shell
+    assert "Screening-level executive snapshot for selected economics rows" in economics_shell
     assert "What CFS Economics does" in economics_shell
     assert "What data it uses" in economics_shell
     assert "What outputs it creates" in economics_shell
@@ -345,8 +345,15 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "DetailsBlock" in economics_shell
     assert "visiblePromptCount={6}" in economics_shell
     assert "More prompts" in read("src/components/dashboard/AskCfsPanel.tsx")
-    assert "Economic snapshot" in economics_shell
-    assert "Select rows in Workspace and send them to Enterprise Workspace or" in economics_shell
+    assert "CFS Economics Snapshot" in economics_shell
+    assert "CFS Economics Snapshot" in economics_shell
+    assert "Print / Save as PDF" in economics_shell
+    assert "Copy snapshot summary" in economics_shell
+    assert "Selected Rows / Area Context" in economics_shell
+    assert "Opportunity Classification" in economics_shell
+    assert "Fiscal / Service Burden Context" in economics_shell
+    assert "Caveats and Assumptions" in economics_shell
+    assert "No rows selected. This snapshot is using the current economics summary." in economics_shell
     assert "Ask CFS Economics" in economics_shell
     assert "EconomicMissionControl" in indicator_center
     assert "getDemoEconomicsIntelligence" in economics_service
@@ -381,4 +388,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Should I use JSON or CSV for Power BI?" in ask_service
     assert "What CSV tables should I import first?" in ask_service
     assert "How do I QA the Power BI export?" in ask_service
+    assert "Build a snapshot summary." in ask_service
+    assert "What should go into the economic snapshot?" in ask_service
+    assert "What caveats should I include?" in ask_service
+    assert "What next diligence should I list?" in ask_service
+    assert "How should I present selected rows?" in ask_service
     assert "What relationships should I build?" in ask_service

@@ -146,6 +146,7 @@ export function EconomicsShell() {
         {economicsSection === "print" ? (
           <EconomicsPrintPage
             intelligence={intelligence}
+            onNavigate={setEconomicsSection}
             selectedSignals={selectedSignals}
           />
         ) : null}
@@ -844,60 +845,300 @@ function EnterpriseSelectedRowsPanel({
 
 function EconomicsPrintPage({
   intelligence,
+  onNavigate,
   selectedSignals,
 }: {
   intelligence: EconomicsIntelligenceResponse | null;
+  onNavigate: (section: "enterprise" | "workspace") => void;
   selectedSignals: EconomicsParcelSignal[];
 }) {
   const summary = intelligence?.summary;
   const snapshotRows = selectedSignals;
+  const [generatedAt] = useState(() => new Date().toLocaleString());
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const reportRows = snapshotRows.length
+    ? snapshotRows
+    : (intelligence?.parcel_economic_signals ?? []).slice(0, 8);
+  const classRows = snapshotRows.length
+    ? countRowsBy(snapshotRows, (signal) => signal.opportunity_class)
+    : (intelligence?.opportunity_class_breakdown ?? []).map((row) => ({
+        label: row.opportunity_class,
+        value: row.count,
+      }));
+  const confidenceRows = countRowsBy(reportRows, (signal) => signal.economic_data_confidence);
+  const scenario = intelligence?.scenario_outputs?.[0] ?? fallbackScenarioOutputs[0];
+  const snapshotSummary = economicSnapshotSummary(summary, snapshotRows);
+  const followUps = nextDiligenceItems(snapshotRows);
+  const caveats = [
+    "Screening-level economic context only.",
+    "Not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.",
+    "Scenario bands depend on assumptions and available source fields.",
+    ...(intelligence?.caveats ?? []).slice(0, 3),
+  ];
+  const copySnapshot = async () => {
+    const text = [
+      "CFS Economics Snapshot",
+      snapshotSummary,
+      `Selected rows: ${snapshotRows.length || "none - using current economics summary"}`,
+      "Recommended next diligence:",
+      ...followUps.map((item) => `- ${item}`),
+      "Caveats:",
+      ...caveats.map((item) => `- ${item}`),
+    ].join("\n");
+    if (!navigator.clipboard) {
+      setCopyStatus("Clipboard unavailable in this browser");
+      return;
+    }
+    await navigator.clipboard.writeText(text);
+    setCopyStatus("Snapshot summary copied");
+  };
   return (
     <>
-      <PageHeader
-        kicker="Print"
-        title="Economic snapshot"
-        text="Printable screening-level summary for selected rows, economic baseline, opportunity class, service burden, scenario context, confidence, caveats, and next diligence."
-      />
-      <PageHelper text="Prepare a simple snapshot for review." />
-      <section className="grid gap-4 xl:grid-cols-3">
-        <EconPanel title="Economic baseline" kicker="Snapshot">
-          <div className="grid gap-3">
-            <MiniMetric label="Parcels analyzed" value={formatNumber(summary?.total_parcels_analyzed)} />
-            <MiniMetric label="Assessed value coverage" value={currency(summary?.total_assessed_value)} />
-            <MiniMetric label="Typical value per acre" value={currency(summary?.median_value_per_acre)} />
-          </div>
-        </EconPanel>
-        <EconPanel title="Fiscal / service burden" kicker="Risk context">
-          <BurdenRows />
-        </EconPanel>
-        <EconPanel title="Data confidence" kicker="Caveats">
-          <ReadinessTable rows={intelligence?.data_readiness ?? []} />
-        </EconPanel>
+      <section className="no-print flex flex-wrap gap-2 rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] p-4">
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => window.print()} type="button">
+          Print / Save as PDF
+        </button>
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copySnapshot()} type="button">
+          Copy snapshot summary
+        </button>
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("workspace")} type="button">
+          Go to Workspace
+        </button>
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("enterprise")} type="button">
+          Go to Enterprise Workspace
+        </button>
+        {copyStatus ? <span className="self-center text-xs text-[var(--econ-green)]">{copyStatus}</span> : null}
       </section>
-      <EconPanel title="Selected rows / selected area" kicker="Print queue">
-        {snapshotRows.length ? (
-          <SignalTable signals={snapshotRows} />
-        ) : (
-          <p className="text-sm leading-7 text-[var(--econ-muted)]">
-            Select rows in Workspace and send them to Enterprise Workspace or
-            Print to build an economic snapshot.
+      <article className="print-report rounded-2xl border border-[var(--econ-border)] bg-[#fbfaf6] p-5 text-slate-950 shadow-[0_24px_80px_rgba(0,0,0,0.24)] md:p-7">
+        <header className="print-section border-b border-slate-300 pb-5">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Print</p>
+              <h1 className="mt-2 text-3xl font-semibold text-slate-950">CFS Economics Snapshot</h1>
+              <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-700">
+                Screening-level executive snapshot for selected economics rows, opportunity classes, scenario bands, and next diligence.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.14em]">
+              <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-slate-700">
+                {USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}
+              </span>
+              <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-slate-700">
+                Generated {generatedAt}
+              </span>
+            </div>
+          </div>
+          <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-950">
+            Screening-level economic context, not official appraisal, tax bill, fiscal impact study, or project approval recommendation.
           </p>
-        )}
-      </EconPanel>
-      <section className="grid gap-4 xl:grid-cols-2">
-        <EconPanel title="Scenario summary" kicker="Output bands">
-          <ScenarioOutputList rows={intelligence?.scenario_outputs ?? []} />
-        </EconPanel>
-        <EconPanel title="Recommended next diligence" kicker="Follow-up">
-          <ul className="space-y-2 text-sm leading-6 text-[var(--econ-muted)]">
-            <li>Verify source value, acreage, and land/improvement fields.</li>
-            <li>Compare opportunity class with service burden and data confidence.</li>
-            <li>Document assumptions before using scenario output bands.</li>
-            <li>Keep caveats visible on any printed stakeholder summary.</li>
+        </header>
+
+        <PrintSection title="1. Executive Summary">
+          <p className="text-sm leading-7 text-slate-700">{snapshotSummary}</p>
+        </PrintSection>
+
+        <PrintSection title="2. Selected Rows / Area Context">
+          {snapshotRows.length ? (
+            <>
+              <p className="text-sm text-slate-700">
+                Based on selected Workspace rows: {snapshotRows.length} selected.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {snapshotRows.slice(0, 10).map((signal) => (
+                  <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700" key={signal.parcel_id}>
+                    {signal.geography_label ?? signal.parcel_id}
+                  </span>
+                ))}
+              </div>
+              <SelectedRowsPrintTable signals={snapshotRows} />
+            </>
+          ) : (
+            <p className="rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm leading-6 text-slate-700">
+              No rows selected. This snapshot is using the current economics summary. Select rows in Workspace to create a focused parcel/area snapshot.
+            </p>
+          )}
+        </PrintSection>
+
+        <PrintSection title="3. Economic Baseline">
+          <div className="grid gap-3 md:grid-cols-3 print:grid-cols-3">
+            <PrintMetric label="Parcels / areas analyzed" value={formatNumber(summary?.total_parcels_analyzed)} />
+            <PrintMetric label="Assessed value coverage" value={currency(summary?.total_assessed_value)} />
+            <PrintMetric label="Median value per acre" value={currency(summary?.median_value_per_acre)} />
+            <PrintMetric label="Underbuilt candidates" value={formatNumber(summary?.underbuilt_candidate_count)} />
+            <PrintMetric label="Tax-base opportunity signals" value={formatNumber(summary?.high_opportunity_count)} />
+            <PrintMetric label="Data-needed count" value={formatNumber(summary?.data_needed_count)} />
+          </div>
+        </PrintSection>
+
+        <PrintSection title="4. Opportunity Classification">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] print:grid-cols-[minmax(0,1fr)_18rem]">
+            <EconomicsBarChart rows={classRows} />
+            <div className="rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm leading-6 text-slate-700">
+              {snapshotRows.length
+                ? "Selected rows show the opportunity classes currently queued for review."
+                : "Countywide/demo summary classes are shown because no rows are selected."}
+            </div>
+          </div>
+        </PrintSection>
+
+        <PrintSection title="5. Fiscal / Service Burden Context">
+          <div className="grid gap-2 md:grid-cols-2 print:grid-cols-2">
+            {burdenContextRows(reportRows, scenario).map((row) => (
+              <PrintKeyValue key={row.label} label={row.label} value={row.value} />
+            ))}
+          </div>
+        </PrintSection>
+
+        <PrintSection title="6. Scenario Summary">
+          <div className="grid gap-2 md:grid-cols-2 print:grid-cols-2">
+            <PrintKeyValue label="Selected/default scenario" value={scenario.title} />
+            <PrintKeyValue label="Tax-base lift band" value={scenario.estimated_tax_base_lift_band} />
+            <PrintKeyValue label="Revenue per acre band" value={scenario.revenue_per_acre_band} />
+            <PrintKeyValue label="Service burden band" value={scenario.service_burden_band} />
+            <PrintKeyValue label="Infrastructure burden band" value={scenario.infrastructure_burden_band} />
+            <PrintKeyValue label="Fiscal attractiveness band" value={scenario.constraint_adjusted_opportunity_band} />
+            <PrintKeyValue label="Data confidence" value={scenario.data_confidence} />
+            <PrintKeyValue label="Recommended next diligence" value={scenario.recommended_next_diligence} />
+          </div>
+        </PrintSection>
+
+        <PrintSection title="7. Data Confidence">
+          <div className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] print:grid-cols-[18rem_minmax(0,1fr)]">
+            <EconomicsBarChart rows={confidenceRows} />
+            <ReadinessPrintTable rows={intelligence?.data_readiness ?? []} />
+          </div>
+        </PrintSection>
+
+        <PrintSection title="8. Recommended Next Diligence">
+          <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+            {followUps.map((item) => <li key={item}>{item}</li>)}
           </ul>
+        </PrintSection>
+
+        <PrintSection title="9. Caveats and Assumptions">
+          <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+            {caveats.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </PrintSection>
+      </article>
+      <section className="no-print">
+        <EconPanel title="Ask CFS Economics" kicker="Snapshot support">
+          <AskCfsPanel appMode="economics" visiblePromptCount={6} />
         </EconPanel>
       </section>
     </>
+  );
+}
+
+function PrintSection({
+  children,
+  title,
+}: {
+  children: ReactNode;
+  title: string;
+}) {
+  return (
+    <section className="print-section mt-6">
+      <h2 className="text-xl font-semibold text-slate-950">{title}</h2>
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
+
+function PrintMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-lg font-semibold text-slate-950">{value}</p>
+    </div>
+  );
+}
+
+function PrintKeyValue({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-slate-300 bg-slate-50 p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-semibold leading-6 text-slate-800">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function SelectedRowsPrintTable({ signals }: { signals: EconomicsParcelSignal[] }) {
+  return (
+    <div className="mt-3 overflow-x-auto rounded-lg border border-slate-300">
+      <table className="w-full min-w-[680px] border-separate border-spacing-0 text-left text-xs">
+        <thead className="bg-slate-100 text-[10px] uppercase tracking-[0.12em] text-slate-500">
+          <tr>
+            <th className="px-3 py-2">Area / parcel</th>
+            <th className="px-3 py-2">Opportunity class</th>
+            <th className="px-3 py-2">Value / acre</th>
+            <th className="px-3 py-2">Confidence</th>
+            <th className="px-3 py-2">Recommended follow-up</th>
+          </tr>
+        </thead>
+        <tbody>
+          {signals.slice(0, 12).map((signal) => (
+            <tr key={signal.parcel_id}>
+              <td className="border-t border-slate-300 px-3 py-2 font-semibold text-slate-950">
+                {signal.geography_label ?? signal.parcel_id}
+              </td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">
+                {signal.opportunity_class}
+              </td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">
+                {currency(signal.value_per_acre)}
+              </td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">
+                {signal.economic_data_confidence}
+              </td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">
+                {signal.recommended_followup}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ReadinessPrintTable({ rows }: { rows: EconomicsReadinessRow[] }) {
+  if (!rows.length) {
+    return <p className="text-sm text-slate-700">Data readiness is not available.</p>;
+  }
+  return (
+    <div className="overflow-x-auto rounded-lg border border-slate-300">
+      <table className="w-full min-w-[560px] border-separate border-spacing-0 text-left text-xs">
+        <thead className="bg-slate-100 text-[10px] uppercase tracking-[0.12em] text-slate-500">
+          <tr>
+            <th className="px-3 py-2">Domain</th>
+            <th className="px-3 py-2">Status</th>
+            <th className="px-3 py-2">Next data need</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.slice(0, 8).map((row) => (
+            <tr key={row.domain}>
+              <td className="border-t border-slate-300 px-3 py-2 font-semibold text-slate-950">
+                {row.domain}
+              </td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">
+                {row.data_status.replaceAll("_", " ")}
+              </td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">
+                {row.gap_or_next_need}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -2261,26 +2502,6 @@ function ScenarioBandGrid({ output }: { output: ScenarioModelOutput }) {
   );
 }
 
-function BurdenRows() {
-  return (
-    <div className="grid gap-2">
-      {burdenRows.map((row) => (
-        <div
-          className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2"
-          key={row.label}
-        >
-          <p className="text-sm font-semibold text-[var(--econ-text)]">
-            {row.label}
-          </p>
-          <p className="mt-1 text-xs leading-5 text-[var(--econ-muted)]">
-            {row.text}
-          </p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function Matrix({ rows }: { rows: Array<{ label: string; value: string }> }) {
   return (
     <div className="overflow-hidden rounded-xl border border-[var(--econ-border)]">
@@ -2393,6 +2614,48 @@ function fiscalAttractivenessBand(signal: EconomicsParcelSignal) {
   if (signal.opportunity_class.toLowerCase().includes("opportunity")) return "Strong";
   if (signal.economic_data_confidence === "data_needed") return "Data Needed";
   return "Moderate";
+}
+
+function economicSnapshotSummary(
+  summary: EconomicsIntelligenceResponse["summary"] | undefined,
+  selectedSignals: EconomicsParcelSignal[],
+) {
+  if (selectedSignals.length) {
+    return "This snapshot summarizes screening-level economic signals for selected CFS Economics records. The current evidence highlights selected opportunity classes, service burden context, data confidence, and recommended next diligence for deeper review.";
+  }
+  return `This snapshot summarizes the current CFS Economics context across ${formatNumber(summary?.total_parcels_analyzed)} parcels or areas. It highlights underbuilt/redevelopment candidates, tax-base opportunity bands, service burden context, and data confidence gaps for deeper review.`;
+}
+
+function nextDiligenceItems(selectedSignals: EconomicsParcelSignal[]) {
+  const selectedFollowUps = selectedSignals
+    .map((signal) => signal.recommended_followup)
+    .filter(Boolean)
+    .slice(0, 3);
+  return [
+    "Verify missing parcel, tax, acreage, land value, and improvement value fields.",
+    "Compare selected rows with observed permit activity before presentation.",
+    "Review floodplain and service burden context for selected areas.",
+    "Check utility readiness and transportation context where confidence is partial.",
+    "Compare scenario assumptions before using tax-base lift bands.",
+    "Export CSVs to Power BI if preparing an external report.",
+    ...selectedFollowUps,
+  ].slice(0, 6);
+}
+
+function burdenContextRows(
+  signals: EconomicsParcelSignal[],
+  scenario: EconomicsScenarioOutput,
+) {
+  const first = signals[0];
+  return [
+    { label: "Tax-base opportunity", value: first ? taxBaseBand(first) : scenario.estimated_tax_base_lift_band },
+    { label: "School / service burden", value: first?.school_pressure_context ?? scenario.service_burden_band },
+    { label: "Infrastructure burden", value: scenario.infrastructure_burden_band },
+    { label: "Flood / constraint context", value: first?.floodplain_context ?? "Review if geography overlaps floodplain or constraint layers." },
+    { label: "Utility readiness confidence", value: first?.utility_readiness_context ?? "Data confidence varies by source coverage." },
+    { label: "Transportation context", value: first?.transportation_context ?? "Review corridor or access context where available." },
+    { label: "Data confidence", value: first?.economic_data_confidence ?? scenario.data_confidence },
+  ];
 }
 
 function countRowsBy<T>(rows: T[], getLabel: (row: T) => string | null | undefined) {
@@ -3033,25 +3296,6 @@ const decisionQuestions = [
   "Where does growth create service burden?",
   "Which corridors deserve deeper investment review?",
   "What data gaps limit confidence?",
-];
-
-const burdenRows = [
-  {
-    label: "Growth pressure",
-    text: "Observed permit activity can indicate review workload and investment demand.",
-  },
-  {
-    label: "School pressure",
-    text: "Preliminary school capacity watch informs fiscal/service tradeoff review.",
-  },
-  {
-    label: "Floodplain review",
-    text: "Flood context can reduce confidence in otherwise high-value opportunities.",
-  },
-  {
-    label: "Utility readiness",
-    text: "Utility capacity remains a proxy until official capacity data is available.",
-  },
 ];
 
 const fallbackScenarioOutputs: EconomicsScenarioOutput[] = [

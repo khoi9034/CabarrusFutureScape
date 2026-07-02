@@ -564,6 +564,8 @@ def _economics_answer(
         return _economics_walkthrough_answer(request, context)
     if _is_economics_workspace_query(request.query):
         return _economics_workspace_answer(request, context, economics if isinstance(economics, dict) else {})
+    if _is_economics_print_query(request.query):
+        return _economics_print_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_dashboard_query(request.query):
         return _economics_dashboard_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_powerbi_query(request.query):
@@ -790,6 +792,105 @@ def _economics_workspace_answer(
             "Send model/export rows to Enterprise Workspace.",
             "Send presentation-ready rows to Print.",
             "Check data-needed rows before making a recommendation.",
+        ],
+    )
+
+
+def _is_economics_print_query(query: str) -> bool:
+    normalized = query.lower()
+    return any(
+        phrase in normalized
+        for phrase in (
+            "snapshot summary",
+            "economic snapshot",
+            "caveats should i include",
+            "next diligence should i list",
+            "present selected rows",
+        )
+    )
+
+
+def _economics_print_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    economics: dict[str, Any],
+) -> CfsAiSearchResponse:
+    summary = economics.get("summary", {})
+    scenarios = [row for row in economics.get("scenario_outputs", []) if isinstance(row, dict)]
+    scenario = scenarios[0] if scenarios else {}
+    answer = _briefing(
+        (
+            "Executive takeaway",
+            "Use the Print page as the final screening-level economic snapshot after Workspace selection, dashboard review, and enterprise/scenario setup.",
+        ),
+        (
+            "Snapshot sections",
+            _bullets(
+                [
+                    "Executive Summary.",
+                    "Selected Rows / Area Context.",
+                    "Economic Baseline.",
+                    "Opportunity Classification.",
+                    "Fiscal / Service Burden Context.",
+                    "Scenario Summary.",
+                    "Data Confidence.",
+                    "Recommended Next Diligence.",
+                    "Caveats and Assumptions.",
+                ]
+            ),
+        ),
+        (
+            "Evidence to include",
+            _bullets(
+                [
+                    f"{_fmt(summary.get('total_parcels_analyzed'))} parcels or areas analyzed.",
+                    f"{_fmt(summary.get('underbuilt_candidate_count'))} underbuilt candidates.",
+                    f"{_fmt(summary.get('high_opportunity_count'))} tax-base opportunity signals.",
+                    f"{scenario.get('title', 'Default scenario')}: tax-base lift {scenario.get('estimated_tax_base_lift_band', 'not available')}; confidence {scenario.get('data_confidence', 'not available')}.",
+                ]
+            ),
+        ),
+        (
+            "Next diligence",
+            _bullets(
+                [
+                    "Verify missing parcel/tax fields.",
+                    "Compare selected rows with permit activity.",
+                    "Review floodplain and service burden context.",
+                    "Check utility readiness and transportation context.",
+                    "Export CSVs to Power BI if preparing an external report.",
+                ]
+            ),
+        ),
+        (
+            "Caveats",
+            _bullets(
+                [
+                    "Screening-level economics only.",
+                    "Not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+                    "Scenario output depends on assumptions and available source fields.",
+                ]
+            ),
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "Economic snapshot context",
+                f"{_fmt(summary.get('total_parcels_analyzed'))} parcels; {_fmt(summary.get('underbuilt_candidate_count'))} underbuilt candidates; {_fmt(summary.get('high_opportunity_count'))} opportunity signals.",
+                "economics_intelligence",
+                "available" if summary else "limited",
+            )
+        ],
+        [
+            "Send selected rows from Workspace to Print.",
+            "Use Print / Save as PDF for the browser-generated report.",
+            "Keep the caveat strip visible.",
+            "Copy the snapshot summary for a memo or slide.",
         ],
     )
 

@@ -47,6 +47,11 @@ export const askCfsEconomicsSuggestedPrompts = [
   "What CSV tables should I import first?",
   "Build a decision-pack summary.",
   "How do I QA the Power BI export?",
+  "Build a snapshot summary.",
+  "What should go into the economic snapshot?",
+  "What caveats should I include?",
+  "What next diligence should I list?",
+  "How should I present selected rows?",
   "How should I walk through CFS Economics?",
   "Which rows should I send to Enterprise Workspace?",
   "Which areas show underbuilt opportunity?",
@@ -160,6 +165,9 @@ async function demoEconomicsAnswer(
   }
   if (isEconomicsWorkspaceQuery(request?.query ?? "")) {
     return demoEconomicsWorkspaceAnswer(economics);
+  }
+  if (isEconomicsPrintQuery(request?.query ?? "")) {
+    return demoEconomicsPrintAnswer(economics);
   }
   if (isEconomicsDashboardQuery(request?.query ?? "")) {
     return demoEconomicsDashboardAnswer(economics);
@@ -557,6 +565,97 @@ function demoEconomicsWorkspaceAnswer(
       "Send model/export rows to Enterprise Workspace.",
       "Send presentation-ready rows to Print.",
       "Check data-needed rows before making a recommendation.",
+    ],
+  };
+}
+
+function isEconomicsPrintQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return [
+    "snapshot summary",
+    "economic snapshot",
+    "caveats should i include",
+    "next diligence should i list",
+    "present selected rows",
+  ].some((term) => normalized.includes(term));
+}
+
+function demoEconomicsPrintAnswer(
+  economics: EconomicsIntelligenceResponse,
+): CfsAiSearchResponse {
+  const summary = economics.summary;
+  const scenario = economics.scenario_outputs[0];
+  return {
+    answer: briefing(
+      [
+        "Executive takeaway",
+        "Use the Print page as the final screening-level economic snapshot after Workspace selection, dashboard review, and enterprise/scenario setup.",
+      ],
+      [
+        "Snapshot sections",
+        bullets([
+          "Executive Summary.",
+          "Selected Rows / Area Context.",
+          "Economic Baseline.",
+          "Opportunity Classification.",
+          "Fiscal / Service Burden Context.",
+          "Scenario Summary.",
+          "Data Confidence.",
+          "Recommended Next Diligence.",
+          "Caveats and Assumptions.",
+        ]),
+      ],
+      [
+        "Evidence to include",
+        bullets([
+          `${format(summary.total_parcels_analyzed)} parcels or areas analyzed.`,
+          `${format(summary.underbuilt_candidate_count)} underbuilt candidates.`,
+          `${format(summary.high_opportunity_count)} tax-base opportunity signals.`,
+          scenario ? `${scenario.title}: tax-base lift ${scenario.estimated_tax_base_lift_band}; confidence ${scenario.data_confidence}.` : "Scenario output bands are not available.",
+        ]),
+      ],
+      [
+        "Next diligence",
+        bullets([
+          "Verify missing parcel/tax fields.",
+          "Compare selected rows with permit activity.",
+          "Review floodplain and service burden context.",
+          "Check utility readiness and transportation context.",
+          "Export CSVs to Power BI if preparing an external report.",
+        ]),
+      ],
+      [
+        "Caveats",
+        bullets([
+          "Portfolio Demo uses a cached demo extract.",
+          "This is screening-level economics, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
+        ]),
+      ],
+    ),
+    as_of: economics.as_of,
+    caveats: economics.caveats,
+    dashboard_actions: {
+      focus_domain: "economics",
+      highlight_kpis: ["underbuilt_candidates", "tax_base_opportunity", "data_needed"],
+      recommended_layers: ["Print", "Workspace", "Enterprise Workspace"],
+    },
+    data_mode: "demo",
+    domains: ["economics"],
+    evidence: [
+      evidence(
+        "Economic snapshot context",
+        `${format(summary.total_parcels_analyzed)} parcels; ${format(summary.underbuilt_candidate_count)} underbuilt candidates; ${format(summary.high_opportunity_count)} opportunity signals.`,
+        "public/demo-data/economics_intelligence.json",
+        "available",
+      ),
+    ],
+    provider: "none",
+    related_layers: ["Print", "Workspace", "Enterprise Workspace"],
+    suggested_actions: [
+      "Send selected rows from Workspace to Print.",
+      "Use Print / Save as PDF for the browser-generated report.",
+      "Keep the caveat strip visible.",
+      "Copy the snapshot summary for a memo or slide.",
     ],
   };
 }

@@ -695,6 +695,24 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert response.evidence[0].source == "economics_powerbi_export"
 
 
+def test_ai_search_economics_print_prompt_returns_snapshot_answer() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Build a snapshot summary.",
+        ),
+        _context(),
+    )
+
+    assert response.domains == ["economics"]
+    assert response.dashboard_actions.focus_domain == "economics"
+    assert "Snapshot sections" in response.answer
+    assert "Selected Rows / Area Context" in response.answer
+    assert "Recommended Next Diligence" in response.answer
+    assert "Caveats" in response.answer
+    assert any("Print / Save as PDF" in action for action in response.suggested_actions)
+
+
 def test_ai_search_selected_economics_signal_returns_focused_explanation() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(
