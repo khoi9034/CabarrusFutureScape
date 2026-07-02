@@ -10,7 +10,10 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import { useDashboardState } from "@/hooks/useDashboardState";
-import { askCfsEconomicsWorkspacePrompts } from "@/lib/aiSearchService";
+import {
+  askCfsEconomicsPowerBiToolPrompts,
+  askCfsEconomicsWorkspacePrompts,
+} from "@/lib/aiSearchService";
 import { buildApiUrl, USE_DEMO_DATA } from "@/lib/api/client";
 import {
   getEconomicsEnterpriseExport,
@@ -937,7 +940,11 @@ function EnterpriseWorkspacePage({
           />
         </div>
         <EconPanel title="Ask CFS Economics" kicker="Assistant">
-          <AskCfsPanel appMode="economics" visiblePromptCount={6} />
+          <AskCfsPanel
+            appMode="economics"
+            suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
+            visiblePromptCount={6}
+          />
         </EconPanel>
       </section>
     </>
@@ -1450,6 +1457,7 @@ function EnterpriseToolsPage({
               </p>
             </div>
             <CsvDownloadTable rows={csvRows} />
+            <PowerBiChartBuilder payload={powerBiPayload} />
             <DetailsBlock summary="Show guide" hint="Power BI Report Builder Guide: 4 recommended report pages.">
               <ReportBuilderGuide guide={reportBuilderGuide} payload={powerBiPayload} />
             </DetailsBlock>
@@ -1721,6 +1729,285 @@ function CsvDownloadTable({ rows }: { rows: ReturnType<typeof powerBiCsvRows> })
                   Download CSV
                 </a>
               </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function PowerBiChartBuilder({
+  payload,
+}: {
+  payload: EconomicsPowerBiExportResponse | null;
+}) {
+  const [tableName, setTableName] = useState<PowerBiTableName>("parcel_economic_signal_fact");
+  const [visualType, setVisualType] = useState<UserChartVisualType>("bar");
+  const [categoryField, setCategoryField] = useState("opportunity_class");
+  const [valueField, setValueField] = useState("signal_id");
+  const [aggregation, setAggregation] = useState<UserChartAggregation>("count");
+  const [filterField, setFilterField] = useState("economic_segment");
+  const [filterValue, setFilterValue] = useState("All");
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const tableRows = payload?.tables[tableName] ?? [];
+  const fields = powerBiChartFieldMetadata[tableName];
+  const categoryOptions = fields.filter((field) =>
+    ["category", "filter", "label", "date"].includes(field.role),
+  );
+  const valueOptions = fields.filter((field) =>
+    ["value", "id", "filter", "category"].includes(field.role),
+  );
+  const filterOptions = fields.filter((field) =>
+    field.role === "filter" || field.role === "category",
+  );
+  const selectedFilterValues = filterField
+    ? ["All", ...uniqueFieldValues(tableRows, filterField).slice(0, 40)]
+    : ["All"];
+  const filteredRows =
+    filterField && filterValue !== "All"
+      ? tableRows.filter((row) => valueText(row[filterField]) === filterValue)
+      : tableRows;
+  const valueMeta = fields.find((field) => field.key === valueField);
+  const activeAggregation = valueMeta?.type === "number" ? aggregation : "count";
+  const chartRows = aggregateChartRows(
+    filteredRows,
+    categoryField,
+    valueField,
+    activeAggregation,
+  );
+  const recipe = chartRecipe({
+    aggregation: activeAggregation,
+    categoryField,
+    filterField,
+    filterValue,
+    tableName,
+    valueField,
+    visualType,
+  });
+  const changeTable = (nextTable: PowerBiTableName) => {
+    const nextFields = powerBiChartFieldMetadata[nextTable];
+    setTableName(nextTable);
+    setCategoryField(nextFields.find((field) => field.role !== "value")?.key ?? nextFields[0]?.key ?? "");
+    setValueField(nextFields.find((field) => field.role === "id" || field.role === "value")?.key ?? nextFields[0]?.key ?? "");
+    setAggregation("count");
+    setFilterField(nextFields.find((field) => field.role === "filter")?.key ?? "");
+    setFilterValue("All");
+  };
+  const applyTemplate = (template: UserChartTemplate) => {
+    setTableName(template.table);
+    setVisualType(template.visual);
+    setCategoryField(template.category);
+    setValueField(template.value);
+    setAggregation(template.aggregation);
+    setFilterField(template.filterField ?? "");
+    setFilterValue("All");
+  };
+  const copyRecipe = async () => {
+    if (!navigator.clipboard) {
+      setCopyStatus("Clipboard unavailable");
+      return;
+    }
+    await navigator.clipboard.writeText(recipe);
+    setCopyStatus("Power BI recipe copied");
+  };
+  return (
+    <EconPanel
+      description="Choose a CFS Economics table, fields, and visual type to preview a Power BI-style chart."
+      kicker="Power BI visual builder"
+      title="Build Your Own Chart"
+    >
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {userChartTemplates.map((template) => (
+          <button
+            className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3 text-left transition hover:border-[var(--econ-gold)]"
+            key={template.name}
+            onClick={() => applyTemplate(template)}
+            type="button"
+          >
+            <span className="text-sm font-semibold text-[var(--econ-text)]">
+              {template.name}
+            </span>
+            <span className="mt-1 block text-xs leading-5 text-[var(--econ-muted)]">
+              {template.description}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <ScenarioSelect
+          label="Step 1 - Table"
+          onChange={(value) => changeTable(value as PowerBiTableName)}
+          options={Object.keys(powerBiChartFieldMetadata)}
+          value={tableName}
+        />
+        <ScenarioSelect
+          label="Step 2 - Visual"
+          onChange={(value) => setVisualType(value as UserChartVisualType)}
+          options={["bar", "donut", "line", "matrix"]}
+          value={visualType}
+        />
+        <ScenarioSelect
+          label="Step 3 - Category / axis"
+          onChange={setCategoryField}
+          options={categoryOptions.map((field) => field.key)}
+          value={categoryField}
+        />
+        <ScenarioSelect
+          label="Value / measure"
+          onChange={setValueField}
+          options={valueOptions.map((field) => field.key)}
+          value={valueField}
+        />
+        <ScenarioSelect
+          label="Aggregation"
+          onChange={(value) => setAggregation(value as UserChartAggregation)}
+          options={valueMeta?.type === "number" ? ["count", "sum", "average"] : ["count"]}
+          value={activeAggregation}
+        />
+        <ScenarioSelect
+          label="Optional filter"
+          onChange={(value) => {
+            setFilterField(value === "None" ? "" : value);
+            setFilterValue("All");
+          }}
+          options={["None", ...filterOptions.map((field) => field.key)]}
+          value={filterField || "None"}
+        />
+        {filterField ? (
+          <ScenarioSelect
+            label="Filter value"
+            onChange={setFilterValue}
+            options={selectedFilterValues}
+            value={filterValue}
+          />
+        ) : null}
+      </div>
+      <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="rounded-xl border border-[var(--econ-border)] bg-black/20 p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold text-[var(--econ-text)]">Step 5 - Preview</h3>
+            <span className="text-xs text-[var(--econ-muted)]">{filteredRows.length} rows</span>
+          </div>
+          {visualType === "bar" ? <UserChartBar rows={chartRows} /> : null}
+          {visualType === "donut" ? <UserChartDonut rows={chartRows} /> : null}
+          {visualType === "line" ? <UserChartLine rows={chartRows} /> : null}
+          {visualType === "matrix" ? (
+            <UserChartMatrix
+              rowField={categoryField}
+              rows={filteredRows}
+              valueFields={[valueField, filterField].filter(Boolean)}
+            />
+          ) : null}
+          {visualType === "donut" && chartRows.length > 6 ? (
+            <p className="mt-3 rounded-lg border border-[var(--econ-gold)]/30 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs text-[#ffe6a6]">
+              Pie charts work best with fewer categories. Consider a bar chart for long category lists.
+            </p>
+          ) : null}
+        </div>
+        <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-4">
+          <h3 className="text-sm font-semibold text-[var(--econ-text)]">Step 6 - Power BI recipe</h3>
+          <pre className="mt-3 whitespace-pre-wrap rounded-lg border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
+            {recipe}
+          </pre>
+          <button
+            className="mt-3 rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+            onClick={() => void copyRecipe()}
+            type="button"
+          >
+            Copy Power BI recipe
+          </button>
+          {copyStatus ? (
+            <p className="mt-2 text-xs text-[var(--econ-green)]">{copyStatus}</p>
+          ) : null}
+        </div>
+      </section>
+      <DetailsBlock summary="Advanced field details" hint="Safe table fields available to the chart builder.">
+        <div className="grid gap-2 md:grid-cols-2">
+          {fields.map((field) => (
+            <div
+              className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] p-3 text-xs text-[var(--econ-muted)]"
+              key={field.key}
+            >
+              <span className="font-semibold text-[var(--econ-text)]">{field.label}</span>
+              <span className="block">Key: {field.key}</span>
+              <span className="block">Type: {field.type}; role: {field.role}</span>
+            </div>
+          ))}
+        </div>
+      </DetailsBlock>
+    </EconPanel>
+  );
+}
+
+function UserChartBar({ rows }: { rows: Array<{ label: string; value: number }> }) {
+  return <EconomicsBarChart rows={rows.slice(0, 8)} />;
+}
+
+function UserChartDonut({ rows }: { rows: Array<{ label: string; value: number }> }) {
+  return <EconomicsDonutChart rows={rows.slice(0, 6)} />;
+}
+
+function UserChartLine({ rows }: { rows: Array<{ label: string; value: number }> }) {
+  if (!rows.length) {
+    return <p className="text-sm text-[var(--econ-muted)]">Data not available.</p>;
+  }
+  const chartRows = rows.slice(0, 8);
+  const max = Math.max(...chartRows.map((row) => row.value), 1);
+  const points = chartRows
+    .map((row, index) => {
+      const x = chartRows.length === 1 ? 50 : (index / (chartRows.length - 1)) * 100;
+      const y = 100 - (row.value / max) * 84 - 8;
+      return `${x},${y}`;
+    })
+    .join(" ");
+  return (
+    <div className="grid gap-3">
+      <svg aria-label="Line / trend chart" className="h-44 w-full" preserveAspectRatio="none" role="img" viewBox="0 0 100 100">
+        <polyline fill="none" points={points} stroke="var(--econ-gold)" strokeWidth="3" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <EconomicsLegend rows={chartRows} />
+    </div>
+  );
+}
+
+function UserChartMatrix({
+  rowField,
+  rows,
+  valueFields,
+}: {
+  rowField: string;
+  rows: Array<Record<string, unknown>>;
+  valueFields: string[];
+}) {
+  if (!rows.length) {
+    return <p className="text-sm text-[var(--econ-muted)]">Data not available.</p>;
+  }
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[560px] border-separate border-spacing-y-2 text-left text-xs">
+        <thead className="uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+          <tr>
+            <th className="px-3 py-2">{rowField}</th>
+            {valueFields.map((field) => (
+              <th className="px-3 py-2" key={field}>{field}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.slice(0, 8).map((row, index) => (
+            <tr className="bg-white/[0.025]" key={`${valueText(row[rowField])}-${index}`}>
+              <td className="rounded-l-xl border-y border-l border-[var(--econ-border)] px-3 py-3 font-semibold text-[var(--econ-text)]">
+                {valueText(row[rowField])}
+              </td>
+              {valueFields.map((field, fieldIndex) => (
+                <td
+                  className={`border-y border-[var(--econ-border)] px-3 py-3 text-[var(--econ-muted)] ${fieldIndex === valueFields.length - 1 ? "rounded-r-xl border-r" : ""}`}
+                  key={field}
+                >
+                  {valueText(row[field])}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>
@@ -2997,6 +3284,72 @@ function uniqueValues(values: Array<string | null | undefined>) {
   return [...new Set(values.filter((value): value is string => Boolean(value)))].sort();
 }
 
+function valueText(value: unknown) {
+  if (value === null || value === undefined || value === "") return "Not available";
+  return String(value);
+}
+
+function uniqueFieldValues(rows: Array<Record<string, unknown>>, field: string) {
+  return uniqueValues(rows.map((row) => valueText(row[field]))).filter(
+    (value) => value !== "Not available",
+  );
+}
+
+function aggregateChartRows(
+  rows: Array<Record<string, unknown>>,
+  categoryField: string,
+  valueField: string,
+  aggregation: UserChartAggregation,
+) {
+  const buckets = new Map<string, { count: number; sum: number }>();
+  rows.forEach((row) => {
+    const label = valueText(row[categoryField]);
+    const bucket = buckets.get(label) ?? { count: 0, sum: 0 };
+    bucket.count += 1;
+    bucket.sum += Number(row[valueField]) || 0;
+    buckets.set(label, bucket);
+  });
+  return [...buckets.entries()]
+    .map(([label, bucket]) => ({
+      label,
+      value:
+        aggregation === "sum"
+          ? bucket.sum
+          : aggregation === "average"
+            ? bucket.sum / Math.max(bucket.count, 1)
+            : bucket.count,
+    }))
+    .sort((left, right) => right.value - left.value);
+}
+
+function chartRecipe({
+  aggregation,
+  categoryField,
+  filterField,
+  filterValue,
+  tableName,
+  valueField,
+  visualType,
+}: UserChartRecipeConfig) {
+  const fieldLabel = (field: string) =>
+    powerBiChartFieldMetadata[tableName].find((row) => row.key === field)?.label ?? field;
+  return [
+    `Use table: ${tableName}`,
+    `Visual: ${visualType === "donut" ? "Pie / donut chart" : visualType === "line" ? "Line / trend chart" : visualType === "matrix" ? "Matrix / table" : "Bar chart"}`,
+    `Axis/category: ${fieldLabel(categoryField)}`,
+    `Values: ${aggregation} ${fieldLabel(valueField)}`,
+    `Filter/slicer: ${filterField ? `${fieldLabel(filterField)}${filterValue !== "All" ? ` = ${filterValue}` : ""}` : "None"}`,
+    `Recommended page: ${chartRecommendedPage(tableName)}`,
+    "Caveat: Use economic_segment first for parcel economics and keep special assets separate when comparing value per acre.",
+  ].join("\n");
+}
+
+function chartRecommendedPage(tableName: PowerBiTableName) {
+  if (tableName === "scenario_output_fact" || tableName === "scenario_dim") return "Scenario Planning";
+  if (tableName === "domain_readiness_dim") return "Data Confidence";
+  return "Executive Dashboard";
+}
+
 function scenarioMatrixRows(rows: EconomicsScenarioOutput[]) {
   return rows.map((row) => ({
     cells: [
@@ -3313,6 +3666,163 @@ const powerBiWorkflowSteps = [
   "Create KPI cards and charts.",
   "Build an executive report page.",
   "Optionally publish or embed later.",
+];
+
+type PowerBiTableName = keyof EconomicsPowerBiExportResponse["tables"];
+type UserChartVisualType = "bar" | "donut" | "line" | "matrix";
+type UserChartAggregation = "count" | "sum" | "average";
+type UserChartField = {
+  key: string;
+  label: string;
+  role: "category" | "value" | "filter" | "label" | "date" | "id";
+  type: "text" | "number" | "band" | "date" | "id";
+};
+type UserChartTemplate = {
+  aggregation: UserChartAggregation;
+  category: string;
+  description: string;
+  filterField?: string;
+  name: string;
+  table: PowerBiTableName;
+  value: string;
+  visual: UserChartVisualType;
+};
+type UserChartRecipeConfig = {
+  aggregation: UserChartAggregation;
+  categoryField: string;
+  filterField: string;
+  filterValue: string;
+  tableName: PowerBiTableName;
+  valueField: string;
+  visualType: UserChartVisualType;
+};
+
+const powerBiChartFieldMetadata: Record<PowerBiTableName, UserChartField[]> = {
+  domain_readiness_dim: [
+    { key: "domain_id", label: "Domain ID", role: "id", type: "id" },
+    { key: "domain_name", label: "Domain", role: "label", type: "text" },
+    { key: "data_status", label: "Data status", role: "filter", type: "band" },
+    { key: "geometry_status", label: "Geometry status", role: "filter", type: "band" },
+    { key: "temporal_status", label: "Temporal status", role: "filter", type: "band" },
+    { key: "current_use", label: "Current use", role: "label", type: "text" },
+    { key: "next_data_need", label: "Next data need", role: "label", type: "text" },
+  ],
+  economics_kpi_fact: [
+    { key: "kpi_id", label: "KPI ID", role: "id", type: "id" },
+    { key: "kpi_name", label: "KPI", role: "category", type: "text" },
+    { key: "value", label: "Value", role: "value", type: "number" },
+    { key: "unit", label: "Unit", role: "filter", type: "text" },
+    { key: "status_band", label: "Status band", role: "filter", type: "band" },
+    { key: "source_mode", label: "Source mode", role: "filter", type: "text" },
+    { key: "as_of", label: "As of", role: "date", type: "date" },
+  ],
+  geography_dim: [
+    { key: "geography_id", label: "Geography ID", role: "id", type: "id" },
+    { key: "geography_label", label: "Geography", role: "category", type: "text" },
+    { key: "geography_type", label: "Geography type", role: "filter", type: "text" },
+    { key: "jurisdiction", label: "Jurisdiction", role: "filter", type: "text" },
+  ],
+  parcel_economic_signal_fact: [
+    { key: "signal_id", label: "Signal ID", role: "id", type: "id" },
+    { key: "parcel_id", label: "Parcel ID", role: "id", type: "id" },
+    { key: "geography_label", label: "Geography", role: "category", type: "text" },
+    { key: "economic_segment", label: "Economic segment", role: "filter", type: "text" },
+    { key: "opportunity_class", label: "Opportunity class", role: "category", type: "text" },
+    { key: "value_per_acre_band", label: "Value per acre band", role: "filter", type: "band" },
+    { key: "improvement_to_land_ratio_band", label: "Improvement-to-land band", role: "filter", type: "band" },
+    { key: "tax_base_opportunity_band", label: "Tax-base opportunity", role: "filter", type: "band" },
+    { key: "constraint_burden_band", label: "Constraint burden", role: "filter", type: "band" },
+    { key: "fiscal_attractiveness_band", label: "Fiscal attractiveness", role: "filter", type: "band" },
+    { key: "data_confidence", label: "Data confidence", role: "filter", type: "band" },
+    { key: "recommended_followup", label: "Recommended follow-up", role: "label", type: "text" },
+  ],
+  scenario_dim: [
+    { key: "scenario_id", label: "Scenario ID", role: "id", type: "id" },
+    { key: "scenario_name", label: "Scenario", role: "category", type: "text" },
+    { key: "scenario_family", label: "Scenario family", role: "filter", type: "text" },
+    { key: "description", label: "Description", role: "label", type: "text" },
+    { key: "caveat", label: "Caveat", role: "label", type: "text" },
+  ],
+  scenario_output_fact: [
+    { key: "scenario_id", label: "Scenario ID", role: "id", type: "id" },
+    { key: "scenario_name", label: "Scenario", role: "category", type: "text" },
+    { key: "intensity_band", label: "Intensity", role: "filter", type: "band" },
+    { key: "value_assumption_band", label: "Value assumption", role: "filter", type: "band" },
+    { key: "tax_base_lift_band", label: "Tax-base lift", role: "filter", type: "band" },
+    { key: "revenue_per_acre_band", label: "Revenue per acre", role: "filter", type: "band" },
+    { key: "service_burden_band", label: "Service burden", role: "filter", type: "band" },
+    { key: "infrastructure_burden_band", label: "Infrastructure burden", role: "filter", type: "band" },
+    { key: "fiscal_attractiveness_band", label: "Fiscal attractiveness", role: "filter", type: "band" },
+    { key: "data_confidence", label: "Data confidence", role: "filter", type: "band" },
+  ],
+  time_dim: [
+    { key: "year", label: "Year", role: "date", type: "date" },
+    { key: "period_label", label: "Period", role: "category", type: "text" },
+    { key: "data_available", label: "Data available", role: "filter", type: "band" },
+  ],
+};
+
+const userChartTemplates: UserChartTemplate[] = [
+  {
+    aggregation: "count",
+    category: "opportunity_class",
+    description: "Count economics rows by opportunity class.",
+    filterField: "economic_segment",
+    name: "Opportunity Class Breakdown",
+    table: "parcel_economic_signal_fact",
+    value: "signal_id",
+    visual: "bar",
+  },
+  {
+    aggregation: "count",
+    category: "economic_segment",
+    description: "Show land-use/property segment mix.",
+    filterField: "data_confidence",
+    name: "Economic Segment Mix",
+    table: "parcel_economic_signal_fact",
+    value: "signal_id",
+    visual: "donut",
+  },
+  {
+    aggregation: "count",
+    category: "domain_name",
+    description: "Matrix-style data confidence register.",
+    filterField: "data_status",
+    name: "Data Confidence Register",
+    table: "domain_readiness_dim",
+    value: "current_use",
+    visual: "matrix",
+  },
+  {
+    aggregation: "count",
+    category: "scenario_name",
+    description: "Compare fiscal attractiveness by scenario.",
+    filterField: "data_confidence",
+    name: "Scenario Fiscal Attractiveness",
+    table: "scenario_output_fact",
+    value: "fiscal_attractiveness_band",
+    visual: "bar",
+  },
+  {
+    aggregation: "count",
+    category: "scenario_name",
+    description: "Review service and infrastructure burden bands.",
+    filterField: "service_burden_band",
+    name: "Service Burden by Scenario",
+    table: "scenario_output_fact",
+    value: "infrastructure_burden_band",
+    visual: "matrix",
+  },
+  {
+    aggregation: "count",
+    category: "geography_label",
+    description: "Count economics signals by geography.",
+    filterField: "opportunity_class",
+    name: "Geography Opportunity Count",
+    table: "parcel_economic_signal_fact",
+    value: "signal_id",
+    visual: "bar",
+  },
 ];
 
 const powerBiCsvTableMetadata = [

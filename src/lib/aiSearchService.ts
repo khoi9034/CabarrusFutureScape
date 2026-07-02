@@ -82,6 +82,17 @@ export const askCfsEconomicsWorkspacePrompts = [
   "Where is data confidence weak?",
 ] as const;
 
+export const askCfsEconomicsPowerBiToolPrompts = [
+  "How do I build this in Power BI?",
+  "What chart should I use for opportunity class?",
+  "How do I make a pie chart?",
+  "How do I chart scenarios?",
+  "How do I build a matrix in Power BI?",
+  "Why is my pie chart too crowded?",
+  "Which table should I use for a dashboard visual?",
+  "How do I QA the Power BI export?",
+] as const;
+
 export async function searchCfsAi(
   request: CfsAiSearchRequest,
   options: { signal?: AbortSignal } = {},
@@ -570,6 +581,13 @@ function isEconomicsPowerBiQuery(query: string) {
     "data confidence register",
     "report pages",
     "visuals",
+    "chart",
+    "pie",
+    "donut",
+    "bar",
+    "matrix",
+    "build your own chart",
+    "dashboard visual",
   ].some((term) => normalized.includes(term));
 }
 
@@ -811,6 +829,16 @@ function demoEconomicsPowerBiAnswer(
         ]),
       ],
       [
+        "Build Your Own Chart",
+        bullets([
+          "Opportunity class: use parcel_economic_signal_fact, bar or donut, category opportunity_class, values count of signal_id.",
+          "Economic segment mix: use parcel_economic_signal_fact, donut or bar, category economic_segment, values count of signal_id.",
+          "Scenario chart: use scenario_output_fact, bar or matrix, category scenario_name, values fiscal_attractiveness_band or service_burden_band.",
+          "Data confidence matrix: use domain_readiness_dim, rows domain_name, values data_status, current_use, and next_data_need.",
+          "Crowded pie charts: switch to a bar chart when there are more than six categories.",
+        ]),
+      ],
+      [
         "Suggested measures",
         bullets(measureLines),
       ],
@@ -862,6 +890,7 @@ function demoEconomicsPowerBiAnswer(
     suggested_actions: [
       "Open Economic Intelligence -> Power BI & Tools.",
       "Use Flat CSV Tables first if you are learning Power BI Desktop.",
+      "Use Build Your Own Chart to pick a table, visual, category, measure, and optional filter.",
       "Preview or download the Power BI JSON Pack.",
       "Build the suggested relationships before creating report visuals.",
       "Use the Power BI Report Builder Guide for page-by-page visual instructions.",

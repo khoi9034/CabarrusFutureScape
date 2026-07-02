@@ -341,6 +341,21 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Copy import order" in economics_shell
     assert "Power BI Import QA Checklist" in economics_shell
     assert "Copy QA Checklist" in economics_shell
+    assert "Build Your Own Chart" in economics_shell
+    assert "PowerBiChartBuilder" in economics_shell
+    assert "userChartTemplates" in economics_shell
+    assert "Opportunity Class Breakdown" in economics_shell
+    assert "Economic Segment Mix" in economics_shell
+    assert "Scenario Fiscal Attractiveness" in economics_shell
+    assert "Copy Power BI recipe" in economics_shell
+    assert "Advanced field details" in economics_shell
+    assert "UserChartBar" in economics_shell
+    assert "UserChartDonut" in economics_shell
+    assert "UserChartMatrix" in economics_shell
+    chart_metadata = economics_shell.split("const powerBiChartFieldMetadata", 1)[1].split("const userChartTemplates", 1)[0].lower()
+    assert "owner" not in chart_metadata
+    assert "mailing" not in chart_metadata
+    assert "raw_score" not in chart_metadata
     assert "Power BI Report Builder Guide" in economics_shell
     assert "Download Power BI JSON Pack" in economics_shell
     assert "Copy relationships" in economics_shell
@@ -388,6 +403,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "How should I walk through CFS Economics?" in ask_service
     assert "Which rows should I send?" in ask_service
     assert "How do I build this in Power BI?" in ask_service
+    assert "What chart should I use for opportunity class?" in ask_service
+    assert "How do I make a pie chart?" in ask_service
     assert "Which areas show underbuilt opportunity?" in ask_service
     assert "Where is data confidence weak?" in ask_service
     assert "Build a decision-pack summary." in ask_service

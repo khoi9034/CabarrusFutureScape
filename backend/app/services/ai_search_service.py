@@ -1165,6 +1165,13 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "data confidence register",
             "report pages",
             "visuals",
+            "chart",
+            "pie",
+            "donut",
+            "bar",
+            "matrix",
+            "build your own chart",
+            "dashboard visual",
         )
     )
 
@@ -1230,6 +1237,18 @@ def _economics_powerbi_answer(
             ),
         ),
         (
+            "Build Your Own Chart",
+            _bullets(
+                [
+                    "Opportunity class: use parcel_economic_signal_fact, bar or donut, category opportunity_class, values count of signal_id.",
+                    "Economic segment mix: use parcel_economic_signal_fact, donut or bar, category economic_segment, values count of signal_id.",
+                    "Scenario chart: use scenario_output_fact, bar or matrix, category scenario_name, values fiscal_attractiveness_band or service_burden_band.",
+                    "Data confidence matrix: use domain_readiness_dim, rows domain_name, values data_status, current_use, and next_data_need.",
+                    "Crowded pie charts: switch to a bar chart when there are more than six categories.",
+                ]
+            ),
+        ),
+        (
             "Suggested measures",
             _bullets(
                 [
@@ -1290,6 +1309,7 @@ def _economics_powerbi_answer(
         [
             "Open Economic Intelligence -> Power BI & Tools -> Power BI Desktop Practice Pack.",
             "Use Flat CSV Tables first if you are learning Power BI Desktop.",
+            "Use Build Your Own Chart to pick a table, visual, category, measure, and optional filter.",
             "Download the JSON pack and import it into Power BI Desktop.",
             "Build the exported relationships before creating report visuals.",
             "Use the Power BI Report Builder Guide for page-by-page visual instructions.",

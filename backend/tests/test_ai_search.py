@@ -691,7 +691,7 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(
             app_mode="economics",
-            query="How do I QA the Power BI export?",
+            query="What chart should I use for opportunity class?",
         ),
         _context(),
     )
@@ -702,6 +702,9 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert "CSV or JSON" in response.answer
     assert "Relationships to build" in response.answer
     assert "Report pages to create" in response.answer
+    assert "Build Your Own Chart" in response.answer
+    assert "Opportunity class: use parcel_economic_signal_fact" in response.answer
+    assert "Crowded pie charts" in response.answer
     assert "Suggested measures" in response.answer
     assert "Quality checks" in response.answer
     assert "scenario_id exists in scenario_output_fact" in response.answer
