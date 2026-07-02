@@ -566,6 +566,8 @@ def _economics_answer(
         return _economics_workspace_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_print_query(request.query):
         return _economics_print_answer(request, context, economics if isinstance(economics, dict) else {})
+    if _is_economics_segment_query(request.query):
+        return _economics_segment_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_dashboard_query(request.query):
         return _economics_dashboard_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_powerbi_query(request.query):
@@ -911,6 +913,100 @@ def _is_economics_dashboard_query(query: str) -> bool:
     )
 
 
+def _is_economics_segment_query(query: str) -> bool:
+    normalized = query.lower()
+    return any(
+        phrase in normalized
+        for phrase in (
+            "value per acre misleading",
+            "countywide",
+            "economic segment",
+            "segment slicer",
+            "segment-aware",
+            "commercial tax-base",
+            "residential areas are underbuilt",
+            "residential underbuilt",
+            "special assets",
+            "skewing the dashboard",
+            "which segment",
+        )
+    )
+
+
+def _economics_segment_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    economics: dict[str, Any],
+) -> CfsAiSearchResponse:
+    segment_rows = [
+        row for row in economics.get("segment_summary", [])[:5]
+        if isinstance(row, dict)
+    ]
+    evidence_rows = [
+        f"{row.get('segment')}: {_fmt(row.get('count'))} rows; median value/acre {_currency(row.get('median_value_per_acre'))}; {_fmt(row.get('underbuilt_candidate_count'))} underbuilt"
+        for row in segment_rows
+    ]
+    answer = _briefing(
+        (
+            "Executive takeaway",
+            "Value per acre should be read within comparable economic segments. A countywide view can mix residential parcels, commercial corridors, industrial/employment sites, civic facilities, infrastructure assets, and underbuilt rows that are not economic peers.",
+        ),
+        (
+            "Economic interpretation",
+            _bullets(
+                [
+                    "Use the Economic Segment slicer before interpreting value-per-acre or improvement-to-land visuals.",
+                    "Median value per acre is safer than an average because special assets can skew countywide comparisons.",
+                    "Institutional, civic, infrastructure, utility, airport, convention, and medical-style rows should be treated as special/non-comparable context.",
+                    "Compare residential, commercial, industrial/employment, corridor, and underbuilt rows inside their own segment before moving them to Power BI or a decision pack.",
+                ]
+            ),
+        ),
+        (
+            "Evidence",
+            _bullets(evidence_rows or ["Segment summary is not available from the current economics context."]),
+        ),
+        (
+            "Power BI build path",
+            _bullets(
+                [
+                    "Use parcel_economic_signal_fact.economic_segment as the first slicer.",
+                    "Build value-per-acre bars after filtering to a segment.",
+                    "Use special_asset_flag to separate civic, institutional, infrastructure, or utility rows from ordinary parcel peers.",
+                ]
+            ),
+        ),
+        (
+            "Caveats",
+            _bullets(
+                [
+                    "CFS Economics provides screening-level bands, not official appraisal conclusions.",
+                    "Segments are inferred from available normalized fields; unknown rows need classification before firm comparison.",
+                ]
+            ),
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "Economic segment summary",
+                "; ".join(evidence_rows) or "No segment summary rows are available.",
+                "economics_intelligence.segment_summary",
+                "available" if evidence_rows else "limited",
+            )
+        ],
+        [
+            "Filter Economic Dashboard by Economic Segment first.",
+            "Use special_asset_flag in Power BI when comparing value-per-acre rows.",
+            "Ask: Which residential areas are underbuilt?",
+        ],
+    )
+
+
 def _economics_dashboard_answer(
     request: CfsAiSearchRequest,
     context: CfsAiContext,
@@ -931,7 +1027,7 @@ def _economics_dashboard_answer(
             _bullets(
                 [
                     "Opportunity Class Breakdown shows how screened parcels or areas distribute across economic opportunity classes.",
-                    "Value per Acre / Land Efficiency ranks filtered areas for tax-base and underbuilt review.",
+                    "Value per Acre / Land Efficiency should be read by economic segment so non-comparable assets do not dominate the view.",
                     "Scenario Output Comparison compares tax-base lift, revenue per acre, burden, and confidence as bands.",
                     "Fiscal / Service Burden Matrix shows where upside may intersect public cost risk.",
                     "Data Confidence Register shows which domains are ready, partial, or data-needed.",
@@ -942,10 +1038,10 @@ def _economics_dashboard_answer(
             "Power BI build path",
             _bullets(
                 [
-                    "Use parcel_economic_signal_fact for opportunity class, value/acre, confidence, and watchlist visuals.",
+                    "Use parcel_economic_signal_fact for opportunity class, economic_segment, value/acre, confidence, and watchlist visuals.",
                     "Use scenario_output_fact for scenario matrices and burden-band comparisons.",
                     "Use domain_readiness_dim for the data confidence register.",
-                    "Use slicers for geography_label, opportunity_class, data_confidence, and scenario_name.",
+                    "Use slicers for economic_segment, geography_label, opportunity_class, data_confidence, and scenario_name.",
                 ]
             ),
         ),
@@ -1147,7 +1243,7 @@ def _economics_powerbi_answer(
                 [
                     "All 7 CSV tables downloaded.",
                     "Headers are present in each CSV.",
-                    "No owner/mailing fields imported.",
+                    "No contact fields imported.",
                     "No raw scores imported.",
                     "No tax bill fields imported.",
                     "scenario_id exists in scenario_output_fact.",

@@ -42,6 +42,10 @@ POWERBI_CSV_TABLES = {
             "signal_id",
             "parcel_id",
             "geography_label",
+            "economic_segment",
+            "economic_segment_order",
+            "special_asset_flag",
+            "segment_caveat",
             "opportunity_class",
             "value_per_acre_band",
             "improvement_to_land_ratio_band",
@@ -282,6 +286,8 @@ def _signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
             "economic_data_confidence": row.get("economic_data_confidence"),
+            "economic_segment": row.get("economic_segment"),
+            "economic_segment_order": row.get("economic_segment_order"),
             "economic_status_band": row.get("economic_status_band"),
             "estimated_county_tax": row.get("estimated_county_tax_screening")
             or row.get("estimated_county_tax"),
@@ -290,6 +296,8 @@ def _signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "opportunity_class": row.get("opportunity_class"),
             "parcel_id": row.get("parcel_id"),
             "recommended_followup": row.get("recommended_followup"),
+            "segment_caveat": row.get("segment_caveat"),
+            "special_asset_flag": bool(row.get("special_asset_flag")),
             "value_per_acre": row.get("value_per_acre"),
         }
         for row in signals
@@ -461,12 +469,16 @@ def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
         {
             "constraint_burden_band": _constraint_burden_band(row),
             "data_confidence": row.get("economic_data_confidence"),
+            "economic_segment": row.get("economic_segment") or "Unknown / Needs Classification",
+            "economic_segment_order": row.get("economic_segment_order"),
             "geography_label": row.get("geography_label"),
             "improvement_to_land_ratio_band": _ratio_band(row.get("improvement_to_land_ratio")),
             "opportunity_class": row.get("opportunity_class"),
             "parcel_id": row.get("parcel_id"),
             "recommended_followup": row.get("recommended_followup"),
+            "segment_caveat": row.get("segment_caveat") or "Compare value per acre within similar land-use or property segments.",
             "signal_id": row.get("parcel_id") or f"signal-{index + 1}",
+            "special_asset_flag": bool(row.get("special_asset_flag")),
             "tax_base_opportunity_band": _tax_base_opportunity_band(row),
             "value_per_acre_band": _value_per_acre_band(row.get("value_per_acre")),
         }
@@ -633,6 +645,7 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
             "Create the two starter relationships listed in this guide.",
             "Build the four report pages with the suggested visuals.",
             "Use the JSON pack later for app-to-app integration or semantic-model automation.",
+            "Use economic_segment as an early slicer before comparing value-per-acre visuals.",
             "Add caveat text boxes so report viewers understand this is practice/export context.",
         ],
         "pages": [
@@ -652,8 +665,14 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
                         "value": "Count of signal_id",
                     },
                     {
+                        "field": "economic_segment",
+                        "table": "parcel_economic_signal_fact",
+                        "title": "Economic segment slicer",
+                    },
+                    {
                         "fields": [
                             "geography_label",
+                            "economic_segment",
                             "opportunity_class",
                             "value_per_acre_band",
                             "improvement_to_land_ratio_band",
@@ -677,6 +696,7 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
                         "fields": [
                             "signal_id",
                             "geography_label",
+                            "economic_segment",
                             "opportunity_class",
                             "value_per_acre_band",
                             "improvement_to_land_ratio_band",
@@ -760,16 +780,18 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
             "All 7 tables loaded.",
             "Scenario relationship created.",
             "Geography relationship created.",
-            "No owner/mailing fields imported.",
+            "No contact fields imported.",
             "No raw scores used.",
             "Report caveats visible.",
             "Slicers do not create misleading blanks.",
+            "Value-per-acre visuals are filtered by economic_segment before interpretation.",
         ],
         "relationship_guidance": [
             "Start with the scenario and geography relationships.",
             "Keep remaining tables disconnected at first if needed.",
             "Use slicers carefully because some tables are summary-level rather than parcel-level.",
             "Do not force incorrect relationships just to connect everything.",
+            "Use economic_segment to avoid comparing residential, institutional, infrastructure, and corridor assets as if they were peers.",
         ],
         "relationships": relationships,
         "suggested_measures": [

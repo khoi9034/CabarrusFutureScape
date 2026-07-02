@@ -25,6 +25,18 @@ router = APIRouter(prefix="/economics", tags=["CFS Economics"])
 ECONOMICS_CACHE_TTL = timedelta(minutes=5)
 _ECONOMICS_CACHE: dict[str, Any] = {"expires_at": None, "payload": None}
 
+ECONOMIC_SEGMENTS = [
+    "Residential",
+    "Commercial",
+    "Industrial / Employment",
+    "Mixed-Use / Corridor",
+    "Institutional / Civic",
+    "Agricultural / Rural",
+    "Vacant / Underbuilt",
+    "Infrastructure / Utility",
+    "Unknown / Needs Classification",
+]
+
 
 @router.get("/intelligence")
 def get_economics_intelligence(
@@ -267,6 +279,7 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         "as_of": as_of,
         "caveats": caveats + [
             "Local economics context uses parcel value and acreage fields first; heavier overlay context is summarized as data readiness so the dashboard stays responsive.",
+            "Value per acre is most meaningful when compared within similar land-use or property segments.",
         ],
         "data_readiness": _economics_data_readiness(columns, dev_join, flood_join, school_join),
         "kpis": _economics_kpis(summary),
@@ -274,6 +287,11 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         "mode": "live",
         "opportunity_class_breakdown": _opportunity_class_breakdown(signals),
         "parcel_economic_signals": signals,
+        "segment_data_confidence": _segment_data_confidence(signals),
+        "segment_improvement_ratio": _segment_improvement_ratio(signals),
+        "segment_opportunity_breakdown": _segment_opportunity_breakdown(signals),
+        "segment_summary": _segment_summary(signals),
+        "segment_value_per_acre": _segment_value_per_acre(signals),
         "scenario_inputs": _scenario_inputs(summary),
         "scenario_outputs": _scenario_outputs(summary),
         "scenario_templates": _scenario_templates(),
@@ -313,6 +331,8 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
     value_per_acre = _float(row.get("value_per_acre")) or calculate_value_per_acre(assessed, acreage)
     ratio = _float(row.get("improvement_to_land_ratio")) or calculate_improvement_to_land_ratio(improvement, land)
     status, opportunity = _status_band(value_per_acre, ratio, land, acreage, row)
+    segment = _economic_segment(row, status, opportunity)
+    special_asset = segment in {"Institutional / Civic", "Infrastructure / Utility"}
     evidence = [
         f"Value per acre: {_money(value_per_acre) if value_per_acre is not None else 'data needed'}.",
         f"Improvement-to-land ratio: {ratio:.2f}" if ratio is not None else "Improvement-to-land ratio needs land and improvement values.",
@@ -327,7 +347,10 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
             "Contact fields are excluded.",
         ],
         "economic_data_confidence": _economic_data_confidence(row, assessed, acreage, land, improvement),
+        "economic_segment": segment,
+        "economic_segment_order": ECONOMIC_SEGMENTS.index(segment),
         "economic_status_band": status,
+        "comparable_asset_flag": not special_asset,
         "estimated_county_tax": estimate_county_tax(assessed, rate_per_100),
         "estimated_county_tax_screening": estimate_county_tax(assessed, rate_per_100),
         "evidence": evidence,
@@ -348,10 +371,45 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
             "Constraint-Adjusted Development Potential",
         ],
         "school_pressure_context": row.get("school_pressure_context"),
+        "segment_caveat": _segment_caveat(segment),
+        "special_asset_flag": special_asset,
         "transportation_context": None,
         "utility_readiness_context": "Official utility capacity remains a data need.",
         "value_per_acre": value_per_acre,
     }
+
+
+def _economic_segment(row: dict[str, Any], status: str, opportunity: str) -> str:
+    text_value = " ".join(
+        str(row.get(key) or "")
+        for key in ("geography_label", "permit_activity_context", "floodplain_context", "school_pressure_context")
+    )
+    text_value = f"{text_value} {status} {opportunity}".lower()
+    if any(term in text_value for term in ("airport", "utility", "infrastructure", "rail", "water", "sewer", "power")):
+        return "Infrastructure / Utility"
+    if any(term in text_value for term in ("school", "hospital", "medical", "convention", "government", "county", "municipal", "civic", "institution")):
+        return "Institutional / Civic"
+    if any(term in text_value for term in ("industrial", "employment", "business park", "warehouse", "manufacturing")):
+        return "Industrial / Employment"
+    if any(term in text_value for term in ("mixed", "corridor", "downtown", "center", "village")):
+        return "Mixed-Use / Corridor"
+    if any(term in text_value for term in ("commercial", "retail", "office")):
+        return "Commercial"
+    if any(term in text_value for term in ("residential", "subdivision", "housing", "single", "multi")):
+        return "Residential"
+    if any(term in text_value for term in ("agricultural", "farm", "rural")):
+        return "Agricultural / Rural"
+    if status in {"underbuilt_watch", "redevelopment_opportunity", "tax_base_opportunity"} or "underbuilt" in text_value:
+        return "Vacant / Underbuilt"
+    return "Unknown / Needs Classification"
+
+
+def _segment_caveat(segment: str) -> str:
+    if segment in {"Institutional / Civic", "Infrastructure / Utility"}:
+        return "Special asset / non-comparable context; compare cautiously outside peer facilities."
+    if segment == "Unknown / Needs Classification":
+        return "Land-use or property segment is not exposed in the current normalized fields."
+    return "Compare value per acre within similar land-use or property segments."
 
 
 def _status_band(
@@ -424,6 +482,79 @@ def _opportunity_class_breakdown(signals: list[dict[str, Any]]) -> list[dict[str
         {"count": count, "opportunity_class": opportunity_class}
         for opportunity_class, count in counts.most_common()
     ]
+
+
+def _segment_summary(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows = []
+    for segment in ECONOMIC_SEGMENTS:
+        group = [signal for signal in signals if signal.get("economic_segment") == segment]
+        if not group:
+            continue
+        geographies = Counter(str(signal.get("geography_label") or "Parcel context") for signal in group)
+        rows.append({
+            "count": len(group),
+            "data_needed_count": sum(1 for signal in group if signal.get("economic_data_confidence") == "data_needed"),
+            "median_improvement_to_land_ratio": _median([signal.get("improvement_to_land_ratio") for signal in group]),
+            "median_value_per_acre": _median([signal.get("value_per_acre") for signal in group]),
+            "segment": segment,
+            "segment_caveat": _segment_caveat(segment),
+            "special_asset_count": sum(1 for signal in group if signal.get("special_asset_flag")),
+            "tax_base_opportunity_count": sum(1 for signal in group if signal.get("economic_status_band") == "tax_base_opportunity"),
+            "top_geographies": [label for label, _count in geographies.most_common(3)],
+            "underbuilt_candidate_count": sum(1 for signal in group if signal.get("economic_status_band") == "underbuilt_watch"),
+        })
+    return rows
+
+
+def _segment_metric_rows(signals: list[dict[str, Any]], key: str) -> list[dict[str, Any]]:
+    return [
+        {
+            "count": row["count"],
+            "segment": row["segment"],
+            "value": row["median_value_per_acre"] if key == "value_per_acre" else row["median_improvement_to_land_ratio"],
+        }
+        for row in _segment_summary(signals)
+    ]
+
+
+def _segment_value_per_acre(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return _segment_metric_rows(signals, "value_per_acre")
+
+
+def _segment_improvement_ratio(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return _segment_metric_rows(signals, "improvement_to_land_ratio")
+
+
+def _segment_opportunity_breakdown(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    counts = Counter(
+        (str(signal.get("economic_segment") or "Unknown / Needs Classification"), str(signal.get("opportunity_class") or "Needs More Data Before Recommendation"))
+        for signal in signals
+    )
+    return [
+        {"count": count, "economic_segment": segment, "opportunity_class": opportunity}
+        for (segment, opportunity), count in counts.most_common()
+    ]
+
+
+def _segment_data_confidence(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    counts = Counter(
+        (str(signal.get("economic_segment") or "Unknown / Needs Classification"), str(signal.get("economic_data_confidence") or "data_needed"))
+        for signal in signals
+    )
+    return [
+        {"count": count, "data_confidence": confidence, "economic_segment": segment}
+        for (segment, confidence), count in counts.most_common()
+    ]
+
+
+def _median(values: list[Any]) -> float | None:
+    numbers = sorted(float(value) for value in values if isinstance(value, (int, float)))
+    if not numbers:
+        return None
+    middle = len(numbers) // 2
+    if len(numbers) % 2:
+        return numbers[middle]
+    return (numbers[middle - 1] + numbers[middle]) / 2
 
 
 def _jurisdiction_summary(row: dict[str, Any]) -> dict[str, Any]:
@@ -568,7 +699,7 @@ def _economics_kpis(summary: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         _kpi("parcels_analyzed", "Parcels analyzed", summary["total_parcels_analyzed"], "parcels", "stable_high_value", "Parcel count with economics screening context."),
         _kpi("assessed_value_coverage", "Assessed value coverage", summary["total_assessed_value"], "dollars", "stable_high_value", "Screening-level assessed value total."),
-        _kpi("median_value_per_acre", "Typical value per acre", summary["median_value_per_acre"], "dollars_per_acre", "redevelopment_opportunity", "Parcel land efficiency context."),
+        _kpi("median_value_per_acre", "Median value per acre", summary["median_value_per_acre"], "dollars_per_acre", "redevelopment_opportunity", "All-segment median; compare value per acre within similar land-use/property segments."),
         _kpi("underbuilt_candidates", "Underbuilt candidates", summary["underbuilt_candidate_count"], "parcels", "underbuilt_watch", "High land value plus low improvement-to-land ratio."),
         _kpi("tax_base_opportunity", "Tax-base opportunity signals", summary["high_opportunity_count"], "signals", "tax_base_opportunity", "Low current value per acre with enough acreage for review."),
         _kpi("data_needed", "Economic data needed", summary["data_needed_count"], "parcels", "data_needed", "Records missing key value or acreage fields."),
@@ -744,6 +875,11 @@ def _unavailable_payload(as_of: str, reason: str) -> dict[str, Any]:
         "mode": "live",
         "opportunity_class_breakdown": [],
         "parcel_economic_signals": [],
+        "segment_data_confidence": [],
+        "segment_improvement_ratio": [],
+        "segment_opportunity_breakdown": [],
+        "segment_summary": [],
+        "segment_value_per_acre": [],
         "scenario_inputs": _scenario_inputs(summary),
         "scenario_outputs": _scenario_outputs(summary),
         "scenario_templates": _scenario_templates(),

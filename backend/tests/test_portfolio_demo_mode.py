@@ -120,7 +120,7 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
     )
     assert "report_builder_guide" in powerbi_text
     assert "suggested_measures" in powerbi_text
-    assert "No owner/mailing fields imported." in powerbi_text
+    assert "No contact fields imported." in powerbi_text
 
 
 def test_demo_map_layers_are_wired_without_backend_calls() -> None:
@@ -275,6 +275,10 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Screening-level economic context, not official appraisal, tax bill, or fiscal impact study." in economics_shell
     assert "Review indicators and ask CFS." in economics_shell
     assert "EconomicsSlicerBar" in economics_shell
+    assert "grid-template-columns:repeat(auto-fit,minmax(220px,1fr))" in economics_shell
+    assert "Economic Segment" in economics_shell
+    assert "Segmented Land Economics" in economics_shell
+    assert "Segment-aware Power BI recipe details" in economics_shell
     assert "EconomicsDonutChart" in economics_shell
     assert "EconomicsMatrixChart" in economics_shell
     assert "EconomicsTrendChart" in economics_shell

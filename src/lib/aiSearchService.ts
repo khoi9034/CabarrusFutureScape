@@ -36,6 +36,8 @@ export const askCfsSuggestedPrompts = [
 
 export const askCfsEconomicsSuggestedPrompts = [
   "What does the opportunity class chart mean?",
+  "Why is value per acre misleading countywide?",
+  "How should I use the economic segment slicer?",
   "How do I recreate this dashboard in Power BI?",
   "What should I filter first?",
   "Explain the scenario comparison matrix.",
@@ -64,6 +66,8 @@ export const askCfsEconomicsSuggestedPrompts = [
   "What is the difference between fact and dimension tables?",
   "What relationships should I build?",
   "Should I use JSON or CSV for Power BI?",
+  "Which segment should I compare first?",
+  "Show commercial tax-base opportunity.",
 ] as const;
 
 export const askCfsEconomicsWorkspacePrompts = [
@@ -168,6 +172,9 @@ async function demoEconomicsAnswer(
   }
   if (isEconomicsPrintQuery(request?.query ?? "")) {
     return demoEconomicsPrintAnswer(economics);
+  }
+  if (isEconomicsSegmentQuery(request?.query ?? "")) {
+    return demoEconomicsSegmentAnswer(economics);
   }
   if (isEconomicsDashboardQuery(request?.query ?? "")) {
     return demoEconomicsDashboardAnswer(economics);
@@ -322,6 +329,93 @@ function isEconomicsDashboardQuery(query: string) {
   ].some((phrase) => normalized.includes(phrase));
 }
 
+function isEconomicsSegmentQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return [
+    "value per acre misleading",
+    "countywide",
+    "economic segment",
+    "segment slicer",
+    "segment-aware",
+    "commercial tax-base",
+    "residential areas are underbuilt",
+    "residential underbuilt",
+    "special assets",
+    "skewing the dashboard",
+    "which segment",
+  ].some((phrase) => normalized.includes(phrase));
+}
+
+function demoEconomicsSegmentAnswer(economics: EconomicsIntelligenceResponse): CfsAiSearchResponse {
+  const segments = economics.segment_summary ?? [];
+  const topSegments = segments
+    .slice(0, 5)
+    .map(
+      (row) =>
+        `${row.segment}: ${format(row.count)} rows; median value/acre ${currency(row.median_value_per_acre)}; ${format(row.underbuilt_candidate_count)} underbuilt.`,
+    );
+  return {
+    answer: briefing(
+      [
+        "Executive takeaway",
+        "Value per acre is useful only when comparable parcels are grouped first. CFS Economics uses economic segments so residential, commercial, industrial/employment, civic, infrastructure, corridor, rural, and underbuilt rows are not treated as one peer set.",
+      ],
+      [
+        "Segment interpretation",
+        bullets([
+          "Use the economic_segment slicer before reading the value-per-acre or improvement-to-land visuals.",
+          "Median is safer than average because special assets can pull a countywide view away from ordinary parcel economics.",
+          "Institutional, civic, infrastructure, utility, airport, convention, and medical-style assets should be treated as special/non-comparable context.",
+          "Commercial and residential opportunity should be compared inside their own segment before using the result in a decision pack or Power BI report.",
+        ]),
+      ],
+      ["Evidence", bullets(topSegments.length ? topSegments : ["Segment summary is not available in the cached demo extract."])],
+      [
+        "Power BI build path",
+        bullets([
+          "Use parcel_economic_signal_fact.economic_segment as the first slicer.",
+          "Build value-per-acre bars after filtering to a segment.",
+          "Keep special_asset_flag visible or use it as a filter when a report audience needs comparable assets only.",
+        ]),
+      ],
+      [
+        "Caveats",
+        bullets([
+          "Portfolio Demo uses a cached demo extract.",
+          "CFS Economics provides screening-level bands, not official appraisal conclusions.",
+        ]),
+      ],
+    ),
+    as_of: economics.as_of,
+    caveats: [
+      "Value per acre is most meaningful within similar land-use or property segments.",
+      "Special assets can distort countywide views.",
+    ],
+    dashboard_actions: {
+      focus_domain: "economics",
+      highlight_kpis: ["median_value_per_acre", "underbuilt_candidates", "tax_base_opportunity"],
+      recommended_layers: ["Economic Dashboard", "Power BI Desktop Practice Pack"],
+    },
+    data_mode: "demo",
+    domains: ["economics"],
+    evidence: [
+      evidence(
+        "Economic segment summary",
+        topSegments.join("; ") || "Segment summary is unavailable.",
+        "public/demo-data/economics_intelligence.json",
+        topSegments.length ? "available" : "limited",
+      ),
+    ],
+    provider: "none",
+    related_layers: ["Economic Dashboard", "Enterprise Workspace"],
+    suggested_actions: [
+      "Filter Economic Dashboard by economic segment first.",
+      "Use special_asset_flag in Power BI when comparing value-per-acre rows.",
+      "Ask: Which residential areas are underbuilt?",
+    ],
+  };
+}
+
 function demoEconomicsDashboardAnswer(economics: EconomicsIntelligenceResponse): CfsAiSearchResponse {
   const classRows = economics.opportunity_class_breakdown
     .slice(0, 5)
@@ -336,7 +430,7 @@ function demoEconomicsDashboardAnswer(economics: EconomicsIntelligenceResponse):
         "Visual interpretation",
         bullets([
           "Opportunity Class Breakdown shows how screened parcels or areas distribute across economic opportunity classes.",
-          "Value per Acre / Land Efficiency ranks filtered areas for tax-base and underbuilt review.",
+          "Value per Acre / Land Efficiency should be read by economic segment so non-comparable assets do not dominate the view.",
           "Scenario Output Comparison compares tax-base lift, revenue per acre, burden, and confidence as bands.",
           "Fiscal / Service Burden Matrix shows where upside may intersect public cost risk.",
           "Data Confidence Register shows which domains are ready, partial, or data-needed.",
@@ -345,10 +439,10 @@ function demoEconomicsDashboardAnswer(economics: EconomicsIntelligenceResponse):
       [
         "Power BI build path",
         bullets([
-          "Use parcel_economic_signal_fact for opportunity class, value/acre, confidence, and watchlist visuals.",
+          "Use parcel_economic_signal_fact for opportunity class, economic_segment, value/acre, confidence, and watchlist visuals.",
           "Use scenario_output_fact for scenario matrices and burden-band comparisons.",
           "Use domain_readiness_dim for the data confidence register.",
-          "Use slicers for geography_label, opportunity_class, data_confidence, and scenario_name.",
+          "Use slicers for economic_segment, geography_label, opportunity_class, data_confidence, and scenario_name.",
         ]),
       ],
       ["Evidence", bullets(classRows.length ? classRows : ["Opportunity class breakdown is unavailable in the cached demo extract."])],
@@ -771,7 +865,7 @@ function demoEconomicsPowerBiAnswer(
 const powerBiImportQaChecklist = [
   "All 7 CSV tables downloaded.",
   "Headers are present in each CSV.",
-  "No owner/mailing fields imported.",
+  "No contact fields imported.",
   "No raw scores imported.",
   "No tax bill fields imported.",
   "scenario_id exists in scenario_output_fact.",

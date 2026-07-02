@@ -1705,7 +1705,7 @@
         "minor_maintenance_permits": 2,
         "official_parcel_id": "CFS-PARCEL-0149803800",
         "permit_segment": "commercial_activity",
-        "recent_permit_count_1yr": 1,
+        "recent_permit_count_1yr": 0,
         "recent_permit_count_3yr": 3,
         "redevelopment_signal_permits": 9,
         "residential_growth_permits": 7,
@@ -15202,7 +15202,7 @@
   ],
   "metadata": {
     "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
-    "generated_at": "2026-07-01T19:57:14Z",
+    "generated_at": "2026-07-02T17:52:27Z",
     "layer_id": "development_hotspots",
     "layer_label": "Demo Development Hotspots",
     "mode": "portfolio_demo",

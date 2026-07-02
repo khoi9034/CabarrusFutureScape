@@ -31,6 +31,16 @@ from app.services.enterprise_export_service import (
     build_powerbi_export_payload,
     powerbi_table_to_csv,
 )
+from app.routers.economics_router import (
+    _economic_segment,
+    _segment_caveat,
+    _segment_data_confidence,
+    _segment_improvement_ratio,
+    _segment_opportunity_breakdown,
+    _segment_summary,
+    _segment_value_per_acre,
+    ECONOMIC_SEGMENTS,
+)
 
 DEMO_DATA_DIR = REPO_ROOT / "public" / "demo-data"
 DEMO_MAP_LAYER_DIR = DEMO_DATA_DIR / "map_layers"
@@ -662,6 +672,11 @@ def build_economics_intelligence_demo(
         "mode": "demo",
         "opportunity_class_breakdown": economics_opportunity_class_breakdown(signals),
         "parcel_economic_signals": signals,
+        "segment_data_confidence": _segment_data_confidence(signals),
+        "segment_improvement_ratio": _segment_improvement_ratio(signals),
+        "segment_opportunity_breakdown": _segment_opportunity_breakdown(signals),
+        "segment_summary": _segment_summary(signals),
+        "segment_value_per_acre": _segment_value_per_acre(signals),
         "scenario_inputs": economics_scenario_inputs(summary),
         "scenario_outputs": economics_scenario_outputs(summary),
         "scenario_templates": economics_scenario_templates(),
@@ -680,6 +695,8 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
     improvement_value = as_number(row.get("improvement_value"))
     acreage = as_number(row.get("acreage"))
     status, opportunity = economics_status_band(value_per_acre, ratio, land_value, acreage)
+    segment = _economic_segment(row, status, opportunity)
+    special_asset = segment in {"Institutional / Civic", "Infrastructure / Utility"}
     estimated_tax = estimate_demo_county_tax(assessed_value)
     return {
         "acreage": acreage,
@@ -690,7 +707,10 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
             "Contact fields are excluded.",
         ],
         "economic_data_confidence": economics_data_confidence(assessed_value, acreage, land_value, improvement_value),
+        "economic_segment": segment,
+        "economic_segment_order": ECONOMIC_SEGMENTS.index(segment),
         "economic_status_band": status,
+        "comparable_asset_flag": not special_asset,
         "estimated_county_tax": estimated_tax,
         "estimated_county_tax_screening": estimated_tax,
         "evidence": [
@@ -714,6 +734,8 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
             "Constraint-Adjusted Development Potential",
         ],
         "school_pressure_context": None,
+        "segment_caveat": _segment_caveat(segment),
+        "special_asset_flag": special_asset,
         "transportation_context": None,
         "utility_readiness_context": "Official utility capacity remains a data need.",
         "value_per_acre": value_per_acre,

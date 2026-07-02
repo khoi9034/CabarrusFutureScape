@@ -9,6 +9,7 @@ from app.routers import economics_router
 from app.routers.economics_router import (
     _economics_signal,
     _opportunity_class_breakdown,
+    _segment_summary,
     _unavailable_payload,
     calculate_improvement_to_land_ratio,
     calculate_value_per_acre,
@@ -115,6 +116,9 @@ def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:
     assert signal["estimated_county_tax"] == 2850
     assert signal["estimated_county_tax_screening"] == 2850
     assert signal["economic_data_confidence"] == "strong"
+    assert signal["economic_segment"]
+    assert "segment_caveat" in signal
+    assert "special_asset_flag" in signal
     assert signal["economic_status_band"] == "underbuilt_watch"
     assert signal["opportunity_class"] == "Underbuilt Redevelopment Candidate"
     assert "owner" not in str(signal).lower()
@@ -157,6 +161,39 @@ def test_economics_signal_handles_missing_denominators_and_class_bands() -> None
         {"count": 1, "opportunity_class": "Needs More Data Before Recommendation"},
         {"count": 1, "opportunity_class": "Tax-Base Opportunity"},
     ]
+
+
+def test_economics_segment_summary_handles_unknown_and_special_assets() -> None:
+    unknown = _economics_signal(
+        {
+            "acreage": None,
+            "assessed_value": 100_000,
+            "geography_label": "Unclassified parcel",
+            "official_parcel_id": "demo-unknown",
+            "value_per_acre": None,
+        },
+        0.57,
+    )
+    special = _economics_signal(
+        {
+            "acreage": 5,
+            "assessed_value": 3_000_000,
+            "geography_label": "Regional airport context",
+            "land_value": 1_500_000,
+            "improvement_value": 1_500_000,
+            "official_parcel_id": "demo-airport",
+            "value_per_acre": 600_000,
+        },
+        0.57,
+    )
+
+    summary = _segment_summary([unknown, special])
+    segment_names = {row["segment"] for row in summary}
+
+    assert "Unknown / Needs Classification" in segment_names
+    assert "Infrastructure / Utility" in segment_names
+    assert special["special_asset_flag"] is True
+    assert "non-comparable" in special["segment_caveat"]
 
 
 def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> None:
@@ -355,6 +392,10 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
         "time_dim",
     }
     assert tables["economics_kpi_fact"][0]["kpi_name"] == "Parcels analyzed"
+    signal_fact = tables["parcel_economic_signal_fact"][0]
+    assert signal_fact["economic_segment"] == "Unknown / Needs Classification"
+    assert "segment_caveat" in signal_fact
+    assert "special_asset_flag" in signal_fact
     assert tables["parcel_economic_signal_fact"][0]["improvement_to_land_ratio_band"] == "low"
     assert tables["scenario_output_fact"][0]["scenario_id"] == "current_conditions"
     assert tables["scenario_dim"][0]["scenario_id"] == "current_conditions"
@@ -369,7 +410,7 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
     assert guide["pages"][0]["page"] == "Executive Economic Dashboard"
     assert any(measure["name"] == "Total Signals" for measure in guide["suggested_measures"])
     assert any(concept["term"] == "Fact table" for concept in guide["concepts"])
-    assert "No owner/mailing fields imported." in guide["quality_checks"]
+    assert "No contact fields imported." in guide["quality_checks"]
     table_text = str(payload["tables"]).lower()
     assert "owner" not in table_text
     assert "mailing" not in table_text

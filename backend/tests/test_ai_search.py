@@ -159,6 +159,22 @@ def _context():
                 "total_parcels_analyzed": 12,
                 "underbuilt_candidate_count": 4,
             },
+            "segment_summary": [
+                {
+                    "count": 5,
+                    "median_value_per_acre": 250000,
+                    "segment": "Residential",
+                    "segment_caveat": "Compare value per acre within similar land-use or property segments.",
+                    "underbuilt_candidate_count": 2,
+                },
+                {
+                    "count": 1,
+                    "median_value_per_acre": 900000,
+                    "segment": "Institutional / Civic",
+                    "segment_caveat": "Special asset / non-comparable context; compare cautiously outside peer facilities.",
+                    "underbuilt_candidate_count": 0,
+                },
+            ],
             "watchlist": [
                 {
                     "evidence": ["Value per acre: $125,000.", "Improvement-to-land ratio: 0.42"],
@@ -693,6 +709,23 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert "Do not connect every table" in response.answer
     assert "Power BI Embedded" in response.answer
     assert response.evidence[0].source == "economics_powerbi_export"
+
+
+def test_ai_search_economics_segment_prompt_explains_value_per_acre_caveat() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Why is value per acre misleading countywide?",
+        ),
+        _context(),
+    )
+
+    assert response.domains == ["economics"]
+    assert response.dashboard_actions.focus_domain == "economics"
+    assert "Economic Segment slicer" in response.answer
+    assert "special/non-comparable" in response.answer
+    assert "Residential" in response.answer
+    assert response.evidence[0].source == "economics_intelligence.segment_summary"
 
 
 def test_ai_search_economics_print_prompt_returns_snapshot_answer() -> None:
