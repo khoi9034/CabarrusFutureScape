@@ -195,6 +195,8 @@ class CfsAiSearchService:
             else request.filters.domains or selected_signal_domains(request) or resolve_query_domains(request)
         )
         fallback = deterministic_answer(request, context, domains)
+        if request.app_mode == "economics" and _is_fast_economics_guidance_query(request.query):
+            return fallback
         provider = self._settings.cfs_ai_provider
 
         if (
@@ -697,7 +699,28 @@ def _economics_answer(
 
 def _is_economics_walkthrough_query(query: str) -> bool:
     normalized = query.lower()
-    return "walk through" in normalized or "tour" in normalized
+    return any(
+        phrase in normalized
+        for phrase in (
+            "walk through",
+            "tour",
+            "how should i use cfs economics",
+            "how do i use cfs economics",
+            "what should i inspect first",
+        )
+    )
+
+
+def _is_fast_economics_guidance_query(query: str) -> bool:
+    return (
+        _is_economics_walkthrough_query(query)
+        or _is_economics_workspace_query(query)
+        or _is_economics_print_query(query)
+        or _is_economics_segment_query(query)
+        or _is_economics_dashboard_query(query)
+        or _is_economics_powerbi_query(query)
+        or _is_economics_scenario_query(query)
+    )
 
 
 def _is_economics_workspace_query(query: str) -> bool:
@@ -809,8 +832,12 @@ def _is_economics_print_query(query: str) -> bool:
         phrase in normalized
         for phrase in (
             "snapshot summary",
+            "print snapshot",
             "economic snapshot",
             "caveats should i include",
+            "what should go in the print snapshot",
+            "frame the decision memo",
+            "copy decision memo",
             "next diligence should i list",
             "present selected rows",
         )
@@ -834,17 +861,22 @@ def _economics_print_answer(
             "Snapshot sections",
             _bullets(
                 [
-                    "Executive Summary.",
-                    "Selected Rows / Area Context.",
+                    "Executive Takeaway.",
+                    "Selected Rows / Scope.",
                     "Economic Baseline.",
-                    "Opportunity Classification.",
+                    "Opportunity & Segment Summary.",
                     "Fiscal / Service Burden Context.",
                     "Scenario Summary.",
                     "Data Confidence.",
                     "Recommended Next Diligence.",
-                    "Caveats and Assumptions.",
+                    "Caveats & Assumptions.",
+                    "Source / Export Notes.",
                 ]
             ),
+        ),
+        (
+            "Decision memo",
+            "Frame the memo around economic upside, public burden risk, data confidence, recommended next diligence, and caveats. Use Copy Decision Memo when selected rows are ready for a concise briefing.",
         ),
         (
             "Evidence to include",
@@ -896,8 +928,8 @@ def _economics_print_answer(
         [
             "Send selected rows from Power BI & Tools to Print.",
             "Use Print / Save as PDF for the browser-generated report.",
-            "Keep the caveat strip visible.",
-            "Copy the snapshot summary for a memo or slide.",
+            "Copy the Executive Summary or Decision Memo for a memo or slide.",
+            "Keep Source / Export Notes visible.",
         ],
     )
 

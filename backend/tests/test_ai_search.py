@@ -648,6 +648,49 @@ def test_ai_search_economics_mode_returns_economic_answer() -> None:
     assert "Revenue per Acre Dashboard" in response.related_layers
 
 
+def test_ai_search_economics_product_guidance_prompt_returns_walkthrough() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="How should I use CFS Economics?",
+        ),
+        _context(),
+    )
+
+    assert response.domains == ["economics"]
+    assert "Overview, Power BI & Tools, Economic Dashboard, then Print" in response.answer
+    assert "Recommended sequence" in response.answer
+    assert any("Power BI & Tools" in action for action in response.suggested_actions)
+
+
+def test_ai_search_economics_guidance_skips_provider(monkeypatch) -> None:
+    calls = {"count": 0}
+
+    def provider_call(*_args, **_kwargs):
+        calls["count"] += 1
+        return {"answer": "Provider should not be needed."}
+
+    monkeypatch.setattr(ai_search_service, "_post_provider_json", provider_call)
+    response = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="gpt-4o-mini",
+            cfs_ai_provider="openai",
+            openai_api_key="test-key",
+        ),
+    ).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="How should I use CFS Economics?",
+        ),
+        _context(),
+    )
+
+    assert calls["count"] == 0
+    assert response.provider == "none"
+    assert "Overview, Power BI & Tools, Economic Dashboard, then Print" in response.answer
+
+
 def test_ai_search_economics_scenario_prompt_returns_model_answer() -> None:
     context = _context()
     context["economics_intelligence"]["scenario_inputs"] = [
@@ -759,10 +802,14 @@ def test_ai_search_economics_print_prompt_returns_snapshot_answer() -> None:
     assert response.domains == ["economics"]
     assert response.dashboard_actions.focus_domain == "economics"
     assert "Snapshot sections" in response.answer
-    assert "Selected Rows / Area Context" in response.answer
+    assert "Selected Rows / Scope" in response.answer
+    assert "Opportunity & Segment Summary" in response.answer
+    assert "Source / Export Notes" in response.answer
+    assert "Decision memo" in response.answer
     assert "Recommended Next Diligence" in response.answer
     assert "Caveats" in response.answer
     assert any("Print / Save as PDF" in action for action in response.suggested_actions)
+    assert any("Decision Memo" in action for action in response.suggested_actions)
 
 
 def test_ai_search_selected_economics_signal_returns_focused_explanation() -> None:

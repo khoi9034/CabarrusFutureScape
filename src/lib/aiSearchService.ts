@@ -94,6 +94,15 @@ export const askCfsEconomicsPowerBiToolPrompts = [
   "How do I QA the Power BI export?",
 ] as const;
 
+export const askCfsEconomicsPrintPrompts = [
+  "How should I use CFS Economics?",
+  "What should go in the print snapshot?",
+  "What should I send to Print?",
+  "How should I frame the decision memo?",
+  "What caveats should I include?",
+  "What next diligence should I list?",
+] as const;
+
 export async function searchCfsAi(
   request: CfsAiSearchRequest,
   options: { signal?: AbortSignal } = {},
@@ -328,7 +337,13 @@ async function demoEconomicsAnswer(
 
 function isEconomicsWalkthroughQuery(query: string) {
   const normalized = query.toLowerCase();
-  return normalized.includes("walk through") || normalized.includes("tour");
+  return [
+    "walk through",
+    "tour",
+    "how should i use cfs economics",
+    "how do i use cfs economics",
+    "what should i inspect first",
+  ].some((phrase) => normalized.includes(phrase));
 }
 
 function isEconomicsDashboardQuery(query: string) {
@@ -695,8 +710,12 @@ function isEconomicsPrintQuery(query: string) {
   const normalized = query.toLowerCase();
   return [
     "snapshot summary",
+    "print snapshot",
     "economic snapshot",
     "caveats should i include",
+    "what should go in the print snapshot",
+    "frame the decision memo",
+    "copy decision memo",
     "next diligence should i list",
     "present selected rows",
   ].some((term) => normalized.includes(term));
@@ -716,16 +735,21 @@ function demoEconomicsPrintAnswer(
       [
         "Snapshot sections",
         bullets([
-          "Executive Summary.",
-          "Selected Rows / Area Context.",
+          "Executive Takeaway.",
+          "Selected Rows / Scope.",
           "Economic Baseline.",
-          "Opportunity Classification.",
+          "Opportunity & Segment Summary.",
           "Fiscal / Service Burden Context.",
           "Scenario Summary.",
           "Data Confidence.",
           "Recommended Next Diligence.",
-          "Caveats and Assumptions.",
+          "Caveats & Assumptions.",
+          "Source / Export Notes.",
         ]),
+      ],
+      [
+        "Decision memo",
+        "Frame the memo around economic upside, public burden risk, data confidence, recommended next diligence, and caveats. Use Copy Decision Memo when selected rows are ready for a concise briefing.",
       ],
       [
         "Evidence to include",
@@ -776,8 +800,8 @@ function demoEconomicsPrintAnswer(
     suggested_actions: [
       "Send selected rows from Power BI & Tools to Print.",
       "Use Print / Save as PDF for the browser-generated report.",
-      "Keep the caveat strip visible.",
-      "Copy the snapshot summary for a memo or slide.",
+      "Copy the Executive Summary or Decision Memo for a memo or slide.",
+      "Keep Source / Export Notes visible.",
     ],
   };
 }
