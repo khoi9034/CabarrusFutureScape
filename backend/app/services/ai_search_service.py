@@ -1172,6 +1172,8 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "matrix",
             "build your own chart",
             "dashboard visual",
+            "report canvas",
+            "canvas recipe",
         )
     )
 
@@ -1249,6 +1251,16 @@ def _economics_powerbi_answer(
             ),
         ),
         (
+            "Report canvas",
+            _bullets(
+                [
+                    "Preview a chart in Build Your Own Chart, then add it to the Report Canvas.",
+                    "Keep Page 1 simple: KPI cards, opportunity class, segment mix, and one scenario or data-confidence visual.",
+                    "Copy the report canvas recipe when you are ready to recreate the page in Power BI Desktop.",
+                ]
+            ),
+        ),
+        (
             "Suggested measures",
             _bullets(
                 [
@@ -1310,6 +1322,7 @@ def _economics_powerbi_answer(
             "Open Economic Intelligence -> Power BI & Tools -> Power BI Desktop Practice Pack.",
             "Use Flat CSV Tables first if you are learning Power BI Desktop.",
             "Use Build Your Own Chart to pick a table, visual, category, measure, and optional filter.",
+            "Add useful previews to the Report Canvas, then copy the report canvas recipe.",
             "Download the JSON pack and import it into Power BI Desktop.",
             "Build the exported relationships before creating report visuals.",
             "Use the Power BI Report Builder Guide for page-by-page visual instructions.",

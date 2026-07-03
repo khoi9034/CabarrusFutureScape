@@ -88,6 +88,7 @@ export const askCfsEconomicsPowerBiToolPrompts = [
   "How do I make a pie chart?",
   "How do I chart scenarios?",
   "How do I build a matrix in Power BI?",
+  "How do I use the report canvas?",
   "Why is my pie chart too crowded?",
   "Which table should I use for a dashboard visual?",
   "How do I QA the Power BI export?",
@@ -588,6 +589,8 @@ function isEconomicsPowerBiQuery(query: string) {
     "matrix",
     "build your own chart",
     "dashboard visual",
+    "report canvas",
+    "canvas recipe",
   ].some((term) => normalized.includes(term));
 }
 
@@ -839,6 +842,14 @@ function demoEconomicsPowerBiAnswer(
         ]),
       ],
       [
+        "Report canvas",
+        bullets([
+          "Preview a chart in Build Your Own Chart, then add it to the Report Canvas.",
+          "Keep Page 1 simple: KPI cards, opportunity class, segment mix, and one scenario or data-confidence visual.",
+          "Copy the report canvas recipe when you are ready to recreate the page in Power BI Desktop.",
+        ]),
+      ],
+      [
         "Suggested measures",
         bullets(measureLines),
       ],
@@ -891,6 +902,7 @@ function demoEconomicsPowerBiAnswer(
       "Open Economic Intelligence -> Power BI & Tools.",
       "Use Flat CSV Tables first if you are learning Power BI Desktop.",
       "Use Build Your Own Chart to pick a table, visual, category, measure, and optional filter.",
+      "Add useful previews to the Report Canvas, then copy the report canvas recipe.",
       "Preview or download the Power BI JSON Pack.",
       "Build the suggested relationships before creating report visuals.",
       "Use the Power BI Report Builder Guide for page-by-page visual instructions.",

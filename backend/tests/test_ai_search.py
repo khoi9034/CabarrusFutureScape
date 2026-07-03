@@ -705,12 +705,28 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert "Build Your Own Chart" in response.answer
     assert "Opportunity class: use parcel_economic_signal_fact" in response.answer
     assert "Crowded pie charts" in response.answer
+    assert "Report canvas" in response.answer
+    assert "Copy the report canvas recipe" in response.answer
     assert "Suggested measures" in response.answer
     assert "Quality checks" in response.answer
     assert "scenario_id exists in scenario_output_fact" in response.answer
     assert "Slicers are checked for blank or missing values" in response.answer
     assert "Do not connect every table" in response.answer
     assert "Power BI Embedded" in response.answer
+    assert response.evidence[0].source == "economics_powerbi_export"
+
+
+def test_ai_search_economics_report_canvas_prompt_routes_to_powerbi_answer() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="How do I use the report canvas?",
+        ),
+        _context(),
+    )
+
+    assert "Report canvas" in response.answer
+    assert "Copy the report canvas recipe" in response.answer
     assert response.evidence[0].source == "economics_powerbi_export"
 
 

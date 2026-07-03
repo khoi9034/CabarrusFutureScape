@@ -215,6 +215,22 @@ function PowerBiToolsPage({
             <MetricPill label="Report pages" value="4" />
             <MetricPill label="Suggested measures" value="5" />
           </div>
+          <div className="mt-4 grid gap-2 md:grid-cols-5">
+            {[
+              "1. Select rows",
+              "2. Download CSVs",
+              "3. Build chart",
+              "4. Add to canvas",
+              "5. Copy recipe or Print",
+            ].map((step) => (
+              <div
+                className="rounded-xl border border-[var(--econ-border)] bg-black/20 px-3 py-2 text-xs font-semibold text-[var(--econ-muted)]"
+                key={step}
+              >
+                {step}
+              </div>
+            ))}
+          </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={focusTools} type="button">
               Download CSV tables
@@ -1750,6 +1766,7 @@ function PowerBiChartBuilder({
   const [filterField, setFilterField] = useState("economic_segment");
   const [filterValue, setFilterValue] = useState("All");
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const [canvasItems, setCanvasItems] = useState<UserReportCanvasItem[]>([]);
   const tableRows = payload?.tables[tableName] ?? [];
   const fields = powerBiChartFieldMetadata[tableName];
   const categoryOptions = fields.filter((field) =>
@@ -1776,7 +1793,7 @@ function PowerBiChartBuilder({
     valueField,
     activeAggregation,
   );
-  const recipe = chartRecipe({
+  const currentChartConfig: UserChartRecipeConfig = {
     aggregation: activeAggregation,
     categoryField,
     filterField,
@@ -1784,7 +1801,14 @@ function PowerBiChartBuilder({
     tableName,
     valueField,
     visualType,
-  });
+  };
+  const recipe = chartRecipe(currentChartConfig);
+  const chartTitle = `${chartFieldLabel(tableName, categoryField)} by ${
+    activeAggregation === "count" ? "row count" : chartFieldLabel(tableName, valueField)
+  }`;
+  const canvasRecipe = canvasItems
+    .map((item, index) => `Visual ${index + 1}: ${item.title}\n${chartRecipe(item)}`)
+    .join("\n\n");
   const changeTable = (nextTable: PowerBiTableName) => {
     const nextFields = powerBiChartFieldMetadata[nextTable];
     setTableName(nextTable);
@@ -1810,6 +1834,29 @@ function PowerBiChartBuilder({
     }
     await navigator.clipboard.writeText(recipe);
     setCopyStatus("Power BI recipe copied");
+  };
+  const addChartToCanvas = () => {
+    setCanvasItems((items) =>
+      [
+        ...items,
+        {
+          ...currentChartConfig,
+          id: `${tableName}-${visualType}-${categoryField}-${valueField}-${items.length + 1}`,
+          title: chartTitle,
+        },
+      ].slice(-6),
+    );
+    setCopyStatus("Chart added to report canvas");
+  };
+  const copyCanvasRecipe = async () => {
+    if (!navigator.clipboard) {
+      setCopyStatus("Clipboard unavailable");
+      return;
+    }
+    await navigator.clipboard.writeText(
+      canvasRecipe || "Report canvas is empty. Add chart previews before copying.",
+    );
+    setCopyStatus("Report canvas recipe copied");
   };
   return (
     <EconPanel
@@ -1917,10 +1964,69 @@ function PowerBiChartBuilder({
           >
             Copy Power BI recipe
           </button>
+          <button
+            className="ml-2 mt-3 rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
+            onClick={addChartToCanvas}
+            type="button"
+          >
+            Add chart to report canvas
+          </button>
           {copyStatus ? (
             <p className="mt-2 text-xs text-[var(--econ-green)]">{copyStatus}</p>
           ) : null}
         </div>
+      </section>
+      <section className="mt-4 rounded-xl border border-[var(--econ-border)] bg-black/20 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="text-sm font-semibold text-[var(--econ-text)]">Report Canvas</h3>
+            <p className="mt-1 text-xs text-[var(--econ-muted)]">
+              Collect a few previewed visuals before copying a Power BI page recipe.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+              disabled={!canvasItems.length}
+              onClick={() => void copyCanvasRecipe()}
+              type="button"
+            >
+              Copy report canvas recipe
+            </button>
+            <button
+              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+              disabled={!canvasItems.length}
+              onClick={() => setCanvasItems([])}
+              type="button"
+            >
+              Clear canvas
+            </button>
+          </div>
+        </div>
+        {canvasItems.length ? (
+          <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {canvasItems.map((item, index) => (
+              <div
+                className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3"
+                key={item.id}
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+                  Visual {index + 1}
+                </p>
+                <p className="mt-1 truncate text-sm font-semibold text-[var(--econ-text)]">
+                  {item.title}
+                </p>
+                <p className="mt-1 truncate text-xs text-[var(--econ-muted)]">
+                  {chartVisualLabel(item.visualType)} | {item.tableName}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-3 rounded-xl border border-dashed border-[var(--econ-border)] px-3 py-4 text-sm text-[var(--econ-muted)]">
+            Add a chart preview to start a simple Power BI report canvas.
+          </p>
+        )}
       </section>
       <DetailsBlock summary="Advanced field details" hint="Safe table fields available to the chart builder.">
         <div className="grid gap-2 md:grid-cols-2">
@@ -3331,17 +3437,29 @@ function chartRecipe({
   valueField,
   visualType,
 }: UserChartRecipeConfig) {
-  const fieldLabel = (field: string) =>
-    powerBiChartFieldMetadata[tableName].find((row) => row.key === field)?.label ?? field;
   return [
     `Use table: ${tableName}`,
-    `Visual: ${visualType === "donut" ? "Pie / donut chart" : visualType === "line" ? "Line / trend chart" : visualType === "matrix" ? "Matrix / table" : "Bar chart"}`,
-    `Axis/category: ${fieldLabel(categoryField)}`,
-    `Values: ${aggregation} ${fieldLabel(valueField)}`,
-    `Filter/slicer: ${filterField ? `${fieldLabel(filterField)}${filterValue !== "All" ? ` = ${filterValue}` : ""}` : "None"}`,
+    `Visual: ${chartVisualLabel(visualType)}`,
+    `Axis/category: ${chartFieldLabel(tableName, categoryField)}`,
+    `Values: ${aggregation} ${chartFieldLabel(tableName, valueField)}`,
+    `Filter/slicer: ${filterField ? `${chartFieldLabel(tableName, filterField)}${filterValue !== "All" ? ` = ${filterValue}` : ""}` : "None"}`,
     `Recommended page: ${chartRecommendedPage(tableName)}`,
     "Caveat: Use economic_segment first for parcel economics and keep special assets separate when comparing value per acre.",
   ].join("\n");
+}
+
+function chartFieldLabel(tableName: PowerBiTableName, field: string) {
+  return powerBiChartFieldMetadata[tableName].find((row) => row.key === field)?.label ?? field;
+}
+
+function chartVisualLabel(visualType: UserChartVisualType) {
+  return visualType === "donut"
+    ? "Pie / donut chart"
+    : visualType === "line"
+      ? "Line / trend chart"
+      : visualType === "matrix"
+        ? "Matrix / table"
+        : "Bar chart";
 }
 
 function chartRecommendedPage(tableName: PowerBiTableName) {
@@ -3695,6 +3813,10 @@ type UserChartRecipeConfig = {
   tableName: PowerBiTableName;
   valueField: string;
   visualType: UserChartVisualType;
+};
+type UserReportCanvasItem = UserChartRecipeConfig & {
+  id: string;
+  title: string;
 };
 
 const powerBiChartFieldMetadata: Record<PowerBiTableName, UserChartField[]> = {

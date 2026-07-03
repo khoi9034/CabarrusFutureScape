@@ -348,6 +348,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Economic Segment Mix" in economics_shell
     assert "Scenario Fiscal Attractiveness" in economics_shell
     assert "Copy Power BI recipe" in economics_shell
+    assert "Report Canvas" in economics_shell
+    assert "Add chart to report canvas" in economics_shell
+    assert "Copy report canvas recipe" in economics_shell
     assert "Advanced field details" in economics_shell
     assert "UserChartBar" in economics_shell
     assert "UserChartDonut" in economics_shell
@@ -403,6 +406,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "How should I walk through CFS Economics?" in ask_service
     assert "Which rows should I send?" in ask_service
     assert "How do I build this in Power BI?" in ask_service
+    assert "How do I use the report canvas?" in ask_service
     assert "What chart should I use for opportunity class?" in ask_service
     assert "How do I make a pie chart?" in ask_service
     assert "Which areas show underbuilt opportunity?" in ask_service
