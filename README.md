@@ -208,6 +208,12 @@ turning the export into a Desktop report:
   Scenario Planning Model, and Data Confidence Register.
 - Beginner path: use the CSV files first because they import as normal flat
   BI source tables. Use the JSON pack later for app-to-app integration.
+- Use `economic_segment` as the first slicer before interpreting
+  value-per-acre visuals.
+- Sort opportunity visuals by `opportunity_class_order` and band visuals by
+  `band_order`.
+- Filter or isolate `special_asset_flag` records before comparing ordinary
+  parcel economics.
 - Suggested starter measures include `Total Signals`,
   `Underbuilt Candidates`, `Data Needed Signals`, `Scenario Count`, and
   `Strong Fiscal Scenarios`.

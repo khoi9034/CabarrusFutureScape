@@ -197,14 +197,14 @@ async function demoEconomicsAnswer(
   if (isEconomicsPrintQuery(request?.query ?? "")) {
     return demoEconomicsPrintAnswer(economics);
   }
+  if (isEconomicsPowerBiQuery(request?.query ?? "")) {
+    return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport());
+  }
   if (isEconomicsSegmentQuery(request?.query ?? "")) {
     return demoEconomicsSegmentAnswer(economics);
   }
   if (isEconomicsDashboardQuery(request?.query ?? "")) {
     return demoEconomicsDashboardAnswer(economics);
-  }
-  if (isEconomicsPowerBiQuery(request?.query ?? "")) {
-    return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport());
   }
   if (isEconomicsScenarioQuery(request?.query ?? "")) {
     return demoEconomicsScenarioAnswer(economics);
@@ -606,6 +606,12 @@ function isEconomicsPowerBiQuery(query: string) {
     "dashboard visual",
     "report canvas",
     "canvas recipe",
+    "first slicer",
+    "sort order",
+    "sort opportunity",
+    "opportunity class sort",
+    "filter special assets",
+    "special asset filter",
   ].some((term) => normalized.includes(term));
 }
 
@@ -871,6 +877,16 @@ function demoEconomicsPowerBiAnswer(
           "Preview a chart in Build Your Own Chart, then add it to the Report Canvas.",
           "Keep Page 1 simple: KPI cards, opportunity class, segment mix, and one scenario or data-confidence visual.",
           "Copy the report canvas recipe when you are ready to recreate the page in Power BI Desktop.",
+        ]),
+      ],
+      [
+        "Sort and slicer fields",
+        bullets([
+          "Use economic_segment as the first slicer so value-per-acre visuals compare similar property segments.",
+          "Sort opportunity_class visuals by opportunity_class_order.",
+          "Sort band visuals by band_order.",
+          "Use special_asset_flag to filter or isolate airports, civic/institutional assets, utilities, venues, and other non-comparable records.",
+          "Use display_label for readable tables and row_id as the stable row key.",
         ]),
       ],
       [

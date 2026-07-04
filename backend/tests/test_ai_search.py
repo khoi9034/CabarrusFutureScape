@@ -759,6 +759,21 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert response.evidence[0].source == "economics_powerbi_export"
 
 
+def test_ai_search_economics_powerbi_sort_prompt_mentions_export_order_fields() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="How do I sort opportunity classes in Power BI and filter special assets?",
+        ),
+        _context(),
+    )
+
+    assert "opportunity_class_order" in response.answer
+    assert "band_order" in response.answer
+    assert "special_asset_flag" in response.answer
+    assert "economic_segment as the first slicer" in response.answer
+
+
 def test_ai_search_economics_report_canvas_prompt_routes_to_powerbi_answer() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(
@@ -771,6 +786,23 @@ def test_ai_search_economics_report_canvas_prompt_routes_to_powerbi_answer() -> 
     assert "Report canvas" in response.answer
     assert "Copy the report canvas recipe" in response.answer
     assert response.evidence[0].source == "economics_powerbi_export"
+
+
+def test_ai_search_economics_context_uses_cached_economics(monkeypatch) -> None:
+    calls = {"count": 0}
+
+    def fake_cached_economics(_db):
+        calls["count"] += 1
+        return {"summary": {"source_mode": "live"}}
+
+    monkeypatch.setattr(ai_search_router, "get_cached_economics_intelligence", fake_cached_economics)
+
+    request = CfsAiSearchRequest(app_mode="economics", query="How should I use CFS Economics?")
+    first = ai_search_router.gather_cfs_ai_context(object(), request)
+    second = ai_search_router.gather_cfs_ai_context(object(), request)
+
+    assert calls["count"] == 1
+    assert first["economics_intelligence"] == second["economics_intelligence"]
 
 
 def test_ai_search_economics_segment_prompt_explains_value_per_acre_caveat() -> None:

@@ -568,12 +568,12 @@ def _economics_answer(
         return _economics_workspace_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_print_query(request.query):
         return _economics_print_answer(request, context, economics if isinstance(economics, dict) else {})
+    if _is_economics_powerbi_query(request.query):
+        return _economics_powerbi_answer(request, context)
     if _is_economics_segment_query(request.query):
         return _economics_segment_answer(request, context, economics if isinstance(economics, dict) else {})
     if _is_economics_dashboard_query(request.query):
         return _economics_dashboard_answer(request, context, economics if isinstance(economics, dict) else {})
-    if _is_economics_powerbi_query(request.query):
-        return _economics_powerbi_answer(request, context)
     if _is_economics_scenario_query(request.query):
         return _economics_scenario_answer(request, context, economics if isinstance(economics, dict) else {})
     top_signals = [
@@ -1206,6 +1206,12 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "dashboard visual",
             "report canvas",
             "canvas recipe",
+            "first slicer",
+            "sort order",
+            "sort opportunity",
+            "opportunity class sort",
+            "filter special assets",
+            "special asset filter",
         )
     )
 
@@ -1279,6 +1285,18 @@ def _economics_powerbi_answer(
                     "Scenario chart: use scenario_output_fact, bar or matrix, category scenario_name, values fiscal_attractiveness_band or service_burden_band.",
                     "Data confidence matrix: use domain_readiness_dim, rows domain_name, values data_status, current_use, and next_data_need.",
                     "Crowded pie charts: switch to a bar chart when there are more than six categories.",
+                ]
+            ),
+        ),
+        (
+            "Sort and slicer fields",
+            _bullets(
+                [
+                    "Use economic_segment as the first slicer so value-per-acre visuals compare similar property segments.",
+                    "Sort opportunity_class visuals by opportunity_class_order.",
+                    "Sort band visuals by band_order.",
+                    "Use special_asset_flag to filter or isolate airports, civic/institutional assets, utilities, venues, and other non-comparable records.",
+                    "Use display_label for readable tables and row_id as the stable row key.",
                 ]
             ),
         ),

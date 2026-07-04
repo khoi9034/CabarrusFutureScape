@@ -12,8 +12,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.dependencies.database import get_read_only_db
-from app.routers.economics_router import build_economics_intelligence
+from app.dependencies.database import get_optional_read_only_db
+from app.routers.economics_router import get_cached_economics_intelligence
 from app.routers.indicators_router import get_cached_indicator_intelligence
 from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchResponse
 from app.services.ai_search_service import CfsAiSearchService
@@ -78,7 +78,7 @@ _FAST_DEVELOPMENT_SQL = text(
 @router.post("/search", response_model=CfsAiSearchResponse)
 def search_cfs(
     request: CfsAiSearchRequest,
-    db: Session = Depends(get_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db),
 ) -> CfsAiSearchResponse:
     """Answer CFS indicator questions from compact server-side context."""
 
@@ -86,7 +86,7 @@ def search_cfs(
     return CfsAiSearchService(get_settings()).search(request, context)
 
 
-def gather_cfs_ai_context(_db: Session, request: CfsAiSearchRequest | None = None) -> CfsAiContext:
+def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | None = None) -> CfsAiContext:
     cache_key = f"payload_{request.app_mode if request else 'planning'}"
     expires_key = f"expires_at_{request.app_mode if request else 'planning'}"
     cached = _ASK_CFS_CONTEXT_CACHE.get(cache_key)
@@ -116,7 +116,7 @@ def gather_cfs_ai_context(_db: Session, request: CfsAiSearchRequest | None = Non
     context["school_pressure"] = {"features": [], "summary": {}, "total_count": 0}
     if request and request.app_mode == "economics":
         try:
-            context["economics_intelligence"] = build_economics_intelligence(_db)
+            context["economics_intelligence"] = get_cached_economics_intelligence(_db)
         except Exception:
             context["caveats"].append("Economics context is unavailable, so CFS used data-needed economics guidance.")
             context["economics_intelligence"] = {}
@@ -127,7 +127,10 @@ def gather_cfs_ai_context(_db: Session, request: CfsAiSearchRequest | None = Non
     return context
 
 
-def _fast_development_context(db: Session, context: CfsAiContext) -> dict:
+def _fast_development_context(db: Session | None, context: CfsAiContext) -> dict:
+    if db is None:
+        context["caveats"].append("Fast development activity summary is unavailable.")
+        return {}
     try:
         row = db.execute(_FAST_DEVELOPMENT_SQL).mappings().one()
     except Exception:

@@ -97,6 +97,19 @@ def test_economics_cache_returns_partial_payload_when_builder_fails(monkeypatch)
     economics_router._ECONOMICS_CACHE["expires_at"] = None
 
 
+def test_economics_cache_returns_partial_payload_without_db_session() -> None:
+    economics_router._ECONOMICS_CACHE["payload"] = None
+    economics_router._ECONOMICS_CACHE["expires_at"] = None
+
+    payload = economics_router._cached_economics_intelligence(None)
+
+    assert payload["mode"] == "live"
+    assert payload["summary"]["data_needed_count"] == 1
+    assert "still warming" in " ".join(payload["caveats"])
+    economics_router._ECONOMICS_CACHE["payload"] = None
+    economics_router._ECONOMICS_CACHE["expires_at"] = None
+
+
 def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:
     signal = _economics_signal(
         {
@@ -222,6 +235,24 @@ def test_economics_segment_summary_handles_unknown_and_special_assets() -> None:
     assert special["opportunity_class"] == "Special Asset / Compare With Caution"
     assert "non-comparable" in special["segment_caveat"]
     assert any(row.get("dominant_opportunity_class") for row in summary)
+
+
+def test_economics_special_asset_terms_are_classified_for_comparison_caveats() -> None:
+    signal = _economics_signal(
+        {
+            "acreage": 1,
+            "assessed_value": 100_000,
+            "geography_label": "Recombination survey admin record",
+            "land_value": 100_000,
+            "official_parcel_id": "demo-survey",
+            "value_per_acre": 100_000,
+        },
+        0.57,
+    )
+
+    assert signal["special_asset_flag"] is True
+    assert signal["comparable_asset_flag"] is False
+    assert signal["opportunity_class"] == "Special Asset / Compare With Caution"
 
 
 def test_enterprise_export_payload_has_facts_dimensions_and_decision_pack() -> None:
@@ -420,17 +451,28 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
         "time_dim",
     }
     assert tables["economics_kpi_fact"][0]["kpi_name"] == "Parcels analyzed"
+    assert tables["economics_kpi_fact"][0]["kpi_order"] == 1
     signal_fact = tables["parcel_economic_signal_fact"][0]
     assert signal_fact["economic_segment"] == "Unknown / Needs Classification"
+    assert signal_fact["row_id"] == "demo-1"
+    assert signal_fact["display_label"] == "Demo corridor"
+    assert signal_fact["sort_order"] == 1
+    assert signal_fact["segment_order"] == 9
     assert "comparable_asset_flag" in signal_fact
     assert "comparison_group" in signal_fact
     assert "land_efficiency_band" in signal_fact
     assert "public_cost_risk_band" in signal_fact
     assert "fiscal_attractiveness_band" in signal_fact
+    assert "band_order" in signal_fact
     assert "segment_caveat" in signal_fact
     assert "special_asset_flag" in signal_fact
+    assert "opportunity_class_order" in signal_fact
+    assert signal_fact["report_page_recommendation"]
+    assert signal_fact["visual_recommendation"]
+    assert "economic_segment" in signal_fact["slicer_recommendation"]
     assert tables["parcel_economic_signal_fact"][0]["improvement_to_land_ratio_band"] == "low"
     assert tables["scenario_output_fact"][0]["scenario_id"] == "current_conditions"
+    assert tables["scenario_output_fact"][0]["scenario_order"] == 1
     assert tables["scenario_dim"][0]["scenario_id"] == "current_conditions"
     assert {
         "from_table": "scenario_output_fact",
@@ -457,6 +499,9 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
     assert "economic_segment" in signal_csv.splitlines()[0]
     assert "comparable_asset_flag" in signal_csv.splitlines()[0]
     assert "fiscal_attractiveness_band" in signal_csv.splitlines()[0]
+    assert "opportunity_class_order" in signal_csv.splitlines()[0]
+    assert "band_order" in signal_csv.splitlines()[0]
+    assert "report_page_recommendation" in signal_csv.splitlines()[0]
     manifest = build_powerbi_csv_manifest(payload)
     assert len(manifest["tables"]) == 7
     assert manifest["recommended_import_order"][0] == "economics_kpi_fact"

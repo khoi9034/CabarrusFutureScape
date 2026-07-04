@@ -29,10 +29,53 @@ PLANNING_MEASURES = [
     "Data Confidence",
 ]
 
+BAND_ORDER = {
+    "low": 1,
+    "moderate": 2,
+    "medium": 2,
+    "strong": 3,
+    "elevated review": 4,
+    "elevated_review": 4,
+    "high": 4,
+    "data needed": 5,
+    "data_needed": 5,
+    "unavailable": 6,
+    "baseline": 2,
+    "screening": 3,
+    "monitor": 2,
+    "review": 4,
+    "lower": 1,
+}
+
+OPPORTUNITY_CLASS_ORDER = {
+    "High-Value Stable Parcel": 1,
+    "Underbuilt Redevelopment Candidate": 2,
+    "Tax-Base Opportunity": 3,
+    "Industrial / Employment Candidate": 4,
+    "Mixed-Use / Corridor Candidate": 5,
+    "Residential Growth Pressure Area": 6,
+    "High Value but Infrastructure-Constrained": 7,
+    "Special Asset / Compare With Caution": 8,
+    "Low Fiscal Upside / High Public Burden": 9,
+    "Needs More Data Before Recommendation": 10,
+}
+
+SEGMENT_ORDER = {
+    "Residential": 1,
+    "Commercial": 2,
+    "Industrial / Employment": 3,
+    "Mixed-Use / Corridor": 4,
+    "Institutional / Civic": 5,
+    "Agricultural / Rural": 6,
+    "Vacant / Underbuilt": 7,
+    "Infrastructure / Utility": 8,
+    "Unknown / Needs Classification": 9,
+}
+
 POWERBI_CSV_TABLES = {
     "economics_kpi_fact": {
         "description": "Economics KPI fact table.",
-        "fields": ["kpi_id", "kpi_name", "value", "unit", "status_band", "source_mode", "as_of"],
+        "fields": ["kpi_id", "kpi_order", "kpi_name", "value", "unit", "status_band", "source_mode", "as_of"],
         "primary_use": "KPI cards",
         "suggested_visual": "Executive Economic Dashboard KPI cards",
     },
@@ -40,15 +83,20 @@ POWERBI_CSV_TABLES = {
         "description": "Parcel and area economic signal fact table.",
         "fields": [
             "signal_id",
+            "row_id",
+            "display_label",
+            "sort_order",
             "parcel_id",
             "geography_label",
             "economic_segment",
             "economic_segment_order",
+            "segment_order",
             "comparable_asset_flag",
             "comparison_group",
             "special_asset_flag",
             "segment_caveat",
             "opportunity_class",
+            "opportunity_class_order",
             "value_per_acre_band",
             "improvement_to_land_ratio_band",
             "land_efficiency_band",
@@ -56,8 +104,12 @@ POWERBI_CSV_TABLES = {
             "constraint_burden_band",
             "public_cost_risk_band",
             "fiscal_attractiveness_band",
+            "band_order",
             "data_confidence",
             "recommended_followup",
+            "report_page_recommendation",
+            "visual_recommendation",
+            "slicer_recommendation",
         ],
         "primary_use": "Parcel/site screening",
         "suggested_visual": "Opportunity class bars and underbuilt watchlist",
@@ -66,6 +118,7 @@ POWERBI_CSV_TABLES = {
         "description": "Scenario output fact table.",
         "fields": [
             "scenario_id",
+            "scenario_order",
             "scenario_name",
             "intensity_band",
             "value_assumption_band",
@@ -295,7 +348,7 @@ def _signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "constraint_burden_band": row.get("constraint_burden_band"),
             "economic_data_confidence": row.get("economic_data_confidence"),
             "economic_segment": row.get("economic_segment"),
-            "economic_segment_order": row.get("economic_segment_order"),
+            "economic_segment_order": row.get("economic_segment_order") or _segment_order(row.get("economic_segment") or "Unknown / Needs Classification"),
             "economic_status_band": row.get("economic_status_band"),
             "estimated_county_tax": row.get("estimated_county_tax_screening")
             or row.get("estimated_county_tax"),
@@ -465,23 +518,26 @@ def _powerbi_kpi_fact(
         {
             "as_of": as_of,
             "kpi_id": row.get("id"),
+            "kpi_order": index + 1,
             "kpi_name": row.get("label"),
             "source_mode": mode,
             "status_band": row.get("status_band"),
             "unit": row.get("unit"),
             "value": row.get("value"),
         }
-        for row in kpis
+        for index, row in enumerate(kpis)
     ]
 
 
 def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
+            "band_order": _signal_band_order(row),
             "comparable_asset_flag": bool(row.get("comparable_asset_flag", not row.get("special_asset_flag"))),
             "comparison_group": row.get("comparison_group") or row.get("economic_segment") or "Unknown / Needs Classification",
             "constraint_burden_band": row.get("constraint_burden_band") or _constraint_burden_band(row),
             "data_confidence": row.get("economic_data_confidence"),
+            "display_label": row.get("display_label") or row.get("geography_label") or row.get("parcel_id") or f"Signal {index + 1}",
             "economic_segment": row.get("economic_segment") or "Unknown / Needs Classification",
             "economic_segment_order": row.get("economic_segment_order"),
             "fiscal_attractiveness_band": row.get("fiscal_attractiveness_band"),
@@ -489,14 +545,21 @@ def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "improvement_to_land_ratio_band": _ratio_band(row.get("improvement_to_land_ratio")),
             "land_efficiency_band": row.get("land_efficiency_band"),
             "opportunity_class": row.get("opportunity_class"),
+            "opportunity_class_order": _opportunity_class_order(row.get("opportunity_class")),
             "parcel_id": row.get("parcel_id"),
             "public_cost_risk_band": row.get("public_cost_risk_band"),
+            "report_page_recommendation": _signal_report_page(row),
             "recommended_followup": row.get("recommended_followup"),
+            "row_id": row.get("profile_id") or row.get("parcel_id") or f"signal-{index + 1}",
             "segment_caveat": row.get("segment_caveat") or "Compare value per acre within similar land-use or property segments.",
+            "segment_order": row.get("economic_segment_order") or _segment_order(row.get("economic_segment") or "Unknown / Needs Classification"),
             "signal_id": row.get("parcel_id") or f"signal-{index + 1}",
+            "slicer_recommendation": "Start with economic_segment, then opportunity_class, geography_label, and special_asset_flag.",
+            "sort_order": index + 1,
             "special_asset_flag": bool(row.get("special_asset_flag")),
             "tax_base_opportunity_band": row.get("tax_base_opportunity_band") or _tax_base_opportunity_band(row),
             "value_per_acre_band": _value_per_acre_band(row.get("value_per_acre")),
+            "visual_recommendation": _signal_visual(row),
         }
         for index, row in enumerate(signals)
     ]
@@ -512,11 +575,12 @@ def _powerbi_scenario_fact(scenarios: list[dict[str, Any]]) -> list[dict[str, An
             "revenue_per_acre_band": row.get("revenue_per_acre_band"),
             "scenario_id": row.get("scenario_id") or row.get("id"),
             "scenario_name": row.get("title"),
+            "scenario_order": index + 1,
             "service_burden_band": row.get("service_burden_band"),
             "tax_base_lift_band": row.get("estimated_tax_base_lift_band"),
             "value_assumption_band": _scenario_value_assumption_band(row),
         }
-        for row in scenarios
+        for index, row in enumerate(scenarios)
     ]
 
 
@@ -662,6 +726,8 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
             "Build the four report pages with the suggested visuals.",
             "Use the JSON pack later for app-to-app integration or semantic-model automation.",
             "Use economic_segment as an early slicer before comparing value-per-acre visuals.",
+            "Use opportunity_class_order and band_order to sort class and band visuals in a business-friendly order.",
+            "Use special_asset_flag to filter or isolate special assets before comparing normal parcel economics.",
             "Add caveat text boxes so report viewers understand this is practice/export context.",
         ],
         "pages": [
@@ -808,6 +874,8 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
             "Use slicers carefully because some tables are summary-level rather than parcel-level.",
             "Do not force incorrect relationships just to connect everything.",
             "Use economic_segment to avoid comparing residential, institutional, infrastructure, and corridor assets as if they were peers.",
+            "Sort opportunity_class by opportunity_class_order and band columns by band_order.",
+            "Filter or isolate special_asset_flag records when value-per-acre comparisons need comparable assets only.",
         ],
         "relationships": relationships,
         "suggested_measures": [
@@ -834,6 +902,52 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
         ],
         "measure_caveat": "Field names may need small adjustments after import depending on how Power BI expands the JSON.",
     }
+
+
+def _band_order(value: Any) -> int:
+    return BAND_ORDER.get(str(value or "").replace("_", " ").strip().lower(), 99)
+
+
+def _opportunity_class_order(value: Any) -> int:
+    return OPPORTUNITY_CLASS_ORDER.get(str(value or ""), 99)
+
+
+def _segment_order(value: Any) -> int:
+    return SEGMENT_ORDER.get(str(value or ""), 99)
+
+
+def _signal_report_page(row: dict[str, Any]) -> str:
+    if row.get("special_asset_flag"):
+        return "Parcel Investment Screen"
+    if str(row.get("economic_data_confidence") or "").lower() in {"data needed", "data_needed", "low"}:
+        return "Data Confidence Register"
+    if str(row.get("opportunity_class") or "").lower().startswith("underbuilt"):
+        return "Parcel Investment Screen"
+    return "Executive Economic Dashboard"
+
+
+def _signal_visual(row: dict[str, Any]) -> str:
+    opportunity = str(row.get("opportunity_class") or "").lower()
+    if row.get("special_asset_flag"):
+        return "Special asset filter table"
+    if "underbuilt" in opportunity:
+        return "Underbuilt watchlist table"
+    if "tax-base" in opportunity or "opportunity" in opportunity:
+        return "Opportunity class bar chart"
+    if "data" in opportunity:
+        return "Data confidence matrix"
+    return "Segment-aware parcel table"
+
+
+def _signal_band_order(row: dict[str, Any]) -> int:
+    band = (
+        row.get("fiscal_attractiveness_band")
+        or row.get("tax_base_opportunity_band")
+        or row.get("land_efficiency_band")
+        or _tax_base_opportunity_band(row)
+        or _value_per_acre_band(row.get("value_per_acre"))
+    )
+    return _band_order(band)
 
 
 def _value_per_acre_band(value: Any) -> str:

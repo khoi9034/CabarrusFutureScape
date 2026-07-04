@@ -32,7 +32,9 @@ $ApiChecks = @(
   "/constraints/schools/statistics",
   "/constraints/schools/CFS-PARCEL-0149726579",
   "/constraints/schools/qa-summary",
-  "/indicators/intelligence"
+  "/indicators/intelligence",
+  "/economics/intelligence",
+  "/economics/powerbi-export"
 )
 
 function Write-Step {

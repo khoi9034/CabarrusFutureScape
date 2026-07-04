@@ -39,6 +39,7 @@ from app.routers.economics_router import (
     _segment_opportunity_breakdown,
     _segment_summary,
     _segment_value_per_acre,
+    _safe_display_label,
     ECONOMIC_SEGMENTS,
 )
 
@@ -697,7 +698,11 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
     status, opportunity = economics_status_band(value_per_acre, ratio, land_value, acreage)
     segment = _economic_segment(row, status, opportunity)
     special_asset = segment in {"Institutional / Civic", "Infrastructure / Utility"}
+    if special_asset:
+        status, opportunity = "special_asset", "Special Asset / Compare With Caution"
     estimated_tax = estimate_demo_county_tax(assessed_value)
+    parcel_id = str(row.get("official_parcel_id"))
+    display_label = _safe_display_label(row.get("geography_label"), parcel_id)
     return {
         "acreage": acreage,
         "assessed_value": assessed_value,
@@ -718,15 +723,17 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
             f"Improvement-to-land ratio: {round(ratio, 2)}" if ratio is not None else "Improvement-to-land ratio needs land and improvement values.",
         ],
         "floodplain_context": None,
-        "geography_label": row.get("geography_label"),
+        "display_label": display_label,
+        "geography_label": display_label,
         "improvement_to_land_ratio": ratio,
         "improvement_value": improvement_value,
         "improvement_value_per_acre": as_number(row.get("improvement_value_per_acre")),
         "land_value": land_value,
         "land_value_per_acre": as_number(row.get("land_value_per_acre")),
         "opportunity_class": opportunity,
-        "parcel_id": row.get("official_parcel_id"),
+        "parcel_id": parcel_id,
         "permit_activity_context": None,
+        "profile_id": f"econ-{parcel_id}",
         "recommended_followup": "Review zoning, constraints, permit activity, and service burden before scenario screening.",
         "related_layers": [
             "Revenue per Acre Dashboard",

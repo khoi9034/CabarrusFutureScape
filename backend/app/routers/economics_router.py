@@ -12,7 +12,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.dependencies.database import get_read_only_db
+from app.dependencies.database import get_optional_read_only_db
 from app.services.enterprise_export_service import (
     build_powerbi_csv_manifest,
     build_enterprise_export_payload,
@@ -40,7 +40,7 @@ ECONOMIC_SEGMENTS = [
 
 @router.get("/intelligence")
 def get_economics_intelligence(
-    db: Session = Depends(get_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db),
 ) -> dict[str, Any]:
     """Return parcel economics screening signals for dashboard use."""
 
@@ -49,7 +49,7 @@ def get_economics_intelligence(
 
 @router.get("/enterprise-export")
 def get_economics_enterprise_export(
-    db: Session = Depends(get_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db),
 ) -> dict[str, Any]:
     """Return connector-ready economics facts, dimensions, and decision pack."""
 
@@ -58,7 +58,7 @@ def get_economics_enterprise_export(
 
 @router.get("/powerbi-export")
 def get_economics_powerbi_export(
-    db: Session = Depends(get_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db),
 ) -> dict[str, Any]:
     """Return Power BI Desktop practice facts, dimensions, and relationship notes."""
 
@@ -67,7 +67,7 @@ def get_economics_powerbi_export(
 
 @router.get("/powerbi-export/csv-manifest")
 def get_economics_powerbi_csv_manifest(
-    db: Session = Depends(get_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db),
 ) -> dict[str, Any]:
     """Return flat CSV table download metadata for Power BI Desktop practice."""
 
@@ -78,7 +78,7 @@ def get_economics_powerbi_csv_manifest(
 @router.get("/powerbi-export/csv/{table_name}")
 def get_economics_powerbi_csv(
     table_name: str,
-    db: Session = Depends(get_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db),
 ) -> Response:
     """Return one sanitized flat Power BI practice table as CSV."""
 
@@ -94,11 +94,20 @@ def get_economics_powerbi_csv(
     )
 
 
-def _cached_economics_intelligence(db: Session) -> dict[str, Any]:
+def _cached_economics_intelligence(db: Session | None) -> dict[str, Any]:
     cached_payload = _ECONOMICS_CACHE.get("payload")
     expires_at = _ECONOMICS_CACHE.get("expires_at")
     if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached_payload:
         return cached_payload
+
+    if db is None:
+        payload = _unavailable_payload(
+            datetime.now(UTC).isoformat(),
+            "Local economics context is still warming, so CFS used available parcel/economic summary fields.",
+        )
+        _ECONOMICS_CACHE["payload"] = payload
+        _ECONOMICS_CACHE["expires_at"] = datetime.now(UTC) + ECONOMICS_CACHE_TTL
+        return payload
 
     try:
         payload = build_economics_intelligence(db)
@@ -112,6 +121,12 @@ def _cached_economics_intelligence(db: Session) -> dict[str, Any]:
     _ECONOMICS_CACHE["payload"] = payload
     _ECONOMICS_CACHE["expires_at"] = datetime.now(UTC) + ECONOMICS_CACHE_TTL
     return payload
+
+
+def get_cached_economics_intelligence(db: Session | None) -> dict[str, Any]:
+    """Return process-cached economics intelligence for routes that need shared context."""
+
+    return _cached_economics_intelligence(db)
 
 
 def build_economics_intelligence(db: Session) -> dict[str, Any]:
@@ -201,7 +216,8 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
               SUM(assessed_value) AS total_assessed_value,
               SUM(land_value) AS total_land_value,
               SUM(improvement_value) AS total_improvement_value,
-              AVG(value_per_acre) FILTER (WHERE value_per_acre IS NOT NULL) AS median_value_per_acre,
+              percentile_cont(0.5) WITHIN GROUP (ORDER BY value_per_acre)
+                FILTER (WHERE value_per_acre IS NOT NULL) AS median_value_per_acre,
               COUNT(*) FILTER (WHERE improvement_to_land_ratio < 0.65 AND land_value >= 100000 AND acreage >= 0.5) AS underbuilt_candidate_count,
               COUNT(*) FILTER (WHERE value_per_acre < 150000 AND acreage >= 1.0 AND assessed_value IS NOT NULL) AS high_opportunity_count,
               COUNT(*) FILTER (WHERE assessed_value IS NULL OR acreage IS NULL OR acreage <= 0) AS data_needed_count
@@ -433,9 +449,9 @@ def _economic_segment(row: dict[str, Any], status: str, opportunity: str) -> str
         for key in ("geography_label", "permit_activity_context", "floodplain_context", "school_pressure_context")
     )
     text_value = f"{text_value} {status} {opportunity}".lower()
-    if any(term in text_value for term in ("airport", "utility", "infrastructure", "rail", "water", "sewer", "power")):
+    if any(term in text_value for term in ("airport", "utility", "infrastructure", "rail", "water", "sewer", "power", "speedway", "stadium", "venue")):
         return "Infrastructure / Utility"
-    if any(term in text_value for term in ("school", "hospital", "medical", "convention", "government", "county", "municipal", "civic", "institution")):
+    if any(term in text_value for term in ("school", "hospital", "medical", "convention", "government", "county", "municipal", "civic", "institution", "campus", "recombination", "survey", "admin", "district-level", "aggregate record")):
         return "Institutional / Civic"
     if any(term in text_value for term in ("industrial", "employment", "business park", "warehouse", "manufacturing")):
         return "Industrial / Employment"
