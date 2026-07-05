@@ -836,7 +836,8 @@ def test_ai_search_economics_print_prompt_returns_snapshot_answer() -> None:
     assert "Snapshot sections" in response.answer
     assert "Selected Rows / Scope" in response.answer
     assert "Opportunity & Segment Summary" in response.answer
-    assert "Source / Export Notes" in response.answer
+    assert "Evidence Pack" in response.answer
+    assert "Power BI / Export Notes" in response.answer
     assert "Decision memo" in response.answer
     assert "Recommended Next Diligence" in response.answer
     assert "Caveats" in response.answer

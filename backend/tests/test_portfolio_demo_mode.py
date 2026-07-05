@@ -374,12 +374,18 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Print / Save as PDF" in economics_shell
     assert "Copy Executive Summary" in economics_shell
     assert "Copy Decision Memo" in economics_shell
+    assert "Copy Evidence Pack" in economics_shell
+    assert "Copy Power BI follow-up notes" in economics_shell
+    assert "text ready to copy manually" in economics_shell
     assert "Go to Economic Dashboard" in economics_shell
     assert "Selected Rows / Scope" in economics_shell
     assert "Opportunity & Segment Summary" in economics_shell
     assert "Fiscal / Service Burden Context" in economics_shell
+    assert "Evidence Pack" in economics_shell
     assert "Caveats & Assumptions" in economics_shell
-    assert "Source / Export Notes" in economics_shell
+    assert "Power BI / Export Notes" in economics_shell
+    assert "Top opportunity class" in economics_shell
+    assert "Special assets" in economics_shell
     assert "No rows selected. This snapshot is using the current economics summary." in economics_shell
     assert "Ask CFS Economics" in economics_shell
     assert "EconomicMissionControl" in indicator_center
@@ -398,6 +404,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "How do I recreate this dashboard in Power BI?" in ask_service
     assert "Explain the scenario comparison matrix." in ask_service
     assert "What does the data confidence register show?" in ask_service
+    assert "Write an executive takeaway for this snapshot." in ask_service
+    assert "How do I explain selected rows?" in ask_service
+    assert "How should I present this to a reviewer?" in ask_service
     assert "Which chart shows fiscal burden?" in ask_service
     assert "Which rows should I select first?" in ask_service
     assert "What does this table mean?" in ask_service
@@ -422,7 +431,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "How do I QA the Power BI export?" in ask_service
     assert "Build a snapshot summary." in ask_service
     assert "What should go in the print snapshot?" in ask_service
-    assert "How should I frame the decision memo?" in ask_service
+    assert "Write an executive takeaway for this snapshot." in ask_service
     assert "What should go into the economic snapshot?" in ask_service
     assert "What caveats should I include?" in ask_service
     assert "What next diligence should I list?" in ask_service

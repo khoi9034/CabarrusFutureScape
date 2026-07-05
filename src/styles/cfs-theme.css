@@ -626,6 +626,22 @@ select:focus-visible {
     page-break-before: always;
   }
 
+  .print-report table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  .print-report tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-report th,
+  .print-report td {
+    border-color: #d1d5db !important;
+    color: #111827 !important;
+  }
+
   .print-report button,
   .print-report summary {
     display: none !important;

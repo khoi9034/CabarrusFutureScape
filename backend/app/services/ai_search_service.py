@@ -838,8 +838,11 @@ def _is_economics_print_query(query: str) -> bool:
             "what should go in the print snapshot",
             "frame the decision memo",
             "copy decision memo",
+            "executive takeaway",
+            "explain selected rows",
             "next diligence should i list",
             "present selected rows",
+            "present this to a reviewer",
         )
     )
 
@@ -868,9 +871,10 @@ def _economics_print_answer(
                     "Fiscal / Service Burden Context.",
                     "Scenario Summary.",
                     "Data Confidence.",
+                    "Evidence Pack.",
                     "Recommended Next Diligence.",
                     "Caveats & Assumptions.",
-                    "Source / Export Notes.",
+                    "Power BI / Export Notes.",
                 ]
             ),
         ),
@@ -929,7 +933,7 @@ def _economics_print_answer(
             "Send selected rows from Power BI & Tools to Print.",
             "Use Print / Save as PDF for the browser-generated report.",
             "Copy the Executive Summary or Decision Memo for a memo or slide.",
-            "Keep Source / Export Notes visible.",
+            "Keep Power BI / Export Notes visible.",
         ],
     )
 

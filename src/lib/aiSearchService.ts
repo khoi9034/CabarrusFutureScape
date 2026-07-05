@@ -95,12 +95,12 @@ export const askCfsEconomicsPowerBiToolPrompts = [
 ] as const;
 
 export const askCfsEconomicsPrintPrompts = [
-  "How should I use CFS Economics?",
   "What should go in the print snapshot?",
-  "What should I send to Print?",
-  "How should I frame the decision memo?",
+  "Write an executive takeaway for this snapshot.",
+  "How do I explain selected rows?",
   "What caveats should I include?",
   "What next diligence should I list?",
+  "How should I present this to a reviewer?",
 ] as const;
 
 export async function searchCfsAi(
@@ -722,8 +722,11 @@ function isEconomicsPrintQuery(query: string) {
     "what should go in the print snapshot",
     "frame the decision memo",
     "copy decision memo",
+    "executive takeaway",
+    "explain selected rows",
     "next diligence should i list",
     "present selected rows",
+    "present this to a reviewer",
   ].some((term) => normalized.includes(term));
 }
 
@@ -748,9 +751,10 @@ function demoEconomicsPrintAnswer(
           "Fiscal / Service Burden Context.",
           "Scenario Summary.",
           "Data Confidence.",
+          "Evidence Pack.",
           "Recommended Next Diligence.",
           "Caveats & Assumptions.",
-          "Source / Export Notes.",
+          "Power BI / Export Notes.",
         ]),
       ],
       [
@@ -807,7 +811,7 @@ function demoEconomicsPrintAnswer(
       "Send selected rows from Power BI & Tools to Print.",
       "Use Print / Save as PDF for the browser-generated report.",
       "Copy the Executive Summary or Decision Memo for a memo or slide.",
-      "Keep Source / Export Notes visible.",
+      "Keep Power BI / Export Notes visible.",
     ],
   };
 }

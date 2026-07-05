@@ -1039,6 +1039,7 @@ function EconomicsPrintPage({
   const snapshotRows = selectedSignals;
   const [generatedAt] = useState(() => new Date().toLocaleString());
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+  const [copyFallback, setCopyFallback] = useState<{ label: string; text: string } | null>(null);
   const reportRows = snapshotRows.length
     ? snapshotRows
     : (intelligence?.parcel_economic_signals ?? []).slice(0, 8);
@@ -1051,6 +1052,7 @@ function EconomicsPrintPage({
   const confidenceRows = countRowsBy(reportRows, (signal) => signal.economic_data_confidence);
   const segmentRows = countRowsBy(reportRows, (signal) => signal.economic_segment ?? "Unknown / Needs Classification");
   const hasSpecialAssets = reportRows.some((signal) => signal.special_asset_flag);
+  const specialAssetCount = reportRows.filter((signal) => signal.special_asset_flag).length;
   const scenario = intelligence?.scenario_outputs?.[0] ?? fallbackScenarioOutputs[0];
   const snapshotSummary = economicSnapshotSummary(summary, snapshotRows);
   const followUps = nextDiligenceItems(snapshotRows);
@@ -1069,6 +1071,12 @@ function EconomicsPrintPage({
     segmentRows,
     snapshotRows,
   });
+  const evidencePackRows = printEvidencePackRows({
+    hasSelectedRows: Boolean(snapshotRows.length),
+    readinessRows: intelligence?.data_readiness ?? [],
+    reportRows,
+    scenario,
+  });
   const sourceNotes = [
     `Data mode: ${USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}.`,
     `Generated: ${generatedAt}.`,
@@ -1076,6 +1084,17 @@ function EconomicsPrintPage({
     "Export sources: economics_powerbi_export.json and flat Power BI-ready CSV tables.",
     "No embedded BI connection, external credential, contact field, or model internal is included in this snapshot.",
   ];
+  const evidencePackText = [
+    "CFS Economics Evidence Pack",
+    ...evidencePackRows.map((row) => `${row.label}: ${row.value}`),
+  ].join("\n");
+  const powerBiNotesText = [
+    "CFS Economics Power BI / Export Notes",
+    ...sourceNotes.map((item) => `- ${item}`),
+    "- Use economic_segment as the first slicer.",
+    "- Sort opportunity_class by opportunity_class_order and bands by band_order.",
+    "- Filter or isolate special_asset_flag records before value-per-acre comparisons.",
+  ].join("\n");
   const executiveSummaryText = [
     "CFS Economics Snapshot",
     snapshotSummary,
@@ -1088,12 +1107,24 @@ function EconomicsPrintPage({
     ...caveats.map((item) => `- ${item}`),
   ].join("\n");
   const copyText = async (label: string, text: string) => {
-    if (!navigator.clipboard) {
-      setCopyStatus("Clipboard unavailable in this browser");
-      return;
+    setCopyFallback(null);
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(text);
+      } else if (!fallbackCopyText(text)) {
+        setCopyFallback({ label, text });
+        setCopyStatus(`${label} ready to copy manually`);
+        return;
+      }
+      setCopyStatus(`${label} copied`);
+    } catch {
+      if (!fallbackCopyText(text)) {
+        setCopyFallback({ label, text });
+        setCopyStatus(`${label} ready to copy manually`);
+        return;
+      }
+      setCopyStatus(`${label} copied`);
     }
-    await navigator.clipboard.writeText(text);
-    setCopyStatus(`${label} copied`);
   };
   return (
     <>
@@ -1107,6 +1138,12 @@ function EconomicsPrintPage({
         <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copyText("Decision memo", decisionMemo)} type="button">
           Copy Decision Memo
         </button>
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copyText("Evidence pack", evidencePackText)} type="button">
+          Copy Evidence Pack
+        </button>
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copyText("Power BI notes", powerBiNotesText)} type="button">
+          Copy Power BI follow-up notes
+        </button>
         <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("tools")} type="button">
           Go to Power BI & Tools
         </button>
@@ -1114,6 +1151,19 @@ function EconomicsPrintPage({
           Go to Economic Dashboard
         </button>
         {copyStatus ? <span className="self-center text-xs text-[var(--econ-green)]">{copyStatus}</span> : null}
+        {copyFallback ? (
+          <div className="basis-full rounded-xl border border-[var(--econ-border)] bg-black/20 p-3">
+            <p className="mb-2 text-xs font-semibold text-[var(--econ-muted)]">
+              {copyFallback.label} text ready to copy manually.
+            </p>
+            <textarea
+              className="h-28 w-full rounded-lg border border-[var(--econ-border)] bg-[#080d14] p-2 text-xs text-[var(--econ-text)]"
+              onFocus={(event) => event.currentTarget.select()}
+              readOnly
+              value={copyFallback.text}
+            />
+          </div>
+        ) : null}
       </section>
       <article className="print-report rounded-2xl border border-[var(--econ-border)] bg-[#fbfaf6] p-5 text-slate-950 shadow-[0_24px_80px_rgba(0,0,0,0.24)] md:p-7">
         <header className="print-section border-b border-slate-300 pb-5">
@@ -1149,6 +1199,12 @@ function EconomicsPrintPage({
               <p className="text-sm text-slate-700">
                 Based on selected Power BI & Tools rows: {snapshotRows.length} selected.
               </p>
+              <div className="mt-3 grid gap-3 md:grid-cols-4 print:grid-cols-4">
+                <PrintMetric label="Selected rows" value={formatNumber(snapshotRows.length)} />
+                <PrintMetric label="Top segment" value={segmentRows[0]?.label ?? "Data Needed"} />
+                <PrintMetric label="Top opportunity class" value={classRows[0]?.label ?? "Data Needed"} />
+                <PrintMetric label="Special assets" value={formatNumber(specialAssetCount)} />
+              </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {snapshotRows.slice(0, 10).map((signal) => (
                   <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700" key={signal.parcel_id}>
@@ -1210,11 +1266,7 @@ function EconomicsPrintPage({
         </PrintSection>
 
         <PrintSection title="5. Fiscal / Service Burden Context">
-          <div className="grid gap-2 md:grid-cols-2 print:grid-cols-2">
-            {burdenContextRows(reportRows, scenario).map((row) => (
-              <PrintKeyValue key={row.label} label={row.label} value={row.value} />
-            ))}
-          </div>
+          <BurdenPrintTable rows={burdenContextRows(reportRows, scenario)} />
         </PrintSection>
 
         <PrintSection title="6. Scenario Summary">
@@ -1237,21 +1289,28 @@ function EconomicsPrintPage({
           </div>
         </PrintSection>
 
-        <PrintSection title="8. Recommended Next Diligence">
+        <PrintSection title="8. Evidence Pack">
+          <EvidencePackTable rows={evidencePackRows} />
+        </PrintSection>
+
+        <PrintSection title="9. Recommended Next Diligence">
           <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
             {followUps.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </PrintSection>
 
-        <PrintSection title="9. Caveats & Assumptions">
+        <PrintSection title="10. Caveats & Assumptions">
           <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
             {caveats.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </PrintSection>
 
-        <PrintSection title="10. Source / Export Notes">
+        <PrintSection title="11. Power BI / Export Notes">
           <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
             {sourceNotes.map((item) => <li key={item}>{item}</li>)}
+            <li>Use economic_segment as the first Power BI slicer for segment-aware interpretation.</li>
+            <li>Use opportunity_class_order and band_order to sort report visuals.</li>
+            <li>Filter or isolate special_asset_flag records before comparing value per acre.</li>
           </ul>
         </PrintSection>
       </article>
@@ -1372,6 +1431,81 @@ function ReadinessPrintTable({ rows }: { rows: EconomicsReadinessRow[] }) {
               <td className="border-t border-slate-300 px-3 py-2 text-slate-700">
                 {row.gap_or_next_need}
               </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function fallbackCopyText(text: string) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  try {
+    return document.execCommand("copy");
+  } finally {
+    document.body.removeChild(textarea);
+  }
+}
+
+function BurdenPrintTable({
+  rows,
+}: {
+  rows: Array<{ evidence: string; label: string; next: string; value: string }>;
+}) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-slate-300">
+      <table className="w-full min-w-[680px] border-separate border-spacing-0 text-left text-xs">
+        <thead className="bg-slate-100 text-[10px] uppercase tracking-[0.12em] text-slate-500">
+          <tr>
+            <th className="px-3 py-2">Context</th>
+            <th className="px-3 py-2">Band</th>
+            <th className="px-3 py-2">Evidence</th>
+            <th className="px-3 py-2">Next diligence</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.label}>
+              <td className="border-t border-slate-300 px-3 py-2 font-semibold text-slate-950">{row.label}</td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">{row.value}</td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">{row.evidence}</td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">{row.next}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function EvidencePackTable({
+  rows,
+}: {
+  rows: Array<{ label: string; value: string }>;
+}) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-slate-300">
+      <table className="w-full min-w-[620px] border-separate border-spacing-0 text-left text-xs">
+        <thead className="bg-slate-100 text-[10px] uppercase tracking-[0.12em] text-slate-500">
+          <tr>
+            <th className="px-3 py-2">Evidence</th>
+            <th className="px-3 py-2">Snapshot value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.label}>
+              <td className="border-t border-slate-300 px-3 py-2 font-semibold text-slate-950">{row.label}</td>
+              <td className="border-t border-slate-300 px-3 py-2 text-slate-700">{row.value}</td>
             </tr>
           ))}
         </tbody>
@@ -3439,13 +3573,87 @@ function burdenContextRows(
 ) {
   const first = signals[0];
   return [
-    { label: "Tax-base opportunity", value: first ? taxBaseBand(first) : scenario.estimated_tax_base_lift_band },
-    { label: "School / service burden", value: first?.school_pressure_context ?? scenario.service_burden_band },
-    { label: "Infrastructure burden", value: scenario.infrastructure_burden_band },
-    { label: "Flood / constraint context", value: first?.floodplain_context ?? "Review if geography overlaps floodplain or constraint layers." },
-    { label: "Utility readiness confidence", value: first?.utility_readiness_context ?? "Data confidence varies by source coverage." },
-    { label: "Transportation context", value: first?.transportation_context ?? "Review corridor or access context where available." },
-    { label: "Data confidence", value: first?.economic_data_confidence ?? scenario.data_confidence },
+    {
+      evidence: first?.opportunity_class ?? "Scenario baseline",
+      label: "Tax-base opportunity",
+      next: "Compare opportunity band with segment and constraint context.",
+      value: first ? taxBaseBand(first) : scenario.estimated_tax_base_lift_band,
+    },
+    {
+      evidence: first?.school_pressure_context ?? "Scenario service-burden band",
+      label: "Service / school burden",
+      next: "Review school and service assumptions before presentation.",
+      value: scenario.service_burden_band,
+    },
+    {
+      evidence: first?.utility_readiness_context ?? "Official utility capacity remains a data need.",
+      label: "Infrastructure burden",
+      next: "Verify utility readiness and infrastructure assumptions.",
+      value: scenario.infrastructure_burden_band,
+    },
+    {
+      evidence: first?.floodplain_context ?? "Flood or constraint overlay should be checked for selected geography.",
+      label: "Constraint burden",
+      next: "Check floodplain and environmental constraint layers.",
+      value: first?.constraint_burden_band ?? "Data Needed",
+    },
+    {
+      evidence: first?.public_cost_risk_band ?? "Public cost risk is shown as a screening band.",
+      label: "Public cost risk",
+      next: "Compare fiscal upside with service burden before next-stage review.",
+      value: first?.public_cost_risk_band ?? "Data Needed",
+    },
+    {
+      evidence: first?.segment_caveat ?? "Value per acre is segment-sensitive.",
+      label: "Data confidence",
+      next: "Resolve data-needed fields before treating the snapshot as decision-ready.",
+      value: first?.economic_data_confidence ?? scenario.data_confidence,
+    },
+  ];
+}
+
+function printEvidencePackRows({
+  hasSelectedRows,
+  readinessRows,
+  reportRows,
+  scenario,
+}: {
+  hasSelectedRows: boolean;
+  readinessRows: EconomicsReadinessRow[];
+  reportRows: EconomicsParcelSignal[];
+  scenario: EconomicsScenarioOutput;
+}) {
+  const missingData = readinessRows
+    .filter((row) => row.data_status !== "available")
+    .map((row) => `${row.domain}: ${row.gap_or_next_need}`)
+    .slice(0, 3);
+  return [
+    {
+      label: "Source tables / layers",
+      value: "CFS Economics intelligence, parcel economic signals, scenario outputs, and data readiness.",
+    },
+    {
+      label: "Rows used",
+      value: hasSelectedRows
+        ? `${reportRows.length} selected Power BI & Tools rows.`
+        : "Current economics summary; select rows for a focused parcel/area report.",
+    },
+    {
+      label: "Key metrics",
+      value: "Median value per acre, opportunity class, economic segment, burden bands, and data confidence.",
+    },
+    {
+      label: "Scenario assumption",
+      value: `${scenario.title}: tax-base lift ${scenario.estimated_tax_base_lift_band}; service burden ${scenario.service_burden_band}.`,
+    },
+    {
+      label: "Missing data",
+      value: missingData.join("; ") || "No elevated missing-data item in the current readiness summary.",
+    },
+    {
+      label: "Related CFS pages",
+      value: "Power BI & Tools, Economic Dashboard, Print.",
+    },
   ];
 }
 
