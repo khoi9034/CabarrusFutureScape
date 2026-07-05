@@ -265,9 +265,26 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "EconomicDashboardPage" in economics_shell
     assert "EnterpriseWorkspacePage" in economics_shell
     assert "EconomicsPrintPage" in economics_shell
-    assert "Start Economics Tour" in economics_shell
-    assert "CFS Economics guided tour" in economics_shell
-    assert "Step ${tourStepIndex + 1} of ${economicsTourSteps.length}" in economics_shell
+    assert "EconomicsTutorialButton" in economics_shell
+    assert "EconomicsTutorialOverlay" in economics_shell
+    assert "Skip tutorial" in economics_shell
+    assert "Escape" in economics_shell
+    assert 'data-econ-tour="overview-hero"' in economics_shell
+    assert 'data-econ-tour="row-selection"' in economics_shell
+    assert 'data-econ-tour="powerbi-export"' in economics_shell
+    assert 'data-econ-tour="chart-builder"' in economics_shell
+    assert 'data-econ-tour="report-canvas"' in economics_shell
+    assert 'data-econ-tour="kpi-strip"' in economics_shell
+    assert 'data-econ-tour="slicers"' in economics_shell
+    assert 'data-econ-tour="segment-visuals"' in economics_shell
+    assert 'data-econ-tour="ask-cfs"' in economics_shell
+    assert 'data-econ-tour="print-header"' in economics_shell
+    assert 'data-econ-tour="print-scope"' in economics_shell
+    assert 'data-econ-tour="print-actions"' in economics_shell
+    assert "overview:" in economics_shell
+    assert "tools:" in economics_shell
+    assert "dashboard:" in economics_shell
+    assert "print:" in economics_shell
     assert "Overview -> Power BI & Tools -> Economic Dashboard -> Print" in ask_service
     assert "Uses the local FastAPI backend and local PostGIS economics data." in economics_shell
     assert "Uses a sanitized cached demo extract for portfolio review." in economics_shell

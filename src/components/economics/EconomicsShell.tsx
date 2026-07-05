@@ -7,7 +7,7 @@ import {
   Search,
   ShieldAlert,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
@@ -44,6 +44,7 @@ export function EconomicsShell() {
     useState<EconomicsPowerBiExportResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedSignalIds, setSelectedSignalIds] = useState<string[]>([]);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
 
   useEffect(() => {
     if (economicsSection === "workspace" || economicsSection === "enterprise") {
@@ -109,6 +110,9 @@ export function EconomicsShell() {
   return (
     <main className="econ-shell relative z-10 min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-5">
       <div className="mx-auto flex w-full max-w-[96rem] flex-col gap-4">
+        <div className="no-print flex justify-end">
+          <EconomicsTutorialButton onClick={() => setTutorialOpen(true)} />
+        </div>
         {error ? (
           <div className="rounded-xl border border-[var(--econ-risk)]/30 bg-[var(--econ-risk)]/10 px-4 py-3 text-sm text-[#ffd1c2]">
             Local economics data is unavailable. Confirm FastAPI is running at
@@ -158,8 +162,174 @@ export function EconomicsShell() {
             selectedSignals={selectedSignals}
           />
         ) : null}
+        {tutorialOpen ? (
+          <EconomicsTutorialOverlay
+            key={activeEconomicsSection}
+            onClose={() => setTutorialOpen(false)}
+            onNavigate={setEconomicsSection}
+            page={activeEconomicsSection}
+          />
+        ) : null}
       </div>
     </main>
+  );
+}
+
+type EconomicsTutorialPage = "overview" | "tools" | "dashboard" | "print";
+
+type EconomicsTutorialStep = {
+  actionSection?: EconomicsTutorialPage;
+  body: string;
+  id: string;
+  optionalActionLabel?: string;
+  targetSelector: string;
+  title: string;
+};
+
+function EconomicsTutorialButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      className="rounded-full border border-[var(--econ-border)] bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] hover:text-[#ffe6a6]"
+      onClick={onClick}
+      type="button"
+    >
+      Tutorial
+    </button>
+  );
+}
+
+function EconomicsTutorialOverlay({
+  onClose,
+  onNavigate,
+  page,
+}: {
+  onClose: () => void;
+  onNavigate: (section: EconomicsTutorialPage) => void;
+  page: EconomicsTutorialPage;
+}) {
+  const steps = economicsTutorialSteps[page];
+  const [stepIndex, setStepIndex] = useState(0);
+  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const step = steps[stepIndex] ?? steps[0];
+  const isLast = stepIndex === steps.length - 1;
+
+  useEffect(() => {
+    const updateTarget = () => {
+      const target = document.querySelector(step.targetSelector);
+      if (!target) {
+        setTargetRect(null);
+        return;
+      }
+      target.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      window.setTimeout(() => setTargetRect(target.getBoundingClientRect()), 220);
+    };
+    updateTarget();
+    cardRef.current?.focus();
+    window.addEventListener("resize", updateTarget);
+    window.addEventListener("scroll", updateTarget, true);
+    return () => {
+      window.removeEventListener("resize", updateTarget);
+      window.removeEventListener("scroll", updateTarget, true);
+    };
+  }, [step.targetSelector]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
+  const viewportWidth = typeof window === "undefined" ? 360 : window.innerWidth;
+  const viewportHeight = typeof window === "undefined" ? 640 : window.innerHeight;
+  const cardStyle = targetRect
+    ? {
+        left: Math.min(Math.max(16, targetRect.left), viewportWidth - 336),
+        top:
+          targetRect.bottom + 16 < viewportHeight - 220
+            ? targetRect.bottom + 16
+            : Math.max(16, targetRect.top - 236),
+      }
+    : {
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+      };
+
+  return (
+    <div className="no-print fixed inset-0 z-[80]" role="presentation">
+      <button
+        aria-label="Close tutorial backdrop"
+        className="absolute inset-0 bg-black/55"
+        onClick={onClose}
+        type="button"
+      />
+      {targetRect ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed rounded-2xl border-2 border-[var(--econ-gold)] shadow-[0_0_0_9999px_rgba(0,0,0,0.18),0_0_36px_rgba(216,184,106,0.5)]"
+          style={{
+            height: targetRect.height + 16,
+            left: targetRect.left - 8,
+            top: targetRect.top - 8,
+            width: targetRect.width + 16,
+          }}
+        />
+      ) : null}
+      <div
+        aria-label="CFS Economics tutorial"
+        aria-modal="true"
+        className="fixed w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-[var(--econ-gold)]/45 bg-[#111722] p-4 text-[var(--econ-text)] shadow-2xl"
+        ref={cardRef}
+        role="dialog"
+        style={cardStyle}
+        tabIndex={-1}
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--econ-muted)]">
+          Step {stepIndex + 1} of {steps.length}
+        </p>
+        <h2 className="mt-2 text-base font-semibold">{step.title}</h2>
+        <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">{step.body}</p>
+        {step.optionalActionLabel && step.actionSection ? (
+          <button
+            className="mt-3 rounded-xl border border-[var(--econ-gold)]/45 bg-[var(--econ-gold)]/12 px-3 py-2 text-sm font-semibold text-[#ffe6a6]"
+            onClick={() => {
+              onNavigate(step.actionSection!);
+              onClose();
+            }}
+            type="button"
+          >
+            {step.optionalActionLabel}
+          </button>
+        ) : null}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold disabled:opacity-45"
+            disabled={stepIndex === 0}
+            onClick={() => setStepIndex((index) => Math.max(0, index - 1))}
+            type="button"
+          >
+            Back
+          </button>
+          <button
+            className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold"
+            onClick={() => (isLast ? onClose() : setStepIndex((index) => Math.min(steps.length - 1, index + 1)))}
+            type="button"
+          >
+            {isLast ? "Finish" : "Next"}
+          </button>
+          <button
+            className="rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-[var(--econ-muted)]"
+            onClick={onClose}
+            type="button"
+          >
+            Skip tutorial
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -206,7 +376,7 @@ function PowerBiToolsPage({
         text="Build export-ready Power BI tables, scenario models, and decision packs from CFS Economics rows."
       />
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <EconPanel title="Power BI Desktop Practice Pack" kicker="Default workflow">
+        <EconPanel title="Power BI Desktop Practice Pack" kicker="Default workflow" tourId="powerbi-export">
           <p className="text-sm leading-6 text-[var(--econ-muted)]">
             Export CFS Economics as fact and dimension tables, then build a real Power BI report with KPI cards, slicers, charts, and scenario pages.
           </p>
@@ -260,7 +430,7 @@ function PowerBiToolsPage({
         signals={signals}
         watchlist={watchlist}
       />
-      <section id="economics-tool-workspace">
+      <section id="economics-tool-workspace" data-econ-tour="powerbi-export">
         <EnterpriseWorkspacePage
           embedded
           exportPayload={exportPayload}
@@ -283,12 +453,9 @@ function ExecutiveBriefPage({
   intelligence: EconomicsIntelligenceResponse | null;
 }) {
   const summary = intelligence?.summary;
-  const [tourOpen, setTourOpen] = useState(false);
-  const [tourStepIndex, setTourStepIndex] = useState(0);
-  const tourStep = economicsTourSteps[tourStepIndex] ?? economicsTourSteps[0];
   return (
     <>
-      <section className="econ-hero rounded-2xl p-6 md:p-8">
+      <section className="econ-hero rounded-2xl p-6 md:p-8" data-econ-tour="overview-hero">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="econ-eyebrow">Overview</p>
@@ -303,18 +470,8 @@ function ExecutiveBriefPage({
               Traditional GIS can show where things are. CFS Economics helps
               explain what those places mean economically.
             </p>
-            <button
-              className="mt-5 rounded-xl border border-[var(--econ-gold)]/40 bg-[var(--econ-gold)]/15 px-4 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
-              onClick={() => {
-                setTourOpen(true);
-                setTourStepIndex(0);
-              }}
-              type="button"
-            >
-              Start Economics Tour
-            </button>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2" data-econ-tour="data-mode">
             <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
             <EconChip>{summary?.as_of ? `As of ${formatDate(summary.as_of)}` : "Freshness pending"}</EconChip>
           </div>
@@ -322,75 +479,6 @@ function ExecutiveBriefPage({
       </section>
 
       <PageHelper text="Understand the workflow." />
-
-      {tourOpen ? (
-        <EconPanel title="CFS Economics guided tour" kicker={`Step ${tourStepIndex + 1} of ${economicsTourSteps.length}`}>
-          <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-            <div>
-              <h2 className="text-xl font-semibold text-[var(--econ-text)]">
-                {tourStep.title}
-              </h2>
-              <p className="mt-2 text-sm leading-7 text-[var(--econ-muted)]">
-                {tourStep.text}
-              </p>
-              <div className="mt-4 grid gap-2 text-sm leading-6 text-[var(--econ-muted)]">
-                <p>
-                  <span className="font-semibold text-[var(--econ-text)]">Local live data:</span>{" "}
-                  Uses the local FastAPI backend and local PostGIS economics data.
-                </p>
-                <p>
-                  <span className="font-semibold text-[var(--econ-text)]">Portfolio demo:</span>{" "}
-                  Uses a sanitized cached demo extract for portfolio review.
-                </p>
-              </div>
-            </div>
-            <div className="grid gap-2">
-              {economicsTourSteps.map((step, index) => (
-                <button
-                  className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
-                    index === tourStepIndex
-                      ? "border-[var(--econ-gold)] bg-[var(--econ-gold)]/12 text-[#ffe6a6]"
-                      : "border-[var(--econ-border)] bg-white/[0.025] text-[var(--econ-muted)] hover:border-[var(--econ-gold)]"
-                  }`}
-                  key={step.title}
-                  onClick={() => setTourStepIndex(index)}
-                  type="button"
-                >
-                  <span className="font-semibold">{index + 1}. {step.title}</span>
-                  <span className="mt-1 block text-xs leading-5">{step.short}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
-              disabled={tourStepIndex === 0}
-              onClick={() => setTourStepIndex((index) => Math.max(0, index - 1))}
-              type="button"
-            >
-              Previous
-            </button>
-            <button
-              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
-              disabled={tourStepIndex === economicsTourSteps.length - 1}
-              onClick={() =>
-                setTourStepIndex((index) => Math.min(economicsTourSteps.length - 1, index + 1))
-              }
-              type="button"
-            >
-              Next
-            </button>
-            <button
-              className="rounded-xl border border-[var(--econ-risk)]/40 px-3 py-2 text-sm font-semibold text-[#ffd1c2] transition hover:border-[var(--econ-risk)]"
-              onClick={() => setTourOpen(false)}
-              type="button"
-            >
-              Close tour
-            </button>
-          </div>
-        </EconPanel>
-      ) : null}
 
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {executiveCards.map((card) => (
@@ -435,7 +523,7 @@ function ExecutiveBriefPage({
             </p>
           </div>
         </EconPanel>
-        <EconPanel title="How to use CFS Economics" kicker="Simple workflow">
+        <EconPanel title="How to use CFS Economics" kicker="Simple workflow" tourId="workflow">
           <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-[var(--econ-muted)]">
             <li>Start in Power BI & Tools.</li>
             <li>Review tables, select rows, and export CSVs.</li>
@@ -590,6 +678,7 @@ function EconomicDashboardPage({
           Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.
         </span>
       </section>
+      <div data-econ-tour="slicers">
       <EconomicsSlicerBar
         filters={[
           { label: "Economic Segment", onChange: setSelectedSegment, options: segmentOptions, value: selectedSegment },
@@ -600,8 +689,9 @@ function EconomicDashboardPage({
         onReset={resetFilters}
         selected={[selectedSegment, selectedGeography, selectedOpportunityClass, selectedDataConfidence]}
       />
+      </div>
       <section className="grid gap-4">
-        <EconPanel title="Executive Economic Signals" kicker="Section 1">
+        <EconPanel title="Executive Economic Signals" kicker="Section 1" tourId="kpi-strip">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
             {kpis.map((kpi) => (
               <KpiCard key={kpi.id} kpi={kpi} />
@@ -634,7 +724,7 @@ function EconomicDashboardPage({
           </EconPanel>
         </div>
       </section>
-      <section className="grid gap-4">
+      <section className="grid gap-4" data-econ-tour="segment-visuals">
         <EconPanel title="Segmented Land Economics" kicker="Section 2">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <MiniMetric label="Selected segment" value={selectedSegment} />
@@ -668,7 +758,7 @@ function EconomicDashboardPage({
           </DetailsBlock>
         </EconPanel>
       </section>
-      <section className="grid gap-4">
+      <section className="grid gap-4" data-econ-tour="scenario-visuals">
         <EconPanel title="Scenario + Power BI Readiness" kicker="Section 3">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <MiniMetric label="Parcels analyzed" value={formatNumber(summary?.total_parcels_analyzed)} />
@@ -709,7 +799,7 @@ function EconomicDashboardPage({
             <li>Special asset flag: use it to separate civic, institutional, infrastructure, or utility rows from ordinary parcel peers.</li>
           </ul>
         </DetailsBlock>
-        <EconPanel title="Ask CFS Economics" kicker="Compact analyst assistant">
+        <EconPanel title="Ask CFS Economics" kicker="Compact analyst assistant" tourId="ask-cfs">
           <AskCfsPanel appMode="economics" visiblePromptCount={6} />
         </EconPanel>
       </section>
@@ -818,6 +908,7 @@ function EconomicsWorkspacePage({
           description={activeMeta.description}
           kicker="Section 1 - Select Economics Rows"
           title={activeMeta.label}
+          tourId="row-selection"
         >
           <WorkspaceTableTabs activeTable={activeTable} onChange={setActiveTable} />
           <div className="mt-4">
@@ -919,7 +1010,7 @@ function EnterpriseWorkspacePage({
               selectedSignals={selectedSignals}
             />
           ) : null}
-          <EconPanel title="Step 2 - Choose Output" kicker="Output type">
+          <EconPanel title="Step 2 - Choose Output" kicker="Output type" tourId="advanced-tools">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               {enterpriseOutputCards.map((card) => (
                 <button
@@ -1128,7 +1219,7 @@ function EconomicsPrintPage({
   };
   return (
     <>
-      <section className="no-print flex flex-wrap gap-2 rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] p-4">
+      <section className="no-print flex flex-wrap gap-2 rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] p-4" data-econ-tour="print-actions">
         <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => window.print()} type="button">
           Print / Save as PDF
         </button>
@@ -1166,7 +1257,7 @@ function EconomicsPrintPage({
         ) : null}
       </section>
       <article className="print-report rounded-2xl border border-[var(--econ-border)] bg-[#fbfaf6] p-5 text-slate-950 shadow-[0_24px_80px_rgba(0,0,0,0.24)] md:p-7">
-        <header className="print-section border-b border-slate-300 pb-5">
+        <header className="print-section border-b border-slate-300 pb-5" data-econ-tour="print-header">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Print</p>
@@ -1189,11 +1280,11 @@ function EconomicsPrintPage({
           </p>
         </header>
 
-        <PrintSection title="1. Executive Takeaway">
+        <PrintSection title="1. Executive Takeaway" tourId="print-takeaway">
           <p className="text-sm leading-7 text-slate-700">{snapshotSummary}</p>
         </PrintSection>
 
-        <PrintSection title="2. Selected Rows / Scope">
+        <PrintSection title="2. Selected Rows / Scope" tourId="print-scope">
           {snapshotRows.length ? (
             <>
               <p className="text-sm text-slate-700">
@@ -1299,7 +1390,7 @@ function EconomicsPrintPage({
           </ul>
         </PrintSection>
 
-        <PrintSection title="10. Caveats & Assumptions">
+        <PrintSection title="10. Caveats & Assumptions" tourId="print-caveats">
           <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
             {caveats.map((item) => <li key={item}>{item}</li>)}
           </ul>
@@ -1330,12 +1421,14 @@ function EconomicsPrintPage({
 function PrintSection({
   children,
   title,
+  tourId,
 }: {
   children: ReactNode;
   title: string;
+  tourId?: string;
 }) {
   return (
-    <section className="print-section mt-6">
+    <section className="print-section mt-6" data-econ-tour={tourId}>
       <h2 className="text-xl font-semibold text-slate-950">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
@@ -2035,6 +2128,7 @@ function PowerBiChartBuilder({
       description="Choose a CFS Economics table, fields, and visual type to preview a Power BI-style chart."
       kicker="Power BI visual builder"
       title="Build Your Own Chart"
+      tourId="chart-builder"
     >
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {userChartTemplates.map((template) => (
@@ -2148,7 +2242,7 @@ function PowerBiChartBuilder({
           ) : null}
         </div>
       </section>
-      <section className="mt-4 rounded-xl border border-[var(--econ-border)] bg-black/20 p-4">
+      <section className="mt-4 rounded-xl border border-[var(--econ-border)] bg-black/20 p-4" data-econ-tour="report-canvas">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-sm font-semibold text-[var(--econ-text)]">Report Canvas</h3>
@@ -2551,14 +2645,16 @@ function EconPanel({
   description,
   kicker,
   title,
+  tourId,
 }: {
   children: ReactNode;
   description?: string;
   kicker: string;
   title: string;
+  tourId?: string;
 }) {
   return (
-    <section className="econ-panel rounded-2xl p-4 md:p-5">
+    <section className="econ-panel rounded-2xl p-4 md:p-5" data-econ-tour={tourId}>
       <p className="econ-eyebrow">{kicker}</p>
       <h2 className="mt-2 text-lg font-semibold text-[var(--econ-text)]">
         {title}
@@ -4472,28 +4568,132 @@ const powerBiImportQaChecklist = [
   "Slicers are checked for blank or missing values.",
 ];
 
-const economicsTourSteps = [
-  {
-    short: "What CFS Economics does.",
-    text: "Start here to understand the workflow: parcel economic baseline, underbuilt redevelopment watchlist, tax-base opportunity, fiscal/service burden context, and enterprise export-ready tables.",
-    title: "Overview",
-  },
-  {
-    short: "Select rows and build exports.",
-    text: "Use Power BI & Tools to compare parcel economics, select useful rows, download CSV/JSON tables, and open scenario, planning-model, or decision-pack workflows.",
-    title: "Power BI & Tools",
-  },
-  {
-    short: "Monitor indicators and Ask CFS.",
-    text: "Use Economic Dashboard for KPIs, charts, watchlist summaries, data confidence, and Ask CFS Economics questions.",
-    title: "Economic Dashboard",
-  },
-  {
-    short: "Create a simple economic snapshot.",
-    text: "Use Print to assemble a presentation-ready economic snapshot with selected rows, baseline context, scenario summary, caveats, and next diligence.",
-    title: "Print",
-  },
-];
+const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialStep[]> = {
+  dashboard: [
+    {
+      body: "These cards summarize the current economics signal.",
+      id: "dashboard-kpi",
+      targetSelector: '[data-econ-tour="kpi-strip"]',
+      title: "KPI strip",
+    },
+    {
+      body: "Use slicers to compare similar economics segments instead of mixing all parcel types.",
+      id: "dashboard-slicers",
+      targetSelector: '[data-econ-tour="slicers"]',
+      title: "Slicers",
+    },
+    {
+      body: "Value per acre is most useful when compared within similar property or land-use segments.",
+      id: "dashboard-segments",
+      targetSelector: '[data-econ-tour="segment-visuals"]',
+      title: "Segment visuals",
+    },
+    {
+      body: "Use these visuals to compare opportunity against service and infrastructure burden.",
+      id: "dashboard-scenarios",
+      targetSelector: '[data-econ-tour="scenario-visuals"]',
+      title: "Scenario visuals",
+    },
+    {
+      body: "Ask CFS can explain charts, filters, Power BI fields, and caveats.",
+      id: "dashboard-ask",
+      targetSelector: '[data-econ-tour="ask-cfs"]',
+      title: "Ask CFS",
+    },
+  ],
+  overview: [
+    {
+      body: "This mode turns parcel, tax-base, and constraint data into screening-level economic intelligence.",
+      id: "overview-hero",
+      targetSelector: '[data-econ-tour="overview-hero"]',
+      title: "What it is",
+    },
+    {
+      body: "Use Overview, Power BI & Tools, Economic Dashboard, and Print as one workflow.",
+      id: "overview-workflow",
+      targetSelector: '[data-econ-tour="workflow"]',
+      title: "Four-page workflow",
+    },
+    {
+      body: "Local mode uses FastAPI and PostGIS. Portfolio demo uses a cached demo extract.",
+      id: "overview-data",
+      targetSelector: '[data-econ-tour="data-mode"]',
+      title: "Data mode",
+    },
+    {
+      actionSection: "tools",
+      body: "Start by selecting rows or building a Power BI-ready output.",
+      id: "overview-next",
+      optionalActionLabel: "Open Power BI & Tools",
+      targetSelector: '[data-econ-tour="workflow"]',
+      title: "Next step",
+    },
+  ],
+  print: [
+    {
+      body: "This page creates a screening-level economics snapshot.",
+      id: "print-header",
+      targetSelector: '[data-econ-tour="print-header"]',
+      title: "Snapshot header",
+    },
+    {
+      body: "Selected rows from Power BI & Tools become the focus of the snapshot.",
+      id: "print-scope",
+      targetSelector: '[data-econ-tour="print-scope"]',
+      title: "Selected rows",
+    },
+    {
+      body: "Use this as the short presentation-ready summary.",
+      id: "print-takeaway",
+      targetSelector: '[data-econ-tour="print-takeaway"]',
+      title: "Executive takeaway",
+    },
+    {
+      body: "Keep caveats visible so the report is not mistaken for an official appraisal or fiscal impact study.",
+      id: "print-caveats",
+      targetSelector: '[data-econ-tour="print-caveats"]',
+      title: "Caveats",
+    },
+    {
+      body: "Print, save as PDF, or copy the memo for a presentation.",
+      id: "print-actions",
+      targetSelector: '[data-econ-tour="print-actions"]',
+      title: "Print actions",
+    },
+  ],
+  tools: [
+    {
+      body: "Choose economics rows to use as report, scenario, or decision-pack context.",
+      id: "tools-rows",
+      targetSelector: '[data-econ-tour="row-selection"]',
+      title: "Select rows",
+    },
+    {
+      body: "Download flat fact/dimension tables for Power BI Desktop.",
+      id: "tools-export",
+      targetSelector: '[data-econ-tour="powerbi-export"]',
+      title: "Download tables",
+    },
+    {
+      body: "Pick a table, visual type, and fields to preview a Power BI-style chart.",
+      id: "tools-chart",
+      targetSelector: '[data-econ-tour="chart-builder"]',
+      title: "Build chart",
+    },
+    {
+      body: "Save chart recipes into a draft Power BI report outline.",
+      id: "tools-canvas",
+      targetSelector: '[data-econ-tour="report-canvas"]',
+      title: "Report canvas",
+    },
+    {
+      body: "Scenario, planning model, and decision-pack tools are available when you need deeper analysis.",
+      id: "tools-advanced",
+      targetSelector: '[data-econ-tour="advanced-tools"]',
+      title: "Advanced tools",
+    },
+  ],
+};
 
 const executiveCards = [
   {
