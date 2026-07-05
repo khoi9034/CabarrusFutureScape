@@ -269,11 +269,18 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "EconomicsTutorialOverlay" in economics_shell
     assert "Skip tutorial" in economics_shell
     assert "Escape" in economics_shell
+    assert "Start Power BI & Tools Tutorial" in economics_shell
     assert 'data-econ-tour="overview-hero"' in economics_shell
-    assert 'data-econ-tour="row-selection"' in economics_shell
-    assert 'data-econ-tour="powerbi-export"' in economics_shell
-    assert 'data-econ-tour="chart-builder"' in economics_shell
+    assert "powerbi-tools-header" in economics_shell
+    assert "economics-row-selection" in economics_shell
+    assert 'data-econ-tour="economics-filters"' in economics_shell
+    assert "selected-rows-tray" in economics_shell
+    assert 'data-econ-tour="powerbi-csv-export"' in economics_shell
+    assert "chart-builder" in economics_shell
+    assert 'data-econ-tour="chart-templates"' in economics_shell
     assert 'data-econ-tour="report-canvas"' in economics_shell
+    assert "advanced-tools" in economics_shell
+    assert "tools-final-actions" in economics_shell
     assert 'data-econ-tour="kpi-strip"' in economics_shell
     assert 'data-econ-tour="slicers"' in economics_shell
     assert 'data-econ-tour="segment-visuals"' in economics_shell
@@ -285,6 +292,16 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "tools:" in economics_shell
     assert "dashboard:" in economics_shell
     assert "print:" in economics_shell
+    assert "tools-purpose" in economics_shell
+    assert "tools-select-rows" in economics_shell
+    assert "tools-filters" in economics_shell
+    assert "tools-selected-tray" in economics_shell
+    assert "tools-csv" in economics_shell
+    assert "tools-chart-builder" in economics_shell
+    assert "tools-chart-templates" in economics_shell
+    assert "tools-report-canvas" in economics_shell
+    assert "tools-advanced" in economics_shell
+    assert "tools-final-output" in economics_shell
     assert "Overview -> Power BI & Tools -> Economic Dashboard -> Print" in ask_service
     assert "Uses the local FastAPI backend and local PostGIS economics data." in economics_shell
     assert "Uses a sanitized cached demo extract for portfolio review." in economics_shell

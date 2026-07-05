@@ -137,6 +137,7 @@ export function EconomicsShell() {
             inputs={intelligence?.scenario_inputs ?? []}
             onClearSelection={() => setSelectedSignalIds([])}
             onNavigate={setEconomicsSection}
+            onStartTutorial={() => setTutorialOpen(true)}
             onToggleSignal={toggleSelectedSignal}
             outputs={intelligence?.scenario_outputs ?? []}
             powerBiPayload={powerBiExport}
@@ -181,9 +182,12 @@ type EconomicsTutorialStep = {
   actionSection?: EconomicsTutorialPage;
   body: string;
   id: string;
+  keepTutorialOpenOnAction?: boolean;
   optionalActionLabel?: string;
+  optionalActionTargetSelector?: string;
   targetSelector: string;
   title: string;
+  why?: string;
 };
 
 function EconomicsTutorialButton({ onClick }: { onClick: () => void }) {
@@ -213,6 +217,7 @@ function EconomicsTutorialOverlay({
   const cardRef = useRef<HTMLDivElement>(null);
   const step = steps[stepIndex] ?? steps[0];
   const isLast = stepIndex === steps.length - 1;
+  const toolsPhaseIndex = Math.min(4, Math.floor(stepIndex / 2));
 
   useEffect(() => {
     const updateTarget = () => {
@@ -244,13 +249,14 @@ function EconomicsTutorialOverlay({
 
   const viewportWidth = typeof window === "undefined" ? 360 : window.innerWidth;
   const viewportHeight = typeof window === "undefined" ? 640 : window.innerHeight;
+  const cardHeightEstimate = Math.min(380, viewportHeight - 32);
   const cardStyle = targetRect
     ? {
         left: Math.min(Math.max(16, targetRect.left), viewportWidth - 336),
         top:
-          targetRect.bottom + 16 < viewportHeight - 220
+          targetRect.bottom + 16 < viewportHeight - cardHeightEstimate
             ? targetRect.bottom + 16
-            : Math.max(16, targetRect.top - 236),
+            : Math.max(16, targetRect.top - cardHeightEstimate - 16),
       }
     : {
         left: "50%",
@@ -281,7 +287,7 @@ function EconomicsTutorialOverlay({
       <div
         aria-label="CFS Economics tutorial"
         aria-modal="true"
-        className="fixed w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-[var(--econ-gold)]/45 bg-[#111722] p-4 text-[var(--econ-text)] shadow-2xl"
+        className="fixed max-h-[calc(100vh-2rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-[var(--econ-gold)]/45 bg-[#111722] p-4 text-[var(--econ-text)] shadow-2xl"
         ref={cardRef}
         role="dialog"
         style={cardStyle}
@@ -292,12 +298,40 @@ function EconomicsTutorialOverlay({
         </p>
         <h2 className="mt-2 text-base font-semibold">{step.title}</h2>
         <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">{step.body}</p>
-        {step.optionalActionLabel && step.actionSection ? (
+        {step.why ? (
+          <p className="mt-2 text-xs leading-5 text-[#f7dc93]">
+            <span className="font-semibold text-[#ffe6a6]">Why it matters: </span>
+            {step.why}
+          </p>
+        ) : null}
+        {page === "tools" ? (
+          <div className="mt-3 grid grid-cols-5 gap-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--econ-muted)]">
+            {["Select rows", "Download CSVs", "Build chart", "Add canvas", "Print"].map((phase, index) => (
+              <span
+                className={`rounded-full px-2 py-1 text-center ${
+                  index === toolsPhaseIndex
+                    ? "bg-[var(--econ-gold)]/20 text-[#ffe6a6]"
+                    : "bg-white/[0.04]"
+                }`}
+                key={phase}
+              >
+                {phase}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {step.optionalActionLabel && (step.actionSection || step.optionalActionTargetSelector) ? (
           <button
             className="mt-3 rounded-xl border border-[var(--econ-gold)]/45 bg-[var(--econ-gold)]/12 px-3 py-2 text-sm font-semibold text-[#ffe6a6]"
             onClick={() => {
-              onNavigate(step.actionSection!);
-              onClose();
+              if (step.actionSection) {
+                onNavigate(step.actionSection);
+                if (!step.keepTutorialOpenOnAction) onClose();
+                return;
+              }
+              document
+                .querySelector(step.optionalActionTargetSelector ?? step.targetSelector)
+                ?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
             }}
             type="button"
           >
@@ -339,6 +373,7 @@ function PowerBiToolsPage({
   inputs,
   onClearSelection,
   onNavigate,
+  onStartTutorial,
   onToggleSignal,
   outputs,
   powerBiPayload,
@@ -354,6 +389,7 @@ function PowerBiToolsPage({
   inputs: EconomicsScenarioInput[];
   onClearSelection: () => void;
   onNavigate: (section: "tools" | "print") => void;
+  onStartTutorial: () => void;
   onToggleSignal: (signal: EconomicsParcelSignal) => void;
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
@@ -374,9 +410,18 @@ function PowerBiToolsPage({
         kicker="Power BI & Tools"
         title="Power BI & Tools"
         text="Build export-ready Power BI tables, scenario models, and decision packs from CFS Economics rows."
-      />
+        tourId="powerbi-tools-header"
+      >
+        <button
+          className="mt-4 rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-4 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
+          onClick={onStartTutorial}
+          type="button"
+        >
+          Start Power BI & Tools Tutorial
+        </button>
+      </PageHeader>
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <EconPanel title="Power BI Desktop Practice Pack" kicker="Default workflow" tourId="powerbi-export">
+        <EconPanel title="Power BI Desktop Practice Pack" kicker="Default workflow" tourId="powerbi-practice-pack">
           <p className="text-sm leading-6 text-[var(--econ-muted)]">
             Export CFS Economics as fact and dimension tables, then build a real Power BI report with KPI cards, slicers, charts, and scenario pages.
           </p>
@@ -428,9 +473,11 @@ function PowerBiToolsPage({
         selectedSignalIds={selectedSignalIds}
         selectedSignals={selectedSignals}
         signals={signals}
+        tourRowSelectionId="economics-row-selection"
+        tourSelectedTrayId="selected-rows-tray"
         watchlist={watchlist}
       />
-      <section id="economics-tool-workspace" data-econ-tour="powerbi-export">
+      <section id="economics-tool-workspace">
         <EnterpriseWorkspacePage
           embedded
           exportPayload={exportPayload}
@@ -818,6 +865,8 @@ function EconomicsWorkspacePage({
   selectedSignalIds,
   selectedSignals,
   signals,
+  tourRowSelectionId = "row-selection",
+  tourSelectedTrayId = "selected-rows-tray",
   watchlist,
 }: {
   dataReadiness: EconomicsReadinessRow[];
@@ -830,6 +879,8 @@ function EconomicsWorkspacePage({
   selectedSignalIds: string[];
   selectedSignals: EconomicsParcelSignal[];
   signals: EconomicsParcelSignal[];
+  tourRowSelectionId?: string;
+  tourSelectedTrayId?: string;
   watchlist: EconomicsParcelSignal[];
 }) {
   const [activeTable, setActiveTable] = useState<WorkspaceTableKey>("baseline");
@@ -884,31 +935,33 @@ function EconomicsWorkspacePage({
           </section>
         </>
       )}
-      <EconomicsSlicerBar
-        filters={[
-          {
-            label: "Table type",
-            onChange: (value) =>
-              setActiveTable(
-                workspaceTableOptions.find((option) => option.label === value)?.key ?? "baseline",
-              ),
-            options: workspaceTableOptions.map((option) => option.label),
-            value: activeMeta.label,
-          },
-          { label: "Opportunity Class", onChange: setSelectedOpportunityClass, options: opportunityOptions, value: selectedOpportunityClass },
-          { label: "Data Confidence", onChange: setSelectedDataConfidence, options: confidenceOptions, value: selectedDataConfidence },
-          { label: "Geography / Jurisdiction", onChange: setSelectedGeography, options: geographyOptions, value: selectedGeography },
-          { label: "Burden Band", onChange: setSelectedBurdenBand, options: burdenOptions, value: selectedBurdenBand },
-        ]}
-        onReset={resetFilters}
-        selected={[activeMeta.label, selectedOpportunityClass, selectedDataConfidence, selectedGeography, selectedBurdenBand]}
-      />
+      <div data-econ-tour="economics-filters">
+        <EconomicsSlicerBar
+          filters={[
+            {
+              label: "Table type",
+              onChange: (value) =>
+                setActiveTable(
+                  workspaceTableOptions.find((option) => option.label === value)?.key ?? "baseline",
+                ),
+              options: workspaceTableOptions.map((option) => option.label),
+              value: activeMeta.label,
+            },
+            { label: "Opportunity Class", onChange: setSelectedOpportunityClass, options: opportunityOptions, value: selectedOpportunityClass },
+            { label: "Data Confidence", onChange: setSelectedDataConfidence, options: confidenceOptions, value: selectedDataConfidence },
+            { label: "Geography / Jurisdiction", onChange: setSelectedGeography, options: geographyOptions, value: selectedGeography },
+            { label: "Burden Band", onChange: setSelectedBurdenBand, options: burdenOptions, value: selectedBurdenBand },
+          ]}
+          onReset={resetFilters}
+          selected={[activeMeta.label, selectedOpportunityClass, selectedDataConfidence, selectedGeography, selectedBurdenBand]}
+        />
+      </div>
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <EconPanel
           description={activeMeta.description}
           kicker="Section 1 - Select Economics Rows"
           title={activeMeta.label}
-          tourId="row-selection"
+          tourId={tourRowSelectionId}
         >
           <WorkspaceTableTabs activeTable={activeTable} onChange={setActiveTable} />
           <div className="mt-4">
@@ -931,6 +984,7 @@ function EconomicsWorkspacePage({
           onUseSelectedInTools={onUseSelectedInTools}
           onSendPrint={onSendSelectedToPrint}
           selectedSignals={selectedSignals}
+          tourId={tourSelectedTrayId}
         />
       </section>
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
@@ -1729,7 +1783,7 @@ function EnterpriseToolsPage({
                 Copy report layout
               </button>
             </div>
-            <div>
+            <div data-econ-tour="powerbi-csv-export">
               <h2 className="text-sm font-semibold text-[var(--econ-text)]">
                 Flat CSV Tables
               </h2>
@@ -1814,7 +1868,7 @@ function EnterpriseToolsPage({
           </div>
         ) : null}
       </EconPanel>
-      <EconPanel title="Section 4 - Export / Next Step" kicker={enterpriseOutputLabel(selectedOutput)}>
+      <EconPanel title="Section 4 - Export / Next Step" kicker={enterpriseOutputLabel(selectedOutput)} tourId="tools-final-actions">
         <div className="grid gap-3 sm:grid-cols-2">
           {selectedOutput === "scenario" ? (
             <>
@@ -2130,7 +2184,7 @@ function PowerBiChartBuilder({
       title="Build Your Own Chart"
       tourId="chart-builder"
     >
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-econ-tour="chart-templates">
         {userChartTemplates.map((template) => (
           <button
             className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3 text-left transition hover:border-[var(--econ-gold)]"
@@ -2610,16 +2664,20 @@ function guideVisualDetails(visual: Record<string, unknown>) {
 }
 
 function PageHeader({
+  children,
   kicker,
   text,
   title,
+  tourId,
 }: {
+  children?: ReactNode;
   kicker: string;
   text: string;
   title: string;
+  tourId?: string;
 }) {
   return (
-    <section className="econ-panel rounded-2xl p-5 md:p-6">
+    <section className="econ-panel rounded-2xl p-5 md:p-6" data-econ-tour={tourId}>
       <p className="econ-eyebrow">{kicker}</p>
       <h1 className="mt-2 text-3xl font-semibold text-[var(--econ-text)]">
         {title}
@@ -2627,6 +2685,7 @@ function PageHeader({
       <p className="mt-3 max-w-4xl text-sm leading-7 text-[var(--econ-muted)]">
         {text}
       </p>
+      {children}
     </section>
   );
 }
@@ -3156,15 +3215,17 @@ function SelectedRowsTray({
   onUseSelectedInTools,
   onSendPrint,
   selectedSignals,
+  tourId,
 }: {
   actions?: boolean;
   onClear: () => void;
   onUseSelectedInTools: () => void;
   onSendPrint: () => void;
   selectedSignals: EconomicsParcelSignal[];
+  tourId?: string;
 }) {
   return (
-    <EconPanel title="Selected for Power BI & Tools / Print" kicker={`${selectedSignals.length} selected`}>
+    <EconPanel title="Selected for Power BI & Tools / Print" kicker={`${selectedSignals.length} selected`} tourId={tourId}>
       <div className="flex flex-col gap-4">
         <div className="flex max-h-64 flex-wrap gap-2 overflow-auto">
           {selectedSignals.length ? (
@@ -4624,7 +4685,8 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
       actionSection: "tools",
       body: "Start by selecting rows or building a Power BI-ready output.",
       id: "overview-next",
-      optionalActionLabel: "Open Power BI & Tools",
+      keepTutorialOpenOnAction: true,
+      optionalActionLabel: "Open Power BI & Tools tutorial",
       targetSelector: '[data-econ-tour="workflow"]',
       title: "Next step",
     },
@@ -4663,34 +4725,82 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
   ],
   tools: [
     {
-      body: "Choose economics rows to use as report, scenario, or decision-pack context.",
-      id: "tools-rows",
-      targetSelector: '[data-econ-tour="row-selection"]',
-      title: "Select rows",
+      body: "This page is the working area for CFS Economics. Select rows, export tables, build charts, and prepare a report canvas.",
+      id: "tools-purpose",
+      targetSelector: '[data-econ-tour="powerbi-tools-header"]',
+      title: "Page purpose",
+      why: "This is the main hands-on workflow.",
     },
     {
-      body: "Download flat fact/dimension tables for Power BI Desktop.",
-      id: "tools-export",
-      targetSelector: '[data-econ-tour="powerbi-export"]',
-      title: "Download tables",
+      body: "Start here. Select rows that you want to analyze, export, or include in a decision snapshot.",
+      id: "tools-select-rows",
+      targetSelector: '[data-econ-tour="economics-row-selection"]',
+      title: "Select economics rows",
+      why: "Selected rows become the working set.",
     },
     {
-      body: "Pick a table, visual type, and fields to preview a Power BI-style chart.",
-      id: "tools-chart",
+      body: "Use filters and table tabs to narrow the list before selecting rows.",
+      id: "tools-filters",
+      targetSelector: '[data-econ-tour="economics-filters"]',
+      title: "Filters and tabs",
+      why: "Start with segment, opportunity class, or confidence.",
+    },
+    {
+      body: "Selected rows become the working set for chart recipes, report canvas notes, and print snapshots.",
+      id: "tools-selected-tray",
+      targetSelector: '[data-econ-tour="selected-rows-tray"]',
+      title: "Selected rows tray",
+      why: "This keeps the workflow focused.",
+    },
+    {
+      body: "Download CSV tables first. They are the easiest format to import into Power BI Desktop.",
+      id: "tools-csv",
+      optionalActionLabel: "Show CSV section",
+      optionalActionTargetSelector: '[data-econ-tour="powerbi-csv-export"]',
+      targetSelector: '[data-econ-tour="powerbi-csv-export"]',
+      title: "Download Power BI tables",
+      why: "CSV turns CFS Economics into a practice BI dataset.",
+    },
+    {
+      body: "Choose a table, visual type, fields, and filters before recreating the chart in Power BI.",
+      id: "tools-chart-builder",
+      optionalActionLabel: "Show chart builder",
+      optionalActionTargetSelector: '[data-econ-tour="chart-builder"]',
       targetSelector: '[data-econ-tour="chart-builder"]',
-      title: "Build chart",
+      title: "Build your own chart",
+      why: "It teaches the table-to-visual mapping.",
     },
     {
-      body: "Save chart recipes into a draft Power BI report outline.",
-      id: "tools-canvas",
+      body: "Templates give safe starts: opportunity class, scenario comparison, or data confidence matrix.",
+      id: "tools-chart-templates",
+      targetSelector: '[data-econ-tour="chart-templates"]',
+      title: "Chart templates",
+      why: "Start from a known-good visual.",
+    },
+    {
+      body: "Add useful chart recipes to the report canvas. This becomes your draft Power BI report outline.",
+      id: "tools-report-canvas",
+      optionalActionLabel: "Show report canvas",
+      optionalActionTargetSelector: '[data-econ-tour="report-canvas"]',
       targetSelector: '[data-econ-tour="report-canvas"]',
       title: "Report canvas",
+      why: "The canvas is your report plan.",
     },
     {
-      body: "Scenario, planning model, and decision-pack tools are available when you need deeper analysis.",
+      body: "Scenario, planning model, and decision-pack tools are advanced. Open them after the basic Power BI workflow makes sense.",
       id: "tools-advanced",
       targetSelector: '[data-econ-tour="advanced-tools"]',
       title: "Advanced tools",
+      why: "They support deeper analysis without cluttering the basic path.",
+    },
+    {
+      actionSection: "print",
+      body: "When ready, copy the report recipe or send selected rows to Print for an executive snapshot.",
+      id: "tools-final-output",
+      optionalActionLabel: "Go to Print",
+      targetSelector: '[data-econ-tour="tools-final-actions"]',
+      title: "Final output",
+      why: "Print is the presentation-ready deliverable.",
     },
   ],
 };
