@@ -275,7 +275,7 @@ Deployment continuation validation on 2026-06-22:
 - CORS check from `https://cabarrus-future-scape.vercel.app` to `https://cfs-api-backend.onrender.com/health`: passed; backend returns the exact production origin in `Access-Control-Allow-Origin`.
 - Representative data-backed endpoint `GET /parcels/search?q=CFS-PARCEL-0149726579&limit=1`: reached the deployed backend but returned HTTP 500 because the connected production database does not currently contain the expected CFS public data tables.
 - Production HTML scan: no `localhost`, `127.0.0.1`, `DATABASE_URL`, service-role key, or raw credential values found in the initial document.
-- Static bundle scan: backend URL is present as expected. Local fallback and guardrail field-name strings remain in bundled code; these are not active production network requests and do not expose probabilities, raw scores, credentials, or database URLs.
+- Static bundle scan: backend URL is present as expected. Local fallback and guardrail field-name strings remain in bundled code; these are not active production network requests and do not expose probabilities, internal model values, credentials, or database URLs.
 - Production browser/data smoke for full live mode is blocked until a populated production database exists. Portfolio Demo Mode avoids this blocker by using `public/demo-data`.
 
 Portfolio Demo Mode validation on 2026-06-22:

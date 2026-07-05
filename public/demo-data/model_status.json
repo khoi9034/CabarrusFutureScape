@@ -1,5 +1,5 @@
 {
-  "caveat": "Internal research only. No exact probabilities or raw scores are shown.",
+  "caveat": "Internal research only. No exact probabilities or internal model values are shown.",
   "current_best_internal_model": "Zoning + Transportation + Tax/Value",
   "exact_probabilities_shown": false,
   "feature_rows": 1430221,

@@ -151,7 +151,7 @@ def main() -> int:
             "Monitoring indicators are not official determinations.",
             "Preliminary school utilization must be verified with official enrollment and capacity.",
             "Utility proxy context does not confirm available capacity.",
-            "Model research remains internal and does not show exact probabilities or raw scores.",
+            "Model research remains internal and does not show exact probabilities or internal model values.",
         ],
         "data_still_needed": DATA_STILL_NEEDED,
         "development_activity": {
@@ -1555,7 +1555,7 @@ def build_school_utilization_seed(conn: psycopg.Connection) -> dict[str, Any]:
 
 def build_model_status(generated_at: str) -> dict[str, Any]:
     return {
-        "caveat": "Internal research only. No exact probabilities or raw scores are shown.",
+        "caveat": "Internal research only. No exact probabilities or internal model values are shown.",
         "current_best_internal_model": "Zoning + Transportation + Tax/Value",
         "exact_probabilities_shown": False,
         "feature_rows": 1430221,

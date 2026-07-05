@@ -417,7 +417,7 @@ function PowerBiToolsPage({
           onClick={onStartTutorial}
           type="button"
         >
-          Start Power BI & Tools Tutorial
+          Start Tutorial
         </button>
       </PageHeader>
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -449,7 +449,7 @@ function PowerBiToolsPage({
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={focusTools} type="button">
-              Download CSV tables
+              Download CSV Tables
             </button>
             <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={focusTools} type="button">
               Preview table schema
@@ -819,7 +819,7 @@ function EconomicDashboardPage({
         </EconPanel>
         <div className="grid gap-4 xl:grid-cols-2">
           <EconomicsVisualPanel
-            description="Compares scenario output bands without exposing raw scores."
+            description="Compares scenario output bands using bands only."
             recipe="Table: scenario_output_fact | Visual: Matrix | Rows: scenario_name | Values: lift, revenue, burden, confidence bands"
             title="Scenario Output Comparison"
           >
@@ -987,20 +987,22 @@ function EconomicsWorkspacePage({
           tourId={tourSelectedTrayId}
         />
       </section>
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
-        <EconPanel title="Power BI & Tools Ask CFS" kicker="Analyst prompts">
-          <AskCfsPanel
-            appMode="economics"
-            suggestedPromptsOverride={askCfsEconomicsWorkspacePrompts}
-            visiblePromptCount={6}
-          />
-        </EconPanel>
-        <EconPanel title="Power BI / model handoff" kicker="Selection note">
-          <p className="text-sm leading-6 text-[var(--econ-muted)]">
-            Selected rows can become Power BI table filters, scenario model context, or decision-pack evidence.
-          </p>
-        </EconPanel>
-      </section>
+      {embedded ? null : (
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
+          <EconPanel title="Ask CFS Economics" kicker="Analyst prompts">
+            <AskCfsPanel
+              appMode="economics"
+              suggestedPromptsOverride={askCfsEconomicsWorkspacePrompts}
+              visiblePromptCount={6}
+            />
+          </EconPanel>
+          <EconPanel title="Power BI / model handoff" kicker="Selection note">
+            <p className="text-sm leading-6 text-[var(--econ-muted)]">
+              Selected rows can become Power BI table filters, scenario model context, or decision-pack evidence.
+            </p>
+          </EconPanel>
+        </section>
+      )}
     </>
   );
 }
@@ -1878,7 +1880,7 @@ function EnterpriseToolsPage({
           ) : null}
           {selectedOutput === "powerbi" ? (
             <>
-              <ActionButton label="Download CSV tables" onClick={() => void copyText("CSV import order", importOrderNotes)} />
+              <ActionButton label="Copy CSV Import Order" onClick={() => void copyText("CSV import order", importOrderNotes)} />
               <ActionButton label="Open Power BI Desktop" onClick={() => void copyText("Power BI reminder", "Open Power BI Desktop, then Get Data -> Text/CSV.")} />
               <ActionButton label="Copy import checklist" onClick={() => void copyText("QA checklist", qaChecklistNotes)} />
             </>
@@ -2165,7 +2167,7 @@ function PowerBiChartBuilder({
         },
       ].slice(-6),
     );
-    setCopyStatus("Chart added to report canvas");
+    setCopyStatus("Chart added to Power BI Report Canvas");
   };
   const copyCanvasRecipe = async () => {
     if (!navigator.clipboard) {
@@ -2173,9 +2175,9 @@ function PowerBiChartBuilder({
       return;
     }
     await navigator.clipboard.writeText(
-      canvasRecipe || "Report canvas is empty. Add chart previews before copying.",
+      canvasRecipe || "Power BI Report Canvas is empty. Build a chart, then add it to the canvas before copying.",
     );
-    setCopyStatus("Report canvas recipe copied");
+    setCopyStatus("Report recipe copied");
   };
   return (
     <EconPanel
@@ -2289,7 +2291,7 @@ function PowerBiChartBuilder({
             onClick={addChartToCanvas}
             type="button"
           >
-            Add chart to report canvas
+            Add to Report Canvas
           </button>
           {copyStatus ? (
             <p className="mt-2 text-xs text-[var(--econ-green)]">{copyStatus}</p>
@@ -2299,9 +2301,9 @@ function PowerBiChartBuilder({
       <section className="mt-4 rounded-xl border border-[var(--econ-border)] bg-black/20 p-4" data-econ-tour="report-canvas">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h3 className="text-sm font-semibold text-[var(--econ-text)]">Report Canvas</h3>
+            <h3 className="text-sm font-semibold text-[var(--econ-text)]">Power BI Report Canvas</h3>
             <p className="mt-1 text-xs text-[var(--econ-muted)]">
-              Collect a few previewed visuals before copying a Power BI page recipe.
+              Collect chart recipes before copying a Power BI page plan.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -2311,7 +2313,7 @@ function PowerBiChartBuilder({
               onClick={() => void copyCanvasRecipe()}
               type="button"
             >
-              Copy report canvas recipe
+              Copy Report Recipe
             </button>
             <button
               className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
@@ -2344,7 +2346,7 @@ function PowerBiChartBuilder({
           </div>
         ) : (
           <p className="mt-3 rounded-xl border border-dashed border-[var(--econ-border)] px-3 py-4 text-sm text-[var(--econ-muted)]">
-            Add a chart preview to start a simple Power BI report canvas.
+            Build a chart, then choose Add to Report Canvas to start a simple Power BI report outline.
           </p>
         )}
       </section>
@@ -4462,7 +4464,7 @@ const enterpriseOutputCards: ReadonlyArray<{
 }> = [
   {
     kind: "powerbi",
-    text: "Download CSV tables or preview the JSON pack.",
+    text: "Download CSV Tables or preview the JSON pack.",
     title: "Power BI Export",
   },
   {
@@ -4618,7 +4620,7 @@ const powerBiImportQaChecklist = [
   "All 7 CSV tables downloaded.",
   "Headers are present in each CSV.",
   "No contact fields imported.",
-  "No raw scores imported.",
+  "No internal model values imported.",
   "No tax bill fields imported.",
   "scenario_id exists in scenario_output_fact.",
   "scenario_id exists in scenario_dim.",
@@ -4725,7 +4727,7 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
   ],
   tools: [
     {
-      body: "This page is the working area for CFS Economics. Select rows, export tables, build charts, and prepare a report canvas.",
+      body: "This page is the working area for CFS Economics. Select rows, export tables, build charts, and prepare a Power BI Report Canvas.",
       id: "tools-purpose",
       targetSelector: '[data-econ-tour="powerbi-tools-header"]',
       title: "Page purpose",
@@ -4746,14 +4748,14 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
       why: "Start with segment, opportunity class, or confidence.",
     },
     {
-      body: "Selected rows become the working set for chart recipes, report canvas notes, and print snapshots.",
+      body: "Selected rows become the working set for chart recipes, Power BI Report Canvas notes, and print snapshots.",
       id: "tools-selected-tray",
       targetSelector: '[data-econ-tour="selected-rows-tray"]',
       title: "Selected rows tray",
       why: "This keeps the workflow focused.",
     },
     {
-      body: "Download CSV tables first. They are the easiest format to import into Power BI Desktop.",
+      body: "Download CSV Tables first. They are the easiest format to import into Power BI Desktop.",
       id: "tools-csv",
       optionalActionLabel: "Show CSV section",
       optionalActionTargetSelector: '[data-econ-tour="powerbi-csv-export"]',
@@ -4778,12 +4780,12 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
       why: "Start from a known-good visual.",
     },
     {
-      body: "Add useful chart recipes to the report canvas. This becomes your draft Power BI report outline.",
+      body: "Add useful chart recipes to the Power BI Report Canvas. This becomes your draft Power BI report outline.",
       id: "tools-report-canvas",
-      optionalActionLabel: "Show report canvas",
+      optionalActionLabel: "Show Power BI Report Canvas",
       optionalActionTargetSelector: '[data-econ-tour="report-canvas"]',
       targetSelector: '[data-econ-tour="report-canvas"]',
-      title: "Report canvas",
+      title: "Power BI Report Canvas",
       why: "The canvas is your report plan.",
     },
     {

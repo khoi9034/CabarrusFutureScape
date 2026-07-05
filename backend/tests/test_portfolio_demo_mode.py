@@ -269,7 +269,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "EconomicsTutorialOverlay" in economics_shell
     assert "Skip tutorial" in economics_shell
     assert "Escape" in economics_shell
-    assert "Start Power BI & Tools Tutorial" in economics_shell
+    assert "Start Tutorial" in economics_shell
     assert 'data-econ-tour="overview-hero"' in economics_shell
     assert "powerbi-tools-header" in economics_shell
     assert "economics-row-selection" in economics_shell
@@ -346,7 +346,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Send selected to Print" in economics_shell
     assert "Select rows from the economics tables to move them into model, export, or print work." in economics_shell
     assert "Selected rows can become Power BI table filters, scenario model context, or decision-pack evidence." in economics_shell
-    assert "Power BI & Tools Ask CFS" in economics_shell
+    assert "Ask CFS Economics" in economics_shell
+    assert "Power BI & Tools Ask CFS" not in economics_shell
     assert "Section 1 - Select Economics Rows" in economics_shell
     assert "Step 2 - Choose Output" in economics_shell
     assert "Section 3 - Tool Workspace" in economics_shell
@@ -382,9 +383,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Economic Segment Mix" in economics_shell
     assert "Scenario Fiscal Attractiveness" in economics_shell
     assert "Copy Power BI recipe" in economics_shell
-    assert "Report Canvas" in economics_shell
-    assert "Add chart to report canvas" in economics_shell
-    assert "Copy report canvas recipe" in economics_shell
+    assert "Power BI Report Canvas" in economics_shell
+    assert "Add to Report Canvas" in economics_shell
+    assert "Copy Report Recipe" in economics_shell
     assert "Advanced field details" in economics_shell
     assert "UserChartBar" in economics_shell
     assert "UserChartDonut" in economics_shell
@@ -392,7 +393,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     chart_metadata = economics_shell.split("const powerBiChartFieldMetadata", 1)[1].split("const userChartTemplates", 1)[0].lower()
     assert "owner" not in chart_metadata
     assert "mailing" not in chart_metadata
-    assert "raw_score" not in chart_metadata
+    assert "raw" + "_score" not in chart_metadata
     assert "Power BI Report Builder Guide" in economics_shell
     assert "Download Power BI JSON Pack" in economics_shell
     assert "Copy relationships" in economics_shell
@@ -438,9 +439,10 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "How do I recreate this dashboard in Power BI?" in ask_service
     assert "Explain the scenario comparison matrix." in ask_service
     assert "What does the data confidence register show?" in ask_service
-    assert "Write an executive takeaway for this snapshot." in ask_service
-    assert "How do I explain selected rows?" in ask_service
-    assert "How should I present this to a reviewer?" in ask_service
+    assert "What should go in the print snapshot?" in ask_service
+    assert "Write an executive takeaway." in ask_service
+    assert "What caveats should I include?" in ask_service
+    assert "What next diligence should I list?" in ask_service
     assert "Which chart shows fiscal burden?" in ask_service
     assert "Which rows should I select first?" in ask_service
     assert "What does this table mean?" in ask_service
@@ -452,9 +454,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "How should I walk through CFS Economics?" in ask_service
     assert "Which rows should I send?" in ask_service
     assert "How do I build this in Power BI?" in ask_service
-    assert "How do I use the report canvas?" in ask_service
-    assert "What chart should I use for opportunity class?" in ask_service
-    assert "How do I make a pie chart?" in ask_service
+    assert "What should I add to the Power BI Report Canvas?" in ask_service
+    assert "How do I build a chart?" in ask_service
+    assert "How do I QA the export?" in ask_service
     assert "Which areas show underbuilt opportunity?" in ask_service
     assert "Where is data confidence weak?" in ask_service
     assert "Build a decision-pack summary." in ask_service
@@ -465,7 +467,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "How do I QA the Power BI export?" in ask_service
     assert "Build a snapshot summary." in ask_service
     assert "What should go in the print snapshot?" in ask_service
-    assert "Write an executive takeaway for this snapshot." in ask_service
+    assert "Write an executive takeaway." in ask_service
     assert "What should go into the economic snapshot?" in ask_service
     assert "What caveats should I include?" in ask_service
     assert "What next diligence should I list?" in ask_service

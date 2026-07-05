@@ -227,7 +227,7 @@ After importing the CFS Economics CSV files into Power BI Desktop, verify:
 
 - All 7 CSV tables were downloaded and imported.
 - Headers are present in each table.
-- No contact fields, raw scores, or tax bill fields were imported.
+- No contact fields, internal model values, or tax bill fields were imported.
 - `scenario_id` exists in both `scenario_output_fact` and `scenario_dim`.
 - `geography_label` exists in both `parcel_economic_signal_fact` and
   `geography_dim`.

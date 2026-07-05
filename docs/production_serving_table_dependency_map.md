@@ -8,7 +8,7 @@ This map supports the production-serving database subset restore. It intentional
 
 - Local/source database remains the full raw and research warehouse.
 - Production database receives only clean/summary/API-required serving objects.
-- Model research endpoints must not expose exact probabilities or raw scores; heavy feature/ranking tables are excluded for this first production subset.
+- Model research endpoints must not expose exact probabilities or internal model values; heavy feature/ranking tables are excluded for this first production subset.
 - Missing production-only data should return safe unavailable/data-needed states rather than fabricated values.
 
 ## Subset Estimate

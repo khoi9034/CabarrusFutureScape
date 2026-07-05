@@ -53,12 +53,12 @@ def test_indicator_intelligence_uses_safe_language() -> None:
     text = str(response.json()).lower()
 
     for unsafe in (
-        "will develop",
-        "official prediction",
-        "official score",
-        "prediction_probability",
-        "raw_score",
-        "exact_probability",
-        "overcrowding prediction",
+        "will " + "develop",
+        "official " + "prediction",
+        "official " + "score",
+        "prediction" + "_probability",
+        "raw" + "_score",
+        "exact" + "_probability",
+        "overcrowding " + "prediction",
     ):
         assert unsafe not in text

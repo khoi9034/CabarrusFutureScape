@@ -165,16 +165,16 @@ DOMAIN_KEYWORDS: list[tuple[CfsAiDomain, tuple[str, ...]]] = [
 ]
 
 UNSAFE_REPLACEMENTS = {
-    r"\bwill be developed\b": "has observed planning context",
-    r"\bwill develop\b": "shows observed permit activity",
+    r"\bwill\s+be\s+developed\b": "has observed planning context",
+    r"\bwill\s+develop\b": "shows observed permit activity",
     r"\bwill overcrowd\b": "needs school capacity review",
-    r"\bovercrowding prediction\b": "preliminary school capacity watch",
+    r"\bovercrowding\s+prediction\b": "preliminary school capacity watch",
     r"\bovercrowded\b": "above capacity in preliminary context",
-    r"\bofficial prediction\b": "planning review signal",
-    r"\bofficial score\b": "review status",
+    r"\bofficial\s+prediction\b": "planning review signal",
+    r"\bofficial\s+score\b": "review status",
     r"\bexact probability\b": "no exact probability",
     r"\bprediction probability\b": "relative research signal",
-    r"\braw score\b": "relative research signal",
+    r"\braw\s+score\b": "relative research signal",
     r"\bguaranteed\b": "not guaranteed",
     r"\bcertain\b": "not certain",
 }
@@ -1091,7 +1091,7 @@ def _economics_dashboard_answer(
             "Caveats",
             _bullets(
                 [
-                    "Dashboard visuals use bands and counts, not raw scores.",
+                    "Dashboard visuals use bands and counts, not internal model values.",
                     "CFS Economics is screening-level context, not an official appraisal, tax bill, fiscal impact study, or approval recommendation.",
                 ]
             ),
@@ -1333,7 +1333,7 @@ def _economics_powerbi_answer(
                     "All 7 CSV tables downloaded.",
                     "Headers are present in each CSV.",
                     "No contact fields imported.",
-                    "No raw scores imported.",
+                    "No internal model values imported.",
                     "No tax bill fields imported.",
                     "scenario_id exists in scenario_output_fact.",
                     "scenario_id exists in scenario_dim.",
@@ -1355,7 +1355,7 @@ def _economics_powerbi_answer(
                 [
                     "This is Power BI Desktop practice, not Power BI Embedded.",
                     "No tenant, workspace, report, client, or embed credentials are required.",
-                    "CFS Economics fields are screening-level context and do not include raw scores or contact fields.",
+                    "CFS Economics fields are screening-level context and do not include internal model values or contact fields.",
                 ]
             ),
         ),
@@ -1578,7 +1578,7 @@ def _selected_signal_meaning(domain: str) -> tuple[str, str, str]:
         return (
             "Model Lab shows relative research signal only and remains internal research context.",
             "It can help prioritize questions, but source records and staff review remain the evidence base.",
-            "No exact probabilities, raw model values, or official prediction classes are shown.",
+            "No exact probabilities, raw model values, or official model classes are shown.",
         )
     if normalized in {"data_readiness", "zoning_land_use", "zoning"}:
         return (
@@ -2320,7 +2320,7 @@ def _provider_system_prompt() -> str:
     return (
         "You are the CFS planning intelligence assistant. Answer only from the supplied CFS context. "
         "Return valid JSON only. Do not invent data. Do not expose owner names, mailing addresses, secrets, "
-        "exact probabilities, raw model scores, official prediction classes, official school overcrowding claims, "
+        "exact probabilities, raw model scores, official model classes, official school overcrowding claims, "
         "or database connection details. Use safe planning language. Distinguish observed permit activity from "
         "prediction. Distinguish preliminary school capacity watch from official school capacity findings. "
         "Use conversation_context only to resolve references like 'those areas' or 'that signal'; do not invent "

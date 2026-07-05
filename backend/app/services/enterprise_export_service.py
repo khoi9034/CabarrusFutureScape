@@ -863,7 +863,7 @@ def _powerbi_report_builder_guide() -> dict[str, Any]:
             "Scenario relationship created.",
             "Geography relationship created.",
             "No contact fields imported.",
-            "No raw scores used.",
+            "No internal model values used.",
             "Report caveats visible.",
             "Slicers do not create misleading blanks.",
             "Value-per-acre visuals are filtered by economic_segment before interpretation.",

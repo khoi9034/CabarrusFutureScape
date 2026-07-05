@@ -35,15 +35,17 @@ export const askCfsSuggestedPrompts = [
 ] as const;
 
 export const askCfsEconomicsSuggestedPrompts = [
-  "What does the opportunity class chart mean?",
+  "What should I inspect first?",
   "Why is value per acre misleading countywide?",
+  "Which segment should I compare first?",
+  "What does this chart mean?",
+  "Which visual should I build in Power BI?",
+  "What does the opportunity class chart mean?",
   "How should I use the economic segment slicer?",
   "How do I recreate this dashboard in Power BI?",
-  "What should I filter first?",
   "Explain the scenario comparison matrix.",
   "What does the data confidence register show?",
   "Which chart shows fiscal burden?",
-  "What should I inspect first?",
   "Which rows should I send?",
   "How do I build this in Power BI?",
   "What CSV tables should I import first?",
@@ -84,23 +86,17 @@ export const askCfsEconomicsWorkspacePrompts = [
 
 export const askCfsEconomicsPowerBiToolPrompts = [
   "How do I build this in Power BI?",
-  "What chart should I use for opportunity class?",
-  "How do I make a pie chart?",
-  "How do I chart scenarios?",
-  "How do I build a matrix in Power BI?",
-  "How do I use the report canvas?",
-  "Why is my pie chart too crowded?",
-  "Which table should I use for a dashboard visual?",
-  "How do I QA the Power BI export?",
+  "What CSV tables should I import first?",
+  "How do I build a chart?",
+  "What should I add to the Power BI Report Canvas?",
+  "How do I QA the export?",
 ] as const;
 
 export const askCfsEconomicsPrintPrompts = [
   "What should go in the print snapshot?",
-  "Write an executive takeaway for this snapshot.",
-  "How do I explain selected rows?",
+  "Write an executive takeaway.",
   "What caveats should I include?",
   "What next diligence should I list?",
-  "How should I present this to a reviewer?",
 ] as const;
 
 export async function searchCfsAi(
@@ -487,7 +483,7 @@ function demoEconomicsDashboardAnswer(economics: EconomicsIntelligenceResponse):
     as_of: economics.as_of,
     caveats: [
       "Portfolio Demo uses a cached demo extract.",
-      "Dashboard visuals use bands and counts, not raw scores.",
+      "Dashboard visuals use bands and counts, not internal model values.",
     ],
     dashboard_actions: {
       focus_domain: "economics",
@@ -876,11 +872,11 @@ function demoEconomicsPowerBiAnswer(
         ]),
       ],
       [
-        "Report canvas",
+        "Power BI Report Canvas",
         bullets([
           "Preview a chart in Build Your Own Chart, then add it to the Report Canvas.",
           "Keep Page 1 simple: KPI cards, opportunity class, segment mix, and one scenario or data-confidence visual.",
-          "Copy the report canvas recipe when you are ready to recreate the page in Power BI Desktop.",
+          "Copy the report recipe when you are ready to recreate the page in Power BI Desktop.",
         ]),
       ],
       [
@@ -946,7 +942,7 @@ function demoEconomicsPowerBiAnswer(
       "Open Economic Intelligence -> Power BI & Tools.",
       "Use Flat CSV Tables first if you are learning Power BI Desktop.",
       "Use Build Your Own Chart to pick a table, visual, category, measure, and optional filter.",
-      "Add useful previews to the Report Canvas, then copy the report canvas recipe.",
+      "Add useful previews to the Power BI Report Canvas, then copy the report recipe.",
       "Preview or download the Power BI JSON Pack.",
       "Build the suggested relationships before creating report visuals.",
       "Use the Power BI Report Builder Guide for page-by-page visual instructions.",
@@ -958,7 +954,7 @@ const powerBiImportQaChecklist = [
   "All 7 CSV tables downloaded.",
   "Headers are present in each CSV.",
   "No contact fields imported.",
-  "No raw scores imported.",
+  "No internal model values imported.",
   "No tax bill fields imported.",
   "scenario_id exists in scenario_output_fact.",
   "scenario_id exists in scenario_dim.",
@@ -1669,7 +1665,7 @@ function selectedSignalMeaning(domain: string): [string, string, string] {
     return [
       "Model Lab shows relative research signal only and remains internal research context.",
       "It can help prioritize questions, but source records and staff review remain the evidence base.",
-      "No exact probabilities, raw model values, or official prediction classes are shown.",
+      "No exact probabilities, raw model values, or official model classes are shown.",
     ];
   }
   return [
@@ -1802,9 +1798,9 @@ function evidence(
 
 function sanitizeDemoResponse(response: CfsAiSearchResponse) {
   const serialized = JSON.stringify(response)
-    .replace(/will develop/gi, "shows observed permit activity")
-    .replace(/raw score/gi, "relative research signal")
-    .replace(/official prediction/gi, "planning review signal");
+    .replace(/will\s+develop/gi, "shows observed permit activity")
+    .replace(/raw\s+score/gi, "relative research signal")
+    .replace(/official\s+prediction/gi, "planning review signal");
   return JSON.parse(serialized) as CfsAiSearchResponse;
 }
 
