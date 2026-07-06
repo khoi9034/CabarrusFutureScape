@@ -267,9 +267,19 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "EconomicsPrintPage" in economics_shell
     assert "EconomicsTutorialButton" in economics_shell
     assert "EconomicsTutorialOverlay" in economics_shell
+    assert "computeTutorialPlacement" in economics_shell
+    assert "clampTutorialValue" in economics_shell
+    assert "getTutorialHeaderOffset" in economics_shell
+    assert "TUTORIAL_VIEWPORT_MARGIN" in economics_shell
+    assert "TUTORIAL_HEADER_FALLBACK" in economics_shell
     assert "Skip tutorial" in economics_shell
     assert "Escape" in economics_shell
     assert "Start Tutorial" in economics_shell
+    assert 'maxWidth: "calc(100vw - 2rem)"' in economics_shell
+    assert 'maxHeight: "calc(100vh - 7rem)"' in economics_shell
+    assert 'window.addEventListener("resize", queueMeasure)' in economics_shell
+    assert 'window.addEventListener("scroll", queueMeasure, true)' in economics_shell
+    assert 'scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" })' in economics_shell
     assert 'data-econ-tour="overview-hero"' in economics_shell
     assert "powerbi-tools-header" in economics_shell
     assert "economics-row-selection" in economics_shell

@@ -7,7 +7,7 @@ import {
   Search,
   ShieldAlert,
 } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
@@ -202,6 +202,117 @@ function EconomicsTutorialButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+type TutorialBox = {
+  height: number;
+  left: number;
+  top: number;
+  width: number;
+};
+
+type TutorialPlacement = {
+  cardStyle: CSSProperties;
+  highlightRect: TutorialBox | null;
+};
+
+const TUTORIAL_VIEWPORT_MARGIN = 20;
+const TUTORIAL_TARGET_GAP = 16;
+const TUTORIAL_HEADER_FALLBACK = 96;
+const TUTORIAL_CARD_FALLBACK = { height: 280, width: 360 };
+
+function clampTutorialValue(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), Math.max(min, max));
+}
+
+function getTutorialHeaderOffset() {
+  const header = document.querySelector("header");
+  const rect = header?.getBoundingClientRect();
+  if (rect && rect.bottom > 0 && rect.top <= TUTORIAL_VIEWPORT_MARGIN) {
+    return Math.min(140, Math.max(TUTORIAL_HEADER_FALLBACK, rect.bottom));
+  }
+  return TUTORIAL_HEADER_FALLBACK;
+}
+
+function boxesOverlap(a: TutorialBox, b: TutorialBox) {
+  return a.left < b.left + b.width && a.left + a.width > b.left && a.top < b.top + b.height && a.top + a.height > b.top;
+}
+
+function computeTutorialPlacement(targetRect: DOMRect | null, cardRect: DOMRect | null): TutorialPlacement {
+  const viewportWidth = window.innerWidth || 360;
+  const viewportHeight = window.innerHeight || 640;
+  const margin = TUTORIAL_VIEWPORT_MARGIN;
+  const safeTop = getTutorialHeaderOffset() + margin;
+  const safeArea = {
+    bottom: viewportHeight - margin,
+    left: margin,
+    right: viewportWidth - margin,
+    top: safeTop,
+  };
+  const maxWidth = Math.max(240, Math.min(460, viewportWidth - margin * 2));
+  const maxHeight = Math.max(180, viewportHeight - safeTop - margin);
+  const cardWidth = Math.min(cardRect?.width || TUTORIAL_CARD_FALLBACK.width, maxWidth);
+  const cardHeight = Math.min(cardRect?.height || TUTORIAL_CARD_FALLBACK.height, maxHeight);
+
+  const centered = {
+    left: clampTutorialValue((viewportWidth - cardWidth) / 2, safeArea.left, safeArea.right - cardWidth),
+    top: clampTutorialValue(safeArea.top + (safeArea.bottom - safeArea.top - cardHeight) / 2, safeArea.top, safeArea.bottom - cardHeight),
+  };
+
+  if (!targetRect) {
+    return {
+      cardStyle: { left: centered.left, maxHeight, maxWidth, top: centered.top },
+      highlightRect: null,
+    };
+  }
+
+  const targetBox = {
+    height: targetRect.height + 16,
+    left: targetRect.left - 8,
+    top: targetRect.top - 8,
+    width: targetRect.width + 16,
+  };
+  const candidates = [
+    { left: targetRect.right + TUTORIAL_TARGET_GAP, top: targetRect.top + targetRect.height / 2 - cardHeight / 2 },
+    { left: targetRect.left - cardWidth - TUTORIAL_TARGET_GAP, top: targetRect.top + targetRect.height / 2 - cardHeight / 2 },
+    { left: targetRect.left + targetRect.width / 2 - cardWidth / 2, top: targetRect.bottom + TUTORIAL_TARGET_GAP },
+    { left: targetRect.left + targetRect.width / 2 - cardWidth / 2, top: targetRect.top - cardHeight - TUTORIAL_TARGET_GAP },
+    centered,
+  ];
+  const chosen =
+    candidates.find((candidate) => {
+      const cardBox = { height: cardHeight, left: candidate.left, top: candidate.top, width: cardWidth };
+      return (
+        candidate.left >= safeArea.left &&
+        candidate.left + cardWidth <= safeArea.right &&
+        candidate.top >= safeArea.top &&
+        candidate.top + cardHeight <= safeArea.bottom &&
+        !boxesOverlap(cardBox, targetBox)
+      );
+    }) ?? centered;
+
+  const highlightLeft = clampTutorialValue(targetBox.left, 8, viewportWidth - 8);
+  const highlightTop = clampTutorialValue(targetBox.top, 8, viewportHeight - 8);
+  const highlightRight = clampTutorialValue(targetBox.left + targetBox.width, 8, viewportWidth - 8);
+  const highlightBottom = clampTutorialValue(targetBox.top + targetBox.height, 8, viewportHeight - 8);
+
+  return {
+    cardStyle: {
+      left: clampTutorialValue(chosen.left, safeArea.left, safeArea.right - cardWidth),
+      maxHeight,
+      maxWidth,
+      top: clampTutorialValue(chosen.top, safeArea.top, safeArea.bottom - cardHeight),
+    },
+    highlightRect:
+      highlightRight > highlightLeft && highlightBottom > highlightTop
+        ? {
+            height: highlightBottom - highlightTop,
+            left: highlightLeft,
+            top: highlightTop,
+            width: highlightRight - highlightLeft,
+          }
+        : null,
+  };
+}
+
 function EconomicsTutorialOverlay({
   onClose,
   onNavigate,
@@ -213,29 +324,45 @@ function EconomicsTutorialOverlay({
 }) {
   const steps = economicsTutorialSteps[page];
   const [stepIndex, setStepIndex] = useState(0);
-  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [placement, setPlacement] = useState<TutorialPlacement | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const step = steps[stepIndex] ?? steps[0];
   const isLast = stepIndex === steps.length - 1;
   const toolsPhaseIndex = Math.min(4, Math.floor(stepIndex / 2));
 
   useEffect(() => {
-    const updateTarget = () => {
+    let frame = 0;
+    let secondFrame = 0;
+    const measureTarget = () => {
       const target = document.querySelector(step.targetSelector);
-      if (!target) {
-        setTargetRect(null);
-        return;
-      }
-      target.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-      window.setTimeout(() => setTargetRect(target.getBoundingClientRect()), 220);
+      setPlacement(
+        computeTutorialPlacement(
+          target ? target.getBoundingClientRect() : null,
+          cardRef.current?.getBoundingClientRect() ?? null,
+        ),
+      );
     };
-    updateTarget();
+    const queueMeasure = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(measureTarget);
+    };
+    const scrollThenMeasure = () => {
+      const target = document.querySelector(step.targetSelector);
+      target?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      frame = window.requestAnimationFrame(() => {
+        measureTarget();
+        secondFrame = window.requestAnimationFrame(measureTarget);
+      });
+    };
+    scrollThenMeasure();
     cardRef.current?.focus();
-    window.addEventListener("resize", updateTarget);
-    window.addEventListener("scroll", updateTarget, true);
+    window.addEventListener("resize", queueMeasure);
+    window.addEventListener("scroll", queueMeasure, true);
     return () => {
-      window.removeEventListener("resize", updateTarget);
-      window.removeEventListener("scroll", updateTarget, true);
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(secondFrame);
+      window.removeEventListener("resize", queueMeasure);
+      window.removeEventListener("scroll", queueMeasure, true);
     };
   }, [step.targetSelector]);
 
@@ -247,22 +374,13 @@ function EconomicsTutorialOverlay({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
 
-  const viewportWidth = typeof window === "undefined" ? 360 : window.innerWidth;
-  const viewportHeight = typeof window === "undefined" ? 640 : window.innerHeight;
-  const cardHeightEstimate = Math.min(380, viewportHeight - 32);
-  const cardStyle = targetRect
-    ? {
-        left: Math.min(Math.max(16, targetRect.left), viewportWidth - 336),
-        top:
-          targetRect.bottom + 16 < viewportHeight - cardHeightEstimate
-            ? targetRect.bottom + 16
-            : Math.max(16, targetRect.top - cardHeightEstimate - 16),
-      }
-    : {
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-      };
+  const cardStyle = placement?.cardStyle ?? {
+    left: "50%",
+    maxHeight: "calc(100vh - 7rem)",
+    maxWidth: "calc(100vw - 2rem)",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+  };
 
   return (
     <div className="no-print fixed inset-0 z-[80]" role="presentation">
@@ -272,22 +390,22 @@ function EconomicsTutorialOverlay({
         onClick={onClose}
         type="button"
       />
-      {targetRect ? (
+      {placement?.highlightRect ? (
         <div
           aria-hidden="true"
           className="pointer-events-none fixed rounded-2xl border-2 border-[var(--econ-gold)] shadow-[0_0_0_9999px_rgba(0,0,0,0.18),0_0_36px_rgba(216,184,106,0.5)]"
           style={{
-            height: targetRect.height + 16,
-            left: targetRect.left - 8,
-            top: targetRect.top - 8,
-            width: targetRect.width + 16,
+            height: placement.highlightRect.height,
+            left: placement.highlightRect.left,
+            top: placement.highlightRect.top,
+            width: placement.highlightRect.width,
           }}
         />
       ) : null}
       <div
         aria-label="CFS Economics tutorial"
         aria-modal="true"
-        className="fixed max-h-[calc(100vh-2rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-[var(--econ-gold)]/45 bg-[#111722] p-4 text-[var(--econ-text)] shadow-2xl"
+        className="fixed w-[min(28.75rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-[var(--econ-gold)]/45 bg-[#111722] p-4 text-[var(--econ-text)] shadow-2xl"
         ref={cardRef}
         role="dialog"
         style={cardStyle}
