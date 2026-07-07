@@ -303,6 +303,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "dashboard:" in economics_shell
     assert "print:" in economics_shell
     assert "tools-purpose" in economics_shell
+    assert "tools-ask-cfs" in economics_shell
     assert "tools-select-rows" in economics_shell
     assert "tools-filters" in economics_shell
     assert "tools-selected-tray" in economics_shell
@@ -317,17 +318,18 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Uses a sanitized cached demo extract for portfolio review." in economics_shell
     assert "You are here:" in economics_shell
     assert "Understand the workflow." in economics_shell
-    assert "Build export-ready Power BI tables, scenario models, and decision packs from CFS Economics rows." in economics_shell
+    assert "Ask CFS, select rows, export CSVs, build charts, and prepare a report canvas." in economics_shell
+    assert economics_shell.index('tourId="tools-ask-cfs"') < economics_shell.index('tourRowSelectionId="economics-row-selection"')
     assert "Screening-level economic context, not official appraisal, tax bill, or fiscal impact study." in economics_shell
-    assert "Review indicators and ask CFS." in economics_shell
+    assert "Growth and tax-base intelligence with segment-aware visuals and slicers." in economics_shell
     assert "EconomicsSlicerBar" in economics_shell
     assert "economicsSignalsFromPowerBiExport" in economics_shell
     assert "Economics data is currently using a partial fallback" in economics_shell
     assert "CFS will not silently swap in demo data while local live mode is selected." in economics_shell
     assert "grid-template-columns:repeat(auto-fit,minmax(220px,1fr))" in economics_shell
     assert "Economic Segment" in economics_shell
-    assert "Segmented Land Economics" in economics_shell
-    assert "Segment-aware Power BI recipe details" in economics_shell
+    assert "Segment-Aware Land Economics" in economics_shell
+    assert "Power BI recipe details" in economics_shell
     assert "EconomicsDonutChart" in economics_shell
     assert "EconomicsMatrixChart" in economics_shell
     assert "EconomicsTrendChart" in economics_shell
@@ -337,8 +339,10 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Fiscal / Service Burden Matrix" in economics_shell
     assert "Data Confidence Visual" in economics_shell
     assert "Power BI recipe" in economics_shell
+    assert "Visual analytics" not in economics_shell
+    assert "Source table, visual type, and fields." not in economics_shell
     assert "Reset filters" in economics_shell
-    assert "Power BI Desktop Practice Pack" in economics_shell
+    assert "Three-step Power BI workflow" in economics_shell
     assert "Screening-level economic context for selected rows or current economics summary." in economics_shell
     assert "What CFS Economics does" in economics_shell
     assert "What data it uses" in economics_shell
@@ -361,10 +365,10 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Selected rows can become Power BI table filters, scenario model context, or decision-pack evidence." in economics_shell
     assert "Ask CFS Economics" in economics_shell
     assert "Power BI & Tools Ask CFS" not in economics_shell
-    assert "Section 1 - Select Economics Rows" in economics_shell
-    assert "Step 2 - Choose Output" in economics_shell
-    assert "Section 3 - Tool Workspace" in economics_shell
-    assert "Section 4 - Export / Next Step" in economics_shell
+    assert "Select rows" in economics_shell
+    assert "Choose Tool" in economics_shell
+    assert "Tool Workspace" in economics_shell
+    assert "Next Actions" in economics_shell
     assert "Select rows on Power BI & Tools" in economics_shell
     assert "enterpriseOutputCards" in economics_shell
     assert "Select Data" in economics_shell
@@ -443,9 +447,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Special assets" in economics_shell
     assert "No rows selected. This snapshot is using the current economics summary." in economics_shell
     assert "Ask CFS Economics" in economics_shell
-    assert "Filtered dashboard assistant" in economics_shell
+    assert "Ask first" in economics_shell
     assert "filterContext={askCfsFilterContext}" in economics_shell
-    assert economics_shell.index("Filtered dashboard assistant") < economics_shell.index('data-econ-tour="slicers"')
+    assert economics_shell.index('tourId="ask-cfs"') < economics_shell.index('data-econ-tour="slicers"')
     assert "Domain Status Breakdown" in indicator_center
     assert "Watchlist by Domain" in indicator_center
     assert "Data Readiness Status" in indicator_center

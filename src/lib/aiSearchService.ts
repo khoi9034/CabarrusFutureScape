@@ -85,9 +85,15 @@ export const askCfsEconomicsWorkspacePrompts = [
 ] as const;
 
 export const askCfsEconomicsPowerBiToolPrompts = [
-  "Build me a Power BI dashboard.",
+  "What should I do first?",
+  "What rows should I select?",
+  "Build me a Power BI report.",
+  "What CSV tables should I import?",
+  "What chart should I build?",
+  "How do I use the report canvas?",
   "How do I build this in Power BI?",
   "What CSV tables should I import first?",
+  "Build me a Power BI dashboard.",
   "What charts should Power BI generate?",
   "How do I build a chart?",
   "What should I add to the Power BI Report Canvas?",

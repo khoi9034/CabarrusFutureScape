@@ -541,7 +541,7 @@ function PowerBiToolsPage({
       <PageHeader
         kicker="Power BI & Tools"
         title="Power BI & Tools"
-        text="Build export-ready Power BI tables, scenario models, and decision packs from CFS Economics rows."
+        text="Ask CFS, select rows, export CSVs, build charts, and prepare a report canvas."
         tourId="powerbi-tools-header"
       >
         <button
@@ -552,24 +552,33 @@ function PowerBiToolsPage({
           Start Tutorial
         </button>
       </PageHeader>
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <EconPanel title="Power BI Desktop Practice Pack" kicker="Default workflow" tourId="powerbi-practice-pack">
-          <p className="text-sm leading-6 text-[var(--econ-muted)]">
-            Export CFS Economics as fact and dimension tables, then build a real Power BI report with KPI cards, slicers, charts, and scenario pages.
-          </p>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <EconPanel title="Ask CFS Economics" kicker="Ask first" tourId="tools-ask-cfs">
+        <p className="mb-3 text-sm leading-6 text-[var(--econ-muted)]">
+          Ask what to build, which rows to select, or how to turn CFS Economics into a Power BI report.
+        </p>
+        <AskCfsPanel
+          appMode="economics"
+          suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
+          visiblePromptCount={6}
+        />
+      </EconPanel>
+      <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
+        <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
+        <span>Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.</span>
+      </section>
+      <section className="grid gap-4">
+        <EconPanel title="Three-step Power BI workflow" kicker="Default workflow" tourId="powerbi-practice-pack">
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
             <MetricPill label="CSV tables" value="7" />
             <MetricPill label="Starter relationships" value="2" />
             <MetricPill label="Report pages" value="4" />
             <MetricPill label="Suggested measures" value="5" />
           </div>
-          <div className="mt-4 grid gap-2 md:grid-cols-5">
+          <div className="mt-4 grid gap-2 md:grid-cols-3">
             {[
               "1. Select rows",
-              "2. Download CSVs",
-              "3. Build chart",
-              "4. Add to canvas",
-              "5. Copy recipe or Print",
+              "2. Download CSV tables",
+              "3. Build chart + canvas",
             ].map((step) => (
               <div
                 className="rounded-xl border border-[var(--econ-border)] bg-black/20 px-3 py-2 text-xs font-semibold text-[var(--econ-muted)]"
@@ -587,11 +596,6 @@ function PowerBiToolsPage({
               Preview table schema
             </button>
           </div>
-        </EconPanel>
-        <EconPanel title="Screening caveat" kicker={USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}>
-          <p className="text-sm leading-6 text-[var(--econ-muted)]">
-            Screening-level economics only: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation. No credentials or embedded BI connection are required.
-          </p>
         </EconPanel>
       </section>
       <EconomicsWorkspacePage
@@ -831,10 +835,6 @@ function EconomicDashboardPage({
   const opportunityOptions = ["All", ...uniqueValues(signals.map((signal) => signal.opportunity_class))];
   const confidenceOptions = ["All", ...uniqueValues(signals.map((signal) => signal.economic_data_confidence))];
   const summary = intelligence?.summary;
-  const segmentCaveat =
-    selectedSegment === "All"
-      ? "All-segment views can be skewed by special, civic, infrastructure, or corridor assets. Filter to a segment before interpreting value per acre."
-      : (selectedSegmentRows[0]?.segment_caveat ?? "Compare value per acre within similar land-use or property segments.");
   const resetFilters = () => {
     setSelectedSegment("All");
     setSelectedGeography("All");
@@ -865,9 +865,8 @@ function EconomicDashboardPage({
       <PageHeader
         kicker="Economic Dashboard"
         title="Economic Dashboard"
-        text="Growth and tax-base intelligence with Power BI-style visuals, slicers, and explainable screening context."
+        text="Growth and tax-base intelligence with segment-aware visuals and slicers."
       />
-      <PageHelper text="Review indicators and ask CFS." />
       <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] px-4 py-3">
         <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
         {intelligence?.context_freshness ? (
@@ -891,7 +890,7 @@ function EconomicDashboardPage({
           </p>
         </EconPanel>
       ) : null}
-      <EconPanel title="Ask CFS Economics" kicker="Filtered dashboard assistant" tourId="ask-cfs">
+      <EconPanel title="Ask CFS Economics" kicker="Ask first" tourId="ask-cfs">
         <AskCfsPanel
           appMode="economics"
           filterContext={askCfsFilterContext}
@@ -899,14 +898,14 @@ function EconomicDashboardPage({
         />
       </EconPanel>
       <section className="grid gap-4">
-        <EconPanel title="Executive Economic Signals" kicker="Section 1" tourId="kpi-strip">
+        <EconPanel title="Executive Economic Signals" kicker="KPIs" tourId="kpi-strip">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
             {kpis.map((kpi) => (
               <KpiCard key={kpi.id} kpi={kpi} />
             ))}
           </div>
           <p className="mt-3 text-xs leading-5 text-[var(--econ-muted)]">
-            Median value per acre is an all-segment context metric. Use the segment slicer before comparing land efficiency.
+            Compare value per acre within similar economic segments.
           </p>
         </EconPanel>
         <div data-econ-tour="slicers">
@@ -936,7 +935,7 @@ function EconomicDashboardPage({
           >
             <EconomicsDonutChart rows={confidenceBars} />
           </EconomicsVisualPanel>
-          <EconPanel title="Underbuilt Redevelopment Watchlist" kicker="Summary">
+          <EconPanel title="Underbuilt Redevelopment Watchlist" kicker="Watchlist">
             <SignalTable signals={filteredWatchlist.slice(0, 5)} />
             <DetailsBlock summary="Show full watchlist" hint={`${filteredWatchlist.length} filtered rows`}>
               <SignalTable signals={filteredWatchlist} />
@@ -945,7 +944,7 @@ function EconomicDashboardPage({
         </div>
       </section>
       <section className="grid gap-4" data-econ-tour="segment-visuals">
-        <EconPanel title="Segmented Land Economics" kicker="Section 2">
+        <EconPanel title="Segment-Aware Land Economics" kicker="Land economics">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <MiniMetric label="Selected segment" value={selectedSegment} />
             <MiniMetric label="Segment rows" value={formatNumber(filteredSignals.length)} />
@@ -953,7 +952,9 @@ function EconomicDashboardPage({
             <MiniMetric label="Tax-base signals" value={formatNumber(filteredSignals.filter((signal) => signal.economic_status_band === "tax_base_opportunity").length)} />
             <MiniMetric label="Data-needed rows" value={formatNumber(filteredSignals.filter((signal) => signal.economic_data_confidence === "data_needed").length)} />
           </div>
-          <p className="mt-3 text-sm leading-6 text-[var(--econ-muted)]">{segmentCaveat}</p>
+          <p className="mt-3 text-sm leading-6 text-[var(--econ-muted)]">
+            Compare value per acre within similar economic segments; special assets can skew countywide views.
+          </p>
         </EconPanel>
         <div className="grid gap-4 xl:grid-cols-2">
           <EconomicsVisualPanel
@@ -971,7 +972,7 @@ function EconomicDashboardPage({
             <EconomicsBarChart formatValue={(value) => value.toFixed(2)} rows={ratioBars} />
           </EconomicsVisualPanel>
         </div>
-        <EconPanel title="Top Opportunity Rows for Selected Segment" kicker="Comparable rows">
+        <EconPanel title="Top Opportunity Rows" kicker="Comparable rows">
           <SignalTable signals={filteredSignals.slice(0, 8)} />
           <DetailsBlock summary="Segment summary" hint="Counts, medians, and caveats by segment.">
             <SegmentSummaryTable rows={selectedSegmentRows} />
@@ -979,7 +980,7 @@ function EconomicDashboardPage({
         </EconPanel>
       </section>
       <section className="grid gap-4" data-econ-tour="scenario-visuals">
-        <EconPanel title="Scenario + Power BI Readiness" kicker="Section 3">
+        <EconPanel title="Scenario + Power BI Readiness" kicker="Scenario readiness">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <MiniMetric label="Parcels analyzed" value={formatNumber(summary?.total_parcels_analyzed)} />
             <MiniMetric label="Assessed value coverage" value={currency(summary?.total_assessed_value)} />
@@ -987,7 +988,7 @@ function EconomicDashboardPage({
             <MiniMetric label="Scenario outputs" value={formatNumber(filteredScenarios.length)} />
           </div>
           <p className="mt-3 text-sm leading-6 text-[var(--econ-muted)]">
-            Power BI recipe: import parcel_economic_signal_fact, use economic_segment as the first slicer, then compare opportunity class, confidence, and scenario bands.
+            Power BI: start with the economic segment slicer, then compare opportunity and confidence bands.
           </p>
         </EconPanel>
         <div className="grid gap-4 xl:grid-cols-2">
@@ -1011,7 +1012,7 @@ function EconomicDashboardPage({
         <DetailsBlock summary="Full Data Confidence Register" hint="Domain readiness, current use, and next data need.">
           <EconomicsReadinessMatrix rows={intelligence?.data_readiness ?? []} />
         </DetailsBlock>
-        <DetailsBlock summary="Segment-aware Power BI recipe details" hint="Use economic_segment before value-per-acre comparisons.">
+        <DetailsBlock summary="Power BI recipe details" hint="Use economic_segment before value-per-acre comparisons.">
           <ul className="grid gap-2 text-sm leading-6 text-[var(--econ-muted)]">
             <li>Source table: parcel_economic_signal_fact.</li>
             <li>Slicer: economic_segment, then geography_label, opportunity_class, and data_confidence.</li>
@@ -1129,7 +1130,7 @@ function EconomicsWorkspacePage({
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <EconPanel
           description={activeMeta.description}
-          kicker="Section 1 - Select Economics Rows"
+          kicker="Select rows"
           title={activeMeta.label}
           tourId={tourRowSelectionId}
         >
@@ -1236,7 +1237,7 @@ function EnterpriseWorkspacePage({
               selectedSignals={selectedSignals}
             />
           ) : null}
-          <EconPanel title="Step 2 - Choose Output" kicker="Output type" tourId="advanced-tools">
+          <EconPanel title="Choose Tool" kicker="Advanced tools" tourId="advanced-tools">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               {enterpriseOutputCards.map((card) => (
                 <button
@@ -1273,13 +1274,15 @@ function EnterpriseWorkspacePage({
             selectedSignals={selectedSignals}
           />
         </div>
-        <EconPanel title="Ask CFS Economics" kicker="Assistant">
-          <AskCfsPanel
-            appMode="economics"
-            suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
-            visiblePromptCount={6}
-          />
-        </EconPanel>
+        {embedded ? null : (
+          <EconPanel title="Ask CFS Economics" kicker="Assistant">
+            <AskCfsPanel
+              appMode="economics"
+              suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
+              visiblePromptCount={6}
+            />
+          </EconPanel>
+        )}
       </section>
     </>
   );
@@ -1903,7 +1906,7 @@ function EnterpriseToolsPage({
   };
   return (
     <>
-      <EconPanel title="Section 3 - Tool Workspace" kicker={enterpriseOutputLabel(selectedOutput)}>
+      <EconPanel title="Tool Workspace" kicker={enterpriseOutputLabel(selectedOutput)}>
         {selectedOutput === "scenario" ? (
           <EnterpriseScenarioConfigurePanel
             inputs={inputs}
@@ -1959,9 +1962,6 @@ function EnterpriseToolsPage({
               <h2 className="text-sm font-semibold text-[var(--econ-text)]">
                 Flat CSV Tables
               </h2>
-              <p className="mt-1 text-xs leading-5 text-[var(--econ-muted)]">
-                Download each flat fact/dimension table for the beginner Power BI Desktop path.
-              </p>
             </div>
             <CsvDownloadTable rows={csvRows} />
             <PowerBiChartBuilder payload={powerBiPayload} />
@@ -2040,7 +2040,7 @@ function EnterpriseToolsPage({
           </div>
         ) : null}
       </EconPanel>
-      <EconPanel title="Section 4 - Export / Next Step" kicker={enterpriseOutputLabel(selectedOutput)} tourId="tools-final-actions">
+      <EconPanel title="Next Actions" kicker={enterpriseOutputLabel(selectedOutput)} tourId="tools-final-actions">
         <div className="grid gap-3 sm:grid-cols-2">
           {selectedOutput === "scenario" ? (
             <>
@@ -3038,14 +3038,14 @@ function EconPanel({
 }: {
   children: ReactNode;
   description?: string;
-  kicker: string;
+  kicker?: string;
   title: string;
   tourId?: string;
 }) {
   return (
     <section className="econ-panel rounded-2xl p-4 md:p-5" data-econ-tour={tourId}>
-      <p className="econ-eyebrow">{kicker}</p>
-      <h2 className="mt-2 text-lg font-semibold text-[var(--econ-text)]">
+      {kicker ? <p className="econ-eyebrow">{kicker}</p> : null}
+      <h2 className={`${kicker ? "mt-2 " : ""}text-lg font-semibold text-[var(--econ-text)]`}>
         {title}
       </h2>
       {description ? (
@@ -3353,9 +3353,10 @@ function EconomicsVisualPanel({
   title: string;
 }) {
   return (
-    <EconPanel description={description} kicker="Visual analytics" title={title}>
+    <EconPanel title={title}>
+      <p className="sr-only">{description}</p>
       {children}
-      <DetailsBlock summary="Power BI recipe" hint="Source table, visual type, and fields.">
+      <DetailsBlock summary="Power BI recipe" hint="Table, fields, and slicer.">
         <p className="text-sm leading-6 text-[var(--econ-muted)]">{recipe}</p>
       </DetailsBlock>
     </EconPanel>
@@ -5758,6 +5759,13 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
       targetSelector: '[data-econ-tour="powerbi-tools-header"]',
       title: "Page purpose",
       why: "This is the main hands-on workflow.",
+    },
+    {
+      body: "Ask what to build, which rows to select, or how to turn economics rows into a Power BI report.",
+      id: "tools-ask-cfs",
+      targetSelector: '[data-econ-tour="tools-ask-cfs"]',
+      title: "Ask CFS",
+      why: "Start with guidance before opening the tables.",
     },
     {
       body: "Start here. Select rows that you want to analyze, export, or include in a decision snapshot.",
