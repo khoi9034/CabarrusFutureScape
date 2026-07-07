@@ -248,9 +248,12 @@ class CfsAiSearchService:
             answer=provider_answer,
             as_of=fallback.as_of,
             caveats=_string_list(provider_payload.get("caveats")) or fallback.caveats,
+            context_freshness=fallback.context_freshness,
             data_mode=request.mode,
+            data_source=fallback.data_source,
             domains=domains,
             evidence=_evidence_items(provider_payload.get("evidence")) or fallback.evidence,
+            filtered_context_summary=fallback.filtered_context_summary,
             dashboard_actions=_dashboard_actions_from_payload(
                 provider_payload.get("dashboard_actions"),
             )
@@ -308,6 +311,7 @@ class CfsAiSearchService:
                         {
                             "domains": domains,
                             "query": request.query,
+                            "filter_context": request.filter_context,
                             "conversation_context": [
                                 turn.model_dump(exclude_none=True)
                                 for turn in request.conversation_context[-5:]
@@ -2181,14 +2185,20 @@ def _response(
     caveats = list(dict.fromkeys(SAFE_CAVEATS + context.get("caveats", [])))[:6]
     if mode == "demo":
         caveats.insert(0, "Portfolio Demo uses a cached demo extract.")
+    filter_summary = context.get("filtered_context_summary")
+    if filter_summary:
+        answer = f"Active dashboard context: {filter_summary}.\n\n{answer}"
     return CfsAiSearchResponse(
         answer=answer,
         as_of=context.get("as_of") or datetime.now(UTC).isoformat(),
         caveats=caveats,
+        context_freshness=str(context.get("context_freshness") or ("cached_demo_extract" if mode == "demo" else "current_session")),
         dashboard_actions=dashboard_actions_for_domains(active_domains, None),
+        data_source=str(context.get("data_source") or ("portfolio_demo_extract" if mode == "demo" else "local_live_backend")),
         data_mode=mode,  # type: ignore[arg-type]
         domains=active_domains,
         evidence=evidence,
+        filtered_context_summary=context.get("filtered_context_summary"),
         provider="none",
         related_layers=_related_layers(active_domains),
         suggested_actions=actions,

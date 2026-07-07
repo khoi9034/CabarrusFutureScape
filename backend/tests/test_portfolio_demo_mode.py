@@ -433,6 +433,11 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Special assets" in economics_shell
     assert "No rows selected. This snapshot is using the current economics summary." in economics_shell
     assert "Ask CFS Economics" in economics_shell
+    assert "Filtered dashboard assistant" in economics_shell
+    assert "filterContext={askCfsFilterContext}" in economics_shell
+    assert economics_shell.index("Filtered dashboard assistant") < economics_shell.index('data-econ-tour="slicers"')
+    assert "Domain Status Breakdown" in indicator_center
+    assert "filterContext={askCfsFilterContext}" in indicator_center
     assert "EconomicMissionControl" in indicator_center
     assert "getDemoEconomicsIntelligence" in economics_service
     assert '"/economics/intelligence"' in economics_service
@@ -442,6 +447,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "askCfsEconomicsSuggestedPrompts" in ask_service
     assert "askCfsEconomicsWorkspacePrompts" in ask_service
     assert 'app_mode === "economics"' in ask_service
+    assert "Source: ${source}" in read("src/components/dashboard/AskCfsPanel.tsx")
+    assert "portfolio_demo_extract" in ask_service
+    assert "cached_demo_extract" in ask_service
     assert "Traditional GIS can show where things are" in overview
     assert "Consulting Decision Workflows" in overview
     assert "What should I inspect first?" in ask_service

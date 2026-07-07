@@ -14,6 +14,7 @@ export type CfsAiDomain =
 export interface CfsAiSearchRequest {
   app_mode?: "economics" | "planning";
   conversation_context?: CfsAiConversationTurn[];
+  filter_context?: Record<string, string | number | boolean | null | undefined>;
   filters?: {
     domains?: CfsAiDomain[];
     year_end?: number | null;
@@ -82,10 +83,13 @@ export interface CfsAiSearchResponse {
   answer: string;
   as_of: string | null;
   caveats: string[];
+  context_freshness?: "cached_demo_extract" | "current_session" | "fallback_partial" | string | null;
   dashboard_actions: CfsAiDashboardActions;
+  data_source?: "local_live_backend" | "portfolio_demo_extract" | string | null;
   data_mode: "demo" | "live";
   domains: CfsAiDomain[];
   evidence: CfsAiEvidenceItem[];
+  filtered_context_summary?: string | null;
   provider: "none" | "openai";
   related_layers: string[];
   suggested_actions: string[];

@@ -7,7 +7,7 @@ import {
   Search,
   ShieldAlert,
 } from "lucide-react";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
@@ -827,6 +827,24 @@ function EconomicDashboardPage({
     setSelectedOpportunityClass("All");
     setSelectedDataConfidence("All");
   };
+  const askCfsFilterContext = useMemo(
+    () => ({
+      economic_segment: selectedSegment,
+      geography: selectedGeography,
+      opportunity_class: selectedOpportunityClass,
+      data_confidence: selectedDataConfidence,
+      filtered_signal_count: filteredSignals.length,
+      filtered_watchlist_rows: filteredWatchlist.length,
+    }),
+    [
+      filteredSignals.length,
+      filteredWatchlist.length,
+      selectedDataConfidence,
+      selectedGeography,
+      selectedOpportunityClass,
+      selectedSegment,
+    ],
+  );
 
   return (
     <>
@@ -843,18 +861,13 @@ function EconomicDashboardPage({
           Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.
         </span>
       </section>
-      <div data-econ-tour="slicers">
-      <EconomicsSlicerBar
-        filters={[
-          { label: "Economic Segment", onChange: setSelectedSegment, options: segmentOptions, value: selectedSegment },
-          { label: "Geography / Jurisdiction", onChange: setSelectedGeography, options: geographyOptions, value: selectedGeography },
-          { label: "Opportunity Class", onChange: setSelectedOpportunityClass, options: opportunityOptions, value: selectedOpportunityClass },
-          { label: "Data Confidence", onChange: setSelectedDataConfidence, options: confidenceOptions, value: selectedDataConfidence },
-        ]}
-        onReset={resetFilters}
-        selected={[selectedSegment, selectedGeography, selectedOpportunityClass, selectedDataConfidence]}
-      />
-      </div>
+      <EconPanel title="Ask CFS Economics" kicker="Filtered dashboard assistant" tourId="ask-cfs">
+        <AskCfsPanel
+          appMode="economics"
+          filterContext={askCfsFilterContext}
+          visiblePromptCount={6}
+        />
+      </EconPanel>
       <section className="grid gap-4">
         <EconPanel title="Executive Economic Signals" kicker="Section 1" tourId="kpi-strip">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
@@ -866,6 +879,18 @@ function EconomicDashboardPage({
             Median value per acre is an all-segment context metric. Use the segment slicer before comparing land efficiency.
           </p>
         </EconPanel>
+        <div data-econ-tour="slicers">
+          <EconomicsSlicerBar
+            filters={[
+              { label: "Economic Segment", onChange: setSelectedSegment, options: segmentOptions, value: selectedSegment },
+              { label: "Geography / Jurisdiction", onChange: setSelectedGeography, options: geographyOptions, value: selectedGeography },
+              { label: "Opportunity Class", onChange: setSelectedOpportunityClass, options: opportunityOptions, value: selectedOpportunityClass },
+              { label: "Data Confidence", onChange: setSelectedDataConfidence, options: confidenceOptions, value: selectedDataConfidence },
+            ]}
+            onReset={resetFilters}
+            selected={[selectedSegment, selectedGeography, selectedOpportunityClass, selectedDataConfidence]}
+          />
+        </div>
         <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr_1fr]">
           <EconomicsVisualPanel
             description="Shows how screened parcels/areas are distributed across economic opportunity classes."
@@ -964,9 +989,6 @@ function EconomicDashboardPage({
             <li>Special asset flag: use it to separate civic, institutional, infrastructure, or utility rows from ordinary parcel peers.</li>
           </ul>
         </DetailsBlock>
-        <EconPanel title="Ask CFS Economics" kicker="Compact analyst assistant" tourId="ask-cfs">
-          <AskCfsPanel appMode="economics" visiblePromptCount={6} />
-        </EconPanel>
       </section>
     </>
   );

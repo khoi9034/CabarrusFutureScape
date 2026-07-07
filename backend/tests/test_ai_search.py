@@ -571,7 +571,10 @@ def test_ai_search_sparse_provider_answer_keeps_detailed_fallback(monkeypatch) -
 
 def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
     def fake_context(_db, _request=None):
-        return _context()
+        context = _context()
+        context["context_freshness"] = "current_session"
+        context["data_source"] = "local_live_backend"
+        return context
 
     app.dependency_overrides[get_read_only_db] = lambda: object()
     monkeypatch.setattr(ai_search_router, "gather_cfs_ai_context", fake_context)
@@ -586,6 +589,8 @@ def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["provider"] == "none"
+    assert body["data_source"] == "local_live_backend"
+    assert body["context_freshness"] == "current_session"
     assert body["domains"] == ["schools"]
     assert body["dashboard_actions"]["focus_domain"] == "schools"
     text = str(body).lower()
@@ -597,6 +602,11 @@ def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
 def test_ai_search_endpoint_returns_fast_fallback_when_intelligence_cache_empty(monkeypatch) -> None:
     app.dependency_overrides[get_read_only_db] = lambda: object()
     monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: None)
+    monkeypatch.setattr(
+        ai_search_router,
+        "get_indicator_intelligence",
+        lambda _db: (_ for _ in ()).throw(RuntimeError("cold db")),
+    )
     try:
         response = TestClient(app).post(
             "/ai/search",
@@ -608,10 +618,30 @@ def test_ai_search_endpoint_returns_fast_fallback_when_intelligence_cache_empty(
     assert response.status_code == 200
     body = response.json()
     assert body["dashboard_actions"]["focus_domain"] == "permits"
+    assert body["data_source"] == "local_live_backend"
+    assert body["context_freshness"] == "fallback_partial"
     assert "still warming" in " ".join(body["caveats"]).lower()
 
 
-def test_ai_search_compact_context_cache_reuses_fast_context(monkeypatch) -> None:
+def test_ai_search_context_cache_reuses_full_live_indicator_context(monkeypatch) -> None:
+    calls = {"count": 0}
+
+    def fake_indicator_context(_db):
+        calls["count"] += 1
+        return {"signals": [{"title": "Live indicator"}]}
+
+    monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: None)
+    monkeypatch.setattr(ai_search_router, "get_indicator_intelligence", fake_indicator_context)
+
+    first = ai_search_router.gather_cfs_ai_context(object())
+    second = ai_search_router.gather_cfs_ai_context(object())
+
+    assert calls["count"] == 1
+    assert first["indicator_intelligence"] == second["indicator_intelligence"]
+    assert first["context_freshness"] == "current_session"
+
+
+def test_ai_search_partial_indicator_context_is_not_cached(monkeypatch) -> None:
     calls = {"count": 0}
 
     def fake_fast_context(_db, _context):
@@ -619,13 +649,44 @@ def test_ai_search_compact_context_cache_reuses_fast_context(monkeypatch) -> Non
         return {"development_activity_detail": {"total_records": 18, "active_parcels": 7}}
 
     monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: None)
+    monkeypatch.setattr(
+        ai_search_router,
+        "get_indicator_intelligence",
+        lambda _db: (_ for _ in ()).throw(RuntimeError("cold db")),
+    )
     monkeypatch.setattr(ai_search_router, "_fast_development_context", fake_fast_context)
 
     first = ai_search_router.gather_cfs_ai_context(object())
     second = ai_search_router.gather_cfs_ai_context(object())
 
-    assert calls["count"] == 1
-    assert first["indicator_intelligence"] == second["indicator_intelligence"]
+    assert calls["count"] == 2
+    assert first["context_freshness"] == second["context_freshness"] == "fallback_partial"
+
+
+def test_ai_search_filter_context_metadata_is_returned() -> None:
+    context = ai_search_router._with_request_context(
+        {
+            **_context(),
+            "context_freshness": "current_session",
+            "data_source": "local_live_backend",
+        },
+        CfsAiSearchRequest(
+            filter_context={
+                "active_tab": "Schools",
+                "selected_domain": "school-context",
+            },
+            query="Which school areas need review?",
+        ),
+    )
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(query="Which school areas need review?"),
+        context,
+    )
+
+    assert response.data_source == "local_live_backend"
+    assert response.context_freshness == "current_session"
+    assert "active tab=Schools" in response.filtered_context_summary
+    assert "Active dashboard context" in response.answer
 
 
 def test_ai_search_economics_mode_returns_economic_answer() -> None:

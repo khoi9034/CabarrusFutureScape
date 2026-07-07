@@ -549,6 +549,25 @@ function PlanningIndicatorCenterWorkspace() {
   const visibleExecutiveSignals = executiveSignals.filter((signal) =>
     shouldShowGroupForReadinessTab(signal.groupId, activeReadinessTab),
   );
+  const activeReadinessTabLabel =
+    readinessTabs.find((tab) => tab.id === activeReadinessTab)?.label ??
+    activeReadinessTab;
+  const askCfsFilterContext = useMemo(
+    () => ({
+      active_tab: activeReadinessTabLabel,
+      selected_domain: selectedIndicatorCenterContext?.groupId ?? null,
+      selected_signal_id: selectedIndicatorCenterContext?.indicatorId ?? null,
+      selected_signal_title: selectedIndicatorCenterContext?.name ?? null,
+      visible_kpis: visibleExecutiveSignals.length,
+      visible_watchlist_rows: visibleAttentionQueue.length,
+    }),
+    [
+      activeReadinessTabLabel,
+      selectedIndicatorCenterContext,
+      visibleAttentionQueue.length,
+      visibleExecutiveSignals.length,
+    ],
+  );
   const showSchoolPressureSection = shouldShowGroupForReadinessTab(
     "school-context",
     activeReadinessTab,
@@ -567,7 +586,20 @@ function PlanningIndicatorCenterWorkspace() {
     key: "permit-segment-breakdown-chart",
     title: "Permit Activity by Type",
   };
+  const domainStatusChart = {
+    caveat: "Status bands are planning review signals, not official determinations.",
+    data: Object.entries(
+      visibleExecutiveSignals.reduce<Record<string, number>>((counts, signal) => {
+        counts[signal.status] = (counts[signal.status] ?? 0) + 1;
+        return counts;
+      }, {}),
+    ).map(([label, value]) => ({ label, value })),
+    emptyLabel: "No filtered indicators.",
+    key: "domain-status-breakdown-chart",
+    title: "Domain Status Breakdown",
+  };
   const monitoringChartCards = [
+    domainStatusChart,
     ...(monitoringCharts[0]
       ? [
           {
@@ -806,6 +838,7 @@ function PlanningIndicatorCenterWorkspace() {
         <AskCfsPanel
           appMode="planning"
           externalRequest={askCfsExternalRequest}
+          filterContext={askCfsFilterContext}
           onResponse={handleAskCfsResponse}
         />
       </div>

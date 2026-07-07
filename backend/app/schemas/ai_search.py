@@ -57,6 +57,7 @@ class CfsAiSelectedSignal(BaseModel):
 class CfsAiSearchRequest(BaseModel):
     app_mode: Literal["economics", "planning"] = "planning"
     conversation_context: list[CfsAiConversationTurn] = Field(default_factory=list, max_length=5)
+    filter_context: dict[str, Any] = Field(default_factory=dict)
     filters: CfsAiSearchFilters = Field(default_factory=CfsAiSearchFilters)
     mode: Literal["demo", "live"] = "live"
     query: str = Field(min_length=1, max_length=500)
@@ -99,12 +100,15 @@ class CfsAiSearchResponse(BaseModel):
     answer: str
     as_of: str | None = None
     caveats: list[str] = Field(default_factory=list)
+    context_freshness: str | None = None
     dashboard_actions: CfsAiDashboardActions = Field(
         default_factory=CfsAiDashboardActions,
     )
+    data_source: str | None = None
     data_mode: Literal["demo", "live"] = "live"
     domains: list[CfsAiDomain] = Field(default_factory=list)
     evidence: list[CfsAiEvidenceItem] = Field(default_factory=list)
+    filtered_context_summary: str | None = None
     provider: CfsAiProvider = "none"
     related_layers: list[str] = Field(default_factory=list)
     suggested_actions: list[str] = Field(default_factory=list)

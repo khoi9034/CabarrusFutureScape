@@ -1801,7 +1801,12 @@ function sanitizeDemoResponse(response: CfsAiSearchResponse) {
     .replace(/will\s+develop/gi, "shows observed permit activity")
     .replace(/raw\s+score/gi, "relative research signal")
     .replace(/official\s+prediction/gi, "planning review signal");
-  return JSON.parse(serialized) as CfsAiSearchResponse;
+  const sanitized = JSON.parse(serialized) as CfsAiSearchResponse;
+  return {
+    ...sanitized,
+    context_freshness: sanitized.context_freshness ?? "cached_demo_extract",
+    data_source: sanitized.data_source ?? "portfolio_demo_extract",
+  };
 }
 
 function format(value: unknown) {

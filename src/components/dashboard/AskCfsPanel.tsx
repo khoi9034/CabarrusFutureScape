@@ -23,12 +23,14 @@ export interface AskCfsExternalRequest {
 export function AskCfsPanel({
   appMode = "planning",
   externalRequest,
+  filterContext,
   onResponse,
   suggestedPromptsOverride,
   visiblePromptCount,
 }: {
   appMode?: CfsAppMode;
   externalRequest?: AskCfsExternalRequest | null;
+  filterContext?: CfsAiSearchRequest["filter_context"];
   onResponse?: (response: CfsAiSearchResponse) => void;
   suggestedPromptsOverride?: readonly string[];
   visiblePromptCount?: number;
@@ -63,10 +65,17 @@ export function AskCfsPanel({
     setIsLoading(true);
     setLoadingStage(0);
     try {
+      const activeFilterContext = {
+        ...(filterContext ?? {}),
+        ...(requestOverrides.filter_context ?? {}),
+      };
       const response = await searchCfsAi({
         ...requestOverrides,
         app_mode: appMode,
         conversation_context: turns,
+        filter_context: Object.keys(activeFilterContext).length
+          ? activeFilterContext
+          : undefined,
         mode: USE_DEMO_DATA ? "demo" : "live",
         query: trimmedQuery,
       });
@@ -84,7 +93,7 @@ export function AskCfsPanel({
     } finally {
       setIsLoading(false);
     }
-  }, [appMode, isLoading, onResponse, query, turns]);
+  }, [appMode, filterContext, isLoading, onResponse, query, turns]);
 
   useEffect(() => {
     if (
@@ -282,6 +291,9 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
           <FileSearch className="h-3.5 w-3.5" />
           Grounded answer
         </div>
+        <p className="mb-3 rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+          {askCfsSourceLine(response)}
+        </p>
         {openAiFallbackActive ? (
           <p className="mb-3 w-fit rounded border border-[#f6d98e]/20 bg-[#f6d98e]/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f6d98e]">
             Provider: OpenAI configured / Status: fallback active / Reason: rate limit/quota
@@ -322,6 +334,28 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
       </aside>
     </div>
   );
+}
+
+function askCfsSourceLine(response: CfsAiSearchResponse) {
+  const source =
+    response.data_source === "portfolio_demo_extract" || response.data_mode === "demo"
+      ? "Portfolio Demo · cached demo extract"
+      : response.data_source === "local_live_backend"
+        ? "Local live backend"
+        : response.data_source ?? "CFS context";
+  const freshness = response.context_freshness
+    ? ` · ${response.context_freshness.replaceAll("_", " ")}`
+    : "";
+  const updated = response.as_of ? ` · Updated: ${formatAskCfsDate(response.as_of)}` : "";
+  const filters = response.filtered_context_summary
+    ? ` · Filters: ${response.filtered_context_summary}`
+    : "";
+  return `Source: ${source}${updated}${freshness}${filters}`;
+}
+
+function formatAskCfsDate(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
 
 function CompactList({
