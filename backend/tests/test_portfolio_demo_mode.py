@@ -398,9 +398,15 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "AI Power BI Report Builder" in economics_shell
     assert "Generate Report Plan" in economics_shell
     assert "buildPowerBiReportPlan" in economics_shell
-    assert "Add recommended visuals to canvas" in economics_shell
-    assert "Copy Power BI build recipe" in economics_shell
-    assert "Download generated report plan JSON" in economics_shell
+    assert "powerbi_actions" in read("src/types/api/aiSearch.ts")
+    assert "demoPowerBiActionsForQuery" in ask_service
+    assert "handleAskCfsResponse" in economics_shell
+    assert "powerBiActionsToGeneratedPlan" in economics_shell
+    assert "Apply to Chart Builder" in economics_shell
+    assert "Add Visuals to Report Canvas" in economics_shell
+    assert "Copy Power BI Build Steps" in economics_shell
+    assert "Download Report Plan JSON" in economics_shell
+    assert "Ask CFS configured this report from your prompt." in economics_shell
     assert "generatedVisualToCanvasItem" in economics_shell
     assert "userChartTemplates" in economics_shell
     assert "Opportunity Class Breakdown" in economics_shell
@@ -489,6 +495,12 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "How should I walk through CFS Economics?" in ask_service
     assert "Which rows should I send?" in ask_service
     assert "How do I build this in Power BI?" in ask_service
+    assert "Build me a Power BI report." in ask_service
+    assert "Create a chart of opportunity classes." in ask_service
+    assert "Build a report for underbuilt parcels." in ask_service
+    assert "Make a scenario comparison page." in ask_service
+    assert "Show special assets as a report." in ask_service
+    assert "Build a data confidence matrix." in ask_service
     assert "What should I add to the Power BI Report Canvas?" in ask_service
     assert "Build me a Power BI dashboard." in ask_service
     assert "What charts should Power BI generate?" in ask_service

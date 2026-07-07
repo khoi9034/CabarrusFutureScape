@@ -80,6 +80,57 @@ export interface CfsAiDashboardActions {
   } | null;
 }
 
+export interface CfsAiPowerBiActions {
+  action_type:
+    | "add_to_canvas"
+    | "build_chart"
+    | "build_report"
+    | "configure_builder"
+    | "none"
+    | "suggest_report";
+  chart_builder_config?: {
+    aggregation?: "average" | "count" | "sum";
+    category_field?: string;
+    caveat?: string;
+    chart_type?: "bar" | "donut" | "line" | "matrix" | "pie" | "table";
+    filter_field?: string;
+    filter_value?: string;
+    table_name: string;
+    title?: string;
+    value_field?: string;
+  } | null;
+  powerbi_build_steps?: string[];
+  report_canvas_items?: Array<{
+    aggregation?: string;
+    category_field?: string;
+    caveat?: string;
+    filter_field?: string;
+    filter_value?: string;
+    page_name: string;
+    powerbi_recipe: string;
+    source_table: string;
+    value_field?: string;
+    visual_title: string;
+    visual_type: "bar" | "donut" | "line" | "matrix" | "pie" | "table";
+  }>;
+  report_summary?: string;
+  report_title?: string;
+  selected_filters?: {
+    data_confidence?: string;
+    economic_segment?: string;
+    geography_label?: string;
+    opportunity_class?: string;
+    scenario_name?: string;
+  };
+  selected_tool?:
+    | "chart_builder"
+    | "decision_pack"
+    | "planning_model"
+    | "powerbi_export"
+    | "report_canvas"
+    | "scenario_model";
+}
+
 export interface CfsAiSearchResponse {
   answer: string;
   as_of: string | null;
@@ -92,6 +143,7 @@ export interface CfsAiSearchResponse {
   evidence: CfsAiEvidenceItem[];
   filtered_context_summary?: string | null;
   provider: "none" | "openai";
+  powerbi_actions?: CfsAiPowerBiActions | null;
   related_layers: string[];
   suggested_actions: string[];
 }

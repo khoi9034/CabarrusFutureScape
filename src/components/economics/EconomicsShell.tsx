@@ -22,6 +22,8 @@ import {
   getEconomicsPowerBiExport,
 } from "@/lib/economicsIntelligenceService";
 import type {
+  CfsAiPowerBiActions,
+  CfsAiSearchResponse,
   EconomicsEnterpriseExportResponse,
   EconomicsIntelligenceResponse,
   EconomicsKpi,
@@ -536,6 +538,19 @@ function PowerBiToolsPage({
     document
       .getElementById("economics-tool-workspace")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const [askPowerBiAction, setAskPowerBiAction] = useState<PowerBiAskActionRequest | null>(null);
+  const askPowerBiActionId = useRef(0);
+  const handleAskCfsResponse = (response: CfsAiSearchResponse) => {
+    const actions = response.powerbi_actions;
+    if (!actions || actions.action_type === "none") return;
+    askPowerBiActionId.current += 1;
+    setAskPowerBiAction({ actions, id: askPowerBiActionId.current });
+    requestAnimationFrame(() =>
+      document
+        .querySelector('[data-econ-tour="chart-builder"]')
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  };
   return (
     <>
       <PageHeader
@@ -558,6 +573,7 @@ function PowerBiToolsPage({
         </p>
         <AskCfsPanel
           appMode="economics"
+          onResponse={handleAskCfsResponse}
           suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
           visiblePromptCount={6}
         />
@@ -615,6 +631,7 @@ function PowerBiToolsPage({
       />
       <section id="economics-tool-workspace">
         <EnterpriseWorkspacePage
+          askPowerBiAction={askPowerBiAction}
           embedded
           exportPayload={exportPayload}
           inputs={inputs}
@@ -1179,6 +1196,7 @@ function EconomicsWorkspacePage({
 }
 
 function EnterpriseWorkspacePage({
+  askPowerBiAction,
   embedded = false,
   exportPayload,
   inputs,
@@ -1189,6 +1207,7 @@ function EnterpriseWorkspacePage({
   selectedSignals,
   showSelectedRowsStep = true,
 }: {
+  askPowerBiAction?: PowerBiAskActionRequest | null;
   embedded?: boolean;
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
@@ -1264,6 +1283,7 @@ function EnterpriseWorkspacePage({
             </div>
           </EconPanel>
           <EnterpriseToolsPage
+            askPowerBiAction={askPowerBiAction}
             exportPayload={exportPayload}
             inputs={inputs}
             onNavigate={onNavigate}
@@ -1837,6 +1857,7 @@ function EvidencePackTable({
 }
 
 function EnterpriseToolsPage({
+  askPowerBiAction,
   exportPayload,
   inputs,
   onNavigate,
@@ -1846,6 +1867,7 @@ function EnterpriseToolsPage({
   selectedOutput,
   selectedSignals,
 }: {
+  askPowerBiAction?: PowerBiAskActionRequest | null;
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
   onNavigate: (section: "tools" | "print") => void;
@@ -1964,7 +1986,11 @@ function EnterpriseToolsPage({
               </h2>
             </div>
             <CsvDownloadTable rows={csvRows} />
-            <PowerBiChartBuilder payload={powerBiPayload} />
+            <PowerBiChartBuilder
+              aiAction={askPowerBiAction}
+              key={askPowerBiAction?.id ?? "manual-chart-builder"}
+              payload={powerBiPayload}
+            />
             <DetailsBlock summary="Show guide" hint="Power BI Report Builder Guide: 4 recommended report pages.">
               <ReportBuilderGuide guide={reportBuilderGuide} payload={powerBiPayload} />
             </DetailsBlock>
@@ -2245,21 +2271,40 @@ function CsvDownloadTable({ rows }: { rows: ReturnType<typeof powerBiCsvRows> })
 }
 
 function PowerBiChartBuilder({
+  aiAction,
   payload,
 }: {
+  aiAction?: PowerBiAskActionRequest | null;
   payload: EconomicsPowerBiExportResponse | null;
 }) {
-  const [reportPrompt, setReportPrompt] = useState("Build a report for underbuilt redevelopment candidates.");
-  const [generatedPlan, setGeneratedPlan] = useState<PowerBiGeneratedReportPlan | null>(null);
-  const [tableName, setTableName] = useState<PowerBiTableName>("parcel_economic_signal_fact");
-  const [visualType, setVisualType] = useState<UserChartVisualType>("bar");
-  const [categoryField, setCategoryField] = useState("opportunity_class");
-  const [valueField, setValueField] = useState("signal_id");
-  const [aggregation, setAggregation] = useState<UserChartAggregation>("count");
-  const [filterField, setFilterField] = useState("economic_segment");
-  const [filterValue, setFilterValue] = useState("All");
-  const [copyStatus, setCopyStatus] = useState<string | null>(null);
-  const [canvasItems, setCanvasItems] = useState<UserReportCanvasItem[]>([]);
+  const aiGeneratedPlan =
+    aiAction?.actions && aiAction.actions.action_type !== "none"
+      ? powerBiActionsToGeneratedPlan(aiAction.actions, payload)
+      : null;
+  const aiInitialVisual = aiGeneratedPlan?.pages.flatMap((page) => page.visuals)[0];
+  const aiInitialConfig = aiInitialVisual ? generatedVisualToRecipeConfig(aiInitialVisual) : null;
+  const aiShouldFillCanvas =
+    aiAction?.actions.action_type === "build_report" ||
+    aiAction?.actions.action_type === "add_to_canvas";
+  const [reportPrompt, setReportPrompt] = useState(
+    aiGeneratedPlan?.generated_from_prompt ?? "Build a report for underbuilt redevelopment candidates.",
+  );
+  const [generatedPlan, setGeneratedPlan] = useState<PowerBiGeneratedReportPlan | null>(aiGeneratedPlan);
+  const [tableName, setTableName] = useState<PowerBiTableName>(
+    aiInitialConfig?.tableName ?? "parcel_economic_signal_fact",
+  );
+  const [visualType, setVisualType] = useState<UserChartVisualType>(aiInitialConfig?.visualType ?? "bar");
+  const [categoryField, setCategoryField] = useState(aiInitialConfig?.categoryField ?? "opportunity_class");
+  const [valueField, setValueField] = useState(aiInitialConfig?.valueField ?? "signal_id");
+  const [aggregation, setAggregation] = useState<UserChartAggregation>(aiInitialConfig?.aggregation ?? "count");
+  const [filterField, setFilterField] = useState(aiInitialConfig?.filterField ?? "economic_segment");
+  const [filterValue, setFilterValue] = useState(aiInitialConfig?.filterValue ?? "All");
+  const [copyStatus, setCopyStatus] = useState<string | null>(
+    aiGeneratedPlan ? "Ask CFS configured this report from your prompt." : null,
+  );
+  const [canvasItems, setCanvasItems] = useState<UserReportCanvasItem[]>(
+    aiGeneratedPlan && aiShouldFillCanvas ? generatedPlanToCanvasItems(aiGeneratedPlan).slice(-8) : [],
+  );
   const tableRows = payload?.tables[tableName] ?? [];
   const fields = powerBiChartFieldMetadata[tableName];
   const categoryOptions = fields.filter((field) =>
@@ -2320,6 +2365,35 @@ function PowerBiChartBuilder({
     setFilterField(template.filterField ?? "");
     setFilterValue("All");
   };
+  const applyChartConfig = (config: NonNullable<CfsAiPowerBiActions["chart_builder_config"]>) => {
+    const nextTable = toPowerBiTableName(config.table_name);
+    const nextVisual = normalizeActionVisualType(config.chart_type);
+    const nextFields = powerBiChartFieldMetadata[nextTable];
+    setTableName(nextTable);
+    setVisualType(nextVisual);
+    setCategoryField(safePowerBiField(nextTable, config.category_field ?? "", "category"));
+    setValueField(safePowerBiField(nextTable, config.value_field ?? "", "value"));
+    setAggregation(normalizeActionAggregation(config.aggregation));
+    setFilterField(config.filter_field ? safePowerBiField(nextTable, config.filter_field, "filter") : "");
+    setFilterValue(config.filter_value || "All");
+    if (!config.category_field) {
+      setCategoryField(nextFields.find((field) => field.role === "category")?.key ?? nextFields[0]?.key ?? "");
+    }
+  };
+  const applyGeneratedPlanToBuilder = (plan: PowerBiGeneratedReportPlan) => {
+    const firstVisual = plan.pages.flatMap((page) => page.visuals)[0];
+    if (!firstVisual) return;
+    applyChartConfig({
+      aggregation: firstVisual.aggregation,
+      category_field: firstVisual.axis,
+      chart_type: firstVisual.visual_type,
+      filter_field: firstVisual.filterField,
+      filter_value: firstVisual.filterValue,
+      table_name: firstVisual.source_table,
+      title: firstVisual.title,
+      value_field: firstVisual.value,
+    });
+  };
   const copyRecipe = async () => {
     if (!navigator.clipboard) {
       setCopyStatus("Clipboard unavailable");
@@ -2356,13 +2430,14 @@ function PowerBiChartBuilder({
     setGeneratedPlan(plan);
     setCopyStatus("Report plan generated");
   };
-  const addGeneratedVisualsToCanvas = () => {
-    if (!generatedPlan) return;
-    const generatedItems = generatedPlan.pages.flatMap((page) =>
-      page.visuals.map((visual, index) => generatedVisualToCanvasItem(visual, page.page_name, index)),
-    );
+  const addPlanVisualsToCanvas = (plan: PowerBiGeneratedReportPlan) => {
+    const generatedItems = generatedPlanToCanvasItems(plan);
     setCanvasItems((items) => [...items, ...generatedItems].slice(-8));
     setCopyStatus("Recommended visuals added to Power BI Report Canvas");
+  };
+  const addGeneratedVisualsToCanvas = () => {
+    if (!generatedPlan) return;
+    addPlanVisualsToCanvas(generatedPlan);
   };
   const copyGeneratedInstructions = async () => {
     if (!navigator.clipboard || !generatedPlan) {
@@ -2380,6 +2455,21 @@ function PowerBiChartBuilder({
     );
     setCopyStatus("Report plan JSON downloaded");
   };
+  const generatedVisualCount =
+    generatedPlan?.pages.reduce((total, page) => total + page.visuals.length, 0) ?? 0;
+  const generatedFilters = generatedPlan
+    ? uniqueStrings(
+        generatedPlan.pages.flatMap((page) =>
+          page.visuals
+            .map((visual) =>
+              visual.filterField && visual.filterValue !== "All"
+                ? `${visual.filterField} = ${visual.filterValue}`
+                : "",
+            )
+            .filter(Boolean),
+        ),
+      )
+    : [];
   return (
     <EconPanel
       description="Choose a CFS Economics table, fields, and visual type to preview a Power BI-style chart."
@@ -2442,7 +2532,7 @@ function PowerBiChartBuilder({
           <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
             <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
-                Generated report plan
+                AI Generated Report Plan
               </p>
               <h3 className="mt-1 text-lg font-semibold text-[var(--econ-text)]">
                 {generatedPlan.title}
@@ -2451,9 +2541,16 @@ function PowerBiChartBuilder({
                 {generatedPlan.summary}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
+                <MetricPill label="Visuals generated" value={String(generatedVisualCount)} />
+                <MetricPill label="Pages generated" value={String(generatedPlan.pages.length)} />
                 {generatedPlan.recommended_tables.map((table) => (
                   <span className="rounded-full border border-[var(--econ-border)] px-2.5 py-1 text-xs text-[var(--econ-muted)]" key={table}>
                     {table}
+                  </span>
+                ))}
+                {generatedFilters.map((filter) => (
+                  <span className="rounded-full border border-[var(--econ-gold)]/40 bg-[var(--econ-gold)]/10 px-2.5 py-1 text-xs text-[#ffe6a6]" key={filter}>
+                    {filter}
                   </span>
                 ))}
               </div>
@@ -2484,30 +2581,46 @@ function PowerBiChartBuilder({
               </pre>
               <div className="mt-3 grid gap-2">
                 <button
+                  className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                  onClick={() => applyGeneratedPlanToBuilder(generatedPlan)}
+                  type="button"
+                >
+                  Apply to Chart Builder
+                </button>
+                <button
                   className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
                   onClick={addGeneratedVisualsToCanvas}
                   type="button"
                 >
-                  Add recommended visuals to canvas
+                  Add Visuals to Report Canvas
                 </button>
                 <button
                   className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
                   onClick={() => void copyGeneratedInstructions()}
                   type="button"
                 >
-                  Copy Power BI build recipe
+                  Copy Power BI Build Steps
                 </button>
                 <button
                   className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
                   onClick={downloadGeneratedPlan}
                   type="button"
                 >
-                  Download generated report plan JSON
+                  Download Report Plan JSON
                 </button>
               </div>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="mt-4 rounded-xl border border-dashed border-[var(--econ-border)] bg-white/[0.025] p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+              AI Generated Report Plan
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
+              Ask CFS to build a report, then CFS will configure the chart builder and report canvas for you.
+            </p>
+          </div>
+        )}
       </section>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-econ-tour="chart-templates">
         {userChartTemplates.map((template) => (
@@ -4661,6 +4774,10 @@ const powerBiWorkflowSteps = [
 type PowerBiTableName = keyof EconomicsPowerBiExportResponse["tables"];
 type UserChartVisualType = "bar" | "donut" | "line" | "matrix";
 type UserChartAggregation = "count" | "sum" | "average";
+type PowerBiAskActionRequest = {
+  actions: CfsAiPowerBiActions;
+  id: number;
+};
 type UserChartField = {
   key: string;
   label: string;
@@ -5187,6 +5304,72 @@ function buildPowerBiReportPlan(
   );
 }
 
+function powerBiActionsToGeneratedPlan(
+  actions: CfsAiPowerBiActions,
+  payload: EconomicsPowerBiExportResponse | null,
+): PowerBiGeneratedReportPlan {
+  const relationships = payload?.relationships?.length
+    ? payload.relationships
+    : defaultPowerBiRelationships;
+  const actionVisuals = actions.report_canvas_items?.length
+    ? actions.report_canvas_items
+    : actions.chart_builder_config
+      ? [
+          {
+            aggregation: actions.chart_builder_config.aggregation,
+            category_field: actions.chart_builder_config.category_field,
+            caveat: actions.chart_builder_config.caveat,
+            filter_field: actions.chart_builder_config.filter_field,
+            filter_value: actions.chart_builder_config.filter_value,
+            page_name: chartRecommendedPage(toPowerBiTableName(actions.chart_builder_config.table_name)),
+            powerbi_recipe: "",
+            source_table: actions.chart_builder_config.table_name,
+            value_field: actions.chart_builder_config.value_field,
+            visual_title: actions.chart_builder_config.title ?? actions.report_title ?? "Ask CFS chart",
+            visual_type: actions.chart_builder_config.chart_type,
+          },
+        ]
+      : [];
+  if (!actionVisuals.length) {
+    return buildPowerBiReportPlan(actions.report_title ?? "Build me a Power BI report.", payload);
+  }
+  const pages = new Map<string, { page_name: string; purpose: string; visuals: PowerBiGeneratedVisual[] }>();
+  actionVisuals.forEach((item) => {
+    const tableName = toPowerBiTableName(item.source_table);
+    const visual = generatedPowerBiVisual({
+      aggregation: normalizeActionAggregation(item.aggregation),
+      axis: item.category_field ?? "",
+      caveat: item.caveat,
+      filterField: item.filter_field ?? "",
+      filterValue: item.filter_value ?? "All",
+      source_table: tableName,
+      title: item.visual_title,
+      value: item.value_field ?? "",
+      visual_type: normalizeActionVisualType(item.visual_type),
+    });
+    const pageName = item.page_name || chartRecommendedPage(tableName);
+    const existing = pages.get(pageName) ?? {
+      page_name: pageName,
+      purpose: "Generated from Ask CFS report automation.",
+      visuals: [],
+    };
+    existing.visuals.push(visual);
+    pages.set(pageName, existing);
+  });
+  return finalizedPowerBiReportPlan(
+    actions.report_title ?? "AI Generated Power BI Report",
+    actions.report_title ?? "AI Generated Power BI Report",
+    actions.report_summary ?? "Ask CFS generated a Power BI-style dataset, visual, and report-canvas plan.",
+    [...pages.values()],
+    relationships,
+    uniqueStrings([
+      actions.chart_builder_config?.caveat ?? "",
+      "CFS generated this as a Power BI Desktop build plan only.",
+      ...powerBiReportCaveats,
+    ]),
+  );
+}
+
 function reportPage(
   page_name: string,
   purpose: string,
@@ -5311,6 +5494,24 @@ function generatedVisualToCanvasItem(
   };
 }
 
+function generatedVisualToRecipeConfig(visual: PowerBiGeneratedVisual): UserChartRecipeConfig {
+  return {
+    aggregation: visual.aggregation,
+    categoryField: visual.axis,
+    filterField: visual.filterField,
+    filterValue: visual.filterValue,
+    tableName: visual.source_table,
+    valueField: visual.value,
+    visualType: visual.visual_type,
+  };
+}
+
+function generatedPlanToCanvasItems(plan: PowerBiGeneratedReportPlan) {
+  return plan.pages.flatMap((page) =>
+    page.visuals.map((visual, index) => generatedVisualToCanvasItem(visual, page.page_name, index)),
+  );
+}
+
 function generatedReportPlanInstructions(plan: PowerBiGeneratedReportPlan) {
   const relationships = plan.relationships.map(
     (row) => `${row.from_table}.${row.from_column} -> ${row.to_table}.${row.to_column}`,
@@ -5355,6 +5556,22 @@ function safePowerBiField(tableName: PowerBiTableName, field: string, fallbackRo
   const fields = powerBiChartFieldMetadata[tableName];
   if (fields.some((row) => row.key === field)) return field;
   return fields.find((row) => row.role === fallbackRole)?.key ?? fields[0]?.key ?? "";
+}
+
+function toPowerBiTableName(value: string | undefined): PowerBiTableName {
+  return value && Object.prototype.hasOwnProperty.call(powerBiChartFieldMetadata, value)
+    ? (value as PowerBiTableName)
+    : "parcel_economic_signal_fact";
+}
+
+function normalizeActionVisualType(value: string | undefined): UserChartVisualType {
+  if (value === "line" || value === "matrix" || value === "bar") return value;
+  if (value === "table") return "matrix";
+  return value === "pie" || value === "donut" ? "donut" : "bar";
+}
+
+function normalizeActionAggregation(value: string | undefined): UserChartAggregation {
+  return value === "sum" || value === "average" ? value : "count";
 }
 
 function hasUnsafePowerBiReportRequest(normalizedPrompt: string) {

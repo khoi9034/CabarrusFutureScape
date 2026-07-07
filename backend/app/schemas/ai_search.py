@@ -110,6 +110,7 @@ class CfsAiSearchResponse(BaseModel):
     domains: list[CfsAiDomain] = Field(default_factory=list)
     evidence: list[CfsAiEvidenceItem] = Field(default_factory=list)
     filtered_context_summary: str | None = None
+    powerbi_actions: dict[str, Any] | None = None
     provider: CfsAiProvider = "none"
     related_layers: list[str] = Field(default_factory=list)
     suggested_actions: list[str] = Field(default_factory=list)

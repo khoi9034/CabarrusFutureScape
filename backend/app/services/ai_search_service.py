@@ -1224,8 +1224,10 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "generate visuals",
             "underbuilt dashboard",
             "fiscal burden report",
+            "scenario comparison",
             "scenario comparison dashboard",
             "special assets report",
+            "special asset",
             "first slicer",
             "sort order",
             "sort opportunity",
@@ -1302,7 +1304,7 @@ def _economics_powerbi_answer(
                 [
                     "Type a request such as Build a report for underbuilt redevelopment candidates.",
                     "CFS generates recommended tables, starter relationships, visuals, canvas recipes, and copyable build steps from the exported fields.",
-                    "Use Add recommended visuals to canvas when the plan looks right.",
+                    "Use Add Visuals to Report Canvas when the plan looks right.",
                     "Download the generated report plan JSON if you want a portable report recipe.",
                 ]
             ),
@@ -1408,7 +1410,136 @@ def _economics_powerbi_answer(
             "Build the exported relationships before creating report visuals.",
             "Use the Power BI Report Builder Guide for page-by-page visual instructions.",
         ],
+        powerbi_actions=_powerbi_actions_for_query(request.query),
     )
+
+
+def _powerbi_actions_for_query(query: str) -> dict[str, Any]:
+    normalized = query.lower()
+
+    def visual(
+        page_name: str,
+        visual_title: str,
+        visual_type: str,
+        source_table: str,
+        category_field: str,
+        value_field: str,
+        *,
+        aggregation: str = "count",
+        filter_field: str = "",
+        filter_value: str = "All",
+        caveat: str = "Screening-level economics; keep caveats visible.",
+    ) -> dict[str, Any]:
+        filter_text = f"; filter {filter_field} = {filter_value}" if filter_field and filter_value != "All" else ""
+        return {
+            "aggregation": aggregation,
+            "category_field": category_field,
+            "caveat": caveat,
+            "filter_field": filter_field,
+            "filter_value": filter_value,
+            "page_name": page_name,
+            "powerbi_recipe": (
+                f"{visual_title}: {visual_type}; table {source_table}; "
+                f"axis {category_field}; values {aggregation} {value_field}{filter_text}."
+            ),
+            "source_table": source_table,
+            "value_field": value_field,
+            "visual_title": visual_title,
+            "visual_type": visual_type,
+        }
+
+    title = "Executive Economic Dashboard"
+    summary = "CFS configured a Power BI-style report plan from your prompt."
+    canvas_items: list[dict[str, Any]]
+    selected_filters: dict[str, str] = {}
+
+    if "underbuilt" in normalized or "redevelopment" in normalized:
+        title = "Underbuilt Redevelopment Candidate Dashboard"
+        summary = "Focus on underbuilt parcel signals, segment mix, and follow-up rows."
+        selected_filters = {"opportunity_class": "Underbuilt Redevelopment Candidate"}
+        canvas_items = [
+            visual("Executive Economic Dashboard", "Underbuilt candidate count", "bar", "parcel_economic_signal_fact", "opportunity_class", "signal_id", filter_field="opportunity_class", filter_value="Underbuilt Redevelopment Candidate"),
+            visual("Parcel Investment Screen", "Underbuilt candidates by segment", "donut", "parcel_economic_signal_fact", "economic_segment", "signal_id", filter_field="opportunity_class", filter_value="Underbuilt Redevelopment Candidate"),
+            visual("Parcel Investment Screen", "Top underbuilt rows", "matrix", "parcel_economic_signal_fact", "geography_label", "recommended_followup", filter_field="opportunity_class", filter_value="Underbuilt Redevelopment Candidate"),
+        ]
+    elif "scenario" in normalized:
+        title = "Scenario Comparison Dashboard"
+        summary = "Compare scenario output bands, service burden, infrastructure burden, and confidence."
+        canvas_items = [
+            visual("Scenario Planning Model", "Scenario fiscal attractiveness", "bar", "scenario_output_fact", "scenario_name", "fiscal_attractiveness_band"),
+            visual("Scenario Planning Model", "Scenario burden matrix", "matrix", "scenario_output_fact", "scenario_name", "service_burden_band"),
+        ]
+    elif "special asset" in normalized:
+        title = "Special Assets Review Page"
+        summary = "Isolate non-comparable assets before interpreting value-per-acre or fiscal bands."
+        selected_filters = {"special_asset_flag": "true"}
+        canvas_items = [
+            visual("Special Assets", "Special asset flag mix", "donut", "parcel_economic_signal_fact", "special_asset_flag", "signal_id"),
+            visual("Special Assets", "Special asset review table", "matrix", "parcel_economic_signal_fact", "geography_label", "segment_caveat", filter_field="special_asset_flag", filter_value="true", caveat="Special assets should be compared separately."),
+        ]
+    elif "confidence" in normalized or "data" in normalized:
+        title = "Data Confidence Matrix"
+        summary = "Show domain readiness and data-needed context before building report conclusions."
+        canvas_items = [
+            visual("Data Confidence Register", "Domain readiness matrix", "matrix", "domain_readiness_dim", "domain_name", "data_status"),
+            visual("Data Confidence Register", "Parcel signal confidence", "donut", "parcel_economic_signal_fact", "data_confidence", "signal_id"),
+        ]
+    elif "burden" in normalized or "fiscal" in normalized or "public cost" in normalized:
+        title = "Fiscal and Service Burden Report"
+        summary = "Compare fiscal attractiveness against service, infrastructure, constraint, and public cost bands."
+        canvas_items = [
+            visual("Fiscal Burden Review", "Fiscal attractiveness bands", "bar", "parcel_economic_signal_fact", "fiscal_attractiveness_band", "signal_id"),
+            visual("Fiscal Burden Review", "Opportunity vs public cost risk", "matrix", "parcel_economic_signal_fact", "opportunity_class", "public_cost_risk_band"),
+            visual("Scenario Planning Model", "Scenario service burden", "matrix", "scenario_output_fact", "scenario_name", "service_burden_band"),
+        ]
+    elif "segment" in normalized or "value per acre" in normalized:
+        title = "Economic Segment Comparison Report"
+        summary = "Compare value-per-acre context within similar economic segments."
+        canvas_items = [
+            visual("Segment-Aware Economics", "Economic segment mix", "bar", "parcel_economic_signal_fact", "economic_segment", "signal_id", caveat="Compare value per acre within segment."),
+            visual("Segment-Aware Economics", "Value per acre bands within segment", "bar", "parcel_economic_signal_fact", "value_per_acre_band", "signal_id", filter_field="economic_segment"),
+        ]
+    elif "opportunity class" in normalized or "opportunity classes" in normalized or "pie" in normalized or "donut" in normalized:
+        title = "Opportunity Class Chart"
+        summary = "Build a compact opportunity class visual from parcel economics rows."
+        canvas_items = [
+            visual("Executive Economic Dashboard", "Opportunity class breakdown", "donut", "parcel_economic_signal_fact", "opportunity_class", "signal_id"),
+        ]
+    else:
+        canvas_items = [
+            visual("Executive Economic Dashboard", "Executive KPI cards", "bar", "economics_kpi_fact", "kpi_name", "value", aggregation="sum"),
+            visual("Executive Economic Dashboard", "Opportunity class breakdown", "bar", "parcel_economic_signal_fact", "opportunity_class", "signal_id"),
+            visual("Executive Economic Dashboard", "Economic segment mix", "donut", "parcel_economic_signal_fact", "economic_segment", "signal_id"),
+            visual("Scenario Planning Model", "Scenario output comparison", "matrix", "scenario_output_fact", "scenario_name", "fiscal_attractiveness_band"),
+            visual("Data Confidence Register", "Data readiness matrix", "matrix", "domain_readiness_dim", "domain_name", "data_status"),
+        ]
+
+    first = canvas_items[0]
+    action_type = "build_chart" if len(canvas_items) == 1 else "build_report"
+    return {
+        "action_type": action_type,
+        "chart_builder_config": {
+            "aggregation": first["aggregation"],
+            "category_field": first["category_field"],
+            "chart_type": first["visual_type"],
+            "filter_field": first["filter_field"],
+            "filter_value": first["filter_value"],
+            "table_name": first["source_table"],
+            "title": first["visual_title"],
+            "value_field": first["value_field"],
+        },
+        "powerbi_build_steps": [
+            "Download CSV tables from Power BI & Tools.",
+            "Import the recommended fact and dimension tables into Power BI Desktop.",
+            "Create the starter scenario and geography relationships.",
+            "Build the generated visuals and keep caveat text visible.",
+        ],
+        "report_canvas_items": canvas_items,
+        "report_summary": summary,
+        "report_title": title,
+        "selected_filters": selected_filters,
+        "selected_tool": "powerbi_export",
+    }
 
 
 def _is_economics_scenario_query(query: str) -> bool:
@@ -2203,6 +2334,7 @@ def _response(
     mode: str,
     evidence: list[CfsAiEvidenceItem],
     actions: list[str],
+    powerbi_actions: dict[str, Any] | None = None,
 ) -> CfsAiSearchResponse:
     active_domains = domains or ["general"]
     caveats = list(dict.fromkeys(SAFE_CAVEATS + context.get("caveats", [])))[:6]
@@ -2222,6 +2354,7 @@ def _response(
         domains=active_domains,
         evidence=evidence,
         filtered_context_summary=context.get("filtered_context_summary"),
+        powerbi_actions=powerbi_actions,
         provider="none",
         related_layers=_related_layers(active_domains),
         suggested_actions=actions,

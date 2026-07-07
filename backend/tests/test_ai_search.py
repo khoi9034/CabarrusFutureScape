@@ -836,9 +836,66 @@ def test_ai_search_economics_powerbi_report_plan_request_is_deterministic() -> N
     assert response.provider == "none"
     assert "AI Power BI Report Builder" in response.answer
     assert "recommended tables" in response.answer
-    assert "Add recommended visuals to canvas" in response.answer
+    assert "Add Visuals to Report Canvas" in response.answer
     assert "generated report plan JSON" in response.answer
     assert response.evidence[0].source == "economics_powerbi_export"
+    assert response.powerbi_actions is not None
+    assert response.powerbi_actions["action_type"] == "build_report"
+    assert response.powerbi_actions["chart_builder_config"]["table_name"] == "parcel_economic_signal_fact"
+    assert response.powerbi_actions["chart_builder_config"]["filter_field"] == "opportunity_class"
+    assert response.powerbi_actions["selected_filters"]["opportunity_class"] == "Underbuilt Redevelopment Candidate"
+    assert response.powerbi_actions["report_canvas_items"]
+    unsafe_fields = {"owner", "mailing", "raw_score", "prediction_probability", "exact_probability"}
+    action_text = str(response.powerbi_actions).lower()
+    assert not any(field in action_text for field in unsafe_fields)
+
+
+def test_ai_search_economics_powerbi_prompt_configures_chart_builder() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Create a pie chart of opportunity classes.",
+        ),
+        _context(),
+    )
+
+    assert response.powerbi_actions is not None
+    assert response.powerbi_actions["action_type"] == "build_chart"
+    assert response.powerbi_actions["chart_builder_config"] == {
+        "aggregation": "count",
+        "category_field": "opportunity_class",
+        "chart_type": "donut",
+        "filter_field": "",
+        "filter_value": "All",
+        "table_name": "parcel_economic_signal_fact",
+        "title": "Opportunity class breakdown",
+        "value_field": "signal_id",
+    }
+
+
+def test_ai_search_economics_powerbi_actions_cover_scenario_and_special_assets() -> None:
+    scenario = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Make a scenario comparison page.",
+        ),
+        _context(),
+    )
+    special = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Show special assets as a report.",
+        ),
+        _context(),
+    )
+
+    assert scenario.powerbi_actions is not None
+    assert scenario.powerbi_actions["report_canvas_items"][0]["source_table"] == "scenario_output_fact"
+    assert scenario.powerbi_actions["report_canvas_items"][1]["visual_type"] == "matrix"
+    assert special.powerbi_actions is not None
+    assert special.powerbi_actions["report_canvas_items"][1]["filter_field"] == "special_asset_flag"
+    assert special.powerbi_actions["report_canvas_items"][1]["filter_value"] == "true"
+    assert "compared separately" in special.powerbi_actions["report_canvas_items"][1]["caveat"].lower()
 
 
 def test_ai_search_economics_powerbi_sort_prompt_mentions_export_order_fields() -> None:

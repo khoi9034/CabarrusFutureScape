@@ -16,6 +16,7 @@ import type {
   CfsAiConversationTurn,
   CfsAiDomain,
   CfsAiEvidenceItem,
+  CfsAiPowerBiActions,
   CfsAiSearchRequest,
   CfsAiSearchResponse,
   CfsAiSelectedSignal,
@@ -85,9 +86,14 @@ export const askCfsEconomicsWorkspacePrompts = [
 ] as const;
 
 export const askCfsEconomicsPowerBiToolPrompts = [
+  "Build me a Power BI report.",
+  "Create a chart of opportunity classes.",
+  "Build a report for underbuilt parcels.",
+  "Make a scenario comparison page.",
+  "Show special assets as a report.",
+  "Build a data confidence matrix.",
   "What should I do first?",
   "What rows should I select?",
-  "Build me a Power BI report.",
   "What CSV tables should I import?",
   "What chart should I build?",
   "How do I use the report canvas?",
@@ -193,7 +199,7 @@ async function demoEconomicsAnswer(
 ): Promise<CfsAiSearchResponse> {
   const economics = await getDemoEconomicsIntelligence();
   if (request?.request_type === "powerbi_report_plan") {
-    return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport());
+    return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport(), request.query);
   }
   if (isEconomicsWalkthroughQuery(request?.query ?? "")) {
     return demoEconomicsWalkthroughAnswer(economics.as_of);
@@ -205,7 +211,7 @@ async function demoEconomicsAnswer(
     return demoEconomicsPrintAnswer(economics);
   }
   if (isEconomicsPowerBiQuery(request?.query ?? "")) {
-    return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport());
+    return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport(), request?.query ?? "");
   }
   if (isEconomicsSegmentQuery(request?.query ?? "")) {
     return demoEconomicsSegmentAnswer(economics);
@@ -619,7 +625,9 @@ function isEconomicsPowerBiQuery(query: string) {
     "generate visuals",
     "underbuilt dashboard",
     "fiscal burden report",
+    "scenario comparison",
     "scenario comparison dashboard",
+    "special asset",
     "special assets report",
     "first slicer",
     "sort order",
@@ -833,6 +841,7 @@ function demoEconomicsPrintAnswer(
 
 function demoEconomicsPowerBiAnswer(
   pack: EconomicsPowerBiExportResponse,
+  query = "",
 ): CfsAiSearchResponse {
   const tableNames = Object.keys(pack.tables);
   const relationshipLines = pack.relationships.map(
@@ -885,7 +894,7 @@ function demoEconomicsPowerBiAnswer(
         bullets([
           "Type a request such as Build a report for underbuilt redevelopment candidates.",
           "CFS generates recommended tables, starter relationships, visuals, canvas recipes, and copyable build steps from the cached export fields.",
-          "Use Add recommended visuals to canvas when the plan looks right.",
+          "Use Add Visuals to Report Canvas when the plan looks right.",
           "Download the generated report plan JSON if you want a portable report recipe.",
         ]),
       ],
@@ -965,6 +974,7 @@ function demoEconomicsPowerBiAnswer(
       ),
     ],
     provider: "none",
+    powerbi_actions: demoPowerBiActionsForQuery(query),
     related_layers: ["Power BI Desktop Practice Pack", "Power BI & Tools"],
     suggested_actions: [
       "Open Economic Intelligence -> Power BI & Tools.",
@@ -975,6 +985,134 @@ function demoEconomicsPowerBiAnswer(
       "Build the suggested relationships before creating report visuals.",
       "Use the Power BI Report Builder Guide for page-by-page visual instructions.",
     ],
+  };
+}
+
+function demoPowerBiActionsForQuery(query: string): CfsAiPowerBiActions {
+  const normalized = query.toLowerCase();
+  const visual = (
+    pageName: string,
+    visualTitle: string,
+    visualType: "bar" | "donut" | "matrix",
+    sourceTable: string,
+    categoryField: string,
+    valueField: string,
+    options: {
+      aggregation?: "count" | "sum";
+      caveat?: string;
+      filterField?: string;
+      filterValue?: string;
+    } = {},
+  ) => {
+    const aggregation = options.aggregation ?? "count";
+    const filterText = options.filterField && options.filterValue && options.filterValue !== "All"
+      ? `; filter ${options.filterField} = ${options.filterValue}`
+      : "";
+    return {
+      aggregation,
+      category_field: categoryField,
+      caveat: options.caveat ?? "Screening-level economics; keep caveats visible.",
+      filter_field: options.filterField ?? "",
+      filter_value: options.filterValue ?? "All",
+      page_name: pageName,
+      powerbi_recipe: `${visualTitle}: ${visualType}; table ${sourceTable}; axis ${categoryField}; values ${aggregation} ${valueField}${filterText}.`,
+      source_table: sourceTable,
+      value_field: valueField,
+      visual_title: visualTitle,
+      visual_type: visualType,
+    };
+  };
+  let reportTitle = "Executive Economic Dashboard";
+  let reportSummary = "CFS configured a Power BI-style report plan from your prompt.";
+  let selectedFilters: CfsAiPowerBiActions["selected_filters"] = {};
+  let reportCanvasItems: NonNullable<CfsAiPowerBiActions["report_canvas_items"]>;
+
+  if (normalized.includes("underbuilt") || normalized.includes("redevelopment")) {
+    reportTitle = "Underbuilt Redevelopment Candidate Dashboard";
+    reportSummary = "Focus on underbuilt rows, segment mix, and follow-up actions.";
+    selectedFilters = { opportunity_class: "Underbuilt Redevelopment Candidate" };
+    reportCanvasItems = [
+      visual("Executive Economic Dashboard", "Underbuilt candidate count", "bar", "parcel_economic_signal_fact", "opportunity_class", "signal_id", { filterField: "opportunity_class", filterValue: "Underbuilt Redevelopment Candidate" }),
+      visual("Parcel Investment Screen", "Underbuilt candidates by segment", "donut", "parcel_economic_signal_fact", "economic_segment", "signal_id", { filterField: "opportunity_class", filterValue: "Underbuilt Redevelopment Candidate" }),
+      visual("Parcel Investment Screen", "Top underbuilt rows", "matrix", "parcel_economic_signal_fact", "geography_label", "recommended_followup", { filterField: "opportunity_class", filterValue: "Underbuilt Redevelopment Candidate" }),
+    ];
+  } else if (normalized.includes("scenario")) {
+    reportTitle = "Scenario Comparison Dashboard";
+    reportSummary = "Compare scenario output bands and burden context.";
+    reportCanvasItems = [
+      visual("Scenario Planning Model", "Scenario fiscal attractiveness", "bar", "scenario_output_fact", "scenario_name", "fiscal_attractiveness_band"),
+      visual("Scenario Planning Model", "Scenario burden matrix", "matrix", "scenario_output_fact", "scenario_name", "service_burden_band"),
+    ];
+  } else if (normalized.includes("special asset")) {
+    reportTitle = "Special Assets Review Page";
+    reportSummary = "Isolate non-comparable assets before interpreting value-per-acre context.";
+    selectedFilters = { opportunity_class: "Special Asset / Compare With Caution" };
+    reportCanvasItems = [
+      visual("Special Assets", "Special asset flag mix", "donut", "parcel_economic_signal_fact", "special_asset_flag", "signal_id"),
+      visual("Special Assets", "Special asset review table", "matrix", "parcel_economic_signal_fact", "geography_label", "segment_caveat", { caveat: "Special assets should be compared separately.", filterField: "special_asset_flag", filterValue: "true" }),
+    ];
+  } else if (normalized.includes("confidence") || normalized.includes("data")) {
+    reportTitle = "Data Confidence Matrix";
+    reportSummary = "Show readiness and next data needs before report interpretation.";
+    reportCanvasItems = [
+      visual("Data Confidence Register", "Domain readiness matrix", "matrix", "domain_readiness_dim", "domain_name", "data_status"),
+      visual("Data Confidence Register", "Parcel signal confidence", "donut", "parcel_economic_signal_fact", "data_confidence", "signal_id"),
+    ];
+  } else if (normalized.includes("burden") || normalized.includes("fiscal")) {
+    reportTitle = "Fiscal and Service Burden Report";
+    reportSummary = "Compare fiscal attractiveness against burden and public cost bands.";
+    reportCanvasItems = [
+      visual("Fiscal Burden Review", "Fiscal attractiveness bands", "bar", "parcel_economic_signal_fact", "fiscal_attractiveness_band", "signal_id"),
+      visual("Fiscal Burden Review", "Opportunity vs public cost risk", "matrix", "parcel_economic_signal_fact", "opportunity_class", "public_cost_risk_band"),
+      visual("Scenario Planning Model", "Scenario service burden", "matrix", "scenario_output_fact", "scenario_name", "service_burden_band"),
+    ];
+  } else if (normalized.includes("segment") || normalized.includes("value per acre")) {
+    reportTitle = "Economic Segment Comparison Report";
+    reportSummary = "Compare value-per-acre context within similar economic segments.";
+    reportCanvasItems = [
+      visual("Segment-Aware Economics", "Economic segment mix", "bar", "parcel_economic_signal_fact", "economic_segment", "signal_id", { caveat: "Compare value per acre within segment." }),
+      visual("Segment-Aware Economics", "Value per acre bands within segment", "bar", "parcel_economic_signal_fact", "value_per_acre_band", "signal_id", { filterField: "economic_segment" }),
+    ];
+  } else if (normalized.includes("opportunity class") || normalized.includes("opportunity classes") || normalized.includes("pie") || normalized.includes("donut")) {
+    reportTitle = "Opportunity Class Chart";
+    reportSummary = "Build a compact opportunity class visual from parcel economics rows.";
+    reportCanvasItems = [
+      visual("Executive Economic Dashboard", "Opportunity class breakdown", "donut", "parcel_economic_signal_fact", "opportunity_class", "signal_id"),
+    ];
+  } else {
+    reportCanvasItems = [
+      visual("Executive Economic Dashboard", "Executive KPI cards", "bar", "economics_kpi_fact", "kpi_name", "value", { aggregation: "sum" }),
+      visual("Executive Economic Dashboard", "Opportunity class breakdown", "bar", "parcel_economic_signal_fact", "opportunity_class", "signal_id"),
+      visual("Executive Economic Dashboard", "Economic segment mix", "donut", "parcel_economic_signal_fact", "economic_segment", "signal_id"),
+      visual("Scenario Planning Model", "Scenario output comparison", "matrix", "scenario_output_fact", "scenario_name", "fiscal_attractiveness_band"),
+      visual("Data Confidence Register", "Data readiness matrix", "matrix", "domain_readiness_dim", "domain_name", "data_status"),
+    ];
+  }
+
+  const first = reportCanvasItems[0];
+  return {
+    action_type: reportCanvasItems.length === 1 ? "build_chart" : "build_report",
+    chart_builder_config: {
+      aggregation: first.aggregation === "sum" ? "sum" : "count",
+      category_field: first.category_field,
+      chart_type: first.visual_type,
+      filter_field: first.filter_field,
+      filter_value: first.filter_value,
+      table_name: first.source_table,
+      title: first.visual_title,
+      value_field: first.value_field,
+    },
+    powerbi_build_steps: [
+      "Download CSV tables from Power BI & Tools.",
+      "Import the recommended fact and dimension tables into Power BI Desktop.",
+      "Create the starter scenario and geography relationships.",
+      "Build the generated visuals and keep caveat text visible.",
+    ],
+    report_canvas_items: reportCanvasItems,
+    report_summary: reportSummary,
+    report_title: reportTitle,
+    selected_filters: selectedFilters,
+    selected_tool: "powerbi_export",
   };
 }
 
