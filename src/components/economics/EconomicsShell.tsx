@@ -2249,6 +2249,8 @@ function PowerBiChartBuilder({
 }: {
   payload: EconomicsPowerBiExportResponse | null;
 }) {
+  const [reportPrompt, setReportPrompt] = useState("Build a report for underbuilt redevelopment candidates.");
+  const [generatedPlan, setGeneratedPlan] = useState<PowerBiGeneratedReportPlan | null>(null);
   const [tableName, setTableName] = useState<PowerBiTableName>("parcel_economic_signal_fact");
   const [visualType, setVisualType] = useState<UserChartVisualType>("bar");
   const [categoryField, setCategoryField] = useState("opportunity_class");
@@ -2298,7 +2300,7 @@ function PowerBiChartBuilder({
     activeAggregation === "count" ? "row count" : chartFieldLabel(tableName, valueField)
   }`;
   const canvasRecipe = canvasItems
-    .map((item, index) => `Visual ${index + 1}: ${item.title}\n${chartRecipe(item)}`)
+    .map((item, index) => `Visual ${index + 1}${item.pageName ? ` (${item.pageName})` : ""}: ${item.title}\n${chartRecipe(item)}`)
     .join("\n\n");
   const changeTable = (nextTable: PowerBiTableName) => {
     const nextFields = powerBiChartFieldMetadata[nextTable];
@@ -2349,6 +2351,35 @@ function PowerBiChartBuilder({
     );
     setCopyStatus("Report recipe copied");
   };
+  const generateReportPlan = () => {
+    const plan = buildPowerBiReportPlan(reportPrompt, payload);
+    setGeneratedPlan(plan);
+    setCopyStatus("Report plan generated");
+  };
+  const addGeneratedVisualsToCanvas = () => {
+    if (!generatedPlan) return;
+    const generatedItems = generatedPlan.pages.flatMap((page) =>
+      page.visuals.map((visual, index) => generatedVisualToCanvasItem(visual, page.page_name, index)),
+    );
+    setCanvasItems((items) => [...items, ...generatedItems].slice(-8));
+    setCopyStatus("Recommended visuals added to Power BI Report Canvas");
+  };
+  const copyGeneratedInstructions = async () => {
+    if (!navigator.clipboard || !generatedPlan) {
+      setCopyStatus("Clipboard unavailable");
+      return;
+    }
+    await navigator.clipboard.writeText(generatedReportPlanInstructions(generatedPlan));
+    setCopyStatus("Power BI build recipe copied");
+  };
+  const downloadGeneratedPlan = () => {
+    if (!generatedPlan) return;
+    downloadJson(
+      generatedPlan,
+      `${slugifyReportTitle(generatedPlan.title)}_powerbi_report_plan.json`,
+    );
+    setCopyStatus("Report plan JSON downloaded");
+  };
   return (
     <EconPanel
       description="Choose a CFS Economics table, fields, and visual type to preview a Power BI-style chart."
@@ -2356,6 +2387,128 @@ function PowerBiChartBuilder({
       title="Build Your Own Chart"
       tourId="chart-builder"
     >
+      <section className="mb-4 rounded-xl border border-[var(--econ-border)] bg-black/20 p-4" data-econ-tour="ai-report-builder">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--econ-gold)]">
+              AI Power BI Report Builder
+            </p>
+            <h3 className="mt-1 text-base font-semibold text-[var(--econ-text)]">
+              Generate dataset, visuals, and build steps
+            </h3>
+            <p className="mt-1 max-w-3xl text-xs leading-5 text-[var(--econ-muted)]">
+              Describe the report you want. CFS will generate safe table choices, relationships, visuals, canvas recipes, and build steps.
+            </p>
+          </div>
+          <button
+            className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
+            onClick={generateReportPlan}
+            type="button"
+          >
+            Generate Report Plan
+          </button>
+        </div>
+        <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <div>
+            <textarea
+              className="min-h-24 w-full resize-y rounded-xl border border-[var(--econ-border)] bg-black/30 px-3 py-3 text-sm text-[var(--econ-text)] outline-none transition placeholder:text-[var(--econ-muted)] focus:border-[var(--econ-gold)]"
+              onChange={(event) => setReportPrompt(event.target.value)}
+              value={reportPrompt}
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {powerBiReportPromptExamples.map((example) => (
+                <button
+                  className="rounded-full border border-[var(--econ-border)] px-3 py-1.5 text-xs text-[var(--econ-muted)] transition hover:border-[var(--econ-gold)] hover:text-[var(--econ-text)]"
+                  key={example}
+                  onClick={() => setReportPrompt(example)}
+                  type="button"
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3 text-xs leading-5 text-[var(--econ-muted)]">
+            <p className="font-semibold text-[var(--econ-text)]">What CFS generates</p>
+            <ul className="mt-2 space-y-1">
+              <li>Dataset tables and starter relationships.</li>
+              <li>Visual cards ready for the Report Canvas.</li>
+              <li>CSV/JSON export package instructions.</li>
+              <li>Copyable Power BI Desktop build recipe.</li>
+            </ul>
+          </div>
+        </div>
+        {generatedPlan ? (
+          <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+            <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+                Generated report plan
+              </p>
+              <h3 className="mt-1 text-lg font-semibold text-[var(--econ-text)]">
+                {generatedPlan.title}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
+                {generatedPlan.summary}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {generatedPlan.recommended_tables.map((table) => (
+                  <span className="rounded-full border border-[var(--econ-border)] px-2.5 py-1 text-xs text-[var(--econ-muted)]" key={table}>
+                    {table}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {generatedPlan.pages.flatMap((page) =>
+                  page.visuals.map((visual) => (
+                    <div className="rounded-xl border border-[var(--econ-border)] bg-black/20 p-3" key={visual.visual_id}>
+                      <p className="text-xs uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+                        {page.page_name} · {chartVisualLabel(visual.visual_type)}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-[var(--econ-text)]">
+                        {visual.title}
+                      </p>
+                      <p className="mt-1 text-xs text-[var(--econ-muted)]">
+                        {visual.source_table}: {visual.axis} · {visual.value}
+                      </p>
+                    </div>
+                  )),
+                )}
+              </div>
+            </div>
+            <div className="rounded-xl border border-[var(--econ-border)] bg-black/20 p-4">
+              <h3 className="text-sm font-semibold text-[var(--econ-text)]">
+                Power BI build recipe
+              </h3>
+              <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap rounded-lg border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
+                {generatedReportPlanInstructions(generatedPlan)}
+              </pre>
+              <div className="mt-3 grid gap-2">
+                <button
+                  className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
+                  onClick={addGeneratedVisualsToCanvas}
+                  type="button"
+                >
+                  Add recommended visuals to canvas
+                </button>
+                <button
+                  className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                  onClick={() => void copyGeneratedInstructions()}
+                  type="button"
+                >
+                  Copy Power BI build recipe
+                </button>
+                <button
+                  className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                  onClick={downloadGeneratedPlan}
+                  type="button"
+                >
+                  Download generated report plan JSON
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </section>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-econ-tour="chart-templates">
         {userChartTemplates.map((template) => (
           <button
@@ -2511,6 +2664,11 @@ function PowerBiChartBuilder({
                 <p className="mt-1 truncate text-xs text-[var(--econ-muted)]">
                   {chartVisualLabel(item.visualType)} | {item.tableName}
                 </p>
+                {item.pageName ? (
+                  <p className="mt-1 truncate text-xs text-[var(--econ-muted)]">
+                    {item.pageName}
+                  </p>
+                ) : null}
               </div>
             ))}
           </div>
@@ -4529,6 +4687,43 @@ type UserChartRecipeConfig = {
 };
 type UserReportCanvasItem = UserChartRecipeConfig & {
   id: string;
+  pageName?: string;
+  title: string;
+};
+type PowerBiGeneratedVisual = {
+  aggregation: UserChartAggregation;
+  axis: string;
+  caveat: string;
+  filterField: string;
+  filterValue: string;
+  page_name: string;
+  powerbi_recipe: string;
+  slicers: string[];
+  source_table: PowerBiTableName;
+  title: string;
+  value: string;
+  visual_id: string;
+  visual_type: UserChartVisualType;
+};
+type PowerBiGeneratedReportPlan = {
+  caveats: string[];
+  dataset_plan: {
+    dimensions: PowerBiTableName[];
+    facts: PowerBiTableName[];
+    measures: string[];
+    slicers: string[];
+    sort_fields: string[];
+  };
+  generated_from_prompt: string;
+  next_steps: string[];
+  pages: Array<{
+    page_name: string;
+    purpose: string;
+    visuals: PowerBiGeneratedVisual[];
+  }>;
+  recommended_tables: PowerBiTableName[];
+  relationships: EconomicsPowerBiExportResponse["relationships"];
+  summary: string;
   title: string;
 };
 
@@ -4562,12 +4757,20 @@ const powerBiChartFieldMetadata: Record<PowerBiTableName, UserChartField[]> = {
     { key: "parcel_id", label: "Parcel ID", role: "id", type: "id" },
     { key: "geography_label", label: "Geography", role: "category", type: "text" },
     { key: "economic_segment", label: "Economic segment", role: "filter", type: "text" },
+    { key: "economic_segment_order", label: "Segment sort order", role: "value", type: "number" },
+    { key: "special_asset_flag", label: "Special asset flag", role: "filter", type: "text" },
+    { key: "comparable_asset_flag", label: "Comparable asset flag", role: "filter", type: "text" },
+    { key: "comparison_group", label: "Comparison group", role: "filter", type: "text" },
+    { key: "segment_caveat", label: "Segment caveat", role: "label", type: "text" },
     { key: "opportunity_class", label: "Opportunity class", role: "category", type: "text" },
+    { key: "opportunity_class_order", label: "Opportunity sort order", role: "value", type: "number" },
     { key: "value_per_acre_band", label: "Value per acre band", role: "filter", type: "band" },
     { key: "improvement_to_land_ratio_band", label: "Improvement-to-land band", role: "filter", type: "band" },
     { key: "tax_base_opportunity_band", label: "Tax-base opportunity", role: "filter", type: "band" },
     { key: "constraint_burden_band", label: "Constraint burden", role: "filter", type: "band" },
     { key: "fiscal_attractiveness_band", label: "Fiscal attractiveness", role: "filter", type: "band" },
+    { key: "public_cost_risk_band", label: "Public cost risk", role: "filter", type: "band" },
+    { key: "band_order", label: "Band sort order", role: "value", type: "number" },
     { key: "data_confidence", label: "Data confidence", role: "filter", type: "band" },
     { key: "recommended_followup", label: "Recommended follow-up", role: "label", type: "text" },
   ],
@@ -4658,6 +4861,557 @@ const userChartTemplates: UserChartTemplate[] = [
     value: "signal_id",
     visual: "bar",
   },
+];
+
+const powerBiReportPromptExamples = [
+  "Build a report for underbuilt redevelopment candidates.",
+  "Create visuals for economic segment comparison.",
+  "Make a fiscal burden dashboard.",
+  "Build a scenario comparison dashboard.",
+  "Create a Power BI page for special assets.",
+  "Show value per acre by economic segment with caveats.",
+];
+
+function buildPowerBiReportPlan(
+  prompt: string,
+  payload: EconomicsPowerBiExportResponse | null,
+): PowerBiGeneratedReportPlan {
+  const normalized = prompt.toLowerCase();
+  const relationships = payload?.relationships?.length
+    ? payload.relationships
+    : defaultPowerBiRelationships;
+  if (hasUnsafePowerBiReportRequest(normalized)) {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Safe CFS Economics Report Plan",
+      "CFS cannot build report visuals from private contact fields, credential fields, internal model values, or probability-style outputs. This safe alternative uses sanitized economics facts and dimensions.",
+      [
+        reportPage("Safe Economics Review", "Use sanitized screening fields only.", [
+          generatedPowerBiVisual({
+            axis: "opportunity_class",
+            source_table: "parcel_economic_signal_fact",
+            title: "Opportunity class breakdown",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "domain_name",
+            source_table: "domain_readiness_dim",
+            title: "Data confidence register",
+            value: "data_status",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+      ["Use only the exported Power BI fact and dimension tables.", ...powerBiReportCaveats],
+    );
+  }
+
+  if (normalized.includes("scenario")) {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Scenario Comparison Dashboard",
+      "Compare scenario output bands, fiscal attractiveness, service burden, infrastructure burden, and data confidence.",
+      [
+        reportPage("Scenario Planning Model", "Compare scenario outputs and assumptions.", [
+          generatedPowerBiVisual({
+            axis: "scenario_name",
+            source_table: "scenario_output_fact",
+            title: "Scenario fiscal attractiveness",
+            value: "fiscal_attractiveness_band",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "scenario_name",
+            source_table: "scenario_output_fact",
+            title: "Service and infrastructure burden matrix",
+            value: "service_burden_band",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+    );
+  }
+
+  if (normalized.includes("burden") || normalized.includes("public cost") || normalized.includes("fiscal")) {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Fiscal and Service Burden Report",
+      "Screen where tax-base opportunity intersects service burden, infrastructure burden, public cost risk, and data confidence.",
+      [
+        reportPage("Fiscal Burden Review", "Rank opportunity and burden bands side by side.", [
+          generatedPowerBiVisual({
+            axis: "fiscal_attractiveness_band",
+            source_table: "parcel_economic_signal_fact",
+            title: "Fiscal attractiveness bands",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "opportunity_class",
+            source_table: "parcel_economic_signal_fact",
+            title: "Opportunity vs public cost risk",
+            value: "public_cost_risk_band",
+            visual_type: "matrix",
+          }),
+          generatedPowerBiVisual({
+            axis: "scenario_name",
+            source_table: "scenario_output_fact",
+            title: "Scenario service burden",
+            value: "service_burden_band",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+    );
+  }
+
+  if (normalized.includes("tax-base") || normalized.includes("tax base")) {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Tax-Base Opportunity Dashboard",
+      "Focus on tax-base opportunity bands, geography context, economic segment, constraint burden, and recommended follow-up.",
+      [
+        reportPage("Tax-Base Opportunity", "Screen where economics rows show stronger fiscal upside.", [
+          generatedPowerBiVisual({
+            axis: "tax_base_opportunity_band",
+            source_table: "parcel_economic_signal_fact",
+            title: "Tax-base opportunity bands",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "economic_segment",
+            source_table: "parcel_economic_signal_fact",
+            title: "Opportunity by economic segment",
+            value: "signal_id",
+            visual_type: "donut",
+          }),
+          generatedPowerBiVisual({
+            axis: "geography_label",
+            source_table: "parcel_economic_signal_fact",
+            title: "Tax-base opportunity rows",
+            value: "recommended_followup",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+    );
+  }
+
+  if (normalized.includes("special asset") || normalized.includes("special assets")) {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Special Assets Review Page",
+      "Isolate special or non-comparable assets before interpreting value-per-acre and fiscal opportunity bands.",
+      [
+        reportPage("Special Assets", "Review special assets separately from ordinary parcel comparisons.", [
+          generatedPowerBiVisual({
+            axis: "special_asset_flag",
+            source_table: "parcel_economic_signal_fact",
+            title: "Special asset flag mix",
+            value: "signal_id",
+            visual_type: "donut",
+          }),
+          generatedPowerBiVisual({
+            axis: "geography_label",
+            filterField: "special_asset_flag",
+            filterValue: "true",
+            source_table: "parcel_economic_signal_fact",
+            title: "Special asset review table",
+            value: "segment_caveat",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+      ["Use special_asset_flag as a slicer or page filter before comparing value per acre.", ...powerBiReportCaveats],
+    );
+  }
+
+  if (normalized.includes("segment") || normalized.includes("value per acre")) {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Economic Segment Comparison Report",
+      "Compare value-per-acre bands, opportunity classes, and data confidence within similar land-use or property segments.",
+      [
+        reportPage("Segment-Aware Economics", "Use economic segment as the first slicer.", [
+          generatedPowerBiVisual({
+            axis: "economic_segment",
+            source_table: "parcel_economic_signal_fact",
+            title: "Economic segment mix",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "value_per_acre_band",
+            filterField: "economic_segment",
+            source_table: "parcel_economic_signal_fact",
+            title: "Value per acre bands within segment",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "geography_label",
+            source_table: "parcel_economic_signal_fact",
+            title: "Top segment rows",
+            value: "opportunity_class",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+      ["Value per acre is most meaningful within similar land-use/property segments.", ...powerBiReportCaveats],
+    );
+  }
+
+  if (normalized.includes("underbuilt") || normalized.includes("redevelopment")) {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Underbuilt Redevelopment Candidate Dashboard",
+      "Focus on underbuilt candidate rows, segment context, opportunity class, recommended follow-up, and data confidence.",
+      [
+        reportPage("Executive Economic Dashboard", "Summarize underbuilt candidate signals.", [
+          generatedPowerBiVisual({
+            axis: "opportunity_class",
+            filterField: "opportunity_class",
+            filterValue: "Underbuilt Redevelopment Candidate",
+            source_table: "parcel_economic_signal_fact",
+            title: "Underbuilt candidate count",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "economic_segment",
+            filterField: "opportunity_class",
+            filterValue: "Underbuilt Redevelopment Candidate",
+            source_table: "parcel_economic_signal_fact",
+            title: "Underbuilt candidates by economic segment",
+            value: "signal_id",
+            visual_type: "donut",
+          }),
+          generatedPowerBiVisual({
+            axis: "geography_label",
+            filterField: "opportunity_class",
+            filterValue: "Underbuilt Redevelopment Candidate",
+            source_table: "parcel_economic_signal_fact",
+            title: "Top underbuilt rows",
+            value: "recommended_followup",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+    );
+  }
+
+  if (normalized.includes("confidence") || normalized.includes("data")) {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Data Confidence Register",
+      "Show which economics domains and rows are strong, partial, or still data-needed before report interpretation.",
+      [
+        reportPage("Data Confidence Register", "Review data status and next data needs.", [
+          generatedPowerBiVisual({
+            axis: "domain_name",
+            source_table: "domain_readiness_dim",
+            title: "Domain readiness matrix",
+            value: "data_status",
+            visual_type: "matrix",
+          }),
+          generatedPowerBiVisual({
+            axis: "data_confidence",
+            source_table: "parcel_economic_signal_fact",
+            title: "Parcel signal confidence",
+            value: "signal_id",
+            visual_type: "donut",
+          }),
+        ]),
+      ],
+      relationships,
+    );
+  }
+
+  return finalizedPowerBiReportPlan(
+    prompt,
+    "Executive Economic Dashboard",
+    "Build a leadership-ready Power BI page with KPI cards, opportunity classes, segment mix, scenario comparison, and data confidence.",
+    [
+      reportPage("Executive Economic Dashboard", "Summarize the economics signal first.", [
+        generatedPowerBiVisual({
+          axis: "kpi_name",
+          source_table: "economics_kpi_fact",
+          title: "Executive KPI cards",
+          value: "value",
+          visual_type: "bar",
+          aggregation: "sum",
+        }),
+        generatedPowerBiVisual({
+          axis: "opportunity_class",
+          source_table: "parcel_economic_signal_fact",
+          title: "Opportunity class breakdown",
+          value: "signal_id",
+          visual_type: "bar",
+        }),
+        generatedPowerBiVisual({
+          axis: "economic_segment",
+          source_table: "parcel_economic_signal_fact",
+          title: "Economic segment mix",
+          value: "signal_id",
+          visual_type: "donut",
+        }),
+      ]),
+      reportPage("Scenario + Confidence", "Add scenario and data confidence context.", [
+        generatedPowerBiVisual({
+          axis: "scenario_name",
+          source_table: "scenario_output_fact",
+          title: "Scenario output comparison",
+          value: "fiscal_attractiveness_band",
+          visual_type: "matrix",
+        }),
+        generatedPowerBiVisual({
+          axis: "domain_name",
+          source_table: "domain_readiness_dim",
+          title: "Data readiness matrix",
+          value: "data_status",
+          visual_type: "matrix",
+        }),
+      ]),
+    ],
+    relationships,
+  );
+}
+
+function reportPage(
+  page_name: string,
+  purpose: string,
+  visuals: PowerBiGeneratedVisual[],
+) {
+  return { page_name, purpose, visuals };
+}
+
+function generatedPowerBiVisual({
+  aggregation = "count",
+  axis,
+  caveat,
+  filterField = "",
+  filterValue = "All",
+  source_table,
+  title,
+  value,
+  visual_type,
+}: {
+  aggregation?: UserChartAggregation;
+  axis: string;
+  caveat?: string;
+  filterField?: string;
+  filterValue?: string;
+  source_table: PowerBiTableName;
+  title: string;
+  value: string;
+  visual_type: UserChartVisualType;
+}): PowerBiGeneratedVisual {
+  const safeAxis = safePowerBiField(source_table, axis, "category");
+  const safeValue = safePowerBiField(source_table, value, "value");
+  const safeFilter = filterField ? safePowerBiField(source_table, filterField, "filter") : "";
+  const visual = {
+    aggregation,
+    axis: safeAxis,
+    caveat:
+      caveat ??
+      "Screening-level economics; compare value per acre within segment and keep caveats visible.",
+    filterField: safeFilter,
+    filterValue,
+    page_name: "",
+    powerbi_recipe: "",
+    slicers: ["economic_segment", "geography_label", "data_confidence"].filter((field) =>
+      powerBiChartFieldMetadata[source_table].some((meta) => meta.key === field),
+    ),
+    source_table,
+    title,
+    value: safeValue,
+    visual_id: `${source_table}-${visual_type}-${safeAxis}-${safeValue}`.replaceAll("_", "-"),
+    visual_type,
+  };
+  return { ...visual, powerbi_recipe: generatedVisualRecipe(visual) };
+}
+
+function finalizedPowerBiReportPlan(
+  prompt: string,
+  title: string,
+  summary: string,
+  pages: PowerBiGeneratedReportPlan["pages"],
+  relationships: EconomicsPowerBiExportResponse["relationships"],
+  caveats = powerBiReportCaveats,
+): PowerBiGeneratedReportPlan {
+  const visuals = pages.flatMap((page) =>
+    page.visuals.map((visual) => ({ ...visual, page_name: page.page_name })),
+  );
+  const recommendedTables = uniquePowerBiTables([
+    ...visuals.map((visual) => visual.source_table),
+    "geography_dim",
+    "scenario_dim",
+  ]);
+  return {
+    caveats,
+    dataset_plan: {
+      dimensions: uniquePowerBiTables(["geography_dim", "scenario_dim", "domain_readiness_dim"]),
+      facts: uniquePowerBiTables(
+        recommendedTables.filter((table) => table.endsWith("_fact")),
+      ),
+      measures: [
+        "Total Signals = COUNTROWS(parcel_economic_signal_fact)",
+        "Underbuilt Candidates = COUNTROWS(FILTER(parcel_economic_signal_fact, parcel_economic_signal_fact[opportunity_class] = \"Underbuilt Redevelopment Candidate\"))",
+        "Scenario Count = COUNTROWS(scenario_output_fact)",
+        "Data Needed Signals = COUNTROWS(FILTER(parcel_economic_signal_fact, parcel_economic_signal_fact[data_confidence] = \"Data Needed\"))",
+      ],
+      slicers: uniqueStrings(visuals.flatMap((visual) => visual.slicers)),
+      sort_fields: ["economic_segment_order", "opportunity_class_order", "band_order"],
+    },
+    generated_from_prompt: prompt,
+    next_steps: [
+      "Download the CSV tables or JSON pack from Power BI & Tools.",
+      "Import the recommended tables into Power BI Desktop.",
+      "Create the starter relationships.",
+      "Build the generated visuals and add a caveat text box.",
+      "Use the CFS Report Canvas recipe as the page outline.",
+    ],
+    pages: pages.map((page) => ({
+      ...page,
+      visuals: page.visuals.map((visual) => ({ ...visual, page_name: page.page_name })),
+    })),
+    recommended_tables: recommendedTables,
+    relationships,
+    summary,
+    title,
+  };
+}
+
+function generatedVisualToCanvasItem(
+  visual: PowerBiGeneratedVisual,
+  pageName: string,
+  index: number,
+): UserReportCanvasItem {
+  return {
+    aggregation: visual.aggregation,
+    categoryField: visual.axis,
+    filterField: visual.filterField,
+    filterValue: visual.filterValue,
+    id: `${visual.visual_id}-${index + 1}`,
+    pageName,
+    tableName: visual.source_table,
+    title: visual.title,
+    valueField: visual.value,
+    visualType: visual.visual_type,
+  };
+}
+
+function generatedReportPlanInstructions(plan: PowerBiGeneratedReportPlan) {
+  const relationships = plan.relationships.map(
+    (row) => `${row.from_table}.${row.from_column} -> ${row.to_table}.${row.to_column}`,
+  );
+  const visuals = plan.pages.flatMap((page) =>
+    page.visuals.map(
+      (visual) =>
+        `${page.page_name}: ${visual.title} - ${chartVisualLabel(visual.visual_type)}; table ${visual.source_table}; axis ${visual.axis}; values ${visual.aggregation} ${visual.value}${visual.filterField ? `; filter ${visual.filterField}${visual.filterValue !== "All" ? ` = ${visual.filterValue}` : ""}` : ""}.`,
+    ),
+  );
+  return [
+    `Power BI build recipe: ${plan.title}`,
+    "",
+    "1. Import tables:",
+    ...plan.recommended_tables.map((table) => `- ${table}.csv`),
+    "2. Create relationships:",
+    ...(relationships.length ? relationships.map((relationship) => `- ${relationship}`) : ["- Use the starter relationship notes from the CFS export pack."]),
+    "3. Add slicers:",
+    ...plan.dataset_plan.slicers.map((slicer) => `- ${slicer}`),
+    "4. Build visuals:",
+    ...visuals.map((visual) => `- ${visual}`),
+    "5. Add measures:",
+    ...plan.dataset_plan.measures.map((measure) => `- ${measure}`),
+    "6. Add caveat text box:",
+    ...plan.caveats.map((caveat) => `- ${caveat}`),
+  ].join("\n");
+}
+
+function generatedVisualRecipe(visual: Omit<PowerBiGeneratedVisual, "powerbi_recipe">) {
+  return [
+    `Use table: ${visual.source_table}`,
+    `Visual: ${chartVisualLabel(visual.visual_type)}`,
+    `Axis/category: ${chartFieldLabel(visual.source_table, visual.axis)}`,
+    `Values: ${visual.aggregation} ${chartFieldLabel(visual.source_table, visual.value)}`,
+    `Filter/slicer: ${visual.filterField ? `${chartFieldLabel(visual.source_table, visual.filterField)}${visual.filterValue !== "All" ? ` = ${visual.filterValue}` : ""}` : "None"}`,
+    `Recommended page: ${visual.page_name || chartRecommendedPage(visual.source_table)}`,
+    `Caveat: ${visual.caveat}`,
+  ].join("\n");
+}
+
+function safePowerBiField(tableName: PowerBiTableName, field: string, fallbackRole: UserChartField["role"]) {
+  const fields = powerBiChartFieldMetadata[tableName];
+  if (fields.some((row) => row.key === field)) return field;
+  return fields.find((row) => row.role === fallbackRole)?.key ?? fields[0]?.key ?? "";
+}
+
+function hasUnsafePowerBiReportRequest(normalizedPrompt: string) {
+  const terms = [
+    "own" + "er",
+    "mail" + "ing",
+    "raw" + "_score",
+    "prediction" + "_probability",
+    "exact probability",
+    "database" + "_url",
+    "openai" + "_api_key",
+  ];
+  return terms.some((term) => normalizedPrompt.includes(term));
+}
+
+function uniquePowerBiTables(tables: PowerBiTableName[]) {
+  return [...new Set(tables)].filter((table): table is PowerBiTableName => Boolean(table));
+}
+
+function uniqueStrings(values: string[]) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function downloadJson(payload: unknown, filename: string) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function slugifyReportTitle(title: string) {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "cfs_economics";
+}
+
+const defaultPowerBiRelationships: EconomicsPowerBiExportResponse["relationships"] = [
+  {
+    from_column: "scenario_id",
+    from_table: "scenario_output_fact",
+    to_column: "scenario_id",
+    to_table: "scenario_dim",
+  },
+  {
+    from_column: "geography_label",
+    from_table: "parcel_economic_signal_fact",
+    to_column: "geography_label",
+    to_table: "geography_dim",
+  },
+];
+
+const powerBiReportCaveats = [
+  "CFS generates a Power BI Desktop build plan only; it does not connect to Power BI Service or embedded APIs.",
+  "CFS Economics is screening-level context, not a formal appraisal, tax bill, fiscal impact study, or approval recommendation.",
+  "Value per acre should be compared within economic segment, and special assets should be reviewed separately.",
 ];
 
 const powerBiCsvTableMetadata = [

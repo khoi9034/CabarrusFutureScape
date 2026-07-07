@@ -85,8 +85,10 @@ export const askCfsEconomicsWorkspacePrompts = [
 ] as const;
 
 export const askCfsEconomicsPowerBiToolPrompts = [
+  "Build me a Power BI dashboard.",
   "How do I build this in Power BI?",
   "What CSV tables should I import first?",
+  "What charts should Power BI generate?",
   "How do I build a chart?",
   "What should I add to the Power BI Report Canvas?",
   "How do I QA the export?",
@@ -184,6 +186,9 @@ async function demoEconomicsAnswer(
   request?: CfsAiSearchRequest,
 ): Promise<CfsAiSearchResponse> {
   const economics = await getDemoEconomicsIntelligence();
+  if (request?.request_type === "powerbi_report_plan") {
+    return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport());
+  }
   if (isEconomicsWalkthroughQuery(request?.query ?? "")) {
     return demoEconomicsWalkthroughAnswer(economics.as_of);
   }
@@ -602,6 +607,14 @@ function isEconomicsPowerBiQuery(query: string) {
     "dashboard visual",
     "report canvas",
     "canvas recipe",
+    "report plan",
+    "report planner",
+    "generate report",
+    "generate visuals",
+    "underbuilt dashboard",
+    "fiscal burden report",
+    "scenario comparison dashboard",
+    "special assets report",
     "first slicer",
     "sort order",
     "sort opportunity",
@@ -859,6 +872,15 @@ function demoEconomicsPowerBiAnswer(
           "Parcel investment screen: parcel_economic_signal_fact and geography_dim.",
           "Scenario Model page: scenario_output_fact and scenario_dim.",
           "Data confidence register: domain_readiness_dim.",
+        ]),
+      ],
+      [
+        "AI Power BI Report Builder",
+        bullets([
+          "Type a request such as Build a report for underbuilt redevelopment candidates.",
+          "CFS generates recommended tables, starter relationships, visuals, canvas recipes, and copyable build steps from the cached export fields.",
+          "Use Add recommended visuals to canvas when the plan looks right.",
+          "Download the generated report plan JSON if you want a portable report recipe.",
         ]),
       ],
       [

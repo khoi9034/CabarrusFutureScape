@@ -22,6 +22,7 @@ export interface CfsAiSearchRequest {
   };
   mode?: "demo" | "live";
   query: string;
+  request_type?: "powerbi_report_plan" | null;
   selected_signal?: CfsAiSelectedSignal | null;
 }
 

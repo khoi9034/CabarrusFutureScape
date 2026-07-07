@@ -61,6 +61,7 @@ class CfsAiSearchRequest(BaseModel):
     filters: CfsAiSearchFilters = Field(default_factory=CfsAiSearchFilters)
     mode: Literal["demo", "live"] = "live"
     query: str = Field(min_length=1, max_length=500)
+    request_type: Literal["powerbi_report_plan"] | None = None
     selected_signal: CfsAiSelectedSignal | None = None
 
 

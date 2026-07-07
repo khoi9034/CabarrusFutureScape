@@ -195,6 +195,8 @@ class CfsAiSearchService:
             else request.filters.domains or selected_signal_domains(request) or resolve_query_domains(request)
         )
         fallback = deterministic_answer(request, context, domains)
+        if request.app_mode == "economics" and request.request_type == "powerbi_report_plan":
+            return fallback
         if request.app_mode == "economics" and _is_fast_economics_guidance_query(request.query):
             return fallback
         provider = self._settings.cfs_ai_provider
@@ -566,6 +568,8 @@ def _economics_answer(
     summary = economics.get("summary", {}) if isinstance(economics, dict) else {}
     watchlist = economics.get("watchlist", []) if isinstance(economics, dict) else []
     readiness = economics.get("data_readiness", []) if isinstance(economics, dict) else []
+    if request.request_type == "powerbi_report_plan":
+        return _economics_powerbi_answer(request, context)
     if _is_economics_walkthrough_query(request.query):
         return _economics_walkthrough_answer(request, context)
     if _is_economics_workspace_query(request.query):
@@ -1214,6 +1218,14 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "dashboard visual",
             "report canvas",
             "canvas recipe",
+            "report plan",
+            "report planner",
+            "generate report",
+            "generate visuals",
+            "underbuilt dashboard",
+            "fiscal burden report",
+            "scenario comparison dashboard",
+            "special assets report",
             "first slicer",
             "sort order",
             "sort opportunity",
@@ -1281,6 +1293,17 @@ def _economics_powerbi_answer(
                     "Parcel investment screen: parcel_economic_signal_fact and geography_dim.",
                     "Scenario Model page: scenario_output_fact and scenario_dim.",
                     "Data confidence register: domain_readiness_dim.",
+                ]
+            ),
+        ),
+        (
+            "AI Power BI Report Builder",
+            _bullets(
+                [
+                    "Type a request such as Build a report for underbuilt redevelopment candidates.",
+                    "CFS generates recommended tables, starter relationships, visuals, canvas recipes, and copyable build steps from the exported fields.",
+                    "Use Add recommended visuals to canvas when the plan looks right.",
+                    "Download the generated report plan JSON if you want a portable report recipe.",
                 ]
             ),
         ),

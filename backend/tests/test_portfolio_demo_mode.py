@@ -391,6 +391,13 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Copy QA Checklist" in economics_shell
     assert "Build Your Own Chart" in economics_shell
     assert "PowerBiChartBuilder" in economics_shell
+    assert "AI Power BI Report Builder" in economics_shell
+    assert "Generate Report Plan" in economics_shell
+    assert "buildPowerBiReportPlan" in economics_shell
+    assert "Add recommended visuals to canvas" in economics_shell
+    assert "Copy Power BI build recipe" in economics_shell
+    assert "Download generated report plan JSON" in economics_shell
+    assert "generatedVisualToCanvasItem" in economics_shell
     assert "userChartTemplates" in economics_shell
     assert "Opportunity Class Breakdown" in economics_shell
     assert "Economic Segment Mix" in economics_shell
@@ -479,6 +486,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Which rows should I send?" in ask_service
     assert "How do I build this in Power BI?" in ask_service
     assert "What should I add to the Power BI Report Canvas?" in ask_service
+    assert "Build me a Power BI dashboard." in ask_service
+    assert "What charts should Power BI generate?" in ask_service
+    assert "AI Power BI Report Builder" in ask_service
     assert "How do I build a chart?" in ask_service
     assert "How do I QA the export?" in ask_service
     assert "Which areas show underbuilt opportunity?" in ask_service

@@ -823,6 +823,24 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert response.evidence[0].source == "economics_powerbi_export"
 
 
+def test_ai_search_economics_powerbi_report_plan_request_is_deterministic() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Build me a Power BI dashboard for underbuilt parcels.",
+            request_type="powerbi_report_plan",
+        ),
+        _context(),
+    )
+
+    assert response.provider == "none"
+    assert "AI Power BI Report Builder" in response.answer
+    assert "recommended tables" in response.answer
+    assert "Add recommended visuals to canvas" in response.answer
+    assert "generated report plan JSON" in response.answer
+    assert response.evidence[0].source == "economics_powerbi_export"
+
+
 def test_ai_search_economics_powerbi_sort_prompt_mentions_export_order_fields() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(
