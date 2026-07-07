@@ -46,6 +46,7 @@ export function EconomicsShell() {
     useState<EconomicsPowerBiExportResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedSignalIds, setSelectedSignalIds] = useState<string[]>([]);
+  const [reportBucketItems, setReportBucketItems] = useState<ReportBucketItem[]>([]);
   const [tutorialOpen, setTutorialOpen] = useState(false);
 
   useEffect(() => {
@@ -118,6 +119,41 @@ export function EconomicsShell() {
         : [...current, signal.parcel_id],
     );
   };
+  const addReportBucketItem = (item: ReportBucketItemInput) => {
+    const bucketItem: ReportBucketItem = {
+      ...item,
+      created_at: item.created_at ?? new Date().toISOString(),
+      selected_for_print: item.selected_for_print ?? true,
+    };
+    setReportBucketItems((current) =>
+      current.some(
+        (existing) =>
+          existing.id === bucketItem.id ||
+          (existing.title === bucketItem.title &&
+            existing.type === bucketItem.type &&
+            existing.content === bucketItem.content),
+      )
+        ? current
+        : [bucketItem, ...current],
+    );
+  };
+  const removeReportBucketItem = (id: string) => {
+    setReportBucketItems((current) => current.filter((item) => item.id !== id));
+  };
+  const toggleReportBucketPrint = (id: string) => {
+    setReportBucketItems((current) =>
+      current.map((item) =>
+        item.id === id
+          ? { ...item, selected_for_print: !item.selected_for_print }
+          : item,
+      ),
+    );
+  };
+  const setAllReportBucketPrint = (selected: boolean) => {
+    setReportBucketItems((current) =>
+      current.map((item) => ({ ...item, selected_for_print: selected })),
+    );
+  };
   const activeEconomicsSection =
     economicsSection === "workspace" || economicsSection === "enterprise"
       ? "tools"
@@ -152,11 +188,16 @@ export function EconomicsShell() {
             exportPayload={enterpriseExport}
             inputs={intelligence?.scenario_inputs ?? []}
             onClearSelection={() => setSelectedSignalIds([])}
+            onAddReportBucketItem={addReportBucketItem}
+            onClearReportBucket={() => setReportBucketItems([])}
             onNavigate={setEconomicsSection}
+            onRemoveReportBucketItem={removeReportBucketItem}
             onStartTutorial={() => setTutorialOpen(true)}
+            onToggleReportBucketPrint={toggleReportBucketPrint}
             onToggleSignal={toggleSelectedSignal}
             outputs={intelligence?.scenario_outputs ?? []}
             powerBiPayload={powerBiExport}
+            reportBucketItems={reportBucketItems}
             scenarioOutputs={intelligence?.scenario_outputs ?? []}
             scenarios={intelligence?.scenario_templates ?? []}
             selectedSignalIds={selectedSignalIds}
@@ -175,7 +216,12 @@ export function EconomicsShell() {
         {activeEconomicsSection === "print" ? (
           <EconomicsPrintPage
             intelligence={intelligence}
+            onClearReportBucket={() => setReportBucketItems([])}
             onNavigate={setEconomicsSection}
+            onRemoveReportBucketItem={removeReportBucketItem}
+            onSetAllReportBucketPrint={setAllReportBucketPrint}
+            onToggleReportBucketPrint={toggleReportBucketPrint}
+            reportBucketItems={reportBucketItems}
             selectedSignals={selectedSignals}
           />
         ) : null}
@@ -505,12 +551,17 @@ function PowerBiToolsPage({
   dataReadiness,
   exportPayload,
   inputs,
+  onAddReportBucketItem,
   onClearSelection,
+  onClearReportBucket,
   onNavigate,
+  onRemoveReportBucketItem,
   onStartTutorial,
+  onToggleReportBucketPrint,
   onToggleSignal,
   outputs,
   powerBiPayload,
+  reportBucketItems,
   scenarioOutputs,
   scenarios,
   selectedSignalIds,
@@ -521,12 +572,17 @@ function PowerBiToolsPage({
   dataReadiness: EconomicsReadinessRow[];
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
+  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
   onClearSelection: () => void;
+  onClearReportBucket: () => void;
   onNavigate: (section: "tools" | "print") => void;
+  onRemoveReportBucketItem: (id: string) => void;
   onStartTutorial: () => void;
+  onToggleReportBucketPrint: (id: string) => void;
   onToggleSignal: (signal: EconomicsParcelSignal) => void;
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
+  reportBucketItems: ReportBucketItem[];
   scenarioOutputs: EconomicsScenarioOutput[];
   scenarios: EconomicsScenarioTemplate[];
   selectedSignalIds: string[];
@@ -539,8 +595,10 @@ function PowerBiToolsPage({
       .getElementById("economics-tool-workspace")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   const [askPowerBiAction, setAskPowerBiAction] = useState<PowerBiAskActionRequest | null>(null);
+  const [lastAskResponse, setLastAskResponse] = useState<CfsAiSearchResponse | null>(null);
   const askPowerBiActionId = useRef(0);
   const handleAskCfsResponse = (response: CfsAiSearchResponse) => {
+    setLastAskResponse(response);
     const actions = response.powerbi_actions;
     if (!actions || actions.action_type === "none") return;
     askPowerBiActionId.current += 1;
@@ -577,6 +635,17 @@ function PowerBiToolsPage({
           suggestedPromptsOverride={askCfsEconomicsPowerBiToolPrompts}
           visiblePromptCount={6}
         />
+        {lastAskResponse ? (
+          <button
+            className="mt-3 rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+            onClick={() =>
+              onAddReportBucketItem(bucketItemFromAskResponse(lastAskResponse))
+            }
+            type="button"
+          >
+            Add Ask CFS answer to Report Bucket
+          </button>
+        ) : null}
       </EconPanel>
       <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
         <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
@@ -635,9 +704,14 @@ function PowerBiToolsPage({
           embedded
           exportPayload={exportPayload}
           inputs={inputs}
+          onAddReportBucketItem={onAddReportBucketItem}
+          onClearReportBucket={onClearReportBucket}
           onNavigate={onNavigate}
+          onRemoveReportBucketItem={onRemoveReportBucketItem}
+          onToggleReportBucketPrint={onToggleReportBucketPrint}
           outputs={outputs}
           powerBiPayload={powerBiPayload}
+          reportBucketItems={reportBucketItems}
           scenarios={scenarios}
           selectedSignals={selectedSignals}
           showSelectedRowsStep={false}
@@ -1200,9 +1274,14 @@ function EnterpriseWorkspacePage({
   embedded = false,
   exportPayload,
   inputs,
+  onAddReportBucketItem,
+  onClearReportBucket,
   onNavigate,
+  onRemoveReportBucketItem,
+  onToggleReportBucketPrint,
   outputs,
   powerBiPayload,
+  reportBucketItems,
   scenarios,
   selectedSignals,
   showSelectedRowsStep = true,
@@ -1211,9 +1290,14 @@ function EnterpriseWorkspacePage({
   embedded?: boolean;
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
+  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onClearReportBucket: () => void;
   onNavigate: (section: "tools" | "print") => void;
+  onRemoveReportBucketItem: (id: string) => void;
+  onToggleReportBucketPrint: (id: string) => void;
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
+  reportBucketItems: ReportBucketItem[];
   scenarios: EconomicsScenarioTemplate[];
   selectedSignals: EconomicsParcelSignal[];
   showSelectedRowsStep?: boolean;
@@ -1286,9 +1370,14 @@ function EnterpriseWorkspacePage({
             askPowerBiAction={askPowerBiAction}
             exportPayload={exportPayload}
             inputs={inputs}
+            onAddReportBucketItem={onAddReportBucketItem}
+            onClearReportBucket={onClearReportBucket}
             onNavigate={onNavigate}
+            onRemoveReportBucketItem={onRemoveReportBucketItem}
+            onToggleReportBucketPrint={onToggleReportBucketPrint}
             outputs={outputs}
             powerBiPayload={powerBiPayload}
+            reportBucketItems={reportBucketItems}
             scenarios={scenarios}
             selectedOutput={selectedOutput}
             selectedSignals={selectedSignals}
@@ -1368,11 +1457,21 @@ function EnterpriseSelectedRowsPanel({
 
 function EconomicsPrintPage({
   intelligence,
+  onClearReportBucket,
   onNavigate,
+  onRemoveReportBucketItem,
+  onSetAllReportBucketPrint,
+  onToggleReportBucketPrint,
+  reportBucketItems,
   selectedSignals,
 }: {
   intelligence: EconomicsIntelligenceResponse | null;
+  onClearReportBucket: () => void;
   onNavigate: (section: "tools" | "dashboard") => void;
+  onRemoveReportBucketItem: (id: string) => void;
+  onSetAllReportBucketPrint: (selected: boolean) => void;
+  onToggleReportBucketPrint: (id: string) => void;
+  reportBucketItems: ReportBucketItem[];
   selectedSignals: EconomicsParcelSignal[];
 }) {
   const summary = intelligence?.summary;
@@ -1424,6 +1523,10 @@ function EconomicsPrintPage({
     "Export sources: economics_powerbi_export.json and flat Power BI-ready CSV tables.",
     "No embedded BI connection, external credential, contact field, or model internal is included in this snapshot.",
   ];
+  const selectedBucketItems = reportBucketItems.filter((item) => item.selected_for_print);
+  const selectedBucketText = selectedBucketItems.length
+    ? selectedBucketItems.map(bucketItemText).join("\n\n---\n\n")
+    : "No report bucket items selected for print.";
   const evidencePackText = [
     "CFS Economics Evidence Pack",
     ...evidencePackRows.map((row) => `${row.label}: ${row.value}`),
@@ -1484,6 +1587,15 @@ function EconomicsPrintPage({
         <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copyText("Power BI notes", powerBiNotesText)} type="button">
           Copy Power BI follow-up notes
         </button>
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copyText("Selected report items", selectedBucketText)} type="button">
+          Copy selected report items
+        </button>
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onSetAllReportBucketPrint(true)} type="button">
+          Select all bucket items
+        </button>
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onSetAllReportBucketPrint(false)} type="button">
+          Deselect all
+        </button>
         <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("tools")} type="button">
           Go to Power BI & Tools
         </button>
@@ -1504,6 +1616,15 @@ function EconomicsPrintPage({
             />
           </div>
         ) : null}
+      </section>
+      <section className="no-print" data-econ-tour="print-report-bucket">
+        <ReportBucketPanel
+          items={reportBucketItems}
+          onClear={onClearReportBucket}
+          onRemove={onRemoveReportBucketItem}
+          onTogglePrint={onToggleReportBucketPrint}
+          title="Report Bucket"
+        />
       </section>
       <article className="print-report rounded-2xl border border-[var(--econ-border)] bg-[#fbfaf6] p-5 text-slate-950 shadow-[0_24px_80px_rgba(0,0,0,0.24)] md:p-7">
         <header className="print-section border-b border-slate-300 pb-5" data-econ-tour="print-header">
@@ -1633,19 +1754,42 @@ function EconomicsPrintPage({
           <EvidencePackTable rows={evidencePackRows} />
         </PrintSection>
 
-        <PrintSection title="9. Recommended Next Diligence">
+        <PrintSection title="9. Selected Report Items">
+          {selectedBucketItems.length ? (
+            <div className="grid gap-3">
+              {selectedBucketItems.map((item) => (
+                <div className="rounded-lg border border-slate-300 bg-slate-50 p-3" key={item.id}>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    {bucketTypeLabel(item.type)}
+                  </p>
+                  <h3 className="mt-1 text-base font-semibold text-slate-950">{item.title}</h3>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">{item.summary}</p>
+                  <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-slate-300 bg-white p-3 text-xs leading-5 text-slate-700">
+                    {bucketItemText(item)}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm leading-6 text-slate-700">
+              No report bucket items yet. Add charts, Power BI recipes, or decision-pack notes from Power BI & Tools.
+            </p>
+          )}
+        </PrintSection>
+
+        <PrintSection title="10. Recommended Next Diligence">
           <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
             {followUps.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </PrintSection>
 
-        <PrintSection title="10. Caveats & Assumptions" tourId="print-caveats">
+        <PrintSection title="11. Caveats & Assumptions" tourId="print-caveats">
           <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
             {caveats.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </PrintSection>
 
-        <PrintSection title="11. Power BI / Export Notes">
+        <PrintSection title="12. Power BI / Export Notes">
           <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
             {sourceNotes.map((item) => <li key={item}>{item}</li>)}
             <li>Use economic_segment as the first Power BI slicer for segment-aware interpretation.</li>
@@ -1860,9 +2004,14 @@ function EnterpriseToolsPage({
   askPowerBiAction,
   exportPayload,
   inputs,
+  onAddReportBucketItem,
+  onClearReportBucket,
   onNavigate,
+  onRemoveReportBucketItem,
+  onToggleReportBucketPrint,
   outputs,
   powerBiPayload,
+  reportBucketItems,
   scenarios,
   selectedOutput,
   selectedSignals,
@@ -1870,9 +2019,14 @@ function EnterpriseToolsPage({
   askPowerBiAction?: PowerBiAskActionRequest | null;
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
+  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onClearReportBucket: () => void;
   onNavigate: (section: "tools" | "print") => void;
+  onRemoveReportBucketItem: (id: string) => void;
+  onToggleReportBucketPrint: (id: string) => void;
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
+  reportBucketItems: ReportBucketItem[];
   scenarios: EconomicsScenarioTemplate[];
   selectedOutput: EnterpriseOutputKind;
   selectedSignals: EconomicsParcelSignal[];
@@ -1989,7 +2143,16 @@ function EnterpriseToolsPage({
             <PowerBiChartBuilder
               aiAction={askPowerBiAction}
               key={askPowerBiAction?.id ?? "manual-chart-builder"}
+              onAddReportBucketItem={onAddReportBucketItem}
               payload={powerBiPayload}
+            />
+            <ReportBucketPanel
+              items={reportBucketItems}
+              onClear={onClearReportBucket}
+              onOpenPrint={() => onNavigate("print")}
+              onRemove={onRemoveReportBucketItem}
+              onTogglePrint={onToggleReportBucketPrint}
+              title="Report Bucket"
             />
             <DetailsBlock summary="Show guide" hint="Power BI Report Builder Guide: 4 recommended report pages.">
               <ReportBuilderGuide guide={reportBuilderGuide} payload={powerBiPayload} />
@@ -2058,6 +2221,23 @@ function EnterpriseToolsPage({
             >
               Copy decision pack
             </button>
+            <button
+              className="w-fit rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+              disabled={!decisionPack}
+              onClick={() =>
+                onAddReportBucketItem({
+                  content: decisionSummaryNotes,
+                  id: "decision-pack-summary",
+                  source_page: "Power BI & Tools",
+                  summary: decisionPack?.executive_takeaway ?? "Decision pack summary.",
+                  title: "Decision Pack Summary",
+                  type: "decision_memo",
+                })
+              }
+              type="button"
+            >
+              Add Decision Pack to Report Bucket
+            </button>
             <DetailsBlock summary="Evidence Pack details" hint="Evidence sections, risk flags, assumptions, and caveats.">
               <pre className="max-h-96 overflow-auto rounded-xl border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
                 {decisionPackPreview}
@@ -2071,6 +2251,19 @@ function EnterpriseToolsPage({
           {selectedOutput === "scenario" ? (
             <>
               <ActionButton label="Copy decision memo" onClick={() => void copyText("Decision memo", scenarioMemoText)} />
+              <ActionButton
+                label="Add memo to Report Bucket"
+                onClick={() =>
+                  onAddReportBucketItem({
+                    content: scenarioMemoText || "Scenario decision memo is not ready yet.",
+                    id: "scenario-decision-memo",
+                    source_page: "Power BI & Tools",
+                    summary: "Scenario decision memo from the current scenario controls.",
+                    title: "Scenario Decision Memo",
+                    type: "decision_memo",
+                  })
+                }
+              />
               <ActionButton label="Send to Print" onClick={() => onNavigate("print")} />
             </>
           ) : null}
@@ -2079,6 +2272,20 @@ function EnterpriseToolsPage({
               <ActionButton label="Copy CSV Import Order" onClick={() => void copyText("CSV import order", importOrderNotes)} />
               <ActionButton label="Open Power BI Desktop" onClick={() => void copyText("Power BI reminder", "Open Power BI Desktop, then Get Data -> Text/CSV.")} />
               <ActionButton label="Copy import checklist" onClick={() => void copyText("QA checklist", qaChecklistNotes)} />
+              <ActionButton
+                label="Add QA checklist to Report Bucket"
+                onClick={() =>
+                  onAddReportBucketItem({
+                    content: qaChecklistNotes,
+                    id: "powerbi-qa-checklist",
+                    source_page: "Power BI & Tools",
+                    summary: "Power BI import QA checklist.",
+                    title: "Power BI Import QA Checklist",
+                    type: "qa_checklist",
+                  })
+                }
+              />
+              <ActionButton label="Send Bucket to Print" onClick={() => onNavigate("print")} />
             </>
           ) : null}
           {selectedOutput === "planning" ? (
@@ -2095,7 +2302,19 @@ function EnterpriseToolsPage({
           ) : null}
         </div>
         <DetailsBlock summary="Power BI Import QA Checklist" hint="Quality checks before import and report build.">
-          <QaChecklist onCopy={() => void copyText("QA checklist", qaChecklistNotes)} />
+          <QaChecklist
+            onAddBucket={() =>
+              onAddReportBucketItem({
+                content: qaChecklistNotes,
+                id: "powerbi-qa-checklist",
+                source_page: "Power BI & Tools",
+                summary: "Power BI import QA checklist.",
+                title: "Power BI Import QA Checklist",
+                type: "qa_checklist",
+              })
+            }
+            onCopy={() => void copyText("QA checklist", qaChecklistNotes)}
+          />
         </DetailsBlock>
       </EconPanel>
       {copyStatus ? (
@@ -2272,9 +2491,11 @@ function CsvDownloadTable({ rows }: { rows: ReturnType<typeof powerBiCsvRows> })
 
 function PowerBiChartBuilder({
   aiAction,
+  onAddReportBucketItem,
   payload,
 }: {
   aiAction?: PowerBiAskActionRequest | null;
+  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
   payload: EconomicsPowerBiExportResponse | null;
 }) {
   const aiGeneratedPlan =
@@ -2415,6 +2636,20 @@ function PowerBiChartBuilder({
     );
     setCopyStatus("Chart added to Power BI Report Canvas");
   };
+  const addChartToBucket = () => {
+    onAddReportBucketItem({
+      chart_config: currentChartConfig,
+      content: recipe,
+      id: `chart-${slugifyReportTitle(chartTitle)}-${slugifyReportTitle(recipe)}`,
+      powerbi_recipe: recipe,
+      related_tables: [tableName],
+      source_page: "Power BI & Tools",
+      summary: `${chartVisualLabel(visualType)} using ${tableName}.`,
+      title: chartTitle,
+      type: "chart",
+    });
+    setCopyStatus("Added to Report Bucket");
+  };
   const copyCanvasRecipe = async () => {
     if (!navigator.clipboard) {
       setCopyStatus("Clipboard unavailable");
@@ -2434,6 +2669,25 @@ function PowerBiChartBuilder({
     const generatedItems = generatedPlanToCanvasItems(plan);
     setCanvasItems((items) => [...items, ...generatedItems].slice(-8));
     setCopyStatus("Recommended visuals added to Power BI Report Canvas");
+  };
+  const addGeneratedPlanToBucket = (plan: PowerBiGeneratedReportPlan) => {
+    onAddReportBucketItem(bucketItemFromGeneratedPlan(plan));
+    setCopyStatus("Added to Report Bucket");
+  };
+  const addGeneratedVisualToBucket = (visual: PowerBiGeneratedVisual) => {
+    onAddReportBucketItem({
+      caveats: [visual.caveat],
+      chart_config: generatedVisualToRecipeConfig(visual),
+      content: visual.powerbi_recipe,
+      id: `visual-${visual.visual_id}`,
+      powerbi_recipe: visual.powerbi_recipe,
+      related_tables: [visual.source_table],
+      source_page: "Power BI & Tools",
+      summary: `${chartVisualLabel(visual.visual_type)} on ${visual.source_table}.`,
+      title: visual.title,
+      type: "chart",
+    });
+    setCopyStatus("Added to Report Bucket");
   };
   const addGeneratedVisualsToCanvas = () => {
     if (!generatedPlan) return;
@@ -2567,6 +2821,13 @@ function PowerBiChartBuilder({
                       <p className="mt-1 text-xs text-[var(--econ-muted)]">
                         {visual.source_table}: {visual.axis} · {visual.value}
                       </p>
+                      <button
+                        className="mt-3 rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                        onClick={() => addGeneratedVisualToBucket(visual)}
+                        type="button"
+                      >
+                        Add to Report Bucket
+                      </button>
                     </div>
                   )),
                 )}
@@ -2586,6 +2847,13 @@ function PowerBiChartBuilder({
                   type="button"
                 >
                   Apply to Chart Builder
+                </button>
+                <button
+                  className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                  onClick={() => addGeneratedPlanToBucket(generatedPlan)}
+                  type="button"
+                >
+                  Add Report Plan to Report Bucket
                 </button>
                 <button
                   className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
@@ -2722,13 +2990,20 @@ function PowerBiChartBuilder({
           >
             Copy Power BI recipe
           </button>
-          <button
-            className="ml-2 mt-3 rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
-            onClick={addChartToCanvas}
-            type="button"
-          >
-            Add to Report Canvas
-          </button>
+	          <button
+	            className="ml-2 mt-3 rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
+	            onClick={addChartToCanvas}
+	            type="button"
+	          >
+	            Add to Report Canvas
+	          </button>
+	          <button
+	            className="ml-2 mt-3 rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+	            onClick={addChartToBucket}
+	            type="button"
+	          >
+	            Add to Report Bucket
+	          </button>
           {copyStatus ? (
             <p className="mt-2 text-xs text-[var(--econ-green)]">{copyStatus}</p>
           ) : null}
@@ -2743,14 +3018,34 @@ function PowerBiChartBuilder({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
-              disabled={!canvasItems.length}
-              onClick={() => void copyCanvasRecipe()}
-              type="button"
-            >
-              Copy Report Recipe
-            </button>
+	            <button
+	              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+	              disabled={!canvasItems.length}
+	              onClick={() => void copyCanvasRecipe()}
+	              type="button"
+	            >
+	              Copy Report Recipe
+	            </button>
+	            <button
+	              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+	              disabled={!canvasItems.length}
+	              onClick={() => {
+	                onAddReportBucketItem({
+	                  content: canvasRecipe,
+	                  id: `report-canvas-${slugifyReportTitle(canvasRecipe)}`,
+	                  powerbi_recipe: canvasRecipe,
+	                  related_tables: uniquePowerBiTables(canvasItems.map((item) => item.tableName)),
+	                  source_page: "Power BI & Tools",
+	                  summary: `${canvasItems.length} report canvas visual recipes.`,
+	                  title: "Power BI Report Canvas Recipe",
+	                  type: "powerbi_recipe",
+	                });
+	                setCopyStatus("Added to Report Bucket");
+	              }}
+	              type="button"
+	            >
+	              Add Canvas to Bucket
+	            </button>
             <button
               className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
               disabled={!canvasItems.length}
@@ -2990,16 +3285,31 @@ function ConceptList({
   );
 }
 
-function QaChecklist({ onCopy }: { onCopy: () => void }) {
+function QaChecklist({
+  onAddBucket,
+  onCopy,
+}: {
+  onAddBucket: () => void;
+  onCopy: () => void;
+}) {
   return (
     <div className="grid gap-3">
-      <button
-        className="w-fit rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
-        onClick={onCopy}
-        type="button"
-      >
-        Copy QA Checklist
-      </button>
+      <div className="flex flex-wrap gap-2">
+        <button
+          className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+          onClick={onCopy}
+          type="button"
+        >
+          Copy QA Checklist
+        </button>
+        <button
+          className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+          onClick={onAddBucket}
+          type="button"
+        >
+          Add QA Checklist to Report Bucket
+        </button>
+      </div>
       <div className="grid gap-2 md:grid-cols-2">
         {powerBiImportQaChecklist.map((item) => (
           <div
@@ -3012,6 +3322,105 @@ function QaChecklist({ onCopy }: { onCopy: () => void }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function ReportBucketPanel({
+  items,
+  onClear,
+  onOpenPrint,
+  onRemove,
+  onTogglePrint,
+  title,
+}: {
+  items: ReportBucketItem[];
+  onClear: () => void;
+  onOpenPrint?: () => void;
+  onRemove: (id: string) => void;
+  onTogglePrint: (id: string) => void;
+  title: string;
+}) {
+  return (
+    <EconPanel
+      description="Save charts, report plans, recipes, or decision notes, then choose what appears in Print."
+      kicker={`${items.length} items`}
+      title={title}
+      tourId="report-bucket"
+    >
+      {items.length ? (
+        <div className="grid gap-3">
+          <div className="flex flex-wrap gap-2">
+            {onOpenPrint ? (
+              <button
+                className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
+                onClick={onOpenPrint}
+                type="button"
+              >
+                Send Bucket to Print
+              </button>
+            ) : null}
+            <button
+              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+              onClick={onClear}
+              type="button"
+            >
+              Clear bucket
+            </button>
+          </div>
+          <div className="grid gap-2">
+            {items.map((item) => (
+              <div
+                className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3"
+                key={item.id}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="rounded-full border border-[var(--econ-border)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--econ-muted)]">
+                      {bucketTypeLabel(item.type)}
+                    </span>
+                    <h3 className="mt-2 truncate text-sm font-semibold text-[var(--econ-text)]">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-xs leading-5 text-[var(--econ-muted)]">
+                      {item.summary}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <label className="inline-flex items-center gap-2 rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs text-[var(--econ-muted)]">
+                      <input
+                        checked={item.selected_for_print}
+                        onChange={() => onTogglePrint(item.id)}
+                        type="checkbox"
+                      />
+                      Include in Print
+                    </label>
+                    <button
+                      className="rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-risk)]"
+                      onClick={() => onRemove(item.id)}
+                      type="button"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+                <details className="mt-2 text-xs text-[var(--econ-muted)]">
+                  <summary className="cursor-pointer font-semibold text-[var(--econ-text)]">
+                    Preview content
+                  </summary>
+                  <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded-lg border border-[var(--econ-border)] bg-black/20 p-3">
+                    {bucketItemText(item)}
+                  </pre>
+                </details>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p className="rounded-xl border border-dashed border-[var(--econ-border)] px-3 py-4 text-sm leading-6 text-[var(--econ-muted)]">
+          Add charts, report plans, recipes, or decision memos to the bucket, then choose what to include in Print.
+        </p>
+      )}
+    </EconPanel>
   );
 }
 
@@ -4808,6 +5217,31 @@ type UserReportCanvasItem = UserChartRecipeConfig & {
   pageName?: string;
   title: string;
 };
+type ReportBucketItemType =
+  | "chart"
+  | "decision_memo"
+  | "evidence_pack"
+  | "powerbi_recipe"
+  | "qa_checklist"
+  | "report_plan"
+  | "scenario_output";
+type ReportBucketItem = {
+  caveats?: string[];
+  chart_config?: UserChartRecipeConfig;
+  content: string;
+  created_at: string;
+  id: string;
+  powerbi_recipe?: string;
+  related_tables?: PowerBiTableName[];
+  report_plan?: PowerBiGeneratedReportPlan;
+  selected_for_print: boolean;
+  source_page: "Ask CFS" | "Economic Dashboard" | "Power BI & Tools" | "Print";
+  summary: string;
+  title: string;
+  type: ReportBucketItemType;
+};
+type ReportBucketItemInput = Omit<ReportBucketItem, "created_at" | "selected_for_print"> &
+  Partial<Pick<ReportBucketItem, "created_at" | "selected_for_print">>;
 type PowerBiGeneratedVisual = {
   aggregation: UserChartAggregation;
   axis: string;
@@ -5512,6 +5946,53 @@ function generatedPlanToCanvasItems(plan: PowerBiGeneratedReportPlan) {
   );
 }
 
+function bucketItemFromGeneratedPlan(plan: PowerBiGeneratedReportPlan): ReportBucketItemInput {
+  return {
+    caveats: plan.caveats,
+    content: generatedReportPlanInstructions(plan),
+    id: `report-plan-${slugifyReportTitle(plan.title)}-${slugifyReportTitle(plan.generated_from_prompt)}`,
+    powerbi_recipe: generatedReportPlanInstructions(plan),
+    related_tables: plan.recommended_tables,
+    report_plan: plan,
+    source_page: "Power BI & Tools",
+    summary: plan.summary,
+    title: plan.title,
+    type: "report_plan",
+  };
+}
+
+function bucketItemFromAskResponse(response: CfsAiSearchResponse): ReportBucketItemInput {
+  const title = response.powerbi_actions?.report_title ?? "Ask CFS Economics Answer";
+  const suggestedActions = response.suggested_actions.map((action) => `- ${action}`).join("\n");
+  return {
+    caveats: response.caveats,
+    content: [response.answer, suggestedActions ? `Suggested actions:\n${suggestedActions}` : ""].filter(Boolean).join("\n\n"),
+    id: `ask-cfs-${slugifyReportTitle(title)}-${slugifyReportTitle(response.as_of ?? "session")}`,
+    source_page: "Ask CFS",
+    summary: response.powerbi_actions?.report_summary ?? response.answer.split("\n").find(Boolean) ?? "Ask CFS response.",
+    title,
+    type: response.powerbi_actions ? "report_plan" : "evidence_pack",
+  };
+}
+
+function bucketItemText(item: ReportBucketItem) {
+  const lines = [
+    item.title,
+    `Type: ${bucketTypeLabel(item.type)}`,
+    `Source: ${item.source_page}`,
+    `Summary: ${item.summary}`,
+    item.related_tables?.length ? `Related tables: ${item.related_tables.join(", ")}` : "",
+    item.powerbi_recipe ? `Power BI recipe:\n${item.powerbi_recipe}` : "",
+    item.content ? `Content:\n${item.content}` : "",
+    item.caveats?.length ? `Caveats:\n${item.caveats.map((caveat) => `- ${caveat}`).join("\n")}` : "",
+  ];
+  return lines.filter(Boolean).join("\n\n");
+}
+
+function bucketTypeLabel(type: ReportBucketItemType) {
+  return type.replaceAll("_", " ");
+}
+
 function generatedReportPlanInstructions(plan: PowerBiGeneratedReportPlan) {
   const relationships = plan.relationships.map(
     (row) => `${row.from_table}.${row.from_column} -> ${row.to_table}.${row.to_column}`,
@@ -5957,6 +6438,12 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
       title: "Executive takeaway",
     },
     {
+      body: "Select which saved bucket items should appear in the printed snapshot.",
+      id: "print-report-bucket",
+      targetSelector: '[data-econ-tour="print-report-bucket"]',
+      title: "Report Bucket",
+    },
+    {
       body: "Keep caveats visible so the report is not mistaken for an official appraisal or fiscal impact study.",
       id: "print-caveats",
       targetSelector: '[data-econ-tour="print-caveats"]',
@@ -6038,6 +6525,13 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
       targetSelector: '[data-econ-tour="report-canvas"]',
       title: "Power BI Report Canvas",
       why: "The canvas is your report plan.",
+    },
+    {
+      body: "Save useful charts, recipes, and decision notes here, then choose what to include in the Print snapshot.",
+      id: "tools-report-bucket",
+      targetSelector: '[data-econ-tour="report-bucket"]',
+      title: "Report Bucket",
+      why: "This connects Power BI work to the final snapshot.",
     },
     {
       body: "Scenario, planning model, and decision-pack tools are advanced. Open them after the basic Power BI workflow makes sense.",

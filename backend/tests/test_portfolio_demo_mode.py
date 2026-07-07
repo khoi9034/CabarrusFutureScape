@@ -408,6 +408,18 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Download Report Plan JSON" in economics_shell
     assert "Ask CFS configured this report from your prompt." in economics_shell
     assert "generatedVisualToCanvasItem" in economics_shell
+    assert "ReportBucketItem" in economics_shell
+    assert "ReportBucketPanel" in economics_shell
+    assert "Add to Report Bucket" in economics_shell
+    assert "Add Ask CFS answer to Report Bucket" in economics_shell
+    assert "Add Report Plan to Report Bucket" in economics_shell
+    assert "Add Canvas to Bucket" in economics_shell
+    assert "Send Bucket to Print" in economics_shell
+    assert "Include in Print" in economics_shell
+    assert "Copy selected report items" in economics_shell
+    assert "Selected Report Items" in economics_shell
+    assert 'data-econ-tour="report-bucket"' in economics_shell
+    assert 'data-econ-tour="print-report-bucket"' in economics_shell
     assert "userChartTemplates" in economics_shell
     assert "Opportunity Class Breakdown" in economics_shell
     assert "Economic Segment Mix" in economics_shell
@@ -502,6 +514,10 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Show special assets as a report." in ask_service
     assert "Build a data confidence matrix." in ask_service
     assert "What should I add to the Power BI Report Canvas?" in ask_service
+    assert "What should I add to the report bucket?" in ask_service
+    assert "How do I use the report bucket?" in ask_service
+    assert "What bucket items should go in the print snapshot?" in ask_service
+    assert "Build a report plan and add it to the bucket." in ask_service
     assert "Build me a Power BI dashboard." in ask_service
     assert "What charts should Power BI generate?" in ask_service
     assert "AI Power BI Report Builder" in ask_service

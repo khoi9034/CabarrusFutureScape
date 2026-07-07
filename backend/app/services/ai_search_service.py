@@ -1218,6 +1218,10 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "dashboard visual",
             "report canvas",
             "canvas recipe",
+            "report bucket",
+            "bucket items",
+            "add it to the bucket",
+            "add this answer to the report bucket",
             "report plan",
             "report planner",
             "generate report",
@@ -1344,6 +1348,16 @@ def _economics_powerbi_answer(
             ),
         ),
         (
+            "Report Bucket",
+            _bullets(
+                [
+                    "Add useful chart recipes, report plans, Ask CFS answers, decision notes, or QA checklists to the Report Bucket.",
+                    "Toggle which bucket items should appear in Print.",
+                    "Use Send Bucket to Print when the draft report outline is ready for a snapshot.",
+                ]
+            ),
+        ),
+        (
             "Suggested measures",
             _bullets(
                 [
@@ -1406,6 +1420,7 @@ def _economics_powerbi_answer(
             "Use Flat CSV Tables first if you are learning Power BI Desktop.",
             "Use Build Your Own Chart to pick a table, visual, category, measure, and optional filter.",
             "Add useful previews to the Report Canvas, then copy the report canvas recipe.",
+            "Add useful plans or recipes to the Report Bucket, then send selected bucket items to Print.",
             "Download the JSON pack and import it into Power BI Desktop.",
             "Build the exported relationships before creating report visuals.",
             "Use the Power BI Report Builder Guide for page-by-page visual instructions.",

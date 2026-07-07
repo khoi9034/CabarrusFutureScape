@@ -814,6 +814,7 @@ def test_ai_search_economics_powerbi_prompt_returns_workflow_answer() -> None:
     assert "Crowded pie charts" in response.answer
     assert "Report canvas" in response.answer
     assert "Copy the report canvas recipe" in response.answer
+    assert "Report Bucket" in response.answer
     assert "Suggested measures" in response.answer
     assert "Quality checks" in response.answer
     assert "scenario_id exists in scenario_output_fact" in response.answer
@@ -924,6 +925,20 @@ def test_ai_search_economics_report_canvas_prompt_routes_to_powerbi_answer() -> 
 
     assert "Report canvas" in response.answer
     assert "Copy the report canvas recipe" in response.answer
+    assert response.evidence[0].source == "economics_powerbi_export"
+
+
+def test_ai_search_economics_report_bucket_prompt_routes_to_powerbi_answer() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="How do I use the report bucket?",
+        ),
+        _context(),
+    )
+
+    assert "Report Bucket" in response.answer
+    assert "Toggle which bucket items should appear in Print" in response.answer
     assert response.evidence[0].source == "economics_powerbi_export"
 
 

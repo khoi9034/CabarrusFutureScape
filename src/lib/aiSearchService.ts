@@ -103,6 +103,10 @@ export const askCfsEconomicsPowerBiToolPrompts = [
   "What charts should Power BI generate?",
   "How do I build a chart?",
   "What should I add to the Power BI Report Canvas?",
+  "What should I add to the report bucket?",
+  "How do I use the report bucket?",
+  "What bucket items should go in the print snapshot?",
+  "Build a report plan and add it to the bucket.",
   "How do I QA the export?",
 ] as const;
 
@@ -619,6 +623,10 @@ function isEconomicsPowerBiQuery(query: string) {
     "dashboard visual",
     "report canvas",
     "canvas recipe",
+    "report bucket",
+    "bucket items",
+    "add it to the bucket",
+    "add this answer to the report bucket",
     "report plan",
     "report planner",
     "generate report",
@@ -914,6 +922,14 @@ function demoEconomicsPowerBiAnswer(
           "Preview a chart in Build Your Own Chart, then add it to the Report Canvas.",
           "Keep Page 1 simple: KPI cards, opportunity class, segment mix, and one scenario or data-confidence visual.",
           "Copy the report recipe when you are ready to recreate the page in Power BI Desktop.",
+        ]),
+      ],
+      [
+        "Report Bucket",
+        bullets([
+          "Add useful chart recipes, report plans, Ask CFS answers, decision notes, or QA checklists to the Report Bucket.",
+          "Toggle which bucket items should appear in Print.",
+          "Use Send Bucket to Print when the draft report outline is ready for a snapshot.",
         ]),
       ],
       [
