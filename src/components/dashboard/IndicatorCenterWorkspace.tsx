@@ -598,8 +598,48 @@ function PlanningIndicatorCenterWorkspace() {
     key: "domain-status-breakdown-chart",
     title: "Domain Status Breakdown",
   };
+  const watchlistByDomainChart = {
+    caveat: "Ranks the currently filtered review queue by planning domain.",
+    data: Object.entries(
+      visibleAttentionQueue.reduce<Record<string, number>>((counts, row) => {
+        counts[row.category] = (counts[row.category] ?? 0) + 1;
+        return counts;
+      }, {}),
+    ).map(([label, value]) => ({ label, value })),
+    emptyLabel: "No watchlist rows in the current filter.",
+    key: "watchlist-by-domain-chart",
+    title: "Watchlist by Domain",
+  };
+  const dataReadinessStatusChart = {
+    caveat: "Shows availability posture for the currently filtered intelligence domains.",
+    data: Object.entries(
+      visibleDomainReadinessRows.reduce<Record<string, number>>((counts, row) => {
+        counts[row.dataStatus] = (counts[row.dataStatus] ?? 0) + 1;
+        return counts;
+      }, {}),
+    ).map(([label, value]) => ({ label, value })),
+    emptyLabel: "No readiness rows in the current filter.",
+    key: "data-readiness-status-chart",
+    title: "Data Readiness Status",
+  };
+  const schoolPressureBandChart = {
+    caveat: "Preliminary school pressure context; verify with official enrollment and capacity.",
+    data: [
+      { label: "Elevated review", value: schoolPressureLayer.summary.elevated_review_count },
+      { label: "Data needed", value: schoolPressureLayer.summary.data_needed_count },
+      { label: "Recent watched permits", value: schoolPressureLayer.summary.recent_residential_permits_in_watched_areas },
+    ].filter((row) => row.value > 0),
+    emptyLabel: "School pressure rows are not available for this filter.",
+    key: "school-pressure-band-chart",
+    title: "School Pressure Signals",
+  };
   const monitoringChartCards = [
     domainStatusChart,
+    watchlistByDomainChart,
+    dataReadinessStatusChart,
+    ...(shouldShowGroupForReadinessTab("school-context", activeReadinessTab)
+      ? [schoolPressureBandChart]
+      : []),
     ...(monitoringCharts[0]
       ? [
           {

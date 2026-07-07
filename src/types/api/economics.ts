@@ -145,6 +145,7 @@ export interface EconomicsSegmentSummary {
 export interface EconomicsIntelligenceResponse {
   as_of: string | null;
   caveats: string[];
+  context_freshness?: "cached_demo_extract" | "current_session" | "fallback_partial" | string | null;
   data_readiness: EconomicsReadinessRow[];
   enterprise_exports?: {
     csv_manifest: string;
@@ -158,6 +159,14 @@ export interface EconomicsIntelligenceResponse {
   opportunity_class_breakdown: EconomicsOpportunityClassBreakdown[];
   parcel_economic_signals: EconomicsParcelSignal[];
   parcel_economic_profiles?: EconomicsParcelSignal[];
+  fallback_reason?: string | null;
+  record_counts?: {
+    data_readiness?: number;
+    parcel_economic_signals?: number;
+    scenario_outputs?: number;
+    total_parcels_analyzed?: number;
+    underbuilt_watchlist?: number;
+  };
   segment_data_confidence?: Array<Record<string, unknown>>;
   segment_improvement_ratio?: Array<Record<string, unknown>>;
   segment_opportunity_breakdown?: Array<Record<string, unknown>>;
@@ -175,6 +184,7 @@ export interface EconomicsIntelligenceResponse {
   scenario_outputs: EconomicsScenarioOutput[];
   scenario_templates: EconomicsScenarioTemplate[];
   signals: EconomicsParcelSignal[];
+  source_mode?: "local_live_backend" | "portfolio_demo_extract" | string | null;
   summary: EconomicsSummary;
   tables?: {
     data_readiness: EconomicsReadinessRow[];

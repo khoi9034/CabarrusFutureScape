@@ -321,6 +321,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Screening-level economic context, not official appraisal, tax bill, or fiscal impact study." in economics_shell
     assert "Review indicators and ask CFS." in economics_shell
     assert "EconomicsSlicerBar" in economics_shell
+    assert "economicsSignalsFromPowerBiExport" in economics_shell
+    assert "Economics data is currently using a partial fallback" in economics_shell
+    assert "CFS will not silently swap in demo data while local live mode is selected." in economics_shell
     assert "grid-template-columns:repeat(auto-fit,minmax(220px,1fr))" in economics_shell
     assert "Economic Segment" in economics_shell
     assert "Segmented Land Economics" in economics_shell
@@ -437,6 +440,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "filterContext={askCfsFilterContext}" in economics_shell
     assert economics_shell.index("Filtered dashboard assistant") < economics_shell.index('data-econ-tour="slicers"')
     assert "Domain Status Breakdown" in indicator_center
+    assert "Watchlist by Domain" in indicator_center
+    assert "Data Readiness Status" in indicator_center
+    assert "School Pressure Signals" in indicator_center
     assert "filterContext={askCfsFilterContext}" in indicator_center
     assert "EconomicMissionControl" in indicator_center
     assert "getDemoEconomicsIntelligence" in economics_service

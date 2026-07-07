@@ -23,7 +23,12 @@ from app.services.enterprise_export_service import (
 router = APIRouter(prefix="/economics", tags=["CFS Economics"])
 
 ECONOMICS_CACHE_TTL = timedelta(minutes=5)
-_ECONOMICS_CACHE: dict[str, Any] = {"expires_at": None, "payload": None}
+_ECONOMICS_CACHE: dict[str, Any] = {
+    "fallback_expires_at": None,
+    "fallback_payload": None,
+    "real_expires_at": None,
+    "real_payload": None,
+}
 
 ECONOMIC_SEGMENTS = [
     "Residential",
@@ -95,18 +100,19 @@ def get_economics_powerbi_csv(
 
 
 def _cached_economics_intelligence(db: Session | None) -> dict[str, Any]:
-    cached_payload = _ECONOMICS_CACHE.get("payload")
-    expires_at = _ECONOMICS_CACHE.get("expires_at")
-    if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached_payload:
-        return cached_payload
+    cached_real = _cached_economics_payload("real")
+    if cached_real:
+        return cached_real
 
     if db is None:
+        cached_fallback = _cached_economics_payload("fallback")
+        if cached_fallback:
+            return cached_fallback
         payload = _unavailable_payload(
             datetime.now(UTC).isoformat(),
             "Local economics context is still warming, so CFS used available parcel/economic summary fields.",
         )
-        _ECONOMICS_CACHE["payload"] = payload
-        _ECONOMICS_CACHE["expires_at"] = datetime.now(UTC) + ECONOMICS_CACHE_TTL
+        _set_cached_economics_payload("fallback", payload)
         return payload
 
     try:
@@ -117,10 +123,23 @@ def _cached_economics_intelligence(db: Session | None) -> dict[str, Any]:
             datetime.now(UTC).isoformat(),
             "Local economics context is still warming, so CFS used available parcel/economic summary fields.",
         )
-    # ponytail: process-local cache is enough for local presentation; use shared cache if multi-worker freshness matters.
-    _ECONOMICS_CACHE["payload"] = payload
-    _ECONOMICS_CACHE["expires_at"] = datetime.now(UTC) + ECONOMICS_CACHE_TTL
+    cache_kind = "fallback" if payload.get("context_freshness") == "fallback_partial" else "real"
+    # ponytail: process-local split cache is enough for local presentation; use shared cache if multi-worker freshness matters.
+    _set_cached_economics_payload(cache_kind, payload)
     return payload
+
+
+def _cached_economics_payload(kind: str) -> dict[str, Any] | None:
+    cached_payload = _ECONOMICS_CACHE.get(f"{kind}_payload")
+    expires_at = _ECONOMICS_CACHE.get(f"{kind}_expires_at")
+    if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached_payload:
+        return cached_payload
+    return None
+
+
+def _set_cached_economics_payload(kind: str, payload: dict[str, Any]) -> None:
+    _ECONOMICS_CACHE[f"{kind}_payload"] = payload
+    _ECONOMICS_CACHE[f"{kind}_expires_at"] = datetime.now(UTC) + ECONOMICS_CACHE_TTL
 
 
 def get_cached_economics_intelligence(db: Session | None) -> dict[str, Any]:
@@ -294,7 +313,7 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         for signal in signals
         if signal["economic_status_band"] == "underbuilt_watch"
     ][:25]
-    return _with_economics_aliases({
+    return _stamp_economics_metadata(_with_economics_aliases({
         "as_of": as_of,
         "caveats": caveats + [
             "Local economics context uses parcel value and acreage fields first; heavier overlay context is summarized as data readiness so the dashboard stays responsive.",
@@ -322,7 +341,7 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         "top_rows_by_segment": _top_rows_by_segment(signals),
         "underbuilt_watchlist": underbuilt_watchlist,
         "watchlist": watchlist,
-    })
+    }))
 
 
 def calculate_value_per_acre(assessed_value: float | None, acreage: float | None) -> float | None:
@@ -843,6 +862,31 @@ def _with_economics_aliases(payload: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+def _stamp_economics_metadata(
+    payload: dict[str, Any],
+    *,
+    fallback_reason: str | None = None,
+) -> dict[str, Any]:
+    payload["source_mode"] = "local_live_backend"
+    payload["context_freshness"] = (
+        "fallback_partial" if fallback_reason else "current_session"
+    )
+    if fallback_reason:
+        payload["fallback_reason"] = fallback_reason
+    else:
+        payload.pop("fallback_reason", None)
+    payload["record_counts"] = {
+        "data_readiness": len(payload.get("data_readiness") or []),
+        "parcel_economic_signals": len(payload.get("parcel_economic_signals") or []),
+        "scenario_outputs": len(payload.get("scenario_outputs") or []),
+        "total_parcels_analyzed": _int(
+            _dict(payload.get("summary")).get("total_parcels_analyzed"),
+        ),
+        "underbuilt_watchlist": len(payload.get("underbuilt_watchlist") or []),
+    }
+    return payload
+
+
 def _table_exists(db: Session, table_name: str) -> bool:
     return bool(
         db.execute(
@@ -1034,7 +1078,7 @@ def _unavailable_payload(as_of: str, reason: str) -> dict[str, Any]:
         "total_parcels_analyzed": 0,
         "underbuilt_candidate_count": 0,
     }
-    return _with_economics_aliases({
+    return _stamp_economics_metadata(_with_economics_aliases({
         "as_of": as_of,
         "caveats": [
             reason,
@@ -1062,7 +1106,7 @@ def _unavailable_payload(as_of: str, reason: str) -> dict[str, Any]:
         "top_rows_by_segment": [],
         "underbuilt_watchlist": [],
         "watchlist": [],
-    })
+    }), fallback_reason=reason)
 
 
 def _float(value: Any) -> float | None:

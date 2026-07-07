@@ -26,6 +26,16 @@ from app.services.enterprise_export_service import (
 client = TestClient(app)
 
 
+def reset_economics_cache() -> None:
+    for key in (
+        "fallback_expires_at",
+        "fallback_payload",
+        "real_expires_at",
+        "real_payload",
+    ):
+        economics_router._ECONOMICS_CACHE[key] = None
+
+
 def test_economics_screening_calculations_are_transparent() -> None:
     assert calculate_value_per_acre(500_000, 2) == 250_000
     assert calculate_value_per_acre(500_000, 0) is None
@@ -38,6 +48,10 @@ def test_economics_missing_fields_return_data_needed_schema() -> None:
     payload = _unavailable_payload("2026-01-01T00:00:00+00:00", "Parcel value fields unavailable.")
 
     assert payload["mode"] == "live"
+    assert payload["source_mode"] == "local_live_backend"
+    assert payload["context_freshness"] == "fallback_partial"
+    assert payload["fallback_reason"] == "Parcel value fields unavailable."
+    assert payload["record_counts"]["parcel_economic_signals"] == 0
     assert payload["summary"]["total_parcels_analyzed"] == 0
     assert payload["summary"]["data_needed_count"] == 1
     assert payload["kpis"]
@@ -80,8 +94,7 @@ def test_economics_cache_returns_partial_payload_when_builder_fails(monkeypatch)
         "build_economics_intelligence",
         lambda _db: (_ for _ in ()).throw(RuntimeError("slow local database")),
     )
-    economics_router._ECONOMICS_CACHE["payload"] = None
-    economics_router._ECONOMICS_CACHE["expires_at"] = None
+    reset_economics_cache()
 
     class FakeDb:
         def rollback(self) -> None:
@@ -90,24 +103,54 @@ def test_economics_cache_returns_partial_payload_when_builder_fails(monkeypatch)
     payload = economics_router._cached_economics_intelligence(FakeDb())
 
     assert payload["mode"] == "live"
+    assert payload["context_freshness"] == "fallback_partial"
     assert payload["summary"]["data_needed_count"] == 1
     assert "still warming" in " ".join(payload["caveats"])
     assert payload["tables"]["parcel_economic_baseline"] == []
-    economics_router._ECONOMICS_CACHE["payload"] = None
-    economics_router._ECONOMICS_CACHE["expires_at"] = None
+    reset_economics_cache()
 
 
 def test_economics_cache_returns_partial_payload_without_db_session() -> None:
-    economics_router._ECONOMICS_CACHE["payload"] = None
-    economics_router._ECONOMICS_CACHE["expires_at"] = None
+    reset_economics_cache()
 
     payload = economics_router._cached_economics_intelligence(None)
 
     assert payload["mode"] == "live"
+    assert payload["context_freshness"] == "fallback_partial"
     assert payload["summary"]["data_needed_count"] == 1
     assert "still warming" in " ".join(payload["caveats"])
-    economics_router._ECONOMICS_CACHE["payload"] = None
-    economics_router._ECONOMICS_CACHE["expires_at"] = None
+    reset_economics_cache()
+
+
+def test_economics_cache_does_not_let_fallback_replace_real_payload(monkeypatch) -> None:
+    reset_economics_cache()
+    calls = {"count": 0}
+
+    def fake_builder(_db: object) -> dict[str, object]:
+        calls["count"] += 1
+        return {
+            "as_of": "2026-01-01T00:00:00+00:00",
+            "context_freshness": "current_session",
+            "mode": "live",
+            "parcel_economic_signals": [{"parcel_id": "live-1"}],
+            "source_mode": "local_live_backend",
+            "summary": {"total_parcels_analyzed": 1},
+        }
+
+    monkeypatch.setattr(economics_router, "build_economics_intelligence", fake_builder)
+
+    class FakeDb:
+        def rollback(self) -> None:
+            pass
+
+    first = economics_router._cached_economics_intelligence(FakeDb())
+    second = economics_router._cached_economics_intelligence(None)
+
+    assert first is second
+    assert calls["count"] == 1
+    assert second["context_freshness"] == "current_session"
+    assert second["parcel_economic_signals"] == [{"parcel_id": "live-1"}]
+    reset_economics_cache()
 
 
 def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:

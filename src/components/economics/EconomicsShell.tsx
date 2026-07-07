@@ -87,11 +87,25 @@ export function EconomicsShell() {
     };
   }, []);
 
-  const signals = intelligence?.parcel_economic_signals ?? intelligence?.signals ?? [];
+  const intelligenceSignals = intelligence?.parcel_economic_signals ?? intelligence?.signals ?? [];
+  const exportSignals = useMemo(
+    () => economicsSignalsFromPowerBiExport(powerBiExport),
+    [powerBiExport],
+  );
+  const signals = intelligenceSignals.length ? intelligenceSignals : exportSignals;
   const watchlist =
     intelligence?.underbuilt_watchlist?.length
       ? intelligence.underbuilt_watchlist
-      : (intelligence?.watchlist ?? []);
+      : intelligence?.watchlist?.length
+        ? intelligence.watchlist
+        : signals.filter((signal) =>
+            [
+              "Underbuilt Redevelopment Candidate",
+              "Tax-Base Opportunity",
+              "High Value but Infrastructure-Constrained",
+              "Needs More Data Before Recommendation",
+            ].includes(signal.opportunity_class),
+          ).slice(0, 25);
   const selectedSignals = signals.filter((signal) =>
     selectedSignalIds.includes(signal.parcel_id),
   );
@@ -856,11 +870,27 @@ function EconomicDashboardPage({
       <PageHelper text="Review indicators and ask CFS." />
       <section className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] px-4 py-3">
         <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
+        {intelligence?.context_freshness ? (
+          <EconChip>{intelligence.context_freshness.replaceAll("_", " ")}</EconChip>
+        ) : null}
         <EconChip>Updated {formatDate(intelligence?.as_of ?? summary?.as_of)}</EconChip>
         <span className="text-xs leading-5 text-[var(--econ-muted)]">
           Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.
         </span>
       </section>
+      {intelligence?.context_freshness === "fallback_partial" ? (
+        <EconPanel title="Economics data is currently using a partial fallback" kicker="Live data diagnostic">
+          <div className="grid gap-2 text-sm leading-6 text-[var(--econ-muted)] md:grid-cols-2">
+            <MiniMetric label="Source mode" value={intelligence.source_mode ?? intelligence.mode} />
+            <MiniMetric label="Context freshness" value={intelligence.context_freshness} />
+            <MiniMetric label="Endpoint checked" value="/economics/intelligence" />
+            <MiniMetric label="Fallback reason" value={intelligence.fallback_reason ?? "Local economics context unavailable"} />
+          </div>
+          <p className="mt-3 text-sm leading-6 text-[var(--econ-muted)]">
+            Confirm FastAPI is running and /economics/intelligence returns parcel_economic_signals. CFS will not silently swap in demo data while local live mode is selected.
+          </p>
+        </EconPanel>
+      ) : null}
       <EconPanel title="Ask CFS Economics" kicker="Filtered dashboard assistant" tourId="ask-cfs">
         <AskCfsPanel
           appMode="economics"
@@ -3954,6 +3984,108 @@ function printEvidencePackRows({
       value: "Power BI & Tools, Economic Dashboard, Print.",
     },
   ];
+}
+
+function economicsSignalsFromPowerBiExport(
+  payload: EconomicsPowerBiExportResponse | null,
+): EconomicsParcelSignal[] {
+  const rows = payload?.tables.parcel_economic_signal_fact ?? [];
+  return rows.map((row, index) => {
+    const parcelId =
+      rowText(row.parcel_id) || rowText(row.signal_id) || `powerbi-signal-${index + 1}`;
+    const opportunityClass =
+      rowText(row.opportunity_class) || "Needs More Data Before Recommendation";
+    const dataConfidence = normalizeEconomicConfidence(rowText(row.data_confidence));
+    const segment =
+      rowText(row.economic_segment) || "Unknown / Needs Classification";
+
+    return {
+      acreage: null,
+      assessed_value: null,
+      caveats: [
+        "Derived from sanitized Power BI export fact rows.",
+        "Value fields are banded; use source intelligence for raw parcel economics.",
+      ],
+      comparable_asset_flag: !rowBool(row.special_asset_flag),
+      comparison_group: rowText(row.comparison_group) || segment,
+      constraint_burden_band: rowText(row.constraint_burden_band),
+      data_confidence: dataConfidence,
+      display_label: rowText(row.display_label) || rowText(row.geography_label) || parcelId,
+      economic_data_confidence: dataConfidence,
+      economic_segment: segment,
+      economic_segment_order: rowNumber(row.economic_segment_order) ?? rowNumber(row.segment_order),
+      economic_status_band: statusBandFromOpportunity(opportunityClass),
+      estimated_county_tax: null,
+      estimated_county_tax_screening: null,
+      evidence: [
+        `Opportunity class: ${opportunityClass}.`,
+        `Economic segment: ${segment}.`,
+        `Data confidence: ${dataConfidence}.`,
+      ],
+      fiscal_attractiveness_band: rowText(row.fiscal_attractiveness_band),
+      floodplain_context: null,
+      geography_label: rowText(row.geography_label) || rowText(row.display_label) || parcelId,
+      improvement_intensity_band: rowText(row.improvement_to_land_ratio_band),
+      improvement_to_land_ratio: null,
+      improvement_value: null,
+      improvement_value_per_acre: null,
+      jurisdiction: rowText(row.geography_label),
+      land_efficiency_band: rowText(row.land_efficiency_band) || rowText(row.value_per_acre_band),
+      land_value: null,
+      land_value_per_acre: null,
+      opportunity_class: opportunityClass,
+      parcel_id: parcelId,
+      permit_activity_context: null,
+      profile_id: rowText(row.row_id) || parcelId,
+      public_cost_risk_band: rowText(row.public_cost_risk_band),
+      recommended_followup:
+        rowText(row.recommended_followup) || "Review source economics intelligence before drawing conclusions.",
+      related_layers: ["Power BI & Tools", "Economic Dashboard"],
+      school_pressure_context: null,
+      segment_caveat:
+        rowText(row.segment_caveat) || "Compare value per acre within similar land-use or property segments.",
+      special_asset_flag: rowBool(row.special_asset_flag),
+      tax_base_opportunity_band: rowText(row.tax_base_opportunity_band),
+      transportation_context: null,
+      utility_readiness_context: null,
+      value_per_acre: null,
+    };
+  });
+}
+
+function rowText(value: unknown) {
+  if (value === null || value === undefined || value === "") return null;
+  return String(value);
+}
+
+function rowNumber(value: unknown) {
+  return typeof value === "number" ? value : Number.isFinite(Number(value)) ? Number(value) : null;
+}
+
+function rowBool(value: unknown) {
+  return value === true || value === "true";
+}
+
+function normalizeEconomicConfidence(value: string | null) {
+  const normalized = (value ?? "").toLowerCase().replaceAll(" ", "_");
+  return normalized || "data_needed";
+}
+
+function statusBandFromOpportunity(
+  opportunityClass: string,
+): EconomicsParcelSignal["economic_status_band"] {
+  const normalized = opportunityClass.toLowerCase();
+  if (normalized.includes("underbuilt")) return "underbuilt_watch";
+  if (normalized.includes("tax-base") || normalized.includes("tax base")) return "tax_base_opportunity";
+  if (normalized.includes("constrained")) return "infrastructure_constrained";
+  if (normalized.includes("special asset")) return "special_asset";
+  if (normalized.includes("industrial")) return "industrial_employment_candidate";
+  if (normalized.includes("mixed-use") || normalized.includes("corridor")) return "mixed_use_corridor_candidate";
+  if (normalized.includes("residential")) return "residential_growth_pressure";
+  if (normalized.includes("stable")) return "stable_high_value";
+  if (normalized.includes("burden")) return "low_fiscal_high_burden";
+  if (normalized.includes("data")) return "data_needed";
+  return "redevelopment_opportunity";
 }
 
 function countRowsBy<T>(rows: T[], getLabel: (row: T) => string | null | undefined) {
