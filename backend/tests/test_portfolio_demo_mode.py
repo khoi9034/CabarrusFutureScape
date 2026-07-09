@@ -304,10 +304,14 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "print:" in economics_shell
     assert "tools-purpose" in economics_shell
     assert "tools-ask-cfs" in economics_shell
-    assert "tools-select-rows" in economics_shell
-    assert "tools-filters" in economics_shell
-    assert "tools-selected-tray" in economics_shell
-    assert "tools-csv" in economics_shell
+    assert "generated-report-preview" in economics_shell
+    assert "Generate Power BI Report" in economics_shell
+    assert "Generated Report Preview" in economics_shell
+    assert "Save Report to Bucket" in economics_shell
+    assert "Send Report to Print" in economics_shell
+    assert "parcel_economic_signal_fact currently has 0 rows" in economics_shell
+    assert "Power BI export table is empty" in economics_shell
+    assert "Advanced Manual Tools" in economics_shell
     assert "tools-chart-builder" in economics_shell
     assert "tools-chart-templates" in economics_shell
     assert "tools-report-canvas" in economics_shell
@@ -318,7 +322,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Uses a sanitized cached demo extract for portfolio review." in economics_shell
     assert "You are here:" in economics_shell
     assert "Understand the workflow." in economics_shell
-    assert "Ask CFS, select rows, export CSVs, build charts, and prepare a report canvas." in economics_shell
+    assert "Generate a Power BI-style report preview, save it to the bucket, then send it to Print." in economics_shell
     assert economics_shell.index('tourId="tools-ask-cfs"') < economics_shell.index('tourRowSelectionId="economics-row-selection"')
     assert "Screening-level economic context, not official appraisal, tax bill, or fiscal impact study." in economics_shell
     assert "Growth and tax-base intelligence with segment-aware visuals and slicers." in economics_shell
@@ -409,6 +413,10 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Ask CFS configured this report from your prompt." in economics_shell
     assert "generatedVisualToCanvasItem" in economics_shell
     assert "ReportBucketItem" in economics_shell
+    assert "GeneratedPowerBiReportSnapshot" in economics_shell
+    assert "generated_report" in economics_shell
+    assert "GeneratedReportPrintDetails" in economics_shell
+    assert "buildGeneratedReportSnapshot" in economics_shell
     assert "ReportBucketPanel" in economics_shell
     assert "Add to Report Bucket" in economics_shell
     assert "Add Ask CFS answer to Report Bucket" in economics_shell

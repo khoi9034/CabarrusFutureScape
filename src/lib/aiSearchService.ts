@@ -851,6 +851,46 @@ function demoEconomicsPowerBiAnswer(
   pack: EconomicsPowerBiExportResponse,
   query = "",
 ): CfsAiSearchResponse {
+  const powerbiActions = demoPowerBiActionsForQuery(query);
+  if (isPowerBiReportCommand(query)) {
+    const title = powerbiActions.report_title ?? "Power BI report";
+    return {
+      answer: briefing(
+        [
+          "Generated report preview",
+          `I generated a ${title} preview below. Review the visuals and tables, then save it to the Report Bucket when ready.`,
+        ],
+        [
+          "Next step",
+          "Use Save Report to Bucket, or Send Report to Print if the preview is ready for the snapshot.",
+        ],
+      ),
+      as_of: pack.as_of,
+      caveats: pack.caveats,
+      dashboard_actions: {
+        focus_domain: "economics",
+        highlight_kpis: ["tax_base_opportunity", "data_readiness"],
+        recommended_layers: ["Power BI & Tools", "Print"],
+      },
+      data_mode: "demo",
+      domains: ["economics"],
+      evidence: [
+        evidence(
+          "Power BI export pack",
+          "CFS uses sanitized Power BI-ready economics tables for generated report previews.",
+          "public/demo-data/economics_powerbi_export.json",
+        ),
+      ],
+      powerbi_actions: powerbiActions,
+      provider: "none",
+      related_layers: ["Power BI & Tools", "Print"],
+      suggested_actions: [
+        "Review the generated report preview.",
+        "Toggle summary, KPI, visual, table, caveat, and Power BI detail sections.",
+        "Save the full generated report to the Report Bucket.",
+      ],
+    };
+  }
   const tableNames = Object.keys(pack.tables);
   const relationshipLines = pack.relationships.map(
     (row) => `${row.from_table}.${row.from_column} -> ${row.to_table}.${row.to_column}`,
@@ -990,7 +1030,7 @@ function demoEconomicsPowerBiAnswer(
       ),
     ],
     provider: "none",
-    powerbi_actions: demoPowerBiActionsForQuery(query),
+    powerbi_actions: powerbiActions,
     related_layers: ["Power BI Desktop Practice Pack", "Power BI & Tools"],
     suggested_actions: [
       "Open Economic Intelligence -> Power BI & Tools.",
@@ -1130,6 +1170,18 @@ function demoPowerBiActionsForQuery(query: string): CfsAiPowerBiActions {
     selected_filters: selectedFilters,
     selected_tool: "powerbi_export",
   };
+}
+
+function isPowerBiReportCommand(query: string) {
+  const normalized = query.toLowerCase();
+  return [
+    "build ",
+    "build me ",
+    "create ",
+    "generate ",
+    "make ",
+    "show special assets",
+  ].some((prefix) => normalized.startsWith(prefix));
 }
 
 const powerBiImportQaChecklist = [

@@ -605,7 +605,7 @@ function PowerBiToolsPage({
     setAskPowerBiAction({ actions, id: askPowerBiActionId.current });
     requestAnimationFrame(() =>
       document
-        .querySelector('[data-econ-tour="chart-builder"]')
+        .querySelector('[data-econ-tour="generated-report-preview"], [data-econ-tour="powerbi-practice-pack"]')
         ?.scrollIntoView({ behavior: "smooth", block: "start" }),
     );
   };
@@ -614,7 +614,7 @@ function PowerBiToolsPage({
       <PageHeader
         kicker="Power BI & Tools"
         title="Power BI & Tools"
-        text="Ask CFS, select rows, export CSVs, build charts, and prepare a report canvas."
+        text="Generate a Power BI-style report preview, save it to the bucket, then send it to Print."
         tourId="powerbi-tools-header"
       >
         <button
@@ -651,72 +651,90 @@ function PowerBiToolsPage({
         <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
         <span>Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.</span>
       </section>
-      <section className="grid gap-4">
-        <EconPanel title="Three-step Power BI workflow" kicker="Default workflow" tourId="powerbi-practice-pack">
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricPill label="CSV tables" value="7" />
-            <MetricPill label="Starter relationships" value="2" />
-            <MetricPill label="Report pages" value="4" />
-            <MetricPill label="Suggested measures" value="5" />
-          </div>
-          <div className="mt-4 grid gap-2 md:grid-cols-3">
-            {[
-              "1. Select rows",
-              "2. Download CSV tables",
-              "3. Build chart + canvas",
-            ].map((step) => (
-              <div
-                className="rounded-xl border border-[var(--econ-border)] bg-black/20 px-3 py-2 text-xs font-semibold text-[var(--econ-muted)]"
-                key={step}
-              >
-                {step}
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={focusTools} type="button">
-              Download CSV Tables
-            </button>
-            <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={focusTools} type="button">
-              Preview table schema
-            </button>
-          </div>
-        </EconPanel>
-      </section>
-      <EconomicsWorkspacePage
+      <PowerBiReportGenerator
+        askPowerBiAction={askPowerBiAction}
         dataReadiness={dataReadiness}
-        embedded
-        onClearSelection={onClearSelection}
-        onUseSelectedInTools={focusTools}
-        onSendSelectedToPrint={() => onNavigate("print")}
-        onToggleSignal={onToggleSignal}
-        scenarioOutputs={scenarioOutputs}
-        selectedSignalIds={selectedSignalIds}
-        selectedSignals={selectedSignals}
+        onAddReportBucketItem={onAddReportBucketItem}
+        onNavigate={onNavigate}
+        outputs={outputs}
+        payload={powerBiPayload}
         signals={signals}
-        tourRowSelectionId="economics-row-selection"
-        tourSelectedTrayId="selected-rows-tray"
-        watchlist={watchlist}
       />
-      <section id="economics-tool-workspace">
-        <EnterpriseWorkspacePage
-          askPowerBiAction={askPowerBiAction}
-          embedded
-          exportPayload={exportPayload}
-          inputs={inputs}
-          onAddReportBucketItem={onAddReportBucketItem}
-          onClearReportBucket={onClearReportBucket}
-          onNavigate={onNavigate}
-          onRemoveReportBucketItem={onRemoveReportBucketItem}
-          onToggleReportBucketPrint={onToggleReportBucketPrint}
-          outputs={outputs}
-          powerBiPayload={powerBiPayload}
-          reportBucketItems={reportBucketItems}
-          scenarios={scenarios}
-          selectedSignals={selectedSignals}
-          showSelectedRowsStep={false}
-        />
-      </section>
+      <ReportBucketPanel
+        items={reportBucketItems}
+        onClear={onClearReportBucket}
+        onOpenPrint={() => onNavigate("print")}
+        onRemove={onRemoveReportBucketItem}
+        onTogglePrint={onToggleReportBucketPrint}
+        title="Report Bucket"
+      />
+      <details className="rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] p-4" data-econ-tour="advanced-tools">
+        <summary className="cursor-pointer text-base font-semibold text-[var(--econ-text)]">
+          Advanced Manual Tools
+          <span className="ml-2 text-sm font-normal text-[var(--econ-muted)]">
+            CSV exports, row selection, manual chart builder, report canvas, scenario tools.
+          </span>
+        </summary>
+        <div className="mt-4 grid gap-4">
+          <EconPanel title="Three-step Power BI workflow" kicker="Manual path">
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              <MetricPill label="CSV tables" value="7" />
+              <MetricPill label="Starter relationships" value="2" />
+              <MetricPill label="Report pages" value="4" />
+              <MetricPill label="Suggested measures" value="5" />
+            </div>
+            <div className="mt-4 grid gap-2 md:grid-cols-3">
+              {["1. Select rows", "2. Download CSV tables", "3. Build chart + canvas"].map((step) => (
+                <div className="rounded-xl border border-[var(--econ-border)] bg-black/20 px-3 py-2 text-xs font-semibold text-[var(--econ-muted)]" key={step}>
+                  {step}
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={focusTools} type="button">
+                Download CSV Tables
+              </button>
+              <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={focusTools} type="button">
+                Preview table schema
+              </button>
+            </div>
+          </EconPanel>
+          <EconomicsWorkspacePage
+            dataReadiness={dataReadiness}
+            embedded
+            onClearSelection={onClearSelection}
+            onUseSelectedInTools={focusTools}
+            onSendSelectedToPrint={() => onNavigate("print")}
+            onToggleSignal={onToggleSignal}
+            scenarioOutputs={scenarioOutputs}
+            selectedSignalIds={selectedSignalIds}
+            selectedSignals={selectedSignals}
+            signals={signals}
+            tourRowSelectionId="economics-row-selection"
+            tourSelectedTrayId="selected-rows-tray"
+            watchlist={watchlist}
+          />
+          <section id="economics-tool-workspace">
+            <EnterpriseWorkspacePage
+              askPowerBiAction={askPowerBiAction}
+              embedded
+              exportPayload={exportPayload}
+              inputs={inputs}
+              onAddReportBucketItem={onAddReportBucketItem}
+              onClearReportBucket={onClearReportBucket}
+              onNavigate={onNavigate}
+              onRemoveReportBucketItem={onRemoveReportBucketItem}
+              onToggleReportBucketPrint={onToggleReportBucketPrint}
+              outputs={outputs}
+              powerBiPayload={powerBiPayload}
+              reportBucketItems={reportBucketItems}
+              scenarios={scenarios}
+              selectedSignals={selectedSignals}
+              showSelectedRowsStep={false}
+            />
+          </section>
+        </div>
+      </details>
     </>
   );
 }
@@ -1764,9 +1782,13 @@ function EconomicsPrintPage({
                   </p>
                   <h3 className="mt-1 text-base font-semibold text-slate-950">{item.title}</h3>
                   <p className="mt-1 text-sm leading-6 text-slate-700">{item.summary}</p>
-                  <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-slate-300 bg-white p-3 text-xs leading-5 text-slate-700">
-                    {bucketItemText(item)}
-                  </pre>
+                  {item.generated_report ? (
+                    <GeneratedReportPrintDetails report={item.generated_report} />
+                  ) : (
+                    <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-slate-300 bg-white p-3 text-xs leading-5 text-slate-700">
+                      {bucketItemText(item)}
+                    </pre>
+                  )}
                 </div>
               ))}
             </div>
@@ -1825,6 +1847,56 @@ function PrintSection({
       <h2 className="text-xl font-semibold text-slate-950">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
+  );
+}
+
+function GeneratedReportPrintDetails({ report }: { report: GeneratedPowerBiReportSnapshot }) {
+  return (
+    <div className="mt-3 grid gap-3">
+      {report.include_sections.kpis ? (
+        <div className="grid gap-2 md:grid-cols-4 print:grid-cols-4">
+          {report.kpis.map((kpi) => (
+            <PrintMetric key={kpi.label} label={kpi.label} value={kpi.value} />
+          ))}
+        </div>
+      ) : null}
+      {report.include_sections.visuals ? (
+        <div className="rounded border border-slate-300 bg-white p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Visuals</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+            {report.visuals.map((visual) => (
+              <li key={visual.visual_id}>
+                {visual.title}: {chartVisualLabel(visual.visual_type)} using {visual.source_table}
+                {visual.rows.length ? ` (${visual.rows.length} rows)` : " (unavailable: 0 rows)"}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {report.include_sections.tables ? (
+        <div className="rounded border border-slate-300 bg-white p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Tables</p>
+          {report.tables.map((table) => (
+            <div className="mt-2" key={table.title}>
+              <p className="text-sm font-semibold text-slate-950">{table.title}</p>
+              <pre className="mt-1 max-h-36 overflow-auto whitespace-pre-wrap rounded border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-700">
+                {generatedTableText(table)}
+              </pre>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {report.include_sections.caveats ? (
+        <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+          {report.caveats.map((caveat) => <li key={caveat}>{caveat}</li>)}
+        </ul>
+      ) : null}
+      {report.include_sections.powerbi_details ? (
+        <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded border border-slate-300 bg-white p-3 text-xs leading-5 text-slate-700">
+          {report.powerbi_details}
+        </pre>
+      ) : null}
+    </div>
   );
 }
 
@@ -2486,6 +2558,222 @@ function CsvDownloadTable({ rows }: { rows: ReturnType<typeof powerBiCsvRows> })
         </tbody>
       </table>
     </div>
+  );
+}
+
+function PowerBiReportGenerator({
+  askPowerBiAction,
+  dataReadiness,
+  onAddReportBucketItem,
+  onNavigate,
+  outputs,
+  payload,
+  signals,
+}: {
+  askPowerBiAction?: PowerBiAskActionRequest | null;
+  dataReadiness: EconomicsReadinessRow[];
+  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onNavigate: (section: "print") => void;
+  outputs: EconomicsScenarioOutput[];
+  payload: EconomicsPowerBiExportResponse | null;
+  signals: EconomicsParcelSignal[];
+}) {
+  const [prompt, setPrompt] = useState("Build an underbuilt parcel report with visuals and a candidate table.");
+  const [includeSections, setIncludeSections] = useState(defaultGeneratedReportIncludes);
+  const [plan, setPlan] = useState<PowerBiGeneratedReportPlan | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
+  useEffect(() => {
+    if (!askPowerBiAction?.actions || askPowerBiAction.actions.action_type === "none") return;
+    const generated = powerBiActionsToGeneratedPlan(askPowerBiAction.actions, payload);
+    const frame = requestAnimationFrame(() => {
+      setPrompt(generated.generated_from_prompt);
+      setPlan(generated);
+      setStatus("Ask CFS generated a report preview below.");
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [askPowerBiAction, payload]);
+  const report = plan
+    ? buildGeneratedReportSnapshot(plan, payload, signals, outputs, dataReadiness, includeSections)
+    : null;
+  const generateReport = () => {
+    setPlan(buildPowerBiReportPlan(prompt, payload));
+    setStatus("Report preview generated");
+  };
+  const saveReport = () => {
+    if (!report) return;
+    onAddReportBucketItem(generatedReportBucketItem(report));
+    setStatus("Generated report saved to Report Bucket");
+  };
+  const sendReportToPrint = () => {
+    saveReport();
+    onNavigate("print");
+  };
+  const copySummary = async () => {
+    if (!report) return;
+    await navigator.clipboard?.writeText(generatedReportText(report));
+    setStatus("Report summary copied");
+  };
+  const downloadReport = () => {
+    if (!report) return;
+    downloadJson(report, `${slugifyReportTitle(report.title)}_generated_report.json`);
+    setStatus("Report JSON downloaded");
+  };
+  return (
+    <EconPanel
+      description="Describe what you want. CFS will build a ready-to-use report preview with visuals, tables, summary text, and print-ready items."
+      kicker="One-click report"
+      title="Generate Power BI Report"
+      tourId="powerbi-practice-pack"
+    >
+      <div className="grid gap-3">
+        <textarea
+          className="min-h-24 w-full resize-y rounded-xl border border-[var(--econ-border)] bg-black/30 px-3 py-3 text-sm text-[var(--econ-text)] outline-none transition placeholder:text-[var(--econ-muted)] focus:border-[var(--econ-gold)]"
+          onChange={(event) => setPrompt(event.target.value)}
+          placeholder="Example: Build an underbuilt parcel report with visuals and a candidate table."
+          value={prompt}
+        />
+        <div className="flex flex-wrap gap-2">
+          {quickPowerBiReportRequests.map((label) => (
+            <button
+              className="rounded-full border border-[var(--econ-border)] px-3 py-1.5 text-xs font-semibold text-[var(--econ-muted)] transition hover:border-[var(--econ-gold)] hover:text-[var(--econ-text)]"
+              key={label}
+              onClick={() => setPrompt(`Build a ${label.toLowerCase()} with visuals, summary, caveats, and print-ready items.`)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-4 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
+            onClick={generateReport}
+            type="button"
+          >
+            Generate Power BI Report
+          </button>
+          {status ? <span className="self-center text-xs text-[var(--econ-green)]">{status}</span> : null}
+        </div>
+      </div>
+      {report ? (
+        <section className="mt-5 grid gap-4 rounded-2xl border border-[var(--econ-border)] bg-black/20 p-4" data-econ-tour="generated-report-preview">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-gold)]">
+                Generated Report Preview
+              </p>
+              <h3 className="mt-1 text-xl font-semibold text-[var(--econ-text)]">{report.title}</h3>
+              {includeSections.summary ? (
+                <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--econ-muted)]">{report.summary}</p>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={saveReport} type="button">
+                Save Report to Bucket
+              </button>
+              <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={sendReportToPrint} type="button">
+                Send Report to Print
+              </button>
+              <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copySummary()} type="button">
+                Copy Summary
+              </button>
+              <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={downloadReport} type="button">
+                Download Report JSON
+              </button>
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-6">
+            {Object.entries(includeSections).map(([key, checked]) => (
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2 text-xs text-[var(--econ-muted)]" key={key}>
+                <input
+                  checked={checked}
+                  onChange={() =>
+                    setIncludeSections((current) => ({
+                      ...current,
+                      [key]: !current[key as GeneratedReportSectionKey],
+                    }))
+                  }
+                  type="checkbox"
+                />
+                {generatedReportSectionLabel(key as GeneratedReportSectionKey)}
+              </label>
+            ))}
+          </div>
+          {report.diagnostics.length ? (
+            <div className="rounded-xl border border-[var(--econ-risk)]/40 bg-[var(--econ-risk)]/10 p-3 text-sm leading-6 text-[#ffc7a6]">
+              {report.diagnostics.map((item) => <p key={item}>{item}</p>)}
+              <p>Refresh data / inspect export: check /economics/powerbi-export if export tables look empty.</p>
+            </div>
+          ) : null}
+          {includeSections.kpis ? (
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              {report.kpis.map((kpi) => <MetricPill key={kpi.label} label={kpi.label} value={kpi.value} />)}
+            </div>
+          ) : null}
+          {includeSections.visuals ? (
+            <div className="grid gap-3 xl:grid-cols-2">
+              {report.visuals.map((visual) => (
+                <GeneratedReportVisualCard
+                  key={visual.visual_id}
+                  onSave={() =>
+                    onAddReportBucketItem({
+                      caveats: [visual.caveat],
+                      chart_config: generatedVisualToRecipeConfig(visual),
+                      content: visual.powerbi_recipe,
+                      id: `visual-${visual.visual_id}`,
+                      powerbi_recipe: visual.powerbi_recipe,
+                      related_tables: [visual.source_table],
+                      source_page: "Power BI & Tools",
+                      summary: `${chartVisualLabel(visual.visual_type)} on ${visual.source_table}.`,
+                      title: visual.title,
+                      type: "chart",
+                    })
+                  }
+                  visual={visual}
+                />
+              ))}
+            </div>
+          ) : null}
+          {includeSections.tables ? (
+            <div className="grid gap-3">
+              {report.tables.map((table) => (
+                <GeneratedReportTableCard
+                  key={table.title}
+                  onSave={() =>
+                    onAddReportBucketItem({
+                      content: generatedTableText(table),
+                      id: `table-${slugifyReportTitle(table.title)}`,
+                      source_page: "Power BI & Tools",
+                      summary: `${table.rows.length} preview rows.`,
+                      title: table.title,
+                      type: "evidence_pack",
+                    })
+                  }
+                  table={table}
+                />
+              ))}
+            </div>
+          ) : null}
+          {includeSections.caveats ? (
+            <p className="rounded-xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-3 py-2 text-sm leading-6 text-[#f7dc93]">
+              {report.caveats[0]}
+            </p>
+          ) : null}
+          <details className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
+            <summary className="cursor-pointer text-sm font-semibold text-[var(--econ-text)]">
+              Show Power BI Details
+            </summary>
+            <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap rounded-lg border border-[var(--econ-border)] bg-black/30 p-3 text-xs leading-5 text-[var(--econ-muted)]">
+              {report.powerbi_details}
+            </pre>
+          </details>
+        </section>
+      ) : (
+        <p className="mt-4 rounded-xl border border-dashed border-[var(--econ-border)] px-3 py-4 text-sm leading-6 text-[var(--econ-muted)]">
+          Choose a report type or describe the report you want, then generate a preview.
+        </p>
+      )}
+    </EconPanel>
   );
 }
 
@@ -3176,6 +3464,80 @@ function UserChartMatrix({
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function GeneratedReportVisualCard({
+  onSave,
+  visual,
+}: {
+  onSave: () => void;
+  visual: GeneratedReportVisualPreview;
+}) {
+  const chartRows = aggregateChartRows(visual.rows, visual.axis, visual.value, visual.aggregation);
+  const valueFields = uniqueStrings([visual.value, visual.filterField, "data_confidence"].filter(Boolean));
+  return (
+    <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p className="text-xs uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+            {chartVisualLabel(visual.visual_type)} | {visual.source_table}
+          </p>
+          <h4 className="mt-1 text-sm font-semibold text-[var(--econ-text)]">{visual.title}</h4>
+        </div>
+        <button
+          className="rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+          onClick={onSave}
+          type="button"
+        >
+          Save this visual
+        </button>
+      </div>
+      <div className="mt-3">
+        {!visual.rows.length ? (
+          <p className="rounded-lg border border-[var(--econ-risk)]/40 bg-[var(--econ-risk)]/10 px-3 py-2 text-sm text-[#ffc7a6]">
+            This visual needs {visual.source_table} rows, but that table currently has 0 matching rows.
+          </p>
+        ) : visual.visual_type === "donut" || visual.visual_type === "pie" ? (
+          <UserChartDonut rows={chartRows} />
+        ) : visual.visual_type === "matrix" || visual.visual_type === "table" ? (
+          <UserChartMatrix rowField={visual.axis} rows={visual.rows} valueFields={valueFields} />
+        ) : (
+          <UserChartBar rows={chartRows} />
+        )}
+      </div>
+      <p className="mt-3 text-xs leading-5 text-[var(--econ-muted)]">{visual.caveat}</p>
+    </div>
+  );
+}
+
+function GeneratedReportTableCard({
+  onSave,
+  table,
+}: {
+  onSave: () => void;
+  table: GeneratedReportTablePreview;
+}) {
+  return (
+    <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h4 className="text-sm font-semibold text-[var(--econ-text)]">{table.title}</h4>
+        <button
+          className="rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+          onClick={onSave}
+          type="button"
+        >
+          Save this table
+        </button>
+      </div>
+      {table.rows.length ? (
+        <UserChartMatrix rowField={table.columns[0] ?? "display_label"} rows={table.rows} valueFields={table.columns.slice(1, 5)} />
+      ) : (
+        <p className="rounded-lg border border-[var(--econ-risk)]/40 bg-[var(--econ-risk)]/10 px-3 py-2 text-sm text-[#ffc7a6]">
+          This table needs row-level export data, but no matching rows are available.
+        </p>
+      )}
     </div>
   );
 }
@@ -4847,11 +5209,11 @@ function chartFieldLabel(tableName: PowerBiTableName, field: string) {
 }
 
 function chartVisualLabel(visualType: UserChartVisualType) {
-  return visualType === "donut"
+  return visualType === "donut" || visualType === "pie"
     ? "Pie / donut chart"
     : visualType === "line"
       ? "Line / trend chart"
-      : visualType === "matrix"
+      : visualType === "matrix" || visualType === "table"
         ? "Matrix / table"
         : "Bar chart";
 }
@@ -5181,7 +5543,7 @@ const powerBiWorkflowSteps = [
 ];
 
 type PowerBiTableName = keyof EconomicsPowerBiExportResponse["tables"];
-type UserChartVisualType = "bar" | "donut" | "line" | "matrix";
+type UserChartVisualType = "bar" | "donut" | "line" | "matrix" | "pie" | "table";
 type UserChartAggregation = "count" | "sum" | "average";
 type PowerBiAskActionRequest = {
   actions: CfsAiPowerBiActions;
@@ -5217,10 +5579,40 @@ type UserReportCanvasItem = UserChartRecipeConfig & {
   pageName?: string;
   title: string;
 };
+type GeneratedReportSectionKey =
+  | "caveats"
+  | "kpis"
+  | "powerbi_details"
+  | "summary"
+  | "tables"
+  | "visuals";
+type GeneratedReportIncludeState = Record<GeneratedReportSectionKey, boolean>;
+type GeneratedReportVisualPreview = PowerBiGeneratedVisual & {
+  rows: Array<Record<string, unknown>>;
+};
+type GeneratedReportTablePreview = {
+  columns: string[];
+  rows: Array<Record<string, unknown>>;
+  title: string;
+};
+type GeneratedPowerBiReportSnapshot = {
+  caveats: string[];
+  diagnostics: string[];
+  generated_from_prompt: string;
+  include_sections: GeneratedReportIncludeState;
+  kpis: Array<{ label: string; value: string }>;
+  powerbi_details: string;
+  report_type: string;
+  summary: string;
+  tables: GeneratedReportTablePreview[];
+  title: string;
+  visuals: GeneratedReportVisualPreview[];
+};
 type ReportBucketItemType =
   | "chart"
   | "decision_memo"
   | "evidence_pack"
+  | "generated_report"
   | "powerbi_recipe"
   | "qa_checklist"
   | "report_plan"
@@ -5231,6 +5623,7 @@ type ReportBucketItem = {
   content: string;
   created_at: string;
   id: string;
+  generated_report?: GeneratedPowerBiReportSnapshot;
   powerbi_recipe?: string;
   related_tables?: PowerBiTableName[];
   report_plan?: PowerBiGeneratedReportPlan;
@@ -5423,6 +5816,24 @@ const powerBiReportPromptExamples = [
   "Create a Power BI page for special assets.",
   "Show value per acre by economic segment with caveats.",
 ];
+
+const quickPowerBiReportRequests = [
+  "Executive Dashboard",
+  "Underbuilt Parcel Report",
+  "Tax-Base Opportunity Report",
+  "Scenario Comparison",
+  "Special Assets Review",
+  "Data Confidence Report",
+];
+
+const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {
+  caveats: true,
+  kpis: true,
+  powerbi_details: false,
+  summary: true,
+  tables: true,
+  visuals: true,
+};
 
 function buildPowerBiReportPlan(
   prompt: string,
@@ -5993,6 +6404,151 @@ function bucketTypeLabel(type: ReportBucketItemType) {
   return type.replaceAll("_", " ");
 }
 
+function generatedReportSectionLabel(section: GeneratedReportSectionKey) {
+  const labels: Record<GeneratedReportSectionKey, string> = {
+    caveats: "Caveats",
+    kpis: "KPI cards",
+    powerbi_details: "Power BI details",
+    summary: "Executive summary",
+    tables: "Tables / rows",
+    visuals: "Visuals",
+  };
+  return labels[section];
+}
+
+function powerBiTableRows(
+  payload: EconomicsPowerBiExportResponse | null,
+  tableName: PowerBiTableName,
+): Array<Record<string, unknown>> {
+  return (payload?.tables[tableName] ?? []) as Array<Record<string, unknown>>;
+}
+
+function filteredPowerBiRows(
+  rows: Array<Record<string, unknown>>,
+  visual: PowerBiGeneratedVisual,
+) {
+  return visual.filterField && visual.filterValue !== "All"
+    ? rows.filter((row) => valueText(row[visual.filterField]) === visual.filterValue)
+    : rows;
+}
+
+function buildGeneratedReportSnapshot(
+  plan: PowerBiGeneratedReportPlan,
+  payload: EconomicsPowerBiExportResponse | null,
+  signals: EconomicsParcelSignal[],
+  outputs: EconomicsScenarioOutput[],
+  dataReadiness: EconomicsReadinessRow[],
+  includeSections: GeneratedReportIncludeState,
+): GeneratedPowerBiReportSnapshot {
+  const allVisuals = plan.pages.flatMap((page) => page.visuals);
+  const visuals = allVisuals.map((visual) => ({
+    ...visual,
+    rows: filteredPowerBiRows(powerBiTableRows(payload, visual.source_table), visual),
+  }));
+  const parcelRows = powerBiTableRows(payload, "parcel_economic_signal_fact");
+  const scenarioRows = powerBiTableRows(payload, "scenario_output_fact");
+  const readinessRows = powerBiTableRows(payload, "domain_readiness_dim");
+  const needsParcelRows = allVisuals.some((visual) => visual.source_table === "parcel_economic_signal_fact");
+  const diagnostics = [
+    needsParcelRows && !parcelRows.length
+      ? "This report needs parcel economic signal rows, but parcel_economic_signal_fact currently has 0 rows."
+      : "",
+    needsParcelRows && !parcelRows.length && signals.length
+      ? "Ask CFS summary has live economics context, but the Power BI export table is empty."
+      : "",
+  ].filter(Boolean);
+  const underbuiltRows = parcelRows.length
+    ? parcelRows.filter((row) => valueText(row.opportunity_class).includes("Underbuilt"))
+    : signals.filter((signal) => signal.opportunity_class.includes("Underbuilt"));
+  const kpis = [
+    { label: "Parcel signal rows", value: formatNumber(parcelRows.length || signals.length) },
+    { label: "Underbuilt candidates", value: formatNumber(underbuiltRows.length) },
+    { label: "Scenario rows", value: formatNumber(scenarioRows.length || outputs.length) },
+    { label: "Readiness domains", value: formatNumber(readinessRows.length || dataReadiness.length) },
+  ];
+  const parcelTableRows = parcelRows.slice(0, 8);
+  const tables: GeneratedReportTablePreview[] = [
+    parcelTableRows.length
+      ? {
+          columns: ["display_label", "economic_segment", "opportunity_class", "data_confidence", "recommended_followup"],
+          rows: parcelTableRows,
+          title: "Candidate rows",
+        }
+      : null,
+    scenarioRows.length
+      ? {
+          columns: ["scenario_name", "tax_base_lift_band", "service_burden_band", "infrastructure_burden_band", "fiscal_attractiveness_band"],
+          rows: scenarioRows.slice(0, 8),
+          title: "Scenario matrix",
+        }
+      : null,
+    readinessRows.length
+      ? {
+          columns: ["domain_name", "data_status", "current_use", "next_data_need"],
+          rows: readinessRows.slice(0, 8),
+          title: "Data confidence matrix",
+        }
+      : null,
+  ].filter((row): row is GeneratedReportTablePreview => Boolean(row));
+  return {
+    caveats: plan.caveats,
+    diagnostics,
+    generated_from_prompt: plan.generated_from_prompt,
+    include_sections: includeSections,
+    kpis,
+    powerbi_details: generatedReportPlanInstructions(plan),
+    report_type: plan.title,
+    summary: plan.summary,
+    tables,
+    title: plan.title,
+    visuals,
+  };
+}
+
+function generatedTableText(table: GeneratedReportTablePreview) {
+  return [
+    table.title,
+    table.columns.join(" | "),
+    ...table.rows.map((row) => table.columns.map((column) => valueText(row[column])).join(" | ")),
+  ].join("\n");
+}
+
+function generatedReportText(report: GeneratedPowerBiReportSnapshot) {
+  const lines = [
+    report.title,
+    report.include_sections.summary ? `Summary: ${report.summary}` : "",
+    report.include_sections.kpis
+      ? `KPI cards:\n${report.kpis.map((kpi) => `- ${kpi.label}: ${kpi.value}`).join("\n")}`
+      : "",
+    report.include_sections.visuals
+      ? `Visuals:\n${report.visuals.map((visual) => `- ${visual.title}: ${chartVisualLabel(visual.visual_type)} using ${visual.source_table}`).join("\n")}`
+      : "",
+    report.include_sections.tables
+      ? `Tables:\n${report.tables.map((table) => `- ${table.title}: ${table.rows.length} rows`).join("\n")}`
+      : "",
+    report.include_sections.caveats ? `Caveats:\n${report.caveats.map((item) => `- ${item}`).join("\n")}` : "",
+    report.include_sections.powerbi_details ? `Power BI details:\n${report.powerbi_details}` : "",
+    report.diagnostics.length ? `Diagnostics:\n${report.diagnostics.map((item) => `- ${item}`).join("\n")}` : "",
+  ];
+  return lines.filter(Boolean).join("\n\n");
+}
+
+function generatedReportBucketItem(report: GeneratedPowerBiReportSnapshot): ReportBucketItemInput {
+  return {
+    caveats: report.caveats,
+    content: generatedReportText(report),
+    generated_report: report,
+    id: `generated-report-${slugifyReportTitle(report.title)}-${slugifyReportTitle(report.generated_from_prompt)}`,
+    powerbi_recipe: report.powerbi_details,
+    related_tables: uniquePowerBiTables(report.visuals.map((visual) => visual.source_table)),
+    report_plan: undefined,
+    source_page: "Power BI & Tools",
+    summary: report.summary,
+    title: report.title,
+    type: "generated_report",
+  };
+}
+
 function generatedReportPlanInstructions(plan: PowerBiGeneratedReportPlan) {
   const relationships = plan.relationships.map(
     (row) => `${row.from_table}.${row.from_column} -> ${row.to_table}.${row.to_column}`,
@@ -6458,95 +7014,61 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
   ],
   tools: [
     {
-      body: "This page is the working area for CFS Economics. Select rows, export tables, build charts, and prepare a Power BI Report Canvas.",
+      body: "Ask CFS or choose a quick report type to start.",
       id: "tools-purpose",
       targetSelector: '[data-econ-tour="powerbi-tools-header"]',
-      title: "Page purpose",
-      why: "This is the main hands-on workflow.",
+      title: "Choose report",
+      why: "Start with the report you want.",
     },
     {
-      body: "Ask what to build, which rows to select, or how to turn economics rows into a Power BI report.",
+      body: "Generate a ready-to-use preview with charts, tables, summary text, and caveats.",
       id: "tools-ask-cfs",
-      targetSelector: '[data-econ-tour="tools-ask-cfs"]',
-      title: "Ask CFS",
-      why: "Start with guidance before opening the tables.",
+      targetSelector: '[data-econ-tour="powerbi-practice-pack"]',
+      title: "Generate report",
+      why: "This is the main path.",
     },
     {
-      body: "Start here. Select rows that you want to analyze, export, or include in a decision snapshot.",
-      id: "tools-select-rows",
-      targetSelector: '[data-econ-tour="economics-row-selection"]',
-      title: "Select economics rows",
-      why: "Selected rows become the working set.",
-    },
-    {
-      body: "Use filters and table tabs to narrow the list before selecting rows.",
-      id: "tools-filters",
-      targetSelector: '[data-econ-tour="economics-filters"]',
-      title: "Filters and tabs",
-      why: "Start with segment, opportunity class, or confidence.",
-    },
-    {
-      body: "Selected rows become the working set for chart recipes, Power BI Report Canvas notes, and print snapshots.",
-      id: "tools-selected-tray",
-      targetSelector: '[data-econ-tour="selected-rows-tray"]',
-      title: "Selected rows tray",
-      why: "This keeps the workflow focused.",
-    },
-    {
-      body: "Download CSV Tables first. They are the easiest format to import into Power BI Desktop.",
-      id: "tools-csv",
-      optionalActionLabel: "Show CSV section",
-      optionalActionTargetSelector: '[data-econ-tour="powerbi-csv-export"]',
-      targetSelector: '[data-econ-tour="powerbi-csv-export"]',
-      title: "Download Power BI tables",
-      why: "CSV turns CFS Economics into a practice BI dataset.",
-    },
-    {
-      body: "Choose a table, visual type, fields, and filters before recreating the chart in Power BI.",
+      body: "Review generated visuals and tables before saving anything.",
       id: "tools-chart-builder",
-      optionalActionLabel: "Show chart builder",
-      optionalActionTargetSelector: '[data-econ-tour="chart-builder"]',
-      targetSelector: '[data-econ-tour="chart-builder"]',
-      title: "Build your own chart",
-      why: "It teaches the table-to-visual mapping.",
+      targetSelector: '[data-econ-tour="generated-report-preview"]',
+      title: "Review preview",
+      why: "No table-name knowledge required.",
     },
     {
-      body: "Templates give safe starts: opportunity class, scenario comparison, or data confidence matrix.",
+      body: "Toggle summary, KPI cards, visuals, tables, caveats, and Power BI details.",
       id: "tools-chart-templates",
-      targetSelector: '[data-econ-tour="chart-templates"]',
-      title: "Chart templates",
-      why: "Start from a known-good visual.",
+      targetSelector: '[data-econ-tour="generated-report-preview"]',
+      title: "Choose sections",
+      why: "Print only what matters.",
     },
     {
-      body: "Add useful chart recipes to the Power BI Report Canvas. This becomes your draft Power BI report outline.",
+      body: "Save the generated report as one bucket item when the preview looks right.",
       id: "tools-report-canvas",
-      optionalActionLabel: "Show Power BI Report Canvas",
-      optionalActionTargetSelector: '[data-econ-tour="report-canvas"]',
-      targetSelector: '[data-econ-tour="report-canvas"]',
-      title: "Power BI Report Canvas",
-      why: "The canvas is your report plan.",
+      targetSelector: '[data-econ-tour="generated-report-preview"]',
+      title: "Save report",
+      why: "The bucket connects tools to Print.",
     },
     {
-      body: "Save useful charts, recipes, and decision notes here, then choose what to include in the Print snapshot.",
+      body: "Saved reports, visuals, and notes live here until you send them to Print.",
       id: "tools-report-bucket",
       targetSelector: '[data-econ-tour="report-bucket"]',
       title: "Report Bucket",
       why: "This connects Power BI work to the final snapshot.",
     },
     {
-      body: "Scenario, planning model, and decision-pack tools are advanced. Open them after the basic Power BI workflow makes sense.",
+      body: "CSV exports, manual chart builder, report canvas, and scenario tools are optional.",
       id: "tools-advanced",
       targetSelector: '[data-econ-tour="advanced-tools"]',
-      title: "Advanced tools",
-      why: "They support deeper analysis without cluttering the basic path.",
+      title: "Advanced Manual Tools",
+      why: "Open only when you need the manual path.",
     },
     {
       actionSection: "print",
-      body: "When ready, copy the report recipe or send selected rows to Print for an executive snapshot.",
+      body: "Send the saved report to Print for the final snapshot.",
       id: "tools-final-output",
       optionalActionLabel: "Go to Print",
-      targetSelector: '[data-econ-tour="tools-final-actions"]',
-      title: "Final output",
+      targetSelector: '[data-econ-tour="report-bucket"]',
+      title: "Send to Print",
       why: "Print is the presentation-ready deliverable.",
     },
   ],

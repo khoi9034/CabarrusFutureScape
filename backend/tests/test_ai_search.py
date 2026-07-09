@@ -835,10 +835,9 @@ def test_ai_search_economics_powerbi_report_plan_request_is_deterministic() -> N
     )
 
     assert response.provider == "none"
-    assert "AI Power BI Report Builder" in response.answer
-    assert "recommended tables" in response.answer
-    assert "Add Visuals to Report Canvas" in response.answer
-    assert "generated report plan JSON" in response.answer
+    assert "Generated report preview" in response.answer
+    assert "save it to the Report Bucket" in response.answer
+    assert "Send Report to Print" in response.answer
     assert response.evidence[0].source == "economics_powerbi_export"
     assert response.powerbi_actions is not None
     assert response.powerbi_actions["action_type"] == "build_report"

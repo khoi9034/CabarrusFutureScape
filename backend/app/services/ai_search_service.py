@@ -1246,6 +1246,38 @@ def _economics_powerbi_answer(
     request: CfsAiSearchRequest,
     context: CfsAiContext,
 ) -> CfsAiSearchResponse:
+    powerbi_actions = _powerbi_actions_for_query(request.query)
+    if _is_powerbi_report_command(request.query):
+        title = powerbi_actions.get("report_title") or "Power BI report"
+        answer = _briefing(
+            (
+                "Generated report preview",
+                f"I generated a {title} preview below. Review the visuals and tables, then save it to the Report Bucket when ready.",
+            ),
+            (
+                "Next step",
+                "Use Save Report to Bucket, or Send Report to Print if the preview is ready for the snapshot.",
+            ),
+        )
+        return _response(
+            answer,
+            context,
+            ["economics"],
+            request.mode,
+            [
+                _evidence(
+                    "Power BI export pack",
+                    "CFS uses sanitized Power BI-ready economics tables for generated report previews.",
+                    "economics_powerbi_export",
+                ),
+            ],
+            [
+                "Review the generated report preview.",
+                "Toggle summary, KPI, visual, table, caveat, and Power BI detail sections.",
+                "Save the full generated report to the Report Bucket.",
+            ],
+            powerbi_actions=powerbi_actions,
+        )
     answer = _briefing(
         (
             "Executive takeaway",
@@ -1425,7 +1457,22 @@ def _economics_powerbi_answer(
             "Build the exported relationships before creating report visuals.",
             "Use the Power BI Report Builder Guide for page-by-page visual instructions.",
         ],
-        powerbi_actions=_powerbi_actions_for_query(request.query),
+        powerbi_actions=powerbi_actions,
+    )
+
+
+def _is_powerbi_report_command(query: str) -> bool:
+    normalized = query.lower()
+    return any(
+        normalized.startswith(prefix)
+        for prefix in (
+            "build ",
+            "build me ",
+            "create ",
+            "generate ",
+            "make ",
+            "show special assets",
+        )
     )
 
 
