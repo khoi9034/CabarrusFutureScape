@@ -90,6 +90,17 @@ confirmed water/sewer capacity or parcel service availability.
 | Planned improvements | Not present | No CIP/planned extension layer found. |
 | Connection/development indicators | Partial | Parcel overlays can be derived after ingestion; capacity still needs source data. |
 
+## Derived Parcel Overlay
+
+After ingestion, run `scripts/build_parcel_wsacc_features.py` to create
+`parcel_wsacc_utility_features`, `parcel_development_model_features`, and
+`parcel_development_screening_output`.
+
+The overlay transforms parcel and WSACC geometries to EPSG:2264 for feet-based
+distance calculations and classifies 250 ft, 500 ft, and 1,000 ft sewer
+proximity bands. See `docs/wsacc_model_features.md` for feature definitions and
+safe-use assumptions.
+
 ## Safe-Use Notes
 
 - Use language such as `development-readiness signal`, `utility proxy context`,

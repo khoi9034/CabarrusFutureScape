@@ -8,19 +8,53 @@
     "water_service_layers_available": false,
     "sewer_capacity_layers_available": false,
     "planned_extension_layers_available": false,
-    "parcel_utility_features_available": false
+    "parcel_utility_features_available": true,
+    "total_parcels_evaluated": 110017,
+    "parcels_within_1000ft_sewer_proxy": 17468,
+    "parcels_inside_wsacc_subbasins": 108304
   },
   "utility_readiness_classes": [
     {
-      "class": "Sewer proxy available",
-      "count": 2075,
-      "unit": "pipe segments"
+      "class": "Sewer basin context only",
+      "count": 90846,
+      "unit": "parcels"
     },
     {
-      "class": "Parcel-level utility readiness",
-      "count": 0,
-      "unit": "derived parcels",
-      "status": "Data needed"
+      "class": "Moderate sewer-proximity signal",
+      "count": 9847,
+      "unit": "parcels"
+    },
+    {
+      "class": "Strong sewer-proximity signal",
+      "count": 7621,
+      "unit": "parcels"
+    },
+    {
+      "class": "Limited utility-readiness evidence",
+      "count": 1703,
+      "unit": "parcels"
+    }
+  ],
+  "sewer_proxy_classes": [
+    {
+      "class": "Outside near-sewer proxy range",
+      "count": 92549,
+      "unit": "parcels"
+    },
+    {
+      "class": "Moderate sewer proximity",
+      "count": 9844,
+      "unit": "parcels"
+    },
+    {
+      "class": "Near sewer infrastructure",
+      "count": 3940,
+      "unit": "parcels"
+    },
+    {
+      "class": "Adjacent to sewer infrastructure",
+      "count": 3684,
+      "unit": "parcels"
     }
   ],
   "caveats": [

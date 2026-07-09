@@ -3228,7 +3228,7 @@ function buildPlanningSnapshot({
           "Utility proxy context does not confirm available sewer or water capacity.",
         label: "Utility Proxy",
         meaning:
-          "Shows proximity/service context only; it is not a confirmed capacity finding.",
+          "Shows proximity/service context only; it is not a capacity confirmation.",
         method:
           "CFS displays available utility proxy context and names provider verification as the next step.",
         recommendedAction:
@@ -3890,7 +3890,7 @@ function buildContextOnlyPlanningSnapshot({
           "Utility proxy context does not confirm available sewer or water capacity.",
         label: "Utility Proxy",
         meaning:
-          "Shows proximity/service context only; it is not a confirmed capacity finding.",
+          "Shows proximity/service context only; it is not a capacity confirmation.",
         method:
           "CFS displays available utility proxy context and names provider verification as the next step.",
         recommendedAction:

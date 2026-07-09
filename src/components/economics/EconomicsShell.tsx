@@ -5715,6 +5715,12 @@ const powerBiChartFieldMetadata: Record<PowerBiTableName, UserChartField[]> = {
     { key: "constraint_burden_band", label: "Constraint burden", role: "filter", type: "band" },
     { key: "fiscal_attractiveness_band", label: "Fiscal attractiveness", role: "filter", type: "band" },
     { key: "public_cost_risk_band", label: "Public cost risk", role: "filter", type: "band" },
+    { key: "sewer_proxy_class", label: "Sewer proxy class", role: "category", type: "band" },
+    { key: "utility_readiness_proxy_class", label: "Utility readiness proxy", role: "filter", type: "band" },
+    { key: "sewer_proxy_confidence", label: "Sewer proxy confidence", role: "filter", type: "band" },
+    { key: "sewer_basin_label", label: "Sewer basin", role: "category", type: "text" },
+    { key: "utility_capacity_status", label: "Utility capacity status", role: "filter", type: "text" },
+    { key: "planned_extension_status", label: "Planned extension status", role: "filter", type: "text" },
     { key: "band_order", label: "Band sort order", role: "value", type: "number" },
     { key: "data_confidence", label: "Data confidence", role: "filter", type: "band" },
     { key: "recommended_followup", label: "Recommended follow-up", role: "label", type: "text" },
@@ -5813,6 +5819,7 @@ const powerBiReportPromptExamples = [
   "Create visuals for economic segment comparison.",
   "Make a fiscal burden dashboard.",
   "Build a scenario comparison dashboard.",
+  "Build a Utility Readiness + Growth Report.",
   "Create a Power BI page for special assets.",
   "Show value per acre by economic segment with caveats.",
 ];
@@ -5822,6 +5829,7 @@ const quickPowerBiReportRequests = [
   "Underbuilt Parcel Report",
   "Tax-Base Opportunity Report",
   "Scenario Comparison",
+  "Utility Readiness + Growth Report",
   "Special Assets Review",
   "Data Confidence Report",
 ];
@@ -5868,6 +5876,50 @@ function buildPowerBiReportPlan(
       ],
       relationships,
       ["Use only the exported Power BI fact and dimension tables.", ...powerBiReportCaveats],
+    );
+  }
+
+  if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Utility Readiness + Growth Report",
+      "Compare economic opportunity against WSACC sewer-proximity proxy context, subbasin labels, and utility data gaps.",
+      [
+        reportPage("Utility Readiness + Growth", "Screen opportunity against sewer-proximity proxy context.", [
+          generatedPowerBiVisual({
+            axis: "sewer_proxy_class",
+            caveat: "Sewer proximity is a proxy; capacity and planned extensions are data needed.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Sewer proxy class breakdown",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "sewer_proxy_class",
+            caveat: "Use this as screening context before utility due diligence.",
+            filterField: "opportunity_class",
+            filterValue: "Underbuilt Redevelopment Candidate",
+            source_table: "parcel_economic_signal_fact",
+            title: "Underbuilt candidates by sewer proxy",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "sewer_basin_label",
+            caveat: "Subbasins provide context, not a capacity confirmation.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Subbasin review table",
+            value: "utility_readiness_proxy_class",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+      [
+        "Use sewer_proxy_class and utility_readiness_proxy_class as proxy slicers only.",
+        "Capacity and planned extension statuses remain data-needed until WSACC provides those layers.",
+        ...powerBiReportCaveats,
+      ],
     );
   }
 

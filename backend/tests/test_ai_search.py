@@ -898,6 +898,26 @@ def test_ai_search_economics_powerbi_actions_cover_scenario_and_special_assets()
     assert "compared separately" in special.powerbi_actions["report_canvas_items"][1]["caveat"].lower()
 
 
+def test_ai_search_economics_powerbi_actions_cover_utility_report() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Build a Utility Readiness + Growth Report.",
+            request_type="powerbi_report_plan",
+        ),
+        _context(),
+    )
+
+    assert response.powerbi_actions is not None
+    assert response.powerbi_actions["report_title"] == "Utility Readiness + Growth Report"
+    assert response.powerbi_actions["chart_builder_config"]["category_field"] == "sewer_proxy_class"
+    assert response.powerbi_actions["report_canvas_items"][0]["source_table"] == "parcel_economic_signal_fact"
+    assert response.powerbi_actions["report_canvas_items"][1]["filter_field"] == "opportunity_class"
+    assert "proxy" in response.powerbi_actions["report_canvas_items"][0]["caveat"].lower()
+    unsafe_fields = {"owner", "mailing", "raw_score", "prediction_probability", "exact_probability"}
+    assert not any(field in str(response.powerbi_actions).lower() for field in unsafe_fields)
+
+
 def test_ai_search_economics_powerbi_sort_prompt_mentions_export_order_fields() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(

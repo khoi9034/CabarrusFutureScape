@@ -172,9 +172,11 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
     dev_columns = set(_table_columns(db, "development_activity_parcel_summary")) if _table_exists(db, "development_activity_parcel_summary") else set()
     flood_columns = set(_table_columns(db, "parcel_flood_constraint_overlay")) if _table_exists(db, "parcel_flood_constraint_overlay") else set()
     school_columns = set(_table_columns(db, "parcel_school_summary")) if _table_exists(db, "parcel_school_summary") else set()
+    utility_columns = set(_table_columns(db, "parcel_wsacc_utility_features")) if _table_exists(db, "parcel_wsacc_utility_features") else set()
     dev_join = "official_parcel_id" in dev_columns and bool(dev_columns & {"development_activity_class", "dominant_permit_segment", "permit_segment"})
     flood_join = "official_parcel_id" in flood_columns and bool(flood_columns & {"flood_review_required", "flood_review_status", "flood_summary", "constraint_status"})
     school_join = "official_parcel_id" in school_columns and bool(school_columns & {"school_summary_status", "capacity_status", "utilization_status"})
+    utility_join = "parcel_id" in utility_columns
     settings = get_settings()
 
     expressions = _parcel_economics_expressions(
@@ -182,6 +184,7 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         dev_columns=dev_columns if dev_join else set(),
         flood_columns=flood_columns if flood_join else set(),
         school_columns=school_columns if school_join else set(),
+        utility_columns=utility_columns if utility_join else set(),
         zoning_columns=set(),
     )
     base_sql = f"""
@@ -198,11 +201,19 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
           ) AS geography_label,
           {expressions['permit_context']} AS permit_activity_context,
           {expressions['flood_context']} AS floodplain_context,
-          {expressions['school_context']} AS school_pressure_context
+          {expressions['school_context']} AS school_pressure_context,
+          {expressions['utility_context']} AS utility_readiness_context,
+          {expressions['sewer_proxy_class']} AS sewer_proxy_class,
+          {expressions['utility_readiness_proxy_class']} AS utility_readiness_proxy_class,
+          {expressions['sewer_proxy_confidence']} AS sewer_proxy_confidence,
+          {expressions['sewer_basin_label']} AS sewer_basin_label,
+          {expressions['utility_capacity_status']} AS utility_capacity_status,
+          {expressions['planned_extension_status']} AS planned_extension_status
         FROM public.parcels_enriched p
         {_optional_join(dev_join, "development_activity_parcel_summary", "d")}
         {_optional_join(flood_join, "parcel_flood_constraint_overlay", "f")}
         {_optional_join(school_join, "parcel_school_summary", "s")}
+        {_optional_join_on(utility_join, "parcel_wsacc_utility_features", "u", "u.parcel_id = p.official_parcel_id")}
         WHERE p.official_parcel_id IS NOT NULL
       ),
       calculated AS (
@@ -259,6 +270,13 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
               permit_activity_context,
               floodplain_context,
               school_pressure_context,
+              utility_readiness_context,
+              sewer_proxy_class,
+              utility_readiness_proxy_class,
+              sewer_proxy_confidence,
+              sewer_basin_label,
+              utility_capacity_status,
+              planned_extension_status,
               value_per_acre,
               land_value_per_acre,
               improvement_value_per_acre,
@@ -388,7 +406,7 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
     ]
     parcel_id = str(row.get("official_parcel_id"))
     display_label = _safe_display_label(row.get("geography_label"), parcel_id)
-    utility_context = _wsacc_utility_context()
+    utility_context = _wsacc_utility_context(row)
     return {
         "acreage": acreage,
         "area_id": None,
@@ -443,7 +461,23 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
     }
 
 
-def _wsacc_utility_context() -> dict[str, Any]:
+def _wsacc_utility_context(row: dict[str, Any]) -> dict[str, Any]:
+    sewer_proxy = row.get("sewer_proxy_class")
+    readiness = row.get("utility_readiness_proxy_class")
+    if sewer_proxy or readiness:
+        return {
+            "utility_readiness_context": readiness or sewer_proxy,
+            "utility_readiness_class": readiness,
+            "sewer_proxy_class": sewer_proxy,
+            "utility_readiness_proxy_class": readiness,
+            "sewer_proxy_confidence": row.get("sewer_proxy_confidence"),
+            "utility_constraint_flag": "Capacity data needed",
+            "planned_extension_nearby_flag": "Data needed",
+            "sewer_basin_label": row.get("sewer_basin_label"),
+            "utility_capacity_status": row.get("utility_capacity_status") or "Capacity data not provided",
+            "planned_extension_status": row.get("planned_extension_status") or "Planned extension data not provided",
+            "utility_confidence": row.get("sewer_proxy_confidence") or "low",
+        }
     try:
         summary = build_wsacc_statistics().get("summary", {})
     except Exception:
@@ -785,6 +819,7 @@ def _parcel_economics_expressions(
     dev_columns: set[str],
     flood_columns: set[str],
     school_columns: set[str],
+    utility_columns: set[str],
     zoning_columns: set[str],
 ) -> dict[str, str]:
     assessed_candidates = [
@@ -814,6 +849,13 @@ def _parcel_economics_expressions(
         "permit_context": _coalesce_text("d", dev_columns, ["development_activity_class", "dominant_permit_segment", "permit_segment"]),
         "flood_context": _flood_context_expression(flood_columns),
         "school_context": _coalesce_text("s", school_columns, ["school_summary_status", "capacity_status", "utilization_status"]),
+        "utility_context": _coalesce_text("u", utility_columns, ["utility_readiness_proxy_class", "sewer_proxy_class"]),
+        "sewer_proxy_class": _coalesce_text("u", utility_columns, ["sewer_proxy_class"]),
+        "utility_readiness_proxy_class": _coalesce_text("u", utility_columns, ["utility_readiness_proxy_class"]),
+        "sewer_proxy_confidence": _coalesce_text("u", utility_columns, ["sewer_proxy_confidence"]),
+        "sewer_basin_label": _coalesce_text("u", utility_columns, ["wsacc_subbasin_name", "wsacc_subbasin_id"]),
+        "utility_capacity_status": _coalesce_text("u", utility_columns, ["utility_capacity_status"]),
+        "planned_extension_status": _coalesce_text("u", utility_columns, ["planned_extension_status"]),
     }
 
 
@@ -844,6 +886,12 @@ def _optional_join(enabled: bool, table_name: str, alias: str) -> str:
         f"LEFT JOIN public.{table_name} {alias} "
         f"ON {alias}.official_parcel_id = p.official_parcel_id"
     )
+
+
+def _optional_join_on(enabled: bool, table_name: str, alias: str, condition: str) -> str:
+    if not enabled:
+        return ""
+    return f"LEFT JOIN public.{table_name} {alias} ON {condition}"
 
 
 def _with_economics_aliases(payload: dict[str, Any]) -> dict[str, Any]:

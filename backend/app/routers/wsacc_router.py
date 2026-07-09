@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
 
+from app.dependencies.database import get_optional_read_only_db
 from app.services.wsacc_service import (
     build_wsacc_inventory,
     build_wsacc_statistics,
@@ -24,13 +26,13 @@ def get_wsacc_inventory() -> dict[str, Any]:
 
 
 @router.get("/statistics")
-def get_wsacc_statistics() -> dict[str, Any]:
-    return build_wsacc_statistics()
+def get_wsacc_statistics(db: Session | None = Depends(get_optional_read_only_db)) -> dict[str, Any]:
+    return build_wsacc_statistics(db)
 
 
 @router.get("/parcel/{parcel_id}")
-def get_wsacc_parcel(parcel_id: str) -> dict[str, Any]:
-    return parcel_utility_context(parcel_id)
+def get_wsacc_parcel(parcel_id: str, db: Session | None = Depends(get_optional_read_only_db)) -> dict[str, Any]:
+    return parcel_utility_context(parcel_id, db)
 
 
 @router.get("/filter")
@@ -42,6 +44,12 @@ def get_wsacc_filter(
     near_planned_extension: bool | None = Query(default=None),
     constrained_basin: bool | None = Query(default=None),
     utility_readiness_class: str | None = Query(default=None),
+    sewer_proxy_class: str | None = Query(default=None),
+    utility_readiness_proxy_class: str | None = Query(default=None),
+    within_pipe_distance: float | None = Query(default=None),
+    within_manhole_distance: float | None = Query(default=None),
+    subbasin: str | None = Query(default=None),
+    db: Session | None = Depends(get_optional_read_only_db),
 ) -> dict[str, Any]:
     return filter_utility_parcels(
         {
@@ -52,12 +60,19 @@ def get_wsacc_filter(
             "near_planned_extension": near_planned_extension,
             "constrained_basin": constrained_basin,
             "utility_readiness_class": utility_readiness_class,
-        }
+            "sewer_proxy_class": sewer_proxy_class,
+            "utility_readiness_proxy_class": utility_readiness_proxy_class,
+            "within_pipe_distance": within_pipe_distance,
+            "within_manhole_distance": within_manhole_distance,
+            "subbasin": subbasin,
+        },
+        db,
     )
 
 
 @router.get("/summary-by-geography")
 def get_wsacc_summary_by_geography(
     geography_type: str = Query(default="sewer_basin"),
+    db: Session | None = Depends(get_optional_read_only_db),
 ) -> dict[str, Any]:
-    return summary_by_geography(geography_type)
+    return summary_by_geography(geography_type, db)

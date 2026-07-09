@@ -164,6 +164,11 @@ def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:
             "land_value": 250_000,
             "official_parcel_id": "demo-1",
             "permit_activity_context": "Recent observed permit activity",
+            "sewer_basin_label": "Basin A - 01",
+            "sewer_proxy_class": "Near sewer infrastructure",
+            "sewer_proxy_confidence": "moderate",
+            "utility_capacity_status": "Capacity data not provided",
+            "utility_readiness_proxy_class": "Moderate sewer-proximity signal",
             "value_per_acre": 250_000,
         },
         0.57,
@@ -183,6 +188,10 @@ def test_economics_signal_uses_bands_and_excludes_contact_fields() -> None:
     assert signal["fiscal_attractiveness_band"] in {"Moderate", "Strong", "Elevated Review", "Data Needed", "Low"}
     assert signal["economic_status_band"] == "underbuilt_watch"
     assert signal["opportunity_class"] == "Underbuilt Redevelopment Candidate"
+    assert signal["sewer_proxy_class"] == "Near sewer infrastructure"
+    assert signal["utility_readiness_proxy_class"] == "Moderate sewer-proximity signal"
+    assert signal["utility_capacity_status"] == "Capacity data not provided"
+    assert signal["sewer_basin_label"] == "Basin A - 01"
     assert "owner" not in str(signal).lower()
     assert "mailing" not in str(signal).lower()
 
@@ -542,6 +551,9 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
     assert "economic_segment" in signal_csv.splitlines()[0]
     assert "comparable_asset_flag" in signal_csv.splitlines()[0]
     assert "fiscal_attractiveness_band" in signal_csv.splitlines()[0]
+    assert "sewer_proxy_class" in signal_csv.splitlines()[0]
+    assert "utility_readiness_proxy_class" in signal_csv.splitlines()[0]
+    assert "utility_capacity_status" in signal_csv.splitlines()[0]
     assert "opportunity_class_order" in signal_csv.splitlines()[0]
     assert "band_order" in signal_csv.splitlines()[0]
     assert "report_page_recommendation" in signal_csv.splitlines()[0]

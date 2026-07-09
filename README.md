@@ -256,6 +256,19 @@ dry run is reviewed. CFS treats this data as screening-level sewer proxy
 context; it does not confirm water/sewer capacity, service commitment, official
 approval, appraisal, tax advice, or investment advice.
 
+After ingesting WSACC locally, build the parcel-level sewer-proximity proxy
+tables with:
+
+```powershell
+python scripts/build_parcel_wsacc_features.py --dry-run
+python scripts/build_parcel_wsacc_features.py --apply
+```
+
+The derived tables power `/wsacc/statistics`, parcel utility context, Indicator
+Center utility readiness, model-ready feature tables, CFS Economics safe utility
+fields, and Power BI CSV/JSON exports. See `docs/wsacc_model_features.md` for
+thresholds, projection assumptions, and safe-use language.
+
 Regenerate the static portfolio data locally with:
 
 ```powershell

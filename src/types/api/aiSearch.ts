@@ -121,6 +121,9 @@ export interface CfsAiPowerBiActions {
     geography_label?: string;
     opportunity_class?: string;
     scenario_name?: string;
+    sewer_proxy_class?: string;
+    utility_capacity_status?: string;
+    utility_readiness_proxy_class?: string;
   };
   selected_tool?:
     | "chart_builder"

@@ -129,6 +129,7 @@ def main() -> int:
         model_status = build_model_status(generated_at)
         model_lab_demo_clusters = build_model_lab_demo_clusters(conn, generated_at)
         economics_intelligence = build_economics_intelligence_demo(conn, generated_at)
+        utility_readiness_summary = build_utility_readiness_summary_demo(conn)
         economics_enterprise_export = build_enterprise_export_payload(
             economics_intelligence,
             mode="demo",
@@ -144,28 +145,6 @@ def main() -> int:
             school_pressure,
         )
 
-    utility_readiness_summary = {
-        "mode": "portfolio_demo_extract",
-        "source": "WSACC sewer proxy inventory",
-        "summary": {
-            "sewer_pipe_segments": 2075,
-            "sewer_manhole_points": 2083,
-            "sewer_subbasins": 55,
-            "water_service_layers_available": False,
-            "sewer_capacity_layers_available": False,
-            "planned_extension_layers_available": False,
-            "parcel_utility_features_available": False,
-        },
-        "utility_readiness_classes": [
-            {"class": "Sewer proxy available", "count": 2075, "unit": "pipe segments"},
-            {"class": "Parcel-level utility readiness", "count": 0, "unit": "derived parcels", "status": "Data needed"},
-        ],
-        "caveats": [
-            "Demo utility context is aggregated and proxy-only.",
-            "It does not confirm available water/sewer capacity, allocation, service commitment, or project approval.",
-            "Verify service readiness with WSACC or the relevant utility provider before parcel-level interpretation.",
-        ],
-    }
     indicator_summary = {
         "available": True,
         "caveats": [
@@ -407,7 +386,7 @@ def build_indicator_intelligence_demo(
             ["Floodplain Review"],
             generated_at,
         ),
-        _demo_signal("utility_readiness", "utility_readiness", "Utility Readiness Coverage", "data_needed", "Data needed", None, None, "Countywide", ["True utility capacity and service readiness data are not available in CFS yet."], ["Utility proxy does not confirm available capacity."], "Request WSACC capacity and service readiness fields.", ["Utility Proxy"], generated_at, confidence="low"),
+        _demo_signal("utility_readiness", "utility_readiness", "Utility Readiness Coverage", "review", "Sewer proxy available", None, None, "Countywide", ["WSACC sewer pipe, manhole, and subbasin proxy context is available in the demo extract."], ["Utility proxy does not confirm available capacity."], "Review sewer-proximity classes, then request WSACC capacity and planned-extension fields.", ["Utility Proxy"], generated_at, confidence="medium"),
         _demo_signal("transportation_context", "transportation_context", "Transportation Project Context", "monitor", "Context available", None, None, "Countywide", ["Transportation context can be reviewed with observed permit activity."], ["Transportation Context is a coordination signal, not project approval."], "Review transportation context near active development areas.", ["Transportation Context", "Development Hotspots"], generated_at, confidence="medium"),
         _demo_signal("zoning_land_use_readiness", "zoning_land_use", "Zoning / Land Use Readiness", "data_needed", "Partial", None, None, "Countywide", ["Parcel zoning context is available; official rezoning and future land use data are still needed."], ["Official rezoning case records and future land use GIS remain data needs where unavailable."], "Request rezoning case records and future land use layers.", ["Parcel Intelligence"], generated_at, confidence="low"),
         _demo_signal("model_research_status", "model_research", "Model Research Status", "monitor", "Internal only", None, None, "Countywide", ["Model Lab exposes relative research signal context only."], ["Internal model research only; no exact probabilities or raw values are shown."], "Use Model Lab to guide questions, then verify source records.", ["Model Lab Research Signals"], generated_at, confidence="medium"),
@@ -602,6 +581,31 @@ def build_economics_intelligence_demo(
     improvement = coalesce_numeric("p", columns, ["buildingvalue_numeric", "improvementvalue_numeric"])
     if improvement == "NULL::numeric" and land != "NULL::numeric" and assessed != "NULL::numeric":
         improvement = f"GREATEST(({assessed}) - ({land}), 0)"
+    utility_join = table_exists(conn, "parcel_wsacc_utility_features")
+    utility_select = (
+        """
+            u.sewer_proxy_class,
+            u.utility_readiness_proxy_class,
+            u.sewer_proxy_confidence,
+            u.wsacc_subbasin_name AS sewer_basin_label,
+            u.utility_capacity_status,
+            u.planned_extension_status
+        """
+        if utility_join
+        else """
+            'Data needed'::text AS sewer_proxy_class,
+            'Data needed'::text AS utility_readiness_proxy_class,
+            'data_needed'::text AS sewer_proxy_confidence,
+            NULL::text AS sewer_basin_label,
+            'Capacity data not provided'::text AS utility_capacity_status,
+            'Planned extension data not provided'::text AS planned_extension_status
+        """
+    )
+    utility_join_sql = (
+        "LEFT JOIN public.parcel_wsacc_utility_features u ON u.parcel_id = p.official_parcel_id"
+        if utility_join
+        else ""
+    )
     rows = fetch_all(
         conn,
         f"""
@@ -612,8 +616,10 @@ def build_economics_intelligence_demo(
             {assessed} AS assessed_value,
             {land} AS land_value,
             {improvement} AS improvement_value,
-            COALESCE(NULLIF(p.subdiv_name, ''), NULLIF(p.nbh_name, ''), NULLIF(p.parcel_size_category, ''), 'Parcel context') AS geography_label
+            COALESCE(NULLIF(p.subdiv_name, ''), NULLIF(p.nbh_name, ''), NULLIF(p.parcel_size_category, ''), 'Parcel context') AS geography_label,
+            {utility_select}
           FROM public.parcels_enriched p
+          {utility_join_sql}
           WHERE p.official_parcel_id IS NOT NULL
         ),
         calculated AS (
@@ -707,6 +713,69 @@ def build_economics_intelligence_demo(
     }
 
 
+def build_utility_readiness_summary_demo(conn: psycopg.Connection) -> dict[str, Any]:
+    overlay_available = table_exists(conn, "parcel_wsacc_utility_features")
+    summary = {
+        "sewer_pipe_segments": table_count(conn, "wsacc_sewer_lines") or 2075,
+        "sewer_manhole_points": table_count(conn, "wsacc_manholes") or 2083,
+        "sewer_subbasins": table_count(conn, "wsacc_basins") or 55,
+        "water_service_layers_available": False,
+        "sewer_capacity_layers_available": False,
+        "planned_extension_layers_available": False,
+        "parcel_utility_features_available": overlay_available,
+    }
+    readiness_classes = (
+        [
+            {
+                "class": row["value"],
+                "count": row["count"],
+                "unit": "parcels",
+            }
+            for row in bucket(conn, "parcel_wsacc_utility_features", "utility_readiness_proxy_class", limit=8)
+        ]
+        if overlay_available
+        else [
+            {"class": "Sewer proxy available", "count": summary["sewer_pipe_segments"], "unit": "pipe segments"},
+            {"class": "Parcel-level utility readiness", "count": 0, "unit": "derived parcels", "status": "Data needed"},
+        ]
+    )
+    if overlay_available:
+        summary.update(
+            {
+                "total_parcels_evaluated": table_count(conn, "parcel_wsacc_utility_features"),
+                "parcels_within_1000ft_sewer_proxy": count_where(
+                    conn,
+                    "parcel_wsacc_utility_features",
+                    "sewer_pipe_within_1000ft_flag OR manhole_within_1000ft_flag",
+                ),
+                "parcels_inside_wsacc_subbasins": count_where(
+                    conn,
+                    "parcel_wsacc_utility_features",
+                    "inside_wsacc_subbasin_flag",
+                ),
+            }
+        )
+    return {
+        "mode": "portfolio_demo_extract",
+        "source": "WSACC sewer proxy inventory",
+        "summary": summary,
+        "utility_readiness_classes": readiness_classes,
+        "sewer_proxy_classes": (
+            [
+                {"class": row["value"], "count": row["count"], "unit": "parcels"}
+                for row in bucket(conn, "parcel_wsacc_utility_features", "sewer_proxy_class", limit=8)
+            ]
+            if overlay_available
+            else []
+        ),
+        "caveats": [
+            "Demo utility context is aggregated and proxy-only.",
+            "It does not confirm available water/sewer capacity, allocation, service commitment, or project approval.",
+            "Verify service readiness with WSACC or the relevant utility provider before parcel-level interpretation.",
+        ],
+    }
+
+
 def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
     assessed_value = as_number(row.get("assessed_value"))
     value_per_acre = as_number(row.get("value_per_acre"))
@@ -763,12 +832,17 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
         "segment_caveat": _segment_caveat(segment),
         "special_asset_flag": special_asset,
         "transportation_context": None,
-        "utility_readiness_context": "WSACC sewer proxy inventory is available; parcel overlay and capacity verification remain data needs.",
-        "utility_readiness_class": "Sewer proxy available / parcel overlay needed",
-        "utility_constraint_flag": "Data needed",
+        "sewer_proxy_class": row.get("sewer_proxy_class") or "Data needed",
+        "utility_readiness_proxy_class": row.get("utility_readiness_proxy_class") or "Data needed",
+        "sewer_proxy_confidence": row.get("sewer_proxy_confidence") or "data_needed",
+        "utility_readiness_context": row.get("utility_readiness_proxy_class") or row.get("sewer_proxy_class") or "Data needed",
+        "utility_readiness_class": row.get("utility_readiness_proxy_class") or "Data needed",
+        "utility_constraint_flag": "Capacity data needed",
         "planned_extension_nearby_flag": "Data needed",
-        "sewer_basin_label": None,
-        "utility_confidence": "low",
+        "sewer_basin_label": row.get("sewer_basin_label"),
+        "utility_confidence": row.get("sewer_proxy_confidence") or "data_needed",
+        "utility_capacity_status": row.get("utility_capacity_status") or "Capacity data not provided",
+        "planned_extension_status": row.get("planned_extension_status") or "Planned extension data not provided",
         "value_per_acre": value_per_acre,
     }
 

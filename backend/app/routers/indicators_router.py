@@ -111,7 +111,7 @@ def get_indicator_intelligence(
         caveats,
     )
     wsacc_statistics = _safe_load(
-        build_wsacc_statistics,
+        lambda: build_wsacc_statistics(db),
         "WSACC utility inventory is unavailable.",
         caveats,
     )
@@ -661,6 +661,8 @@ def _utility_signal(as_of: str, wsacc_statistics: Any = None) -> dict[str, Any]:
     summary = (wsacc_statistics or {}).get("summary", {}) if isinstance(wsacc_statistics, dict) else {}
     sewer_lines = int(summary.get("sewer_pipe_segments") or 0)
     basins = int(summary.get("sewer_subbasins") or 0)
+    evaluated = int(summary.get("total_parcels_evaluated") or 0)
+    near = int(summary.get("parcels_within_1000ft_sewer_proxy") or 0)
     if sewer_lines or basins:
         return _signal(
             caveats=list((wsacc_statistics or {}).get("caveats") or ["Utility proxy does not confirm available capacity."]),
@@ -670,15 +672,17 @@ def _utility_signal(as_of: str, wsacc_statistics: Any = None) -> dict[str, Any]:
             evidence=[
                 f"{sewer_lines:,} WSACC sewer pipe segments inventoried.",
                 f"{basins:,} WSACC sewer subbasins inventoried.",
-                "Water service areas, capacity constraints, CIP projects, and parcel overlay remain data needs.",
+                f"{evaluated:,} parcels evaluated; {near:,} parcels are within 1,000 ft of sewer proxy infrastructure." if evaluated else "Parcel overlay remains a data need.",
+                "Water service areas, capacity constraints, CIP projects, and planned extensions remain data needs.",
             ],
             geography_label="Countywide",
             id="utility_readiness",
-            recommended_followup="Run WSACC parcel overlay before using utility readiness for parcel-level review.",
+            recommended_followup="Use sewer proxy as a screening signal and verify service/capacity with WSACC before parcel-level conclusions.",
             related_layers=["WSACC sewer lines", "WSACC sewer subbasins"],
             status_band="review",
             title="Utility Readiness Coverage",
-            value="Sewer proxy available",
+            value=near if evaluated else "Sewer proxy available",
+            unit="parcels within 1,000 ft" if evaluated else None,
         )
     return _signal(
         caveats=["Utility proxy does not confirm available capacity."],

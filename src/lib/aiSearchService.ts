@@ -1083,7 +1083,16 @@ function demoPowerBiActionsForQuery(query: string): CfsAiPowerBiActions {
   let selectedFilters: CfsAiPowerBiActions["selected_filters"] = {};
   let reportCanvasItems: NonNullable<CfsAiPowerBiActions["report_canvas_items"]>;
 
-  if (normalized.includes("underbuilt") || normalized.includes("redevelopment")) {
+  if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) {
+    reportTitle = "Utility Readiness + Growth Report";
+    reportSummary = "Compare growth and economic opportunity against WSACC sewer-proximity proxy context and utility data gaps.";
+    selectedFilters = { utility_capacity_status: "Capacity data not provided" };
+    reportCanvasItems = [
+      visual("Utility Readiness + Growth", "Sewer proxy class breakdown", "bar", "parcel_economic_signal_fact", "sewer_proxy_class", "signal_id", { caveat: "Sewer proximity is a proxy; capacity and planned extensions are data needed." }),
+      visual("Utility Readiness + Growth", "Underbuilt candidates by sewer proxy", "bar", "parcel_economic_signal_fact", "sewer_proxy_class", "signal_id", { caveat: "Use this as screening context before utility due diligence.", filterField: "opportunity_class", filterValue: "Underbuilt Redevelopment Candidate" }),
+      visual("Utility Readiness + Growth", "Subbasin review table", "matrix", "parcel_economic_signal_fact", "sewer_basin_label", "utility_readiness_proxy_class", { caveat: "Subbasins provide context, not a capacity confirmation." }),
+    ];
+  } else if (normalized.includes("underbuilt") || normalized.includes("redevelopment")) {
     reportTitle = "Underbuilt Redevelopment Candidate Dashboard";
     reportSummary = "Focus on underbuilt rows, segment mix, and follow-up actions.";
     selectedFilters = { opportunity_class: "Underbuilt Redevelopment Candidate" };

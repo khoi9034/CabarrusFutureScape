@@ -1239,6 +1239,11 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "opportunity class sort",
             "filter special assets",
             "special asset filter",
+            "utility readiness",
+            "sewer proxy",
+            "wsacc",
+            "sewer proximity",
+            "growth report",
         )
     )
 
@@ -1516,7 +1521,16 @@ def _powerbi_actions_for_query(query: str) -> dict[str, Any]:
     canvas_items: list[dict[str, Any]]
     selected_filters: dict[str, str] = {}
 
-    if "underbuilt" in normalized or "redevelopment" in normalized:
+    if "utility" in normalized or "sewer" in normalized or "wsacc" in normalized:
+        title = "Utility Readiness + Growth Report"
+        summary = "Compare growth and economic opportunity against WSACC sewer-proximity proxy context and utility data gaps."
+        selected_filters = {"utility_capacity_status": "Capacity data not provided"}
+        canvas_items = [
+            visual("Utility Readiness + Growth", "Sewer proxy class breakdown", "bar", "parcel_economic_signal_fact", "sewer_proxy_class", "signal_id", caveat="Sewer proximity is a proxy; capacity and planned extensions are data needed."),
+            visual("Utility Readiness + Growth", "Underbuilt candidates by sewer proxy", "bar", "parcel_economic_signal_fact", "sewer_proxy_class", "signal_id", filter_field="opportunity_class", filter_value="Underbuilt Redevelopment Candidate", caveat="Use this as screening context before utility due diligence."),
+            visual("Utility Readiness + Growth", "Subbasin review table", "matrix", "parcel_economic_signal_fact", "sewer_basin_label", "utility_readiness_proxy_class", caveat="Subbasins provide context, not a capacity confirmation."),
+        ]
+    elif "underbuilt" in normalized or "redevelopment" in normalized:
         title = "Underbuilt Redevelopment Candidate Dashboard"
         summary = "Focus on underbuilt parcel signals, segment mix, and follow-up rows."
         selected_filters = {"opportunity_class": "Underbuilt Redevelopment Candidate"}

@@ -14,6 +14,7 @@ from typing import Any
 import geopandas as gpd
 import pandas as pd
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BACKEND_ROOT = REPO_ROOT / "backend"
@@ -37,17 +38,20 @@ def main() -> int:
         return 0
 
     engine = get_engine()
-    for row in inventory:
-        source = root / row["file_name"]
-        table_name = row["target_table"]
-        gdf = _normalized_layer(source, row)
-        gdf.to_postgis(table_name, engine, schema="public", if_exists="replace", index=False)
-        with engine.begin() as connection:
-            connection.execute(
-                text(f'CREATE INDEX IF NOT EXISTS idx_{table_name}_geometry ON public.{table_name} USING GIST ("geometry")')
-            )
+    try:
+        for row in inventory:
+            source = root / row["file_name"]
+            table_name = row["target_table"]
+            gdf = _normalized_layer(source, row)
+            gdf.to_postgis(table_name, engine, schema="public", if_exists="replace", index=False)
+            with engine.begin() as connection:
+                connection.execute(
+                    text(f'CREATE INDEX IF NOT EXISTS idx_{table_name}_geometry ON public.{table_name} USING GIST ("geometry")')
+                )
 
-    _write_inventory_table(engine, inventory)
+        _write_inventory_table(engine, inventory)
+    except SQLAlchemyError as exc:
+        raise SystemExit(f"Database operation failed. Check local PostGIS settings. ({exc.__class__.__name__})") from exc
     print(json.dumps({"mode": "apply", "layers_written": len(inventory)}, indent=2))
     return 0
 

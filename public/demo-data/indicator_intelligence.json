@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-07-09T18:11:55Z",
+  "as_of": "2026-07-09T19:06:23Z",
   "caveats": [
     "Portfolio Demo uses a cached CFS demo extract.",
     "CFS indicators are planning review signals, not official determinations.",
@@ -394,7 +394,7 @@
       "geometry_available": true,
       "temporal_fields_available": true,
       "update_cadence_known": false,
-      "source_freshness": "2026-07-09T18:11:55Z",
+      "source_freshness": "2026-07-09T19:06:23Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -408,7 +408,7 @@
       "geometry_available": true,
       "temporal_fields_available": true,
       "update_cadence_known": false,
-      "source_freshness": "2026-07-09T18:11:55Z",
+      "source_freshness": "2026-07-09T19:06:23Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -422,7 +422,7 @@
       "geometry_available": true,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-07-09T18:11:55Z",
+      "source_freshness": "2026-07-09T19:06:23Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -436,7 +436,7 @@
       "geometry_available": false,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-07-09T18:11:55Z",
+      "source_freshness": "2026-07-09T19:06:23Z",
       "local_live_status": "data needed",
       "demo_extract_status": "not included",
       "coverage": "data needed",
@@ -450,7 +450,7 @@
       "geometry_available": true,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-07-09T18:11:55Z",
+      "source_freshness": "2026-07-09T19:06:23Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -464,7 +464,7 @@
       "geometry_available": true,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-07-09T18:11:55Z",
+      "source_freshness": "2026-07-09T19:06:23Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -478,7 +478,7 @@
       "geometry_available": true,
       "temporal_fields_available": false,
       "update_cadence_known": false,
-      "source_freshness": "2026-07-09T18:11:55Z",
+      "source_freshness": "2026-07-09T19:06:23Z",
       "local_live_status": "available",
       "demo_extract_status": "cached extract",
       "coverage": "available",
@@ -522,7 +522,7 @@
       "related_layers": [
         "Development Hotspots"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -552,7 +552,7 @@
         "School Utilization + Permit Pressure",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -578,32 +578,32 @@
       "related_layers": [
         "Floodplain Review"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
       "id": "utility_readiness",
       "domain": "utility_readiness",
       "title": "Utility Readiness Coverage",
-      "status_band": "data_needed",
+      "status_band": "review",
       "severity": 2,
-      "confidence": "low",
-      "value": "Data needed",
+      "confidence": "medium",
+      "value": "Sewer proxy available",
       "unit": null,
       "trend_direction": "not_available",
       "trend_label": null,
       "geography_label": "Countywide",
       "evidence": [
-        "True utility capacity and service readiness data are not available in CFS yet."
+        "WSACC sewer pipe, manhole, and subbasin proxy context is available in the demo extract."
       ],
       "caveats": [
         "Utility proxy does not confirm available capacity."
       ],
-      "recommended_followup": "Request WSACC capacity and service readiness fields.",
+      "recommended_followup": "Review sewer-proximity classes, then request WSACC capacity and planned-extension fields.",
       "related_layers": [
         "Utility Proxy"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -629,7 +629,7 @@
         "Transportation Context",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -654,7 +654,7 @@
       "related_layers": [
         "Parcel Intelligence"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -679,7 +679,7 @@
       "related_layers": [
         "Model Lab Research Signals"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -705,7 +705,7 @@
       ],
       "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
       "related_layers": [],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     }
   ],
@@ -742,7 +742,7 @@
       "related_layers": [
         "Development Hotspots"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -772,7 +772,7 @@
         "School Utilization + Permit Pressure",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -798,32 +798,32 @@
       "related_layers": [
         "Floodplain Review"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
       "id": "utility_readiness",
       "domain": "utility_readiness",
       "title": "Utility Readiness Coverage",
-      "status_band": "data_needed",
+      "status_band": "review",
       "severity": 2,
-      "confidence": "low",
-      "value": "Data needed",
+      "confidence": "medium",
+      "value": "Sewer proxy available",
       "unit": null,
       "trend_direction": "not_available",
       "trend_label": null,
       "geography_label": "Countywide",
       "evidence": [
-        "True utility capacity and service readiness data are not available in CFS yet."
+        "WSACC sewer pipe, manhole, and subbasin proxy context is available in the demo extract."
       ],
       "caveats": [
         "Utility proxy does not confirm available capacity."
       ],
-      "recommended_followup": "Request WSACC capacity and service readiness fields.",
+      "recommended_followup": "Review sewer-proximity classes, then request WSACC capacity and planned-extension fields.",
       "related_layers": [
         "Utility Proxy"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -849,7 +849,7 @@
         "Transportation Context",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -874,7 +874,7 @@
       "related_layers": [
         "Parcel Intelligence"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -899,7 +899,7 @@
       "related_layers": [
         "Model Lab Research Signals"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -925,15 +925,15 @@
       ],
       "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
       "related_layers": [],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     }
   ],
   "summary": {
     "total_signals": 8,
     "elevated_review_count": 2,
-    "review_count": 0,
-    "data_needed_count": 3,
+    "review_count": 1,
+    "data_needed_count": 2,
     "unavailable_count": 0
   },
   "watchlist": [
@@ -960,7 +960,7 @@
       "related_layers": [
         "Floodplain Review"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -990,7 +990,32 @@
         "School Utilization + Permit Pressure",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
+      "source_mode": "demo"
+    },
+    {
+      "id": "utility_readiness",
+      "domain": "utility_readiness",
+      "title": "Utility Readiness Coverage",
+      "status_band": "review",
+      "severity": 2,
+      "confidence": "medium",
+      "value": "Sewer proxy available",
+      "unit": null,
+      "trend_direction": "not_available",
+      "trend_label": null,
+      "geography_label": "Countywide",
+      "evidence": [
+        "WSACC sewer pipe, manhole, and subbasin proxy context is available in the demo extract."
+      ],
+      "caveats": [
+        "Utility proxy does not confirm available capacity."
+      ],
+      "recommended_followup": "Review sewer-proximity classes, then request WSACC capacity and planned-extension fields.",
+      "related_layers": [
+        "Utility Proxy"
+      ],
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -1016,32 +1041,7 @@
       ],
       "recommended_followup": "Prioritize official utility, school, rezoning, pipeline, and planning context data requests.",
       "related_layers": [],
-      "data_freshness": "2026-07-09T18:11:55Z",
-      "source_mode": "demo"
-    },
-    {
-      "id": "utility_readiness",
-      "domain": "utility_readiness",
-      "title": "Utility Readiness Coverage",
-      "status_band": "data_needed",
-      "severity": 2,
-      "confidence": "low",
-      "value": "Data needed",
-      "unit": null,
-      "trend_direction": "not_available",
-      "trend_label": null,
-      "geography_label": "Countywide",
-      "evidence": [
-        "True utility capacity and service readiness data are not available in CFS yet."
-      ],
-      "caveats": [
-        "Utility proxy does not confirm available capacity."
-      ],
-      "recommended_followup": "Request WSACC capacity and service readiness fields.",
-      "related_layers": [
-        "Utility Proxy"
-      ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -1066,7 +1066,7 @@
       "related_layers": [
         "Parcel Intelligence"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -1091,7 +1091,7 @@
       "related_layers": [
         "Model Lab Research Signals"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -1117,7 +1117,7 @@
       "related_layers": [
         "Development Hotspots"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     },
     {
@@ -1143,7 +1143,7 @@
         "Transportation Context",
         "Development Hotspots"
       ],
-      "data_freshness": "2026-07-09T18:11:55Z",
+      "data_freshness": "2026-07-09T19:06:23Z",
       "source_mode": "demo"
     }
   ]
