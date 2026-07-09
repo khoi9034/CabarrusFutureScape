@@ -309,6 +309,15 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Generated Report Preview" in economics_shell
     assert "Save Report to Bucket" in economics_shell
     assert "Send Report to Print" in economics_shell
+    assert "buildReportDataAvailability" in economics_shell
+    assert "available_report_types" in economics_shell
+    assert "best_default_report_type" in economics_shell
+    assert "Scenario + Data Confidence Report" in economics_shell
+    assert "Unavailable until data refresh" in economics_shell
+    assert "Unavailable visuals" in economics_shell
+    assert "CFS selected" in economics_shell
+    assert "underbuilt candidate rows unavailable" in economics_shell
+    assert "generatedVisualUnavailableReason" in economics_shell
     assert "parcel_economic_signal_fact currently has 0 rows" in economics_shell
     assert "Power BI export table is empty" in economics_shell
     assert "Advanced Manual Tools" in economics_shell

@@ -597,6 +597,16 @@ function PowerBiToolsPage({
   const [askPowerBiAction, setAskPowerBiAction] = useState<PowerBiAskActionRequest | null>(null);
   const [lastAskResponse, setLastAskResponse] = useState<CfsAiSearchResponse | null>(null);
   const askPowerBiActionId = useRef(0);
+  const reportAvailability = useMemo(
+    () =>
+      buildReportDataAvailability(
+        powerBiPayload,
+        signals,
+        dataReadiness,
+        outputs,
+      ),
+    [dataReadiness, outputs, powerBiPayload, signals],
+  );
   const handleAskCfsResponse = (response: CfsAiSearchResponse) => {
     setLastAskResponse(response);
     const actions = response.powerbi_actions;
@@ -653,6 +663,7 @@ function PowerBiToolsPage({
       </section>
       <PowerBiReportGenerator
         askPowerBiAction={askPowerBiAction}
+        availability={reportAvailability}
         dataReadiness={dataReadiness}
         onAddReportBucketItem={onAddReportBucketItem}
         onNavigate={onNavigate}
@@ -719,6 +730,7 @@ function PowerBiToolsPage({
               askPowerBiAction={askPowerBiAction}
               embedded
               exportPayload={exportPayload}
+              reportAvailability={reportAvailability}
               inputs={inputs}
               onAddReportBucketItem={onAddReportBucketItem}
               onClearReportBucket={onClearReportBucket}
@@ -1299,6 +1311,7 @@ function EnterpriseWorkspacePage({
   onToggleReportBucketPrint,
   outputs,
   powerBiPayload,
+  reportAvailability,
   reportBucketItems,
   scenarios,
   selectedSignals,
@@ -1315,6 +1328,7 @@ function EnterpriseWorkspacePage({
   onToggleReportBucketPrint: (id: string) => void;
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
+  reportAvailability: PowerBiReportDataAvailability;
   reportBucketItems: ReportBucketItem[];
   scenarios: EconomicsScenarioTemplate[];
   selectedSignals: EconomicsParcelSignal[];
@@ -1395,6 +1409,7 @@ function EnterpriseWorkspacePage({
             onToggleReportBucketPrint={onToggleReportBucketPrint}
             outputs={outputs}
             powerBiPayload={powerBiPayload}
+            reportAvailability={reportAvailability}
             reportBucketItems={reportBucketItems}
             scenarios={scenarios}
             selectedOutput={selectedOutput}
@@ -2083,6 +2098,7 @@ function EnterpriseToolsPage({
   onToggleReportBucketPrint,
   outputs,
   powerBiPayload,
+  reportAvailability,
   reportBucketItems,
   scenarios,
   selectedOutput,
@@ -2098,6 +2114,7 @@ function EnterpriseToolsPage({
   onToggleReportBucketPrint: (id: string) => void;
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
+  reportAvailability: PowerBiReportDataAvailability;
   reportBucketItems: ReportBucketItem[];
   scenarios: EconomicsScenarioTemplate[];
   selectedOutput: EnterpriseOutputKind;
@@ -2214,6 +2231,7 @@ function EnterpriseToolsPage({
             <CsvDownloadTable rows={csvRows} />
             <PowerBiChartBuilder
               aiAction={askPowerBiAction}
+              availability={reportAvailability}
               key={askPowerBiAction?.id ?? "manual-chart-builder"}
               onAddReportBucketItem={onAddReportBucketItem}
               payload={powerBiPayload}
@@ -2563,6 +2581,7 @@ function CsvDownloadTable({ rows }: { rows: ReturnType<typeof powerBiCsvRows> })
 
 function PowerBiReportGenerator({
   askPowerBiAction,
+  availability,
   dataReadiness,
   onAddReportBucketItem,
   onNavigate,
@@ -2571,6 +2590,7 @@ function PowerBiReportGenerator({
   signals,
 }: {
   askPowerBiAction?: PowerBiAskActionRequest | null;
+  availability: PowerBiReportDataAvailability;
   dataReadiness: EconomicsReadinessRow[];
   onAddReportBucketItem: (item: ReportBucketItemInput) => void;
   onNavigate: (section: "print") => void;
@@ -2578,25 +2598,25 @@ function PowerBiReportGenerator({
   payload: EconomicsPowerBiExportResponse | null;
   signals: EconomicsParcelSignal[];
 }) {
-  const [prompt, setPrompt] = useState("Build an underbuilt parcel report with visuals and a candidate table.");
+  const [prompt, setPrompt] = useState("Build me a Power BI report.");
   const [includeSections, setIncludeSections] = useState(defaultGeneratedReportIncludes);
   const [plan, setPlan] = useState<PowerBiGeneratedReportPlan | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   useEffect(() => {
     if (!askPowerBiAction?.actions || askPowerBiAction.actions.action_type === "none") return;
-    const generated = powerBiActionsToGeneratedPlan(askPowerBiAction.actions, payload);
+    const generated = powerBiActionsToGeneratedPlan(askPowerBiAction.actions, payload, availability);
     const frame = requestAnimationFrame(() => {
       setPrompt(generated.generated_from_prompt);
       setPlan(generated);
       setStatus("Ask CFS generated a report preview below.");
     });
     return () => cancelAnimationFrame(frame);
-  }, [askPowerBiAction, payload]);
+  }, [askPowerBiAction, availability, payload]);
   const report = plan
     ? buildGeneratedReportSnapshot(plan, payload, signals, outputs, dataReadiness, includeSections)
     : null;
   const generateReport = () => {
-    setPlan(buildPowerBiReportPlan(prompt, payload));
+    setPlan(buildPowerBiReportPlan(prompt, payload, availability));
     setStatus("Report preview generated");
   };
   const saveReport = () => {
@@ -2629,21 +2649,58 @@ function PowerBiReportGenerator({
         <textarea
           className="min-h-24 w-full resize-y rounded-xl border border-[var(--econ-border)] bg-black/30 px-3 py-3 text-sm text-[var(--econ-text)] outline-none transition placeholder:text-[var(--econ-muted)] focus:border-[var(--econ-gold)]"
           onChange={(event) => setPrompt(event.target.value)}
-          placeholder="Example: Build an underbuilt parcel report with visuals and a candidate table."
+          placeholder="Example: Build me a Power BI report."
           value={prompt}
         />
         <div className="flex flex-wrap gap-2">
-          {quickPowerBiReportRequests.map((label) => (
+          {quickPowerBiReportTypes.map((item) => {
+            const state = availability.report_types.find((report) => report.type === item.type);
+            const disabled = !state?.available;
+            return (
             <button
-              className="rounded-full border border-[var(--econ-border)] px-3 py-1.5 text-xs font-semibold text-[var(--econ-muted)] transition hover:border-[var(--econ-gold)] hover:text-[var(--econ-text)]"
-              key={label}
-              onClick={() => setPrompt(`Build a ${label.toLowerCase()} with visuals, summary, caveats, and print-ready items.`)}
+              className="rounded-full border border-[var(--econ-border)] px-3 py-1.5 text-xs font-semibold text-[var(--econ-muted)] transition hover:border-[var(--econ-gold)] hover:text-[var(--econ-text)] disabled:cursor-not-allowed disabled:opacity-45"
+              disabled={disabled}
+              key={item.type}
+              onClick={() => setPrompt(item.prompt)}
+              title={disabled ? state?.reason : item.label}
               type="button"
             >
-              {label}
+              {item.label}
             </button>
-          ))}
+            );
+          })}
         </div>
+        <div className="grid gap-3 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3 md:grid-cols-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-green)]">Available now</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {availability.available_report_types.map((type) => (
+                <button
+                  className="rounded-full border border-[var(--econ-green)]/40 bg-[var(--econ-green)]/10 px-2.5 py-1 text-xs text-[var(--econ-text)]"
+                  key={type}
+                  onClick={() => setPrompt(quickPowerBiReportTypes.find((item) => item.type === type)?.prompt ?? `Build a ${reportTypeLabel(type)}.`)}
+                  type="button"
+                >
+                  {reportTypeLabel(type)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">Unavailable until data refresh</p>
+            <div className="mt-2 space-y-1 text-xs text-[var(--econ-muted)]">
+              {availability.unavailable_report_types.length ? availability.unavailable_report_types.map((item) => (
+                <p key={item.type}>{reportTypeLabel(item.type)} - {item.reason}</p>
+              )) : <p>All configured quick reports have supporting rows.</p>}
+            </div>
+          </div>
+        </div>
+        {availability.mismatch_warning ? (
+          <div className="rounded-xl border border-[var(--econ-risk)]/40 bg-[var(--econ-risk)]/10 p-3 text-sm leading-6 text-[#ffc7a6]">
+            <p>{availability.mismatch_warning}</p>
+            <p>Checked table: parcel_economic_signal_fact; current rows: {availability.parcel_economic_signal_fact_rows}. Likely fixes: check /economics/powerbi-export, rebuild economics export/demo data, and confirm economics intelligence is not fallback_partial.</p>
+          </div>
+        ) : null}
         <div className="flex flex-wrap gap-2">
           <button
             className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-4 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
@@ -2711,8 +2768,9 @@ function PowerBiReportGenerator({
             </div>
           ) : null}
           {includeSections.visuals ? (
-            <div className="grid gap-3 xl:grid-cols-2">
-              {report.visuals.map((visual) => (
+            report.visuals.length ? (
+              <div className="grid gap-3 xl:grid-cols-2">
+                {report.visuals.map((visual) => (
                 <GeneratedReportVisualCard
                   key={visual.visual_id}
                   onSave={() =>
@@ -2731,8 +2789,27 @@ function PowerBiReportGenerator({
                   }
                   visual={visual}
                 />
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-xl border border-dashed border-[var(--econ-border)] px-3 py-4 text-sm text-[var(--econ-muted)]">
+                No chart visuals can render from the currently available rows. Use the tables below or refresh the Power BI export.
+              </p>
+            )
+          ) : null}
+          {report.unavailable_visuals.length ? (
+            <details className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
+              <summary className="cursor-pointer text-sm font-semibold text-[var(--econ-text)]">
+                Unavailable visuals
+              </summary>
+              <div className="mt-3 space-y-2 text-sm text-[var(--econ-muted)]">
+                {report.unavailable_visuals.map((item) => (
+                  <p key={`${item.visual.visual_id}-${item.reason}`}>
+                    {item.title} - {item.reason}
+                  </p>
+                ))}
+              </div>
+            </details>
           ) : null}
           {includeSections.tables ? (
             <div className="grid gap-3">
@@ -2779,16 +2856,18 @@ function PowerBiReportGenerator({
 
 function PowerBiChartBuilder({
   aiAction,
+  availability,
   onAddReportBucketItem,
   payload,
 }: {
   aiAction?: PowerBiAskActionRequest | null;
+  availability: PowerBiReportDataAvailability;
   onAddReportBucketItem: (item: ReportBucketItemInput) => void;
   payload: EconomicsPowerBiExportResponse | null;
 }) {
   const aiGeneratedPlan =
     aiAction?.actions && aiAction.actions.action_type !== "none"
-      ? powerBiActionsToGeneratedPlan(aiAction.actions, payload)
+      ? powerBiActionsToGeneratedPlan(aiAction.actions, payload, availability)
       : null;
   const aiInitialVisual = aiGeneratedPlan?.pages.flatMap((page) => page.visuals)[0];
   const aiInitialConfig = aiInitialVisual ? generatedVisualToRecipeConfig(aiInitialVisual) : null;
@@ -2796,7 +2875,7 @@ function PowerBiChartBuilder({
     aiAction?.actions.action_type === "build_report" ||
     aiAction?.actions.action_type === "add_to_canvas";
   const [reportPrompt, setReportPrompt] = useState(
-    aiGeneratedPlan?.generated_from_prompt ?? "Build a report for underbuilt redevelopment candidates.",
+    aiGeneratedPlan?.generated_from_prompt ?? "Build me a Power BI report.",
   );
   const [generatedPlan, setGeneratedPlan] = useState<PowerBiGeneratedReportPlan | null>(aiGeneratedPlan);
   const [tableName, setTableName] = useState<PowerBiTableName>(
@@ -2949,7 +3028,7 @@ function PowerBiChartBuilder({
     setCopyStatus("Report recipe copied");
   };
   const generateReportPlan = () => {
-    const plan = buildPowerBiReportPlan(reportPrompt, payload);
+    const plan = buildPowerBiReportPlan(reportPrompt, payload, availability);
     setGeneratedPlan(plan);
     setCopyStatus("Report plan generated");
   };
@@ -5590,6 +5669,11 @@ type GeneratedReportIncludeState = Record<GeneratedReportSectionKey, boolean>;
 type GeneratedReportVisualPreview = PowerBiGeneratedVisual & {
   rows: Array<Record<string, unknown>>;
 };
+type UnavailableGeneratedVisual = {
+  reason: string;
+  title: string;
+  visual: PowerBiGeneratedVisual;
+};
 type GeneratedReportTablePreview = {
   columns: string[];
   rows: Array<Record<string, unknown>>;
@@ -5606,7 +5690,40 @@ type GeneratedPowerBiReportSnapshot = {
   summary: string;
   tables: GeneratedReportTablePreview[];
   title: string;
+  unavailable_visuals: UnavailableGeneratedVisual[];
   visuals: GeneratedReportVisualPreview[];
+};
+type PowerBiReportType =
+  | "data_confidence"
+  | "executive"
+  | "scenario"
+  | "scenario_data_confidence"
+  | "special_assets"
+  | "tax_base"
+  | "underbuilt"
+  | "utility";
+type PowerBiReportAvailabilityItem = {
+  available: boolean;
+  reason: string;
+  type: PowerBiReportType;
+};
+type PowerBiReportDataAvailability = {
+  available_report_types: PowerBiReportType[];
+  best_default_report_type: PowerBiReportType;
+  domain_readiness_dim_rows: number;
+  economics_intelligence_summary_available: boolean;
+  economics_kpi_fact_rows: number;
+  geography_dim_rows: number;
+  mismatch_warning: string | null;
+  parcel_economic_signal_fact_rows: number;
+  report_types: PowerBiReportAvailabilityItem[];
+  scenario_output_fact_rows: number;
+  special_asset_rows: number;
+  tax_base_opportunity_rows: number;
+  underbuilt_rows: number;
+  unavailable_report_types: PowerBiReportAvailabilityItem[];
+  utility_summary_available: boolean;
+  wsacc_summary_available: boolean;
 };
 type ReportBucketItemType =
   | "chart"
@@ -5824,16 +5941,6 @@ const powerBiReportPromptExamples = [
   "Show value per acre by economic segment with caveats.",
 ];
 
-const quickPowerBiReportRequests = [
-  "Executive Dashboard",
-  "Underbuilt Parcel Report",
-  "Tax-Base Opportunity Report",
-  "Scenario Comparison",
-  "Utility Readiness + Growth Report",
-  "Special Assets Review",
-  "Data Confidence Report",
-];
-
 const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {
   caveats: true,
   kpis: true,
@@ -5843,47 +5950,254 @@ const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {
   visuals: true,
 };
 
+const quickPowerBiReportTypes: Array<{ label: string; prompt: string; type: PowerBiReportType }> = [
+  { label: "Executive Dashboard", prompt: "Build an executive dashboard.", type: "executive" },
+  { label: "Scenario Comparison", prompt: "Build a scenario comparison dashboard.", type: "scenario" },
+  { label: "Data Confidence Report", prompt: "Build a data confidence report.", type: "data_confidence" },
+  { label: "Utility Readiness + Growth Report", prompt: "Build a Utility Readiness + Growth Report.", type: "utility" },
+  { label: "Underbuilt Parcel Report", prompt: "Build an underbuilt parcel report.", type: "underbuilt" },
+  { label: "Tax-Base Opportunity Report", prompt: "Build a tax-base opportunity report.", type: "tax_base" },
+  { label: "Special Assets Review", prompt: "Build a special assets review.", type: "special_assets" },
+];
+
+function buildReportDataAvailability(
+  payload: EconomicsPowerBiExportResponse | null,
+  signals: EconomicsParcelSignal[] = [],
+  dataReadiness: EconomicsReadinessRow[] = [],
+  outputs: EconomicsScenarioOutput[] = [],
+): PowerBiReportDataAvailability {
+  const parcelRows = payload?.tables.parcel_economic_signal_fact ?? [];
+  const kpiRows = payload?.tables.economics_kpi_fact?.length ?? 0;
+  const scenarioRows = (payload?.tables.scenario_output_fact?.length ?? 0) || outputs.length;
+  const readinessRows = (payload?.tables.domain_readiness_dim?.length ?? 0) || dataReadiness.length;
+  const underbuiltRows = parcelRows.filter((row) =>
+    valueText(row.opportunity_class).toLowerCase().includes("underbuilt"),
+  ).length;
+  const taxBaseRows = parcelRows.filter((row) =>
+    `${valueText(row.opportunity_class)} ${valueText(row.tax_base_opportunity_band)}`
+      .toLowerCase()
+      .includes("opportunity"),
+  ).length;
+  const specialRows = parcelRows.filter((row) =>
+    valueText(row.special_asset_flag).toLowerCase() === "true" ||
+    valueText(row.opportunity_class).toLowerCase().includes("special asset"),
+  ).length;
+  const hasUtilityFields = parcelRows.some((row) =>
+    ["sewer_proxy_class", "utility_readiness_proxy_class", "sewer_basin_label"].some((field) =>
+      Boolean(valueText(row[field])),
+    ),
+  );
+  const hasSummary = Boolean(kpiRows || signals.length);
+  const states: PowerBiReportAvailabilityItem[] = [
+    {
+      available: Boolean(kpiRows || hasSummary),
+      reason: "Needs KPI rows or economics summary context.",
+      type: "executive",
+    },
+    {
+      available: Boolean(parcelRows.length && underbuiltRows),
+      reason: parcelRows.length ? "Needs underbuilt candidate rows." : "Needs parcel economic signal rows.",
+      type: "underbuilt",
+    },
+    {
+      available: Boolean(parcelRows.length && taxBaseRows),
+      reason: parcelRows.length ? "Needs tax-base opportunity rows." : "Needs parcel economic signal rows.",
+      type: "tax_base",
+    },
+    {
+      available: Boolean(parcelRows.length && specialRows),
+      reason: parcelRows.length ? "Needs special asset rows." : "Needs parcel economic signal rows.",
+      type: "special_assets",
+    },
+    {
+      available: Boolean(scenarioRows),
+      reason: "Needs scenario_output_fact rows.",
+      type: "scenario",
+    },
+    {
+      available: Boolean(readinessRows),
+      reason: "Needs domain_readiness_dim rows.",
+      type: "data_confidence",
+    },
+    {
+      available: Boolean(hasUtilityFields),
+      reason: "Needs WSACC/utility proxy fields in the economics export.",
+      type: "utility",
+    },
+  ];
+  if (scenarioRows || readinessRows) {
+    states.push({
+      available: Boolean(scenarioRows || readinessRows),
+      reason: "Needs scenario or domain readiness rows.",
+      type: "scenario_data_confidence",
+    });
+  }
+  const available = states.filter((item) => item.available).map((item) => item.type);
+  const bestDefault =
+    scenarioRows && readinessRows && !parcelRows.length
+      ? "scenario_data_confidence"
+      : (["executive", "scenario", "data_confidence", "utility", "underbuilt"] as PowerBiReportType[])
+          .find((type) => available.includes(type)) ?? "executive";
+  return {
+    available_report_types: available,
+    best_default_report_type: bestDefault,
+    domain_readiness_dim_rows: readinessRows,
+    economics_intelligence_summary_available: hasSummary,
+    economics_kpi_fact_rows: kpiRows,
+    geography_dim_rows: payload?.tables.geography_dim?.length ?? 0,
+    mismatch_warning:
+      hasSummary && !parcelRows.length
+        ? "Economics intelligence has summary context, but parcel_economic_signal_fact has 0 rows. Rebuild or refresh the Power BI export before using parcel-level reports."
+        : null,
+    parcel_economic_signal_fact_rows: parcelRows.length,
+    report_types: states,
+    scenario_output_fact_rows: scenarioRows,
+    special_asset_rows: specialRows,
+    tax_base_opportunity_rows: taxBaseRows,
+    underbuilt_rows: underbuiltRows,
+    unavailable_report_types: states.filter((item) => !item.available),
+    utility_summary_available: hasUtilityFields,
+    wsacc_summary_available: hasUtilityFields,
+  };
+}
+
+function reportTypeLabel(type: PowerBiReportType) {
+  return quickPowerBiReportTypes.find((item) => item.type === type)?.label
+    ?? (type === "scenario_data_confidence" ? "Scenario + Data Confidence Report" : type.replaceAll("_", " "));
+}
+
+function reportTypeFromPrompt(prompt: string): PowerBiReportType | null {
+  const normalized = prompt.toLowerCase();
+  if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) return "utility";
+  if (normalized.includes("scenario + data") || (normalized.includes("scenario") && normalized.includes("confidence"))) return "scenario_data_confidence";
+  if (normalized.includes("scenario") || normalized.includes("burden") || normalized.includes("fiscal")) return "scenario";
+  if (normalized.includes("confidence") || normalized.includes("data readiness") || normalized.includes("data confidence")) return "data_confidence";
+  if (normalized.includes("special asset")) return "special_assets";
+  if (normalized.includes("tax-base") || normalized.includes("tax base")) return "tax_base";
+  if (normalized.includes("underbuilt") || normalized.includes("redevelopment")) return "underbuilt";
+  if (normalized.includes("segment") || normalized.includes("value per acre")) return "executive";
+  return null;
+}
+
+function selectAvailableReportType(prompt: string, availability: PowerBiReportDataAvailability) {
+  const requested = reportTypeFromPrompt(prompt);
+  if (requested && availability.available_report_types.includes(requested)) return requested;
+  return availability.best_default_report_type;
+}
+
+function reportSelectionNote(
+  requested: PowerBiReportType | null,
+  selected: PowerBiReportType,
+  availability: PowerBiReportDataAvailability,
+) {
+  if (!requested || requested === selected) return "";
+  return `CFS selected ${reportTypeLabel(selected)} because ${reportTypeLabel(requested)} is unavailable: ${availability.report_types.find((item) => item.type === requested)?.reason ?? "required rows are unavailable"}`;
+}
+
 function buildPowerBiReportPlan(
   prompt: string,
   payload: EconomicsPowerBiExportResponse | null,
+  availability = buildReportDataAvailability(payload),
 ): PowerBiGeneratedReportPlan {
   const normalized = prompt.toLowerCase();
   const relationships = payload?.relationships?.length
     ? payload.relationships
     : defaultPowerBiRelationships;
+  const requestedReportType = reportTypeFromPrompt(prompt);
+  const selectedReportType = selectAvailableReportType(prompt, availability);
+  const selectionNote = reportSelectionNote(requestedReportType, selectedReportType, availability);
   if (hasUnsafePowerBiReportRequest(normalized)) {
-    return finalizedPowerBiReportPlan(
-      prompt,
-      "Safe CFS Economics Report Plan",
-      "CFS cannot build report visuals from private contact fields, credential fields, internal model values, or probability-style outputs. This safe alternative uses sanitized economics facts and dimensions.",
-      [
-        reportPage("Safe Economics Review", "Use sanitized screening fields only.", [
-          generatedPowerBiVisual({
-            axis: "opportunity_class",
-            source_table: "parcel_economic_signal_fact",
-            title: "Opportunity class breakdown",
-            value: "signal_id",
-            visual_type: "bar",
-          }),
-          generatedPowerBiVisual({
+    const safeVisuals = [
+      availability.domain_readiness_dim_rows
+        ? generatedPowerBiVisual({
             axis: "domain_name",
             source_table: "domain_readiness_dim",
             title: "Data confidence register",
             value: "data_status",
             visual_type: "matrix",
-          }),
-        ]),
+          })
+        : null,
+      availability.scenario_output_fact_rows
+        ? generatedPowerBiVisual({
+            axis: "scenario_name",
+            source_table: "scenario_output_fact",
+            title: "Scenario output comparison",
+            value: "fiscal_attractiveness_band",
+            visual_type: "matrix",
+          })
+        : null,
+      availability.parcel_economic_signal_fact_rows
+        ? generatedPowerBiVisual({
+            axis: "opportunity_class",
+            source_table: "parcel_economic_signal_fact",
+            title: "Opportunity class breakdown",
+            value: "signal_id",
+            visual_type: "bar",
+          })
+        : null,
+    ].filter((visual): visual is PowerBiGeneratedVisual => Boolean(visual));
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Safe CFS Economics Report Plan",
+      "CFS cannot build report visuals from private contact fields, credential fields, internal model values, or probability-style outputs. This safe alternative uses sanitized economics facts and dimensions.",
+      [
+        reportPage("Safe Economics Review", "Use sanitized screening fields only.", safeVisuals),
       ],
       relationships,
       ["Use only the exported Power BI fact and dimension tables.", ...powerBiReportCaveats],
     );
   }
 
-  if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) {
+  if (selectedReportType === "scenario_data_confidence") {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Scenario + Data Confidence Report",
+      `${selectionNote ? `${selectionNote}. ` : ""}The preview uses the scenario model and data readiness matrix because those tables are available now.`,
+      [
+        reportPage("Scenario + Data Confidence", "Use available scenario and readiness context.", [
+          availability.scenario_output_fact_rows
+            ? generatedPowerBiVisual({
+                axis: "scenario_name",
+                source_table: "scenario_output_fact",
+                title: "Scenario output comparison",
+                value: "fiscal_attractiveness_band",
+                visual_type: "matrix",
+              })
+            : null,
+          availability.scenario_output_fact_rows
+            ? generatedPowerBiVisual({
+                axis: "scenario_name",
+                source_table: "scenario_output_fact",
+                title: "Service and infrastructure burden",
+                value: "service_burden_band",
+                visual_type: "matrix",
+              })
+            : null,
+          availability.domain_readiness_dim_rows
+            ? generatedPowerBiVisual({
+                axis: "domain_name",
+                source_table: "domain_readiness_dim",
+                title: "Data confidence matrix",
+                value: "data_status",
+                visual_type: "matrix",
+              })
+            : null,
+        ].filter((visual): visual is PowerBiGeneratedVisual => Boolean(visual))),
+      ],
+      relationships,
+      uniqueStrings([
+        selectionNote,
+        "Parcel-level candidate charts are hidden until parcel_economic_signal_fact has rows.",
+        ...powerBiReportCaveats,
+      ]),
+    );
+  }
+
+  if (selectedReportType === "utility") {
     return finalizedPowerBiReportPlan(
       prompt,
       "Utility Readiness + Growth Report",
-      "Compare economic opportunity against WSACC sewer-proximity proxy context, subbasin labels, and utility data gaps.",
+      `${selectionNote ? `${selectionNote}. ` : ""}Compare economic opportunity against WSACC sewer-proximity proxy context, subbasin labels, and utility data gaps.`,
       [
         reportPage("Utility Readiness + Growth", "Screen opportunity against sewer-proximity proxy context.", [
           generatedPowerBiVisual({
@@ -5894,16 +6208,18 @@ function buildPowerBiReportPlan(
             value: "signal_id",
             visual_type: "bar",
           }),
-          generatedPowerBiVisual({
-            axis: "sewer_proxy_class",
-            caveat: "Use this as screening context before utility due diligence.",
-            filterField: "opportunity_class",
-            filterValue: "Underbuilt Redevelopment Candidate",
-            source_table: "parcel_economic_signal_fact",
-            title: "Underbuilt candidates by sewer proxy",
-            value: "signal_id",
-            visual_type: "bar",
-          }),
+          availability.underbuilt_rows
+            ? generatedPowerBiVisual({
+                axis: "sewer_proxy_class",
+                caveat: "Use this as screening context before utility due diligence.",
+                filterField: "opportunity_class",
+                filterValue: "Underbuilt Redevelopment Candidate",
+                source_table: "parcel_economic_signal_fact",
+                title: "Underbuilt candidates by sewer proxy",
+                value: "signal_id",
+                visual_type: "bar",
+              })
+            : null,
           generatedPowerBiVisual({
             axis: "sewer_basin_label",
             caveat: "Subbasins provide context, not a capacity confirmation.",
@@ -5912,7 +6228,7 @@ function buildPowerBiReportPlan(
             value: "utility_readiness_proxy_class",
             visual_type: "matrix",
           }),
-        ]),
+        ].filter((visual): visual is PowerBiGeneratedVisual => Boolean(visual))),
       ],
       relationships,
       [
@@ -5923,11 +6239,11 @@ function buildPowerBiReportPlan(
     );
   }
 
-  if (normalized.includes("scenario")) {
+  if (selectedReportType === "scenario") {
     return finalizedPowerBiReportPlan(
       prompt,
       "Scenario Comparison Dashboard",
-      "Compare scenario output bands, fiscal attractiveness, service burden, infrastructure burden, and data confidence.",
+      `${selectionNote ? `${selectionNote}. ` : ""}Compare scenario output bands, fiscal attractiveness, service burden, infrastructure burden, and data confidence.`,
       [
         reportPage("Scenario Planning Model", "Compare scenario outputs and assumptions.", [
           generatedPowerBiVisual({
@@ -5950,45 +6266,11 @@ function buildPowerBiReportPlan(
     );
   }
 
-  if (normalized.includes("burden") || normalized.includes("public cost") || normalized.includes("fiscal")) {
-    return finalizedPowerBiReportPlan(
-      prompt,
-      "Fiscal and Service Burden Report",
-      "Screen where tax-base opportunity intersects service burden, infrastructure burden, public cost risk, and data confidence.",
-      [
-        reportPage("Fiscal Burden Review", "Rank opportunity and burden bands side by side.", [
-          generatedPowerBiVisual({
-            axis: "fiscal_attractiveness_band",
-            source_table: "parcel_economic_signal_fact",
-            title: "Fiscal attractiveness bands",
-            value: "signal_id",
-            visual_type: "bar",
-          }),
-          generatedPowerBiVisual({
-            axis: "opportunity_class",
-            source_table: "parcel_economic_signal_fact",
-            title: "Opportunity vs public cost risk",
-            value: "public_cost_risk_band",
-            visual_type: "matrix",
-          }),
-          generatedPowerBiVisual({
-            axis: "scenario_name",
-            source_table: "scenario_output_fact",
-            title: "Scenario service burden",
-            value: "service_burden_band",
-            visual_type: "matrix",
-          }),
-        ]),
-      ],
-      relationships,
-    );
-  }
-
-  if (normalized.includes("tax-base") || normalized.includes("tax base")) {
+  if (selectedReportType === "tax_base") {
     return finalizedPowerBiReportPlan(
       prompt,
       "Tax-Base Opportunity Dashboard",
-      "Focus on tax-base opportunity bands, geography context, economic segment, constraint burden, and recommended follow-up.",
+      `${selectionNote ? `${selectionNote}. ` : ""}Focus on tax-base opportunity bands, geography context, economic segment, constraint burden, and recommended follow-up.`,
       [
         reportPage("Tax-Base Opportunity", "Screen where economics rows show stronger fiscal upside.", [
           generatedPowerBiVisual({
@@ -6018,11 +6300,11 @@ function buildPowerBiReportPlan(
     );
   }
 
-  if (normalized.includes("special asset") || normalized.includes("special assets")) {
+  if (selectedReportType === "special_assets") {
     return finalizedPowerBiReportPlan(
       prompt,
       "Special Assets Review Page",
-      "Isolate special or non-comparable assets before interpreting value-per-acre and fiscal opportunity bands.",
+      `${selectionNote ? `${selectionNote}. ` : ""}Isolate special or non-comparable assets before interpreting value-per-acre and fiscal opportunity bands.`,
       [
         reportPage("Special Assets", "Review special assets separately from ordinary parcel comparisons.", [
           generatedPowerBiVisual({
@@ -6048,7 +6330,7 @@ function buildPowerBiReportPlan(
     );
   }
 
-  if (normalized.includes("segment") || normalized.includes("value per acre")) {
+  if (availability.parcel_economic_signal_fact_rows && (normalized.includes("segment") || normalized.includes("value per acre"))) {
     return finalizedPowerBiReportPlan(
       prompt,
       "Economic Segment Comparison Report",
@@ -6084,11 +6366,11 @@ function buildPowerBiReportPlan(
     );
   }
 
-  if (normalized.includes("underbuilt") || normalized.includes("redevelopment")) {
+  if (selectedReportType === "underbuilt") {
     return finalizedPowerBiReportPlan(
       prompt,
       "Underbuilt Redevelopment Candidate Dashboard",
-      "Focus on underbuilt candidate rows, segment context, opportunity class, recommended follow-up, and data confidence.",
+      `${selectionNote ? `${selectionNote}. ` : ""}Focus on underbuilt candidate rows, segment context, opportunity class, recommended follow-up, and data confidence.`,
       [
         reportPage("Executive Economic Dashboard", "Summarize underbuilt candidate signals.", [
           generatedPowerBiVisual({
@@ -6124,11 +6406,11 @@ function buildPowerBiReportPlan(
     );
   }
 
-  if (normalized.includes("confidence") || normalized.includes("data")) {
+  if (selectedReportType === "data_confidence") {
     return finalizedPowerBiReportPlan(
       prompt,
       "Data Confidence Register",
-      "Show which economics domains and rows are strong, partial, or still data-needed before report interpretation.",
+      `${selectionNote ? `${selectionNote}. ` : ""}Show which economics domains are strong, partial, or still data-needed before report interpretation.`,
       [
         reportPage("Data Confidence Register", "Review data status and next data needs.", [
           generatedPowerBiVisual({
@@ -6138,72 +6420,86 @@ function buildPowerBiReportPlan(
             value: "data_status",
             visual_type: "matrix",
           }),
-          generatedPowerBiVisual({
-            axis: "data_confidence",
-            source_table: "parcel_economic_signal_fact",
-            title: "Parcel signal confidence",
-            value: "signal_id",
-            visual_type: "donut",
-          }),
-        ]),
+          availability.parcel_economic_signal_fact_rows
+            ? generatedPowerBiVisual({
+                axis: "data_confidence",
+                source_table: "parcel_economic_signal_fact",
+                title: "Parcel signal confidence",
+                value: "signal_id",
+                visual_type: "donut",
+              })
+            : null,
+        ].filter((visual): visual is PowerBiGeneratedVisual => Boolean(visual))),
       ],
       relationships,
     );
   }
 
-  return finalizedPowerBiReportPlan(
-    prompt,
-    "Executive Economic Dashboard",
-    "Build a leadership-ready Power BI page with KPI cards, opportunity classes, segment mix, scenario comparison, and data confidence.",
-    [
-      reportPage("Executive Economic Dashboard", "Summarize the economics signal first.", [
-        generatedPowerBiVisual({
+  const executiveVisuals = [
+    availability.economics_kpi_fact_rows
+      ? generatedPowerBiVisual({
           axis: "kpi_name",
           source_table: "economics_kpi_fact",
           title: "Executive KPI cards",
           value: "value",
           visual_type: "bar",
           aggregation: "sum",
-        }),
-        generatedPowerBiVisual({
+        })
+      : null,
+    availability.parcel_economic_signal_fact_rows
+      ? generatedPowerBiVisual({
           axis: "opportunity_class",
           source_table: "parcel_economic_signal_fact",
           title: "Opportunity class breakdown",
           value: "signal_id",
           visual_type: "bar",
-        }),
-        generatedPowerBiVisual({
+        })
+      : null,
+    availability.parcel_economic_signal_fact_rows
+      ? generatedPowerBiVisual({
           axis: "economic_segment",
           source_table: "parcel_economic_signal_fact",
           title: "Economic segment mix",
           value: "signal_id",
           visual_type: "donut",
-        }),
-      ]),
-      reportPage("Scenario + Confidence", "Add scenario and data confidence context.", [
-        generatedPowerBiVisual({
+        })
+      : null,
+    availability.scenario_output_fact_rows
+      ? generatedPowerBiVisual({
           axis: "scenario_name",
           source_table: "scenario_output_fact",
           title: "Scenario output comparison",
           value: "fiscal_attractiveness_band",
           visual_type: "matrix",
-        }),
-        generatedPowerBiVisual({
+        })
+      : null,
+    availability.domain_readiness_dim_rows
+      ? generatedPowerBiVisual({
           axis: "domain_name",
           source_table: "domain_readiness_dim",
           title: "Data readiness matrix",
           value: "data_status",
           visual_type: "matrix",
-        }),
-      ]),
+        })
+      : null,
+  ].filter((visual): visual is PowerBiGeneratedVisual => Boolean(visual));
+
+  return finalizedPowerBiReportPlan(
+    prompt,
+    "Executive Economic Dashboard",
+    `${selectionNote ? `${selectionNote}. ` : ""}Build a leadership-ready Power BI page from the tables that are available now.`,
+    [
+      reportPage("Executive Economic Dashboard", "Summarize the economics signal first.", executiveVisuals),
     ],
     relationships,
+    uniqueStrings([selectionNote, ...powerBiReportCaveats]),
   );
 }
 
 function powerBiActionsToGeneratedPlan(
   actions: CfsAiPowerBiActions,
   payload: EconomicsPowerBiExportResponse | null,
+  availability = buildReportDataAvailability(payload),
 ): PowerBiGeneratedReportPlan {
   const relationships = payload?.relationships?.length
     ? payload.relationships
@@ -6228,7 +6524,7 @@ function powerBiActionsToGeneratedPlan(
         ]
       : [];
   if (!actionVisuals.length) {
-    return buildPowerBiReportPlan(actions.report_title ?? "Build me a Power BI report.", payload);
+    return buildPowerBiReportPlan(actions.report_title ?? "Build me a Power BI report.", payload, availability);
   }
   const pages = new Map<string, { page_name: string; purpose: string; visuals: PowerBiGeneratedVisual[] }>();
   actionVisuals.forEach((item) => {
@@ -6253,7 +6549,8 @@ function powerBiActionsToGeneratedPlan(
     existing.visuals.push(visual);
     pages.set(pageName, existing);
   });
-  return finalizedPowerBiReportPlan(
+  return sanitizePowerBiReportPlan(
+    finalizedPowerBiReportPlan(
     actions.report_title ?? "AI Generated Power BI Report",
     actions.report_title ?? "AI Generated Power BI Report",
     actions.report_summary ?? "Ask CFS generated a Power BI-style dataset, visual, and report-canvas plan.",
@@ -6264,7 +6561,70 @@ function powerBiActionsToGeneratedPlan(
       "CFS generated this as a Power BI Desktop build plan only.",
       ...powerBiReportCaveats,
     ]),
+    ),
+    payload,
+    availability,
   );
+}
+
+function sanitizePowerBiReportPlan(
+  plan: PowerBiGeneratedReportPlan,
+  payload: EconomicsPowerBiExportResponse | null,
+  availability: PowerBiReportDataAvailability,
+) {
+  const hidden: string[] = [];
+  const pages = plan.pages
+    .map((page) => ({
+      ...page,
+      visuals: page.visuals.filter((visual) => {
+        const reason = generatedVisualUnavailableReason(visual, availability);
+        if (reason) hidden.push(`${visual.title} - ${reason}`);
+        return !reason;
+      }),
+    }))
+    .filter((page) => page.visuals.length);
+  if (!hidden.length) return plan;
+  if (!pages.length) {
+    return buildPowerBiReportPlan(plan.generated_from_prompt, payload, availability);
+  }
+  return finalizedPowerBiReportPlan(
+    plan.generated_from_prompt,
+    plan.title,
+    `${plan.summary} CFS hid unavailable visuals from the main preview.`,
+    pages,
+    plan.relationships,
+    uniqueStrings([
+      ...plan.caveats,
+      ...hidden.map((item) => `Unavailable visual hidden: ${item}`),
+    ]),
+  );
+}
+
+function generatedVisualUnavailableReason(
+  visual: Pick<PowerBiGeneratedVisual, "filterField" | "filterValue" | "source_table">,
+  availability: PowerBiReportDataAvailability,
+) {
+  const tableRows: Record<PowerBiTableName, number> = {
+    domain_readiness_dim: availability.domain_readiness_dim_rows,
+    economics_kpi_fact: availability.economics_kpi_fact_rows,
+    geography_dim: availability.geography_dim_rows,
+    parcel_economic_signal_fact: availability.parcel_economic_signal_fact_rows,
+    scenario_dim: 0,
+    scenario_output_fact: availability.scenario_output_fact_rows,
+    time_dim: 0,
+  };
+  if (!tableRows[visual.source_table]) return `${visual.source_table} has 0 rows`;
+  const filterText = `${visual.filterField} ${visual.filterValue}`.toLowerCase();
+  if (filterText.includes("underbuilt") && !availability.underbuilt_rows) {
+    return "underbuilt candidate rows unavailable";
+  }
+  if (filterText.includes("special_asset") && !availability.special_asset_rows) {
+    return "special asset rows unavailable";
+  }
+  if (filterText.includes("tax") && !availability.tax_base_opportunity_rows) {
+    return "tax-base opportunity rows unavailable";
+  }
+  return null;
 }
 
 function reportPage(
@@ -6475,6 +6835,37 @@ function powerBiTableRows(
   return (payload?.tables[tableName] ?? []) as Array<Record<string, unknown>>;
 }
 
+function reportRowsForTable(
+  payload: EconomicsPowerBiExportResponse | null,
+  tableName: PowerBiTableName,
+  outputs: EconomicsScenarioOutput[],
+  dataReadiness: EconomicsReadinessRow[],
+) {
+  const rows = powerBiTableRows(payload, tableName);
+  if (rows.length) return rows;
+  if (tableName === "scenario_output_fact") {
+    return outputs.map((output) => ({
+      data_confidence: output.data_confidence,
+      fiscal_attractiveness_band: output.constraint_adjusted_opportunity_band,
+      infrastructure_burden_band: output.infrastructure_burden_band,
+      revenue_per_acre_band: output.revenue_per_acre_band,
+      scenario_id: output.scenario_id,
+      scenario_name: output.title,
+      service_burden_band: output.service_burden_band,
+      tax_base_lift_band: output.estimated_tax_base_lift_band,
+    }));
+  }
+  if (tableName === "domain_readiness_dim") {
+    return dataReadiness.map((row) => ({
+      current_use: row.current_use,
+      data_status: row.data_status,
+      domain_name: row.domain,
+      next_data_need: row.gap_or_next_need,
+    }));
+  }
+  return rows;
+}
+
 function filteredPowerBiRows(
   rows: Array<Record<string, unknown>>,
   visual: PowerBiGeneratedVisual,
@@ -6493,13 +6884,23 @@ function buildGeneratedReportSnapshot(
   includeSections: GeneratedReportIncludeState,
 ): GeneratedPowerBiReportSnapshot {
   const allVisuals = plan.pages.flatMap((page) => page.visuals);
-  const visuals = allVisuals.map((visual) => ({
+  const visualPreviews = allVisuals.map((visual) => ({
     ...visual,
-    rows: filteredPowerBiRows(powerBiTableRows(payload, visual.source_table), visual),
+    rows: filteredPowerBiRows(reportRowsForTable(payload, visual.source_table, outputs, dataReadiness), visual),
   }));
+  const visuals = visualPreviews.filter((visual) => visual.rows.length);
+  const unavailableVisuals = visualPreviews
+    .filter((visual) => !visual.rows.length)
+    .map((visual) => ({
+      reason: visual.filterField && visual.filterValue !== "All"
+        ? `${visual.source_table} has 0 rows matching ${visual.filterField} = ${visual.filterValue}`
+        : `${visual.source_table} has 0 rows`,
+      title: visual.title,
+      visual,
+    }));
   const parcelRows = powerBiTableRows(payload, "parcel_economic_signal_fact");
-  const scenarioRows = powerBiTableRows(payload, "scenario_output_fact");
-  const readinessRows = powerBiTableRows(payload, "domain_readiness_dim");
+  const scenarioRows = reportRowsForTable(payload, "scenario_output_fact", outputs, dataReadiness);
+  const readinessRows = reportRowsForTable(payload, "domain_readiness_dim", outputs, dataReadiness);
   const needsParcelRows = allVisuals.some((visual) => visual.source_table === "parcel_economic_signal_fact");
   const diagnostics = [
     needsParcelRows && !parcelRows.length
@@ -6507,6 +6908,9 @@ function buildGeneratedReportSnapshot(
       : "",
     needsParcelRows && !parcelRows.length && signals.length
       ? "Ask CFS summary has live economics context, but the Power BI export table is empty."
+      : "",
+    unavailableVisuals.length
+      ? "Unavailable visuals were hidden from the main preview."
       : "",
   ].filter(Boolean);
   const underbuiltRows = parcelRows.length
@@ -6553,6 +6957,7 @@ function buildGeneratedReportSnapshot(
     summary: plan.summary,
     tables,
     title: plan.title,
+    unavailable_visuals: unavailableVisuals,
     visuals,
   };
 }
