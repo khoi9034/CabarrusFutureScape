@@ -41,6 +41,14 @@ Model-ready fields include encoded sewer proxy class, utility readiness class,
 proxy confidence, and interaction placeholders for permit pressure, underbuilt
 status, zoning support, corridor access, flood constraint, and school pressure.
 
+`parcel_development_screening_output` also feeds the CFS Economics Land
+Opportunity Screener when the full parcel economics query is unavailable. The
+Power BI `parcel_economic_signal_fact` export includes the safe screening
+fields `development_readiness_band`, `land_opportunity_class`,
+`growth_pressure_band`, `zoning_support_band`, `flood_constraint_band`,
+`school_service_pressure_band`, `economic_opportunity_band`,
+`due_diligence_flags`, and `suggested_next_checks`.
+
 ## Safe Interpretation
 
 This dataset supports:

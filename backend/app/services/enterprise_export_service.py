@@ -58,6 +58,12 @@ OPPORTUNITY_CLASS_ORDER = {
     "Special Asset / Compare With Caution": 8,
     "Low Fiscal Upside / High Public Burden": 9,
     "Needs More Data Before Recommendation": 10,
+    "Strong infrastructure-supported review candidate": 11,
+    "Good candidate, verify zoning and utilities": 12,
+    "Opportunity signal, capacity data needed": 13,
+    "Growth pressure but utility evidence limited": 14,
+    "Data needed before interpretation": 15,
+    "Low near-term readiness signal": 16,
 }
 
 SEGMENT_ORDER = {
@@ -104,6 +110,14 @@ POWERBI_CSV_TABLES = {
             "constraint_burden_band",
             "public_cost_risk_band",
             "fiscal_attractiveness_band",
+            "land_opportunity_class",
+            "development_readiness_band",
+            "growth_pressure_band",
+            "zoning_support_band",
+            "transportation_access_band",
+            "flood_constraint_band",
+            "school_service_pressure_band",
+            "economic_opportunity_band",
             "sewer_proxy_class",
             "utility_readiness_proxy_class",
             "sewer_proxy_confidence",
@@ -117,6 +131,8 @@ POWERBI_CSV_TABLES = {
             "band_order",
             "data_confidence",
             "recommended_followup",
+            "due_diligence_flags",
+            "suggested_next_checks",
             "report_page_recommendation",
             "visual_recommendation",
             "slicer_recommendation",
@@ -549,6 +565,12 @@ def _powerbi_kpi_fact(
     ]
 
 
+def _join_list(value: Any) -> str | None:
+    if isinstance(value, (list, tuple)):
+        return "; ".join(str(item) for item in value if item)
+    return str(value) if value else None
+
+
 def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
@@ -560,10 +582,16 @@ def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "display_label": row.get("display_label") or row.get("geography_label") or row.get("parcel_id") or f"Signal {index + 1}",
             "economic_segment": row.get("economic_segment") or "Unknown / Needs Classification",
             "economic_segment_order": row.get("economic_segment_order"),
+            "economic_opportunity_band": row.get("economic_opportunity_band"),
+            "development_readiness_band": row.get("development_readiness_band"),
+            "due_diligence_flags": _join_list(row.get("due_diligence_flags")),
             "fiscal_attractiveness_band": row.get("fiscal_attractiveness_band"),
+            "flood_constraint_band": row.get("flood_constraint_band"),
             "geography_label": row.get("geography_label"),
+            "growth_pressure_band": row.get("growth_pressure_band"),
             "improvement_to_land_ratio_band": _ratio_band(row.get("improvement_to_land_ratio")),
             "land_efficiency_band": row.get("land_efficiency_band"),
+            "land_opportunity_class": row.get("land_opportunity_class"),
             "opportunity_class": row.get("opportunity_class"),
             "opportunity_class_order": _opportunity_class_order(row.get("opportunity_class")),
             "parcel_id": row.get("parcel_id"),
@@ -577,10 +605,14 @@ def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "slicer_recommendation": "Start with economic_segment, then opportunity_class, geography_label, and special_asset_flag.",
             "sort_order": index + 1,
             "special_asset_flag": bool(row.get("special_asset_flag")),
+            "school_service_pressure_band": row.get("school_service_pressure_band"),
+            "suggested_next_checks": _join_list(row.get("suggested_next_checks")),
             "tax_base_opportunity_band": row.get("tax_base_opportunity_band") or _tax_base_opportunity_band(row),
             "sewer_proxy_class": row.get("sewer_proxy_class"),
+            "transportation_access_band": row.get("transportation_access_band"),
             "utility_readiness_proxy_class": row.get("utility_readiness_proxy_class"),
             "sewer_proxy_confidence": row.get("sewer_proxy_confidence"),
+            "zoning_support_band": row.get("zoning_support_band"),
             "utility_confidence": row.get("utility_confidence"),
             "utility_constraint_flag": row.get("utility_constraint_flag"),
             "utility_readiness_class": row.get("utility_readiness_class"),
@@ -685,6 +717,7 @@ def _powerbi_suggested_visuals() -> list[dict[str, Any]]:
                 "Value per acre band",
                 "Improvement-to-land ratio band",
                 "Constraint burden band",
+                "Development readiness and sewer proxy bands",
                 "Recommended follow-up",
             ],
         },

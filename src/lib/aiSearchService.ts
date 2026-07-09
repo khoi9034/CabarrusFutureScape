@@ -89,6 +89,7 @@ export const askCfsEconomicsPowerBiToolPrompts = [
   "Build me a Power BI report.",
   "Create a chart of opportunity classes.",
   "Build a report for underbuilt parcels.",
+  "Build a Land Opportunity Screener report.",
   "Make a scenario comparison page.",
   "Show special assets as a report.",
   "Build a data confidence matrix.",
@@ -1083,7 +1084,16 @@ function demoPowerBiActionsForQuery(query: string): CfsAiPowerBiActions {
   let selectedFilters: CfsAiPowerBiActions["selected_filters"] = {};
   let reportCanvasItems: NonNullable<CfsAiPowerBiActions["report_canvas_items"]>;
 
-  if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) {
+  if (normalized.includes("land opportunity") || normalized.includes("land screener") || normalized.includes("development readiness")) {
+    reportTitle = "Land Opportunity Screener Report";
+    reportSummary = "Screen model-ready parcel rows by development readiness, sewer-proximity proxy context, and next diligence needs.";
+    selectedFilters = { utility_capacity_status: "Capacity data not provided" };
+    reportCanvasItems = [
+      visual("Land Opportunity Screener", "Development readiness bands", "bar", "parcel_economic_signal_fact", "development_readiness_band", "signal_id", { caveat: "Readiness bands are screening outputs, not approvals or service commitments." }),
+      visual("Land Opportunity Screener", "Land opportunity by sewer proxy", "bar", "parcel_economic_signal_fact", "sewer_proxy_class", "signal_id", { caveat: "Sewer proximity does not confirm capacity or water service." }),
+      visual("Land Opportunity Screener", "Subbasin diligence table", "matrix", "parcel_economic_signal_fact", "sewer_basin_label", "suggested_next_checks", { caveat: "Subbasins provide context for review only." }),
+    ];
+  } else if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) {
     reportTitle = "Utility Readiness + Growth Report";
     reportSummary = "Compare growth and economic opportunity against WSACC sewer-proximity proxy context and utility data gaps.";
     selectedFilters = { utility_capacity_status: "Capacity data not provided" };

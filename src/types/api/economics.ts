@@ -33,8 +33,11 @@ export interface EconomicsParcelSignal {
   comparison_group?: string | null;
   constraint_burden_band?: string | null;
   data_confidence?: string;
+  development_readiness_band?: string | null;
   display_label?: string | null;
+  due_diligence_flags?: string[] | string | null;
   economic_data_confidence: "strong" | "medium" | "proxy" | "data_needed" | string;
+  economic_opportunity_band?: string | null;
   economic_segment?: string;
   economic_segment_order?: number | null;
   economic_status_band: EconomicsStatusBand;
@@ -42,14 +45,17 @@ export interface EconomicsParcelSignal {
   estimated_county_tax_screening: number | null;
   evidence: string[];
   fiscal_attractiveness_band?: string | null;
+  flood_constraint_band?: string | null;
   floodplain_context: string | null;
   geography_label: string | null;
+  growth_pressure_band?: string | null;
   improvement_to_land_ratio: number | null;
   improvement_intensity_band?: string | null;
   improvement_value: number | null;
   improvement_value_per_acre: number | null;
   jurisdiction?: string | null;
   land_efficiency_band?: string | null;
+  land_opportunity_class?: string | null;
   land_value: number | null;
   land_value_per_acre: number | null;
   opportunity_class: string;
@@ -60,11 +66,25 @@ export interface EconomicsParcelSignal {
   recommended_followup: string;
   related_layers: string[];
   school_pressure_context: string | null;
+  school_service_pressure_band?: string | null;
   segment_caveat?: string | null;
+  sewer_basin_label?: string | null;
+  sewer_proxy_class?: string | null;
+  sewer_proxy_confidence?: string | null;
   special_asset_flag?: boolean;
+  suggested_next_checks?: string[] | string | null;
   tax_base_opportunity_band?: string | null;
+  transportation_access_band?: string | null;
   transportation_context: string | null;
+  planned_extension_nearby_flag?: string | boolean | null;
+  planned_extension_status?: string | null;
+  utility_capacity_status?: string | null;
+  utility_confidence?: string | null;
+  utility_constraint_flag?: string | boolean | null;
+  utility_readiness_class?: string | null;
   utility_readiness_context: string | null;
+  utility_readiness_proxy_class?: string | null;
+  zoning_support_band?: string | null;
   value_per_acre: number | null;
 }
 

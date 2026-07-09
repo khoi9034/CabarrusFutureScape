@@ -951,6 +951,17 @@ function EconomicDashboardPage({
   const confidenceBars = countRowsBy(filteredSignals, (signal) => signal.economic_data_confidence);
   const scenarioRows = scenarioMatrixRows(filteredScenarios);
   const burdenRows = fiscalBurdenRows(filteredSignals, filteredScenarios);
+  const landOpportunityRows = filteredSignals.filter((signal) =>
+    Boolean(signal.development_readiness_band || signal.land_opportunity_class || signal.sewer_proxy_class),
+  );
+  const readinessBars = countRowsBy(
+    landOpportunityRows,
+    (signal) => signal.development_readiness_band ?? signal.land_opportunity_class ?? "Data Needed",
+  );
+  const sewerProxyBars = countRowsBy(
+    landOpportunityRows,
+    (signal) => signal.sewer_proxy_class ?? "Data Needed",
+  );
   const segmentOptions = ["All", ...uniqueValues([...segmentRows.map((row) => row.segment), ...signals.map((signal) => signalSegment(signal))])];
   const geographyOptions = ["All", ...uniqueValues(signals.map((signal) => signal.geography_label).filter(Boolean))];
   const opportunityOptions = ["All", ...uniqueValues(signals.map((signal) => signal.opportunity_class))];
@@ -962,24 +973,14 @@ function EconomicDashboardPage({
     setSelectedOpportunityClass("All");
     setSelectedDataConfidence("All");
   };
-  const askCfsFilterContext = useMemo(
-    () => ({
-      economic_segment: selectedSegment,
-      geography: selectedGeography,
-      opportunity_class: selectedOpportunityClass,
-      data_confidence: selectedDataConfidence,
-      filtered_signal_count: filteredSignals.length,
-      filtered_watchlist_rows: filteredWatchlist.length,
-    }),
-    [
-      filteredSignals.length,
-      filteredWatchlist.length,
-      selectedDataConfidence,
-      selectedGeography,
-      selectedOpportunityClass,
-      selectedSegment,
-    ],
-  );
+  const askCfsFilterContext = {
+    economic_segment: selectedSegment,
+    geography: selectedGeography,
+    opportunity_class: selectedOpportunityClass,
+    data_confidence: selectedDataConfidence,
+    filtered_signal_count: filteredSignals.length,
+    filtered_watchlist_rows: filteredWatchlist.length,
+  };
 
   return (
     <>
@@ -1098,6 +1099,38 @@ function EconomicDashboardPage({
           <DetailsBlock summary="Segment summary" hint="Counts, medians, and caveats by segment.">
             <SegmentSummaryTable rows={selectedSegmentRows} />
           </DetailsBlock>
+        </EconPanel>
+      </section>
+      <section className="grid gap-4">
+        <EconPanel title="Land Opportunity Screener" kicker="Utility + model-ready context">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <MiniMetric label="Screener rows" value={formatNumber(landOpportunityRows.length)} />
+            <MiniMetric label="Sewer proxy classes" value={formatNumber(sewerProxyBars.length)} />
+            <MiniMetric label="Capacity status" value="Data needed" />
+            <MiniMetric label="Planned extension status" value="Data needed" />
+          </div>
+          <p className="mt-3 text-sm leading-6 text-[var(--econ-muted)]">
+            Sewer proximity is a screening proxy only; it does not confirm capacity, water service, approval, or future development.
+          </p>
+        </EconPanel>
+        <div className="grid gap-4 xl:grid-cols-2">
+          <EconomicsVisualPanel
+            description="Counts model-ready parcel rows by screening-level development readiness band."
+            recipe="Table: parcel_economic_signal_fact | Visual: Bar chart | Axis: development_readiness_band | Values: Count of signal_id | Slicer: sewer_proxy_class"
+            title="Development Readiness Bands"
+          >
+            <EconomicsBarChart rows={readinessBars} />
+          </EconomicsVisualPanel>
+          <EconomicsVisualPanel
+            description="Shows where opportunity rows align with WSACC sewer-proximity proxy classes."
+            recipe="Table: parcel_economic_signal_fact | Visual: Bar chart | Axis: sewer_proxy_class | Values: Count of signal_id | Slicer: development_readiness_band"
+            title="Sewer Proxy Context"
+          >
+            <EconomicsBarChart rows={sewerProxyBars} />
+          </EconomicsVisualPanel>
+        </div>
+        <EconPanel title="Land Opportunity Rows" kicker="Next diligence">
+          <SignalTable signals={landOpportunityRows.slice(0, 8)} />
         </EconPanel>
       </section>
       <section className="grid gap-4" data-econ-tour="scenario-visuals">
@@ -5696,6 +5729,7 @@ type GeneratedPowerBiReportSnapshot = {
 type PowerBiReportType =
   | "data_confidence"
   | "executive"
+  | "land_opportunity"
   | "scenario"
   | "scenario_data_confidence"
   | "special_assets"
@@ -5714,6 +5748,7 @@ type PowerBiReportDataAvailability = {
   economics_intelligence_summary_available: boolean;
   economics_kpi_fact_rows: number;
   geography_dim_rows: number;
+  land_opportunity_rows: number;
   mismatch_warning: string | null;
   parcel_economic_signal_fact_rows: number;
   report_types: PowerBiReportAvailabilityItem[];
@@ -5832,6 +5867,13 @@ const powerBiChartFieldMetadata: Record<PowerBiTableName, UserChartField[]> = {
     { key: "constraint_burden_band", label: "Constraint burden", role: "filter", type: "band" },
     { key: "fiscal_attractiveness_band", label: "Fiscal attractiveness", role: "filter", type: "band" },
     { key: "public_cost_risk_band", label: "Public cost risk", role: "filter", type: "band" },
+    { key: "land_opportunity_class", label: "Land opportunity class", role: "category", type: "band" },
+    { key: "development_readiness_band", label: "Development readiness", role: "category", type: "band" },
+    { key: "growth_pressure_band", label: "Growth pressure", role: "filter", type: "band" },
+    { key: "zoning_support_band", label: "Zoning support", role: "filter", type: "band" },
+    { key: "flood_constraint_band", label: "Flood constraint", role: "filter", type: "band" },
+    { key: "school_service_pressure_band", label: "School/service pressure", role: "filter", type: "band" },
+    { key: "economic_opportunity_band", label: "Economic opportunity", role: "filter", type: "band" },
     { key: "sewer_proxy_class", label: "Sewer proxy class", role: "category", type: "band" },
     { key: "utility_readiness_proxy_class", label: "Utility readiness proxy", role: "filter", type: "band" },
     { key: "sewer_proxy_confidence", label: "Sewer proxy confidence", role: "filter", type: "band" },
@@ -5921,6 +5963,16 @@ const userChartTemplates: UserChartTemplate[] = [
   },
   {
     aggregation: "count",
+    category: "development_readiness_band",
+    description: "Screen model-ready land opportunity classes.",
+    filterField: "sewer_proxy_class",
+    name: "Land Opportunity Screener",
+    table: "parcel_economic_signal_fact",
+    value: "signal_id",
+    visual: "bar",
+  },
+  {
+    aggregation: "count",
     category: "geography_label",
     description: "Count economics signals by geography.",
     filterField: "opportunity_class",
@@ -5936,6 +5988,7 @@ const powerBiReportPromptExamples = [
   "Create visuals for economic segment comparison.",
   "Make a fiscal burden dashboard.",
   "Build a scenario comparison dashboard.",
+  "Build a Land Opportunity Screener report.",
   "Build a Utility Readiness + Growth Report.",
   "Create a Power BI page for special assets.",
   "Show value per acre by economic segment with caveats.",
@@ -5952,6 +6005,7 @@ const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {
 
 const quickPowerBiReportTypes: Array<{ label: string; prompt: string; type: PowerBiReportType }> = [
   { label: "Executive Dashboard", prompt: "Build an executive dashboard.", type: "executive" },
+  { label: "Land Opportunity Screener", prompt: "Build a Land Opportunity Screener report.", type: "land_opportunity" },
   { label: "Scenario Comparison", prompt: "Build a scenario comparison dashboard.", type: "scenario" },
   { label: "Data Confidence Report", prompt: "Build a data confidence report.", type: "data_confidence" },
   { label: "Utility Readiness + Growth Report", prompt: "Build a Utility Readiness + Growth Report.", type: "utility" },
@@ -5982,6 +6036,9 @@ function buildReportDataAvailability(
     valueText(row.special_asset_flag).toLowerCase() === "true" ||
     valueText(row.opportunity_class).toLowerCase().includes("special asset"),
   ).length;
+  const landOpportunityRows = parcelRows.filter((row) =>
+    Boolean(valueText(row.development_readiness_band) || valueText(row.land_opportunity_class)),
+  ).length;
   const hasUtilityFields = parcelRows.some((row) =>
     ["sewer_proxy_class", "utility_readiness_proxy_class", "sewer_basin_label"].some((field) =>
       Boolean(valueText(row[field])),
@@ -5993,6 +6050,11 @@ function buildReportDataAvailability(
       available: Boolean(kpiRows || hasSummary),
       reason: "Needs KPI rows or economics summary context.",
       type: "executive",
+    },
+    {
+      available: Boolean(parcelRows.length && landOpportunityRows),
+      reason: parcelRows.length ? "Needs development readiness or land opportunity fields." : "Needs parcel economic signal rows.",
+      type: "land_opportunity",
     },
     {
       available: Boolean(parcelRows.length && underbuiltRows),
@@ -6036,7 +6098,7 @@ function buildReportDataAvailability(
   const bestDefault =
     scenarioRows && readinessRows && !parcelRows.length
       ? "scenario_data_confidence"
-      : (["executive", "scenario", "data_confidence", "utility", "underbuilt"] as PowerBiReportType[])
+      : (["executive", "land_opportunity", "scenario", "data_confidence", "utility", "underbuilt"] as PowerBiReportType[])
           .find((type) => available.includes(type)) ?? "executive";
   return {
     available_report_types: available,
@@ -6045,6 +6107,7 @@ function buildReportDataAvailability(
     economics_intelligence_summary_available: hasSummary,
     economics_kpi_fact_rows: kpiRows,
     geography_dim_rows: payload?.tables.geography_dim?.length ?? 0,
+    land_opportunity_rows: landOpportunityRows,
     mismatch_warning:
       hasSummary && !parcelRows.length
         ? "Economics intelligence has summary context, but parcel_economic_signal_fact has 0 rows. Rebuild or refresh the Power BI export before using parcel-level reports."
@@ -6068,6 +6131,7 @@ function reportTypeLabel(type: PowerBiReportType) {
 
 function reportTypeFromPrompt(prompt: string): PowerBiReportType | null {
   const normalized = prompt.toLowerCase();
+  if (normalized.includes("land opportunity") || normalized.includes("land screener") || normalized.includes("development readiness")) return "land_opportunity";
   if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) return "utility";
   if (normalized.includes("scenario + data") || (normalized.includes("scenario") && normalized.includes("confidence"))) return "scenario_data_confidence";
   if (normalized.includes("scenario") || normalized.includes("burden") || normalized.includes("fiscal")) return "scenario";
@@ -6190,6 +6254,48 @@ function buildPowerBiReportPlan(
         "Parcel-level candidate charts are hidden until parcel_economic_signal_fact has rows.",
         ...powerBiReportCaveats,
       ]),
+    );
+  }
+
+  if (selectedReportType === "land_opportunity") {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Land Opportunity Screener Report",
+      `${selectionNote ? `${selectionNote}. ` : ""}Screen model-ready parcel rows by development readiness, sewer-proximity proxy context, and next diligence needs.`,
+      [
+        reportPage("Land Opportunity Screener", "Prioritize rows for screening-level review.", [
+          generatedPowerBiVisual({
+            axis: "development_readiness_band",
+            caveat: "Readiness bands are screening outputs, not approval or service commitments.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Development readiness bands",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "sewer_proxy_class",
+            caveat: "Sewer proximity does not confirm capacity or water service.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Land opportunity by sewer proxy",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "sewer_basin_label",
+            caveat: "Subbasin labels provide context for review only.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Subbasin diligence table",
+            value: "suggested_next_checks",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+      [
+        "Use development_readiness_band, sewer_proxy_class, and due_diligence_flags as the first slicers.",
+        "Capacity, water service, and planned extension data are still needed before site-level conclusions.",
+        ...powerBiReportCaveats,
+      ],
     );
   }
 

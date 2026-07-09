@@ -481,9 +481,12 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
                     "economic_status_band": "underbuilt_watch",
                     "geography_label": "Demo corridor",
                     "improvement_to_land_ratio": 0.4,
+                    "development_readiness_band": "Good candidate, verify zoning and utilities",
+                    "land_opportunity_class": "Good candidate, verify zoning and utilities",
                     "opportunity_class": "Underbuilt Redevelopment Candidate",
                     "parcel_id": "demo-1",
                     "recommended_followup": "Review records.",
+                    "suggested_next_checks": ["Verify utility capacity with WSACC"],
                     "value_per_acre": 100000,
                 }
             ],
@@ -554,6 +557,9 @@ def test_powerbi_export_payload_has_required_tables_and_relationships() -> None:
     assert "sewer_proxy_class" in signal_csv.splitlines()[0]
     assert "utility_readiness_proxy_class" in signal_csv.splitlines()[0]
     assert "utility_capacity_status" in signal_csv.splitlines()[0]
+    assert "development_readiness_band" in signal_csv.splitlines()[0]
+    assert "land_opportunity_class" in signal_csv.splitlines()[0]
+    assert "suggested_next_checks" in signal_csv.splitlines()[0]
     assert "opportunity_class_order" in signal_csv.splitlines()[0]
     assert "band_order" in signal_csv.splitlines()[0]
     assert "report_page_recommendation" in signal_csv.splitlines()[0]
@@ -610,3 +616,9 @@ def test_powerbi_export_endpoint_returns_stable_schema(monkeypatch) -> None:
 
     missing_response = client.get("/economics/powerbi-export/csv/not_a_table")
     assert missing_response.status_code == 404
+
+    diagnostics_response = client.get("/economics/export-diagnostics")
+    assert diagnostics_response.status_code == 200
+    diagnostics = diagnostics_response.json()
+    assert "powerbi_table_counts" in diagnostics
+    assert "parcel_economic_signal_fact" in diagnostics["powerbi_table_counts"]

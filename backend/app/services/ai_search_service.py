@@ -1521,7 +1521,16 @@ def _powerbi_actions_for_query(query: str) -> dict[str, Any]:
     canvas_items: list[dict[str, Any]]
     selected_filters: dict[str, str] = {}
 
-    if "utility" in normalized or "sewer" in normalized or "wsacc" in normalized:
+    if "land opportunity" in normalized or "land screener" in normalized or "development readiness" in normalized:
+        title = "Land Opportunity Screener Report"
+        summary = "Screen model-ready parcel rows by development readiness, sewer-proximity proxy context, and next diligence needs."
+        selected_filters = {"utility_capacity_status": "Capacity data not provided"}
+        canvas_items = [
+            visual("Land Opportunity Screener", "Development readiness bands", "bar", "parcel_economic_signal_fact", "development_readiness_band", "signal_id", caveat="Readiness bands are screening outputs, not approvals or service commitments."),
+            visual("Land Opportunity Screener", "Land opportunity by sewer proxy", "bar", "parcel_economic_signal_fact", "sewer_proxy_class", "signal_id", caveat="Sewer proximity does not confirm capacity or water service."),
+            visual("Land Opportunity Screener", "Subbasin diligence table", "matrix", "parcel_economic_signal_fact", "sewer_basin_label", "suggested_next_checks", caveat="Subbasins provide context for review only."),
+        ]
+    elif "utility" in normalized or "sewer" in normalized or "wsacc" in normalized:
         title = "Utility Readiness + Growth Report"
         summary = "Compare growth and economic opportunity against WSACC sewer-proximity proxy context and utility data gaps."
         selected_filters = {"utility_capacity_status": "Capacity data not provided"}

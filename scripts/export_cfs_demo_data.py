@@ -582,6 +582,7 @@ def build_economics_intelligence_demo(
     if improvement == "NULL::numeric" and land != "NULL::numeric" and assessed != "NULL::numeric":
         improvement = f"GREATEST(({assessed}) - ({land}), 0)"
     utility_join = table_exists(conn, "parcel_wsacc_utility_features")
+    screening_join = table_exists(conn, "parcel_development_screening_output")
     utility_select = (
         """
             u.sewer_proxy_class,
@@ -606,6 +607,36 @@ def build_economics_intelligence_demo(
         if utility_join
         else ""
     )
+    screening_select = (
+        """
+            s.growth_pressure_band,
+            s.zoning_support_band,
+            s.transportation_access_band,
+            s.flood_constraint_band,
+            s.school_service_pressure_band,
+            s.economic_opportunity_band,
+            s.development_readiness_band,
+            s.due_diligence_flags,
+            s.suggested_next_checks
+        """
+        if screening_join
+        else """
+            'Data Needed'::text AS growth_pressure_band,
+            'Data Needed'::text AS zoning_support_band,
+            'Data Needed'::text AS transportation_access_band,
+            'Data Needed'::text AS flood_constraint_band,
+            'Data Needed'::text AS school_service_pressure_band,
+            'Data Needed'::text AS economic_opportunity_band,
+            'Data needed before interpretation'::text AS development_readiness_band,
+            ARRAY['Verify utility capacity with WSACC', 'Review zoning, flood, school, and transportation context']::text[] AS due_diligence_flags,
+            ARRAY['Verify utility capacity with WSACC', 'Review zoning, flood, school, and transportation context']::text[] AS suggested_next_checks
+        """
+    )
+    screening_join_sql = (
+        "LEFT JOIN public.parcel_development_screening_output s ON s.parcel_id = p.official_parcel_id"
+        if screening_join
+        else ""
+    )
     rows = fetch_all(
         conn,
         f"""
@@ -617,9 +648,11 @@ def build_economics_intelligence_demo(
             {land} AS land_value,
             {improvement} AS improvement_value,
             COALESCE(NULLIF(p.subdiv_name, ''), NULLIF(p.nbh_name, ''), NULLIF(p.parcel_size_category, ''), 'Parcel context') AS geography_label,
-            {utility_select}
+            {utility_select},
+            {screening_select}
           FROM public.parcels_enriched p
           {utility_join_sql}
+          {screening_join_sql}
           WHERE p.official_parcel_id IS NOT NULL
         ),
         calculated AS (
@@ -800,6 +833,8 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
     estimated_tax = estimate_demo_county_tax(assessed_value)
     parcel_id = str(row.get("official_parcel_id"))
     display_label = _safe_display_label(row.get("geography_label"), parcel_id)
+    due_diligence = string_list(row.get("due_diligence_flags"))
+    next_checks = string_list(row.get("suggested_next_checks")) or due_diligence
     return {
         "acreage": acreage,
         "assessed_value": assessed_value,
@@ -809,7 +844,10 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
             "Contact fields are excluded.",
         ],
         "economic_data_confidence": economics_data_confidence(assessed_value, acreage, land_value, improvement_value),
+        "development_readiness_band": row.get("development_readiness_band") or "Data needed before interpretation",
+        "due_diligence_flags": due_diligence,
         "economic_segment": segment,
+        "economic_opportunity_band": row.get("economic_opportunity_band") or "Data Needed",
         "economic_segment_order": ECONOMIC_SEGMENTS.index(segment),
         "economic_status_band": status,
         "comparable_asset_flag": not special_asset,
@@ -820,13 +858,16 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
             f"Improvement-to-land ratio: {round(ratio, 2)}" if ratio is not None else "Improvement-to-land ratio needs land and improvement values.",
         ],
         "floodplain_context": None,
+        "flood_constraint_band": row.get("flood_constraint_band") or "Data Needed",
         "display_label": display_label,
         "geography_label": display_label,
+        "growth_pressure_band": row.get("growth_pressure_band") or "Data Needed",
         "improvement_to_land_ratio": ratio,
         "improvement_value": improvement_value,
         "improvement_value_per_acre": as_number(row.get("improvement_value_per_acre")),
         "land_value": land_value,
         "land_value_per_acre": as_number(row.get("land_value_per_acre")),
+        "land_opportunity_class": row.get("development_readiness_band") or "Data needed before interpretation",
         "opportunity_class": opportunity,
         "parcel_id": parcel_id,
         "permit_activity_context": None,
@@ -836,10 +877,14 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
             "Revenue per Acre Dashboard",
             "Underbuilt Redevelopment Watchlist",
             "Constraint-Adjusted Development Potential",
+            "Land Opportunity Screener",
         ],
         "school_pressure_context": None,
+        "school_service_pressure_band": row.get("school_service_pressure_band") or "Data Needed",
         "segment_caveat": _segment_caveat(segment),
         "special_asset_flag": special_asset,
+        "suggested_next_checks": next_checks,
+        "transportation_access_band": row.get("transportation_access_band") or "Data Needed",
         "transportation_context": None,
         "sewer_proxy_class": row.get("sewer_proxy_class") or "Data needed",
         "utility_readiness_proxy_class": row.get("utility_readiness_proxy_class") or "Data needed",
@@ -853,7 +898,18 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
         "utility_capacity_status": row.get("utility_capacity_status") or "Capacity data not provided",
         "planned_extension_status": row.get("planned_extension_status") or "Planned extension data not provided",
         "value_per_acre": value_per_acre,
-    }
+        "zoning_support_band": row.get("zoning_support_band") or "Data Needed",
+}
+
+
+def string_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item) for item in value if item]
+    if isinstance(value, tuple):
+        return [str(item) for item in value if item]
+    if isinstance(value, str) and value.strip():
+        return [part.strip() for part in value.split(";") if part.strip()]
+    return []
 
 
 def economics_status_band(

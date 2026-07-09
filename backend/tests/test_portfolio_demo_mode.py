@@ -212,6 +212,9 @@ def test_points_clusters_heatmap_view_modes_are_wired_for_map_modes() -> None:
     assert "modelResearchViewMode === \"heatmap\"" in scene
     assert "formatMapOverlayViewMode(modelResearchViewMode)" in intelligence_panel
     assert "formatMapOverlayViewMode(controls.viewMode)" in intelligence_panel
+    assert "Utility + Land Opportunity Features in Model" in intelligence_panel
+    assert "LandOpportunityScreenerPanel" in intelligence_panel
+    assert "Land Opportunity Screener" in intelligence_panel
     assert "Choose how research signals appear on the map." in sidebar
 
 
@@ -313,6 +316,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "available_report_types" in economics_shell
     assert "best_default_report_type" in economics_shell
     assert "Scenario + Data Confidence Report" in economics_shell
+    assert "Land Opportunity Screener" in economics_shell
+    assert "development_readiness_band" in economics_shell
     assert "Unavailable until data refresh" in economics_shell
     assert "Unavailable visuals" in economics_shell
     assert "CFS selected" in economics_shell
@@ -351,6 +356,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Scenario Output Comparison" in economics_shell
     assert "Fiscal / Service Burden Matrix" in economics_shell
     assert "Data Confidence Visual" in economics_shell
+    assert "Development Readiness Bands" in economics_shell
     assert "Power BI recipe" in economics_shell
     assert "Visual analytics" not in economics_shell
     assert "Source table, visual type, and fields." not in economics_shell

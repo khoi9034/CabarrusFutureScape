@@ -71,6 +71,32 @@ def get_economics_powerbi_export(
     return build_powerbi_export_payload(_cached_economics_intelligence(db), mode="live")
 
 
+@router.get("/export-diagnostics")
+def get_economics_export_diagnostics(
+    db: Session | None = Depends(get_optional_read_only_db),
+) -> dict[str, Any]:
+    """Return safe diagnostics for the economics export source."""
+
+    economics = _cached_economics_intelligence(db)
+    export_payload = build_powerbi_export_payload(economics, mode="live")
+    tables = export_payload.get("tables") or {}
+    return {
+        "as_of": economics.get("as_of"),
+        "context_freshness": economics.get("context_freshness"),
+        "fallback_reason": economics.get("fallback_reason"),
+        "powerbi_table_counts": {
+            name: len(rows or []) for name, rows in tables.items()
+        },
+        "record_counts": economics.get("record_counts") or {},
+        "recommended_fix": (
+            "Run scripts/build_parcel_wsacc_features.py --apply if land opportunity rows are missing."
+            if not tables.get("parcel_economic_signal_fact")
+            else "Power BI signal export is populated."
+        ),
+        "source_mode": economics.get("source_mode") or economics.get("mode"),
+    }
+
+
 @router.get("/powerbi-export/csv-manifest")
 def get_economics_powerbi_csv_manifest(
     db: Session | None = Depends(get_optional_read_only_db),
@@ -118,12 +144,23 @@ def _cached_economics_intelligence(db: Session | None) -> dict[str, Any]:
 
     try:
         payload = build_economics_intelligence(db)
-    except Exception:
+    except Exception as exc:
         db.rollback()
-        payload = _unavailable_payload(
-            datetime.now(UTC).isoformat(),
+        as_of = datetime.now(UTC).isoformat()
+        payload = _land_opportunity_screener_payload(db, as_of, str(exc)) or _unavailable_payload(
+            as_of,
             "Local economics context is still warming, so CFS used available parcel/economic summary fields.",
         )
+    else:
+        signals = payload.get("parcel_economic_signals") or payload.get("signals") or []
+        if not signals:
+            derived = _land_opportunity_screener_payload(
+                db,
+                payload.get("as_of") or datetime.now(UTC).isoformat(),
+                "Live parcel economics returned no signal rows.",
+            )
+            if derived:
+                payload = derived
     cache_kind = "fallback" if payload.get("context_freshness") == "fallback_partial" else "real"
     # ponytail: process-local split cache is enough for local presentation; use shared cache if multi-worker freshness matters.
     _set_cached_economics_payload(cache_kind, payload)
@@ -151,7 +188,7 @@ def get_cached_economics_intelligence(db: Session | None) -> dict[str, Any]:
 
 def build_economics_intelligence(db: Session) -> dict[str, Any]:
     as_of = datetime.now(UTC).isoformat()
-    db.execute(text("SET LOCAL statement_timeout = '3000ms'"))
+    db.execute(text("SET LOCAL statement_timeout = '8000ms'"))
     caveats = [
         "CFS Economics is screening-level planning context, not a formal appraisal or tax bill.",
         "Estimated county tax uses a configurable rate and should be verified before fiscal analysis.",
@@ -361,6 +398,252 @@ def build_economics_intelligence(db: Session) -> dict[str, Any]:
         "underbuilt_watchlist": underbuilt_watchlist,
         "watchlist": watchlist,
     }))
+
+
+def _land_opportunity_screener_payload(
+    db: Session,
+    as_of: str,
+    reason: str | None = None,
+) -> dict[str, Any] | None:
+    """Build economics signals from the model-ready land opportunity output."""
+
+    try:
+        if not _table_exists(db, "parcel_development_screening_output"):
+            return None
+        screening_columns = set(_table_columns(db, "parcel_development_screening_output"))
+        if "parcel_id" not in screening_columns:
+            return None
+        utility_columns = set(_table_columns(db, "parcel_wsacc_utility_features")) if _table_exists(db, "parcel_wsacc_utility_features") else set()
+        utility_join = "parcel_id" in utility_columns
+        readiness_expr = _column_text_expr(
+            "s",
+            screening_columns,
+            "development_readiness_band",
+            "'Data needed before interpretation'::text",
+        )
+        summary_row = db.execute(
+            text(
+                f"""
+                WITH rows AS (
+                  SELECT {readiness_expr} AS development_readiness_band
+                  FROM public.parcel_development_screening_output s
+                  WHERE s.parcel_id IS NOT NULL
+                )
+                SELECT
+                  COUNT(*) AS total_parcels_analyzed,
+                  COUNT(*) FILTER (
+                    WHERE lower(development_readiness_band) LIKE '%good candidate%'
+                       OR lower(development_readiness_band) LIKE '%strong%'
+                  ) AS high_opportunity_count,
+                  COUNT(*) FILTER (
+                    WHERE lower(development_readiness_band) LIKE '%data needed%'
+                  ) AS data_needed_count
+                FROM rows
+                """
+            )
+        ).mappings().one()
+        utility_select = {
+            "sewer_proxy_class": _column_text_expr("u", utility_columns, "sewer_proxy_class") if utility_join else "NULL::text",
+            "utility_readiness_proxy_class": _column_text_expr("u", utility_columns, "utility_readiness_proxy_class") if utility_join else "NULL::text",
+            "sewer_proxy_confidence": _column_text_expr("u", utility_columns, "sewer_proxy_confidence") if utility_join else "NULL::text",
+            "sewer_basin_label": _coalesce_text("u", utility_columns, ["wsacc_subbasin_name", "wsacc_subbasin_id"]) if utility_join else "NULL::text",
+            "utility_capacity_status": _column_text_expr("u", utility_columns, "utility_capacity_status", "'Capacity data not provided'::text") if utility_join else "'Capacity data not provided'::text",
+            "planned_extension_status": _column_text_expr("u", utility_columns, "planned_extension_status", "'Planned extension data not provided'::text") if utility_join else "'Planned extension data not provided'::text",
+        }
+        signal_rows = db.execute(
+            text(
+                f"""
+                SELECT
+                  s.parcel_id::text AS parcel_id,
+                  {_column_text_expr("s", screening_columns, "growth_pressure_band")} AS growth_pressure_band,
+                  {_column_text_expr("s", screening_columns, "zoning_support_band")} AS zoning_support_band,
+                  {_column_text_expr("s", screening_columns, "transportation_access_band")} AS transportation_access_band,
+                  {_column_text_expr("s", screening_columns, "flood_constraint_band")} AS flood_constraint_band,
+                  {_column_text_expr("s", screening_columns, "school_service_pressure_band")} AS school_service_pressure_band,
+                  {_column_text_expr("s", screening_columns, "economic_opportunity_band")} AS economic_opportunity_band,
+                  {readiness_expr} AS development_readiness_band,
+                  {_column_array_expr("s", screening_columns, "due_diligence_flags")} AS due_diligence_flags,
+                  {_column_array_expr("s", screening_columns, "suggested_next_checks")} AS suggested_next_checks,
+                  {utility_select["sewer_proxy_class"]} AS sewer_proxy_class,
+                  {utility_select["utility_readiness_proxy_class"]} AS utility_readiness_proxy_class,
+                  {utility_select["sewer_proxy_confidence"]} AS sewer_proxy_confidence,
+                  {utility_select["sewer_basin_label"]} AS sewer_basin_label,
+                  {utility_select["utility_capacity_status"]} AS utility_capacity_status,
+                  {utility_select["planned_extension_status"]} AS planned_extension_status
+                FROM public.parcel_development_screening_output s
+                {_optional_join_on(utility_join, "parcel_wsacc_utility_features", "u", "u.parcel_id = s.parcel_id")}
+                WHERE s.parcel_id IS NOT NULL
+                ORDER BY
+                  CASE
+                    WHEN lower({readiness_expr}) LIKE '%good candidate%' THEN 1
+                    WHEN lower({readiness_expr}) LIKE '%opportunity signal%' THEN 2
+                    WHEN lower({readiness_expr}) LIKE '%growth pressure%' THEN 3
+                    WHEN lower({readiness_expr}) LIKE '%data needed%' THEN 5
+                    ELSE 4
+                  END,
+                  s.parcel_id
+                LIMIT 120
+                """
+            )
+        ).mappings().all()
+    except Exception:
+        db.rollback()
+        return None
+
+    signals = [_land_opportunity_signal(dict(row)) for row in signal_rows]
+    summary = {
+        "as_of": as_of,
+        "data_needed_count": _int(summary_row.get("data_needed_count")),
+        "high_opportunity_count": _int(summary_row.get("high_opportunity_count")),
+        "median_value_per_acre": None,
+        "source_mode": "live",
+        "total_assessed_value": None,
+        "total_improvement_value": None,
+        "total_land_value": None,
+        "total_parcels_analyzed": _int(summary_row.get("total_parcels_analyzed")),
+        "underbuilt_candidate_count": sum(
+            1 for signal in signals if "underbuilt" in str(signal.get("opportunity_class") or "").lower()
+        ),
+    }
+    return _stamp_economics_metadata(_with_economics_aliases({
+        "as_of": as_of,
+        "caveats": [
+            "Land Opportunity Screener uses model-ready parcel screening rows when the full parcel economics query is unavailable.",
+            "WSACC utility fields are sewer infrastructure proximity proxies only; capacity, water service, and planned extensions remain data needs.",
+            "CFS Economics is screening-level context, not an appraisal, tax bill, fiscal impact study, or approval recommendation.",
+        ],
+        "data_readiness": [
+            _readiness("Land Opportunity Screener", True, "Model-ready parcel screening output", "Retrain the model before claiming trained-model use."),
+            _readiness("WSACC Sewer Proximity Proxy", True, "Sewer pipe, manhole, and subbasin context", "Request official capacity, water service, and planned extension data."),
+            _readiness("Parcel Value Detail", False, "Value-per-acre economics", "Restore the full parcel economics query for assessed value and acreage metrics."),
+        ],
+        "kpis": _economics_kpis(summary),
+        "jurisdiction_value_summary": [],
+        "mode": "live",
+        "opportunity_class_breakdown": _opportunity_class_breakdown(signals),
+        "parcel_economic_profiles": signals,
+        "parcel_economic_signals": signals,
+        "segment_data_confidence": _segment_data_confidence(signals),
+        "segment_improvement_ratio": _segment_improvement_ratio(signals),
+        "segment_opportunity_breakdown": _segment_opportunity_breakdown(signals),
+        "segment_summary": _segment_summary(signals),
+        "segment_value_per_acre": _segment_value_per_acre(signals),
+        "scenario_inputs": _scenario_inputs(summary),
+        "scenario_outputs": _scenario_outputs(summary),
+        "scenario_templates": _scenario_templates(),
+        "signals": signals,
+        "summary": summary,
+        "tax_base_opportunity_watchlist": signals[:25],
+        "top_rows_by_segment": _top_rows_by_segment(signals),
+        "underbuilt_watchlist": [
+            signal for signal in signals if "underbuilt" in str(signal.get("opportunity_class") or "").lower()
+        ][:25],
+        "watchlist": signals[:25],
+    }))
+
+
+def _land_opportunity_signal(row: dict[str, Any]) -> dict[str, Any]:
+    parcel_id = str(row.get("parcel_id") or "")
+    readiness = str(row.get("development_readiness_band") or "Data needed before interpretation")
+    lower_readiness = readiness.lower()
+    if "data needed" in lower_readiness:
+        status = "data_needed"
+    elif "limited" in lower_readiness or "capacity" in lower_readiness:
+        status = "infrastructure_constrained"
+    else:
+        status = "tax_base_opportunity"
+    due_diligence = _list_text(row.get("due_diligence_flags")) or [
+        "Verify utility capacity with WSACC",
+        "Review zoning, flood, school, and transportation context",
+    ]
+    next_checks = _list_text(row.get("suggested_next_checks")) or due_diligence
+    sewer_proxy = row.get("sewer_proxy_class")
+    readiness_proxy = row.get("utility_readiness_proxy_class")
+    basin_label = row.get("sewer_basin_label")
+    display_label = _safe_display_label(basin_label, parcel_id)
+    opportunity = readiness if readiness else "Land Opportunity Screener"
+    confidence = "proxy" if sewer_proxy or readiness_proxy else "data_needed"
+    return {
+        "acreage": None,
+        "assessed_value": None,
+        "caveats": [
+            "Screening-level land opportunity context only.",
+            "Sewer proximity does not confirm capacity, water service, approval, or future development.",
+        ],
+        "comparable_asset_flag": True,
+        "comparison_group": "Land Opportunity Screener",
+        "constraint_burden_band": row.get("flood_constraint_band") or "Data Needed",
+        "data_confidence": confidence,
+        "development_readiness_band": readiness,
+        "display_label": display_label,
+        "due_diligence_flags": due_diligence,
+        "economic_data_confidence": confidence,
+        "economic_opportunity_band": row.get("economic_opportunity_band") or "Data Needed",
+        "economic_segment": "Unknown / Needs Classification",
+        "economic_segment_order": ECONOMIC_SEGMENTS.index("Unknown / Needs Classification"),
+        "economic_status_band": status,
+        "estimated_county_tax": None,
+        "estimated_county_tax_screening": None,
+        "evidence": [
+            f"Development readiness band: {readiness}.",
+            f"Sewer proxy class: {sewer_proxy or 'Data needed'}.",
+            f"Utility readiness proxy: {readiness_proxy or 'Data needed'}.",
+        ],
+        "fiscal_attractiveness_band": row.get("economic_opportunity_band") or "Data Needed",
+        "flood_constraint_band": row.get("flood_constraint_band") or "Data Needed",
+        "floodplain_context": row.get("flood_constraint_band"),
+        "geography_label": display_label,
+        "growth_pressure_band": row.get("growth_pressure_band") or "Data Needed",
+        "improvement_to_land_ratio": None,
+        "improvement_intensity_band": "Data Needed",
+        "improvement_value": None,
+        "improvement_value_per_acre": None,
+        "jurisdiction": display_label,
+        "land_efficiency_band": "Data Needed",
+        "land_opportunity_class": opportunity,
+        "land_value": None,
+        "land_value_per_acre": None,
+        "opportunity_class": opportunity,
+        "parcel_id": parcel_id,
+        "permit_activity_context": row.get("growth_pressure_band"),
+        "profile_id": f"land-opportunity-{parcel_id}",
+        "public_cost_risk_band": row.get("school_service_pressure_band") or "Data Needed",
+        "recommended_followup": "; ".join(next_checks),
+        "related_layers": ["Land Opportunity Screener", "Utility Readiness Proxy", "Model Lab"],
+        "school_pressure_context": row.get("school_service_pressure_band"),
+        "school_service_pressure_band": row.get("school_service_pressure_band") or "Data Needed",
+        "segment_caveat": "Land-use or property segment is not exposed in the current normalized fields.",
+        "special_asset_flag": False,
+        "suggested_next_checks": next_checks,
+        "tax_base_opportunity_band": row.get("economic_opportunity_band") or "Data Needed",
+        "transportation_access_band": row.get("transportation_access_band") or "Data Needed",
+        "transportation_context": row.get("transportation_access_band"),
+        "utility_readiness_context": readiness_proxy or sewer_proxy,
+        "value_per_acre": None,
+        "zoning_support_band": row.get("zoning_support_band") or "Data Needed",
+        **_wsacc_utility_context(row),
+    }
+
+
+def _column_text_expr(
+    alias: str,
+    columns: set[str],
+    name: str,
+    default: str = "NULL::text",
+) -> str:
+    return f"NULLIF({alias}.{name}::text, '')" if name in columns else default
+
+
+def _column_array_expr(alias: str, columns: set[str], name: str) -> str:
+    return f"{alias}.{name}" if name in columns else "ARRAY[]::text[]"
+
+
+def _list_text(value: Any) -> list[str]:
+    if isinstance(value, (list, tuple)):
+        return [str(item) for item in value if item]
+    if isinstance(value, str) and value.strip():
+        return [part.strip() for part in value.split(";") if part.strip()]
+    return []
 
 
 def calculate_value_per_acre(assessed_value: float | None, acreage: float | None) -> float | None:

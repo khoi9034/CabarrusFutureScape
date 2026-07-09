@@ -1054,10 +1054,10 @@ function UtilityFeaturesInModelPanel({
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9ff0bd]">
-            Utility Features in Model
+            Utility + Land Opportunity Features in Model
           </p>
           <h4 className="mt-1 text-sm font-semibold text-white">
-            Utility readiness proxy
+            WSACC proxy fields in model-ready tables
           </h4>
         </div>
         <span className="shrink-0 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold uppercase text-slate-300">
@@ -1072,7 +1072,7 @@ function UtilityFeaturesInModelPanel({
           value={formatDevelopmentCount(rowCount ?? WSACC_MODEL_READY_FALLBACK_ROWS)}
         />
         <BriefStat
-          caveat="Safe output table with bands and due-diligence flags."
+          caveat="Safe land opportunity output table with bands and due-diligence flags."
           label="Screening output"
           value={screeningAvailable ? "Available" : "Check local table"}
         />
@@ -2229,6 +2229,7 @@ function CountywideBrief({
       </div>
 
       <UtilityReadinessProxyPanel state={wsaccState} />
+      <LandOpportunityScreenerPanel state={wsaccState} />
 
       <div className="rounded-md border border-white/10 bg-white/[0.035] p-3">
         <div className="flex items-start justify-between gap-3">
@@ -2386,6 +2387,72 @@ function UtilityReadinessProxyPanel({ state }: { state: WsaccLoadState }) {
       <p className="mt-3 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.07] px-3 py-2 text-[11px] leading-5 text-[#f6d98e]">
         Proxy only: sewer infrastructure proximity does not confirm available
         capacity, water service, service approval, or future development.
+      </p>
+    </div>
+  );
+}
+
+function LandOpportunityScreenerPanel({ state }: { state: WsaccLoadState }) {
+  if (state.status !== "loaded") return null;
+
+  const data = state.data;
+  const limitedEvidence = Math.max(
+    0,
+    (data.totalParcels ?? 0) - (data.within1000 ?? 0),
+  );
+
+  return (
+    <div className="rounded-lg border border-[#d8b86a]/24 bg-[#d8b86a]/[0.065] p-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f6d98e]">
+            Land Opportunity Screener
+          </p>
+          <h4 className="mt-1 text-sm font-semibold text-white">
+            Development-readiness proxy inputs
+          </h4>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Combines WSACC sewer proximity, subbasin context, permit pressure,
+            zoning, flood, school, and economics fields in model-ready tables.
+          </p>
+        </div>
+        <span className="shrink-0 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold uppercase text-slate-300">
+          Model-ready
+        </span>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="Rows available for parcel_development_model_features and screening output."
+          label="Model rows"
+          value={formatWsaccValue(data.totalParcels)}
+        />
+        <BriefStat
+          caveat="Rows with near-sewer screening context."
+          label="Sewer-supported review"
+          value={formatWsaccValue(data.within1000)}
+        />
+        <BriefStat
+          caveat="Rows where utility evidence remains limited or data-needed."
+          label="Limited utility evidence"
+          value={formatWsaccValue(limitedEvidence)}
+        />
+        <BriefStat
+          caveat="Capacity, water service, and planned extensions still need official data."
+          label="Required checks"
+          value="Capacity / water / extensions"
+        />
+      </div>
+
+      <WsaccBreakdownChart
+        data={data.readinessClasses}
+        emptyLabel="Utility readiness proxy counts are not available."
+        title="Readiness proxy classes for land screening"
+      />
+
+      <p className="mt-3 rounded-md border border-[#d8b86a]/25 bg-black/20 px-3 py-2 text-[11px] leading-5 text-[#f6d98e]">
+        Screening-level signal only: sewer infrastructure proximity does not
+        confirm capacity, service approval, future development, or land value.
       </p>
     </div>
   );

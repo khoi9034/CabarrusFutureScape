@@ -266,8 +266,9 @@ python scripts/build_parcel_wsacc_features.py --apply
 
 The derived tables power `/wsacc/statistics`, parcel utility context, Indicator
 Center utility readiness, model-ready feature tables, CFS Economics safe utility
-fields, and Power BI CSV/JSON exports. See `docs/wsacc_model_features.md` for
-thresholds, projection assumptions, and safe-use language.
+fields, the Economics Land Opportunity Screener, and Power BI CSV/JSON exports.
+See `docs/wsacc_model_features.md` for thresholds, projection assumptions, and
+safe-use language.
 
 Regenerate the static portfolio data locally with:
 

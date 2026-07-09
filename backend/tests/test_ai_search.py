@@ -918,6 +918,26 @@ def test_ai_search_economics_powerbi_actions_cover_utility_report() -> None:
     assert not any(field in str(response.powerbi_actions).lower() for field in unsafe_fields)
 
 
+def test_ai_search_economics_powerbi_actions_cover_land_opportunity_report() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Build a Land Opportunity Screener report.",
+            request_type="powerbi_report_plan",
+        ),
+        _context(),
+    )
+
+    assert response.powerbi_actions is not None
+    assert response.powerbi_actions["report_title"] == "Land Opportunity Screener Report"
+    assert response.powerbi_actions["chart_builder_config"]["category_field"] == "development_readiness_band"
+    assert response.powerbi_actions["report_canvas_items"][0]["source_table"] == "parcel_economic_signal_fact"
+    assert response.powerbi_actions["report_canvas_items"][1]["category_field"] == "sewer_proxy_class"
+    assert "does not confirm capacity" in response.powerbi_actions["report_canvas_items"][1]["caveat"].lower()
+    unsafe_fields = {"owner", "mailing", "raw_score", "prediction_probability", "exact_probability"}
+    assert not any(field in str(response.powerbi_actions).lower() for field in unsafe_fields)
+
+
 def test_ai_search_economics_powerbi_sort_prompt_mentions_export_order_fields() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(

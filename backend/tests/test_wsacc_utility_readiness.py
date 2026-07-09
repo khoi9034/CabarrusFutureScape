@@ -183,6 +183,10 @@ def test_economics_powerbi_export_includes_safe_utility_fields() -> None:
         "planned_extension_status",
         "sewer_basin_label",
         "utility_confidence",
+        "development_readiness_band",
+        "land_opportunity_class",
+        "due_diligence_flags",
+        "suggested_next_checks",
     }:
         assert field in fields
         if table_rows:
@@ -200,5 +204,6 @@ def test_planning_ui_surfaces_wsacc_in_explore_and_model_lab() -> None:
     )
 
     assert "UtilityReadinessProxyPanel" in source
-    assert "Utility Features in Model" in source
+    assert "Utility + Land Opportunity Features in Model" in source
+    assert "LandOpportunityScreenerPanel" in source
     assert "scripts/build_parcel_wsacc_features.py --apply" in source
