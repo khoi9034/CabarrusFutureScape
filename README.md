@@ -254,7 +254,7 @@ Use `python scripts/ingest_wsacc_data.py --input "C:\CabarrusFutureScape\data\WS
 to inspect the layers before any PostGIS write. Add `--apply` only after the
 dry run is reviewed. CFS treats this data as screening-level sewer proxy
 context; it does not confirm water/sewer capacity, service commitment, official
-approval, appraisal, tax advice, or investment advice.
+approval, appraisal, tax advice, or financial guidance.
 
 After ingesting WSACC locally, build the parcel-level sewer-proximity proxy
 tables with:

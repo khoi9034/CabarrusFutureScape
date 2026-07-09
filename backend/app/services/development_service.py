@@ -1008,6 +1008,26 @@ class DevelopmentService:
             utility_proxy_only_features_present=bool(
                 record.get("utility_proxy_only_features_present"),
             ),
+            wsacc_model_feature_columns_present=[
+                str(column)
+                for column in record.get("wsacc_model_feature_columns_present", [])
+            ],
+            wsacc_model_feature_row_count=int(
+                record.get("wsacc_model_feature_row_count") or 0,
+            ),
+            wsacc_model_feature_table_available=bool(
+                record.get("wsacc_model_feature_table_available"),
+            ),
+            wsacc_model_screening_output_row_count=int(
+                record.get("wsacc_model_screening_output_row_count") or 0,
+            ),
+            wsacc_model_screening_output_available=bool(
+                record.get("wsacc_model_screening_output_available"),
+            ),
+            wsacc_model_status=str(
+                record.get("wsacc_model_status")
+                or "WSACC model-ready feature table not available.",
+            ),
             latest_feature_ablation_available=bool(feature_ablation_summary),
             recommended_internal_model_experiment_id=(
                 feature_ablation_decision.get("recommended_internal_model_experiment_id")

@@ -109,4 +109,4 @@ safe-use assumptions.
 - Do not claim a parcel has available water/sewer capacity from these files
   alone.
 - Do not present this as official approval, appraisal, tax, zoning, or
-  investment advice.
+  financial guidance.

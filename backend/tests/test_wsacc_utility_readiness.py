@@ -59,8 +59,8 @@ def test_wsacc_statistics_uses_parcel_overlay_when_available() -> None:
         summary = payload["summary"]
 
         assert summary["parcel_utility_features_available"] is True
-        assert summary["total_parcels_evaluated"] >= 0
-        assert summary["parcels_within_1000ft_sewer_proxy"] >= 0
+        assert summary["total_parcels_evaluated"] > 0
+        assert summary["parcels_within_1000ft_sewer_proxy"] > 0
         assert payload["parcel_statistics"]["parcels_within_1000ft_of_sewer_line"] >= 0
         assert payload["parcel_statistics"]["sewer_proxy_class_breakdown"]
         assert "capacity" not in str(payload).lower() or "not provided" in str(payload).lower()
@@ -107,6 +107,27 @@ def test_build_parcel_wsacc_features_dry_run_when_source_tables_exist() -> None:
     assert '"mode": "dry_run"' in result.stdout
 
 
+def test_check_wsacc_model_integration_script_reports_safe_model_fields() -> None:
+    env = {**os.environ, "DATABASE_URL": ""}
+    result = subprocess.run(
+        [sys.executable, "scripts/check_wsacc_model_integration.py"],
+        cwd=REPO_ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+
+    if result.returncode != 0:
+        return
+
+    assert "parcel_development_model_features" in result.stdout
+    assert "sewer_pipe_within_250ft_flag" in result.stdout
+    assert "owner" not in result.stdout.lower()
+    assert "mailing" not in result.stdout.lower()
+
+
 def test_wsacc_endpoints_return_safe_payloads() -> None:
     assert client.get("/wsacc/inventory").status_code == 200
     stats = client.get("/wsacc/statistics")
@@ -118,6 +139,19 @@ def test_wsacc_endpoints_return_safe_payloads() -> None:
     assert filtered.status_code == 200
     assert parcel.json()["utility_readiness_class"]
     assert filtered.json()["status"] in {"ok", "data_needed"}
+
+
+def test_development_model_summary_exposes_wsacc_model_ready_evidence() -> None:
+    response = client.get("/development/prediction/features/summary")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert "wsacc_model_feature_table_available" in body
+    assert "wsacc_model_status" in body
+    assert body["prediction_probability_available"] is False
+    if body["wsacc_model_feature_table_available"]:
+        assert body["wsacc_model_feature_row_count"] > 0
+        assert "sewer_pipe_within_250ft_flag" in body["wsacc_model_feature_columns_present"]
 
 
 def test_indicator_center_uses_wsacc_inventory_for_utility_signal() -> None:
@@ -158,3 +192,13 @@ def test_economics_powerbi_export_includes_safe_utility_fields() -> None:
     assert "owner" not in unsafe
     assert "mailing" not in unsafe
     assert "raw_score" not in unsafe
+
+
+def test_planning_ui_surfaces_wsacc_in_explore_and_model_lab() -> None:
+    source = (REPO_ROOT / "src/components/dashboard/IntelligencePanel.tsx").read_text(
+        encoding="utf-8",
+    )
+
+    assert "UtilityReadinessProxyPanel" in source
+    assert "Utility Features in Model" in source
+    assert "scripts/build_parcel_wsacc_features.py --apply" in source

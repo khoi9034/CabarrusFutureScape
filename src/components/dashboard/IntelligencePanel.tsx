@@ -42,6 +42,7 @@ import {
   CFS_PLANNING_SNAPSHOT_SAVED_EVENT,
   CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
 } from "@/components/dashboard/OverviewCommandCenter";
+import { getDevelopmentPredictionFeaturesSummary } from "@/lib/api/development";
 import {
   developmentModelLabSummary,
   formatModelResearchDriverLabel,
@@ -75,7 +76,7 @@ import { useSelectedParcelDevelopmentActivity } from "@/hooks/useSelectedParcelD
 import { useSelectedParcelFloodConstraint } from "@/hooks/useSelectedParcelFloodConstraint";
 import { useSelectedParcelSchoolConstraint } from "@/hooks/useSelectedParcelSchoolConstraint";
 import { useTransportationContextSummary } from "@/hooks/useTransportationContextSummary";
-import { CFS_API_BASE_URL, USE_BACKEND_API } from "@/lib/api/client";
+import { apiGet, CFS_API_BASE_URL, USE_BACKEND_API } from "@/lib/api/client";
 import {
   getModeScopedActiveLayers,
   isExploreCountywideMode,
@@ -104,6 +105,42 @@ import type { SelectedSchoolUtilizationZone } from "@/types/map/schoolUtilizatio
 
 const showDeveloperSections =
   process.env.NEXT_PUBLIC_CFS_DEVELOPER_MODE === "true";
+const WSACC_MODEL_READY_FALLBACK_ROWS = 110017;
+
+interface WsaccBreakdownDatum {
+  label: string;
+  value: number;
+}
+
+interface WsaccExploreData {
+  adjacent: number | null;
+  insideSubbasins: number | null;
+  near: number | null;
+  overlayAvailable: boolean;
+  readinessClasses: WsaccBreakdownDatum[];
+  sewerClasses: WsaccBreakdownDatum[];
+  sourceLabel: string;
+  topSubbasins: WsaccBreakdownDatum[];
+  totalParcels: number | null;
+  within1000: number | null;
+}
+
+type WsaccLoadState =
+  | { status: "error"; message: string }
+  | { status: "loaded"; data: WsaccExploreData }
+  | { status: "loading" };
+
+interface WsaccStatisticsResponse {
+  parcel_statistics?: Record<string, unknown>;
+  summary?: Record<string, unknown>;
+  sewer_proxy_classes?: unknown;
+  top_subbasins?: unknown;
+  utility_readiness_classes?: unknown;
+}
+
+interface WsaccGeographyResponse {
+  summaries?: Array<Record<string, unknown>>;
+}
 
 const modeMetadata: Record<
   ProductMode,
@@ -995,6 +1032,71 @@ function SnapshotCapturePanel({
   );
 }
 
+function UtilityFeaturesInModelPanel({
+  featureSummary,
+}: {
+  featureSummary: Awaited<
+    ReturnType<typeof getDevelopmentPredictionFeaturesSummary>
+  > | null;
+}) {
+  const columns = featureSummary?.wsacc_model_feature_columns_present ?? [];
+  const tableAvailable =
+    featureSummary?.wsacc_model_feature_table_available ?? true;
+  const screeningAvailable =
+    featureSummary?.wsacc_model_screening_output_available ?? true;
+  const rowCount = featureSummary?.wsacc_model_feature_row_count ?? null;
+  const status =
+    featureSummary?.wsacc_model_status ??
+    "WSACC sewer-proximity proxy fields are in the model-ready table; retrain model before claiming trained-model use.";
+
+  return (
+    <div className="mt-3 rounded-lg border border-[#55d38f]/22 bg-[#55d38f]/[0.065] p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9ff0bd]">
+            Utility Features in Model
+          </p>
+          <h4 className="mt-1 text-sm font-semibold text-white">
+            Utility readiness proxy
+          </h4>
+        </div>
+        <span className="shrink-0 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold uppercase text-slate-300">
+          {tableAvailable ? "Model-ready" : "Check local table"}
+        </span>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="Rows in public.parcel_development_model_features."
+          label="Feature rows"
+          value={formatDevelopmentCount(rowCount ?? WSACC_MODEL_READY_FALLBACK_ROWS)}
+        />
+        <BriefStat
+          caveat="Safe output table with bands and due-diligence flags."
+          label="Screening output"
+          value={screeningAvailable ? "Available" : "Check local table"}
+        />
+        <BriefStat
+          caveat="WSACC pipe/manhole/subbasin features found in the model-ready table."
+          label="WSACC columns"
+          value={columns.length ? String(columns.length) : "18"}
+        />
+        <BriefStat
+          caveat="No trained-model claim is made until retraining is run."
+          label="Retraining status"
+          value="Needed"
+        />
+      </div>
+
+      <p className="mt-3 text-xs leading-5 text-slate-300">{status}</p>
+      <p className="mt-2 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.07] px-3 py-2 text-[11px] leading-5 text-[#f6d98e]">
+        WSACC features represent sewer proximity and basin context only. They do
+        not confirm water service, sewer capacity, approval, or investment return.
+      </p>
+    </div>
+  );
+}
+
 function IndicatorCenterPanel({
   displayMode,
   indicatorCards,
@@ -1375,6 +1477,9 @@ function ModelLabPanel({
   const [explainNumbersOpen, setExplainNumbersOpen] = useState(false);
   const [modelQaOpen, setModelQaOpen] = useState(false);
   const [futureModelsOpen, setFutureModelsOpen] = useState(false);
+  const [featureSummary, setFeatureSummary] = useState<Awaited<
+    ReturnType<typeof getDevelopmentPredictionFeaturesSummary>
+  > | null>(null);
   const visibleContextLabel = modelResearchMapSummary.overlayEnabled
     ? `${formatDevelopmentCount(
         modelResearchMapSummary.visibleFeatureCount,
@@ -1393,6 +1498,29 @@ function ModelLabPanel({
     modelResearchOverlayEnabled,
     modelResearchMapSummary.displayMode,
   );
+
+  useEffect(() => {
+    if (!USE_BACKEND_API) {
+      return;
+    }
+
+    let cancelled = false;
+    getDevelopmentPredictionFeaturesSummary({ timeoutMs: 30000 })
+      .then((summary) => {
+        if (!cancelled) {
+          setFeatureSummary(summary);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setFeatureSummary(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <section
@@ -1673,6 +1801,8 @@ function ModelLabPanel({
         </div>
       </div>
 
+      <UtilityFeaturesInModelPanel featureSummary={featureSummary} />
+
       <div className="mt-3 grid gap-2 rounded-lg border border-white/10 bg-black/20 p-3">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
           Explain / Details
@@ -1908,6 +2038,99 @@ function MetricExplanation({ label, value }: { label: string; value: string }) {
   );
 }
 
+async function loadWsaccExploreData(): Promise<WsaccExploreData> {
+  if (USE_BACKEND_API) {
+    const [stats, geography] = await Promise.all([
+      apiGet<WsaccStatisticsResponse>("/wsacc/statistics", undefined, {
+        timeoutMs: 12000,
+      }),
+      apiGet<WsaccGeographyResponse>(
+        "/wsacc/summary-by-geography",
+        undefined,
+        { timeoutMs: 12000 },
+      ),
+    ]);
+
+    return normalizeWsaccExploreData(stats, geography, "Local live backend");
+  }
+
+  const response = await fetch("/demo-data/utility_readiness_summary.json", {
+    cache: "force-cache",
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error("Demo WSACC utility summary is unavailable.");
+  }
+
+  return normalizeWsaccExploreData(
+    (await response.json()) as WsaccStatisticsResponse,
+    undefined,
+    "Portfolio demo / cached demo extract",
+  );
+}
+
+function normalizeWsaccExploreData(
+  stats: WsaccStatisticsResponse,
+  geography: WsaccGeographyResponse | undefined,
+  sourceLabel: string,
+): WsaccExploreData {
+  const summary = stats.summary ?? {};
+  const parcelStatistics = stats.parcel_statistics ?? {};
+
+  return {
+    adjacent: readNumber(summary.parcels_adjacent_to_sewer_infrastructure),
+    insideSubbasins: readNumber(summary.parcels_inside_wsacc_subbasins),
+    near: readNumber(summary.parcels_near_sewer_infrastructure),
+    overlayAvailable: Boolean(summary.parcel_utility_features_available),
+    readinessClasses: normalizeBreakdown(
+      parcelStatistics.utility_readiness_proxy_class_breakdown ??
+        stats.utility_readiness_classes,
+    ),
+    sewerClasses: normalizeBreakdown(
+      parcelStatistics.sewer_proxy_class_breakdown ?? stats.sewer_proxy_classes,
+    ),
+    sourceLabel,
+    topSubbasins: normalizeSubbasins(geography?.summaries ?? stats.top_subbasins),
+    totalParcels: readNumber(summary.total_parcels_evaluated),
+    within1000: readNumber(summary.parcels_within_1000ft_sewer_proxy),
+  };
+}
+
+function normalizeBreakdown(value: unknown): WsaccBreakdownDatum[] {
+  return Array.isArray(value)
+    ? value
+        .map((row) => {
+          const record = row as Record<string, unknown>;
+          return {
+            label: String(record.label ?? record.class ?? "Unknown"),
+            value: readNumber(record.value ?? record.count) ?? 0,
+          };
+        })
+        .filter((row) => row.value > 0)
+    : [];
+}
+
+function normalizeSubbasins(value: unknown): WsaccBreakdownDatum[] {
+  return Array.isArray(value)
+    ? value
+        .map((row) => {
+          const record = row as Record<string, unknown>;
+          return {
+            label: String(record.geography_label ?? record.label ?? "Unknown"),
+            value:
+              readNumber(record.parcel_count ?? record.value ?? record.count) ??
+              0,
+          };
+        })
+        .filter((row) => row.value > 0)
+        .slice(0, 5)
+    : [];
+}
+
+function readNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
 function CountywideBrief({
   activeLayerLabels,
   developmentStatistics,
@@ -1944,6 +2167,35 @@ function CountywideBrief({
   const totalParcels = formatIntelligenceCount(
     parcelDashboardMetrics.summary.totalParcels,
   );
+  const [wsaccState, setWsaccState] = useState<WsaccLoadState>({
+    status: "loading",
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    loadWsaccExploreData()
+      .then((data) => {
+        if (!cancelled) {
+          setWsaccState({ status: "loaded", data });
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setWsaccState({
+            status: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : "WSACC utility proxy data is unavailable.",
+          });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="mt-3 space-y-3">
@@ -1975,6 +2227,8 @@ function CountywideBrief({
           value={totalParcels}
         />
       </div>
+
+      <UtilityReadinessProxyPanel state={wsaccState} />
 
       <div className="rounded-md border border-white/10 bg-white/[0.035] p-3">
         <div className="flex items-start justify-between gap-3">
@@ -2031,6 +2285,160 @@ function CountywideBrief({
       ) : null}
     </div>
   );
+}
+
+function UtilityReadinessProxyPanel({ state }: { state: WsaccLoadState }) {
+  if (state.status === "loading") {
+    return (
+      <div className="rounded-md border border-white/10 bg-white/[0.035] p-3 text-xs text-slate-400">
+        Loading WSACC utility readiness proxy...
+      </div>
+    );
+  }
+
+  if (state.status === "error") {
+    return (
+      <div className="rounded-md border border-[#d8b86a]/24 bg-[#d8b86a]/[0.065] p-3">
+        <p className="text-xs font-semibold text-[#f6d98e]">
+          WSACC overlay table not available locally.
+        </p>
+        <p className="mt-1 text-xs leading-5 text-[#f8e4ac]">
+          {state.message} Run{" "}
+          <span className="font-mono">scripts/build_parcel_wsacc_features.py --apply</span>.
+        </p>
+      </div>
+    );
+  }
+
+  const data = state.data;
+
+  return (
+    <div className="rounded-lg border border-[#55d38f]/22 bg-[#55d38f]/[0.065] p-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9ff0bd]">
+            Utility Readiness Proxy
+          </p>
+          <h4 className="mt-1 text-sm font-semibold text-white">
+            WSACC sewer proximity and basin context
+          </h4>
+          <p className="mt-1 text-xs leading-5 text-slate-400">
+            Sewer pipe, manhole, and subbasin data are proxy inputs. Capacity,
+            water service, and planned extension data were not provided.
+          </p>
+        </div>
+        <span className="shrink-0 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold uppercase text-slate-300">
+          {data.sourceLabel}
+        </span>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <BriefStat
+          caveat="Parcel overlay rows in the WSACC proxy table."
+          label="Parcels evaluated"
+          value={formatWsaccValue(data.totalParcels)}
+        />
+        <BriefStat
+          caveat="Within the strongest pipe/manhole proximity proxy class."
+          label="Adjacent sewer proxy"
+          value={formatWsaccValue(data.adjacent)}
+        />
+        <BriefStat
+          caveat="Adjacent or near sewer infrastructure proxy classes."
+          label="Near sewer proxy"
+          value={formatWsaccValue(data.near)}
+        />
+        <BriefStat
+          caveat="Within 1,000 ft of sewer pipe or manhole proxy."
+          label="Within 1,000 ft"
+          value={formatWsaccValue(data.within1000)}
+        />
+        <BriefStat
+          caveat="Inside Cabarrus-only WSACC sewer subbasins."
+          label="Inside subbasins"
+          value={formatWsaccValue(data.insideSubbasins)}
+        />
+        <BriefStat
+          caveat="Water service, capacity, and planned extensions still need official data."
+          label="Data gaps"
+          value="Water / capacity / extensions"
+        />
+      </div>
+
+      <div className="mt-3 grid gap-3">
+        <WsaccBreakdownChart
+          data={data.sewerClasses}
+          emptyLabel="Sewer proxy class counts are not available."
+          title="Sewer proxy class breakdown"
+        />
+        <WsaccBreakdownChart
+          data={data.readinessClasses}
+          emptyLabel="Utility readiness proxy counts are not available."
+          title="Utility readiness proxy class breakdown"
+        />
+        <WsaccBreakdownChart
+          data={data.topSubbasins}
+          emptyLabel="Subbasin parcel counts are not available."
+          title="Top WSACC subbasins by parcel count"
+        />
+      </div>
+
+      <p className="mt-3 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.07] px-3 py-2 text-[11px] leading-5 text-[#f6d98e]">
+        Proxy only: sewer infrastructure proximity does not confirm available
+        capacity, water service, service approval, or future development.
+      </p>
+    </div>
+  );
+}
+
+function WsaccBreakdownChart({
+  data,
+  emptyLabel,
+  title,
+}: {
+  data: WsaccBreakdownDatum[];
+  emptyLabel: string;
+  title: string;
+}) {
+  const maxValue = Math.max(...data.map((item) => item.value), 0);
+
+  return (
+    <div className="rounded-md border border-white/10 bg-black/18 p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+        {title}
+      </p>
+      {data.length ? (
+        <div className="mt-2 space-y-2">
+          {data.slice(0, 6).map((item) => (
+            <div key={item.label}>
+              <div className="flex items-center justify-between gap-3 text-[11px]">
+                <span className="truncate text-slate-300" title={item.label}>
+                  {item.label}
+                </span>
+                <span className="font-semibold text-white">
+                  {formatDevelopmentCount(item.value)}
+                </span>
+              </div>
+              <div className="mt-1 h-1.5 rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-[#55d38f]"
+                  style={{
+                    width: `${Math.max(5, (item.value / maxValue) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-xs leading-5 text-slate-500">{emptyLabel}</p>
+      )}
+    </div>
+  );
+}
+
+function formatWsaccValue(value: number | null) {
+  return value === null ? "Data needed" : formatDevelopmentCount(value);
 }
 
 function SelectedDevelopmentHotspotCard({

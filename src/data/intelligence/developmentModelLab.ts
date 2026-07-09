@@ -24,7 +24,6 @@ export const developmentModelLabSummary = {
   excludedFeatureGroups: [
     "Accela plan reviews",
     "Central Area Plan layers",
-    "utility proxy",
     "current-context metadata flags",
   ],
   featureRows: "1,430,221",
@@ -32,6 +31,7 @@ export const developmentModelLabSummary = {
     "historical zoning",
     "transportation accessibility",
     "tax/value enrichment",
+    "WSACC utility readiness proxy in model-ready table",
   ],
   historicalOutcome: "new construction permits",
   modelName: "Development Model",
@@ -54,6 +54,7 @@ export const developmentModelLabSummary = {
     "parcel-year feature matrix",
     "historical zoning",
     "transportation accessibility / STIP / AADT",
+    "WSACC sewer-proximity proxy features",
     "tax/value enrichment",
     "model QA and governance outputs",
   ],

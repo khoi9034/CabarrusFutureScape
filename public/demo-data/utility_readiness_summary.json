@@ -13,6 +13,28 @@
     "parcels_within_1000ft_sewer_proxy": 17468,
     "parcels_inside_wsacc_subbasins": 108304
   },
+  "top_subbasins": [
+    {
+      "geography_label": "Coldwater Creek - CW10",
+      "parcel_count": 6483
+    },
+    {
+      "geography_label": "Irish Buffalo - IB5",
+      "parcel_count": 6134
+    },
+    {
+      "geography_label": "Irish Buffalo - IB2",
+      "parcel_count": 5341
+    },
+    {
+      "geography_label": "Rocky River - RR4",
+      "parcel_count": 5332
+    },
+    {
+      "geography_label": "Irish Buffalo - IB3",
+      "parcel_count": 4804
+    }
+  ],
   "utility_readiness_classes": [
     {
       "class": "Sewer basin context only",

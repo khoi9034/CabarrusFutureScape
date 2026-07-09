@@ -739,6 +739,14 @@ def build_utility_readiness_summary_demo(conn: psycopg.Connection) -> dict[str, 
             {"class": "Parcel-level utility readiness", "count": 0, "unit": "derived parcels", "status": "Data needed"},
         ]
     )
+    top_subbasins = (
+        [
+            {"geography_label": row["value"], "parcel_count": row["count"]}
+            for row in bucket(conn, "parcel_wsacc_utility_features", "wsacc_subbasin_name", limit=5)
+        ]
+        if overlay_available
+        else []
+    )
     if overlay_available:
         summary.update(
             {
@@ -759,6 +767,7 @@ def build_utility_readiness_summary_demo(conn: psycopg.Connection) -> dict[str, 
         "mode": "portfolio_demo_extract",
         "source": "WSACC sewer proxy inventory",
         "summary": summary,
+        "top_subbasins": top_subbasins,
         "utility_readiness_classes": readiness_classes,
         "sewer_proxy_classes": (
             [

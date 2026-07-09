@@ -543,6 +543,13 @@ export interface DevelopmentPredictionFeaturesSummaryResponse {
   snapshot_year_count: number;
   standardized_metrics_available: boolean;
   unique_parcel_count: number;
+  utility_proxy_only_features_present?: boolean;
+  wsacc_model_feature_columns_present?: string[];
+  wsacc_model_feature_row_count?: number;
+  wsacc_model_feature_table_available?: boolean;
+  wsacc_model_screening_output_available?: boolean;
+  wsacc_model_screening_output_row_count?: number;
+  wsacc_model_status?: string;
   zoning_enhanced_feature_matrix_available: boolean;
   zoning_enhanced_model_experiment_available: boolean;
   zoning_enhanced_row_count: number;

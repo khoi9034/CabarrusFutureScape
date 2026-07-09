@@ -2510,6 +2510,78 @@ class DevelopmentRepository:
                 ),
             }
 
+        wsacc_feature_columns = [
+            "sewer_pipe_within_250ft_flag",
+            "sewer_pipe_within_500ft_flag",
+            "sewer_pipe_within_1000ft_flag",
+            "distance_to_nearest_sewer_pipe_ft",
+            "manhole_within_250ft_flag",
+            "manhole_within_500ft_flag",
+            "manhole_within_1000ft_flag",
+            "distance_to_nearest_manhole_ft",
+            "inside_wsacc_subbasin_flag",
+            "sewer_proxy_class_encoded",
+            "utility_readiness_proxy_class_encoded",
+            "sewer_proxy_confidence_encoded",
+            "permit_pressure_x_sewer_proxy",
+            "vacant_or_underbuilt_x_sewer_proxy",
+            "zoning_support_x_sewer_proxy",
+            "corridor_access_x_sewer_proxy",
+            "flood_constraint_x_sewer_proxy",
+            "school_pressure_x_sewer_proxy",
+        ]
+        wsacc_table_status = self._fetch_one(
+            """
+            SELECT
+              to_regclass('public.parcel_development_model_features') IS NOT NULL
+                AS wsacc_model_feature_table_available,
+              to_regclass('public.parcel_development_screening_output') IS NOT NULL
+                AS wsacc_model_screening_output_available
+            """,
+        )
+        wsacc_feature_metadata: dict[str, object] = {
+            **wsacc_table_status,
+            "wsacc_model_feature_columns_present": [],
+            "wsacc_model_feature_row_count": 0,
+            "wsacc_model_screening_output_row_count": 0,
+            "wsacc_model_status": "WSACC model-ready feature table not available.",
+        }
+        if wsacc_table_status["wsacc_model_feature_table_available"]:
+            present_columns = self._fetch_all(
+                """
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'parcel_development_model_features'
+                  AND column_name = ANY(:columns)
+                ORDER BY column_name
+                """,
+                {"columns": wsacc_feature_columns},
+            )
+            wsacc_feature_metadata = {
+                **wsacc_feature_metadata,
+                **self._fetch_one(
+                    """
+                    SELECT COUNT(*) AS wsacc_model_feature_row_count
+                    FROM public.parcel_development_model_features
+                    """,
+                ),
+                "wsacc_model_feature_columns_present": [
+                    row["column_name"] for row in present_columns
+                ],
+                "wsacc_model_status": "WSACC sewer-proximity proxy fields are in the model-ready table; retrain model before claiming trained-model use.",
+            }
+        if wsacc_table_status["wsacc_model_screening_output_available"]:
+            wsacc_feature_metadata = {
+                **wsacc_feature_metadata,
+                **self._fetch_one(
+                    """
+                    SELECT COUNT(*) AS wsacc_model_screening_output_row_count
+                    FROM public.parcel_development_screening_output
+                    """,
+                ),
+            }
+
         return {
             **self._fetch_one(
                 """
@@ -2599,6 +2671,7 @@ class DevelopmentRepository:
             **zoning_feature_metadata,
             **transportation_feature_metadata,
             **planning_pipeline_utility_feature_metadata,
+            **wsacc_feature_metadata,
         }
 
     def get_prediction_ranking_summary(self) -> dict[str, object]:

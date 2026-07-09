@@ -1908,7 +1908,7 @@ function buildDrilldownSections({
         },
         {
           label: "Still not helpful enough",
-          value: "Accela / Central Area / utility proxy",
+          value: "Accela / Central Area / current-context flags",
         },
       ],
       title: "Model Status",

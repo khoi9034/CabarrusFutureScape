@@ -1165,13 +1165,13 @@
     "sfha_parcels": 7254,
     "total_parcels": 110017
   },
-  "generated_at": "2026-07-09T19:06:23Z",
+  "generated_at": "2026-07-09T19:53:06Z",
   "model_status": {
     "caveat": "Internal research only. No exact probabilities or internal model values are shown.",
     "current_best_internal_model": "Zoning + Transportation + Tax/Value",
     "exact_probabilities_shown": false,
     "feature_rows": 1430221,
-    "generated_at": "2026-07-09T19:06:23Z",
+    "generated_at": "2026-07-09T19:53:06Z",
     "model_status": "Internal only",
     "production_ready": false,
     "public_exposure_allowed": false,
@@ -1825,7 +1825,7 @@
     }
   },
   "school_pressure": {
-    "as_of": "2026-07-09T19:06:23Z",
+    "as_of": "2026-07-09T19:53:06Z",
     "available": true,
     "caveats": [
       "Portfolio demo uses a cached CFS demo extract.",
@@ -1864,6 +1864,28 @@
       "parcels_within_1000ft_sewer_proxy": 17468,
       "parcels_inside_wsacc_subbasins": 108304
     },
+    "top_subbasins": [
+      {
+        "geography_label": "Coldwater Creek - CW10",
+        "parcel_count": 6483
+      },
+      {
+        "geography_label": "Irish Buffalo - IB5",
+        "parcel_count": 6134
+      },
+      {
+        "geography_label": "Irish Buffalo - IB2",
+        "parcel_count": 5341
+      },
+      {
+        "geography_label": "Rocky River - RR4",
+        "parcel_count": 5332
+      },
+      {
+        "geography_label": "Irish Buffalo - IB3",
+        "parcel_count": 4804
+      }
+    ],
     "utility_readiness_classes": [
       {
         "class": "Sewer basin context only",

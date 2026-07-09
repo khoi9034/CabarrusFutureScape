@@ -388,6 +388,12 @@ class DevelopmentPredictionFeaturesSummaryResponse(BaseModel):
     planning_pipeline_utility_current_context_only: bool = True
     concord_only_features_present: bool = False
     utility_proxy_only_features_present: bool = False
+    wsacc_model_feature_columns_present: list[str] = Field(default_factory=list)
+    wsacc_model_feature_row_count: int = 0
+    wsacc_model_feature_table_available: bool = False
+    wsacc_model_screening_output_row_count: int = 0
+    wsacc_model_screening_output_available: bool = False
+    wsacc_model_status: str = "WSACC model-ready feature table not available."
     latest_feature_ablation_available: bool = False
     recommended_internal_model_experiment_id: str | None = None
     recommended_internal_model_variant: str | None = None
