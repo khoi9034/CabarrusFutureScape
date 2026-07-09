@@ -144,6 +144,28 @@ def main() -> int:
             school_pressure,
         )
 
+    utility_readiness_summary = {
+        "mode": "portfolio_demo_extract",
+        "source": "WSACC sewer proxy inventory",
+        "summary": {
+            "sewer_pipe_segments": 2075,
+            "sewer_manhole_points": 2083,
+            "sewer_subbasins": 55,
+            "water_service_layers_available": False,
+            "sewer_capacity_layers_available": False,
+            "planned_extension_layers_available": False,
+            "parcel_utility_features_available": False,
+        },
+        "utility_readiness_classes": [
+            {"class": "Sewer proxy available", "count": 2075, "unit": "pipe segments"},
+            {"class": "Parcel-level utility readiness", "count": 0, "unit": "derived parcels", "status": "Data needed"},
+        ],
+        "caveats": [
+            "Demo utility context is aggregated and proxy-only.",
+            "It does not confirm available water/sewer capacity, allocation, service commitment, or project approval.",
+            "Verify service readiness with WSACC or the relevant utility provider before parcel-level interpretation.",
+        ],
+    }
     indicator_summary = {
         "available": True,
         "caveats": [
@@ -168,11 +190,7 @@ def main() -> int:
             "utilization_seed": school_watch["utilization_seed"],
         },
         "school_pressure": school_pressure_summary,
-        "utility_readiness": {
-            "caveat": "Utility proxy does not confirm available capacity.",
-            "status": "Data still needed",
-            "true_capacity_available": False,
-        },
+        "utility_readiness": utility_readiness_summary,
     }
     indicator_intelligence = build_indicator_intelligence_demo(
         generated_at=generated_at,
@@ -221,6 +239,7 @@ def main() -> int:
             **school_watch,
         },
         "school_pressure_summary.json": school_pressure_summary,
+        "utility_readiness_summary.json": utility_readiness_summary,
         "model_status.json": model_status,
         "sample_parcels.json": sample_parcels,
         "model_lab_demo_clusters.json": model_lab_demo_clusters,
@@ -744,7 +763,12 @@ def economics_demo_signal(row: dict[str, Any]) -> dict[str, Any]:
         "segment_caveat": _segment_caveat(segment),
         "special_asset_flag": special_asset,
         "transportation_context": None,
-        "utility_readiness_context": "Official utility capacity remains a data need.",
+        "utility_readiness_context": "WSACC sewer proxy inventory is available; parcel overlay and capacity verification remain data needs.",
+        "utility_readiness_class": "Sewer proxy available / parcel overlay needed",
+        "utility_constraint_flag": "Data needed",
+        "planned_extension_nearby_flag": "Data needed",
+        "sewer_basin_label": None,
+        "utility_confidence": "low",
         "value_per_acre": value_per_acre,
     }
 

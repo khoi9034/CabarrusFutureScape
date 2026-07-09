@@ -19,6 +19,7 @@ from app.schemas.ai_search import (
     CfsAiSearchResponse,
     CfsAiSelectedSignal,
 )
+from app.services.wsacc_service import build_wsacc_statistics
 
 SAFE_CAVEATS = [
     "Answers use CFS summary context only and do not invent missing data.",
@@ -2197,10 +2198,22 @@ def _transportation_answer(request, context, domains):
 
 
 def _utility_answer(request, context, domains):
+    try:
+        summary = build_wsacc_statistics()["summary"]
+    except Exception:
+        summary = {}
+    sewer_lines = int(summary.get("sewer_pipe_segments") or 0)
+    basins = int(summary.get("sewer_subbasins") or 0)
+    answer = (
+        f"CFS has inventoried {sewer_lines:,} WSACC sewer pipe segments and {basins:,} sewer subbasins. "
+        "Use them as screening-level sewer proxy context; parcel service availability, capacity, planned extensions, and CIP timing still need official WSACC verification."
+        if sewer_lines or basins
+        else "Utility readiness is proxy-only until true capacity data is received. Proximity does not confirm available capacity."
+    )
     return _simple_domain_answer(
         "Utility Readiness",
-        "Utility readiness is proxy-only until true capacity data is received. Proximity does not confirm available capacity.",
-        "Request WSACC service area, available capacity, committed capacity, and update date.",
+        answer,
+        "Use WSACC sewer proxy layers for planning review, then request service area, available capacity, committed capacity, planned extension, and update-date fields.",
         request,
         context,
         domains,

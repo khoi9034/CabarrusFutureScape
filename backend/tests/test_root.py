@@ -24,4 +24,5 @@ def test_root_endpoint_returns_api_status() -> None:
         "economics": "/economics",
         "indicators": "/indicators",
         "parcels": "/parcels",
+        "wsacc": "/wsacc",
     }

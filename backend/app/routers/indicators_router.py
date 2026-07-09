@@ -21,6 +21,7 @@ from app.schemas.school_constraints import SchoolUtilizationSeedResponse
 from app.services import DevelopmentService
 from app.services.constraints_service import ConstraintsService
 from app.services.school_constraints_service import SchoolConstraintsService
+from app.services.wsacc_service import build_wsacc_statistics
 
 router = APIRouter(prefix="/indicators", tags=["Indicator Center"])
 
@@ -109,12 +110,17 @@ def get_indicator_intelligence(
         "School utilization plus permit pressure is unavailable.",
         caveats,
     )
+    wsacc_statistics = _safe_load(
+        build_wsacc_statistics,
+        "WSACC utility inventory is unavailable.",
+        caveats,
+    )
 
     signals = [
         _development_signal(development_stats, development_trends, permit_segments, as_of),
         *_school_pressure_signals(school_pressure, as_of),
         _flood_signal(flood_summary, as_of),
-        _utility_signal(as_of),
+        _utility_signal(as_of, wsacc_statistics),
         _transportation_signal(development_stats, as_of),
         _zoning_signal(as_of),
         _model_signal(as_of),
@@ -651,7 +657,29 @@ def _flood_signal(summary: Any, as_of: str) -> dict[str, Any]:
     )
 
 
-def _utility_signal(as_of: str) -> dict[str, Any]:
+def _utility_signal(as_of: str, wsacc_statistics: Any = None) -> dict[str, Any]:
+    summary = (wsacc_statistics or {}).get("summary", {}) if isinstance(wsacc_statistics, dict) else {}
+    sewer_lines = int(summary.get("sewer_pipe_segments") or 0)
+    basins = int(summary.get("sewer_subbasins") or 0)
+    if sewer_lines or basins:
+        return _signal(
+            caveats=list((wsacc_statistics or {}).get("caveats") or ["Utility proxy does not confirm available capacity."]),
+            confidence="medium",
+            data_freshness=as_of,
+            domain="utility_readiness",
+            evidence=[
+                f"{sewer_lines:,} WSACC sewer pipe segments inventoried.",
+                f"{basins:,} WSACC sewer subbasins inventoried.",
+                "Water service areas, capacity constraints, CIP projects, and parcel overlay remain data needs.",
+            ],
+            geography_label="Countywide",
+            id="utility_readiness",
+            recommended_followup="Run WSACC parcel overlay before using utility readiness for parcel-level review.",
+            related_layers=["WSACC sewer lines", "WSACC sewer subbasins"],
+            status_band="review",
+            title="Utility Readiness Coverage",
+            value="Sewer proxy available",
+        )
     return _signal(
         caveats=["Utility proxy does not confirm available capacity."],
         confidence="low",

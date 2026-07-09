@@ -1,0 +1,31 @@
+{
+  "mode": "portfolio_demo_extract",
+  "source": "WSACC sewer proxy inventory",
+  "summary": {
+    "sewer_pipe_segments": 2075,
+    "sewer_manhole_points": 2083,
+    "sewer_subbasins": 55,
+    "water_service_layers_available": false,
+    "sewer_capacity_layers_available": false,
+    "planned_extension_layers_available": false,
+    "parcel_utility_features_available": false
+  },
+  "utility_readiness_classes": [
+    {
+      "class": "Sewer proxy available",
+      "count": 2075,
+      "unit": "pipe segments"
+    },
+    {
+      "class": "Parcel-level utility readiness",
+      "count": 0,
+      "unit": "derived parcels",
+      "status": "Data needed"
+    }
+  ],
+  "caveats": [
+    "Demo utility context is aggregated and proxy-only.",
+    "It does not confirm available water/sewer capacity, allocation, service commitment, or project approval.",
+    "Verify service readiness with WSACC or the relevant utility provider before parcel-level interpretation."
+  ]
+}

@@ -13,6 +13,7 @@ from app.routers import (
     parcel_router,
     school_constraints_router,
     temporal_router,
+    wsacc_router,
 )
 
 settings = get_settings()
@@ -53,6 +54,7 @@ def root() -> dict[str, object]:
             "constraints": "/constraints",
             "ai_search": "/ai/search",
             "indicators": "/indicators",
+            "wsacc": "/wsacc",
         },
     }
 
@@ -83,3 +85,4 @@ app.include_router(constraints_router.router)
 app.include_router(school_constraints_router.router)
 app.include_router(indicators_router.router)
 app.include_router(ai_search_router.router)
+app.include_router(wsacc_router.router)

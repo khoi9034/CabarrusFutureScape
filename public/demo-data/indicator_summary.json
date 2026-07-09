@@ -1165,13 +1165,13 @@
     "sfha_parcels": 7254,
     "total_parcels": 110017
   },
-  "generated_at": "2026-07-04T02:59:21Z",
+  "generated_at": "2026-07-09T18:11:55Z",
   "model_status": {
     "caveat": "Internal research only. No exact probabilities or internal model values are shown.",
     "current_best_internal_model": "Zoning + Transportation + Tax/Value",
     "exact_probabilities_shown": false,
     "feature_rows": 1430221,
-    "generated_at": "2026-07-04T02:59:21Z",
+    "generated_at": "2026-07-09T18:11:55Z",
     "model_status": "Internal only",
     "production_ready": false,
     "public_exposure_allowed": false,
@@ -1825,7 +1825,7 @@
     }
   },
   "school_pressure": {
-    "as_of": "2026-07-04T02:59:21Z",
+    "as_of": "2026-07-09T18:11:55Z",
     "available": true,
     "caveats": [
       "Portfolio demo uses a cached CFS demo extract.",
@@ -1850,8 +1850,34 @@
     "total_count": 35
   },
   "utility_readiness": {
-    "caveat": "Utility proxy does not confirm available capacity.",
-    "status": "Data still needed",
-    "true_capacity_available": false
+    "mode": "portfolio_demo_extract",
+    "source": "WSACC sewer proxy inventory",
+    "summary": {
+      "sewer_pipe_segments": 2075,
+      "sewer_manhole_points": 2083,
+      "sewer_subbasins": 55,
+      "water_service_layers_available": false,
+      "sewer_capacity_layers_available": false,
+      "planned_extension_layers_available": false,
+      "parcel_utility_features_available": false
+    },
+    "utility_readiness_classes": [
+      {
+        "class": "Sewer proxy available",
+        "count": 2075,
+        "unit": "pipe segments"
+      },
+      {
+        "class": "Parcel-level utility readiness",
+        "count": 0,
+        "unit": "derived parcels",
+        "status": "Data needed"
+      }
+    ],
+    "caveats": [
+      "Demo utility context is aggregated and proxy-only.",
+      "It does not confirm available water/sewer capacity, allocation, service commitment, or project approval.",
+      "Verify service readiness with WSACC or the relevant utility provider before parcel-level interpretation."
+    ]
   }
 }

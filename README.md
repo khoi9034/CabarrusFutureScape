@@ -235,6 +235,27 @@ After importing the CFS Economics CSV files into Power BI Desktop, verify:
 - Report caveats are visible.
 - Slicers have been checked for blank or missing values.
 
+### WSACC Utility Readiness Data
+
+The local WSACC drop in `data/WSACC` is inventoried in
+`docs/wsacc_data_inventory.md`. It currently contains sewer proxy infrastructure
+and subbasin shapefiles only: manholes, sewer pipes, and Cabarrus-only WSACC
+subbasins.
+
+Local API endpoints:
+
+- `GET /wsacc/inventory`
+- `GET /wsacc/statistics`
+- `GET /wsacc/parcel/{parcel_id}`
+- `GET /wsacc/filter`
+- `GET /wsacc/summary-by-geography`
+
+Use `python scripts/ingest_wsacc_data.py --input "C:\CabarrusFutureScape\data\WSACC" --dry-run`
+to inspect the layers before any PostGIS write. Add `--apply` only after the
+dry run is reviewed. CFS treats this data as screening-level sewer proxy
+context; it does not confirm water/sewer capacity, service commitment, official
+approval, appraisal, tax advice, or investment advice.
+
 Regenerate the static portfolio data locally with:
 
 ```powershell

@@ -51,6 +51,9 @@ backend/.venv/
 # generated run artifacts
 outputs/
 
+# local source-data drops
+data/WSACC/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

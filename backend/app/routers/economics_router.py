@@ -19,6 +19,7 @@ from app.services.enterprise_export_service import (
     build_powerbi_export_payload,
     powerbi_table_to_csv,
 )
+from app.services.wsacc_service import build_wsacc_statistics
 
 router = APIRouter(prefix="/economics", tags=["CFS Economics"])
 
@@ -387,6 +388,7 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
     ]
     parcel_id = str(row.get("official_parcel_id"))
     display_label = _safe_display_label(row.get("geography_label"), parcel_id)
+    utility_context = _wsacc_utility_context()
     return {
         "acreage": acreage,
         "area_id": None,
@@ -436,8 +438,28 @@ def _economics_signal(row: dict[str, Any], rate_per_100: float) -> dict[str, Any
         "special_asset_flag": special_asset,
         "tax_base_opportunity_band": tax_base_band,
         "transportation_context": None,
-        "utility_readiness_context": "Official utility capacity remains a data need.",
+        **utility_context,
         "value_per_acre": value_per_acre,
+    }
+
+
+def _wsacc_utility_context() -> dict[str, Any]:
+    try:
+        summary = build_wsacc_statistics().get("summary", {})
+    except Exception:
+        summary = {}
+    has_sewer_proxy = bool(summary.get("sewer_pipe_segments") or summary.get("sewer_subbasins"))
+    return {
+        "utility_readiness_context": (
+            "WSACC sewer proxy inventory is available; parcel overlay and capacity verification remain data needs."
+            if has_sewer_proxy
+            else "Official utility capacity remains a data need."
+        ),
+        "utility_readiness_class": "Sewer proxy available / parcel overlay needed" if has_sewer_proxy else "Data needed",
+        "utility_constraint_flag": "Data needed",
+        "planned_extension_nearby_flag": "Data needed",
+        "sewer_basin_label": None,
+        "utility_confidence": "low" if has_sewer_proxy else "unknown",
     }
 
 
