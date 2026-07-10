@@ -1165,13 +1165,13 @@
     "sfha_parcels": 7254,
     "total_parcels": 110017
   },
-  "generated_at": "2026-07-09T22:54:39Z",
+  "generated_at": "2026-07-10T02:22:53Z",
   "model_status": {
     "caveat": "Internal research only. No exact probabilities or internal model values are shown.",
     "current_best_internal_model": "Zoning + Transportation + Tax/Value",
     "exact_probabilities_shown": false,
     "feature_rows": 1430221,
-    "generated_at": "2026-07-09T22:54:39Z",
+    "generated_at": "2026-07-10T02:22:53Z",
     "model_status": "Internal only",
     "production_ready": false,
     "public_exposure_allowed": false,
@@ -1825,7 +1825,7 @@
     }
   },
   "school_pressure": {
-    "as_of": "2026-07-09T22:54:39Z",
+    "as_of": "2026-07-10T02:22:53Z",
     "available": true,
     "caveats": [
       "Portfolio demo uses a cached CFS demo extract.",
@@ -1905,6 +1905,57 @@
       {
         "class": "Limited utility-readiness evidence",
         "count": 1703,
+        "unit": "parcels"
+      }
+    ],
+    "development_readiness_band_breakdown": [
+      {
+        "class": "Growth pressure but utility evidence limited",
+        "count": 90846,
+        "unit": "parcels"
+      },
+      {
+        "class": "Opportunity signal, capacity data needed",
+        "count": 9847,
+        "unit": "parcels"
+      },
+      {
+        "class": "Good candidate, verify zoning and utilities",
+        "count": 7621,
+        "unit": "parcels"
+      },
+      {
+        "class": "Low near-term readiness signal",
+        "count": 1703,
+        "unit": "parcels"
+      }
+    ],
+    "growth_pressure_band_breakdown": [
+      {
+        "class": "Data needed",
+        "count": 110017,
+        "unit": "parcels"
+      }
+    ],
+    "sewer_proxy_growth_pressure_breakdown": [
+      {
+        "class": "Outside near-sewer proxy range / Data needed",
+        "count": 92549,
+        "unit": "parcels"
+      },
+      {
+        "class": "Moderate sewer proximity / Data needed",
+        "count": 9844,
+        "unit": "parcels"
+      },
+      {
+        "class": "Near sewer infrastructure / Data needed",
+        "count": 3940,
+        "unit": "parcels"
+      },
+      {
+        "class": "Adjacent to sewer infrastructure / Data needed",
+        "count": 3684,
         "unit": "parcels"
       }
     ],

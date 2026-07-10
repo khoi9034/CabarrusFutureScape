@@ -63,6 +63,9 @@ def test_wsacc_statistics_uses_parcel_overlay_when_available() -> None:
         assert summary["parcels_within_1000ft_sewer_proxy"] > 0
         assert payload["parcel_statistics"]["parcels_within_1000ft_of_sewer_line"] >= 0
         assert payload["parcel_statistics"]["sewer_proxy_class_breakdown"]
+        if db.execute(text("SELECT to_regclass('public.parcel_development_screening_output') IS NOT NULL")).scalar_one():
+            assert "development_readiness_band_breakdown" in payload["parcel_statistics"]
+            assert "sewer_proxy_growth_pressure_breakdown" in payload["parcel_statistics"]
         assert "capacity" not in str(payload).lower() or "not provided" in str(payload).lower()
     finally:
         db.close()
@@ -124,6 +127,9 @@ def test_check_wsacc_model_integration_script_reports_safe_model_fields() -> Non
 
     assert "parcel_development_model_features" in result.stdout
     assert "sewer_pipe_within_250ft_flag" in result.stdout
+    assert "local_dev_settings" in result.stdout
+    assert "land_opportunity_fields_present" in result.stdout
+    assert "development_readiness_band" in result.stdout
     assert "owner" not in result.stdout.lower()
     assert "mailing" not in result.stdout.lower()
 

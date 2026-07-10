@@ -772,6 +772,40 @@ def build_utility_readiness_summary_demo(conn: psycopg.Connection) -> dict[str, 
             {"class": "Parcel-level utility readiness", "count": 0, "unit": "derived parcels", "status": "Data needed"},
         ]
     )
+    screening_available = table_exists(conn, "parcel_development_screening_output")
+    development_readiness_classes = (
+        [
+            {"class": row["value"], "count": row["count"], "unit": "parcels"}
+            for row in bucket(conn, "parcel_development_screening_output", "development_readiness_band", limit=8)
+        ]
+        if screening_available
+        else []
+    )
+    growth_pressure_classes = (
+        [
+            {"class": row["value"], "count": row["count"], "unit": "parcels"}
+            for row in bucket(conn, "parcel_development_screening_output", "growth_pressure_band", limit=8)
+        ]
+        if screening_available
+        else []
+    )
+    sewer_growth = (
+        fetch_all(
+            conn,
+            """
+            SELECT
+              CONCAT(sewer_proxy_class, ' / ', growth_pressure_band) AS class,
+              COUNT(*) AS count,
+              'parcels' AS unit
+            FROM public.parcel_development_screening_output
+            GROUP BY 1
+            ORDER BY 2 DESC
+            LIMIT 8
+            """,
+        )
+        if screening_available
+        else []
+    )
     top_subbasins = (
         [
             {"geography_label": row["value"], "parcel_count": row["count"]}
@@ -802,6 +836,9 @@ def build_utility_readiness_summary_demo(conn: psycopg.Connection) -> dict[str, 
         "summary": summary,
         "top_subbasins": top_subbasins,
         "utility_readiness_classes": readiness_classes,
+        "development_readiness_band_breakdown": development_readiness_classes,
+        "growth_pressure_band_breakdown": growth_pressure_classes,
+        "sewer_proxy_growth_pressure_breakdown": sewer_growth,
         "sewer_proxy_classes": (
             [
                 {"class": row["value"], "count": row["count"], "unit": "parcels"}

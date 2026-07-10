@@ -57,6 +57,57 @@
       "unit": "parcels"
     }
   ],
+  "development_readiness_band_breakdown": [
+    {
+      "class": "Growth pressure but utility evidence limited",
+      "count": 90846,
+      "unit": "parcels"
+    },
+    {
+      "class": "Opportunity signal, capacity data needed",
+      "count": 9847,
+      "unit": "parcels"
+    },
+    {
+      "class": "Good candidate, verify zoning and utilities",
+      "count": 7621,
+      "unit": "parcels"
+    },
+    {
+      "class": "Low near-term readiness signal",
+      "count": 1703,
+      "unit": "parcels"
+    }
+  ],
+  "growth_pressure_band_breakdown": [
+    {
+      "class": "Data needed",
+      "count": 110017,
+      "unit": "parcels"
+    }
+  ],
+  "sewer_proxy_growth_pressure_breakdown": [
+    {
+      "class": "Outside near-sewer proxy range / Data needed",
+      "count": 92549,
+      "unit": "parcels"
+    },
+    {
+      "class": "Moderate sewer proximity / Data needed",
+      "count": 9844,
+      "unit": "parcels"
+    },
+    {
+      "class": "Near sewer infrastructure / Data needed",
+      "count": 3940,
+      "unit": "parcels"
+    },
+    {
+      "class": "Adjacent to sewer infrastructure / Data needed",
+      "count": 3684,
+      "unit": "parcels"
+    }
+  ],
   "sewer_proxy_classes": [
     {
       "class": "Outside near-sewer proxy range",

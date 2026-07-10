@@ -27441,7 +27441,7 @@
   ],
   "metadata": {
     "caveat": "Portfolio demo layer uses a cached sample extract, not full county production coverage.",
-    "generated_at": "2026-07-09T22:54:39Z",
+    "generated_at": "2026-07-10T02:22:53Z",
     "layer_id": "parcels",
     "layer_label": "Demo Parcels",
     "mode": "portfolio_demo",

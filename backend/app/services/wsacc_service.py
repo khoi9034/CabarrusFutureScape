@@ -305,6 +305,54 @@ def _overlay_statistics(db: Session | None) -> dict[str, Any] | None:
             """
         )
     ).mappings().all()
+    development_readiness_counts: list[dict[str, Any]] = []
+    growth_pressure_counts: list[dict[str, Any]] = []
+    sewer_growth_counts: list[dict[str, Any]] = []
+    if _table_has_columns(
+        db,
+        "parcel_development_screening_output",
+        ("development_readiness_band", "growth_pressure_band", "sewer_proxy_class"),
+    ):
+        development_readiness_counts = [
+            dict(row)
+            for row in db.execute(
+                text(
+                    """
+                    SELECT development_readiness_band AS label, COUNT(*) AS value
+                    FROM public.parcel_development_screening_output
+                    GROUP BY 1 ORDER BY 2 DESC
+                    """
+                )
+            ).mappings().all()
+        ]
+        growth_pressure_counts = [
+            dict(row)
+            for row in db.execute(
+                text(
+                    """
+                    SELECT growth_pressure_band AS label, COUNT(*) AS value
+                    FROM public.parcel_development_screening_output
+                    GROUP BY 1 ORDER BY 2 DESC
+                    """
+                )
+            ).mappings().all()
+        ]
+        sewer_growth_counts = [
+            {
+                "label": f"{row['sewer_proxy_class']} / {row['growth_pressure_band']}",
+                "value": int(row["value"] or 0),
+            }
+            for row in db.execute(
+                text(
+                    """
+                    SELECT sewer_proxy_class, growth_pressure_band, COUNT(*) AS value
+                    FROM public.parcel_development_screening_output
+                    GROUP BY 1, 2 ORDER BY 3 DESC
+                    LIMIT 8
+                    """
+                )
+            ).mappings().all()
+        ]
     data = dict(row)
     return {
         "summary": {key: int(value or 0) for key, value in data.items()},
@@ -325,12 +373,35 @@ def _overlay_statistics(db: Session | None) -> dict[str, Any] | None:
             "parcels_near_cip_project": "Data needed",
             "sewer_proxy_class_breakdown": [dict(row) for row in class_counts],
             "utility_readiness_proxy_class_breakdown": [dict(row) for row in readiness_counts],
+            "development_readiness_band_breakdown": development_readiness_counts,
+            "growth_pressure_band_breakdown": growth_pressure_counts,
+            "sewer_proxy_growth_pressure_breakdown": sewer_growth_counts,
         },
     }
 
 
 def _table_exists(db: Session, table_name: str) -> bool:
     return bool(db.execute(text("SELECT to_regclass(:name) IS NOT NULL"), {"name": f"public.{table_name}"}).scalar_one())
+
+
+def _table_has_columns(db: Session, table_name: str, columns: tuple[str, ...]) -> bool:
+    if not _table_exists(db, table_name):
+        return False
+    found = set(
+        db.execute(
+            text(
+                """
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = :table_name
+                  AND column_name = ANY(:columns)
+                """
+            ),
+            {"table_name": table_name, "columns": list(columns)},
+        ).scalars()
+    )
+    return all(column in found for column in columns)
 
 
 def _dict(value: Any) -> dict[str, Any]:

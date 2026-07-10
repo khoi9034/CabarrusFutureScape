@@ -114,6 +114,9 @@ interface WsaccBreakdownDatum {
 
 interface WsaccExploreData {
   adjacent: number | null;
+  developmentReadinessClasses: WsaccBreakdownDatum[];
+  growthPressureBySewerProxy: WsaccBreakdownDatum[];
+  growthPressureClasses: WsaccBreakdownDatum[];
   insideSubbasins: number | null;
   near: number | null;
   overlayAvailable: boolean;
@@ -131,7 +134,10 @@ type WsaccLoadState =
   | { status: "loading" };
 
 interface WsaccStatisticsResponse {
+  development_readiness_band_breakdown?: unknown;
+  growth_pressure_band_breakdown?: unknown;
   parcel_statistics?: Record<string, unknown>;
+  sewer_proxy_growth_pressure_breakdown?: unknown;
   summary?: Record<string, unknown>;
   sewer_proxy_classes?: unknown;
   top_subbasins?: unknown;
@@ -2079,6 +2085,18 @@ function normalizeWsaccExploreData(
 
   return {
     adjacent: readNumber(summary.parcels_adjacent_to_sewer_infrastructure),
+    developmentReadinessClasses: normalizeBreakdown(
+      parcelStatistics.development_readiness_band_breakdown ??
+        stats.development_readiness_band_breakdown,
+    ),
+    growthPressureBySewerProxy: normalizeBreakdown(
+      parcelStatistics.sewer_proxy_growth_pressure_breakdown ??
+        stats.sewer_proxy_growth_pressure_breakdown,
+    ),
+    growthPressureClasses: normalizeBreakdown(
+      parcelStatistics.growth_pressure_band_breakdown ??
+        stats.growth_pressure_band_breakdown,
+    ),
     insideSubbasins: readNumber(summary.parcels_inside_wsacc_subbasins),
     near: readNumber(summary.parcels_near_sewer_infrastructure),
     overlayAvailable: Boolean(summary.parcel_utility_features_available),
@@ -2412,8 +2430,8 @@ function LandOpportunityScreenerPanel({ state }: { state: WsaccLoadState }) {
             Development-readiness proxy inputs
           </h4>
           <p className="mt-1 text-xs leading-5 text-slate-400">
-            Combines WSACC sewer proximity, subbasin context, permit pressure,
-            zoning, flood, school, and economics fields in model-ready tables.
+            Combines growth pressure, WSACC sewer proxy, constraints, and
+            economics context into screening-level land opportunity bands.
           </p>
         </div>
         <span className="shrink-0 rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold uppercase text-slate-300">
@@ -2445,10 +2463,31 @@ function LandOpportunityScreenerPanel({ state }: { state: WsaccLoadState }) {
       </div>
 
       <WsaccBreakdownChart
+        data={data.developmentReadinessClasses.length ? data.developmentReadinessClasses : data.readinessClasses}
+        emptyLabel="Development-readiness band counts are not available."
+        title="Development-readiness band breakdown"
+      />
+      <WsaccBreakdownChart
         data={data.readinessClasses}
         emptyLabel="Utility readiness proxy counts are not available."
-        title="Readiness proxy classes for land screening"
+        title="Utility readiness proxy classes"
       />
+      <WsaccBreakdownChart
+        data={data.growthPressureBySewerProxy.length ? data.growthPressureBySewerProxy : data.growthPressureClasses}
+        emptyLabel="Growth pressure by sewer proxy is not available."
+        title="Sewer proxy x growth pressure"
+      />
+
+      <div className="mt-3 rounded-md border border-white/10 bg-black/18 p-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+          Due diligence flags
+        </p>
+        <ul className="mt-2 list-disc space-y-1 pl-4 text-[11px] leading-5 text-slate-300">
+          <li>Capacity data not provided.</li>
+          <li>Water service data not provided.</li>
+          <li>Planned extension data not provided.</li>
+        </ul>
+      </div>
 
       <p className="mt-3 rounded-md border border-[#d8b86a]/25 bg-black/20 px-3 py-2 text-[11px] leading-5 text-[#f6d98e]">
         Screening-level signal only: sewer infrastructure proximity does not
