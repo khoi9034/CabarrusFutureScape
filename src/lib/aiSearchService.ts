@@ -87,8 +87,10 @@ export const askCfsEconomicsWorkspacePrompts = [
 
 export const askCfsEconomicsPowerBiToolPrompts = [
   "Build me a Power BI report.",
+  "Generate a due diligence packet.",
   "Create a chart of opportunity classes.",
   "Build a report for underbuilt parcels.",
+  "What are the red flags?",
   "Build a Land Due Diligence Report.",
   "Build a Land Opportunity Screener report.",
   "Make a scenario comparison page.",
@@ -218,6 +220,9 @@ async function demoEconomicsAnswer(
   }
   if (isEconomicsPrintQuery(request?.query ?? "")) {
     return demoEconomicsPrintAnswer(economics);
+  }
+  if (isEconomicsDueDiligencePacketQuery(request?.query ?? "")) {
+    return demoEconomicsDueDiligencePacketAnswer(economics, request?.query ?? "");
   }
   if (isEconomicsPowerBiQuery(request?.query ?? "")) {
     return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport(), request?.query ?? "");
@@ -692,6 +697,14 @@ function isEconomicsPowerBiQuery(query: string) {
     "due diligence",
     "manual review",
     "parcel review",
+    "due diligence packet",
+    "watchlist due diligence",
+    "what should i verify",
+    "why did this parcel surface",
+    "questions should i ask",
+    "what questions should i ask planning",
+    "what questions should i ask wsacc",
+    "what are the red flags",
     "utility readiness",
     "sewer proxy",
     "wsacc",
@@ -703,6 +716,22 @@ function isEconomicsPowerBiQuery(query: string) {
     "opportunity class sort",
     "filter special assets",
     "special asset filter",
+  ].some((term) => normalized.includes(term));
+}
+
+function isEconomicsDueDiligencePacketQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return [
+    "due diligence packet",
+    "watchlist due diligence",
+    "what should i verify",
+    "why did this parcel surface",
+    "questions should i ask",
+    "what questions should i ask planning",
+    "what questions should i ask wsacc",
+    "what should i ask wsacc",
+    "what should i ask utilities",
+    "what are the red flags",
   ].some((term) => normalized.includes(term));
 }
 
@@ -819,6 +848,73 @@ function isEconomicsPrintQuery(query: string) {
     "present selected rows",
     "present this to a reviewer",
   ].some((term) => normalized.includes(term));
+}
+
+function demoEconomicsDueDiligencePacketAnswer(
+  economics: EconomicsIntelligenceResponse,
+  query: string,
+): CfsAiSearchResponse {
+  return {
+    answer: briefing(
+      [
+        "Direct answer",
+        "Use Power BI & Tools -> Land Due Diligence Screener. Select one candidate for a parcel packet, or select several rows for a watchlist packet.",
+      ],
+      [
+        "What CFS will include",
+        bullets([
+          "Why the row surfaced: readiness band, sewer-proximity proxy, growth pressure, economics, constraints, and flags.",
+          "Infrastructure context: sewer proxy class, utility-readiness proxy, sewer basin, and data-needed utility statuses.",
+          "Questions to ask planning/utilities and recommended next checks.",
+        ]),
+      ],
+      [
+        "Questions to ask",
+        bullets([
+          "Is sewer service available under current utility rules?",
+          "Is system capacity available for the review scenario?",
+          "Is water service available and which provider should confirm it?",
+          "Does zoning support the intended use?",
+          "Are floodplain, wetlands, access, easement, or site constraints present?",
+        ]),
+      ],
+      [
+        "Caveat",
+        "This is screening-level review only. WSACC data supports sewer proximity and subbasin context only; capacity, water service, and planned extensions were not provided.",
+      ],
+    ),
+    as_of: economics.as_of,
+    caveats: [
+      "Portfolio Demo uses a cached demo extract.",
+      "CFS packets support manual review and do not replace planning, utility, legal, or site due diligence.",
+    ],
+    context_freshness: "cached_demo_extract",
+    dashboard_actions: {
+      filter_watchlist: { domain: "economics", status: "land_due_diligence" },
+      focus_domain: "economics",
+      highlight_kpis: ["development_readiness", "utility_readiness", "data_confidence"],
+      recommended_layers: ["Power BI & Tools", "Print"],
+    },
+    data_mode: "demo",
+    data_source: "portfolio_demo_extract",
+    domains: ["economics"],
+    evidence: [
+      evidence(
+        "Land Due Diligence Screener",
+        "CFS uses sanitized economics rows and WSACC proxy fields to build packet-ready review context.",
+        "public/demo-data/economics_powerbi_export.json",
+        "available",
+      ),
+    ],
+    powerbi_actions: isPowerBiReportCommand(query) ? demoPowerBiActionsForQuery(query) : undefined,
+    provider: "none",
+    related_layers: ["Power BI & Tools", "Report Bucket", "Print"],
+    suggested_actions: [
+      "Select one candidate and choose Generate Due Diligence Packet.",
+      "Select multiple watchlist rows and choose Generate Watchlist Due Diligence Packet.",
+      "Add the packet to the Report Bucket or send it to Print.",
+    ],
+  };
 }
 
 function demoEconomicsPrintAnswer(

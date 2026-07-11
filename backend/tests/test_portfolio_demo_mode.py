@@ -320,6 +320,21 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Land Due Diligence Report" in economics_shell
     assert "Land Review Watchlist" in economics_shell
     assert "Parcel Due Diligence Card" in economics_shell
+    assert "Generate Due Diligence Packet" in economics_shell
+    assert "Generate Watchlist Due Diligence Packet" in economics_shell
+    assert "Parcel Due Diligence Packet Preview" in economics_shell
+    assert "Add Packet to Report Bucket" in economics_shell
+    assert "Send Packet to Print" in economics_shell
+    assert "Copy Packet Summary" in economics_shell
+    assert "Copy Questions to Ask" in economics_shell
+    assert "Download Packet JSON" in economics_shell
+    assert "due_diligence_packet" in economics_shell
+    assert "DueDiligencePacketPrintDetails" in economics_shell
+    assert "Parcel Due Diligence Packet" in economics_shell
+    assert "WSACC data supports sewer proximity and subbasin context only" in economics_shell
+    assert "Not financial or buy/sell guidance" in economics_shell
+    assert "Is sewer service available" in economics_shell
+    assert "review priority" in economics_shell
     assert "Add selected rows to bucket" in economics_shell
     assert "Send due diligence report to Print" in economics_shell
     assert "Verify utility service/capacity with utility provider" in economics_shell

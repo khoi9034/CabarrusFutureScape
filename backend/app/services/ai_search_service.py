@@ -1308,6 +1308,14 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "due diligence",
             "manual review",
             "parcel review",
+            "due diligence packet",
+            "watchlist due diligence",
+            "what should i verify",
+            "why did this parcel surface",
+            "questions should i ask",
+            "what questions should i ask planning",
+            "what questions should i ask wsacc",
+            "what are the red flags",
             "utility readiness",
             "sewer proxy",
             "wsacc",
@@ -1317,11 +1325,82 @@ def _is_economics_powerbi_query(query: str) -> bool:
     )
 
 
+def _is_economics_due_diligence_packet_query(query: str) -> bool:
+    normalized = query.lower()
+    return any(
+        term in normalized
+        for term in (
+            "due diligence packet",
+            "watchlist due diligence",
+            "what should i verify",
+            "why did this parcel surface",
+            "questions should i ask",
+            "what questions should i ask planning",
+            "what questions should i ask wsacc",
+            "what should i ask wsacc",
+            "what should i ask utilities",
+            "what are the red flags",
+        )
+    )
+
+
 def _economics_powerbi_answer(
     request: CfsAiSearchRequest,
     context: CfsAiContext,
 ) -> CfsAiSearchResponse:
     powerbi_actions = _powerbi_actions_for_query(request.query)
+    if _is_economics_due_diligence_packet_query(request.query):
+        answer = _briefing(
+            (
+                "Direct answer",
+                "Use Power BI & Tools -> Land Due Diligence Screener. Select one candidate for a parcel packet, or select several rows for a watchlist packet.",
+            ),
+            (
+                "What CFS will include",
+                _bullets(
+                    [
+                        "Why the row surfaced: readiness band, sewer-proximity proxy, growth pressure, economics, constraints, and flags.",
+                        "Infrastructure context: sewer proxy class, utility-readiness proxy, sewer basin, and data-needed utility statuses.",
+                        "Questions to ask planning/utilities and recommended next checks.",
+                    ]
+                ),
+            ),
+            (
+                "Questions to ask",
+                _bullets(
+                    [
+                        "Is sewer service available under current utility rules?",
+                        "Is system capacity available for the review scenario?",
+                        "Is water service available and which provider should confirm it?",
+                        "Does zoning support the intended use?",
+                        "Are floodplain, wetlands, access, easement, or site constraints present?",
+                    ]
+                ),
+            ),
+            (
+                "Caveat",
+                "This is screening-level review only. WSACC data supports sewer proximity and subbasin context only; capacity, water service, and planned extensions were not provided.",
+            ),
+        )
+        return _response(
+            answer,
+            context,
+            ["economics"],
+            request.mode,
+            [
+                _evidence(
+                    "Land Due Diligence Screener",
+                    "CFS uses sanitized economics rows and WSACC proxy fields to build packet-ready review context.",
+                    "economics_powerbi_export",
+                )
+            ],
+            [
+                "Select one candidate and choose Generate Due Diligence Packet.",
+                "Select multiple watchlist rows and choose Generate Watchlist Due Diligence Packet.",
+                "Add the packet to the Report Bucket or send it to Print.",
+            ],
+            powerbi_actions=powerbi_actions if _is_powerbi_report_command(request.query) else None,
+        )
     if _is_powerbi_report_command(request.query):
         title = powerbi_actions.get("report_title") or "Power BI report"
         answer = _briefing(

@@ -1837,7 +1837,9 @@ function EconomicsPrintPage({
                   </p>
                   <h3 className="mt-1 text-base font-semibold text-slate-950">{item.title}</h3>
                   <p className="mt-1 text-sm leading-6 text-slate-700">{item.summary}</p>
-                  {item.generated_report ? (
+                  {item.due_diligence_packet ? (
+                    <DueDiligencePacketPrintDetails packet={item.due_diligence_packet} />
+                  ) : item.generated_report ? (
                     <GeneratedReportPrintDetails report={item.generated_report} />
                   ) : (
                     <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-slate-300 bg-white p-3 text-xs leading-5 text-slate-700">
@@ -1951,6 +1953,33 @@ function GeneratedReportPrintDetails({ report }: { report: GeneratedPowerBiRepor
           {report.powerbi_details}
         </pre>
       ) : null}
+    </div>
+  );
+}
+
+function DueDiligencePacketPrintDetails({ packet }: { packet: DueDiligencePacket }) {
+  const printSections = [
+    "Why This Surfaced",
+    "Infrastructure / WSACC Context",
+    "Red Flags / Missing Data",
+    "Questions to Ask",
+    "Recommended Next Checks",
+    "Caveats",
+  ];
+  return (
+    <div className="mt-3 grid gap-3">
+      {packet.sections
+        .filter((section) => printSections.includes(section.title))
+        .map((section) => (
+          <div className="rounded border border-slate-300 bg-white p-3" key={section.title}>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+              {section.title}
+            </p>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+              {section.lines.map((line) => <li key={line}>{line}</li>)}
+            </ul>
+          </div>
+        ))}
     </div>
   );
 }
@@ -2919,6 +2948,8 @@ function LandDueDiligenceScreener({
   const [confidence, setConfidence] = useState("All");
   const [flag, setFlag] = useState("All");
   const [geography, setGeography] = useState("All");
+  const [packet, setPacket] = useState<DueDiligencePacket | null>(null);
+  const [packetStatus, setPacketStatus] = useState<string | null>(null);
   const filteredRows = rows.filter((signal) => {
     const matchesReadiness =
       readiness === "All" ||
@@ -2961,6 +2992,11 @@ function LandDueDiligenceScreener({
     if (!activeReviewSignal) return;
     onAddReportBucketItem(landDueDiligenceBucketItem(activeReviewSignal));
   };
+  const addPacketToBucket = (nextPacket = packet) => {
+    if (!nextPacket) return;
+    onAddReportBucketItem(dueDiligencePacketBucketItem(nextPacket));
+    setPacketStatus("Added packet to Report Bucket");
+  };
   const sendToPrint = () => {
     if (selectedRows.length) {
       addSelectedRowsToBucket();
@@ -2968,6 +3004,34 @@ function LandDueDiligenceScreener({
       onAddReportBucketItem(landDueDiligenceBucketItem(activeReviewSignal));
     }
     onNavigate("print");
+  };
+  const generateSinglePacket = () => {
+    if (!activeReviewSignal) return;
+    const nextPacket = singleParcelDueDiligencePacket(activeReviewSignal);
+    setPacket(nextPacket);
+    setPacketStatus("Parcel due diligence packet generated");
+  };
+  const generateWatchlistPacket = () => {
+    if (!selectedRows.length) return;
+    const nextPacket = watchlistDueDiligencePacket(selectedRows);
+    setPacket(nextPacket);
+    setPacketStatus("Watchlist due diligence packet generated");
+  };
+  const sendPacketToPrint = () => {
+    if (packet) addPacketToBucket(packet);
+    onNavigate("print");
+  };
+  const copyPacket = (label: string, text: string) => {
+    if (navigator.clipboard) {
+      void navigator.clipboard.writeText(text).then(
+        () => setPacketStatus(`${label} copied`),
+        () => {
+          if (fallbackCopyText(text)) setPacketStatus(`${label} copied`);
+        },
+      );
+    } else if (fallbackCopyText(text)) {
+      setPacketStatus(`${label} copied`);
+    }
   };
 
   return (
@@ -3050,6 +3114,9 @@ function LandDueDiligenceScreener({
               <p className="mt-1 text-xs text-[var(--econ-muted)]">Select rows to save to the Report Bucket or Print snapshot.</p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!selectedRows.length} onClick={generateWatchlistPacket} type="button">
+                Generate Watchlist Due Diligence Packet
+              </button>
               <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!selectedRows.length} onClick={addSelectedRowsToBucket} type="button">
                 Add selected rows to bucket
               </button>
@@ -3066,9 +3133,19 @@ function LandDueDiligenceScreener({
         </div>
         <ParcelDueDiligenceCard
           onAddToBucket={addReviewCardToBucket}
+          onGeneratePacket={generateSinglePacket}
           signal={activeReviewSignal}
         />
       </div>
+      <DueDiligencePacketPreview
+        onAddToBucket={() => addPacketToBucket()}
+        onCopyQuestions={() => packet ? copyPacket("Questions to ask", packet.questions_to_ask.map((item) => `- ${item}`).join("\n")) : undefined}
+        onCopySummary={() => packet ? copyPacket("Packet summary", dueDiligencePacketSummaryText(packet)) : undefined}
+        onDownload={() => packet ? downloadJson(packet, `${slugifyReportTitle(packet.title)}.json`) : undefined}
+        onSendToPrint={sendPacketToPrint}
+        packet={packet}
+        status={packetStatus}
+      />
     </EconPanel>
   );
 }
@@ -3137,9 +3214,11 @@ function LandDueDiligenceTable({
 
 function ParcelDueDiligenceCard({
   onAddToBucket,
+  onGeneratePacket,
   signal,
 }: {
   onAddToBucket: () => void;
+  onGeneratePacket: () => void;
   signal: EconomicsParcelSignal | null;
 }) {
   if (!signal) {
@@ -3157,9 +3236,14 @@ function ParcelDueDiligenceCard({
           <h3 className="mt-1 text-lg font-semibold text-[var(--econ-text)]">{signalLabel(signal)}</h3>
           <p className="mt-1 text-xs text-[var(--econ-muted)]">{signal.geography_label ?? "Geography data needed"}</p>
         </div>
-        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={onAddToBucket} type="button">
-          Add card to Report Bucket
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={onGeneratePacket} type="button">
+            Generate Due Diligence Packet
+          </button>
+          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={onAddToBucket} type="button">
+            Add card to Report Bucket
+          </button>
+        </div>
       </div>
       <Matrix
         rows={[
@@ -3180,6 +3264,68 @@ function ParcelDueDiligenceCard({
         </ul>
       </div>
     </div>
+  );
+}
+
+function DueDiligencePacketPreview({
+  onAddToBucket,
+  onCopyQuestions,
+  onCopySummary,
+  onDownload,
+  onSendToPrint,
+  packet,
+  status,
+}: {
+  onAddToBucket: () => void;
+  onCopyQuestions: () => void;
+  onCopySummary: () => void;
+  onDownload: () => void;
+  onSendToPrint: () => void;
+  packet: DueDiligencePacket | null;
+  status: string | null;
+}) {
+  return (
+    <section className="mt-5 rounded-xl border border-[var(--econ-border)] bg-black/20 p-4" data-econ-tour="due-diligence-packet">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-gold)]">Parcel Due Diligence Packet Preview</p>
+          <h3 className="mt-1 text-lg font-semibold text-[var(--econ-text)]">{packet?.title ?? "Generate a packet from selected rows"}</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--econ-muted)]">
+            {packet?.summary ?? "Select a watchlist row for a parcel packet, or select multiple rows for a watchlist packet."}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onAddToBucket} type="button">
+            Add Packet to Report Bucket
+          </button>
+          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onSendToPrint} type="button">
+            Send Packet to Print
+          </button>
+          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onCopySummary} type="button">
+            Copy Packet Summary
+          </button>
+          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onCopyQuestions} type="button">
+            Copy Questions to Ask
+          </button>
+          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onDownload} type="button">
+            Download Packet JSON
+          </button>
+        </div>
+      </div>
+      {status ? <p className="mt-3 text-xs font-semibold text-[var(--econ-green)]">{status}</p> : null}
+      {packet ? (
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {packet.sections.map((section) => (
+            <details className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3" key={section.title} open={section.title === "Why This Surfaced"}>
+              <summary className="cursor-pointer text-sm font-semibold text-[var(--econ-text)]">{section.title}</summary>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-5 text-[var(--econ-muted)]">
+                {section.lines.map((line) => <li key={line}>{line}</li>)}
+              </ul>
+            </details>
+          ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -5360,6 +5506,184 @@ function landDueDiligenceBucketItem(signal: EconomicsParcelSignal): ReportBucket
   };
 }
 
+function packetSection(title: string, lines: string[]): DueDiligencePacketSection {
+  return { lines: uniqueStrings(lines.filter(Boolean)), title };
+}
+
+function packetLine(label: string, value: unknown) {
+  return `${label}: ${valueText(value) || "Data Needed"}`;
+}
+
+function singleParcelDueDiligencePacket(signal: EconomicsParcelSignal): DueDiligencePacket {
+  const flags = dueDiligenceRedFlags(signal);
+  const nextChecks = dueDiligenceNextChecks(signal);
+  const questions = dueDiligenceQuestions(signal);
+  return {
+    caveats: landDueDiligencePacketCaveats,
+    id: `due-diligence-packet-${signal.parcel_id}`,
+    packet_type: "single_parcel",
+    questions_to_ask: questions,
+    sections: [
+      packetSection("Parcel / Area Summary", [
+        packetLine("Label", signalLabel(signal)),
+        packetLine("Geography", signal.geography_label),
+        packetLine("Acreage band", acreageBandForSignal(signal)),
+        packetLine("Development-readiness", signal.development_readiness_band),
+        packetLine("Land opportunity", signal.land_opportunity_class),
+        packetLine("Data confidence", signal.data_confidence ?? signal.economic_data_confidence),
+      ]),
+      packetSection("Why This Surfaced", [
+        `Review signal: ${valueText(signal.development_readiness_band) || valueText(signal.land_opportunity_class) || "screening row"}.`,
+        `Growth pressure: ${valueText(signal.growth_pressure_band) || "Data Needed"}.`,
+        `Utility proxy: ${valueText(signal.sewer_proxy_class) || "Data Needed"}; ${valueText(signal.utility_readiness_proxy_class) || "Data Needed"}.`,
+        `Economic opportunity: ${valueText(signal.economic_opportunity_band) || valueText(signal.opportunity_class) || "Data Needed"}.`,
+        flags.length ? `Primary flags: ${flags.slice(0, 4).join("; ")}.` : "Primary flags: Data Needed.",
+      ]),
+      packetSection("Infrastructure / WSACC Context", [
+        packetLine("Sewer proxy class", signal.sewer_proxy_class),
+        packetLine("Utility-readiness proxy", signal.utility_readiness_proxy_class),
+        packetLine("Sewer proxy confidence", signal.sewer_proxy_confidence),
+        packetLine("Sewer basin", signal.sewer_basin_label),
+        packetLine("Utility capacity status", signal.utility_capacity_status),
+        packetLine("Planned extension status", signal.planned_extension_status),
+        landDueDiligenceWsaccCaveat,
+      ]),
+      packetSection("Economic Context", [
+        packetLine("Economic opportunity", signal.economic_opportunity_band),
+        packetLine("Opportunity class", signal.opportunity_class),
+        packetLine("Tax-base opportunity", signal.tax_base_opportunity_band),
+        packetLine("Value-per-acre band", signalExtraField(signal, "value_per_acre_band")),
+        packetLine("Improvement ratio band", signalExtraField(signal, "improvement_to_land_ratio_band")),
+        signal.special_asset_flag ? "Special asset / compare with caution." : "",
+      ]),
+      packetSection("Constraint Context", [
+        packetLine("Flood constraint", signal.flood_constraint_band),
+        packetLine("School/service pressure", signal.school_service_pressure_band),
+        packetLine("Public cost risk", signal.public_cost_risk_band ?? signal.constraint_burden_band),
+        packetLine("Zoning support", signal.zoning_support_band),
+      ]),
+      packetSection("Red Flags / Missing Data", flags.length ? flags : ["Data Needed"]),
+      packetSection("Questions to Ask", questions),
+      packetSection("Recommended Next Checks", nextChecks),
+      packetSection("Caveats", landDueDiligencePacketCaveats),
+    ],
+    summary: `${signalLabel(signal)} surfaced as ${valueText(signal.development_readiness_band) || valueText(signal.land_opportunity_class) || "a screening-level review candidate"}; verify planning, utilities, access, constraints, and site feasibility before any decision.`,
+    title: `Parcel Due Diligence Packet - ${signalLabel(signal)}`,
+  };
+}
+
+function watchlistDueDiligencePacket(rows: EconomicsParcelSignal[]): DueDiligencePacket {
+  const flags = topTextCounts(rows.flatMap((signal) => dueDiligenceRedFlags(signal))).slice(0, 8);
+  const candidates = rows.slice(0, 12).map((signal, index) =>
+    `${index + 1}. ${signalLabel(signal)} - review priority: ${valueText(signal.development_readiness_band) || valueText(signal.land_opportunity_class) || "Data Needed"}; sewer proxy: ${valueText(signal.sewer_proxy_class) || "Data Needed"}`,
+  );
+  return {
+    caveats: landDueDiligencePacketCaveats,
+    id: `due-diligence-watchlist-packet-${rows.length}-${rows.slice(0, 8).map((row) => row.parcel_id).join("-")}`,
+    packet_type: "watchlist",
+    questions_to_ask: defaultDueDiligenceQuestions,
+    sections: [
+      packetSection("Parcel / Area Summary", [
+        `Selected row count: ${formatNumber(rows.length)}`,
+        `Segment mix: ${countRowsBy(rows, (row) => row.economic_segment ?? "Data Needed").slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `Opportunity mix: ${countRowsBy(rows, (row) => row.land_opportunity_class ?? row.opportunity_class).slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `Sewer proxy mix: ${countRowsBy(rows, (row) => row.sewer_proxy_class ?? "Data Needed").slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+      ]),
+      packetSection("Why This Surfaced", [
+        "Selected rows combine development-readiness, sewer-proximity proxy, economic opportunity, constraints, and due diligence flags.",
+        "Use review priority bands to order manual checks; do not treat the list as a financial ranking.",
+      ]),
+      packetSection("Infrastructure / WSACC Context", [
+        `Utility proxy mix: ${countRowsBy(rows, (row) => row.utility_readiness_proxy_class ?? "Data Needed").slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `Top basins/geographies: ${countRowsBy(rows, (row) => row.sewer_basin_label ?? row.geography_label ?? "Data Needed").slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        landDueDiligenceWsaccCaveat,
+      ]),
+      packetSection("Economic Context", [
+        `Economic opportunity mix: ${countRowsBy(rows, (row) => row.economic_opportunity_band ?? "Data Needed").slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `Special asset rows: ${formatNumber(rows.filter((row) => row.special_asset_flag).length)}`,
+      ]),
+      packetSection("Constraint Context", [
+        `Flood constraint mix: ${countRowsBy(rows, (row) => row.flood_constraint_band ?? "Data Needed").slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `School/service pressure mix: ${countRowsBy(rows, (row) => row.school_service_pressure_band ?? "Data Needed").slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+      ]),
+      packetSection("Red Flags / Missing Data", flags.length ? flags.map((row) => `${row.label}: ${row.value}`) : ["Data Needed"]),
+      packetSection("Questions to Ask", defaultDueDiligenceQuestions),
+      packetSection("Recommended Next Checks", candidates),
+      packetSection("Caveats", landDueDiligencePacketCaveats),
+    ],
+    summary: `${rows.length} selected land screening rows prepared for manual due diligence review. Use review priority, not financial ranking, and verify utilities/planning before decisions.`,
+    title: "Watchlist Due Diligence Packet",
+  };
+}
+
+function dueDiligenceRedFlags(signal: EconomicsParcelSignal) {
+  return uniqueStrings([
+    ...signalListValues(signal.due_diligence_flags),
+    ...[
+      valueText(signal.utility_capacity_status).toLowerCase().includes("data") ? "Utility capacity status needs verification" : "",
+      valueText(signal.planned_extension_status).toLowerCase().includes("data") ? "Planned extension status needs verification" : "",
+      !valueText(signal.zoning_support_band) ? "Zoning support data needed" : "",
+      !valueText(signal.flood_constraint_band) ? "Floodplain/wetlands review needed" : "",
+      signal.special_asset_flag ? "Special asset / compare separately" : "",
+      valueText(signal.data_confidence ?? signal.economic_data_confidence).toLowerCase().includes("data") ? "Data confidence needs review" : "",
+    ],
+  ]);
+}
+
+function dueDiligenceNextChecks(signal: EconomicsParcelSignal) {
+  return uniqueStrings([
+    ...signalListValues(signal.suggested_next_checks),
+    signal.recommended_followup ?? "",
+    ...landDueDiligenceChecklist,
+  ]).slice(0, 12);
+}
+
+function dueDiligenceQuestions(signal: EconomicsParcelSignal) {
+  return uniqueStrings([
+    `Is sewer service available for ${signalLabel(signal)} under current utility rules?`,
+    "Is system capacity available for the intended review scenario?",
+    "Is water service available, and what provider confirmation is required?",
+    "Does zoning support the intended use, or is a rezoning/special use path needed?",
+    "Are there known floodplain, wetlands, access, easement, or site-dimension constraints?",
+    "Are road frontage, access, or off-site improvements required?",
+    "Are there active or recent planning cases, permits, or subdivision actions nearby?",
+  ]);
+}
+
+function signalExtraField(signal: EconomicsParcelSignal, field: string) {
+  return (signal as EconomicsParcelSignal & Record<string, unknown>)[field];
+}
+
+function dueDiligencePacketSummaryText(packet: DueDiligencePacket) {
+  return [packet.title, packet.summary, "", ...packet.caveats.map((caveat) => `- ${caveat}`)].join("\n");
+}
+
+function dueDiligencePacketText(packet: DueDiligencePacket) {
+  return [
+    packet.title,
+    packet.summary,
+    ...packet.sections.map((section) => [
+      "",
+      section.title,
+      ...section.lines.map((line) => `- ${line}`),
+    ].join("\n")),
+  ].join("\n");
+}
+
+function dueDiligencePacketBucketItem(packet: DueDiligencePacket): ReportBucketItemInput {
+  return {
+    caveats: packet.caveats,
+    content: dueDiligencePacketText(packet),
+    due_diligence_packet: packet,
+    id: packet.id,
+    related_tables: ["parcel_economic_signal_fact"],
+    source_page: "Power BI & Tools",
+    summary: packet.summary,
+    title: packet.title,
+    type: "due_diligence_packet",
+  };
+}
+
 function economicSnapshotSummary(
   summary: EconomicsIntelligenceResponse["summary"] | undefined,
   selectedSignals: EconomicsParcelSignal[],
@@ -5623,6 +5947,10 @@ function countRowsBy<T>(rows: T[], getLabel: (row: T) => string | null | undefin
   return [...counts.entries()]
     .map(([label, value]) => ({ label, value }))
     .sort((left, right) => right.value - left.value);
+}
+
+function topTextCounts(values: string[]) {
+  return countRowsBy(values.filter(Boolean), (value) => value);
 }
 
 function uniqueValues(values: Array<string | null | undefined>) {
@@ -6135,17 +6463,32 @@ type PowerBiReportDataAvailability = {
 type ReportBucketItemType =
   | "chart"
   | "decision_memo"
+  | "due_diligence_packet"
   | "evidence_pack"
   | "generated_report"
   | "powerbi_recipe"
   | "qa_checklist"
   | "report_plan"
   | "scenario_output";
+type DueDiligencePacketSection = {
+  lines: string[];
+  title: string;
+};
+type DueDiligencePacket = {
+  caveats: string[];
+  id: string;
+  packet_type: "single_parcel" | "watchlist";
+  questions_to_ask: string[];
+  sections: DueDiligencePacketSection[];
+  summary: string;
+  title: string;
+};
 type ReportBucketItem = {
   caveats?: string[];
   chart_config?: UserChartRecipeConfig;
   content: string;
   created_at: string;
+  due_diligence_packet?: DueDiligencePacket;
   id: string;
   generated_report?: GeneratedPowerBiReportSnapshot;
   powerbi_recipe?: string;
@@ -6381,6 +6724,7 @@ const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {
 
 const quickPowerBiReportTypes: Array<{ label: string; prompt: string; type: PowerBiReportType }> = [
   { label: "Executive Dashboard", prompt: "Build an executive dashboard.", type: "executive" },
+  { label: "Parcel Due Diligence Packet", prompt: "Build a Parcel Due Diligence Packet.", type: "due_diligence" },
   { label: "Land Due Diligence Report", prompt: "Build a Land Due Diligence Report.", type: "due_diligence" },
   { label: "Land Opportunity Screener", prompt: "Build a Land Opportunity Screener report.", type: "land_opportunity" },
   { label: "Scenario Comparison", prompt: "Build a scenario comparison dashboard.", type: "scenario" },
@@ -6407,9 +6751,28 @@ const landDueDiligenceChecklist = [
   "Check site dimensions/buildability",
   "Confirm planning cases/permits nearby",
 ];
+const defaultDueDiligenceQuestions = [
+  "Is sewer service available under current utility rules?",
+  "Is system capacity available for the review scenario?",
+  "Is water service available, and which provider should confirm it?",
+  "Does zoning support the intended use?",
+  "Are there known floodplain, wetlands, access, easement, or site constraints?",
+  "Are road frontage, access, or off-site improvements required?",
+  "Are there active or recent planning cases, permits, or subdivision actions nearby?",
+];
 
 const landDueDiligenceSafeUseText =
   "CFS provides screening-level planning and infrastructure intelligence. It does not provide buy/sell guidance, appraisal conclusions, utility service verification, or future-value assurances.";
+const landDueDiligenceWsaccCaveat =
+  "WSACC data supports sewer proximity and subbasin context only. Capacity, water service, and planned extensions were not provided.";
+const landDueDiligencePacketCaveats = [
+  "Screening-level review only.",
+  "Not financial or buy/sell guidance.",
+  "Not an appraisal.",
+  "Not official utility confirmation.",
+  "Not a project approval recommendation.",
+  landDueDiligenceWsaccCaveat,
+];
 
 function buildReportDataAvailability(
   payload: EconomicsPowerBiExportResponse | null,
@@ -6533,7 +6896,7 @@ function reportTypeLabel(type: PowerBiReportType) {
 
 function reportTypeFromPrompt(prompt: string): PowerBiReportType | null {
   const normalized = prompt.toLowerCase();
-  if (normalized.includes("due diligence") || normalized.includes("manual review") || normalized.includes("parcel review")) return "due_diligence";
+  if (normalized.includes("due diligence") || normalized.includes("manual review") || normalized.includes("parcel review") || normalized.includes("parcel packet")) return "due_diligence";
   if (normalized.includes("land opportunity") || normalized.includes("land screener") || normalized.includes("development readiness")) return "land_opportunity";
   if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) return "utility";
   if (normalized.includes("scenario + data") || (normalized.includes("scenario") && normalized.includes("confidence"))) return "scenario_data_confidence";
@@ -6661,9 +7024,12 @@ function buildPowerBiReportPlan(
   }
 
   if (selectedReportType === "due_diligence") {
+    const dueDiligenceTitle = normalized.includes("packet")
+      ? "Parcel Due Diligence Packet"
+      : "Land Due Diligence Report";
     return finalizedPowerBiReportPlan(
       prompt,
-      "Land Due Diligence Report",
+      dueDiligenceTitle,
       `${selectionNote ? `${selectionNote}. ` : ""}Create a manual parcel review watchlist using development-readiness, sewer-proximity proxy, growth pressure, constraints, and next-check fields.`,
       [
         reportPage("Land Due Diligence Screener", "Prioritize rows for manual planning, utility, site, and economics review.", [
@@ -7358,6 +7724,7 @@ function bucketItemFromAskResponse(response: CfsAiSearchResponse): ReportBucketI
 }
 
 function bucketItemText(item: ReportBucketItem) {
+  if (item.due_diligence_packet) return dueDiligencePacketText(item.due_diligence_packet);
   const lines = [
     item.title,
     `Type: ${bucketTypeLabel(item.type)}`,
@@ -7372,6 +7739,7 @@ function bucketItemText(item: ReportBucketItem) {
 }
 
 function bucketTypeLabel(type: ReportBucketItemType) {
+  if (type === "due_diligence_packet") return "due diligence packet";
   return type.replaceAll("_", " ");
 }
 

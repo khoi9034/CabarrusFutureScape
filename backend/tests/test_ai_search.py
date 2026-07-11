@@ -1054,6 +1054,22 @@ def test_ai_search_economics_report_bucket_prompt_routes_to_powerbi_answer() -> 
     assert response.evidence[0].source == "economics_powerbi_export"
 
 
+def test_ai_search_economics_due_diligence_packet_prompt_is_safe() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Generate a due diligence packet for this parcel.",
+        ),
+        _context(),
+    )
+
+    assert "Land Due Diligence Screener" in response.answer
+    assert "Questions to ask" in response.answer
+    assert "WSACC data supports sewer proximity and subbasin context only" in response.answer
+    assert "Generate Due Diligence Packet" in " ".join(response.suggested_actions)
+    assert "buy this" not in response.answer.lower()
+
+
 def test_ai_search_economics_context_uses_cached_economics(monkeypatch) -> None:
     calls = {"count": 0}
 
