@@ -320,14 +320,22 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Land Due Diligence Report" in economics_shell
     assert "Land Review Watchlist" in economics_shell
     assert "Parcel Due Diligence Card" in economics_shell
+    assert "land-due-diligence-steps" in economics_shell
+    assert "Filter" in economics_shell
+    assert "Select" in economics_shell
+    assert "Review" in economics_shell
+    assert "Generate Packet" in economics_shell
+    assert "land-due-diligence-primary-filters" in economics_shell
+    assert "land-due-diligence-advanced-filters" in economics_shell
+    assert "Show advanced filters" in economics_shell
     assert "Generate Due Diligence Packet" in economics_shell
-    assert "Generate Watchlist Due Diligence Packet" in economics_shell
-    assert "Parcel Due Diligence Packet Preview" in economics_shell
+    assert "Generate Watchlist Packet" in economics_shell
+    assert "Due Diligence Packet Preview" in economics_shell
     assert "Add Packet to Report Bucket" in economics_shell
     assert "Send Packet to Print" in economics_shell
     assert "Copy Packet Summary" in economics_shell
     assert "Copy Questions to Ask" in economics_shell
-    assert "Download Packet JSON" in economics_shell
+    assert "Download JSON" in economics_shell
     assert "due_diligence_packet" in economics_shell
     assert "DueDiligencePacketPrintDetails" in economics_shell
     assert "Parcel Due Diligence Packet" in economics_shell
@@ -335,8 +343,11 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Not financial or buy/sell guidance" in economics_shell
     assert "Is sewer service available" in economics_shell
     assert "review priority" in economics_shell
-    assert "Add selected rows to bucket" in economics_shell
-    assert "Send due diligence report to Print" in economics_shell
+    assert "Add selected rows to bucket" not in economics_shell
+    assert "Send due diligence report to Print" not in economics_shell
+    assert "What supports the signal" in economics_shell
+    assert "What could be a problem" in economics_shell
+    assert "What to verify next" in economics_shell
     assert "Verify utility service/capacity with utility provider" in economics_shell
     assert "buy this" not in economics_shell.lower()
     assert ("guaranteed " + "return") not in economics_shell.lower()
@@ -353,6 +364,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "tools-chart-builder" in economics_shell
     assert "tools-chart-templates" in economics_shell
     assert "tools-report-canvas" in economics_shell
+    assert "tools-due-diligence" in economics_shell
     assert "tools-advanced" in economics_shell
     assert "tools-final-output" in economics_shell
     assert "Overview -> Power BI & Tools -> Economic Dashboard -> Print" in ask_service

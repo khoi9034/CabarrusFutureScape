@@ -86,11 +86,14 @@ export const askCfsEconomicsWorkspacePrompts = [
 ] as const;
 
 export const askCfsEconomicsPowerBiToolPrompts = [
-  "Build me a Power BI report.",
+  "Which parcels should I review first?",
   "Generate a due diligence packet.",
+  "What should I ask utilities?",
+  "What are the red flags?",
+  "What should I verify before considering this parcel?",
+  "Build me a Power BI report.",
   "Create a chart of opportunity classes.",
   "Build a report for underbuilt parcels.",
-  "What are the red flags?",
   "Build a Land Due Diligence Report.",
   "Build a Land Opportunity Screener report.",
   "Make a scenario comparison page.",
@@ -699,6 +702,7 @@ function isEconomicsPowerBiQuery(query: string) {
     "parcel review",
     "due diligence packet",
     "watchlist due diligence",
+    "which parcels should i review first",
     "what should i verify",
     "why did this parcel surface",
     "questions should i ask",
@@ -724,6 +728,7 @@ function isEconomicsDueDiligencePacketQuery(query: string) {
   return [
     "due diligence packet",
     "watchlist due diligence",
+    "which parcels should i review first",
     "what should i verify",
     "why did this parcel surface",
     "questions should i ask",
@@ -911,7 +916,7 @@ function demoEconomicsDueDiligencePacketAnswer(
     related_layers: ["Power BI & Tools", "Report Bucket", "Print"],
     suggested_actions: [
       "Select one candidate and choose Generate Due Diligence Packet.",
-      "Select multiple watchlist rows and choose Generate Watchlist Due Diligence Packet.",
+      "Select multiple watchlist rows and choose Generate Watchlist Packet.",
       "Add the packet to the Report Bucket or send it to Print.",
     ],
   };
