@@ -41,6 +41,11 @@ Model-ready fields include encoded sewer proxy class, utility readiness class,
 proxy confidence, and interaction placeholders for permit pressure, underbuilt
 status, zoning support, corridor access, flood constraint, and school pressure.
 
+These fields are model-ready, but the current-best evaluated internal model does
+not select the WSACC utility proxy group as a predictive driver. The current-best
+variant is `transportation_plus_tax_value_only`; WSACC remains a due-diligence
+and development-readiness screening layer.
+
 `parcel_development_screening_output` also feeds the CFS Economics Land
 Opportunity Screener when the full parcel economics query is unavailable. The
 Power BI `parcel_economic_signal_fact` export includes the safe screening
@@ -75,3 +80,9 @@ readiness signal`.
 
 Public demo outputs use aggregated/sanitized proxy classes and summary fields.
 Raw WSACC source files are not committed and `data/WSACC` remains ignored.
+
+## Model Evaluation Link
+
+See `docs/model_evaluation_summary.md` for the current comparison table and the
+safe interpretation of WSACC as screening context rather than a proven model
+accuracy improvement.

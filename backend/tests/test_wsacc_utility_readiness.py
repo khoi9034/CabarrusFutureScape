@@ -211,5 +211,23 @@ def test_planning_ui_surfaces_wsacc_in_explore_and_model_lab() -> None:
 
     assert "UtilityReadinessProxyPanel" in source
     assert "Utility + Land Opportunity Features in Model" in source
+    assert "Model Evaluation Summary" in source
+    assert "Current-best variant: {developmentModelLabSummary.bestAblationVariant}" in source
+    assert "WSACC utility proxy is retained for due diligence" in source
+    assert "Predictive model driver: no, not currently selected." in source
+    assert "Why WSACC Still Matters" in source
     assert "LandOpportunityScreenerPanel" in source
     assert "scripts/build_parcel_wsacc_features.py --apply" in source
+
+
+def test_economics_land_due_diligence_screener_shows_model_status() -> None:
+    source = (REPO_ROOT / "src/components/economics/EconomicsShell.tsx").read_text(
+        encoding="utf-8",
+    )
+
+    assert "Land Due Diligence Screener" in source
+    assert "Current-best predictive variant" in source
+    assert "transportation_plus_tax_value_only" in source
+    assert "Utility proxy status" in source
+    assert "Due diligence layer" in source
+    assert "WSACC utility proxy was not selected in the current-best predictive" in source

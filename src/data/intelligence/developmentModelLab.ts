@@ -21,9 +21,38 @@ export const developmentModelLabSummary = {
   ],
   bestAblationVariant: "transportation_plus_tax_value_only",
   currentBestInternalVariant: "Zoning + Transportation + Tax/Value",
+  currentBestReason:
+    "Selected because it produced the best PR-AUC and top-5% lift among tested internal variants.",
+  evaluationRows: [
+    {
+      interpretation: "baseline screen",
+      liftTop5: "3.889837",
+      prAuc: "0.082744",
+      variant: "Transportation baseline",
+    },
+    {
+      interpretation: "current-best internal variant",
+      liftTop5: "4.051123",
+      prAuc: "0.137928",
+      variant: "Tax/value only",
+    },
+    {
+      interpretation: "mixed; retained for due diligence",
+      liftTop5: "3.590984",
+      prAuc: "0.089515",
+      variant: "Utility proxy only",
+    },
+    {
+      interpretation: "not selected",
+      liftTop5: "0.711556",
+      prAuc: "0.071244",
+      variant: "Full enhanced bundle",
+    },
+  ],
   excludedFeatureGroups: [
     "Accela plan reviews",
     "Central Area Plan layers",
+    "WSACC utility proxy",
     "current-context metadata flags",
   ],
   featureRows: "1,430,221",
@@ -31,7 +60,11 @@ export const developmentModelLabSummary = {
     "historical zoning",
     "transportation accessibility",
     "tax/value enrichment",
-    "WSACC utility readiness proxy in model-ready table",
+  ],
+  contextOnlyFeatureGroups: [
+    "WSACC utility-readiness proxy",
+    "Accela plan reviews",
+    "Central Area Plan layers",
   ],
   historicalOutcome: "new construction permits",
   modelName: "Development Model",
@@ -54,10 +87,11 @@ export const developmentModelLabSummary = {
     "parcel-year feature matrix",
     "historical zoning",
     "transportation accessibility / STIP / AADT",
-    "WSACC sewer-proximity proxy features",
     "tax/value enrichment",
     "model QA and governance outputs",
   ],
+  wsaccInterpretation:
+    "WSACC sewer proximity did not improve the current-best historical prediction model, but it remains important for development-readiness review and utility due diligence.",
   whyNotPublicFacing: [
     "exact probability calibration is weak and still under review",
     "official utility capacity is missing",

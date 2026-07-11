@@ -267,8 +267,12 @@ python scripts/build_parcel_wsacc_features.py --apply
 The derived tables power `/wsacc/statistics`, parcel utility context, Indicator
 Center utility readiness, model-ready feature tables, CFS Economics safe utility
 fields, the Economics Land Opportunity Screener, and Power BI CSV/JSON exports.
-See `docs/wsacc_model_features.md` for thresholds, projection assumptions, and
-safe-use language.
+They do not mean WSACC improved the current-best predictive model. The evaluated
+current-best internal variant remains `transportation_plus_tax_value_only`;
+WSACC stays as a due-diligence and development-readiness proxy layer. See
+`docs/wsacc_model_features.md` and `docs/model_evaluation_summary.md` for
+thresholds, projection assumptions, model-evaluation results, and safe-use
+language.
 
 Regenerate the static portfolio data locally with:
 
@@ -2819,6 +2823,12 @@ Excluded for now:
 
 These excluded groups remain useful as planning context and QA inputs, but they
 are not part of the current best internal ranking variant.
+
+WSACC sewer-proximity proxy stays visible in Explore Countywide, Indicator
+Center, CFS Economics, Power BI exports, and the Land Due Diligence Screener
+because it supports utility due diligence. It should not be described as a
+proven model accuracy improvement unless a future governed retraining run shows
+that result.
 
 Safety flags remain:
 

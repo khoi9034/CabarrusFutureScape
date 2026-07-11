@@ -2980,6 +2980,30 @@ function LandDueDiligenceScreener({
       <div className="rounded-xl border border-[var(--econ-gold)]/30 bg-[var(--econ-gold)]/[0.08] px-3 py-2 text-sm leading-6 text-[#f7dc93]">
         {landDueDiligenceSafeUseText}
       </div>
+      <div className="mt-4 rounded-xl border border-[var(--econ-border)] bg-black/20 p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+          Model status
+        </p>
+        <div className="mt-3 grid gap-3 md:grid-cols-3">
+          <MiniMetric
+            label="Current-best predictive variant"
+            value="transportation_plus_tax_value_only"
+          />
+          <MiniMetric
+            label="Utility proxy status"
+            value="Due diligence layer"
+          />
+          <MiniMetric
+            label="Use"
+            value="Review candidate screening"
+          />
+        </div>
+        <p className="mt-3 text-xs leading-5 text-[var(--econ-muted)]">
+          WSACC utility proxy was not selected in the current-best predictive
+          model. It remains useful for sewer-proximity review, capacity
+          follow-up, and development-readiness screening.
+        </p>
+      </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <MiniMetric label="Candidate rows" value={formatNumber(filteredRows.length)} />
         <MiniMetric label="Selected for review" value={formatNumber(selectedRows.length)} />

@@ -429,6 +429,39 @@ def test_ai_search_dashboard_action_mappings() -> None:
         assert highlight in response.dashboard_actions.highlight_kpis
 
 
+def test_ai_search_wsacc_model_evaluation_answer_is_safe() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(query="Did WSACC improve the model?"),
+        _context(),
+    )
+
+    text = response.answer.lower()
+    assert response.dashboard_actions.focus_domain == "model_lab"
+    assert "transportation_plus_tax_value_only" in response.answer
+    assert "utility proxy only" in text
+    assert "not selected" in text
+    assert "due-diligence layer" in text
+    assert "production-ready" not in text or "not production-ready" in text
+    assert "raw model values" in text
+
+
+def test_ai_search_economics_wsacc_model_evaluation_answer_is_safe() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Did WSACC improve the model?",
+        ),
+        _context(),
+    )
+
+    text = response.answer.lower()
+    assert response.domains == ["economics", "model_lab"]
+    assert "transportation_plus_tax_value_only" in response.answer
+    assert "did not improve top-k screening enough" in text
+    assert "buy/sell guidance" in text
+    assert "confirmed capacity" not in text
+
+
 def test_ai_search_provider_missing_model_falls_back() -> None:
     service = CfsAiSearchService(
         _settings(cfs_ai_enabled=True, cfs_ai_provider="openai"),

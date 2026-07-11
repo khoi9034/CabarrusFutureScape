@@ -1095,6 +1095,22 @@ function UtilityFeaturesInModelPanel({
       </div>
 
       <p className="mt-3 text-xs leading-5 text-slate-300">{status}</p>
+      <div className="mt-3 rounded-md border border-white/10 bg-black/18 px-3 py-2">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+          Why WSACC Still Matters
+        </p>
+        <p className="mt-1 text-[11px] leading-5 text-slate-300">
+          {developmentModelLabSummary.wsaccInterpretation} Sewer proximity,
+          manhole proximity, and subbasin context help identify where growth
+          pressure warrants utility due diligence.
+        </p>
+        <div className="mt-2 grid gap-1 text-[11px] leading-5 text-slate-400 sm:grid-cols-2">
+          <span>Predictive model driver: no, not currently selected.</span>
+          <span>Due diligence screen: yes.</span>
+          <span>Capacity confirmation: not provided.</span>
+          <span>Water service and planned extensions: not provided.</span>
+        </div>
+      </div>
       <p className="mt-2 rounded-md border border-[#d8b86a]/20 bg-[#d8b86a]/[0.07] px-3 py-2 text-[11px] leading-5 text-[#f6d98e]">
         WSACC features represent sewer proximity and basin context only. They do
         not confirm water service, sewer capacity, approval, or investment return.
@@ -1785,7 +1801,11 @@ function ModelLabPanel({
               {developmentModelLabSummary.currentBestInternalVariant}
             </h4>
             <p className="mt-2 text-xs leading-5 text-slate-400">
-              Target: {developmentModelLabSummary.target}
+              Current-best internal variant:{" "}
+              {developmentModelLabSummary.bestAblationVariant}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-slate-400">
+              {developmentModelLabSummary.currentBestReason}
             </p>
           </div>
           <span className="shrink-0 rounded-full border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-[10px] font-semibold uppercase text-[#f0cd79]">
@@ -1806,6 +1826,8 @@ function ModelLabPanel({
           />
         </div>
       </div>
+
+      <ModelLabEvaluationSummaryPanel />
 
       <UtilityFeaturesInModelPanel featureSummary={featureSummary} />
 
@@ -1886,6 +1908,56 @@ function ModelLabPanel({
         </div>
       </div>
     </section>
+  );
+}
+
+function ModelLabEvaluationSummaryPanel() {
+  return (
+    <div className="mt-3 rounded-lg border border-[#d8b86a]/22 bg-[#d8b86a]/[0.065] p-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">
+            Model Evaluation Summary
+          </p>
+          <h4 className="mt-1 text-sm font-semibold text-white">
+            Current-best variant: {developmentModelLabSummary.bestAblationVariant}
+          </h4>
+        </div>
+        <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold uppercase text-slate-300">
+          Not production-ready
+        </span>
+      </div>
+      <p className="mt-2 text-xs leading-5 text-slate-300">
+        WSACC utility proxy is retained for due diligence, not selected in the
+        current-best predictive model.
+      </p>
+      <div className="mt-3 overflow-hidden rounded-md border border-white/10">
+        <table className="w-full text-left text-[11px]">
+          <thead className="bg-black/24 text-[10px] uppercase tracking-[0.12em] text-slate-500">
+            <tr>
+              <th className="px-3 py-2">Variant</th>
+              <th className="px-3 py-2">PR-AUC</th>
+              <th className="px-3 py-2">Lift @ Top 5%</th>
+              <th className="px-3 py-2">Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            {developmentModelLabSummary.evaluationRows.map((row) => (
+              <tr className="border-t border-white/10" key={row.variant}>
+                <td className="px-3 py-2 font-semibold text-slate-200">
+                  {row.variant}
+                </td>
+                <td className="px-3 py-2 text-slate-300">{row.prAuc}</td>
+                <td className="px-3 py-2 text-slate-300">{row.liftTop5}</td>
+                <td className="px-3 py-2 text-slate-400">
+                  {row.interpretation}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 

@@ -158,8 +158,22 @@ DOMAIN_KEYWORDS: list[tuple[CfsAiDomain, tuple[str, ...]]] = [
     ("flood", ("flood", "fema", "floodplain", "floodway", "hazard")),
     ("permits", ("permit", "development", "growth", "activity", "trend")),
     ("transportation", ("transportation", "traffic", "road", "stip", "aadt")),
+    (
+        "model_lab",
+        (
+            "model",
+            "research",
+            "signal",
+            "lab",
+            "prediction",
+            "predictive",
+            "current-best",
+            "current best",
+            "production-ready",
+            "production ready",
+        ),
+    ),
     ("utilities", ("utility", "utilities", "wsacc", "water", "sewer")),
-    ("model_lab", ("model", "research", "signal", "lab")),
     ("data_readiness", ("missing", "data", "coverage", "readiness", "needed")),
     ("zoning", ("zoning", "land use", "rezoning", "planning")),
     ("methodology", ("method", "explain", "caveat", "limitation")),
@@ -571,6 +585,8 @@ def _economics_answer(
     readiness = economics.get("data_readiness", []) if isinstance(economics, dict) else []
     if request.request_type == "powerbi_report_plan":
         return _economics_powerbi_answer(request, context)
+    if _is_economics_model_evaluation_query(request.query):
+        return _economics_model_evaluation_answer(request, context)
     if _is_economics_walkthrough_query(request.query):
         return _economics_walkthrough_answer(request, context)
     if _is_economics_workspace_query(request.query):
@@ -635,7 +651,7 @@ def _economics_answer(
         ),
         (
             "Fiscal / service interpretation",
-            "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as an investment-ready candidate.",
+            "Compare tax-base opportunity with observed permit activity, floodplain review, school pressure, utility readiness, and transportation context before treating any parcel as ready for manual due diligence.",
         ),
         (
             "Inspect next",
@@ -722,13 +738,60 @@ def _is_economics_walkthrough_query(query: str) -> bool:
 
 def _is_fast_economics_guidance_query(query: str) -> bool:
     return (
-        _is_economics_walkthrough_query(query)
+        _is_economics_model_evaluation_query(query)
+        or _is_economics_walkthrough_query(query)
         or _is_economics_workspace_query(query)
         or _is_economics_print_query(query)
         or _is_economics_segment_query(query)
         or _is_economics_dashboard_query(query)
         or _is_economics_powerbi_query(query)
         or _is_economics_scenario_query(query)
+    )
+
+
+def _is_economics_model_evaluation_query(query: str) -> bool:
+    normalized = query.lower()
+    return (
+        ("wsacc" in normalized or "utility proxy" in normalized)
+        and any(term in normalized for term in ("model", "prediction", "predictive", "improve", "best", "production", "invest"))
+    ) or "transportation_plus_tax_value_only" in normalized
+
+
+def _economics_model_evaluation_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+) -> CfsAiSearchResponse:
+    answer = _briefing(
+        (
+            "Direct answer",
+            "WSACC utility proxy did not improve top-k screening enough to be selected in the current-best internal predictive model.",
+        ),
+        (
+            "Current-best model",
+            "The current-best internal variant is transportation_plus_tax_value_only because it had the best PR-AUC and top-5% lift among tested variants.",
+        ),
+        (
+            "Why keep WSACC",
+            "WSACC remains useful as a sewer-proximity and utility-readiness proxy for due diligence. It helps identify where growth pressure should be checked against utility feasibility, but it does not confirm capacity or service.",
+        ),
+        (
+            "Safe use",
+            "Use CFS Economics for screening-level review, Power BI context, and report evidence. Do not treat it as buy/sell guidance, utility service confirmation, or production-ready prediction.",
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics", "model_lab"],
+        request.mode,
+        [
+            _evidence(
+                "Model evaluation",
+                "Tax/value only PR-AUC 0.137928 and lift at top 5% 4.051123; utility proxy only PR-AUC 0.089515 and lift at top 5% 3.590984.",
+                "docs/model_evaluation_summary.md",
+            ),
+        ],
+        ["Open Model Lab -> Model Evaluation Summary, then use Land Due Diligence Screener for WSACC context."],
     )
 
 
@@ -2125,25 +2188,27 @@ def _model_answer(
     answer = _briefing(
         (
             "Executive summary",
-            "Model Lab is internal research context. It compares relative research signals and planning features; it does not make official determinations.",
+            "The current-best internal model variant is transportation_plus_tax_value_only. It beat the tested alternatives on PR-AUC and top-5% lift, but CFS still treats Model Lab as internal research only.",
         ),
         (
             "Key findings",
             _bullets(
                 [
-                    "Use bands such as Very Strong Research Signal or Moderate Research Signal as review prompts.",
-                    "Factors can include zoning context, transportation access, observed permit activity, parcel context, and data readiness.",
+                    "Transportation baseline: PR-AUC 0.082744; lift at top 5% 3.889837.",
+                    "Tax/value only: PR-AUC 0.137928; lift at top 5% 4.051123; current-best internal variant.",
+                    "Utility proxy only: PR-AUC 0.089515; lift at top 5% 3.590984; useful context, not selected.",
+                    "Full enhanced bundle: PR-AUC 0.071244; lift at top 5% 0.711556; not selected.",
                     "No exact probabilities, raw model values, or official classifications are shown.",
                 ]
             ),
         ),
         (
-            "Planning interpretation",
-            "Treat Model Lab as a way to prioritize questions, not as a decision engine. Always verify source records before drawing conclusions.",
+            "WSACC interpretation",
+            "WSACC sewer proximity did not improve top-k screening enough to be selected in the current-best predictive model. Keep it as a utility-readiness proxy and due-diligence layer because sewer proximity, manhole proximity, and subbasin context still matter for feasibility review.",
         ),
         (
             "Inspect next",
-            _bullets(["Model Lab Research Signals.", "Methodology.", "Related parcel, zoning, transportation, and permit layers."]),
+            _bullets(["Model Evaluation Summary.", "Why WSACC Still Matters.", "Land Due Diligence Screener.", "Verify utility service/capacity with the utility provider."]),
         ),
     )
     return _response(
@@ -2154,7 +2219,7 @@ def _model_answer(
         [
             _evidence(
                 "Model status",
-                "Current public-facing status is internal research only and not production-ready.",
+                "Current-best internal variant is transportation_plus_tax_value_only; production-ready remains false.",
                 "model_status",
             ),
         ],
@@ -2245,7 +2310,7 @@ def _utility_answer(request, context, domains):
     basins = int(summary.get("sewer_subbasins") or 0)
     answer = (
         f"CFS has inventoried {sewer_lines:,} WSACC sewer pipe segments and {basins:,} sewer subbasins. "
-        "Use them as screening-level sewer proxy context; parcel service availability, capacity, planned extensions, and CIP timing still need official WSACC verification."
+        "Use them as screening-level sewer proxy context and due-diligence evidence. WSACC proxy fields were not selected in the current-best predictive model, and parcel service availability, capacity, planned extensions, and CIP timing still need official WSACC verification."
         if sewer_lines or basins
         else "Utility readiness is proxy-only until true capacity data is received. Proximity does not confirm available capacity."
     )

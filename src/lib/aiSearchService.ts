@@ -174,7 +174,7 @@ async function searchDemoCfsAi(
                 : primaryDomain === "utilities"
                   ? demoSimpleAnswer(
                       "Utility Readiness",
-                      "Utility readiness remains a data coverage item unless official utility capacity is available. Proxy context does not confirm capacity.",
+                      "Utility readiness remains a data coverage item unless official utility capacity is available. WSACC proxy fields support due diligence, but they were not selected in the current-best predictive model.",
                       "Review Data Still Needed and request official utility capacity fields.",
                       context,
                       domains,
@@ -206,6 +206,9 @@ async function demoEconomicsAnswer(
   const economics = await getDemoEconomicsIntelligence();
   if (request?.request_type === "powerbi_report_plan") {
     return demoEconomicsPowerBiAnswer(await getDemoEconomicsPowerBiExport(), request.query);
+  }
+  if (isEconomicsModelEvaluationQuery(request?.query ?? "")) {
+    return demoEconomicsModelEvaluationAnswer(economics.as_of);
   }
   if (isEconomicsWalkthroughQuery(request?.query ?? "")) {
     return demoEconomicsWalkthroughAnswer(economics.as_of);
@@ -363,6 +366,50 @@ function isEconomicsWalkthroughQuery(query: string) {
     "how do i use cfs economics",
     "what should i inspect first",
   ].some((phrase) => normalized.includes(phrase));
+}
+
+function isEconomicsModelEvaluationQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return (
+    ((normalized.includes("wsacc") || normalized.includes("utility proxy")) &&
+      ["model", "prediction", "predictive", "improve", "best", "production", "invest"].some((term) =>
+        normalized.includes(term),
+      )) ||
+    normalized.includes("transportation_plus_tax_value_only")
+  );
+}
+
+function demoEconomicsModelEvaluationAnswer(asOf: string | null): CfsAiSearchResponse {
+  return baseDemoResponse(
+    briefing(
+      [
+        "Direct answer",
+        "WSACC utility proxy did not improve top-k screening enough to be selected in the current-best internal predictive model.",
+      ],
+      [
+        "Current-best model",
+        "The current-best internal variant is transportation_plus_tax_value_only because it had the best PR-AUC and top-5% lift among tested variants.",
+      ],
+      [
+        "Why keep WSACC",
+        "WSACC remains useful as a sewer-proximity and utility-readiness proxy for due diligence. It does not confirm capacity or service.",
+      ],
+      [
+        "Safe use",
+        "Use CFS Economics for screening-level review, Power BI context, and report evidence; not buy/sell guidance or production-ready prediction.",
+      ],
+    ),
+    ["economics", "model_lab"],
+    asOf,
+    [
+      evidence(
+        "Model evaluation",
+        "Tax/value only PR-AUC 0.137928 and lift at top 5% 4.051123; utility proxy only PR-AUC 0.089515 and lift at top 5% 3.590984.",
+        "docs/model_evaluation_summary.md",
+      ),
+    ],
+    ["Open Model Lab -> Model Evaluation Summary, then use Land Due Diligence Screener for WSACC context."],
+  );
 }
 
 function isEconomicsDashboardQuery(query: string) {
@@ -1602,21 +1649,23 @@ function demoModelAnswer(context: DemoAiContext, domains: CfsAiDomain[]) {
     briefing(
       [
         "Executive summary",
-        "Model Lab is internal research context. The public demo shows relative research signals and hides exact probabilities, raw model values, and official classifications.",
+        "The current-best internal model variant is transportation_plus_tax_value_only. It beat the tested alternatives on PR-AUC and top-5% lift, but CFS still treats Model Lab as internal research only.",
       ],
       [
         "Key findings",
         bullets([
-          "Use research bands as review prompts, not decisions.",
-          "Factors can include zoning context, transportation access, observed permit activity, parcel context, and data readiness.",
+          "Transportation baseline: PR-AUC 0.082744; lift at top 5% 3.889837.",
+          "Tax/value only: PR-AUC 0.137928; lift at top 5% 4.051123; current-best internal variant.",
+          "Utility proxy only: PR-AUC 0.089515; lift at top 5% 3.590984; useful context, not selected.",
+          "Full enhanced bundle: PR-AUC 0.071244; lift at top 5% 0.711556; not selected.",
           "Production ready remains false in the cached demo extract.",
         ]),
       ],
       [
-        "Planning interpretation",
-        "Use Model Lab to prioritize questions, then verify source records before drawing conclusions.",
+        "WSACC interpretation",
+        "WSACC sewer proximity did not improve top-k screening enough to be selected in the current-best predictive model. Keep it as a utility-readiness proxy and due-diligence layer.",
       ],
-      ["Inspect next", bullets(["Model Lab Research Signals.", "Methodology.", "Related parcel and permit layers."])],
+      ["Inspect next", bullets(["Model Evaluation Summary.", "Why WSACC Still Matters.", "Land Due Diligence Screener.", "Verify utility service/capacity with the utility provider."])],
     ),
     domains,
     context.manifest.generated_at,
@@ -1803,9 +1852,20 @@ function classifyDemoDomains(query: string): CfsAiDomain[] {
   add("flood", ["flood", "fema", "floodplain", "floodway"]);
   add("permits", ["permit", "development", "growth", "trend", "activity"]);
   add("transportation", ["transportation", "traffic", "road", "stip", "aadt"]);
+  add("model_lab", [
+    "model",
+    "research",
+    "signal",
+    "lab",
+    "prediction",
+    "predictive",
+    "current-best",
+    "current best",
+    "production-ready",
+    "production ready",
+  ]);
   add("utilities", ["utility", "utilities", "wsacc", "water", "sewer"]);
   add("zoning", ["zoning", "land use", "rezoning", "planning"]);
-  add("model_lab", ["model", "research", "signal", "lab"]);
   add("data_readiness", ["missing", "coverage", "data", "readiness"]);
   add("methodology", ["method", "explain", "caveat", "limitation"]);
   return domains.slice(0, 3).length ? domains.slice(0, 3) : ["general"];
@@ -1926,7 +1986,7 @@ function selectedSignalMeaning(domain: string): [string, string, string] {
     return [
       "Utility readiness shows where CFS has only proxy context or where official capacity data is still needed.",
       "Missing service, committed capacity, and update-date fields limit infrastructure readiness conclusions.",
-      "Proxy proximity does not confirm available capacity.",
+      "Proxy proximity supports due diligence but does not confirm capacity or improve the current-best model by itself.",
     ];
   }
   if (normalized === "transportation" || normalized === "transportation_context") {
@@ -1938,8 +1998,8 @@ function selectedSignalMeaning(domain: string): [string, string, string] {
   }
   if (normalized === "model_lab" || normalized === "model_research") {
     return [
-      "Model Lab shows relative research signal only and remains internal research context.",
-      "It can help prioritize questions, but source records and staff review remain the evidence base.",
+      "Model Lab current-best internal variant is transportation_plus_tax_value_only.",
+      "WSACC utility proxy is retained for due diligence, not selected as a current-best predictive feature group.",
       "No exact probabilities, raw model values, or official model classes are shown.",
     ];
   }
