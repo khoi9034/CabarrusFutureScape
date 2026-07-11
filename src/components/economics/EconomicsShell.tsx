@@ -671,6 +671,13 @@ function PowerBiToolsPage({
         payload={powerBiPayload}
         signals={signals}
       />
+      <LandDueDiligenceScreener
+        onAddReportBucketItem={onAddReportBucketItem}
+        onNavigate={onNavigate}
+        onToggleSignal={onToggleSignal}
+        selectedSignalIds={selectedSignalIds}
+        signals={signals}
+      />
       <ReportBucketPanel
         items={reportBucketItems}
         onClear={onClearReportBucket}
@@ -2887,6 +2894,271 @@ function PowerBiReportGenerator({
   );
 }
 
+function LandDueDiligenceScreener({
+  onAddReportBucketItem,
+  onNavigate,
+  onToggleSignal,
+  selectedSignalIds,
+  signals,
+}: {
+  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onNavigate: (section: "print") => void;
+  onToggleSignal: (signal: EconomicsParcelSignal) => void;
+  selectedSignalIds: string[];
+  signals: EconomicsParcelSignal[];
+}) {
+  const rows = useMemo(() => landDueDiligenceRows(signals), [signals]);
+  const [readiness, setReadiness] = useState("Priority candidates");
+  const [landClass, setLandClass] = useState("All");
+  const [sewerClass, setSewerClass] = useState("All");
+  const [utilityClass, setUtilityClass] = useState("All");
+  const [growthBand, setGrowthBand] = useState("All");
+  const [acreageBand, setAcreageBand] = useState("All");
+  const [floodBand, setFloodBand] = useState("All");
+  const [economicBand, setEconomicBand] = useState("All");
+  const [confidence, setConfidence] = useState("All");
+  const [flag, setFlag] = useState("All");
+  const [geography, setGeography] = useState("All");
+  const filteredRows = rows.filter((signal) => {
+    const matchesReadiness =
+      readiness === "All" ||
+      (readiness === "Priority candidates"
+        ? landDueDiligencePriorityBands.includes(valueText(signal.development_readiness_band))
+        : valueText(signal.development_readiness_band) === readiness);
+    return (
+      matchesReadiness &&
+      matchesFilter(signal.land_opportunity_class, landClass) &&
+      matchesFilter(signal.sewer_proxy_class, sewerClass) &&
+      matchesFilter(signal.utility_readiness_proxy_class, utilityClass) &&
+      matchesFilter(signal.growth_pressure_band, growthBand) &&
+      matchesFilter(acreageBandForSignal(signal), acreageBand) &&
+      matchesFilter(signal.flood_constraint_band, floodBand) &&
+      matchesFilter(signal.economic_opportunity_band, economicBand) &&
+      matchesFilter(signal.data_confidence ?? signal.economic_data_confidence, confidence) &&
+      matchesArrayFilter(signal.due_diligence_flags, flag) &&
+      matchesFilter(signal.sewer_basin_label ?? signal.geography_label, geography)
+    );
+  });
+  const selectedRows = filteredRows.filter((signal) => selectedSignalIds.includes(signal.parcel_id));
+  const activeReviewSignal = selectedRows[0] ?? filteredRows[0] ?? rows[0] ?? null;
+  const selectedContent = selectedRows.length
+    ? landDueDiligenceWatchlistText(selectedRows)
+    : "No land due diligence watchlist rows are selected.";
+  const addSelectedRowsToBucket = () => {
+    if (!selectedRows.length) return;
+    onAddReportBucketItem({
+      caveats: [landDueDiligenceSafeUseText],
+      content: selectedContent,
+      id: `land-due-diligence-watchlist-${selectedRows.map((row) => row.parcel_id).join("-")}`,
+      related_tables: ["parcel_economic_signal_fact"],
+      source_page: "Power BI & Tools",
+      summary: `${selectedRows.length} selected land screening rows for manual review.`,
+      title: "Land Due Diligence Watchlist",
+      type: "evidence_pack",
+    });
+  };
+  const addReviewCardToBucket = () => {
+    if (!activeReviewSignal) return;
+    onAddReportBucketItem(landDueDiligenceBucketItem(activeReviewSignal));
+  };
+  const sendToPrint = () => {
+    if (selectedRows.length) {
+      addSelectedRowsToBucket();
+    } else if (activeReviewSignal) {
+      onAddReportBucketItem(landDueDiligenceBucketItem(activeReviewSignal));
+    }
+    onNavigate("print");
+  };
+
+  return (
+    <EconPanel
+      description="Build a parcel watchlist for manual planning, utility, site, and economics review."
+      kicker="Internal screening"
+      title="Land Due Diligence Screener"
+      tourId="land-due-diligence-screener"
+    >
+      <div className="rounded-xl border border-[var(--econ-gold)]/30 bg-[var(--econ-gold)]/[0.08] px-3 py-2 text-sm leading-6 text-[#f7dc93]">
+        {landDueDiligenceSafeUseText}
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <MiniMetric label="Candidate rows" value={formatNumber(filteredRows.length)} />
+        <MiniMetric label="Selected for review" value={formatNumber(selectedRows.length)} />
+        <MiniMetric label="Sewer proxy classes" value={formatNumber(uniqueValues(filteredRows.map((row) => row.sewer_proxy_class)).length)} />
+        <MiniMetric label="Data confidence bands" value={formatNumber(uniqueValues(filteredRows.map((row) => row.data_confidence ?? row.economic_data_confidence)).length)} />
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <ScenarioSelect label="Development-readiness" onChange={setReadiness} options={["Priority candidates", "All", ...uniqueValues(rows.map((row) => row.development_readiness_band))]} value={readiness} />
+        <ScenarioSelect label="Land opportunity class" onChange={setLandClass} options={["All", ...uniqueValues(rows.map((row) => row.land_opportunity_class))]} value={landClass} />
+        <ScenarioSelect label="Sewer proxy class" onChange={setSewerClass} options={["All", ...uniqueValues(rows.map((row) => row.sewer_proxy_class))]} value={sewerClass} />
+        <ScenarioSelect label="Utility proxy class" onChange={setUtilityClass} options={["All", ...uniqueValues(rows.map((row) => row.utility_readiness_proxy_class))]} value={utilityClass} />
+        <ScenarioSelect label="Growth pressure" onChange={setGrowthBand} options={["All", ...uniqueValues(rows.map((row) => row.growth_pressure_band))]} value={growthBand} />
+        <ScenarioSelect label="Acreage band" onChange={setAcreageBand} options={["All", ...uniqueValues(rows.map(acreageBandForSignal))]} value={acreageBand} />
+        <ScenarioSelect label="Flood constraint" onChange={setFloodBand} options={["All", ...uniqueValues(rows.map((row) => row.flood_constraint_band))]} value={floodBand} />
+        <ScenarioSelect label="Economic opportunity" onChange={setEconomicBand} options={["All", ...uniqueValues(rows.map((row) => row.economic_opportunity_band))]} value={economicBand} />
+        <ScenarioSelect label="Data confidence" onChange={setConfidence} options={["All", ...uniqueValues(rows.map((row) => row.data_confidence ?? row.economic_data_confidence))]} value={confidence} />
+        <ScenarioSelect label="Due diligence flag" onChange={setFlag} options={["All", ...uniqueValues(rows.flatMap((row) => signalListValues(row.due_diligence_flags)))]} value={flag} />
+        <ScenarioSelect label="Geography / subbasin" onChange={setGeography} options={["All", ...uniqueValues(rows.map((row) => row.sewer_basin_label ?? row.geography_label))]} value={geography} />
+        <button
+          className="self-end rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+          onClick={() => {
+            setReadiness("Priority candidates");
+            setLandClass("All");
+            setSewerClass("All");
+            setUtilityClass("All");
+            setGrowthBand("All");
+            setAcreageBand("All");
+            setFloodBand("All");
+            setEconomicBand("All");
+            setConfidence("All");
+            setFlag("All");
+            setGeography("All");
+          }}
+          type="button"
+        >
+          Reset filters
+        </button>
+      </div>
+      <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.65fr)]">
+        <div>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base font-semibold text-[var(--econ-text)]">Land Review Watchlist</h3>
+              <p className="mt-1 text-xs text-[var(--econ-muted)]">Select rows to save to the Report Bucket or Print snapshot.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!selectedRows.length} onClick={addSelectedRowsToBucket} type="button">
+                Add selected rows to bucket
+              </button>
+              <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={sendToPrint} type="button">
+                Send due diligence report to Print
+              </button>
+            </div>
+          </div>
+          <LandDueDiligenceTable
+            onToggleSignal={onToggleSignal}
+            rows={filteredRows}
+            selectedSignalIds={selectedSignalIds}
+          />
+        </div>
+        <ParcelDueDiligenceCard
+          onAddToBucket={addReviewCardToBucket}
+          signal={activeReviewSignal}
+        />
+      </div>
+    </EconPanel>
+  );
+}
+
+function LandDueDiligenceTable({
+  onToggleSignal,
+  rows,
+  selectedSignalIds,
+}: {
+  onToggleSignal: (signal: EconomicsParcelSignal) => void;
+  rows: EconomicsParcelSignal[];
+  selectedSignalIds: string[];
+}) {
+  if (!rows.length) {
+    return <p className="rounded-xl border border-dashed border-[var(--econ-border)] px-3 py-4 text-sm text-[var(--econ-muted)]">No rows match the current due diligence filters.</p>;
+  }
+  return (
+    <div className="max-h-[34rem] overflow-auto rounded-xl border border-[var(--econ-border)]">
+      <table className="w-full min-w-[1120px] border-separate border-spacing-0 text-left text-xs">
+        <thead className="sticky top-0 z-10 bg-[#171a20] text-[10px] uppercase tracking-[0.12em] text-[var(--econ-muted)]">
+          <tr>
+            <th className="px-3 py-2">Select</th>
+            <th className="px-3 py-2">Parcel / area label</th>
+            <th className="px-3 py-2">Geography</th>
+            <th className="px-3 py-2">Development-readiness band</th>
+            <th className="px-3 py-2">Land opportunity class</th>
+            <th className="px-3 py-2">Sewer proxy class</th>
+            <th className="px-3 py-2">Growth pressure</th>
+            <th className="px-3 py-2">Economic opportunity</th>
+            <th className="px-3 py-2">Constraint/flood band</th>
+            <th className="px-3 py-2">Due diligence flags</th>
+            <th className="px-3 py-2">Recommended next checks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.slice(0, 80).map((signal) => {
+            const selected = selectedSignalIds.includes(signal.parcel_id);
+            return (
+              <tr className={`transition hover:bg-white/[0.045] ${selected ? "bg-[var(--econ-gold)]/10" : ""}`} key={signal.parcel_id}>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2">
+                  <input
+                    aria-label={`Select ${signalLabel(signal)}`}
+                    checked={selected}
+                    onChange={() => onToggleSignal(signal)}
+                    type="checkbox"
+                  />
+                </td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 font-semibold text-[var(--econ-text)]">{signalLabel(signal)}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{signal.geography_label ?? "Data Needed"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.development_readiness_band) || "Data Needed"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.land_opportunity_class) || "Data Needed"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.sewer_proxy_class) || "Data Needed"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.growth_pressure_band) || "Data Needed"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.economic_opportunity_band) || "Data Needed"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.flood_constraint_band) || "Data Needed"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{signalListValues(signal.due_diligence_flags).join("; ") || "Data Needed"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{signalListValues(signal.suggested_next_checks).join("; ") || signal.recommended_followup}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ParcelDueDiligenceCard({
+  onAddToBucket,
+  signal,
+}: {
+  onAddToBucket: () => void;
+  signal: EconomicsParcelSignal | null;
+}) {
+  if (!signal) {
+    return (
+      <div className="rounded-xl border border-dashed border-[var(--econ-border)] p-4 text-sm text-[var(--econ-muted)]">
+        Select a watchlist row to open a parcel due diligence card.
+      </div>
+    );
+  }
+  return (
+    <div className="rounded-xl border border-[var(--econ-border)] bg-black/20 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-gold)]">Parcel Due Diligence Card</p>
+          <h3 className="mt-1 text-lg font-semibold text-[var(--econ-text)]">{signalLabel(signal)}</h3>
+          <p className="mt-1 text-xs text-[var(--econ-muted)]">{signal.geography_label ?? "Geography data needed"}</p>
+        </div>
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={onAddToBucket} type="button">
+          Add card to Report Bucket
+        </button>
+      </div>
+      <Matrix
+        rows={[
+          { label: "Why this surfaced", value: valueText(signal.land_opportunity_class) || valueText(signal.development_readiness_band) || "Land opportunity fields are data needed." },
+          { label: "Infrastructure / sewer proxy", value: `${valueText(signal.sewer_proxy_class) || "Data Needed"}; ${valueText(signal.utility_readiness_proxy_class) || "Data Needed"}; confidence ${valueText(signal.sewer_proxy_confidence) || "Data Needed"}` },
+          { label: "Growth pressure", value: valueText(signal.growth_pressure_band) || signal.permit_activity_context || "Data Needed" },
+          { label: "Economics / underbuilt signal", value: `${signal.opportunity_class}; ${valueText(signal.economic_opportunity_band) || valueText(signal.tax_base_opportunity_band) || "Data Needed"}` },
+          { label: "Constraints", value: `Flood: ${valueText(signal.flood_constraint_band) || "Data Needed"}; school/service: ${valueText(signal.school_service_pressure_band) || "Data Needed"}; zoning: ${valueText(signal.zoning_support_band) || "Data Needed"}` },
+          { label: "Due diligence flags", value: signalListValues(signal.due_diligence_flags).join("; ") || "Data Needed" },
+          { label: "Recommended next checks", value: signalListValues(signal.suggested_next_checks).join("; ") || signal.recommended_followup },
+          { label: "CFS caveat", value: "Screening-level only; verify planning, utility, access, title, and site constraints before any decision." },
+        ]}
+      />
+      <div className="mt-4 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">Due diligence checklist</p>
+        <ul className="mt-2 grid gap-1 text-xs leading-5 text-[var(--econ-muted)] sm:grid-cols-2">
+          {landDueDiligenceChecklist.map((item) => <li key={item}>- {item}</li>)}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 function PowerBiChartBuilder({
   aiAction,
   availability,
@@ -4989,6 +5261,81 @@ function fiscalAttractivenessBand(signal: EconomicsParcelSignal) {
   return "Moderate";
 }
 
+function landDueDiligenceRows(signals: EconomicsParcelSignal[]) {
+  return signals
+    .filter((signal) =>
+      Boolean(
+        signal.development_readiness_band ||
+          signal.land_opportunity_class ||
+          signal.sewer_proxy_class ||
+          signal.utility_readiness_proxy_class,
+      ),
+    )
+    .sort((a, b) => landDueDiligenceRank(a) - landDueDiligenceRank(b));
+}
+
+function landDueDiligenceRank(signal: EconomicsParcelSignal) {
+  const readiness = valueText(signal.development_readiness_band);
+  const index = landDueDiligencePriorityBands.indexOf(readiness);
+  return index >= 0 ? index : 99;
+}
+
+function matchesFilter(value: unknown, selected: string) {
+  return selected === "All" || valueText(value) === selected;
+}
+
+function matchesArrayFilter(value: unknown, selected: string) {
+  return selected === "All" || signalListValues(value).includes(selected);
+}
+
+function signalListValues(value: unknown) {
+  if (Array.isArray(value)) return value.map(valueText).filter(Boolean);
+  const text = valueText(value);
+  if (!text) return [];
+  // ponytail: export lists are semicolon/pipe/comma strings; upgrade if rows become nested checklist objects.
+  return text.split(/[;|,]/).map((item) => item.trim()).filter(Boolean);
+}
+
+function signalLabel(signal: EconomicsParcelSignal) {
+  return signal.display_label ?? signal.geography_label ?? signal.parcel_id;
+}
+
+function acreageBandForSignal(signal: EconomicsParcelSignal) {
+  const explicitBand = valueText((signal as EconomicsParcelSignal & { acreage_band?: unknown }).acreage_band);
+  if (explicitBand) return explicitBand;
+  const acreage = signal.acreage;
+  if (acreage == null) return "Data Needed";
+  if (acreage < 1) return "Under 1 acre";
+  if (acreage < 5) return "1-5 acres";
+  if (acreage < 25) return "5-25 acres";
+  return "25+ acres";
+}
+
+function landDueDiligenceWatchlistText(rows: EconomicsParcelSignal[]) {
+  return rows.map((signal, index) => [
+    `${index + 1}. ${signalLabel(signal)}`,
+    `Geography: ${signal.geography_label ?? "Data Needed"}`,
+    `Development readiness: ${valueText(signal.development_readiness_band) || "Data Needed"}`,
+    `Land opportunity: ${valueText(signal.land_opportunity_class) || "Data Needed"}`,
+    `Sewer proxy: ${valueText(signal.sewer_proxy_class) || "Data Needed"}`,
+    `Growth pressure: ${valueText(signal.growth_pressure_band) || "Data Needed"}`,
+    `Next checks: ${signalListValues(signal.suggested_next_checks).join("; ") || signal.recommended_followup}`,
+  ].join("\n")).join("\n\n");
+}
+
+function landDueDiligenceBucketItem(signal: EconomicsParcelSignal): ReportBucketItemInput {
+  return {
+    caveats: [landDueDiligenceSafeUseText],
+    content: landDueDiligenceWatchlistText([signal]),
+    id: `land-due-diligence-card-${signal.parcel_id}`,
+    related_tables: ["parcel_economic_signal_fact"],
+    source_page: "Power BI & Tools",
+    summary: `${signalLabel(signal)}: ${valueText(signal.development_readiness_band) || valueText(signal.land_opportunity_class) || "screening row"}.`,
+    title: `Land Due Diligence Card - ${signalLabel(signal)}`,
+    type: "evidence_pack",
+  };
+}
+
 function economicSnapshotSummary(
   summary: EconomicsIntelligenceResponse["summary"] | undefined,
   selectedSignals: EconomicsParcelSignal[],
@@ -5728,6 +6075,7 @@ type GeneratedPowerBiReportSnapshot = {
 };
 type PowerBiReportType =
   | "data_confidence"
+  | "due_diligence"
   | "executive"
   | "land_opportunity"
   | "scenario"
@@ -5880,6 +6228,9 @@ const powerBiChartFieldMetadata: Record<PowerBiTableName, UserChartField[]> = {
     { key: "sewer_basin_label", label: "Sewer basin", role: "category", type: "text" },
     { key: "utility_capacity_status", label: "Utility capacity status", role: "filter", type: "text" },
     { key: "planned_extension_status", label: "Planned extension status", role: "filter", type: "text" },
+    { key: "acreage_band", label: "Acreage band", role: "filter", type: "band" },
+    { key: "due_diligence_flags", label: "Due diligence flags", role: "filter", type: "text" },
+    { key: "suggested_next_checks", label: "Suggested next checks", role: "label", type: "text" },
     { key: "band_order", label: "Band sort order", role: "value", type: "number" },
     { key: "data_confidence", label: "Data confidence", role: "filter", type: "band" },
     { key: "recommended_followup", label: "Recommended follow-up", role: "label", type: "text" },
@@ -5984,6 +6335,7 @@ const userChartTemplates: UserChartTemplate[] = [
 ];
 
 const powerBiReportPromptExamples = [
+  "Build a Land Due Diligence Report.",
   "Build a report for underbuilt redevelopment candidates.",
   "Create visuals for economic segment comparison.",
   "Make a fiscal burden dashboard.",
@@ -6005,6 +6357,7 @@ const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {
 
 const quickPowerBiReportTypes: Array<{ label: string; prompt: string; type: PowerBiReportType }> = [
   { label: "Executive Dashboard", prompt: "Build an executive dashboard.", type: "executive" },
+  { label: "Land Due Diligence Report", prompt: "Build a Land Due Diligence Report.", type: "due_diligence" },
   { label: "Land Opportunity Screener", prompt: "Build a Land Opportunity Screener report.", type: "land_opportunity" },
   { label: "Scenario Comparison", prompt: "Build a scenario comparison dashboard.", type: "scenario" },
   { label: "Data Confidence Report", prompt: "Build a data confidence report.", type: "data_confidence" },
@@ -6013,6 +6366,26 @@ const quickPowerBiReportTypes: Array<{ label: string; prompt: string; type: Powe
   { label: "Tax-Base Opportunity Report", prompt: "Build a tax-base opportunity report.", type: "tax_base" },
   { label: "Special Assets Review", prompt: "Build a special assets review.", type: "special_assets" },
 ];
+
+const landDueDiligencePriorityBands = [
+  "Strong infrastructure-supported review candidate",
+  "Good candidate, verify zoning and utilities",
+  "Opportunity signal, capacity data needed",
+];
+
+const landDueDiligenceChecklist = [
+  "Verify zoning",
+  "Verify utility service/capacity with utility provider",
+  "Check road frontage/legal access",
+  "Check floodplain/wetlands",
+  "Check title/easements",
+  "Check recent sales comps",
+  "Check site dimensions/buildability",
+  "Confirm planning cases/permits nearby",
+];
+
+const landDueDiligenceSafeUseText =
+  "CFS provides screening-level planning and infrastructure intelligence. It does not provide buy/sell guidance, appraisal conclusions, utility service verification, or future-value assurances.";
 
 function buildReportDataAvailability(
   payload: EconomicsPowerBiExportResponse | null,
@@ -6050,6 +6423,11 @@ function buildReportDataAvailability(
       available: Boolean(kpiRows || hasSummary),
       reason: "Needs KPI rows or economics summary context.",
       type: "executive",
+    },
+    {
+      available: Boolean(parcelRows.length && landOpportunityRows),
+      reason: parcelRows.length ? "Needs development readiness or land opportunity fields." : "Needs parcel economic signal rows.",
+      type: "due_diligence",
     },
     {
       available: Boolean(parcelRows.length && landOpportunityRows),
@@ -6098,7 +6476,7 @@ function buildReportDataAvailability(
   const bestDefault =
     scenarioRows && readinessRows && !parcelRows.length
       ? "scenario_data_confidence"
-      : (["executive", "land_opportunity", "scenario", "data_confidence", "utility", "underbuilt"] as PowerBiReportType[])
+      : (["executive", "due_diligence", "land_opportunity", "scenario", "data_confidence", "utility", "underbuilt"] as PowerBiReportType[])
           .find((type) => available.includes(type)) ?? "executive";
   return {
     available_report_types: available,
@@ -6131,6 +6509,7 @@ function reportTypeLabel(type: PowerBiReportType) {
 
 function reportTypeFromPrompt(prompt: string): PowerBiReportType | null {
   const normalized = prompt.toLowerCase();
+  if (normalized.includes("due diligence") || normalized.includes("manual review") || normalized.includes("parcel review")) return "due_diligence";
   if (normalized.includes("land opportunity") || normalized.includes("land screener") || normalized.includes("development readiness")) return "land_opportunity";
   if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) return "utility";
   if (normalized.includes("scenario + data") || (normalized.includes("scenario") && normalized.includes("confidence"))) return "scenario_data_confidence";
@@ -6254,6 +6633,56 @@ function buildPowerBiReportPlan(
         "Parcel-level candidate charts are hidden until parcel_economic_signal_fact has rows.",
         ...powerBiReportCaveats,
       ]),
+    );
+  }
+
+  if (selectedReportType === "due_diligence") {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Land Due Diligence Report",
+      `${selectionNote ? `${selectionNote}. ` : ""}Create a manual parcel review watchlist using development-readiness, sewer-proximity proxy, growth pressure, constraints, and next-check fields.`,
+      [
+        reportPage("Land Due Diligence Screener", "Prioritize rows for manual planning, utility, site, and economics review.", [
+          generatedPowerBiVisual({
+            axis: "land_opportunity_class",
+            caveat: "Land opportunity classes are screening labels, not buy/sell guidance.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Land opportunity class breakdown",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "development_readiness_band",
+            caveat: "Readiness bands are screening outputs, not approval or service commitments.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Development-readiness bands",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "sewer_proxy_class",
+            caveat: "Sewer proximity does not verify utility capacity or water service.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Sewer proxy x growth pressure",
+            value: "growth_pressure_band",
+            visual_type: "matrix",
+          }),
+          generatedPowerBiVisual({
+            axis: "geography_label",
+            caveat: "Use as a watchlist for manual due diligence only.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Candidate watchlist table",
+            value: "suggested_next_checks",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+      [
+        "Use development_readiness_band, land_opportunity_class, sewer_proxy_class, due_diligence_flags, and suggested_next_checks as first review fields.",
+        "Verify zoning, utility service/capacity, access, title/easements, floodplain/wetlands, planning cases, and site buildability before any decision.",
+        ...powerBiReportCaveats,
+      ],
     );
   }
 

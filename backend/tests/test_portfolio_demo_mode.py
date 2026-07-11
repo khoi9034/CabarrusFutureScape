@@ -316,6 +316,15 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "available_report_types" in economics_shell
     assert "best_default_report_type" in economics_shell
     assert "Scenario + Data Confidence Report" in economics_shell
+    assert "Land Due Diligence Screener" in economics_shell
+    assert "Land Due Diligence Report" in economics_shell
+    assert "Land Review Watchlist" in economics_shell
+    assert "Parcel Due Diligence Card" in economics_shell
+    assert "Add selected rows to bucket" in economics_shell
+    assert "Send due diligence report to Print" in economics_shell
+    assert "Verify utility service/capacity with utility provider" in economics_shell
+    assert "buy this" not in economics_shell.lower()
+    assert ("guaranteed " + "return") not in economics_shell.lower()
     assert "Land Opportunity Screener" in economics_shell
     assert "development_readiness_band" in economics_shell
     assert "Unavailable until data refresh" in economics_shell

@@ -89,6 +89,7 @@ export const askCfsEconomicsPowerBiToolPrompts = [
   "Build me a Power BI report.",
   "Create a chart of opportunity classes.",
   "Build a report for underbuilt parcels.",
+  "Build a Land Due Diligence Report.",
   "Build a Land Opportunity Screener report.",
   "Make a scenario comparison page.",
   "Show special assets as a report.",
@@ -641,6 +642,9 @@ function isEconomicsPowerBiQuery(query: string) {
     "land opportunity",
     "land screener",
     "development readiness",
+    "due diligence",
+    "manual review",
+    "parcel review",
     "utility readiness",
     "sewer proxy",
     "wsacc",
@@ -1092,7 +1096,17 @@ function demoPowerBiActionsForQuery(query: string): CfsAiPowerBiActions {
   let selectedFilters: CfsAiPowerBiActions["selected_filters"] = {};
   let reportCanvasItems: NonNullable<CfsAiPowerBiActions["report_canvas_items"]>;
 
-  if (normalized.includes("land opportunity") || normalized.includes("land screener") || normalized.includes("development readiness")) {
+  if (normalized.includes("due diligence") || normalized.includes("manual review") || normalized.includes("parcel review")) {
+    reportTitle = "Land Due Diligence Report";
+    reportSummary = "Create a manual parcel review watchlist using development-readiness, sewer-proximity proxy, growth pressure, constraints, and next-check fields.";
+    selectedFilters = { utility_capacity_status: "Capacity data not provided" };
+    reportCanvasItems = [
+      visual("Land Due Diligence Screener", "Land opportunity class breakdown", "bar", "parcel_economic_signal_fact", "land_opportunity_class", "signal_id", { caveat: "Land opportunity classes are screening labels, not buy/sell guidance." }),
+      visual("Land Due Diligence Screener", "Development-readiness bands", "bar", "parcel_economic_signal_fact", "development_readiness_band", "signal_id", { caveat: "Readiness bands are screening outputs, not approvals or service commitments." }),
+      visual("Land Due Diligence Screener", "Sewer proxy x growth pressure", "matrix", "parcel_economic_signal_fact", "sewer_proxy_class", "growth_pressure_band", { caveat: "Sewer proximity does not verify utility capacity or water service." }),
+      visual("Land Due Diligence Screener", "Candidate watchlist table", "matrix", "parcel_economic_signal_fact", "geography_label", "suggested_next_checks", { caveat: "Use as a watchlist for manual due diligence only." }),
+    ];
+  } else if (normalized.includes("land opportunity") || normalized.includes("land screener") || normalized.includes("development readiness")) {
     reportTitle = "Land Opportunity Screener Report";
     reportSummary = "Screen model-ready parcel rows by development readiness, sewer-proximity proxy context, and next diligence needs.";
     selectedFilters = { utility_capacity_status: "Capacity data not provided" };

@@ -952,6 +952,32 @@ def test_ai_search_economics_land_opportunity_prompt_routes_to_builder() -> None
     assert response.powerbi_actions["chart_builder_config"]["category_field"] == "development_readiness_band"
 
 
+def test_ai_search_economics_powerbi_actions_cover_land_due_diligence_report() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Build a Land Due Diligence Report.",
+            request_type="powerbi_report_plan",
+        ),
+        _context(),
+    )
+
+    assert response.powerbi_actions is not None
+    assert response.powerbi_actions["report_title"] == "Land Due Diligence Report"
+    action_text = str(response.powerbi_actions).lower()
+    assert "land_opportunity_class" in action_text
+    assert "development_readiness_band" in action_text
+    assert "suggested_next_checks" in action_text
+    unsafe_fields = {
+        "ow" + "ner",
+        "mail" + "ing",
+        "raw_" + "score",
+        "prediction_" + "probability",
+        "exact_" + "probability",
+    }
+    assert not any(field in action_text for field in unsafe_fields)
+
+
 def test_ai_search_economics_powerbi_sort_prompt_mentions_export_order_fields() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(

@@ -1242,6 +1242,9 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "land opportunity",
             "land screener",
             "development readiness",
+            "due diligence",
+            "manual review",
+            "parcel review",
             "utility readiness",
             "sewer proxy",
             "wsacc",
@@ -1524,7 +1527,17 @@ def _powerbi_actions_for_query(query: str) -> dict[str, Any]:
     canvas_items: list[dict[str, Any]]
     selected_filters: dict[str, str] = {}
 
-    if "land opportunity" in normalized or "land screener" in normalized or "development readiness" in normalized:
+    if "due diligence" in normalized or "manual review" in normalized or "parcel review" in normalized:
+        title = "Land Due Diligence Report"
+        summary = "Create a manual parcel review watchlist using development-readiness, sewer-proximity proxy, growth pressure, constraints, and next-check fields."
+        selected_filters = {"utility_capacity_status": "Capacity data not provided"}
+        canvas_items = [
+            visual("Land Due Diligence Screener", "Land opportunity class breakdown", "bar", "parcel_economic_signal_fact", "land_opportunity_class", "signal_id", caveat="Land opportunity classes are screening labels, not buy/sell guidance."),
+            visual("Land Due Diligence Screener", "Development-readiness bands", "bar", "parcel_economic_signal_fact", "development_readiness_band", "signal_id", caveat="Readiness bands are screening outputs, not approvals or service commitments."),
+            visual("Land Due Diligence Screener", "Sewer proxy x growth pressure", "matrix", "parcel_economic_signal_fact", "sewer_proxy_class", "growth_pressure_band", caveat="Sewer proximity does not verify utility capacity or water service."),
+            visual("Land Due Diligence Screener", "Candidate watchlist table", "matrix", "parcel_economic_signal_fact", "geography_label", "suggested_next_checks", caveat="Use as a watchlist for manual due diligence only."),
+        ]
+    elif "land opportunity" in normalized or "land screener" in normalized or "development readiness" in normalized:
         title = "Land Opportunity Screener Report"
         summary = "Screen model-ready parcel rows by development readiness, sewer-proximity proxy context, and next diligence needs."
         selected_filters = {"utility_capacity_status": "Capacity data not provided"}
