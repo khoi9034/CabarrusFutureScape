@@ -1125,6 +1125,24 @@ def test_ai_search_economics_due_diligence_packet_prompt_is_safe() -> None:
     assert "buy this" not in response.answer.lower()
 
 
+def test_ai_search_economics_investment_panel_prompt_is_safe() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            filter_context={"mode": "investment_panel"},
+            query="Which candidates should I review first?",
+        ),
+        _context(),
+    )
+
+    answer = response.answer.lower()
+    assert "investment panel" in answer
+    assert "review guide" in answer
+    assert "screening-level" in answer
+    assert "buy this" not in answer
+    assert "guaranteed" not in answer
+
+
 def test_ai_search_economics_context_uses_cached_economics(monkeypatch) -> None:
     calls = {"count": 0}
 

@@ -317,6 +317,16 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "best_default_report_type" in economics_shell
     assert "Scenario + Data Confidence Report" in economics_shell
     assert "Land Due Diligence Screener" in economics_shell
+    assert "InvestmentPanelGate" in economics_shell
+    assert "InvestmentPanelPage" in economics_shell
+    assert "Investment Panel Access" in economics_shell
+    assert "Local convenience gate only" in economics_shell
+    assert 'const INVESTMENT_PANEL_ACCESS_CODE = "demo"' in economics_shell
+    assert "Access code did not match" in economics_shell
+    assert "Ask CFS Investment Research" in economics_shell
+    assert "Ranked Candidate Table" in economics_shell
+    assert "Generate Review Guide" in economics_shell
+    assert "Ask CFS about this candidate" in economics_shell
     assert "Land Due Diligence Report" in economics_shell
     assert "Land Review Watchlist" in economics_shell
     assert "Top Land Review Candidates" in economics_shell
@@ -354,10 +364,10 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Show advanced filters" in economics_shell
     assert "Generate Due Diligence Packet" in economics_shell
     assert "Generate Watchlist Packet" in economics_shell
-    assert "Due Diligence Packet Preview" in economics_shell
-    assert "Add Packet to Report Bucket" in economics_shell
-    assert "Send Packet to Print" in economics_shell
-    assert "Copy Packet Summary" in economics_shell
+    assert "Due Diligence {noun} Preview" in economics_shell
+    assert "Add {noun} to Report Bucket" in economics_shell
+    assert "Send {noun} to Print" in economics_shell
+    assert "Copy {noun} Summary" in economics_shell
     assert "Copy Questions to Ask" in economics_shell
     assert "Download JSON" in economics_shell
     assert "due_diligence_packet" in economics_shell

@@ -8,7 +8,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
+import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
   askCfsEconomicsPowerBiToolPrompts,
@@ -47,6 +47,8 @@ export function EconomicsShell() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSignalIds, setSelectedSignalIds] = useState<string[]>([]);
   const [reportBucketItems, setReportBucketItems] = useState<ReportBucketItem[]>([]);
+  const [investmentGateOpen, setInvestmentGateOpen] = useState(false);
+  const [investmentPanelOpen, setInvestmentPanelOpen] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
 
   useEffect(() => {
@@ -179,52 +181,66 @@ export function EconomicsShell() {
             </button>
           </div>
         ) : null}
-        {activeEconomicsSection === "overview" ? (
-          <ExecutiveBriefPage intelligence={intelligence} />
-        ) : null}
-        {activeEconomicsSection === "tools" ? (
-          <PowerBiToolsPage
-            dataReadiness={intelligence?.data_readiness ?? []}
-            exportPayload={enterpriseExport}
-            inputs={intelligence?.scenario_inputs ?? []}
-            onClearSelection={() => setSelectedSignalIds([])}
+        {investmentPanelOpen ? (
+          <InvestmentPanelPage
             onAddReportBucketItem={addReportBucketItem}
-            onClearReportBucket={() => setReportBucketItems([])}
+            onClearSelection={() => setSelectedSignalIds([])}
+            onClose={() => setInvestmentPanelOpen(false)}
             onNavigate={setEconomicsSection}
-            onRemoveReportBucketItem={removeReportBucketItem}
-            onStartTutorial={() => setTutorialOpen(true)}
-            onToggleReportBucketPrint={toggleReportBucketPrint}
             onToggleSignal={toggleSelectedSignal}
-            outputs={intelligence?.scenario_outputs ?? []}
-            powerBiPayload={powerBiExport}
-            reportBucketItems={reportBucketItems}
-            scenarioOutputs={intelligence?.scenario_outputs ?? []}
-            scenarios={intelligence?.scenario_templates ?? []}
             selectedSignalIds={selectedSignalIds}
-            selectedSignals={selectedSignals}
             signals={signals}
-            watchlist={watchlist}
           />
-        ) : null}
-        {activeEconomicsSection === "dashboard" ? (
-          <EconomicDashboardPage
-            intelligence={intelligence}
-            signals={signals}
-            watchlist={watchlist}
-          />
-        ) : null}
-        {activeEconomicsSection === "print" ? (
-          <EconomicsPrintPage
-            intelligence={intelligence}
-            onClearReportBucket={() => setReportBucketItems([])}
-            onNavigate={setEconomicsSection}
-            onRemoveReportBucketItem={removeReportBucketItem}
-            onSetAllReportBucketPrint={setAllReportBucketPrint}
-            onToggleReportBucketPrint={toggleReportBucketPrint}
-            reportBucketItems={reportBucketItems}
-            selectedSignals={selectedSignals}
-          />
-        ) : null}
+        ) : (
+          <>
+            {activeEconomicsSection === "overview" ? (
+              <ExecutiveBriefPage intelligence={intelligence} />
+            ) : null}
+            {activeEconomicsSection === "tools" ? (
+              <PowerBiToolsPage
+                dataReadiness={intelligence?.data_readiness ?? []}
+                exportPayload={enterpriseExport}
+                inputs={intelligence?.scenario_inputs ?? []}
+                onClearSelection={() => setSelectedSignalIds([])}
+                onAddReportBucketItem={addReportBucketItem}
+                onClearReportBucket={() => setReportBucketItems([])}
+                onNavigate={setEconomicsSection}
+                onRemoveReportBucketItem={removeReportBucketItem}
+                onStartTutorial={() => setTutorialOpen(true)}
+                onToggleReportBucketPrint={toggleReportBucketPrint}
+                onToggleSignal={toggleSelectedSignal}
+                outputs={intelligence?.scenario_outputs ?? []}
+                powerBiPayload={powerBiExport}
+                reportBucketItems={reportBucketItems}
+                scenarioOutputs={intelligence?.scenario_outputs ?? []}
+                scenarios={intelligence?.scenario_templates ?? []}
+                selectedSignalIds={selectedSignalIds}
+                selectedSignals={selectedSignals}
+                signals={signals}
+                watchlist={watchlist}
+              />
+            ) : null}
+            {activeEconomicsSection === "dashboard" ? (
+              <EconomicDashboardPage
+                intelligence={intelligence}
+                signals={signals}
+                watchlist={watchlist}
+              />
+            ) : null}
+            {activeEconomicsSection === "print" ? (
+              <EconomicsPrintPage
+                intelligence={intelligence}
+                onClearReportBucket={() => setReportBucketItems([])}
+                onNavigate={setEconomicsSection}
+                onRemoveReportBucketItem={removeReportBucketItem}
+                onSetAllReportBucketPrint={setAllReportBucketPrint}
+                onToggleReportBucketPrint={toggleReportBucketPrint}
+                reportBucketItems={reportBucketItems}
+                selectedSignals={selectedSignals}
+              />
+            ) : null}
+          </>
+        )}
         {tutorialOpen ? (
           <EconomicsTutorialOverlay
             key={activeEconomicsSection}
@@ -232,6 +248,24 @@ export function EconomicsShell() {
             onNavigate={setEconomicsSection}
             page={activeEconomicsSection}
           />
+        ) : null}
+        {investmentGateOpen ? (
+          <InvestmentPanelGate
+            onCancel={() => setInvestmentGateOpen(false)}
+            onUnlock={() => {
+              setInvestmentGateOpen(false);
+              setInvestmentPanelOpen(true);
+            }}
+          />
+        ) : null}
+        {!investmentPanelOpen ? (
+          <button
+            className="no-print fixed bottom-4 right-4 z-40 rounded-full border border-[var(--econ-border)] bg-[#11151c]/90 px-3 py-2 text-xs font-semibold text-[var(--econ-muted)] shadow-lg backdrop-blur transition hover:border-[var(--econ-gold)] hover:text-[#ffe6a6]"
+            onClick={() => setInvestmentGateOpen(true)}
+            type="button"
+          >
+            Investment Panel
+          </button>
         ) : null}
       </div>
     </main>
@@ -261,6 +295,66 @@ function EconomicsTutorialButton({ onClick }: { onClick: () => void }) {
     >
       Tutorial
     </button>
+  );
+}
+
+const INVESTMENT_PANEL_ACCESS_CODE = "demo";
+
+function InvestmentPanelGate({
+  onCancel,
+  onUnlock,
+}: {
+  onCancel: () => void;
+  onUnlock: () => void;
+}) {
+  const [code, setCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const unlock = () => {
+    if (code.trim() === INVESTMENT_PANEL_ACCESS_CODE) {
+      onUnlock();
+      return;
+    }
+    setError("Access code did not match.");
+  };
+  return (
+    <div className="no-print fixed inset-0 z-50 grid place-items-center bg-black/65 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl border border-[var(--econ-border)] bg-[#12161f] p-5 shadow-2xl">
+        <p className="econ-eyebrow">Internal research mode</p>
+        <h2 className="mt-2 text-xl font-semibold text-[var(--econ-text)]">Investment Panel Access</h2>
+        <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
+          Local convenience gate only. Screening-level review; no financial guidance, appraisal conclusion, utility confirmation, or future-value assurance.
+        </p>
+        <label className="mt-4 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--econ-muted)]" htmlFor="investment-panel-code">
+          Access code
+        </label>
+        <input
+          autoFocus
+          className="mt-2 w-full rounded-xl border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-sm text-[var(--econ-text)] outline-none transition focus:border-[var(--econ-gold)]"
+          id="investment-panel-code"
+          onChange={(event) => {
+            setCode(event.target.value);
+            setError(null);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") unlock();
+            if (event.key === "Escape") onCancel();
+          }}
+          placeholder="demo"
+          type="password"
+          value={code}
+        />
+        <p className="mt-2 text-xs text-[var(--econ-muted)]">Demo/local code: demo. Do not use this as real authentication.</p>
+        {error ? <p className="mt-2 text-xs font-semibold text-[var(--econ-risk)]">{error}</p> : null}
+        <div className="mt-4 flex flex-wrap justify-end gap-2">
+          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={onCancel} type="button">
+            Cancel
+          </button>
+          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={unlock} type="button">
+            Unlock
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -755,6 +849,105 @@ function PowerBiToolsPage({
           </section>
         </div>
       </details>
+    </>
+  );
+}
+
+function InvestmentPanelPage({
+  onAddReportBucketItem,
+  onClearSelection,
+  onClose,
+  onNavigate,
+  onToggleSignal,
+  selectedSignalIds,
+  signals,
+}: {
+  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onClearSelection: () => void;
+  onClose: () => void;
+  onNavigate: (section: "print") => void;
+  onToggleSignal: (signal: EconomicsParcelSignal) => void;
+  selectedSignalIds: string[];
+  signals: EconomicsParcelSignal[];
+}) {
+  const rows = useMemo(
+    () =>
+      landDueDiligenceRows(signals)
+        .map((signal) => ({ ranking: landReviewRanking(signal), signal }))
+        .sort((left, right) => right.ranking.sort_value - left.ranking.sort_value),
+    [signals],
+  );
+  const tier1 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 1")).length;
+  const tier2 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 2")).length;
+  const sewerSupported = rows.filter((row) => hasSewerSupport(row.signal)).length;
+  const dataNeeded = rows.filter((row) => row.ranking.review_priority_band.includes("Data") || row.ranking.caution_flags.some((flag) => flag.toLowerCase().includes("data"))).length;
+  const special = rows.filter((row) => row.ranking.review_priority_band.startsWith("Special")).length;
+  const [askRequest, setAskRequest] = useState<AskCfsExternalRequest | null>(null);
+  const askAboutSignal = (signal: EconomicsParcelSignal) => {
+    setAskRequest({
+      request: {
+        app_mode: "economics",
+        filter_context: {
+          mode: "investment_panel",
+          selected_candidate: signal.parcel_id,
+        },
+        query: `Why is ${signalLabel(signal)} ranked high for manual review?`,
+      },
+      requestId: Date.now(),
+    });
+  };
+  return (
+    <>
+      <PageHeader
+        kicker="Internal Economics"
+        text="Private land review cockpit for screening-level development-readiness and due diligence candidates."
+        title="Investment Panel"
+      >
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={onClose} type="button">
+            Back to CFS Economics
+          </button>
+          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("print")} type="button">
+            Open Print
+          </button>
+        </div>
+      </PageHeader>
+      <section className="rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
+        CFS ranks parcels for manual review only. It does not provide financial or buy/sell guidance, appraisal conclusions, utility confirmation, or future-value assurances.
+      </section>
+      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+        <MiniMetric label="Total candidate rows" value={formatNumber(rows.length)} />
+        <MiniMetric label="Tier 1 candidates" value={formatNumber(tier1)} />
+        <MiniMetric label="Tier 2 candidates" value={formatNumber(tier2)} />
+        <MiniMetric label="Sewer-proxy supported" value={formatNumber(sewerSupported)} />
+        <MiniMetric label="Data-needed but interesting" value={formatNumber(dataNeeded)} />
+        <MiniMetric label="Special review" value={formatNumber(special)} />
+      </section>
+      <EconPanel title="Ask CFS Investment Research" kicker="Screening assistant">
+        <AskCfsPanel
+          appMode="economics"
+          externalRequest={askRequest}
+          filterContext={{
+            candidate_rows: rows.length,
+            mode: "investment_panel",
+            sewer_proxy_supported_candidates: sewerSupported,
+            tier_1_candidates: tier1,
+            tier_2_candidates: tier2,
+          }}
+          suggestedPromptsOverride={askCfsInvestmentResearchPrompts}
+          visiblePromptCount={7}
+        />
+      </EconPanel>
+      <LandDueDiligenceScreener
+        mode="investment"
+        onAddReportBucketItem={onAddReportBucketItem}
+        onAskCfs={askAboutSignal}
+        onClearSelection={onClearSelection}
+        onNavigate={onNavigate}
+        onToggleSignal={onToggleSignal}
+        selectedSignalIds={selectedSignalIds}
+        signals={signals}
+      />
     </>
   );
 }
@@ -2928,20 +3121,26 @@ function PowerBiReportGenerator({
 }
 
 function LandDueDiligenceScreener({
+  mode = "tools",
   onAddReportBucketItem,
+  onAskCfs,
   onClearSelection,
   onNavigate,
   onToggleSignal,
   selectedSignalIds,
   signals,
 }: {
+  mode?: "investment" | "tools";
   onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onAskCfs?: (signal: EconomicsParcelSignal) => void;
   onClearSelection: () => void;
   onNavigate: (section: "print") => void;
   onToggleSignal: (signal: EconomicsParcelSignal) => void;
   selectedSignalIds: string[];
   signals: EconomicsParcelSignal[];
 }) {
+  const investmentMode = mode === "investment";
+  const guideNoun = investmentMode ? "Guide" : "Packet";
   const rows = useMemo(() => landDueDiligenceRows(signals), [signals]);
   const [readiness, setReadiness] = useState("Priority candidates");
   const [landClass, setLandClass] = useState("All");
@@ -3009,13 +3208,13 @@ function LandDueDiligenceScreener({
     if (!activeReviewSignal) return;
     const nextPacket = singleParcelDueDiligencePacket(activeReviewSignal);
     setPacket(nextPacket);
-    setPacketStatus("Parcel due diligence packet generated");
+    setPacketStatus(investmentMode ? "Parcel review guide generated" : "Parcel due diligence packet generated");
   };
   const generateWatchlistPacket = () => {
     if (!selectedRows.length) return;
     const nextPacket = watchlistDueDiligencePacket(selectedRows);
     setPacket(nextPacket);
-    setPacketStatus("Watchlist due diligence packet generated");
+    setPacketStatus(investmentMode ? "Watchlist review guide generated" : "Watchlist due diligence packet generated");
   };
   const createTop25Packet = () => {
     const topRows = rankedRows.slice(0, 25);
@@ -3023,7 +3222,7 @@ function LandDueDiligenceScreener({
     const nextPacket = topLandReviewWatchlistPacket(topRows);
     setPacket(nextPacket);
     addPacketToBucket(nextPacket);
-    setPacketStatus("Top 25 review watchlist created and added to Report Bucket");
+    setPacketStatus(investmentMode ? "Top 25 review guide created and added to Report Bucket" : "Top 25 review watchlist created and added to Report Bucket");
   };
   const compareSelectedCandidates = () => {
     if (selectedRankedRows.length < 2 || selectedRankedRows.length > 5) return;
@@ -3050,16 +3249,16 @@ function LandDueDiligenceScreener({
 
   return (
     <EconPanel
-      description="Build a parcel watchlist for manual planning, utility, site, and economics review."
-      kicker="Internal screening"
-      title="Land Due Diligence Screener"
+      description={investmentMode ? "Live candidate table for private manual review, comparison, and due diligence guide creation." : "Build a parcel watchlist for manual planning, utility, site, and economics review."}
+      kicker={investmentMode ? "Investment research panel" : "Internal screening"}
+      title={investmentMode ? "Ranked Candidate Table" : "Land Due Diligence Screener"}
       tourId="land-due-diligence-screener"
     >
       <div className="rounded-xl border border-[var(--econ-gold)]/30 bg-[var(--econ-gold)]/[0.08] px-3 py-2 text-sm leading-6 text-[#f7dc93]">
         {landDueDiligenceSafeUseText}
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-5" data-econ-tour="land-due-diligence-steps">
-        {["Filter", "Select", "Review", "Generate Packet", "Print"].map((step, index) => (
+        {(investmentMode ? ["Filter", "Select", "Review", "Generate Guide", "Optional Print"] : ["Filter", "Select", "Review", "Generate Packet", "Print"]).map((step, index) => (
           <div className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2 text-xs font-semibold text-[var(--econ-text)]" key={step}>
             <span className="mr-2 text-[var(--econ-gold)]">{index + 1}</span>{step}
           </div>
@@ -3131,7 +3330,7 @@ function LandDueDiligenceScreener({
             </div>
             <div className="flex flex-wrap gap-2">
               <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!selectedRows.length} onClick={generateWatchlistPacket} type="button">
-                Generate Watchlist Packet
+                {investmentMode ? "Generate Review Guide" : "Generate Watchlist Packet"}
               </button>
               <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!selectedRows.length} onClick={onClearSelection} type="button">
                 Clear selection
@@ -3145,14 +3344,17 @@ function LandDueDiligenceScreener({
           />
       </div>
       <ParcelDueDiligenceCard
+          onAskCfs={onAskCfs}
           onGeneratePacket={generateSinglePacket}
+          primaryActionLabel={investmentMode ? "Generate Review Guide" : "Generate Due Diligence Packet"}
           signal={activeReviewSignal}
         />
       </div>
       <DueDiligencePacketPreview
+        noun={guideNoun}
         onAddToBucket={() => addPacketToBucket()}
         onCopyQuestions={() => packet ? copyPacket("Questions to ask", packet.questions_to_ask.map((item) => `- ${item}`).join("\n")) : undefined}
-        onCopySummary={() => packet ? copyPacket("Packet summary", dueDiligencePacketSummaryText(packet)) : undefined}
+        onCopySummary={() => packet ? copyPacket(`${guideNoun} summary`, dueDiligencePacketSummaryText(packet)) : undefined}
         onDownload={() => packet ? downloadJson(packet, `${slugifyReportTitle(packet.title)}.json`) : undefined}
         onSendToPrint={sendPacketToPrint}
         packet={packet}
@@ -3276,6 +3478,7 @@ function TopLandReviewCandidatesPanel({
           </button>
         </div>
       </div>
+      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">Strategy Presets</p>
       <div className="mt-4 flex flex-wrap gap-2">
         {landReviewPresetLabels.map((label) => (
           <button
@@ -3372,10 +3575,14 @@ function TopLandReviewCandidatesPanel({
 }
 
 function ParcelDueDiligenceCard({
+  onAskCfs,
   onGeneratePacket,
+  primaryActionLabel = "Generate Due Diligence Packet",
   signal,
 }: {
+  onAskCfs?: (signal: EconomicsParcelSignal) => void;
   onGeneratePacket: () => void;
+  primaryActionLabel?: string;
   signal: EconomicsParcelSignal | null;
 }) {
   if (!signal) {
@@ -3396,9 +3603,16 @@ function ParcelDueDiligenceCard({
           <h3 className="mt-1 text-lg font-semibold text-[var(--econ-text)]">{signalLabel(signal)}</h3>
           <p className="mt-1 text-xs text-[var(--econ-muted)]">{signal.geography_label ?? "Geography data needed"}</p>
         </div>
-        <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={onGeneratePacket} type="button">
-          Generate Due Diligence Packet
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {onAskCfs ? (
+            <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onAskCfs(signal)} type="button">
+              Ask CFS about this candidate
+            </button>
+          ) : null}
+          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={onGeneratePacket} type="button">
+            {primaryActionLabel}
+          </button>
+        </div>
       </div>
       <Matrix
         rows={[
@@ -3448,6 +3662,7 @@ function ComparableContextPanel({ signal }: { signal: EconomicsParcelSignal }) {
 }
 
 function DueDiligencePacketPreview({
+  noun = "Packet",
   onAddToBucket,
   onCopyQuestions,
   onCopySummary,
@@ -3456,6 +3671,7 @@ function DueDiligencePacketPreview({
   packet,
   status,
 }: {
+  noun?: "Guide" | "Packet";
   onAddToBucket: () => void;
   onCopyQuestions: () => void;
   onCopySummary: () => void;
@@ -3468,21 +3684,21 @@ function DueDiligencePacketPreview({
     <section className="mt-5 rounded-xl border border-[var(--econ-border)] bg-black/20 p-4" data-econ-tour="due-diligence-packet">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-gold)]">Due Diligence Packet Preview</p>
-          <h3 className="mt-1 text-lg font-semibold text-[var(--econ-text)]">{packet?.title ?? "Generate a packet from selected rows"}</h3>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-gold)]">Due Diligence {noun} Preview</p>
+          <h3 className="mt-1 text-lg font-semibold text-[var(--econ-text)]">{packet?.title ?? `Generate a ${noun.toLowerCase()} from selected rows`}</h3>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--econ-muted)]">
-            {packet?.summary ?? "Select a watchlist row for a parcel packet, or select multiple rows for a watchlist packet."}
+            {packet?.summary ?? `Select a watchlist row for a parcel ${noun.toLowerCase()}, or select multiple rows for a watchlist ${noun.toLowerCase()}.`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onAddToBucket} type="button">
-            Add Packet to Report Bucket
+            Add {noun} to Report Bucket
           </button>
           <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onSendToPrint} type="button">
-            Send Packet to Print
+            Send {noun} to Print
           </button>
           <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onCopySummary} type="button">
-            Copy Packet Summary
+            Copy {noun} Summary
           </button>
           <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onCopyQuestions} type="button">
             Copy Questions to Ask
@@ -7215,6 +7431,16 @@ const powerBiReportPromptExamples = [
   "Build a Utility Readiness + Growth Report.",
   "Create a Power BI page for special assets.",
   "Show value per acre by economic segment with caveats.",
+];
+
+const askCfsInvestmentResearchPrompts = [
+  "Which candidates should I review first?",
+  "Show infrastructure-supported candidates.",
+  "Compare selected candidates.",
+  "What are the biggest red flags?",
+  "What should I verify before spending money?",
+  "Which candidates need utility due diligence?",
+  "Which candidates have growth pressure and sewer proximity?",
 ];
 
 const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {

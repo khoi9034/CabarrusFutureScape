@@ -713,6 +713,12 @@ function isEconomicsPowerBiQuery(query: string) {
     "watchlist due diligence",
     "which parcels should i review first",
     "which candidates should i review first",
+    "show infrastructure-supported candidates",
+    "compare selected candidates",
+    "ranked high for manual review",
+    "real-world decision",
+    "use cfs without overtrusting",
+    "biggest red flags",
     "why is this parcel ranked highly",
     "compare these selected candidates",
     "top 25 land review",
@@ -735,6 +741,7 @@ function isEconomicsPowerBiQuery(query: string) {
     "what questions should i ask planning",
     "what questions should i ask wsacc",
     "what are the red flags",
+    "utility due diligence",
     "utility readiness",
     "sewer proxy",
     "wsacc",
@@ -756,6 +763,12 @@ function isEconomicsDueDiligencePacketQuery(query: string) {
     "watchlist due diligence",
     "which parcels should i review first",
     "which candidates should i review first",
+    "show infrastructure-supported candidates",
+    "compare selected candidates",
+    "ranked high for manual review",
+    "real-world decision",
+    "use cfs without overtrusting",
+    "biggest red flags",
     "why is this parcel ranked highly",
     "compare these selected candidates",
     "top 25 land review",
@@ -780,6 +793,7 @@ function isEconomicsDueDiligencePacketQuery(query: string) {
     "what should i ask wsacc",
     "what should i ask utilities",
     "what are the red flags",
+    "utility due diligence",
   ].some((term) => normalized.includes(term));
 }
 
@@ -906,7 +920,7 @@ function demoEconomicsDueDiligencePacketAnswer(
     answer: briefing(
       [
         "Direct answer",
-        "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy.",
+        "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. In the hidden Investment Panel, use the same ranked candidates as a private research cockpit, then generate a Review Guide when you want a live summary.",
       ],
       [
         "What CFS will include",

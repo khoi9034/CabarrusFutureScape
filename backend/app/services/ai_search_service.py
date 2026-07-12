@@ -1312,6 +1312,12 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "watchlist due diligence",
             "which parcels should i review first",
             "which candidates should i review first",
+            "show infrastructure-supported candidates",
+            "compare selected candidates",
+            "ranked high for manual review",
+            "real-world decision",
+            "use cfs without overtrusting",
+            "biggest red flags",
             "why is this parcel ranked highly",
             "compare these selected candidates",
             "top 25 land review",
@@ -1335,6 +1341,7 @@ def _is_economics_powerbi_query(query: str) -> bool:
             "what questions should i ask wsacc",
             "what should i ask utilities",
             "what are the red flags",
+            "utility due diligence",
             "utility readiness",
             "sewer proxy",
             "wsacc",
@@ -1353,6 +1360,12 @@ def _is_economics_due_diligence_packet_query(query: str) -> bool:
             "watchlist due diligence",
             "which parcels should i review first",
             "which candidates should i review first",
+            "show infrastructure-supported candidates",
+            "compare selected candidates",
+            "ranked high for manual review",
+            "real-world decision",
+            "use cfs without overtrusting",
+            "biggest red flags",
             "why is this parcel ranked highly",
             "compare these selected candidates",
             "top 25 land review",
@@ -1377,6 +1390,7 @@ def _is_economics_due_diligence_packet_query(query: str) -> bool:
             "what should i ask wsacc",
             "what should i ask utilities",
             "what are the red flags",
+            "utility due diligence",
         )
     )
 
@@ -1390,7 +1404,7 @@ def _economics_powerbi_answer(
         answer = _briefing(
             (
                 "Direct answer",
-                "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy.",
+                "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. In the hidden Investment Panel, use the same ranked candidates as a private research cockpit, then generate a Review Guide when you want a live summary.",
             ),
             (
                 "What CFS will include",
