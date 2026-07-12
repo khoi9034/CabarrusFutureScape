@@ -2954,8 +2954,10 @@ function LandDueDiligenceScreener({
   const [confidence, setConfidence] = useState("All");
   const [flag, setFlag] = useState("All");
   const [geography, setGeography] = useState("All");
+  const [preset, setPreset] = useState("All");
   const [packet, setPacket] = useState<DueDiligencePacket | null>(null);
   const [packetStatus, setPacketStatus] = useState<string | null>(null);
+  const [comparisonRows, setComparisonRows] = useState<RankedLandReviewCandidate[]>([]);
   const resetFilters = () => {
     setReadiness("Priority candidates");
     setLandClass("All");
@@ -2968,6 +2970,7 @@ function LandDueDiligenceScreener({
     setConfidence("All");
     setFlag("All");
     setGeography("All");
+    setPreset("All");
   };
   const filteredRows = rows.filter((signal) => {
     const matchesReadiness =
@@ -2986,11 +2989,17 @@ function LandDueDiligenceScreener({
       matchesFilter(signal.economic_opportunity_band, economicBand) &&
       matchesFilter(signal.data_confidence ?? signal.economic_data_confidence, confidence) &&
       matchesArrayFilter(signal.due_diligence_flags, flag) &&
-      matchesFilter(signal.sewer_basin_label ?? signal.geography_label, geography)
+      matchesFilter(signal.sewer_basin_label ?? signal.geography_label, geography) &&
+      matchesLandReviewPreset(signal, preset)
     );
   });
-  const selectedRows = filteredRows.filter((signal) => selectedSignalIds.includes(signal.parcel_id));
-  const activeReviewSignal = selectedRows[0] ?? filteredRows[0] ?? rows[0] ?? null;
+  const rankedRows = filteredRows
+    .map((signal) => ({ ranking: landReviewRanking(signal), signal }))
+    .sort((left, right) => right.ranking.sort_value - left.ranking.sort_value || signalLabel(left.signal).localeCompare(signalLabel(right.signal)))
+    .map((row, index) => ({ ...row, rank: index + 1 }));
+  const selectedRankedRows = rankedRows.filter((row) => selectedSignalIds.includes(row.signal.parcel_id));
+  const selectedRows = selectedRankedRows.map((row) => row.signal);
+  const activeReviewSignal = selectedRows[0] ?? rankedRows[0]?.signal ?? rows[0] ?? null;
   const addPacketToBucket = (nextPacket = packet) => {
     if (!nextPacket) return;
     onAddReportBucketItem(dueDiligencePacketBucketItem(nextPacket));
@@ -3007,6 +3016,20 @@ function LandDueDiligenceScreener({
     const nextPacket = watchlistDueDiligencePacket(selectedRows);
     setPacket(nextPacket);
     setPacketStatus("Watchlist due diligence packet generated");
+  };
+  const createTop25Packet = () => {
+    const topRows = rankedRows.slice(0, 25);
+    if (!topRows.length) return;
+    const nextPacket = topLandReviewWatchlistPacket(topRows);
+    setPacket(nextPacket);
+    addPacketToBucket(nextPacket);
+    setPacketStatus("Top 25 review watchlist created and added to Report Bucket");
+  };
+  const compareSelectedCandidates = () => {
+    if (selectedRankedRows.length < 2 || selectedRankedRows.length > 5) return;
+    setComparisonRows(selectedRankedRows.slice(0, 5));
+    setPacket(candidateComparisonPacket(selectedRankedRows.slice(0, 5)));
+    setPacketStatus("Selected candidate comparison generated");
   };
   const sendPacketToPrint = () => {
     if (packet) addPacketToBucket(packet);
@@ -3065,6 +3088,15 @@ function LandDueDiligenceScreener({
         <MiniMetric label="Sewer proxy classes" value={formatNumber(uniqueValues(filteredRows.map((row) => row.sewer_proxy_class)).length)} />
         <MiniMetric label="Data confidence bands" value={formatNumber(uniqueValues(filteredRows.map((row) => row.data_confidence ?? row.economic_data_confidence)).length)} />
       </div>
+      <TopLandReviewCandidatesPanel
+        comparisonRows={comparisonRows}
+        onCompareSelected={compareSelectedCandidates}
+        onCreateTop25={createTop25Packet}
+        onSetPreset={setPreset}
+        preset={preset}
+        rankedRows={rankedRows}
+        selectedCount={selectedRankedRows.length}
+      />
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-econ-tour="land-due-diligence-primary-filters">
         <ScenarioSelect label="Development-readiness" onChange={setReadiness} options={["Priority candidates", "All", ...uniqueValues(rows.map((row) => row.development_readiness_band))]} value={readiness} />
         <ScenarioSelect label="Land opportunity class" onChange={setLandClass} options={["All", ...uniqueValues(rows.map((row) => row.land_opportunity_class))]} value={landClass} />
@@ -3108,9 +3140,9 @@ function LandDueDiligenceScreener({
           </div>
           <LandDueDiligenceTable
             onToggleSignal={onToggleSignal}
-            rows={filteredRows}
+            rows={rankedRows}
             selectedSignalIds={selectedSignalIds}
-        />
+          />
       </div>
       <ParcelDueDiligenceCard
           onGeneratePacket={generateSinglePacket}
@@ -3136,7 +3168,7 @@ function LandDueDiligenceTable({
   selectedSignalIds,
 }: {
   onToggleSignal: (signal: EconomicsParcelSignal) => void;
-  rows: EconomicsParcelSignal[];
+  rows: RankedLandReviewCandidate[];
   selectedSignalIds: string[];
 }) {
   if (!rows.length) {
@@ -3147,21 +3179,25 @@ function LandDueDiligenceTable({
       <table className="w-full min-w-[920px] border-separate border-spacing-0 text-left text-xs">
         <thead className="sticky top-0 z-10 bg-[#171a20] text-[10px] uppercase tracking-[0.12em] text-[var(--econ-muted)]">
           <tr>
+            <th className="px-3 py-2">Rank</th>
             <th className="px-3 py-2">Select</th>
             <th className="px-3 py-2">Parcel / area label</th>
-            <th className="px-3 py-2">Development-readiness</th>
+            <th className="px-3 py-2">Review priority</th>
+            <th className="px-3 py-2">Why surfaced</th>
             <th className="px-3 py-2">Land opportunity</th>
             <th className="px-3 py-2">Sewer proxy</th>
             <th className="px-3 py-2">Growth pressure</th>
-            <th className="px-3 py-2">Due diligence flags</th>
+            <th className="px-3 py-2">Caution flags</th>
             <th className="px-3 py-2">Next checks</th>
           </tr>
         </thead>
         <tbody>
-          {rows.slice(0, 80).map((signal) => {
+          {rows.slice(0, 80).map((row) => {
+            const { signal, ranking } = row;
             const selected = selectedSignalIds.includes(signal.parcel_id);
             return (
               <tr className={`transition hover:bg-white/[0.045] ${selected ? "bg-[var(--econ-gold)]/10" : ""}`} key={signal.parcel_id}>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 font-semibold text-[var(--econ-gold)]">{row.rank}</td>
                 <td className="border-t border-[var(--econ-border)] px-3 py-2">
                   <input
                     aria-label={`Select ${signalLabel(signal)}`}
@@ -3183,17 +3219,139 @@ function LandDueDiligenceTable({
                     </div>
                   </details>
                 </td>
-                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.development_readiness_band) || "Data Needed"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 font-semibold text-[var(--econ-text)]">{ranking.review_priority_band}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{ranking.review_reason_summary}</td>
                 <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.land_opportunity_class) || "Data Needed"}</td>
                 <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.sewer_proxy_class) || "Data Needed"}</td>
                 <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{valueText(signal.growth_pressure_band) || "Data Needed"}</td>
-                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{signalListValues(signal.due_diligence_flags).join("; ") || "Data Needed"}</td>
-                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{signalListValues(signal.suggested_next_checks).join("; ") || signal.recommended_followup}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{ranking.caution_flags.slice(0, 3).join("; ") || "Monitor"}</td>
+                <td className="border-t border-[var(--econ-border)] px-3 py-2 text-[var(--econ-muted)]">{ranking.recommended_next_checks.slice(0, 3).join("; ") || signal.recommended_followup}</td>
               </tr>
             );
           })}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function TopLandReviewCandidatesPanel({
+  comparisonRows,
+  onCompareSelected,
+  onCreateTop25,
+  onSetPreset,
+  preset,
+  rankedRows,
+  selectedCount,
+}: {
+  comparisonRows: RankedLandReviewCandidate[];
+  onCompareSelected: () => void;
+  onCreateTop25: () => void;
+  onSetPreset: (preset: string) => void;
+  preset: string;
+  rankedRows: RankedLandReviewCandidate[];
+  selectedCount: number;
+}) {
+  const tierCounts = countRowsBy(rankedRows, (row) => row.ranking.review_priority_band).slice(0, 6);
+  const topRows = rankedRows.slice(0, 5);
+  return (
+    <div className="mt-5 rounded-2xl border border-[var(--econ-gold)]/35 bg-[var(--econ-gold)]/5 p-4" data-econ-tour="land-top-candidates">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-gold)]">Top Land Review Candidates</p>
+          <h3 className="mt-1 text-xl font-semibold text-[var(--econ-text)]">Screening-level candidate ranking</h3>
+          <p className="mt-1 max-w-3xl text-sm text-[var(--econ-muted)]">
+            Ranks parcels for manual review using growth pressure, sewer-proximity proxy, economics, constraints, and due diligence flags.
+          </p>
+          <p className="mt-2 text-xs text-[#ffe6a6]">
+            CFS ranks candidates for manual review only. It does not provide financial or buy/sell guidance or future-value assurances.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!rankedRows.length} onClick={onCreateTop25} type="button">
+            Create Top 25 Review Watchlist
+          </button>
+          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={selectedCount < 2 || selectedCount > 5} onClick={onCompareSelected} type="button">
+            Compare Selected Candidates
+          </button>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {landReviewPresetLabels.map((label) => (
+          <button
+            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${preset === label ? "border-[var(--econ-gold)] bg-[var(--econ-gold)]/15 text-[#ffe6a6]" : "border-[var(--econ-border)] text-[var(--econ-muted)] hover:border-[var(--econ-gold)] hover:text-[var(--econ-text)]"}`}
+            key={label}
+            onClick={() => onSetPreset(label)}
+            type="button"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <MiniMetric label="Visible candidates" value={formatNumber(rankedRows.length)} />
+        <MiniMetric label="Tier 1 / Tier 2" value={formatNumber(rankedRows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 1") || row.ranking.review_priority_band.startsWith("Tier 2")).length)} />
+        <MiniMetric label="Data / constraint-limited" value={formatNumber(rankedRows.filter((row) => row.ranking.review_priority_band.includes("Data") || row.ranking.review_priority_band.includes("Constraint")).length)} />
+        <MiniMetric label="Special review" value={formatNumber(rankedRows.filter((row) => row.ranking.review_priority_band.startsWith("Special")).length)} />
+      </div>
+      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+        <div className="rounded-xl border border-[var(--econ-border)] bg-black/20 p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">Priority mix</p>
+          <div className="mt-2 grid gap-2">
+            {tierCounts.map((row) => (
+              <div className="flex items-center justify-between gap-3 text-xs" key={row.label}>
+                <span className="text-[var(--econ-muted)]">{row.label}</span>
+                <span className="font-semibold text-[var(--econ-text)]">{formatNumber(row.value)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-xl border border-[var(--econ-border)] bg-black/20 p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">Top visible rows</p>
+          <div className="mt-2 grid gap-2">
+            {topRows.map((row) => (
+              <div className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] p-2 text-xs" key={row.signal.parcel_id}>
+                <div className="flex items-start justify-between gap-3">
+                  <span className="font-semibold text-[var(--econ-text)]">#{row.rank} {signalLabel(row.signal)}</span>
+                  <span className="text-[var(--econ-gold)]">{row.ranking.review_priority_band.replace(" - ", ": ")}</span>
+                </div>
+                <p className="mt-1 text-[var(--econ-muted)]">{row.ranking.review_reason_summary}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      {comparisonRows.length >= 2 ? (
+        <div className="mt-4 rounded-xl border border-[var(--econ-border)] bg-black/20 p-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">Comparison for manual due diligence prioritization</p>
+          <div className="mt-2 overflow-auto">
+            <table className="w-full min-w-[760px] text-left text-xs">
+              <thead className="text-[10px] uppercase tracking-[0.12em] text-[var(--econ-muted)]">
+                <tr>
+                  <th className="px-2 py-2">Candidate</th>
+                  <th className="px-2 py-2">Priority</th>
+                  <th className="px-2 py-2">Sewer proxy</th>
+                  <th className="px-2 py-2">Growth</th>
+                  <th className="px-2 py-2">Cautions</th>
+                  <th className="px-2 py-2">Next checks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonRows.map((row) => (
+                  <tr key={row.signal.parcel_id}>
+                    <td className="border-t border-[var(--econ-border)] px-2 py-2 font-semibold text-[var(--econ-text)]">{signalLabel(row.signal)}</td>
+                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{row.ranking.review_priority_band}</td>
+                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{valueText(row.signal.sewer_proxy_class) || "Data Needed"}</td>
+                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{valueText(row.signal.growth_pressure_band) || "Data Needed"}</td>
+                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{row.ranking.caution_flags.slice(0, 3).join("; ") || "Monitor"}</td>
+                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{row.ranking.recommended_next_checks.slice(0, 3).join("; ") || "Verify planning and utility context."}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -3214,6 +3372,7 @@ function ParcelDueDiligenceCard({
   }
   const flags = dueDiligenceRedFlags(signal);
   const nextChecks = dueDiligenceNextChecks(signal);
+  const ranking = landReviewRanking(signal);
   return (
     <div className="rounded-xl border border-[var(--econ-border)] bg-black/20 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -3228,10 +3387,12 @@ function ParcelDueDiligenceCard({
       </div>
       <Matrix
         rows={[
-          { label: "Why this surfaced", value: valueText(signal.land_opportunity_class) || valueText(signal.development_readiness_band) || "Data needed" },
-          { label: "What supports the signal", value: [`Growth: ${valueText(signal.growth_pressure_band)}`, `Sewer proxy: ${valueText(signal.sewer_proxy_class)}`, `Economics: ${valueText(signal.economic_opportunity_band) || valueText(signal.tax_base_opportunity_band)}`].join("; ") },
-          { label: "What could be a problem", value: flags.slice(0, 4).join("; ") || "Data needed" },
+          { label: "Review priority", value: ranking.review_priority_band },
+          { label: "Why this candidate ranked here", value: ranking.review_reason_summary },
+          { label: "Supporting signals / What supports the signal", value: ranking.supporting_signals.slice(0, 5).join("; ") || "Data needed" },
+          { label: "Caution flags / What could be a problem", value: flags.slice(0, 4).join("; ") || "Monitor" },
           { label: "What to verify next", value: nextChecks.slice(0, 4).join("; ") || "Verify planning, utilities, access, and constraints." },
+          { label: "Why CFS is not making a buy recommendation", value: "CFS is ranking records for manual review only. Verify planning, utility, legal, access, and site facts before any outside decision." },
         ]}
       />
       <div className="mt-4 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
@@ -5427,6 +5588,198 @@ function landDueDiligenceRank(signal: EconomicsParcelSignal) {
   return index >= 0 ? index : 99;
 }
 
+function matchesLandReviewPreset(signal: EconomicsParcelSignal, preset: string) {
+  if (preset === "All") return true;
+  const text = landReviewSearchText(signal);
+  if (preset === "Infrastructure-supported candidates") {
+    return hasSewerSupport(signal) && textIncludesAny(text, ["strong infrastructure", "good candidate", "strong sewer", "moderate sewer"]);
+  }
+  if (preset === "Growth pressure + sewer proximity") {
+    return hasGrowthPressure(signal) && hasSewerSupport(signal);
+  }
+  if (preset === "Underbuilt + utility proxy") {
+    return hasSewerSupport(signal) && textIncludesAny(text, ["underbuilt", "redevelopment", "vacant"]);
+  }
+  if (preset === "More data needed but interesting") {
+    return hasOpportunitySignal(signal) && textIncludesAny(text, ["data needed", "not provided", "verify", "capacity"]);
+  }
+  if (preset === "Special assets / compare separately") {
+    return isSpecialReviewCandidate(signal);
+  }
+  return true;
+}
+
+function landReviewRanking(signal: EconomicsParcelSignal): LandReviewRanking {
+  const text = landReviewSearchText(signal);
+  const special = isSpecialReviewCandidate(signal);
+  const supportingSignals = uniqueStrings([
+    valueText(signal.development_readiness_band) ? `Development readiness: ${valueText(signal.development_readiness_band)}` : "",
+    valueText(signal.land_opportunity_class) ? `Land opportunity: ${valueText(signal.land_opportunity_class)}` : "",
+    hasSewerSupport(signal) ? `Sewer proxy: ${valueText(signal.sewer_proxy_class) || valueText(signal.utility_readiness_proxy_class)}` : "",
+    hasGrowthPressure(signal) ? `Growth pressure: ${valueText(signal.growth_pressure_band)}` : "",
+    hasOpportunitySignal(signal) ? `Economic opportunity: ${valueText(signal.economic_opportunity_band) || valueText(signal.opportunity_class) || valueText(signal.tax_base_opportunity_band)}` : "",
+    valueText(signal.zoning_support_band) ? `Zoning support: ${valueText(signal.zoning_support_band)}` : "",
+  ]);
+  const cautionFlags = uniqueStrings([
+    ...dueDiligenceRedFlags(signal),
+    special ? "Special asset / compare separately" : "",
+    textIncludesAny(text, ["flood", "constraint"]) ? `Constraint context: ${valueText(signal.flood_constraint_band) || valueText(signal.constraint_burden_band) || "review needed"}` : "",
+    textIncludesAny(text, ["data needed", "not provided"]) ? "Missing or proxy-only data needs verification" : "",
+  ]);
+  const nextChecks = dueDiligenceNextChecks(signal);
+  const score =
+    (textIncludesAny(text, ["strong infrastructure-supported", "strong sewer", "adjacent to sewer"]) ? 4 : 0) +
+    (textIncludesAny(text, ["good candidate", "near sewer", "moderate sewer"]) ? 3 : 0) +
+    (hasGrowthPressure(signal) ? 2 : 0) +
+    (hasOpportunitySignal(signal) ? 2 : 0) +
+    (textIncludesAny(text, ["zoning support", "supportive"]) ? 1 : 0) -
+    (textIncludesAny(text, ["data needed", "not provided"]) ? 1 : 0) -
+    (textIncludesAny(text, ["flood", "limited utility", "constraint"]) ? 1 : 0);
+  const reviewPriorityBand = landReviewPriorityBand(signal, score, special);
+  return {
+    caution_flags: cautionFlags,
+    recommended_next_checks: nextChecks,
+    review_priority_band: reviewPriorityBand,
+    review_reason_summary: landReviewReasonSummary(signal, reviewPriorityBand, supportingSignals, cautionFlags),
+    sort_value: landReviewSortValue(reviewPriorityBand) + score,
+    supporting_signals: supportingSignals,
+  };
+}
+
+function landReviewPriorityBand(signal: EconomicsParcelSignal, score: number, special: boolean): LandReviewPriorityBand {
+  const readiness = valueText(signal.development_readiness_band).toLowerCase();
+  if (special) return "Special Review - Compare Separately";
+  if (readiness.includes("strong infrastructure-supported") || score >= 8) return "Tier 1 - Strong Review Candidate";
+  if (readiness.includes("good candidate") || score >= 5) return "Tier 2 - Good Review Candidate";
+  if (readiness.includes("opportunity signal") || score >= 2) return "Tier 3 - Watchlist / More Data Needed";
+  return "Tier 4 - Constraint or Data-Limited";
+}
+
+function landReviewSortValue(band: LandReviewPriorityBand) {
+  if (band.startsWith("Tier 1")) return 500;
+  if (band.startsWith("Tier 2")) return 400;
+  if (band.startsWith("Tier 3")) return 300;
+  if (band.startsWith("Special")) return 200;
+  return 100;
+}
+
+function landReviewReasonSummary(
+  signal: EconomicsParcelSignal,
+  band: LandReviewPriorityBand,
+  supportingSignals: string[],
+  cautionFlags: string[],
+) {
+  if (band.startsWith("Special")) {
+    return "Special or non-comparable asset context; review separately from ordinary parcels.";
+  }
+  if (supportingSignals.length) {
+    return `${supportingSignals.slice(0, 3).join("; ")}.${cautionFlags.length ? ` Verify ${cautionFlags[0].toLowerCase()}.` : ""}`;
+  }
+  return valueText(signal.development_readiness_band) || valueText(signal.land_opportunity_class) || "Data needed before ranking interpretation.";
+}
+
+function landReviewSearchText(signal: EconomicsParcelSignal) {
+  return [
+    signal.development_readiness_band,
+    signal.land_opportunity_class,
+    signal.sewer_proxy_class,
+    signal.utility_readiness_proxy_class,
+    signal.sewer_proxy_confidence,
+    signal.economic_segment,
+    signal.growth_pressure_band,
+    signal.economic_opportunity_band,
+    signal.opportunity_class,
+    signal.tax_base_opportunity_band,
+    signal.flood_constraint_band,
+    signal.constraint_burden_band,
+    signal.zoning_support_band,
+    signal.utility_capacity_status,
+    signal.planned_extension_status,
+    signal.data_confidence,
+    signal.economic_data_confidence,
+    signal.recommended_followup,
+    signalListValues(signal.due_diligence_flags).join(" "),
+    signalListValues(signal.suggested_next_checks).join(" "),
+  ]
+    .map(valueText)
+    .join(" ")
+    .toLowerCase();
+}
+
+function textIncludesAny(value: string, terms: string[]) {
+  return terms.some((term) => value.includes(term));
+}
+
+function hasSewerSupport(signal: EconomicsParcelSignal) {
+  const text = landReviewSearchText(signal);
+  return textIncludesAny(text, ["adjacent to sewer", "near sewer", "within 1000", "strong sewer", "moderate sewer", "sewer basin", "sewer-proximity"]);
+}
+
+function hasGrowthPressure(signal: EconomicsParcelSignal) {
+  return textIncludesAny(valueText(signal.growth_pressure_band).toLowerCase(), ["growth pressure", "strong", "high", "elevated", "permit pressure"]);
+}
+
+function hasOpportunitySignal(signal: EconomicsParcelSignal) {
+  return textIncludesAny(landReviewSearchText(signal), ["opportunity", "underbuilt", "redevelopment", "candidate", "tax-base", "tax base", "economic"]);
+}
+
+function isSpecialReviewCandidate(signal: EconomicsParcelSignal) {
+  if (signal.special_asset_flag) return true;
+  return textIncludesAny(landReviewSearchText(signal), ["special asset", "compare separately", "institutional", "civic", "infrastructure / utility"]);
+}
+
+function topLandReviewWatchlistPacket(rows: RankedLandReviewCandidate[]): DueDiligencePacket {
+  const signals = rows.map((row) => row.signal);
+  const topLines = rows.slice(0, 25).map((row) =>
+    `${row.rank}. ${signalLabel(row.signal)} - ${row.ranking.review_priority_band}; ${row.ranking.review_reason_summary}`,
+  );
+  const flags = topTextCounts(rows.flatMap((row) => row.ranking.caution_flags)).slice(0, 8);
+  return {
+    caveats: landDueDiligencePacketCaveats,
+    id: `top-land-review-watchlist-${rows.length}-${signals.slice(0, 8).map((row) => row.parcel_id).join("-")}`,
+    packet_type: "watchlist",
+    questions_to_ask: defaultDueDiligenceQuestions,
+    sections: [
+      packetSection("Top 25 Review Watchlist", topLines),
+      packetSection("Review Priority Mix", countRowsBy(rows, (row) => row.ranking.review_priority_band).map((row) => `${row.label}: ${row.value}`)),
+      packetSection("Why These Candidates Surfaced", [
+        "CFS combined development-readiness bands, sewer-proximity proxy, growth pressure, economic opportunity, constraints, and due diligence flags.",
+        "The list is for manual review sequencing only and should be verified with planning, utilities, access, legal/title, and site checks.",
+      ]),
+      packetSection("Sewer / Utility Proxy Context", [
+        `Sewer proxy mix: ${countRowsBy(signals, (row) => row.sewer_proxy_class ?? "Data Needed").slice(0, 6).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `Utility proxy mix: ${countRowsBy(signals, (row) => row.utility_readiness_proxy_class ?? "Data Needed").slice(0, 6).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        landDueDiligenceWsaccCaveat,
+      ]),
+      packetSection("Caution Flags", flags.length ? flags.map((row) => `${row.label}: ${row.value}`) : ["Monitor; no common caution flag surfaced in the selected rows."]),
+      packetSection("Recommended Next Checks", defaultDueDiligenceQuestions),
+      packetSection("Caveats", landDueDiligencePacketCaveats),
+    ],
+    summary: `Top ${Math.min(rows.length, 25)} land review candidates prepared for screening-level manual review. Use priority bands and reasons, not raw scores, to sequence due diligence.`,
+    title: "Top 25 Land Review Watchlist",
+  };
+}
+
+function candidateComparisonPacket(rows: RankedLandReviewCandidate[]): DueDiligencePacket {
+  return {
+    caveats: landDueDiligencePacketCaveats,
+    id: `land-review-comparison-${rows.map((row) => row.signal.parcel_id).join("-")}`,
+    packet_type: "watchlist",
+    questions_to_ask: defaultDueDiligenceQuestions,
+    sections: [
+      packetSection("Candidate Comparison", rows.map((row) =>
+        `${signalLabel(row.signal)} - ${row.ranking.review_priority_band}; sewer proxy: ${valueText(row.signal.sewer_proxy_class) || "Data Needed"}; growth: ${valueText(row.signal.growth_pressure_band) || "Data Needed"}; caution: ${row.ranking.caution_flags[0] ?? "Monitor"}`,
+      )),
+      packetSection("Supporting Signals", rows.map((row) => `${signalLabel(row.signal)}: ${row.ranking.supporting_signals.slice(0, 4).join("; ") || "Data Needed"}`)),
+      packetSection("Caution Flags", rows.map((row) => `${signalLabel(row.signal)}: ${row.ranking.caution_flags.slice(0, 4).join("; ") || "Monitor"}`)),
+      packetSection("What To Verify Next", rows.map((row) => `${signalLabel(row.signal)}: ${row.ranking.recommended_next_checks.slice(0, 4).join("; ") || "Verify planning and utility context."}`)),
+      packetSection("Caveats", landDueDiligencePacketCaveats),
+    ],
+    summary: `${rows.length} selected candidates compared for manual due diligence prioritization.`,
+    title: "Selected Land Review Candidate Comparison",
+  };
+}
+
 function matchesFilter(value: unknown, selected: string) {
   return selected === "All" || valueText(value) === selected;
 }
@@ -6386,6 +6739,7 @@ type PowerBiReportType =
   | "scenario_data_confidence"
   | "special_assets"
   | "tax_base"
+  | "top_candidates"
   | "underbuilt"
   | "utility";
 type PowerBiReportAvailabilityItem = {
@@ -6434,6 +6788,25 @@ type DueDiligencePacket = {
   sections: DueDiligencePacketSection[];
   summary: string;
   title: string;
+};
+type LandReviewPriorityBand =
+  | "Tier 1 - Strong Review Candidate"
+  | "Tier 2 - Good Review Candidate"
+  | "Tier 3 - Watchlist / More Data Needed"
+  | "Tier 4 - Constraint or Data-Limited"
+  | "Special Review - Compare Separately";
+type LandReviewRanking = {
+  caution_flags: string[];
+  recommended_next_checks: string[];
+  review_priority_band: LandReviewPriorityBand;
+  review_reason_summary: string;
+  sort_value: number;
+  supporting_signals: string[];
+};
+type RankedLandReviewCandidate = {
+  rank: number;
+  ranking: LandReviewRanking;
+  signal: EconomicsParcelSignal;
 };
 type ReportBucketItem = {
   caveats?: string[];
@@ -6643,6 +7016,16 @@ const userChartTemplates: UserChartTemplate[] = [
   },
   {
     aggregation: "count",
+    category: "development_readiness_band",
+    description: "Rank candidate rows for screening-level manual review.",
+    filterField: "sewer_proxy_class",
+    name: "Top Land Review Candidates",
+    table: "parcel_economic_signal_fact",
+    value: "signal_id",
+    visual: "bar",
+  },
+  {
+    aggregation: "count",
     category: "geography_label",
     description: "Count economics signals by geography.",
     filterField: "opportunity_class",
@@ -6654,6 +7037,7 @@ const userChartTemplates: UserChartTemplate[] = [
 ];
 
 const powerBiReportPromptExamples = [
+  "Build a Top Land Review Candidates Report.",
   "Build a Land Due Diligence Report.",
   "Build a report for underbuilt redevelopment candidates.",
   "Create visuals for economic segment comparison.",
@@ -6676,6 +7060,7 @@ const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {
 
 const quickPowerBiReportTypes: Array<{ label: string; prompt: string; type: PowerBiReportType }> = [
   { label: "Executive Dashboard", prompt: "Build an executive dashboard.", type: "executive" },
+  { label: "Top Land Review Candidates", prompt: "Build a Top Land Review Candidates Report.", type: "top_candidates" },
   { label: "Parcel Due Diligence Packet", prompt: "Build a Parcel Due Diligence Packet.", type: "due_diligence" },
   { label: "Land Due Diligence Report", prompt: "Build a Land Due Diligence Report.", type: "due_diligence" },
   { label: "Land Opportunity Screener", prompt: "Build a Land Opportunity Screener report.", type: "land_opportunity" },
@@ -6691,6 +7076,14 @@ const landDueDiligencePriorityBands = [
   "Strong infrastructure-supported review candidate",
   "Good candidate, verify zoning and utilities",
   "Opportunity signal, capacity data needed",
+];
+const landReviewPresetLabels = [
+  "All",
+  "Infrastructure-supported candidates",
+  "Growth pressure + sewer proximity",
+  "Underbuilt + utility proxy",
+  "More data needed but interesting",
+  "Special assets / compare separately",
 ];
 
 const landDueDiligenceChecklist = [
@@ -6771,6 +7164,11 @@ function buildReportDataAvailability(
     {
       available: Boolean(parcelRows.length && landOpportunityRows),
       reason: parcelRows.length ? "Needs development readiness or land opportunity fields." : "Needs parcel economic signal rows.",
+      type: "top_candidates",
+    },
+    {
+      available: Boolean(parcelRows.length && landOpportunityRows),
+      reason: parcelRows.length ? "Needs development readiness or land opportunity fields." : "Needs parcel economic signal rows.",
       type: "land_opportunity",
     },
     {
@@ -6815,7 +7213,7 @@ function buildReportDataAvailability(
   const bestDefault =
     scenarioRows && readinessRows && !parcelRows.length
       ? "scenario_data_confidence"
-      : (["executive", "due_diligence", "land_opportunity", "scenario", "data_confidence", "utility", "underbuilt"] as PowerBiReportType[])
+      : (["executive", "top_candidates", "due_diligence", "land_opportunity", "scenario", "data_confidence", "utility", "underbuilt"] as PowerBiReportType[])
           .find((type) => available.includes(type)) ?? "executive";
   return {
     available_report_types: available,
@@ -6848,6 +7246,7 @@ function reportTypeLabel(type: PowerBiReportType) {
 
 function reportTypeFromPrompt(prompt: string): PowerBiReportType | null {
   const normalized = prompt.toLowerCase();
+  if (normalized.includes("top land") || normalized.includes("top candidate") || normalized.includes("top 25") || normalized.includes("review candidate")) return "top_candidates";
   if (normalized.includes("due diligence") || normalized.includes("manual review") || normalized.includes("parcel review") || normalized.includes("parcel packet")) return "due_diligence";
   if (normalized.includes("land opportunity") || normalized.includes("land screener") || normalized.includes("development readiness")) return "land_opportunity";
   if (normalized.includes("utility") || normalized.includes("sewer") || normalized.includes("wsacc")) return "utility";
@@ -6972,6 +7371,57 @@ function buildPowerBiReportPlan(
         "Parcel-level candidate charts are hidden until parcel_economic_signal_fact has rows.",
         ...powerBiReportCaveats,
       ]),
+    );
+  }
+
+  if (selectedReportType === "top_candidates") {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Top Land Review Candidates Report",
+      `${selectionNote ? `${selectionNote}. ` : ""}Create a screening-level ranked watchlist using development-readiness, sewer-proximity proxy, growth pressure, land opportunity, constraints, and due diligence flags.`,
+      [
+        reportPage("Top Land Review Candidates", "Rank and explain candidates for manual review sequencing.", [
+          generatedPowerBiVisual({
+            axis: "development_readiness_band",
+            caveat: "Use bands for manual review order; do not treat them as financial guidance.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Review priority breakdown",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "sewer_proxy_class",
+            caveat: "Sewer proximity is a proxy and does not verify utility capacity or water service.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Sewer proxy x growth pressure",
+            value: "growth_pressure_band",
+            visual_type: "matrix",
+          }),
+          generatedPowerBiVisual({
+            axis: "land_opportunity_class",
+            caveat: "Land opportunity classes are screening labels only.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Land opportunity class mix",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "geography_label",
+            caveat: "Use this table to choose rows for manual due diligence and Print.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Top candidate watchlist table",
+            value: "suggested_next_checks",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+      [
+        "Use development_readiness_band, land_opportunity_class, sewer_proxy_class, growth_pressure_band, due_diligence_flags, and suggested_next_checks as the first fields.",
+        "Create a candidate table, then use slicers for sewer_proxy_class, growth_pressure_band, and data_confidence.",
+        "Verify planning, utilities, access, title/easements, site dimensions, and constraints before any outside decision.",
+        ...powerBiReportCaveats,
+      ],
     );
   }
 
@@ -8385,10 +8835,10 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
       why: "The bucket connects tools to Print.",
     },
     {
-      body: "Filter candidates, select rows, generate a due diligence packet, then save it to the bucket or Print.",
+      body: "Use ranked bands, presets, Top 25, and comparison tools to sequence manual parcel review.",
       id: "tools-due-diligence",
-      targetSelector: '[data-econ-tour="land-due-diligence-screener"]',
-      title: "Due diligence packet",
+      targetSelector: '[data-econ-tour="land-top-candidates"]',
+      title: "Top candidates",
       why: "This is the parcel review path.",
     },
     {

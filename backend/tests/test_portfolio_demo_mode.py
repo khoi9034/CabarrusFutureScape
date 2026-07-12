@@ -319,6 +319,24 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Land Due Diligence Screener" in economics_shell
     assert "Land Due Diligence Report" in economics_shell
     assert "Land Review Watchlist" in economics_shell
+    assert "Top Land Review Candidates" in economics_shell
+    assert "Screening-level candidate ranking" in economics_shell
+    assert "CFS ranks candidates for manual review only" in economics_shell
+    assert "Tier 1 - Strong Review Candidate" in economics_shell
+    assert "Tier 2 - Good Review Candidate" in economics_shell
+    assert "Tier 3 - Watchlist / More Data Needed" in economics_shell
+    assert "Tier 4 - Constraint or Data-Limited" in economics_shell
+    assert "Special Review - Compare Separately" in economics_shell
+    assert "Infrastructure-supported candidates" in economics_shell
+    assert "Growth pressure + sewer proximity" in economics_shell
+    assert "Underbuilt + utility proxy" in economics_shell
+    assert "More data needed but interesting" in economics_shell
+    assert "Special assets / compare separately" in economics_shell
+    assert "Create Top 25 Review Watchlist" in economics_shell
+    assert "Compare Selected Candidates" in economics_shell
+    assert "Why this candidate ranked here" in economics_shell
+    assert "Comparison for manual due diligence prioritization" in economics_shell
+    assert "Top Land Review Candidates Report" in economics_shell
     assert "Parcel Due Diligence Card" in economics_shell
     assert "land-due-diligence-steps" in economics_shell
     assert "Filter" in economics_shell

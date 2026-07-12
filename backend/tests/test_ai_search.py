@@ -1011,6 +1011,34 @@ def test_ai_search_economics_powerbi_actions_cover_land_due_diligence_report() -
     assert not any(field in action_text for field in unsafe_fields)
 
 
+def test_ai_search_economics_powerbi_actions_cover_top_land_candidates_report() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Build a Top 25 Land Review Watchlist.",
+            request_type="powerbi_report_plan",
+        ),
+        _context(),
+    )
+
+    assert response.powerbi_actions is not None
+    assert response.powerbi_actions["report_title"] == "Top Land Review Candidates Report"
+    action_text = str(response.powerbi_actions).lower()
+    assert "development_readiness_band" in action_text
+    assert "sewer_proxy_class" in action_text
+    assert "growth_pressure_band" in action_text
+    assert "suggested_next_checks" in action_text
+    assert "financial guidance" in action_text
+    unsafe_fields = {
+        "ow" + "ner",
+        "mail" + "ing",
+        "raw_" + "score",
+        "prediction_" + "probability",
+        "exact_" + "probability",
+    }
+    assert not any(field in action_text for field in unsafe_fields)
+
+
 def test_ai_search_economics_powerbi_sort_prompt_mentions_export_order_fields() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(

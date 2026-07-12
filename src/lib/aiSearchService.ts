@@ -86,12 +86,17 @@ export const askCfsEconomicsWorkspacePrompts = [
 ] as const;
 
 export const askCfsEconomicsPowerBiToolPrompts = [
-  "Which parcels should I review first?",
+  "Which candidates should I review first?",
+  "Why is this parcel ranked highly?",
+  "Compare these selected candidates.",
+  "Build a Top 25 Land Review Watchlist.",
+  "What are the red flags for these candidates?",
+  "What should I verify before spending money on due diligence?",
+  "Which candidates have growth pressure and sewer proximity?",
   "Generate a due diligence packet.",
   "What should I ask utilities?",
-  "What are the red flags?",
-  "What should I verify before considering this parcel?",
   "Build me a Power BI report.",
+  "Build a Top Land Review Candidates Report.",
   "Create a chart of opportunity classes.",
   "Build a report for underbuilt parcels.",
   "Build a Land Due Diligence Report.",
@@ -703,6 +708,15 @@ function isEconomicsPowerBiQuery(query: string) {
     "due diligence packet",
     "watchlist due diligence",
     "which parcels should i review first",
+    "which candidates should i review first",
+    "why is this parcel ranked highly",
+    "compare these selected candidates",
+    "top 25 land review",
+    "top land review",
+    "top candidates",
+    "red flags for these candidates",
+    "spending money on due diligence",
+    "growth pressure and sewer proximity",
     "what should i verify",
     "why did this parcel surface",
     "questions should i ask",
@@ -729,6 +743,15 @@ function isEconomicsDueDiligencePacketQuery(query: string) {
     "due diligence packet",
     "watchlist due diligence",
     "which parcels should i review first",
+    "which candidates should i review first",
+    "why is this parcel ranked highly",
+    "compare these selected candidates",
+    "top 25 land review",
+    "top land review",
+    "top candidates",
+    "red flags for these candidates",
+    "spending money on due diligence",
+    "growth pressure and sewer proximity",
     "what should i verify",
     "why did this parcel surface",
     "questions should i ask",
@@ -863,11 +886,12 @@ function demoEconomicsDueDiligencePacketAnswer(
     answer: briefing(
       [
         "Direct answer",
-        "Use Power BI & Tools -> Land Due Diligence Screener. Select one candidate for a parcel packet, or select several rows for a watchlist packet.",
+        "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy.",
       ],
       [
         "What CFS will include",
         bullets([
+          "Ranked watchlist bands with plain-language reasons and caution flags.",
           "Why the row surfaced: readiness band, sewer-proximity proxy, growth pressure, economics, constraints, and flags.",
           "Infrastructure context: sewer proxy class, utility-readiness proxy, sewer basin, and data-needed utility statuses.",
           "Questions to ask planning/utilities and recommended next checks.",
@@ -915,8 +939,9 @@ function demoEconomicsDueDiligencePacketAnswer(
     provider: "none",
     related_layers: ["Power BI & Tools", "Report Bucket", "Print"],
     suggested_actions: [
+      "Use Create Top 25 Review Watchlist for a report-ready screening packet.",
+      "Select 2-5 candidates and choose Compare Selected Candidates.",
       "Select one candidate and choose Generate Due Diligence Packet.",
-      "Select multiple watchlist rows and choose Generate Watchlist Packet.",
       "Add the packet to the Report Bucket or send it to Print.",
     ],
   };
@@ -1244,7 +1269,23 @@ function demoPowerBiActionsForQuery(query: string): CfsAiPowerBiActions {
   let selectedFilters: CfsAiPowerBiActions["selected_filters"] = {};
   let reportCanvasItems: NonNullable<CfsAiPowerBiActions["report_canvas_items"]>;
 
-  if (normalized.includes("due diligence") || normalized.includes("manual review") || normalized.includes("parcel review")) {
+  if (
+    normalized.includes("top land") ||
+    normalized.includes("top candidate") ||
+    normalized.includes("top 25") ||
+    normalized.includes("review candidate") ||
+    normalized.includes("which candidates should i review first")
+  ) {
+    reportTitle = "Top Land Review Candidates Report";
+    reportSummary = "Create a screening-level ranked watchlist using development-readiness, sewer-proximity proxy, growth pressure, land opportunity, constraints, and due diligence flags.";
+    selectedFilters = { utility_capacity_status: "Capacity data not provided" };
+    reportCanvasItems = [
+      visual("Top Land Review Candidates", "Review priority breakdown", "bar", "parcel_economic_signal_fact", "development_readiness_band", "signal_id", { caveat: "Use bands for manual review order; do not treat them as financial guidance." }),
+      visual("Top Land Review Candidates", "Sewer proxy x growth pressure", "matrix", "parcel_economic_signal_fact", "sewer_proxy_class", "growth_pressure_band", { caveat: "Sewer proximity is a proxy and does not verify utility capacity or water service." }),
+      visual("Top Land Review Candidates", "Land opportunity class mix", "bar", "parcel_economic_signal_fact", "land_opportunity_class", "signal_id", { caveat: "Land opportunity classes are screening labels only." }),
+      visual("Top Land Review Candidates", "Top candidate watchlist table", "matrix", "parcel_economic_signal_fact", "geography_label", "suggested_next_checks", { caveat: "Use this table to choose rows for manual due diligence and Print." }),
+    ];
+  } else if (normalized.includes("due diligence") || normalized.includes("manual review") || normalized.includes("parcel review")) {
     reportTitle = "Land Due Diligence Report";
     reportSummary = "Create a manual parcel review watchlist using development-readiness, sewer-proximity proxy, growth pressure, constraints, and next-check fields.";
     selectedFilters = { utility_capacity_status: "Capacity data not provided" };
