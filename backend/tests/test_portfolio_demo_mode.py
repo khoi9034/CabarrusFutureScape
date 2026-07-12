@@ -337,6 +337,12 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Why this candidate ranked here" in economics_shell
     assert "Comparison for manual due diligence prioritization" in economics_shell
     assert "Top Land Review Candidates Report" in economics_shell
+    assert "Comparable Context" in economics_shell
+    assert "Comparable Context Report" in economics_shell
+    assert "value_per_acre_band" in economics_shell
+    assert "comparison_group" in economics_shell
+    assert "Manual comps review required" in economics_shell
+    assert "CFS is not an appraisal" in economics_shell
     assert "Parcel Due Diligence Card" in economics_shell
     assert "land-due-diligence-steps" in economics_shell
     assert "Filter" in economics_shell

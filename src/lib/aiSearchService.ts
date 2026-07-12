@@ -92,11 +92,15 @@ export const askCfsEconomicsPowerBiToolPrompts = [
   "Build a Top 25 Land Review Watchlist.",
   "What are the red flags for these candidates?",
   "What should I verify before spending money on due diligence?",
+  "How do these candidates compare by value per acre?",
+  "Which candidates need valuation due diligence?",
+  "Why can value per acre be misleading?",
   "Which candidates have growth pressure and sewer proximity?",
   "Generate a due diligence packet.",
   "What should I ask utilities?",
   "Build me a Power BI report.",
   "Build a Top Land Review Candidates Report.",
+  "Build a Comparable Context Report.",
   "Create a chart of opportunity classes.",
   "Build a report for underbuilt parcels.",
   "Build a Land Due Diligence Report.",
@@ -717,6 +721,14 @@ function isEconomicsPowerBiQuery(query: string) {
     "red flags for these candidates",
     "spending money on due diligence",
     "growth pressure and sewer proximity",
+    "candidates compare by value per acre",
+    "valuation due diligence",
+    "comparable context",
+    "comparable sales",
+    "comps",
+    "price makes sense",
+    "misleading myself",
+    "special assets or not comparable",
     "what should i verify",
     "why did this parcel surface",
     "questions should i ask",
@@ -752,6 +764,14 @@ function isEconomicsDueDiligencePacketQuery(query: string) {
     "red flags for these candidates",
     "spending money on due diligence",
     "growth pressure and sewer proximity",
+    "candidates compare by value per acre",
+    "valuation due diligence",
+    "comparable context",
+    "comparable sales",
+    "comps",
+    "price makes sense",
+    "misleading myself",
+    "special assets or not comparable",
     "what should i verify",
     "why did this parcel surface",
     "questions should i ask",
@@ -905,6 +925,14 @@ function demoEconomicsDueDiligencePacketAnswer(
           "Is water service available and which provider should confirm it?",
           "Does zoning support the intended use?",
           "Are floodplain, wetlands, access, easement, or site constraints present?",
+        ]),
+      ],
+      [
+        "Valuation context",
+        bullets([
+          "Compare value per acre within similar segment, acreage, geography, and constraint context.",
+          "Review special assets separately.",
+          "CFS is not an appraisal; verify comparable sales, deed history, public records, and broker/appraiser context.",
         ]),
       ],
       [
@@ -1270,6 +1298,21 @@ function demoPowerBiActionsForQuery(query: string): CfsAiPowerBiActions {
   let reportCanvasItems: NonNullable<CfsAiPowerBiActions["report_canvas_items"]>;
 
   if (
+    normalized.includes("comparable") ||
+    normalized.includes("valuation") ||
+    normalized.includes("comps") ||
+    normalized.includes("price makes sense") ||
+    (normalized.includes("value per acre") && (normalized.includes("candidate") || normalized.includes("compare")))
+  ) {
+    reportTitle = "Comparable Context Report";
+    reportSummary = "Compare candidate rows with assessed-value context, value-per-acre bands, comparison groups, special asset flags, and valuation due diligence notes.";
+    reportCanvasItems = [
+      visual("Comparable Context", "Value-per-acre band comparison", "bar", "parcel_economic_signal_fact", "value_per_acre_band", "signal_id", { caveat: "Compare value per acre within similar segment, acreage, geography, and constraint context." }),
+      visual("Comparable Context", "Comparison group summary", "bar", "parcel_economic_signal_fact", "comparison_group", "signal_id", { caveat: "Comparison groups are screening context; verify with public records and professional review." }),
+      visual("Comparable Context", "Special asset flags", "donut", "parcel_economic_signal_fact", "special_asset_flag", "signal_id", { caveat: "Special assets should be reviewed separately." }),
+      visual("Comparable Context", "Candidate comparable context table", "matrix", "parcel_economic_signal_fact", "geography_label", "recommended_followup", { caveat: "Use this table for manual comps review, not a price conclusion." }),
+    ];
+  } else if (
     normalized.includes("top land") ||
     normalized.includes("top candidate") ||
     normalized.includes("top 25") ||

@@ -3332,21 +3332,36 @@ function TopLandReviewCandidatesPanel({
                   <th className="px-2 py-2">Priority</th>
                   <th className="px-2 py-2">Sewer proxy</th>
                   <th className="px-2 py-2">Growth</th>
+                  <th className="px-2 py-2">Value / acre</th>
+                  <th className="px-2 py-2">Improvement ratio</th>
+                  <th className="px-2 py-2">Assessed value</th>
+                  <th className="px-2 py-2">Comparison group</th>
+                  <th className="px-2 py-2">Comparable status</th>
+                  <th className="px-2 py-2">Valuation flags</th>
                   <th className="px-2 py-2">Cautions</th>
                   <th className="px-2 py-2">Next checks</th>
                 </tr>
               </thead>
               <tbody>
-                {comparisonRows.map((row) => (
-                  <tr key={row.signal.parcel_id}>
-                    <td className="border-t border-[var(--econ-border)] px-2 py-2 font-semibold text-[var(--econ-text)]">{signalLabel(row.signal)}</td>
-                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{row.ranking.review_priority_band}</td>
-                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{valueText(row.signal.sewer_proxy_class) || "Data Needed"}</td>
-                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{valueText(row.signal.growth_pressure_band) || "Data Needed"}</td>
-                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{row.ranking.caution_flags.slice(0, 3).join("; ") || "Monitor"}</td>
-                    <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{row.ranking.recommended_next_checks.slice(0, 3).join("; ") || "Verify planning and utility context."}</td>
-                  </tr>
-                ))}
+                {comparisonRows.map((row) => {
+                  const context = valuationContext(row.signal);
+                  return (
+                    <tr key={row.signal.parcel_id}>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 font-semibold text-[var(--econ-text)]">{signalLabel(row.signal)}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{row.ranking.review_priority_band}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{valueText(row.signal.sewer_proxy_class) || "Data Needed"}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{valueText(row.signal.growth_pressure_band) || "Data Needed"}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{context.value_per_acre_band}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{context.improvement_to_land_ratio_band}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{context.assessed_value_band}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{context.comparison_group}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{context.comparable_context_status}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{context.valuation_due_diligence_flags.slice(0, 3).join("; ")}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{row.ranking.caution_flags.slice(0, 3).join("; ") || "Monitor"}</td>
+                      <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{row.ranking.recommended_next_checks.slice(0, 3).join("; ") || "Verify planning and utility context."}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -3395,12 +3410,39 @@ function ParcelDueDiligenceCard({
           { label: "Why CFS is not making a buy recommendation", value: "CFS is ranking records for manual review only. Verify planning, utility, legal, access, and site facts before any outside decision." },
         ]}
       />
+      <ComparableContextPanel signal={signal} />
       <div className="mt-4 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">Due diligence checklist</p>
         <ul className="mt-2 grid gap-1 text-xs leading-5 text-[var(--econ-muted)] sm:grid-cols-2">
           {landDueDiligenceChecklist.map((item) => <li key={item}>- {item}</li>)}
         </ul>
       </div>
+    </div>
+  );
+}
+
+function ComparableContextPanel({ signal }: { signal: EconomicsParcelSignal }) {
+  const context = valuationContext(signal);
+  return (
+    <div className="mt-4 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">Comparable Context</p>
+      <p className="mt-1 text-xs leading-5 text-[var(--econ-muted)]">
+        CFS provides assessed-value and value-per-acre screening context. CFS is not an appraisal; confirm market value with comparable sales, broker/appraiser review, and public records.
+      </p>
+      <Matrix
+        rows={[
+          { label: "Value-per-acre band", value: context.value_per_acre_band },
+          { label: "Comparison group", value: context.comparison_group },
+          { label: "Group context", value: context.comparable_context_status },
+          { label: "Assessed value context", value: context.assessed_value_band },
+          { label: "Land value context", value: context.land_value_band },
+          { label: "Improvement value context", value: context.improvement_value_band },
+          { label: "Land/improvement ratio", value: context.improvement_to_land_ratio_band },
+          { label: "Sale recency", value: context.sale_recency_band },
+          { label: "Sale price", value: context.sale_price_band },
+          { label: "Valuation due diligence flags", value: context.valuation_due_diligence_flags.join("; ") },
+        ]}
+      />
     </div>
   );
 }
@@ -5612,6 +5654,7 @@ function matchesLandReviewPreset(signal: EconomicsParcelSignal, preset: string) 
 function landReviewRanking(signal: EconomicsParcelSignal): LandReviewRanking {
   const text = landReviewSearchText(signal);
   const special = isSpecialReviewCandidate(signal);
+  const valuation = valuationContext(signal);
   const supportingSignals = uniqueStrings([
     valueText(signal.development_readiness_band) ? `Development readiness: ${valueText(signal.development_readiness_band)}` : "",
     valueText(signal.land_opportunity_class) ? `Land opportunity: ${valueText(signal.land_opportunity_class)}` : "",
@@ -5622,6 +5665,7 @@ function landReviewRanking(signal: EconomicsParcelSignal): LandReviewRanking {
   ]);
   const cautionFlags = uniqueStrings([
     ...dueDiligenceRedFlags(signal),
+    ...valuation.valuation_due_diligence_flags.slice(0, 3),
     special ? "Special asset / compare separately" : "",
     textIncludesAny(text, ["flood", "constraint"]) ? `Constraint context: ${valueText(signal.flood_constraint_band) || valueText(signal.constraint_burden_band) || "review needed"}` : "",
     textIncludesAny(text, ["data needed", "not provided"]) ? "Missing or proxy-only data needs verification" : "",
@@ -5734,6 +5778,7 @@ function topLandReviewWatchlistPacket(rows: RankedLandReviewCandidate[]): DueDil
     `${row.rank}. ${signalLabel(row.signal)} - ${row.ranking.review_priority_band}; ${row.ranking.review_reason_summary}`,
   );
   const flags = topTextCounts(rows.flatMap((row) => row.ranking.caution_flags)).slice(0, 8);
+  const valuationFlags = topTextCounts(signals.flatMap((signal) => valuationContext(signal).valuation_due_diligence_flags)).slice(0, 8);
   return {
     caveats: landDueDiligencePacketCaveats,
     id: `top-land-review-watchlist-${rows.length}-${signals.slice(0, 8).map((row) => row.parcel_id).join("-")}`,
@@ -5750,6 +5795,12 @@ function topLandReviewWatchlistPacket(rows: RankedLandReviewCandidate[]): DueDil
         `Sewer proxy mix: ${countRowsBy(signals, (row) => row.sewer_proxy_class ?? "Data Needed").slice(0, 6).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
         `Utility proxy mix: ${countRowsBy(signals, (row) => row.utility_readiness_proxy_class ?? "Data Needed").slice(0, 6).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
         landDueDiligenceWsaccCaveat,
+      ]),
+      packetSection("Valuation / Comparable Context", [
+        `Value-per-acre context: ${countRowsBy(signals, (row) => valuationContext(row).value_per_acre_band).slice(0, 6).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `Comparison groups: ${countRowsBy(signals, (row) => valuationContext(row).comparison_group).slice(0, 6).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `Special asset rows: ${formatNumber(signals.filter((row) => row.special_asset_flag).length)}`,
+        ...valuationFlags.map((row) => `${row.label}: ${row.value}`),
       ]),
       packetSection("Caution Flags", flags.length ? flags.map((row) => `${row.label}: ${row.value}`) : ["Monitor; no common caution flag surfaced in the selected rows."]),
       packetSection("Recommended Next Checks", defaultDueDiligenceQuestions),
@@ -5770,6 +5821,10 @@ function candidateComparisonPacket(rows: RankedLandReviewCandidate[]): DueDilige
       packetSection("Candidate Comparison", rows.map((row) =>
         `${signalLabel(row.signal)} - ${row.ranking.review_priority_band}; sewer proxy: ${valueText(row.signal.sewer_proxy_class) || "Data Needed"}; growth: ${valueText(row.signal.growth_pressure_band) || "Data Needed"}; caution: ${row.ranking.caution_flags[0] ?? "Monitor"}`,
       )),
+      packetSection("Valuation / Comparable Context", rows.map((row) => {
+        const context = valuationContext(row.signal);
+        return `${signalLabel(row.signal)} - value/acre: ${context.value_per_acre_band}; assessed value: ${context.assessed_value_band}; comparison group: ${context.comparison_group}; status: ${context.comparable_context_status}`;
+      })),
       packetSection("Supporting Signals", rows.map((row) => `${signalLabel(row.signal)}: ${row.ranking.supporting_signals.slice(0, 4).join("; ") || "Data Needed"}`)),
       packetSection("Caution Flags", rows.map((row) => `${signalLabel(row.signal)}: ${row.ranking.caution_flags.slice(0, 4).join("; ") || "Monitor"}`)),
       packetSection("What To Verify Next", rows.map((row) => `${signalLabel(row.signal)}: ${row.ranking.recommended_next_checks.slice(0, 4).join("; ") || "Verify planning and utility context."}`)),
@@ -5811,6 +5866,76 @@ function acreageBandForSignal(signal: EconomicsParcelSignal) {
   return "25+ acres";
 }
 
+function valuationContext(signal: EconomicsParcelSignal): ValuationContext {
+  const saleDate = valueText(signalExtraField(signal, "sale_date") ?? signalExtraField(signal, "last_sale_date"));
+  const salePrice = numericExtraField(signal, "sale_price") ?? numericExtraField(signal, "last_sale_price");
+  const recentSaleAvailable = Boolean(saleDate || salePrice != null);
+  const comparisonGroup = valueText(signal.comparison_group)
+    || uniqueStrings([
+      valueText(signal.economic_segment),
+      valueText(signal.jurisdiction ?? signal.geography_label),
+      acreageBandForSignal(signal),
+      valueText(signal.sewer_proxy_class),
+      valueText(signal.land_opportunity_class),
+    ]).slice(0, 4).join(" / ")
+    || "Data Needed";
+  const flags = uniqueStrings([
+    !recentSaleAvailable ? "Recent sale fields are not available in the current CFS Economics export" : "",
+    !valueText(signalExtraField(signal, "value_per_acre_band")) && signal.value_per_acre == null ? "Value-per-acre context needs review" : "",
+    signal.assessed_value == null ? "Assessed-value field needs review" : "",
+    signal.special_asset_flag ? "Special asset / compare separately" : "",
+    "Manual comps review required",
+    "Verify with public records, broker, or appraiser as needed",
+  ]);
+  return {
+    assessed_value_band: valueText(signalExtraField(signal, "assessed_value_band")) || moneyBand(signal.assessed_value),
+    comparable_context_status: signal.special_asset_flag
+      ? "Special asset / compare separately"
+      : recentSaleAvailable
+        ? "Sale indicator available; verify manually"
+        : "Assessed-value and value-per-acre context only",
+    comparison_group: comparisonGroup,
+    improvement_to_land_ratio_band: valueText(signalExtraField(signal, "improvement_to_land_ratio_band")) || ratioBand(signal.improvement_to_land_ratio),
+    improvement_value_band: valueText(signalExtraField(signal, "improvement_value_band")) || moneyBand(signal.improvement_value),
+    land_value_band: valueText(signalExtraField(signal, "land_value_band")) || moneyBand(signal.land_value),
+    recent_sale_available_flag: recentSaleAvailable,
+    sale_price_band: salePrice == null ? "Sale price not available" : moneyBand(salePrice),
+    sale_recency_band: saleDate ? saleRecencyBand(saleDate) : "Sale date not available",
+    valuation_due_diligence_flags: flags,
+    value_per_acre_band: valueText(signalExtraField(signal, "value_per_acre_band")) || moneyBand(signal.value_per_acre),
+  };
+}
+
+function moneyBand(value: number | null | undefined) {
+  if (value == null || Number.isNaN(value)) return "Data Needed";
+  if (value < 100_000) return "Under $100K";
+  if (value < 250_000) return "$100K-$250K";
+  if (value < 500_000) return "$250K-$500K";
+  if (value < 1_000_000) return "$500K-$1M";
+  return "$1M+";
+}
+
+function ratioBand(value: number | null | undefined) {
+  if (value == null || Number.isNaN(value)) return "Data Needed";
+  if (value < 0.5) return "Low";
+  if (value < 1.5) return "Moderate";
+  return "High";
+}
+
+function saleRecencyBand(value: string) {
+  const year = new Date(value).getFullYear();
+  if (!Number.isFinite(year)) return "Sale date needs review";
+  const age = new Date().getFullYear() - year;
+  if (age <= 2) return "Recent sale indicator";
+  if (age <= 5) return "Moderate recency sale indicator";
+  return "Older sale indicator";
+}
+
+function numericExtraField(signal: EconomicsParcelSignal, field: string) {
+  const value = signalExtraField(signal, field);
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
 function packetSection(title: string, lines: string[]): DueDiligencePacketSection {
   return { lines: uniqueStrings(lines.filter(Boolean)), title };
 }
@@ -5823,6 +5948,7 @@ function singleParcelDueDiligencePacket(signal: EconomicsParcelSignal): DueDilig
   const flags = dueDiligenceRedFlags(signal);
   const nextChecks = dueDiligenceNextChecks(signal);
   const questions = dueDiligenceQuestions(signal);
+  const valuation = valuationContext(signal);
   return {
     caveats: landDueDiligencePacketCaveats,
     id: `due-diligence-packet-${signal.parcel_id}`,
@@ -5857,9 +5983,19 @@ function singleParcelDueDiligencePacket(signal: EconomicsParcelSignal): DueDilig
         packetLine("Economic opportunity", signal.economic_opportunity_band),
         packetLine("Opportunity class", signal.opportunity_class),
         packetLine("Tax-base opportunity", signal.tax_base_opportunity_band),
-        packetLine("Value-per-acre band", signalExtraField(signal, "value_per_acre_band")),
-        packetLine("Improvement ratio band", signalExtraField(signal, "improvement_to_land_ratio_band")),
+        packetLine("Value-per-acre band", valuation.value_per_acre_band),
+        packetLine("Improvement ratio band", valuation.improvement_to_land_ratio_band),
         signal.special_asset_flag ? "Special asset / compare with caution." : "",
+      ]),
+      packetSection("Valuation / Comparable Context", [
+        packetLine("Comparison group", valuation.comparison_group),
+        packetLine("Comparable context status", valuation.comparable_context_status),
+        packetLine("Assessed value context", valuation.assessed_value_band),
+        packetLine("Land value context", valuation.land_value_band),
+        packetLine("Improvement value context", valuation.improvement_value_band),
+        packetLine("Sale recency", valuation.sale_recency_band),
+        packetLine("Sale price", valuation.sale_price_band),
+        ...valuation.valuation_due_diligence_flags,
       ]),
       packetSection("Constraint Context", [
         packetLine("Flood constraint", signal.flood_constraint_band),
@@ -5879,6 +6015,7 @@ function singleParcelDueDiligencePacket(signal: EconomicsParcelSignal): DueDilig
 
 function watchlistDueDiligencePacket(rows: EconomicsParcelSignal[]): DueDiligencePacket {
   const flags = topTextCounts(rows.flatMap((signal) => dueDiligenceRedFlags(signal))).slice(0, 8);
+  const valuationFlags = topTextCounts(rows.flatMap((signal) => valuationContext(signal).valuation_due_diligence_flags)).slice(0, 8);
   const candidates = rows.slice(0, 12).map((signal, index) =>
     `${index + 1}. ${signalLabel(signal)} - review priority: ${valueText(signal.development_readiness_band) || valueText(signal.land_opportunity_class) || "Data Needed"}; sewer proxy: ${valueText(signal.sewer_proxy_class) || "Data Needed"}`,
   );
@@ -5906,6 +6043,12 @@ function watchlistDueDiligencePacket(rows: EconomicsParcelSignal[]): DueDiligenc
       packetSection("Economic Context", [
         `Economic opportunity mix: ${countRowsBy(rows, (row) => row.economic_opportunity_band ?? "Data Needed").slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
         `Special asset rows: ${formatNumber(rows.filter((row) => row.special_asset_flag).length)}`,
+      ]),
+      packetSection("Valuation / Comparable Context", [
+        `Value-per-acre context: ${countRowsBy(rows, (row) => valuationContext(row).value_per_acre_band).slice(0, 6).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `Comparison groups: ${countRowsBy(rows, (row) => valuationContext(row).comparison_group).slice(0, 6).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        `Comparable context status: ${countRowsBy(rows, (row) => valuationContext(row).comparable_context_status).slice(0, 6).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
+        ...valuationFlags.map((row) => `${row.label}: ${row.value}`),
       ]),
       packetSection("Constraint Context", [
         `Flood constraint mix: ${countRowsBy(rows, (row) => row.flood_constraint_band ?? "Data Needed").slice(0, 5).map((row) => `${row.label}: ${row.value}`).join("; ") || "Data Needed"}`,
@@ -6731,6 +6874,7 @@ type GeneratedPowerBiReportSnapshot = {
   visuals: GeneratedReportVisualPreview[];
 };
 type PowerBiReportType =
+  | "comparable_context"
   | "data_confidence"
   | "due_diligence"
   | "executive"
@@ -6802,6 +6946,19 @@ type LandReviewRanking = {
   review_reason_summary: string;
   sort_value: number;
   supporting_signals: string[];
+};
+type ValuationContext = {
+  assessed_value_band: string;
+  comparable_context_status: string;
+  comparison_group: string;
+  improvement_to_land_ratio_band: string;
+  improvement_value_band: string;
+  land_value_band: string;
+  recent_sale_available_flag: boolean;
+  sale_price_band: string;
+  sale_recency_band: string;
+  valuation_due_diligence_flags: string[];
+  value_per_acre_band: string;
 };
 type RankedLandReviewCandidate = {
   rank: number;
@@ -7026,6 +7183,16 @@ const userChartTemplates: UserChartTemplate[] = [
   },
   {
     aggregation: "count",
+    category: "value_per_acre_band",
+    description: "Compare candidate valuation context by safe bands.",
+    filterField: "comparison_group",
+    name: "Comparable Context",
+    table: "parcel_economic_signal_fact",
+    value: "signal_id",
+    visual: "bar",
+  },
+  {
+    aggregation: "count",
     category: "geography_label",
     description: "Count economics signals by geography.",
     filterField: "opportunity_class",
@@ -7037,6 +7204,7 @@ const userChartTemplates: UserChartTemplate[] = [
 ];
 
 const powerBiReportPromptExamples = [
+  "Build a Comparable Context Report.",
   "Build a Top Land Review Candidates Report.",
   "Build a Land Due Diligence Report.",
   "Build a report for underbuilt redevelopment candidates.",
@@ -7061,6 +7229,7 @@ const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {
 const quickPowerBiReportTypes: Array<{ label: string; prompt: string; type: PowerBiReportType }> = [
   { label: "Executive Dashboard", prompt: "Build an executive dashboard.", type: "executive" },
   { label: "Top Land Review Candidates", prompt: "Build a Top Land Review Candidates Report.", type: "top_candidates" },
+  { label: "Comparable Context Report", prompt: "Build a Comparable Context Report.", type: "comparable_context" },
   { label: "Parcel Due Diligence Packet", prompt: "Build a Parcel Due Diligence Packet.", type: "due_diligence" },
   { label: "Land Due Diligence Report", prompt: "Build a Land Due Diligence Report.", type: "due_diligence" },
   { label: "Land Opportunity Screener", prompt: "Build a Land Opportunity Screener report.", type: "land_opportunity" },
@@ -7088,12 +7257,19 @@ const landReviewPresetLabels = [
 
 const landDueDiligenceChecklist = [
   "Verify zoning",
+  "Verify recent arms-length sales",
+  "Check deed/sale history",
+  "Compare similar acreage and zoning",
+  "Compare within same economic segment",
+  "Confirm usable acreage after constraints",
+  "Confirm frontage/access",
+  "Review floodplain/wetlands",
   "Verify utility service/capacity with utility provider",
   "Check road frontage/legal access",
-  "Check floodplain/wetlands",
   "Check title/easements",
-  "Check recent sales comps",
+  "Check recent comparable sales",
   "Check site dimensions/buildability",
+  "Speak with broker/appraiser/planning as needed",
   "Confirm planning cases/permits nearby",
 ];
 const defaultDueDiligenceQuestions = [
@@ -7165,6 +7341,11 @@ function buildReportDataAvailability(
       available: Boolean(parcelRows.length && landOpportunityRows),
       reason: parcelRows.length ? "Needs development readiness or land opportunity fields." : "Needs parcel economic signal rows.",
       type: "top_candidates",
+    },
+    {
+      available: Boolean(parcelRows.length),
+      reason: "Needs parcel economic signal rows.",
+      type: "comparable_context",
     },
     {
       available: Boolean(parcelRows.length && landOpportunityRows),
@@ -7246,6 +7427,7 @@ function reportTypeLabel(type: PowerBiReportType) {
 
 function reportTypeFromPrompt(prompt: string): PowerBiReportType | null {
   const normalized = prompt.toLowerCase();
+  if (normalized.includes("comparable") || normalized.includes("valuation") || normalized.includes("comps") || normalized.includes("price makes sense") || (normalized.includes("value per acre") && (normalized.includes("candidate") || normalized.includes("compare")))) return "comparable_context";
   if (normalized.includes("top land") || normalized.includes("top candidate") || normalized.includes("top 25") || normalized.includes("review candidate")) return "top_candidates";
   if (normalized.includes("due diligence") || normalized.includes("manual review") || normalized.includes("parcel review") || normalized.includes("parcel packet")) return "due_diligence";
   if (normalized.includes("land opportunity") || normalized.includes("land screener") || normalized.includes("development readiness")) return "land_opportunity";
@@ -7371,6 +7553,57 @@ function buildPowerBiReportPlan(
         "Parcel-level candidate charts are hidden until parcel_economic_signal_fact has rows.",
         ...powerBiReportCaveats,
       ]),
+    );
+  }
+
+  if (selectedReportType === "comparable_context") {
+    return finalizedPowerBiReportPlan(
+      prompt,
+      "Comparable Context Report",
+      `${selectionNote ? `${selectionNote}. ` : ""}Compare land review candidates with assessed-value context, value-per-acre bands, comparison groups, special asset flags, and valuation due diligence notes.`,
+      [
+        reportPage("Comparable Context", "Use safe bands and groups for manual comps review.", [
+          generatedPowerBiVisual({
+            axis: "value_per_acre_band",
+            caveat: "Value per acre should be compared within similar segment, acreage, geography, and constraint context.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Value-per-acre band comparison",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "comparison_group",
+            caveat: "Comparison groups are screening context; verify with public records and professional review.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Comparison group summary",
+            value: "signal_id",
+            visual_type: "bar",
+          }),
+          generatedPowerBiVisual({
+            axis: "special_asset_flag",
+            caveat: "Special assets should be reviewed separately from ordinary parcel candidates.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Special asset flags",
+            value: "signal_id",
+            visual_type: "donut",
+          }),
+          generatedPowerBiVisual({
+            axis: "geography_label",
+            caveat: "Use this table for manual comps review, not a price conclusion.",
+            source_table: "parcel_economic_signal_fact",
+            title: "Candidate comparable context table",
+            value: "recommended_followup",
+            visual_type: "matrix",
+          }),
+        ]),
+      ],
+      relationships,
+      [
+        "Use comparison_group, economic_segment, acreage_band, geography_label, value_per_acre_band, improvement_to_land_ratio_band, and special_asset_flag.",
+        "Verify recent arms-length sales, deed history, public records, constraints, usable acreage, frontage/access, and broker/appraiser context.",
+        "CFS provides screening-level valuation context only; it is not an appraisal or price conclusion.",
+        ...powerBiReportCaveats,
+      ],
     );
   }
 

@@ -1039,6 +1039,33 @@ def test_ai_search_economics_powerbi_actions_cover_top_land_candidates_report() 
     assert not any(field in action_text for field in unsafe_fields)
 
 
+def test_ai_search_economics_powerbi_actions_cover_comparable_context_report() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Build a Comparable Context Report.",
+            request_type="powerbi_report_plan",
+        ),
+        _context(),
+    )
+
+    assert response.powerbi_actions is not None
+    assert response.powerbi_actions["report_title"] == "Comparable Context Report"
+    action_text = str(response.powerbi_actions).lower()
+    assert "value_per_acre_band" in action_text
+    assert "comparison_group" in action_text
+    assert "special_asset_flag" in action_text
+    assert "screening context" in action_text or "manual comps review" in action_text
+    unsafe_fields = {
+        "ow" + "ner",
+        "mail" + "ing",
+        "raw_" + "score",
+        "prediction_" + "probability",
+        "exact_" + "probability",
+    }
+    assert not any(field in action_text for field in unsafe_fields)
+
+
 def test_ai_search_economics_powerbi_sort_prompt_mentions_export_order_fields() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(
