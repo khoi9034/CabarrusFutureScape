@@ -11,7 +11,14 @@ from app.routers import investment_router
 from app.schemas.ai_search import CfsAiSearchRequest
 from app.services.ai_search_service import CfsAiSearchService
 from app.services.investment_environmental_context_service import (
+    FACILITY_TABLE,
+    NWI_TABLE,
     SAFE_LIMITATION,
+    SOIL_TABLE,
+    TERRAIN_TABLE,
+    _soil_limit_note,
+    _source_attribution,
+    _source_limitations,
     candidate_environmental_context,
     environmental_context_by_parcel,
 )
@@ -90,6 +97,25 @@ def test_candidate_environmental_context_is_screening_level_and_safe() -> None:
         assert unsafe not in text
 
 
+def test_environmental_source_limitations_reflect_loaded_sources() -> None:
+    counts = {NWI_TABLE: 1, TERRAIN_TABLE: 0, SOIL_TABLE: 1, FACILITY_TABLE: 1}
+    limitations = " ".join(_source_limitations(counts))
+    attribution = _source_attribution(nwi=True, terrain=False, soils=True, epa=True)
+
+    assert "USGS terrain/slope context has not been refreshed locally" in limitations
+    assert "USFWS NWI wetlands context has not been refreshed" not in limitations
+    assert attribution["wetlands"] == "USFWS National Wetlands Inventory"
+    assert attribution["soils"] == "USDA NRCS Soil Data Access / SSURGO mapunitpolyextended"
+    assert attribution["regulated_facilities"] == "U.S. EPA ECHO All Media Programs Facility Search"
+    assert "not yet refreshed" in attribution["slope"]
+
+
+def test_soil_limitation_note_uses_focused_nrcs_fields() -> None:
+    assert _soil_limit_note({"engdwobdcd": "Very limited", "engdwbdcd": None}) == "Very limited"
+    assert _soil_limit_note({"engdwobdcd": None, "engdwbdcd": "Somewhat limited"}) == "Somewhat limited"
+    assert _soil_limit_note({}) is None
+
+
 def test_environmental_context_by_parcel_returns_screening_fields() -> None:
     contexts = environmental_context_by_parcel(FakeDb(), ["P1", "P1", ""])
 
@@ -164,9 +190,14 @@ def test_environmental_frontend_contracts() -> None:
 def test_environmental_docs_and_registry_are_safe() -> None:
     doc = (ROOT / "docs/investment-environmental-context.md").read_text().lower()
     registry = (ROOT / "config/investment_data_sources.json").read_text().lower()
+    service = (ROOT / "backend/app/services/investment_environmental_context_service.py").read_text()
 
     assert "usgs_3dep" in registry
     assert "nrcs_soils" in registry
+    assert "USFWS NWI Wetlands Map Service" in service
+    assert "USDA NRCS Soil Data Access WFS" in service
+    assert "EPA ECHO All Media Programs Facility Search" in service
+    assert "centroid raster sampling keeps refresh tractable" in service
     assert "usable-area screening proxy" in doc
     for unsafe in ["environmentally cleared", "safe to develop", "guaranteed development", "investment advice"]:
         assert unsafe not in doc.replace("not investment advice", "")

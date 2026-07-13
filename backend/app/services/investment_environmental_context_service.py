@@ -2,25 +2,42 @@
 
 from __future__ import annotations
 
+import csv
+import io
+import json
 from datetime import UTC, datetime
 from decimal import Decimal
+from itertools import batched
 from typing import Any
+
+import requests
+from shapely.geometry import mapping, shape
+from shapely.validation import make_valid
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 ENV_TABLE = "investment_parcel_environmental_context"
 NWI_TABLE = "investment_nwi_wetlands"
+TERRAIN_TABLE = "investment_terrain_context"
 SOIL_TABLE = "investment_soil_units"
 FACILITY_TABLE = "investment_environmental_facilities"
+COUNTY_FIPS = "37025"
+NWI_QUERY_URL = "https://fwspublicservices.wim.usgs.gov/wetlandsmapservice/rest/services/Wetlands/MapServer/0/query"
+NWI_SOURCE_VERSION = "USFWS NWI Wetlands Map Service; state downloads last updated May 2026"
+NRCS_WFS_URL = "https://SDMDataAccess.sc.egov.usda.gov/Spatial/SDMWGS84Geographic.wfs"
+NRCS_SOURCE_VERSION = "USDA NRCS Soil Data Access WFS mapunitpolyextended"
+USGS_3DEP_EXPORT_URL = "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage"
+USGS_3DEP_SOURCE_VERSION = "USGS 3DEP Elevation ImageServer export; county screening raster"
+EPA_ECHO_BASE_URL = "https://echodata.epa.gov/echo/echo_rest_services"
+EPA_ECHO_SOURCE_VERSION = "EPA ECHO All Media Programs Facility Search"
+STEEP_SLOPE_PERCENT = 15
 
 SAFE_LIMITATION = (
     "Environmental context is screening-level only and does not replace survey, wetland delineation, "
     "engineering, geotechnical, zoning, utility, or environmental review."
 )
 PROXY_LIMITATION = "Usable-area screening proxy is not a certified site-area calculation or a development certification."
-MISSING_SOURCE_NOTE = "NWI wetlands, USGS slope, NRCS soils, and EPA facility extracts have not been refreshed locally yet."
-
 
 def environmental_status(db: Session) -> dict[str, Any]:
     _ensure_tables(db)
@@ -45,7 +62,7 @@ def environmental_status(db: Session) -> dict[str, Any]:
         "parcel_summary": _json_ready(summary),
         "source_rows": _source_counts(db),
         "sources": _source_statuses(db),
-        "limitations": [SAFE_LIMITATION, PROXY_LIMITATION, MISSING_SOURCE_NOTE],
+        "limitations": _source_limitations(_source_counts(db)),
     }
 
 
@@ -53,12 +70,22 @@ def refresh_environmental_context(db: Session, *, source: str = "all") -> dict[s
     _ensure_tables(db)
     if source not in {"all", "nwi", "slope", "soils", "epa"}:
         raise ValueError("source must be one of all, nwi, slope, soils, or epa")
-    # ponytail: source-specific downloads are intentionally not hidden in API requests; load official extracts, then rerun this summary.
-    _refresh_parcel_summary(db)
+    loaders = {
+        "nwi": _load_nwi_wetlands,
+        "slope": _load_usgs_terrain,
+        "soils": _load_nrcs_soils,
+        "epa": _load_epa_facilities,
+    }
+    loaded_sources: dict[str, Any] = {}
+    for source_name, loader in loaders.items():
+        if source in {"all", source_name}:
+            loaded_sources[source_name] = loader(db)
+        _refresh_parcel_summary(db, source=source)
     status = environmental_status(db)
     return {
         "status": "ok",
         "source_requested": source,
+        "loaded_sources": loaded_sources,
         "parcel_summary_count": status["parcel_summary"]["parcel_summary_count"],
         "source_rows": status["source_rows"],
         "last_refreshed": status["parcel_summary"].get("last_refreshed"),
@@ -83,10 +110,18 @@ def candidate_environmental_context(db: Session, parcel_id: str | None) -> dict[
         "flood_context": data.get("flood_context_band") or "Data Unavailable",
         "mapped_wetland_context": data.get("wetland_context_band") or "Data Unavailable",
         "wetland_percent_of_parcel": data.get("wetland_percent"),
+        "minimum_elevation": data.get("minimum_elevation"),
+        "maximum_elevation": data.get("maximum_elevation"),
         "terrain_context": data.get("terrain_context_band") or "Data Unavailable",
         "mean_slope_percent": data.get("mean_slope_percent"),
+        "steep_slope_percent": data.get("steep_slope_percent"),
         "soil_context": data.get("soil_limitation_band") or "Data Unavailable",
+        "dominant_soil_group": data.get("dominant_soil_group"),
+        "poor_drainage_percent": data.get("poor_drainage_percent"),
+        "prime_farmland_percent": data.get("prime_farmland_percent"),
         "environmental_facility_context": data.get("regulated_facility_context_band") or "Data Unavailable",
+        "regulated_facility_count_1mi": data.get("regulated_facility_count_1mi"),
+        "nearest_regulated_facility_distance_miles": data.get("nearest_regulated_facility_distance_miles"),
         "usable_area_screening_proxy": data.get("usable_area_screening_proxy") or "Insufficient Environmental Information",
         "overall_environmental_constraint_band": data.get("overall_environmental_constraint_band") or "Insufficient Information",
         "environmental_data_confidence": data.get("environmental_data_confidence") or "Data Needed",
@@ -94,7 +129,7 @@ def candidate_environmental_context(db: Session, parcel_id: str | None) -> dict[
         "source_attribution": data.get("source_attribution") or _source_attribution(),
         "source_version": data.get("source_version") or "FEMA flood overlay plus pending environmental source extracts",
         "last_refreshed": data.get("refreshed_at"),
-        "limitations": [SAFE_LIMITATION, PROXY_LIMITATION],
+        "limitations": _source_limitations(_source_counts(db)),
     }
 
 
@@ -114,6 +149,24 @@ def _ensure_tables(db: Session) -> None:
         )
     )
     db.execute(text(f"CREATE INDEX IF NOT EXISTS idx_{NWI_TABLE}_geometry ON {NWI_TABLE} USING GIST (geometry)"))
+    db.execute(
+        text(
+            f"""
+            CREATE TABLE IF NOT EXISTS {TERRAIN_TABLE} (
+              parcel_id text PRIMARY KEY,
+              minimum_elevation numeric,
+              maximum_elevation numeric,
+              mean_elevation numeric,
+              mean_slope_percent numeric,
+              steep_slope_percent numeric,
+              terrain_context_band text NOT NULL DEFAULT 'Data Unavailable',
+              source_attribution text NOT NULL DEFAULT 'U.S. Geological Survey 3D Elevation Program',
+              source_version text,
+              retrieved_at timestamptz NOT NULL DEFAULT now()
+            )
+            """
+        )
+    )
     db.execute(
         text(
             f"""
@@ -160,15 +213,21 @@ def _ensure_tables(db: Session) -> None:
               wetland_percent numeric,
               wetland_context_band text NOT NULL DEFAULT 'Data Unavailable',
               wetland_data_status text NOT NULL DEFAULT 'Data Unavailable',
+              minimum_elevation numeric,
+              maximum_elevation numeric,
               mean_slope_percent numeric,
               steep_slope_percent numeric,
               terrain_context_band text NOT NULL DEFAULT 'Data Unavailable',
               slope_data_status text NOT NULL DEFAULT 'Data Unavailable',
               dominant_soil_group text,
+              poor_drainage_percent numeric,
+              prime_farmland_percent numeric,
               soil_limitation_band text NOT NULL DEFAULT 'Data Unavailable',
               soil_data_status text NOT NULL DEFAULT 'Data Unavailable',
               soil_verification_required boolean NOT NULL DEFAULT true,
               regulated_facility_nearby_flag boolean NOT NULL DEFAULT false,
+              regulated_facility_count_1mi integer,
+              nearest_regulated_facility_distance_miles numeric,
               regulated_facility_count_band text NOT NULL DEFAULT 'Data Unavailable',
               nearest_regulated_facility_distance_band text NOT NULL DEFAULT 'Data Unavailable',
               regulated_facility_context_band text NOT NULL DEFAULT 'Data Unavailable',
@@ -185,15 +244,218 @@ def _ensure_tables(db: Session) -> None:
         )
     )
     db.execute(text(f"CREATE INDEX IF NOT EXISTS idx_{ENV_TABLE}_constraint_band ON {ENV_TABLE}(overall_environmental_constraint_band)"))
+    for column, definition in {
+        "minimum_elevation": "numeric",
+        "maximum_elevation": "numeric",
+        "poor_drainage_percent": "numeric",
+        "prime_farmland_percent": "numeric",
+        "regulated_facility_count_1mi": "integer",
+        "nearest_regulated_facility_distance_miles": "numeric",
+    }.items():
+        db.execute(text(f"ALTER TABLE {ENV_TABLE} ADD COLUMN IF NOT EXISTS {column} {definition}"))
 
 
-def _refresh_parcel_summary(db: Session) -> None:
-    has_flood = _table_exists(db, "parcel_flood_constraint_overlay")
-    has_nwi = _source_counts(db)[NWI_TABLE] > 0
-    if has_nwi:
-        _refresh_summary_with_nwi(db, has_flood=has_flood)
-    else:
-        _refresh_summary_without_nwi(db, has_flood=has_flood)
+def _refresh_parcel_summary(db: Session, *, source: str = "all") -> None:
+    source_counts = _source_counts(db)
+    has_summary = bool(db.execute(text(f"SELECT EXISTS (SELECT 1 FROM {ENV_TABLE})")).scalar())
+    if source in {"all", "nwi"} or not has_summary:
+        has_flood = _table_exists(db, "parcel_flood_constraint_overlay")
+        if source_counts[NWI_TABLE] > 0:
+            _refresh_summary_with_nwi(db, has_flood=has_flood)
+        else:
+            _refresh_summary_without_nwi(db, has_flood=has_flood)
+    if source in {"all", "slope"} and source_counts[TERRAIN_TABLE] > 0:
+        _apply_terrain_summary(db)
+    if source in {"all", "soils"} and source_counts[SOIL_TABLE] > 0:
+        _apply_soil_summary(db)
+    if source in {"all", "epa"} and source_counts[FACILITY_TABLE] > 0:
+        _apply_facility_summary(db)
+    _recalculate_environmental_bands(db)
+
+
+def _apply_terrain_summary(db: Session) -> None:
+    db.execute(
+        text(
+            f"""
+            UPDATE {ENV_TABLE} e
+            SET minimum_elevation = t.minimum_elevation,
+                maximum_elevation = t.maximum_elevation,
+                mean_slope_percent = t.mean_slope_percent,
+                steep_slope_percent = t.steep_slope_percent,
+                terrain_context_band = t.terrain_context_band,
+                slope_data_status = 'Available'
+            FROM {TERRAIN_TABLE} t
+            WHERE t.parcel_id = e.parcel_id
+            """
+        )
+    )
+
+
+def _apply_soil_summary(db: Session) -> None:
+    db.execute(
+        text(
+            f"""
+            WITH parcel_base AS (
+              SELECT official_parcel_id AS parcel_id, CASE WHEN ST_SRID(geometry) = 4326 THEN geometry ELSE ST_Transform(geometry, 4326) END AS geom
+              FROM parcels_enriched
+              WHERE official_parcel_id IS NOT NULL AND geometry IS NOT NULL AND NOT ST_IsEmpty(geometry)
+            ),
+            overlap AS (
+              SELECT p.parcel_id,
+                     s.hydrologic_soil_group,
+                     s.drainage_class,
+                     s.prime_farmland_class,
+                     s.soil_limitation_note,
+                     ST_Area(ST_Intersection(p.geom, s.geometry)::geography) AS area_m2
+              FROM parcel_base p
+              JOIN {SOIL_TABLE} s ON ST_Intersects(p.geom, s.geometry)
+            ),
+            ranked AS (
+              SELECT *,
+                     ROW_NUMBER() OVER (PARTITION BY parcel_id ORDER BY area_m2 DESC NULLS LAST) AS rn,
+                     SUM(area_m2) OVER (PARTITION BY parcel_id) AS total_area_m2,
+                     SUM(area_m2) FILTER (WHERE drainage_class ILIKE '%poor%' OR drainage_class ILIKE '%very poorly%') OVER (PARTITION BY parcel_id) AS poor_area_m2,
+                     SUM(area_m2) FILTER (WHERE prime_farmland_class ILIKE '%prime%' OR prime_farmland_class ILIKE '%farmland%') OVER (PARTITION BY parcel_id) AS prime_area_m2,
+                     BOOL_OR(soil_limitation_note ILIKE '%Very limited%') OVER (PARTITION BY parcel_id) AS has_very_limited,
+                     BOOL_OR(soil_limitation_note ILIKE '%Somewhat limited%') OVER (PARTITION BY parcel_id) AS has_somewhat_limited
+              FROM overlap
+            )
+            UPDATE {ENV_TABLE} e
+            SET dominant_soil_group = r.hydrologic_soil_group,
+                poor_drainage_percent = round((COALESCE(r.poor_area_m2, 0) / NULLIF(r.total_area_m2, 0) * 100)::numeric, 2),
+                prime_farmland_percent = round((COALESCE(r.prime_area_m2, 0) / NULLIF(r.total_area_m2, 0) * 100)::numeric, 2),
+                soil_limitation_band = CASE
+                  WHEN r.has_very_limited OR COALESCE(r.poor_area_m2, 0) / NULLIF(r.total_area_m2, 0) >= 0.30 THEN 'Material Soil Review Need'
+                  WHEN r.has_somewhat_limited OR COALESCE(r.poor_area_m2, 0) / NULLIF(r.total_area_m2, 0) > 0 THEN 'Moderate Soil Review Need'
+                  ELSE 'Limited Mapped Soil Limitation'
+                END,
+                soil_data_status = 'Available',
+                soil_verification_required = true
+            FROM ranked r
+            WHERE r.rn = 1 AND r.parcel_id = e.parcel_id
+            """
+        )
+    )
+
+
+def _apply_facility_summary(db: Session) -> None:
+    db.execute(
+        text(
+            f"""
+            WITH parcel_points AS (
+              SELECT official_parcel_id AS parcel_id, ST_Transform(ST_PointOnSurface(geometry), 3857) AS geom
+              FROM parcels_enriched
+              WHERE official_parcel_id IS NOT NULL AND geometry IS NOT NULL AND NOT ST_IsEmpty(geometry)
+            ),
+            facility_points AS (
+              SELECT source_id, ST_Transform(geometry, 3857) AS geom
+              FROM {FACILITY_TABLE}
+              WHERE geometry IS NOT NULL
+            ),
+            nearby AS (
+              SELECT p.parcel_id,
+                     COUNT(f.source_id)::int AS facility_count,
+                     MIN(ST_Distance(p.geom, f.geom)) / 1609.344 AS nearest_miles
+              FROM parcel_points p
+              LEFT JOIN facility_points f ON ST_DWithin(p.geom, f.geom, 1609.344)
+              GROUP BY p.parcel_id
+            )
+            UPDATE {ENV_TABLE} e
+            SET regulated_facility_nearby_flag = COALESCE(n.facility_count, 0) > 0,
+                regulated_facility_count_1mi = COALESCE(n.facility_count, 0),
+                nearest_regulated_facility_distance_miles = round(n.nearest_miles::numeric, 2),
+                regulated_facility_count_band = CASE
+                  WHEN COALESCE(n.facility_count, 0) = 0 THEN 'No Facility Identified in Screening Radius'
+                  WHEN n.facility_count = 1 THEN 'One Facility Within 1 Mile'
+                  WHEN n.facility_count <= 4 THEN 'Multiple Facilities Within 1 Mile'
+                  ELSE 'Five or More Facilities Within 1 Mile'
+                END,
+                nearest_regulated_facility_distance_band = CASE
+                  WHEN n.nearest_miles IS NULL THEN 'No Facility Identified in Screening Radius'
+                  WHEN n.nearest_miles <= 0.25 THEN 'Facility Within 0.25 Mile'
+                  WHEN n.nearest_miles <= 0.5 THEN 'Facility Within 0.5 Mile'
+                  WHEN n.nearest_miles <= 1 THEN 'Facility Within 1 Mile'
+                  ELSE 'No Facility Identified in Screening Radius'
+                END,
+                regulated_facility_context_band = CASE
+                  WHEN n.nearest_miles IS NULL THEN 'No Facility Identified in Screening Radius'
+                  WHEN n.nearest_miles <= 0.25 THEN 'Facility Within 0.25 Mile'
+                  WHEN n.nearest_miles <= 0.5 THEN 'Facility Within 0.5 Mile'
+                  WHEN n.nearest_miles <= 1 THEN 'Facility Within 1 Mile'
+                  ELSE 'No Facility Identified in Screening Radius'
+                END,
+                epa_data_status = 'Available'
+            FROM nearby n
+            WHERE n.parcel_id = e.parcel_id
+            """
+        )
+    )
+
+
+def _recalculate_environmental_bands(db: Session) -> None:
+    source_counts = _source_counts(db)
+    available_count = sum(
+        1
+        for table in (NWI_TABLE, TERRAIN_TABLE, SOIL_TABLE, FACILITY_TABLE)
+        if source_counts.get(table, 0) > 0
+    )
+    source_version = _source_version_text(source_counts)
+    db.execute(
+        text(
+            f"""
+            UPDATE {ENV_TABLE}
+            SET usable_area_screening_proxy = CASE
+                  WHEN GREATEST(COALESCE(flood_percent, 0), COALESCE(wetland_percent, 0), COALESCE(steep_slope_percent, 0)) >= 30 THEN 'Material Usable-Area Limitations'
+                  WHEN GREATEST(COALESCE(flood_percent, 0), COALESCE(wetland_percent, 0), COALESCE(steep_slope_percent, 0)) > 0 THEN 'Moderate Usable-Area Limitations'
+                  WHEN :available_count >= 2 THEN 'Broad Usable-Area Signal'
+                  ELSE 'Insufficient Environmental Information'
+                END,
+                overall_environmental_constraint_band = CASE
+                  WHEN GREATEST(COALESCE(flood_percent, 0), COALESCE(wetland_percent, 0), COALESCE(steep_slope_percent, 0)) >= 30
+                       OR soil_limitation_band = 'Material Soil Review Need' THEN 'Material Mapped Constraint'
+                  WHEN GREATEST(COALESCE(flood_percent, 0), COALESCE(wetland_percent, 0), COALESCE(steep_slope_percent, 0)) > 0
+                       OR terrain_context_band = 'Higher-Slope Constraint'
+                       OR regulated_facility_context_band IN ('Facility Within 0.25 Mile', 'Facility Within 0.5 Mile')
+                       OR soil_limitation_band = 'Moderate Soil Review Need' THEN 'Moderate Mapped Constraint'
+                  WHEN :available_count >= 2 THEN 'Limited Mapped Constraint'
+                  ELSE 'Insufficient Information'
+                END,
+                environmental_data_confidence = CASE
+                  WHEN :available_count >= 4 THEN 'Medium'
+                  WHEN :available_count >= 1 THEN 'Limited'
+                  ELSE 'Data Needed'
+                END,
+                source_attribution = CAST(:source_attribution AS jsonb),
+                source_version = :source_version,
+                refreshed_at = now()
+            """
+        ),
+        {
+            "available_count": available_count,
+            "source_version": source_version,
+            "source_attribution": _json(
+                _source_attribution(
+                    nwi=source_counts.get(NWI_TABLE, 0) > 0,
+                    terrain=source_counts.get(TERRAIN_TABLE, 0) > 0,
+                    soils=source_counts.get(SOIL_TABLE, 0) > 0,
+                    epa=source_counts.get(FACILITY_TABLE, 0) > 0,
+                )
+            ),
+        },
+    )
+
+
+def _source_version_text(counts: dict[str, int]) -> str:
+    parts = ["FEMA NFHL parcel overlay"]
+    if counts.get(NWI_TABLE):
+        parts.append(NWI_SOURCE_VERSION)
+    if counts.get(TERRAIN_TABLE):
+        parts.append(USGS_3DEP_SOURCE_VERSION)
+    if counts.get(SOIL_TABLE):
+        parts.append(NRCS_SOURCE_VERSION)
+    if counts.get(FACILITY_TABLE):
+        parts.append(EPA_ECHO_SOURCE_VERSION)
+    return "; ".join(parts)
 
 
 def _refresh_summary_without_nwi(db: Session, *, has_flood: bool) -> None:
@@ -408,7 +670,7 @@ def _table_exists(db: Session, table_name: str) -> bool:
 
 def _source_counts(db: Session) -> dict[str, int]:
     counts: dict[str, int] = {}
-    for table in (NWI_TABLE, SOIL_TABLE, FACILITY_TABLE):
+    for table in (NWI_TABLE, TERRAIN_TABLE, SOIL_TABLE, FACILITY_TABLE):
         counts[table] = int(db.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar() or 0)
     counts["parcel_flood_constraint_overlay"] = int(db.execute(text("SELECT COUNT(*) FROM parcel_flood_constraint_overlay")).scalar() or 0) if _table_exists(db, "parcel_flood_constraint_overlay") else 0
     return counts
@@ -419,7 +681,7 @@ def _source_statuses(db: Session) -> list[dict[str, Any]]:
     return [
         _source("fema_nfhl", "FEMA National Flood Hazard Layer", counts["parcel_flood_constraint_overlay"], "Available" if counts["parcel_flood_constraint_overlay"] else "Data Unavailable", "Official flood hazard overlay already used by CFS."),
         _source("usfws_nwi", "USFWS National Wetlands Inventory", counts[NWI_TABLE], "Available" if counts[NWI_TABLE] else "Data Unavailable", "Mapped wetland context only; professional delineation may still be required."),
-        _source("usgs_3dep", "USGS 3DEP elevation and slope", 0, "Data Unavailable", "Slope summaries require a county-clipped elevation workflow."),
+        _source("usgs_3dep", "USGS 3DEP elevation and slope", counts[TERRAIN_TABLE], "Available" if counts[TERRAIN_TABLE] else "Data Unavailable", "Slope summaries are screening context, not engineering conclusions."),
         _source("nrcs_soils", "NRCS soil survey context", counts[SOIL_TABLE], "Available" if counts[SOIL_TABLE] else "Data Unavailable", "Soil mapping is screening context, not geotechnical confirmation."),
         _source("epa_echo", "EPA regulated facility proximity", counts[FACILITY_TABLE], "Available" if counts[FACILITY_TABLE] else "Data Unavailable", "Facility proximity does not imply parcel contamination."),
     ]
@@ -427,6 +689,374 @@ def _source_statuses(db: Session) -> list[dict[str, Any]]:
 
 def _source(source_id: str, name: str, row_count: int, status: str, limitation: str) -> dict[str, Any]:
     return {"source_id": source_id, "source_name": name, "row_count": row_count, "status": status, "limitation": limitation}
+
+
+def _county_bbox(db: Session) -> tuple[float, float, float, float]:
+    row = db.execute(
+        text(
+            """
+            SELECT ST_XMin(extent) AS xmin, ST_YMin(extent) AS ymin, ST_XMax(extent) AS xmax, ST_YMax(extent) AS ymax
+            FROM (
+              SELECT ST_Extent(CASE WHEN ST_SRID(geometry) = 4326 THEN geometry ELSE ST_Transform(geometry, 4326) END) AS extent
+              FROM parcels_enriched
+              WHERE geometry IS NOT NULL AND NOT ST_IsEmpty(geometry)
+            ) bounds
+            """
+        )
+    ).mappings().first()
+    if not row or row["xmin"] is None:
+        raise RuntimeError("Parcel geometry extent is unavailable.")
+    return (float(row["xmin"]), float(row["ymin"]), float(row["xmax"]), float(row["ymax"]))
+
+
+def _load_nwi_wetlands(db: Session) -> dict[str, Any]:
+    xmin, ymin, xmax, ymax = _county_bbox(db)
+    params = {
+        "f": "json",
+        "where": "1=1",
+        "returnIdsOnly": "true",
+        "geometry": f"{xmin},{ymin},{xmax},{ymax}",
+        "geometryType": "esriGeometryEnvelope",
+        "inSR": "4326",
+        "spatialRel": "esriSpatialRelIntersects",
+    }
+    ids = requests.get(NWI_QUERY_URL, params=params, timeout=180).json().get("objectIds") or []
+    rows: list[dict[str, Any]] = []
+    invalid_count = 0
+    for chunk in batched(ids, 100):
+        response = requests.get(
+            NWI_QUERY_URL,
+            params={
+                "f": "geojson",
+                "objectIds": ",".join(str(value) for value in chunk),
+                "outFields": "Wetlands.OBJECTID,Wetlands.ATTRIBUTE,Wetlands.WETLAND_TYPE,Wetlands.ACRES,Wetlands.GLOBALID",
+                "returnGeometry": "true",
+                "outSR": "4326",
+            },
+            timeout=120,
+        )
+        response.raise_for_status()
+        for feature in response.json().get("features") or []:
+            geometry_json = feature.get("geometry")
+            if not geometry_json:
+                continue
+            geom = make_valid(shape(geometry_json))
+            if geom.is_empty:
+                invalid_count += 1
+                continue
+            if not geom.is_valid:
+                invalid_count += 1
+            props = feature.get("properties") or {}
+            source_id = str(props.get("Wetlands.OBJECTID") or feature.get("id") or props.get("OBJECTID"))
+            rows.append(
+                {
+                    "source_id": source_id,
+                    "wetland_type": props.get("Wetlands.WETLAND_TYPE") or props.get("WETLAND_TYPE") or props.get("Wetlands.ATTRIBUTE") or props.get("ATTRIBUTE"),
+                    "source_date": NWI_SOURCE_VERSION,
+                    "source_attribution": "U.S. Fish and Wildlife Service National Wetlands Inventory",
+                    "geometry": json.dumps(mapping(geom)),
+                }
+            )
+    if rows:
+        db.execute(text(f"DELETE FROM {NWI_TABLE}"))
+        db.execute(
+            text(
+                f"""
+                INSERT INTO {NWI_TABLE} (source_id, wetland_type, source_date, source_attribution, geometry)
+                VALUES (
+                  :source_id, :wetland_type, :source_date, :source_attribution,
+                  ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(:geometry), 4326)), 3))
+                )
+                ON CONFLICT (source_id) DO UPDATE SET
+                  wetland_type = EXCLUDED.wetland_type,
+                  source_date = EXCLUDED.source_date,
+                  source_attribution = EXCLUDED.source_attribution,
+                  retrieved_at = now(),
+                  geometry = EXCLUDED.geometry
+                """
+            ),
+            rows,
+        )
+    return {"source_rows": len(rows), "invalid_geometry_count": invalid_count, "source_version": NWI_SOURCE_VERSION}
+
+
+def _load_nrcs_soils(db: Session) -> dict[str, Any]:
+    import geopandas as gpd
+
+    xmin, ymin, xmax, ymax = _county_bbox(db)
+    url = (
+        f"{NRCS_WFS_URL}?service=WFS&version=1.0.0&request=GetFeature&typeName=mapunitpolyextended"
+        f"&srsName=EPSG:4326&BBOX={xmin},{ymin},{xmax},{ymax}"
+    )
+    gdf = gpd.read_file(url)
+    if gdf.empty:
+        return {"source_rows": 0, "source_version": NRCS_SOURCE_VERSION}
+    rows: list[dict[str, Any]] = []
+    invalid_count = 0
+    for record in gdf.to_dict("records"):
+        geom = record.get("geometry")
+        if geom is None or geom.is_empty:
+            invalid_count += 1
+            continue
+        geom = make_valid(geom)
+        if not geom.is_valid:
+            invalid_count += 1
+        if geom.is_empty:
+            continue
+        source_id = str(record.get("mupolygonkey") or record.get("gml_id") or record.get("mukey"))
+        rows.append(
+            {
+                "source_id": source_id,
+                "map_unit": record.get("muname") or record.get("musym") or record.get("mukey"),
+                "hydrologic_soil_group": record.get("hydgrpdcd"),
+                "drainage_class": record.get("drclassdcd") or record.get("drclasswettest"),
+                "prime_farmland_class": record.get("iccdcd") or record.get("niccdcd"),
+                "soil_limitation_note": _soil_limit_note(record),
+                "source_attribution": "USDA NRCS Soil Data Access / SSURGO mapunitpolyextended",
+                "geometry": json.dumps(mapping(geom)),
+            }
+        )
+    if rows:
+        db.execute(text(f"DELETE FROM {SOIL_TABLE}"))
+        db.execute(
+            text(
+                f"""
+                INSERT INTO {SOIL_TABLE} (
+                  source_id, map_unit, hydrologic_soil_group, drainage_class,
+                  prime_farmland_class, soil_limitation_note, source_attribution, geometry
+                ) VALUES (
+                  :source_id, :map_unit, :hydrologic_soil_group, :drainage_class,
+                  :prime_farmland_class, :soil_limitation_note, :source_attribution,
+                  ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(:geometry), 4326)), 3))
+                )
+                ON CONFLICT (source_id) DO UPDATE SET
+                  map_unit = EXCLUDED.map_unit,
+                  hydrologic_soil_group = EXCLUDED.hydrologic_soil_group,
+                  drainage_class = EXCLUDED.drainage_class,
+                  prime_farmland_class = EXCLUDED.prime_farmland_class,
+                  soil_limitation_note = EXCLUDED.soil_limitation_note,
+                  source_attribution = EXCLUDED.source_attribution,
+                  retrieved_at = now(),
+                  geometry = EXCLUDED.geometry
+                """
+            ),
+            rows,
+        )
+    return {"source_rows": len(rows), "invalid_geometry_count": invalid_count, "source_version": NRCS_SOURCE_VERSION}
+
+
+def _soil_limit_note(record: dict[str, Any]) -> str | None:
+    values = [
+        record.get("engdwobdcd"),
+        record.get("engdwbdcd"),
+        record.get("engdwbll"),
+        record.get("engdwbml"),
+        record.get("engstafdcd"),
+        record.get("engstafll"),
+        record.get("engstafml"),
+        record.get("engsldcd"),
+        record.get("engsldcp"),
+        record.get("urbrecptdcd"),
+        record.get("forpehrtdcp"),
+    ]
+    notes = [str(value) for value in values if value not in (None, "")]
+    if any("Very limited" in note or "severe" in note.lower() for note in notes):
+        return "Very limited"
+    if any("Somewhat limited" in note or "moderate" in note.lower() for note in notes):
+        return "Somewhat limited"
+    return notes[0] if notes else None
+
+
+def _load_epa_facilities(db: Session) -> dict[str, Any]:
+    facilities_response = requests.get(
+        f"{EPA_ECHO_BASE_URL}.get_facilities",
+        params={"output": "JSON", "p_st": "NC", "p_co": "Cabarrus"},
+        timeout=60,
+    )
+    facilities_response.raise_for_status()
+    result = facilities_response.json().get("Results") or {}
+    qid = result.get("QueryID")
+    if not qid:
+        return {"source_rows": 0, "source_version": EPA_ECHO_SOURCE_VERSION}
+    lat_by_registry: dict[str, dict[str, Any]] = {}
+    page = 1
+    while True:
+        page_response = requests.get(
+            f"{EPA_ECHO_BASE_URL}.get_qid",
+            params={"output": "JSON", "qid": qid, "pageno": page},
+            timeout=60,
+        )
+        page_response.raise_for_status()
+        rows = ((page_response.json().get("Results") or {}).get("Facilities") or [])
+        if not rows:
+            break
+        for row in rows:
+            registry_id = str(row.get("RegistryID") or "")
+            if registry_id:
+                lat_by_registry[registry_id] = row
+        if len(rows) < 5000:
+            break
+        page += 1
+    csv_response = requests.get(f"{EPA_ECHO_BASE_URL}.get_download", params={"qid": qid}, timeout=120)
+    csv_response.raise_for_status()
+    rows: list[dict[str, Any]] = []
+    for row in csv.DictReader(io.StringIO(csv_response.text)):
+        registry_id = str(row.get("RegistryID") or "")
+        details = lat_by_registry.get(registry_id, {})
+        lat = _float(details.get("FacLat"))
+        lon = _float(row.get("FacLong"))
+        if not registry_id or lat is None or lon is None:
+            continue
+        rows.append(
+            {
+                "source_id": registry_id,
+                "facility_name": row.get("FacName"),
+                "program_type": _epa_program_type(row, details),
+                "facility_status": details.get("FacActiveFlag") or details.get("FacComplianceStatus") or "Status not provided",
+                "source_attribution": "U.S. Environmental Protection Agency ECHO",
+                "lon": lon,
+                "lat": lat,
+            }
+        )
+    if rows:
+        db.execute(text(f"DELETE FROM {FACILITY_TABLE}"))
+        db.execute(
+            text(
+                f"""
+                INSERT INTO {FACILITY_TABLE} (
+                  source_id, facility_name, program_type, facility_status, source_attribution, geometry
+                ) VALUES (
+                  :source_id, :facility_name, :program_type, :facility_status, :source_attribution,
+                  ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)
+                )
+                ON CONFLICT (source_id) DO UPDATE SET
+                  facility_name = EXCLUDED.facility_name,
+                  program_type = EXCLUDED.program_type,
+                  facility_status = EXCLUDED.facility_status,
+                  source_attribution = EXCLUDED.source_attribution,
+                  retrieved_at = now(),
+                  geometry = EXCLUDED.geometry
+                """
+            ),
+            rows,
+        )
+    return {"source_rows": len(rows), "source_version": EPA_ECHO_SOURCE_VERSION}
+
+
+def _epa_program_type(row: dict[str, Any], details: dict[str, Any]) -> str:
+    programs = []
+    if row.get("TRIIDs") or details.get("TRIFlag") == "Y":
+        programs.append("TRI")
+    if row.get("SDWAIDs") or details.get("SDWASystemTypes"):
+        programs.append("SDWA")
+    if row.get("FacSICCodes") or details.get("AIRFlag") == "Y":
+        programs.append("Air/industrial")
+    if details.get("CWAComplianceTracking"):
+        programs.append("CWA")
+    if details.get("RCRAComplianceStatus") or details.get("RCRAInspectionCount"):
+        programs.append("RCRA")
+    return ", ".join(programs) or "EPA regulated facility"
+
+
+def _load_usgs_terrain(db: Session) -> dict[str, Any]:
+    xmin, ymin, xmax, ymax = _county_bbox(db)
+    href = None
+    raster_size = None
+    last_error: Exception | None = None
+    for size in ("512,512", "256,256"):
+        try:
+            export = requests.get(
+                USGS_3DEP_EXPORT_URL,
+                params={
+                    "f": "json",
+                    "bbox": f"{xmin},{ymin},{xmax},{ymax}",
+                    "bboxSR": "4326",
+                    "imageSR": "3857",
+                    "size": size,
+                    "format": "tiff",
+                    "pixelType": "F32",
+                    "interpolation": "RSP_BilinearInterpolation",
+                },
+                timeout=120,
+            )
+            export.raise_for_status()
+            href = export.json().get("href")
+            if href:
+                raster_size = size
+                break
+        except requests.RequestException as exc:
+            last_error = exc
+    if not href:
+        if last_error:
+            raise last_error
+        raise RuntimeError("USGS 3DEP export did not return a raster href.")
+    raster = requests.get(href, timeout=180)
+    raster.raise_for_status()
+    db.execute(text("CREATE TEMP TABLE tmp_cfs_dem (rid serial PRIMARY KEY, rast raster) ON COMMIT DROP"))
+    db.execute(text("INSERT INTO tmp_cfs_dem (rast) VALUES (ST_FromGDALRaster(:raster_data, 3857))"), {"raster_data": raster.content})
+    db.execute(text("CREATE TEMP TABLE tmp_cfs_slope AS SELECT ST_Slope(rast, 1, '32BF', 'PERCENT', 1.0, true) AS rast FROM tmp_cfs_dem"))
+    db.execute(text(f"DELETE FROM {TERRAIN_TABLE}"))
+    # ponytail: centroid raster sampling keeps refresh tractable; use parcel-clip stats if slope becomes decision-critical.
+    db.execute(
+        text(
+            f"""
+            INSERT INTO {TERRAIN_TABLE} (
+              parcel_id, minimum_elevation, maximum_elevation, mean_elevation,
+              mean_slope_percent, steep_slope_percent, terrain_context_band, source_version
+            )
+            WITH parcel_points AS (
+              SELECT official_parcel_id, ST_Transform(ST_PointOnSurface(geometry), 3857) AS geom
+              FROM parcels_enriched
+              WHERE official_parcel_id IS NOT NULL AND geometry IS NOT NULL AND NOT ST_IsEmpty(geometry)
+            ),
+            sampled AS (
+              SELECT p.official_parcel_id,
+                     ST_Value(d.rast, p.geom) AS elev,
+                     ST_Value(s.rast, p.geom) AS mean_slope
+              FROM parcel_points p
+              CROSS JOIN tmp_cfs_dem d
+              CROSS JOIN tmp_cfs_slope s
+              WHERE ST_Intersects(d.rast::geometry, p.geom)
+            )
+            SELECT
+              official_parcel_id,
+              round(elev::numeric, 2),
+              round(elev::numeric, 2),
+              round(elev::numeric, 2),
+              round(mean_slope::numeric, 2),
+              CASE WHEN mean_slope >= {STEEP_SLOPE_PERCENT} THEN 100 ELSE 0 END,
+              CASE
+                WHEN mean_slope IS NULL THEN 'Data Unavailable'
+                WHEN mean_slope >= 15 THEN 'Higher-Slope Constraint'
+                WHEN mean_slope >= 8 THEN 'Mixed Terrain'
+                WHEN mean_slope >= 4 THEN 'Moderate Terrain'
+                ELSE 'Generally Level'
+              END,
+              :source_version
+            FROM sampled
+            WHERE elev IS NOT NULL
+            ON CONFLICT (parcel_id) DO UPDATE SET
+              minimum_elevation = EXCLUDED.minimum_elevation,
+              maximum_elevation = EXCLUDED.maximum_elevation,
+              mean_elevation = EXCLUDED.mean_elevation,
+              mean_slope_percent = EXCLUDED.mean_slope_percent,
+              steep_slope_percent = EXCLUDED.steep_slope_percent,
+              terrain_context_band = EXCLUDED.terrain_context_band,
+              source_version = EXCLUDED.source_version,
+              retrieved_at = now()
+            """
+        ),
+        {"source_version": USGS_3DEP_SOURCE_VERSION},
+    )
+    count = int(db.execute(text(f"SELECT COUNT(*) FROM {TERRAIN_TABLE}")).scalar() or 0)
+    return {"source_rows": count, "source_version": USGS_3DEP_SOURCE_VERSION, "resolution": f"{raster_size} county screening raster"}
+
+
+def _float(value: Any) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _default_verification_flags() -> list[str]:
@@ -439,12 +1069,29 @@ def _default_verification_flags() -> list[str]:
     ]
 
 
-def _source_attribution(*, nwi: bool = False) -> dict[str, str]:
+def _source_limitations(source_counts: dict[str, int]) -> list[str]:
+    missing = []
+    if source_counts.get(NWI_TABLE, 0) <= 0:
+        missing.append("USFWS NWI wetlands")
+    if source_counts.get(TERRAIN_TABLE, 0) <= 0:
+        missing.append("USGS terrain/slope")
+    if source_counts.get(SOIL_TABLE, 0) <= 0:
+        missing.append("NRCS soils")
+    if source_counts.get(FACILITY_TABLE, 0) <= 0:
+        missing.append("EPA facility proximity")
+    limitations = [SAFE_LIMITATION, PROXY_LIMITATION]
+    if missing:
+        limitations.append(f"{', '.join(missing)} context has not been refreshed locally; missing source coverage is not evidence of no constraint.")
+    limitations.append("Loaded source evidence is mapped or aggregate screening context and requires professional verification.")
+    return limitations
+
+
+def _source_attribution(*, nwi: bool = False, terrain: bool = False, soils: bool = False, epa: bool = False) -> dict[str, str]:
     sources = {
         "flood": "FEMA National Flood Hazard Layer parcel overlay",
-        "slope": "USGS 3DEP elevation/slope extract not yet refreshed locally",
-        "soils": "USDA NRCS soil extract not yet refreshed locally",
-        "regulated_facilities": "U.S. EPA facility extract not yet refreshed locally",
+        "slope": "USGS 3DEP elevation/slope extract" if terrain else "USGS 3DEP elevation/slope extract not yet refreshed locally",
+        "soils": "USDA NRCS Soil Data Access / SSURGO mapunitpolyextended" if soils else "USDA NRCS soil extract not yet refreshed locally",
+        "regulated_facilities": "U.S. EPA ECHO All Media Programs Facility Search" if epa else "U.S. EPA facility extract not yet refreshed locally",
     }
     sources["wetlands"] = "USFWS National Wetlands Inventory" if nwi else "USFWS NWI extract not yet refreshed locally"
     return sources

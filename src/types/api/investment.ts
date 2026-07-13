@@ -182,18 +182,26 @@ export interface InvestmentMarketContext {
 }
 
 export interface InvestmentEnvironmentalContext {
+  dominant_soil_group?: string | null;
   environmental_data_confidence: string;
   environmental_facility_context: string;
   flood_context: string;
   last_refreshed?: string | null;
   limitations: string[];
   mapped_wetland_context: string;
+  maximum_elevation?: number | null;
   mean_slope_percent?: number | null;
+  minimum_elevation?: number | null;
+  nearest_regulated_facility_distance_miles?: number | null;
   overall_environmental_constraint_band: string;
   parcel_id?: string | null;
+  poor_drainage_percent?: number | null;
+  prime_farmland_percent?: number | null;
+  regulated_facility_count_1mi?: number | null;
   soil_context: string;
   source_attribution: Record<string, string>;
   source_version?: string | null;
+  steep_slope_percent?: number | null;
   terrain_context: string;
   usable_area_screening_proxy: string;
   verification_requirements: string[];
