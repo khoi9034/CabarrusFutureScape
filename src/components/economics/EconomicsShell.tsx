@@ -37,7 +37,16 @@ import {
   getEconomicsIntelligence,
   getEconomicsPowerBiExport,
 } from "@/lib/economicsIntelligenceService";
-import { getInvestmentScreen } from "@/lib/investmentIntelligenceService";
+import {
+  compareInvestmentIntakeCandidates,
+  createInvestmentIntakeCandidate,
+  deleteInvestmentIntakeCandidate,
+  getInvestmentIntake,
+  getInvestmentIntakeAnalysis,
+  getInvestmentScreen,
+  importInvestmentIntakeCsv,
+  updateInvestmentIntakeCandidate,
+} from "@/lib/investmentIntelligenceService";
 import type {
   CfsAiPowerBiActions,
   CfsAiSearchResponse,
@@ -52,6 +61,12 @@ import type {
   EconomicsSegmentSummary,
   EconomicsScenarioTemplate,
   InvestmentScreenCandidate,
+  InvestmentIntakeAnalysisResponse,
+  InvestmentIntakeCandidate,
+  InvestmentIntakeCompareResponse,
+  InvestmentIntakePayload,
+  InvestmentReviewStatus,
+  InvestmentSourceType,
   InvestmentScreenResponse,
   InvestmentStrategyId,
 } from "@/types/api";
@@ -909,6 +924,15 @@ function InvestmentPanelPage({
   const [activeCandidateId, setActiveCandidateId] = useState<string | null>(null);
   const [comparisonRows, setComparisonRows] = useState<RankedLandReviewCandidate[]>([]);
   const [guide, setGuide] = useState<DueDiligencePacket | null>(null);
+  const [intakeAnalysis, setIntakeAnalysis] = useState<InvestmentIntakeAnalysisResponse | null>(null);
+  const [intakeCandidates, setIntakeCandidates] = useState<InvestmentIntakeCandidate[]>([]);
+  const [intakeCompareIds, setIntakeCompareIds] = useState<string[]>([]);
+  const [intakeComparison, setIntakeComparison] = useState<InvestmentIntakeCompareResponse | null>(null);
+  const [intakeCsv, setIntakeCsv] = useState("");
+  const [editingIntakeId, setEditingIntakeId] = useState<string | null>(null);
+  const [intakeForm, setIntakeForm] = useState<InvestmentIntakePayload>(defaultInvestmentIntakeForm(activeStrategy));
+  const [intakeLoading, setIntakeLoading] = useState(!USE_DEMO_DATA);
+  const [intakeUnavailable, setIntakeUnavailable] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   useEffect(() => {
     let mounted = true;
@@ -928,6 +952,27 @@ function InvestmentPanelPage({
       mounted = false;
     };
   }, [activeStrategy]);
+  useEffect(() => {
+    let mounted = true;
+    if (USE_DEMO_DATA) return () => {
+      mounted = false;
+    };
+    void getInvestmentIntake()
+      .then((response) => {
+        if (mounted) setIntakeCandidates(response.candidates);
+        if (mounted) setIntakeUnavailable(false);
+      })
+      .catch(() => {
+        if (mounted) setIntakeCandidates([]);
+        if (mounted) setIntakeUnavailable(true);
+      })
+      .finally(() => {
+        if (mounted) setIntakeLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const activeInvestmentScreen = investmentScreen?.strategy === activeStrategy ? investmentScreen : null;
   const engineCandidatesByParcel = useMemo(
     () =>
@@ -1007,6 +1052,115 @@ function InvestmentPanelPage({
     if (guide) onAddReportBucketItem(dueDiligencePacketBucketItem(guide));
     onNavigate("print");
   };
+  const refreshIntake = () => {
+    setIntakeLoading(true);
+    return getInvestmentIntake()
+      .then((response) => {
+        setIntakeCandidates(response.candidates);
+        setIntakeUnavailable(false);
+      })
+      .catch(() => {
+        setIntakeUnavailable(true);
+        setStatus("Candidate Intake is available only when the local backend and database are running.");
+      })
+      .finally(() => setIntakeLoading(false));
+  };
+  const createIntakeFromForm = () => {
+    const payload = { ...intakeForm, strategy: activeStrategy };
+    const request = editingIntakeId
+      ? updateInvestmentIntakeCandidate(editingIntakeId, payload)
+      : createInvestmentIntakeCandidate(payload);
+    void request
+      .then((analysis) => {
+        setIntakeAnalysis(analysis);
+        setEditingIntakeId(null);
+        setIntakeForm(defaultInvestmentIntakeForm(activeStrategy));
+        setStatus(editingIntakeId ? "Candidate intake updated" : "Candidate added to Opportunity Review Queue");
+        return refreshIntake();
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate intake failed."));
+  };
+  const createIntakeFromSignal = (signal: EconomicsParcelSignal) => {
+    void createInvestmentIntakeCandidate({
+      candidate_name: signalLabel(signal),
+      parcel_id: signal.parcel_id,
+      source_type: "Existing CFS Candidate",
+      strategy: activeStrategy,
+    })
+      .then((analysis) => {
+        setIntakeAnalysis(analysis);
+        setStatus("Existing CFS candidate added to intake.");
+        return refreshIntake();
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate intake failed."));
+  };
+  const importCsv = () => {
+    void importInvestmentIntakeCsv(intakeCsv)
+      .then((result) => {
+        const notes = [
+          `Imported ${result.created_count ?? result.created.length} candidate(s).`,
+          result.duplicates.length ? `Duplicates skipped: ${result.duplicates.join(", ")}` : "",
+          result.unmatched_parcel_ids.length ? `Unmatched parcel IDs: ${result.unmatched_parcel_ids.join(", ")}` : "",
+          result.errors.length ? `Errors: ${result.errors.join(" | ")}` : "",
+        ].filter(Boolean);
+        setStatus(notes.join(" | "));
+        setIntakeCsv("");
+        return refreshIntake();
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "CSV import failed."));
+  };
+  const openIntakeAnalysis = (candidateId: string) => {
+    void getInvestmentIntakeAnalysis(candidateId)
+      .then(setIntakeAnalysis)
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate analysis failed."));
+  };
+  const editIntakeCandidate = (candidate: InvestmentIntakeCandidate) => {
+    setEditingIntakeId(candidate.id);
+    setActiveStrategy(candidate.strategy);
+    setIntakeForm({
+      asking_price: candidate.asking_price ?? null,
+      asking_price_date: candidate.asking_price_date ?? null,
+      candidate_name: candidate.candidate_name,
+      parcel_id: candidate.parcel_id ?? null,
+      property_type: candidate.property_type ?? null,
+      review_status: candidate.review_status,
+      source_name: candidate.source_name ?? null,
+      source_type: candidate.source_type,
+      source_url: candidate.source_url ?? null,
+      strategy: candidate.strategy,
+      user_notes: candidate.user_notes ?? null,
+    });
+    setStatus("Editing intake candidate");
+  };
+  const toggleIntakeCompare = (candidateId: string) => {
+    setIntakeCompareIds((current) => {
+      if (current.includes(candidateId)) return current.filter((id) => id !== candidateId);
+      return current.length < 4 ? [...current, candidateId] : current;
+    });
+  };
+  const compareIntakeSelected = () => {
+    if (intakeCompareIds.length < 2 || intakeCompareIds.length > 4) {
+      setStatus("Select two to four intake candidates to compare.");
+      return;
+    }
+    void compareInvestmentIntakeCandidates(intakeCompareIds)
+      .then((response) => {
+        setIntakeComparison(response);
+        setStatus("Intake candidates compared");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate comparison failed."));
+  };
+  const removeIntakeCandidate = (candidateId: string) => {
+    void deleteInvestmentIntakeCandidate(candidateId)
+      .then(() => {
+        if (intakeAnalysis?.candidate.id === candidateId) setIntakeAnalysis(null);
+        setIntakeCompareIds((current) => current.filter((id) => id !== candidateId));
+        setIntakeComparison(null);
+        setStatus("Candidate removed from intake.");
+        return refreshIntake();
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate delete failed."));
+  };
   return (
     <section className="investment-shell">
       <aside className="investment-sidebar" aria-label="Investment Panel navigation">
@@ -1081,6 +1235,45 @@ function InvestmentPanelPage({
                   visiblePromptCount={5}
                 />
               </section>
+              <InvestmentIntakeWorkspace
+                analysis={intakeAnalysis}
+                candidates={intakeCandidates}
+                compareIds={intakeCompareIds}
+                comparison={intakeComparison}
+                csvText={intakeCsv}
+                editingId={editingIntakeId}
+                form={intakeForm}
+                intakeLoading={intakeLoading}
+                intakeUnavailable={intakeUnavailable}
+                onAddAnalysisToBucket={() => {
+                  if (!intakeAnalysis) return;
+                  onAddReportBucketItem(intakeAnalysisBucketItem(intakeAnalysis));
+                  setStatus("Intake analysis saved to Report Bucket");
+                }}
+                onArchive={(candidate) => {
+                  void updateInvestmentIntakeCandidate(candidate.id, { review_status: "Archived" })
+                    .then((analysis) => {
+                      setIntakeAnalysis(analysis);
+                      setStatus("Candidate archived");
+                      return refreshIntake();
+                    })
+                    .catch((error) => setStatus(error instanceof Error ? error.message : "Archive failed."));
+                }}
+                onClearEdit={() => {
+                  setEditingIntakeId(null);
+                  setIntakeForm(defaultInvestmentIntakeForm(activeStrategy));
+                }}
+                onCompare={compareIntakeSelected}
+                onCreate={createIntakeFromForm}
+                onCreateFromActive={() => activeSignal && createIntakeFromSignal(activeSignal)}
+                onDelete={removeIntakeCandidate}
+                onEdit={editIntakeCandidate}
+                onImportCsv={importCsv}
+                onOpen={openIntakeAnalysis}
+                onSetCsvText={setIntakeCsv}
+                onSetForm={setIntakeForm}
+                onToggleCompare={toggleIntakeCompare}
+              />
               <section className="investment-card">
                 <div className="investment-section-heading">
                   <div>
@@ -1195,6 +1388,7 @@ function InvestmentPanelPage({
 const investmentNavItems = [
   { icon: Gauge, id: "command-center", label: "Command Center", sublabel: "Overview & KPIs" },
   { icon: Filter, id: "strategy-screener", label: "Strategy Screener", sublabel: "Find & Filter Parcels" },
+  { icon: ClipboardList, id: "candidate-intake", label: "Candidate Intake", sublabel: "Add leads for review" },
   { icon: MapPinned, id: "candidate-review", label: "Candidate Review", sublabel: "Deep Dive Workspace" },
   { icon: Layers3, id: "compare", label: "Compare", sublabel: "Side-by-Side Analysis" },
   { icon: ClipboardList, id: "review-guides", label: "Review Guides", sublabel: "Methods & Checklists" },
@@ -1267,6 +1461,391 @@ function InvestmentKpiCard({
     </article>
   );
 }
+
+const investmentSourceTypes: InvestmentSourceType[] = [
+  "Active Listing",
+  "Off-Market Lead",
+  "Broker Lead",
+  "Auction",
+  "County Sale Record",
+  "Existing CFS Candidate",
+  "Manual Research",
+  "Other",
+];
+
+const investmentReviewStatuses: InvestmentReviewStatus[] = [
+  "New",
+  "Screening",
+  "Researching",
+  "Needs Verification",
+  "Priority Review",
+  "Hold for Later",
+  "Archived",
+];
+
+function defaultInvestmentIntakeForm(strategy: InvestmentStrategyId): InvestmentIntakePayload {
+  return {
+    candidate_name: "",
+    source_type: "Manual Research",
+    strategy,
+  };
+}
+
+function InvestmentIntakeWorkspace({
+  analysis,
+  candidates,
+  compareIds,
+  comparison,
+  csvText,
+  editingId,
+  form,
+  intakeLoading,
+  intakeUnavailable,
+  onAddAnalysisToBucket,
+  onArchive,
+  onClearEdit,
+  onCompare,
+  onCreate,
+  onCreateFromActive,
+  onDelete,
+  onEdit,
+  onImportCsv,
+  onOpen,
+  onSetCsvText,
+  onSetForm,
+  onToggleCompare,
+}: {
+  analysis: InvestmentIntakeAnalysisResponse | null;
+  candidates: InvestmentIntakeCandidate[];
+  compareIds: string[];
+  comparison: InvestmentIntakeCompareResponse | null;
+  csvText: string;
+  editingId: string | null;
+  form: InvestmentIntakePayload;
+  intakeLoading: boolean;
+  intakeUnavailable: boolean;
+  onAddAnalysisToBucket: () => void;
+  onArchive: (candidate: InvestmentIntakeCandidate) => void;
+  onClearEdit: () => void;
+  onCompare: () => void;
+  onCreate: () => void;
+  onCreateFromActive: () => void;
+  onDelete: (candidateId: string) => void;
+  onEdit: (candidate: InvestmentIntakeCandidate) => void;
+  onImportCsv: () => void;
+  onOpen: (candidateId: string) => void;
+  onSetCsvText: (value: string) => void;
+  onSetForm: (value: InvestmentIntakePayload | ((current: InvestmentIntakePayload) => InvestmentIntakePayload)) => void;
+  onToggleCompare: (candidateId: string) => void;
+}) {
+  const [strategyFilter, setStrategyFilter] = useState<InvestmentStrategyId | "All">("All");
+  const [reviewFilter, setReviewFilter] = useState<InvestmentReviewStatus | "All">("All");
+  const [listingFilter, setListingFilter] = useState("All");
+  const [sortMode, setSortMode] = useState<"date_added" | "last_verified">("date_added");
+  const update = (patch: Partial<InvestmentIntakePayload>) => onSetForm((current) => ({ ...current, ...patch }));
+  const listingOptions = uniqueValues(candidates.map((candidate) => candidate.listing_status ?? "")).filter(Boolean);
+  const filteredCandidates = candidates
+    .filter((candidate) => strategyFilter === "All" || candidate.strategy === strategyFilter)
+    .filter((candidate) => reviewFilter === "All" || candidate.review_status === reviewFilter)
+    .filter((candidate) => listingFilter === "All" || (candidate.listing_status ?? "Unspecified") === listingFilter)
+    .sort((left, right) => Date.parse(right[sortMode] ?? "") - Date.parse(left[sortMode] ?? ""));
+  return (
+    <section className="investment-card" id="candidate-intake">
+      <div className="investment-section-heading">
+        <div>
+          <p>Candidate Intake</p>
+          <h2>Add a listing, off-market lead, or parcel for private review.</h2>
+        </div>
+        <button className="investment-ghost-button" onClick={onCreateFromActive} type="button">Use active CFS candidate</button>
+      </div>
+      <div className="investment-disclaimer">
+        Source reference only. CFS does not automatically reproduce or verify third-party listing content.
+      </div>
+      {editingId ? (
+        <div className="investment-disclaimer">
+          Editing an intake candidate. Save updates or clear the edit form before adding a new lead.
+        </div>
+      ) : null}
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Candidate label
+          <input className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={form.candidate_name} onChange={(event) => update({ candidate_name: event.target.value })} placeholder="Highway 49 Land Lead" />
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Parcel ID
+          <input className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={form.parcel_id ?? ""} onChange={(event) => update({ parcel_id: event.target.value })} placeholder="CFS-PARCEL-..." />
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Source type
+          <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={form.source_type} onChange={(event) => update({ source_type: event.target.value as InvestmentSourceType })}>
+            {investmentSourceTypes.map((value) => <option key={value}>{value}</option>)}
+          </select>
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Asking price
+          <input className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" min={0} type="number" value={form.asking_price ?? ""} onChange={(event) => update({ asking_price: event.target.value ? Number(event.target.value) : null })} />
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Asking price date
+          <input className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" type="date" value={form.asking_price_date ?? ""} onChange={(event) => update({ asking_price_date: event.target.value || null })} />
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Review status
+          <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={form.review_status ?? "New"} onChange={(event) => update({ review_status: event.target.value as InvestmentReviewStatus })}>
+            {investmentReviewStatuses.map((value) => <option key={value}>{value}</option>)}
+          </select>
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)] md:col-span-2">
+          Source URL
+          <input className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={form.source_url ?? ""} onChange={(event) => update({ source_url: event.target.value || null })} placeholder="Reference link only" />
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Source name
+          <input className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={form.source_name ?? ""} onChange={(event) => update({ source_name: event.target.value || null })} />
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)] md:col-span-3">
+          Notes
+          <textarea className="min-h-20 rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={form.user_notes ?? ""} onChange={(event) => update({ user_notes: event.target.value || null })} placeholder="No owner names, mailing addresses, phone numbers, emails, grantor or grantee names." />
+        </label>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button className="investment-primary-button" disabled={!form.candidate_name.trim()} onClick={onCreate} type="button">
+          {editingId ? "Save Candidate" : "Add Candidate"}
+        </button>
+        {editingId ? <button className="investment-ghost-button" onClick={onClearEdit} type="button">Cancel Edit</button> : null}
+        <details className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs text-[var(--econ-muted)]">
+          <summary>CSV import template</summary>
+          <p className="mt-2">Headers: parcel_id,candidate_name,source_type,source_name,source_url,asking_price,asking_price_date,listing_status,property_type,strategy,notes</p>
+          <textarea className="mt-2 min-h-24 w-full rounded-lg border border-[var(--econ-border)] bg-black/30 p-2 text-[var(--econ-text)]" value={csvText} onChange={(event) => onSetCsvText(event.target.value)} placeholder="Paste up to 50 CSV rows here" />
+          <button className="investment-ghost-button mt-2" disabled={!csvText.trim()} onClick={onImportCsv} type="button">Import CSV</button>
+        </details>
+      </div>
+      <div className="mt-5 flex flex-wrap items-end gap-2">
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Strategy
+          <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={strategyFilter} onChange={(event) => setStrategyFilter(event.target.value as InvestmentStrategyId | "All")}>
+            <option>All</option>
+            {investmentStrategies.map((strategy) => <option key={strategy.id} value={strategy.id}>{strategy.label}</option>)}
+          </select>
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Review status
+          <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={reviewFilter} onChange={(event) => setReviewFilter(event.target.value as InvestmentReviewStatus | "All")}>
+            <option>All</option>
+            {investmentReviewStatuses.map((value) => <option key={value}>{value}</option>)}
+          </select>
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Listing status
+          <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={listingFilter} onChange={(event) => setListingFilter(event.target.value)}>
+            <option>All</option>
+            {listingOptions.map((value) => <option key={value}>{value}</option>)}
+            {!listingOptions.length ? <option>Unspecified</option> : null}
+          </select>
+        </label>
+        <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
+          Sort
+          <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={sortMode} onChange={(event) => setSortMode(event.target.value as "date_added" | "last_verified")}>
+            <option value="date_added">Date added</option>
+            <option value="last_verified">Last verified</option>
+          </select>
+        </label>
+        <button className="investment-primary-button" disabled={compareIds.length < 2 || compareIds.length > 4} onClick={onCompare} type="button">
+          Compare Selected
+        </button>
+        <span className="investment-muted">{compareIds.length} selected / 4 maximum</span>
+      </div>
+      <h3 className="mt-5 text-sm font-semibold text-[var(--econ-text)]">Opportunity Review Queue</h3>
+      {intakeLoading ? <p className="investment-empty">Loading private intake candidates...</p> : null}
+      {intakeUnavailable ? <p className="investment-empty">Candidate Intake is unavailable. Confirm FastAPI and the local database are running.</p> : null}
+      <InvestmentIntakeQueue
+        candidates={filteredCandidates}
+        compareIds={compareIds}
+        onArchive={onArchive}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        onOpen={onOpen}
+        onToggleCompare={onToggleCompare}
+      />
+      {analysis ? <InvestmentIntakeAnalysisCard analysis={analysis} onAddToBucket={onAddAnalysisToBucket} /> : null}
+      {comparison ? <InvestmentIntakeComparison comparison={comparison} /> : null}
+    </section>
+  );
+}
+
+function InvestmentIntakeQueue({
+  candidates,
+  compareIds,
+  onArchive,
+  onDelete,
+  onEdit,
+  onOpen,
+  onToggleCompare,
+}: {
+  candidates: InvestmentIntakeCandidate[];
+  compareIds: string[];
+  onArchive: (candidate: InvestmentIntakeCandidate) => void;
+  onDelete: (candidateId: string) => void;
+  onEdit: (candidate: InvestmentIntakeCandidate) => void;
+  onOpen: (candidateId: string) => void;
+  onToggleCompare: (candidateId: string) => void;
+}) {
+  if (!candidates.length) return <p className="investment-empty">No private intake candidates yet.</p>;
+  return (
+    <div className="investment-table-wrap mt-3">
+      <table className="investment-table">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>Candidate</th>
+            <th>Parcel ID</th>
+            <th>Source Type</th>
+            <th>Listing</th>
+            <th>Strategy</th>
+            <th>Current Asking Basis</th>
+            <th>Price Recency</th>
+            <th>Comparable Context</th>
+            <th>Readiness Signal</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {candidates.map((candidate) => (
+            <tr key={candidate.id}>
+              <td>
+                <button aria-pressed={compareIds.includes(candidate.id)} className="investment-select-button" onClick={() => onToggleCompare(candidate.id)} type="button">
+                  {compareIds.includes(candidate.id) ? "Selected" : "Select"}
+                </button>
+              </td>
+              <td>{candidate.candidate_name}</td>
+              <td>{candidate.parcel_id || "Manual opportunity"}</td>
+              <td>{candidate.source_type}</td>
+              <td>{candidate.listing_status || "Unverified"}</td>
+              <td>{investmentStrategyLabel(candidate.strategy)}</td>
+              <td>{candidate.acquisition_basis_band || "Acquisition basis unavailable"}</td>
+              <td>{candidate.asking_price_date ? formatDate(candidate.asking_price_date) : "Missing asking price date"}</td>
+              <td>{candidate.comparable_context || "Verify"}</td>
+              <td>{candidate.readiness_signal || "Verify"}</td>
+              <td>{candidate.review_status}</td>
+              <td>
+                <div className="investment-row-actions">
+                  <button onClick={() => onOpen(candidate.id)} type="button">Open</button>
+                  <button onClick={() => onEdit(candidate)} type="button">Edit</button>
+                  <button onClick={() => onArchive(candidate)} type="button">Archive</button>
+                  <button onClick={() => onDelete(candidate.id)} type="button">Delete</button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function InvestmentIntakeAnalysisCard({
+  analysis,
+  onAddToBucket,
+}: {
+  analysis: InvestmentIntakeAnalysisResponse;
+  onAddToBucket: () => void;
+}) {
+  const candidate = analysis.candidate;
+  return (
+    <div className="mt-4 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="investment-rail-label">Candidate Intake Analysis</p>
+          <h3 className="text-lg font-semibold text-[var(--econ-text)]">{candidate.candidate_name}</h3>
+          <p className="investment-muted">{analysis.parcel_match_status}</p>
+        </div>
+        <button className="investment-ghost-button" onClick={onAddToBucket} type="button">Add to Report Bucket</button>
+      </div>
+      <Matrix
+        rows={[
+          { label: "Current Asking Basis", value: analysis.acquisition_basis.asking_basis_band },
+          { label: "Asking Price Entered", value: moneyText(analysis.acquisition_basis.asking_price) },
+          { label: "Asking Price Date", value: formatDate(candidate.asking_price_date) },
+          { label: "Asking Price Recency", value: analysis.acquisition_basis.asking_price_date_age_days == null ? "Missing or unverified" : `${analysis.acquisition_basis.asking_price_date_age_days} days old` },
+          { label: "Approximate Acreage", value: analysis.acquisition_basis.parcel_acres == null ? "Not available" : `${analysis.acquisition_basis.parcel_acres.toLocaleString("en-US")} acres` },
+          { label: "Asking Price / Acre", value: moneyText(analysis.acquisition_basis.asking_price_per_acre) },
+          { label: "Historical Sale Quality", value: analysis.screening_context?.sale_quality_band || "Not Available" },
+          { label: "Historical Sale Recency", value: analysis.screening_context?.sale_recency_band || "No sale information available" },
+          { label: "Comparable Depth", value: analysis.screening_context?.comparable_count_band || "No comparable evidence" },
+          { label: "Comparable Confidence", value: analysis.screening_context?.comparable_confidence_band || analysis.screening_context?.basis_data_confidence || "Low" },
+          { label: "Comparable Land Context", value: analysis.screening_context?.basis_context_band || "Insufficient Basis Information" },
+          { label: "Constraint Burden", value: analysis.screening_context?.dimension_bands.constraint_burden || "Verify" },
+          { label: "Data Confidence", value: analysis.screening_context?.data_confidence_band || "Data Needed" },
+        ]}
+      />
+      <Matrix
+        rows={[
+          { label: "Asking price evidence", value: analysis.data_attribution.asking_basis || "User-entered information" },
+          { label: "Listing/source evidence", value: candidate.source_url ? "Third-party source reference" : "Missing or unverified" },
+          { label: "Historical sale evidence", value: analysis.data_attribution.historical_sale_context || "Assessor context requiring verification" },
+          { label: "Utility evidence", value: "CFS-derived sewer/utility proxy" },
+        ]}
+      />
+      <p className="investment-muted">{analysis.acquisition_basis.asking_basis_summary}</p>
+      <InvestmentSignalList title="Basis positives" values={analysis.acquisition_basis.basis_positive_reasons.slice(0, 4)} />
+      <InvestmentSignalList title="Basis cautions" values={analysis.acquisition_basis.basis_caution_reasons.slice(0, 4)} />
+      <InvestmentSignalList title="Verification requirements" values={(analysis.screening_context?.verification_requirements || ["Verify asking basis, deed/sale context, utility capacity, access, title, and site constraints."]).slice(0, 5)} />
+      <InvestmentSignalList title="Due diligence checklist" values={landDueDiligenceChecklist.slice(0, 8)} />
+    </div>
+  );
+}
+
+function InvestmentIntakeComparison({ comparison }: { comparison: InvestmentIntakeCompareResponse }) {
+  const rows = [
+    ["Candidate label", (analysis: InvestmentIntakeAnalysisResponse) => analysis.candidate.candidate_name],
+    ["Parcel ID", (analysis: InvestmentIntakeAnalysisResponse) => analysis.candidate.parcel_id || "Manual opportunity"],
+    ["Source type", (analysis: InvestmentIntakeAnalysisResponse) => analysis.candidate.source_type],
+    ["Listing status", (analysis: InvestmentIntakeAnalysisResponse) => analysis.candidate.listing_status || "Unverified"],
+    ["Selected strategy", (analysis: InvestmentIntakeAnalysisResponse) => investmentStrategyLabel(analysis.candidate.strategy)],
+    ["Approximate acreage", (analysis: InvestmentIntakeAnalysisResponse) => analysis.acquisition_basis.parcel_acres == null ? "Not available" : `${analysis.acquisition_basis.parcel_acres.toLocaleString("en-US")} acres`],
+    ["Current asking basis", (analysis: InvestmentIntakeAnalysisResponse) => analysis.acquisition_basis.asking_basis_band],
+    ["Asking-price recency", (analysis: InvestmentIntakeAnalysisResponse) => analysis.acquisition_basis.asking_price_date_age_days == null ? "Missing or unverified" : `${analysis.acquisition_basis.asking_price_date_age_days} days old`],
+    ["Historical sale context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.sale_quality_band || "Not Available"],
+    ["Comparable context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.basis_context_band || analysis.candidate.comparable_context || "Insufficient Basis Information"],
+    ["Development-readiness signal", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.dimension_bands.readiness_signal || analysis.candidate.readiness_signal || "Verify"],
+    ["Planning alignment", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.dimension_bands.strategy_fit || analysis.candidate.strategy_fit || "Verify"],
+    ["Utility-readiness proxy", (analysis: InvestmentIntakeAnalysisResponse) => String(analysis.screening_context?.safe_display_fields?.utility_readiness_proxy_class || analysis.screening_context?.safe_display_fields?.sewer_proxy_class || "Verify")],
+    ["Constraint burden", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.dimension_bands.constraint_burden || analysis.candidate.constraint_burden || "Verify"],
+    ["Data confidence", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.data_confidence_band || analysis.candidate.data_confidence || "Data Needed"],
+    ["Verification requirements", (analysis: InvestmentIntakeAnalysisResponse) => (analysis.screening_context?.verification_requirements || analysis.acquisition_basis.basis_caution_reasons).slice(0, 2).join(" | ") || "Manual verification required"],
+    ["Review status", (analysis: InvestmentIntakeAnalysisResponse) => analysis.candidate.review_status],
+  ] as const;
+  return (
+    <div className="mt-4 rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
+      <p className="investment-rail-label">Intake Candidate Comparison</p>
+      <h3 className="text-lg font-semibold text-[var(--econ-text)]">Compare selected leads</h3>
+      <InvestmentSignalList title="Comparison summary" values={comparison.comparison_summary} />
+      <div className="investment-table-wrap mt-3">
+        <table className="investment-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              {comparison.intake_candidates.map((analysis) => <th key={analysis.candidate.id}>{analysis.candidate.candidate_name}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(([label, getValue]) => (
+              <tr key={label}>
+                <td><strong>{label}</strong></td>
+                {comparison.intake_candidates.map((analysis) => <td key={`${analysis.candidate.id}-${label}`}>{getValue(analysis)}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="investment-disclaimer mt-3">
+        Comparison shows tradeoffs only. CFS does not identify a winning parcel or recommend a purchase.
+      </div>
+    </div>
+  );
+}
+
 
 function InvestmentCandidateTable({
   activeCandidateId,
@@ -6949,6 +7528,27 @@ function dueDiligencePacketBucketItem(packet: DueDiligencePacket): ReportBucketI
   };
 }
 
+function intakeAnalysisBucketItem(analysis: InvestmentIntakeAnalysisResponse): ReportBucketItemInput {
+  return {
+    caveats: analysis.caveats,
+    content: [
+      `Candidate: ${analysis.candidate.candidate_name}`,
+      `Parcel ID: ${analysis.candidate.parcel_id || "Manual opportunity"}`,
+      `Current Asking Basis: ${analysis.acquisition_basis.asking_basis_band}`,
+      `Comparable Context: ${analysis.screening_context?.basis_context_band || "Insufficient Basis Information"}`,
+      `Readiness Signal: ${analysis.screening_context?.dimension_bands.readiness_signal || "Verify"}`,
+      `Cautions: ${analysis.acquisition_basis.basis_caution_reasons.join("; ")}`,
+      "Source reference only. CFS does not automatically reproduce or verify third-party listing content.",
+    ].join("\n"),
+    id: `intake-${analysis.candidate.id}`,
+    related_tables: ["parcel_economic_signal_fact"],
+    source_page: "Power BI & Tools",
+    summary: analysis.acquisition_basis.asking_basis_summary,
+    title: `Candidate intake: ${analysis.candidate.candidate_name}`,
+    type: "evidence_pack",
+  };
+}
+
 function economicSnapshotSummary(
   summary: EconomicsIntelligenceResponse["summary"] | undefined,
   selectedSignals: EconomicsParcelSignal[],
@@ -7391,6 +7991,10 @@ function currency(value: number | null | undefined) {
 
 function formatNumber(value: number | null | undefined) {
   return typeof value === "number" ? value.toLocaleString("en-US") : "Not available";
+}
+
+function moneyText(value: number | null | undefined) {
+  return typeof value === "number" ? `$${Math.round(value).toLocaleString("en-US")}` : "Not available";
 }
 
 function formatDate(value: string | null | undefined) {

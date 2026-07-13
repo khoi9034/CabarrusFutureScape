@@ -23,6 +23,20 @@ def get_read_only_db() -> Generator[Session, None, None]:
         db.close()
 
 
+def get_db() -> Generator[Session, None, None]:
+    """Provide a read/write database session for private local workflows."""
+
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
 def get_optional_read_only_db() -> Generator[Session | None, None, None]:
     """Provide a read-only session, or None so fallback-first routes can degrade cleanly."""
 
