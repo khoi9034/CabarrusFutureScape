@@ -167,11 +167,13 @@ def test_intake_analysis_includes_market_context(monkeypatch) -> None:
     monkeypatch.setattr(investment_intake_service, "get_intake_candidate", lambda db, cid: {"id": cid, "candidate_name": "Lead", "parcel_id": "P1", "strategy": "development_land"})
     monkeypatch.setattr(investment_intake_service, "_parcel_acres", lambda db, parcel_id: 5)
     monkeypatch.setattr(investment_intake_service, "candidate_market_context", lambda db, parcel_id: {"household_context": {"band": "Typical Local Context"}, "data_confidence": "Medium"})
+    monkeypatch.setattr(investment_intake_service, "candidate_environmental_context", lambda db, parcel_id: {"environmental_data_confidence": "Limited"})
 
     result = investment_intake_service.analyze_intake_candidate(SimpleNamespace(), "C1", [])
 
     assert result is not None
     assert result["market_area_context"]["data_confidence"] == "Medium"
+    assert result["environmental_context"]["environmental_data_confidence"] == "Limited"
 
 
 def test_service_uses_batch_postgis_overlay_not_per_parcel_geocoder() -> None:

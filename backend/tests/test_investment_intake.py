@@ -77,6 +77,9 @@ def test_intake_comparison_is_qualitative_and_safe(monkeypatch) -> None:
                 },
                 "safe_display_fields": {"utility_readiness_proxy_class": "Moderate sewer-proximity signal"},
             },
+            "environmental_context": {
+                "overall_environmental_constraint_band": "Insufficient Information",
+            },
         }
 
     monkeypatch.setattr(investment_intake_service, "analyze_intake_candidate", fake_analysis)
@@ -169,6 +172,7 @@ def test_intake_workspace_frontend_contracts() -> None:
         "Candidate Intake is unavailable",
         "Comparison shows tradeoffs only",
         "Market Area Context",
+        "Environmental & Physical Context",
         "sampling uncertainty",
     ]:
         assert text in source

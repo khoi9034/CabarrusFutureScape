@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.schemas.investment import InvestmentCsvImportRequest, InvestmentIntakePatch, InvestmentIntakePayload
 from app.services.investment_comparable_service import COMPARABLE_MIN_COUNT, _comparable_count_band
+from app.services.investment_environmental_context_service import candidate_environmental_context
 from app.services.investment_market_context_service import candidate_market_context
 from app.services.investment_screening_service import SAFE_CAVEAT, candidate_detail, compare_candidates
 
@@ -127,9 +128,11 @@ def analyze_intake_candidate(db: Session, candidate_id: str, investment_rows: li
         "data_attribution": {
             "asking_basis": "User-entered information",
             "comparable_land_context": "CFS-derived screening context",
+            "environmental_context": "FEMA flood overlay plus local environmental source extracts when refreshed",
             "historical_sale_context": "CFS assessor/deed context requiring verification",
             "readiness_context": "CFS-derived proxy and public-source context",
         },
+        "environmental_context": candidate_environmental_context(db, row.get("parcel_id")),
         "market_area_context": candidate_market_context(db, row.get("parcel_id")),
         "parcel_match_status": "Matched CFS parcel context" if match else "Parcel ID not matched to current CFS investment context",
         "screening_context": screening,
@@ -297,7 +300,7 @@ def _comparison_summary(analyses: list[dict[str, Any]]) -> list[str]:
             f"{label}: asking-basis context is {acquisition.get('asking_basis_band') or 'unavailable'}; "
             f"development-readiness signal is {dimensions.get('readiness_signal') or 'Verify'}; "
             f"market-area context is {(market.get('household_context') or {}).get('band') or 'unavailable'}; "
-            f"utility/constraint context requires due diligence."
+            f"environmental constraint context is {(analysis.get('environmental_context') or {}).get('overall_environmental_constraint_band') or 'unavailable'}."
         )
     return summaries
 

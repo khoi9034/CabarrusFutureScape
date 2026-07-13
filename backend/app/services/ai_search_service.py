@@ -587,6 +587,8 @@ def _economics_answer(
         return _economics_powerbi_answer(request, context)
     if _is_economics_model_evaluation_query(request.query):
         return _economics_model_evaluation_answer(request, context)
+    if _is_economics_environmental_context_query(request.query):
+        return _economics_environmental_context_answer(request, context)
     if _is_economics_market_context_query(request.query):
         return _economics_market_context_answer(request, context)
     if _is_economics_walkthrough_query(request.query):
@@ -741,6 +743,7 @@ def _is_economics_walkthrough_query(query: str) -> bool:
 def _is_fast_economics_guidance_query(query: str) -> bool:
     return (
         _is_economics_model_evaluation_query(query)
+        or _is_economics_environmental_context_query(query)
         or _is_economics_market_context_query(query)
         or _is_economics_walkthrough_query(query)
         or _is_economics_workspace_query(query)
@@ -755,6 +758,66 @@ def _is_fast_economics_guidance_query(query: str) -> bool:
 def _is_economics_market_context_query(query: str) -> bool:
     normalized = query.lower()
     return any(term in normalized for term in ("acs", "census", "demographic", "market area", "market-area", "household growth", "housing growth", "tract compare", "cabarrus county"))
+
+
+def _is_economics_environmental_context_query(query: str) -> bool:
+    normalized = query.lower()
+    return any(term in normalized for term in ("environment", "physical constraint", "wetland", "slope", "terrain", "soil", "regulated facility", "epa", "usable-area", "usable area", "phase i", "geotechnical"))
+
+
+def _economics_environmental_context_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+) -> CfsAiSearchResponse:
+    filters = request.filter_context or {}
+    candidate = filters.get("active_intake_candidate") or "the active candidate"
+    wetland = filters.get("active_wetland_context") or "not loaded"
+    terrain = filters.get("active_terrain_context") or "not loaded"
+    soil = filters.get("active_soil_context") or "not loaded"
+    facility = filters.get("active_facility_context") or "not loaded"
+    usable = filters.get("active_usable_area_proxy") or "insufficient environmental information"
+    confidence = filters.get("active_environmental_confidence") or "Data Needed"
+    answer = _briefing(
+        (
+            "Direct answer",
+            f"Use Environmental & Physical Context in Candidate Intake for {candidate}. Current screening shows mapped wetland context: {wetland}; terrain context: {terrain}; soil context: {soil}; regulated-facility proximity: {facility}; usable-area screening proxy: {usable}; confidence: {confidence}.",
+        ),
+        (
+            "Next diligence",
+            _bullets(
+                [
+                    "Review FEMA floodplain context and local floodplain requirements.",
+                    "Review NWI mapping when available and obtain professional wetland delineation if needed.",
+                    "Obtain topographic survey and engineering review for slope, grading, and stormwater feasibility.",
+                    "Review NRCS soil mapping and obtain geotechnical investigation where appropriate.",
+                    "Review nearby regulated facilities and consider Phase I environmental site assessment where appropriate.",
+                ]
+            ),
+        ),
+        (
+            "Caveat",
+            "This is screening-level environmental context only. It does not replace professional wetland, engineering, geotechnical, environmental, zoning, utility, or title review.",
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "Environmental & Physical Context",
+                f"Wetland: {wetland}; terrain: {terrain}; soil: {soil}; facility proximity: {facility}; usable-area proxy: {usable}.",
+                "investment_parcel_environmental_context",
+                "available" if confidence not in {"Data Needed", "not loaded"} else "limited",
+            )
+        ],
+        [
+            "Open Candidate Intake analysis and review Environmental & Physical Context.",
+            "Compare environmental context against utility, market-area, basis, and development-readiness evidence.",
+            "Document professional verification needs before any site-specific conclusion.",
+        ],
+    )
 
 
 def _economics_market_context_answer(

@@ -186,6 +186,38 @@
       "enabled": false
     },
     {
+      "source_id": "usgs_3dep",
+      "source_name": "USGS 3D Elevation Program",
+      "category": "environmental_terrain",
+      "authority_level": "federal_public_data",
+      "access_method": "county_clipped_elevation_download_or_service",
+      "status": "prototype",
+      "coverage": "United States where 3DEP products are available",
+      "public_url": "https://www.usgs.gov/3d-elevation-program",
+      "license_summary": "Public elevation context; slope summaries are screening context and not engineering conclusions.",
+      "attribution": "U.S. Geological Survey 3D Elevation Program",
+      "data_quality_band": "medium_high",
+      "refresh_schedule": "source_release",
+      "connector_name": "environmental",
+      "enabled": false
+    },
+    {
+      "source_id": "nrcs_soils",
+      "source_name": "NRCS Soil Survey Geographic Database",
+      "category": "environmental_soils",
+      "authority_level": "federal_public_data",
+      "access_method": "soil_survey_download_or_service",
+      "status": "prototype",
+      "coverage": "United States where soil survey data are published",
+      "public_url": "https://websoilsurvey.nrcs.usda.gov/",
+      "license_summary": "Public soil mapping context; site-specific geotechnical review may still be required.",
+      "attribution": "USDA Natural Resources Conservation Service",
+      "data_quality_band": "medium_high",
+      "refresh_schedule": "source_release",
+      "connector_name": "environmental",
+      "enabled": false
+    },
+    {
       "source_id": "epa_echo",
       "source_name": "EPA ECHO Web Services",
       "category": "environmental_facilities",

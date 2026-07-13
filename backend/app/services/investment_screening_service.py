@@ -252,9 +252,11 @@ def _factor_groups(row: dict[str, Any], missing_count: int, strategy: Investment
         "constraints": {
             "access_uncertainty": "Verify",
             "entitlement_requirement": "Verify with planning if zoning/future land-use support is unclear",
+            "environmental_constraint": _band(row.get("overall_environmental_constraint_band")),
             "flood_constraint": _band(row.get("flood_constraint_band")),
             "missing_critical_information": missing_count,
             "overall_constraint_band": _band(row.get("constraint_burden_band") or row.get("public_cost_risk_band")),
+            "usable_area_screening_proxy": _band(row.get("usable_area_screening_proxy")),
             "utility_verification_requirement": "Verify with utility provider",
         },
         "development_readiness_signals": {
@@ -343,7 +345,7 @@ def _verification_requirements(row: dict[str, Any], cautions: list[str]) -> list
     if "Comparable evidence is limited or stale" in cautions or row.get("basis_verification_required"):
         requirements.append("Verify comparable sales and basis context manually.")
     if "Flood constraints affect part of the parcel" in cautions:
-        requirements.append("Review floodplain, wetlands, and buildable area constraints.")
+        requirements.append("Review floodplain, wetland, and usable-area screening constraints.")
     if row.get("planned_extension_status") in (None, "", "Planned extension data not provided"):
         requirements.append("Confirm planned utility extension data before interpretation.")
     return _unique(requirements)
@@ -363,6 +365,11 @@ def _safe_display_fields(row: dict[str, Any]) -> dict[str, Any]:
         "basis_context_band": row.get("basis_context_band"),
         "sale_quality_band": row.get("sale_quality_band"),
         "comparable_count_band": row.get("comparable_count_band"),
+        "environmental_constraint_band": row.get("overall_environmental_constraint_band"),
+        "mapped_wetland_context": row.get("wetland_context_band"),
+        "terrain_context": row.get("terrain_context_band"),
+        "soil_limitation_band": row.get("soil_limitation_band"),
+        "usable_area_screening_proxy": row.get("usable_area_screening_proxy"),
     }
     return {key: value for key, value in fields.items() if key not in UNSAFE_RESPONSE_KEYS}
 

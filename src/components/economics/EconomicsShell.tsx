@@ -1230,6 +1230,13 @@ function InvestmentPanelPage({
                     active_market_geography: intakeAnalysis?.market_area_context?.geoid,
                     active_market_geography_type: intakeAnalysis?.market_area_context?.geography_type,
                     active_market_year: intakeAnalysis?.market_area_context?.acs_year,
+                    active_environmental_constraint: intakeAnalysis?.environmental_context?.overall_environmental_constraint_band,
+                    active_environmental_confidence: intakeAnalysis?.environmental_context?.environmental_data_confidence,
+                    active_facility_context: intakeAnalysis?.environmental_context?.environmental_facility_context,
+                    active_soil_context: intakeAnalysis?.environmental_context?.soil_context,
+                    active_terrain_context: intakeAnalysis?.environmental_context?.terrain_context,
+                    active_usable_area_proxy: intakeAnalysis?.environmental_context?.usable_area_screening_proxy,
+                    active_wetland_context: intakeAnalysis?.environmental_context?.mapped_wetland_context,
                     mode: "investment_panel",
                     strategy_screening_source: activeInvestmentScreen ? "Investment Intelligence Engine" : "local panel fallback",
                     sewer_proxy_supported_candidates: sewerSupported,
@@ -1785,11 +1792,13 @@ function InvestmentIntakeAnalysisCard({
         ]}
       />
       <MarketAreaContextPanel context={analysis.market_area_context} />
+      <EnvironmentalPhysicalContextPanel context={analysis.environmental_context} />
       <Matrix
         rows={[
           { label: "Asking price evidence", value: analysis.data_attribution.asking_basis || "User-entered information" },
           { label: "Listing/source evidence", value: candidate.source_url ? "Third-party source reference" : "Missing or unverified" },
           { label: "Historical sale evidence", value: analysis.data_attribution.historical_sale_context || "Assessor context requiring verification" },
+          { label: "Environmental evidence", value: analysis.data_attribution.environmental_context || "Screening context requiring professional verification" },
           { label: "Utility evidence", value: "CFS-derived sewer/utility proxy" },
         ]}
       />
@@ -1818,6 +1827,13 @@ function InvestmentIntakeComparison({ comparison }: { comparison: InvestmentInta
     ["Planning alignment", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.dimension_bands.strategy_fit || analysis.candidate.strategy_fit || "Verify"],
     ["Utility-readiness proxy", (analysis: InvestmentIntakeAnalysisResponse) => String(analysis.screening_context?.safe_display_fields?.utility_readiness_proxy_class || analysis.screening_context?.safe_display_fields?.sewer_proxy_class || "Verify")],
     ["Constraint burden", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.dimension_bands.constraint_burden || analysis.candidate.constraint_burden || "Verify"],
+    ["Mapped Wetland Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.environmental_context?.mapped_wetland_context || "Data Unavailable"],
+    ["Terrain Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.environmental_context?.terrain_context || "Data Unavailable"],
+    ["Soil Limitation Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.environmental_context?.soil_context || "Data Unavailable"],
+    ["Environmental Facility Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.environmental_context?.environmental_facility_context || "Data Unavailable"],
+    ["Usable-Area Screening Proxy", (analysis: InvestmentIntakeAnalysisResponse) => analysis.environmental_context?.usable_area_screening_proxy || "Insufficient Environmental Information"],
+    ["Environmental Constraint Band", (analysis: InvestmentIntakeAnalysisResponse) => analysis.environmental_context?.overall_environmental_constraint_band || "Insufficient Information"],
+    ["Environmental Data Confidence", (analysis: InvestmentIntakeAnalysisResponse) => analysis.environmental_context?.environmental_data_confidence || "Data Needed"],
     ["Population Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.market_area_context?.population_context?.band || "Market geography unavailable"],
     ["Household Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.market_area_context?.household_context?.band || "Market geography unavailable"],
     ["Income Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.market_area_context?.income_context?.band || "Market geography unavailable"],
@@ -1879,6 +1895,30 @@ function MarketAreaContextPanel({ context }: { context?: InvestmentIntakeAnalysi
       <p className="investment-muted">
         {context?.uncertainty_note || "ACS values are area-level estimates and may include sampling uncertainty. They do not represent parcel-level demand, value, or future performance."}
       </p>
+    </div>
+  );
+}
+
+function EnvironmentalPhysicalContextPanel({ context }: { context?: InvestmentIntakeAnalysisResponse["environmental_context"] }) {
+  const rows = [
+    { label: "Flood Context", value: context?.flood_context || "Data Unavailable" },
+    { label: "Mapped Wetland Context", value: context?.mapped_wetland_context || "Data Unavailable" },
+    { label: "Terrain / Slope Context", value: context?.terrain_context || "Data Unavailable" },
+    { label: "Soil Context", value: context?.soil_context || "Data Unavailable" },
+    { label: "EPA Facility Proximity", value: context?.environmental_facility_context || "Data Unavailable" },
+    { label: "Usable-Area Screening Proxy", value: context?.usable_area_screening_proxy || "Insufficient Environmental Information" },
+    { label: "Environmental Constraint Band", value: context?.overall_environmental_constraint_band || "Insufficient Information" },
+    { label: "Environmental Data Confidence", value: context?.environmental_data_confidence || "Data Needed" },
+    { label: "Source / Last Refresh", value: `${context?.source_version || "Environmental source extracts pending"}${context?.last_refreshed ? ` - ${formatDate(context.last_refreshed)}` : ""}` },
+  ];
+  return (
+    <div className="investment-signal-list">
+      <p>Environmental & Physical Context</p>
+      <Matrix rows={rows} />
+      <p className="investment-muted">
+        Environmental context is screening-level only. It does not replace survey, wetland delineation, engineering, geotechnical, zoning, utility, or environmental review.
+      </p>
+      <InvestmentSignalList title="Environmental verification requirements" values={(context?.verification_requirements || environmentalDueDiligenceChecklist).slice(0, 6)} />
     </div>
   );
 }
@@ -8679,6 +8719,8 @@ const powerBiReportPromptExamples = [
 const askCfsInvestmentResearchPrompts = [
   "Review this parcel as a long-term land-banking candidate.",
   "Summarize the market-area context around this candidate.",
+  "Summarize the major physical constraints for this candidate.",
+  "What environmental due diligence should come next?",
   "How does this tract compare with Cabarrus County?",
   "Summarize development-readiness signals.",
   "Generate a screening-level review guide.",
@@ -8732,23 +8774,36 @@ const landDueDiligenceChecklist = [
   "Check deed/sale history",
   "Compare similar acreage and zoning",
   "Compare within same economic segment",
-  "Confirm usable acreage after constraints",
+  "Confirm usable-area screening limitations",
   "Confirm frontage/access",
-  "Review floodplain/wetlands",
+  "Review floodplain and mapped wetland context",
   "Verify utility service/capacity with utility provider",
   "Check road frontage/legal access",
   "Check title/easements",
   "Check recent comparable sales",
-  "Check site dimensions/buildability",
+  "Check site dimensions and physical constraints",
+  "Obtain professional wetland delineation if mapped wetland context warrants it",
+  "Obtain topographic survey and slope/grading review",
+  "Review NRCS soil mapping and geotechnical needs",
+  "Review nearby regulated facilities and Phase I environmental due diligence need",
   "Speak with broker/appraiser/planning as needed",
   "Confirm planning cases/permits nearby",
+];
+const environmentalDueDiligenceChecklist = [
+  "Review NWI mapping and local stream or buffer requirements.",
+  "Obtain professional wetland delineation if needed.",
+  "Obtain topographic survey and review slope/grading feasibility.",
+  "Evaluate stormwater and earthwork implications.",
+  "Review NRCS soil mapping and obtain geotechnical investigation where appropriate.",
+  "Review nearby regulated facilities and consider Phase I environmental site assessment where appropriate.",
+  "Verify parcel-specific environmental history before any site conclusion.",
 ];
 const defaultDueDiligenceQuestions = [
   "Is sewer service available under current utility rules?",
   "Is system capacity available for the review scenario?",
   "Is water service available, and which provider should confirm it?",
   "Does zoning support the intended use?",
-  "Are there known floodplain, wetlands, access, easement, or site constraints?",
+  "Are there mapped floodplain, wetland, access, easement, or site constraints?",
   "Are road frontage, access, or off-site improvements required?",
   "Are there active or recent planning cases, permits, or subdivision actions nearby?",
 ];
@@ -9176,7 +9231,7 @@ function buildPowerBiReportPlan(
       relationships,
       [
         "Use development_readiness_band, land_opportunity_class, sewer_proxy_class, due_diligence_flags, and suggested_next_checks as first review fields.",
-        "Verify zoning, utility service/capacity, access, title/easements, floodplain/wetlands, planning cases, and site buildability before any decision.",
+        "Verify zoning, utility service/capacity, access, title/easements, floodplain/wetlands, planning cases, and site constraints before any decision.",
         ...powerBiReportCaveats,
       ],
     );

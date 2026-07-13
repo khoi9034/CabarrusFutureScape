@@ -20,6 +20,11 @@ from app.schemas.investment import (
 )
 from app.services.enterprise_export_service import build_powerbi_export_payload
 from app.services.investment_comparable_service import enrich_basis_context
+from app.services.investment_environmental_context_service import (
+    candidate_environmental_context,
+    environmental_status,
+    refresh_environmental_context,
+)
 from app.services.investment_intake_service import (
     analyze_intake_candidate,
     compare_intake_candidates,
@@ -92,6 +97,26 @@ def get_investment_data_quality(
     return data_quality(_investment_rows(db))
 
 
+@router.get("/environmental/status")
+def get_investment_environmental_status(
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return environmental_status(db)
+
+
+@router.post("/environmental/refresh")
+def post_investment_environmental_refresh(
+    source: str = Query(default="all"),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    try:
+        return refresh_environmental_context(db, source=source)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Environmental refresh failed before replacing last-good data.") from exc
+
+
 @router.get("/market-context/acs/status")
 def get_investment_acs_status(
     db: Session = Depends(get_db),
@@ -117,6 +142,14 @@ def get_investment_candidate_market_context(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     return candidate_market_context(db, parcel_id)
+
+
+@router.get("/candidates/{parcel_id}/environmental-context")
+def get_investment_candidate_environmental_context(
+    parcel_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return candidate_environmental_context(db, parcel_id)
 
 
 @router.get("/intake")
@@ -159,6 +192,17 @@ def get_investment_intake_market_context(
     if not candidate:
         raise HTTPException(status_code=404, detail="Investment intake candidate not found.")
     return candidate_market_context(db, candidate.get("parcel_id"))
+
+
+@router.get("/intake/{candidate_id}/environmental-context")
+def get_investment_intake_environmental_context(
+    candidate_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    candidate = get_intake_candidate(db, candidate_id)
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Investment intake candidate not found.")
+    return candidate_environmental_context(db, candidate.get("parcel_id"))
 
 
 @router.get("/intake/{candidate_id}")

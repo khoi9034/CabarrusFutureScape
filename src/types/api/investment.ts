@@ -126,6 +126,7 @@ export interface InvestmentIntakeAnalysisResponse {
   candidate: InvestmentIntakeCandidate;
   caveats: string[];
   data_attribution: Record<string, string>;
+  environmental_context?: InvestmentEnvironmentalContext;
   market_area_context?: InvestmentMarketContext;
   parcel_match_status: string;
   screening_context?: InvestmentScreenCandidate | null;
@@ -174,4 +175,23 @@ export interface InvestmentMarketContext {
   source: string;
   source_attribution: string;
   uncertainty_note?: string;
+}
+
+export interface InvestmentEnvironmentalContext {
+  environmental_data_confidence: string;
+  environmental_facility_context: string;
+  flood_context: string;
+  last_refreshed?: string | null;
+  limitations: string[];
+  mapped_wetland_context: string;
+  mean_slope_percent?: number | null;
+  overall_environmental_constraint_band: string;
+  parcel_id?: string | null;
+  soil_context: string;
+  source_attribution: Record<string, string>;
+  source_version?: string | null;
+  terrain_context: string;
+  usable_area_screening_proxy: string;
+  verification_requirements: string[];
+  wetland_percent_of_parcel?: number | null;
 }
