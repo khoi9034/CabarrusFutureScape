@@ -1,11 +1,27 @@
 "use client";
 
 import {
+  ArrowLeft,
+  BarChart3,
+  BriefcaseBusiness,
+  Building2,
   Calculator,
+  CheckCircle2,
+  ClipboardList,
   Database,
+  FileText,
+  Filter,
   Gauge,
+  Layers3,
+  LockKeyhole,
+  MapPinned,
+  Network,
+  PanelLeft,
   Search,
   ShieldAlert,
+  ShieldCheck,
+  Sparkles,
+  Target,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
@@ -21,6 +37,7 @@ import {
   getEconomicsIntelligence,
   getEconomicsPowerBiExport,
 } from "@/lib/economicsIntelligenceService";
+import { getInvestmentScreen } from "@/lib/investmentIntelligenceService";
 import type {
   CfsAiPowerBiActions,
   CfsAiSearchResponse,
@@ -34,6 +51,9 @@ import type {
   EconomicsScenarioOutput,
   EconomicsSegmentSummary,
   EconomicsScenarioTemplate,
+  InvestmentScreenCandidate,
+  InvestmentScreenResponse,
+  InvestmentStrategyId,
 } from "@/types/api";
 
 export function EconomicsShell() {
@@ -184,10 +204,17 @@ export function EconomicsShell() {
         {investmentPanelOpen ? (
           <InvestmentPanelPage
             onAddReportBucketItem={addReportBucketItem}
+            onClearReportBucket={() => setReportBucketItems([])}
             onClearSelection={() => setSelectedSignalIds([])}
             onClose={() => setInvestmentPanelOpen(false)}
-            onNavigate={setEconomicsSection}
+            onNavigate={(section) => {
+              setInvestmentPanelOpen(false);
+              setEconomicsSection(section);
+            }}
+            onRemoveReportBucketItem={removeReportBucketItem}
+            onToggleReportBucketPrint={toggleReportBucketPrint}
             onToggleSignal={toggleSelectedSignal}
+            reportBucketItems={reportBucketItems}
             selectedSignalIds={selectedSignalIds}
             signals={signals}
           />
@@ -317,19 +344,18 @@ function InvestmentPanelGate({
     setError("Access code did not match.");
   };
   return (
-    <div className="no-print fixed inset-0 z-50 grid place-items-center bg-black/65 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-[var(--econ-border)] bg-[#12161f] p-5 shadow-2xl">
-        <p className="econ-eyebrow">Internal research mode</p>
-        <h2 className="mt-2 text-xl font-semibold text-[var(--econ-text)]">Investment Panel Access</h2>
-        <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
-          Local convenience gate only. Screening-level review; no financial guidance, appraisal conclusion, utility confirmation, or future-value assurance.
-        </p>
-        <label className="mt-4 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--econ-muted)]" htmlFor="investment-panel-code">
+    <div className="investment-gate no-print">
+      <div className="investment-gate-card">
+        <p>Internal Preview Access</p>
+        <h2>Investment Panel Access</h2>
+        <span>
+          Local convenience gate only. Screening-level review; not investment advice, not an appraisal, no utility confirmation, and no future-value assurance.
+        </span>
+        <label htmlFor="investment-panel-code">
           Access code
         </label>
         <input
           autoFocus
-          className="mt-2 w-full rounded-xl border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-sm text-[var(--econ-text)] outline-none transition focus:border-[var(--econ-gold)]"
           id="investment-panel-code"
           onChange={(event) => {
             setCode(event.target.value);
@@ -343,13 +369,13 @@ function InvestmentPanelGate({
           type="password"
           value={code}
         />
-        <p className="mt-2 text-xs text-[var(--econ-muted)]">Demo/local code: demo. Do not use this as real authentication.</p>
-        {error ? <p className="mt-2 text-xs font-semibold text-[var(--econ-risk)]">{error}</p> : null}
-        <div className="mt-4 flex flex-wrap justify-end gap-2">
-          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={onCancel} type="button">
+        <small>Demo/local code: demo. This is not production authentication.</small>
+        {error ? <strong>{error}</strong> : null}
+        <div>
+          <button onClick={onCancel} type="button">
             Cancel
           </button>
-          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={unlock} type="button">
+          <button onClick={unlock} type="button">
             Unlock
           </button>
         </div>
@@ -855,33 +881,99 @@ function PowerBiToolsPage({
 
 function InvestmentPanelPage({
   onAddReportBucketItem,
+  onClearReportBucket,
   onClearSelection,
   onClose,
   onNavigate,
+  onRemoveReportBucketItem,
+  onToggleReportBucketPrint,
   onToggleSignal,
+  reportBucketItems,
   selectedSignalIds,
   signals,
 }: {
   onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onClearReportBucket: () => void;
   onClearSelection: () => void;
   onClose: () => void;
   onNavigate: (section: "print") => void;
+  onRemoveReportBucketItem: (id: string) => void;
+  onToggleReportBucketPrint: (id: string) => void;
   onToggleSignal: (signal: EconomicsParcelSignal) => void;
+  reportBucketItems: ReportBucketItem[];
   selectedSignalIds: string[];
   signals: EconomicsParcelSignal[];
 }) {
+  const [activeStrategy, setActiveStrategy] = useState<InvestmentStrategyId>("development_land");
+  const [investmentScreen, setInvestmentScreen] = useState<InvestmentScreenResponse | null>(null);
+  const [activeCandidateId, setActiveCandidateId] = useState<string | null>(null);
+  const [comparisonRows, setComparisonRows] = useState<RankedLandReviewCandidate[]>([]);
+  const [guide, setGuide] = useState<DueDiligencePacket | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    if (USE_DEMO_DATA) {
+      return () => {
+        mounted = false;
+      };
+    }
+    void getInvestmentScreen(activeStrategy)
+      .then((response) => {
+        if (mounted) setInvestmentScreen(response);
+      })
+      .catch(() => {
+        if (mounted) setInvestmentScreen(null);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [activeStrategy]);
+  const activeInvestmentScreen = investmentScreen?.strategy === activeStrategy ? investmentScreen : null;
+  const engineCandidatesByParcel = useMemo(
+    () =>
+      new Map(
+        (activeInvestmentScreen?.candidates ?? []).map((candidate) => [
+          candidate.parcel_id,
+          candidate,
+        ]),
+      ),
+    [activeInvestmentScreen],
+  );
   const rows = useMemo(
     () =>
       landDueDiligenceRows(signals)
-        .map((signal) => ({ ranking: landReviewRanking(signal), signal }))
-        .sort((left, right) => right.ranking.sort_value - left.ranking.sort_value),
-    [signals],
+        .map((signal) => {
+          const investmentCandidate = engineCandidatesByParcel.get(signal.parcel_id);
+          return {
+            investment_candidate: investmentCandidate,
+            ranking: investmentCandidate ? investmentCandidateRanking(investmentCandidate) : landReviewRanking(signal),
+            signal,
+          };
+        })
+        .sort((left, right) => {
+          if (left.investment_candidate && right.investment_candidate) {
+            return left.investment_candidate.sort_order - right.investment_candidate.sort_order;
+          }
+          return right.ranking.sort_value - left.ranking.sort_value;
+        }),
+    [engineCandidatesByParcel, signals],
   );
+  const visibleRows = rows
+    .filter((row) => (activeInvestmentScreen ? Boolean(row.investment_candidate) : matchesInvestmentStrategy(row.signal, activeStrategy)))
+    .map((row, index) => ({ ...row, rank: index + 1 }));
+  const selectedRows = rows.filter((row) => selectedSignalIds.includes(row.signal.parcel_id)).slice(0, 5);
+  const activeRow =
+    visibleRows.find((row) => row.signal.parcel_id === activeCandidateId) ??
+    selectedRows[0] ??
+    visibleRows[0] ??
+    rows[0] ??
+    null;
+  const activeSignal = activeRow?.signal ?? null;
+  const activeInvestmentCandidate = activeRow?.investment_candidate ?? null;
   const tier1 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 1")).length;
   const tier2 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 2")).length;
   const sewerSupported = rows.filter((row) => hasSewerSupport(row.signal)).length;
-  const dataNeeded = rows.filter((row) => row.ranking.review_priority_band.includes("Data") || row.ranking.caution_flags.some((flag) => flag.toLowerCase().includes("data"))).length;
-  const special = rows.filter((row) => row.ranking.review_priority_band.startsWith("Special")).length;
+  const confidenceBands = uniqueValues(rows.map((row) => row.signal.data_confidence ?? row.signal.economic_data_confidence)).length;
   const [askRequest, setAskRequest] = useState<AskCfsExternalRequest | null>(null);
   const askAboutSignal = (signal: EconomicsParcelSignal) => {
     setAskRequest({
@@ -896,59 +988,545 @@ function InvestmentPanelPage({
       requestId: Date.now(),
     });
   };
+  const createGuide = () => {
+    const nextGuide = selectedRows.length
+      ? watchlistDueDiligencePacket(selectedRows.map((row) => row.signal))
+      : activeSignal
+        ? singleParcelDueDiligencePacket(activeSignal)
+        : null;
+    if (!nextGuide) return;
+    setGuide(nextGuide);
+    setStatus("Review guide generated");
+  };
+  const addGuideToBucket = () => {
+    if (!guide) return;
+    onAddReportBucketItem(dueDiligencePacketBucketItem(guide));
+    setStatus("Review guide saved to Report Bucket");
+  };
+  const sendGuideToPrint = () => {
+    if (guide) onAddReportBucketItem(dueDiligencePacketBucketItem(guide));
+    onNavigate("print");
+  };
   return (
-    <>
-      <PageHeader
-        kicker="Internal Economics"
-        text="Private land review cockpit for screening-level development-readiness and due diligence candidates."
-        title="Investment Panel"
-      >
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={onClose} type="button">
-            Back to CFS Economics
-          </button>
-          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("print")} type="button">
-            Open Print
-          </button>
+    <section className="investment-shell">
+      <aside className="investment-sidebar" aria-label="Investment Panel navigation">
+        <div className="investment-brand">
+          <span className="investment-brand-mark"><LockKeyhole className="h-4 w-4" /></span>
+          <div>
+            <p>Investment Panel</p>
+            <span>Internal</span>
+          </div>
         </div>
-      </PageHeader>
-      <section className="rounded-2xl border border-[var(--econ-gold)]/25 bg-[var(--econ-gold)]/[0.07] px-4 py-3 text-sm leading-6 text-[#f7dc93]">
-        CFS ranks parcels for manual review only. It does not provide financial or buy/sell guidance, appraisal conclusions, utility confirmation, or future-value assurances.
-      </section>
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-        <MiniMetric label="Total candidate rows" value={formatNumber(rows.length)} />
-        <MiniMetric label="Tier 1 candidates" value={formatNumber(tier1)} />
-        <MiniMetric label="Tier 2 candidates" value={formatNumber(tier2)} />
-        <MiniMetric label="Sewer-proxy supported" value={formatNumber(sewerSupported)} />
-        <MiniMetric label="Data-needed but interesting" value={formatNumber(dataNeeded)} />
-        <MiniMetric label="Special review" value={formatNumber(special)} />
-      </section>
-      <EconPanel title="Ask CFS Investment Research" kicker="Screening assistant">
-        <AskCfsPanel
-          appMode="economics"
-          externalRequest={askRequest}
-          filterContext={{
-            candidate_rows: rows.length,
-            mode: "investment_panel",
-            sewer_proxy_supported_candidates: sewerSupported,
-            tier_1_candidates: tier1,
-            tier_2_candidates: tier2,
-          }}
-          suggestedPromptsOverride={askCfsInvestmentResearchPrompts}
-          visiblePromptCount={7}
-        />
-      </EconPanel>
-      <LandDueDiligenceScreener
-        mode="investment"
-        onAddReportBucketItem={onAddReportBucketItem}
-        onAskCfs={askAboutSignal}
-        onClearSelection={onClearSelection}
-        onNavigate={onNavigate}
-        onToggleSignal={onToggleSignal}
-        selectedSignalIds={selectedSignalIds}
-        signals={signals}
+        <nav className="investment-nav">
+          {investmentNavItems.map(({ icon: Icon, id, label, sublabel }) => (
+            <button key={id} onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })} type="button">
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              <span><strong>{label}</strong><small>{sublabel}</small></span>
+            </button>
+          ))}
+        </nav>
+        <div className="investment-sidebar-footer">
+          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+          <p>Private Internal Use Only</p>
+          <button onClick={onClose} type="button"><ArrowLeft className="h-4 w-4" /> Return to CFS Economics</button>
+        </div>
+      </aside>
+      <div className="investment-workspace">
+        <header className="investment-header" id="command-center">
+          <div>
+            <div className="investment-header-kicker">
+              <span>Internal</span>
+              <span>{USE_DEMO_DATA ? "Portfolio Demo" : "Local live context"}</span>
+            </div>
+            <h1>Investment Panel</h1>
+            <p>Private research workspace for land and parcel intelligence.</p>
+          </div>
+          <div className="investment-header-actions">
+            <button className="investment-ghost-button" type="button"><Filter className="h-4 w-4" /> Filters</button>
+            <button className="investment-ghost-button" onClick={onClose} type="button"><ArrowLeft className="h-4 w-4" /> CFS Economics</button>
+          </div>
+        </header>
+        <main className="investment-main">
+          <section className="investment-kpi-grid" aria-label="Investment Panel command KPIs">
+            <InvestmentKpiCard icon={Target} label="Priority Review Candidates" status={tier1 + tier2 ? "Active" : "Limited"} note="Tier 1 and Tier 2 review bands." />
+            <InvestmentKpiCard icon={CheckCircle2} label="Strong Review Candidates" status={tier1 ? "Elevated" : "Verify"} note="Strong infrastructure-supported signal." />
+            <InvestmentKpiCard icon={Network} label="Utility-Readiness Proxy Coverage" status={sewerSupported ? "Solid" : "Limited"} note="Sewer proximity proxy context." />
+            <InvestmentKpiCard icon={BarChart3} label="Recent Comparable Context" status="Verify" note="Use assessed-value bands; confirm comps manually." />
+            <InvestmentKpiCard icon={ShieldAlert} label="Data Confidence Mix" status={confidenceBands > 1 ? "Balanced" : "Verify"} note="Review confidence before decisions." />
+          </section>
+          <section className="investment-grid">
+            <div className="investment-primary-column">
+              <section className="investment-card investment-ask" id="strategy-screener">
+                <div className="investment-section-heading">
+                  <div>
+                    <p>Ask CFS Investment Research</p>
+                    <h2>Use natural language to explore parcels, strategies, and market context.</h2>
+                  </div>
+                  <Sparkles className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <AskCfsPanel
+                  appMode="economics"
+                  externalRequest={askRequest}
+                  filterContext={{
+                    active_strategy: investmentStrategyLabel(activeStrategy),
+                    engine_candidates: activeInvestmentScreen?.candidate_count,
+                    candidate_rows: rows.length,
+                    mode: "investment_panel",
+                    strategy_screening_source: activeInvestmentScreen ? "Investment Intelligence Engine" : "local panel fallback",
+                    sewer_proxy_supported_candidates: sewerSupported,
+                    tier_1_candidates: tier1,
+                    tier_2_candidates: tier2,
+                  }}
+                  suggestedPromptsOverride={askCfsInvestmentResearchPrompts}
+                  visiblePromptCount={5}
+                />
+              </section>
+              <section className="investment-card">
+                <div className="investment-section-heading">
+                  <div>
+                    <p>Strategy Presets</p>
+                    <h2>Choose a private research lens.</h2>
+                  </div>
+                </div>
+                <div className="investment-strategy-grid">
+                  {investmentStrategies.map(({ description, icon: Icon, id, label }) => (
+                    <button
+                      aria-pressed={activeStrategy === id}
+                      className="investment-strategy-card"
+                      key={id}
+                      onClick={() => setActiveStrategy(id)}
+                      type="button"
+                    >
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                      <span>{label}</span>
+                      <small>{description}</small>
+                    </button>
+                  ))}
+                </div>
+              </section>
+              <section className="investment-card" id="candidate-review">
+                <div className="investment-section-heading">
+                  <div>
+                    <p>Top Land Review Candidates</p>
+                    <h2>{investmentStrategyLabel(activeStrategy)} pipeline</h2>
+                  </div>
+                  <span className="investment-pill">{formatNumber(visibleRows.length)} visible</span>
+                </div>
+                <InvestmentCandidateTable
+                  activeCandidateId={activeSignal?.parcel_id ?? null}
+                  onAddCandidate={(signal) => {
+                    onAddReportBucketItem(dueDiligencePacketBucketItem(singleParcelDueDiligencePacket(signal)));
+                    setStatus("Candidate review saved to Report Bucket");
+                  }}
+                  onOpenCandidate={(signal) => setActiveCandidateId(signal.parcel_id)}
+                  onToggleSignal={onToggleSignal}
+                  rows={visibleRows}
+                  selectedSignalIds={selectedSignalIds}
+                  strategy={activeStrategy}
+                />
+              </section>
+              {comparisonRows.length >= 2 ? (
+                <section className="investment-card" id="compare">
+                  <div className="investment-section-heading">
+                    <div>
+                      <p>Compare</p>
+                      <h2>Side-by-side analysis</h2>
+                    </div>
+                  </div>
+                  <InvestmentComparisonTable rows={comparisonRows} />
+                </section>
+              ) : null}
+            </div>
+            <aside className="investment-rail">
+              <InvestmentCandidateRail
+                onAskCfs={askAboutSignal}
+                onGenerateGuide={createGuide}
+                signal={activeSignal}
+                investmentCandidate={activeInvestmentCandidate}
+                strategy={activeStrategy}
+              />
+              <section className="investment-card investment-action-card">
+                <div>
+                  <p>Compare Selected</p>
+                  <span>{selectedRows.length} selected / 5 maximum</span>
+                </div>
+                <button className="investment-primary-button" disabled={selectedRows.length < 2 || selectedRows.length > 5} onClick={() => setComparisonRows(selectedRows.map((row, index) => ({ ...row, rank: index + 1 })))} type="button">
+                  Compare Selected
+                </button>
+                <button className="investment-ghost-button" disabled={!selectedRows.length} onClick={onClearSelection} type="button">
+                  Clear Selection
+                </button>
+              </section>
+              <section className="investment-card investment-action-card" id="review-guides">
+                <div>
+                  <p>Generate Review Guide</p>
+                  <span>Live on-screen summary for manual due diligence.</span>
+                </div>
+                <button className="investment-primary-button" disabled={!activeSignal && !selectedRows.length} onClick={createGuide} type="button">
+                  Generate Review Guide
+                </button>
+                <button className="investment-ghost-button" disabled={!guide} onClick={addGuideToBucket} type="button">
+                  Save guide to Report Bucket
+                </button>
+                <button className="investment-ghost-button" disabled={!guide} onClick={sendGuideToPrint} type="button">
+                  Send to Print
+                </button>
+                {status ? <span className="investment-status">{status}</span> : null}
+              </section>
+              {guide ? <InvestmentGuidePreview guide={guide} /> : null}
+              <InvestmentBucketPanel
+                items={reportBucketItems}
+                onClear={onClearReportBucket}
+                onOpenPrint={() => onNavigate("print")}
+                onRemove={onRemoveReportBucketItem}
+                onTogglePrint={onToggleReportBucketPrint}
+              />
+            </aside>
+          </section>
+        </main>
+        <footer className="investment-footer">
+          Internal use only. Information is derived from multiple sources and proxies. Use professional judgment and consult appropriate experts. Screening-level review only - not investment advice, not an appraisal, and not a guarantee of future value.
+        </footer>
+      </div>
+    </section>
+  );
+}
+
+const investmentNavItems = [
+  { icon: Gauge, id: "command-center", label: "Command Center", sublabel: "Overview & KPIs" },
+  { icon: Filter, id: "strategy-screener", label: "Strategy Screener", sublabel: "Find & Filter Parcels" },
+  { icon: MapPinned, id: "candidate-review", label: "Candidate Review", sublabel: "Deep Dive Workspace" },
+  { icon: Layers3, id: "compare", label: "Compare", sublabel: "Side-by-Side Analysis" },
+  { icon: ClipboardList, id: "review-guides", label: "Review Guides", sublabel: "Methods & Checklists" },
+  { icon: FileText, id: "report-bucket", label: "Report Bucket", sublabel: "Saved for Reporting" },
+] as const;
+
+const investmentStrategies: Array<{
+  description: string;
+  icon: typeof Gauge;
+  id: InvestmentStrategyId;
+  label: string;
+}> = [
+  {
+    description: "Near-to-mid-term development-readiness signals.",
+    icon: Building2,
+    id: "development_land",
+    label: "Development Land",
+  },
+  {
+    description: "Land assembly, growth context, and future optionality.",
+    icon: Network,
+    id: "land_banking",
+    label: "Long-Term Land Banking",
+  },
+  {
+    description: "Planning alignment and repositioning pathway.",
+    icon: BriefcaseBusiness,
+    id: "entitlement_repositioning",
+    label: "Entitlement / Repositioning",
+  },
+  {
+    description: "Current use, operational context, and optionality.",
+    icon: PanelLeft,
+    id: "existing_use",
+    label: "Existing-Use Land",
+  },
+];
+
+function investmentStrategyLabel(strategy: InvestmentStrategyId) {
+  return investmentStrategies.find((item) => item.id === strategy)?.label ?? "Development Land";
+}
+
+function matchesInvestmentStrategy(signal: EconomicsParcelSignal, strategy: InvestmentStrategyId) {
+  if (strategy === "development_land") return matchesLandReviewPreset(signal, "Growth pressure + sewer proximity") || valueText(signal.development_readiness_band).toLowerCase().includes("strong");
+  if (strategy === "land_banking") return hasGrowthPressure(signal) || matchesLandReviewPreset(signal, "More data needed but interesting");
+  if (strategy === "entitlement_repositioning") return matchesLandReviewPreset(signal, "Underbuilt + utility proxy") || valueText(signal.zoning_support_band).toLowerCase().includes("support");
+  return isSpecialReviewCandidate(signal) || valueText(signal.opportunity_class).toLowerCase().includes("stable") || valueText(signal.economic_segment).toLowerCase().includes("commercial");
+}
+
+function InvestmentKpiCard({
+  icon: Icon,
+  label,
+  note,
+  status,
+}: {
+  icon: typeof Gauge;
+  label: string;
+  note: string;
+  status: string;
+}) {
+  return (
+    <article className="investment-kpi-card">
+      <div>
+        <Icon className="h-5 w-5" aria-hidden="true" />
+        <span>{status}</span>
+      </div>
+      <h2>{label}</h2>
+      <p>{note}</p>
+      <i aria-hidden="true" />
+    </article>
+  );
+}
+
+function InvestmentCandidateTable({
+  activeCandidateId,
+  onAddCandidate,
+  onOpenCandidate,
+  onToggleSignal,
+  rows,
+  selectedSignalIds,
+  strategy,
+}: {
+  activeCandidateId: string | null;
+  onAddCandidate: (signal: EconomicsParcelSignal) => void;
+  onOpenCandidate: (signal: EconomicsParcelSignal) => void;
+  onToggleSignal: (signal: EconomicsParcelSignal) => void;
+  rows: RankedLandReviewCandidate[];
+  selectedSignalIds: string[];
+  strategy: InvestmentStrategyId;
+}) {
+  if (!rows.length) {
+    return <p className="investment-empty">No candidates match this strategy. Choose another strategy or refresh economics data.</p>;
+  }
+  return (
+    <div className="investment-table-wrap">
+      <table className="investment-table">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>Parcel ID</th>
+            <th>Area</th>
+            <th>Strategy Fit</th>
+            <th>Readiness Signal</th>
+            <th>Basis Context</th>
+            <th>Constraint Burden</th>
+            <th>Data Confidence</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.slice(0, 80).map((row) => {
+            const selected = selectedSignalIds.includes(row.signal.parcel_id);
+            const active = activeCandidateId === row.signal.parcel_id;
+            return (
+              <tr className={active ? "is-active" : ""} key={row.signal.parcel_id}>
+                <td>
+                  <button aria-pressed={selected} className="investment-select-button" onClick={() => onToggleSignal(row.signal)} type="button">
+                    {selected ? "Selected" : "Select"}
+                  </button>
+                </td>
+                <td><strong>{row.signal.parcel_id}</strong></td>
+                <td>{valueText(row.signal.geography_label) || signalLabel(row.signal)}</td>
+                <td><span className="investment-chip investment-chip--teal">{row.investment_candidate?.dimension_bands.strategy_fit ?? investmentStrategyLabel(strategy)}</span></td>
+                <td><span className="investment-chip">{row.investment_candidate?.candidate_band ?? row.ranking.review_priority_band.replace(" - ", ": ")}</span></td>
+                <td>{row.investment_candidate?.dimension_bands.basis_context ?? (row.ranking.supporting_signals.slice(0, 2).join(" | ") || "Screening context needed")}</td>
+                <td>{row.investment_candidate?.dimension_bands.constraint_burden ?? (valueText(row.signal.flood_constraint_band) || valueText(row.signal.constraint_burden_band) || "Verify")}</td>
+                <td>{row.investment_candidate?.dimension_bands.data_confidence ?? (valueText(row.signal.data_confidence ?? row.signal.economic_data_confidence) || "Verify")}</td>
+                <td>
+                  <div className="investment-row-actions">
+                    <button onClick={() => onOpenCandidate(row.signal)} type="button">Open</button>
+                    <button onClick={() => onAddCandidate(row.signal)} type="button">Bucket</button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function InvestmentCandidateRail({
+  investmentCandidate,
+  onAskCfs,
+  onGenerateGuide,
+  signal,
+  strategy,
+}: {
+  investmentCandidate?: InvestmentScreenCandidate | null;
+  onAskCfs: (signal: EconomicsParcelSignal) => void;
+  onGenerateGuide: () => void;
+  signal: EconomicsParcelSignal | null;
+  strategy: InvestmentStrategyId;
+}) {
+  if (!signal) {
+    return <section className="investment-card investment-rail-card"><p className="investment-empty">Open a candidate to review its screening context.</p></section>;
+  }
+  const ranking = investmentCandidate ? investmentCandidateRanking(investmentCandidate) : landReviewRanking(signal);
+  return (
+    <section className="investment-card investment-rail-card">
+      <div className="investment-parcel-preview" aria-hidden="true">
+        <MapPinned className="h-8 w-8" />
+      </div>
+      <p className="investment-rail-label">Candidate Review</p>
+      <h2>{signal.parcel_id}</h2>
+      <p className="investment-muted">{signalLabel(signal)} | {valueText(signal.geography_label) || "Area data needed"}</p>
+      <div className="investment-chip-row">
+        {["screening-level review", "sewer proximity proxy", "utility-readiness proxy", "due diligence required"].map((chip) => (
+          <span className="investment-chip" key={chip}>{chip}</span>
+        ))}
+      </div>
+      <div className="investment-disclaimer">
+        Screening-level review only - not investment advice, not an appraisal, and not a guarantee of future value.
+      </div>
+      <p className="investment-summary">{ranking.review_reason_summary}</p>
+      <InvestmentSignalList title="Major positive signals" values={ranking.supporting_signals.slice(0, 4)} />
+      <InvestmentSignalList title="Major caution signals" values={ranking.caution_flags.slice(0, 4)} />
+      {investmentCandidate ? <InvestmentBasisContextPanel candidate={investmentCandidate} /> : null}
+      <ComparableContextPanel signal={signal} />
+      <div className="investment-rail-actions">
+        <button className="investment-primary-button" onClick={onGenerateGuide} type="button">Generate Review Guide</button>
+        <button className="investment-ghost-button" onClick={() => onAskCfs(signal)} type="button">Ask CFS about this candidate</button>
+      </div>
+      <p className="investment-muted">Strategy: {investmentStrategyLabel(strategy)}</p>
+    </section>
+  );
+}
+
+function InvestmentSignalList({ title, values }: { title: string; values: string[] }) {
+  return (
+    <div className="investment-signal-list">
+      <p>{title}</p>
+      <ul>
+        {(values.length ? values : ["Verify with planning, utilities, access, title, and site review."]).map((value) => (
+          <li key={value}>{value}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function InvestmentBasisContextPanel({ candidate }: { candidate: InvestmentScreenCandidate }) {
+  return (
+    <div className="investment-signal-list">
+      <p>Basis & Comparable Context</p>
+      <Matrix
+        rows={[
+          { label: "Basis Context", value: candidate.basis_context_band || candidate.dimension_bands.basis_context },
+          { label: "Sale Evidence", value: candidate.sale_quality_band || "Not Available" },
+          { label: "Sale Recency", value: candidate.sale_recency_band || "No sale information available" },
+          { label: "Comparable Depth", value: candidate.comparable_count_band || "No comparable evidence" },
+          { label: "Confidence", value: candidate.basis_data_confidence || candidate.comparable_confidence_band || "Low" },
+        ]}
       />
-    </>
+      <p className="investment-muted">{candidate.comparable_context_summary || "Basis evaluation requires manual due diligence."}</p>
+      <InvestmentSignalList title="Basis positives" values={(candidate.basis_positive_reasons || []).slice(0, 3)} />
+      <InvestmentSignalList title="Basis cautions" values={(candidate.basis_caution_reasons || []).slice(0, 3)} />
+    </div>
+  );
+}
+
+function InvestmentComparisonTable({ rows }: { rows: RankedLandReviewCandidate[] }) {
+  return (
+    <div className="investment-table-wrap">
+      <table className="investment-table">
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Review priority</th>
+            <th>Basis context</th>
+            <th>Sale evidence</th>
+            <th>Comparable depth</th>
+            <th>Sewer proxy</th>
+            <th>Growth pressure</th>
+            <th>Comparable context</th>
+            <th>Basis cautions</th>
+            <th>Constraint flags</th>
+            <th>Data confidence</th>
+            <th>Next checks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            const context = valuationContext(row.signal);
+            const candidate = row.investment_candidate;
+            return (
+              <tr key={row.signal.parcel_id}>
+                <td>{signalLabel(row.signal)}</td>
+                <td>{row.ranking.review_priority_band}</td>
+                <td>{candidate?.basis_context_band || candidate?.dimension_bands.basis_context || context.comparable_context_status}</td>
+                <td>{candidate?.sale_quality_band || context.sale_recency_band}</td>
+                <td>{candidate?.comparable_count_band || "Manual review"}</td>
+                <td>{valueText(row.signal.sewer_proxy_class) || "Verify"}</td>
+                <td>{valueText(row.signal.growth_pressure_band) || "Verify"}</td>
+                <td>{candidate?.comparable_context_summary || context.comparable_context_status}</td>
+                <td>{(candidate?.basis_caution_reasons || context.valuation_due_diligence_flags).slice(0, 2).join(" | ") || "Monitor"}</td>
+                <td>{row.ranking.caution_flags.slice(0, 2).join(" | ") || "Monitor"}</td>
+                <td>{valueText(row.signal.data_confidence ?? row.signal.economic_data_confidence) || "Verify"}</td>
+                <td>{row.ranking.recommended_next_checks.slice(0, 2).join(" | ") || "Manual review required"}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function InvestmentGuidePreview({ guide }: { guide: DueDiligencePacket }) {
+  return (
+    <section className="investment-card">
+      <p className="investment-rail-label">Review Guide</p>
+      <h2>{guide.title}</h2>
+      <p className="investment-muted">{guide.summary}</p>
+      <details>
+        <summary>Open guide contents</summary>
+        <div className="investment-guide-sections">
+          {guide.sections.slice(0, 5).map((section) => (
+            <div key={section.title}>
+              <strong>{section.title}</strong>
+              <ul>{section.lines.slice(0, 4).map((line) => <li key={line}>{line}</li>)}</ul>
+            </div>
+          ))}
+        </div>
+      </details>
+    </section>
+  );
+}
+
+function InvestmentBucketPanel({
+  items,
+  onClear,
+  onOpenPrint,
+  onRemove,
+  onTogglePrint,
+}: {
+  items: ReportBucketItem[];
+  onClear: () => void;
+  onOpenPrint: () => void;
+  onRemove: (id: string) => void;
+  onTogglePrint: (id: string) => void;
+}) {
+  return (
+    <section className="investment-card" id="report-bucket">
+      <div className="investment-section-heading">
+        <div>
+          <p>Report Bucket</p>
+          <h2>Saved for reporting</h2>
+        </div>
+        <span className="investment-pill">{items.length} items</span>
+      </div>
+      {items.length ? (
+        <div className="investment-bucket-list">
+          {items.slice(0, 6).map((item) => (
+            <div key={item.id}>
+              <span>{bucketTypeLabel(item.type)}</span>
+              <strong>{item.title}</strong>
+              <small>{new Date(item.created_at).toLocaleDateString()}</small>
+              <div>
+                <label><input checked={item.selected_for_print} onChange={() => onTogglePrint(item.id)} type="checkbox" /> Print</label>
+                <button onClick={() => onRemove(item.id)} type="button">Remove</button>
+              </div>
+            </div>
+          ))}
+          <button className="investment-primary-button" onClick={onOpenPrint} type="button">View all in Report Bucket</button>
+          <button className="investment-ghost-button" onClick={onClear} type="button">Clear bucket</button>
+        </div>
+      ) : (
+        <p className="investment-empty">Save review guides, candidate notes, or chart plans here before printing.</p>
+      )}
+    </section>
   );
 }
 
@@ -5867,6 +6445,29 @@ function matchesLandReviewPreset(signal: EconomicsParcelSignal, preset: string) 
   return true;
 }
 
+function investmentCandidateRanking(candidate: InvestmentScreenCandidate): LandReviewRanking {
+  const reviewBand = investmentCandidateReviewBand(candidate.candidate_band);
+  return {
+    caution_flags: candidate.caution_reason_codes,
+    recommended_next_checks: candidate.verification_requirements,
+    review_priority_band: reviewBand,
+    review_reason_summary:
+      candidate.positive_reason_codes.slice(0, 3).join("; ") ||
+      `${candidate.candidate_band}; manual verification required.`,
+    sort_value: landReviewSortValue(reviewBand) + Math.max(0, 100 - candidate.sort_order),
+    supporting_signals: candidate.positive_reason_codes,
+  };
+}
+
+function investmentCandidateReviewBand(candidateBand: string): LandReviewPriorityBand {
+  if (candidateBand === "Priority Review" || candidateBand === "Strong Review Candidate") {
+    return "Tier 1 - Strong Review Candidate";
+  }
+  if (candidateBand === "Moderate Review Candidate") return "Tier 2 - Good Review Candidate";
+  if (candidateBand === "Limited Current Signal") return "Tier 3 - Watchlist / More Data Needed";
+  return "Tier 4 - Constraint or Data-Limited";
+}
+
 function landReviewRanking(signal: EconomicsParcelSignal): LandReviewRanking {
   const text = landReviewSearchText(signal);
   const special = isSpecialReviewCandidate(signal);
@@ -7177,6 +7778,7 @@ type ValuationContext = {
   value_per_acre_band: string;
 };
 type RankedLandReviewCandidate = {
+  investment_candidate?: InvestmentScreenCandidate | null;
   rank: number;
   ranking: LandReviewRanking;
   signal: EconomicsParcelSignal;
@@ -7434,11 +8036,11 @@ const powerBiReportPromptExamples = [
 ];
 
 const askCfsInvestmentResearchPrompts = [
-  "Which candidates should I review first?",
-  "Show infrastructure-supported candidates.",
-  "Compare selected candidates.",
-  "What are the biggest red flags?",
-  "What should I verify before spending money?",
+  "Review this parcel as a long-term land-banking candidate.",
+  "Summarize development-readiness signals.",
+  "Generate a screening-level review guide.",
+  "Compare the selected land review candidates.",
+  "Explain the major constraint indicators.",
   "Which candidates need utility due diligence?",
   "Which candidates have growth pressure and sewer proximity?",
 ];

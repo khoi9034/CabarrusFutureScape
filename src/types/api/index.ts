@@ -4,4 +4,5 @@ export * from "@/types/api/parcels";
 export * from "@/types/api/schoolConstraints";
 export * from "@/types/api/aiSearch";
 export * from "@/types/api/indicatorIntelligence";
+export * from "@/types/api/investment";
 export * from "@/types/api/economics";

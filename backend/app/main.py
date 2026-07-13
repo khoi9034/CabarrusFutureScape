@@ -10,6 +10,7 @@ from app.routers import (
     development_router,
     economics_router,
     indicators_router,
+    investment_router,
     parcel_router,
     school_constraints_router,
     temporal_router,
@@ -54,6 +55,7 @@ def root() -> dict[str, object]:
             "constraints": "/constraints",
             "ai_search": "/ai/search",
             "indicators": "/indicators",
+            "investment": "/investment",
             "wsacc": "/wsacc",
         },
     }
@@ -86,3 +88,4 @@ app.include_router(school_constraints_router.router)
 app.include_router(indicators_router.router)
 app.include_router(ai_search_router.router)
 app.include_router(wsacc_router.router)
+app.include_router(investment_router.router)
