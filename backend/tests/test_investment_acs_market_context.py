@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.connectors import census_acs
-from app.connectors.census_acs import CensusAcsConnector
+from app.connectors.census_acs import CensusAcsConnector, configured_acs_year, validate_acs_year
 from app.dependencies.database import get_db
 from app.main import app
 from app.routers import investment_router
@@ -51,6 +52,40 @@ def test_census_connector_parses_cabarrus_tracts(monkeypatch) -> None:
     assert "configured-but-not-logged" not in str(result)
 
 
+def test_census_acs_year_is_configurable(monkeypatch) -> None:
+    monkeypatch.delenv("CENSUS_ACS_YEAR", raising=False)
+    assert configured_acs_year() == 2024
+    monkeypatch.setenv("CENSUS_ACS_YEAR", "2023")
+    assert configured_acs_year() == 2023
+    with pytest.raises(ValueError):
+        validate_acs_year("bad")
+
+
+def test_census_connector_fetches_cabarrus_tract_geometry(monkeypatch) -> None:
+    response = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {"GEOID": "37025042604", "STATE": "37", "COUNTY": "025", "TRACT": "042604", "BASENAME": "426.04"},
+                "geometry": {"type": "Polygon", "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 0]]]},
+            },
+            {
+                "type": "Feature",
+                "properties": {"GEOID": "99999000000", "STATE": "99", "COUNTY": "999", "TRACT": "000000"},
+                "geometry": {"type": "Polygon", "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 0]]]},
+            },
+        ],
+    }
+    monkeypatch.setattr(census_acs.urllib.request, "urlopen", lambda *_args, **_kwargs: FakeResponse(response))
+
+    rows = CensusAcsConnector(api_key=None).fetch_cabarrus_tract_geometries(year=2024)
+
+    assert len(rows) == 1
+    assert rows[0]["geoid"] == "37025042604"
+    assert rows[0]["acs_year"] == 2024
+
+
 def test_census_connector_handles_missing_variable_and_null(monkeypatch) -> None:
     response = [
         ["NAME", "B01003_001E", "state", "county", "tract"],
@@ -87,6 +122,8 @@ def test_build_market_context_is_qualitative_and_safe() -> None:
 
     assert context["population_context"]["band"] == "Elevated Local Context"
     assert context["growth_context"]["band"] == "Insufficient Information"
+    assert context["data_confidence"] == "Medium"
+    assert "sampling uncertainty" in context["uncertainty_note"]
     assert SAFE_LIMITATION in context["limitations"]
     for unsafe in ["guaranteed", "official appraisal", "raw_score", "owner_name", "mailing_address"]:
         assert unsafe not in text
@@ -115,13 +152,13 @@ def test_market_context_routes_are_wired(monkeypatch) -> None:
     app.dependency_overrides[get_db] = lambda: SimpleNamespace()
     monkeypatch.setattr(investment_router, "acs_status", lambda db: {"status": "loaded", "row_count": 1})
     monkeypatch.setattr(investment_router, "refresh_acs_market_context", lambda db: {"rows_loaded": 1})
-    monkeypatch.setattr(investment_router, "candidate_market_context", lambda db, parcel_id: {"geoid": "37025010101", "data_confidence": "Moderate"})
+    monkeypatch.setattr(investment_router, "candidate_market_context", lambda db, parcel_id: {"geoid": "37025010101", "data_confidence": "Medium"})
     monkeypatch.setattr(investment_router, "get_intake_candidate", lambda db, candidate_id: {"id": candidate_id, "parcel_id": "P1"})
     try:
         assert client.get("/investment/market-context/acs/status").json()["row_count"] == 1
         assert client.post("/investment/market-context/acs/refresh").json()["rows_loaded"] == 1
         assert client.get("/investment/candidates/P1/market-context").json()["geoid"] == "37025010101"
-        assert client.get("/investment/intake/C1/market-context").json()["data_confidence"] == "Moderate"
+        assert client.get("/investment/intake/C1/market-context").json()["data_confidence"] == "Medium"
     finally:
         app.dependency_overrides.clear()
 
@@ -129,9 +166,16 @@ def test_market_context_routes_are_wired(monkeypatch) -> None:
 def test_intake_analysis_includes_market_context(monkeypatch) -> None:
     monkeypatch.setattr(investment_intake_service, "get_intake_candidate", lambda db, cid: {"id": cid, "candidate_name": "Lead", "parcel_id": "P1", "strategy": "development_land"})
     monkeypatch.setattr(investment_intake_service, "_parcel_acres", lambda db, parcel_id: 5)
-    monkeypatch.setattr(investment_intake_service, "candidate_market_context", lambda db, parcel_id: {"household_context": {"band": "Typical Local Context"}, "data_confidence": "Moderate"})
+    monkeypatch.setattr(investment_intake_service, "candidate_market_context", lambda db, parcel_id: {"household_context": {"band": "Typical Local Context"}, "data_confidence": "Medium"})
 
     result = investment_intake_service.analyze_intake_candidate(SimpleNamespace(), "C1", [])
 
     assert result is not None
-    assert result["market_area_context"]["data_confidence"] == "Moderate"
+    assert result["market_area_context"]["data_confidence"] == "Medium"
+
+
+def test_service_uses_batch_postgis_overlay_not_per_parcel_geocoder() -> None:
+    source = (Path(__file__).resolve().parents[1] / "app/services/investment_market_context_service.py").read_text()
+    assert "ST_Intersects" in source
+    assert "postgis_tract_overlay" in source
+    assert "tract_geoid_for_point" not in source

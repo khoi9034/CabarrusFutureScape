@@ -66,7 +66,7 @@
       "refresh_schedule": "annual",
       "connector_name": "census_acs",
       "dataset": "ACS 5-year",
-      "acs_year": 2023,
+      "acs_year": 2024,
       "geography": "tract",
       "last_checked": "2026-07-13",
       "last_refreshed": null,

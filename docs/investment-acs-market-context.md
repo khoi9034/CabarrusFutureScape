@@ -12,7 +12,7 @@ development outcome.
 
 - Source: U.S. Census Bureau ACS API
 - Dataset: ACS 5-year
-- Initial year: 2023
+- Default year: 2024, configurable with `CENSUS_ACS_YEAR`
 - Geography: Census tract
 - Coverage: Cabarrus County, North Carolina (`state:37`, `county:025`)
 - Refresh: controlled local refresh, not per-candidate API calls
@@ -35,8 +35,9 @@ The first connector imports a focused set of aggregate variables:
 ## Storage
 
 ACS rows are persisted in `investment_acs_market_context`, keyed by GEOID,
-geography type, and ACS year. Candidate parcel-to-tract matches are cached in
-`investment_parcel_acs_geography` after a candidate asks for market context.
+geography type, and ACS year. Census tract polygons are stored in
+`investment_acs_tract_geometry`, and parcel-to-tract matches are written to
+`investment_parcel_acs_geography` through a batch PostGIS overlay.
 
 The cache stores aggregate geography identifiers only. It does not store owner,
 mailing, household-level, or microdata records.
@@ -62,8 +63,9 @@ household, or income context does not make a parcel a better investment.
   does not yet surface MOE values in the Investment Panel.
 - Multi-year growth comparisons are not enabled because overlapping ACS
   five-year vintages require careful interpretation.
-- Parcel-to-tract resolution uses parcel geometry when available. If a parcel
-  lacks a valid geometry match, CFS returns `Market geography unavailable`.
+- Parcel-to-tract resolution uses parcel geometry and local Census tract
+  geometry. If a parcel lacks a valid geometry match, CFS returns `Market
+  geography unavailable`.
 - Census context must be reviewed alongside zoning, utilities, constraints,
   access, basis/comparable context, and manual due diligence.
 

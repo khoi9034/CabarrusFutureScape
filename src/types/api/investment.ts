@@ -173,4 +173,5 @@ export interface InvestmentMarketContext {
   population_context: InvestmentMarketContextItem;
   source: string;
   source_attribution: string;
+  uncertainty_note?: string;
 }

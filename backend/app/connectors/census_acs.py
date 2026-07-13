@@ -12,12 +12,14 @@ from typing import Any
 
 from app.connectors.base import ConnectorResult
 
-ACS_YEAR = 2023
+DEFAULT_ACS_YEAR = 2024
 ACS_DATASET = "acs/acs5"
 CABARRUS_STATE_FIPS = "37"
 CABARRUS_COUNTY_FIPS = "025"
 CENSUS_API_BASE = "https://api.census.gov/data"
 CENSUS_GEOCODER_BASE = "https://geocoding.geo.census.gov/geocoder/geographies/coordinates"
+CENSUS_TIGERWEB_BASE = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Tracts_Blocks/MapServer"
+CENSUS_TRACT_LAYER_BY_YEAR = {2024: 7}
 
 ACS_VARIABLES: dict[str, str] = {
     "B01003_001E": "total_population",
@@ -47,7 +49,8 @@ class CensusAcsConnector:
     def api_key_configured(self) -> bool:
         return bool(self.api_key)
 
-    def fetch_cabarrus_tracts(self, *, year: int = ACS_YEAR) -> ConnectorResult:
+    def fetch_cabarrus_tracts(self, *, year: int | None = None) -> ConnectorResult:
+        year = validate_acs_year(year or configured_acs_year())
         fields = ["NAME", *ACS_VARIABLES]
         params = {
             "get": ",".join(fields),
@@ -70,6 +73,43 @@ class CensusAcsConnector:
             geography_type="tract",
             missing_variables=missing,
         )
+
+    def fetch_cabarrus_tract_geometries(self, *, year: int | None = None) -> list[dict[str, Any]]:
+        year = validate_acs_year(year or configured_acs_year())
+        layer = CENSUS_TRACT_LAYER_BY_YEAR.get(year, 0)
+        params = urllib.parse.urlencode(
+            {
+                "where": f"STATE='{CABARRUS_STATE_FIPS}' AND COUNTY='{CABARRUS_COUNTY_FIPS}'",
+                "outFields": "GEOID,STATE,COUNTY,TRACT,BASENAME",
+                "outSR": "4326",
+                "f": "geojson",
+            }
+        )
+        data = _read_json(f"{CENSUS_TIGERWEB_BASE}/{layer}/query?{params}", self.timeout_seconds)
+        features = data.get("features") if isinstance(data, dict) else None
+        if not features:
+            raise RuntimeError("Census TIGERweb returned no Cabarrus tract geometry.")
+        rows: list[dict[str, Any]] = []
+        retrieved_at = datetime.now(UTC)
+        for feature in features:
+            props = feature.get("properties") or {}
+            geoid = str(props.get("GEOID") or "")
+            if not geoid.startswith(f"{CABARRUS_STATE_FIPS}{CABARRUS_COUNTY_FIPS}") or len(geoid) != 11:
+                continue
+            rows.append(
+                {
+                    "geoid": geoid,
+                    "acs_year": year,
+                    "state_fips": str(props.get("STATE") or CABARRUS_STATE_FIPS),
+                    "county_fips": str(props.get("COUNTY") or CABARRUS_COUNTY_FIPS),
+                    "tract_name": str(props.get("BASENAME") or props.get("TRACT") or geoid),
+                    "geometry_geojson": json.dumps(feature.get("geometry") or {}),
+                    "source_name": "U.S. Census Bureau TIGERweb",
+                    "source_dataset": f"TIGERweb tract geometry for ACS {year}",
+                    "retrieved_at": retrieved_at,
+                }
+            )
+        return rows
 
     def tract_geoid_for_point(self, longitude: float, latitude: float) -> str | None:
         params = urllib.parse.urlencode(
@@ -111,9 +151,24 @@ def _number_or_none(value: Any) -> float | None:
     if value in (None, "", "null", "-666666666", "-222222222", "-999999999"):
         return None
     try:
-        return float(value)
+        number = float(value)
     except (TypeError, ValueError):
         return None
+    return number if number >= 0 else None
+
+
+def configured_acs_year() -> int:
+    return validate_acs_year(os.getenv("CENSUS_ACS_YEAR") or DEFAULT_ACS_YEAR)
+
+
+def validate_acs_year(value: Any) -> int:
+    try:
+        year = int(value)
+    except (TypeError, ValueError):
+        raise ValueError("CENSUS_ACS_YEAR must be a four-digit year.") from None
+    if year < 2020 or year > 2030:
+        raise ValueError("CENSUS_ACS_YEAR must be between 2020 and 2030.")
+    return year
 
 
 def _read_json(url: str, timeout_seconds: float) -> Any:
@@ -129,4 +184,3 @@ def _read_json(url: str, timeout_seconds: float) -> Any:
         if "Missing Key" in body:
             raise RuntimeError("Census ACS API key is required by the current API response; set CENSUS_API_KEY.") from exc
         raise RuntimeError("Census ACS returned a non-JSON response.") from exc
-

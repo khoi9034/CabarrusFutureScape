@@ -764,11 +764,13 @@ def _economics_market_context_answer(
     filters = request.filter_context or {}
     market_band = filters.get("active_market_context") or "not currently loaded for the active candidate"
     geoid = filters.get("active_market_geography") or "unresolved"
+    acs_year = filters.get("active_market_year") or "not loaded"
+    geography_type = filters.get("active_market_geography_type") or "tract"
     candidate = filters.get("active_intake_candidate") or "the active candidate"
     answer = _briefing(
         (
             "Direct answer",
-            f"Use the Market Area Context section in Candidate Intake for {candidate}. Current tract context is {market_band}; Census geography is {geoid}. Treat this as aggregate market-area context, not proof of demand or investment performance.",
+            f"Use the Market Area Context section in Candidate Intake for {candidate}. Current ACS {acs_year} {geography_type} context is {market_band}; Census GEOID is {geoid}. Treat this as aggregate market-area context, not proof of demand or investment performance.",
         ),
         (
             "How to use it",

@@ -1228,6 +1228,8 @@ function InvestmentPanelPage({
                     active_intake_candidate: intakeAnalysis?.candidate.candidate_name,
                     active_market_context: intakeAnalysis?.market_area_context?.household_context?.band,
                     active_market_geography: intakeAnalysis?.market_area_context?.geoid,
+                    active_market_geography_type: intakeAnalysis?.market_area_context?.geography_type,
+                    active_market_year: intakeAnalysis?.market_area_context?.acs_year,
                     mode: "investment_panel",
                     strategy_screening_source: activeInvestmentScreen ? "Investment Intelligence Engine" : "local panel fallback",
                     sewer_proxy_supported_candidates: sewerSupported,
@@ -1875,7 +1877,7 @@ function MarketAreaContextPanel({ context }: { context?: InvestmentIntakeAnalysi
       <p>Market Area Context</p>
       <Matrix rows={rows} />
       <p className="investment-muted">
-        Census market-area context is aggregate and does not establish property demand, feasibility, value, or future investment performance.
+        {context?.uncertainty_note || "ACS values are area-level estimates and may include sampling uncertainty. They do not represent parcel-level demand, value, or future performance."}
       </p>
     </div>
   );

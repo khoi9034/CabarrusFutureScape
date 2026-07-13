@@ -169,7 +169,7 @@ def test_intake_workspace_frontend_contracts() -> None:
         "Candidate Intake is unavailable",
         "Comparison shows tradeoffs only",
         "Market Area Context",
-        "Census market-area context is aggregate",
+        "sampling uncertainty",
     ]:
         assert text in source
 
