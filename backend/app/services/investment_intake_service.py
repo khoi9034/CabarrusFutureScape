@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.schemas.investment import InvestmentCsvImportRequest, InvestmentIntakePatch, InvestmentIntakePayload
 from app.services.investment_comparable_service import COMPARABLE_MIN_COUNT, _comparable_count_band
+from app.services.investment_market_context_service import candidate_market_context
 from app.services.investment_screening_service import SAFE_CAVEAT, candidate_detail, compare_candidates
 
 INTAKE_TABLE = "investment_candidate_intake"
@@ -129,6 +130,7 @@ def analyze_intake_candidate(db: Session, candidate_id: str, investment_rows: li
             "historical_sale_context": "CFS assessor/deed context requiring verification",
             "readiness_context": "CFS-derived proxy and public-source context",
         },
+        "market_area_context": candidate_market_context(db, row.get("parcel_id")),
         "parcel_match_status": "Matched CFS parcel context" if match else "Parcel ID not matched to current CFS investment context",
         "screening_context": screening,
         "source_note": "Source reference only. CFS does not automatically reproduce or verify third-party listing content.",
@@ -289,10 +291,12 @@ def _comparison_summary(analyses: list[dict[str, Any]]) -> list[str]:
         acquisition = analysis.get("acquisition_basis") or {}
         screening = analysis.get("screening_context") or {}
         dimensions = screening.get("dimension_bands") or {}
+        market = analysis.get("market_area_context") or {}
         label = candidate.get("candidate_name") or candidate.get("parcel_id") or "Candidate"
         summaries.append(
             f"{label}: asking-basis context is {acquisition.get('asking_basis_band') or 'unavailable'}; "
             f"development-readiness signal is {dimensions.get('readiness_signal') or 'Verify'}; "
+            f"market-area context is {(market.get('household_context') or {}).get('band') or 'unavailable'}; "
             f"utility/constraint context requires due diligence."
         )
     return summaries

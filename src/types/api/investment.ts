@@ -126,6 +126,7 @@ export interface InvestmentIntakeAnalysisResponse {
   candidate: InvestmentIntakeCandidate;
   caveats: string[];
   data_attribution: Record<string, string>;
+  market_area_context?: InvestmentMarketContext;
   parcel_match_status: string;
   screening_context?: InvestmentScreenCandidate | null;
   source_note: string;
@@ -144,4 +145,32 @@ export interface InvestmentCsvImportResponse {
   duplicates: string[];
   errors: string[];
   unmatched_parcel_ids: string[];
+}
+
+export interface InvestmentMarketContextItem {
+  band: string;
+  summary: string;
+}
+
+export interface InvestmentMarketHousingContext {
+  occupancy_band: string;
+  tenure_band: string;
+  housing_unit_context_band: string;
+  summary: string;
+}
+
+export interface InvestmentMarketContext {
+  acs_year?: number | null;
+  data_confidence: string;
+  geoid?: string | null;
+  geography_type: string;
+  growth_context: InvestmentMarketContextItem;
+  household_context: InvestmentMarketContextItem;
+  housing_context: InvestmentMarketHousingContext;
+  income_context: InvestmentMarketContextItem;
+  last_refreshed?: string | null;
+  limitations: string[];
+  population_context: InvestmentMarketContextItem;
+  source: string;
+  source_attribution: string;
 }

@@ -1225,6 +1225,9 @@ function InvestmentPanelPage({
                     active_strategy: investmentStrategyLabel(activeStrategy),
                     engine_candidates: activeInvestmentScreen?.candidate_count,
                     candidate_rows: rows.length,
+                    active_intake_candidate: intakeAnalysis?.candidate.candidate_name,
+                    active_market_context: intakeAnalysis?.market_area_context?.household_context?.band,
+                    active_market_geography: intakeAnalysis?.market_area_context?.geoid,
                     mode: "investment_panel",
                     strategy_screening_source: activeInvestmentScreen ? "Investment Intelligence Engine" : "local panel fallback",
                     sewer_proxy_supported_candidates: sewerSupported,
@@ -1779,6 +1782,7 @@ function InvestmentIntakeAnalysisCard({
           { label: "Data Confidence", value: analysis.screening_context?.data_confidence_band || "Data Needed" },
         ]}
       />
+      <MarketAreaContextPanel context={analysis.market_area_context} />
       <Matrix
         rows={[
           { label: "Asking price evidence", value: analysis.data_attribution.asking_basis || "User-entered information" },
@@ -1812,6 +1816,12 @@ function InvestmentIntakeComparison({ comparison }: { comparison: InvestmentInta
     ["Planning alignment", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.dimension_bands.strategy_fit || analysis.candidate.strategy_fit || "Verify"],
     ["Utility-readiness proxy", (analysis: InvestmentIntakeAnalysisResponse) => String(analysis.screening_context?.safe_display_fields?.utility_readiness_proxy_class || analysis.screening_context?.safe_display_fields?.sewer_proxy_class || "Verify")],
     ["Constraint burden", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.dimension_bands.constraint_burden || analysis.candidate.constraint_burden || "Verify"],
+    ["Population Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.market_area_context?.population_context?.band || "Market geography unavailable"],
+    ["Household Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.market_area_context?.household_context?.band || "Market geography unavailable"],
+    ["Income Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.market_area_context?.income_context?.band || "Market geography unavailable"],
+    ["Housing Occupancy", (analysis: InvestmentIntakeAnalysisResponse) => analysis.market_area_context?.housing_context?.occupancy_band || "Insufficient Information"],
+    ["Growth Context", (analysis: InvestmentIntakeAnalysisResponse) => analysis.market_area_context?.growth_context?.band || "Insufficient Information"],
+    ["ACS Data Confidence", (analysis: InvestmentIntakeAnalysisResponse) => analysis.market_area_context?.data_confidence || "Data Needed"],
     ["Data confidence", (analysis: InvestmentIntakeAnalysisResponse) => analysis.screening_context?.data_confidence_band || analysis.candidate.data_confidence || "Data Needed"],
     ["Verification requirements", (analysis: InvestmentIntakeAnalysisResponse) => (analysis.screening_context?.verification_requirements || analysis.acquisition_basis.basis_caution_reasons).slice(0, 2).join(" | ") || "Manual verification required"],
     ["Review status", (analysis: InvestmentIntakeAnalysisResponse) => analysis.candidate.review_status],
@@ -1842,6 +1852,31 @@ function InvestmentIntakeComparison({ comparison }: { comparison: InvestmentInta
       <div className="investment-disclaimer mt-3">
         Comparison shows tradeoffs only. CFS does not identify a winning parcel or recommend a purchase.
       </div>
+    </div>
+  );
+}
+
+function MarketAreaContextPanel({ context }: { context?: InvestmentIntakeAnalysisResponse["market_area_context"] }) {
+  const rows = [
+    { label: "Census Geography", value: context?.geography_type && context?.geoid ? `${context.geography_type} ${context.geoid}` : "Market geography unavailable" },
+    { label: "ACS Year", value: context?.acs_year ? String(context.acs_year) : "Not loaded" },
+    { label: "Population Context", value: context?.population_context?.band || "Insufficient Information" },
+    { label: "Household Context", value: context?.household_context?.band || "Insufficient Information" },
+    { label: "Household-Income Context", value: context?.income_context?.band || "Insufficient Information" },
+    { label: "Housing Occupancy", value: context?.housing_context?.occupancy_band || "Insufficient Information" },
+    { label: "Owner/Renter Context", value: context?.housing_context?.tenure_band || "Insufficient Information" },
+    { label: "Housing-Unit Context", value: context?.housing_context?.housing_unit_context_band || "Insufficient Information" },
+    { label: "Growth Context", value: context?.growth_context?.band || "Insufficient Information" },
+    { label: "ACS Data Confidence", value: context?.data_confidence || "Data Needed" },
+    { label: "Source / Last Refresh", value: `${context?.source_attribution || "U.S. Census Bureau ACS 5-year estimates."}${context?.last_refreshed ? ` · ${formatDate(context.last_refreshed)}` : ""}` },
+  ];
+  return (
+    <div className="investment-signal-list">
+      <p>Market Area Context</p>
+      <Matrix rows={rows} />
+      <p className="investment-muted">
+        Census market-area context is aggregate and does not establish property demand, feasibility, value, or future investment performance.
+      </p>
     </div>
   );
 }
@@ -8641,6 +8676,8 @@ const powerBiReportPromptExamples = [
 
 const askCfsInvestmentResearchPrompts = [
   "Review this parcel as a long-term land-banking candidate.",
+  "Summarize the market-area context around this candidate.",
+  "How does this tract compare with Cabarrus County?",
   "Summarize development-readiness signals.",
   "Generate a screening-level review guide.",
   "Compare the selected land review candidates.",

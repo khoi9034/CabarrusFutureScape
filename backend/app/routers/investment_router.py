@@ -30,6 +30,11 @@ from app.services.investment_intake_service import (
     list_intake_candidates,
     update_intake_candidate,
 )
+from app.services.investment_market_context_service import (
+    acs_status,
+    candidate_market_context,
+    refresh_acs_market_context,
+)
 from app.services.investment_screening_service import (
     candidate_detail,
     compare_candidates,
@@ -87,6 +92,33 @@ def get_investment_data_quality(
     return data_quality(_investment_rows(db))
 
 
+@router.get("/market-context/acs/status")
+def get_investment_acs_status(
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return acs_status(db)
+
+
+@router.post("/market-context/acs/refresh")
+def post_investment_acs_refresh(
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    try:
+        return refresh_acs_market_context(db)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="ACS refresh failed before writing data. Check database connectivity and Census API key configuration.") from exc
+
+
+@router.get("/candidates/{parcel_id}/market-context")
+def get_investment_candidate_market_context(
+    parcel_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return candidate_market_context(db, parcel_id)
+
+
 @router.get("/intake")
 def get_investment_intake(
     db: Session = Depends(get_db),
@@ -116,6 +148,17 @@ def post_investment_intake_compare(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     return compare_intake_candidates(db, request.candidate_ids, _investment_rows(db))
+
+
+@router.get("/intake/{candidate_id}/market-context")
+def get_investment_intake_market_context(
+    candidate_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    candidate = get_intake_candidate(db, candidate_id)
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Investment intake candidate not found.")
+    return candidate_market_context(db, candidate.get("parcel_id"))
 
 
 @router.get("/intake/{candidate_id}")

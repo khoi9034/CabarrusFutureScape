@@ -587,6 +587,8 @@ def _economics_answer(
         return _economics_powerbi_answer(request, context)
     if _is_economics_model_evaluation_query(request.query):
         return _economics_model_evaluation_answer(request, context)
+    if _is_economics_market_context_query(request.query):
+        return _economics_market_context_answer(request, context)
     if _is_economics_walkthrough_query(request.query):
         return _economics_walkthrough_answer(request, context)
     if _is_economics_workspace_query(request.query):
@@ -739,6 +741,7 @@ def _is_economics_walkthrough_query(query: str) -> bool:
 def _is_fast_economics_guidance_query(query: str) -> bool:
     return (
         _is_economics_model_evaluation_query(query)
+        or _is_economics_market_context_query(query)
         or _is_economics_walkthrough_query(query)
         or _is_economics_workspace_query(query)
         or _is_economics_print_query(query)
@@ -746,6 +749,60 @@ def _is_fast_economics_guidance_query(query: str) -> bool:
         or _is_economics_dashboard_query(query)
         or _is_economics_powerbi_query(query)
         or _is_economics_scenario_query(query)
+    )
+
+
+def _is_economics_market_context_query(query: str) -> bool:
+    normalized = query.lower()
+    return any(term in normalized for term in ("acs", "census", "demographic", "market area", "market-area", "household growth", "housing growth", "tract compare", "cabarrus county"))
+
+
+def _economics_market_context_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+) -> CfsAiSearchResponse:
+    filters = request.filter_context or {}
+    market_band = filters.get("active_market_context") or "not currently loaded for the active candidate"
+    geoid = filters.get("active_market_geography") or "unresolved"
+    candidate = filters.get("active_intake_candidate") or "the active candidate"
+    answer = _briefing(
+        (
+            "Direct answer",
+            f"Use the Market Area Context section in Candidate Intake for {candidate}. Current tract context is {market_band}; Census geography is {geoid}. Treat this as aggregate market-area context, not proof of demand or investment performance.",
+        ),
+        (
+            "How to use it",
+            _bullets(
+                [
+                    "Compare population, household, income, occupancy, tenure, and growth context against development-readiness and basis context.",
+                    "Use it as one evidence dimension for screening; do not let ACS context override utility, zoning, access, flood, school, or comparable-sale due diligence.",
+                    "If geography is unavailable, refresh ACS data and verify the candidate has a parcel geometry match.",
+                ]
+            ),
+        ),
+        (
+            "Caveats",
+            "ACS values are aggregate estimates with margins of error. They do not establish property demand, feasibility, value, or future investment performance.",
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [
+            _evidence(
+                "ACS Market Area Context",
+                "Candidate Intake can attach aggregate ACS tract context when a parcel-to-tract geography is available.",
+                "investment_acs_market_context",
+                "available" if geoid != "unresolved" else "limited",
+            )
+        ],
+        [
+            "Open Candidate Intake analysis and review Market Area Context.",
+            "Compare ACS context with development-readiness, basis context, and due diligence flags.",
+            "Use the comparison table to see candidate tradeoffs without declaring a winner.",
+        ],
     )
 
 

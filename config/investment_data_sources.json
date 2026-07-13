@@ -64,8 +64,14 @@
       "attribution": "U.S. Census Bureau",
       "data_quality_band": "high_with_moe_caveats",
       "refresh_schedule": "annual",
-      "connector_name": "census",
-      "enabled": false
+      "connector_name": "census_acs",
+      "dataset": "ACS 5-year",
+      "acs_year": 2023,
+      "geography": "tract",
+      "last_checked": "2026-07-13",
+      "last_refreshed": null,
+      "notes": "Aggregate tract market-area context only; does not establish demand, feasibility, value, or investment performance.",
+      "enabled": true
     },
     {
       "source_id": "lehd_lodes",

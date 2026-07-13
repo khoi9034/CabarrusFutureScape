@@ -168,6 +168,8 @@ def test_intake_workspace_frontend_contracts() -> None:
         "No private intake candidates yet.",
         "Candidate Intake is unavailable",
         "Comparison shows tradeoffs only",
+        "Market Area Context",
+        "Census market-area context is aggregate",
     ]:
         assert text in source
 
