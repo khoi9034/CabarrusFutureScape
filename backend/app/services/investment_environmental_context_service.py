@@ -468,6 +468,38 @@ def _unavailable(reason: str, *, parcel_id: str | None = None) -> dict[str, Any]
     }
 
 
+def environmental_context_by_parcel(db: Session, parcel_ids: list[str]) -> dict[str, dict[str, Any]]:
+    _ensure_tables(db)
+    ids = [str(parcel_id) for parcel_id in dict.fromkeys(parcel_ids) if parcel_id]
+    if not ids:
+        return {}
+    rows = db.execute(
+        text(
+            f"""
+            SELECT parcel_id, flood_context_band, wetland_context_band, terrain_context_band,
+                   soil_limitation_band, regulated_facility_context_band, usable_area_screening_proxy,
+                   overall_environmental_constraint_band, environmental_data_confidence
+            FROM {ENV_TABLE}
+            WHERE parcel_id = ANY(:parcel_ids)
+            """
+        ),
+        {"parcel_ids": ids},
+    ).mappings()
+    return {
+        str(row["parcel_id"]): {
+            "flood_context_band": row.get("flood_context_band"),
+            "wetland_context_band": row.get("wetland_context_band"),
+            "terrain_context_band": row.get("terrain_context_band"),
+            "soil_limitation_band": row.get("soil_limitation_band"),
+            "regulated_facility_context_band": row.get("regulated_facility_context_band"),
+            "usable_area_screening_proxy": row.get("usable_area_screening_proxy"),
+            "overall_environmental_constraint_band": row.get("overall_environmental_constraint_band"),
+            "environmental_data_confidence": row.get("environmental_data_confidence"),
+        }
+        for row in rows
+    }
+
+
 def _json_ready(row: Any) -> dict[str, Any]:
     data = dict(row)
     for key, value in list(data.items()):

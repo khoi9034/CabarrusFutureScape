@@ -23,6 +23,7 @@ from app.services.investment_comparable_service import enrich_basis_context
 from app.services.investment_environmental_context_service import (
     candidate_environmental_context,
     environmental_status,
+    environmental_context_by_parcel,
     refresh_environmental_context,
 )
 from app.services.investment_intake_service import (
@@ -255,4 +256,12 @@ def _investment_rows(db: Session | None) -> list[dict[str, Any]]:
     tables = powerbi.get("tables") if isinstance(powerbi.get("tables"), dict) else {}
     rows = tables.get("parcel_economic_signal_fact") if isinstance(tables, dict) else []
     safe_rows = [row for row in rows if isinstance(row, dict)]
-    return enrich_basis_context(safe_rows, db)
+    enriched = enrich_basis_context(safe_rows, db)
+    if db is None:
+        return enriched
+    parcel_ids = [str(row.get("parcel_id") or row.get("signal_id") or row.get("row_id") or "") for row in enriched]
+    environmental = environmental_context_by_parcel(db, parcel_ids)
+    return [
+        {**row, **environmental.get(str(row.get("parcel_id") or row.get("signal_id") or row.get("row_id") or ""), {})}
+        for row in enriched
+    ]

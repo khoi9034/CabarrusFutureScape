@@ -1553,13 +1553,25 @@ function InvestmentIntakeWorkspace({
   const [strategyFilter, setStrategyFilter] = useState<InvestmentStrategyId | "All">("All");
   const [reviewFilter, setReviewFilter] = useState<InvestmentReviewStatus | "All">("All");
   const [listingFilter, setListingFilter] = useState("All");
+  const [environmentalFilter, setEnvironmentalFilter] = useState("All");
+  const [wetlandFilter, setWetlandFilter] = useState("All");
+  const [terrainFilter, setTerrainFilter] = useState("All");
+  const [environmentalConfidenceFilter, setEnvironmentalConfidenceFilter] = useState("All");
   const [sortMode, setSortMode] = useState<"date_added" | "last_verified">("date_added");
   const update = (patch: Partial<InvestmentIntakePayload>) => onSetForm((current) => ({ ...current, ...patch }));
   const listingOptions = uniqueValues(candidates.map((candidate) => candidate.listing_status ?? "")).filter(Boolean);
+  const environmentalOptions = uniqueValues(candidates.map((candidate) => candidate.environmental_constraint_band ?? "")).filter(Boolean);
+  const wetlandOptions = uniqueValues(candidates.map((candidate) => candidate.mapped_wetland_context ?? "")).filter(Boolean);
+  const terrainOptions = uniqueValues(candidates.map((candidate) => candidate.terrain_context ?? "")).filter(Boolean);
+  const environmentalConfidenceOptions = uniqueValues(candidates.map((candidate) => candidate.environmental_data_confidence ?? "")).filter(Boolean);
   const filteredCandidates = candidates
     .filter((candidate) => strategyFilter === "All" || candidate.strategy === strategyFilter)
     .filter((candidate) => reviewFilter === "All" || candidate.review_status === reviewFilter)
     .filter((candidate) => listingFilter === "All" || (candidate.listing_status ?? "Unspecified") === listingFilter)
+    .filter((candidate) => environmentalFilter === "All" || (candidate.environmental_constraint_band ?? "Insufficient Information") === environmentalFilter)
+    .filter((candidate) => wetlandFilter === "All" || (candidate.mapped_wetland_context ?? "Data Unavailable") === wetlandFilter)
+    .filter((candidate) => terrainFilter === "All" || (candidate.terrain_context ?? "Data Unavailable") === terrainFilter)
+    .filter((candidate) => environmentalConfidenceFilter === "All" || (candidate.environmental_data_confidence ?? "Data Needed") === environmentalConfidenceFilter)
     .sort((left, right) => Date.parse(right[sortMode] ?? "") - Date.parse(left[sortMode] ?? ""));
   return (
     <section className="investment-card" id="candidate-intake">
@@ -1667,6 +1679,47 @@ function InvestmentIntakeWorkspace({
         </button>
         <span className="investment-muted">{compareIds.length} selected / 4 maximum</span>
       </div>
+      <details className="mt-3 rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs text-[var(--econ-muted)]">
+        <summary>Environmental filters</summary>
+        <div className="mt-3 flex flex-wrap items-end gap-2">
+          <label className="grid gap-1">
+            Environmental constraint
+            <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={environmentalFilter} onChange={(event) => setEnvironmentalFilter(event.target.value)}>
+              <option>All</option>
+              {environmentalOptions.map((value) => <option key={value}>{value}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1">
+            Mapped wetland context
+            <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={wetlandFilter} onChange={(event) => setWetlandFilter(event.target.value)}>
+              <option>All</option>
+              {wetlandOptions.map((value) => <option key={value}>{value}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1">
+            Terrain context
+            <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={terrainFilter} onChange={(event) => setTerrainFilter(event.target.value)}>
+              <option>All</option>
+              {terrainOptions.map((value) => <option key={value}>{value}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1">
+            Environmental confidence
+            <select className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-[var(--econ-text)]" value={environmentalConfidenceFilter} onChange={(event) => setEnvironmentalConfidenceFilter(event.target.value)}>
+              <option>All</option>
+              {environmentalConfidenceOptions.map((value) => <option key={value}>{value}</option>)}
+            </select>
+          </label>
+          <button className="investment-ghost-button" onClick={() => {
+            setEnvironmentalFilter("All");
+            setWetlandFilter("All");
+            setTerrainFilter("All");
+            setEnvironmentalConfidenceFilter("All");
+          }} type="button">
+            Reset environmental filters
+          </button>
+        </div>
+      </details>
       <h3 className="mt-5 text-sm font-semibold text-[var(--econ-text)]">Opportunity Review Queue</h3>
       {intakeLoading ? <p className="investment-empty">Loading private intake candidates...</p> : null}
       {intakeUnavailable ? <p className="investment-empty">Candidate Intake is unavailable. Confirm FastAPI and the local database are running.</p> : null}
@@ -1718,6 +1771,8 @@ function InvestmentIntakeQueue({
             <th>Price Recency</th>
             <th>Comparable Context</th>
             <th>Readiness Signal</th>
+            <th>Environmental Context</th>
+            <th>Mapped Wetland Context</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
@@ -1739,6 +1794,8 @@ function InvestmentIntakeQueue({
               <td>{candidate.asking_price_date ? formatDate(candidate.asking_price_date) : "Missing asking price date"}</td>
               <td>{candidate.comparable_context || "Verify"}</td>
               <td>{candidate.readiness_signal || "Verify"}</td>
+              <td>{candidate.environmental_constraint_band || "Insufficient Information"}</td>
+              <td>{candidate.mapped_wetland_context || "Data Unavailable"}</td>
               <td>{candidate.review_status}</td>
               <td>
                 <div className="investment-row-actions">
@@ -2030,6 +2087,7 @@ function InvestmentCandidateRail({
       <InvestmentSignalList title="Major positive signals" values={ranking.supporting_signals.slice(0, 4)} />
       <InvestmentSignalList title="Major caution signals" values={ranking.caution_flags.slice(0, 4)} />
       {investmentCandidate ? <InvestmentBasisContextPanel candidate={investmentCandidate} /> : null}
+      {investmentCandidate ? <InvestmentCandidateEnvironmentalPanel candidate={investmentCandidate} /> : null}
       <ComparableContextPanel signal={signal} />
       <div className="investment-rail-actions">
         <button className="investment-primary-button" onClick={onGenerateGuide} type="button">Generate Review Guide</button>
@@ -2073,6 +2131,27 @@ function InvestmentBasisContextPanel({ candidate }: { candidate: InvestmentScree
   );
 }
 
+function InvestmentCandidateEnvironmentalPanel({ candidate }: { candidate: InvestmentScreenCandidate }) {
+  const fields = candidate.safe_display_fields ?? {};
+  return (
+    <div className="investment-signal-list">
+      <p>Environmental Screening Context</p>
+      <Matrix
+        rows={[
+          { label: "Environmental Constraint", value: valueText(fields.environmental_constraint_band) },
+          { label: "Mapped Wetland Context", value: valueText(fields.mapped_wetland_context) },
+          { label: "Terrain Context", value: valueText(fields.terrain_context) },
+          { label: "Soil Context", value: valueText(fields.soil_limitation_band) },
+          { label: "Usable-Area Screening Proxy", value: valueText(fields.usable_area_screening_proxy) },
+        ]}
+      />
+      <p className="investment-muted">
+        Screening proxy only; verify wetlands, terrain, soils, floodplain, and environmental history with qualified professionals.
+      </p>
+    </div>
+  );
+}
+
 function InvestmentComparisonTable({ rows }: { rows: RankedLandReviewCandidate[] }) {
   return (
     <div className="investment-table-wrap">
@@ -2089,6 +2168,8 @@ function InvestmentComparisonTable({ rows }: { rows: RankedLandReviewCandidate[]
             <th>Comparable context</th>
             <th>Basis cautions</th>
             <th>Constraint flags</th>
+            <th>Environmental context</th>
+            <th>Usable-area proxy</th>
             <th>Data confidence</th>
             <th>Next checks</th>
           </tr>
@@ -2097,6 +2178,7 @@ function InvestmentComparisonTable({ rows }: { rows: RankedLandReviewCandidate[]
           {rows.map((row) => {
             const context = valuationContext(row.signal);
             const candidate = row.investment_candidate;
+            const fields = candidate?.safe_display_fields ?? {};
             return (
               <tr key={row.signal.parcel_id}>
                 <td>{signalLabel(row.signal)}</td>
@@ -2109,6 +2191,8 @@ function InvestmentComparisonTable({ rows }: { rows: RankedLandReviewCandidate[]
                 <td>{candidate?.comparable_context_summary || context.comparable_context_status}</td>
                 <td>{(candidate?.basis_caution_reasons || context.valuation_due_diligence_flags).slice(0, 2).join(" | ") || "Monitor"}</td>
                 <td>{row.ranking.caution_flags.slice(0, 2).join(" | ") || "Monitor"}</td>
+                <td>{valueText(fields.environmental_constraint_band)}</td>
+                <td>{valueText(fields.usable_area_screening_proxy)}</td>
                 <td>{valueText(row.signal.data_confidence ?? row.signal.economic_data_confidence) || "Verify"}</td>
                 <td>{row.ranking.recommended_next_checks.slice(0, 2).join(" | ") || "Manual review required"}</td>
               </tr>

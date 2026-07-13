@@ -73,10 +73,13 @@ export interface InvestmentIntakeCandidate {
   comparable_context?: string;
   constraint_burden?: string;
   data_confidence?: string;
+  environmental_constraint_band?: string;
+  environmental_data_confidence?: string;
   id: string;
   date_added?: string | null;
   last_verified?: string | null;
   listing_status?: string | null;
+  mapped_wetland_context?: string;
   parcel_id?: string | null;
   parcel_match_status?: string;
   property_type?: string | null;
@@ -87,6 +90,7 @@ export interface InvestmentIntakeCandidate {
   source_url?: string | null;
   strategy: InvestmentStrategyId;
   strategy_fit?: string;
+  terrain_context?: string;
   user_notes?: string | null;
 }
 

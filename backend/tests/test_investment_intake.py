@@ -173,6 +173,9 @@ def test_intake_workspace_frontend_contracts() -> None:
         "Comparison shows tradeoffs only",
         "Market Area Context",
         "Environmental & Physical Context",
+        "Environmental filters",
+        "Environmental Context",
+        "Mapped Wetland Context",
         "sampling uncertainty",
     ]:
         assert text in source

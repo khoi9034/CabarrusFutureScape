@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.schemas.investment import InvestmentCsvImportRequest, InvestmentIntakePatch, InvestmentIntakePayload
 from app.services.investment_comparable_service import COMPARABLE_MIN_COUNT, _comparable_count_band
-from app.services.investment_environmental_context_service import candidate_environmental_context
+from app.services.investment_environmental_context_service import candidate_environmental_context, environmental_context_by_parcel
 from app.services.investment_market_context_service import candidate_market_context
 from app.services.investment_screening_service import SAFE_CAVEAT, candidate_detail, compare_candidates
 
@@ -42,9 +42,18 @@ UNSAFE_HEADERS = {"owner", "owner_name", "mailing", "mailing_address", "grantor"
 def list_intake_candidates(db: Session, investment_rows: list[dict[str, Any]]) -> dict[str, Any]:
     _ensure_table(db)
     rows = [_serialize(row) for row in db.execute(text(f"SELECT * FROM {INTAKE_TABLE} ORDER BY updated_at DESC LIMIT 250")).mappings()]
+    environmental = environmental_context_by_parcel(db, [str(row.get("parcel_id") or "") for row in rows])
     return {
         "caveats": [SAFE_CAVEAT, "User-entered listing or lead information is not independently verified by CFS."],
-        "candidates": [_summary(row, investment_rows, parcel_acres=_parcel_acres(db, row.get("parcel_id"))) for row in rows],
+        "candidates": [
+            _summary(
+                row,
+                investment_rows,
+                environmental_context=environmental.get(str(row.get("parcel_id") or ""), {}),
+                parcel_acres=_parcel_acres(db, row.get("parcel_id")),
+            )
+            for row in rows
+        ],
         "count": len(rows),
     }
 
@@ -305,7 +314,13 @@ def _comparison_summary(analyses: list[dict[str, Any]]) -> list[str]:
     return summaries
 
 
-def _summary(candidate: dict[str, Any], investment_rows: list[dict[str, Any]], *, parcel_acres: float | None = None) -> dict[str, Any]:
+def _summary(
+    candidate: dict[str, Any],
+    investment_rows: list[dict[str, Any]],
+    *,
+    environmental_context: dict[str, Any] | None = None,
+    parcel_acres: float | None = None,
+) -> dict[str, Any]:
     match = _matching_investment_row(candidate, investment_rows)
     acquisition = _acquisition_basis(candidate, match, parcel_acres=parcel_acres)
     screening = candidate_detail(investment_rows, candidate["parcel_id"], strategy=candidate["strategy"]) if match else None
@@ -315,9 +330,13 @@ def _summary(candidate: dict[str, Any], investment_rows: list[dict[str, Any]], *
         "comparable_context": (screening or {}).get("basis_context_band") or "Insufficient Basis Information",
         "constraint_burden": ((screening or {}).get("dimension_bands") or {}).get("constraint_burden") or "Verify",
         "data_confidence": (screening or {}).get("data_confidence_band") or "Data Needed",
+        "environmental_constraint_band": (environmental_context or {}).get("overall_environmental_constraint_band") or ((screening or {}).get("safe_display_fields") or {}).get("environmental_constraint_band") or "Insufficient Information",
+        "environmental_data_confidence": (environmental_context or {}).get("environmental_data_confidence") or "Data Needed",
+        "mapped_wetland_context": (environmental_context or {}).get("wetland_context_band") or "Data Unavailable",
         "parcel_match_status": "Matched CFS parcel context" if match else "Parcel ID not matched to current CFS investment context",
         "readiness_signal": ((screening or {}).get("dimension_bands") or {}).get("readiness_signal") or "Verify",
         "strategy_fit": ((screening or {}).get("dimension_bands") or {}).get("strategy_fit") or "Verify",
+        "terrain_context": (environmental_context or {}).get("terrain_context_band") or "Data Unavailable",
     }
 
 

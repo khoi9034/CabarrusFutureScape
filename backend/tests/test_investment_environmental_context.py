@@ -13,6 +13,7 @@ from app.services.ai_search_service import CfsAiSearchService
 from app.services.investment_environmental_context_service import (
     SAFE_LIMITATION,
     candidate_environmental_context,
+    environmental_context_by_parcel,
 )
 
 client = TestClient(app)
@@ -20,9 +21,13 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class FakeResult:
-    def __init__(self, row=None, scalar_value=0):  # noqa: ANN001
+    def __init__(self, row=None, rows=None, scalar_value=0):  # noqa: ANN001
         self.row = row
+        self.rows = rows or []
         self.scalar_value = scalar_value
+
+    def __iter__(self):
+        return iter(self.rows)
 
     def mappings(self):
         return self
@@ -55,6 +60,22 @@ class FakeDb:
                     "refreshed_at": "2026-07-13T00:00:00Z",
                 }
             )
+        if "WHERE parcel_id = ANY" in sql:
+            return FakeResult(
+                rows=[
+                    {
+                        "parcel_id": "P1",
+                        "flood_context_band": "Mapped floodplain context",
+                        "wetland_context_band": "Data Unavailable",
+                        "terrain_context_band": "Data Unavailable",
+                        "soil_limitation_band": "Data Unavailable",
+                        "regulated_facility_context_band": "Data Unavailable",
+                        "usable_area_screening_proxy": "Moderate Usable-Area Limitations",
+                        "overall_environmental_constraint_band": "Moderate Mapped Constraint",
+                        "environmental_data_confidence": "Limited",
+                    }
+                ]
+            )
         return FakeResult()
 
 
@@ -67,6 +88,14 @@ def test_candidate_environmental_context_is_screening_level_and_safe() -> None:
     assert SAFE_LIMITATION in context["limitations"]
     for unsafe in ["wetland-free", "environmentally cleared", "safe to develop", "buy this parcel", "guaranteed value", "raw_score"]:
         assert unsafe not in text
+
+
+def test_environmental_context_by_parcel_returns_screening_fields() -> None:
+    contexts = environmental_context_by_parcel(FakeDb(), ["P1", "P1", ""])
+
+    assert contexts["P1"]["overall_environmental_constraint_band"] == "Moderate Mapped Constraint"
+    assert contexts["P1"]["usable_area_screening_proxy"] == "Moderate Usable-Area Limitations"
+    assert contexts["P1"]["environmental_data_confidence"] == "Limited"
 
 
 def test_environmental_routes_are_wired(monkeypatch) -> None:
@@ -124,6 +153,8 @@ def test_environmental_frontend_contracts() -> None:
         "Terrain / Slope Context",
         "Usable-Area Screening Proxy",
         "Environmental verification requirements",
+        "Environmental filters",
+        "Environmental Screening Context",
         "What environmental due diligence should come next?",
     ]:
         assert text in source
