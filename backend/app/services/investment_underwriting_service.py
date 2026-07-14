@@ -16,16 +16,31 @@ from app.schemas.investment_underwriting import (
     InvestmentUnderwritingScenarioPatch,
     InvestmentUnderwritingScenarioPayload,
 )
+from app.schemas.investment_opportunities import InvestmentUnderwritingPrefillRequest, InvestmentUnderwritingTemplatePayload
 from app.services.investment_research_context_service import build_intake_research_context, build_parcel_research_context
 from app.services.investment_screening_service import SAFE_CAVEAT
 
 UNDERWRITING_TABLE = "investment_underwriting_scenario"
+TEMPLATE_TABLE = "investment_assumption_template"
 SCENARIO_LABELS = {
     "development_land": "Development Land",
     "land_banking": "Long-Term Land Banking",
     "entitlement_repositioning": "Entitlement / Repositioning",
     "existing_use_acquisition": "Existing-Use Acquisition",
 }
+
+DEFAULT_TEMPLATES = [
+    {"id": "dev-residential", "template_name": "Development Land - Residential", "scenario_type": "development_land", "default_source": "Analyst default", "assumptions": {"contingency_percent": 10, "entitlement_period_months": 12, "construction_period_months": 18, "absorption_period_months": 6}, "values_requiring_confirmation": ["scenario_unit_count", "sale_price_per_unit", "site_preparation_cost", "vertical_construction_cost"]},
+    {"id": "dev-commercial", "template_name": "Development Land - Commercial", "scenario_type": "development_land", "default_source": "Analyst default", "assumptions": {"contingency_percent": 12, "entitlement_period_months": 12, "construction_period_months": 16}, "values_requiring_confirmation": ["scenario_building_area", "sale_price_per_square_foot", "vertical_construction_cost"]},
+    {"id": "dev-industrial", "template_name": "Development Land - Industrial", "scenario_type": "development_land", "default_source": "Analyst default", "assumptions": {"contingency_percent": 12, "entitlement_period_months": 10, "construction_period_months": 14}, "values_requiring_confirmation": ["scenario_building_area", "utility_extension_cost", "vertical_construction_cost"]},
+    {"id": "land-banking", "template_name": "Long-Term Land Banking", "scenario_type": "land_banking", "default_source": "Analyst default", "assumptions": {"annual_cost_growth_rate": 3, "closing_cost_percent": 2, "holding_period_years": 5, "selling_cost_percent": 3}, "values_requiring_confirmation": ["acquisition_basis", "annual_property_tax_assumption", "exit_price_scenario"]},
+    {"id": "entitlement", "template_name": "Entitlement / Repositioning", "scenario_type": "entitlement_repositioning", "default_source": "Analyst default", "assumptions": {"contingency_percent": 10, "holding_period": 2}, "values_requiring_confirmation": ["entitlement_cost", "post_entitlement_exit_basis"]},
+    {"id": "existing-retail", "template_name": "Existing-Use - Retail", "scenario_type": "existing_use_acquisition", "default_source": "Analyst default", "assumptions": {"vacancy_and_credit_loss": 5, "loan_to_value": 65, "interest_rate": 7, "amortization_years": 25, "holding_period": 5}, "values_requiring_confirmation": ["gross_potential_income", "operating_expenses", "exit_cap_rate"]},
+    {"id": "existing-industrial", "template_name": "Existing-Use - Industrial", "scenario_type": "existing_use_acquisition", "default_source": "Analyst default", "assumptions": {"vacancy_and_credit_loss": 4, "loan_to_value": 60, "interest_rate": 7, "amortization_years": 25, "holding_period": 5}, "values_requiring_confirmation": ["gross_potential_income", "operating_expenses", "exit_cap_rate"]},
+    {"id": "existing-office", "template_name": "Existing-Use - Office", "scenario_type": "existing_use_acquisition", "default_source": "Analyst default", "assumptions": {"vacancy_and_credit_loss": 8, "loan_to_value": 60, "interest_rate": 7, "amortization_years": 25, "holding_period": 5}, "values_requiring_confirmation": ["gross_potential_income", "operating_expenses", "exit_cap_rate"]},
+    {"id": "existing-multifamily", "template_name": "Existing-Use - Multifamily", "scenario_type": "existing_use_acquisition", "default_source": "Analyst default", "assumptions": {"vacancy_and_credit_loss": 5, "loan_to_value": 65, "interest_rate": 7, "amortization_years": 30, "holding_period": 5}, "values_requiring_confirmation": ["gross_potential_income", "operating_expenses", "exit_cap_rate"]},
+    {"id": "custom", "template_name": "Custom", "scenario_type": "development_land", "default_source": "Analyst custom", "assumptions": {}, "values_requiring_confirmation": []},
+]
 
 
 def calculate_underwriting(
@@ -183,6 +198,76 @@ def compare_underwriting_scenarios(db: Session, scenario_ids: list[str]) -> dict
             f"{scenario['scenario_name']}: {scenario['scenario_type_label']} with total cost {scenario['results'].get('total_project_cost') or scenario['results'].get('total_basis_at_exit') or scenario['results'].get('total_basis_after_entitlement') or 'not available'} and return context {scenario['results'].get('scenario_return') or scenario['results'].get('scenario_irr') or 'not available'}."
             for scenario in scenarios
         ],
+    }
+
+
+def list_underwriting_templates(db: Session) -> dict[str, Any]:
+    _ensure_template_table(db)
+    custom = [_serialize_template(row) for row in db.execute(text(f"SELECT * FROM {TEMPLATE_TABLE} ORDER BY updated_at DESC LIMIT 100")).mappings()]
+    return {"count": len(DEFAULT_TEMPLATES) + len(custom), "templates": DEFAULT_TEMPLATES + custom, "caveats": [SAFE_CAVEAT, "Template values are analyst defaults, not verified facts."]}
+
+
+def create_underwriting_template(db: Session, payload: InvestmentUnderwritingTemplatePayload) -> dict[str, Any]:
+    _ensure_template_table(db)
+    now = datetime.now(UTC)
+    template_id = str(uuid4())
+    db.execute(
+        text(
+            f"""
+            INSERT INTO {TEMPLATE_TABLE} (
+              id, template_name, scenario_type, default_source, assumptions_json,
+              values_requiring_confirmation_json, created_at, updated_at
+            ) VALUES (
+              :id, :template_name, :scenario_type, :default_source, CAST(:assumptions_json AS jsonb),
+              CAST(:values_requiring_confirmation_json AS jsonb), :created_at, :updated_at
+            )
+            """
+        ),
+        {
+            "assumptions_json": json.dumps(payload.assumptions),
+            "created_at": now,
+            "default_source": payload.default_source,
+            "id": template_id,
+            "scenario_type": payload.scenario_type,
+            "template_name": payload.template_name,
+            "updated_at": now,
+            "values_requiring_confirmation_json": json.dumps(payload.values_requiring_confirmation),
+        },
+    )
+    return _serialize_template(db.execute(text(f"SELECT * FROM {TEMPLATE_TABLE} WHERE id = :id"), {"id": template_id}).mappings().first())
+
+
+def prefill_underwriting(
+    db: Session,
+    request: InvestmentUnderwritingPrefillRequest,
+    investment_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    from app.services.investment_opportunity_feed_service import get_opportunity
+
+    context = None
+    if request.candidate_id:
+        context = build_intake_research_context(db, investment_rows, request.candidate_id)
+    elif request.parcel_id:
+        context = build_parcel_research_context(db, investment_rows, request.parcel_id, strategy=request.strategy)
+    opportunity = get_opportunity(db, investment_rows, request.opportunity_id) if request.opportunity_id else {}
+    template = _template_by_id(db, request.template_id, request.scenario_type)
+    cfs_fields = _cfs_prefill(context)
+    source_fields = _opportunity_prefill(opportunity)
+    template_fields = template.get("assumptions", {})
+    merged, sources = _merge_prefill(request.existing_assumptions, cfs_fields, source_fields, template_fields)
+    return {
+        "scenario_type": template.get("scenario_type") or request.scenario_type,
+        "template": template,
+        "assumptions": merged,
+        "field_sources": sources,
+        "prefill_summary": {
+            "fields_populated_from_cfs": sorted(k for k, v in sources.items() if v == "CFS evidence"),
+            "fields_populated_from_opportunity_source": sorted(k for k, v in sources.items() if v == "Third-party or user-entered opportunity reference"),
+            "fields_populated_from_template": sorted(k for k, v in sources.items() if v == "Analyst template default"),
+            "fields_requiring_analyst_input": template.get("values_requiring_confirmation", []),
+            "fields_requiring_professional_verification": ["utility_capacity", "entitlement_outcome", "environmental_conditions", "financing_terms"],
+        },
+        "caveats": [SAFE_CAVEAT, "Prefill does not overwrite analyst-entered assumptions and does not verify third-party listing content."],
     }
 
 
@@ -392,6 +477,25 @@ def _ensure_table(db: Session) -> None:
     db.execute(text(f"CREATE INDEX IF NOT EXISTS idx_{UNDERWRITING_TABLE}_candidate ON {UNDERWRITING_TABLE}(candidate_id)"))
 
 
+def _ensure_template_table(db: Session) -> None:
+    db.execute(
+        text(
+            f"""
+            CREATE TABLE IF NOT EXISTS {TEMPLATE_TABLE} (
+                id text PRIMARY KEY,
+                template_name text NOT NULL,
+                scenario_type text NOT NULL,
+                default_source text NOT NULL,
+                assumptions_json jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+                values_requiring_confirmation_json jsonb NOT NULL DEFAULT '[]'::jsonb,
+                created_at timestamptz NOT NULL,
+                updated_at timestamptz NOT NULL
+            )
+            """
+        )
+    )
+
+
 def _row_values(scenario_id: str, payload: InvestmentUnderwritingScenarioPayload, result: dict[str, Any], now: datetime) -> dict[str, Any]:
     return {
         "id": scenario_id,
@@ -428,6 +532,59 @@ def _serialize(row: Any) -> dict[str, Any]:
         "scenario_type_label": SCENARIO_LABELS.get(data.get("scenario_type"), data.get("scenario_type")),
         "limitations": results.get("limitations", [SAFE_CAVEAT]) if isinstance(results, dict) else [SAFE_CAVEAT],
     }
+
+
+def _serialize_template(row: Any) -> dict[str, Any]:
+    data = dict(row)
+    assumptions = data.pop("assumptions_json", {}) or {}
+    confirm = data.pop("values_requiring_confirmation_json", []) or []
+    if isinstance(assumptions, str):
+        assumptions = json.loads(assumptions)
+    if isinstance(confirm, str):
+        confirm = json.loads(confirm)
+    return {**data, "assumptions": assumptions, "values_requiring_confirmation": confirm}
+
+
+def _template_by_id(db: Session, template_id: str | None, scenario_type: str) -> dict[str, Any]:
+    if template_id:
+        for template in list_underwriting_templates(db)["templates"]:
+            if template["id"] == template_id:
+                return template
+    return next((template for template in DEFAULT_TEMPLATES if template["scenario_type"] == scenario_type), DEFAULT_TEMPLATES[-1])
+
+
+def _cfs_prefill(context: dict[str, Any] | None) -> dict[str, Any]:
+    if not context:
+        return {}
+    identity = context.get("identity") or {}
+    fundamentals = context.get("parcel_fundamentals") or {}
+    return {
+        "scenario_site_area": identity.get("approximate_acreage") or fundamentals.get("acreage"),
+    }
+
+
+def _opportunity_prefill(opportunity: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in {
+            "asking_price": opportunity.get("asking_price"),
+            "scenario_site_area": opportunity.get("acreage"),
+            "scenario_building_area": opportunity.get("building_area"),
+        }.items()
+        if value not in (None, "")
+    }
+
+
+def _merge_prefill(existing: dict[str, Any], cfs: dict[str, Any], source: dict[str, Any], template: dict[str, Any]) -> tuple[dict[str, Any], dict[str, str]]:
+    merged = dict(existing or {})
+    sources: dict[str, str] = {key: "Manual analyst override" for key, value in merged.items() if value not in (None, "")}
+    for label, values in (("CFS evidence", cfs), ("Third-party or user-entered opportunity reference", source), ("Analyst template default", template)):
+        for key, value in values.items():
+            if value in (None, "") or merged.get(key) not in (None, ""):
+                continue
+            merged[key] = value
+            sources[key] = label
+    return merged, sources
 
 
 def _clean_assumptions(values: dict[str, Any]) -> dict[str, float]:

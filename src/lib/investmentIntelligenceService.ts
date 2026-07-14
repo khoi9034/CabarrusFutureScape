@@ -1,10 +1,15 @@
 import { apiGet, apiPost, buildApiUrl, USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import type {
   InvestmentCsvImportResponse,
+  InvestmentAreaRadarResponse,
+  InvestmentEngagement,
+  InvestmentEngagementListResponse,
   InvestmentIntakeAnalysisResponse,
   InvestmentIntakeCompareResponse,
   InvestmentIntakeListResponse,
   InvestmentIntakePayload,
+  InvestmentOpportunityListResponse,
+  InvestmentOpportunitySource,
   InvestmentReportResponse,
   InvestmentResearchContext,
   InvestmentScreenResponse,
@@ -12,8 +17,10 @@ import type {
   InvestmentUnderwritingCalculation,
   InvestmentUnderwritingCompareResponse,
   InvestmentUnderwritingListResponse,
+  InvestmentUnderwritingPrefillResponse,
   InvestmentUnderwritingScenario,
   InvestmentUnderwritingScenarioStatus,
+  InvestmentUnderwritingTemplate,
   InvestmentUnderwritingScenarioType,
 } from "@/types/api";
 
@@ -169,6 +176,69 @@ export async function deleteInvestmentUnderwritingScenario(scenarioId: string) {
 export async function compareInvestmentUnderwritingScenarios(scenarioIds: string[]) {
   assertLive();
   return apiPost<InvestmentUnderwritingCompareResponse>("/investment/underwriting/compare", { scenario_ids: scenarioIds }, { timeoutMs: 20000 });
+}
+
+export async function getInvestmentOpportunitySources() {
+  assertLive();
+  return apiGet<{ sources: InvestmentOpportunitySource[] }>("/investment/opportunities/sources", undefined, { timeoutMs: 20000 });
+}
+
+export async function getInvestmentOpportunities() {
+  assertLive();
+  return apiGet<InvestmentOpportunityListResponse>("/investment/opportunities", undefined, { timeoutMs: 30000 });
+}
+
+export async function matchInvestmentOpportunity(opportunityId: string, parcelId?: string | null) {
+  assertLive();
+  return apiPost<Record<string, unknown>>(`/investment/opportunities/${encodeURIComponent(opportunityId)}/match`, { parcel_id: parcelId ?? null }, { timeoutMs: 20000 });
+}
+
+export async function addInvestmentOpportunityToIntake(opportunityId: string, strategy: InvestmentStrategyId) {
+  assertLive();
+  return apiPost<InvestmentIntakeAnalysisResponse>(`/investment/opportunities/${encodeURIComponent(opportunityId)}/intake`, { strategy }, { timeoutMs: 30000 });
+}
+
+export async function searchInvestmentRadar(strategy = "industrial_site") {
+  assertLive();
+  return apiPost<InvestmentAreaRadarResponse>(`/investment/radar/search?strategy=${encodeURIComponent(strategy)}`, {}, { timeoutMs: 30000 });
+}
+
+export async function getInvestmentEngagements() {
+  assertLive();
+  return apiGet<InvestmentEngagementListResponse>("/investment/engagements", undefined, { timeoutMs: 20000 });
+}
+
+export async function createInvestmentEngagement(payload: Record<string, unknown>) {
+  assertLive();
+  return apiPost<InvestmentEngagement>("/investment/engagements", payload, { timeoutMs: 20000 });
+}
+
+export async function addInvestmentEngagementShortlistItem(engagementId: string, payload: Record<string, unknown>) {
+  assertLive();
+  return apiPost<InvestmentEngagement>(`/investment/engagements/${encodeURIComponent(engagementId)}/shortlist`, payload, { timeoutMs: 20000 });
+}
+
+export async function generateInvestmentEngagementReport(engagementId: string) {
+  assertLive();
+  return apiPost<InvestmentReportResponse>(`/investment/engagements/${encodeURIComponent(engagementId)}/report`, {}, { timeoutMs: 20000 });
+}
+
+export async function getInvestmentUnderwritingTemplates() {
+  assertLive();
+  return apiGet<{ templates: InvestmentUnderwritingTemplate[] }>("/investment/underwriting/templates", undefined, { timeoutMs: 20000 });
+}
+
+export async function prefillInvestmentUnderwriting(payload: {
+  candidate_id?: string | null;
+  existing_assumptions?: Record<string, number | string | null>;
+  opportunity_id?: string | null;
+  parcel_id?: string | null;
+  scenario_type: InvestmentUnderwritingScenarioType;
+  strategy?: InvestmentStrategyId;
+  template_id?: string | null;
+}) {
+  assertLive();
+  return apiPost<InvestmentUnderwritingPrefillResponse>("/investment/underwriting/prefill", payload, { timeoutMs: 30000 });
 }
 
 function assertLive() {

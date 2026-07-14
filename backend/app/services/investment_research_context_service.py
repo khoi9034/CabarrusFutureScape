@@ -47,6 +47,16 @@ REPORT_TYPES: dict[str, dict[str, Any]] = {
     "scenario_comparison": {"title": "Scenario Comparison", "sections": ("summary", "underwriting", "missing", "sources")},
     "sources_and_uses": {"title": "Sources and Uses", "sections": ("summary", "underwriting", "sources")},
     "sensitivity_analysis": {"title": "Sensitivity Analysis", "sections": ("summary", "underwriting", "diligence")},
+    "site_selection_screening_report": {"title": "Site Selection Screening Report", "sections": ("summary", "readiness", "market", "environmental", "diligence", "sources")},
+    "acquisition_opportunity_review": {"title": "Acquisition Opportunity Review", "sections": ("summary", "basis", "readiness", "underwriting", "sources")},
+    "market_entry_location_report": {"title": "Market Entry Location Report", "sections": ("summary", "market", "economic", "diligence", "sources")},
+    "portfolio_screening_report": {"title": "Portfolio Screening Report", "sections": ("summary", "readiness", "market", "environmental", "sources")},
+    "area_opportunity_report": {"title": "Area Opportunity Report", "sections": ("summary", "readiness", "market", "diligence", "sources")},
+    "shortlist_comparison": {"title": "Shortlist Comparison", "sections": ("summary", "basis", "readiness", "environmental", "diligence")},
+    "site_due_diligence_matrix": {"title": "Site Due-Diligence Matrix", "sections": ("summary", "missing", "diligence", "sources")},
+    "financial_feasibility_summary": {"title": "Financial Feasibility Summary", "sections": ("summary", "underwriting", "basis", "sources")},
+    "environmental_technical_screening": {"title": "Environmental and Technical Screening", "sections": ("summary", "environmental", "utility", "diligence", "sources")},
+    "executive_recommendation_brief": {"title": "Executive Recommendation Brief", "sections": ("summary", "readiness", "basis", "diligence", "sources")},
 }
 
 

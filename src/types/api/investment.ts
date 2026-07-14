@@ -335,3 +335,108 @@ export interface InvestmentUnderwritingCompareResponse {
   scenarios: InvestmentUnderwritingScenario[];
   summary: string[];
 }
+
+export interface InvestmentOpportunitySource {
+  access_mode: string;
+  attribution_required: string;
+  coverage: string;
+  data_confidence: string;
+  enabled: boolean;
+  last_checked?: string | null;
+  last_refreshed?: string | null;
+  license_status: string;
+  source_id: string;
+  source_name: string;
+  source_type: string;
+  source_url?: string | null;
+  storage_allowed: string;
+}
+
+export interface InvestmentOpportunityReference {
+  acreage?: number | null;
+  asking_price?: number | null;
+  attribution?: string | null;
+  building_area?: number | null;
+  cfs_review_signal?: string | null;
+  data_freshness_band: string;
+  external_opportunity_id: string;
+  external_search_links?: Array<{ source_name: string; url: string }>;
+  general_location?: string | null;
+  listing_status: string;
+  parcel_id?: string | null;
+  parcel_match_status: string;
+  price_per_acre?: number | null;
+  property_type: string;
+  source_caveat?: string;
+  source_id: string;
+  source_name: string;
+  source_type: string;
+  source_url?: string | null;
+  storage_policy: string;
+  title: string;
+}
+
+export interface InvestmentOpportunityListResponse {
+  as_of: string;
+  caveats: string[];
+  count: number;
+  opportunities: InvestmentOpportunityReference[];
+  source_modes: string[];
+}
+
+export interface InvestmentAreaRadarArea {
+  area_classification: string;
+  area_id: string;
+  area_name: string;
+  candidate_count: number;
+  data_confidence: string;
+  external_search_links: Array<{ source_name: string; url: string }>;
+  major_cautions: string[];
+  missing_evidence: string[];
+  recommended_next_search_action: string;
+  strategy_label: string;
+  why_it_surfaced: string[];
+}
+
+export interface InvestmentAreaRadarResponse {
+  areas: InvestmentAreaRadarArea[];
+  caveats: string[];
+  count: number;
+  strategy: string;
+  strategy_label: string;
+}
+
+export interface InvestmentEngagement {
+  brief: Record<string, unknown>;
+  criteria: Array<Record<string, unknown>>;
+  engagement_name: string;
+  engagement_status: string;
+  id: string;
+  portfolio_summary: Record<string, unknown>;
+  selected_strategy: InvestmentStrategyId;
+  shortlist: Array<Record<string, unknown>>;
+}
+
+export interface InvestmentEngagementListResponse {
+  caveats: string[];
+  count: number;
+  engagements: InvestmentEngagement[];
+}
+
+export interface InvestmentUnderwritingTemplate {
+  assumptions: Record<string, number | string | null>;
+  default_source: string;
+  id: string;
+  scenario_type: InvestmentUnderwritingScenarioType;
+  template_name: string;
+  values_requiring_confirmation: string[];
+}
+
+export interface InvestmentUnderwritingPrefillResponse {
+  assumptions: Record<string, number | string | null>;
+  caveats: string[];
+  field_sources: Record<string, string>;
+  prefill_summary: Record<string, string[]>;
+  scenario_type: InvestmentUnderwritingScenarioType;
+  template: InvestmentUnderwritingTemplate;
+}

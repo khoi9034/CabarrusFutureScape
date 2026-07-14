@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpen,
+  BriefcaseBusiness,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -21,6 +22,8 @@ import { useState } from "react";
 
 export type InvestmentPageId =
   | "overview"
+  | "opportunity-feed"
+  | "area-radar"
   | "opportunity"
   | "intake"
   | "research"
@@ -29,6 +32,7 @@ export type InvestmentPageId =
   | "underwriting"
   | "due-diligence"
   | "report-studio"
+  | "engagements"
   | "report-bucket"
   | "methodology";
 
@@ -45,6 +49,8 @@ export const investmentPageGroups: Array<{
     group: "Discover",
     pages: [
       { icon: Gauge, id: "overview", label: "Executive Overview", sublabel: "Command view" },
+      { icon: Sparkles, id: "opportunity-feed", label: "Opportunity Feed", sublabel: "Source references" },
+      { icon: MapPinned, id: "area-radar", label: "Area Opportunity Radar", sublabel: "Search areas" },
       { icon: Filter, id: "opportunity", label: "Opportunity Engine", sublabel: "Screen parcels" },
       { icon: ClipboardList, id: "intake", label: "Candidate Intake", sublabel: "Private leads" },
     ],
@@ -63,6 +69,7 @@ export const investmentPageGroups: Array<{
     pages: [
       { icon: ClipboardList, id: "due-diligence", label: "Due Diligence", sublabel: "Verification" },
       { icon: FileText, id: "report-studio", label: "Report Studio", sublabel: "Reports" },
+      { icon: BriefcaseBusiness, id: "engagements", label: "Engagements", sublabel: "Client criteria" },
       { icon: FileText, id: "report-bucket", label: "Report Bucket", sublabel: "Saved artifacts" },
     ],
   },

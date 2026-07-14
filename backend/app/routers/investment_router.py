@@ -19,13 +19,37 @@ from app.schemas.investment import (
     InvestmentScreenRequest,
     InvestmentStrategyId,
 )
+from app.schemas.investment_engagements import (
+    InvestmentEngagementCriteriaRequest,
+    InvestmentEngagementPatch,
+    InvestmentEngagementPayload,
+    InvestmentEngagementShortlistRequest,
+)
+from app.schemas.investment_opportunities import (
+    InvestmentOpportunityIntakeRequest,
+    InvestmentOpportunityMatchRequest,
+    InvestmentOpportunityRefreshRequest,
+    InvestmentUnderwritingPrefillRequest,
+    InvestmentUnderwritingTemplatePayload,
+)
 from app.schemas.investment_underwriting import (
     InvestmentUnderwritingCalculateRequest,
     InvestmentUnderwritingCompareRequest,
     InvestmentUnderwritingScenarioPatch,
     InvestmentUnderwritingScenarioPayload,
 )
+from app.services.investment_area_radar_service import radar_area, radar_area_opportunities, radar_area_parcels, radar_search
 from app.services.enterprise_export_service import build_powerbi_export_payload
+from app.services.investment_engagement_service import (
+    add_shortlist_item,
+    create_engagement,
+    delete_engagement,
+    engagement_report,
+    get_engagement,
+    list_engagements,
+    set_criteria,
+    update_engagement,
+)
 from app.services.investment_comparable_service import enrich_basis_context
 from app.services.investment_environmental_context_service import (
     candidate_environmental_context,
@@ -48,6 +72,13 @@ from app.services.investment_market_context_service import (
     candidate_market_context,
     refresh_acs_market_context,
 )
+from app.services.investment_opportunity_feed_service import (
+    list_opportunities,
+    match_opportunity,
+    opportunity_sources,
+    opportunity_to_intake,
+    refresh_opportunities,
+)
 from app.services.investment_research_context_service import (
     build_intake_research_context,
     build_parcel_research_context,
@@ -67,7 +98,10 @@ from app.services.investment_underwriting_service import (
     create_underwriting_scenario,
     delete_underwriting_scenario,
     get_underwriting_scenario,
+    create_underwriting_template,
+    list_underwriting_templates,
     list_underwriting_scenarios,
+    prefill_underwriting,
     update_underwriting_scenario,
 )
 
@@ -302,6 +336,195 @@ def post_investment_report(
         return generate_investment_report(db, _investment_rows(db), request)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/opportunities/sources")
+def get_investment_opportunity_sources() -> dict[str, Any]:
+    return opportunity_sources()
+
+
+@router.get("/opportunities")
+def get_investment_opportunities(
+    db: Session = Depends(get_db),
+    source_id: str | None = Query(default=None),
+    property_type: str | None = Query(default=None),
+    listing_status: str | None = Query(default=None),
+    parcel_match_status: str | None = Query(default=None),
+    minimum_acres: float | None = Query(default=None),
+    maximum_acres: float | None = Query(default=None),
+) -> dict[str, Any]:
+    return list_opportunities(
+        db,
+        _investment_rows(db),
+        {
+            "source_id": source_id,
+            "property_type": property_type,
+            "listing_status": listing_status,
+            "parcel_match_status": parcel_match_status,
+            "minimum_acres": minimum_acres,
+            "maximum_acres": maximum_acres,
+        },
+    )
+
+
+@router.post("/opportunities/refresh")
+def post_investment_opportunities_refresh(request: InvestmentOpportunityRefreshRequest) -> dict[str, Any]:
+    return refresh_opportunities(request.source_id)
+
+
+@router.post("/opportunities/{opportunity_id}/match")
+def post_investment_opportunity_match(
+    opportunity_id: str,
+    request: InvestmentOpportunityMatchRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return match_opportunity(db, opportunity_id, _investment_rows(db), request)
+
+
+@router.post("/opportunities/{opportunity_id}/intake")
+def post_investment_opportunity_intake(
+    opportunity_id: str,
+    request: InvestmentOpportunityIntakeRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return opportunity_to_intake(db, opportunity_id, _investment_rows(db), request)
+
+
+@router.post("/radar/search")
+def post_investment_radar_search(
+    strategy: str = Query(default="industrial_site"),
+    limit: int = Query(default=25, ge=1, le=100),
+    db: Session | None = Depends(get_optional_read_only_db),
+) -> dict[str, Any]:
+    return radar_search(_investment_rows(db), strategy=strategy, limit=limit)
+
+
+@router.get("/radar/areas/{area_id}")
+def get_investment_radar_area(
+    area_id: str,
+    strategy: str = Query(default="industrial_site"),
+    db: Session | None = Depends(get_optional_read_only_db),
+) -> dict[str, Any]:
+    return radar_area(_investment_rows(db), area_id, strategy=strategy)
+
+
+@router.get("/radar/areas/{area_id}/parcels")
+def get_investment_radar_area_parcels(
+    area_id: str,
+    limit: int = Query(default=80, ge=1, le=250),
+    db: Session | None = Depends(get_optional_read_only_db),
+) -> dict[str, Any]:
+    return radar_area_parcels(_investment_rows(db), area_id, limit=limit)
+
+
+@router.get("/radar/areas/{area_id}/opportunities")
+def get_investment_radar_area_opportunities(
+    area_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return radar_area_opportunities(db, _investment_rows(db), area_id)
+
+
+@router.get("/engagements")
+def get_investment_engagements(db: Session = Depends(get_db)) -> dict[str, Any]:
+    return list_engagements(db)
+
+
+@router.post("/engagements")
+def post_investment_engagement(
+    request: InvestmentEngagementPayload,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return create_engagement(db, request)
+
+
+@router.get("/engagements/{engagement_id}")
+def get_investment_engagement(
+    engagement_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    engagement = get_engagement(db, engagement_id)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Investment engagement not found.")
+    return engagement
+
+
+@router.patch("/engagements/{engagement_id}")
+def patch_investment_engagement(
+    engagement_id: str,
+    request: InvestmentEngagementPatch,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    engagement = update_engagement(db, engagement_id, request)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Investment engagement not found.")
+    return engagement
+
+
+@router.delete("/engagements/{engagement_id}")
+def delete_investment_engagement(
+    engagement_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    if not delete_engagement(db, engagement_id):
+        raise HTTPException(status_code=404, detail="Investment engagement not found.")
+    return {"deleted": True}
+
+
+@router.post("/engagements/{engagement_id}/criteria")
+def post_investment_engagement_criteria(
+    engagement_id: str,
+    request: InvestmentEngagementCriteriaRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    engagement = set_criteria(db, engagement_id, request)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Investment engagement not found.")
+    return engagement
+
+
+@router.post("/engagements/{engagement_id}/shortlist")
+def post_investment_engagement_shortlist(
+    engagement_id: str,
+    request: InvestmentEngagementShortlistRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    engagement = add_shortlist_item(db, engagement_id, request)
+    if not engagement:
+        raise HTTPException(status_code=404, detail="Investment engagement not found.")
+    return engagement
+
+
+@router.post("/engagements/{engagement_id}/report")
+def post_investment_engagement_report(
+    engagement_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    report = engagement_report(db, engagement_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Investment engagement not found.")
+    return report
+
+
+@router.get("/underwriting/templates")
+def get_investment_underwriting_templates(db: Session = Depends(get_db)) -> dict[str, Any]:
+    return list_underwriting_templates(db)
+
+
+@router.post("/underwriting/templates")
+def post_investment_underwriting_template(
+    request: InvestmentUnderwritingTemplatePayload,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return create_underwriting_template(db, request)
+
+
+@router.post("/underwriting/prefill")
+def post_investment_underwriting_prefill(
+    request: InvestmentUnderwritingPrefillRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return prefill_underwriting(db, request, _investment_rows(db))
 
 
 @router.get("/underwriting/scenarios")

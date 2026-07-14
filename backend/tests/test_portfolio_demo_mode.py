@@ -218,6 +218,26 @@ def test_points_clusters_heatmap_view_modes_are_wired_for_map_modes() -> None:
     assert "Choose how research signals appear on the map." in sidebar
 
 
+def test_cfs_investment_opportunity_workbench_frontend_contracts() -> None:
+    shell = read("src/components/investment/InvestmentShell.tsx")
+    economics_shell = read("src/components/economics/EconomicsShell.tsx")
+    service = read("src/lib/investmentIntelligenceService.ts")
+
+    for page_id in ["opportunity-feed", "area-radar", "engagements"]:
+        assert page_id in shell
+    assert "InvestmentOpportunityFeedPage" in economics_shell
+    assert "InvestmentAreaRadarPage" in economics_shell
+    assert "InvestmentEngagementsPage" in economics_shell
+    assert "Smart Prefill" in economics_shell
+    assert "Assumption template" in economics_shell
+    assert "Recommended for additional diligence" in economics_shell
+    assert "getInvestmentOpportunities" in service
+    assert "searchInvestmentRadar" in service
+    assert "getInvestmentEngagements" in service
+    assert "prefillInvestmentUnderwriting" in service
+    assert "scrape" not in economics_shell.lower()
+
+
 def test_portfolio_demo_mode_is_documented() -> None:
     readme = read("README.md")
     env_example = read(".env.example")

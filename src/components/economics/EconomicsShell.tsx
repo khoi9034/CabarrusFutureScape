@@ -33,17 +33,28 @@ import {
 import {
   compareInvestmentIntakeCandidates,
   compareInvestmentUnderwritingScenarios,
+  addInvestmentEngagementShortlistItem,
+  addInvestmentOpportunityToIntake,
   calculateInvestmentUnderwriting,
+  createInvestmentEngagement,
   createInvestmentIntakeCandidate,
   createInvestmentUnderwritingScenario,
   deleteInvestmentIntakeCandidate,
   deleteInvestmentUnderwritingScenario,
   generateInvestmentReport,
+  generateInvestmentEngagementReport,
+  getInvestmentEngagements,
   getInvestmentIntake,
   getInvestmentIntakeAnalysis,
+  getInvestmentOpportunities,
+  getInvestmentOpportunitySources,
   getInvestmentScreen,
   getInvestmentUnderwritingScenarios,
+  getInvestmentUnderwritingTemplates,
   importInvestmentIntakeCsv,
+  matchInvestmentOpportunity,
+  prefillInvestmentUnderwriting,
+  searchInvestmentRadar,
   updateInvestmentIntakeCandidate,
   updateInvestmentUnderwritingScenario,
 } from "@/lib/investmentIntelligenceService";
@@ -70,9 +81,15 @@ import type {
   InvestmentSourceType,
   InvestmentScreenResponse,
   InvestmentStrategyId,
+  InvestmentAreaRadarArea,
+  InvestmentEngagement,
+  InvestmentOpportunityReference,
+  InvestmentOpportunitySource,
   InvestmentUnderwritingCalculation,
   InvestmentUnderwritingCompareResponse,
+  InvestmentUnderwritingPrefillResponse,
   InvestmentUnderwritingScenario,
+  InvestmentUnderwritingTemplate,
   InvestmentUnderwritingScenarioType,
 } from "@/types/api";
 
@@ -948,6 +965,12 @@ function InvestmentPanelPage({
   const [underwritingScenarioName, setUnderwritingScenarioName] = useState("Development Feasibility Scenario");
   const [underwritingScenarioType, setUnderwritingScenarioType] = useState<InvestmentUnderwritingScenarioType>("development_land");
   const [underwritingStatus, setUnderwritingStatus] = useState<string | null>(null);
+  const [engagements, setEngagements] = useState<InvestmentEngagement[]>([]);
+  const [opportunities, setOpportunities] = useState<InvestmentOpportunityReference[]>([]);
+  const [opportunitySources, setOpportunitySources] = useState<InvestmentOpportunitySource[]>([]);
+  const [radarAreas, setRadarAreas] = useState<InvestmentAreaRadarArea[]>([]);
+  const [underwritingPrefill, setUnderwritingPrefill] = useState<InvestmentUnderwritingPrefillResponse | null>(null);
+  const [underwritingTemplates, setUnderwritingTemplates] = useState<InvestmentUnderwritingTemplate[]>([]);
   const [intakeLoading, setIntakeLoading] = useState(!USE_DEMO_DATA);
   const [intakeUnavailable, setIntakeUnavailable] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -986,6 +1009,29 @@ function InvestmentPanelPage({
       .finally(() => {
         if (mounted) setIntakeLoading(false);
       });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  useEffect(() => {
+    let mounted = true;
+    if (USE_DEMO_DATA) return () => {
+      mounted = false;
+    };
+    void Promise.allSettled([
+      getInvestmentOpportunitySources(),
+      getInvestmentOpportunities(),
+      searchInvestmentRadar(),
+      getInvestmentEngagements(),
+      getInvestmentUnderwritingTemplates(),
+    ]).then(([sources, feed, radar, engagementList, templates]) => {
+      if (!mounted) return;
+      if (sources.status === "fulfilled") setOpportunitySources(sources.value.sources);
+      if (feed.status === "fulfilled") setOpportunities(feed.value.opportunities);
+      if (radar.status === "fulfilled") setRadarAreas(radar.value.areas);
+      if (engagementList.status === "fulfilled") setEngagements(engagementList.value.engagements);
+      if (templates.status === "fulfilled") setUnderwritingTemplates(templates.value.templates);
+    });
     return () => {
       mounted = false;
     };
@@ -1223,6 +1269,10 @@ function InvestmentPanelPage({
     getInvestmentUnderwritingScenarios()
       .then((response) => setUnderwritingScenarios(response.scenarios))
       .catch(() => setUnderwritingStatus("Underwriting scenarios are available only when the local backend and database are running."));
+  const refreshEngagements = () =>
+    getInvestmentEngagements()
+      .then((response) => setEngagements(response.engagements))
+      .catch(() => setStatus("Engagements are available only when the local backend and database are running."));
   const underwritingPayload = () => {
     const intakeAskingPrice = intakeAnalysis?.acquisition_basis.asking_price;
     const assumptions = intakeAskingPrice && !underwritingAssumptions.asking_price && !underwritingAssumptions.purchase_price && !underwritingAssumptions.acquisition_basis
@@ -1303,6 +1353,77 @@ function InvestmentPanelPage({
     downloadJson(underwritingResult, `${slugifyReportTitle(underwritingResult.scenario_name)}_underwriting.json`);
     setUnderwritingStatus("Underwriting JSON exported.");
   };
+  const applyUnderwritingPrefill = (opportunityId?: string | null, templateId?: string | null) => {
+    void prefillInvestmentUnderwriting({
+      candidate_id: intakeAnalysis?.candidate.id ?? null,
+      existing_assumptions: underwritingAssumptions,
+      opportunity_id: opportunityId ?? null,
+      parcel_id: activeSignal?.parcel_id ?? intakeAnalysis?.candidate.parcel_id ?? null,
+      scenario_type: underwritingScenarioType,
+      strategy: activeStrategy,
+      template_id: templateId ?? null,
+    })
+      .then((response) => {
+        setUnderwritingPrefill(response);
+        setUnderwritingAssumptions(response.assumptions);
+        setUnderwritingScenarioType(response.scenario_type);
+        setUnderwritingStatus("Smart prefill applied. Review assumptions before recalculating.");
+      })
+      .catch((error) => setUnderwritingStatus(error instanceof Error ? error.message : "Underwriting prefill failed."));
+  };
+  const addOpportunityToIntake = (opportunity: InvestmentOpportunityReference) => {
+    void addInvestmentOpportunityToIntake(opportunity.external_opportunity_id, activeStrategy)
+      .then((analysis) => {
+        setIntakeAnalysis(analysis);
+        setActiveInvestmentPage("intake");
+        setStatus("Opportunity reference added to Candidate Intake.");
+        return refreshIntake();
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to add opportunity to intake."));
+  };
+  const matchOpportunity = (opportunity: InvestmentOpportunityReference) => {
+    void matchInvestmentOpportunity(opportunity.external_opportunity_id, opportunity.parcel_id)
+      .then((result) => setStatus(`Parcel match: ${String(result.parcel_match_status ?? "Manual Verification Required")}`))
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Opportunity match failed."));
+  };
+  const createDefaultEngagement = () => {
+    void createInvestmentEngagement({
+      engagement_name: "New site-selection engagement",
+      engagement_type: "Site-selection study",
+      minimum_acres: 10,
+      property_type: "Industrial / commercial land",
+      selected_strategy: activeStrategy,
+      target_geography: "Cabarrus County",
+    })
+      .then((engagement) => {
+        setStatus("Engagement created.");
+        setEngagements((current) => [engagement, ...current.filter((item) => item.id !== engagement.id)]);
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to create engagement."));
+  };
+  const addToFirstEngagement = (itemId: string, itemType: string) => {
+    const engagement = engagements[0];
+    if (!engagement) {
+      setStatus("Create an engagement before adding shortlist items.");
+      return;
+    }
+    void addInvestmentEngagementShortlistItem(engagement.id, { item_id: itemId, item_type: itemType, status: "Shortlist" })
+      .then(() => refreshEngagements())
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to update shortlist."));
+  };
+  const generateFirstEngagementReport = () => {
+    const engagement = engagements[0];
+    if (!engagement) {
+      setStatus("Create an engagement before generating a consulting report.");
+      return;
+    }
+    void generateInvestmentEngagementReport(engagement.id)
+      .then((report) => {
+        onAddReportBucketItem(investmentReportBucketItem(report));
+        setStatus("Engagement report saved to Report Bucket.");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to generate engagement report."));
+  };
   const askFilterContext = {
     active_page: activeInvestmentPage,
     active_strategy: investmentStrategyLabel(activeStrategy),
@@ -1321,6 +1442,9 @@ function InvestmentPanelPage({
     active_usable_area_proxy: intakeAnalysis?.environmental_context?.usable_area_screening_proxy,
     active_wetland_context: intakeAnalysis?.environmental_context?.mapped_wetland_context,
     mode: "cfs_investment",
+    active_engagement: engagements[0]?.engagement_name,
+    active_opportunity_count: opportunities.length,
+    active_priority_search_area: radarAreas[0]?.area_name,
     active_underwriting_summary: underwritingResult
       ? `${underwritingResult.scenario_type_label}; missing inputs: ${underwritingResult.missing_inputs.join(", ") || "none"}; total project/basis: ${underwritingResult.results.total_project_cost ?? underwritingResult.results.total_basis_at_exit ?? underwritingResult.results.total_basis_after_entitlement ?? "not available"}`
       : undefined,
@@ -1523,6 +1647,30 @@ function InvestmentPanelPage({
             {strategySelector}
           </>
         );
+      case "opportunity-feed":
+        return (
+          <InvestmentOpportunityFeedPage
+            onAddToBucket={(opportunity) => onAddReportBucketItem(opportunityBucketItem(opportunity))}
+            onAddToEngagement={(opportunity) => addToFirstEngagement(opportunity.external_opportunity_id, "opportunity")}
+            onAddToIntake={addOpportunityToIntake}
+            onMatch={matchOpportunity}
+            onStartUnderwriting={(opportunity) => {
+              applyUnderwritingPrefill(opportunity.external_opportunity_id);
+              setActiveInvestmentPage("underwriting");
+            }}
+            opportunities={opportunities}
+            sources={opportunitySources}
+          />
+        );
+      case "area-radar":
+        return (
+          <InvestmentAreaRadarPage
+            areas={radarAreas}
+            onAddToBucket={(area) => onAddReportBucketItem(areaRadarBucketItem(area))}
+            onAddToEngagement={(area) => addToFirstEngagement(area.area_id, "search_area")}
+            onOpenOpportunityFeed={() => setActiveInvestmentPage("opportunity-feed")}
+          />
+        );
       case "opportunity":
         return (
           <section className="investment-work-grid">
@@ -1582,6 +1730,7 @@ function InvestmentPanelPage({
             intakeAnalysis={intakeAnalysis}
             onAddToBucket={addUnderwritingToBucket}
             onArchiveScenario={archiveUnderwritingScenario}
+            onApplyPrefill={applyUnderwritingPrefill}
             onCalculate={calculateUnderwriting}
             onCompare={compareUnderwriting}
             onDeleteScenario={deleteUnderwritingScenario}
@@ -1602,12 +1751,23 @@ function InvestmentPanelPage({
             scenarioType={underwritingScenarioType}
             status={underwritingStatus}
             strategy={activeStrategy}
+            templates={underwritingTemplates}
+            prefill={underwritingPrefill}
           />
         );
       case "due-diligence":
         return <section className="investment-two-column"><div>{dueDiligenceActions}{guide ? <InvestmentGuidePreview guide={guide} /> : null}</div><InvestmentChecklistLibrary /></section>;
       case "report-studio":
         return reportStudio;
+      case "engagements":
+        return (
+          <InvestmentEngagementsPage
+            engagements={engagements}
+            onAddArea={(areaId) => addToFirstEngagement(areaId, "search_area")}
+            onCreate={createDefaultEngagement}
+            onGenerateReport={generateFirstEngagementReport}
+          />
+        );
       case "report-bucket":
         return <InvestmentBucketPanel items={reportBucketItems} onClear={onClearReportBucket} onOpenPrint={() => onNavigate("print")} onRemove={onRemoveReportBucketItem} onTogglePrint={onToggleReportBucketPrint} />;
       case "methodology":
@@ -1697,6 +1857,16 @@ const investmentReportTypeOptions = [
   { id: "scenario_comparison", label: "Scenario Comparison" },
   { id: "sources_and_uses", label: "Sources and Uses" },
   { id: "sensitivity_analysis", label: "Sensitivity Analysis" },
+  { id: "site_selection_screening_report", label: "Site Selection Screening Report" },
+  { id: "acquisition_opportunity_review", label: "Acquisition Opportunity Review" },
+  { id: "market_entry_location_report", label: "Market Entry Location Report" },
+  { id: "portfolio_screening_report", label: "Portfolio Screening Report" },
+  { id: "area_opportunity_report", label: "Area Opportunity Report" },
+  { id: "shortlist_comparison", label: "Shortlist Comparison" },
+  { id: "site_due_diligence_matrix", label: "Site Due-Diligence Matrix" },
+  { id: "financial_feasibility_summary", label: "Financial Feasibility Summary" },
+  { id: "environmental_technical_screening", label: "Environmental and Technical Screening" },
+  { id: "executive_recommendation_brief", label: "Executive Recommendation Brief" },
 ] as const;
 
 function investmentStrategyLabel(strategy: InvestmentStrategyId) {
@@ -1876,6 +2046,158 @@ function InvestmentMethodologyPage({ compact = false }: { compact?: boolean }) {
   );
 }
 
+function InvestmentOpportunityFeedPage({
+  onAddToBucket,
+  onAddToEngagement,
+  onAddToIntake,
+  onMatch,
+  onStartUnderwriting,
+  opportunities,
+  sources,
+}: {
+  onAddToBucket: (opportunity: InvestmentOpportunityReference) => void;
+  onAddToEngagement: (opportunity: InvestmentOpportunityReference) => void;
+  onAddToIntake: (opportunity: InvestmentOpportunityReference) => void;
+  onMatch: (opportunity: InvestmentOpportunityReference) => void;
+  onStartUnderwriting: (opportunity: InvestmentOpportunityReference) => void;
+  opportunities: InvestmentOpportunityReference[];
+  sources: InvestmentOpportunitySource[];
+}) {
+  return (
+    <section className="investment-work-grid">
+      <div className="investment-primary-column">
+        <section className="investment-card">
+          <div className="investment-section-heading"><div><p>Opportunity Feed</p><h2>Available sites, listing references, public opportunities, and broker feeds</h2></div><span className="investment-pill">{opportunities.length}</span></div>
+          <div className="investment-disclaimer">Available opportunity references from enabled sources. External search references are not synchronized listings; verify availability and content on the source platform.</div>
+          <div className="investment-table-wrap">
+            <table className="investment-table">
+              <thead><tr><th>Opportunity</th><th>Source</th><th>Area</th><th>Acreage</th><th>Asking Basis</th><th>Match</th><th>Action</th></tr></thead>
+              <tbody>
+                {opportunities.slice(0, 35).map((opportunity) => (
+                  <tr key={opportunity.external_opportunity_id}>
+                    <td><strong>{opportunity.title}</strong><br /><span className="investment-muted">{opportunity.property_type}</span></td>
+                    <td>{opportunity.source_name}<br /><span className="investment-muted">{opportunity.listing_status}</span></td>
+                    <td>{opportunity.general_location ?? "Verify"}</td>
+                    <td>{displayValue(opportunity.acreage)}</td>
+                    <td>{moneyText(opportunity.asking_price)}<br /><span className="investment-muted">{opportunity.data_freshness_band}</span></td>
+                    <td>{opportunity.parcel_match_status}</td>
+                    <td>
+                      <div className="investment-row-actions">
+                        {opportunity.source_url ? <a className="investment-ghost-button" href={opportunity.source_url} rel="noreferrer" target="_blank">Open Source</a> : null}
+                        <button onClick={() => onMatch(opportunity)} type="button">Match Parcel</button>
+                        <button onClick={() => onAddToIntake(opportunity)} type="button">Add to Intake</button>
+                        <button onClick={() => onStartUnderwriting(opportunity)} type="button">Start Underwriting</button>
+                        <button onClick={() => onAddToEngagement(opportunity)} type="button">Shortlist</button>
+                        <button onClick={() => onAddToBucket(opportunity)} type="button">Bucket</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <aside className="investment-rail">
+        <section className="investment-card">
+          <div className="investment-section-heading"><div><p>Source Governance</p><h2>Enabled and restricted sources</h2></div></div>
+          <div className="investment-bucket-list">
+            {sources.map((source) => (
+              <div key={source.source_id}>
+                <span>{source.source_type}</span>
+                <strong>{source.source_name}</strong>
+                <small>{source.access_mode} · {source.license_status}</small>
+              </div>
+            ))}
+          </div>
+        </section>
+      </aside>
+    </section>
+  );
+}
+
+function InvestmentAreaRadarPage({
+  areas,
+  onAddToBucket,
+  onAddToEngagement,
+  onOpenOpportunityFeed,
+}: {
+  areas: InvestmentAreaRadarArea[];
+  onAddToBucket: (area: InvestmentAreaRadarArea) => void;
+  onAddToEngagement: (area: InvestmentAreaRadarArea) => void;
+  onOpenOpportunityFeed: () => void;
+}) {
+  return (
+    <section className="investment-card">
+      <div className="investment-section-heading"><div><p>Area Opportunity Radar</p><h2>Identify high-priority geographies before reviewing individual properties</h2></div><span className="investment-pill">{areas.length}</span></div>
+      <div className="investment-table-wrap">
+        <table className="investment-table">
+          <thead><tr><th>Area</th><th>Classification</th><th>Why it surfaced</th><th>Cautions</th><th>Next action</th><th>Actions</th></tr></thead>
+          <tbody>
+            {areas.slice(0, 30).map((area) => (
+              <tr key={area.area_id}>
+                <td><strong>{area.area_name}</strong><br /><span className="investment-muted">{area.candidate_count} CFS candidates</span></td>
+                <td>{area.area_classification}<br /><span className="investment-muted">{area.data_confidence}</span></td>
+                <td>{area.why_it_surfaced.join("; ")}</td>
+                <td>{area.major_cautions.join("; ")}</td>
+                <td>{area.recommended_next_search_action}</td>
+                <td><div className="investment-row-actions"><button onClick={onOpenOpportunityFeed} type="button">Drill to Opportunities</button><button onClick={() => onAddToEngagement(area)} type="button">Save to Engagement</button><button onClick={() => onAddToBucket(area)} type="button">Area Report</button></div></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function InvestmentEngagementsPage({
+  engagements,
+  onAddArea,
+  onCreate,
+  onGenerateReport,
+}: {
+  engagements: InvestmentEngagement[];
+  onAddArea: (areaId: string) => void;
+  onCreate: () => void;
+  onGenerateReport: () => void;
+}) {
+  const active = engagements[0];
+  return (
+    <section className="investment-work-grid">
+      <div className="investment-primary-column">
+        <section className="investment-card">
+          <div className="investment-section-heading"><div><p>Engagements</p><h2>Client criteria, site screening, shortlists, and deliverables</h2></div><button className="investment-primary-button" onClick={onCreate} type="button">Create Engagement</button></div>
+          {active ? (
+            <>
+              <Matrix rows={[
+                { label: "Engagement", value: active.engagement_name },
+                { label: "Strategy", value: investmentStrategyLabel(active.selected_strategy) },
+                { label: "Status", value: active.engagement_status },
+                { label: "Shortlist items", value: String(active.shortlist.length) },
+                { label: "Criteria", value: String(active.criteria.length) },
+              ]} />
+              <InvestmentSignalList title="Criteria matrix" values={active.criteria.map((item) => `${String(item.type ?? "Informational")}: ${String(item.criterion ?? item.label ?? "Criteria")}`)} />
+              <InvestmentSignalList title="Consultant shortlist" values={active.shortlist.map((item) => `${String(item.item_type)} ${String(item.item_id)} · ${String(item.status)}`)} />
+              <div className="investment-row-actions mt-4">
+                <button className="investment-primary-button" onClick={onGenerateReport} type="button">Generate Client-Ready Summary</button>
+                <button className="investment-ghost-button" onClick={() => onAddArea("countywide")} type="button">Add Countywide Search Area</button>
+              </div>
+            </>
+          ) : <p className="investment-empty">No engagements yet. Create one to manage client criteria, shortlist sites, portfolio screening, and deliverables.</p>}
+        </section>
+      </div>
+      <aside className="investment-rail">
+        <section className="investment-card">
+          <div className="investment-section-heading"><div><p>Consulting Workflow</p><h2>Safe deliverable language</h2></div></div>
+          <InvestmentSignalList title="Use" values={["Recommended for additional diligence", "Priority Search Area", "Screening-level review", "Verify source availability"]} />
+          <InvestmentSignalList title="Avoid" values={["Purchase directives", "Complete listing inventory claims", "Return assurances", "Valuation conclusions"]} />
+        </section>
+      </aside>
+    </section>
+  );
+}
+
 const underwritingScenarioTypeOptions: Array<{ id: InvestmentUnderwritingScenarioType; label: string; fields: string[] }> = [
   { id: "development_land", label: "Development Land", fields: ["purchase_price", "scenario_unit_count", "scenario_building_area", "site_preparation_cost", "grading_cost", "utility_extension_cost", "stormwater_cost", "vertical_construction_cost", "professional_fees", "permit_and_impact_fees", "financing_cost", "contingency_percent", "sale_price_per_unit", "sale_price_per_square_foot", "rent_per_unit", "exit_cap_rate", "entitlement_period_months", "construction_period_months", "absorption_period_months"] },
   { id: "land_banking", label: "Long-Term Land Banking", fields: ["acquisition_basis", "closing_cost_percent", "scenario_site_area", "annual_property_tax_assumption", "annual_insurance_assumption", "annual_land_management_cost", "annual_legal_or_compliance_cost", "annual_other_holding_cost", "annual_cost_growth_rate", "holding_period_years", "exit_price_scenario", "exit_price_per_acre_scenario", "selling_cost_percent"] },
@@ -1964,6 +2286,7 @@ function InvestmentUnderwritingLab({
   intakeAnalysis,
   onAddToBucket,
   onArchiveScenario,
+  onApplyPrefill,
   onCalculate,
   onCompare,
   onDeleteScenario,
@@ -1980,6 +2303,8 @@ function InvestmentUnderwritingLab({
   scenarioType,
   status,
   strategy,
+  templates,
+  prefill,
 }: {
   activeSignal: EconomicsParcelSignal | null;
   assumptions: Record<string, number | string | null>;
@@ -1988,6 +2313,7 @@ function InvestmentUnderwritingLab({
   intakeAnalysis: InvestmentIntakeAnalysisResponse | null;
   onAddToBucket: () => void;
   onArchiveScenario: (scenarioId: string) => void;
+  onApplyPrefill: (opportunityId?: string | null, templateId?: string | null) => void;
   onCalculate: () => void;
   onCompare: () => void;
   onDeleteScenario: (scenarioId: string) => void;
@@ -2004,6 +2330,8 @@ function InvestmentUnderwritingLab({
   scenarioType: InvestmentUnderwritingScenarioType;
   status: string | null;
   strategy: InvestmentStrategyId;
+  templates: InvestmentUnderwritingTemplate[];
+  prefill: InvestmentUnderwritingPrefillResponse | null;
 }) {
   const scenarioOption = underwritingScenarioTypeOptions.find((option) => option.id === scenarioType) ?? underwritingScenarioTypeOptions[0];
   const updateAssumption = (key: string, value: string) => onSetAssumptions((current) => ({ ...current, [key]: value === "" ? null : Number(value) }));
@@ -2036,6 +2364,16 @@ function InvestmentUnderwritingLab({
                 {underwritingScenarioTypeOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
               </select>
             </label>
+            <label className="grid gap-1 text-xs text-[var(--investment-text-muted)]">
+              Assumption template
+              <select className="investment-select" onChange={(event) => event.target.value && onApplyPrefill(null, event.target.value)} defaultValue="">
+                <option value="">Choose template</option>
+                {templates.map((template) => <option key={template.id} value={template.id}>{template.template_name}</option>)}
+              </select>
+            </label>
+            <div className="investment-row-actions self-end">
+              <button className="investment-ghost-button" onClick={() => onApplyPrefill()} type="button">Smart Prefill</button>
+            </div>
           </div>
           <Matrix rows={[
             { label: "Active opportunity", value: selectedLabel },
@@ -2045,6 +2383,14 @@ function InvestmentUnderwritingLab({
             { label: "Scenario Acquisition Basis", value: "User-entered assumption" },
             { label: "Utility evidence", value: activeSignal?.utility_readiness_proxy_class ?? "CFS-derived proxy; capacity not confirmed" },
           ]} />
+          {prefill ? (
+            <InvestmentSignalList title="Prefill summary" values={[
+              `CFS fields: ${prefill.prefill_summary.fields_populated_from_cfs?.join(", ") || "none"}`,
+              `Opportunity fields: ${prefill.prefill_summary.fields_populated_from_opportunity_source?.join(", ") || "none"}`,
+              `Template fields: ${prefill.prefill_summary.fields_populated_from_template?.join(", ") || "none"}`,
+              `Analyst input needed: ${prefill.prefill_summary.fields_requiring_analyst_input?.join(", ") || "review remaining blanks"}`,
+            ]} />
+          ) : null}
         </section>
         <section className="investment-card">
           <div className="investment-section-heading"><div><p>Assumptions</p><h2>{scenarioOption.label}</h2></div></div>
@@ -2199,6 +2545,47 @@ function underwritingBucketItem(result: InvestmentUnderwritingCalculation): Repo
     summary: `${result.scenario_type_label} with ${result.missing_inputs.length} missing-input warning(s).`,
     title: result.scenario_name,
     type: "scenario_output",
+  };
+}
+
+function opportunityBucketItem(opportunity: InvestmentOpportunityReference): ReportBucketItemInput {
+  return {
+    caveats: [opportunity.source_caveat ?? "Verify opportunity availability and source terms before relying on this reference."],
+    content: [
+      `Opportunity: ${opportunity.title}`,
+      `Source: ${opportunity.source_name}`,
+      `Property type: ${opportunity.property_type}`,
+      `General area: ${opportunity.general_location ?? "Verify"}`,
+      `Parcel match: ${opportunity.parcel_match_status}`,
+      `Asking basis: ${moneyText(opportunity.asking_price)}`,
+      `Storage policy: ${opportunity.storage_policy}`,
+    ].join("\n"),
+    id: `opportunity-${slugifyReportTitle(opportunity.external_opportunity_id)}-${Date.now()}`,
+    selected_for_print: true,
+    source_page: "CFS Investment",
+    summary: `${opportunity.source_name} reference requiring source verification.`,
+    title: `Opportunity reference: ${opportunity.title}`,
+    type: "evidence_pack",
+  };
+}
+
+function areaRadarBucketItem(area: InvestmentAreaRadarArea): ReportBucketItemInput {
+  return {
+    caveats: ["Area Radar is a CFS-derived search aid, not a complete property inventory."],
+    content: [
+      `Area: ${area.area_name}`,
+      `Classification: ${area.area_classification}`,
+      `Why it surfaced: ${area.why_it_surfaced.join("; ")}`,
+      `Major cautions: ${area.major_cautions.join("; ")}`,
+      `Missing evidence: ${area.missing_evidence.join("; ")}`,
+      `Next action: ${area.recommended_next_search_action}`,
+    ].join("\n"),
+    id: `area-radar-${slugifyReportTitle(area.area_id)}-${Date.now()}`,
+    selected_for_print: true,
+    source_page: "CFS Investment",
+    summary: `${area.area_classification} with ${area.candidate_count} CFS candidate records.`,
+    title: `Area Opportunity Radar: ${area.area_name}`,
+    type: "evidence_pack",
   };
 }
 

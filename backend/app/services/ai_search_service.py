@@ -777,6 +777,9 @@ def _investment_intent(query: str) -> str:
     normalized = query.lower()
     checks = [
         ("Underwriting", ("underwriting", "feasibility", "break-even", "break even", "sensitivity", "sources and uses", "cash flow", "dscr", "cap rate", "irr", "modeled return")),
+        ("Consulting Engagement", ("engagement", "client", "site selection", "shortlist", "criteria", "portfolio", "consulting", "market entry")),
+        ("Opportunity Feed", ("opportunity feed", "available opportunity", "available opportunities", "listing", "broker", "external search", "source platform")),
+        ("Area Opportunity Radar", ("area", "radar", "search area", "priority search area", "geography", "corridor")),
         ("Report Generation", ("report", "memorandum", "brief", "guide")),
         ("Candidate Comparison", ("compare", "versus", "tradeoff")),
         ("Acquisition Basis", ("asking", "basis", "comparable", "sale")),
@@ -821,6 +824,9 @@ def _investment_research_answer(
                 [
                     "Use CFS Investment as screening-level research for candidate status, data readiness, and verification needs.",
                     "Use Opportunity Engine for ranked parcel candidates and strategy filters.",
+                    "Use Opportunity Feed for governed opportunity references, source links, parcel matching, and intake handoff.",
+                    "Use Area Opportunity Radar to identify Priority Search Areas before reviewing individual parcels or opportunity references.",
+                    "Use Engagements to manage client criteria, shortlists, portfolio screening, and deliverables.",
                     "Use Property Research for unified parcel, planning, economics, market-area, basis, utility, and environmental context.",
                     "Use Underwriting Lab for deterministic scenario calculations, sensitivities, and exports based on user-entered assumptions.",
                     "Use Report Studio for structured reports with sources, limitations, and due-diligence requirements.",
