@@ -16,6 +16,10 @@ from app.services.investment_environmental_context_service import (
     SAFE_LIMITATION,
     SOIL_TABLE,
     TERRAIN_TABLE,
+    _epa_physical_facility_key,
+    _epa_program_categories,
+    _epa_status_band,
+    _clean_source_text,
     _soil_limit_note,
     _source_attribution,
     _source_limitations,
@@ -114,6 +118,23 @@ def test_soil_limitation_note_uses_focused_nrcs_fields() -> None:
     assert _soil_limit_note({"engdwobdcd": "Very limited", "engdwbdcd": None}) == "Very limited"
     assert _soil_limit_note({"engdwobdcd": None, "engdwbdcd": "Somewhat limited"}) == "Somewhat limited"
     assert _soil_limit_note({}) is None
+    assert _clean_source_text("nan") is None
+
+
+def test_epa_facility_dedup_and_program_categories() -> None:
+    key_a = _epa_physical_facility_key(" Example Facility  ", 35.123456, -80.123456, "1")
+    key_b = _epa_physical_facility_key("EXAMPLE   FACILITY", 35.123457, -80.123455, "2")
+    categories = _epa_program_categories(
+        {"RCRAIDs": "NCD1", "NPDESIDs": "NC002", "AIRIDs": "AIR1", "TRIIDs": "TRI1"},
+        {"RCRAInspectionCount": 1},
+    )
+
+    assert key_a == key_b
+    assert "Hazardous Waste / RCRA Context" in categories
+    assert "Water-Discharge / NPDES Context" in categories
+    assert "Air-Regulated Facility Context" in categories
+    assert _epa_status_band(1, 0) == "Active regulatory program context"
+    assert _epa_status_band(0, 2) == "Historical regulatory program context"
 
 
 def test_environmental_context_by_parcel_returns_screening_fields() -> None:
@@ -197,7 +218,11 @@ def test_environmental_docs_and_registry_are_safe() -> None:
     assert "USFWS NWI Wetlands Map Service" in service
     assert "USDA NRCS Soil Data Access WFS" in service
     assert "EPA ECHO All Media Programs Facility Search" in service
-    assert "centroid raster sampling keeps refresh tractable" in service
+    assert "tmp_cfs_terrain_points" in service
+    assert "CFS_ENVIRONMENTAL_CACHE_DIR" in service
     assert "usable-area screening proxy" in doc
+    assert "--source terrain" in doc
+    assert "--source summaries" in doc
+    assert '"source_rows": 1497' in registry
     for unsafe in ["environmentally cleared", "safe to develop", "guaranteed development", "investment advice"]:
         assert unsafe not in doc.replace("not investment advice", "")

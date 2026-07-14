@@ -777,11 +777,26 @@ def _economics_environmental_context_answer(
     facility = filters.get("active_facility_context") or "not loaded"
     usable = filters.get("active_usable_area_proxy") or "insufficient environmental information"
     confidence = filters.get("active_environmental_confidence") or "Data Needed"
+    normalized_query = request.query.lower()
+    interpretation = []
+    if "epa" in normalized_query or "facility" in normalized_query or "contaminat" in normalized_query:
+        interpretation.append("EPA regulated-facility proximity is a due-diligence cue only; it does not mean the candidate parcel is contaminated.")
+    if "wetland" in normalized_query:
+        interpretation.append("Mapped NWI wetland percentage is screening evidence only and does not replace professional wetland delineation.")
+    if "terrain" in normalized_query or "slope" in normalized_query or "engineering" in normalized_query:
+        interpretation.append("Terrain and slope bands indicate where survey, grading, stormwater, or engineering verification may be needed; they do not determine feasibility.")
+    if "usable" in normalized_query or "proxy" in normalized_query:
+        interpretation.append("The usable-area screening proxy compares mapped flood, wetland, and steep-slope limitations without certifying developable acreage.")
+    if "unavailable" in normalized_query or "missing" in normalized_query:
+        interpretation.append("If a source is unavailable, treat it as a data gap, not as evidence that no environmental condition exists.")
+    if not interpretation:
+        interpretation.append("Treat each environmental layer as one screening dimension alongside utility, market-area, basis, access, and planning evidence.")
     answer = _briefing(
         (
             "Direct answer",
             f"Use Environmental & Physical Context in Candidate Intake for {candidate}. Current screening shows mapped wetland context: {wetland}; terrain context: {terrain}; soil context: {soil}; regulated-facility proximity: {facility}; usable-area screening proxy: {usable}; confidence: {confidence}.",
         ),
+        ("Interpretation", _bullets(interpretation)),
         (
             "Next diligence",
             _bullets(

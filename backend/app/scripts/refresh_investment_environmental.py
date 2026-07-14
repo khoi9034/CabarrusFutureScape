@@ -15,7 +15,7 @@ from app.services.investment_environmental_context_service import refresh_enviro
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Refresh environmental screening context for Investment Panel candidates.")
-    parser.add_argument("--source", choices=["all", "nwi", "slope", "soils", "epa"], default="all")
+    parser.add_argument("--source", choices=["all", "nwi", "terrain", "slope", "soils", "epa", "summaries"], default="all")
     args = parser.parse_args()
     with SessionLocal() as db:
         try:

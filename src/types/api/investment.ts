@@ -183,6 +183,7 @@ export interface InvestmentMarketContext {
 
 export interface InvestmentEnvironmentalContext {
   dominant_soil_group?: string | null;
+  elevation_range?: number | null;
   environmental_data_confidence: string;
   environmental_facility_context: string;
   flood_context: string;
@@ -191,6 +192,8 @@ export interface InvestmentEnvironmentalContext {
   mapped_wetland_context: string;
   maximum_elevation?: number | null;
   mean_slope_percent?: number | null;
+  mean_elevation?: number | null;
+  maximum_slope_percent?: number | null;
   minimum_elevation?: number | null;
   nearest_regulated_facility_distance_miles?: number | null;
   overall_environmental_constraint_band: string;
@@ -203,6 +206,8 @@ export interface InvestmentEnvironmentalContext {
   source_version?: string | null;
   steep_slope_percent?: number | null;
   terrain_context: string;
+  terrain_source_date?: string | null;
+  terrain_source_resolution?: string | null;
   usable_area_screening_proxy: string;
   verification_requirements: string[];
   wetland_percent_of_parcel?: number | null;

@@ -1143,6 +1143,27 @@ def test_ai_search_economics_investment_panel_prompt_is_safe() -> None:
     assert "guaranteed" not in answer
 
 
+def test_ai_search_environmental_prompt_rejects_contamination_conclusion() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            query="Does EPA facility proximity mean this parcel is contaminated?",
+            filter_context={
+                "active_intake_candidate": "Demo candidate",
+                "active_facility_context": "Facility Within 0.25 Mile",
+                "active_environmental_confidence": "High",
+            },
+        ),
+        _context(),
+    )
+
+    answer = response.answer.lower()
+    assert "does not mean the candidate parcel is contaminated" in answer
+    assert "due-diligence cue" in answer
+    assert "environmentally cleared" not in answer
+    assert "safe to develop" not in answer
+
+
 def test_ai_search_economics_context_uses_cached_economics(monkeypatch) -> None:
     calls = {"count": 0}
 
