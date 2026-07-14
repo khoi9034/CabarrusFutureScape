@@ -727,6 +727,135 @@ select:focus-visible {
   gap: 0.65rem;
 }
 
+.investment-home-hero {
+  background:
+    linear-gradient(135deg, rgba(53, 213, 154, 0.12), rgba(99, 216, 255, 0.04)),
+    var(--investment-surface-raised);
+  border: 1px solid var(--investment-border);
+  border-radius: 1.6rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 0.8fr) minmax(20rem, 1.2fr);
+  padding: 1.2rem;
+}
+
+.investment-home-hero h2 {
+  color: var(--investment-text);
+  font-size: clamp(1.4rem, 2vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.12;
+  margin-top: 0.35rem;
+}
+
+.investment-guided-search,
+.investment-guided-search div,
+.investment-guided-form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.investment-guided-search div {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.investment-guided-search label,
+.investment-guided-form label {
+  color: var(--investment-text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.investment-guided-search input {
+  background: rgba(2, 7, 17, 0.68);
+  border: 1px solid var(--investment-border);
+  border-radius: 0.9rem;
+  color: var(--investment-text);
+  padding: 0.75rem 0.9rem;
+  width: 100%;
+}
+
+.investment-task-grid,
+.investment-result-grid,
+.investment-guided-form,
+.investment-preflight {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.investment-task-card,
+.investment-result-card {
+  background: rgba(5, 16, 29, 0.74);
+  border: 1px solid var(--investment-border);
+  border-radius: 1.2rem;
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+}
+
+.investment-task-card h3,
+.investment-result-card h3 {
+  color: var(--investment-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.investment-task-card p,
+.investment-task-card small,
+.investment-result-card p,
+.investment-result-card small,
+.investment-preflight p,
+.investment-disclosure {
+  color: var(--investment-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.investment-task-card > span,
+.investment-result-card > span {
+  color: var(--investment-emerald);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.investment-preflight > div,
+.investment-disclosure {
+  background: rgba(2, 7, 17, 0.42);
+  border: 1px solid var(--investment-border);
+  border-radius: 1rem;
+  padding: 0.8rem;
+}
+
+.investment-disclosure summary {
+  color: var(--investment-text);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.investment-view-toggle {
+  background: rgba(2, 7, 17, 0.46);
+  border: 1px solid var(--investment-border);
+  border-radius: 999px;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+}
+
+.investment-view-toggle button {
+  border-radius: 999px;
+  color: var(--investment-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.38rem 0.65rem;
+}
+
+.investment-view-toggle button[aria-pressed="true"] {
+  background: rgba(53, 213, 154, 0.16);
+  color: var(--investment-text);
+}
+
 .investment-primary-column,
 .investment-rail,
 .investment-bucket-list,
@@ -1218,8 +1347,13 @@ select:focus-visible {
   }
 
   .investment-grid,
+  .investment-home-hero,
   .investment-work-grid,
   .investment-two-column,
+  .investment-task-grid,
+  .investment-result-grid,
+  .investment-guided-form,
+  .investment-preflight,
   .investment-assumption-grid,
   .investment-kpi-grid {
     grid-template-columns: 1fr;
@@ -1242,6 +1376,10 @@ select:focus-visible {
 
   .investment-nav {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .investment-guided-search div {
+    grid-template-columns: 1fr;
   }
 
   .investment-checklist-grid {

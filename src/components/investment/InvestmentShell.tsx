@@ -2,18 +2,16 @@
 
 import {
   ArrowLeft,
-  BarChart3,
   BookOpen,
   BriefcaseBusiness,
   ChevronLeft,
   ChevronRight,
-  ClipboardList,
   FileText,
-  Filter,
   Gauge,
   Layers3,
   LockKeyhole,
   MapPinned,
+  Search,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -46,37 +44,15 @@ export const investmentPageGroups: Array<{
   }>;
 }> = [
   {
-    group: "Discover",
+    group: "Guided",
     pages: [
-      { icon: Gauge, id: "overview", label: "Executive Overview", sublabel: "Command view" },
-      { icon: Sparkles, id: "opportunity-feed", label: "Opportunity Feed", sublabel: "Source references" },
-      { icon: MapPinned, id: "area-radar", label: "Area Opportunity Radar", sublabel: "Search areas" },
-      { icon: Filter, id: "opportunity", label: "Opportunity Engine", sublabel: "Screen parcels" },
-      { icon: ClipboardList, id: "intake", label: "Candidate Intake", sublabel: "Private leads" },
-    ],
-  },
-  {
-    group: "Analyze",
-    pages: [
-      { icon: MapPinned, id: "research", label: "Property Research", sublabel: "Parcel workspace" },
+      { icon: Gauge, id: "overview", label: "Home", sublabel: "Start here" },
+      { icon: Search, id: "area-radar", label: "Find", sublabel: "Areas and opportunities" },
+      { icon: MapPinned, id: "research", label: "Analyze", sublabel: "One property workspace" },
       { icon: Layers3, id: "compare", label: "Compare", sublabel: "Tradeoffs only" },
-      { icon: BarChart3, id: "market", label: "Market Research", sublabel: "ACS & economics" },
-      { icon: Gauge, id: "underwriting", label: "Underwriting Lab", sublabel: "Deal scenarios" },
-    ],
-  },
-  {
-    group: "Review and Deliver",
-    pages: [
-      { icon: ClipboardList, id: "due-diligence", label: "Due Diligence", sublabel: "Verification" },
-      { icon: FileText, id: "report-studio", label: "Report Studio", sublabel: "Reports" },
-      { icon: BriefcaseBusiness, id: "engagements", label: "Engagements", sublabel: "Client criteria" },
-      { icon: FileText, id: "report-bucket", label: "Report Bucket", sublabel: "Saved artifacts" },
-    ],
-  },
-  {
-    group: "Governance",
-    pages: [
-      { icon: BookOpen, id: "methodology", label: "Data & Methodology", sublabel: "Sources & limits" },
+      { icon: BriefcaseBusiness, id: "engagements", label: "Projects", sublabel: "Criteria and shortlists" },
+      { icon: FileText, id: "report-studio", label: "Reports", sublabel: "Studio and bucket" },
+      { icon: BookOpen, id: "methodology", label: "More", sublabel: "Sources and advanced tools" },
     ],
   },
 ];
@@ -88,9 +64,12 @@ type InvestmentShellProps = {
   children: ReactNode;
   currentCandidateLabel?: string | null;
   dataMode: string;
+  shortlistCount?: number;
+  viewMode?: "guided" | "advanced";
   onClose: () => void;
   onAskCfs: () => void;
   onPageChange: (page: InvestmentPageId) => void;
+  onViewModeChange?: (mode: "guided" | "advanced") => void;
 };
 
 export function InvestmentShell({
@@ -98,9 +77,12 @@ export function InvestmentShell({
   children,
   currentCandidateLabel,
   dataMode,
+  shortlistCount = 0,
+  viewMode = "guided",
   onAskCfs,
   onClose,
   onPageChange,
+  onViewModeChange,
 }: InvestmentShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const active = investmentPages.find((page) => page.id === activePage) ?? investmentPages[0];
@@ -147,12 +129,17 @@ export function InvestmentShell({
             <div className="investment-header-kicker">
               <span>Private Research</span>
               <span>{dataMode}</span>
+              <span>{shortlistCount} shortlisted</span>
               {currentCandidateLabel ? <span>{currentCandidateLabel}</span> : null}
             </div>
             <h1>{active.label}</h1>
             <p>CFS Investment · Land, Property, and Real Estate Intelligence</p>
           </div>
           <div className="investment-header-actions">
+            <div className="investment-view-toggle" role="group" aria-label="CFS Investment view mode">
+              <button aria-pressed={viewMode === "guided"} onClick={() => onViewModeChange?.("guided")} type="button">Guided</button>
+              <button aria-pressed={viewMode === "advanced"} onClick={() => onViewModeChange?.("advanced")} type="button">Advanced</button>
+            </div>
             <button className="investment-primary-button" onClick={onAskCfs} type="button"><Sparkles className="h-4 w-4" /> Ask CFS</button>
             <button className="investment-ghost-button" onClick={onClose} type="button"><ArrowLeft className="h-4 w-4" /> CFS Economics</button>
           </div>

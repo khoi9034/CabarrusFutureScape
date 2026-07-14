@@ -230,6 +230,14 @@ def test_cfs_investment_opportunity_workbench_frontend_contracts() -> None:
     assert "InvestmentEngagementsPage" in economics_shell
     assert "Smart Prefill" in economics_shell
     assert "Assumption template" in economics_shell
+    assert "What property or investment question are you working on?" in economics_shell
+    assert "Guided Find" in economics_shell
+    assert "My Shortlist" in economics_shell
+    assert "Essential Inputs" in economics_shell
+    assert "Advanced Assumptions" in economics_shell
+    assert "cfs-investment-guided-state" in economics_shell
+    assert "guided_task_started" in economics_shell
+    assert "candidate_shortlisted" in economics_shell
     assert "Recommended for additional diligence" in economics_shell
     assert "getInvestmentOpportunities" in service
     assert "searchInvestmentRadar" in service
@@ -345,15 +353,18 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "CFS Investment" in investment_shell
     assert "Land, Property, and Real Estate Intelligence" in investment_shell
     assert "investmentPageGroups" in investment_shell
-    assert "Discover" in investment_shell
+    assert "Home" in investment_shell
+    assert "Find" in investment_shell
     assert "Analyze" in investment_shell
-    assert "Underwriting Lab" in investment_shell
-    assert "Deal scenarios" in investment_shell
-    assert "Review and Deliver" in investment_shell
-    assert "Governance" in investment_shell
+    assert "Projects" in investment_shell
+    assert "Reports" in investment_shell
+    assert "More" in investment_shell
+    assert "Underwriting Lab" in economics_shell
     assert 'aria-current={activePage === id ? "page" : undefined}' in investment_shell
     assert 'data-investment-page={activePage}' in investment_shell
     assert "is-collapsed" in investment_shell
+    assert "investment-view-toggle" in investment_shell
+    assert "shortlisted" in investment_shell
     assert "switch (activeInvestmentPage)" in economics_shell
     assert "investment-assistant-drawer" in economics_shell
     assert "InvestmentResearchTabs" in economics_shell
@@ -373,6 +384,19 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Ask CFS Investment Research" in economics_shell
     assert "Investment Report Studio" in economics_shell
     assert "InvestmentUnderwritingLab" in economics_shell
+    assert "What are you trying to do?" in economics_shell
+    assert "Find Promising Areas" in economics_shell
+    assert "Find Available Properties" in economics_shell
+    assert "Analyze a Property" in economics_shell
+    assert "Compare Properties" in economics_shell
+    assert "Build a Client Report" in economics_shell
+    assert "Continue Recent Work" in economics_shell
+    assert "My Shortlist" in economics_shell
+    assert "Guided Find" in economics_shell
+    assert "Advanced Criteria" in economics_shell
+    assert "Essential Inputs" in economics_shell
+    assert "Advanced Assumptions" in economics_shell
+    assert "recordInvestmentEvent" in economics_shell
     assert "Underwriting uses user-entered assumptions and deterministic calculations" in economics_shell
     assert "Calculate Scenario" in economics_shell
     assert "Compare Scenarios" in economics_shell

@@ -135,6 +135,7 @@ def test_consulting_intents_route_to_new_workbench_context() -> None:
     assert ai_search_service._investment_intent("Find parcels matching this engagement's must-have criteria.") == "Consulting Engagement"
     assert ai_search_service._investment_intent("Which areas should I investigate for a 50-acre industrial site?") == "Area Opportunity Radar"
     assert ai_search_service._investment_intent("Show available opportunities inside the top search areas.") == "Opportunity Feed"
+    assert ai_search_service._investment_intent("Start a land-banking scenario.") == "Underwriting"
 
 
 def test_opportunity_workbench_routes_are_wired(monkeypatch) -> None:

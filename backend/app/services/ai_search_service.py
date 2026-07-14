@@ -776,7 +776,7 @@ def _is_investment_research_context(request: CfsAiSearchRequest) -> bool:
 def _investment_intent(query: str) -> str:
     normalized = query.lower()
     checks = [
-        ("Underwriting", ("underwriting", "feasibility", "break-even", "break even", "sensitivity", "sources and uses", "cash flow", "dscr", "cap rate", "irr", "modeled return")),
+        ("Underwriting", ("underwriting", "feasibility", "break-even", "break even", "sensitivity", "sources and uses", "cash flow", "dscr", "cap rate", "irr", "modeled return", "scenario", "land-banking")),
         ("Consulting Engagement", ("engagement", "client", "site selection", "shortlist", "criteria", "portfolio", "consulting", "market entry")),
         ("Opportunity Feed", ("opportunity feed", "available opportunity", "available opportunities", "listing", "broker", "external search", "source platform")),
         ("Area Opportunity Radar", ("area", "radar", "search area", "priority search area", "geography", "corridor")),
