@@ -4,6 +4,19 @@ export type InvestmentStrategyId =
   | "existing_use"
   | "land_banking";
 
+export type InvestmentUnderwritingScenarioType =
+  | "development_land"
+  | "entitlement_repositioning"
+  | "existing_use_acquisition"
+  | "land_banking";
+
+export type InvestmentUnderwritingScenarioStatus =
+  | "Archived"
+  | "Draft"
+  | "In Review"
+  | "Needs Verification"
+  | "Ready for Report";
+
 export interface InvestmentScreenCandidate {
   basis_context_band?: string;
   basis_caution_reasons?: string[];
@@ -266,4 +279,59 @@ export interface InvestmentReportResponse {
   report_type: string;
   sections: InvestmentReportSection[];
   strategy: InvestmentStrategyId;
+}
+
+export interface InvestmentUnderwritingCalculation {
+  as_of: string;
+  assumption_evidence: Record<string, string>;
+  assumptions: Record<string, number>;
+  brand: "CFS Investment";
+  candidate_id?: string | null;
+  limitations: string[];
+  missing_inputs: string[];
+  parcel_id?: string | null;
+  research_context_summary: Record<string, unknown>;
+  results: Record<string, unknown>;
+  scenario_name: string;
+  scenario_type: InvestmentUnderwritingScenarioType;
+  scenario_type_label: string;
+  sensitivity: {
+    matrix: Array<{ outcomes: Array<string | number | null>; variable_value: number | null }>;
+    status: string;
+    variables: string[];
+  };
+  strategy: InvestmentStrategyId;
+  warnings: string[];
+}
+
+export interface InvestmentUnderwritingScenario {
+  assumptions: Record<string, number>;
+  calculation: InvestmentUnderwritingCalculation;
+  candidate_id?: string | null;
+  created_at: string;
+  id: string;
+  last_calculated_at?: string | null;
+  limitations: string[];
+  parcel_id?: string | null;
+  private_notes?: string | null;
+  results: Record<string, unknown>;
+  scenario_name: string;
+  scenario_status: InvestmentUnderwritingScenarioStatus;
+  scenario_type: InvestmentUnderwritingScenarioType;
+  scenario_type_label: string;
+  strategy: InvestmentStrategyId;
+  updated_at: string;
+}
+
+export interface InvestmentUnderwritingListResponse {
+  caveats: string[];
+  count: number;
+  scenarios: InvestmentUnderwritingScenario[];
+}
+
+export interface InvestmentUnderwritingCompareResponse {
+  caveats: string[];
+  count: number;
+  scenarios: InvestmentUnderwritingScenario[];
+  summary: string[];
 }

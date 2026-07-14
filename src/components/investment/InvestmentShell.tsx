@@ -26,6 +26,7 @@ export type InvestmentPageId =
   | "research"
   | "compare"
   | "market"
+  | "underwriting"
   | "due-diligence"
   | "report-studio"
   | "report-bucket"
@@ -54,6 +55,7 @@ export const investmentPageGroups: Array<{
       { icon: MapPinned, id: "research", label: "Property Research", sublabel: "Parcel workspace" },
       { icon: Layers3, id: "compare", label: "Compare", sublabel: "Tradeoffs only" },
       { icon: BarChart3, id: "market", label: "Market Research", sublabel: "ACS & economics" },
+      { icon: Gauge, id: "underwriting", label: "Underwriting Lab", sublabel: "Deal scenarios" },
     ],
   },
   {

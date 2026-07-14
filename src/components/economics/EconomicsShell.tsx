@@ -32,14 +32,20 @@ import {
 } from "@/lib/economicsIntelligenceService";
 import {
   compareInvestmentIntakeCandidates,
+  compareInvestmentUnderwritingScenarios,
+  calculateInvestmentUnderwriting,
   createInvestmentIntakeCandidate,
+  createInvestmentUnderwritingScenario,
   deleteInvestmentIntakeCandidate,
+  deleteInvestmentUnderwritingScenario,
   generateInvestmentReport,
   getInvestmentIntake,
   getInvestmentIntakeAnalysis,
   getInvestmentScreen,
+  getInvestmentUnderwritingScenarios,
   importInvestmentIntakeCsv,
   updateInvestmentIntakeCandidate,
+  updateInvestmentUnderwritingScenario,
 } from "@/lib/investmentIntelligenceService";
 import type {
   CfsAiPowerBiActions,
@@ -64,6 +70,10 @@ import type {
   InvestmentSourceType,
   InvestmentScreenResponse,
   InvestmentStrategyId,
+  InvestmentUnderwritingCalculation,
+  InvestmentUnderwritingCompareResponse,
+  InvestmentUnderwritingScenario,
+  InvestmentUnderwritingScenarioType,
 } from "@/types/api";
 
 export function EconomicsShell() {
@@ -930,6 +940,14 @@ function InvestmentPanelPage({
   const [investmentReportType, setInvestmentReportType] = useState("development_site_review");
   const [activeInvestmentPage, setActiveInvestmentPage] = useState<InvestmentPageId>("overview");
   const [assistantOpen, setAssistantOpen] = useState(false);
+  const [underwritingAssumptions, setUnderwritingAssumptions] = useState<Record<string, number | string | null>>(defaultUnderwritingAssumptions("development_land"));
+  const [underwritingCompareIds, setUnderwritingCompareIds] = useState<string[]>([]);
+  const [underwritingComparison, setUnderwritingComparison] = useState<InvestmentUnderwritingCompareResponse | null>(null);
+  const [underwritingResult, setUnderwritingResult] = useState<InvestmentUnderwritingCalculation | null>(null);
+  const [underwritingScenarios, setUnderwritingScenarios] = useState<InvestmentUnderwritingScenario[]>([]);
+  const [underwritingScenarioName, setUnderwritingScenarioName] = useState("Development Feasibility Scenario");
+  const [underwritingScenarioType, setUnderwritingScenarioType] = useState<InvestmentUnderwritingScenarioType>("development_land");
+  const [underwritingStatus, setUnderwritingStatus] = useState<string | null>(null);
   const [intakeLoading, setIntakeLoading] = useState(!USE_DEMO_DATA);
   const [intakeUnavailable, setIntakeUnavailable] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -967,6 +985,22 @@ function InvestmentPanelPage({
       })
       .finally(() => {
         if (mounted) setIntakeLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  useEffect(() => {
+    let mounted = true;
+    if (USE_DEMO_DATA) return () => {
+      mounted = false;
+    };
+    void getInvestmentUnderwritingScenarios()
+      .then((response) => {
+        if (mounted) setUnderwritingScenarios(response.scenarios);
+      })
+      .catch(() => {
+        if (mounted) setUnderwritingScenarios([]);
       });
     return () => {
       mounted = false;
@@ -1185,6 +1219,90 @@ function InvestmentPanelPage({
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate delete failed."));
   };
+  const refreshUnderwriting = () =>
+    getInvestmentUnderwritingScenarios()
+      .then((response) => setUnderwritingScenarios(response.scenarios))
+      .catch(() => setUnderwritingStatus("Underwriting scenarios are available only when the local backend and database are running."));
+  const underwritingPayload = () => {
+    const intakeAskingPrice = intakeAnalysis?.acquisition_basis.asking_price;
+    const assumptions = intakeAskingPrice && !underwritingAssumptions.asking_price && !underwritingAssumptions.purchase_price && !underwritingAssumptions.acquisition_basis
+      ? { ...underwritingAssumptions, asking_price: intakeAskingPrice }
+      : underwritingAssumptions;
+    return {
+      assumptions,
+      candidate_id: intakeAnalysis?.candidate.id ?? null,
+      parcel_id: intakeAnalysis?.candidate.parcel_id || activeSignal?.parcel_id || null,
+      scenario_name: underwritingScenarioName,
+      scenario_type: underwritingScenarioType,
+      strategy: activeStrategy,
+    };
+  };
+  const calculateUnderwriting = () => {
+    void calculateInvestmentUnderwriting(underwritingPayload())
+      .then((result) => {
+        setUnderwritingResult(result);
+        setUnderwritingStatus("Scenario calculated from user-entered assumptions.");
+      })
+      .catch((error) => setUnderwritingStatus(error instanceof Error ? error.message : "Underwriting calculation failed."));
+  };
+  const saveUnderwriting = () => {
+    void createInvestmentUnderwritingScenario({
+      ...underwritingPayload(),
+      private_notes: "Created from CFS Investment Underwriting Lab.",
+      scenario_status: "Draft",
+    })
+      .then((scenario) => {
+        setUnderwritingResult(scenario.calculation);
+        setUnderwritingStatus("Underwriting scenario saved.");
+        return refreshUnderwriting();
+      })
+      .catch((error) => setUnderwritingStatus(error instanceof Error ? error.message : "Unable to save underwriting scenario."));
+  };
+  const openUnderwritingScenario = (scenario: InvestmentUnderwritingScenario) => {
+    setUnderwritingScenarioName(scenario.scenario_name);
+    setUnderwritingScenarioType(scenario.scenario_type);
+    setUnderwritingAssumptions(scenario.assumptions);
+    setUnderwritingResult(scenario.calculation);
+    setUnderwritingStatus("Saved scenario opened for review.");
+  };
+  const archiveUnderwritingScenario = (scenarioId: string) => {
+    void updateInvestmentUnderwritingScenario(scenarioId, { scenario_status: "Archived" })
+      .then(() => refreshUnderwriting())
+      .catch((error) => setUnderwritingStatus(error instanceof Error ? error.message : "Unable to archive scenario."));
+  };
+  const deleteUnderwritingScenario = (scenarioId: string) => {
+    void deleteInvestmentUnderwritingScenario(scenarioId)
+      .then(() => {
+        setUnderwritingCompareIds((current) => current.filter((id) => id !== scenarioId));
+        return refreshUnderwriting();
+      })
+      .catch((error) => setUnderwritingStatus(error instanceof Error ? error.message : "Unable to delete scenario."));
+  };
+  const toggleUnderwritingCompare = (scenarioId: string) => {
+    setUnderwritingCompareIds((current) => {
+      if (current.includes(scenarioId)) return current.filter((id) => id !== scenarioId);
+      return current.length < 4 ? [...current, scenarioId] : current;
+    });
+  };
+  const compareUnderwriting = () => {
+    if (underwritingCompareIds.length < 2) {
+      setUnderwritingStatus("Select two to four saved scenarios to compare.");
+      return;
+    }
+    void compareInvestmentUnderwritingScenarios(underwritingCompareIds)
+      .then(setUnderwritingComparison)
+      .catch((error) => setUnderwritingStatus(error instanceof Error ? error.message : "Unable to compare scenarios."));
+  };
+  const addUnderwritingToBucket = () => {
+    if (!underwritingResult) return;
+    onAddReportBucketItem(underwritingBucketItem(underwritingResult));
+    setUnderwritingStatus("Underwriting summary saved to Report Bucket.");
+  };
+  const exportUnderwriting = () => {
+    if (!underwritingResult) return;
+    downloadJson(underwritingResult, `${slugifyReportTitle(underwritingResult.scenario_name)}_underwriting.json`);
+    setUnderwritingStatus("Underwriting JSON exported.");
+  };
   const askFilterContext = {
     active_page: activeInvestmentPage,
     active_strategy: investmentStrategyLabel(activeStrategy),
@@ -1203,6 +1321,9 @@ function InvestmentPanelPage({
     active_usable_area_proxy: intakeAnalysis?.environmental_context?.usable_area_screening_proxy,
     active_wetland_context: intakeAnalysis?.environmental_context?.mapped_wetland_context,
     mode: "cfs_investment",
+    active_underwriting_summary: underwritingResult
+      ? `${underwritingResult.scenario_type_label}; missing inputs: ${underwritingResult.missing_inputs.join(", ") || "none"}; total project/basis: ${underwritingResult.results.total_project_cost ?? underwritingResult.results.total_basis_at_exit ?? underwritingResult.results.total_basis_after_entitlement ?? "not available"}`
+      : undefined,
     strategy_screening_source: activeInvestmentScreen ? "CFS Investment Research Engine" : "local product fallback",
     sewer_proxy_supported_candidates: sewerSupported,
     tier_1_candidates: tier1,
@@ -1417,7 +1538,14 @@ function InvestmentPanelPage({
             <div className="investment-primary-column">
               <InvestmentResearchTabs activeSignal={activeSignal} analysis={intakeAnalysis} strategy={activeStrategy} />
             </div>
-            <aside className="investment-rail"><InvestmentCandidateRail onAskCfs={askAboutSignal} onGenerateGuide={createGuide} signal={activeSignal} investmentCandidate={activeInvestmentCandidate} strategy={activeStrategy} />{dueDiligenceActions}</aside>
+            <aside className="investment-rail">
+              <InvestmentCandidateRail onAskCfs={askAboutSignal} onGenerateGuide={createGuide} signal={activeSignal} investmentCandidate={activeInvestmentCandidate} strategy={activeStrategy} />
+              <section className="investment-card investment-action-card">
+                <div><p>Underwriting Lab</p><span>Open deterministic financial scenarios for this candidate.</span></div>
+                <button className="investment-primary-button" onClick={() => setActiveInvestmentPage("underwriting")} type="button">Open Underwriting Lab</button>
+              </section>
+              {dueDiligenceActions}
+            </aside>
           </section>
         );
       case "compare":
@@ -1443,6 +1571,38 @@ function InvestmentPanelPage({
               ]} />
             </div>
           </section>
+        );
+      case "underwriting":
+        return (
+          <InvestmentUnderwritingLab
+            activeSignal={activeSignal}
+            assumptions={underwritingAssumptions}
+            compareIds={underwritingCompareIds}
+            comparison={underwritingComparison}
+            intakeAnalysis={intakeAnalysis}
+            onAddToBucket={addUnderwritingToBucket}
+            onArchiveScenario={archiveUnderwritingScenario}
+            onCalculate={calculateUnderwriting}
+            onCompare={compareUnderwriting}
+            onDeleteScenario={deleteUnderwritingScenario}
+            onExport={exportUnderwriting}
+            onOpenScenario={openUnderwritingScenario}
+            onSave={saveUnderwriting}
+            onSetAssumptions={setUnderwritingAssumptions}
+            onSetScenarioName={setUnderwritingScenarioName}
+            onSetScenarioType={(type) => {
+              setUnderwritingScenarioType(type);
+              setUnderwritingAssumptions(defaultUnderwritingAssumptions(type));
+              setUnderwritingResult(null);
+            }}
+            onToggleCompare={toggleUnderwritingCompare}
+            result={underwritingResult}
+            scenarioName={underwritingScenarioName}
+            scenarios={underwritingScenarios}
+            scenarioType={underwritingScenarioType}
+            status={underwritingStatus}
+            strategy={activeStrategy}
+          />
         );
       case "due-diligence":
         return <section className="investment-two-column"><div>{dueDiligenceActions}{guide ? <InvestmentGuidePreview guide={guide} /> : null}</div><InvestmentChecklistLibrary /></section>;
@@ -1529,6 +1689,14 @@ const investmentReportTypeOptions = [
   { id: "candidate_comparison_report", label: "Candidate Comparison Report" },
   { id: "due_diligence_brief", label: "Due-Diligence Brief" },
   { id: "planning_utility_question_guide", label: "Planning and Utility Question Guide" },
+  { id: "acquisition_underwriting_summary", label: "Acquisition Underwriting Summary" },
+  { id: "development_feasibility_review", label: "Development Feasibility Review" },
+  { id: "land_banking_scenario_memorandum", label: "Land Banking Scenario Memorandum" },
+  { id: "entitlement_scenario_analysis", label: "Entitlement Scenario Analysis" },
+  { id: "existing_use_underwriting_summary", label: "Existing-Use Underwriting Summary" },
+  { id: "scenario_comparison", label: "Scenario Comparison" },
+  { id: "sources_and_uses", label: "Sources and Uses" },
+  { id: "sensitivity_analysis", label: "Sensitivity Analysis" },
 ] as const;
 
 function investmentStrategyLabel(strategy: InvestmentStrategyId) {
@@ -1692,6 +1860,7 @@ function InvestmentMethodologyPage({ compact = false }: { compact?: boolean }) {
     { label: "Utility proxy", value: "WSACC sewer proximity and basin context only; capacity and service are not confirmed" },
     { label: "Environmental context", value: "FEMA, NWI, NRCS, EPA, and terrain summaries are screening evidence requiring verification" },
     { label: "Comparable context", value: "Historical sale and assessed context are due-diligence inputs, not appraisal conclusions" },
+    { label: "Underwriting formulas", value: "Deterministic scenario calculations use user-entered assumptions, not AI arithmetic or CFS forecasts" },
     { label: "Safety interpretation", value: "CFS Investment does not recommend purchases or guarantee future value" },
   ];
   return (
@@ -1705,6 +1874,343 @@ function InvestmentMethodologyPage({ compact = false }: { compact?: boolean }) {
       ) : null}
     </section>
   );
+}
+
+const underwritingScenarioTypeOptions: Array<{ id: InvestmentUnderwritingScenarioType; label: string; fields: string[] }> = [
+  { id: "development_land", label: "Development Land", fields: ["purchase_price", "scenario_unit_count", "scenario_building_area", "site_preparation_cost", "grading_cost", "utility_extension_cost", "stormwater_cost", "vertical_construction_cost", "professional_fees", "permit_and_impact_fees", "financing_cost", "contingency_percent", "sale_price_per_unit", "sale_price_per_square_foot", "rent_per_unit", "exit_cap_rate", "entitlement_period_months", "construction_period_months", "absorption_period_months"] },
+  { id: "land_banking", label: "Long-Term Land Banking", fields: ["acquisition_basis", "closing_cost_percent", "scenario_site_area", "annual_property_tax_assumption", "annual_insurance_assumption", "annual_land_management_cost", "annual_legal_or_compliance_cost", "annual_other_holding_cost", "annual_cost_growth_rate", "holding_period_years", "exit_price_scenario", "exit_price_per_acre_scenario", "selling_cost_percent"] },
+  { id: "entitlement_repositioning", label: "Entitlement / Repositioning", fields: ["acquisition_basis", "entitlement_cost", "planning_consultant_cost", "legal_cost", "engineering_cost", "application_and_review_fees", "environmental_review_cost", "contingency_percent", "holding_period", "post_entitlement_exit_basis", "development_partner_sale_basis"] },
+  { id: "existing_use_acquisition", label: "Existing-Use Acquisition", fields: ["purchase_price", "gross_potential_income", "vacancy_and_credit_loss", "other_income", "effective_gross_income", "operating_expenses", "capital_reserves", "net_operating_income", "loan_amount", "loan_to_value", "interest_rate", "amortization_years", "interest_only_period", "origination_fee", "exit_cap_rate", "annual_income_growth", "annual_expense_growth", "capital_improvement_plan", "holding_period", "sale_cost"] },
+];
+
+const underwritingFieldLabels: Record<string, string> = {
+  absorption_period_months: "Absorption period (months)",
+  acquisition_basis: "Acquisition basis",
+  amortization_years: "Amortization years",
+  annual_cost_growth_rate: "Annual cost growth rate",
+  annual_expense_growth: "Annual expense growth",
+  annual_income_growth: "Annual income growth",
+  annual_insurance_assumption: "Annual insurance",
+  annual_land_management_cost: "Annual land management",
+  annual_legal_or_compliance_cost: "Annual legal/compliance",
+  annual_other_holding_cost: "Annual other holding cost",
+  annual_property_tax_assumption: "Annual property tax assumption",
+  application_and_review_fees: "Application and review fees",
+  capital_improvement_plan: "Capital improvement plan",
+  capital_reserves: "Capital reserves",
+  closing_cost_percent: "Closing cost percent",
+  construction_period_months: "Construction period (months)",
+  contingency_percent: "Contingency percent",
+  development_partner_sale_basis: "Development partner sale basis",
+  engineering_cost: "Engineering cost",
+  entitlement_cost: "Entitlement cost",
+  entitlement_period_months: "Entitlement period (months)",
+  environmental_review_cost: "Environmental review cost",
+  exit_cap_rate: "Exit cap rate",
+  exit_price_per_acre_scenario: "Exit price per acre scenario",
+  exit_price_scenario: "Exit price scenario",
+  financing_cost: "Financing cost",
+  grading_cost: "Grading cost",
+  gross_potential_income: "Gross potential income",
+  holding_period: "Holding period",
+  holding_period_years: "Holding period (years)",
+  interest_only_period: "Interest-only period",
+  interest_rate: "Interest rate",
+  legal_cost: "Legal cost",
+  loan_amount: "Loan amount",
+  loan_to_value: "Loan to value",
+  net_operating_income: "Net operating income",
+  operating_expenses: "Operating expenses",
+  origination_fee: "Origination fee",
+  other_income: "Other income",
+  permit_and_impact_fees: "Permit and impact fees",
+  planning_consultant_cost: "Planning consultant cost",
+  post_entitlement_exit_basis: "Post-entitlement exit basis",
+  professional_fees: "Professional fees",
+  purchase_price: "Purchase price",
+  rent_per_unit: "Rent per unit",
+  sale_cost: "Sale cost",
+  sale_price_per_square_foot: "Sale price per square foot",
+  sale_price_per_unit: "Sale price per unit",
+  scenario_building_area: "Scenario building area",
+  scenario_site_area: "Scenario site area",
+  scenario_unit_count: "Scenario unit count",
+  selling_cost_percent: "Selling cost percent",
+  site_preparation_cost: "Site preparation cost",
+  stormwater_cost: "Stormwater cost",
+  utility_extension_cost: "Utility extension cost",
+  vacancy_and_credit_loss: "Vacancy / credit loss",
+  vertical_construction_cost: "Vertical construction cost",
+};
+
+function defaultUnderwritingAssumptions(type: InvestmentUnderwritingScenarioType): Record<string, number | string | null> {
+  if (type === "development_land") {
+    return { construction_period_months: 18, contingency_percent: 10, entitlement_period_months: 12, exit_cap_rate: 6, scenario_unit_count: 100 };
+  }
+  if (type === "land_banking") {
+    return { annual_cost_growth_rate: 3, closing_cost_percent: 2, holding_period_years: 5, selling_cost_percent: 3 };
+  }
+  if (type === "entitlement_repositioning") {
+    return { contingency_percent: 10, holding_period: 2 };
+  }
+  return { amortization_years: 25, exit_cap_rate: 7, holding_period: 5, interest_rate: 7, loan_to_value: 65, vacancy_and_credit_loss: 5 };
+}
+
+function InvestmentUnderwritingLab({
+  activeSignal,
+  assumptions,
+  compareIds,
+  comparison,
+  intakeAnalysis,
+  onAddToBucket,
+  onArchiveScenario,
+  onCalculate,
+  onCompare,
+  onDeleteScenario,
+  onExport,
+  onOpenScenario,
+  onSave,
+  onSetAssumptions,
+  onSetScenarioName,
+  onSetScenarioType,
+  onToggleCompare,
+  result,
+  scenarioName,
+  scenarios,
+  scenarioType,
+  status,
+  strategy,
+}: {
+  activeSignal: EconomicsParcelSignal | null;
+  assumptions: Record<string, number | string | null>;
+  compareIds: string[];
+  comparison: InvestmentUnderwritingCompareResponse | null;
+  intakeAnalysis: InvestmentIntakeAnalysisResponse | null;
+  onAddToBucket: () => void;
+  onArchiveScenario: (scenarioId: string) => void;
+  onCalculate: () => void;
+  onCompare: () => void;
+  onDeleteScenario: (scenarioId: string) => void;
+  onExport: () => void;
+  onOpenScenario: (scenario: InvestmentUnderwritingScenario) => void;
+  onSave: () => void;
+  onSetAssumptions: (value: Record<string, number | string | null> | ((current: Record<string, number | string | null>) => Record<string, number | string | null>)) => void;
+  onSetScenarioName: (value: string) => void;
+  onSetScenarioType: (value: InvestmentUnderwritingScenarioType) => void;
+  onToggleCompare: (scenarioId: string) => void;
+  result: InvestmentUnderwritingCalculation | null;
+  scenarioName: string;
+  scenarios: InvestmentUnderwritingScenario[];
+  scenarioType: InvestmentUnderwritingScenarioType;
+  status: string | null;
+  strategy: InvestmentStrategyId;
+}) {
+  const scenarioOption = underwritingScenarioTypeOptions.find((option) => option.id === scenarioType) ?? underwritingScenarioTypeOptions[0];
+  const updateAssumption = (key: string, value: string) => onSetAssumptions((current) => ({ ...current, [key]: value === "" ? null : Number(value) }));
+  const selectedLabel = intakeAnalysis?.candidate.candidate_name ?? (activeSignal ? signalLabel(activeSignal) : "No active opportunity");
+  return (
+    <section className="investment-work-grid">
+      <div className="investment-primary-column">
+        <section className="investment-card">
+          <div className="investment-section-heading">
+            <div>
+              <p>Underwriting Lab</p>
+              <h2>Deal scenarios, feasibility, and sensitivity analysis</h2>
+            </div>
+            <span className="investment-pill">{investmentStrategyLabel(strategy)}</span>
+          </div>
+          <div className="investment-step-strip" aria-label="Underwriting workflow steps">
+            <span>1. Select Opportunity</span><span>2. Choose Scenario Type</span><span>3. Enter Assumptions</span><span>4. Review Results</span><span>5. Test Sensitivities</span><span>6. Save / Report</span>
+          </div>
+          <div className="investment-disclaimer">
+            Underwriting uses user-entered assumptions and deterministic calculations. It is not investment advice, not an appraisal, not a financing commitment, and not a guarantee of future value.
+          </div>
+          <div className="investment-two-column mt-4">
+            <label className="grid gap-1 text-xs text-[var(--investment-text-muted)]">
+              Scenario name
+              <input className="investment-input" value={scenarioName} onChange={(event) => onSetScenarioName(event.target.value)} />
+            </label>
+            <label className="grid gap-1 text-xs text-[var(--investment-text-muted)]">
+              Scenario type
+              <select className="investment-select" value={scenarioType} onChange={(event) => onSetScenarioType(event.target.value as InvestmentUnderwritingScenarioType)}>
+                {underwritingScenarioTypeOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+              </select>
+            </label>
+          </div>
+          <Matrix rows={[
+            { label: "Active opportunity", value: selectedLabel },
+            { label: "Parcel", value: intakeAnalysis?.candidate.parcel_id ?? activeSignal?.parcel_id ?? "Select an opportunity" },
+            { label: "Parcel acreage", value: String(intakeAnalysis?.acquisition_basis.parcel_acres ?? activeSignal?.acreage ?? "CFS evidence unavailable") },
+            { label: "Current Asking Basis", value: intakeAnalysis?.acquisition_basis.asking_basis_band ?? "Missing or unverified" },
+            { label: "Scenario Acquisition Basis", value: "User-entered assumption" },
+            { label: "Utility evidence", value: activeSignal?.utility_readiness_proxy_class ?? "CFS-derived proxy; capacity not confirmed" },
+          ]} />
+        </section>
+        <section className="investment-card">
+          <div className="investment-section-heading"><div><p>Assumptions</p><h2>{scenarioOption.label}</h2></div></div>
+          <div className="investment-assumption-grid">
+            {scenarioOption.fields.map((key) => (
+              <label key={key}>
+                <span>{underwritingFieldLabels[key] ?? key}</span>
+                <input inputMode="decimal" type="number" value={assumptions[key] ?? ""} onChange={(event) => updateAssumption(key, event.target.value)} />
+                <small>User-entered assumption</small>
+              </label>
+            ))}
+          </div>
+          <div className="investment-row-actions mt-4">
+            <button className="investment-primary-button" onClick={onCalculate} type="button">Calculate Scenario</button>
+            <button className="investment-ghost-button" disabled={!result} onClick={onSave} type="button">Save Scenario</button>
+            <button className="investment-ghost-button" disabled={!result} onClick={onExport} type="button">Export JSON</button>
+            <button className="investment-ghost-button" disabled={!result} onClick={onAddToBucket} type="button">Add to Report Bucket</button>
+          </div>
+          {status ? <p className="investment-status mt-3">{status}</p> : null}
+        </section>
+        <InvestmentUnderwritingResults result={result} />
+      </div>
+      <aside className="investment-rail">
+        <InvestmentUnderwritingScenarioList
+          compareIds={compareIds}
+          onArchive={onArchiveScenario}
+          onCompare={onCompare}
+          onDelete={onDeleteScenario}
+          onOpen={onOpenScenario}
+          onToggleCompare={onToggleCompare}
+          scenarios={scenarios}
+        />
+        {comparison ? <InvestmentUnderwritingComparison comparison={comparison} /> : null}
+      </aside>
+    </section>
+  );
+}
+
+function InvestmentUnderwritingResults({ result }: { result: InvestmentUnderwritingCalculation | null }) {
+  if (!result) return <section className="investment-card"><p className="investment-empty">No underwriting result yet. Enter assumptions and calculate a scenario.</p></section>;
+  const resultRows = Object.entries(result.results)
+    .filter(([key]) => !["missing_inputs", "warnings", "evidence_label", "scenario_interpretation"].includes(key))
+    .map(([key, value]) => ({ label: underwritingFieldLabels[key] ?? titleText(key), value: displayValue(value) }));
+  return (
+    <section className="investment-card">
+      <div className="investment-section-heading"><div><p>Review Results</p><h2>{result.scenario_type_label}</h2></div></div>
+      <Matrix rows={resultRows} />
+      <InvestmentSignalList title="Missing inputs" values={result.missing_inputs.length ? result.missing_inputs : ["No required-input warnings from the current calculation."]} />
+      <InvestmentSignalList title="Major risks and warnings" values={result.warnings.length ? result.warnings : ["Verify all assumptions with financial, legal, planning, utility, engineering, and tax professionals."]} />
+      <InvestmentSensitivityTable sensitivity={result.sensitivity} />
+    </section>
+  );
+}
+
+function InvestmentSensitivityTable({ sensitivity }: { sensitivity: InvestmentUnderwritingCalculation["sensitivity"] }) {
+  return (
+    <div className="investment-signal-list">
+      <p>Sensitivity Analysis</p>
+      <span className="investment-muted">{sensitivity.status}: {sensitivity.variables.join(" vs ") || "inputs unavailable"}</span>
+      {sensitivity.matrix.length ? (
+        <div className="investment-table-wrap">
+          <table className="investment-table investment-table--compact">
+            <tbody>
+              {sensitivity.matrix.map((row) => (
+                <tr key={String(row.variable_value)}>
+                  <td>{displayValue(row.variable_value)}</td>
+                  {row.outcomes.map((value, index) => <td key={`${row.variable_value}-${index}`}>{displayValue(value)}</td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function InvestmentUnderwritingScenarioList({
+  compareIds,
+  onArchive,
+  onCompare,
+  onDelete,
+  onOpen,
+  onToggleCompare,
+  scenarios,
+}: {
+  compareIds: string[];
+  onArchive: (scenarioId: string) => void;
+  onCompare: () => void;
+  onDelete: (scenarioId: string) => void;
+  onOpen: (scenario: InvestmentUnderwritingScenario) => void;
+  onToggleCompare: (scenarioId: string) => void;
+  scenarios: InvestmentUnderwritingScenario[];
+}) {
+  return (
+    <section className="investment-card">
+      <div className="investment-section-heading"><div><p>Saved Scenarios</p><h2>Private underwriting library</h2></div><span className="investment-pill">{scenarios.length}</span></div>
+      {scenarios.length ? (
+        <div className="investment-bucket-list">
+          {scenarios.slice(0, 8).map((scenario) => (
+            <div key={scenario.id}>
+              <span>{scenario.scenario_type_label}</span>
+              <strong>{scenario.scenario_name}</strong>
+              <small>{scenario.scenario_status} · {formatDate(scenario.updated_at)}</small>
+              <div className="investment-row-actions">
+                <label><input checked={compareIds.includes(scenario.id)} onChange={() => onToggleCompare(scenario.id)} type="checkbox" /> Compare</label>
+                <button onClick={() => onOpen(scenario)} type="button">Open</button>
+                <button onClick={() => onArchive(scenario.id)} type="button">Archive</button>
+                <button onClick={() => onDelete(scenario.id)} type="button">Delete</button>
+              </div>
+            </div>
+          ))}
+          <button className="investment-primary-button" disabled={compareIds.length < 2} onClick={onCompare} type="button">Compare Scenarios</button>
+        </div>
+      ) : <p className="investment-empty">No saved underwriting scenarios yet.</p>}
+    </section>
+  );
+}
+
+function InvestmentUnderwritingComparison({ comparison }: { comparison: InvestmentUnderwritingCompareResponse }) {
+  return (
+    <section className="investment-card">
+      <div className="investment-section-heading"><div><p>Scenario Comparison</p><h2>Modeled tradeoffs only</h2></div></div>
+      <InvestmentSignalList title="Comparison summary" values={comparison.summary} />
+      <div className="investment-table-wrap">
+        <table className="investment-table investment-table--compact">
+          <thead><tr><th>Scenario</th><th>Type</th><th>Status</th><th>Return Context</th><th>Missing Evidence</th></tr></thead>
+          <tbody>
+            {comparison.scenarios.map((scenario) => (
+              <tr key={scenario.id}>
+                <td>{scenario.scenario_name}</td>
+                <td>{scenario.scenario_type_label}</td>
+                <td>{scenario.scenario_status}</td>
+                <td>{displayValue(scenario.results.scenario_irr ?? scenario.results.scenario_return ?? scenario.results.unlevered_return_context)}</td>
+                <td>{Array.isArray(scenario.results.missing_inputs) ? scenario.results.missing_inputs.join("; ") : "Review assumptions"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function underwritingBucketItem(result: InvestmentUnderwritingCalculation): ReportBucketItemInput {
+  return {
+    caveats: result.limitations,
+    content: JSON.stringify({ assumptions: result.assumptions, results: result.results, sensitivity: result.sensitivity }, null, 2),
+    id: `underwriting-${slugifyReportTitle(result.scenario_name)}-${Date.now()}`,
+    selected_for_print: true,
+    source_page: "CFS Investment",
+    summary: `${result.scenario_type_label} with ${result.missing_inputs.length} missing-input warning(s).`,
+    title: result.scenario_name,
+    type: "scenario_output",
+  };
+}
+
+function titleText(value: string) {
+  return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function displayValue(value: unknown): string {
+  if (value == null || value === "") return "Not available";
+  if (typeof value === "number") return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  if (Array.isArray(value)) return value.join("; ");
+  return String(value);
 }
 
 const investmentSourceTypes: InvestmentSourceType[] = [

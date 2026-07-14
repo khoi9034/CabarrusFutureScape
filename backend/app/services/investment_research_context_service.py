@@ -39,6 +39,14 @@ REPORT_TYPES: dict[str, dict[str, Any]] = {
     "candidate_comparison_report": {"title": "Candidate Comparison Report", "sections": ("summary", "basis", "readiness", "market", "environmental", "diligence")},
     "due_diligence_brief": {"title": "Due-Diligence Brief", "sections": ("summary", "missing", "diligence", "sources")},
     "planning_utility_question_guide": {"title": "Planning and Utility Question Guide", "sections": ("summary", "planning", "utility", "diligence", "sources")},
+    "acquisition_underwriting_summary": {"title": "Acquisition Underwriting Summary", "sections": ("summary", "basis", "underwriting", "sources")},
+    "development_feasibility_review": {"title": "Development Feasibility Review", "sections": ("summary", "readiness", "underwriting", "environmental", "diligence")},
+    "land_banking_scenario_memorandum": {"title": "Land Banking Scenario Memorandum", "sections": ("summary", "market", "underwriting", "diligence", "sources")},
+    "entitlement_scenario_analysis": {"title": "Entitlement Scenario Analysis", "sections": ("summary", "planning", "underwriting", "diligence", "sources")},
+    "existing_use_underwriting_summary": {"title": "Existing-Use Underwriting Summary", "sections": ("summary", "fundamentals", "underwriting", "market", "sources")},
+    "scenario_comparison": {"title": "Scenario Comparison", "sections": ("summary", "underwriting", "missing", "sources")},
+    "sources_and_uses": {"title": "Sources and Uses", "sections": ("summary", "underwriting", "sources")},
+    "sensitivity_analysis": {"title": "Sensitivity Analysis", "sections": ("summary", "underwriting", "diligence")},
 }
 
 
@@ -240,6 +248,7 @@ def _report_section(section_id: str, context: dict[str, Any]) -> dict[str, Any]:
         "missing": "Missing Evidence",
         "diligence": "Recommended Verification Sequence",
         "sources": "Sources and Limitations",
+        "underwriting": "Underwriting Scenario Context",
     }
     title = title_map.get(section_id, section_id.replace("_", " ").title())
     if section_id == "summary":
@@ -248,6 +257,8 @@ def _report_section(section_id: str, context: dict[str, Any]) -> dict[str, Any]:
         body = "; ".join(context.get("verification_requirements") or ["Manual due diligence required."])
     elif section_id == "sources":
         body = "; ".join(source["name"] for source in context.get("source_registry", []))
+    elif section_id == "underwriting":
+        body = "Use the Underwriting Lab for deterministic scenario assumptions, calculated results, sensitivity outputs, and exports. Financial outputs are user-entered modeled scenarios, not CFS forecasts or recommendations."
     else:
         body = _compact(context.get(_section_context_key(section_id), {}))
     return {

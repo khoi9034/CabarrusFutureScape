@@ -879,6 +879,64 @@ select:focus-visible {
   width: 100%;
 }
 
+.investment-input {
+  background: rgba(2, 7, 17, 0.68);
+  border: 1px solid var(--investment-border);
+  border-radius: 0.8rem;
+  color: var(--investment-text);
+  padding: 0.55rem 0.75rem;
+  width: 100%;
+}
+
+.investment-assumption-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.investment-assumption-grid label {
+  background: rgba(3, 13, 24, 0.58);
+  border: 1px solid var(--investment-border);
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.75rem;
+}
+
+.investment-assumption-grid span {
+  color: var(--investment-text-secondary);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.investment-assumption-grid input {
+  background: rgba(2, 7, 17, 0.72);
+  border: 1px solid rgba(121, 178, 196, 0.16);
+  border-radius: 0.7rem;
+  color: var(--investment-text);
+  padding: 0.5rem 0.65rem;
+}
+
+.investment-assumption-grid small {
+  color: var(--investment-text-muted);
+  font-size: 0.68rem;
+}
+
+.investment-input:focus-visible,
+.investment-assumption-grid input:focus-visible {
+  box-shadow: var(--investment-focus-ring);
+  outline: none;
+}
+
+.investment-table--compact {
+  min-width: 0;
+}
+
+.investment-table--compact td,
+.investment-table--compact th {
+  padding: 0.55rem 0.6rem;
+}
+
 .investment-primary-button:disabled,
 .investment-ghost-button:disabled {
   cursor: not-allowed;
@@ -1162,6 +1220,7 @@ select:focus-visible {
   .investment-grid,
   .investment-work-grid,
   .investment-two-column,
+  .investment-assumption-grid,
   .investment-kpi-grid {
     grid-template-columns: 1fr;
   }

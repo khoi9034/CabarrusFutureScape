@@ -19,6 +19,12 @@ from app.schemas.investment import (
     InvestmentScreenRequest,
     InvestmentStrategyId,
 )
+from app.schemas.investment_underwriting import (
+    InvestmentUnderwritingCalculateRequest,
+    InvestmentUnderwritingCompareRequest,
+    InvestmentUnderwritingScenarioPatch,
+    InvestmentUnderwritingScenarioPayload,
+)
 from app.services.enterprise_export_service import build_powerbi_export_payload
 from app.services.investment_comparable_service import enrich_basis_context
 from app.services.investment_environmental_context_service import (
@@ -53,6 +59,16 @@ from app.services.investment_screening_service import (
     data_quality,
     screen_candidates,
     strategy_catalog,
+)
+from app.services.investment_underwriting_service import (
+    calculate_saved_underwriting_scenario,
+    calculate_underwriting,
+    compare_underwriting_scenarios,
+    create_underwriting_scenario,
+    delete_underwriting_scenario,
+    get_underwriting_scenario,
+    list_underwriting_scenarios,
+    update_underwriting_scenario,
 )
 
 router = APIRouter(prefix="/investment", tags=["Investment Intelligence"])
@@ -286,6 +302,86 @@ def post_investment_report(
         return generate_investment_report(db, _investment_rows(db), request)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/underwriting/scenarios")
+def get_investment_underwriting_scenarios(
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return list_underwriting_scenarios(db)
+
+
+@router.post("/underwriting/calculate")
+def post_investment_underwriting_calculate(
+    request: InvestmentUnderwritingCalculateRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    context = None
+    if request.candidate_id:
+        context = build_intake_research_context(db, _investment_rows(db), request.candidate_id)
+    elif request.parcel_id:
+        context = build_parcel_research_context(db, _investment_rows(db), request.parcel_id, strategy=request.strategy)
+    return calculate_underwriting(request, research_context=context)
+
+
+@router.post("/underwriting/scenarios")
+def post_investment_underwriting_scenario(
+    request: InvestmentUnderwritingScenarioPayload,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return create_underwriting_scenario(db, request, _investment_rows(db))
+
+
+@router.get("/underwriting/scenarios/{scenario_id}")
+def get_investment_underwriting_scenario(
+    scenario_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    scenario = get_underwriting_scenario(db, scenario_id)
+    if not scenario:
+        raise HTTPException(status_code=404, detail="Underwriting scenario not found.")
+    return scenario
+
+
+@router.patch("/underwriting/scenarios/{scenario_id}")
+def patch_investment_underwriting_scenario(
+    scenario_id: str,
+    request: InvestmentUnderwritingScenarioPatch,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    scenario = update_underwriting_scenario(db, scenario_id, request, _investment_rows(db))
+    if not scenario:
+        raise HTTPException(status_code=404, detail="Underwriting scenario not found.")
+    return scenario
+
+
+@router.delete("/underwriting/scenarios/{scenario_id}")
+def delete_investment_underwriting_scenario(
+    scenario_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    if not delete_underwriting_scenario(db, scenario_id):
+        raise HTTPException(status_code=404, detail="Underwriting scenario not found.")
+    return {"deleted": True}
+
+
+@router.post("/underwriting/scenarios/{scenario_id}/calculate")
+def post_investment_underwriting_saved_calculate(
+    scenario_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    scenario = calculate_saved_underwriting_scenario(db, scenario_id, _investment_rows(db))
+    if not scenario:
+        raise HTTPException(status_code=404, detail="Underwriting scenario not found.")
+    return scenario
+
+
+@router.post("/underwriting/compare")
+def post_investment_underwriting_compare(
+    request: InvestmentUnderwritingCompareRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return compare_underwriting_scenarios(db, request.scenario_ids)
 
 
 def _investment_rows(db: Session | None) -> list[dict[str, Any]]:

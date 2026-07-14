@@ -327,6 +327,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "investmentPageGroups" in investment_shell
     assert "Discover" in investment_shell
     assert "Analyze" in investment_shell
+    assert "Underwriting Lab" in investment_shell
+    assert "Deal scenarios" in investment_shell
     assert "Review and Deliver" in investment_shell
     assert "Governance" in investment_shell
     assert 'aria-current={activePage === id ? "page" : undefined}' in investment_shell
@@ -350,6 +352,12 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Access code did not match" in economics_shell
     assert "Ask CFS Investment Research" in economics_shell
     assert "Investment Report Studio" in economics_shell
+    assert "InvestmentUnderwritingLab" in economics_shell
+    assert "Underwriting uses user-entered assumptions and deterministic calculations" in economics_shell
+    assert "Calculate Scenario" in economics_shell
+    assert "Compare Scenarios" in economics_shell
+    assert "calculateInvestmentUnderwriting" in read("src/lib/investmentIntelligenceService.ts")
+    assert "investment-assumption-grid" in investment_styles
     assert "Generate Report" in economics_shell
     assert "Add report to Report Bucket" in economics_shell
     assert "Ranked Candidate Table" in economics_shell

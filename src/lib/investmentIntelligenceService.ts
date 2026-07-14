@@ -9,6 +9,12 @@ import type {
   InvestmentResearchContext,
   InvestmentScreenResponse,
   InvestmentStrategyId,
+  InvestmentUnderwritingCalculation,
+  InvestmentUnderwritingCompareResponse,
+  InvestmentUnderwritingListResponse,
+  InvestmentUnderwritingScenario,
+  InvestmentUnderwritingScenarioStatus,
+  InvestmentUnderwritingScenarioType,
 } from "@/types/api";
 
 export async function getInvestmentScreen(strategy: InvestmentStrategyId) {
@@ -93,6 +99,76 @@ export async function generateInvestmentReport(payload: {
 }) {
   assertLive();
   return apiPost<InvestmentReportResponse>("/investment/reports/generate", payload, { timeoutMs: 20000 });
+}
+
+export async function getInvestmentUnderwritingScenarios() {
+  assertLive();
+  return apiGet<InvestmentUnderwritingListResponse>("/investment/underwriting/scenarios", undefined, { timeoutMs: 20000 });
+}
+
+export async function calculateInvestmentUnderwriting(payload: {
+  assumptions: Record<string, number | string | null>;
+  candidate_id?: string | null;
+  parcel_id?: string | null;
+  scenario_name: string;
+  scenario_type: InvestmentUnderwritingScenarioType;
+  strategy?: InvestmentStrategyId;
+}) {
+  assertLive();
+  return apiPost<InvestmentUnderwritingCalculation>("/investment/underwriting/calculate", payload, { timeoutMs: 20000 });
+}
+
+export async function createInvestmentUnderwritingScenario(payload: {
+  assumptions: Record<string, number | string | null>;
+  candidate_id?: string | null;
+  parcel_id?: string | null;
+  private_notes?: string | null;
+  scenario_name: string;
+  scenario_status?: InvestmentUnderwritingScenarioStatus;
+  scenario_type: InvestmentUnderwritingScenarioType;
+  strategy?: InvestmentStrategyId;
+}) {
+  assertLive();
+  return apiPost<InvestmentUnderwritingScenario>("/investment/underwriting/scenarios", payload, { timeoutMs: 20000 });
+}
+
+export async function updateInvestmentUnderwritingScenario(scenarioId: string, payload: Partial<{
+  assumptions: Record<string, number | string | null>;
+  candidate_id: string | null;
+  parcel_id: string | null;
+  private_notes: string | null;
+  scenario_name: string;
+  scenario_status: InvestmentUnderwritingScenarioStatus;
+  scenario_type: InvestmentUnderwritingScenarioType;
+  strategy: InvestmentStrategyId;
+}>) {
+  assertLive();
+  const response = await fetch(buildApiUrl(`/investment/underwriting/scenarios/${scenarioId}`), {
+    body: JSON.stringify(payload),
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    method: "PATCH",
+  });
+  if (!response.ok) throw new Error("Unable to update underwriting scenario.");
+  return response.json() as Promise<InvestmentUnderwritingScenario>;
+}
+
+export async function deleteInvestmentUnderwritingScenario(scenarioId: string) {
+  assertLive();
+  const response = await fetch(buildApiUrl(`/investment/underwriting/scenarios/${scenarioId}`), {
+    cache: "no-store",
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Unable to delete underwriting scenario.");
+  return response.json() as Promise<{ deleted: boolean }>;
+}
+
+export async function compareInvestmentUnderwritingScenarios(scenarioIds: string[]) {
+  assertLive();
+  return apiPost<InvestmentUnderwritingCompareResponse>("/investment/underwriting/compare", { scenario_ids: scenarioIds }, { timeoutMs: 20000 });
 }
 
 function assertLive() {

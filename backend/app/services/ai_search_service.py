@@ -776,6 +776,7 @@ def _is_investment_research_context(request: CfsAiSearchRequest) -> bool:
 def _investment_intent(query: str) -> str:
     normalized = query.lower()
     checks = [
+        ("Underwriting", ("underwriting", "feasibility", "break-even", "break even", "sensitivity", "sources and uses", "cash flow", "dscr", "cap rate", "irr", "modeled return")),
         ("Report Generation", ("report", "memorandum", "brief", "guide")),
         ("Candidate Comparison", ("compare", "versus", "tradeoff")),
         ("Acquisition Basis", ("asking", "basis", "comparable", "sale")),
@@ -801,6 +802,17 @@ def _investment_research_answer(
     intent = _investment_intent(request.query)
     candidate = filters.get("active_intake_candidate") or filters.get("selected_candidate") or "the active candidate"
     strategy = filters.get("active_strategy") or "selected strategy"
+    underwriting = filters.get("active_underwriting_summary") or filters.get("active_underwriting_result")
+    underwriting_lines = []
+    if isinstance(underwriting, dict):
+        underwriting_lines = [
+            f"Scenario type: {underwriting.get('scenario_type_label') or underwriting.get('scenario_type') or 'not selected'}",
+            f"Total cost/basis: {underwriting.get('total_project_cost') or underwriting.get('total_basis_at_exit') or underwriting.get('total_basis_after_entitlement') or 'not available'}",
+            f"Return context: {underwriting.get('scenario_irr') or underwriting.get('scenario_return') or underwriting.get('unlevered_return_context') or 'not available'}",
+            f"Missing inputs: {', '.join(underwriting.get('missing_inputs') or []) if isinstance(underwriting.get('missing_inputs'), list) else 'not available'}",
+        ]
+    elif isinstance(underwriting, str) and underwriting:
+        underwriting_lines = [underwriting]
     answer = _briefing(
         ("Intent", f"{intent} for {candidate} under {strategy}."),
         (
@@ -810,9 +822,14 @@ def _investment_research_answer(
                     "Use CFS Investment as screening-level research for candidate status, data readiness, and verification needs.",
                     "Use Opportunity Engine for ranked parcel candidates and strategy filters.",
                     "Use Property Research for unified parcel, planning, economics, market-area, basis, utility, and environmental context.",
+                    "Use Underwriting Lab for deterministic scenario calculations, sensitivities, and exports based on user-entered assumptions.",
                     "Use Report Studio for structured reports with sources, limitations, and due-diligence requirements.",
                 ]
             ),
+        ),
+        (
+            "Underwriting context" if underwriting_lines else "Underwriting context",
+            _bullets(underwriting_lines or ["No active underwriting scenario was provided. Open Underwriting Lab, calculate a scenario, then ask again."]),
         ),
         (
             "Evidence boundaries",
