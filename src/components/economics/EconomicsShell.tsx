@@ -13,12 +13,11 @@ import {
   PanelLeft,
   Search,
   ShieldAlert,
-  Sparkles,
   Target,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
-import { InvestmentShell } from "@/components/investment/InvestmentShell";
+import { InvestmentShell, type InvestmentPageId } from "@/components/investment/InvestmentShell";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
   askCfsEconomicsPowerBiToolPrompts,
@@ -929,6 +928,8 @@ function InvestmentPanelPage({
   const [intakeForm, setIntakeForm] = useState<InvestmentIntakePayload>(defaultInvestmentIntakeForm(activeStrategy));
   const [investmentReport, setInvestmentReport] = useState<InvestmentReportResponse | null>(null);
   const [investmentReportType, setInvestmentReportType] = useState("development_site_review");
+  const [activeInvestmentPage, setActiveInvestmentPage] = useState<InvestmentPageId>("overview");
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const [intakeLoading, setIntakeLoading] = useState(!USE_DEMO_DATA);
   const [intakeUnavailable, setIntakeUnavailable] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -1017,6 +1018,7 @@ function InvestmentPanelPage({
   const tier2 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 2")).length;
   const sewerSupported = rows.filter((row) => hasSewerSupport(row.signal)).length;
   const confidenceBands = uniqueValues(rows.map((row) => row.signal.data_confidence ?? row.signal.economic_data_confidence)).length;
+  const activeDueDiligenceFlags = stringList(activeSignal?.due_diligence_flags).join("; ");
   const [askRequest, setAskRequest] = useState<AskCfsExternalRequest | null>(null);
   const askAboutSignal = (signal: EconomicsParcelSignal) => {
     setAskRequest({
@@ -1030,6 +1032,7 @@ function InvestmentPanelPage({
       },
       requestId: Date.now(),
     });
+    setAssistantOpen(true);
   };
   const createGuide = () => {
     const nextGuide = selectedRows.length
@@ -1182,215 +1185,304 @@ function InvestmentPanelPage({
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate delete failed."));
   };
-  return (
-    <InvestmentShell dataMode={USE_DEMO_DATA ? "Portfolio Demo" : "Local live context"} onClose={onClose}>
-        <main className="investment-main">
-          <section className="investment-kpi-grid" aria-label="CFS Investment command KPIs">
-            <InvestmentKpiCard icon={Target} label="Priority Review Candidates" status={tier1 + tier2 ? "Active" : "Limited"} note="Tier 1 and Tier 2 review bands." />
-            <InvestmentKpiCard icon={CheckCircle2} label="Strong Review Candidates" status={tier1 ? "Elevated" : "Verify"} note="Strong infrastructure-supported signal." />
-            <InvestmentKpiCard icon={Network} label="Utility-Readiness Proxy Coverage" status={sewerSupported ? "Solid" : "Limited"} note="Sewer proximity proxy context." />
-            <InvestmentKpiCard icon={BarChart3} label="Recent Comparable Context" status="Verify" note="Use assessed-value bands; confirm comps manually." />
-            <InvestmentKpiCard icon={ShieldAlert} label="Data Confidence Mix" status={confidenceBands > 1 ? "Balanced" : "Verify"} note="Review confidence before decisions." />
+  const askFilterContext = {
+    active_page: activeInvestmentPage,
+    active_strategy: investmentStrategyLabel(activeStrategy),
+    engine_candidates: activeInvestmentScreen?.candidate_count,
+    candidate_rows: rows.length,
+    active_intake_candidate: intakeAnalysis?.candidate.candidate_name,
+    active_market_context: intakeAnalysis?.market_area_context?.household_context?.band,
+    active_market_geography: intakeAnalysis?.market_area_context?.geoid,
+    active_market_geography_type: intakeAnalysis?.market_area_context?.geography_type,
+    active_market_year: intakeAnalysis?.market_area_context?.acs_year,
+    active_environmental_constraint: intakeAnalysis?.environmental_context?.overall_environmental_constraint_band,
+    active_environmental_confidence: intakeAnalysis?.environmental_context?.environmental_data_confidence,
+    active_facility_context: intakeAnalysis?.environmental_context?.environmental_facility_context,
+    active_soil_context: intakeAnalysis?.environmental_context?.soil_context,
+    active_terrain_context: intakeAnalysis?.environmental_context?.terrain_context,
+    active_usable_area_proxy: intakeAnalysis?.environmental_context?.usable_area_screening_proxy,
+    active_wetland_context: intakeAnalysis?.environmental_context?.mapped_wetland_context,
+    mode: "cfs_investment",
+    strategy_screening_source: activeInvestmentScreen ? "CFS Investment Research Engine" : "local product fallback",
+    sewer_proxy_supported_candidates: sewerSupported,
+    tier_1_candidates: tier1,
+    tier_2_candidates: tier2,
+  };
+  const strategySelector = (
+    <section className="investment-card">
+      <div className="investment-section-heading">
+        <div>
+          <p>Strategy Presets</p>
+          <h2>Choose a private research lens.</h2>
+        </div>
+      </div>
+      <div className="investment-strategy-grid">
+        {investmentStrategies.map(({ description, icon: Icon, id, label }) => (
+          <button
+            aria-pressed={activeStrategy === id}
+            className="investment-strategy-card"
+            key={id}
+            onClick={() => setActiveStrategy(id)}
+            type="button"
+          >
+            <Icon className="h-5 w-5" aria-hidden="true" />
+            <span>{label}</span>
+            <small>{description}</small>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+  const candidateTable = (
+    <section className="investment-card">
+      <div className="investment-section-heading">
+        <div>
+          <p>Ranked Candidate Table</p>
+          <h2>{investmentStrategyLabel(activeStrategy)} pipeline</h2>
+        </div>
+        <span className="investment-pill">{formatNumber(visibleRows.length)} visible</span>
+      </div>
+      <InvestmentCandidateTable
+        activeCandidateId={activeSignal?.parcel_id ?? null}
+        onAddCandidate={(signal) => {
+          onAddReportBucketItem(dueDiligencePacketBucketItem(singleParcelDueDiligencePacket(signal)));
+          setStatus("Candidate review saved to Report Bucket");
+        }}
+        onOpenCandidate={(signal) => {
+          setActiveCandidateId(signal.parcel_id);
+          setActiveInvestmentPage("research");
+        }}
+        onToggleSignal={onToggleSignal}
+        rows={visibleRows}
+        selectedSignalIds={selectedSignalIds}
+        strategy={activeStrategy}
+      />
+    </section>
+  );
+  const compareActions = (
+    <section className="investment-card investment-action-card">
+      <div>
+        <p>Compare Selected</p>
+        <span>{selectedRows.length} selected / 5 maximum</span>
+      </div>
+      <button className="investment-primary-button" disabled={selectedRows.length < 2 || selectedRows.length > 5} onClick={() => {
+        setComparisonRows(selectedRows.map((row, index) => ({ ...row, rank: index + 1 })));
+        setActiveInvestmentPage("compare");
+      }} type="button">
+        Compare Selected
+      </button>
+      <button className="investment-ghost-button" disabled={!selectedRows.length} onClick={onClearSelection} type="button">
+        Clear Selection
+      </button>
+    </section>
+  );
+  const dueDiligenceActions = (
+    <section className="investment-card investment-action-card">
+      <div>
+        <p>Generate Review Guide</p>
+        <span>Live on-screen summary for manual due diligence.</span>
+      </div>
+      <button className="investment-primary-button" disabled={!activeSignal && !selectedRows.length} onClick={createGuide} type="button">
+        Generate Review Guide
+      </button>
+      <button className="investment-ghost-button" disabled={!guide} onClick={addGuideToBucket} type="button">
+        Save guide to Report Bucket
+      </button>
+      <button className="investment-ghost-button" disabled={!guide} onClick={sendGuideToPrint} type="button">
+        Send to Print
+      </button>
+      {status ? <span className="investment-status">{status}</span> : null}
+    </section>
+  );
+  const reportStudio = (
+    <section className="investment-card investment-action-card">
+      <div>
+        <p>Investment Report Studio</p>
+        <span>Configure, preview, then save or print a structured CFS Investment report.</span>
+      </div>
+      <div className="investment-step-strip" aria-label="Report Studio steps">
+        <span>1. Configure</span><span>2. Preview</span><span>3. Save / Print</span>
+      </div>
+      <select className="investment-select" value={investmentReportType} onChange={(event) => setInvestmentReportType(event.target.value)}>
+        {investmentReportTypeOptions.map((option) => (
+          <option key={option.id} value={option.id}>{option.label}</option>
+        ))}
+      </select>
+      <button className="investment-primary-button" disabled={!activeSignal && !intakeAnalysis} onClick={generateReport} type="button">
+        Generate Report
+      </button>
+      <button className="investment-ghost-button" disabled={!investmentReport} onClick={addReportToBucket} type="button">
+        Add report to Report Bucket
+      </button>
+      {investmentReport ? (
+        <div className="investment-report-preview">
+          <strong>{investmentReport.report_title}</strong>
+          <span>{investmentReport.sections.length} sections ready for Report Bucket or Print.</span>
+          <ul>{investmentReport.sections.slice(0, 4).map((section) => <li key={section.id}>{section.title}</li>)}</ul>
+        </div>
+      ) : <p className="investment-empty">No report generated yet.</p>}
+    </section>
+  );
+  const intakeWorkspace = (
+    <InvestmentIntakeWorkspace
+      analysis={intakeAnalysis}
+      candidates={intakeCandidates}
+      compareIds={intakeCompareIds}
+      comparison={intakeComparison}
+      csvText={intakeCsv}
+      editingId={editingIntakeId}
+      form={intakeForm}
+      intakeLoading={intakeLoading}
+      intakeUnavailable={intakeUnavailable}
+      onAddAnalysisToBucket={() => {
+        if (!intakeAnalysis) return;
+        onAddReportBucketItem(intakeAnalysisBucketItem(intakeAnalysis));
+        setStatus("Intake analysis saved to Report Bucket");
+      }}
+      onArchive={(candidate) => {
+        void updateInvestmentIntakeCandidate(candidate.id, { review_status: "Archived" })
+          .then((analysis) => {
+            setIntakeAnalysis(analysis);
+            setStatus("Candidate archived");
+            return refreshIntake();
+          })
+          .catch((error) => setStatus(error instanceof Error ? error.message : "Archive failed."));
+      }}
+      onClearEdit={() => {
+        setEditingIntakeId(null);
+        setIntakeForm(defaultInvestmentIntakeForm(activeStrategy));
+      }}
+      onCompare={compareIntakeSelected}
+      onCreate={createIntakeFromForm}
+      onCreateFromActive={() => activeSignal && createIntakeFromSignal(activeSignal)}
+      onDelete={removeIntakeCandidate}
+      onEdit={editIntakeCandidate}
+      onImportCsv={importCsv}
+      onOpen={(candidateId) => {
+        openIntakeAnalysis(candidateId);
+        setActiveInvestmentPage("research");
+      }}
+      onSetCsvText={setIntakeCsv}
+      onSetForm={setIntakeForm}
+      onToggleCompare={toggleIntakeCompare}
+    />
+  );
+  const activePageContent = (() => {
+    switch (activeInvestmentPage) {
+      case "overview":
+        return (
+          <>
+            <section className="investment-kpi-grid" aria-label="CFS Investment command KPIs">
+              <InvestmentKpiCard icon={Target} label="Priority Review Candidates" status={tier1 + tier2 ? "Active" : "Limited"} note="Tier 1 and Tier 2 review bands." />
+              <InvestmentKpiCard icon={CheckCircle2} label="Intake Opportunities" status={intakeLoading ? "Loading" : formatNumber(intakeCandidates.length)} note="Private listings, leads, and manual candidates." />
+              <InvestmentKpiCard icon={Network} label="Utility-Readiness Proxy Coverage" status={sewerSupported ? "Solid" : "Limited"} note="Sewer proximity proxy context." />
+              <InvestmentKpiCard icon={BarChart3} label="Saved Reports" status={formatNumber(reportBucketItems.length)} note="Report Bucket artifacts ready for print." />
+              <InvestmentKpiCard icon={ShieldAlert} label="Data Confidence Mix" status={confidenceBands > 1 ? "Balanced" : "Verify"} note="Review confidence before decisions." />
+            </section>
+            <section className="investment-two-column">
+              <div className="investment-card">
+                <div className="investment-section-heading"><div><p>Current Activity</p><h2>Concise command view</h2></div></div>
+                <Matrix rows={[
+                  { label: "Active strategy", value: investmentStrategyLabel(activeStrategy) },
+                  { label: "Visible candidates", value: formatNumber(visibleRows.length) },
+                  { label: "Recently added intake", value: intakeCandidates[0]?.candidate_name ?? "No intake candidates yet" },
+                  { label: "Highest-priority verification", value: activeDueDiligenceFlags || "Select a candidate for verification sequence" },
+                ]} />
+              </div>
+              <div className="investment-card">
+                <div className="investment-section-heading"><div><p>Quick Actions</p><h2>Open a focused workspace</h2></div></div>
+                <div className="investment-action-grid">
+                  <button className="investment-primary-button" onClick={() => setActiveInvestmentPage("opportunity")} type="button">Open Opportunity Engine</button>
+                  <button className="investment-ghost-button" onClick={() => setActiveInvestmentPage("intake")} type="button">Add Candidate</button>
+                  <button className="investment-ghost-button" onClick={() => setActiveInvestmentPage("research")} type="button">Start Property Research</button>
+                  <button className="investment-ghost-button" onClick={() => setActiveInvestmentPage("report-studio")} type="button">Generate Report</button>
+                </div>
+              </div>
+            </section>
+            {strategySelector}
+          </>
+        );
+      case "opportunity":
+        return (
+          <section className="investment-work-grid">
+            <div className="investment-primary-column">{strategySelector}{candidateTable}</div>
+            <aside className="investment-rail"><InvestmentCandidateRail onAskCfs={askAboutSignal} onGenerateGuide={createGuide} signal={activeSignal} investmentCandidate={activeInvestmentCandidate} strategy={activeStrategy} />{compareActions}</aside>
           </section>
-          <section className="investment-grid">
+        );
+      case "intake":
+        return intakeWorkspace;
+      case "research":
+        return (
+          <section className="investment-work-grid">
             <div className="investment-primary-column">
-              <section className="investment-card investment-ask" id="strategy-screener">
-                <div className="investment-section-heading">
-                  <div>
-                    <p>Ask CFS Investment Research</p>
-                    <h2>Use natural language to explore parcels, strategies, and market context.</h2>
-                  </div>
-                  <Sparkles className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <AskCfsPanel
-                  appMode="economics"
-                  externalRequest={askRequest}
-                  filterContext={{
-                    active_strategy: investmentStrategyLabel(activeStrategy),
-                    engine_candidates: activeInvestmentScreen?.candidate_count,
-                    candidate_rows: rows.length,
-                    active_intake_candidate: intakeAnalysis?.candidate.candidate_name,
-                    active_market_context: intakeAnalysis?.market_area_context?.household_context?.band,
-                    active_market_geography: intakeAnalysis?.market_area_context?.geoid,
-                    active_market_geography_type: intakeAnalysis?.market_area_context?.geography_type,
-                    active_market_year: intakeAnalysis?.market_area_context?.acs_year,
-                    active_environmental_constraint: intakeAnalysis?.environmental_context?.overall_environmental_constraint_band,
-                    active_environmental_confidence: intakeAnalysis?.environmental_context?.environmental_data_confidence,
-                    active_facility_context: intakeAnalysis?.environmental_context?.environmental_facility_context,
-                    active_soil_context: intakeAnalysis?.environmental_context?.soil_context,
-                    active_terrain_context: intakeAnalysis?.environmental_context?.terrain_context,
-                    active_usable_area_proxy: intakeAnalysis?.environmental_context?.usable_area_screening_proxy,
-                    active_wetland_context: intakeAnalysis?.environmental_context?.mapped_wetland_context,
-                    mode: "investment_panel",
-                    strategy_screening_source: activeInvestmentScreen ? "CFS Investment Research Engine" : "local product fallback",
-                    sewer_proxy_supported_candidates: sewerSupported,
-                    tier_1_candidates: tier1,
-                    tier_2_candidates: tier2,
-                  }}
-                  suggestedPromptsOverride={askCfsInvestmentResearchPrompts}
-                  visiblePromptCount={5}
-                />
-              </section>
-              <InvestmentIntakeWorkspace
-                analysis={intakeAnalysis}
-                candidates={intakeCandidates}
-                compareIds={intakeCompareIds}
-                comparison={intakeComparison}
-                csvText={intakeCsv}
-                editingId={editingIntakeId}
-                form={intakeForm}
-                intakeLoading={intakeLoading}
-                intakeUnavailable={intakeUnavailable}
-                onAddAnalysisToBucket={() => {
-                  if (!intakeAnalysis) return;
-                  onAddReportBucketItem(intakeAnalysisBucketItem(intakeAnalysis));
-                  setStatus("Intake analysis saved to Report Bucket");
-                }}
-                onArchive={(candidate) => {
-                  void updateInvestmentIntakeCandidate(candidate.id, { review_status: "Archived" })
-                    .then((analysis) => {
-                      setIntakeAnalysis(analysis);
-                      setStatus("Candidate archived");
-                      return refreshIntake();
-                    })
-                    .catch((error) => setStatus(error instanceof Error ? error.message : "Archive failed."));
-                }}
-                onClearEdit={() => {
-                  setEditingIntakeId(null);
-                  setIntakeForm(defaultInvestmentIntakeForm(activeStrategy));
-                }}
-                onCompare={compareIntakeSelected}
-                onCreate={createIntakeFromForm}
-                onCreateFromActive={() => activeSignal && createIntakeFromSignal(activeSignal)}
-                onDelete={removeIntakeCandidate}
-                onEdit={editIntakeCandidate}
-                onImportCsv={importCsv}
-                onOpen={openIntakeAnalysis}
-                onSetCsvText={setIntakeCsv}
-                onSetForm={setIntakeForm}
-                onToggleCompare={toggleIntakeCompare}
-              />
-              <section className="investment-card">
-                <div className="investment-section-heading">
-                  <div>
-                    <p>Strategy Presets</p>
-                    <h2>Choose a private research lens.</h2>
-                  </div>
-                </div>
-                <div className="investment-strategy-grid">
-                  {investmentStrategies.map(({ description, icon: Icon, id, label }) => (
-                    <button
-                      aria-pressed={activeStrategy === id}
-                      className="investment-strategy-card"
-                      key={id}
-                      onClick={() => setActiveStrategy(id)}
-                      type="button"
-                    >
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                      <span>{label}</span>
-                      <small>{description}</small>
-                    </button>
-                  ))}
-                </div>
-              </section>
-              <section className="investment-card" id="candidate-review">
-                <div className="investment-section-heading">
-                  <div>
-                    <p>Top Land Review Candidates</p>
-                    <h2>{investmentStrategyLabel(activeStrategy)} pipeline</h2>
-                  </div>
-                  <span className="investment-pill">{formatNumber(visibleRows.length)} visible</span>
-                </div>
-                <InvestmentCandidateTable
-                  activeCandidateId={activeSignal?.parcel_id ?? null}
-                  onAddCandidate={(signal) => {
-                    onAddReportBucketItem(dueDiligencePacketBucketItem(singleParcelDueDiligencePacket(signal)));
-                    setStatus("Candidate review saved to Report Bucket");
-                  }}
-                  onOpenCandidate={(signal) => setActiveCandidateId(signal.parcel_id)}
-                  onToggleSignal={onToggleSignal}
-                  rows={visibleRows}
-                  selectedSignalIds={selectedSignalIds}
-                  strategy={activeStrategy}
-                />
-              </section>
-              {comparisonRows.length >= 2 ? (
-                <section className="investment-card" id="compare">
-                  <div className="investment-section-heading">
-                    <div>
-                      <p>Compare</p>
-                      <h2>Side-by-side analysis</h2>
-                    </div>
-                  </div>
-                  <InvestmentComparisonTable rows={comparisonRows} />
-                </section>
-              ) : null}
+              <InvestmentResearchTabs activeSignal={activeSignal} analysis={intakeAnalysis} strategy={activeStrategy} />
             </div>
-            <aside className="investment-rail">
-              <InvestmentCandidateRail
-                onAskCfs={askAboutSignal}
-                onGenerateGuide={createGuide}
-                signal={activeSignal}
-                investmentCandidate={activeInvestmentCandidate}
-                strategy={activeStrategy}
-              />
-              <section className="investment-card investment-action-card">
-                <div>
-                  <p>Compare Selected</p>
-                  <span>{selectedRows.length} selected / 5 maximum</span>
-                </div>
-                <button className="investment-primary-button" disabled={selectedRows.length < 2 || selectedRows.length > 5} onClick={() => setComparisonRows(selectedRows.map((row, index) => ({ ...row, rank: index + 1 })))} type="button">
-                  Compare Selected
-                </button>
-                <button className="investment-ghost-button" disabled={!selectedRows.length} onClick={onClearSelection} type="button">
-                  Clear Selection
-                </button>
-              </section>
-              <section className="investment-card investment-action-card" id="due-diligence">
-                <div>
-                  <p>Generate Review Guide</p>
-                  <span>Live on-screen summary for manual due diligence.</span>
-                </div>
-                <button className="investment-primary-button" disabled={!activeSignal && !selectedRows.length} onClick={createGuide} type="button">
-                  Generate Review Guide
-                </button>
-                <button className="investment-ghost-button" disabled={!guide} onClick={addGuideToBucket} type="button">
-                  Save guide to Report Bucket
-                </button>
-                <button className="investment-ghost-button" disabled={!guide} onClick={sendGuideToPrint} type="button">
-                  Send to Print
-                </button>
-                {status ? <span className="investment-status">{status}</span> : null}
-              </section>
-              <section className="investment-card investment-action-card" id="report-studio">
-                <div>
-                  <p>Investment Report Studio</p>
-                  <span>Generate structured CFS Investment reports from the active parcel or intake candidate.</span>
-                </div>
-                <select className="investment-select" value={investmentReportType} onChange={(event) => setInvestmentReportType(event.target.value)}>
-                  {investmentReportTypeOptions.map((option) => (
-                    <option key={option.id} value={option.id}>{option.label}</option>
-                  ))}
-                </select>
-                <button className="investment-primary-button" disabled={!activeSignal && !intakeAnalysis} onClick={generateReport} type="button">
-                  Generate Report
-                </button>
-                <button className="investment-ghost-button" disabled={!investmentReport} onClick={addReportToBucket} type="button">
-                  Add report to Report Bucket
-                </button>
-                {investmentReport ? <p className="investment-muted">{investmentReport.report_title}: {investmentReport.sections.length} sections ready for Print.</p> : null}
-              </section>
-              {guide ? <InvestmentGuidePreview guide={guide} /> : null}
-              <InvestmentBucketPanel
-                items={reportBucketItems}
-                onClear={onClearReportBucket}
-                onOpenPrint={() => onNavigate("print")}
-                onRemove={onRemoveReportBucketItem}
-                onTogglePrint={onToggleReportBucketPrint}
-              />
-            </aside>
+            <aside className="investment-rail"><InvestmentCandidateRail onAskCfs={askAboutSignal} onGenerateGuide={createGuide} signal={activeSignal} investmentCandidate={activeInvestmentCandidate} strategy={activeStrategy} />{dueDiligenceActions}</aside>
           </section>
-        </main>
+        );
+      case "compare":
+        return (
+          <section className="investment-card">
+            <div className="investment-section-heading"><div><p>Compare</p><h2>Side-by-side tradeoffs</h2></div></div>
+            {compareActions}
+            {comparisonRows.length >= 2 ? <InvestmentComparisonTable rows={comparisonRows} /> : <p className="investment-empty">Select two to five Opportunity Engine candidates to compare.</p>}
+            {intakeComparison ? <InvestmentIntakeComparison comparison={intakeComparison} /> : null}
+          </section>
+        );
+      case "market":
+        return (
+          <section className="investment-two-column">
+            <div className="investment-card"><MarketAreaContextPanel context={intakeAnalysis?.market_area_context} /></div>
+            <div className="investment-card">
+              <div className="investment-section-heading"><div><p>CFS Economics Context</p><h2>Land and real-estate signals</h2></div></div>
+              <Matrix rows={[
+                { label: "Active parcel", value: activeSignal ? signalLabel(activeSignal) : "Select a candidate" },
+                { label: "Economic segment", value: activeSignal?.economic_segment ?? "Not available" },
+                { label: "Opportunity class", value: activeSignal?.opportunity_class ?? activeSignal?.land_opportunity_class ?? "Not available" },
+                { label: "Data confidence", value: activeSignal?.data_confidence ?? "Data Needed" },
+              ]} />
+            </div>
+          </section>
+        );
+      case "due-diligence":
+        return <section className="investment-two-column"><div>{dueDiligenceActions}{guide ? <InvestmentGuidePreview guide={guide} /> : null}</div><InvestmentChecklistLibrary /></section>;
+      case "report-studio":
+        return reportStudio;
+      case "report-bucket":
+        return <InvestmentBucketPanel items={reportBucketItems} onClear={onClearReportBucket} onOpenPrint={() => onNavigate("print")} onRemove={onRemoveReportBucketItem} onTogglePrint={onToggleReportBucketPrint} />;
+      case "methodology":
+        return <InvestmentMethodologyPage />;
+      default:
+        return null;
+    }
+  })();
+  return (
+    <InvestmentShell
+      activePage={activeInvestmentPage}
+      currentCandidateLabel={activeSignal?.parcel_id ?? intakeAnalysis?.candidate.candidate_name}
+      dataMode={USE_DEMO_DATA ? "Portfolio Demo" : "Local live context"}
+      onAskCfs={() => setAssistantOpen(true)}
+      onClose={onClose}
+      onPageChange={setActiveInvestmentPage}
+    >
+      {activePageContent}
+      {assistantOpen ? (
+        <div className="investment-assistant-drawer" role="dialog" aria-label="Ask CFS Investment Research">
+          <div className="investment-assistant-panel">
+            <div className="investment-section-heading">
+              <div><p>Ask CFS Investment Research</p><h2>Context-aware assistant</h2></div>
+              <button className="investment-ghost-button" onClick={() => setAssistantOpen(false)} type="button">Close</button>
+            </div>
+            <AskCfsPanel
+              appMode="economics"
+              externalRequest={askRequest}
+              filterContext={askFilterContext}
+              suggestedPromptsOverride={askCfsInvestmentResearchPrompts}
+              visiblePromptCount={5}
+            />
+          </div>
+        </div>
+      ) : null}
     </InvestmentShell>
   );
 }
@@ -1443,6 +1535,11 @@ function investmentStrategyLabel(strategy: InvestmentStrategyId) {
   return investmentStrategies.find((item) => item.id === strategy)?.label ?? "Development Land";
 }
 
+function stringList(value: string | string[] | null | undefined) {
+  if (!value) return [];
+  return Array.isArray(value) ? value.filter(Boolean) : [value];
+}
+
 function matchesInvestmentStrategy(signal: EconomicsParcelSignal, strategy: InvestmentStrategyId) {
   if (strategy === "development_land") return matchesLandReviewPreset(signal, "Growth pressure + sewer proximity") || valueText(signal.development_readiness_band).toLowerCase().includes("strong");
   if (strategy === "land_banking") return hasGrowthPressure(signal) || matchesLandReviewPreset(signal, "More data needed but interesting");
@@ -1471,6 +1568,142 @@ function InvestmentKpiCard({
       <p>{note}</p>
       <i aria-hidden="true" />
     </article>
+  );
+}
+
+function InvestmentResearchTabs({
+  activeSignal,
+  analysis,
+  strategy,
+}: {
+  activeSignal: EconomicsParcelSignal | null;
+  analysis: InvestmentIntakeAnalysisResponse | null;
+  strategy: InvestmentStrategyId;
+}) {
+  const [tab, setTab] = useState<"overview" | "planning" | "basis" | "readiness" | "market" | "environmental" | "utility" | "sources">("overview");
+  const signalRows = activeSignal
+    ? [
+        { label: "Parcel ID", value: activeSignal.parcel_id },
+        { label: "Parcel / area label", value: signalLabel(activeSignal) },
+        { label: "Selected strategy", value: investmentStrategyLabel(strategy) },
+        { label: "Development-readiness band", value: activeSignal.development_readiness_band ?? "Data Needed" },
+        { label: "Land opportunity", value: activeSignal.land_opportunity_class ?? activeSignal.opportunity_class ?? "Data Needed" },
+        { label: "Data confidence", value: activeSignal.data_confidence ?? "Data Needed" },
+      ]
+    : [{ label: "Candidate", value: "Select a parcel or intake candidate to begin property research." }];
+  const tabs = [
+    ["overview", "Overview"],
+    ["planning", "Parcel & Planning"],
+    ["basis", "Acquisition Basis"],
+    ["readiness", "Development Readiness"],
+    ["market", "Market Area"],
+    ["environmental", "Environmental & Physical"],
+    ["utility", "Utilities & Infrastructure"],
+    ["sources", "Sources"],
+  ] as const;
+  return (
+    <section className="investment-card">
+      <div className="investment-section-heading">
+        <div>
+          <p>Property Research</p>
+          <h2>{activeSignal ? signalLabel(activeSignal) : analysis?.candidate.candidate_name ?? "No candidate selected"}</h2>
+        </div>
+        <span className="investment-pill">{investmentStrategyLabel(strategy)}</span>
+      </div>
+      <div className="investment-tabs" role="tablist" aria-label="Property Research tabs">
+        {tabs.map(([id, label]) => (
+          <button aria-selected={tab === id} key={id} onClick={() => setTab(id)} role="tab" type="button">
+            {label}
+          </button>
+        ))}
+      </div>
+      {tab === "overview" ? (
+        <>
+          <Matrix rows={signalRows} />
+          <InvestmentSignalList title="Why this candidate surfaced" values={[
+            activeSignal?.development_readiness_band,
+            activeSignal?.economic_opportunity_band,
+            activeSignal?.sewer_proxy_class,
+          ].filter(Boolean).map(String)} />
+          <InvestmentSignalList title="Recommended verification sequence" values={(stringList(activeSignal?.due_diligence_flags).length ? stringList(activeSignal?.due_diligence_flags) : landDueDiligenceChecklist).slice(0, 6)} />
+        </>
+      ) : null}
+      {tab === "planning" ? <Matrix rows={[
+        { label: "Land-use context", value: activeSignal?.economic_segment ?? "Not available" },
+        { label: "Zoning support", value: activeSignal?.zoning_support_band ?? "Verify" },
+        { label: "Future-use context", value: "Verify with planning staff" },
+        { label: "Jurisdiction", value: activeSignal?.geography_label ?? "Not available" },
+      ]} /> : null}
+      {tab === "basis" ? <Matrix rows={[
+        { label: "User-entered asking basis", value: analysis?.acquisition_basis.asking_basis_band ?? "Missing asking price" },
+        { label: "Asking price per acre", value: moneyText(analysis?.acquisition_basis.asking_price_per_acre) },
+        { label: "Historical sale quality", value: analysis?.screening_context?.sale_quality_band ?? "Not Available" },
+        { label: "Comparable context", value: analysis?.screening_context?.basis_context_band ?? "Insufficient Basis Information" },
+        { label: "Assessor context", value: "Assessed values are context only, not market value or an appraisal." },
+      ]} /> : null}
+      {tab === "readiness" ? <Matrix rows={[
+        { label: "Growth pressure", value: activeSignal?.growth_pressure_band ?? "Data Needed" },
+        { label: "Transportation access", value: activeSignal?.transportation_access_band ?? "Verify" },
+        { label: "Utility-readiness proxy", value: activeSignal?.utility_readiness_proxy_class ?? "Data Needed" },
+        { label: "Sewer-proximity proxy", value: activeSignal?.sewer_proxy_class ?? "Data Needed" },
+        { label: "Strategy fit", value: activeSignal ? investmentStrategyLabel(strategy) : "Select candidate" },
+      ]} /> : null}
+      {tab === "market" ? <MarketAreaContextPanel context={analysis?.market_area_context} /> : null}
+      {tab === "environmental" ? <EnvironmentalPhysicalContextPanel context={analysis?.environmental_context} /> : null}
+      {tab === "utility" ? <Matrix rows={[
+        { label: "Sewer proximity", value: activeSignal?.sewer_proxy_class ?? "Data Needed" },
+        { label: "WSACC basin context", value: activeSignal?.sewer_basin_label ?? "Data Needed" },
+        { label: "Utility capacity status", value: activeSignal?.utility_capacity_status ?? "Capacity data not confirmed" },
+        { label: "Planned extension status", value: activeSignal?.planned_extension_status ?? "Planned extension data not confirmed" },
+      ]} /> : null}
+      {tab === "sources" ? <InvestmentMethodologyPage compact /> : null}
+    </section>
+  );
+}
+
+function InvestmentChecklistLibrary() {
+  const groups: Array<{ group: string; items: string[] }> = [
+    { group: "Title and Legal", items: ["Check title/easements", "Confirm legal access", "Review deed restrictions"] },
+    { group: "Planning and Entitlement", items: ["Verify zoning", "Confirm future land-use context", "Review planning cases"] },
+    { group: "Utilities", items: ["Verify service and capacity with utility provider", "Review sewer-proximity proxy", "Confirm extension requirements"] },
+    { group: "Access and Transportation", items: ["Check road frontage/legal access", "Review transportation projects", "Confirm driveway/access permits"] },
+    { group: "Environmental", items: environmentalDueDiligenceChecklist.slice(0, 4) },
+    { group: "Survey and Engineering", items: ["Obtain survey", "Review topography", "Evaluate stormwater implications"] },
+    { group: "Market and Financial", items: ["Check recent sale comps", "Verify asking basis", "Review assessor context as context only"] },
+  ];
+  return (
+    <section className="investment-card">
+      <div className="investment-section-heading"><div><p>Due Diligence</p><h2>Verification task library</h2></div></div>
+      <div className="investment-checklist-grid">
+        {groups.map(({ group, items }) => (
+          <div key={group}>
+            <strong>{group}</strong>
+            <ul>{items.map((item) => <li key={item}><span>Not Started</span>{item}</li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function InvestmentMethodologyPage({ compact = false }: { compact?: boolean }) {
+  const rows = [
+    { label: "ACS coverage", value: "2024 ACS 5-year tract context where parcel-to-tract assignment is available" },
+    { label: "Utility proxy", value: "WSACC sewer proximity and basin context only; capacity and service are not confirmed" },
+    { label: "Environmental context", value: "FEMA, NWI, NRCS, EPA, and terrain summaries are screening evidence requiring verification" },
+    { label: "Comparable context", value: "Historical sale and assessed context are due-diligence inputs, not appraisal conclusions" },
+    { label: "Safety interpretation", value: "CFS Investment does not recommend purchases or guarantee future value" },
+  ];
+  return (
+    <section className={compact ? "investment-signal-list" : "investment-card"}>
+      <div className="investment-section-heading"><div><p>Data & Methodology</p><h2>Source inventory, proxies, and limits</h2></div></div>
+      <Matrix rows={rows} />
+      {!compact ? (
+        <div className="investment-disclaimer">
+          Do not expose owner names, mailing addresses, grantor/grantee names, raw scores, exact probabilities, internal weights, secrets, or raw source records.
+        </div>
+      ) : null}
+    </section>
   );
 }
 

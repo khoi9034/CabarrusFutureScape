@@ -320,9 +320,29 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "InvestmentPanelGate" in economics_shell
     assert "InvestmentPanelPage" in economics_shell
     investment_shell = read("src/components/investment/InvestmentShell.tsx")
+    investment_styles = read("src/styles/cfs-theme.css")
     assert "InvestmentShell" in economics_shell
     assert "CFS Investment" in investment_shell
     assert "Land, Property, and Real Estate Intelligence" in investment_shell
+    assert "investmentPageGroups" in investment_shell
+    assert "Discover" in investment_shell
+    assert "Analyze" in investment_shell
+    assert "Review and Deliver" in investment_shell
+    assert "Governance" in investment_shell
+    assert 'aria-current={activePage === id ? "page" : undefined}' in investment_shell
+    assert 'data-investment-page={activePage}' in investment_shell
+    assert "is-collapsed" in investment_shell
+    assert "switch (activeInvestmentPage)" in economics_shell
+    assert "investment-assistant-drawer" in economics_shell
+    assert "InvestmentResearchTabs" in economics_shell
+    assert "InvestmentChecklistLibrary" in economics_shell
+    assert "InvestmentMethodologyPage" in economics_shell
+    assert "--investment-app-bg" in investment_styles
+    assert "--investment-sidebar-bg" in investment_styles
+    assert "--investment-focus-ring" in investment_styles
+    assert ".investment-work-grid" in investment_styles
+    assert ".investment-tabs" in investment_styles
+    assert ".investment-assistant-drawer" in investment_styles
     assert "CFS Investment" in economics_shell
     assert "Internal Access" in economics_shell
     assert "Local convenience gate only" in economics_shell

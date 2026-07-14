@@ -379,21 +379,34 @@ select:focus-visible {
 }
 
 .investment-shell {
-  --investment-bg: #020711;
+  --investment-app-bg: #020711;
+  --investment-sidebar-bg: rgba(2, 8, 16, 0.98);
+  --investment-header-bg: rgba(3, 12, 23, 0.88);
   --investment-surface: rgba(4, 13, 24, 0.9);
   --investment-surface-raised: rgba(7, 20, 35, 0.94);
+  --investment-surface-soft: rgba(9, 28, 45, 0.62);
   --investment-border: rgba(121, 178, 196, 0.18);
   --investment-border-strong: rgba(45, 217, 183, 0.36);
-  --investment-text: #f3fbff;
+  --investment-text-primary: #f3fbff;
+  --investment-text-secondary: #b6c9d5;
   --investment-text-muted: #8fa7b8;
-  --investment-emerald: #35d59a;
-  --investment-teal: #29d9c2;
-  --investment-cyan: #63d8ff;
-  --investment-gold: #c8a96a;
+  --investment-accent-primary: #35d59a;
+  --investment-accent-secondary: #29d9c2;
+  --investment-accent-cyan: #63d8ff;
+  --investment-accent-bronze: #c8a96a;
   --investment-warning: #e0ad54;
   --investment-danger: #e36d5b;
-  --investment-shadow: 0 24px 72px rgba(0, 0, 0, 0.42);
+  --investment-success: #35d59a;
+  --investment-shadow-sm: 0 14px 32px rgba(0, 0, 0, 0.28);
+  --investment-shadow-lg: 0 24px 72px rgba(0, 0, 0, 0.42);
+  --investment-focus-ring: 0 0 0 3px rgba(53, 213, 154, 0.22);
   --investment-glow: 0 0 44px rgba(41, 217, 194, 0.08);
+  --investment-text: var(--investment-text-primary);
+  --investment-emerald: var(--investment-accent-primary);
+  --investment-teal: var(--investment-accent-secondary);
+  --investment-cyan: var(--investment-accent-cyan);
+  --investment-gold: var(--investment-accent-bronze);
+  --investment-shadow: var(--investment-shadow-lg);
   --econ-border: var(--investment-border);
   --econ-gold: var(--investment-teal);
   --econ-muted: var(--investment-text-muted);
@@ -401,7 +414,7 @@ select:focus-visible {
   --econ-panel: var(--investment-surface);
   background:
     linear-gradient(135deg, rgba(3, 10, 20, 0.96), rgba(4, 17, 29, 0.98) 42%, rgba(2, 6, 13, 1)),
-    var(--investment-bg);
+    var(--investment-app-bg);
   color: var(--investment-text);
   display: grid;
   grid-template-columns: 18rem minmax(0, 1fr);
@@ -411,16 +424,28 @@ select:focus-visible {
   z-index: 80;
 }
 
+.investment-shell.is-collapsed {
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+}
+
 .investment-sidebar {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 22%),
-    rgba(2, 8, 16, 0.98);
+    var(--investment-sidebar-bg);
   border-right: 1px solid var(--investment-border);
   display: flex;
   flex-direction: column;
   gap: 1rem;
   min-height: 0;
   padding: 1.25rem;
+}
+
+.investment-shell.is-collapsed .investment-brand div,
+.investment-shell.is-collapsed .investment-nav-group p,
+.investment-shell.is-collapsed .investment-nav small,
+.investment-shell.is-collapsed .investment-nav strong,
+.investment-shell.is-collapsed .investment-sidebar-footer p {
+  display: none;
 }
 
 .investment-brand,
@@ -441,6 +466,10 @@ select:focus-visible {
   display: flex;
   gap: 0.75rem;
   padding: 0.9rem;
+}
+
+.investment-brand .investment-icon-button {
+  margin-left: auto;
 }
 
 .investment-brand-mark {
@@ -476,9 +505,25 @@ select:focus-visible {
 .investment-nav {
   display: grid;
   gap: 0.45rem;
+  overflow: auto;
+}
+
+.investment-nav-group {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.investment-nav-group > p {
+  color: var(--investment-text-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  padding: 0.45rem 0.4rem 0.15rem;
+  text-transform: uppercase;
 }
 
 .investment-nav button,
+.investment-icon-button,
 .investment-sidebar-footer button,
 .investment-ghost-button,
 .investment-row-actions button,
@@ -497,6 +542,9 @@ select:focus-visible {
 
 .investment-nav button:hover,
 .investment-nav button:focus-visible,
+.investment-nav button[aria-current="page"],
+.investment-icon-button:hover,
+.investment-icon-button:focus-visible,
 .investment-sidebar-footer button:hover,
 .investment-ghost-button:hover,
 .investment-row-actions button:hover,
@@ -504,6 +552,10 @@ select:focus-visible {
   background: rgba(99, 216, 255, 0.07);
   border-color: var(--investment-border-strong);
   color: var(--investment-text);
+}
+
+.investment-nav button[aria-current="page"] {
+  background: linear-gradient(135deg, rgba(53, 213, 154, 0.16), rgba(99, 216, 255, 0.08));
 }
 
 .investment-nav strong {
@@ -532,6 +584,7 @@ select:focus-visible {
 
 .investment-header {
   align-items: center;
+  background: var(--investment-header-bg);
   border-bottom: 1px solid var(--investment-border);
   display: flex;
   gap: 1rem;
@@ -577,6 +630,12 @@ select:focus-visible {
 }
 
 .investment-main {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.investment-page-shell {
   display: grid;
   gap: 1rem;
   padding: 1rem;
@@ -645,6 +704,29 @@ select:focus-visible {
   grid-template-columns: minmax(0, 1.45fr) minmax(22rem, 0.55fr);
 }
 
+.investment-work-grid {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.35fr) minmax(21rem, 0.65fr);
+}
+
+.investment-two-column {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.investment-action-grid,
+.investment-step-strip,
+.investment-tabs,
+.investment-checklist-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
 .investment-primary-column,
 .investment-rail,
 .investment-bucket-list,
@@ -658,6 +740,29 @@ select:focus-visible {
   display: flex;
   gap: 1rem;
   justify-content: space-between;
+}
+
+.investment-tabs {
+  border-bottom: 1px solid var(--investment-border);
+  margin: 1rem 0;
+  padding-bottom: 0.6rem;
+}
+
+.investment-tabs button {
+  border: 1px solid var(--investment-border);
+  border-radius: 999px;
+  color: var(--investment-text-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 0.45rem 0.7rem;
+}
+
+.investment-tabs button[aria-selected="true"],
+.investment-tabs button:focus-visible,
+.investment-tabs button:hover {
+  background: rgba(53, 213, 154, 0.1);
+  border-color: var(--investment-border-strong);
+  color: var(--investment-text-primary);
 }
 
 .investment-section-heading h2,
@@ -780,6 +885,14 @@ select:focus-visible {
   opacity: 0.45;
 }
 
+.investment-primary-button:focus-visible,
+.investment-ghost-button:focus-visible,
+.investment-select-button:focus-visible,
+.investment-icon-button:focus-visible {
+  box-shadow: var(--investment-focus-ring);
+  outline: none;
+}
+
 .investment-chip--teal {
   border-color: rgba(99, 216, 255, 0.2);
   color: #c5f5ff;
@@ -850,6 +963,81 @@ select:focus-visible {
 .investment-action-card {
   display: grid;
   gap: 0.75rem;
+}
+
+.investment-step-strip span {
+  border: 1px solid rgba(99, 216, 255, 0.16);
+  border-radius: 999px;
+  color: var(--investment-text-secondary);
+  font-size: 0.72rem;
+  padding: 0.35rem 0.55rem;
+}
+
+.investment-report-preview {
+  border: 1px solid var(--investment-border);
+  border-radius: 1rem;
+  color: var(--investment-text-muted);
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+}
+
+.investment-report-preview strong,
+.investment-checklist-grid strong {
+  color: var(--investment-text-primary);
+}
+
+.investment-checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.investment-checklist-grid div {
+  background: var(--investment-surface-soft);
+  border: 1px solid var(--investment-border);
+  border-radius: 1rem;
+  padding: 0.75rem;
+}
+
+.investment-checklist-grid ul {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.investment-checklist-grid li {
+  color: var(--investment-text-muted);
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+}
+
+.investment-checklist-grid li span {
+  color: var(--investment-warning);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.investment-assistant-drawer {
+  align-items: stretch;
+  background: rgba(0, 0, 0, 0.38);
+  display: flex;
+  inset: 0;
+  justify-content: flex-end;
+  position: fixed;
+  z-index: 95;
+}
+
+.investment-assistant-panel {
+  background: var(--investment-surface-raised);
+  border-left: 1px solid var(--investment-border-strong);
+  box-shadow: var(--investment-shadow-lg);
+  max-width: 34rem;
+  overflow: auto;
+  padding: 1rem;
+  width: min(34rem, 100vw);
 }
 
 .investment-status {
@@ -972,6 +1160,8 @@ select:focus-visible {
   }
 
   .investment-grid,
+  .investment-work-grid,
+  .investment-two-column,
   .investment-kpi-grid {
     grid-template-columns: 1fr;
   }
@@ -993,6 +1183,10 @@ select:focus-visible {
 
   .investment-nav {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .investment-checklist-grid {
+    grid-template-columns: 1fr;
   }
 
   .investment-header,
