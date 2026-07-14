@@ -1,4 +1,4 @@
-"""ACS market-area context for internal Investment Panel candidates."""
+"""ACS market-area context for internal CFS Investment candidates."""
 
 from __future__ import annotations
 

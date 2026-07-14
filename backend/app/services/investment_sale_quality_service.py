@@ -1,4 +1,4 @@
-"""Sale-quality bands for Investment Panel basis screening."""
+"""Sale-quality bands for CFS Investment basis screening."""
 
 from __future__ import annotations
 

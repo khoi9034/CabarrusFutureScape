@@ -1,4 +1,4 @@
-"""Basis and comparable context enrichment for Investment Panel candidates."""
+"""Basis and comparable context enrichment for CFS Investment candidates."""
 
 from __future__ import annotations
 

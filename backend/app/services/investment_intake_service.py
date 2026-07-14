@@ -1,4 +1,4 @@
-"""Private candidate intake workflow for the Investment Panel."""
+"""Private candidate intake workflow for CFS Investment."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Rules-based Investment Panel screening foundation."""
+"""Rules-based CFS Investment screening foundation."""
 
 from __future__ import annotations
 

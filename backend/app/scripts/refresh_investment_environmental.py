@@ -1,4 +1,4 @@
-"""Refresh Investment Panel environmental parcel summaries.
+"""Refresh CFS Investment environmental parcel summaries.
 
 Run from the backend import context:
 python -m app.scripts.refresh_investment_environmental --source all
@@ -14,7 +14,7 @@ from app.services.investment_environmental_context_service import refresh_enviro
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Refresh environmental screening context for Investment Panel candidates.")
+    parser = argparse.ArgumentParser(description="Refresh environmental screening context for CFS Investment candidates.")
     parser.add_argument("--source", choices=["all", "nwi", "terrain", "slope", "soils", "epa", "summaries"], default="all")
     args = parser.parse_args()
     with SessionLocal() as db:

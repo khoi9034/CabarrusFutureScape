@@ -1,4 +1,4 @@
-"""Internal Investment Panel screening routes."""
+"""Internal CFS Investment screening routes."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from app.schemas.investment import (
     InvestmentIntakeCompareRequest,
     InvestmentIntakePatch,
     InvestmentIntakePayload,
+    InvestmentReportRequest,
     InvestmentScreenRequest,
     InvestmentStrategyId,
 )
@@ -40,6 +41,11 @@ from app.services.investment_market_context_service import (
     acs_status,
     candidate_market_context,
     refresh_acs_market_context,
+)
+from app.services.investment_research_context_service import (
+    build_intake_research_context,
+    build_parcel_research_context,
+    generate_investment_report,
 )
 from app.services.investment_screening_service import (
     candidate_detail,
@@ -153,6 +159,16 @@ def get_investment_candidate_environmental_context(
     return candidate_environmental_context(db, parcel_id)
 
 
+@router.get("/research-context/{parcel_id}")
+def get_investment_research_context(
+    parcel_id: str,
+    strategy: InvestmentStrategyId = Query(default="development_land"),
+    candidate_id: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return build_parcel_research_context(db, _investment_rows(db), parcel_id, strategy=strategy, candidate_id=candidate_id)
+
+
 @router.get("/intake")
 def get_investment_intake(
     db: Session = Depends(get_db),
@@ -206,6 +222,17 @@ def get_investment_intake_environmental_context(
     return candidate_environmental_context(db, candidate.get("parcel_id"))
 
 
+@router.get("/intake/{candidate_id}/research-context")
+def get_investment_intake_research_context(
+    candidate_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    context = build_intake_research_context(db, _investment_rows(db), candidate_id)
+    if not context:
+        raise HTTPException(status_code=404, detail="Investment intake candidate not found.")
+    return context
+
+
 @router.get("/intake/{candidate_id}")
 def get_investment_intake_candidate(
     candidate_id: str,
@@ -248,6 +275,17 @@ def get_investment_intake_analysis(
     if not analysis:
         raise HTTPException(status_code=404, detail="Investment intake candidate not found.")
     return analysis
+
+
+@router.post("/reports/generate")
+def post_investment_report(
+    request: InvestmentReportRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    try:
+        return generate_investment_report(db, _investment_rows(db), request)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 def _investment_rows(db: Session | None) -> list[dict[str, Any]]:

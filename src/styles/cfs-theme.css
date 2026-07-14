@@ -765,6 +765,15 @@ select:focus-visible {
   padding: 0.55rem 0.75rem;
 }
 
+.investment-select {
+  background: rgba(2, 7, 17, 0.68);
+  border: 1px solid var(--investment-border);
+  border-radius: 0.8rem;
+  color: var(--investment-text);
+  padding: 0.55rem 0.75rem;
+  width: 100%;
+}
+
 .investment-primary-button:disabled,
 .investment-ghost-button:disabled {
   cursor: not-allowed;

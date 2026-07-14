@@ -1,6 +1,6 @@
 # Investment Environmental Context
 
-This phase adds an environmental and physical-land screening foundation for the internal Investment Panel.
+This phase adds an environmental and physical-land screening foundation for internal CFS Investment.
 
 ## Sources
 
@@ -12,7 +12,7 @@ This phase adds an environmental and physical-land screening foundation for the 
 
 ## Parcel Summary
 
-The Investment Panel uses `investment_parcel_environmental_context` as the candidate-facing summary table. It contains one row per parcel when refreshed. The table is designed for screening-level fields:
+CFS Investment uses `investment_parcel_environmental_context` as the candidate-facing summary table. It contains one row per parcel when refreshed. The table is designed for screening-level fields:
 
 - flood context from existing FEMA parcel overlay
 - mapped wetland context

@@ -591,6 +591,8 @@ def _economics_answer(
         return _economics_environmental_context_answer(request, context)
     if _is_economics_market_context_query(request.query):
         return _economics_market_context_answer(request, context)
+    if _is_investment_research_context(request):
+        return _investment_research_answer(request, context)
     if _is_economics_walkthrough_query(request.query):
         return _economics_walkthrough_answer(request, context)
     if _is_economics_workspace_query(request.query):
@@ -763,6 +765,78 @@ def _is_economics_market_context_query(query: str) -> bool:
 def _is_economics_environmental_context_query(query: str) -> bool:
     normalized = query.lower()
     return any(term in normalized for term in ("environment", "physical constraint", "wetland", "slope", "terrain", "soil", "regulated facility", "epa", "usable-area", "usable area", "phase i", "geotechnical"))
+
+
+def _is_investment_research_context(request: CfsAiSearchRequest) -> bool:
+    filters = request.filter_context or {}
+    normalized = request.query.lower()
+    return filters.get("mode") in {"investment_panel", "cfs_investment"} or "cfs investment" in normalized or "investment research" in normalized
+
+
+def _investment_intent(query: str) -> str:
+    normalized = query.lower()
+    checks = [
+        ("Report Generation", ("report", "memorandum", "brief", "guide")),
+        ("Candidate Comparison", ("compare", "versus", "tradeoff")),
+        ("Acquisition Basis", ("asking", "basis", "comparable", "sale")),
+        ("Environmental and Physical", ("environment", "wetland", "slope", "terrain", "soil", "epa", "usable")),
+        ("Market Area", ("market", "acs", "census", "demographic", "housing", "household")),
+        ("Utility and Infrastructure", ("utility", "sewer", "capacity", "infrastructure")),
+        ("Planning and Entitlement", ("planning", "zoning", "entitlement", "permit")),
+        ("Due Diligence", ("verify", "verification", "diligence", "checklist", "ask staff")),
+        ("Development Readiness", ("readiness", "development", "momentum", "access")),
+        ("Opportunity Screening", ("screen", "candidate", "surface", "priority")),
+    ]
+    for label, terms in checks:
+        if any(term in normalized for term in terms):
+            return label
+    return "Parcel Review"
+
+
+def _investment_research_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+) -> CfsAiSearchResponse:
+    filters = request.filter_context or {}
+    intent = _investment_intent(request.query)
+    candidate = filters.get("active_intake_candidate") or filters.get("selected_candidate") or "the active candidate"
+    strategy = filters.get("active_strategy") or "selected strategy"
+    answer = _briefing(
+        ("Intent", f"{intent} for {candidate} under {strategy}."),
+        (
+            "Use in CFS Investment",
+            _bullets(
+                [
+                    "Use CFS Investment as screening-level research for candidate status, data readiness, and verification needs.",
+                    "Use Opportunity Engine for ranked parcel candidates and strategy filters.",
+                    "Use Property Research for unified parcel, planning, economics, market-area, basis, utility, and environmental context.",
+                    "Use Report Studio for structured reports with sources, limitations, and due-diligence requirements.",
+                ]
+            ),
+        ),
+        (
+            "Evidence boundaries",
+            _bullets(
+                [
+                    "Distinguish public-source evidence from CFS-derived proxies and user-entered information.",
+                    "Treat missing evidence as a data gap, not as a positive or negative parcel signal.",
+                    "Do not treat ACS, comparable context, utility proxies, or environmental layers as proof of demand, value, service, capacity, or feasibility.",
+                ]
+            ),
+        ),
+        (
+            "Next action",
+            "Generate the relevant CFS Investment report or add the candidate evidence to the Report Bucket before Print.",
+        ),
+    )
+    return _response(
+        answer,
+        context,
+        ["economics"],
+        request.mode,
+        [_evidence("CFS Investment research context", f"Intent group: {intent}; candidate: {candidate}; strategy: {strategy}.", "investment_research_context")],
+        ["Open CFS Investment Report Studio.", "Review missing evidence and verification requirements.", "Compare candidates as tradeoffs only."],
+    )
 
 
 def _economics_environmental_context_answer(
@@ -1551,7 +1625,7 @@ def _economics_powerbi_answer(
         answer = _briefing(
             (
                 "Direct answer",
-                "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. In the hidden Investment Panel, use the same ranked candidates as a private research cockpit, then generate a Review Guide when you want a live summary.",
+                "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. In CFS Investment, use the same ranked candidates as a private research cockpit, then generate a Review Guide when you want a live summary.",
             ),
             (
                 "What CFS will include",

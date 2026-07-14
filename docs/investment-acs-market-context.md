@@ -60,7 +60,7 @@ household, or income context does not make a parcel a better investment.
 ## Limitations
 
 - ACS estimates have margins of error. This compact phase records the caveat but
-  does not yet surface MOE values in the Investment Panel.
+  does not yet surface MOE values in CFS Investment.
 - Multi-year growth comparisons are not enabled because overlapping ACS
   five-year vintages require careful interpretation.
 - Parcel-to-tract resolution uses parcel geometry and local Census tract

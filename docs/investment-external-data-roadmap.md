@@ -2,13 +2,13 @@
 
 Phase IP-2C: External Property, Market, and Location Data Research
 
-This roadmap is for the hidden CFS Investment Panel only. CFS remains a screening-level land and property research tool. External data can improve due-diligence triage, but it must not be described as investment advice, an appraisal, a guaranteed return, a confirmed market value, a confirmed development outcome, or confirmed utility service/capacity.
+This roadmap is for internal CFS Investment only. CFS remains a screening-level land and property research tool. External data can improve due-diligence triage, but it must not be described as investment advice, an appraisal, a guaranteed return, a confirmed market value, a confirmed development outcome, or confirmed utility service/capacity.
 
 ## 1. Current Internal Data Coverage
 
 The local CFS database already has strong public/proxy coverage. The important gaps are sale qualification, active listing/licensed market data, verified utility capacity, and authoritative development-pipeline status.
 
-| Domain | Current CFS coverage | Local tables / services observed | Status | Investment Panel use |
+| Domain | Current CFS coverage | Local tables / services observed | Status | CFS Investment use |
 |---|---|---|---|---|
 | Parcels and acreage | 110,017 parcel rows with calculated acreage and parcel quality fields | `parcels_enriched`, `parcels_clean`, `/parcels` | Authoritative/proxy mix; local-only | Parcel identity, acreage band, screening scope |
 | Assessed land/improvement context | Land, building/improvement, assessed/total value fields | `parcels_enriched`, `parcel_tax_value_enrichment_features`, `tax_parcel_value_enrichment` | Authoritative assessor context; not appraisal | Basis context only; never market value claim |
@@ -28,7 +28,7 @@ The local CFS database already has strong public/proxy coverage. The important g
 | Addresses | Present in some source tables; avoid owner/mailing fields | parcel/permit source tables | Sensitive use; display sparingly | Location matching only |
 | Development activity | Permit and plan-review signals | development activity summaries | Good proxy, not completion proof | Pipeline context |
 
-Privacy note: some raw/local tables contain owner, mailing, account, or address-like fields. These should stay out of Investment Panel responses, public demo exports, and Power BI outputs unless a future approved display policy explicitly allows a safe field.
+Privacy note: some raw/local tables contain owner, mailing, account, or address-like fields. These should stay out of CFS Investment responses, public demo exports, and Power BI outputs unless a future approved display policy explicitly allows a safe field.
 
 ## 2. External Source Evaluation Matrix
 
@@ -94,7 +94,7 @@ Privacy note: some raw/local tables contain owner, mailing, account, or address-
 - Coverage: Cabarrus County.
 - Cost/auth: public/manual or request access; no credentials should be committed.
 - Licensing: verify county/public-record reuse and redistribution limits before automated ingestion.
-- Refresh: monthly or quarterly; manual review accepted for hidden Investment Panel.
+- Refresh: monthly or quarterly; manual review accepted for internal CFS Investment.
 - Backend architecture: `external_data_sources` registry entry plus optional deed-verification import table keyed by parcel/deedbook/deedpage.
 - Storage: small normalized verification table; no owner/grantee display in panel.
 - Privacy: do not expose owner, grantor/grantee, or mailing fields.
@@ -131,7 +131,7 @@ Privacy note: some raw/local tables contain owner, mailing, account, or address-
 
 ### 4. NCDOT/CRTPO transportation context connector
 
-- Problem solved: CFS has some AADT/STIP data, but the Investment Panel needs refreshed traffic/project context and long-range regional plan signals.
+- Problem solved: CFS has some AADT/STIP data, but CFS Investment needs refreshed traffic/project context and long-range regional plan signals.
 - Data gained: AADT, traffic stations/segments, functional class, STIP project proximity, CTP/MTP corridor plans.
 - Coverage: Cabarrus/NC/Charlotte region.
 - Cost/auth: public ArcGIS/web services.
@@ -221,7 +221,7 @@ connector_name
 enabled
 ```
 
-This can later power an Investment Panel data-readiness view without exposing credentials.
+This can later power a CFS Investment data-readiness view without exposing credentials.
 
 ## 8. Refresh Strategy
 

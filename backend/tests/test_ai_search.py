@@ -1136,11 +1136,26 @@ def test_ai_search_economics_investment_panel_prompt_is_safe() -> None:
     )
 
     answer = response.answer.lower()
-    assert "investment panel" in answer
-    assert "review guide" in answer
+    assert "cfs investment" in answer
+    assert "report studio" in answer
     assert "screening-level" in answer
     assert "buy this" not in answer
     assert "guaranteed" not in answer
+
+
+def test_ai_search_investment_research_intent_routes_reports() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="economics",
+            filter_context={"mode": "cfs_investment", "active_strategy": "Development Land"},
+            query="Generate a development-site review report.",
+        ),
+        _context(),
+    )
+
+    assert "Report Generation" in response.answer
+    assert "CFS Investment" in response.answer
+    assert response.evidence[0].source == "investment_research_context"
 
 
 def test_ai_search_environmental_prompt_rejects_contamination_conclusion() -> None:

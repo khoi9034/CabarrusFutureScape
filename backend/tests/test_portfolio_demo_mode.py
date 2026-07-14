@@ -319,11 +319,19 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Land Due Diligence Screener" in economics_shell
     assert "InvestmentPanelGate" in economics_shell
     assert "InvestmentPanelPage" in economics_shell
-    assert "Investment Panel Access" in economics_shell
+    investment_shell = read("src/components/investment/InvestmentShell.tsx")
+    assert "InvestmentShell" in economics_shell
+    assert "CFS Investment" in investment_shell
+    assert "Land, Property, and Real Estate Intelligence" in investment_shell
+    assert "CFS Investment" in economics_shell
+    assert "Internal Access" in economics_shell
     assert "Local convenience gate only" in economics_shell
     assert 'const INVESTMENT_PANEL_ACCESS_CODE = "demo"' in economics_shell
     assert "Access code did not match" in economics_shell
     assert "Ask CFS Investment Research" in economics_shell
+    assert "Investment Report Studio" in economics_shell
+    assert "Generate Report" in economics_shell
+    assert "Add report to Report Bucket" in economics_shell
     assert "Ranked Candidate Table" in economics_shell
     assert "Generate Review Guide" in economics_shell
     assert "Ask CFS about this candidate" in economics_shell

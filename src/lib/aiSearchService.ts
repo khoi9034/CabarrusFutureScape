@@ -930,7 +930,7 @@ function demoEconomicsDueDiligencePacketAnswer(
     answer: briefing(
       [
         "Direct answer",
-        "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. In the hidden Investment Panel, use the same ranked candidates as a private research cockpit, then generate a Review Guide when you want a live summary.",
+        "Use Power BI & Tools -> Land Due Diligence Screener -> Top Land Review Candidates. Start with Tier 1 and Tier 2 rows, then use presets such as Growth pressure + sewer proximity or Underbuilt + utility proxy. In CFS Investment, use the same ranked candidates as a private research cockpit, then generate a Review Guide when you want a live summary.",
       ],
       [
         "What CFS will include",

@@ -1,4 +1,4 @@
-"""Refresh Cabarrus ACS tract context for the Investment Panel.
+"""Refresh Cabarrus ACS tract context for CFS Investment.
 
 Run from the backend import context, for example:
 python -m app.scripts.refresh_investment_acs

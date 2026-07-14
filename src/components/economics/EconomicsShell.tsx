@@ -1,30 +1,24 @@
 "use client";
 
 import {
-  ArrowLeft,
   BarChart3,
   BriefcaseBusiness,
   Building2,
   Calculator,
   CheckCircle2,
-  ClipboardList,
   Database,
-  FileText,
-  Filter,
   Gauge,
-  Layers3,
-  LockKeyhole,
   MapPinned,
   Network,
   PanelLeft,
   Search,
   ShieldAlert,
-  ShieldCheck,
   Sparkles,
   Target,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
+import { InvestmentShell } from "@/components/investment/InvestmentShell";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
   askCfsEconomicsPowerBiToolPrompts,
@@ -41,6 +35,7 @@ import {
   compareInvestmentIntakeCandidates,
   createInvestmentIntakeCandidate,
   deleteInvestmentIntakeCandidate,
+  generateInvestmentReport,
   getInvestmentIntake,
   getInvestmentIntakeAnalysis,
   getInvestmentScreen,
@@ -65,6 +60,7 @@ import type {
   InvestmentIntakeCandidate,
   InvestmentIntakeCompareResponse,
   InvestmentIntakePayload,
+  InvestmentReportResponse,
   InvestmentReviewStatus,
   InvestmentSourceType,
   InvestmentScreenResponse,
@@ -306,7 +302,7 @@ export function EconomicsShell() {
             onClick={() => setInvestmentGateOpen(true)}
             type="button"
           >
-            Investment Panel
+            CFS Investment
           </button>
         ) : null}
       </div>
@@ -362,9 +358,9 @@ function InvestmentPanelGate({
     <div className="investment-gate no-print">
       <div className="investment-gate-card">
         <p>Internal Preview Access</p>
-        <h2>Investment Panel Access</h2>
+        <h2>CFS Investment — Internal Access</h2>
         <span>
-          Local convenience gate only. Screening-level review; not investment advice, not an appraisal, no utility confirmation, and no future-value assurance.
+          Local convenience gate only. Production authentication is not yet enabled. Screening-level review; not investment advice, not an appraisal, no utility confirmation, and no future-value assurance.
         </span>
         <label htmlFor="investment-panel-code">
           Access code
@@ -931,6 +927,8 @@ function InvestmentPanelPage({
   const [intakeCsv, setIntakeCsv] = useState("");
   const [editingIntakeId, setEditingIntakeId] = useState<string | null>(null);
   const [intakeForm, setIntakeForm] = useState<InvestmentIntakePayload>(defaultInvestmentIntakeForm(activeStrategy));
+  const [investmentReport, setInvestmentReport] = useState<InvestmentReportResponse | null>(null);
+  const [investmentReportType, setInvestmentReportType] = useState("development_site_review");
   const [intakeLoading, setIntakeLoading] = useState(!USE_DEMO_DATA);
   const [intakeUnavailable, setIntakeUnavailable] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -1052,6 +1050,29 @@ function InvestmentPanelPage({
     if (guide) onAddReportBucketItem(dueDiligencePacketBucketItem(guide));
     onNavigate("print");
   };
+  const generateReport = () => {
+    const parcelId = intakeAnalysis?.candidate.parcel_id || activeSignal?.parcel_id;
+    if (!parcelId && !intakeAnalysis?.candidate.id) {
+      setStatus("Choose a parcel or intake candidate before generating a report.");
+      return;
+    }
+    void generateInvestmentReport({
+      candidate_id: intakeAnalysis?.candidate.id ?? null,
+      parcel_id: parcelId ?? null,
+      report_type: investmentReportType,
+      strategy: activeStrategy,
+    })
+      .then((report) => {
+        setInvestmentReport(report);
+        setStatus("CFS Investment report generated");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Report generation failed."));
+  };
+  const addReportToBucket = () => {
+    if (!investmentReport) return;
+    onAddReportBucketItem(investmentReportBucketItem(investmentReport));
+    setStatus("CFS Investment report saved to Report Bucket");
+  };
   const refreshIntake = () => {
     setIntakeLoading(true);
     return getInvestmentIntake()
@@ -1162,46 +1183,9 @@ function InvestmentPanelPage({
       .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate delete failed."));
   };
   return (
-    <section className="investment-shell">
-      <aside className="investment-sidebar" aria-label="Investment Panel navigation">
-        <div className="investment-brand">
-          <span className="investment-brand-mark"><LockKeyhole className="h-4 w-4" /></span>
-          <div>
-            <p>Investment Panel</p>
-            <span>Internal</span>
-          </div>
-        </div>
-        <nav className="investment-nav">
-          {investmentNavItems.map(({ icon: Icon, id, label, sublabel }) => (
-            <button key={id} onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })} type="button">
-              <Icon className="h-4 w-4" aria-hidden="true" />
-              <span><strong>{label}</strong><small>{sublabel}</small></span>
-            </button>
-          ))}
-        </nav>
-        <div className="investment-sidebar-footer">
-          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-          <p>Private Internal Use Only</p>
-          <button onClick={onClose} type="button"><ArrowLeft className="h-4 w-4" /> Return to CFS Economics</button>
-        </div>
-      </aside>
-      <div className="investment-workspace">
-        <header className="investment-header" id="command-center">
-          <div>
-            <div className="investment-header-kicker">
-              <span>Internal</span>
-              <span>{USE_DEMO_DATA ? "Portfolio Demo" : "Local live context"}</span>
-            </div>
-            <h1>Investment Panel</h1>
-            <p>Private research workspace for land and parcel intelligence.</p>
-          </div>
-          <div className="investment-header-actions">
-            <button className="investment-ghost-button" type="button"><Filter className="h-4 w-4" /> Filters</button>
-            <button className="investment-ghost-button" onClick={onClose} type="button"><ArrowLeft className="h-4 w-4" /> CFS Economics</button>
-          </div>
-        </header>
+    <InvestmentShell dataMode={USE_DEMO_DATA ? "Portfolio Demo" : "Local live context"} onClose={onClose}>
         <main className="investment-main">
-          <section className="investment-kpi-grid" aria-label="Investment Panel command KPIs">
+          <section className="investment-kpi-grid" aria-label="CFS Investment command KPIs">
             <InvestmentKpiCard icon={Target} label="Priority Review Candidates" status={tier1 + tier2 ? "Active" : "Limited"} note="Tier 1 and Tier 2 review bands." />
             <InvestmentKpiCard icon={CheckCircle2} label="Strong Review Candidates" status={tier1 ? "Elevated" : "Verify"} note="Strong infrastructure-supported signal." />
             <InvestmentKpiCard icon={Network} label="Utility-Readiness Proxy Coverage" status={sewerSupported ? "Solid" : "Limited"} note="Sewer proximity proxy context." />
@@ -1238,7 +1222,7 @@ function InvestmentPanelPage({
                     active_usable_area_proxy: intakeAnalysis?.environmental_context?.usable_area_screening_proxy,
                     active_wetland_context: intakeAnalysis?.environmental_context?.mapped_wetland_context,
                     mode: "investment_panel",
-                    strategy_screening_source: activeInvestmentScreen ? "Investment Intelligence Engine" : "local panel fallback",
+                    strategy_screening_source: activeInvestmentScreen ? "CFS Investment Research Engine" : "local product fallback",
                     sewer_proxy_supported_candidates: sewerSupported,
                     tier_1_candidates: tier1,
                     tier_2_candidates: tier2,
@@ -1362,7 +1346,7 @@ function InvestmentPanelPage({
                   Clear Selection
                 </button>
               </section>
-              <section className="investment-card investment-action-card" id="review-guides">
+              <section className="investment-card investment-action-card" id="due-diligence">
                 <div>
                   <p>Generate Review Guide</p>
                   <span>Live on-screen summary for manual due diligence.</span>
@@ -1378,6 +1362,24 @@ function InvestmentPanelPage({
                 </button>
                 {status ? <span className="investment-status">{status}</span> : null}
               </section>
+              <section className="investment-card investment-action-card" id="report-studio">
+                <div>
+                  <p>Investment Report Studio</p>
+                  <span>Generate structured CFS Investment reports from the active parcel or intake candidate.</span>
+                </div>
+                <select className="investment-select" value={investmentReportType} onChange={(event) => setInvestmentReportType(event.target.value)}>
+                  {investmentReportTypeOptions.map((option) => (
+                    <option key={option.id} value={option.id}>{option.label}</option>
+                  ))}
+                </select>
+                <button className="investment-primary-button" disabled={!activeSignal && !intakeAnalysis} onClick={generateReport} type="button">
+                  Generate Report
+                </button>
+                <button className="investment-ghost-button" disabled={!investmentReport} onClick={addReportToBucket} type="button">
+                  Add report to Report Bucket
+                </button>
+                {investmentReport ? <p className="investment-muted">{investmentReport.report_title}: {investmentReport.sections.length} sections ready for Print.</p> : null}
+              </section>
               {guide ? <InvestmentGuidePreview guide={guide} /> : null}
               <InvestmentBucketPanel
                 items={reportBucketItems}
@@ -1389,23 +1391,9 @@ function InvestmentPanelPage({
             </aside>
           </section>
         </main>
-        <footer className="investment-footer">
-          Internal use only. Information is derived from multiple sources and proxies. Use professional judgment and consult appropriate experts. Screening-level review only - not investment advice, not an appraisal, and not a guarantee of future value.
-        </footer>
-      </div>
-    </section>
+    </InvestmentShell>
   );
 }
-
-const investmentNavItems = [
-  { icon: Gauge, id: "command-center", label: "Command Center", sublabel: "Overview & KPIs" },
-  { icon: Filter, id: "strategy-screener", label: "Strategy Screener", sublabel: "Find & Filter Parcels" },
-  { icon: ClipboardList, id: "candidate-intake", label: "Candidate Intake", sublabel: "Add leads for review" },
-  { icon: MapPinned, id: "candidate-review", label: "Candidate Review", sublabel: "Deep Dive Workspace" },
-  { icon: Layers3, id: "compare", label: "Compare", sublabel: "Side-by-Side Analysis" },
-  { icon: ClipboardList, id: "review-guides", label: "Review Guides", sublabel: "Methods & Checklists" },
-  { icon: FileText, id: "report-bucket", label: "Report Bucket", sublabel: "Saved for Reporting" },
-] as const;
 
 const investmentStrategies: Array<{
   description: string;
@@ -1438,6 +1426,18 @@ const investmentStrategies: Array<{
     label: "Existing-Use Land",
   },
 ];
+
+const investmentReportTypeOptions = [
+  { id: "land_investment_review", label: "Land Investment Review" },
+  { id: "development_site_review", label: "Development Site Review" },
+  { id: "long_term_land_banking_memorandum", label: "Long-Term Land Banking Memorandum" },
+  { id: "entitlement_repositioning_review", label: "Entitlement and Repositioning Review" },
+  { id: "existing_use_property_review", label: "Existing-Use Property Review" },
+  { id: "market_area_report", label: "Market Area Report" },
+  { id: "candidate_comparison_report", label: "Candidate Comparison Report" },
+  { id: "due_diligence_brief", label: "Due-Diligence Brief" },
+  { id: "planning_utility_question_guide", label: "Planning and Utility Question Guide" },
+] as const;
 
 function investmentStrategyLabel(strategy: InvestmentStrategyId) {
   return investmentStrategies.find((item) => item.id === strategy)?.label ?? "Development Land";
@@ -1946,7 +1946,7 @@ function MarketAreaContextPanel({ context }: { context?: InvestmentIntakeAnalysi
     { label: "Source / Last Refresh", value: `${context?.source_attribution || "U.S. Census Bureau ACS 5-year estimates."}${context?.last_refreshed ? ` · ${formatDate(context.last_refreshed)}` : ""}` },
   ];
   return (
-    <div className="investment-signal-list">
+    <div className="investment-signal-list" id="market-research">
       <p>Market Area Context</p>
       <Matrix rows={rows} />
       <p className="investment-muted">
@@ -4568,7 +4568,7 @@ function LandDueDiligenceScreener({
   return (
     <EconPanel
       description={investmentMode ? "Live candidate table for private manual review, comparison, and due diligence guide creation." : "Build a parcel watchlist for manual planning, utility, site, and economics review."}
-      kicker={investmentMode ? "Investment research panel" : "Internal screening"}
+      kicker={investmentMode ? "CFS Investment research" : "Internal screening"}
       title={investmentMode ? "Ranked Candidate Table" : "Land Due Diligence Screener"}
       tourId="land-due-diligence-screener"
     >
@@ -7689,6 +7689,18 @@ function dueDiligencePacketBucketItem(packet: DueDiligencePacket): ReportBucketI
   };
 }
 
+function investmentReportBucketItem(report: InvestmentReportResponse): ReportBucketItemInput {
+  return {
+    caveats: report.limitations,
+    content: report.sections.map((section) => `${section.title}\n${section.body}`).join("\n\n"),
+    id: `investment-report-${report.report_type}-${Date.now()}`,
+    source_page: "CFS Investment",
+    summary: report.report_bucket_item.summary,
+    title: report.report_title,
+    type: "generated_report",
+  };
+}
+
 function intakeAnalysisBucketItem(analysis: InvestmentIntakeAnalysisResponse): ReportBucketItemInput {
   return {
     caveats: analysis.caveats,
@@ -8560,7 +8572,7 @@ type ReportBucketItem = {
   related_tables?: PowerBiTableName[];
   report_plan?: PowerBiGeneratedReportPlan;
   selected_for_print: boolean;
-  source_page: "Ask CFS" | "Economic Dashboard" | "Power BI & Tools" | "Print";
+  source_page: "Ask CFS" | "CFS Investment" | "Economic Dashboard" | "Power BI & Tools" | "Print";
   summary: string;
   title: string;
   type: ReportBucketItemType;

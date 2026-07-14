@@ -1,4 +1,4 @@
-"""Environmental screening context for internal Investment Panel candidates."""
+"""Environmental screening context for internal CFS Investment candidates."""
 
 from __future__ import annotations
 

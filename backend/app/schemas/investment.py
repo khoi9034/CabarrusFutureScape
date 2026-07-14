@@ -13,6 +13,13 @@ InvestmentStrategyId = Literal[
 ]
 
 
+def reject_private_identity_text(value: Any) -> Any:
+    text = str(value or "").lower()
+    if "owner" in text or "mailing" in text or "grantor" in text or "grantee" in text:
+        raise ValueError("Do not enter owner, mailing, grantor, or grantee information.")
+    return value
+
+
 class InvestmentScreenRequest(BaseModel):
     filters: dict[str, Any] = Field(default_factory=dict)
     limit: int = Field(default=80, ge=1, le=250)
@@ -26,6 +33,18 @@ class InvestmentCompareRequest(BaseModel):
 
 class InvestmentIntakeCompareRequest(BaseModel):
     candidate_ids: list[str] = Field(min_length=2, max_length=4)
+
+
+class InvestmentReportRequest(BaseModel):
+    report_type: str = Field(min_length=1, max_length=80)
+    parcel_id: str | None = Field(default=None, max_length=80)
+    candidate_id: str | None = Field(default=None, max_length=80)
+    strategy: InvestmentStrategyId = "development_land"
+    selected_sections: list[str] = Field(default_factory=list, max_length=20)
+    selected_comparables: list[str] = Field(default_factory=list, max_length=8)
+    user_notes: str | None = Field(default=None, max_length=4000)
+
+    _safe_text = field_validator("user_notes", mode="before")(reject_private_identity_text)
 
 
 InvestmentSourceType = Literal[
@@ -88,10 +107,7 @@ class InvestmentIntakePayload(BaseModel):
     @field_validator("candidate_name", "source_name", "listing_status", "property_type", "user_notes", "broker_notes", mode="before")
     @classmethod
     def reject_private_identity_fields(cls, value: Any) -> Any:
-        text = str(value or "").lower()
-        if "owner" in text or "mailing" in text or "grantor" in text or "grantee" in text:
-            raise ValueError("Do not enter owner, mailing, grantor, or grantee information.")
-        return value
+        return reject_private_identity_text(value)
 
     @model_validator(mode="after")
     def normalize_private_label(self) -> "InvestmentIntakePayload":

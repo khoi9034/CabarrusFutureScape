@@ -5,6 +5,8 @@ import type {
   InvestmentIntakeCompareResponse,
   InvestmentIntakeListResponse,
   InvestmentIntakePayload,
+  InvestmentReportResponse,
+  InvestmentResearchContext,
   InvestmentScreenResponse,
   InvestmentStrategyId,
 } from "@/types/api";
@@ -69,6 +71,28 @@ export async function deleteInvestmentIntakeCandidate(candidateId: string) {
   });
   if (!response.ok) throw new Error("Unable to delete investment intake candidate.");
   return response.json() as Promise<{ deleted: boolean }>;
+}
+
+export async function getInvestmentResearchContext(parcelId: string, strategy: InvestmentStrategyId) {
+  assertLive();
+  return apiGet<InvestmentResearchContext>(`/investment/research-context/${encodeURIComponent(parcelId)}?strategy=${strategy}`, undefined, { timeoutMs: 20000 });
+}
+
+export async function getInvestmentIntakeResearchContext(candidateId: string) {
+  assertLive();
+  return apiGet<InvestmentResearchContext>(`/investment/intake/${encodeURIComponent(candidateId)}/research-context`, undefined, { timeoutMs: 20000 });
+}
+
+export async function generateInvestmentReport(payload: {
+  candidate_id?: string | null;
+  parcel_id?: string | null;
+  report_type: string;
+  selected_sections?: string[];
+  strategy?: InvestmentStrategyId;
+  user_notes?: string | null;
+}) {
+  assertLive();
+  return apiPost<InvestmentReportResponse>("/investment/reports/generate", payload, { timeoutMs: 20000 });
 }
 
 function assertLive() {

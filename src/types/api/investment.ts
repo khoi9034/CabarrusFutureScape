@@ -212,3 +212,58 @@ export interface InvestmentEnvironmentalContext {
   verification_requirements: string[];
   wetland_percent_of_parcel?: number | null;
 }
+
+export interface InvestmentResearchContext {
+  brand: "CFS Investment";
+  acquisition_basis: Record<string, unknown>;
+  comparable_context: Record<string, unknown>;
+  development_readiness: Record<string, unknown>;
+  economic_context: Record<string, unknown>;
+  environmental_context: InvestmentEnvironmentalContext | Record<string, unknown>;
+  evidence_quality: Record<string, unknown>;
+  identity: {
+    approximate_acreage?: number | null;
+    geography_label?: string | null;
+    intake_candidate_id?: string | null;
+    parcel_id: string;
+    private_candidate_label?: string | null;
+  };
+  limitations: string[];
+  market_area_context: InvestmentMarketContext | Record<string, unknown>;
+  missing_evidence: string[];
+  parcel_fundamentals: Record<string, unknown>;
+  planning_context: Record<string, unknown>;
+  safe_summary: string;
+  selected_strategy: InvestmentStrategyId;
+  source_registry: Array<Record<string, string>>;
+  utility_context: Record<string, unknown>;
+  verification_requirements: string[];
+}
+
+export interface InvestmentReportSection {
+  body: string;
+  id: string;
+  limitations: string[];
+  sources: Array<Record<string, string>>;
+  title: string;
+}
+
+export interface InvestmentReportResponse {
+  as_of: string;
+  brand: "CFS Investment";
+  candidate_id?: string | null;
+  limitations: string[];
+  parcel_id?: string | null;
+  purpose: string;
+  report_bucket_item: {
+    caveats: string[];
+    content: string;
+    summary: string;
+    title: string;
+    type: string;
+  };
+  report_title: string;
+  report_type: string;
+  sections: InvestmentReportSection[];
+  strategy: InvestmentStrategyId;
+}
