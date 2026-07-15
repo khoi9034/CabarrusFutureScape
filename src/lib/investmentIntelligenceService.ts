@@ -10,8 +10,15 @@ import type {
   InvestmentIntakePayload,
   InvestmentOpportunityListResponse,
   InvestmentOpportunitySource,
+  InvestmentRecentWorkResponse,
   InvestmentReportResponse,
   InvestmentResearchContext,
+  InvestmentSavedItem,
+  InvestmentSavedItemListResponse,
+  InvestmentSavedItemStatus,
+  InvestmentSavedItemType,
+  InvestmentSavedSearch,
+  InvestmentSavedSearchListResponse,
   InvestmentScreenResponse,
   InvestmentStrategyId,
   InvestmentUnderwritingCalculation,
@@ -239,6 +246,104 @@ export async function prefillInvestmentUnderwriting(payload: {
 }) {
   assertLive();
   return apiPost<InvestmentUnderwritingPrefillResponse>("/investment/underwriting/prefill", payload, { timeoutMs: 30000 });
+}
+
+export async function getInvestmentSavedItems() {
+  assertLive();
+  return apiGet<InvestmentSavedItemListResponse>("/investment/saved-items", undefined, { timeoutMs: 20000 });
+}
+
+export async function createInvestmentSavedItem(payload: {
+  area_id?: string | null;
+  candidate_id?: string | null;
+  engagement_id?: string | null;
+  item_reference_id: string;
+  item_type: InvestmentSavedItemType;
+  label: string;
+  opportunity_id?: string | null;
+  parcel_id?: string | null;
+  private_notes?: string | null;
+  scenario_id?: string | null;
+  status?: InvestmentSavedItemStatus;
+  strategy?: InvestmentStrategyId | null;
+  summary?: string | null;
+}) {
+  assertLive();
+  return apiPost<InvestmentSavedItem>("/investment/saved-items", payload, { timeoutMs: 20000 });
+}
+
+export async function updateInvestmentSavedItem(itemId: string, payload: Partial<Pick<InvestmentSavedItem, "label" | "private_notes" | "status" | "summary">>) {
+  assertLive();
+  const response = await fetch(buildApiUrl(`/investment/saved-items/${encodeURIComponent(itemId)}`), {
+    body: JSON.stringify(payload),
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    method: "PATCH",
+  });
+  if (!response.ok) throw new Error("Unable to update saved CFS Investment item.");
+  return response.json() as Promise<InvestmentSavedItem>;
+}
+
+export async function deleteInvestmentSavedItem(itemId: string) {
+  assertLive();
+  const response = await fetch(buildApiUrl(`/investment/saved-items/${encodeURIComponent(itemId)}`), {
+    cache: "no-store",
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Unable to remove saved CFS Investment item.");
+  return response.json() as Promise<{ deleted: boolean }>;
+}
+
+export async function getInvestmentRecentWork() {
+  assertLive();
+  return apiGet<InvestmentRecentWorkResponse>("/investment/recent-work", undefined, { timeoutMs: 20000 });
+}
+
+export async function recordInvestmentRecentWork(payload: {
+  activity_type: string;
+  context?: Record<string, unknown>;
+  label: string;
+  page: string;
+  parcel_id?: string | null;
+  reference_id?: string | null;
+  reference_type: string;
+  strategy?: InvestmentStrategyId | null;
+  summary?: string | null;
+}) {
+  assertLive();
+  return apiPost<InvestmentRecentWorkResponse>("/investment/recent-work", payload, { timeoutMs: 20000 });
+}
+
+export async function getInvestmentSavedSearches() {
+  assertLive();
+  return apiGet<InvestmentSavedSearchListResponse>("/investment/saved-searches", undefined, { timeoutMs: 20000 });
+}
+
+export async function createInvestmentSavedSearch(payload: {
+  advanced_criteria?: Record<string, unknown>;
+  essential_criteria?: Record<string, unknown>;
+  goal: string;
+  guided_or_advanced?: "advanced" | "guided";
+  location_type?: string;
+  location_value?: string | null;
+  result_summary?: Record<string, unknown>;
+  search_name: string;
+}) {
+  assertLive();
+  return apiPost<InvestmentSavedSearch>("/investment/saved-searches", payload, { timeoutMs: 20000 });
+}
+
+export async function rerunInvestmentSavedSearch(searchId: string) {
+  assertLive();
+  return apiPost<Record<string, unknown>>(`/investment/saved-searches/${encodeURIComponent(searchId)}/rerun`, {}, { timeoutMs: 30000 });
+}
+
+export async function convertInvestmentSavedSearchToEngagement(searchId: string) {
+  assertLive();
+  return apiPost<{ engagement: InvestmentEngagement; saved_search: InvestmentSavedSearch }>(`/investment/saved-searches/${encodeURIComponent(searchId)}/engagement`, {}, { timeoutMs: 20000 });
 }
 
 function assertLive() {

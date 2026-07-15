@@ -38,9 +38,13 @@ import {
   calculateInvestmentUnderwriting,
   createInvestmentEngagement,
   createInvestmentIntakeCandidate,
+  createInvestmentSavedItem,
+  createInvestmentSavedSearch,
   createInvestmentUnderwritingScenario,
   deleteInvestmentIntakeCandidate,
+  deleteInvestmentSavedItem,
   deleteInvestmentUnderwritingScenario,
+  convertInvestmentSavedSearchToEngagement,
   generateInvestmentReport,
   generateInvestmentEngagementReport,
   getInvestmentEngagements,
@@ -48,12 +52,17 @@ import {
   getInvestmentIntakeAnalysis,
   getInvestmentOpportunities,
   getInvestmentOpportunitySources,
+  getInvestmentRecentWork,
+  getInvestmentSavedItems,
+  getInvestmentSavedSearches,
   getInvestmentScreen,
   getInvestmentUnderwritingScenarios,
   getInvestmentUnderwritingTemplates,
   importInvestmentIntakeCsv,
   matchInvestmentOpportunity,
   prefillInvestmentUnderwriting,
+  recordInvestmentRecentWork,
+  rerunInvestmentSavedSearch,
   searchInvestmentRadar,
   updateInvestmentIntakeCandidate,
   updateInvestmentUnderwritingScenario,
@@ -78,6 +87,9 @@ import type {
   InvestmentIntakePayload,
   InvestmentReportResponse,
   InvestmentReviewStatus,
+  InvestmentSavedItem,
+  InvestmentSavedSearch,
+  InvestmentRecentWorkItem,
   InvestmentSourceType,
   InvestmentScreenResponse,
   InvestmentStrategyId,
@@ -955,11 +967,12 @@ function InvestmentPanelPage({
   const [intakeForm, setIntakeForm] = useState<InvestmentIntakePayload>(defaultInvestmentIntakeForm(activeStrategy));
   const [investmentReport, setInvestmentReport] = useState<InvestmentReportResponse | null>(null);
   const [investmentReportType, setInvestmentReportType] = useState("development_site_review");
-  const [activeInvestmentPage, setActiveInvestmentPage] = useState<InvestmentPageId>("overview");
-  const [investmentViewMode, setInvestmentViewMode] = useState<"guided" | "advanced">(() => readInvestmentGuidedSessionState().viewMode ?? "guided");
+  const [activeInvestmentPage, setActiveInvestmentPage] = useState<InvestmentPageId>(() => readInvestmentDisplayPreference().lastPage ?? "overview");
+  const [investmentViewMode, setInvestmentViewMode] = useState<"guided" | "advanced">(() => readInvestmentDisplayPreference().viewMode ?? "guided");
   const [guidedQuestion, setGuidedQuestion] = useState("");
-  const [myShortlist, setMyShortlist] = useState<Array<{ id: string; label: string; type: string; summary: string }>>(() => readInvestmentGuidedSessionState().myShortlist ?? []);
-  const [recentWork, setRecentWork] = useState<Array<{ label: string; page: InvestmentPageId; summary: string }>>(() => readInvestmentGuidedSessionState().recentWork ?? []);
+  const [myShortlist, setMyShortlist] = useState<InvestmentSavedItem[]>([]);
+  const [recentWork, setRecentWork] = useState<InvestmentRecentWorkItem[]>([]);
+  const [savedSearches, setSavedSearches] = useState<InvestmentSavedSearch[]>([]);
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [underwritingAssumptions, setUnderwritingAssumptions] = useState<Record<string, number | string | null>>(defaultUnderwritingAssumptions("development_land"));
   const [underwritingCompareIds, setUnderwritingCompareIds] = useState<string[]>([]);
@@ -980,12 +993,8 @@ function InvestmentPanelPage({
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      sessionStorage.setItem("cfs-investment-guided-state", JSON.stringify({ myShortlist, recentWork, viewMode: investmentViewMode }));
-    } catch {
-      // Ignore storage quota/private-mode failures.
-    }
-  }, [investmentViewMode, myShortlist, recentWork]);
+    writeInvestmentDisplayPreference({ lastPage: activeInvestmentPage, viewMode: investmentViewMode });
+  }, [activeInvestmentPage, investmentViewMode]);
 
   useEffect(() => {
     let mounted = true;
@@ -1037,13 +1046,19 @@ function InvestmentPanelPage({
       searchInvestmentRadar(),
       getInvestmentEngagements(),
       getInvestmentUnderwritingTemplates(),
-    ]).then(([sources, feed, radar, engagementList, templates]) => {
+      getInvestmentSavedItems(),
+      getInvestmentRecentWork(),
+      getInvestmentSavedSearches(),
+    ]).then(([sources, feed, radar, engagementList, templates, savedItems, recentItems, searches]) => {
       if (!mounted) return;
       if (sources.status === "fulfilled") setOpportunitySources(sources.value.sources);
       if (feed.status === "fulfilled") setOpportunities(feed.value.opportunities);
       if (radar.status === "fulfilled") setRadarAreas(radar.value.areas);
       if (engagementList.status === "fulfilled") setEngagements(engagementList.value.engagements);
       if (templates.status === "fulfilled") setUnderwritingTemplates(templates.value.templates);
+      if (savedItems.status === "fulfilled") setMyShortlist(savedItems.value.items);
+      if (recentItems.status === "fulfilled") setRecentWork(recentItems.value.items);
+      if (searches.status === "fulfilled") setSavedSearches(searches.value.searches);
     });
     return () => {
       mounted = false;
@@ -1286,6 +1301,14 @@ function InvestmentPanelPage({
     getInvestmentEngagements()
       .then((response) => setEngagements(response.engagements))
       .catch(() => setStatus("Engagements are available only when the local backend and database are running."));
+  const refreshSavedWorkspace = () =>
+    Promise.allSettled([getInvestmentSavedItems(), getInvestmentRecentWork(), getInvestmentSavedSearches()])
+      .then(([savedItems, recentItems, searches]) => {
+        if (savedItems.status === "fulfilled") setMyShortlist(savedItems.value.items);
+        if (recentItems.status === "fulfilled") setRecentWork(recentItems.value.items);
+        if (searches.status === "fulfilled") setSavedSearches(searches.value.searches);
+      })
+      .catch(() => setStatus("Saved CFS Investment workspace is available when the local backend and database are running."));
   const underwritingPayload = () => {
     const intakeAskingPrice = intakeAnalysis?.acquisition_basis.asking_price;
     const assumptions = intakeAskingPrice && !underwritingAssumptions.asking_price && !underwritingAssumptions.purchase_price && !underwritingAssumptions.acquisition_basis
@@ -1400,7 +1423,7 @@ function InvestmentPanelPage({
       .then((result) => setStatus(`Parcel match: ${String(result.parcel_match_status ?? "Manual Verification Required")}`))
       .catch((error) => setStatus(error instanceof Error ? error.message : "Opportunity match failed."));
   };
-  const createDefaultEngagement = () => {
+  const createDefaultEngagement = (items: InvestmentSavedItem[] = []) => {
     void createInvestmentEngagement({
       engagement_name: "New site-selection engagement",
       engagement_type: "Site-selection study",
@@ -1412,6 +1435,14 @@ function InvestmentPanelPage({
       .then((engagement) => {
         setStatus("Engagement created.");
         setEngagements((current) => [engagement, ...current.filter((item) => item.id !== engagement.id)]);
+        const engagementItems = items
+          .map((item) => ({ item_id: item.item_reference_id, item_type: engagementShortlistType(item.item_type) }))
+          .filter((item): item is { item_id: string; item_type: "search_area" | "parcel" | "opportunity" | "intake_candidate" | "underwriting_scenario" } => Boolean(item.item_type));
+        if (engagementItems.length) {
+          void Promise.allSettled(
+            engagementItems.map((item) => addInvestmentEngagementShortlistItem(engagement.id, { ...item, status: "Shortlist" })),
+          ).then(() => refreshEngagements());
+        }
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to create engagement."));
   };
@@ -1441,26 +1472,89 @@ function InvestmentPanelPage({
   const openInvestmentPage = (page: InvestmentPageId, label?: string) => {
     setActiveInvestmentPage(page);
     if (label) {
-      setRecentWork((current) => [{ label, page, summary: "Continue" }, ...current.filter((item) => item.label !== label)].slice(0, 6));
+      void recordInvestmentRecentWork({
+        activity_type: "opened_workspace",
+        context: { source: "guided_navigation" },
+        label,
+        page,
+        reference_id: page,
+        reference_type: "page",
+        strategy: activeStrategy,
+        summary: "Continue",
+      })
+        .then((response) => setRecentWork(response.items))
+        .catch(() => setStatus("Recent Work could not be saved because the local backend is unavailable."));
     }
   };
-  const addShortlistItem = (item: { id: string; label: string; type: string; summary: string }) => {
-    setMyShortlist((current) => [item, ...current.filter((existing) => existing.id !== item.id)].slice(0, 24));
-    recordInvestmentEvent("candidate_shortlisted", { type: item.type });
-    setStatus(`${item.label} added to My Shortlist.`);
+  const addShortlistItem = (item: Parameters<typeof createInvestmentSavedItem>[0]) => {
+    void createInvestmentSavedItem(item)
+      .then((savedItem) => {
+        setMyShortlist((current) => [savedItem, ...current.filter((existing) => existing.id !== savedItem.id && existing.item_reference_id !== savedItem.item_reference_id)].slice(0, 24));
+        recordInvestmentEvent("candidate_shortlisted", { type: item.item_type });
+        setStatus(`${savedItem.label} added to My Shortlist.`);
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to save My Shortlist item."));
+  };
+  const removeShortlistItem = (id: string) => {
+    void deleteInvestmentSavedItem(id)
+      .then(() => {
+        setMyShortlist((current) => current.filter((item) => item.id !== id));
+        setStatus("Saved shortlist item removed. Underlying parcel or candidate was not deleted.");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to remove saved item."));
   };
   const addSignalToShortlist = (signal: EconomicsParcelSignal) => addShortlistItem({
-    id: `parcel-${signal.parcel_id}`,
+    item_reference_id: signal.parcel_id,
+    item_type: "parcel",
     label: signalLabel(signal),
+    parcel_id: signal.parcel_id,
+    status: "Shortlisted",
+    strategy: activeStrategy,
     summary: signal.development_readiness_band ?? signal.opportunity_class ?? "Screening-level review candidate",
-    type: "Parcel",
   });
   const addOpportunityToShortlist = (opportunity: InvestmentOpportunityReference) => addShortlistItem({
-    id: `opportunity-${opportunity.external_opportunity_id}`,
+    item_reference_id: opportunity.external_opportunity_id,
+    item_type: "opportunity",
     label: opportunity.title,
+    opportunity_id: opportunity.external_opportunity_id,
+    parcel_id: opportunity.parcel_id ?? null,
+    status: "Shortlisted",
+    strategy: activeStrategy,
     summary: `${opportunity.source_name}; ${opportunity.parcel_match_status}`,
-    type: "Opportunity",
   });
+  const saveGuidedSearch = (name?: string) => {
+    const searchName = (name || guidedQuestion || `${investmentStrategyLabel(activeStrategy)} guided search`).trim();
+    void createInvestmentSavedSearch({
+      essential_criteria: { query: guidedQuestion.trim(), strategy: activeStrategy },
+      goal: investmentStrategyLabel(activeStrategy),
+      guided_or_advanced: investmentViewMode,
+      location_type: "All Cabarrus County",
+      result_summary: { active_page: activeInvestmentPage, result_count: visibleRows.length },
+      search_name: searchName,
+    })
+      .then((search) => {
+        setSavedSearches((current) => [search, ...current.filter((item) => item.id !== search.id)].slice(0, 12));
+        setStatus("Guided search saved.");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to save guided search."));
+  };
+  const rerunSavedSearch = (search: InvestmentSavedSearch) => {
+    void rerunInvestmentSavedSearch(search.id)
+      .then(() => {
+        openInvestmentPage("area-radar", search.search_name);
+        void refreshSavedWorkspace();
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to rerun saved search."));
+  };
+  const convertSavedSearchToProject = (search: InvestmentSavedSearch) => {
+    void convertInvestmentSavedSearchToEngagement(search.id)
+      .then(({ engagement }) => {
+        setEngagements((current) => [engagement, ...current.filter((item) => item.id !== engagement.id)]);
+        openInvestmentPage("engagements", engagement.engagement_name);
+        setStatus("Saved search converted to a project.");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to create project from saved search."));
+  };
   const handleGuidedQuestion = () => {
     const query = guidedQuestion.trim();
     if (!query) return;
@@ -1505,6 +1599,10 @@ function InvestmentPanelPage({
     active_engagement: engagements[0]?.engagement_name,
     active_opportunity_count: opportunities.length,
     active_priority_search_area: radarAreas[0]?.area_name,
+    persisted_shortlist_count: myShortlist.length,
+    persisted_shortlist_preview: myShortlist.slice(0, 5).map((item) => `${item.label} (${titleText(item.item_type)})`).join("; "),
+    recent_work_preview: recentWork.slice(0, 5).map((item) => `${item.label} (${titleText(item.page)})`).join("; "),
+    saved_search_preview: savedSearches.slice(0, 5).map((item) => item.search_name).join("; "),
     active_underwriting_summary: underwritingResult
       ? `${underwritingResult.scenario_type_label}; missing inputs: ${underwritingResult.missing_inputs.join(", ") || "none"}; total project/basis: ${underwritingResult.results.total_project_cost ?? underwritingResult.results.total_basis_at_exit ?? underwritingResult.results.total_basis_after_entitlement ?? "not available"}`
       : undefined,
@@ -1691,6 +1789,7 @@ function InvestmentPanelPage({
                     value={guidedQuestion}
                   />
                   <button className="investment-primary-button" type="submit">Find</button>
+                  <button className="investment-ghost-button" onClick={() => saveGuidedSearch()} type="button">Save Search</button>
                 </div>
               </form>
             </section>
@@ -1701,7 +1800,7 @@ function InvestmentPanelPage({
                 { action: "Analyze", page: "research" as InvestmentPageId, title: "Analyze a Property", body: "Enter a parcel ID, choose an existing candidate, or open a property reference.", result: "Strengths, cautions, missing evidence, and sources." },
                 { action: "Compare", page: "compare" as InvestmentPageId, title: "Compare Properties", body: "Compare two to four candidates across price, planning, market, environmental, utility, and financial evidence.", result: "Tradeoffs without declaring a winner." },
                 { action: "Report", page: "report-studio" as InvestmentPageId, title: "Build a Client Report", body: "Create a professional screening, site-selection, acquisition, or due-diligence report.", result: "Structured report sections and source notes." },
-                { action: "Continue", page: (recentWork[0]?.page ?? "engagements") as InvestmentPageId, title: "Continue Recent Work", body: recentWork[0]?.label ?? "Resume a shortlist, project, report, or analysis from this session.", result: recentWork[0]?.summary ?? "Recent work appears after you start." },
+                { action: "Continue", page: (recentWork[0]?.page ?? "engagements") as InvestmentPageId, title: "Continue Recent Work", body: recentWork[0]?.label ?? "Resume a shortlist, project, report, or analysis from your saved workspace.", result: recentWork[0]?.summary ?? "Recent work appears after you start." },
               ].map((task) => (
                 <article className="investment-task-card" key={task.title}>
                   <span>{task.action}</span>
@@ -1713,14 +1812,31 @@ function InvestmentPanelPage({
               ))}
             </section>
             <section className="investment-two-column">
-              <InvestmentRecentWorkPanel items={recentWork} onOpen={(item) => openInvestmentPage(item.page, item.label)} />
+              <InvestmentRecentWorkPanel items={recentWork} onOpen={(item) => openInvestmentPage(item.page as InvestmentPageId, item.label)} />
               <InvestmentShortlistPanel
                 items={myShortlist}
-                onAnalyze={(item) => openInvestmentPage(item.type === "Opportunity" ? "opportunity-feed" : "research", item.label)}
+                onAnalyze={(item) => openInvestmentPage(item.item_type === "opportunity" ? "opportunity-feed" : "research", item.label)}
                 onCompare={() => openInvestmentPage("compare", "Compare shortlist")}
-                onRemove={(id) => setMyShortlist((current) => current.filter((item) => item.id !== id))}
+                onCreateProject={() => createDefaultEngagement(myShortlist)}
+                onRemove={removeShortlistItem}
                 onReport={() => openInvestmentPage("report-studio", "Create report from shortlist")}
               />
+            </section>
+            <section className="investment-two-column">
+              <InvestmentSavedSearchPanel
+                items={savedSearches}
+                onConvertProject={convertSavedSearchToProject}
+                onOpen={(item) => openInvestmentPage("area-radar", item.search_name)}
+                onRerun={rerunSavedSearch}
+              />
+              <section className="investment-card">
+                <div className="investment-section-heading"><div><p>Draft Work</p><h2>Projects and scenarios needing review</h2></div></div>
+                <Matrix rows={[
+                  { label: "Draft scenarios", value: formatNumber(underwritingScenarios.filter((scenario) => scenario.scenario_status === "Draft").length) },
+                  { label: "Projects needing verification", value: formatNumber(engagements.filter((engagement) => engagement.engagement_status !== "Archived").length) },
+                  { label: "Saved searches", value: formatNumber(savedSearches.length) },
+                ]} />
+              </section>
             </section>
             <section className="investment-kpi-grid" aria-label="CFS Investment readiness">
               <InvestmentKpiCard icon={Target} label="Priority Review Candidates" status={tier1 + tier2 ? "Active" : "Limited"} note="Tier 1 and Tier 2 review bands." />
@@ -1753,8 +1869,16 @@ function InvestmentPanelPage({
             areas={radarAreas}
             onAddToBucket={(area) => onAddReportBucketItem(areaRadarBucketItem(area))}
             onAddToEngagement={(area) => addToFirstEngagement(area.area_id, "search_area")}
-            onAddToShortlist={(area) => addShortlistItem({ id: `area-${area.area_id}`, label: area.area_name, summary: area.area_classification, type: "Search Area" })}
+            onAddToShortlist={(area) => addShortlistItem({
+              area_id: area.area_id,
+              item_reference_id: area.area_id,
+              item_type: "area",
+              label: area.area_name,
+              status: "Shortlisted",
+              summary: area.area_classification,
+            })}
             onOpenOpportunityFeed={() => openInvestmentPage("opportunity-feed", "Opportunity Feed")}
+            onSaveSearch={() => saveGuidedSearch("Guided Find: Industrial Site")}
           />
         );
       case "opportunity":
@@ -2149,8 +2273,8 @@ function InvestmentRecentWorkPanel({
   items,
   onOpen,
 }: {
-  items: Array<{ label: string; page: InvestmentPageId; summary: string }>;
-  onOpen: (item: { label: string; page: InvestmentPageId; summary: string }) => void;
+  items: InvestmentRecentWorkItem[];
+  onOpen: (item: InvestmentRecentWorkItem) => void;
 }) {
   return (
     <section className="investment-card">
@@ -2158,10 +2282,10 @@ function InvestmentRecentWorkPanel({
       {items.length ? (
         <div className="investment-bucket-list">
           {items.map((item) => (
-            <div key={`${item.page}-${item.label}`}>
+            <div key={item.id}>
               <span>{titleText(item.page)}</span>
               <strong>{item.label}</strong>
-              <small>{item.summary}</small>
+              <small>{item.summary ?? item.reference_status ?? "Continue"}</small>
               <button className="investment-ghost-button" onClick={() => onOpen(item)} type="button">Continue</button>
             </div>
           ))}
@@ -2175,12 +2299,14 @@ function InvestmentShortlistPanel({
   items,
   onAnalyze,
   onCompare,
+  onCreateProject,
   onRemove,
   onReport,
 }: {
-  items: Array<{ id: string; label: string; type: string; summary: string }>;
-  onAnalyze: (item: { id: string; label: string; type: string; summary: string }) => void;
+  items: InvestmentSavedItem[];
+  onAnalyze: (item: InvestmentSavedItem) => void;
   onCompare: () => void;
+  onCreateProject: () => void;
   onRemove: (id: string) => void;
   onReport: () => void;
 }) {
@@ -2191,9 +2317,9 @@ function InvestmentShortlistPanel({
         <div className="investment-bucket-list">
           {items.map((item) => (
             <div key={item.id}>
-              <span>{item.type}</span>
+              <span>{titleText(item.item_type)}</span>
               <strong>{item.label}</strong>
-              <small>{item.summary}</small>
+              <small>{item.summary ?? item.reference_status ?? "Saved reference"}</small>
               <div className="investment-row-actions">
                 <button onClick={() => onAnalyze(item)} type="button">Analyze</button>
                 <button onClick={() => onRemove(item.id)} type="button">Remove</button>
@@ -2202,10 +2328,45 @@ function InvestmentShortlistPanel({
           ))}
           <div className="investment-row-actions">
             <button className="investment-primary-button" onClick={onCompare} type="button">Compare</button>
+            <button className="investment-ghost-button" onClick={onCreateProject} type="button">Create Project</button>
             <button className="investment-ghost-button" onClick={onReport} type="button">Create Report</button>
           </div>
         </div>
       ) : <p className="investment-empty">Your shortlist is empty. Add candidates from Find or Property Analysis.</p>}
+    </section>
+  );
+}
+
+function InvestmentSavedSearchPanel({
+  items,
+  onConvertProject,
+  onOpen,
+  onRerun,
+}: {
+  items: InvestmentSavedSearch[];
+  onConvertProject: (item: InvestmentSavedSearch) => void;
+  onOpen: (item: InvestmentSavedSearch) => void;
+  onRerun: (item: InvestmentSavedSearch) => void;
+}) {
+  return (
+    <section className="investment-card">
+      <div className="investment-section-heading"><div><p>Saved Searches</p><h2>Run again or create a project</h2></div><span className="investment-pill">{items.length}</span></div>
+      {items.length ? (
+        <div className="investment-bucket-list">
+          {items.slice(0, 6).map((item) => (
+            <div key={item.id}>
+              <span>{item.guided_or_advanced === "advanced" ? "Advanced" : "Guided"} Search</span>
+              <strong>{item.search_name}</strong>
+              <small>{item.goal} · {item.location_type}</small>
+              <div className="investment-row-actions">
+                <button onClick={() => onRerun(item)} type="button">Run Again</button>
+                <button onClick={() => onOpen(item)} type="button">Open Results</button>
+                <button onClick={() => onConvertProject(item)} type="button">Convert to Project</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : <p className="investment-empty">No saved guided searches yet. Use Find, then save the criteria for repeat analysis.</p>}
     </section>
   );
 }
@@ -2289,12 +2450,14 @@ function InvestmentAreaRadarPage({
   onAddToEngagement,
   onAddToShortlist,
   onOpenOpportunityFeed,
+  onSaveSearch,
 }: {
   areas: InvestmentAreaRadarArea[];
   onAddToBucket: (area: InvestmentAreaRadarArea) => void;
   onAddToEngagement: (area: InvestmentAreaRadarArea) => void;
   onAddToShortlist: (area: InvestmentAreaRadarArea) => void;
   onOpenOpportunityFeed: () => void;
+  onSaveSearch: () => void;
 }) {
   return (
     <section className="investment-primary-column">
@@ -2317,6 +2480,10 @@ function InvestmentAreaRadarPage({
           <summary>Advanced Criteria</summary>
           <p>Zoning, traffic, ACS, soils, wetlands, slope, comparable confidence, permit momentum, and detailed source filters remain available in the advanced Opportunity Engine and Data & Methodology views.</p>
         </details>
+        <div className="investment-row-actions">
+          <button className="investment-primary-button" onClick={onSaveSearch} type="button">Save Search</button>
+          <button className="investment-ghost-button" onClick={onOpenOpportunityFeed} type="button">Open Opportunity Feed</button>
+        </div>
       </section>
       <section className="investment-result-grid" aria-label="Find results">
         {areas.slice(0, 12).map((area) => (
@@ -2818,22 +2985,49 @@ function titleText(value: string) {
   return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function engagementShortlistType(itemType: InvestmentSavedItem["item_type"]) {
+  if (itemType === "area") return "search_area";
+  if (["parcel", "opportunity", "intake_candidate", "underwriting_scenario"].includes(itemType)) return itemType;
+  return null;
+}
+
 function recordInvestmentEvent(eventName: string, detail: Record<string, string | number | boolean | null> = {}) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent("cfs-investment-event", { detail: { eventName, ...detail } }));
 }
 
-function readInvestmentGuidedSessionState(): {
-  myShortlist?: Array<{ id: string; label: string; type: string; summary: string }>;
-  recentWork?: Array<{ label: string; page: InvestmentPageId; summary: string }>;
+function readInvestmentDisplayPreference(): {
+  lastPage?: InvestmentPageId;
   viewMode?: "guided" | "advanced";
 } {
   if (typeof window === "undefined") return {};
   try {
-    return JSON.parse(sessionStorage.getItem("cfs-investment-guided-state") ?? "{}");
+    const params = new URLSearchParams(window.location.search);
+    const pageFromUrl = params.get("investmentPage");
+    const stored = JSON.parse(localStorage.getItem("cfs-investment-display-preferences") ?? "{}");
+    return {
+      ...stored,
+      lastPage: isInvestmentPageId(pageFromUrl) ? pageFromUrl : stored.lastPage,
+    };
   } catch {
     return {};
   }
+}
+
+function writeInvestmentDisplayPreference(preference: { lastPage: InvestmentPageId; viewMode: "guided" | "advanced" }) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem("cfs-investment-display-preferences", JSON.stringify(preference));
+    const url = new URL(window.location.href);
+    url.searchParams.set("investmentPage", preference.lastPage);
+    window.history.replaceState(null, "", url);
+  } catch {
+    // Low-risk display preference only; ignore private-mode or quota failures.
+  }
+}
+
+function isInvestmentPageId(value: string | null): value is InvestmentPageId {
+  return Boolean(value && investmentPages.some((page) => page.id === value));
 }
 
 function displayValue(value: unknown): string {

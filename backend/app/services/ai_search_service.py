@@ -777,6 +777,7 @@ def _investment_intent(query: str) -> str:
     normalized = query.lower()
     checks = [
         ("Underwriting", ("underwriting", "feasibility", "break-even", "break even", "sensitivity", "sources and uses", "cash flow", "dscr", "cap rate", "irr", "modeled return", "scenario", "land-banking")),
+        ("Saved Workspace", ("my shortlist", "saved candidate", "saved candidates", "saved search", "recent search", "recent work", "recent industrial search", "continue my", "current project")),
         ("Consulting Engagement", ("engagement", "client", "site selection", "shortlist", "criteria", "portfolio", "consulting", "market entry")),
         ("Opportunity Feed", ("opportunity feed", "available opportunity", "available opportunities", "listing", "broker", "external search", "source platform")),
         ("Area Opportunity Radar", ("area", "radar", "search area", "priority search area", "geography", "corridor")),
@@ -806,6 +807,12 @@ def _investment_research_answer(
     candidate = filters.get("active_intake_candidate") or filters.get("selected_candidate") or "the active candidate"
     strategy = filters.get("active_strategy") or "selected strategy"
     underwriting = filters.get("active_underwriting_summary") or filters.get("active_underwriting_result")
+    saved_workspace_lines = [
+        f"Shortlist count: {filters.get('persisted_shortlist_count') or 0}",
+        f"Shortlist preview: {filters.get('persisted_shortlist_preview') or 'No saved shortlist items were provided in context.'}",
+        f"Recent work: {filters.get('recent_work_preview') or 'No recent work was provided in context.'}",
+        f"Saved searches: {filters.get('saved_search_preview') or 'No saved searches were provided in context.'}",
+    ]
     underwriting_lines = []
     if isinstance(underwriting, dict):
         underwriting_lines = [
@@ -836,6 +843,10 @@ def _investment_research_answer(
         (
             "Underwriting context" if underwriting_lines else "Underwriting context",
             _bullets(underwriting_lines or ["No active underwriting scenario was provided. Open Underwriting Lab, calculate a scenario, then ask again."]),
+        ),
+        (
+            "Saved workspace",
+            _bullets(saved_workspace_lines if intent == "Saved Workspace" else ["Use Home to continue Recent Work, rerun Saved Searches, or open My Shortlist."]),
         ),
         (
             "Evidence boundaries",

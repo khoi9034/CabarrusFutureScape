@@ -38,6 +38,14 @@ from app.schemas.investment_underwriting import (
     InvestmentUnderwritingScenarioPatch,
     InvestmentUnderwritingScenarioPayload,
 )
+from app.schemas.investment_workspace import (
+    InvestmentRecentWorkPayload,
+    InvestmentSavedItemPatch,
+    InvestmentSavedItemPayload,
+    InvestmentSavedItemReorderRequest,
+    InvestmentSavedSearchPatch,
+    InvestmentSavedSearchPayload,
+)
 from app.services.investment_area_radar_service import radar_area, radar_area_opportunities, radar_area_parcels, radar_search
 from app.services.enterprise_export_service import build_powerbi_export_payload
 from app.services.investment_engagement_service import (
@@ -103,6 +111,24 @@ from app.services.investment_underwriting_service import (
     list_underwriting_scenarios,
     prefill_underwriting,
     update_underwriting_scenario,
+)
+from app.services.investment_workspace_service import (
+    create_saved_item,
+    create_saved_search,
+    delete_recent_work,
+    delete_saved_item,
+    delete_saved_search,
+    duplicate_saved_search,
+    get_saved_search,
+    list_recent_work,
+    list_saved_items,
+    list_saved_searches,
+    record_recent_work,
+    reorder_saved_items,
+    rerun_saved_search,
+    saved_search_to_engagement,
+    update_saved_item,
+    update_saved_search,
 )
 
 router = APIRouter(prefix="/investment", tags=["Investment Intelligence"])
@@ -336,6 +362,145 @@ def post_investment_report(
         return generate_investment_report(db, _investment_rows(db), request)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/saved-items")
+def get_investment_saved_items(
+    item_type: str | None = Query(default=None),
+    strategy: str | None = Query(default=None),
+    status: str | None = Query(default=None),
+    sort: str = Query(default="recent"),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return list_saved_items(db, item_type=item_type, strategy=strategy, status=status, sort=sort)
+
+
+@router.post("/saved-items")
+def post_investment_saved_item(
+    request: InvestmentSavedItemPayload,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return create_saved_item(db, request)
+
+
+@router.patch("/saved-items/{item_id}")
+def patch_investment_saved_item(
+    item_id: str,
+    request: InvestmentSavedItemPatch,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    item = update_saved_item(db, item_id, request)
+    if not item:
+        raise HTTPException(status_code=404, detail="Saved CFS Investment item not found.")
+    return item
+
+
+@router.delete("/saved-items/{item_id}")
+def delete_investment_saved_item(
+    item_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    if not delete_saved_item(db, item_id):
+        raise HTTPException(status_code=404, detail="Saved CFS Investment item not found.")
+    return {"deleted": True}
+
+
+@router.post("/saved-items/reorder")
+def post_investment_saved_items_reorder(
+    request: InvestmentSavedItemReorderRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return reorder_saved_items(db, request)
+
+
+@router.get("/recent-work")
+def get_investment_recent_work(db: Session = Depends(get_db)) -> dict[str, Any]:
+    return list_recent_work(db)
+
+
+@router.post("/recent-work")
+def post_investment_recent_work(
+    request: InvestmentRecentWorkPayload,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return record_recent_work(db, request)
+
+
+@router.delete("/recent-work/{item_id}")
+def delete_investment_recent_work(
+    item_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    if not delete_recent_work(db, item_id):
+        raise HTTPException(status_code=404, detail="Recent CFS Investment item not found.")
+    return {"deleted": True}
+
+
+@router.get("/saved-searches")
+def get_investment_saved_searches(db: Session = Depends(get_db)) -> dict[str, Any]:
+    return list_saved_searches(db)
+
+
+@router.post("/saved-searches")
+def post_investment_saved_search(
+    request: InvestmentSavedSearchPayload,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return create_saved_search(db, request)
+
+
+@router.patch("/saved-searches/{search_id}")
+def patch_investment_saved_search(
+    search_id: str,
+    request: InvestmentSavedSearchPatch,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    search = update_saved_search(db, search_id, request)
+    if not search:
+        raise HTTPException(status_code=404, detail="Saved CFS Investment search not found.")
+    return search
+
+
+@router.delete("/saved-searches/{search_id}")
+def delete_investment_saved_search(
+    search_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    if not delete_saved_search(db, search_id):
+        raise HTTPException(status_code=404, detail="Saved CFS Investment search not found.")
+    return {"deleted": True}
+
+
+@router.post("/saved-searches/{search_id}/duplicate")
+def post_investment_saved_search_duplicate(
+    search_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    search = duplicate_saved_search(db, search_id)
+    if not search:
+        raise HTTPException(status_code=404, detail="Saved CFS Investment search not found.")
+    return search
+
+
+@router.post("/saved-searches/{search_id}/rerun")
+def post_investment_saved_search_rerun(
+    search_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    result = rerun_saved_search(db, search_id, _investment_rows(db))
+    if not result:
+        raise HTTPException(status_code=404, detail="Saved CFS Investment search not found.")
+    return result
+
+
+@router.post("/saved-searches/{search_id}/engagement")
+def post_investment_saved_search_engagement(
+    search_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    if not get_saved_search(db, search_id):
+        raise HTTPException(status_code=404, detail="Saved CFS Investment search not found.")
+    return saved_search_to_engagement(db, search_id) or {}
 
 
 @router.get("/opportunities/sources")

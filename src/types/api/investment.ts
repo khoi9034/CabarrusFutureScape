@@ -440,3 +440,89 @@ export interface InvestmentUnderwritingPrefillResponse {
   scenario_type: InvestmentUnderwritingScenarioType;
   template: InvestmentUnderwritingTemplate;
 }
+
+export type InvestmentSavedItemType =
+  | "area"
+  | "parcel"
+  | "opportunity"
+  | "intake_candidate"
+  | "underwriting_scenario"
+  | "report"
+  | "engagement";
+
+export type InvestmentSavedItemStatus =
+  | "Archived"
+  | "Needs Verification"
+  | "Reviewing"
+  | "Saved"
+  | "Shortlisted";
+
+export interface InvestmentSavedItem {
+  area_id?: string | null;
+  candidate_id?: string | null;
+  created_at: string;
+  engagement_id?: string | null;
+  id: string;
+  item_reference_id: string;
+  item_type: InvestmentSavedItemType;
+  label: string;
+  last_opened_at?: string | null;
+  opportunity_id?: string | null;
+  parcel_id?: string | null;
+  private_notes?: string | null;
+  reference_status?: string;
+  scenario_id?: string | null;
+  status: InvestmentSavedItemStatus;
+  strategy?: InvestmentStrategyId | null;
+  summary?: string | null;
+  updated_at: string;
+}
+
+export interface InvestmentSavedItemListResponse {
+  caveats: string[];
+  count: number;
+  items: InvestmentSavedItem[];
+}
+
+export interface InvestmentRecentWorkItem {
+  activity_type: string;
+  context: Record<string, unknown>;
+  id: string;
+  label: string;
+  last_opened_at: string;
+  page: string;
+  parcel_id?: string | null;
+  reference_id?: string | null;
+  reference_status?: string;
+  reference_type: string;
+  strategy?: InvestmentStrategyId | null;
+  summary?: string | null;
+}
+
+export interface InvestmentRecentWorkResponse {
+  caveats: string[];
+  count: number;
+  items: InvestmentRecentWorkItem[];
+  max_items: number;
+}
+
+export interface InvestmentSavedSearch {
+  advanced_criteria: Record<string, unknown>;
+  created_at: string;
+  essential_criteria: Record<string, unknown>;
+  goal: string;
+  guided_or_advanced: "advanced" | "guided";
+  id: string;
+  last_run_at?: string | null;
+  location_type: string;
+  location_value?: string | null;
+  result_summary: Record<string, unknown>;
+  search_name: string;
+  updated_at: string;
+}
+
+export interface InvestmentSavedSearchListResponse {
+  caveats: string[];
+  count: number;
+  searches: InvestmentSavedSearch[];
+}

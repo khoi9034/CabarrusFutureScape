@@ -235,7 +235,10 @@ def test_cfs_investment_opportunity_workbench_frontend_contracts() -> None:
     assert "My Shortlist" in economics_shell
     assert "Essential Inputs" in economics_shell
     assert "Advanced Assumptions" in economics_shell
-    assert "cfs-investment-guided-state" in economics_shell
+    assert "cfs-investment-display-preferences" in economics_shell
+    assert "getInvestmentSavedItems" in economics_shell
+    assert "getInvestmentRecentWork" in economics_shell
+    assert "getInvestmentSavedSearches" in economics_shell
     assert "guided_task_started" in economics_shell
     assert "candidate_shortlisted" in economics_shell
     assert "Recommended for additional diligence" in economics_shell
