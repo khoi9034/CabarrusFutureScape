@@ -53,6 +53,8 @@ class FakeResult:
 class FakeDb:
     def execute(self, statement, params=None):  # noqa: ANN001
         sql = str(statement)
+        if "to_regclass" in sql:
+            return FakeResult(scalar_value="investment_parcel_environmental_context")
         if "SELECT * FROM investment_parcel_environmental_context" in sql:
             return FakeResult(
                 {

@@ -1388,9 +1388,10 @@ def _unavailable(reason: str, *, parcel_id: str | None = None) -> dict[str, Any]
 
 
 def environmental_context_by_parcel(db: Session, parcel_ids: list[str]) -> dict[str, dict[str, Any]]:
-    _ensure_tables(db)
     ids = [str(parcel_id) for parcel_id in dict.fromkeys(parcel_ids) if parcel_id]
     if not ids:
+        return {}
+    if not _table_exists(db, ENV_TABLE):
         return {}
     rows = db.execute(
         text(
@@ -1417,6 +1418,10 @@ def environmental_context_by_parcel(db: Session, parcel_ids: list[str]) -> dict[
         }
         for row in rows
     }
+
+
+def _table_exists(db: Session, table_name: str) -> bool:
+    return bool(db.execute(text("SELECT to_regclass(:table_name)"), {"table_name": table_name}).scalar())
 
 
 def _json_ready(row: Any) -> dict[str, Any]:

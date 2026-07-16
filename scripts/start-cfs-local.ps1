@@ -110,7 +110,25 @@ function Get-ProcessCommandLine {
   }
 }
 
-function Write-PortOwnership {
+function Test-CfsLocalProcess {
+  param(
+    [int]$ProcessId,
+    [string]$CommandLine
+  )
+
+  if (!$CommandLine) {
+    return $false
+  }
+
+  $normalized = $CommandLine.ToLowerInvariant()
+  $rootText = ([string]$Root).ToLowerInvariant()
+  return $normalized.Contains($rootText) -or
+    $normalized.Contains("uvicorn app.main:app") -or
+    $normalized.Contains("uvicorn backend.app.main:app") -or
+    $normalized.Contains("next dev")
+}
+
+function Write-PortProcessInfo {
   param([int]$Port)
 
   $listeners = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
@@ -126,7 +144,8 @@ function Write-PortOwnership {
     $commandLine = Get-ProcessCommandLine -ProcessId $ownerPid
     Write-Step "Port $Port is occupied by PID $ownerPid ($processName)."
     if ($commandLine) {
-      Write-Step "Port $Port command line: $commandLine"
+      $isCfs = Test-CfsLocalProcess -ProcessId $ownerPid -CommandLine $commandLine
+      Write-Step "Port $Port process appears to be $(if ($isCfs) { 'a CFS local process' } else { 'a non-CFS process' })."
     }
   }
 }
@@ -150,10 +169,10 @@ function Stop-ListenersOnPort {
       $process = Get-Process -Id $id -ErrorAction SilentlyContinue
       if ($process) {
         $commandLine = Get-ProcessCommandLine -ProcessId $id
-        Write-Step "Stopping process $id on port $Port ($($process.ProcessName))"
-        if ($commandLine) {
-          Write-Step "Stopped process command line: $commandLine"
+        if (!(Test-CfsLocalProcess -ProcessId $id -CommandLine $commandLine)) {
+          throw "Port $Port is held by PID $id ($($process.ProcessName)), which does not look like a CFS local dev process. Stop it manually or choose another port."
         }
+        Write-Step "Stopping process $id on port $Port ($($process.ProcessName))"
         Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
       }
     }
@@ -236,8 +255,8 @@ Ensure-FrontendEnv
 
 if (!$NoRestart) {
   Write-Step "Reserved CFS local ports: frontend $FrontendPort, backend $BackendPort."
-  Write-PortOwnership -Port $FrontendPort
-  Write-PortOwnership -Port $BackendPort
+  Write-PortProcessInfo -Port $FrontendPort
+  Write-PortProcessInfo -Port $BackendPort
   Stop-ListenersOnPort -Port $FrontendPort
   Stop-ListenersOnPort -Port $BackendPort
   Start-Sleep -Seconds 2
@@ -246,8 +265,8 @@ if (!$NoRestart) {
 } else {
   Write-Step "NoRestart supplied; checking existing local services."
   Write-Step "Reserved CFS local ports: frontend $FrontendPort, backend $BackendPort."
-  Write-PortOwnership -Port $FrontendPort
-  Write-PortOwnership -Port $BackendPort
+  Write-PortProcessInfo -Port $FrontendPort
+  Write-PortProcessInfo -Port $BackendPort
 }
 
 $health = Wait-Http -Url "$ApiBaseUrl/health" -TimeoutSeconds 90

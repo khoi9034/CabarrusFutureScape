@@ -629,6 +629,37 @@ select:focus-visible {
   text-transform: uppercase;
 }
 
+.investment-active-property {
+  align-items: center;
+  background: rgba(4, 15, 27, 0.92);
+  border-bottom: 1px solid var(--investment-border);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.8rem 1.5rem;
+}
+
+.investment-active-property span,
+.investment-universal-search label,
+.investment-search-results span {
+  color: var(--investment-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.investment-active-property strong,
+.investment-search-results strong {
+  color: var(--investment-text);
+  display: block;
+}
+
+.investment-active-property small,
+.investment-search-results small {
+  color: var(--investment-text-muted);
+}
+
 .investment-main {
   display: grid;
   gap: 1rem;
@@ -772,6 +803,49 @@ select:focus-visible {
   color: var(--investment-text);
   padding: 0.75rem 0.9rem;
   width: 100%;
+}
+
+.investment-search-row {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.investment-search-row input {
+  background: rgba(2, 7, 17, 0.68);
+  border: 1px solid var(--investment-border);
+  border-radius: 0.9rem;
+  color: var(--investment-text);
+  padding: 0.75rem 0.9rem;
+  width: 100%;
+}
+
+.investment-search-results {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.investment-search-results button {
+  align-items: center;
+  background: rgba(2, 7, 17, 0.42);
+  border: 1px solid var(--investment-border);
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.2rem;
+  grid-template-columns: minmax(8rem, 0.3fr) minmax(0, 1fr) auto;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.investment-search-results button:hover {
+  border-color: var(--investment-accent-primary);
+}
+
+.investment-search-results em {
+  color: var(--investment-emerald);
+  font-style: normal;
+  font-weight: 800;
 }
 
 .investment-task-grid,
@@ -1387,9 +1461,15 @@ select:focus-visible {
   }
 
   .investment-header,
+  .investment-active-property,
   .investment-section-heading {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .investment-search-row,
+  .investment-search-results button {
+    grid-template-columns: 1fr;
   }
 
   .investment-strategy-grid {

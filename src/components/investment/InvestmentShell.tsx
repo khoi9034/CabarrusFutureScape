@@ -61,6 +61,14 @@ export const investmentPages = investmentPageGroups.flatMap((group) => group.pag
 
 type InvestmentShellProps = {
   activePage: InvestmentPageId;
+  activeProperty?: {
+    acreage?: number | null;
+    dataConfidence?: string | null;
+    label: string;
+    parcelId: string;
+    researchStatus?: string | null;
+    strategy?: string | null;
+  } | null;
   children: ReactNode;
   currentCandidateLabel?: string | null;
   dataMode: string;
@@ -68,18 +76,31 @@ type InvestmentShellProps = {
   viewMode?: "guided" | "advanced";
   onClose: () => void;
   onAskCfs: () => void;
+  onActiveAnalyze?: () => void;
+  onActiveClear?: () => void;
+  onActiveCompare?: () => void;
+  onActiveReport?: () => void;
+  onActiveShortlist?: () => void;
+  onActiveUnderwrite?: () => void;
   onPageChange: (page: InvestmentPageId) => void;
   onViewModeChange?: (mode: "guided" | "advanced") => void;
 };
 
 export function InvestmentShell({
   activePage,
+  activeProperty,
   children,
   currentCandidateLabel,
   dataMode,
   shortlistCount = 0,
   viewMode = "guided",
   onAskCfs,
+  onActiveAnalyze,
+  onActiveClear,
+  onActiveCompare,
+  onActiveReport,
+  onActiveShortlist,
+  onActiveUnderwrite,
   onClose,
   onPageChange,
   onViewModeChange,
@@ -138,12 +159,35 @@ export function InvestmentShell({
           <div className="investment-header-actions">
             <div className="investment-view-toggle" role="group" aria-label="CFS Investment view mode">
               <button aria-pressed={viewMode === "guided"} onClick={() => onViewModeChange?.("guided")} type="button">Guided</button>
-              <button aria-pressed={viewMode === "advanced"} onClick={() => onViewModeChange?.("advanced")} type="button">Advanced</button>
+              <button aria-pressed={viewMode === "advanced"} onClick={() => onViewModeChange?.("advanced")} type="button">Analyst</button>
             </div>
             <button className="investment-primary-button" onClick={onAskCfs} type="button"><Sparkles className="h-4 w-4" /> Ask CFS</button>
             <button className="investment-ghost-button" onClick={onClose} type="button"><ArrowLeft className="h-4 w-4" /> CFS Economics</button>
           </div>
         </header>
+        {activeProperty ? (
+          <section className="investment-active-property" aria-label="Active property">
+            <div>
+              <span>Active Property</span>
+              <strong>{activeProperty.label}</strong>
+              <small>
+                Parcel {activeProperty.parcelId}
+                {activeProperty.acreage ? ` · ${activeProperty.acreage.toLocaleString("en-US", { maximumFractionDigits: 2 })} acres` : ""}
+                {activeProperty.strategy ? ` · ${activeProperty.strategy}` : ""}
+                {activeProperty.dataConfidence ? ` · ${activeProperty.dataConfidence}` : ""}
+                {activeProperty.researchStatus ? ` · Research ${activeProperty.researchStatus}` : ""}
+              </small>
+            </div>
+            <div className="investment-row-actions">
+              <button onClick={onActiveAnalyze} type="button">Analyze</button>
+              <button onClick={onActiveShortlist} type="button">Shortlist</button>
+              <button onClick={onActiveCompare} type="button">Compare</button>
+              <button onClick={onActiveUnderwrite} type="button">Underwrite</button>
+              <button onClick={onActiveReport} type="button">Create Report</button>
+              <button onClick={onActiveClear} type="button">Clear</button>
+            </div>
+          </section>
+        ) : null}
         <main className="investment-page-shell" data-investment-page={activePage}>
           {children}
         </main>

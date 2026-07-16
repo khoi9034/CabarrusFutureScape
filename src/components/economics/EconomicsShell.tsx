@@ -25,6 +25,7 @@ import {
   askCfsEconomicsWorkspacePrompts,
 } from "@/lib/aiSearchService";
 import { buildApiUrl, USE_DEMO_DATA } from "@/lib/api/client";
+import { searchParcels } from "@/lib/api/parcels";
 import {
   getEconomicsEnterpriseExport,
   getEconomicsIntelligence,
@@ -53,6 +54,7 @@ import {
   getInvestmentOpportunities,
   getInvestmentOpportunitySources,
   getInvestmentRecentWork,
+  getInvestmentResearchContext,
   getInvestmentSavedItems,
   getInvestmentSavedSearches,
   getInvestmentScreen,
@@ -86,6 +88,7 @@ import type {
   InvestmentIntakeCompareResponse,
   InvestmentIntakePayload,
   InvestmentReportResponse,
+  InvestmentResearchContext,
   InvestmentReviewStatus,
   InvestmentSavedItem,
   InvestmentSavedSearch,
@@ -103,6 +106,7 @@ import type {
   InvestmentUnderwritingScenario,
   InvestmentUnderwritingTemplate,
   InvestmentUnderwritingScenarioType,
+  ParcelSearchResult,
 } from "@/types/api";
 
 export function EconomicsShell() {
@@ -329,6 +333,7 @@ export function EconomicsShell() {
           <InvestmentPanelGate
             onCancel={() => setInvestmentGateOpen(false)}
             onUnlock={() => {
+              rememberLocalInvestmentAccess();
               setInvestmentGateOpen(false);
               setInvestmentPanelOpen(true);
             }}
@@ -337,7 +342,13 @@ export function EconomicsShell() {
         {!investmentPanelOpen ? (
           <button
             className="no-print fixed bottom-4 right-4 z-40 rounded-full border border-[var(--econ-border)] bg-[#11151c]/90 px-3 py-2 text-xs font-semibold text-[var(--econ-muted)] shadow-lg backdrop-blur transition hover:border-[var(--econ-gold)] hover:text-[#ffe6a6]"
-            onClick={() => setInvestmentGateOpen(true)}
+            onClick={() => {
+              if (hasLocalInvestmentAccess()) {
+                setInvestmentPanelOpen(true);
+                return;
+              }
+              setInvestmentGateOpen(true);
+            }}
             type="button"
           >
             CFS Investment
@@ -375,6 +386,19 @@ function EconomicsTutorialButton({ onClick }: { onClick: () => void }) {
 }
 
 const INVESTMENT_PANEL_ACCESS_CODE = "demo";
+const INVESTMENT_LOCAL_ACCESS_KEY = "cfs-investment-local-access-until";
+const INVESTMENT_LOCAL_ACCESS_TTL_MS = 8 * 60 * 60 * 1000;
+
+function hasLocalInvestmentAccess() {
+  if (typeof window === "undefined" || !["localhost", "127.0.0.1"].includes(window.location.hostname)) return false;
+  const expires = Number(window.sessionStorage.getItem(INVESTMENT_LOCAL_ACCESS_KEY) ?? 0);
+  return Number.isFinite(expires) && expires > Date.now();
+}
+
+function rememberLocalInvestmentAccess() {
+  if (typeof window === "undefined" || !["localhost", "127.0.0.1"].includes(window.location.hostname)) return;
+  window.sessionStorage.setItem(INVESTMENT_LOCAL_ACCESS_KEY, String(Date.now() + INVESTMENT_LOCAL_ACCESS_TTL_MS));
+}
 
 function InvestmentPanelGate({
   onCancel,
@@ -955,7 +979,9 @@ function InvestmentPanelPage({
 }) {
   const [activeStrategy, setActiveStrategy] = useState<InvestmentStrategyId>("development_land");
   const [investmentScreen, setInvestmentScreen] = useState<InvestmentScreenResponse | null>(null);
-  const [activeCandidateId, setActiveCandidateId] = useState<string | null>(null);
+  const [activeCandidateId, setActiveCandidateId] = useState<string | null>(() => readInvestmentParcelPreference());
+  const [activeResearchContext, setActiveResearchContext] = useState<InvestmentResearchContext | null>(null);
+  const [activeResearchStatus, setActiveResearchStatus] = useState<"Idle" | "Loading" | "Ready" | "Error">("Idle");
   const [comparisonRows, setComparisonRows] = useState<RankedLandReviewCandidate[]>([]);
   const [guide, setGuide] = useState<DueDiligencePacket | null>(null);
   const [intakeAnalysis, setIntakeAnalysis] = useState<InvestmentIntakeAnalysisResponse | null>(null);
@@ -968,7 +994,7 @@ function InvestmentPanelPage({
   const [investmentReport, setInvestmentReport] = useState<InvestmentReportResponse | null>(null);
   const [investmentReportType, setInvestmentReportType] = useState("development_site_review");
   const [activeInvestmentPage, setActiveInvestmentPage] = useState<InvestmentPageId>(() => readInvestmentDisplayPreference().lastPage ?? "overview");
-  const [investmentViewMode, setInvestmentViewMode] = useState<"guided" | "advanced">(() => readInvestmentDisplayPreference().viewMode ?? "guided");
+  const [investmentViewMode, setInvestmentViewMode] = useState<"guided" | "advanced">(() => readInvestmentDisplayPreference().viewMode ?? "advanced");
   const [guidedQuestion, setGuidedQuestion] = useState("");
   const [myShortlist, setMyShortlist] = useState<InvestmentSavedItem[]>([]);
   const [recentWork, setRecentWork] = useState<InvestmentRecentWorkItem[]>([]);
@@ -1080,6 +1106,29 @@ function InvestmentPanelPage({
       mounted = false;
     };
   }, []);
+  useEffect(() => {
+    let mounted = true;
+    if (!activeCandidateId || activeResearchContext?.identity.parcel_id === activeCandidateId) {
+      return () => {
+        mounted = false;
+      };
+    }
+    void getInvestmentResearchContext(activeCandidateId, activeStrategy)
+      .then((context) => {
+        if (!mounted) return;
+        setActiveResearchContext(context);
+        setActiveResearchStatus("Ready");
+        setStatus(`Loaded research context for ${activeCandidateId}.`);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setActiveResearchStatus("Error");
+        setStatus("Research context failed. Retry or search another parcel.");
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [activeCandidateId, activeResearchContext?.identity.parcel_id, activeStrategy]);
   const activeInvestmentScreen = investmentScreen?.strategy === activeStrategy ? investmentScreen : null;
   const engineCandidatesByParcel = useMemo(
     () =>
@@ -1114,14 +1163,22 @@ function InvestmentPanelPage({
     .filter((row) => (activeInvestmentScreen ? Boolean(row.investment_candidate) : matchesInvestmentStrategy(row.signal, activeStrategy)))
     .map((row, index) => ({ ...row, rank: index + 1 }));
   const selectedRows = rows.filter((row) => selectedSignalIds.includes(row.signal.parcel_id)).slice(0, 5);
-  const activeRow =
-    visibleRows.find((row) => row.signal.parcel_id === activeCandidateId) ??
-    selectedRows[0] ??
-    visibleRows[0] ??
-    rows[0] ??
-    null;
+  const activeRow = activeCandidateId
+    ? rows.find((row) => row.signal.parcel_id === activeCandidateId) ?? null
+    : selectedRows[0] ?? visibleRows[0] ?? rows[0] ?? null;
   const activeSignal = activeRow?.signal ?? null;
   const activeInvestmentCandidate = activeRow?.investment_candidate ?? null;
+  const activeParcelId = activeResearchContext?.identity.parcel_id ?? intakeAnalysis?.candidate.parcel_id ?? activeSignal?.parcel_id ?? null;
+  const activePropertySummary = activeParcelId
+    ? {
+        acreage: activeResearchContext?.identity.approximate_acreage ?? intakeAnalysis?.acquisition_basis.parcel_acres ?? activeSignal?.acreage ?? null,
+        dataConfidence: String(activeResearchContext?.evidence_quality.overall_data_confidence_band ?? activeSignal?.data_confidence ?? activeSignal?.economic_data_confidence ?? "Needs Verification"),
+        label: activeResearchContext?.identity.private_candidate_label ?? intakeAnalysis?.candidate.candidate_name ?? activeParcelId,
+        parcelId: activeParcelId,
+        researchStatus: activeResearchStatus,
+        strategy: investmentStrategyLabel(activeStrategy),
+      }
+    : null;
   const tier1 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 1")).length;
   const tier2 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 2")).length;
   const sewerSupported = rows.filter((row) => hasSewerSupport(row.signal)).length;
@@ -1161,7 +1218,7 @@ function InvestmentPanelPage({
     onNavigate("print");
   };
   const generateReport = () => {
-    const parcelId = intakeAnalysis?.candidate.parcel_id || activeSignal?.parcel_id;
+    const parcelId = activeParcelId;
     if (!parcelId && !intakeAnalysis?.candidate.id) {
       setStatus("Choose a parcel or intake candidate before generating a report.");
       return;
@@ -1205,6 +1262,7 @@ function InvestmentPanelPage({
     void request
       .then((analysis) => {
         setIntakeAnalysis(analysis);
+        if (analysis.candidate.parcel_id) analyzeParcel(analysis.candidate.parcel_id, analysis.candidate.candidate_name);
         setEditingIntakeId(null);
         setIntakeForm(defaultInvestmentIntakeForm(activeStrategy));
         setStatus(editingIntakeId ? "Candidate intake updated" : "Candidate added to Opportunity Review Queue");
@@ -1221,6 +1279,7 @@ function InvestmentPanelPage({
     })
       .then((analysis) => {
         setIntakeAnalysis(analysis);
+        analyzeParcel(signal.parcel_id, signalLabel(signal));
         setStatus("Existing CFS candidate added to intake.");
         return refreshIntake();
       })
@@ -1243,7 +1302,10 @@ function InvestmentPanelPage({
   };
   const openIntakeAnalysis = (candidateId: string) => {
     void getInvestmentIntakeAnalysis(candidateId)
-      .then(setIntakeAnalysis)
+      .then((analysis) => {
+        setIntakeAnalysis(analysis);
+        if (analysis.candidate.parcel_id) analyzeParcel(analysis.candidate.parcel_id, analysis.candidate.candidate_name);
+      })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate analysis failed."));
   };
   const editIntakeCandidate = (candidate: InvestmentIntakeCandidate) => {
@@ -1317,7 +1379,7 @@ function InvestmentPanelPage({
     return {
       assumptions,
       candidate_id: intakeAnalysis?.candidate.id ?? null,
-      parcel_id: intakeAnalysis?.candidate.parcel_id || activeSignal?.parcel_id || null,
+      parcel_id: activeParcelId,
       scenario_name: underwritingScenarioName,
       scenario_type: underwritingScenarioType,
       strategy: activeStrategy,
@@ -1395,7 +1457,7 @@ function InvestmentPanelPage({
       candidate_id: intakeAnalysis?.candidate.id ?? null,
       existing_assumptions: underwritingAssumptions,
       opportunity_id: opportunityId ?? null,
-      parcel_id: activeSignal?.parcel_id ?? intakeAnalysis?.candidate.parcel_id ?? null,
+      parcel_id: activeParcelId,
       scenario_type: underwritingScenarioType,
       strategy: activeStrategy,
       template_id: templateId ?? null,
@@ -1486,6 +1548,29 @@ function InvestmentPanelPage({
         .catch(() => setStatus("Recent Work could not be saved because the local backend is unavailable."));
     }
   };
+  const analyzeParcel = (parcelId: string, label?: string) => {
+    const safeParcelId = parcelId.trim();
+    if (!safeParcelId) return;
+    setActiveCandidateId(safeParcelId);
+    setActiveResearchContext(null);
+    setActiveInvestmentPage("research");
+    writeInvestmentParcelPreference(safeParcelId);
+    setActiveResearchStatus("Loading");
+    const safeLabel = label || safeParcelId;
+    void recordInvestmentRecentWork({
+      activity_type: "viewed_property",
+      context: { source: "universal_search" },
+      label: safeLabel,
+      page: "research",
+      parcel_id: safeParcelId,
+      reference_id: safeParcelId,
+      reference_type: "parcel",
+      strategy: activeStrategy,
+      summary: "Property Analysis",
+    })
+      .then((response) => setRecentWork(response.items))
+      .catch(() => undefined);
+  };
   const addShortlistItem = (item: Parameters<typeof createInvestmentSavedItem>[0]) => {
     void createInvestmentSavedItem(item)
       .then((savedItem) => {
@@ -1512,6 +1597,40 @@ function InvestmentPanelPage({
     strategy: activeStrategy,
     summary: signal.development_readiness_band ?? signal.opportunity_class ?? "Screening-level review candidate",
   });
+  const addActivePropertyToShortlist = () => {
+    if (activeSignal) {
+      addSignalToShortlist(activeSignal);
+      return;
+    }
+    if (!activePropertySummary) {
+      setStatus("Search for a parcel before adding it to My Shortlist.");
+      return;
+    }
+    addShortlistItem({
+      item_reference_id: activePropertySummary.parcelId,
+      item_type: "parcel",
+      label: activePropertySummary.label,
+      parcel_id: activePropertySummary.parcelId,
+      status: "Shortlisted",
+      strategy: activeStrategy,
+      summary: activeResearchContext?.safe_summary ?? "Screening-level property analysis.",
+    });
+  };
+  const addActivePropertyToCompare = () => {
+    if (!activeSignal) {
+      setStatus("Compare requires a CFS candidate signal. Use Opportunity Engine or add another signaled parcel.");
+      return;
+    }
+    onToggleSignal(activeSignal);
+    openInvestmentPage("compare", "Compare active property");
+  };
+  const clearActiveProperty = () => {
+    setActiveCandidateId(null);
+    setActiveResearchContext(null);
+    setActiveResearchStatus("Idle");
+    writeInvestmentParcelPreference(null);
+    setStatus("Active property cleared.");
+  };
   const addOpportunityToShortlist = (opportunity: InvestmentOpportunityReference) => addShortlistItem({
     item_reference_id: opportunity.external_opportunity_id,
     item_type: "opportunity",
@@ -1580,6 +1699,10 @@ function InvestmentPanelPage({
   };
   const askFilterContext = {
     active_page: activeInvestmentPage,
+    active_parcel_id: activeParcelId,
+    active_research_context_status: activeResearchStatus,
+    active_research_summary: activeResearchContext?.safe_summary,
+    active_missing_evidence: activeResearchContext?.missing_evidence?.join("; "),
     active_strategy: investmentStrategyLabel(activeStrategy),
     engine_candidates: activeInvestmentScreen?.candidate_count,
     candidate_rows: rows.length,
@@ -1650,10 +1773,7 @@ function InvestmentPanelPage({
         onAddCandidate={(signal) => {
           addSignalToShortlist(signal);
         }}
-        onOpenCandidate={(signal) => {
-          setActiveCandidateId(signal.parcel_id);
-          openInvestmentPage("research", signalLabel(signal));
-        }}
+        onOpenCandidate={(signal) => analyzeParcel(signal.parcel_id, signalLabel(signal))}
         onToggleSignal={onToggleSignal}
         rows={visibleRows}
         selectedSignalIds={selectedSignalIds}
@@ -1710,7 +1830,7 @@ function InvestmentPanelPage({
           <option key={option.id} value={option.id}>{option.label}</option>
         ))}
       </select>
-      <button className="investment-primary-button" disabled={!activeSignal && !intakeAnalysis} onClick={generateReport} type="button">
+      <button className="investment-primary-button" disabled={!activeParcelId && !intakeAnalysis} onClick={generateReport} type="button">
         Generate Report
       </button>
       <button className="investment-ghost-button" disabled={!investmentReport} onClick={addReportToBucket} type="button">
@@ -1762,7 +1882,6 @@ function InvestmentPanelPage({
       onImportCsv={importCsv}
       onOpen={(candidateId) => {
         openIntakeAnalysis(candidateId);
-        setActiveInvestmentPage("research");
       }}
       onSetCsvText={setIntakeCsv}
       onSetForm={setIntakeForm}
@@ -1776,46 +1895,74 @@ function InvestmentPanelPage({
           <>
             <section className="investment-home-hero">
               <div>
-                <p>What are you trying to do?</p>
-                <h2>Start with the business question. CFS will route you to the right workspace.</h2>
+                <p>Analyst View</p>
+                <h2>Search, resume, analyze, underwrite, and report from one daily workspace.</h2>
               </div>
-              <form className="investment-guided-search" onSubmit={(event) => { event.preventDefault(); handleGuidedQuestion(); }}>
-                <label htmlFor="investment-guided-question">What property or investment question are you working on?</label>
-                <div>
-                  <input
-                    id="investment-guided-question"
-                    onChange={(event) => setGuidedQuestion(event.target.value)}
-                    placeholder="Find industrial land over 20 acres near major roads."
-                    value={guidedQuestion}
-                  />
-                  <button className="investment-primary-button" type="submit">Find</button>
-                  <button className="investment-ghost-button" onClick={() => saveGuidedSearch()} type="button">Save Search</button>
+              <InvestmentUniversalSearch
+                engagements={engagements}
+                intakeCandidates={intakeCandidates}
+                onAnalyzeParcel={analyzeParcel}
+                onOpenIntake={openIntakeAnalysis}
+                onOpenPage={openInvestmentPage}
+                opportunities={opportunities}
+                reportBucketItems={reportBucketItems}
+                savedItems={myShortlist}
+                savedSearches={savedSearches}
+                scenarios={underwritingScenarios}
+              />
+            </section>
+            {investmentViewMode === "guided" ? (
+              <>
+                <form className="investment-guided-search" onSubmit={(event) => { event.preventDefault(); handleGuidedQuestion(); }}>
+                  <p>What are you trying to do?</p>
+                  <label htmlFor="investment-guided-question">What property or investment question are you working on?</label>
+                  <div>
+                    <input
+                      id="investment-guided-question"
+                      onChange={(event) => setGuidedQuestion(event.target.value)}
+                      placeholder="Find industrial land over 20 acres near major roads."
+                      value={guidedQuestion}
+                    />
+                    <button className="investment-primary-button" type="submit">Find</button>
+                    <button className="investment-ghost-button" onClick={() => saveGuidedSearch()} type="button">Save Search</button>
+                  </div>
+                </form>
+                <section className="investment-task-grid" aria-label="Guided CFS Investment tasks">
+                  {[
+                    { action: "Find", page: "area-radar" as InvestmentPageId, title: "Find Promising Areas", body: "Identify areas that match your development, acquisition, or site-selection requirements.", result: "Search areas, candidate parcels, and next actions." },
+                    { action: "Find", page: "opportunity-feed" as InvestmentPageId, title: "Find Available Properties", body: "Review opportunity references, public offerings, imported listings, and private leads.", result: "Opportunity references with parcel-match status." },
+                    { action: "Analyze", page: "research" as InvestmentPageId, title: "Analyze a Property", body: "Enter a parcel ID, choose an existing candidate, or open a property reference.", result: "Strengths, cautions, missing evidence, and sources." },
+                    { action: "Compare", page: "compare" as InvestmentPageId, title: "Compare Properties", body: "Compare two to four candidates across price, planning, market, environmental, utility, and financial evidence.", result: "Tradeoffs without declaring a winner." },
+                    { action: "Report", page: "report-studio" as InvestmentPageId, title: "Build a Client Report", body: "Create a professional screening, site-selection, acquisition, or due-diligence report.", result: "Structured report sections and source notes." },
+                    { action: "Continue", page: (recentWork[0]?.page ?? "engagements") as InvestmentPageId, title: "Continue Recent Work", body: recentWork[0]?.label ?? "Resume a shortlist, project, report, or analysis from your saved workspace.", result: recentWork[0]?.summary ?? "Recent work appears after you start." },
+                  ].map((task) => (
+                    <article className="investment-task-card" key={task.title}>
+                      <span>{task.action}</span>
+                      <h3>{task.title}</h3>
+                      <p>{task.body}</p>
+                      <small>Expected result: {task.result}</small>
+                      <button className="investment-primary-button" onClick={() => openInvestmentPage(task.page, task.title)} type="button">{task.action}</button>
+                    </article>
+                  ))}
+                </section>
+              </>
+            ) : (
+              <section className="investment-card">
+                <div className="investment-section-heading"><div><p>Direct Actions</p><h2>Daily analyst shortcuts</h2></div></div>
+                <div className="investment-action-grid">
+                  <button className="investment-primary-button" onClick={() => openInvestmentPage("area-radar", "Find")} type="button">Find</button>
+                  <button className="investment-ghost-button" onClick={() => activeParcelId ? analyzeParcel(activeParcelId, activePropertySummary?.label) : openInvestmentPage("research", "Analyze")} type="button">Analyze</button>
+                  <button className="investment-ghost-button" onClick={() => openInvestmentPage("compare", "Compare")} type="button">Compare</button>
+                  <button className="investment-ghost-button" onClick={() => openInvestmentPage("underwriting", "Underwrite")} type="button">Underwrite</button>
+                  <button className="investment-ghost-button" onClick={() => openInvestmentPage("report-studio", "Create Report")} type="button">Create Report</button>
                 </div>
-              </form>
-            </section>
-            <section className="investment-task-grid" aria-label="Guided CFS Investment tasks">
-              {[
-                { action: "Find", page: "area-radar" as InvestmentPageId, title: "Find Promising Areas", body: "Identify areas that match your development, acquisition, or site-selection requirements.", result: "Search areas, candidate parcels, and next actions." },
-                { action: "Find", page: "opportunity-feed" as InvestmentPageId, title: "Find Available Properties", body: "Review opportunity references, public offerings, imported listings, and private leads.", result: "Opportunity references with parcel-match status." },
-                { action: "Analyze", page: "research" as InvestmentPageId, title: "Analyze a Property", body: "Enter a parcel ID, choose an existing candidate, or open a property reference.", result: "Strengths, cautions, missing evidence, and sources." },
-                { action: "Compare", page: "compare" as InvestmentPageId, title: "Compare Properties", body: "Compare two to four candidates across price, planning, market, environmental, utility, and financial evidence.", result: "Tradeoffs without declaring a winner." },
-                { action: "Report", page: "report-studio" as InvestmentPageId, title: "Build a Client Report", body: "Create a professional screening, site-selection, acquisition, or due-diligence report.", result: "Structured report sections and source notes." },
-                { action: "Continue", page: (recentWork[0]?.page ?? "engagements") as InvestmentPageId, title: "Continue Recent Work", body: recentWork[0]?.label ?? "Resume a shortlist, project, report, or analysis from your saved workspace.", result: recentWork[0]?.summary ?? "Recent work appears after you start." },
-              ].map((task) => (
-                <article className="investment-task-card" key={task.title}>
-                  <span>{task.action}</span>
-                  <h3>{task.title}</h3>
-                  <p>{task.body}</p>
-                  <small>Expected result: {task.result}</small>
-                  <button className="investment-primary-button" onClick={() => openInvestmentPage(task.page, task.title)} type="button">{task.action}</button>
-                </article>
-              ))}
-            </section>
+              </section>
+            )}
             <section className="investment-two-column">
               <InvestmentRecentWorkPanel items={recentWork} onOpen={(item) => openInvestmentPage(item.page as InvestmentPageId, item.label)} />
               <InvestmentShortlistPanel
                 items={myShortlist}
-                onAnalyze={(item) => openInvestmentPage(item.item_type === "opportunity" ? "opportunity-feed" : "research", item.label)}
+                onAnalyze={(item) => item.parcel_id ? analyzeParcel(item.parcel_id, item.label) : openInvestmentPage(item.item_type === "opportunity" ? "opportunity-feed" : "research", item.label)}
                 onCompare={() => openInvestmentPage("compare", "Compare shortlist")}
                 onCreateProject={() => createDefaultEngagement(myShortlist)}
                 onRemove={removeShortlistItem}
@@ -1838,6 +1985,25 @@ function InvestmentPanelPage({
                 ]} />
               </section>
             </section>
+            <section className="investment-two-column">
+              <InvestmentResearchCompletenessPanel
+                activeSignal={activeSignal}
+                context={activeResearchContext}
+                intakeAnalysis={intakeAnalysis}
+                reportReady={Boolean(investmentReport)}
+                underwritingReady={Boolean(underwritingResult)}
+              />
+              <InvestmentDataStatusPanel
+                engagements={engagements}
+                intakeCandidates={intakeCandidates}
+                opportunities={opportunities}
+                reportCount={reportBucketItems.length}
+                savedItems={myShortlist}
+                savedSearches={savedSearches}
+                signals={signals}
+                underwritingScenarios={underwritingScenarios}
+              />
+            </section>
             <section className="investment-kpi-grid" aria-label="CFS Investment readiness">
               <InvestmentKpiCard icon={Target} label="Priority Review Candidates" status={tier1 + tier2 ? "Active" : "Limited"} note="Tier 1 and Tier 2 review bands." />
               <InvestmentKpiCard icon={CheckCircle2} label="Intake Opportunities" status={intakeLoading ? "Loading" : formatNumber(intakeCandidates.length)} note="Private listings, leads, and manual candidates." />
@@ -1856,6 +2022,7 @@ function InvestmentPanelPage({
             onAddToShortlist={addOpportunityToShortlist}
             onMatch={matchOpportunity}
             onStartUnderwriting={(opportunity) => {
+              if (opportunity.parcel_id) analyzeParcel(opportunity.parcel_id, opportunity.title);
               applyUnderwritingPrefill(opportunity.external_opportunity_id);
               setActiveInvestmentPage("underwriting");
             }}
@@ -1894,10 +2061,17 @@ function InvestmentPanelPage({
         return (
           <section className="investment-work-grid">
             <div className="investment-primary-column">
-              <InvestmentResearchTabs activeSignal={activeSignal} analysis={intakeAnalysis} strategy={activeStrategy} />
+              <InvestmentResearchTabs activeSignal={activeSignal} analysis={intakeAnalysis} context={activeResearchContext} status={activeResearchStatus} strategy={activeStrategy} />
             </div>
             <aside className="investment-rail">
               <InvestmentCandidateRail onAskCfs={askAboutSignal} onGenerateGuide={createGuide} signal={activeSignal} investmentCandidate={activeInvestmentCandidate} strategy={activeStrategy} />
+              <InvestmentResearchCompletenessPanel
+                activeSignal={activeSignal}
+                context={activeResearchContext}
+                intakeAnalysis={intakeAnalysis}
+                reportReady={Boolean(investmentReport)}
+                underwritingReady={Boolean(underwritingResult)}
+              />
               <section className="investment-card investment-action-card">
                 <div><p>Underwriting Lab</p><span>Open deterministic financial scenarios for this candidate.</span></div>
                 <button className="investment-primary-button" onClick={() => setActiveInvestmentPage("underwriting")} type="button">Open Underwriting Lab</button>
@@ -2005,10 +2179,20 @@ function InvestmentPanelPage({
   return (
     <InvestmentShell
       activePage={activeInvestmentPage}
-      currentCandidateLabel={activeSignal?.parcel_id ?? intakeAnalysis?.candidate.candidate_name}
+      activeProperty={activePropertySummary}
+      currentCandidateLabel={activePropertySummary?.parcelId ?? activeSignal?.parcel_id ?? intakeAnalysis?.candidate.candidate_name}
       dataMode={USE_DEMO_DATA ? "Portfolio Demo" : "Local live context"}
       shortlistCount={myShortlist.length}
       viewMode={investmentViewMode}
+      onActiveAnalyze={() => activeParcelId ? analyzeParcel(activeParcelId, activePropertySummary?.label) : setStatus("Search for a parcel before opening Property Analysis.")}
+      onActiveClear={clearActiveProperty}
+      onActiveCompare={addActivePropertyToCompare}
+      onActiveReport={() => openInvestmentPage("report-studio", activePropertySummary?.label ?? "Create Report")}
+      onActiveShortlist={addActivePropertyToShortlist}
+      onActiveUnderwrite={() => {
+        if (activeParcelId) void applyUnderwritingPrefill();
+        openInvestmentPage("underwriting", activePropertySummary?.label ?? "Underwriting");
+      }}
       onAskCfs={() => setAssistantOpen(true)}
       onClose={onClose}
       onPageChange={(page) => openInvestmentPage(page, investmentPages.find((item) => item.id === page)?.label ?? titleText(page))}
@@ -2144,21 +2328,27 @@ function InvestmentKpiCard({
 function InvestmentResearchTabs({
   activeSignal,
   analysis,
+  context,
+  status,
   strategy,
 }: {
   activeSignal: EconomicsParcelSignal | null;
   analysis: InvestmentIntakeAnalysisResponse | null;
+  context: InvestmentResearchContext | null;
+  status: "Error" | "Idle" | "Loading" | "Ready";
   strategy: InvestmentStrategyId;
 }) {
   const [tab, setTab] = useState<"summary" | "property" | "market" | "constraints" | "financial" | "diligence" | "sources">("summary");
-  const signalRows = activeSignal
+  const identity = context?.identity;
+  const signalRows = activeSignal || context
     ? [
-        { label: "Parcel ID", value: activeSignal.parcel_id },
-        { label: "Parcel / area label", value: signalLabel(activeSignal) },
+        { label: "Parcel ID", value: identity?.parcel_id ?? activeSignal?.parcel_id ?? "Not available" },
+        { label: "Parcel / area label", value: identity?.private_candidate_label ?? (activeSignal ? signalLabel(activeSignal) : "Private candidate") },
         { label: "Selected strategy", value: investmentStrategyLabel(strategy) },
-        { label: "Development-readiness band", value: activeSignal.development_readiness_band ?? "Data Needed" },
-        { label: "Land opportunity", value: activeSignal.land_opportunity_class ?? activeSignal.opportunity_class ?? "Data Needed" },
-        { label: "Data confidence", value: activeSignal.data_confidence ?? "Data Needed" },
+        { label: "Research-context status", value: status },
+        { label: "Development-readiness band", value: String(context?.development_readiness.strategy_fit ?? activeSignal?.development_readiness_band ?? "Data Needed") },
+        { label: "Land opportunity", value: activeSignal?.land_opportunity_class ?? activeSignal?.opportunity_class ?? "Data Needed" },
+        { label: "Data confidence", value: String(context?.evidence_quality.overall_data_confidence_band ?? activeSignal?.data_confidence ?? "Data Needed") },
       ]
     : [{ label: "Candidate", value: "Select a parcel or intake candidate to begin property research." }];
   const tabs = [
@@ -2190,34 +2380,54 @@ function InvestmentResearchTabs({
         <>
           <Matrix rows={signalRows} />
           <InvestmentSignalList title="Why this candidate surfaced" values={[
+            context?.safe_summary,
             activeSignal?.development_readiness_band,
             activeSignal?.economic_opportunity_band,
             activeSignal?.sewer_proxy_class,
           ].filter(Boolean).map(String)} />
+          <InvestmentSignalList title="Strongest evidence" values={[
+            context?.development_readiness.strategy_fit ? String(context.development_readiness.strategy_fit) : "",
+            context?.utility_context.utility_readiness_proxy_class || activeSignal?.utility_readiness_proxy_class ? String(context?.utility_context.utility_readiness_proxy_class ?? activeSignal?.utility_readiness_proxy_class) : "",
+            context?.market_area_context ? "Market-area context available" : "",
+            context?.environmental_context ? "Environmental context available" : "",
+          ].filter(Boolean)} />
+          <InvestmentSignalList title="Main cautions" values={(context?.limitations ?? analysis?.caveats ?? [activeSignal?.segment_caveat ?? "Verify all source evidence before relying on this review."]).filter(Boolean).map(String).slice(0, 5)} />
+          <InvestmentSignalList title="Missing evidence" values={(context?.missing_evidence ?? ["Review asking basis, utility capacity, entitlement path, and parcel-specific due diligence."]).slice(0, 6)} />
           <InvestmentSignalList title="Recommended verification sequence" values={(stringList(activeSignal?.due_diligence_flags).length ? stringList(activeSignal?.due_diligence_flags) : landDueDiligenceChecklist).slice(0, 6)} />
         </>
       ) : null}
       {tab === "property" ? <Matrix rows={[
-        { label: "Land-use context", value: activeSignal?.economic_segment ?? "Not available" },
-        { label: "Zoning support", value: activeSignal?.zoning_support_band ?? "Verify" },
-        { label: "Future-use context", value: "Verify with planning staff" },
-        { label: "Jurisdiction", value: activeSignal?.geography_label ?? "Not available" },
-        { label: "Growth pressure", value: activeSignal?.growth_pressure_band ?? "Data Needed" },
-        { label: "Transportation access", value: activeSignal?.transportation_access_band ?? "Verify" },
-        { label: "Utility Proximity", value: activeSignal?.utility_readiness_proxy_class ?? "Data Needed" },
-        { label: "Sewer-proximity proxy", value: activeSignal?.sewer_proxy_class ?? "Data Needed" },
+        { label: "Acreage", value: displayValue(identity?.approximate_acreage ?? activeSignal?.acreage) },
+        { label: "Land-use context", value: String(context?.parcel_fundamentals.existing_land_use_context ?? activeSignal?.economic_segment ?? "Not available") },
+        { label: "Zoning", value: String(context?.planning_context.current_zoning ?? activeSignal?.zoning_support_band ?? "Verify") },
+        { label: "Future-use context", value: String(context?.planning_context.future_use_context ?? "Verify with planning staff") },
+        { label: "Planning jurisdiction", value: identity?.geography_label ?? activeSignal?.geography_label ?? "Not available" },
+        { label: "Permit and development activity", value: activeSignal?.permit_activity_context ?? activeSignal?.growth_pressure_band ?? "Data Needed" },
+        { label: "Transportation context", value: String(context?.development_readiness.transportation_access ?? activeSignal?.transportation_access_band ?? "Verify") },
+        { label: "Sewer-proximity proxy", value: String(context?.utility_context.sewer_proxy_class ?? activeSignal?.sewer_proxy_class ?? "Data Needed") },
+        { label: "Utility-readiness proxy", value: String(context?.utility_context.utility_readiness_proxy_class ?? activeSignal?.utility_readiness_proxy_class ?? "Data Needed") },
       ]} /> : null}
       {tab === "financial" ? <Matrix rows={[
         { label: "User-entered asking basis", value: analysis?.acquisition_basis.asking_basis_band ?? "Missing asking price" },
         { label: "Asking price per acre", value: moneyText(analysis?.acquisition_basis.asking_price_per_acre) },
-        { label: "Historical sale quality", value: analysis?.screening_context?.sale_quality_band ?? "Not Available" },
-        { label: "Comparable context", value: analysis?.screening_context?.basis_context_band ?? "Insufficient Basis Information" },
+        { label: "Historical transfer context", value: String(context?.acquisition_basis.sale_quality_band ?? analysis?.screening_context?.sale_quality_band ?? "Not Available") },
+        { label: "Comparable context", value: String(context?.comparable_context.basis_context_band ?? analysis?.screening_context?.basis_context_band ?? "Insufficient Basis Information") },
         { label: "Assessor context", value: "Assessed values are context only, not market value or an appraisal." },
+        { label: "Saved underwriting scenarios", value: "Open Underwriting Lab to review saved scenarios for this parcel." },
+        { label: "Start Underwriting", value: "Use active-property header or Underwriting Lab action." },
       ]} /> : null}
-      {tab === "market" ? <MarketAreaContextPanel context={analysis?.market_area_context} /> : null}
-      {tab === "constraints" ? <EnvironmentalPhysicalContextPanel context={analysis?.environmental_context} /> : null}
-      {tab === "diligence" ? <InvestmentSignalList title="Verification checklist" values={landDueDiligenceChecklist.concat(environmentalDueDiligenceChecklist).slice(0, 10)} /> : null}
-      {tab === "sources" ? <InvestmentMethodologyPage compact /> : null}
+      {tab === "market" ? <MarketAreaContextPanel context={analysis?.market_area_context ?? (context?.market_area_context as InvestmentIntakeAnalysisResponse["market_area_context"] | undefined)} /> : null}
+      {tab === "constraints" ? <EnvironmentalPhysicalContextPanel context={analysis?.environmental_context ?? (context?.environmental_context as InvestmentIntakeAnalysisResponse["environmental_context"] | undefined)} /> : null}
+      {tab === "diligence" ? <InvestmentSignalList title="Verification checklist" values={(context?.verification_requirements ?? landDueDiligenceChecklist.concat(environmentalDueDiligenceChecklist)).slice(0, 10)} /> : null}
+      {tab === "sources" ? (
+        <>
+          <Matrix rows={(context?.source_registry ?? []).slice(0, 12).map((source) => ({
+            label: source.name ?? source.source ?? "Source",
+            value: [source.category, source.authority_level, source.vintage ?? source.source_date, source.limitation].filter(Boolean).join(" · ") || "Source details available",
+          }))} />
+          <InvestmentMethodologyPage compact />
+        </>
+      ) : null}
     </section>
   );
 }
@@ -2265,6 +2475,250 @@ function InvestmentMethodologyPage({ compact = false }: { compact?: boolean }) {
           Do not expose owner names, mailing addresses, grantor/grantee names, raw scores, exact probabilities, internal weights, secrets, or raw source records.
         </div>
       ) : null}
+    </section>
+  );
+}
+
+type InvestmentUniversalSearchResult = {
+  kind: string;
+  label: string;
+  parcelId?: string | null;
+  page: InvestmentPageId;
+  referenceId?: string | null;
+  summary: string;
+};
+
+function InvestmentUniversalSearch({
+  engagements,
+  intakeCandidates,
+  onAnalyzeParcel,
+  onOpenIntake,
+  onOpenPage,
+  opportunities,
+  reportBucketItems,
+  savedItems,
+  savedSearches,
+  scenarios,
+}: {
+  engagements: InvestmentEngagement[];
+  intakeCandidates: InvestmentIntakeCandidate[];
+  onAnalyzeParcel: (parcelId: string, label?: string) => void;
+  onOpenIntake: (candidateId: string) => void;
+  onOpenPage: (page: InvestmentPageId, label?: string) => void;
+  opportunities: InvestmentOpportunityReference[];
+  reportBucketItems: ReportBucketItem[];
+  savedItems: InvestmentSavedItem[];
+  savedSearches: InvestmentSavedSearch[];
+  scenarios: InvestmentUnderwritingScenario[];
+}) {
+  const [query, setQuery] = useState("");
+  const [parcelResults, setParcelResults] = useState<ParcelSearchResult[]>([]);
+  const [searchStatus, setSearchStatus] = useState<string | null>(null);
+  const normalized = query.trim().toLowerCase();
+
+  useEffect(() => {
+    let cancelled = false;
+    if (normalized.length < 3 || USE_DEMO_DATA || !isInvestmentParcelLookupQuery(normalized)) {
+      return () => {
+        cancelled = true;
+      };
+    }
+    const timeout = window.setTimeout(() => {
+      void searchParcels({ q: query.trim(), limit: 5, safe_for_dashboard: true }, { timeoutMs: 12000 })
+        .then((response) => {
+          if (!cancelled) {
+            setParcelResults(response.results);
+            setSearchStatus(null);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setSearchStatus("Parcel search unavailable. Check backend/database health, then retry.");
+        });
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
+  }, [normalized, query]);
+
+  const safeParcelResults = normalized.length < 3 || !isInvestmentParcelLookupQuery(normalized) ? [] : parcelResults;
+  const workspaceResults = useMemo(() => {
+    if (!normalized) return [];
+    const matches = (value?: string | null) => String(value ?? "").toLowerCase().includes(normalized);
+    const results: InvestmentUniversalSearchResult[] = [];
+    intakeCandidates.forEach((candidate) => {
+      if (matches(candidate.candidate_name) || matches(candidate.parcel_id)) {
+        results.push({ kind: "Intake candidate", label: candidate.candidate_name, page: "research", parcelId: candidate.parcel_id, referenceId: candidate.id, summary: candidate.review_status });
+      }
+    });
+    opportunities.forEach((opportunity) => {
+      if (matches(opportunity.title) || matches(opportunity.parcel_id) || matches(opportunity.general_location)) {
+        results.push({ kind: "Opportunity reference", label: opportunity.title, page: "opportunity-feed", parcelId: opportunity.parcel_id, referenceId: opportunity.external_opportunity_id, summary: `${opportunity.source_name}; ${opportunity.parcel_match_status}` });
+      }
+    });
+    savedItems.forEach((item) => {
+      if (matches(item.label) || matches(item.parcel_id) || matches(item.item_reference_id)) {
+        results.push({ kind: `Saved ${titleText(item.item_type)}`, label: item.label, page: item.item_type === "underwriting_scenario" ? "underwriting" : item.item_type === "report" ? "report-bucket" : "research", parcelId: item.parcel_id, referenceId: item.item_reference_id, summary: item.summary ?? item.status });
+      }
+    });
+    engagements.forEach((engagement) => {
+      if (matches(engagement.engagement_name)) {
+        results.push({ kind: "Project", label: engagement.engagement_name, page: "engagements", referenceId: engagement.id, summary: engagement.engagement_status });
+      }
+    });
+    scenarios.forEach((scenario) => {
+      if (matches(scenario.scenario_name) || matches(scenario.parcel_id)) {
+        results.push({ kind: "Underwriting scenario", label: scenario.scenario_name, page: "underwriting", parcelId: scenario.parcel_id, referenceId: scenario.id, summary: scenario.scenario_status });
+      }
+    });
+    savedSearches.forEach((search) => {
+      if (matches(search.search_name) || matches(search.goal)) {
+        results.push({ kind: "Saved search", label: search.search_name, page: "area-radar", referenceId: search.id, summary: search.goal });
+      }
+    });
+    reportBucketItems.forEach((item) => {
+      if (matches(item.title) || matches(item.summary)) {
+        results.push({ kind: "Report", label: item.title, page: "report-bucket", referenceId: item.id, summary: item.summary });
+      }
+    });
+    return results.slice(0, 8);
+  }, [engagements, intakeCandidates, normalized, opportunities, reportBucketItems, savedItems, savedSearches, scenarios]);
+
+  const results: InvestmentUniversalSearchResult[] = [
+    ...safeParcelResults.map((parcel) => ({
+      kind: parcel.pin14 ? "Parcel / PIN" : "Parcel",
+      label: parcel.official_parcel_id,
+      page: "research" as InvestmentPageId,
+      parcelId: parcel.official_parcel_id,
+      referenceId: parcel.official_parcel_id,
+      summary: [parcel.pin14 ? `PIN ${parcel.pin14}` : "", parcel.zoning_jurisdiction_name, parcel.dominant_zoning_general_normalized].filter(Boolean).join(" · ") || "Safe parcel result",
+    })),
+    ...workspaceResults,
+  ].slice(0, 12);
+  const visibleSearchStatus = normalized.length >= 3 && isInvestmentParcelLookupQuery(normalized) ? searchStatus : null;
+
+  const openResult = (result: InvestmentUniversalSearchResult) => {
+    if (result.referenceId && result.kind === "Intake candidate") {
+      onOpenIntake(result.referenceId);
+      return;
+    }
+    if (result.parcelId) {
+      onAnalyzeParcel(result.parcelId, result.label);
+      return;
+    }
+    onOpenPage(result.page, result.label);
+  };
+
+  return (
+    <section className="investment-card investment-universal-search" aria-label="Universal CFS Investment search">
+      <div className="investment-section-heading">
+        <div><p>Universal Search</p><h2>Find a parcel, candidate, project, scenario, report, or saved search</h2></div>
+      </div>
+      <label htmlFor="investment-universal-search-input">Search by Parcel ID, PIN, candidate, opportunity, project, scenario, report, or saved search</label>
+      <div className="investment-search-row">
+        <input
+          id="investment-universal-search-input"
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Example: CFS-PARCEL-0149726579 or a saved candidate name"
+          value={query}
+        />
+        <button className="investment-primary-button" disabled={!results[0]} onClick={() => results[0] && openResult(results[0])} type="button">Analyze</button>
+      </div>
+      <small className="investment-muted">Private identity fields are not searchable or displayed here.</small>
+      {visibleSearchStatus ? <p className="investment-status">{visibleSearchStatus}</p> : null}
+      {normalized ? (
+        results.length ? (
+          <div className="investment-search-results">
+            {results.map((result) => (
+              <button key={`${result.kind}-${result.referenceId ?? result.label}`} onClick={() => openResult(result)} type="button">
+                <span>{result.kind}</span>
+                <strong>{result.label}</strong>
+                <small>{result.summary}</small>
+                <em>Analyze</em>
+              </button>
+            ))}
+          </div>
+        ) : <p className="investment-empty">No safe workspace or parcel matches yet. Check the ID/PIN or search another parcel.</p>
+      ) : null}
+    </section>
+  );
+}
+
+function InvestmentResearchCompletenessPanel({
+  activeSignal,
+  context,
+  intakeAnalysis,
+  reportReady,
+  underwritingReady,
+}: {
+  activeSignal: EconomicsParcelSignal | null;
+  context: InvestmentResearchContext | null;
+  intakeAnalysis: InvestmentIntakeAnalysisResponse | null;
+  reportReady: boolean;
+  underwritingReady: boolean;
+}) {
+  const status = (available: unknown, partial?: unknown): string => available ? "Available" : partial ? "Partial" : "Needs Verification";
+  const rows = [
+    { label: "Parcel", value: status(context?.parcel_fundamentals, activeSignal) },
+    { label: "Planning", value: status(context?.planning_context, activeSignal?.zoning_support_band) },
+    { label: "Market", value: status(intakeAnalysis?.market_area_context ?? context?.market_area_context, activeSignal?.economic_segment) },
+    { label: "Transportation", value: status(context?.development_readiness, activeSignal?.transportation_access_band) },
+    { label: "Utilities", value: status(context?.utility_context, activeSignal?.utility_readiness_proxy_class) },
+    { label: "Historical sales", value: status(context?.acquisition_basis, intakeAnalysis?.screening_context?.sale_quality_band) },
+    { label: "Comparables", value: status(context?.comparable_context, intakeAnalysis?.screening_context?.basis_context_band) },
+    { label: "Asking basis", value: intakeAnalysis?.acquisition_basis.asking_price ? "Available" : "Needs Input" },
+    { label: "Environmental", value: status(intakeAnalysis?.environmental_context ?? context?.environmental_context, activeSignal?.flood_constraint_band) },
+    { label: "Underwriting", value: underwritingReady ? "Available" : "Needs Input" },
+    { label: "Due diligence", value: activeSignal?.due_diligence_flags || context?.verification_requirements?.length ? "Needs Verification" : "Partial" },
+    { label: "Report", value: reportReady ? "Available" : "Needs Input" },
+  ];
+  return (
+    <section className="investment-card">
+      <div className="investment-section-heading"><div><p>Research Completeness</p><h2>What remains before review is ready</h2></div></div>
+      <Matrix rows={rows} />
+    </section>
+  );
+}
+
+function InvestmentDataStatusPanel({
+  engagements,
+  intakeCandidates,
+  opportunities,
+  reportCount,
+  savedItems,
+  savedSearches,
+  signals,
+  underwritingScenarios,
+}: {
+  engagements: InvestmentEngagement[];
+  intakeCandidates: InvestmentIntakeCandidate[];
+  opportunities: InvestmentOpportunityReference[];
+  reportCount: number;
+  savedItems: InvestmentSavedItem[];
+  savedSearches: InvestmentSavedSearch[];
+  signals: EconomicsParcelSignal[];
+  underwritingScenarios: InvestmentUnderwritingScenario[];
+}) {
+  const rows = [
+    { label: "Parcel database", value: `${formatNumber(signals.length)} economics parcel signals loaded` },
+    { label: "Economics intelligence", value: signals.length ? "Available" : "Unavailable" },
+    { label: "ACS", value: "2024 ACS 5-year tract context where assigned" },
+    { label: "FEMA", value: "Flood context available in environmental summaries" },
+    { label: "NWI", value: "Mapped wetland context available where intersected" },
+    { label: "Terrain", value: "USGS terrain/slope summaries where raster coverage exists" },
+    { label: "Soils", value: "NRCS soil context available in environmental summaries" },
+    { label: "EPA", value: "Regulated-facility proximity context available as screening evidence" },
+    { label: "Transportation", value: "Traffic/access context available where matched" },
+    { label: "Utility proxies", value: "WSACC sewer proximity and basin context; capacity not confirmed" },
+    { label: "Comparable context", value: "Historical sales and comparable depth bands where source evidence exists" },
+    { label: "Opportunity references", value: `${formatNumber(opportunities.length)} reference(s); verify source availability` },
+    { label: "Workspace records", value: `${savedItems.length} saved, ${savedSearches.length} searches, ${engagements.length} projects, ${underwritingScenarios.length} scenarios, ${intakeCandidates.length} intake, ${reportCount} report artifacts` },
+  ];
+  return (
+    <section className="investment-card">
+      <div className="investment-section-heading"><div><p>Data Status</p><h2>Source readiness and limitations</h2></div></div>
+      <Matrix rows={rows} />
+      <p className="investment-muted">Refresh actions appear only where a local refresh service already exists. Failures preserve last-good data.</p>
     </section>
   );
 }
@@ -2985,6 +3439,11 @@ function titleText(value: string) {
   return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function isInvestmentParcelLookupQuery(value: string) {
+  const query = value.trim();
+  return /^cfs-parcel-[a-z0-9._:-]+$/i.test(query) || /^\d{8,20}$/.test(query);
+}
+
 function engagementShortlistType(itemType: InvestmentSavedItem["item_type"]) {
   if (itemType === "area") return "search_area";
   if (["parcel", "opportunity", "intake_candidate", "underwriting_scenario"].includes(itemType)) return itemType;
@@ -3023,6 +3482,28 @@ function writeInvestmentDisplayPreference(preference: { lastPage: InvestmentPage
     window.history.replaceState(null, "", url);
   } catch {
     // Low-risk display preference only; ignore private-mode or quota failures.
+  }
+}
+
+function readInvestmentParcelPreference() {
+  if (typeof window === "undefined") return null;
+  try {
+    const value = new URLSearchParams(window.location.search).get("parcelId");
+    return value && /^[A-Za-z0-9._:-]+$/.test(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeInvestmentParcelPreference(parcelId: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    const url = new URL(window.location.href);
+    if (parcelId) url.searchParams.set("parcelId", parcelId);
+    else url.searchParams.delete("parcelId");
+    window.history.replaceState(null, "", url);
+  } catch {
+    // URL restoration is best-effort display state only.
   }
 }
 
