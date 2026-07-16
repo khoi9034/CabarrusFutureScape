@@ -17,6 +17,7 @@ from app.services.investment_comparable_service import COMPARABLE_MIN_COUNT, _co
 from app.services.investment_environmental_context_service import candidate_environmental_context, environmental_context_by_parcel
 from app.services.investment_market_context_service import candidate_market_context
 from app.services.investment_screening_service import SAFE_CAVEAT, candidate_detail, compare_candidates
+from app.services.schema_guard import cloud_tables_exist
 
 INTAKE_TABLE = "investment_candidate_intake"
 CSV_REQUIRED_HEADERS = {
@@ -346,6 +347,8 @@ def _matching_investment_row(candidate: dict[str, Any], rows: list[dict[str, Any
 
 
 def _ensure_table(db: Session) -> None:
+    if cloud_tables_exist(db, [INTAKE_TABLE]):
+        return
     db.execute(
         text(
             f"""

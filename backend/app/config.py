@@ -7,6 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 EnvironmentName = Literal["dev", "test", "prod"]
 AiProviderName = Literal["none", "openai"]
+DatabaseAuthMode = Literal["password", "managed_identity"]
 BACKEND_ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 ROOT_BACKEND_ENV_FILE = Path(__file__).resolve().parents[2] / "backend.env"
 LOCAL_FRONTEND_CORS_ORIGINS = (
@@ -56,12 +57,60 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("DATABASE_URL"),
     )
+    database_auth_mode: DatabaseAuthMode = Field(
+        default="password",
+        validation_alias=AliasChoices("CFS_DATABASE_AUTH_MODE"),
+    )
+    azure_postgres_host: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_AZURE_POSTGRES_HOST"),
+    )
+    azure_postgres_database: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_AZURE_POSTGRES_DATABASE"),
+    )
+    azure_postgres_port: int = Field(
+        default=5432,
+        validation_alias=AliasChoices("CFS_AZURE_POSTGRES_PORT"),
+    )
+    azure_postgres_user: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_AZURE_POSTGRES_USER"),
+    )
+    azure_client_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("AZURE_CLIENT_ID", "CFS_AZURE_CLIENT_ID"),
+    )
     database_connect_timeout_seconds: int = Field(
         default=5,
         validation_alias=AliasChoices(
             "DATABASE_CONNECT_TIMEOUT_SECONDS",
             "DB_CONNECT_TIMEOUT_SECONDS",
         ),
+    )
+    database_pool_size: int = Field(
+        default=2,
+        ge=1,
+        le=5,
+        validation_alias=AliasChoices("CFS_DATABASE_POOL_SIZE", "SQLALCHEMY_POOL_SIZE"),
+    )
+    database_max_overflow: int = Field(
+        default=1,
+        ge=0,
+        le=3,
+        validation_alias=AliasChoices("CFS_DATABASE_MAX_OVERFLOW", "SQLALCHEMY_MAX_OVERFLOW"),
+    )
+    database_pool_timeout_seconds: int = Field(
+        default=10,
+        ge=1,
+        le=30,
+        validation_alias=AliasChoices("CFS_DATABASE_POOL_TIMEOUT_SECONDS", "SQLALCHEMY_POOL_TIMEOUT_SECONDS"),
+    )
+    database_pool_recycle_seconds: int = Field(
+        default=2700,
+        ge=300,
+        le=3300,
+        validation_alias=AliasChoices("CFS_DATABASE_POOL_RECYCLE_SECONDS", "SQLALCHEMY_POOL_RECYCLE_SECONDS"),
     )
     database_statement_timeout_ms: int = Field(
         default=3000,
@@ -77,6 +126,26 @@ class Settings(BaseSettings):
     cors_allowed_origins: str = Field(
         default=",".join(LOCAL_FRONTEND_CORS_ORIGINS),
         validation_alias=AliasChoices("CORS_ALLOWED_ORIGINS", "CFS_CORS_ALLOWED_ORIGINS"),
+    )
+    cfs_enable_docs: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("CFS_ENABLE_DOCS"),
+    )
+    cfs_staging_protect_api: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("CFS_STAGING_PROTECT_API"),
+    )
+    cfs_staging_access_token: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_STAGING_ACCESS_TOKEN"),
+    )
+    cfs_telemetry_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("CFS_TELEMETRY_ENABLED"),
+    )
+    applicationinsights_connection_string: str = Field(
+        default="",
+        validation_alias=AliasChoices("APPLICATIONINSIGHTS_CONNECTION_STRING"),
     )
     cfs_ai_enabled: bool = Field(
         default=False,
@@ -128,6 +197,14 @@ class Settings(BaseSettings):
             return [origin for origin in origins if origin != "*"]
 
         return origins
+
+    @property
+    def docs_enabled(self) -> bool:
+        return self.cfs_enable_docs
+
+    @property
+    def staging_protection_enabled(self) -> bool:
+        return self.cfs_staging_protect_api or bool(self.cfs_staging_access_token)
 
 
 @lru_cache

@@ -1,0 +1,72 @@
+name: Deploy CFS API to Azure Container Apps
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "scripts/azure/**"
+      - ".github/workflows/deploy-cfs-api.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cfs-api-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+    environment: azure-staging
+    env:
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      AZURE_ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+      AZURE_CONTAINER_APP_NAME: ${{ vars.AZURE_CONTAINER_APP_NAME }}
+      IMAGE_REPOSITORY: cfs-api
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push API image
+        shell: bash
+        run: |
+          set -euo pipefail
+          login_server="$(az acr show -g "$AZURE_RESOURCE_GROUP" -n "$AZURE_ACR_NAME" --query loginServer -o tsv)"
+          az acr login -n "$AZURE_ACR_NAME"
+          docker build -f backend/Dockerfile -t "$login_server/$IMAGE_REPOSITORY:$GITHUB_SHA" backend
+          docker push "$login_server/$IMAGE_REPOSITORY:$GITHUB_SHA"
+          echo "login_server=$login_server" >> "$GITHUB_ENV"
+
+      - name: Deploy API revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          short_sha="${GITHUB_SHA::12}"
+          az containerapp update \
+            -g "$AZURE_RESOURCE_GROUP" \
+            -n "$AZURE_CONTAINER_APP_NAME" \
+            --image "$login_server/$IMAGE_REPOSITORY:$GITHUB_SHA" \
+            --revision-suffix "$short_sha" \
+            -o none
+
+      - name: Wait for readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          fqdn="$(az containerapp show -g "$AZURE_RESOURCE_GROUP" -n "$AZURE_CONTAINER_APP_NAME" --query properties.configuration.ingress.fqdn -o tsv)"
+          for _ in {1..36}; do
+            if curl --fail --silent --show-error "https://$fqdn/health/ready"; then
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1

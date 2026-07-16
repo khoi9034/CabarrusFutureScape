@@ -17,6 +17,7 @@ from app.schemas.investment_engagements import (
     InvestmentEngagementShortlistRequest,
 )
 from app.services.investment_screening_service import SAFE_CAVEAT
+from app.services.schema_guard import cloud_tables_exist
 
 ENGAGEMENT_TABLE = "investment_engagement"
 
@@ -140,6 +141,8 @@ def engagement_report(db: Session, engagement_id: str) -> dict[str, Any] | None:
 
 
 def _ensure_table(db: Session) -> None:
+    if cloud_tables_exist(db, [ENGAGEMENT_TABLE]):
+        return
     db.execute(
         text(
             f"""

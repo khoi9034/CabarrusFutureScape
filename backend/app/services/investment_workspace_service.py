@@ -22,6 +22,7 @@ from app.schemas.investment_workspace import (
 from app.services.investment_area_radar_service import radar_search
 from app.services.investment_engagement_service import create_engagement
 from app.services.investment_screening_service import SAFE_CAVEAT
+from app.services.schema_guard import cloud_tables_exist
 
 SAVED_ITEM_TABLE = "investment_saved_item"
 RECENT_WORK_TABLE = "investment_recent_work"
@@ -345,6 +346,8 @@ def saved_search_to_engagement(db: Session, search_id: str) -> dict[str, Any] | 
 
 
 def _ensure_tables(db: Session) -> None:
+    if cloud_tables_exist(db, [SAVED_ITEM_TABLE, RECENT_WORK_TABLE, SAVED_SEARCH_TABLE]):
+        return
     db.execute(
         text(
             f"""

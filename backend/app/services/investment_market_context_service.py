@@ -10,6 +10,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.connectors.census_acs import CensusAcsConnector, configured_acs_year
+from app.services.schema_guard import cloud_tables_exist
 
 ACS_TABLE = "investment_acs_market_context"
 TRACT_GEOMETRY_TABLE = "investment_acs_tract_geometry"
@@ -210,6 +211,8 @@ def build_market_context(record: dict[str, Any], county_rows: list[dict[str, Any
 
 
 def _ensure_tables(db: Session) -> None:
+    if cloud_tables_exist(db, [ACS_TABLE, TRACT_GEOMETRY_TABLE, PARCEL_GEO_TABLE]):
+        return
     db.execute(
         text(
             f"""

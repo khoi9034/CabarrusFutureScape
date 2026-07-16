@@ -19,6 +19,7 @@ from app.schemas.investment_underwriting import (
 from app.schemas.investment_opportunities import InvestmentUnderwritingPrefillRequest, InvestmentUnderwritingTemplatePayload
 from app.services.investment_research_context_service import build_intake_research_context, build_parcel_research_context
 from app.services.investment_screening_service import SAFE_CAVEAT
+from app.services.schema_guard import cloud_tables_exist
 
 UNDERWRITING_TABLE = "investment_underwriting_scenario"
 TEMPLATE_TABLE = "investment_assumption_template"
@@ -452,6 +453,8 @@ def _sensitivity(request: InvestmentUnderwritingCalculateRequest, assumptions: d
 
 
 def _ensure_table(db: Session) -> None:
+    if cloud_tables_exist(db, [UNDERWRITING_TABLE]):
+        return
     db.execute(
         text(
             f"""
@@ -478,6 +481,8 @@ def _ensure_table(db: Session) -> None:
 
 
 def _ensure_template_table(db: Session) -> None:
+    if cloud_tables_exist(db, [TEMPLATE_TABLE]):
+        return
     db.execute(
         text(
             f"""

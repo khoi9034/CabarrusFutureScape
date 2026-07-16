@@ -21,6 +21,8 @@ from shapely.validation import make_valid
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.services.schema_guard import cloud_tables_exist
+
 ENV_TABLE = "investment_parcel_environmental_context"
 NWI_TABLE = "investment_nwi_wetlands"
 TERRAIN_TABLE = "investment_terrain_context"
@@ -159,6 +161,9 @@ def _ensure_tables(db: Session) -> None:
         return
     with _SCHEMA_LOCK:
         if _SCHEMA_READY:
+            return
+        if cloud_tables_exist(db, [NWI_TABLE, TERRAIN_TABLE, SOIL_TABLE, FACILITY_TABLE, ENV_TABLE]):
+            _SCHEMA_READY = True
             return
         _ensure_tables_unlocked(db)
         commit = getattr(db, "commit", None)
