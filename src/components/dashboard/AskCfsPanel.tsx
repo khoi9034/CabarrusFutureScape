@@ -7,7 +7,7 @@ import {
   askCfsSuggestedPrompts,
   searchCfsAi,
 } from "@/lib/aiSearchService";
-import { getApiErrorDisplayMessage, USE_DEMO_DATA } from "@/lib/api/client";
+import { ApiClientError, getApiErrorDisplayMessage, USE_DEMO_DATA } from "@/lib/api/client";
 import type { CfsAppMode } from "@/types";
 import type {
   CfsAiConversationTurn,
@@ -42,6 +42,7 @@ export function AskCfsPanel({
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const lastExternalRequestId = useRef<number | null>(null);
+  const latestRequestId = useRef(0);
   const lastTurn = turns.at(-1);
   const suggestedPrompts = suggestedPromptsOverride ??
     (appMode === "economics"
@@ -61,6 +62,8 @@ export function AskCfsPanel({
     const trimmedQuery = nextQuery.trim();
     if (!trimmedQuery || isLoading) return;
 
+    const requestId = latestRequestId.current + 1;
+    latestRequestId.current = requestId;
     setError(null);
     setIsLoading(true);
     setLoadingStage(0);
@@ -79,19 +82,18 @@ export function AskCfsPanel({
         mode: USE_DEMO_DATA ? "demo" : "live",
         query: trimmedQuery,
       });
+      if (requestId !== latestRequestId.current) return;
       setAnswer(response);
       setTurns((current) => [...current, toConversationTurn(trimmedQuery, response)].slice(-5));
       onResponse?.(response);
     } catch (requestError) {
+      if (requestId !== latestRequestId.current) return;
       setAnswer(null);
-      setError(
-        getApiErrorDisplayMessage(
-          requestError,
-          "Ask CFS is unavailable for the current session.",
-        ),
-      );
+      setError(askCfsErrorMessage(requestError));
     } finally {
-      setIsLoading(false);
+      if (requestId === latestRequestId.current) {
+        setIsLoading(false);
+      }
     }
   }, [appMode, filterContext, isLoading, onResponse, query, turns]);
 
@@ -238,9 +240,16 @@ export function AskCfsPanel({
       ) : null}
 
       {error ? (
-        <div className="mt-4 flex gap-2 rounded-lg border border-[#f87171]/25 bg-[#f87171]/10 p-3 text-xs text-[#fecaca]">
+        <div className="mt-4 flex flex-col gap-3 rounded-lg border border-[#f87171]/25 bg-[#f87171]/10 p-3 text-xs text-[#fecaca] sm:flex-row sm:items-center">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{error}</span>
+          <span className="min-w-0 flex-1">{error}</span>
+          <button
+            className="w-fit rounded border border-[#fecaca]/30 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#fee2e2] transition hover:border-[#fee2e2]/60"
+            onClick={() => void submit()}
+            type="button"
+          >
+            Retry
+          </button>
         </div>
       ) : null}
 
@@ -265,9 +274,31 @@ function toConversationTurn(
 
 function loadingStageMessage(stage: number) {
   if (USE_DEMO_DATA) return "Using cached demo intelligence context.";
-  if (stage >= 2) return "Still working; fallback will return if provider is slow.";
-  if (stage >= 1) return "Using cached local intelligence context.";
-  return "Using cached intelligence context when available; fast fallback is enabled.";
+  if (stage >= 2) return "Enhancing explanation if the provider responds in time.";
+  if (stage >= 1) return "Preparing grounded local analysis.";
+  return "Loading CFS context.";
+}
+
+function askCfsErrorMessage(error: unknown) {
+  if (error instanceof ApiClientError) {
+    if (error.kind === "network") {
+      return "CFS data service is unavailable. Restart the local CFS services and retry.";
+    }
+    if (error.kind === "timeout") {
+      return "CFS data service did not respond before the presentation timeout. Retry or run the presentation check.";
+    }
+    if (error.kind === "cancelled") return "Ask CFS request cancelled.";
+    if (error.status === 503) {
+      return "CFS database is unavailable. Check local services, then retry.";
+    }
+    if (error.status === 429) {
+      return "OpenAI enhancement is temporarily unavailable. CFS can still return grounded local analysis.";
+    }
+  }
+  return getApiErrorDisplayMessage(
+    error,
+    "Ask CFS is unavailable for the current session.",
+  );
 }
 
 function labelForTurn(turn: CfsAiConversationTurn) {
@@ -289,7 +320,7 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
       <div className="rounded-xl border border-white/10 bg-black/24 p-4">
         <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9be9ff]">
           <FileSearch className="h-3.5 w-3.5" />
-          Grounded answer
+          {askCfsProviderLabel(response)}
         </div>
         <p className="mb-3 rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
           {askCfsSourceLine(response)}
@@ -302,25 +333,30 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
         <div className="whitespace-pre-line text-sm leading-6 text-slate-100">
           {response.answer}
         </div>
-        <div className="mt-4 grid gap-2 md:grid-cols-2">
-          {response.evidence.map((item) => (
-            <article
-              className="rounded-lg border border-white/10 bg-white/[0.035] p-3"
-              key={`${item.source}-${item.title}`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-xs font-semibold text-white">{item.title}</h3>
-                <span className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#b7f0ff]">
-                  {item.confidence.replace("_", " ")}
-                </span>
-              </div>
-              <p className="mt-2 text-xs leading-5 text-slate-300">{item.detail}</p>
-              <p className="mt-2 truncate text-[10px] text-slate-500" title={item.source}>
-                {item.source}
-              </p>
-            </article>
-          ))}
-        </div>
+        <details className="mt-4 rounded-lg border border-white/10 bg-white/[0.025] p-3">
+          <summary className="cursor-pointer text-xs font-semibold text-slate-300">
+            Evidence used ({response.evidence.length})
+          </summary>
+          <div className="mt-3 grid gap-2 md:grid-cols-2">
+            {response.evidence.map((item) => (
+              <article
+                className="rounded-lg border border-white/10 bg-white/[0.035] p-3"
+                key={`${item.source}-${item.title}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-xs font-semibold text-white">{item.title}</h3>
+                  <span className="rounded border border-[#68d8ff]/20 bg-[#68d8ff]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#b7f0ff]">
+                    {item.confidence.replace("_", " ")}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-slate-300">{item.detail}</p>
+                <p className="mt-2 truncate text-[10px] text-slate-500" title={item.source}>
+                  {item.source}
+                </p>
+              </article>
+            ))}
+          </div>
+        </details>
       </div>
 
       <aside className="space-y-3">
@@ -330,10 +366,18 @@ function AskCfsAnswer({ response }: { response: CfsAiSearchResponse }) {
           values={response.dashboard_actions?.recommended_layers ?? []}
         />
         <CompactList title="Suggested next actions" values={response.suggested_actions} />
-        <CompactList title="Caveats" tone="amber" values={response.caveats} />
+        <DetailsList title="Caveats" tone="amber" values={response.caveats} />
       </aside>
     </div>
   );
+}
+
+function askCfsProviderLabel(response: CfsAiSearchResponse) {
+  if (response.data_mode === "demo") return "Cached demo analysis";
+  if (response.provider_status === "openai_enhanced" || response.provider === "openai") {
+    return "OpenAI enhanced";
+  }
+  return "Grounded CFS analysis";
 }
 
 function askCfsSourceLine(response: CfsAiSearchResponse) {
@@ -389,5 +433,39 @@ function CompactList({
         )}
       </ul>
     </div>
+  );
+}
+
+function DetailsList({
+  title,
+  tone = "cyan",
+  values,
+}: {
+  title: string;
+  tone?: "amber" | "cyan";
+  values: string[];
+}) {
+  return (
+    <details className="rounded-xl border border-white/10 bg-black/24 p-3">
+      <summary
+        className={
+          tone === "amber"
+            ? "cursor-pointer text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f6d98e]"
+            : "cursor-pointer text-[10px] font-semibold uppercase tracking-[0.16em] text-[#9be9ff]"
+        }
+      >
+        {title}
+      </summary>
+      <ul className="mt-2 space-y-1.5 text-xs leading-5 text-slate-300">
+        {(values.length ? values : ["Not available from current context."]).map(
+          (value) => (
+            <li className="flex gap-2" key={value}>
+              <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-current opacity-70" />
+              <span>{value}</span>
+            </li>
+          ),
+        )}
+      </ul>
+    </details>
   );
 }

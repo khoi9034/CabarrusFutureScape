@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import copy
+import logging
+import time
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -16,9 +18,10 @@ from app.dependencies.database import get_optional_read_only_db
 from app.routers.economics_router import get_cached_economics_intelligence
 from app.routers.indicators_router import get_cached_indicator_intelligence, get_indicator_intelligence
 from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchResponse
-from app.services.ai_search_service import CfsAiSearchService
+from app.services.ai_search_service import CfsAiSearchService, get_ai_provider_status
 
 router = APIRouter(prefix="/ai", tags=["CFS AI Search"])
+LOGGER = logging.getLogger(__name__)
 ASK_CFS_CONTEXT_CACHE_TTL = timedelta(minutes=5)
 _ASK_CFS_CONTEXT_CACHE: dict[str, Any] = {"expires_at": None, "payload": None}
 
@@ -82,8 +85,33 @@ def search_cfs(
 ) -> CfsAiSearchResponse:
     """Answer CFS indicator questions from compact server-side context."""
 
+    start = time.perf_counter()
     context = gather_cfs_ai_context(db, request)
-    return CfsAiSearchService(get_settings()).search(request, context)
+    context_ms = int((time.perf_counter() - start) * 1000)
+    response = CfsAiSearchService(get_settings()).search(request, context)
+    response.timings_ms = {**response.timings_ms, "context_ms": context_ms}
+    LOGGER.info(
+        "ai_search request_received app_mode=%s context_ms=%s total_ms=%s provider_status=%s",
+        request.app_mode,
+        context_ms,
+        response.timings_ms.get("total_ms"),
+        response.provider_status,
+    )
+    return response
+
+
+@router.get("/status")
+def ai_status() -> dict[str, Any]:
+    """Return safe AI/search status for local presentation checks."""
+
+    context_keys = [key for key in _ASK_CFS_CONTEXT_CACHE if key.startswith("payload_")]
+    return {
+        **get_ai_provider_status(get_settings()),
+        "context_cache": {
+            "active_keys": context_keys,
+            "ttl_seconds": int(ASK_CFS_CONTEXT_CACHE_TTL.total_seconds()),
+        },
+    }
 
 
 def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | None = None) -> CfsAiContext:

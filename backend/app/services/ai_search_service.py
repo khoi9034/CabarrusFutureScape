@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import concurrent.futures
 import json
+import logging
 import re
 import threading
+import time
 import urllib.error
 import urllib.request
 from datetime import UTC, datetime, timedelta
@@ -46,11 +48,18 @@ RELATED_LAYERS = {
     "zoning": ["Zoning / Land Use"],
 }
 
-_PROVIDER_TIMEOUT_SECONDS = 1.25
+LOGGER = logging.getLogger(__name__)
+_PROVIDER_TIMEOUT_SECONDS = 6.0
 _PROVIDER_COOLDOWN_TTL = timedelta(minutes=5)
 _PROVIDER_COOLDOWN_LOCK = threading.Lock()
 _PROVIDER_COOLDOWN_UNTIL: datetime | None = None
 _PROVIDER_COOLDOWN_REASON: str | None = None
+_PROVIDER_STATUS_LOCK = threading.Lock()
+_PROVIDER_LAST_STATUS: dict[str, Any] = {
+    "last_provider_latency_ms": None,
+    "last_provider_status": "not_called",
+    "last_success_at": None,
+}
 _PROVIDER_EXECUTOR = concurrent.futures.ThreadPoolExecutor(
     max_workers=2,
     thread_name_prefix="cfs-ai-provider",
@@ -204,15 +213,26 @@ class CfsAiSearchService:
         request: CfsAiSearchRequest,
         context: CfsAiContext,
     ) -> CfsAiSearchResponse:
+        total_start = time.perf_counter()
         domains = (
             ["economics"]
             if request.app_mode == "economics" and not request.filters.domains
             else request.filters.domains or selected_signal_domains(request) or resolve_query_domains(request)
         )
+        deterministic_start = time.perf_counter()
         fallback = deterministic_answer(request, context, domains)
+        deterministic_ms = _elapsed_ms(deterministic_start)
+        fallback.timings_ms = {
+            "deterministic_ms": deterministic_ms,
+            "provider_ms": 0,
+            "total_ms": _elapsed_ms(total_start),
+        }
+        fallback.provider_status = "grounded_cfs_analysis"
         if request.app_mode == "economics" and request.request_type == "powerbi_report_plan":
+            _log_ai_timing("deterministic_powerbi", fallback.timings_ms)
             return fallback
         if request.app_mode == "economics" and _is_fast_economics_guidance_query(request.query):
+            _log_ai_timing("deterministic_fast_guidance", fallback.timings_ms)
             return fallback
         provider = self._settings.cfs_ai_provider
 
@@ -221,24 +241,40 @@ class CfsAiSearchService:
             or provider == "none"
             or not self._settings.cfs_ai_model.strip()
         ):
+            _record_provider_status("disabled", None)
+            _log_ai_timing("disabled", fallback.timings_ms)
             return fallback
 
         if cooldown_reason := _provider_cooldown_reason():
             fallback.caveats.append(_provider_cooldown_caveat(cooldown_reason))
+            fallback.provider_status = f"fallback_{cooldown_reason}"
+            fallback.timings_ms["total_ms"] = _elapsed_ms(total_start)
+            _log_ai_timing(f"cooldown_{cooldown_reason}", fallback.timings_ms)
             return sanitize_response(fallback)
 
         try:
+            provider_start = time.perf_counter()
             provider_payload = self._provider_answer_with_timeout(request, context, domains)
+            provider_ms = _elapsed_ms(provider_start)
         except concurrent.futures.TimeoutError:
             _mark_provider_unavailable("timeout")
             fallback.caveats.append(
                 "OpenAI provider did not respond within the presentation timeout, so CFS used grounded deterministic analysis.",
             )
+            fallback.provider_status = "provider_timeout_fallback"
+            fallback.timings_ms["provider_ms"] = int(_provider_timeout_seconds(self._settings) * 1000)
+            fallback.timings_ms["total_ms"] = _elapsed_ms(total_start)
+            _record_provider_status("timeout", fallback.timings_ms["provider_ms"])
+            _log_ai_timing("timeout", fallback.timings_ms)
             return sanitize_response(fallback)
         except Exception:
             fallback.caveats.append(
                 "AI provider was unavailable; deterministic CFS answer returned.",
             )
+            fallback.provider_status = "provider_unavailable_fallback"
+            fallback.timings_ms["total_ms"] = _elapsed_ms(total_start)
+            _record_provider_status("unavailable", None)
+            _log_ai_timing("unavailable", fallback.timings_ms)
             return sanitize_response(fallback)
 
         if provider_payload and provider_payload.get("_provider_unavailable_reason") == "rate_limit_quota":
@@ -246,12 +282,22 @@ class CfsAiSearchService:
             fallback.caveats.append(
                 "OpenAI provider was unavailable due to rate limit or quota status, so CFS used grounded deterministic analysis.",
             )
+            fallback.provider_status = "rate_limit_fallback"
+            fallback.timings_ms["provider_ms"] = provider_ms
+            fallback.timings_ms["total_ms"] = _elapsed_ms(total_start)
+            _record_provider_status("rate_limit_quota", provider_ms)
+            _log_ai_timing("rate_limit_quota", fallback.timings_ms)
             return sanitize_response(fallback)
 
         if provider_payload is None:
             fallback.caveats.append(
                 "AI provider is not fully configured; deterministic CFS answer returned.",
             )
+            fallback.provider_status = "provider_unavailable_fallback"
+            fallback.timings_ms["provider_ms"] = provider_ms
+            fallback.timings_ms["total_ms"] = _elapsed_ms(total_start)
+            _record_provider_status("unavailable", provider_ms)
+            _log_ai_timing("unavailable", fallback.timings_ms)
             return sanitize_response(fallback)
 
         provider_answer = str(provider_payload.get("answer") or "")
@@ -259,6 +305,11 @@ class CfsAiSearchService:
             fallback.caveats.append(
                 "AI provider response was too sparse for the presentation view, so CFS used grounded deterministic analysis.",
             )
+            fallback.provider_status = "sparse_provider_fallback"
+            fallback.timings_ms["provider_ms"] = provider_ms
+            fallback.timings_ms["total_ms"] = _elapsed_ms(total_start)
+            _record_provider_status("sparse_response", provider_ms)
+            _log_ai_timing("sparse_response", fallback.timings_ms)
             return sanitize_response(fallback)
 
         response = CfsAiSearchResponse(
@@ -281,6 +332,14 @@ class CfsAiSearchService:
             suggested_actions=_string_list(provider_payload.get("suggested_actions"))
             or fallback.suggested_actions,
         )
+        response.provider_status = "openai_enhanced"
+        response.timings_ms = {
+            "deterministic_ms": deterministic_ms,
+            "provider_ms": provider_ms,
+            "total_ms": _elapsed_ms(total_start),
+        }
+        _record_provider_status("openai_success", provider_ms, success=True)
+        _log_ai_timing("openai", response.timings_ms)
         if request.selected_signal:
             response.dashboard_actions = _selected_signal_actions(request.selected_signal, domains)
             response.related_layers = list(
@@ -299,9 +358,10 @@ class CfsAiSearchService:
         context: CfsAiContext,
         domains: list[CfsAiDomain],
     ) -> dict[str, Any] | None:
+        timeout_seconds = _provider_timeout_seconds(self._settings)
         future = _PROVIDER_EXECUTOR.submit(self._provider_answer, request, context, domains)
         try:
-            return future.result(timeout=_PROVIDER_TIMEOUT_SECONDS)
+            return future.result(timeout=timeout_seconds)
         except concurrent.futures.TimeoutError:
             future.cancel()
             raise
@@ -355,6 +415,7 @@ class CfsAiSearchService:
                 "Content-Type": "application/json",
             },
             ["choices", 0, "message", "content"],
+            timeout_seconds=_provider_timeout_seconds(self._settings),
         )
 
 
@@ -527,6 +588,55 @@ def _provider_cooldown_caveat(reason: str) -> str:
     if reason == "timeout":
         return "OpenAI provider is temporarily unavailable after a slow response, so CFS used grounded deterministic analysis."
     return "OpenAI provider is temporarily unavailable, so CFS used grounded deterministic analysis."
+
+
+def _elapsed_ms(start: float) -> int:
+    return int((time.perf_counter() - start) * 1000)
+
+
+def _provider_timeout_seconds(settings: Settings) -> float:
+    value = getattr(settings, "cfs_ai_provider_timeout_seconds", _PROVIDER_TIMEOUT_SECONDS)
+    try:
+        seconds = float(value)
+    except (TypeError, ValueError):
+        return _PROVIDER_TIMEOUT_SECONDS
+    return min(max(seconds, 0.05), 20.0)
+
+
+def _record_provider_status(status: str, latency_ms: float | int | None, *, success: bool = False) -> None:
+    with _PROVIDER_STATUS_LOCK:
+        _PROVIDER_LAST_STATUS["last_provider_status"] = status
+        _PROVIDER_LAST_STATUS["last_provider_latency_ms"] = int(latency_ms) if latency_ms is not None else None
+        if success:
+            _PROVIDER_LAST_STATUS["last_success_at"] = datetime.now(UTC).isoformat()
+
+
+def get_ai_provider_status(settings: Settings) -> dict[str, Any]:
+    with _PROVIDER_STATUS_LOCK:
+        last_status = dict(_PROVIDER_LAST_STATUS)
+    return {
+        "ai_enabled": settings.cfs_ai_enabled,
+        "api_key_configured": bool(settings.openai_api_key.strip()),
+        "backend_status": "ok",
+        "configured_provider": settings.cfs_ai_provider,
+        "deterministic_fallback_available": True,
+        "last_provider_latency_ms": last_status["last_provider_latency_ms"],
+        "last_provider_status": last_status["last_provider_status"],
+        "last_successful_provider_request_time": last_status["last_success_at"],
+        "model_configured": bool(settings.cfs_ai_model.strip()),
+        "model_name": settings.cfs_ai_model.strip() or None,
+        "provider_timeout_seconds": _provider_timeout_seconds(settings),
+    }
+
+
+def _log_ai_timing(provider_status: str, timings: dict[str, int]) -> None:
+    LOGGER.info(
+        "ai_search deterministic_ms=%s provider_ms=%s total_ms=%s provider_status=%s",
+        timings.get("deterministic_ms"),
+        timings.get("provider_ms"),
+        timings.get("total_ms"),
+        provider_status,
+    )
 
 
 def extract_development_activity_detail(context: CfsAiContext) -> dict[str, Any]:
@@ -3109,18 +3219,36 @@ def _post_provider_json(
     payload: dict[str, Any],
     headers: dict[str, str],
     content_path: list[Any],
+    *,
+    timeout_seconds: float = _PROVIDER_TIMEOUT_SECONDS,
 ) -> dict[str, Any] | None:
     data = json.dumps(payload).encode("utf-8")
-    request = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    try:
-        with urllib.request.urlopen(request, timeout=3) as response:
-            provider_payload = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as error:
-        if error.code == 429:
-            return {"_provider_unavailable_reason": "rate_limit_quota"}
-        return None
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
-        return None
+    deadline = time.monotonic() + timeout_seconds
+    provider_payload: Any = None
+    for attempt in range(2):
+        remaining = max(0.1, deadline - time.monotonic())
+        request = urllib.request.Request(url, data=data, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(request, timeout=remaining) as response:
+                provider_payload = json.loads(response.read().decode("utf-8"))
+            break
+        except urllib.error.HTTPError as error:
+            if error.code == 429:
+                if attempt == 0 and deadline - time.monotonic() > 0.3:
+                    time.sleep(min(0.25, max(0.0, deadline - time.monotonic())))
+                    continue
+                return {"_provider_unavailable_reason": "rate_limit_quota"}
+            if 500 <= error.code <= 599 and attempt == 0 and deadline - time.monotonic() > 0.3:
+                time.sleep(min(0.25, max(0.0, deadline - time.monotonic())))
+                continue
+            return None
+        except (TimeoutError, json.JSONDecodeError):
+            return None
+        except urllib.error.URLError:
+            if attempt == 0 and deadline - time.monotonic() > 0.3:
+                time.sleep(min(0.25, max(0.0, deadline - time.monotonic())))
+                continue
+            return None
 
     content: Any = provider_payload
     for key in content_path:

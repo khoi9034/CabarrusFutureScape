@@ -495,8 +495,38 @@ def test_ai_search_provider_failure_falls_back(monkeypatch) -> None:
     )
 
     assert response.provider == "none"
+    assert response.provider_status == "provider_unavailable_fallback"
+    assert "total_ms" in response.timings_ms
     assert response.dashboard_actions.focus_domain == "permits"
     assert "deterministic CFS answer returned" in " ".join(response.caveats)
+
+
+def test_ai_search_provider_uses_configured_timeout(monkeypatch) -> None:
+    captured: dict[str, float] = {}
+
+    def provider_call(*_args, **kwargs):
+        captured["timeout_seconds"] = kwargs["timeout_seconds"]
+        return {
+            "answer": (
+                "Provider answer with enough detail for the presentation view. " * 20
+            ),
+        }
+
+    monkeypatch.setattr(ai_search_service, "_post_provider_json", provider_call)
+    response = CfsAiSearchService(
+        _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="gpt-4o-mini",
+            cfs_ai_provider="openai",
+            cfs_ai_provider_timeout_seconds=4.5,
+            openai_api_key="test-key",
+        ),
+    ).search(CfsAiSearchRequest(query="What are the main permit trends?"), _context())
+
+    assert captured["timeout_seconds"] == 4.5
+    assert response.provider == "openai"
+    assert response.provider_status == "openai_enhanced"
+    assert response.timings_ms["provider_ms"] >= 0
 
 
 def test_ai_search_openai_429_falls_back_with_safe_caveat(monkeypatch) -> None:
@@ -548,7 +578,7 @@ def test_ai_search_provider_timeout_returns_detailed_fallback(monkeypatch) -> No
         time.sleep(0.2)
         return {"answer": "late provider answer"}
 
-    monkeypatch.setattr(ai_search_service, "_PROVIDER_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr(ai_search_service, "_PROVIDER_TIMEOUT_SECONDS", 0.05)
     monkeypatch.setattr(ai_search_service, "_post_provider_json", slow_provider)
     service = CfsAiSearchService(
         _settings(
@@ -564,6 +594,8 @@ def test_ai_search_provider_timeout_returns_detailed_fallback(monkeypatch) -> No
     )
 
     assert response.provider == "none"
+    assert response.provider_status == "provider_timeout_fallback"
+    assert response.timings_ms["provider_ms"] == 50
     assert "Key findings" in response.answer
     assert "presentation timeout" in " ".join(response.caveats)
     assert response.dashboard_actions.focus_domain == "permits"
@@ -611,6 +643,7 @@ def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
 
     app.dependency_overrides[get_read_only_db] = lambda: object()
     monkeypatch.setattr(ai_search_router, "gather_cfs_ai_context", fake_context)
+    monkeypatch.setattr(ai_search_router, "get_settings", lambda: _settings())
     try:
         response = TestClient(app).post(
             "/ai/search",
@@ -622,6 +655,8 @@ def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["provider"] == "none"
+    assert body["provider_status"] == "grounded_cfs_analysis"
+    assert "context_ms" in body["timings_ms"]
     assert body["data_source"] == "local_live_backend"
     assert body["context_freshness"] == "current_session"
     assert body["domains"] == ["schools"]
@@ -630,6 +665,28 @@ def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
     assert "prediction_probability" not in text
     assert "raw" + "_score" not in text
     assert "will " + "develop" not in text
+
+
+def test_ai_status_endpoint_is_safe(monkeypatch) -> None:
+    monkeypatch.setattr(
+        ai_search_router,
+        "get_settings",
+        lambda: _settings(
+            cfs_ai_enabled=True,
+            cfs_ai_model="gpt-4o-mini",
+            cfs_ai_provider="openai",
+            cfs_ai_provider_timeout_seconds=6.0,
+            openai_api_key="sk-test-secret",
+        ),
+    )
+
+    response = TestClient(app).get("/ai/status")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["api_key_configured"] is True
+    assert body["provider_timeout_seconds"] == 6.0
+    assert "sk-test-secret" not in str(body)
 
 
 def test_ai_search_endpoint_returns_fast_fallback_when_intelligence_cache_empty(monkeypatch) -> None:

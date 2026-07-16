@@ -787,6 +787,8 @@ function PowerBiToolsPage({
     document
       .getElementById("economics-tool-workspace")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const [activeToolsTab, setActiveToolsTab] =
+    useState<"builder" | "tables" | "screener" | "bucket">("builder");
   const [askPowerBiAction, setAskPowerBiAction] = useState<PowerBiAskActionRequest | null>(null);
   const [lastAskResponse, setLastAskResponse] = useState<CfsAiSearchResponse | null>(null);
   const askPowerBiActionId = useRef(0);
@@ -854,6 +856,35 @@ function PowerBiToolsPage({
         <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
         <span>Screening-level economics: not an official appraisal, tax bill, fiscal impact study, or project approval recommendation.</span>
       </section>
+      <section className="rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
+        <div className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+          Power BI workflow
+        </div>
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Power BI and tools workflow tabs">
+          {[
+            ["builder", "Report Builder"],
+            ["tables", "Data Tables"],
+            ["screener", "Land Screener"],
+            ["bucket", "Report Bucket"],
+          ].map(([key, label]) => (
+            <button
+              aria-selected={activeToolsTab === key}
+              className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                activeToolsTab === key
+                  ? "border-[var(--econ-gold)]/60 bg-[var(--econ-gold)]/15 text-[#ffe6a6]"
+                  : "border-[var(--econ-border)] text-[var(--econ-muted)] hover:border-[var(--econ-gold)]/45 hover:text-[var(--econ-text)]"
+              }`}
+              key={key}
+              onClick={() => setActiveToolsTab(key as typeof activeToolsTab)}
+              role="tab"
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </section>
+      {activeToolsTab === "builder" ? (
       <PowerBiReportGenerator
         askPowerBiAction={askPowerBiAction}
         availability={reportAvailability}
@@ -864,6 +895,8 @@ function PowerBiToolsPage({
         payload={powerBiPayload}
         signals={signals}
       />
+      ) : null}
+      {activeToolsTab === "screener" ? (
       <LandDueDiligenceScreener
         onAddReportBucketItem={onAddReportBucketItem}
         onClearSelection={onClearSelection}
@@ -872,6 +905,8 @@ function PowerBiToolsPage({
         selectedSignalIds={selectedSignalIds}
         signals={signals}
       />
+      ) : null}
+      {activeToolsTab === "bucket" ? (
       <ReportBucketPanel
         items={reportBucketItems}
         onClear={onClearReportBucket}
@@ -880,6 +915,8 @@ function PowerBiToolsPage({
         onTogglePrint={onToggleReportBucketPrint}
         title="Report Bucket"
       />
+      ) : null}
+      {activeToolsTab === "tables" ? (
       <details className="rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] p-4" data-econ-tour="advanced-tools">
         <summary className="cursor-pointer text-base font-semibold text-[var(--econ-text)]">
           Advanced Manual Tools
@@ -948,6 +985,7 @@ function PowerBiToolsPage({
           </section>
         </div>
       </details>
+      ) : null}
     </>
   );
 }
@@ -4466,6 +4504,8 @@ function EconomicDashboardPage({
   const [selectedGeography, setSelectedGeography] = useState("All");
   const [selectedOpportunityClass, setSelectedOpportunityClass] = useState("All");
   const [selectedDataConfidence, setSelectedDataConfidence] = useState("All");
+  const [activeDashboardSegment, setActiveDashboardSegment] =
+    useState<"pulse" | "land" | "burden" | "confidence">("pulse");
   const kpis = intelligence?.kpis ?? [];
   const filteredSignals = filterEconomicSignals(signals, {
     dataConfidence: selectedDataConfidence,
@@ -4582,6 +4622,35 @@ function EconomicDashboardPage({
           visiblePromptCount={6}
         />
       </EconPanel>
+      <section className="rounded-2xl border border-[var(--econ-border)] bg-white/[0.025] p-3">
+        <div className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--econ-muted)]">
+          Presentation view
+        </div>
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Economic dashboard presentation segments">
+          {[
+            ["pulse", "Executive Pulse"],
+            ["land", "Land Economics"],
+            ["burden", "Scenario Burden"],
+            ["confidence", "Data Confidence"],
+          ].map(([key, label]) => (
+            <button
+              aria-selected={activeDashboardSegment === key}
+              className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                activeDashboardSegment === key
+                  ? "border-[var(--econ-gold)]/60 bg-[var(--econ-gold)]/15 text-[#ffe6a6]"
+                  : "border-[var(--econ-border)] text-[var(--econ-muted)] hover:border-[var(--econ-gold)]/45 hover:text-[var(--econ-text)]"
+              }`}
+              key={key}
+              onClick={() => setActiveDashboardSegment(key as typeof activeDashboardSegment)}
+              role="tab"
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </section>
+      {activeDashboardSegment === "pulse" ? (
       <section className="grid gap-4">
         <EconPanel title="Executive Economic Signals" kicker="KPIs" tourId="kpi-strip">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
@@ -4613,13 +4682,6 @@ function EconomicDashboardPage({
           >
             <EconomicsDonutChart rows={classBars} />
           </EconomicsVisualPanel>
-          <EconomicsVisualPanel
-            description="Shows confidence distribution for the currently filtered parcel signals."
-            recipe="Table: parcel_economic_signal_fact | Visual: Donut chart | Legend: data_confidence | Values: Count of signal_id"
-            title="Data Confidence Visual"
-          >
-            <EconomicsDonutChart rows={confidenceBars} />
-          </EconomicsVisualPanel>
           <EconPanel title="Underbuilt Redevelopment Watchlist" kicker="Watchlist">
             <SignalTable signals={filteredWatchlist.slice(0, 5)} />
             <DetailsBlock summary="Show full watchlist" hint={`${filteredWatchlist.length} filtered rows`}>
@@ -4628,6 +4690,8 @@ function EconomicDashboardPage({
           </EconPanel>
         </div>
       </section>
+      ) : null}
+      {activeDashboardSegment === "land" ? (
       <section className="grid gap-4" data-econ-tour="segment-visuals">
         <EconPanel title="Segment-Aware Land Economics" kicker="Land economics">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -4664,6 +4728,8 @@ function EconomicDashboardPage({
           </DetailsBlock>
         </EconPanel>
       </section>
+      ) : null}
+      {activeDashboardSegment === "land" ? (
       <section className="grid gap-4">
         <EconPanel title="Land Opportunity Screener" kicker="Utility + model-ready context">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -4696,6 +4762,8 @@ function EconomicDashboardPage({
           <SignalTable signals={landOpportunityRows.slice(0, 8)} />
         </EconPanel>
       </section>
+      ) : null}
+      {activeDashboardSegment === "burden" ? (
       <section className="grid gap-4" data-econ-tour="scenario-visuals">
         <EconPanel title="Scenario + Power BI Readiness" kicker="Scenario readiness">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -4726,6 +4794,29 @@ function EconomicDashboardPage({
             <EconomicsMatrixChart rows={burdenRows} />
           </EconomicsVisualPanel>
         </div>
+      </section>
+      ) : null}
+      {activeDashboardSegment === "confidence" ? (
+      <section className="grid gap-4">
+        <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+          <EconomicsVisualPanel
+            description="Shows confidence distribution for the currently filtered parcel signals."
+            recipe="Table: parcel_economic_signal_fact | Visual: Donut chart | Legend: data_confidence | Values: Count of signal_id"
+            title="Data Confidence Visual"
+          >
+            <EconomicsDonutChart rows={confidenceBars} />
+          </EconomicsVisualPanel>
+          <EconPanel title="Data Confidence Summary" kicker="Presentation guardrails">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <MiniMetric label="Filtered rows" value={formatNumber(filteredSignals.length)} />
+              <MiniMetric label="Data-needed rows" value={formatNumber(filteredSignals.filter((signal) => signal.economic_data_confidence === "data_needed").length)} />
+              <MiniMetric label="Readiness domains" value={formatNumber(intelligence?.data_readiness?.length ?? 0)} />
+            </div>
+            <p className="mt-3 text-sm leading-6 text-[var(--econ-muted)]">
+              Keep this segment visible when discussing gaps: CFS Economics is a screening tool, not an appraisal, tax bill, or approval recommendation.
+            </p>
+          </EconPanel>
+        </div>
         <DetailsBlock summary="Full Data Confidence Register" hint="Domain readiness, current use, and next data need.">
           <EconomicsReadinessMatrix rows={intelligence?.data_readiness ?? []} />
         </DetailsBlock>
@@ -4738,6 +4829,7 @@ function EconomicDashboardPage({
           </ul>
         </DetailsBlock>
       </section>
+      ) : null}
     </>
   );
 }
@@ -6243,6 +6335,13 @@ function PowerBiReportGenerator({
   const report = plan
     ? buildGeneratedReportSnapshot(plan, payload, signals, outputs, dataReadiness, includeSections)
     : null;
+  const applyAskPlan = () => {
+    if (!askPowerBiAction?.actions || askPowerBiAction.actions.action_type === "none") return;
+    const generated = powerBiActionsToGeneratedPlan(askPowerBiAction.actions, payload, availability);
+    setPrompt(generated.generated_from_prompt);
+    setPlan(generated);
+    setStatus("AI plan applied to the report builder");
+  };
   const generateReport = () => {
     setPlan(buildPowerBiReportPlan(prompt, payload, availability));
     setStatus("Report preview generated");
@@ -6330,6 +6429,15 @@ function PowerBiReportGenerator({
           </div>
         ) : null}
         <div className="flex flex-wrap gap-2">
+          {askPowerBiAction?.actions && askPowerBiAction.actions.action_type !== "none" ? (
+            <button
+              className="rounded-xl border border-[var(--econ-green)]/45 bg-[var(--econ-green)]/10 px-4 py-2 text-sm font-semibold text-[var(--econ-green)] transition hover:border-[var(--econ-green)]"
+              onClick={applyAskPlan}
+              type="button"
+            >
+              Apply AI Plan
+            </button>
+          ) : null}
           <button
             className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/15 px-4 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
             onClick={generateReport}

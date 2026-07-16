@@ -146,7 +146,9 @@ export interface CfsAiSearchResponse {
   evidence: CfsAiEvidenceItem[];
   filtered_context_summary?: string | null;
   provider: "none" | "openai";
+  provider_status?: string | null;
   powerbi_actions?: CfsAiPowerBiActions | null;
   related_layers: string[];
   suggested_actions: string[];
+  timings_ms?: Record<string, number>;
 }

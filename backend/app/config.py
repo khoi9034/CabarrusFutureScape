@@ -90,6 +90,12 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("CFS_AI_MODEL"),
     )
+    cfs_ai_provider_timeout_seconds: float = Field(
+        default=6.0,
+        gt=0,
+        le=20,
+        validation_alias=AliasChoices("CFS_AI_PROVIDER_TIMEOUT_SECONDS"),
+    )
     openai_api_key: str = Field(
         default="",
         validation_alias=AliasChoices("OPENAI_API_KEY"),

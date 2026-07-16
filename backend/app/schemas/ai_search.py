@@ -112,8 +112,10 @@ class CfsAiSearchResponse(BaseModel):
     filtered_context_summary: str | None = None
     powerbi_actions: dict[str, Any] | None = None
     provider: CfsAiProvider = "none"
+    provider_status: str | None = None
     related_layers: list[str] = Field(default_factory=list)
     suggested_actions: list[str] = Field(default_factory=list)
+    timings_ms: dict[str, int] = Field(default_factory=dict)
 
 
 CfsAiContext = dict[str, Any]
