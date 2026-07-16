@@ -31,6 +31,7 @@ if (!(Test-Path $PgBin)) {
 }
 
 $PgDump = Join-Path $PgBin "pg_dump.exe"
+$Psql = Join-Path $PgBin "psql.exe"
 $PgDumpVersion = & $PgDump --version
 if ($LASTEXITCODE -ne 0 -or $PgDumpVersion -notmatch "PostgreSQL\) 18\.") {
   throw "pg_dump from PostgreSQL 18 is required."
@@ -40,22 +41,45 @@ if (Test-Path $DumpRoot) {
   throw "Dump directory already exists: $DumpRoot"
 }
 
-$env:PGPASSWORD = Read-Host "Enter local PostgreSQL password if required, then press Enter" -AsSecureString |
-  ForEach-Object { [System.Net.NetworkCredential]::new("", $_).Password }
+$HadPgPassword = [bool]$env:PGPASSWORD
+if (-not $HadPgPassword) {
+  $env:PGPASSWORD = Read-Host "Enter local PostgreSQL password if required, then press Enter" -AsSecureString |
+    ForEach-Object { [System.Net.NetworkCredential]::new("", $_).Password }
+}
 
 try {
-  & $PgDump `
+  $StartTime = (Get-Date).ToUniversalTime()
+  $CountsJson = & $Psql `
     --host localhost `
     --port 5433 `
     --username postgres `
     --dbname cfs_cloud_stage `
-    --format directory `
-    --jobs $Jobs `
-    --file $DumpRoot `
-    --no-owner `
-    --no-acl `
-    --verbose *> $LogPath
-  if ($LASTEXITCODE -ne 0) { throw "pg_dump failed. See $LogPath" }
+    -X `
+    -qAt `
+    -v ON_ERROR_STOP=1 `
+    -c "SELECT jsonb_build_object('table_count', (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'), 'view_count', (SELECT COUNT(*) FROM information_schema.views WHERE table_schema='public'))::text"
+  if ($LASTEXITCODE -ne 0) { throw "Pre-export object count failed." }
+
+  $StdoutPath = Join-Path $OutputRoot "export_cfs_cloud_stage.stdout.log"
+  $StderrPath = Join-Path $OutputRoot "export_cfs_cloud_stage.stderr.log"
+  $DumpArgs = @(
+    "--host", "localhost",
+    "--port", "5433",
+    "--username", "postgres",
+    "--dbname", "cfs_cloud_stage",
+    "--format", "directory",
+    "--jobs", "$Jobs",
+    "--file", $DumpRoot,
+    "--no-owner",
+    "--no-acl",
+    "--verbose"
+  )
+  $DumpProcess = Start-Process -FilePath $PgDump -ArgumentList $DumpArgs -Wait -PassThru -WindowStyle Hidden -RedirectStandardOutput $StdoutPath -RedirectStandardError $StderrPath
+  Get-Content $StdoutPath, $StderrPath -ErrorAction SilentlyContinue | Set-Content -Path $LogPath -Encoding utf8
+  Remove-Item $StdoutPath, $StderrPath -Force -ErrorAction SilentlyContinue
+  if ($DumpProcess.ExitCode -ne 0) { throw "pg_dump failed. See $LogPath" }
+  $EndTime = (Get-Date).ToUniversalTime()
+  $DumpBytes = (Get-ChildItem -Recurse -File $DumpRoot | Measure-Object -Property Length -Sum).Sum
   Get-ChildItem -Recurse $DumpRoot | Get-FileHash -Algorithm SHA256 |
     Select-Object Path, Hash |
     ConvertTo-Json -Depth 3 |
@@ -63,14 +87,22 @@ try {
   [ordered]@{
     generated_at = (Get-Date).ToUniversalTime().ToString("o")
     database = "cfs_cloud_stage"
+    started_at = $StartTime.ToString("o")
+    completed_at = $EndTime.ToString("o")
+    duration_seconds = [math]::Round(($EndTime - $StartTime).TotalSeconds, 1)
     pg_dump_version = $PgDumpVersion
     format = "directory"
     jobs = $Jobs
     no_owner = $true
     no_acl = $true
+    dump_bytes = $DumpBytes
+    table_count = ($CountsJson | ConvertFrom-Json).table_count
+    view_count = ($CountsJson | ConvertFrom-Json).view_count
     dump_path = $DumpRoot
     checksum_path = (Join-Path $OutputRoot "cfs_cloud_stage_dump_sha256.json")
   } | ConvertTo-Json -Depth 3 | Set-Content -Path (Join-Path $OutputRoot "cfs_cloud_stage_export_manifest.json") -Encoding utf8
 } finally {
-  Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
+  if (-not $HadPgPassword) {
+    Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
+  }
 }
