@@ -8,6 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 EnvironmentName = Literal["dev", "test", "prod"]
 AiProviderName = Literal["none", "openai"]
 DatabaseAuthMode = Literal["password", "managed_identity"]
+ApiAuthMode = Literal["off", "entra"]
 BACKEND_ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 ROOT_BACKEND_ENV_FILE = Path(__file__).resolve().parents[2] / "backend.env"
 LOCAL_FRONTEND_CORS_ORIGINS = (
@@ -139,6 +140,40 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("CFS_STAGING_ACCESS_TOKEN"),
     )
+    cfs_api_auth_mode: ApiAuthMode = Field(
+        default="off",
+        validation_alias=AliasChoices("CFS_API_AUTH_MODE"),
+    )
+    cfs_entra_tenant_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_ENTRA_TENANT_ID"),
+    )
+    cfs_entra_api_audience: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_ENTRA_API_AUDIENCE"),
+    )
+    cfs_entra_required_scope: str = Field(
+        default="CFS.Access",
+        validation_alias=AliasChoices("CFS_ENTRA_REQUIRED_SCOPE"),
+    )
+    cfs_entra_write_role: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_ENTRA_WRITE_ROLE"),
+    )
+    cfs_entra_admin_role: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_ENTRA_ADMIN_ROLE"),
+    )
+    cfs_entra_allowed_object_ids: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_ENTRA_ALLOWED_OBJECT_IDS"),
+    )
+    cfs_model_lab_summary_cache_ttl_seconds: int = Field(
+        default=21600,
+        ge=0,
+        le=86400,
+        validation_alias=AliasChoices("CFS_MODEL_LAB_SUMMARY_CACHE_TTL_SECONDS"),
+    )
     cfs_telemetry_enabled: bool = Field(
         default=False,
         validation_alias=AliasChoices("CFS_TELEMETRY_ENABLED"),
@@ -205,6 +240,18 @@ class Settings(BaseSettings):
     @property
     def staging_protection_enabled(self) -> bool:
         return self.cfs_staging_protect_api or bool(self.cfs_staging_access_token)
+
+    @property
+    def entra_auth_enabled(self) -> bool:
+        return self.cfs_api_auth_mode == "entra"
+
+    @property
+    def entra_allowed_object_id_set(self) -> set[str]:
+        return {
+            value.strip().lower()
+            for value in self.cfs_entra_allowed_object_ids.split(",")
+            if value.strip()
+        }
 
 
 @lru_cache

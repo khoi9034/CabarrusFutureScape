@@ -1,12 +1,14 @@
 import hmac
 import logging
 import re
+import time
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.auth import AuthError, authenticate_bearer_token, classify_route
 from app.config import get_settings
 from app.database import verify_database_connection
 from app.routers import (
@@ -52,26 +54,42 @@ if settings.cors_origin_list:
     )
 
 
-_ANONYMOUS_PATHS = {"/health", "/health/ready", "/health/database"}
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    started = time.perf_counter()
+    response = await call_next(request)
+    response.headers["X-CFS-Process-Time-Ms"] = f"{(time.perf_counter() - started) * 1000:.1f}"
+    return response
 
 
 @app.middleware("http")
-async def enforce_staging_access(request: Request, call_next):
+async def enforce_staging_or_entra_access(request: Request, call_next):
+    route_policy = classify_route(request.url.path, request.method)
     if (
-        not settings.staging_protection_enabled
-        or request.method == "OPTIONS"
-        or request.url.path in _ANONYMOUS_PATHS
+        (not settings.staging_protection_enabled and not settings.entra_auth_enabled)
+        or route_policy == "public"
     ):
         return await call_next(request)
 
     expected = settings.cfs_staging_access_token
-    supplied = request.headers.get("x-cfs-staging-token", "")
+    supplied = request.headers.get("x-cfs-staging-token", "").strip()
     authorization = request.headers.get("authorization", "")
-    if authorization.lower().startswith("bearer "):
-        supplied = authorization[7:].strip()
 
     if expected and hmac.compare_digest(supplied, expected):
         return await call_next(request)
+
+    if settings.entra_auth_enabled:
+        bearer = authorization[7:].strip() if authorization.lower().startswith("bearer ") else ""
+        try:
+            request.state.cfs_principal = authenticate_bearer_token(
+                bearer,
+                settings,
+                route_policy,
+            )
+        except AuthError as exc:
+            return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+        return await call_next(request)
+
     if not expected:
         return JSONResponse({"detail": "Staging access is not configured."}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
     return JSONResponse({"detail": "Staging access required."}, status_code=status.HTTP_401_UNAUTHORIZED)

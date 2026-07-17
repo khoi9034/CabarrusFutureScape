@@ -1,7 +1,10 @@
 import json
-from datetime import date
+from copy import deepcopy
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
+from threading import Lock
 
+from app.config import get_settings
 from app.core.contracts import DEVELOPMENT_ACTIVITY_CONTRACT
 from app.repositories import DevelopmentRepository
 from app.repositories.development_repository import (
@@ -160,6 +163,34 @@ DEVELOPMENT_CURRENT_BEST_MODEL_REGISTRY_PATH = (
     / "development_prediction"
     / "current_best_internal_model_registry.json"
 )
+_MODEL_LAB_SUMMARY_CACHE: dict[str, object] = {"expires_at": None, "payload": None}
+_MODEL_LAB_SUMMARY_CACHE_LOCK = Lock()
+
+
+def clear_model_lab_summary_cache() -> None:
+    _MODEL_LAB_SUMMARY_CACHE["expires_at"] = None
+    _MODEL_LAB_SUMMARY_CACHE["payload"] = None
+
+
+def _get_or_build_model_lab_summary(
+    ttl_seconds: int,
+    build,
+) -> DevelopmentPredictionFeaturesSummaryResponse:
+    if ttl_seconds <= 0:
+        return build()
+
+    with _MODEL_LAB_SUMMARY_CACHE_LOCK:
+        now = datetime.now(UTC)
+        expires_at = _MODEL_LAB_SUMMARY_CACHE.get("expires_at")
+        payload = _MODEL_LAB_SUMMARY_CACHE.get("payload")
+        if isinstance(expires_at, datetime) and expires_at > now and payload:
+            return deepcopy(payload)
+
+        response = build()
+        _MODEL_LAB_SUMMARY_CACHE["payload"] = response
+        _MODEL_LAB_SUMMARY_CACHE["expires_at"] = now + timedelta(seconds=ttl_seconds)
+        # ponytail: process-local cache is enough for one-replica staging; use shared cache if replicas scale out.
+        return deepcopy(response)
 
 
 class DevelopmentService:
@@ -906,6 +937,14 @@ class DevelopmentService:
         )
 
     def get_prediction_features_summary(
+        self,
+    ) -> DevelopmentPredictionFeaturesSummaryResponse:
+        return _get_or_build_model_lab_summary(
+            get_settings().cfs_model_lab_summary_cache_ttl_seconds,
+            self._build_prediction_features_summary,
+        )
+
+    def _build_prediction_features_summary(
         self,
     ) -> DevelopmentPredictionFeaturesSummaryResponse:
         if self.repository is None:

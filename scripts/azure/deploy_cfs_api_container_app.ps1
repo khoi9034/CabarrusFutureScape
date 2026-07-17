@@ -12,6 +12,11 @@ param(
   [string]$PostgresResourceGroup = "CFS",
   [string]$PostgresServerName = "cfs",
   [string]$AllowedOrigins = "https://cabarrus-future-scape.vercel.app,http://localhost:3000,http://127.0.0.1:3000",
+  [string]$EntraTenantId = "",
+  [string]$EntraApiAudience = "",
+  [string]$EntraAllowedObjectIds = "",
+  [string]$EntraWriteRole = "",
+  [string]$EntraAdminRole = "",
   [switch]$SkipImageBuild
 )
 
@@ -232,6 +237,7 @@ Invoke-Az $SecretSetArgs
 
 $EnvVars = @(
   "APP_ENV=prod",
+  "CFS_API_AUTH_MODE=$(if ($EntraTenantId -and $EntraApiAudience) { 'entra' } else { 'off' })",
   "CFS_DATABASE_AUTH_MODE=managed_identity",
   "CFS_AZURE_POSTGRES_HOST=$PostgresServer",
   "CFS_AZURE_POSTGRES_DATABASE=$PostgresDatabase",
@@ -246,12 +252,18 @@ $EnvVars = @(
   "CFS_DATABASE_MAX_OVERFLOW=1",
   "CFS_DATABASE_POOL_TIMEOUT_SECONDS=10",
   "CFS_DATABASE_POOL_RECYCLE_SECONDS=2700",
+  "CFS_MODEL_LAB_SUMMARY_CACHE_TTL_SECONDS=21600",
   "CORS_ALLOWED_ORIGINS=$AllowedOrigins",
   "CFS_AI_ENABLED=true",
   "CFS_AI_PROVIDER=openai",
   "CFS_AI_MODEL=gpt-4o-mini",
   "CFS_AI_PROVIDER_TIMEOUT_SECONDS=6"
 )
+if ($EntraTenantId) { $EnvVars += "CFS_ENTRA_TENANT_ID=$EntraTenantId" }
+if ($EntraApiAudience) { $EnvVars += "CFS_ENTRA_API_AUDIENCE=$EntraApiAudience" }
+if ($EntraAllowedObjectIds) { $EnvVars += "CFS_ENTRA_ALLOWED_OBJECT_IDS=$EntraAllowedObjectIds" }
+if ($EntraWriteRole) { $EnvVars += "CFS_ENTRA_WRITE_ROLE=$EntraWriteRole" }
+if ($EntraAdminRole) { $EnvVars += "CFS_ENTRA_ADMIN_ROLE=$EntraAdminRole" }
 if ($OpenAiSecret) { $EnvVars += "OPENAI_API_KEY=secretref:openai-key" }
 if ($CensusSecret) { $EnvVars += "CENSUS_API_KEY=secretref:census-key" }
 $EnvVarArgs = @("containerapp", "update", "-g", $ResourceGroup, "-n", $ContainerAppName, "--set-env-vars") + $EnvVars + @("-o", "none")

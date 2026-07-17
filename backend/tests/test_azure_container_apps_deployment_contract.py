@@ -22,6 +22,8 @@ TELEMETRY = ROOT / "backend" / "app" / "telemetry.py"
 DEPLOY_SCRIPT = ROOT / "scripts" / "azure" / "deploy_cfs_api_container_app.ps1"
 ROLLBACK_SCRIPT = ROOT / "scripts" / "azure" / "rollback_cfs_api_container_app.ps1"
 SMOKE_SCRIPT = ROOT / "scripts" / "azure" / "smoke_cfs_api.py"
+PREWARM_SCRIPT = ROOT / "scripts" / "azure" / "prewarm_cfs_api.ps1"
+ENTRA_SCRIPT = ROOT / "scripts" / "azure" / "configure_cfs_entra_apps.ps1"
 WORKFLOW = ROOT / ".github" / "workflows" / "deploy-cfs-api.yml"
 
 
@@ -175,6 +177,8 @@ def test_deployment_script_uses_managed_identity_key_vault_and_conservative_netw
     assert "--registry-identity" in script
     assert "keyvaultref:" in script
     assert "CFS_DATABASE_AUTH_MODE=managed_identity" in script
+    assert "CFS_API_AUTH_MODE=$(if ($EntraTenantId -and $EntraApiAudience)" in script
+    assert "CFS_MODEL_LAB_SUMMARY_CACHE_TTL_SECONDS=21600" in script
     assert "CFS_STAGING_ACCESS_TOKEN=secretref:staging-token" in script
     assert "AllowAzureServicesForCfsApi" in script
     assert '"0.0.0.0"' in script
@@ -186,6 +190,26 @@ def test_smoke_runner_has_bounded_configurable_timeout() -> None:
     smoke = _text(SMOKE_SCRIPT)
     assert "--timeout-seconds" in smoke
     assert "timeout=self.timeout_seconds" in smoke
+
+
+def test_prewarm_script_warms_model_lab_without_printing_token() -> None:
+    prewarm = _text(PREWARM_SCRIPT)
+    assert "/development/prediction/features/summary" in prewarm
+    assert "cfs-staging-access-token" in prewarm
+    assert "X-CFS-Staging-Token" in prewarm
+    assert "Refusing to write prewarm output inside the repository" in prewarm
+    assert "Write-Output $Token" not in prewarm
+
+
+def test_entra_script_uses_scope_roles_and_safe_output() -> None:
+    entra = _text(ENTRA_SCRIPT)
+    assert "CFS.Access" in entra
+    assert "CFS.Write" in entra
+    assert "CFS.Admin" in entra
+    assert "requiredResourceAccess" in entra
+    assert "admin-consent" in entra
+    assert "Refusing to write Entra output inside the repository" in entra
+    assert "clientSecret" not in entra
 
 
 def test_github_actions_deploy_uses_oidc_sha_tags_and_api_only() -> None:
