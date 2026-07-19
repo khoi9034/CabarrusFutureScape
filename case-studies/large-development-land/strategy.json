@@ -1,0 +1,27 @@
+{
+  "case_study_name": "CFS Large Development-Land Acquisition Case Study",
+  "client_label": "Hypothetical Regional Residential and Mixed-Use Developer",
+  "engagement_type": "Development-Land Acquisition Review",
+  "target_geography": "Cabarrus County, North Carolina",
+  "strategy": "Medium- to long-term residential or mixed-use development land",
+  "status_labels": [
+    "Hypothetical",
+    "Portfolio case study",
+    "Internal screening-level research",
+    "Not a real client engagement"
+  ],
+  "search_date": "2026-07-18",
+  "primary_requirements": {
+    "property_type": "Development land",
+    "minimum_gross_acreage": "Approximately 100 acres",
+    "preferred_use": "Residential or mixed-use potential",
+    "market": "Growing Cabarrus County submarket",
+    "transportation": "Reasonable access to major roads or road-proximity evidence",
+    "utilities": "Sewer-proximity evidence or plausible extension context",
+    "environmental_profile": "Manageable mapped flood, wetland, terrain, slope, and soil constraints",
+    "development_context": "Permit activity, nearby development, infrastructure investment, or population growth evidence",
+    "time_horizon": "Medium to long term",
+    "risk_tolerance": "Moderate"
+  },
+  "interpretation": "Hypothetical acquisition criteria only; not official investment requirements, zoning determinations, utility capacity confirmation, or development approvals."
+}

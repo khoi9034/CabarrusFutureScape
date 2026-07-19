@@ -1,0 +1,62 @@
+{
+  "parcel_id": "CFS-PARCEL-0149758869",
+  "recommendation": "Advance for preliminary acquisition review, subject to confirmation of zoning interpretation, utility service and capacity, legal access, environmental conditions, asking basis, seller expectations, title, and infrastructure cost.",
+  "what_makes_it_interesting": [
+    "489.43 gross acres verified in CFS safe parcel context.",
+    "Adjacent sewer-proximity and strong utility-readiness proxy.",
+    "Moderate mapped environmental constraint band with limited mapped flood and wetland acreage relative to gross site size.",
+    "Very high development-activity context in the surrounding CFS permit summary."
+  ],
+  "what_limits_development_potential": [
+    "Current zoning code is I-2 in Concord and must not be treated as residential or mixed-use entitlement.",
+    "Utility capacity, water service, and extension feasibility are not confirmed.",
+    "Mapped soils, poor drainage context, and regulated-facility proximity require professional review.",
+    "Legal access, frontage, easements, title, asking basis, and infrastructure costs are missing."
+  ],
+  "developable_area": {
+    "parcel_id": "CFS-PARCEL-0149758869",
+    "sfha_acres": 8.83,
+    "gross_acres": 489.43,
+    "floodway_acres": 0.83,
+    "flood_overlay_acres": 9.69,
+    "steep_slope_percent": 0.0,
+    "soil_limitation_band": "Material Soil Review Need",
+    "terrain_context_band": "Moderate Terrain",
+    "flood_overlay_percent": 1.98,
+    "poor_drainage_percent": 7.29,
+    "wetland_context_acres": 22.08,
+    "wetland_context_percent": 4.51,
+    "individual_geometry_constraint_acres": {
+      "fema_mapped_flood": 8.83,
+      "nwi_mapped_wetland": 22.08
+    },
+    "overall_environmental_constraint_band": "Moderate Mapped Constraint",
+    "unioned_flood_wetland_constraint_acres": 28.13,
+    "severe_slope_acres_estimate_no_geometry": 0.0,
+    "poor_drainage_acres_estimate_no_geometry": 35.68,
+    "stream_or_water_feature_acres": null,
+    "assumed_stream_buffer_acres": null,
+    "existing_right_of_way_or_infrastructure_acres": null,
+    "other_mapped_constraint_acres": null,
+    "overlapping_constrained_acres_flood_wetland": 2.78,
+    "preliminary_net_acres_after_unioned_flood_wetland": 461.3,
+    "additional_open_space_stormwater_assumption_percent": 15,
+    "additional_open_space_stormwater_assumption_acres": 69.19,
+    "estimated_developable_acres": 392.11,
+    "method_label": "Preliminary developable-area screening estimate",
+    "fema_filter": "SFHA/floodway/high-severity FEMA polygons only; broad minimal-risk X zones excluded from constrained-area union"
+  },
+  "evidence_still_missing": [
+    "Utility service and capacity",
+    "Water service",
+    "Asking price or negotiated basis",
+    "Seller expectations",
+    "Historical transaction and qualified comparable-sale verification",
+    "Ownership verification without exposing identity in CFS artifacts",
+    "Title, easements, and access rights",
+    "Entitlement feasibility",
+    "Environmental field review",
+    "Geotechnical conditions",
+    "Infrastructure-cost estimate"
+  ]
+}

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.dependencies.database import get_db, get_optional_read_only_db
@@ -19,6 +20,7 @@ from app.schemas.investment import (
     InvestmentScreenRequest,
     InvestmentStrategyId,
 )
+from app.schemas.investment_case_studies import InvestmentCaseStudyPatch
 from app.schemas.investment_engagements import (
     InvestmentEngagementCriteriaRequest,
     InvestmentEngagementPatch,
@@ -47,6 +49,15 @@ from app.schemas.investment_workspace import (
     InvestmentSavedSearchPayload,
 )
 from app.services.investment_area_radar_service import radar_area, radar_area_opportunities, radar_area_parcels, radar_search
+from app.services.investment_case_study_service import (
+    archive_case_study,
+    duplicate_case_study,
+    export_codex_brief,
+    get_case_study,
+    list_case_studies,
+    sync_case_study,
+    update_case_study,
+)
 from app.services.enterprise_export_service import build_powerbi_export_payload
 from app.services.investment_engagement_service import (
     add_shortlist_item,
@@ -132,6 +143,127 @@ from app.services.investment_workspace_service import (
 )
 
 router = APIRouter(prefix="/investment", tags=["Investment Intelligence"])
+
+_DB_INVESTMENT_ROWS_SQL = """
+    SELECT
+        p.official_parcel_id AS parcel_id,
+        p.official_parcel_id AS signal_id,
+        p.official_parcel_id AS row_id,
+        p.official_parcel_id AS display_label,
+        p.parcel_area_acres_calc::double precision AS acreage,
+        p.parcel_area_acres_calc::double precision AS parcel_acres,
+        p.parcel_area_acres_calc::double precision AS parcel_area_acres_calc,
+        p.parcel_size_category AS acreage_band,
+        COALESCE(z.zoning_jurisdiction_name, z.planning_jurisdiction_name) AS geography_label,
+        p.parcel_size_category AS economic_segment,
+        CASE
+            WHEN p.parcel_area_acres_calc >= 100 THEN 'Large-acreage development-land review candidate'
+            ELSE NULL
+        END AS land_opportunity_class,
+        CASE
+            WHEN p.value_per_acre IS NULL THEN NULL
+            WHEN p.value_per_acre < 25000 THEN 'Lower assessed value-per-acre context'
+            WHEN p.value_per_acre < 75000 THEN 'Moderate assessed value-per-acre context'
+            ELSE 'Elevated assessed value-per-acre context'
+        END AS value_per_acre_band,
+        CONCAT_WS(' / ', p.parcel_size_category, p.neighborhood_density_class) AS comparison_group,
+        CASE
+            WHEN COALESCE(p.landvalue_numeric, 0) <= 0 THEN 'Assessor improvement mix requires verification'
+            WHEN COALESCE(p.buildingvalue_numeric, 0) / NULLIF(p.landvalue_numeric, 0) < 0.25 THEN 'Limited improvement context'
+            ELSE 'Existing improvement context requires review'
+        END AS improvement_to_land_ratio_band,
+        CASE
+            WHEN COALESCE(p.buildingvalue_numeric, 0) <= 0 THEN 'Limited existing improvement context'
+            WHEN COALESCE(p.buildingvalue_numeric, 0) / NULLIF(p.assessedvalue_numeric, 0) < 0.25 THEN 'Low improvement share'
+            ELSE 'Improved-property context'
+        END AS land_efficiency_band,
+        CASE
+            WHEN p.has_valid_geometry
+             AND p.has_valid_area
+             AND z.zoning_assignment_confidence IN ('high', 'medium')
+             AND e.environmental_data_confidence IS NOT NULL THEN 'High'
+            WHEN p.has_valid_area THEN 'Medium'
+            ELSE 'Low'
+        END AS data_confidence,
+        CASE
+            WHEN p.has_valid_geometry
+             AND p.has_valid_area
+             AND z.zoning_assignment_confidence IN ('high', 'medium')
+             AND e.environmental_data_confidence IS NOT NULL THEN 'High'
+            WHEN p.has_valid_area THEN 'Medium'
+            ELSE 'Low'
+        END AS economic_data_confidence,
+        s.development_readiness_band,
+        COALESCE(s.growth_pressure_band, d.development_activity_class) AS growth_pressure_band,
+        s.economic_opportunity_band,
+        COALESCE(s.sewer_proxy_class, w.sewer_proxy_class) AS sewer_proxy_class,
+        COALESCE(s.utility_readiness_proxy_class, w.utility_readiness_proxy_class) AS utility_readiness_proxy_class,
+        w.sewer_proxy_confidence,
+        COALESCE(
+            s.zoning_support_band,
+            CASE
+                WHEN z.dominant_zoning_code_raw IS NOT NULL THEN CONCAT('Zoning overlay available: ', z.dominant_zoning_code_raw)
+                ELSE NULL
+            END
+        ) AS zoning_support_band,
+        COALESCE(
+            s.transportation_access_band,
+            CASE
+                WHEN t.distance_to_nearest_major_road_ft <= 2640 THEN 'Near major-road network'
+                WHEN t.distance_to_nearest_road_ft <= 1000 THEN 'Road-proximity evidence available'
+                WHEN t.distance_to_nearest_road_ft IS NOT NULL THEN 'Transportation verification required'
+                ELSE NULL
+            END
+        ) AS transportation_access_band,
+        COALESCE(s.flood_constraint_band, e.flood_context_band) AS flood_constraint_band,
+        e.flood_context_band,
+        e.flood_percent,
+        e.wetland_intersection_flag,
+        e.wetland_area_acres,
+        e.wetland_percent,
+        e.wetland_context_band,
+        e.mean_slope_percent,
+        e.steep_slope_percent,
+        e.terrain_context_band,
+        e.dominant_soil_group,
+        e.soil_limitation_band,
+        e.regulated_facility_count_band,
+        e.nearest_regulated_facility_distance_band,
+        e.regulated_facility_context_band,
+        e.usable_area_screening_proxy,
+        e.overall_environmental_constraint_band,
+        e.environmental_data_confidence,
+        e.poor_drainage_percent,
+        z.planning_jurisdiction_name,
+        z.zoning_jurisdiction_name,
+        z.dominant_zoning_code_raw,
+        z.dominant_zoning_general_normalized,
+        z.zoning_assignment_confidence,
+        t.nearest_road_type,
+        t.transportation_accessibility_data_quality,
+        d.total_permit_count,
+        d.recent_permit_count_3yr,
+        d.development_activity_class,
+        s.due_diligence_flags,
+        s.suggested_next_checks,
+        COALESCE(w.utility_capacity_status, 'Capacity data not confirmed') AS utility_capacity_status,
+        COALESCE(w.planned_extension_status, 'Planned extension data not confirmed') AS planned_extension_status,
+        'Current CFS cloud-safe parcel extract' AS as_of
+    FROM public.parcels_enriched p
+    LEFT JOIN public.parcel_development_screening_output s
+      ON s.parcel_id = p.official_parcel_id
+    LEFT JOIN public.parcel_wsacc_utility_features w
+      ON w.parcel_id = p.official_parcel_id
+    LEFT JOIN public.investment_parcel_environmental_context e
+      ON e.parcel_id = p.official_parcel_id
+    LEFT JOIN public.parcel_zoning_overlay_v2 z
+      ON z.official_parcel_id = p.official_parcel_id
+    LEFT JOIN public.parcel_transportation_accessibility_features t
+      ON t.official_parcel_id = p.official_parcel_id
+    LEFT JOIN public.development_activity_parcel_summary d
+      ON d.official_parcel_id = p.official_parcel_id
+    WHERE p.official_parcel_id IS NOT NULL
+"""
 
 
 @router.get("/strategies")
@@ -503,6 +635,79 @@ def post_investment_saved_search_engagement(
     return saved_search_to_engagement(db, search_id) or {}
 
 
+@router.get("/case-studies")
+def get_investment_case_studies(db: Session = Depends(get_db)) -> dict[str, Any]:
+    return list_case_studies(db)
+
+
+@router.post("/case-studies/sync")
+def post_investment_case_study_sync(
+    case_study: str = Query(..., min_length=1, max_length=80),
+    dry_run: bool = Query(default=False),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    try:
+        return sync_case_study(db, case_study, dry_run=dry_run)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/case-studies/{slug}")
+def get_investment_case_study(
+    slug: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    case_study = get_case_study(db, slug)
+    if not case_study:
+        raise HTTPException(status_code=404, detail="Investment case study not found.")
+    return case_study
+
+
+@router.patch("/case-studies/{slug}")
+def patch_investment_case_study(
+    slug: str,
+    request: InvestmentCaseStudyPatch,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    case_study = update_case_study(db, slug, request)
+    if not case_study:
+        raise HTTPException(status_code=404, detail="Investment case study not found.")
+    return case_study
+
+
+@router.post("/case-studies/{slug}/duplicate")
+def post_investment_case_study_duplicate(
+    slug: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    case_study = duplicate_case_study(db, slug)
+    if not case_study:
+        raise HTTPException(status_code=404, detail="Investment case study not found.")
+    return case_study
+
+
+@router.post("/case-studies/{slug}/archive")
+def post_investment_case_study_archive(
+    slug: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    case_study = archive_case_study(db, slug)
+    if not case_study:
+        raise HTTPException(status_code=404, detail="Investment case study not found.")
+    return case_study
+
+
+@router.post("/case-studies/{slug}/codex-brief")
+def post_investment_case_study_codex_brief(
+    slug: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    brief = export_codex_brief(db, slug)
+    if not brief:
+        raise HTTPException(status_code=404, detail="Investment case study not found.")
+    return brief
+
+
 @router.get("/opportunities/sources")
 def get_investment_opportunity_sources() -> dict[str, Any]:
     return opportunity_sources()
@@ -773,6 +978,11 @@ def post_investment_underwriting_compare(
 
 
 def _investment_rows(db: Session | None) -> list[dict[str, Any]]:
+    if db is not None:
+        rows = _investment_rows_from_database(db)
+        if rows:
+            return rows
+
     economics = get_cached_economics_intelligence(db)
     powerbi = build_powerbi_export_payload(economics, mode="live")
     tables = powerbi.get("tables") if isinstance(powerbi.get("tables"), dict) else {}
@@ -787,3 +997,16 @@ def _investment_rows(db: Session | None) -> list[dict[str, Any]]:
         {**row, **environmental.get(str(row.get("parcel_id") or row.get("signal_id") or row.get("row_id") or ""), {})}
         for row in enriched
     ]
+
+
+def _investment_rows_from_database(db: Session) -> list[dict[str, Any]]:
+    try:
+        rows = [dict(row) for row in db.execute(text(_DB_INVESTMENT_ROWS_SQL)).mappings().all()]
+        db.rollback()
+        return rows
+    except Exception:
+        try:
+            db.rollback()
+        except Exception:
+            pass
+        return []

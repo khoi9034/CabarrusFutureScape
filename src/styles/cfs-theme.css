@@ -857,6 +857,10 @@ select:focus-visible {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.investment-result-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+}
+
 .investment-task-card,
 .investment-result-card {
   background: rgba(5, 16, 29, 0.74);

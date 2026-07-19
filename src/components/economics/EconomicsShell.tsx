@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
+import { InvestmentCaseStudies } from "@/components/investment/InvestmentCaseStudies";
 import { InvestmentShell, investmentPages, type InvestmentPageId } from "@/components/investment/InvestmentShell";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
@@ -37,6 +38,7 @@ import {
   addInvestmentEngagementShortlistItem,
   addInvestmentOpportunityToIntake,
   calculateInvestmentUnderwriting,
+  archiveInvestmentCaseStudy,
   createInvestmentEngagement,
   createInvestmentIntakeCandidate,
   createInvestmentSavedItem,
@@ -45,9 +47,12 @@ import {
   deleteInvestmentIntakeCandidate,
   deleteInvestmentSavedItem,
   deleteInvestmentUnderwritingScenario,
+  duplicateInvestmentCaseStudy,
   convertInvestmentSavedSearchToEngagement,
+  exportInvestmentCaseStudyCodexBrief,
   generateInvestmentReport,
   generateInvestmentEngagementReport,
+  getInvestmentCaseStudies,
   getInvestmentEngagements,
   getInvestmentIntake,
   getInvestmentIntakeAnalysis,
@@ -66,6 +71,7 @@ import {
   recordInvestmentRecentWork,
   rerunInvestmentSavedSearch,
   searchInvestmentRadar,
+  updateInvestmentCaseStudy,
   updateInvestmentIntakeCandidate,
   updateInvestmentUnderwritingScenario,
 } from "@/lib/investmentIntelligenceService";
@@ -82,6 +88,7 @@ import type {
   EconomicsScenarioOutput,
   EconomicsSegmentSummary,
   EconomicsScenarioTemplate,
+  InvestmentCaseStudy,
   InvestmentScreenCandidate,
   InvestmentIntakeAnalysisResponse,
   InvestmentIntakeCandidate,
@@ -1034,6 +1041,9 @@ function InvestmentPanelPage({
   const [activeInvestmentPage, setActiveInvestmentPage] = useState<InvestmentPageId>(() => readInvestmentDisplayPreference().lastPage ?? "overview");
   const [investmentViewMode, setInvestmentViewMode] = useState<"guided" | "advanced">(() => readInvestmentDisplayPreference().viewMode ?? "advanced");
   const [guidedQuestion, setGuidedQuestion] = useState("");
+  const [caseStudies, setCaseStudies] = useState<InvestmentCaseStudy[]>([]);
+  const [activeCaseStudySlug, setActiveCaseStudySlug] = useState<string | null>(null);
+  const [caseStudyBriefMarkdown, setCaseStudyBriefMarkdown] = useState<string | null>(null);
   const [myShortlist, setMyShortlist] = useState<InvestmentSavedItem[]>([]);
   const [recentWork, setRecentWork] = useState<InvestmentRecentWorkItem[]>([]);
   const [savedSearches, setSavedSearches] = useState<InvestmentSavedSearch[]>([]);
@@ -1104,6 +1114,15 @@ function InvestmentPanelPage({
     if (USE_DEMO_DATA) return () => {
       mounted = false;
     };
+    void getInvestmentCaseStudies()
+      .then((response) => {
+        if (!mounted) return;
+        setCaseStudies(response.case_studies);
+        setActiveCaseStudySlug((current) => current ?? response.case_studies[0]?.slug ?? null);
+      })
+      .catch(() => {
+        if (mounted) setCaseStudies([]);
+      });
     void Promise.allSettled([
       getInvestmentOpportunitySources(),
       getInvestmentOpportunities(),
@@ -1217,6 +1236,7 @@ function InvestmentPanelPage({
         strategy: investmentStrategyLabel(activeStrategy),
       }
     : null;
+  const activeCaseStudy = caseStudies.find((item) => item.slug === activeCaseStudySlug) ?? caseStudies[0] ?? null;
   const tier1 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 1")).length;
   const tier2 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 2")).length;
   const sewerSupported = rows.filter((row) => hasSewerSupport(row.signal)).length;
@@ -1409,6 +1429,74 @@ function InvestmentPanelPage({
         if (searches.status === "fulfilled") setSavedSearches(searches.value.searches);
       })
       .catch(() => setStatus("Saved CFS Investment workspace is available when the local backend and database are running."));
+  const openCaseStudy = (slug: string) => {
+    const selected = caseStudies.find((item) => item.slug === slug);
+    setActiveCaseStudySlug(slug);
+    setActiveInvestmentPage("engagements");
+    if (!selected) return;
+    void recordInvestmentRecentWork({
+      activity_type: "opened_case_study",
+      context: { source: "case_studies_library", stage: selected.current_stage },
+      label: selected.title,
+      page: "engagements",
+      parcel_id: selected.active_parcel_id ?? null,
+      reference_id: selected.slug,
+      reference_type: "case_study",
+      strategy: "development_land",
+      summary: selected.package?.next_action ? String(selected.package.next_action) : "Continue Case Study",
+    })
+      .then((response) => setRecentWork(response.items))
+      .catch(() => undefined);
+  };
+  const compareCaseStudyCandidates = (parcelIds: string[]) => {
+    const ids = new Set(parcelIds);
+    const nextRows = rows.filter((row) => ids.has(row.signal.parcel_id)).slice(0, 5).map((row, index) => ({ ...row, rank: index + 1 }));
+    setComparisonRows(nextRows);
+    openInvestmentPage("compare", "Compare case-study candidates");
+  };
+  const makeCaseStudyCandidateActive = (slug: string, parcelId: string) => {
+    void updateInvestmentCaseStudy(slug, { active_parcel_id: parcelId })
+      .then((caseStudy) => {
+        setCaseStudies((current) => [caseStudy, ...current.filter((item) => item.slug !== caseStudy.slug)]);
+        analyzeParcel(parcelId, caseStudy.title);
+        setStatus("Active case-study candidate updated.");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to update active case-study candidate."));
+  };
+  const exportCaseStudyBrief = (slug: string) => {
+    void exportInvestmentCaseStudyCodexBrief(slug)
+      .then((response) => {
+        setCaseStudyBriefMarkdown(response.markdown);
+        downloadText(response.markdown, `${slugifyReportTitle(slug)}_codex_brief.md`);
+        setStatus("Codex brief exported.");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to export Codex brief."));
+  };
+  const saveCaseStudyNote = (slug: string, analystNote: string) => {
+    void updateInvestmentCaseStudy(slug, { analyst_note: analystNote })
+      .then((caseStudy) => {
+        setCaseStudies((current) => [caseStudy, ...current.filter((item) => item.slug !== caseStudy.slug)]);
+        setStatus("Analyst note saved and will be preserved during Codex sync.");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to save analyst note."));
+  };
+  const duplicateCaseStudy = (slug: string) => {
+    void duplicateInvestmentCaseStudy(slug)
+      .then((caseStudy) => {
+        setCaseStudies((current) => [caseStudy, ...current]);
+        setActiveCaseStudySlug(caseStudy.slug);
+        setStatus("Case study duplicated.");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to duplicate case study."));
+  };
+  const archiveCaseStudy = (slug: string) => {
+    void archiveInvestmentCaseStudy(slug)
+      .then((caseStudy) => {
+        setCaseStudies((current) => current.map((item) => item.slug === caseStudy.slug ? caseStudy : item));
+        setStatus("Case study archived.");
+      })
+      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to archive case study."));
+  };
   const underwritingPayload = () => {
     const intakeAskingPrice = intakeAnalysis?.acquisition_basis.asking_price;
     const assumptions = intakeAskingPrice && !underwritingAssumptions.asking_price && !underwritingAssumptions.purchase_price && !underwritingAssumptions.acquisition_basis
@@ -1767,6 +1855,14 @@ function InvestmentPanelPage({
     active_underwriting_summary: underwritingResult
       ? `${underwritingResult.scenario_type_label}; missing inputs: ${underwritingResult.missing_inputs.join(", ") || "none"}; total project/basis: ${underwritingResult.results.total_project_cost ?? underwritingResult.results.total_basis_at_exit ?? underwritingResult.results.total_basis_after_entitlement ?? "not available"}`
       : undefined,
+    active_case_study: activeCaseStudy?.title,
+    active_case_study_slug: activeCaseStudy?.slug,
+    active_case_study_stage: activeCaseStudy?.current_stage,
+    active_case_study_status: activeCaseStudy?.status,
+    active_case_study_priority_candidate: activeCaseStudy?.priority_candidate_id,
+    active_case_study_candidate_count: activeCaseStudy?.candidate_count,
+    active_case_study_underwriting_status: activeCaseStudy?.underwriting_status,
+    active_case_study_next_action: activeCaseStudy?.package?.next_action ? String(activeCaseStudy.package.next_action) : undefined,
     strategy_screening_source: activeInvestmentScreen ? "CFS Investment Research Engine" : "local product fallback",
     sewer_proxy_supported_candidates: sewerSupported,
     tier_1_candidates: tier1,
@@ -1971,6 +2067,7 @@ function InvestmentPanelPage({
                     { action: "Find", page: "opportunity-feed" as InvestmentPageId, title: "Find Available Properties", body: "Review opportunity references, public offerings, imported listings, and private leads.", result: "Opportunity references with parcel-match status." },
                     { action: "Analyze", page: "research" as InvestmentPageId, title: "Analyze a Property", body: "Enter a parcel ID, choose an existing candidate, or open a property reference.", result: "Strengths, cautions, missing evidence, and sources." },
                     { action: "Compare", page: "compare" as InvestmentPageId, title: "Compare Properties", body: "Compare two to four candidates across price, planning, market, environmental, utility, and financial evidence.", result: "Tradeoffs without declaring a winner." },
+                    { action: "Open", page: "engagements" as InvestmentPageId, title: "Open Case Studies", body: activeCaseStudy?.title ?? "Continue acquisition and consulting case studies from Projects.", result: activeCaseStudy?.current_stage ?? "Case Studies library." },
                     { action: "Report", page: "report-studio" as InvestmentPageId, title: "Build a Client Report", body: "Create a professional screening, site-selection, acquisition, or due-diligence report.", result: "Structured report sections and source notes." },
                     { action: "Continue", page: (recentWork[0]?.page ?? "engagements") as InvestmentPageId, title: "Continue Recent Work", body: recentWork[0]?.label ?? "Resume a shortlist, project, report, or analysis from your saved workspace.", result: recentWork[0]?.summary ?? "Recent work appears after you start." },
                   ].map((task) => (
@@ -1993,11 +2090,24 @@ function InvestmentPanelPage({
                   <button className="investment-ghost-button" onClick={() => openInvestmentPage("compare", "Compare")} type="button">Compare</button>
                   <button className="investment-ghost-button" onClick={() => openInvestmentPage("underwriting", "Underwrite")} type="button">Underwrite</button>
                   <button className="investment-ghost-button" onClick={() => openInvestmentPage("report-studio", "Create Report")} type="button">Create Report</button>
+                  <button className="investment-ghost-button" onClick={() => activeCaseStudy ? openCaseStudy(activeCaseStudy.slug) : openInvestmentPage("engagements", "Case Studies")} type="button">Open Case Studies</button>
                 </div>
               </section>
             )}
+            {activeCaseStudy ? (
+              <section className="investment-card">
+                <div className="investment-section-heading"><div><p>Active Case Study</p><h2>{activeCaseStudy.title}</h2></div><span className="investment-pill">{activeCaseStudy.status}</span></div>
+                <Matrix rows={[
+                  { label: "Current stage", value: activeCaseStudy.current_stage },
+                  { label: "Priority candidate", value: activeCaseStudy.priority_candidate_id ?? "Not set" },
+                  { label: "Next action", value: String(activeCaseStudy.package?.next_action ?? "Continue Case Study") },
+                  { label: "Deliverables", value: activeCaseStudy.deliverable_status ?? "Needs Review" },
+                ]} />
+                <button className="investment-primary-button mt-4" onClick={() => openCaseStudy(activeCaseStudy.slug)} type="button">Continue Case Study</button>
+              </section>
+            ) : null}
             <section className="investment-two-column">
-              <InvestmentRecentWorkPanel items={recentWork} onOpen={(item) => openInvestmentPage(item.page as InvestmentPageId, item.label)} />
+              <InvestmentRecentWorkPanel items={recentWork} onOpen={(item) => item.reference_type === "case_study" && item.reference_id ? openCaseStudy(item.reference_id) : openInvestmentPage(item.page as InvestmentPageId, item.label)} />
               <InvestmentShortlistPanel
                 items={myShortlist}
                 onAnalyze={(item) => item.parcel_id ? analyzeParcel(item.parcel_id, item.label) : openInvestmentPage(item.item_type === "opportunity" ? "opportunity-feed" : "research", item.label)}
@@ -2184,11 +2294,31 @@ function InvestmentPanelPage({
       case "engagements":
         return (
           <InvestmentEngagementsPage
+            activeCaseStudy={activeCaseStudy}
+            caseStudies={caseStudies}
+            caseStudyBriefMarkdown={caseStudyBriefMarkdown}
             engagements={engagements}
             onAddArea={(areaId) => addToFirstEngagement(areaId, "search_area")}
+            onAnalyzeCaseStudyParcel={analyzeParcel}
+            onArchiveCaseStudy={archiveCaseStudy}
+            onCompareCaseStudyCandidates={compareCaseStudyCandidates}
             onCreate={createDefaultEngagement}
+            onDuplicateCaseStudy={duplicateCaseStudy}
+            onExportCaseStudyBrief={exportCaseStudyBrief}
             onGenerateReport={generateFirstEngagementReport}
+            onMakeCaseStudyCandidateActive={makeCaseStudyCandidateActive}
+            onOpenCaseStudy={openCaseStudy}
             onOpenIntake={() => openInvestmentPage("intake", "Candidate Intake")}
+            onOpenReport={() => openInvestmentPage("report-studio", "Case Study Report")}
+            onSaveCaseStudyNote={saveCaseStudyNote}
+            onUnderwriteCaseStudy={(parcelId) => {
+              if (parcelId) {
+                setActiveCandidateId(parcelId);
+                writeInvestmentParcelPreference(parcelId);
+              }
+              openInvestmentPage("underwriting", "Case Study Underwriting");
+            }}
+            savedSearches={savedSearches}
           />
         );
       case "report-bucket":
@@ -3000,21 +3130,87 @@ function InvestmentAreaRadarPage({
 }
 
 function InvestmentEngagementsPage({
+  activeCaseStudy,
+  caseStudies,
+  caseStudyBriefMarkdown,
   engagements,
   onAddArea,
+  onAnalyzeCaseStudyParcel,
+  onArchiveCaseStudy,
+  onCompareCaseStudyCandidates,
   onCreate,
+  onDuplicateCaseStudy,
+  onExportCaseStudyBrief,
   onGenerateReport,
+  onMakeCaseStudyCandidateActive,
+  onOpenCaseStudy,
   onOpenIntake,
+  onOpenReport,
+  onSaveCaseStudyNote,
+  onUnderwriteCaseStudy,
+  savedSearches,
 }: {
+  activeCaseStudy: InvestmentCaseStudy | null;
+  caseStudies: InvestmentCaseStudy[];
+  caseStudyBriefMarkdown?: string | null;
   engagements: InvestmentEngagement[];
   onAddArea: (areaId: string) => void;
+  onAnalyzeCaseStudyParcel: (parcelId: string, label?: string) => void;
+  onArchiveCaseStudy: (slug: string) => void;
+  onCompareCaseStudyCandidates: (parcelIds: string[]) => void;
   onCreate: () => void;
+  onDuplicateCaseStudy: (slug: string) => void;
+  onExportCaseStudyBrief: (slug: string) => void;
   onGenerateReport: () => void;
+  onMakeCaseStudyCandidateActive: (slug: string, parcelId: string) => void;
+  onOpenCaseStudy: (slug: string) => void;
   onOpenIntake: () => void;
+  onOpenReport: () => void;
+  onSaveCaseStudyNote: (slug: string, note: string) => void;
+  onUnderwriteCaseStudy: (parcelId?: string | null) => void;
+  savedSearches: InvestmentSavedSearch[];
 }) {
+  const [projectView, setProjectView] = useState<"active" | "case-studies" | "saved-searches" | "intake">("case-studies");
   const active = engagements[0];
+  const projectTabs = [
+    ["active", "Active Projects"],
+    ["case-studies", "Case Studies"],
+    ["saved-searches", "Saved Searches"],
+    ["intake", "Candidate Intake"],
+  ] as const;
   return (
-    <section className="investment-work-grid">
+    <>
+      <section className="investment-card">
+        <div className="investment-section-heading">
+          <div><p>Projects</p><h2>Active projects, case studies, saved searches, and candidate intake</h2></div>
+          <button className="investment-primary-button" onClick={onCreate} type="button">Create Engagement</button>
+        </div>
+        <div className="investment-tabs" role="tablist" aria-label="Investment Projects sections">
+          {projectTabs.map(([id, label]) => (
+            <button aria-selected={projectView === id} key={id} onClick={() => setProjectView(id)} role="tab" type="button">{label}</button>
+          ))}
+        </div>
+      </section>
+      {projectView === "case-studies" ? (
+        <InvestmentCaseStudies
+          activeCaseStudy={activeCaseStudy}
+          caseStudies={caseStudies}
+          codexBriefMarkdown={caseStudyBriefMarkdown}
+          onAnalyzeParcel={onAnalyzeCaseStudyParcel}
+          onArchive={onArchiveCaseStudy}
+          onCompare={onCompareCaseStudyCandidates}
+          onDuplicate={onDuplicateCaseStudy}
+          onExportBrief={onExportCaseStudyBrief}
+          onMakeActive={onMakeCaseStudyCandidateActive}
+          onOpen={onOpenCaseStudy}
+          onOpenIntake={onOpenIntake}
+          onReport={onOpenReport}
+          onSaveNote={onSaveCaseStudyNote}
+          onUnderwrite={onUnderwriteCaseStudy}
+        />
+      ) : null}
+      {projectView === "active" ? (
+        <section className="investment-work-grid">
       <div className="investment-primary-column">
         <section className="investment-card">
           <div className="investment-section-heading"><div><p>Engagements</p><h2>Client criteria, site screening, shortlists, and deliverables</h2></div><button className="investment-primary-button" onClick={onCreate} type="button">Create Engagement</button></div>
@@ -3047,7 +3243,22 @@ function InvestmentEngagementsPage({
           <InvestmentSignalList title="Avoid" values={["Purchase directives", "Complete listing inventory claims", "Return assurances", "Valuation conclusions"]} />
         </section>
       </aside>
-    </section>
+        </section>
+      ) : null}
+      {projectView === "saved-searches" ? (
+        <section className="investment-card">
+          <div className="investment-section-heading"><div><p>Saved Searches</p><h2>Project search history</h2></div><span className="investment-pill">{savedSearches.length}</span></div>
+          {savedSearches.length ? <InvestmentSignalList title="Saved searches" values={savedSearches.map((item) => `${item.search_name} | ${item.goal} | ${item.location_type}`)} /> : <p className="investment-empty">No saved searches yet.</p>}
+        </section>
+      ) : null}
+      {projectView === "intake" ? (
+        <section className="investment-card">
+          <div className="investment-section-heading"><div><p>Candidate Intake</p><h2>Private candidate queue</h2></div></div>
+          <p className="investment-muted">Candidate Intake remains the writable queue for leads, saved candidates, and parcel references connected to projects and case studies.</p>
+          <button className="investment-primary-button mt-4" onClick={onOpenIntake} type="button">Open Candidate Intake</button>
+        </section>
+      ) : null}
+    </>
   );
 }
 
@@ -10983,6 +11194,14 @@ const askCfsInvestmentResearchPrompts = [
   "Explain the major constraint indicators.",
   "Which candidates need utility due diligence?",
   "Which candidates have growth pressure and sewer proximity?",
+  "Summarize this case study.",
+  "What stage is this project in?",
+  "Why did the priority candidate rank first?",
+  "Compare the three case-study candidates.",
+  "What underwriting assumptions still need review?",
+  "Draft a Codex update brief.",
+  "Which deliverables are incomplete?",
+  "What must be verified before this recommendation is final?",
 ];
 
 const defaultGeneratedReportIncludes: GeneratedReportIncludeState = {
@@ -12436,6 +12655,16 @@ function downloadJson(payload: unknown, filename: string) {
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
   });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadText(content: string, filename: string) {
+  const blob = new Blob([content], { type: "text/markdown" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

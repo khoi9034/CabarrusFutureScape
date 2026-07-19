@@ -382,6 +382,15 @@ def _matches_filters(row: dict[str, Any], filters: dict[str, Any]) -> bool:
     for key, expected in filters.items():
         if expected in (None, "", "All"):
             continue
+        if key in {"minimum_acres", "min_acres"}:
+            if (_number(_first_present(row, "acreage", "parcel_acres", "parcel_area_acres_calc")) or 0) < float(expected):
+                return False
+            continue
+        if key in {"maximum_acres", "max_acres"}:
+            acres = _number(_first_present(row, "acreage", "parcel_acres", "parcel_area_acres_calc"))
+            if acres is None or acres > float(expected):
+                return False
+            continue
         actual = row.get(key)
         if isinstance(expected, list):
             if actual not in expected:
@@ -475,6 +484,17 @@ def _missing_count(row: dict[str, Any], strategy: InvestmentStrategyId | None = 
         "value_per_acre_band",
     )
     return sum(1 for key in keys if not row.get(key))
+
+
+def _first_present(row: dict[str, Any], *keys: str) -> Any:
+    return next((row.get(key) for key in keys if row.get(key) not in (None, "")), None)
+
+
+def _number(value: Any) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _points(text: str, terms: list[str], value: int) -> int:

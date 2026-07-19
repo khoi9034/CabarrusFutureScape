@@ -2,6 +2,9 @@ import { apiGet, apiPost, buildApiUrl, USE_BACKEND_API, USE_DEMO_DATA } from "@/
 import type {
   InvestmentCsvImportResponse,
   InvestmentAreaRadarResponse,
+  InvestmentCaseStudy,
+  InvestmentCaseStudyBriefResponse,
+  InvestmentCaseStudyListResponse,
   InvestmentEngagement,
   InvestmentEngagementListResponse,
   InvestmentIntakeAnalysisResponse,
@@ -344,6 +347,46 @@ export async function rerunInvestmentSavedSearch(searchId: string) {
 export async function convertInvestmentSavedSearchToEngagement(searchId: string) {
   assertLive();
   return apiPost<{ engagement: InvestmentEngagement; saved_search: InvestmentSavedSearch }>(`/investment/saved-searches/${encodeURIComponent(searchId)}/engagement`, {}, { timeoutMs: 20000 });
+}
+
+export async function getInvestmentCaseStudies() {
+  assertLive();
+  return apiGet<InvestmentCaseStudyListResponse>("/investment/case-studies", undefined, { timeoutMs: 20000 });
+}
+
+export async function updateInvestmentCaseStudy(slug: string, payload: {
+  active_parcel_id?: string | null;
+  analyst_note?: string | null;
+  current_stage?: string | null;
+  status?: string | null;
+}) {
+  assertLive();
+  const response = await fetch(buildApiUrl(`/investment/case-studies/${encodeURIComponent(slug)}`), {
+    body: JSON.stringify(payload),
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    method: "PATCH",
+  });
+  if (!response.ok) throw new Error("Unable to update investment case study.");
+  return response.json() as Promise<InvestmentCaseStudy>;
+}
+
+export async function duplicateInvestmentCaseStudy(slug: string) {
+  assertLive();
+  return apiPost<InvestmentCaseStudy>(`/investment/case-studies/${encodeURIComponent(slug)}/duplicate`, {}, { timeoutMs: 20000 });
+}
+
+export async function archiveInvestmentCaseStudy(slug: string) {
+  assertLive();
+  return apiPost<InvestmentCaseStudy>(`/investment/case-studies/${encodeURIComponent(slug)}/archive`, {}, { timeoutMs: 20000 });
+}
+
+export async function exportInvestmentCaseStudyCodexBrief(slug: string) {
+  assertLive();
+  return apiPost<InvestmentCaseStudyBriefResponse>(`/investment/case-studies/${encodeURIComponent(slug)}/codex-brief`, {}, { timeoutMs: 20000 });
 }
 
 function assertLive() {

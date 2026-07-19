@@ -9,8 +9,10 @@ from jwt import PyJWKClientError
 
 from app.auth import AuthError, Principal, authenticate_bearer_token, classify_route
 from app.config import Settings
+from app.routers import investment_router
 from app.schemas.development import DevelopmentPredictionFeaturesSummaryResponse
 from app.services import development_service
+from app.services.investment_screening_service import screen_candidates
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -58,6 +60,44 @@ def test_route_security_matrix_classifies_public_read_write_and_admin() -> None:
     assert classify_route("/ai/search", "POST") == "read"
     assert classify_route("/investment/intake", "POST") == "write"
     assert classify_route("/economics/export-diagnostics", "GET") == "admin"
+
+
+def test_investment_screen_supports_minimum_acreage_filter() -> None:
+    result = screen_candidates(
+        [
+            {"parcel_id": "small", "acreage": 25, "data_confidence": "High"},
+            {"parcel_id": "large", "acreage": 125, "data_confidence": "High"},
+        ],
+        filters={"minimum_acres": 100},
+        strategy="development_land",
+    )
+
+    assert [candidate["parcel_id"] for candidate in result["candidates"]] == ["large"]
+
+
+def test_investment_database_rows_release_transaction_before_scoring() -> None:
+    class FakeResult:
+        def mappings(self):
+            return self
+
+        def all(self):
+            return [{"parcel_id": "large", "acreage": 125}]
+
+    class FakeDb:
+        rolled_back = False
+
+        def execute(self, _statement):
+            return FakeResult()
+
+        def rollback(self):
+            self.rolled_back = True
+
+    db = FakeDb()
+
+    rows = investment_router._investment_rows_from_database(db)
+
+    assert rows == [{"parcel_id": "large", "acreage": 125}]
+    assert db.rolled_back is True
 
 
 def test_entra_validation_requires_allowed_user_scope_and_write_role(monkeypatch) -> None:

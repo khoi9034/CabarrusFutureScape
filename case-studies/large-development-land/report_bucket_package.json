@@ -1,0 +1,390 @@
+{
+  "generated_report": {
+    "as_of": "2026-07-18T03:57:22.630799+00:00",
+    "brand": "CFS Investment",
+    "report_type": "development_feasibility_review",
+    "report_title": "Development Feasibility Review",
+    "parcel_id": "CFS-PARCEL-0149758869",
+    "candidate_id": null,
+    "strategy": "development_land",
+    "purpose": "Screening-level land, property, and real-estate research for manual due diligence.",
+    "sections": [
+      {
+        "id": "summary",
+        "title": "Executive Summary",
+        "body": "CFS-PARCEL-0149758869 is a screening-level CFS Investment research candidate with Strong Review Candidate readiness context, Medium market-area confidence, and Moderate Mapped Constraint environmental context. Use this to prioritize manual due diligence, not as investment advice or an appraisal.",
+        "sources": [
+          {
+            "name": "CFS Economics export",
+            "category": "economic_context",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "Not an appraisal or tax bill."
+          },
+          {
+            "name": "Investment Intelligence Engine",
+            "category": "screening_rules",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "No raw scores or exact probabilities."
+          },
+          {
+            "name": "U.S. Census Bureau ACS API",
+            "category": "market_area",
+            "authority_level": "Federal aggregate estimate",
+            "limitation": "Does not prove demand or future performance."
+          },
+          {
+            "name": "USFWS National Wetlands Inventory",
+            "category": "environmental",
+            "authority_level": "Mapped public evidence",
+            "limitation": "Requires professional verification."
+          }
+        ],
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+          "Utility capacity, water service, environmental clearance, and parcel value are not confirmed by this context."
+        ]
+      },
+      {
+        "id": "readiness",
+        "title": "Development-Readiness Signals",
+        "body": "Candidate Band: Strong Review Candidate; Dimension Bands: Basis Context: Moderately Supportive; Constraint Burden: High Constraint; Data Confidence: High Confidence; Readiness Signal: Supportive; Strategy Fit: Moderately Supportive; Permit Or Growth Context: Data needed; Verification Requirements: Verify zoning and entitlement path with planning staff.; Verify utility service and capacity with the utility provider.; Confirm road frontage, legal access, title, and easements.; Review floodplain, wetland, and usable-area screening constraints.; Confirm planned utility extension data before interpretation.",
+        "sources": [
+          {
+            "name": "CFS Economics export",
+            "category": "economic_context",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "Not an appraisal or tax bill."
+          },
+          {
+            "name": "Investment Intelligence Engine",
+            "category": "screening_rules",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "No raw scores or exact probabilities."
+          },
+          {
+            "name": "U.S. Census Bureau ACS API",
+            "category": "market_area",
+            "authority_level": "Federal aggregate estimate",
+            "limitation": "Does not prove demand or future performance."
+          },
+          {
+            "name": "USFWS National Wetlands Inventory",
+            "category": "environmental",
+            "authority_level": "Mapped public evidence",
+            "limitation": "Requires professional verification."
+          }
+        ],
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+          "Utility capacity, water service, environmental clearance, and parcel value are not confirmed by this context."
+        ]
+      },
+      {
+        "id": "planning",
+        "title": "Planning and Entitlement Review",
+        "body": "Zoning Support Band: Data needed; Planning Activity: Capacity data needed; Water service data needed; Planned extension data needed",
+        "sources": [
+          {
+            "name": "CFS Economics export",
+            "category": "economic_context",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "Not an appraisal or tax bill."
+          },
+          {
+            "name": "Investment Intelligence Engine",
+            "category": "screening_rules",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "No raw scores or exact probabilities."
+          },
+          {
+            "name": "U.S. Census Bureau ACS API",
+            "category": "market_area",
+            "authority_level": "Federal aggregate estimate",
+            "limitation": "Does not prove demand or future performance."
+          },
+          {
+            "name": "USFWS National Wetlands Inventory",
+            "category": "environmental",
+            "authority_level": "Mapped public evidence",
+            "limitation": "Requires professional verification."
+          }
+        ],
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+          "Utility capacity, water service, environmental clearance, and parcel value are not confirmed by this context."
+        ]
+      },
+      {
+        "id": "utility",
+        "title": "Utility and Infrastructure Review",
+        "body": "Sewer Proxy Class: Adjacent to sewer infrastructure; Utility Readiness Proxy Class: Strong sewer-proximity signal; Capacity Status: Capacity data not provided; Planned Extension Status: Planned extension data not provided",
+        "sources": [
+          {
+            "name": "CFS Economics export",
+            "category": "economic_context",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "Not an appraisal or tax bill."
+          },
+          {
+            "name": "Investment Intelligence Engine",
+            "category": "screening_rules",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "No raw scores or exact probabilities."
+          },
+          {
+            "name": "U.S. Census Bureau ACS API",
+            "category": "market_area",
+            "authority_level": "Federal aggregate estimate",
+            "limitation": "Does not prove demand or future performance."
+          },
+          {
+            "name": "USFWS National Wetlands Inventory",
+            "category": "environmental",
+            "authority_level": "Mapped public evidence",
+            "limitation": "Requires professional verification."
+          }
+        ],
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+          "Utility capacity, water service, environmental clearance, and parcel value are not confirmed by this context."
+        ]
+      },
+      {
+        "id": "environmental",
+        "title": "Environmental and Physical Context",
+        "body": "Parcel Id: CFS-PARCEL-0149758869; Flood Context: Floodplain review required; Mapped Wetland Context: Limited Mapped Intersection; Wetland Percent Of Parcel: 4.51068103697377; Minimum Elevation: 179.43; Maximum Elevation: 203.58; Mean Elevation: 192.75; Elevation Range: 24.15",
+        "sources": [
+          {
+            "name": "CFS Economics export",
+            "category": "economic_context",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "Not an appraisal or tax bill."
+          },
+          {
+            "name": "Investment Intelligence Engine",
+            "category": "screening_rules",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "No raw scores or exact probabilities."
+          },
+          {
+            "name": "U.S. Census Bureau ACS API",
+            "category": "market_area",
+            "authority_level": "Federal aggregate estimate",
+            "limitation": "Does not prove demand or future performance."
+          },
+          {
+            "name": "USFWS National Wetlands Inventory",
+            "category": "environmental",
+            "authority_level": "Mapped public evidence",
+            "limitation": "Requires professional verification."
+          }
+        ],
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+          "Utility capacity, water service, environmental clearance, and parcel value are not confirmed by this context."
+        ]
+      },
+      {
+        "id": "underwriting",
+        "title": "Underwriting Scenario Context",
+        "body": "Use the Underwriting Lab for deterministic scenario assumptions, calculated results, sensitivity outputs, and exports. Financial outputs are user-entered modeled scenarios, not CFS forecasts or recommendations.",
+        "sources": [
+          {
+            "name": "CFS Economics export",
+            "category": "economic_context",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "Not an appraisal or tax bill."
+          },
+          {
+            "name": "Investment Intelligence Engine",
+            "category": "screening_rules",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "No raw scores or exact probabilities."
+          },
+          {
+            "name": "U.S. Census Bureau ACS API",
+            "category": "market_area",
+            "authority_level": "Federal aggregate estimate",
+            "limitation": "Does not prove demand or future performance."
+          },
+          {
+            "name": "USFWS National Wetlands Inventory",
+            "category": "environmental",
+            "authority_level": "Mapped public evidence",
+            "limitation": "Requires professional verification."
+          }
+        ],
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+          "Utility capacity, water service, environmental clearance, and parcel value are not confirmed by this context."
+        ]
+      },
+      {
+        "id": "diligence",
+        "title": "Recommended Verification Sequence",
+        "body": "Verify zoning and entitlement path with planning staff.; Verify utility service and capacity with the utility provider.; Confirm road frontage, legal access, title, and easements.; Review floodplain, wetland, and usable-area screening constraints.; Confirm planned utility extension data before interpretation.; Review FEMA floodplain context where mapped.; Review NWI mapping when available and obtain professional wetland delineation if needed.; Obtain topographic survey and engineering review for slope/grading feasibility.; Review NRCS soil mapping and obtain geotechnical investigation where appropriate.; Review nearby regulated facilities and consider Phase I environmental site assessment where appropriate.",
+        "sources": [
+          {
+            "name": "CFS Economics export",
+            "category": "economic_context",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "Not an appraisal or tax bill."
+          },
+          {
+            "name": "Investment Intelligence Engine",
+            "category": "screening_rules",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "No raw scores or exact probabilities."
+          },
+          {
+            "name": "U.S. Census Bureau ACS API",
+            "category": "market_area",
+            "authority_level": "Federal aggregate estimate",
+            "limitation": "Does not prove demand or future performance."
+          },
+          {
+            "name": "USFWS National Wetlands Inventory",
+            "category": "environmental",
+            "authority_level": "Mapped public evidence",
+            "limitation": "Requires professional verification."
+          }
+        ],
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+          "Utility capacity, water service, environmental clearance, and parcel value are not confirmed by this context."
+        ]
+      },
+      {
+        "id": "sources",
+        "title": "Sources and Limitations",
+        "body": "CFS Economics export; Investment Intelligence Engine; U.S. Census Bureau ACS API; USFWS National Wetlands Inventory",
+        "sources": [
+          {
+            "name": "CFS Economics export",
+            "category": "economic_context",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "Not an appraisal or tax bill."
+          },
+          {
+            "name": "Investment Intelligence Engine",
+            "category": "screening_rules",
+            "authority_level": "CFS-derived screening context",
+            "limitation": "No raw scores or exact probabilities."
+          },
+          {
+            "name": "U.S. Census Bureau ACS API",
+            "category": "market_area",
+            "authority_level": "Federal aggregate estimate",
+            "limitation": "Does not prove demand or future performance."
+          },
+          {
+            "name": "USFWS National Wetlands Inventory",
+            "category": "environmental",
+            "authority_level": "Mapped public evidence",
+            "limitation": "Requires professional verification."
+          }
+        ],
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+          "Utility capacity, water service, environmental clearance, and parcel value are not confirmed by this context."
+        ]
+      }
+    ],
+    "report_bucket_item": {
+      "title": "Development Feasibility Review",
+      "type": "investment_report",
+      "summary": "CFS-PARCEL-0149758869 is a screening-level CFS Investment research candidate with Strong Review Candidate readiness context, Medium market-area confidence, and Moderate Mapped Constraint environmental context. Use this to prioritize manual due diligence, not as investment advice or an appraisal.",
+      "content": "Executive Summary\nCFS-PARCEL-0149758869 is a screening-level CFS Investment research candidate with Strong Review Candidate readiness context, Medium market-area confidence, and Moderate Mapped Constraint environmental context. Use this to prioritize manual due diligence, not as investment advice or an appraisal.\n\nDevelopment-Readiness Signals\nCandidate Band: Strong Review Candidate; Dimension Bands: Basis Context: Moderately Supportive; Constraint Burden: High Constraint; Data Confidence: High Confidence; Readiness Signal: Supportive; Strategy Fit: Moderately Supportive; Permit Or Growth Context: Data needed; Verification Requirements: Verify zoning and entitlement path with planning staff.; Verify utility service and capacity with the utility provider.; Confirm road frontage, legal access, title, and easements.; Review floodplain, wetland, and usable-area screening constraints.; Confirm planned utility extension data before interpretation.\n\nPlanning and Entitlement Review\nZoning Support Band: Data needed; Planning Activity: Capacity data needed; Water service data needed; Planned extension data needed\n\nUtility and Infrastructure Review\nSewer Proxy Class: Adjacent to sewer infrastructure; Utility Readiness Proxy Class: Strong sewer-proximity signal; Capacity Status: Capacity data not provided; Planned Extension Status: Planned extension data not provided\n\nEnvironmental and Physical Context\nParcel Id: CFS-PARCEL-0149758869; Flood Context: Floodplain review required; Mapped Wetland Context: Limited Mapped Intersection; Wetland Percent Of Parcel: 4.51068103697377; Minimum Elevation: 179.43; Maximum Elevation: 203.58; Mean Elevation: 192.75; Elevation Range: 24.15\n\nUnderwriting Scenario Context\nUse the Underwriting Lab for deterministic scenario assumptions, calculated results, sensitivity outputs, and exports. Financial outputs are user-entered modeled scenarios, not CFS forecasts or recommendations.\n\nRecommended Verification Sequence\nVerify zoning and entitlement path with planning staff.; Verify utility service and capacity with the utility provider.; Confirm road frontage, legal access, title, and easements.; Review floodplain, wetland, and usable-area screening constraints.; Confirm planned utility extension data before interpretation.; Review FEMA floodplain context where mapped.; Review NWI mapping when available and obtain professional wetland delineation if needed.; Obtain topographic survey and engineering review for slope/grading feasibility.; Review NRCS soil mapping and obtain geotechnical investigation where appropriate.; Review nearby regulated facilities and consider Phase I environmental site assessment where appropriate.\n\nSources and Limitations\nCFS Economics export; Investment Intelligence Engine; U.S. Census Bureau ACS API; USFWS National Wetlands Inventory",
+      "caveats": [
+        "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value."
+      ]
+    },
+    "limitations": [
+      "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+      "Reports are structured decision-support notes, not recommendations to buy, sell, develop, or value property."
+    ]
+  },
+  "engagement_report": {
+    "as_of": "2026-07-18T03:57:22.632349+00:00",
+    "brand": "CFS Investment",
+    "candidate_id": null,
+    "engagement_id": "c7cb72b0-02ef-485e-8eba-00674a033338",
+    "limitations": [
+      "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+      "Recommended for additional diligence means further review, not a purchase recommendation."
+    ],
+    "parcel_id": null,
+    "purpose": "Screening-level consulting engagement summary for manual due diligence.",
+    "report_bucket_item": {
+      "caveats": [
+        "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value."
+      ],
+      "content": "Engagement Brief\nNotes: Hypothetical portfolio case study for internal screening-level research; not a real client engagement; not investment advice, valuation, utility confirmation, entitlement determination, or environmental clearance.; Criteria: [{'type': 'Must Have', 'criterion': 'Approximately 100 acres or larger'}, {'type': 'Preferred', 'criterion': 'Residential or mixed-use potential'}, {'type': 'Preferred', 'criterion': 'Sewer-proximity proxy evidence'}, {'type': 'Preferred', 'criterion': 'Manageable mapped environmental constraint profile'}, {'type': 'Needs Verification', 'criterion': 'Capacity, access, title, and entitlement path'}]; Timeline: Medium to long term; Shortlist: [{'notes': 'Do not advance yet: Defer. CASE-1 score 36.', 'status': 'Needs Verification', 'item_id': 'CFS-PARCEL-0149777275', 'item_type': 'parcel', 'updated_at': '2026-07-18T03:57:12.220490+00:00'}, {'notes': 'Secondary review: Recommended for additional diligence. CASE-1 score 77.', 'status': 'Needs Verification', 'item_id': 'CFS-PARCEL-0149760035', 'item_type': 'parcel', 'updated_at': '2026-07-18T03:57:12.212805+00:00'}, {'notes': 'Priority review: Advance for additional acquisition review. CASE-1 score 89.', 'status': 'Finalist for Further Diligence', 'item_id': 'CFS-PARCEL-0149758869', 'item_type': 'parcel', 'updated_at': '2026-07-18T03:57:12.183437+00:00'}]; Minimum Acres: 100.0; Property Type: Development land; Engagement Name: CFS Large Development-Land Acquisition Case Study; Engagement Type: Developmen\n\nCriteria Matrix\nMust Have: Approximately 100 acres or larger; Preferred: Residential or mixed-use potential; Preferred: Sewer-proximity proxy evidence; Preferred: Manageable mapped environmental constraint profile; Needs Verification: Capacity, access, title, and entitlement path\n\nShortlist\nparcel: CFS-PARCEL-0149777275 (Needs Verification); parcel: CFS-PARCEL-0149760035 (Needs Verification); parcel: CFS-PARCEL-0149758869 (Finalist for Further Diligence)\n\nLimitations\nScreening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+      "summary": "parcel: CFS-PARCEL-0149777275 (Needs Verification); parcel: CFS-PARCEL-0149760035 (Needs Verification); parcel: CFS-PARCEL-0149758869 (Finalist for Further Diligence)",
+      "title": "CFS Large Development-Land Acquisition Case Study - Site Selection Screening Report",
+      "type": "investment_engagement_report"
+    },
+    "report_title": "CFS Large Development-Land Acquisition Case Study - Site Selection Screening Report",
+    "report_type": "site_selection_screening_report",
+    "sections": [
+      {
+        "body": "Notes: Hypothetical portfolio case study for internal screening-level research; not a real client engagement; not investment advice, valuation, utility confirmation, entitlement determination, or environmental clearance.; Criteria: [{'type': 'Must Have', 'criterion': 'Approximately 100 acres or larger'}, {'type': 'Preferred', 'criterion': 'Residential or mixed-use potential'}, {'type': 'Preferred', 'criterion': 'Sewer-proximity proxy evidence'}, {'type': 'Preferred', 'criterion': 'Manageable mapped environmental constraint profile'}, {'type': 'Needs Verification', 'criterion': 'Capacity, access, title, and entitlement path'}]; Timeline: Medium to long term; Shortlist: [{'notes': 'Do not advance yet: Defer. CASE-1 score 36.', 'status': 'Needs Verification', 'item_id': 'CFS-PARCEL-0149777275', 'item_type': 'parcel', 'updated_at': '2026-07-18T03:57:12.220490+00:00'}, {'notes': 'Secondary review: Recommended for additional diligence. CASE-1 score 77.', 'status': 'Needs Verification', 'item_id': 'CFS-PARCEL-0149760035', 'item_type': 'parcel', 'updated_at': '2026-07-18T03:57:12.212805+00:00'}, {'notes': 'Priority review: Advance for additional acquisition review. CASE-1 score 89.', 'status': 'Finalist for Further Diligence', 'item_id': 'CFS-PARCEL-0149758869', 'item_type': 'parcel', 'updated_at': '2026-07-18T03:57:12.183437+00:00'}]; Minimum Acres: 100.0; Property Type: Development land; Engagement Name: CFS Large Development-Land Acquisition Case Study; Engagement Type: Developmen",
+        "id": "engagement_brief",
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value."
+        ],
+        "sources": [
+          {
+            "name": "CFS Investment engagement workspace",
+            "authority_level": "Internal analyst workspace"
+          }
+        ],
+        "title": "Engagement Brief"
+      },
+      {
+        "body": "Must Have: Approximately 100 acres or larger; Preferred: Residential or mixed-use potential; Preferred: Sewer-proximity proxy evidence; Preferred: Manageable mapped environmental constraint profile; Needs Verification: Capacity, access, title, and entitlement path",
+        "id": "criteria_matrix",
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value."
+        ],
+        "sources": [
+          {
+            "name": "CFS Investment engagement workspace",
+            "authority_level": "Internal analyst workspace"
+          }
+        ],
+        "title": "Criteria Matrix"
+      },
+      {
+        "body": "parcel: CFS-PARCEL-0149777275 (Needs Verification); parcel: CFS-PARCEL-0149760035 (Needs Verification); parcel: CFS-PARCEL-0149758869 (Finalist for Further Diligence)",
+        "id": "shortlist",
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value."
+        ],
+        "sources": [
+          {
+            "name": "CFS Investment engagement workspace",
+            "authority_level": "Internal analyst workspace"
+          }
+        ],
+        "title": "Shortlist"
+      },
+      {
+        "body": "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.",
+        "id": "limitations",
+        "limitations": [
+          "Screening-level review only: not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value."
+        ],
+        "sources": [
+          {
+            "name": "CFS Investment engagement workspace",
+            "authority_level": "Internal analyst workspace"
+          }
+        ],
+        "title": "Limitations"
+      }
+    ],
+    "strategy": "development_land"
+  },
+  "saved_report_reference_id": "case1-report-CFS-PARCEL-0149758869"
+}

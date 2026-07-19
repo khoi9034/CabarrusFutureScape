@@ -1,0 +1,22 @@
+{
+  "engagement_id": "c7cb72b0-02ef-485e-8eba-00674a033338",
+  "saved_search_id": "23b68315-42f9-4961-950e-805b55d198a1",
+  "underwriting_scenarios": [
+    {
+      "scenario_name": "CASE-1 Downside - CFS-PARCEL-0149758869",
+      "scenario_id": "48190cec-a8e3-4fae-8773-5d75a22357c0",
+      "status": "Needs Verification"
+    },
+    {
+      "scenario_name": "CASE-1 Base - CFS-PARCEL-0149758869",
+      "scenario_id": "e7c42066-b287-4f76-be52-43140d1145d9",
+      "status": "Needs Verification"
+    },
+    {
+      "scenario_name": "CASE-1 Upside - CFS-PARCEL-0149758869",
+      "scenario_id": "7b2bae57-2f9a-46af-8b6e-764887c54b04",
+      "status": "Needs Verification"
+    }
+  ],
+  "report_reference_id": "case1-report-CFS-PARCEL-0149758869"
+}

@@ -1,0 +1,44 @@
+{
+  "portfolio_safe_exhibits": [
+    {
+      "name": "Countywide candidate-screening map",
+      "status": "Identified",
+      "safe_content": "Parcel IDs and screening bands only; no owner or mailing fields."
+    },
+    {
+      "name": "Candidate funnel",
+      "status": "Created as JSON and markdown table",
+      "safe_content": "Counts and criteria only."
+    },
+    {
+      "name": "Three-property comparison",
+      "status": "Created as JSON and markdown table",
+      "safe_content": "Parcel IDs, scores, bands, and proxy evidence."
+    },
+    {
+      "name": "Active-property constraint map",
+      "status": "Identified for later map export",
+      "safe_content": "FEMA/NWI/parcel geometry only; no restricted labels."
+    },
+    {
+      "name": "Preliminary developable-area diagram",
+      "status": "Created as calculation table; visual can be generated after review",
+      "safe_content": "Unioned constraints and assumptions only."
+    },
+    {
+      "name": "Underwriting scenario comparison",
+      "status": "Created as JSON and markdown table",
+      "safe_content": "Assumptions and formulas, no price claims."
+    },
+    {
+      "name": "Due-diligence matrix",
+      "status": "Created in report docs",
+      "safe_content": "Verification tasks only."
+    },
+    {
+      "name": "Final recommendation",
+      "status": "Draft pending user review",
+      "safe_content": "Conditional advancement language only."
+    }
+  ]
+}

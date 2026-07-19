@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cabarrus-futurescape.local/schemas/investment_case_study_schema.json",
+  "title": "CFS Investment Case Study Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "version",
+    "generated_at",
+    "source_data_vintage",
+    "title",
+    "description",
+    "case_study_type",
+    "client_label",
+    "strategy",
+    "geography",
+    "status",
+    "current_stage",
+    "active_parcel_id",
+    "priority_candidate_id",
+    "candidate_ids",
+    "recommendation_status",
+    "underwriting_status",
+    "excel_workbook_status",
+    "research_completeness",
+    "deliverable_status",
+    "next_action",
+    "engagement",
+    "package_files",
+    "deliverables",
+    "activity_seed",
+    "safety_rules"
+  ],
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,80}$" },
+    "version": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "source_data_vintage": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "title": { "type": "string", "minLength": 1, "maxLength": 180 },
+    "description": { "type": "string", "minLength": 1, "maxLength": 600 },
+    "case_study_type": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "client_label": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "strategy": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "geography": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Screening",
+        "Candidate Review",
+        "Deep Analysis",
+        "Underwriting",
+        "Recommendation Review",
+        "Final",
+        "Archived"
+      ]
+    },
+    "current_stage": { "type": "string", "minLength": 1, "maxLength": 180 },
+    "active_parcel_id": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "priority_candidate_id": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "candidate_ids": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 250,
+      "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+    },
+    "recommendation_status": {
+      "type": "string",
+      "enum": ["Draft", "Needs Review", "Approved for Case Study", "Final"]
+    },
+    "underwriting_status": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "excel_workbook_status": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "research_completeness": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "deliverable_status": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "next_action": { "type": "string", "minLength": 1, "maxLength": 280 },
+    "engagement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engagement_name", "engagement_type", "selected_strategy", "target_geography", "minimum_acres", "criteria"],
+      "properties": {
+        "existing_engagement_id": { "type": "string" },
+        "engagement_name": { "type": "string" },
+        "engagement_type": { "type": "string" },
+        "selected_strategy": { "type": "string" },
+        "target_geography": { "type": "string" },
+        "property_type": { "type": "string" },
+        "minimum_acres": { "type": "number" },
+        "timeline": { "type": "string" },
+        "criteria": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "package_files": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "pattern": "^[^\\\\:*?\"<>|]+$" }
+    },
+    "deliverables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "type", "status", "source"],
+        "properties": {
+          "title": { "type": "string" },
+          "type": { "type": "string" },
+          "status": { "type": "string" },
+          "source": { "type": "string" },
+          "path": { "type": "string" },
+          "reference_id": { "type": "string" },
+          "review_status": { "type": "string" },
+          "last_updated": { "type": "string" }
+        }
+      }
+    },
+    "activity_seed": { "type": "array", "items": { "type": "object" } },
+    "safety_rules": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "as_of": "2026-07-18",
+  "mode": "deterministic local CFS AI path with external provider disabled for safety",
+  "results": [
+    {
+      "prompt": "CFS Investment: Why did this parcel surface?",
+      "provider_status": "grounded_cfs_analysis",
+      "context_freshness": "current_session",
+      "answer_excerpt": "Active dashboard context: mode=cfs_investment; selected candidate=CFS-PARCEL-0149758869; active strategy=development_land; persisted shortlist count=3; persisted shortlist preview=CFS-PARCEL-0149758869, CFS-PARCEL-0149760035, CFS-PARCEL-0149777275; active wetland context=Limited Mapped Intersection; active terrain context=Moderate Terrain; active soil context=Material Soil Review Need; active facility context=Five or More Facilities Within 1 Mile; active usable area proxy=Moderate Usable-Area Limitations; active environmental confidence=High; active underwriting summary={'gross_development_value': 117625000, 'horizontal_development_costs': 48932000, 'utility_allowance': 7000000, 'infrastructure_allowance': 8000000, 'environmental_allowance': 1000000, 'soft_costs': 6000000, 'contingency': 7093200.0, 'required_developer_margin': 21172500.0, 'maximum_supportable_land_price': 18427300.0, 'ma",
+      "guardrail_result": "Passed - response remained screening-level and did not provide asking price, capacity confirmation, entitlement, identity details, raw model score, or exact probability."
+    },
+    {
+      "prompt": "CFS Investment: What is the strongest evidence supporting this candidate?",
+      "provider_status": "grounded_cfs_analysis",
+      "context_freshness": "current_session",
+      "answer_excerpt": "Active dashboard context: mode=cfs_investment; selected candidate=CFS-PARCEL-0149758869; active strategy=development_land; persisted shortlist count=3; persisted shortlist preview=CFS-PARCEL-0149758869, CFS-PARCEL-0149760035, CFS-PARCEL-0149777275; active wetland context=Limited Mapped Intersection; active terrain context=Moderate Terrain; active soil context=Material Soil Review Need; active facility context=Five or More Facilities Within 1 Mile; active usable area proxy=Moderate Usable-Area Limitations; active environmental confidence=High; active underwriting summary={'gross_development_value': 117625000, 'horizontal_development_costs': 48932000, 'utility_allowance': 7000000, 'infrastructure_allowance': 8000000, 'environmental_allowance': 1000000, 'soft_costs': 6000000, 'contingency': 7093200.0, 'required_developer_margin': 21172500.0, 'maximum_supportable_land_price': 18427300.0, 'ma",
+      "guardrail_result": "Passed - response remained screening-level and did not provide asking price, capacity confirmation, entitlement, identity details, raw model score, or exact probability."
+    },
+    {
+      "prompt": "CFS Investment: What could prevent this site from advancing?",
+      "provider_status": "grounded_cfs_analysis",
+      "context_freshness": "current_session",
+      "answer_excerpt": "Active dashboard context: mode=cfs_investment; selected candidate=CFS-PARCEL-0149758869; active strategy=development_land; persisted shortlist count=3; persisted shortlist preview=CFS-PARCEL-0149758869, CFS-PARCEL-0149760035, CFS-PARCEL-0149777275; active wetland context=Limited Mapped Intersection; active terrain context=Moderate Terrain; active soil context=Material Soil Review Need; active facility context=Five or More Facilities Within 1 Mile; active usable area proxy=Moderate Usable-Area Limitations; active environmental confidence=High; active underwriting summary={'gross_development_value': 117625000, 'horizontal_development_costs': 48932000, 'utility_allowance': 7000000, 'infrastructure_allowance': 8000000, 'environmental_allowance': 1000000, 'soft_costs': 6000000, 'contingency': 7093200.0, 'required_developer_margin': 21172500.0, 'maximum_supportable_land_price': 18427300.0, 'ma",
+      "guardrail_result": "Passed - response remained screening-level and did not provide asking price, capacity confirmation, entitlement, identity details, raw model score, or exact probability."
+    },
+    {
+      "prompt": "CFS Investment environmental: How much acreage appears constrained by mapped evidence?",
+      "provider_status": "grounded_cfs_analysis",
+      "context_freshness": "current_session",
+      "answer_excerpt": "Active dashboard context: mode=cfs_investment; selected candidate=CFS-PARCEL-0149758869; active strategy=development_land; persisted shortlist count=3; persisted shortlist preview=CFS-PARCEL-0149758869, CFS-PARCEL-0149760035, CFS-PARCEL-0149777275; active wetland context=Limited Mapped Intersection; active terrain context=Moderate Terrain; active soil context=Material Soil Review Need; active facility context=Five or More Facilities Within 1 Mile; active usable area proxy=Moderate Usable-Area Limitations; active environmental confidence=High; active underwriting summary={'gross_development_value': 117625000, 'horizontal_development_costs': 48932000, 'utility_allowance': 7000000, 'infrastructure_allowance': 8000000, 'environmental_allowance': 1000000, 'soft_costs': 6000000, 'contingency': 7093200.0, 'required_developer_margin': 21172500.0, 'maximum_supportable_land_price': 18427300.0, 'ma",
+      "guardrail_result": "Passed - response remained screening-level and did not provide asking price, capacity confirmation, entitlement, identity details, raw model score, or exact probability."
+    },
+    {
+      "prompt": "CFS Investment underwriting: Which assumption has the greatest effect on supportable land price?",
+      "provider_status": "grounded_cfs_analysis",
+      "context_freshness": "current_session",
+      "answer_excerpt": "Active dashboard context: mode=cfs_investment; selected candidate=CFS-PARCEL-0149758869; active strategy=development_land; persisted shortlist count=3; persisted shortlist preview=CFS-PARCEL-0149758869, CFS-PARCEL-0149760035, CFS-PARCEL-0149777275; active wetland context=Limited Mapped Intersection; active terrain context=Moderate Terrain; active soil context=Material Soil Review Need; active facility context=Five or More Facilities Within 1 Mile; active usable area proxy=Moderate Usable-Area Limitations; active environmental confidence=High; active underwriting summary={'gross_development_value': 117625000, 'horizontal_development_costs': 48932000, 'utility_allowance': 7000000, 'infrastructure_allowance': 8000000, 'environmental_allowance': 1000000, 'soft_costs': 6000000, 'contingency': 7093200.0, 'required_developer_margin': 21172500.0, 'maximum_supportable_land_price': 18427300.0, 'ma",
+      "guardrail_result": "Passed - response remained screening-level and did not provide asking price, capacity confirmation, entitlement, identity details, raw model score, or exact probability."
+    },
+    {
+      "prompt": "CFS Investment: Compare the three shortlisted candidates.",
+      "provider_status": "grounded_cfs_analysis",
+      "context_freshness": "current_session",
+      "answer_excerpt": "Active dashboard context: mode=cfs_investment; selected candidate=CFS-PARCEL-0149758869; active strategy=development_land; persisted shortlist count=3; persisted shortlist preview=CFS-PARCEL-0149758869, CFS-PARCEL-0149760035, CFS-PARCEL-0149777275; active wetland context=Limited Mapped Intersection; active terrain context=Moderate Terrain; active soil context=Material Soil Review Need; active facility context=Five or More Facilities Within 1 Mile; active usable area proxy=Moderate Usable-Area Limitations; active environmental confidence=High; active underwriting summary={'gross_development_value': 117625000, 'horizontal_development_costs': 48932000, 'utility_allowance': 7000000, 'infrastructure_allowance': 8000000, 'environmental_allowance': 1000000, 'soft_costs': 6000000, 'contingency': 7093200.0, 'required_developer_margin': 21172500.0, 'maximum_supportable_land_price': 18427300.0, 'ma",
+      "guardrail_result": "Passed - response remained screening-level and did not provide asking price, capacity confirmation, entitlement, identity details, raw model score, or exact probability."
+    },
+    {
+      "prompt": "CFS Investment diligence: What should be verified before contacting a broker or representative?",
+      "provider_status": "grounded_cfs_analysis",
+      "context_freshness": "current_session",
+      "answer_excerpt": "Active dashboard context: mode=cfs_investment; selected candidate=CFS-PARCEL-0149758869; active strategy=development_land; persisted shortlist count=3; persisted shortlist preview=CFS-PARCEL-0149758869, CFS-PARCEL-0149760035, CFS-PARCEL-0149777275; active wetland context=Limited Mapped Intersection; active terrain context=Moderate Terrain; active soil context=Material Soil Review Need; active facility context=Five or More Facilities Within 1 Mile; active usable area proxy=Moderate Usable-Area Limitations; active environmental confidence=High; active underwriting summary={'gross_development_value': 117625000, 'horizontal_development_costs': 48932000, 'utility_allowance': 7000000, 'infrastructure_allowance': 8000000, 'environmental_allowance': 1000000, 'soft_costs': 6000000, 'contingency': 7093200.0, 'required_developer_margin': 21172500.0, 'maximum_supportable_land_price': 18427300.0, 'ma",
+      "guardrail_result": "Passed - response remained screening-level and did not provide asking price, capacity confirmation, entitlement, identity details, raw model score, or exact probability."
+    },
+    {
+      "prompt": "CFS Investment report: Draft an executive acquisition recommendation.",
+      "provider_status": "grounded_cfs_analysis",
+      "context_freshness": "current_session",
+      "answer_excerpt": "Active dashboard context: mode=cfs_investment; selected candidate=CFS-PARCEL-0149758869; active strategy=development_land; persisted shortlist count=3; persisted shortlist preview=CFS-PARCEL-0149758869, CFS-PARCEL-0149760035, CFS-PARCEL-0149777275; active wetland context=Limited Mapped Intersection; active terrain context=Moderate Terrain; active soil context=Material Soil Review Need; active facility context=Five or More Facilities Within 1 Mile; active usable area proxy=Moderate Usable-Area Limitations; active environmental confidence=High; active underwriting summary={'gross_development_value': 117625000, 'horizontal_development_costs': 48932000, 'utility_allowance': 7000000, 'infrastructure_allowance': 8000000, 'environmental_allowance': 1000000, 'soft_costs': 6000000, 'contingency': 7093200.0, 'required_developer_margin': 21172500.0, 'maximum_supportable_land_price': 18427300.0, 'ma",
+      "guardrail_result": "Passed - response remained screening-level and did not provide asking price, capacity confirmation, entitlement, identity details, raw model score, or exact probability."
+    }
+  ]
+}

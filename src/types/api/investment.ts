@@ -423,6 +423,55 @@ export interface InvestmentEngagementListResponse {
   engagements: InvestmentEngagement[];
 }
 
+export interface InvestmentCaseStudyActivity {
+  action: string;
+  revision_id?: string | null;
+  safe_summary: string;
+  section: string;
+  source: string;
+  timestamp: string;
+}
+
+export interface InvestmentCaseStudy {
+  active_parcel_id?: string | null;
+  activity: InvestmentCaseStudyActivity[];
+  candidate_count: number;
+  case_study_type: string;
+  created_at: string;
+  current_stage: string;
+  deliverable_status?: string | null;
+  description: string;
+  engagement_id: string;
+  geography: string;
+  id: string;
+  last_synced_at?: string | null;
+  manifest_path: string;
+  package: Record<string, unknown>;
+  priority_candidate?: Record<string, unknown> | null;
+  priority_candidate_id?: string | null;
+  research_completeness?: string | null;
+  slug: string;
+  source_package_version: string;
+  status: string;
+  strategy: string;
+  title: string;
+  underwriting_status?: string | null;
+  updated_at: string;
+  user_state: Record<string, unknown>;
+}
+
+export interface InvestmentCaseStudyListResponse {
+  case_studies: InvestmentCaseStudy[];
+  caveats: string[];
+  count: number;
+}
+
+export interface InvestmentCaseStudyBriefResponse {
+  brief: Record<string, unknown>;
+  caveats: string[];
+  markdown: string;
+}
+
 export interface InvestmentUnderwritingTemplate {
   assumptions: Record<string, number | string | null>;
   default_source: string;

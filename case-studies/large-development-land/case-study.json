@@ -1,0 +1,138 @@
+{
+  "slug": "large-development-land",
+  "version": "case-1.0",
+  "generated_at": "2026-07-18T04:00:00Z",
+  "source_data_vintage": "CFS cloud-safe local stage validated against Azure cfs_cloud during AZ-1B",
+  "title": "CFS Large Development-Land Acquisition Case Study",
+  "description": "Hypothetical acquisition review workspace for a large development-land search in Cabarrus County.",
+  "case_study_type": "Development-Land Acquisition Review",
+  "client_label": "Hypothetical Regional Residential and Mixed-Use Developer",
+  "strategy": "Development land",
+  "geography": "Cabarrus County, North Carolina",
+  "status": "Deep Analysis",
+  "current_stage": "Candidate Review / Underwriting Assumptions Pending",
+  "active_parcel_id": "CFS-PARCEL-0149758869",
+  "priority_candidate_id": "CFS-PARCEL-0149758869",
+  "candidate_ids": [
+    "CFS-PARCEL-0149758869",
+    "CFS-PARCEL-0149760035",
+    "CFS-PARCEL-0149777275"
+  ],
+  "recommendation_status": "Needs Review",
+  "underwriting_status": "Assumptions Required",
+  "excel_workbook_status": "Not Started - assumptions require review",
+  "research_completeness": "Screening package complete; ownership, title, asking basis, utility capacity, access, and professional field work remain unverified.",
+  "deliverable_status": "Markdown deliverables drafted; Excel workbook not started.",
+  "next_action": "Review priority candidate assumptions, then decide whether to continue underwriting diligence.",
+  "engagement": {
+    "existing_engagement_id": "c7cb72b0-02ef-485e-8eba-00674a033338",
+    "engagement_name": "CFS Large Development-Land Acquisition Case Study",
+    "engagement_type": "Development-Land Acquisition Review",
+    "selected_strategy": "development_land",
+    "target_geography": "Cabarrus County, North Carolina",
+    "property_type": "Development land",
+    "minimum_acres": 100,
+    "timeline": "Medium to long term",
+    "criteria": [
+      { "type": "Must Have", "criterion": "Approximately 100 acres or larger", "source": "Hypothetical client requirement" },
+      { "type": "Preferred", "criterion": "Residential or mixed-use potential", "source": "Analyst-defined criterion" },
+      { "type": "Preferred", "criterion": "Sewer-proximity proxy evidence", "source": "CFS evidence" },
+      { "type": "Preferred", "criterion": "Manageable mapped environmental constraint profile", "source": "CFS evidence" },
+      { "type": "Needs Verification", "criterion": "Capacity, access, title, and entitlement path", "source": "Professional verification requirement" }
+    ]
+  },
+  "package_files": {
+    "strategy": "strategy.json",
+    "workflow_readiness": "workflow_readiness.json",
+    "screening_funnel": "screening_funnel.json",
+    "shortlisted_candidates": "shortlisted_candidates.json",
+    "candidate_comparison": "candidate_comparison.json",
+    "active_property_analysis": "active_property_analysis.json",
+    "developable_area_analysis": "developable_area_analysis.json",
+    "underwriting_scenarios": "underwriting_scenarios.json",
+    "due_diligence_plan": "due_diligence_plan.json",
+    "sources": "sources.json",
+    "limitations": "limitations.json",
+    "visual_exhibits": "visual_exhibits.json",
+    "report_bucket_package": "report_bucket_package.json",
+    "saved_workspace_records": "saved_workspace_records.json",
+    "ask_cfs_case_study_results": "ask_cfs_case_study_results.json"
+  },
+  "deliverables": [
+    {
+      "title": "Detailed report",
+      "type": "Detailed report",
+      "status": "Draft",
+      "source": "Codex package",
+      "path": "../../docs/case-studies/cfs-investment-large-development-land.md",
+      "review_status": "Needs Review",
+      "last_updated": "2026-07-18"
+    },
+    {
+      "title": "Executive recommendation",
+      "type": "Executive recommendation",
+      "status": "Draft",
+      "source": "Codex package",
+      "path": "../../docs/case-studies/cfs-investment-executive-recommendation.md",
+      "review_status": "Needs Review",
+      "last_updated": "2026-07-18"
+    },
+    {
+      "title": "Acquisition presentation",
+      "type": "Presentation",
+      "status": "Draft",
+      "source": "Codex package",
+      "path": "../../docs/case-studies/cfs-investment-acquisition-presentation.md",
+      "review_status": "Needs Review",
+      "last_updated": "2026-07-18"
+    },
+    {
+      "title": "Interview walkthrough",
+      "type": "Interview walkthrough",
+      "status": "Draft",
+      "source": "Codex package",
+      "path": "../../docs/case-studies/cfs-investment-interview-walkthrough.md",
+      "review_status": "Needs Review",
+      "last_updated": "2026-07-18"
+    },
+    {
+      "title": "Excel underwriting model",
+      "type": "Excel underwriting model",
+      "status": "Not Started",
+      "source": "CFS Underwriting Lab",
+      "review_status": "Assumptions require review",
+      "last_updated": "2026-07-18"
+    },
+    {
+      "title": "Report Bucket collection",
+      "type": "Report Bucket collection",
+      "status": "Draft",
+      "source": "CFS Report Bucket",
+      "reference_id": "case1-report-CFS-PARCEL-0149758869",
+      "review_status": "Needs Review",
+      "last_updated": "2026-07-18"
+    }
+  ],
+  "activity_seed": [
+    {
+      "timestamp": "2026-07-18T04:00:00Z",
+      "action": "Case study package created",
+      "section": "Codex Sync",
+      "safe_summary": "CASE-1 package assembled from cloud-safe CFS Investment evidence.",
+      "source": "Codex Sync",
+      "revision_id": "case-1.0"
+    }
+  ],
+  "safety_rules": [
+    "Internal screening-level research only.",
+    "Not investment advice.",
+    "Not an appraisal.",
+    "Not confirmation of utility service or capacity.",
+    "Not a guarantee of future value.",
+    "Not a formal environmental assessment.",
+    "Not legal entitlement advice.",
+    "Based partly on public and proxy data.",
+    "Subject to source-date and coverage limitations.",
+    "Do not include owner names, mailing addresses, grantor or grantee names, raw WSACC records, raw model scores, exact probabilities, credentials, API keys, tokens, or database URLs."
+  ]
+}
