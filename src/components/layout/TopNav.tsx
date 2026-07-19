@@ -148,6 +148,12 @@ const appModeOptions = [
     label: "Economic Intelligence",
     shortLabel: "CFS Economics",
   },
+  {
+    description: "Site selection, acquisition screening, due diligence, underwriting, and case studies.",
+    id: "consulting",
+    label: "Real Estate Consulting",
+    shortLabel: "CFS Consulting",
+  },
 ] as const;
 
 type QuickSearchStatus =
@@ -212,19 +218,29 @@ export function TopNav() {
       ? "API Live"
       : "Static";
   const runtimeStatusTone = USE_BACKEND_API ? "green" : "blue";
+  const consultingMode = cfsAppMode === "consulting";
   const searchPlaceholder = USE_DEMO_DATA
     ? "Search demo parcel, PIN, zoning, subdivision"
-    : cfsAppMode === "economics"
+    : cfsAppMode === "economics" || consultingMode
       ? "Search parcel, PIN, zoning, subdivision"
       : "Search parcel, PIN, owner, address, subdivision";
   const searchTitle = USE_DEMO_DATA
     ? "Search demo parcels, PINs, zoning, subdivisions, or neighborhoods"
-    : cfsAppMode === "economics"
+    : cfsAppMode === "economics" || consultingMode
       ? "Search parcels, PINs, zoning, subdivisions, or neighborhoods"
       : "Search parcels, PINs, owners, addresses, subdivisions, or neighborhoods";
   const currentAppMode =
     appModeOptions.find((option) => option.id === cfsAppMode) ??
     appModeOptions[0];
+  const selectAppMode = useCallback((mode: typeof appModeOptions[number]["id"]) => {
+    if (typeof window !== "undefined" && mode !== cfsAppMode) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("app", mode);
+      window.history.pushState(null, "", url);
+    }
+    setCfsAppMode(mode);
+    setModeMenuOpen(false);
+  }, [cfsAppMode, setCfsAppMode]);
 
   useEffect(() => {
     quickSearchQueryRef.current = trimmedQuickSearchQuery;
@@ -499,8 +515,10 @@ export function TopNav() {
 
       <header
         className={cn(
-          "relative z-30 flex min-h-[4.5rem] shrink-0 flex-wrap items-center gap-2 overflow-visible px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4",
-          cfsAppMode === "economics"
+          "relative z-30 flex min-h-[var(--cfs-top-nav-height)] shrink-0 flex-wrap items-center gap-2 overflow-visible px-3 py-2 backdrop-blur-2xl lg:flex-nowrap lg:gap-3 lg:px-4",
+          consultingMode
+            ? "consult-command-bar"
+            : cfsAppMode === "economics"
             ? "econ-command-bar"
             : "cfs-command-bar border-b border-[#68d8ff]/14 bg-[#03070d]/94",
         )}
@@ -514,7 +532,9 @@ export function TopNav() {
             type="button"
           >
             <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#68d8ff]/28 bg-[#68d8ff]/[0.1]">
-              {cfsAppMode === "economics" ? (
+              {consultingMode ? (
+                <BriefcaseBusiness className="h-4 w-4 text-[var(--consult-emerald)]" />
+              ) : cfsAppMode === "economics" ? (
                 <BarChart3 className="h-4 w-4 text-[#f0cd79]" />
               ) : (
                 <Map className="h-4 w-4 text-[#f0cd79]" />
@@ -554,10 +574,7 @@ export function TopNav() {
                         : "border-transparent text-slate-300 hover:border-white/10 hover:bg-white/[0.055] hover:text-white",
                     )}
                     key={option.id}
-                    onClick={() => {
-                      setCfsAppMode(option.id);
-                      setModeMenuOpen(false);
-                    }}
+                    onClick={() => selectAppMode(option.id)}
                     role="menuitemradio"
                     type="button"
                   >
@@ -613,7 +630,7 @@ export function TopNav() {
               );
             })}
           </nav>
-        ) : (
+        ) : cfsAppMode === "planning" ? (
           <nav
             aria-label="CFS product mode"
             className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-4 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
@@ -681,7 +698,7 @@ export function TopNav() {
               );
             })}
           </nav>
-        )}
+        ) : null}
 
         <div className="order-4 flex w-full min-w-0 items-center gap-2 md:order-2 md:w-auto md:flex-1 lg:order-3">
           <div
@@ -820,7 +837,7 @@ export function TopNav() {
                             </p>
                             <p className="mt-0.5 truncate text-[11px] text-slate-400">
                               {record.pin14 ?? "PIN unavailable"}
-                              {cfsAppMode !== "economics" && record.ownerName
+                              {cfsAppMode === "planning" && record.ownerName
                                 ? ` / ${record.ownerName}`
                                 : ""}
                             </p>
@@ -830,7 +847,7 @@ export function TopNav() {
                           </span>
                         </div>
                         <p className="mt-1 truncate text-[11px] text-slate-500">
-                          {(cfsAppMode === "economics"
+                          {(cfsAppMode === "economics" || consultingMode
                             ? [record.neighborhood, record.subdivision]
                             : [
                                 record.mailingAddress,
@@ -889,6 +906,8 @@ export function TopNav() {
             aria-label={
               cfsAppMode === "economics"
                 ? "Open economics controls"
+                : consultingMode
+                  ? "Open consulting controls"
                 : "Open dashboard controls"
             }
             className="flex h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:text-white"
@@ -896,6 +915,8 @@ export function TopNav() {
             title={
               cfsAppMode === "economics"
                 ? "Economics status and mode controls"
+                : consultingMode
+                  ? "Consulting status and mode controls"
                 : "Role, workspace, and scenario controls"
             }
             type="button"
@@ -912,7 +933,30 @@ export function TopNav() {
 
           {moreOpen ? (
             <div className="absolute right-0 top-11 z-50 w-[min(24rem,calc(100vw-1.5rem))] rounded-lg border border-white/10 bg-[#08111d]/98 p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-              {cfsAppMode === "economics" ? (
+              {consultingMode ? (
+                <div className="grid gap-3">
+                  <div className="rounded-lg border border-[var(--consult-border)] bg-[rgba(53,201,141,0.08)] p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--consult-emerald)]">
+                      CFS Consulting
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-slate-300">
+                      Site selection, due diligence, underwriting, reports, and case studies.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <CompactStatusChip
+                      icon={RadioTower}
+                      label={dashboardStatusLabels[mapStatus]}
+                      tone={mapStatus === "online" ? "green" : mapStatus === "degraded" ? "red" : "gold"}
+                    />
+                    <CompactStatusChip
+                      icon={Activity}
+                      label={runtimeStatusLabel}
+                      tone={runtimeStatusTone}
+                    />
+                  </div>
+                </div>
+              ) : cfsAppMode === "economics" ? (
                 <div className="grid gap-3">
                   <div className="rounded-lg border border-[#d8b86a]/20 bg-[#d8b86a]/10 p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#f0cd79]">

@@ -15,6 +15,7 @@ export function DashboardUrlSync() {
     clearSelectedParcel,
     dashboardUrlState,
     selectParcel,
+    setCfsAppMode,
     setActiveLayerIds,
     setBriefingMode,
     setComparisonPair,
@@ -45,6 +46,12 @@ export function DashboardUrlSync() {
       // Invalid share URLs fall back to the current mock-safe state instead of
       // throwing or reaching for production county services.
       const nextState = deserializeDashboardUrlState(currentSearch);
+      const appMode = new URLSearchParams(currentSearch).get("app");
+      if (appMode === "planning" || appMode === "economics" || appMode === "consulting") {
+        setCfsAppMode(appMode);
+      } else if (new URLSearchParams(currentSearch).has("investmentPage")) {
+        setCfsAppMode("consulting");
+      }
 
       if (nextState.roleId) {
         applyRolePreset(nextState.roleId);
@@ -111,6 +118,7 @@ export function DashboardUrlSync() {
     clearSelectedParcel,
     selectParcel,
     selectReportPackage,
+    setCfsAppMode,
     setActiveLayerIds,
     setBriefingMode,
     setComparisonPair,

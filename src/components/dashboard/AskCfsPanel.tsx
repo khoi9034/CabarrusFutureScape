@@ -48,6 +48,18 @@ export function AskCfsPanel({
     (appMode === "economics"
       ? askCfsEconomicsSuggestedPrompts
       : askCfsSuggestedPrompts);
+  const helperText =
+    appMode === "consulting"
+      ? "Search across case studies, active candidates, comparisons, underwriting, evidence gaps, and deliverables."
+      : appMode === "economics"
+        ? "Search across parcel economics, tax-base opportunity, constraints, and scenario context."
+        : "Search across indicators, layers, methodology, and cached planning signals.";
+  const inputPlaceholder =
+    appMode === "consulting"
+      ? "Ask about the active case study, candidate tradeoffs, underwriting assumptions, or next diligence..."
+      : appMode === "economics"
+        ? "Ask about underbuilt parcels, value per acre, tax-base opportunity, or scenarios..."
+        : "Ask about permit trends, school pressure, floodplain review, Model Lab, or data readiness...";
   const visiblePrompts = visiblePromptCount
     ? suggestedPrompts.slice(0, visiblePromptCount)
     : suggestedPrompts;
@@ -135,11 +147,7 @@ export function AskCfsPanel({
             </span>
             <div>
               <h2 className="text-lg font-semibold text-white">Ask CFS</h2>
-              <p className="text-xs text-slate-400">
-                {appMode === "economics"
-                  ? "Search across parcel economics, tax-base opportunity, constraints, and scenario context."
-                  : "Search across indicators, layers, methodology, and cached planning signals."}
-              </p>
+              <p className="text-xs text-slate-400">{helperText}</p>
             </div>
           </div>
         </div>
@@ -156,11 +164,7 @@ export function AskCfsPanel({
           className="min-w-0 flex-1 rounded-lg border border-white/10 bg-black/30 px-3 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-[#68d8ff]/55 focus:ring-2 focus:ring-[#68d8ff]/15"
           id="ask-cfs-query"
           onChange={(event) => setQuery(event.target.value)}
-          placeholder={
-            appMode === "economics"
-              ? "Ask about underbuilt parcels, value per acre, tax-base opportunity, or scenarios..."
-              : "Ask about permit trends, school pressure, floodplain review, Model Lab, or data readiness..."
-          }
+          placeholder={inputPlaceholder}
           value={query}
         />
         <button

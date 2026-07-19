@@ -155,7 +155,7 @@ export async function searchCfsAi(
 async function searchDemoCfsAi(
   request: CfsAiSearchRequest,
 ): Promise<CfsAiSearchResponse> {
-  if (request.app_mode === "economics") {
+  if (request.app_mode === "consulting" || request.app_mode === "economics") {
     return sanitizeDemoResponse(await demoEconomicsAnswer(request));
   }
 

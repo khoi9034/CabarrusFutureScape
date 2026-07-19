@@ -70,7 +70,7 @@ export type ProductMode =
   | "overview"
   | "workspace";
 
-export type CfsAppMode = "economics" | "planning";
+export type CfsAppMode = "consulting" | "economics" | "planning";
 
 export type EconomicsSection =
   | "dashboard"

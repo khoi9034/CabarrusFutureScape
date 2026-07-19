@@ -316,7 +316,7 @@ const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS = [
 const MAX_STORED_PLANNING_SNAPSHOTS = 8;
 
 function isCfsAppMode(value: unknown): value is CfsAppMode {
-  return value === "planning" || value === "economics";
+  return value === "planning" || value === "economics" || value === "consulting";
 }
 
 function readStoredCfsAppMode(): CfsAppMode {
@@ -677,9 +677,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedIndicatorCenterContext,
     setSelectedIndicatorCenterContext,
   ] = useState<IndicatorCenterContext | null>(null);
-  const [cfsAppMode, setCfsAppModeState] = useState<CfsAppMode>(() =>
-    readStoredCfsAppMode(),
-  );
+  const [cfsAppMode, setCfsAppModeState] = useState<CfsAppMode>("planning");
   const [
     indicatorCenterDisplayMode,
     setIndicatorCenterDisplayMode,
@@ -706,6 +704,20 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const temporalAnalysisState = useTemporalAnalysisState();
   const exploreCountywideLayersActive =
     isExploreCountywideMode(overviewCommandMode);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (isCfsAppMode(params.get("app")) || params.has("investmentPage")) return;
+    } catch {
+      return;
+    }
+    const timeoutId = window.setTimeout(() => {
+      setCfsAppModeState(readStoredCfsAppMode());
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
   const developmentHotspotLayer = useDevelopmentHotspotLayer({
     activityClass: developmentHotspotControls.activityClass,
     enabled: developmentHotspotsEnabled && exploreCountywideLayersActive,

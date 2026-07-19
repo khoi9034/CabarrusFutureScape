@@ -216,7 +216,7 @@ class CfsAiSearchService:
         total_start = time.perf_counter()
         domains = (
             ["economics"]
-            if request.app_mode == "economics" and not request.filters.domains
+            if request.app_mode in {"consulting", "economics"} and not request.filters.domains
             else request.filters.domains or selected_signal_domains(request) or resolve_query_domains(request)
         )
         deterministic_start = time.perf_counter()
@@ -880,7 +880,13 @@ def _is_economics_environmental_context_query(query: str) -> bool:
 def _is_investment_research_context(request: CfsAiSearchRequest) -> bool:
     filters = request.filter_context or {}
     normalized = request.query.lower()
-    return filters.get("mode") in {"investment_panel", "cfs_investment"} or "cfs investment" in normalized or "investment research" in normalized
+    return (
+        request.app_mode == "consulting"
+        or filters.get("mode") in {"investment_panel", "cfs_investment"}
+        or "cfs investment" in normalized
+        or "cfs consulting" in normalized
+        or "investment research" in normalized
+    )
 
 
 def _investment_intent(query: str) -> str:
@@ -917,6 +923,7 @@ def _investment_research_answer(
     candidate = filters.get("active_intake_candidate") or filters.get("selected_candidate") or "the active candidate"
     strategy = filters.get("active_strategy") or "selected strategy"
     underwriting = filters.get("active_underwriting_summary") or filters.get("active_underwriting_result")
+    product_label = "CFS Consulting" if request.app_mode == "consulting" else "CFS Investment"
     saved_workspace_lines = [
         f"Shortlist count: {filters.get('persisted_shortlist_count') or 0}",
         f"Shortlist preview: {filters.get('persisted_shortlist_preview') or 'No saved shortlist items were provided in context.'}",
@@ -936,10 +943,10 @@ def _investment_research_answer(
     answer = _briefing(
         ("Intent", f"{intent} for {candidate} under {strategy}."),
         (
-            "Use in CFS Investment",
+            f"Use in {product_label}",
             _bullets(
                 [
-                    "Use CFS Investment as screening-level research for candidate status, data readiness, and verification needs.",
+                    f"Use {product_label} as screening-level research for candidate status, data readiness, and verification needs.",
                     "Use Opportunity Engine for ranked parcel candidates and strategy filters.",
                     "Use Opportunity Feed for governed opportunity references, source links, parcel matching, and intake handoff.",
                     "Use Area Opportunity Radar to identify Priority Search Areas before reviewing individual parcels or opportunity references.",
@@ -970,7 +977,7 @@ def _investment_research_answer(
         ),
         (
             "Next action",
-            "Generate the relevant CFS Investment report or add the candidate evidence to the Report Bucket before Print.",
+            f"Generate the relevant {product_label} report or add the candidate evidence to the Report Bucket before Print.",
         ),
     )
     return _response(
@@ -978,8 +985,8 @@ def _investment_research_answer(
         context,
         ["economics"],
         request.mode,
-        [_evidence("CFS Investment research context", f"Intent group: {intent}; candidate: {candidate}; strategy: {strategy}.", "investment_research_context")],
-        ["Open CFS Investment Report Studio.", "Review missing evidence and verification requirements.", "Compare candidates as tradeoffs only."],
+        [_evidence(f"{product_label} research context", f"Intent group: {intent}; candidate: {candidate}; strategy: {strategy}.", "investment_research_context")],
+        [f"Open {product_label} Report Studio.", "Review missing evidence and verification requirements.", "Compare candidates as tradeoffs only."],
     )
 
 

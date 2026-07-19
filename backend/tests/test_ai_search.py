@@ -1215,6 +1215,24 @@ def test_ai_search_investment_research_intent_routes_reports() -> None:
     assert response.evidence[0].source == "investment_research_context"
 
 
+def test_ai_search_consulting_mode_uses_consulting_label() -> None:
+    response = CfsAiSearchService(_settings()).search(
+        CfsAiSearchRequest(
+            app_mode="consulting",
+            filter_context={
+                "active_case_study": "CFS Large Development-Land Acquisition Case Study",
+                "active_strategy": "Development Land",
+            },
+            query="What should I work on next?",
+        ),
+        _context(),
+    )
+
+    assert "CFS Consulting" in response.answer
+    assert "CFS Investment" not in response.answer
+    assert response.evidence[0].source == "investment_research_context"
+
+
 def test_ai_search_environmental_prompt_rejects_contamination_conclusion() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(

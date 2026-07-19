@@ -150,7 +150,7 @@ def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | Non
         )
     context["indicator_summary"] = {}
     context["school_pressure"] = {"features": [], "summary": {}, "total_count": 0}
-    if request and request.app_mode == "economics":
+    if request and request.app_mode in {"consulting", "economics"}:
         try:
             context["economics_intelligence"] = get_cached_economics_intelligence(_db)
         except Exception:

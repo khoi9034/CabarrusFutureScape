@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowLeft,
   BookOpen,
   BriefcaseBusiness,
   ChevronLeft,
@@ -11,6 +10,7 @@ import {
   Layers3,
   LockKeyhole,
   MapPinned,
+  MoreHorizontal,
   Search,
   ShieldCheck,
   Sparkles,
@@ -35,7 +35,6 @@ export type InvestmentPageId =
   | "methodology";
 
 export const investmentPageGroups: Array<{
-  group: string;
   pages: Array<{
     icon: typeof Gauge;
     id: InvestmentPageId;
@@ -44,20 +43,29 @@ export const investmentPageGroups: Array<{
   }>;
 }> = [
   {
-    group: "Guided",
     pages: [
-      { icon: Gauge, id: "overview", label: "Home", sublabel: "Start here" },
-      { icon: Search, id: "area-radar", label: "Find", sublabel: "Areas and opportunities" },
-      { icon: MapPinned, id: "research", label: "Analyze", sublabel: "One property workspace" },
-      { icon: Layers3, id: "compare", label: "Compare", sublabel: "Tradeoffs only" },
-      { icon: BriefcaseBusiness, id: "engagements", label: "Projects", sublabel: "Criteria and shortlists" },
-      { icon: FileText, id: "report-studio", label: "Reports", sublabel: "Studio and bucket" },
-      { icon: BookOpen, id: "methodology", label: "More", sublabel: "Sources and advanced tools" },
+      { icon: Gauge, id: "overview", label: "Home", sublabel: "Current work and next action" },
+      { icon: BriefcaseBusiness, id: "engagements", label: "Case Studies", sublabel: "Projects, candidates, and deliverables" },
+      { icon: Search, id: "area-radar", label: "Find Sites", sublabel: "Screen parcels and opportunities" },
+      { icon: MapPinned, id: "research", label: "Analyze Property", sublabel: "One-property due diligence" },
+      { icon: Layers3, id: "compare", label: "Compare", sublabel: "Candidate tradeoffs" },
+      { icon: FileText, id: "report-studio", label: "Reports", sublabel: "Recommendations and deliverables" },
+      { icon: BookOpen, id: "methodology", label: "Data & Methods", sublabel: "Sources, status, assumptions, and advanced tools" },
     ],
   },
 ];
 
-export const investmentPages = investmentPageGroups.flatMap((group) => group.pages);
+const legacyInvestmentPages: Array<(typeof investmentPageGroups)[number]["pages"][number]> = [
+  { icon: Search, id: "opportunity-feed", label: "Opportunity Feed", sublabel: "External references" },
+  { icon: Search, id: "opportunity", label: "Opportunity Engine", sublabel: "Advanced screening" },
+  { icon: Search, id: "intake", label: "Candidate Intake", sublabel: "Writable candidate queue" },
+  { icon: Gauge, id: "market", label: "Market Research", sublabel: "ACS and market context" },
+  { icon: Gauge, id: "underwriting", label: "Underwriting", sublabel: "Scenario lab" },
+  { icon: ShieldCheck, id: "due-diligence", label: "Due Diligence", sublabel: "Checklist library" },
+  { icon: FileText, id: "report-bucket", label: "Report Bucket", sublabel: "Print collection" },
+];
+
+export const investmentPages = [...investmentPageGroups.flatMap((group) => group.pages), ...legacyInvestmentPages];
 
 type InvestmentShellProps = {
   activePage: InvestmentPageId;
@@ -73,8 +81,6 @@ type InvestmentShellProps = {
   currentCandidateLabel?: string | null;
   dataMode: string;
   shortlistCount?: number;
-  viewMode?: "guided" | "advanced";
-  onClose: () => void;
   onAskCfs: () => void;
   onActiveAnalyze?: () => void;
   onActiveClear?: () => void;
@@ -83,7 +89,6 @@ type InvestmentShellProps = {
   onActiveShortlist?: () => void;
   onActiveUnderwrite?: () => void;
   onPageChange: (page: InvestmentPageId) => void;
-  onViewModeChange?: (mode: "guided" | "advanced") => void;
 };
 
 export function InvestmentShell({
@@ -93,7 +98,6 @@ export function InvestmentShell({
   currentCandidateLabel,
   dataMode,
   shortlistCount = 0,
-  viewMode = "guided",
   onAskCfs,
   onActiveAnalyze,
   onActiveClear,
@@ -101,29 +105,26 @@ export function InvestmentShell({
   onActiveReport,
   onActiveShortlist,
   onActiveUnderwrite,
-  onClose,
   onPageChange,
-  onViewModeChange,
 }: InvestmentShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const active = investmentPages.find((page) => page.id === activePage) ?? investmentPages[0];
   return (
-    <section className={`investment-shell ${collapsed ? "is-collapsed" : ""}`} aria-label="CFS Investment">
-      <aside className="investment-sidebar" aria-label="CFS Investment navigation">
+    <section className={`investment-shell ${collapsed ? "is-collapsed" : ""}`} aria-label="CFS Consulting">
+      <aside className="investment-sidebar" aria-label="CFS Consulting navigation">
         <div className="investment-brand">
           <span className="investment-brand-mark"><LockKeyhole className="h-4 w-4" /></span>
           <div>
-            <p>CFS Investment</p>
-            <span>Private Research</span>
+            <p>CFS Consulting</p>
+            <span>Real Estate, Site Selection & Due Diligence</span>
           </div>
-          <button className="investment-icon-button" onClick={() => setCollapsed((value) => !value)} type="button" aria-label={collapsed ? "Expand CFS Investment navigation" : "Collapse CFS Investment navigation"}>
+          <button className="investment-icon-button" onClick={() => setCollapsed((value) => !value)} type="button" aria-label={collapsed ? "Expand CFS Consulting navigation" : "Collapse CFS Consulting navigation"}>
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
         </div>
         <nav className="investment-nav">
           {investmentPageGroups.map((group) => (
-            <div className="investment-nav-group" key={group.group}>
-              <p>{group.group}</p>
+            <div className="investment-nav-group" key="consulting">
               {group.pages.map(({ icon: Icon, id, label, sublabel }) => (
                 <button
                   aria-current={activePage === id ? "page" : undefined}
@@ -140,29 +141,23 @@ export function InvestmentShell({
         </nav>
         <div className="investment-sidebar-footer">
           <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-          <p>Local convenience gate only. Production authentication is not yet enabled.</p>
-          <button onClick={onClose} type="button"><ArrowLeft className="h-4 w-4" /> Return to CFS Economics</button>
+          <p>{dataMode}</p>
         </div>
       </aside>
       <div className="investment-workspace">
         <header className="investment-header">
           <div>
             <div className="investment-header-kicker">
-              <span>Private Research</span>
+              <span>Consulting Engine</span>
               <span>{dataMode}</span>
               <span>{shortlistCount} shortlisted</span>
               {currentCandidateLabel ? <span>{currentCandidateLabel}</span> : null}
             </div>
             <h1>{active.label}</h1>
-            <p>CFS Investment · Land, Property, and Real Estate Intelligence</p>
+            <p>CFS Consulting - Real Estate, Site Selection & Due Diligence</p>
           </div>
           <div className="investment-header-actions">
-            <div className="investment-view-toggle" role="group" aria-label="CFS Investment view mode">
-              <button aria-pressed={viewMode === "guided"} onClick={() => onViewModeChange?.("guided")} type="button">Guided</button>
-              <button aria-pressed={viewMode === "advanced"} onClick={() => onViewModeChange?.("advanced")} type="button">Analyst</button>
-            </div>
             <button className="investment-primary-button" onClick={onAskCfs} type="button"><Sparkles className="h-4 w-4" /> Ask CFS</button>
-            <button className="investment-ghost-button" onClick={onClose} type="button"><ArrowLeft className="h-4 w-4" /> CFS Economics</button>
           </div>
         </header>
         {activeProperty ? (
@@ -179,12 +174,15 @@ export function InvestmentShell({
               </small>
             </div>
             <div className="investment-row-actions">
-              <button onClick={onActiveAnalyze} type="button">Analyze</button>
-              <button onClick={onActiveShortlist} type="button">Shortlist</button>
+              <button className="investment-primary-button" onClick={onActiveAnalyze} type="button">Open Analysis</button>
               <button onClick={onActiveCompare} type="button">Compare</button>
               <button onClick={onActiveUnderwrite} type="button">Underwrite</button>
-              <button onClick={onActiveReport} type="button">Create Report</button>
-              <button onClick={onActiveClear} type="button">Clear</button>
+              <details className="investment-active-overflow">
+                <summary><MoreHorizontal className="h-4 w-4" /> More</summary>
+                <button onClick={onActiveShortlist} type="button">Add to Shortlist</button>
+                <button onClick={onActiveReport} type="button">Create Report</button>
+                <button onClick={onActiveClear} type="button">Clear Active Property</button>
+              </details>
             </div>
           </section>
         ) : null}
@@ -192,7 +190,7 @@ export function InvestmentShell({
           {children}
         </main>
         <footer className="investment-footer">
-          CFS Investment is for internal screening-level research only. It is not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.
+          CFS Consulting is for screening-level real estate research only. It is not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.
         </footer>
       </div>
     </section>

@@ -36,6 +36,16 @@ const caseStudyTabs = [
 
 type CaseStudyTab = (typeof caseStudyTabs)[number];
 
+const caseStudyWorkflowSteps = [
+  "Strategy",
+  "Screening",
+  "Candidate Review",
+  "Deep Analysis",
+  "Underwriting",
+  "Recommendation",
+  "Deliverables",
+] as const;
+
 export function InvestmentCaseStudies({
   activeCaseStudy,
   caseStudies,
@@ -73,6 +83,12 @@ export function InvestmentCaseStudies({
   const candidates = artifacts.shortlisted_candidates?.candidates ?? [];
   const candidateIds = candidates.map((candidate) => candidate.parcel_id).filter(Boolean);
   const activeParcelId = selected?.active_parcel_id ?? packageData?.active_parcel_id ?? selected?.priority_candidate_id ?? null;
+  const currentWorkflowStep = selected ? currentCaseStudyWorkflowStep(selected.current_stage) : "Strategy";
+  const continueTab = workflowStepToTab(currentWorkflowStep);
+  const openUnderwriting = (parcelId?: string | null) => {
+    setTab("Underwriting");
+    onUnderwrite(parcelId);
+  };
 
   return (
     <section className="investment-work-grid">
@@ -185,10 +201,16 @@ export function InvestmentCaseStudies({
                 ["Last updated", formatDate(selected.updated_at)],
               ].map(([label, value]) => <span key={label}>{label}: {value}</span>)}
             </div>
+            <div className="investment-step-strip investment-step-strip--workflow mt-4" aria-label="Case-study workflow">
+              {caseStudyWorkflowSteps.map((step) => (
+                <span aria-current={currentWorkflowStep === step ? "step" : undefined} key={step}>{step}</span>
+              ))}
+            </div>
             <div className="investment-row-actions mt-4">
-              <button className="investment-primary-button" onClick={() => activeParcelId ? onAnalyzeParcel(activeParcelId, selected.title) : undefined} type="button">Open Active Candidate</button>
+              <button className="investment-primary-button" onClick={() => setTab(continueTab)} type="button">Continue Next Step</button>
+              <button className="investment-ghost-button" onClick={() => activeParcelId ? onAnalyzeParcel(activeParcelId, selected.title) : undefined} type="button">Open Active Candidate</button>
               <button className="investment-ghost-button" onClick={() => onCompare(candidateIds)} type="button">Compare Candidates</button>
-              <button className="investment-ghost-button" onClick={() => onUnderwrite(activeParcelId)} type="button">Start or Continue Underwriting</button>
+              <button className="investment-ghost-button" onClick={() => openUnderwriting(activeParcelId)} type="button">Start or Continue Underwriting</button>
               <button className="investment-ghost-button" onClick={onReport} type="button">Create Report</button>
               <button className="investment-ghost-button" onClick={() => onExportBrief(selected.slug)} type="button">Export Codex Brief</button>
             </div>
@@ -212,7 +234,7 @@ export function InvestmentCaseStudies({
                 onOpenIntake={onOpenIntake}
                 onReport={onReport}
                 onSaveNote={() => onSaveNote(selected.slug, note || String(selected.user_state?.analyst_note ?? ""))}
-                onUnderwrite={onUnderwrite}
+                onUnderwrite={openUnderwriting}
                 packageData={packageData}
                 tab={tab}
               />
@@ -534,6 +556,23 @@ function formatDate(value: string | null | undefined) {
   if (!value) return "Not available";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("en-US");
+}
+
+function currentCaseStudyWorkflowStep(stage: string): (typeof caseStudyWorkflowSteps)[number] {
+  const normalized = stage.toLowerCase();
+  if (normalized.includes("deliverable")) return "Deliverables";
+  if (normalized.includes("recommend")) return "Recommendation";
+  if (normalized.includes("underwriting")) return "Underwriting";
+  if (normalized.includes("deep")) return "Deep Analysis";
+  if (normalized.includes("candidate")) return "Candidate Review";
+  if (normalized.includes("screen")) return "Screening";
+  return "Strategy";
+}
+
+function workflowStepToTab(step: (typeof caseStudyWorkflowSteps)[number]): CaseStudyTab {
+  if (step === "Candidate Review") return "Candidates";
+  if (step === "Deep Analysis") return "Deep Dive";
+  return step;
 }
 
 type CaseStudyPackage = {

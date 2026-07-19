@@ -34,7 +34,7 @@ import { IndicatorCenterWorkspace } from "@/components/dashboard/IndicatorCenter
 import { IntelligencePanel } from "@/components/dashboard/IntelligencePanel";
 import { MethodologyWorkspace } from "@/components/dashboard/MethodologyWorkspace";
 import { OverviewCommandCenter } from "@/components/dashboard/OverviewCommandCenter";
-import { EconomicsShell } from "@/components/economics/EconomicsShell";
+import { ConsultingShell, EconomicsShell } from "@/components/economics/EconomicsShell";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
@@ -137,12 +137,14 @@ function ProductShell() {
     <div
       className={cn(
         "relative flex min-h-screen flex-col overflow-x-hidden text-slate-100 lg:h-screen lg:overflow-hidden",
-        cfsAppMode === "economics"
+        cfsAppMode === "consulting"
+          ? "consult-app-backdrop"
+          : cfsAppMode === "economics"
           ? "econ-app-backdrop"
           : "cfs-command-backdrop metric-grid",
       )}
     >
-      {cfsAppMode === "economics" ? null : (
+      {cfsAppMode === "economics" || cfsAppMode === "consulting" ? null : (
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,13,0.08),rgba(3,7,13,0.88))]" />
       )}
       <div className="pointer-events-none absolute left-0 right-0 top-[4.5rem] z-10 h-px gold-line opacity-70" />
@@ -151,7 +153,14 @@ function ProductShell() {
         <TopNav />
       </div>
 
-      {cfsAppMode === "economics" ? (
+      {cfsAppMode === "consulting" ? (
+        <EnterpriseErrorBoundary
+          moduleName="CFS Consulting"
+          resetKey="consulting"
+        >
+          <ConsultingShell />
+        </EnterpriseErrorBoundary>
+      ) : cfsAppMode === "economics" ? (
         <EnterpriseErrorBoundary
           moduleName="CFS Economics"
           resetKey="economics"

@@ -8,13 +8,15 @@ STARTUP_SCRIPT = ROOT / "scripts" / "start-cfs-local.ps1"
 OPS_DOC = ROOT / "docs" / "cfs-investment-operations.md"
 
 
-def test_investment_defaults_to_analyst_view_with_guided_optional() -> None:
+def test_consulting_uses_one_primary_workspace_experience() -> None:
     shell = ECONOMICS_SHELL.read_text(encoding="utf-8")
     investment_shell = INVESTMENT_SHELL.read_text(encoding="utf-8")
 
-    assert 'readInvestmentDisplayPreference().viewMode ?? "advanced"' in shell
-    assert ">Guided<" in investment_shell
-    assert ">Analyst<" in investment_shell
+    assert 'const investmentViewMode = "advanced" as const' in shell
+    assert "CFS Consulting" in investment_shell
+    assert ">Guided<" not in investment_shell
+    assert ">Analyst<" not in investment_shell
+    assert "investment-view-toggle" not in investment_shell
 
 
 def test_universal_search_and_active_property_contracts() -> None:
@@ -43,13 +45,12 @@ def test_daily_readiness_panels_are_present() -> None:
     assert "Due diligence" in shell
 
 
-def test_local_gate_and_startup_hardening_contract() -> None:
+def test_old_local_gate_removed_and_startup_hardening_remains() -> None:
     shell = ECONOMICS_SHELL.read_text(encoding="utf-8")
     startup = STARTUP_SCRIPT.read_text(encoding="utf-8")
 
-    assert "INVESTMENT_LOCAL_ACCESS_KEY" in shell
-    assert "sessionStorage.setItem" in shell
-    assert "Production authentication is not yet enabled" in shell
+    assert "INVESTMENT_LOCAL_ACCESS_KEY" not in shell
+    assert "Production authentication is not yet enabled" not in shell
     assert "Test-CfsLocalProcess" in startup
     assert "does not look like a CFS local dev process" in startup
     assert "Port $Port process appears to be" in startup

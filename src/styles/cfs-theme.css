@@ -19,6 +19,15 @@
   --econ-blue: #7f9db8;
   --econ-muted: #a9a49a;
   --econ-text: #f4efe4;
+  --cfs-top-nav-height: 4.5rem;
+  --consult-bg: #07100d;
+  --consult-panel: #0c1914;
+  --consult-panel-strong: #09130f;
+  --consult-border: rgba(67, 190, 143, 0.2);
+  --consult-emerald: #35c98d;
+  --consult-bronze: #b99158;
+  --consult-text: #edf7f2;
+  --consult-muted: #91a99d;
 }
 
 @theme inline {
@@ -117,6 +126,14 @@ select:focus-visible {
     linear-gradient(135deg, #0d0c0a 0%, #171512 48%, #0b0f12 100%);
 }
 
+.consult-app-backdrop {
+  background:
+    radial-gradient(circle at 14% 8%, rgba(53, 201, 141, 0.13), transparent 22rem),
+    radial-gradient(circle at 90% 12%, rgba(185, 145, 88, 0.1), transparent 24rem),
+    radial-gradient(circle at 78% 88%, rgba(53, 201, 141, 0.08), transparent 22rem),
+    linear-gradient(135deg, #06100d 0%, #0b1712 48%, #050a08 100%);
+}
+
 .econ-app-backdrop::before {
   background-image:
     linear-gradient(rgba(216, 184, 106, 0.045) 1px, transparent 1px),
@@ -135,6 +152,20 @@ select:focus-visible {
   z-index: 0;
 }
 
+.consult-app-backdrop::before {
+  background-image:
+    linear-gradient(rgba(53, 201, 141, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(53, 201, 141, 0.03) 1px, transparent 1px);
+  background-size: 52px 52px;
+  content: "";
+  inset: 0;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.72), transparent 78%);
+  opacity: 0.7;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
 .econ-command-bar {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015)),
@@ -143,6 +174,16 @@ select:focus-visible {
   box-shadow:
     0 18px 46px rgba(0, 0, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.075);
+}
+
+.consult-command-bar {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.014)),
+    rgba(7, 16, 13, 0.96);
+  border-bottom: 1px solid var(--consult-border);
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
 .econ-product-nav {
@@ -379,21 +420,21 @@ select:focus-visible {
 }
 
 .investment-shell {
-  --investment-app-bg: #020711;
-  --investment-sidebar-bg: rgba(2, 8, 16, 0.98);
-  --investment-header-bg: rgba(3, 12, 23, 0.88);
-  --investment-surface: rgba(4, 13, 24, 0.9);
-  --investment-surface-raised: rgba(7, 20, 35, 0.94);
-  --investment-surface-soft: rgba(9, 28, 45, 0.62);
-  --investment-border: rgba(121, 178, 196, 0.18);
-  --investment-border-strong: rgba(45, 217, 183, 0.36);
-  --investment-text-primary: #f3fbff;
-  --investment-text-secondary: #b6c9d5;
-  --investment-text-muted: #8fa7b8;
-  --investment-accent-primary: #35d59a;
-  --investment-accent-secondary: #29d9c2;
-  --investment-accent-cyan: #63d8ff;
-  --investment-accent-bronze: #c8a96a;
+  --investment-app-bg: var(--consult-bg);
+  --investment-sidebar-bg: rgba(7, 16, 13, 0.98);
+  --investment-header-bg: rgba(9, 19, 15, 0.9);
+  --investment-surface: rgba(12, 25, 20, 0.9);
+  --investment-surface-raised: rgba(9, 19, 15, 0.96);
+  --investment-surface-soft: rgba(13, 34, 26, 0.62);
+  --investment-border: var(--consult-border);
+  --investment-border-strong: rgba(53, 201, 141, 0.4);
+  --investment-text-primary: var(--consult-text);
+  --investment-text-secondary: #bed0c8;
+  --investment-text-muted: var(--consult-muted);
+  --investment-accent-primary: var(--consult-emerald);
+  --investment-accent-secondary: #65d4a5;
+  --investment-accent-cyan: #82d8b1;
+  --investment-accent-bronze: var(--consult-bronze);
   --investment-warning: #e0ad54;
   --investment-danger: #e36d5b;
   --investment-success: #35d59a;
@@ -413,15 +454,17 @@ select:focus-visible {
   --econ-text: var(--investment-text);
   --econ-panel: var(--investment-surface);
   background:
-    linear-gradient(135deg, rgba(3, 10, 20, 0.96), rgba(4, 17, 29, 0.98) 42%, rgba(2, 6, 13, 1)),
+    linear-gradient(135deg, rgba(7, 16, 13, 0.96), rgba(12, 25, 20, 0.98) 42%, rgba(5, 10, 8, 1)),
     var(--investment-app-bg);
   color: var(--investment-text);
   display: grid;
   grid-template-columns: 18rem minmax(0, 1fr);
-  inset: 0;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
-  position: fixed;
-  z-index: 80;
+  position: relative;
+  width: 100%;
+  z-index: 1;
 }
 
 .investment-shell.is-collapsed {
@@ -451,8 +494,7 @@ select:focus-visible {
 .investment-brand,
 .investment-sidebar-footer,
 .investment-card,
-.investment-kpi-card,
-.investment-gate-card {
+.investment-kpi-card {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
     var(--investment-surface);
@@ -527,8 +569,7 @@ select:focus-visible {
 .investment-sidebar-footer button,
 .investment-ghost-button,
 .investment-row-actions button,
-.investment-bucket-list button,
-.investment-gate-card button {
+.investment-bucket-list button {
   align-items: center;
   border: 1px solid transparent;
   border-radius: 0.95rem;
@@ -578,8 +619,9 @@ select:focus-visible {
 .investment-workspace {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .investment-header {
@@ -587,6 +629,7 @@ select:focus-visible {
   background: var(--investment-header-bg);
   border-bottom: 1px solid var(--investment-border);
   display: flex;
+  flex: 0 0 auto;
   gap: 1rem;
   justify-content: space-between;
   padding: 1.35rem 1.5rem;
@@ -608,8 +651,7 @@ select:focus-visible {
 .investment-header-actions,
 .investment-chip-row,
 .investment-row-actions,
-.investment-rail-actions,
-.investment-gate-card div {
+.investment-rail-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -631,12 +673,46 @@ select:focus-visible {
 
 .investment-active-property {
   align-items: center;
-  background: rgba(4, 15, 27, 0.92);
+  background: rgba(9, 19, 15, 0.94);
   border-bottom: 1px solid var(--investment-border);
   display: flex;
+  flex: 0 0 auto;
   gap: 1rem;
   justify-content: space-between;
   padding: 0.8rem 1.5rem;
+}
+
+.investment-active-overflow {
+  position: relative;
+}
+
+.investment-active-overflow summary {
+  align-items: center;
+  border: 1px solid var(--investment-border);
+  border-radius: 0.95rem;
+  color: var(--investment-text-muted);
+  display: flex;
+  gap: 0.45rem;
+  list-style: none;
+  padding: 0.75rem;
+}
+
+.investment-active-overflow summary::-webkit-details-marker {
+  display: none;
+}
+
+.investment-active-overflow[open] {
+  z-index: 10;
+}
+
+.investment-active-overflow[open]::details-content {
+  display: grid;
+}
+
+.investment-active-overflow[open] button {
+  background: var(--investment-surface-raised);
+  border-color: var(--investment-border);
+  width: 100%;
 }
 
 .investment-active-property span,
@@ -668,7 +744,10 @@ select:focus-visible {
 
 .investment-page-shell {
   display: grid;
+  flex: 1 1 auto;
   gap: 1rem;
+  min-height: 0;
+  overflow: auto;
   padding: 1rem;
 }
 
@@ -733,6 +812,14 @@ select:focus-visible {
   display: grid;
   gap: 1rem;
   grid-template-columns: minmax(0, 1.45fr) minmax(22rem, 0.55fr);
+}
+
+.investment-numbered-list {
+  color: var(--investment-text-secondary);
+  display: grid;
+  gap: 0.45rem;
+  list-style-position: inside;
+  margin: 0.85rem 0;
 }
 
 .investment-work-grid {
@@ -910,28 +997,6 @@ select:focus-visible {
   color: var(--investment-text);
   cursor: pointer;
   font-weight: 800;
-}
-
-.investment-view-toggle {
-  background: rgba(2, 7, 17, 0.46);
-  border: 1px solid var(--investment-border);
-  border-radius: 999px;
-  display: flex;
-  gap: 0.25rem;
-  padding: 0.25rem;
-}
-
-.investment-view-toggle button {
-  border-radius: 999px;
-  color: var(--investment-text-muted);
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 0.38rem 0.65rem;
-}
-
-.investment-view-toggle button[aria-pressed="true"] {
-  background: rgba(53, 213, 154, 0.16);
-  color: var(--investment-text);
 }
 
 .investment-primary-column,
@@ -1238,6 +1303,12 @@ select:focus-visible {
   padding: 0.35rem 0.55rem;
 }
 
+.investment-step-strip span[aria-current="step"] {
+  background: rgba(53, 213, 154, 0.14);
+  border-color: var(--investment-border-strong);
+  color: var(--investment-text);
+}
+
 .investment-report-preview {
   border: 1px solid var(--investment-border);
   border-radius: 1rem;
@@ -1289,7 +1360,7 @@ select:focus-visible {
   align-items: stretch;
   background: rgba(0, 0, 0, 0.38);
   display: flex;
-  inset: 0;
+  inset: var(--cfs-top-nav-height) 0 0 0;
   justify-content: flex-end;
   position: fixed;
   z-index: 95;
@@ -1333,83 +1404,10 @@ select:focus-visible {
 .investment-footer {
   border-top: 1px solid var(--investment-border);
   color: var(--investment-text-muted);
+  flex: 0 0 auto;
   font-size: 0.75rem;
   line-height: 1.6;
   padding: 1rem 1.5rem;
-}
-
-.investment-gate {
-  align-items: center;
-  background:
-    linear-gradient(135deg, rgba(2, 7, 17, 0.92), rgba(3, 16, 29, 0.96)),
-    #020711;
-  color: var(--investment-text, #f3fbff);
-  display: flex;
-  inset: 0;
-  justify-content: center;
-  padding: 1rem;
-  position: fixed;
-  z-index: 90;
-}
-
-.investment-gate-card {
-  --investment-text: #f3fbff;
-  --investment-text-muted: #8fa7b8;
-  --investment-border: rgba(121, 178, 196, 0.18);
-  border-radius: 1.5rem;
-  max-width: 28rem;
-  padding: 1.4rem;
-  width: 100%;
-}
-
-.investment-gate-card p {
-  color: #29d9c2;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.investment-gate-card h2 {
-  color: var(--investment-text);
-  font-size: 1.5rem;
-  margin-top: 0.45rem;
-}
-
-.investment-gate-card span,
-.investment-gate-card small,
-.investment-gate-card label {
-  color: var(--investment-text-muted);
-  display: block;
-  line-height: 1.6;
-  margin-top: 0.65rem;
-}
-
-.investment-gate-card input {
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid var(--investment-border);
-  border-radius: 0.95rem;
-  color: var(--investment-text);
-  margin-top: 0.5rem;
-  outline: none;
-  padding: 0.8rem;
-  width: 100%;
-}
-
-.investment-gate-card input:focus {
-  border-color: rgba(53, 213, 154, 0.5);
-}
-
-.investment-gate-card strong {
-  color: #e0ad54;
-  display: block;
-  font-size: 0.78rem;
-  margin-top: 0.55rem;
-}
-
-.investment-gate-card div {
-  justify-content: flex-end;
-  margin-top: 1rem;
 }
 
 @media (max-width: 1280px) {
