@@ -80,6 +80,7 @@ type InvestmentShellProps = {
   children: ReactNode;
   currentCandidateLabel?: string | null;
   dataMode: string;
+  caseStudyCandidateCount?: number;
   shortlistCount?: number;
   onAskCfs: () => void;
   onActiveAnalyze?: () => void;
@@ -97,6 +98,7 @@ export function InvestmentShell({
   children,
   currentCandidateLabel,
   dataMode,
+  caseStudyCandidateCount,
   shortlistCount = 0,
   onAskCfs,
   onActiveAnalyze,
@@ -150,7 +152,8 @@ export function InvestmentShell({
             <div className="investment-header-kicker">
               <span>Consulting Engine</span>
               <span>{dataMode}</span>
-              <span>{shortlistCount} shortlisted</span>
+              {caseStudyCandidateCount ? <span>{caseStudyCandidateCount} case-study candidates</span> : null}
+              <span>Global Shortlist: {shortlistCount}</span>
               {currentCandidateLabel ? <span>{currentCandidateLabel}</span> : null}
             </div>
             <h1>{active.label}</h1>

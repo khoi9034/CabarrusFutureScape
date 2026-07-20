@@ -26,6 +26,7 @@ import {
   askCfsEconomicsWorkspacePrompts,
 } from "@/lib/aiSearchService";
 import { buildApiUrl, USE_DEMO_DATA } from "@/lib/api/client";
+import { packageBackedConsultingCaseStudy } from "@/lib/consultingCaseStudyPackage";
 import { searchParcels } from "@/lib/api/parcels";
 import {
   getEconomicsEnterpriseExport,
@@ -104,6 +105,7 @@ import type {
   InvestmentScreenResponse,
   InvestmentStrategyId,
   InvestmentAreaRadarArea,
+  InvestmentCaseStudyCandidate,
   InvestmentEngagement,
   InvestmentOpportunityReference,
   InvestmentOpportunitySource,
@@ -120,45 +122,7 @@ type EconomicsShellProps = {
   mode?: "consulting" | "economics";
 };
 
-const defaultConsultingCaseStudy: InvestmentCaseStudy = {
-  active_parcel_id: "CFS-PARCEL-0149758869",
-  activity: [],
-  candidate_count: 3,
-  case_study_type: "Development-Land Acquisition Review",
-  created_at: "2026-07-18T04:00:00Z",
-  current_stage: "Candidate Review / Underwriting Assumptions Pending",
-  deliverable_status: "Markdown deliverables drafted; Excel workbook not started.",
-  description: "Hypothetical acquisition review workspace for a large development-land search in Cabarrus County.",
-  engagement_id: "c7cb72b0-02ef-485e-8eba-00674a033338",
-  geography: "Cabarrus County, North Carolina",
-  id: "large-development-land",
-  last_synced_at: null,
-  manifest_path: "case-studies/large-development-land/case-study.json",
-  package: {
-    artifacts: {
-      shortlisted_candidates: {
-        candidates: [
-          { parcel_id: "CFS-PARCEL-0149758869" },
-          { parcel_id: "CFS-PARCEL-0149760035" },
-          { parcel_id: "CFS-PARCEL-0149777275" },
-        ],
-      },
-    },
-    next_action: "Review priority candidate assumptions, then decide whether to continue underwriting diligence.",
-    recommendation_status: "Needs Review",
-  },
-  priority_candidate: null,
-  priority_candidate_id: "CFS-PARCEL-0149758869",
-  research_completeness: "Screening package complete; ownership, title, asking basis, utility capacity, access, and professional field work remain unverified.",
-  slug: "large-development-land",
-  source_package_version: "case-1.0",
-  status: "Deep Analysis",
-  strategy: "Development land",
-  title: "CFS Large Development-Land Acquisition Case Study",
-  underwriting_status: "Assumptions Required",
-  updated_at: "2026-07-18T04:00:00Z",
-  user_state: {},
-};
+const defaultConsultingCaseStudy = packageBackedConsultingCaseStudy;
 
 export function ConsultingShell() {
   return <EconomicsShell mode="consulting" />;
@@ -1183,8 +1147,18 @@ function InvestmentPanelPage({
     .filter((row) => (activeInvestmentScreen ? Boolean(row.investment_candidate) : matchesInvestmentStrategy(row.signal, activeStrategy)))
     .map((row, index) => ({ ...row, rank: index + 1 }));
   const selectedRows = rows.filter((row) => selectedSignalIds.includes(row.signal.parcel_id)).slice(0, 5);
+  const visibleCaseStudies = caseStudies.length ? caseStudies : [defaultConsultingCaseStudy];
+  const activeCaseStudy = visibleCaseStudies.find((item) => item.slug === activeCaseStudySlug) ?? visibleCaseStudies[0] ?? null;
+  const activeCaseStudyPackage = activeCaseStudy?.package as {
+    artifacts?: { shortlisted_candidates?: { candidates?: Array<{ parcel_id?: string }> } };
+    deliverable_status?: unknown;
+    excel_workbook_status?: unknown;
+    next_action?: unknown;
+    recommendation_status?: unknown;
+  } | undefined;
+  const activeCaseStudyCandidate = activeCandidateId ? activeCaseStudy?.candidates?.find((candidate) => candidate.parcel_id === activeCandidateId) : null;
   const activeRow = activeCandidateId
-    ? rows.find((row) => row.signal.parcel_id === activeCandidateId) ?? null
+    ? rows.find((row) => row.signal.parcel_id === activeCandidateId) ?? (activeCaseStudyCandidate ? caseStudyCandidateComparisonRow(activeCaseStudyCandidate) : null)
     : selectedRows[0] ?? visibleRows[0] ?? rows[0] ?? null;
   const activeSignal = activeRow?.signal ?? null;
   const activeInvestmentCandidate = activeRow?.investment_candidate ?? null;
@@ -1199,16 +1173,10 @@ function InvestmentPanelPage({
         strategy: investmentStrategyLabel(activeStrategy),
       }
     : null;
-  const visibleCaseStudies = caseStudies.length ? caseStudies : [defaultConsultingCaseStudy];
-  const activeCaseStudy = visibleCaseStudies.find((item) => item.slug === activeCaseStudySlug) ?? visibleCaseStudies[0] ?? null;
-  const activeCaseStudyPackage = activeCaseStudy?.package as {
-    artifacts?: { shortlisted_candidates?: { candidates?: Array<{ parcel_id?: string }> } };
-    deliverable_status?: unknown;
-    excel_workbook_status?: unknown;
-    next_action?: unknown;
-    recommendation_status?: unknown;
-  } | undefined;
-  const activeCaseStudyCandidateIds = activeCaseStudyPackage?.artifacts?.shortlisted_candidates?.candidates?.map((candidate) => candidate.parcel_id).filter((parcelId): parcelId is string => Boolean(parcelId)) ?? [];
+  const activeCaseStudyCandidateIds =
+    activeCaseStudy?.candidates?.map((candidate) => candidate.parcel_id).filter(Boolean) ??
+    activeCaseStudyPackage?.artifacts?.shortlisted_candidates?.candidates?.map((candidate) => candidate.parcel_id).filter((parcelId): parcelId is string => Boolean(parcelId)) ??
+    [];
   const tier1 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 1")).length;
   const tier2 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 2")).length;
   const sewerSupported = rows.filter((row) => hasSewerSupport(row.signal)).length;
@@ -1422,10 +1390,64 @@ function InvestmentPanelPage({
   };
   const compareCaseStudyCandidates = (parcelIds: string[]) => {
     const ids = new Set(parcelIds);
-    const nextRows = rows.filter((row) => ids.has(row.signal.parcel_id)).slice(0, 5).map((row, index) => ({ ...row, rank: index + 1 }));
+    const liveRows = rows.filter((row) => ids.has(row.signal.parcel_id));
+    const liveIds = new Set(liveRows.map((row) => row.signal.parcel_id));
+    const packageRows = (activeCaseStudy?.candidates ?? [])
+      .filter((candidate) => ids.has(candidate.parcel_id) && !liveIds.has(candidate.parcel_id))
+      .map(caseStudyCandidateComparisonRow);
+    const nextRows = [...liveRows, ...packageRows].slice(0, 5).map((row, index) => ({ ...row, rank: index + 1 }));
     setComparisonRows(nextRows);
     openInvestmentPage("compare", "Compare case-study candidates");
   };
+  function caseStudyCandidateComparisonRow(candidate: InvestmentCaseStudyCandidate): RankedLandReviewCandidate {
+    const cautions = candidate.negative_evidence ?? candidate.major_cautions ?? [];
+    const missing = candidate.missing_evidence ?? candidate.missing_information ?? [];
+    const positives = candidate.positive_evidence ?? [];
+    return {
+      rank: 0,
+      ranking: {
+        caution_flags: cautions,
+        recommended_next_checks: missing.length ? missing : ["Verify planning, utility, access, title, and field conditions."],
+        review_priority_band: caseStudyReviewBand(candidate.screening_score ?? undefined),
+        review_reason_summary: candidate.why_it_surfaced ?? positives[0] ?? candidate.decision ?? "Case-study candidate",
+        sort_value: candidate.screening_score ?? 0,
+        supporting_signals: positives,
+      },
+      signal: {
+        acreage: candidate.gross_acres ?? null,
+        assessed_value: null,
+        caveats: ["Case-study package comparison row; open Analyze Property for live CFS evidence."],
+        constraint_burden_band: cautions[0] ?? null,
+        data_confidence: candidate.data_confidence ?? undefined,
+        development_readiness_band: candidate.review_band ?? null,
+        display_label: candidate.parcel_id,
+        due_diligence_flags: cautions,
+        economic_data_confidence: candidate.data_confidence ?? "proxy",
+        economic_status_band: "data_needed",
+        estimated_county_tax: null,
+        estimated_county_tax_screening: null,
+        evidence: positives,
+        floodplain_context: null,
+        geography_label: activeCaseStudy?.geography ?? "Cabarrus County, North Carolina",
+        growth_pressure_band: null,
+        improvement_to_land_ratio: null,
+        improvement_value: null,
+        improvement_value_per_acre: null,
+        land_value: null,
+        land_value_per_acre: null,
+        opportunity_class: candidate.decision ?? "Case-study candidate",
+        parcel_id: candidate.parcel_id,
+        permit_activity_context: null,
+        recommended_followup: missing[0] ?? "Open Analyze Property for live CFS evidence.",
+        related_layers: [],
+        school_pressure_context: null,
+        sewer_proxy_class: null,
+        transportation_context: null,
+        utility_readiness_context: null,
+        value_per_acre: null,
+      },
+    };
+  }
   const makeCaseStudyCandidateActive = (slug: string, parcelId: string) => {
     void updateInvestmentCaseStudy(slug, { active_parcel_id: parcelId })
       .then((caseStudy) => {
@@ -2234,7 +2256,8 @@ function InvestmentPanelPage({
             onGenerateReport={generateFirstEngagementReport}
             onMakeCaseStudyCandidateActive={makeCaseStudyCandidateActive}
             onOpenCaseStudy={openCaseStudy}
-            onOpenIntake={() => openInvestmentPage("intake", "Candidate Intake")}
+            onOpenFindSites={() => openInvestmentPage("area-radar", "Find Sites")}
+            onOpenIntake={() => openInvestmentPage("intake", "Add External Opportunity")}
             onOpenReport={() => openInvestmentPage("report-studio", "Case Study Report")}
             onSaveCaseStudyNote={saveCaseStudyNote}
             onUnderwriteCaseStudy={(parcelId) => {
@@ -2276,6 +2299,7 @@ function InvestmentPanelPage({
       activeProperty={activePropertySummary}
       currentCandidateLabel={activePropertySummary?.parcelId ?? activeSignal?.parcel_id ?? intakeAnalysis?.candidate.candidate_name}
       dataMode={statusLabel ?? (USE_DEMO_DATA ? "Portfolio demonstration mode" : "Local development session")}
+      caseStudyCandidateCount={activeCaseStudy?.candidate_count ?? activeCaseStudyCandidateIds.length}
       shortlistCount={myShortlist.length}
       onActiveAnalyze={() => activeParcelId ? analyzeParcel(activeParcelId, activePropertySummary?.label) : setStatus("Search for a parcel before opening Property Analysis.")}
       onActiveClear={clearActiveProperty}
@@ -3088,6 +3112,7 @@ function InvestmentEngagementsPage({
   onGenerateReport,
   onMakeCaseStudyCandidateActive,
   onOpenCaseStudy,
+  onOpenFindSites,
   onOpenIntake,
   onOpenReport,
   onSaveCaseStudyNote,
@@ -3108,6 +3133,7 @@ function InvestmentEngagementsPage({
   onGenerateReport: () => void;
   onMakeCaseStudyCandidateActive: (slug: string, parcelId: string) => void;
   onOpenCaseStudy: (slug: string) => void;
+  onOpenFindSites: () => void;
   onOpenIntake: () => void;
   onOpenReport: () => void;
   onSaveCaseStudyNote: (slug: string, note: string) => void;
@@ -3147,6 +3173,7 @@ function InvestmentEngagementsPage({
           onExportBrief={onExportCaseStudyBrief}
           onMakeActive={onMakeCaseStudyCandidateActive}
           onOpen={onOpenCaseStudy}
+          onOpenFindSites={onOpenFindSites}
           onOpenIntake={onOpenIntake}
           onReport={onOpenReport}
           onSaveNote={onSaveCaseStudyNote}
@@ -9569,6 +9596,14 @@ function landReviewSortValue(band: LandReviewPriorityBand) {
   if (band.startsWith("Tier 3")) return 300;
   if (band.startsWith("Special")) return 200;
   return 100;
+}
+
+function caseStudyReviewBand(score: number | undefined): LandReviewPriorityBand {
+  if (score == null) return "Tier 3 - Watchlist / More Data Needed";
+  if (score >= 85) return "Tier 1 - Strong Review Candidate";
+  if (score >= 70) return "Tier 2 - Good Review Candidate";
+  if (score >= 40) return "Tier 3 - Watchlist / More Data Needed";
+  return "Tier 4 - Constraint or Data-Limited";
 }
 
 function landReviewReasonSummary(

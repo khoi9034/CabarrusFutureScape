@@ -373,7 +373,8 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert 'data-investment-page={activePage}' in investment_shell
     assert "is-collapsed" in investment_shell
     assert "investment-view-toggle" not in investment_shell
-    assert "shortlisted" in investment_shell
+    assert "Global Shortlist" in investment_shell
+    assert "case-study candidates" in investment_shell
     assert "switch (activeInvestmentPage)" in economics_shell
     assert "investment-assistant-drawer" in economics_shell
     assert "InvestmentResearchTabs" in economics_shell
@@ -412,8 +413,11 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Advanced Assumptions" in economics_shell
     assert "recordInvestmentEvent" in economics_shell
     case_studies = read("src/components/investment/InvestmentCaseStudies.tsx")
-    assert "const openUnderwriting" in case_studies
-    assert 'setTab("Underwriting");' in case_studies
+    assert "workflowSteps" in case_studies
+    assert "writeCaseStudyUrl" in case_studies
+    assert "Open Find Sites" in case_studies
+    assert "Add External Opportunity" in case_studies
+    assert "Score unavailable - case-study sync requires review" in case_studies
     assert "Underwriting uses user-entered assumptions and deterministic calculations" in economics_shell
     assert "Calculate Scenario" in economics_shell
     assert "Compare Scenarios" in economics_shell

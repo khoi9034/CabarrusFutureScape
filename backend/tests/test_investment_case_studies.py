@@ -86,6 +86,18 @@ def test_case_study_sync_preserves_user_state_conflict(monkeypatch) -> None:
     assert result["conflicts"] == ["user_state_preserved"]
 
 
+def test_case_study_package_fallback_returns_normalized_contract() -> None:
+    case_study = service._case_from_package(service.load_case_study_package("large-development-land"))
+
+    assert case_study["case_study"]["slug"] == "large-development-land"
+    assert case_study["funnel"]["countywide_reviewed"] == 110017
+    assert case_study["funnel"]["final_shortlist_count"] == 3
+    assert [candidate["screening_score"] for candidate in case_study["candidates"]] == [89, 77, 36]
+    assert case_study["candidates"][0]["developable_area_estimate"] == pytest.approx(392.11)
+    assert case_study["candidates"][0]["main_advantage"]
+    assert case_study["candidates"][0]["missing_evidence"]
+
+
 def test_case_study_routes_are_wired(monkeypatch) -> None:
     app.dependency_overrides[get_db] = lambda: SimpleNamespace()
     case_study = {
@@ -138,8 +150,14 @@ def test_case_study_frontend_and_ask_cfs_contracts_are_wired() -> None:
     assert "InvestmentCaseStudies" in shell
     assert "void getInvestmentCaseStudies()" in shell
     assert "getInvestmentSavedSearches(),\n      getInvestmentCaseStudies()," not in shell
-    assert "Overview" in component and "Due Diligence" in component and "Deliverables" in component
-    assert "100-point score explanation" in component
+    assert "Back to Case Studies" in component
+    assert "writeCaseStudyUrl" in component and "caseStep" in component
+    assert "Open Find Sites" in component
+    assert "Add External Opportunity" in component
+    assert "Score breakdown" in component
+    assert "This is an analyst screening score" in component
+    assert "100-point score explanation" not in component
+    assert "Open Find with Criteria" not in component
     assert "Export Codex Brief" in component
     assert "owner" + "_name" not in component.lower()
     assert "/investment/case-studies" in service_source

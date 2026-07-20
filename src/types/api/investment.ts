@@ -436,12 +436,30 @@ export interface InvestmentCaseStudy {
   active_parcel_id?: string | null;
   activity: InvestmentCaseStudyActivity[];
   candidate_count: number;
+  candidates?: InvestmentCaseStudyCandidate[];
   case_study_type: string;
+  case_study?: {
+    active_parcel_id?: string | null;
+    client_label?: string | null;
+    current_stage?: string | null;
+    description?: string | null;
+    geography?: string | null;
+    last_updated?: string | null;
+    priority_candidate_id?: string | null;
+    slug: string;
+    status?: string | null;
+    strategy?: string | null;
+    title: string;
+    workflow_step?: string | null;
+  };
   created_at: string;
   current_stage: string;
+  deliverables?: Array<Record<string, unknown>>;
   deliverable_status?: string | null;
   description: string;
+  due_diligence?: Record<string, unknown>;
   engagement_id: string;
+  funnel?: Record<string, unknown>;
   geography: string;
   id: string;
   last_synced_at?: string | null;
@@ -449,15 +467,42 @@ export interface InvestmentCaseStudy {
   package: Record<string, unknown>;
   priority_candidate?: Record<string, unknown> | null;
   priority_candidate_id?: string | null;
+  recommendation?: Record<string, unknown>;
   research_completeness?: string | null;
   slug: string;
   source_package_version: string;
   status: string;
   strategy: string;
   title: string;
+  underwriting?: Record<string, unknown>;
   underwriting_status?: string | null;
   updated_at: string;
   user_state: Record<string, unknown>;
+  workflow?: Array<{ status: string; step: string }>;
+}
+
+export interface InvestmentCaseStudyCandidate {
+  data_confidence?: string | null;
+  decision?: string | null;
+  developable_area_estimate?: number | null;
+  gross_acres?: number | null;
+  label?: string | null;
+  major_cautions?: string[];
+  main_advantage?: string | null;
+  main_risk?: string | null;
+  missing_evidence?: string[];
+  missing_information?: string[];
+  negative_evidence?: string[];
+  parcel_id: string;
+  positive_evidence?: string[];
+  preliminary_developable_acres?: number | null;
+  review_band?: string | null;
+  role_in_case_study?: string | null;
+  score_breakdown?: Array<Record<string, unknown>>;
+  score_categories?: Array<Record<string, unknown>>;
+  screening_score?: number | null;
+  verification_burden?: string | null;
+  why_it_surfaced?: string | null;
 }
 
 export interface InvestmentCaseStudyListResponse {

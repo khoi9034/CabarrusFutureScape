@@ -51,13 +51,20 @@ MANIFEST_NAME = "case-study.json"
 def list_case_studies(db: Session) -> dict[str, Any]:
     _ensure_table(db)
     rows = [_serialize(row) for row in db.execute(text(f"SELECT * FROM {CASE_STUDY_TABLE} ORDER BY updated_at DESC LIMIT 100")).mappings()]
+    if not rows:
+        rows = [_case_from_package(load_case_study_package("large-development-land"))]
     return {"case_studies": rows, "caveats": [SAFE_CAVEAT], "count": len(rows)}
 
 
 def get_case_study(db: Session, slug: str) -> dict[str, Any] | None:
     _ensure_table(db)
     row = db.execute(text(f"SELECT * FROM {CASE_STUDY_TABLE} WHERE slug = :slug"), {"slug": slug}).mappings().first()
-    return _serialize(row) if row else None
+    if row:
+        return _serialize(row)
+    try:
+        return _case_from_package(load_case_study_package(slug))
+    except ValueError:
+        return None
 
 
 def update_case_study(db: Session, slug: str, patch: InvestmentCaseStudyPatch) -> dict[str, Any] | None:
@@ -497,13 +504,42 @@ def _summary_from_package(package: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _case_from_package(package: dict[str, Any]) -> dict[str, Any]:
+    generated_at = package.get("generated_at") or _now()
+    data = {
+        "active_parcel_id": package.get("active_parcel_id"),
+        "case_study_type": package.get("case_study_type"),
+        "created_at": generated_at,
+        "current_stage": package.get("current_stage"),
+        "description": package.get("description"),
+        "engagement_id": (package.get("engagement") or {}).get("existing_engagement_id"),
+        "geography": package.get("geography"),
+        "id": package.get("slug"),
+        "last_synced_at": None,
+        "manifest_path": str(_manifest_path(package["slug"]).relative_to(REPO_ROOT)),
+        "priority_candidate_id": package.get("priority_candidate_id"),
+        "slug": package.get("slug"),
+        "source_package_version": package.get("version"),
+        "status": package.get("status"),
+        "strategy": package.get("strategy"),
+        "title": package.get("title"),
+        "updated_at": generated_at,
+    }
+    return _with_case_study_contract(data, package, {}, package.get("activity_seed") or [])
+
+
 def _serialize(row: Any) -> dict[str, Any]:
     data = dict(row)
     package = _json(data.pop("package_json", {}), {})
     user_state = _json(data.pop("user_state_json", {}), {})
     activity = _json(data.pop("activity_json", []), [])
+    return _with_case_study_contract(data, package, user_state, activity)
+
+
+def _with_case_study_contract(data: dict[str, Any], package: dict[str, Any], user_state: dict[str, Any], activity: list[dict[str, Any]]) -> dict[str, Any]:
     artifacts = package.get("artifacts") or {}
     candidates = (artifacts.get("shortlisted_candidates") or {}).get("candidates") or []
+    normalized = _normalized_case_study_contract(data, package, artifacts, candidates, activity)
     return {
         **data,
         "activity": activity,
@@ -514,7 +550,102 @@ def _serialize(row: Any) -> dict[str, Any]:
         "research_completeness": package.get("research_completeness"),
         "underwriting_status": package.get("underwriting_status"),
         "user_state": user_state,
+        **normalized,
     }
+
+
+def _normalized_case_study_contract(
+    data: dict[str, Any],
+    package: dict[str, Any],
+    artifacts: dict[str, Any],
+    candidates: list[dict[str, Any]],
+    activity: list[dict[str, Any]],
+) -> dict[str, Any]:
+    funnel = artifacts.get("screening_funnel") or {}
+    counts = funnel.get("counts") or {}
+    comparison = artifacts.get("candidate_comparison") or {}
+    underwriting = artifacts.get("underwriting_scenarios") or {}
+    due_diligence = artifacts.get("due_diligence_plan") or {}
+    deliverables = package.get("deliverables") or []
+    return {
+        "case_study": {
+            "active_parcel_id": data.get("active_parcel_id") or package.get("active_parcel_id"),
+            "client_label": package.get("client_label"),
+            "current_stage": data.get("current_stage") or package.get("current_stage"),
+            "description": data.get("description") or package.get("description"),
+            "geography": data.get("geography") or package.get("geography"),
+            "last_updated": data.get("updated_at") or package.get("generated_at"),
+            "priority_candidate_id": data.get("priority_candidate_id") or package.get("priority_candidate_id"),
+            "slug": data.get("slug") or package.get("slug"),
+            "status": data.get("status") or package.get("status"),
+            "strategy": data.get("strategy") or package.get("strategy"),
+            "title": data.get("title") or package.get("title"),
+            "workflow_step": _workflow_step(package.get("current_stage") or data.get("current_stage") or ""),
+        },
+        "funnel": {
+            "countywide_reviewed": counts.get("countywide_parcels_reviewed"),
+            "data_vintage": package.get("source_data_vintage"),
+            "evidence_ready": counts.get("parcels_with_usable_planning_and_investment_evidence"),
+            "final_shortlist_count": counts.get("final_shortlist_count"),
+            "initial_screen_pass": counts.get("parcels_passing_initial_screens"),
+            "manual_review_count": counts.get("parcels_receiving_preliminary_manual_review"),
+            "minimum_acreage_pass": counts.get("parcels_meeting_minimum_100_acres"),
+            "screened_at": funnel.get("as_of") or package.get("generated_at"),
+            "source": funnel.get("source"),
+            "criteria": funnel.get("criteria") or [],
+        },
+        "candidates": [_normalized_candidate(candidate) for candidate in candidates],
+        "underwriting": underwriting,
+        "recommendation": {
+            "status": package.get("recommendation_status"),
+            "comparison": comparison,
+            "priority_candidate_id": package.get("priority_candidate_id"),
+        },
+        "due_diligence": due_diligence,
+        "deliverables": deliverables,
+        "activity": activity,
+        "workflow": _workflow_statuses(package),
+    }
+
+
+def _normalized_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
+    cautions = candidate.get("major_cautions") or []
+    positives = candidate.get("positive_evidence") or []
+    missing = candidate.get("missing_information") or []
+    return {
+        **candidate,
+        "developable_area_estimate": candidate.get("preliminary_developable_acres"),
+        "label": candidate.get("parcel_id"),
+        "main_advantage": positives[0] if positives else candidate.get("why_it_surfaced"),
+        "main_risk": cautions[0] if cautions else None,
+        "negative_evidence": cautions,
+        "missing_evidence": missing,
+        "score_breakdown": candidate.get("score_categories") or [],
+        "verification_burden": "; ".join(missing[:2]) if missing else None,
+    }
+
+
+def _workflow_step(stage: str) -> str:
+    normalized = stage.lower()
+    if "underwrit" in normalized:
+        return "Analyze"
+    if "candidate" in normalized or "deep" in normalized:
+        return "Analyze"
+    if "screen" in normalized:
+        return "Screen"
+    return "Define"
+
+
+def _workflow_statuses(package: dict[str, Any]) -> list[dict[str, str]]:
+    return [
+        {"step": "Define", "status": "Complete"},
+        {"step": "Screen", "status": "Complete"},
+        {"step": "Shortlist", "status": "Complete"},
+        {"step": "Analyze", "status": "In Progress"},
+        {"step": "Underwrite", "status": package.get("underwriting_status") or "Assumptions Required"},
+        {"step": "Decide", "status": package.get("recommendation_status") or "Needs Review"},
+        {"step": "Deliver", "status": package.get("deliverable_status") or "Draft / Incomplete"},
+    ]
 
 
 def _get_case_row_if_table_exists(db: Session, slug: str) -> Any | None:

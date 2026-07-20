@@ -1410,6 +1410,68 @@ select:focus-visible {
   padding: 1rem 1.5rem;
 }
 
+.case-study-card-grid,
+.case-study-workspace {
+  display: grid;
+  gap: 1rem;
+}
+
+.case-study-card-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.consulting-workflow-stepper {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(7, minmax(7rem, 1fr));
+  overflow-x: auto;
+}
+
+.consulting-workflow-stepper button {
+  background: var(--investment-surface-soft);
+  border: 1px solid var(--investment-border);
+  border-radius: 0.9rem;
+  color: var(--investment-text-muted);
+  display: grid;
+  gap: 0.25rem;
+  min-height: 4.25rem;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.consulting-workflow-stepper button[aria-current="step"] {
+  border-color: var(--investment-border-strong);
+  box-shadow: var(--investment-focus-ring);
+  color: var(--investment-text);
+}
+
+.consulting-workflow-stepper strong {
+  color: var(--investment-text);
+}
+
+.case-study-funnel {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.case-study-funnel span {
+  background: rgba(53, 213, 154, 0.1);
+  border: 1px solid var(--investment-border);
+  border-radius: 999px;
+  color: var(--investment-text);
+  font-weight: 800;
+  padding: 0.45rem 0.7rem;
+}
+
+.case-study-funnel span:not(:last-child)::after {
+  color: var(--investment-text-muted);
+  content: "→";
+  margin-left: 0.6rem;
+}
+
 @media (max-width: 1280px) {
   .investment-shell {
     grid-template-columns: 5.5rem minmax(0, 1fr);
@@ -1431,7 +1493,8 @@ select:focus-visible {
   .investment-guided-form,
   .investment-preflight,
   .investment-assumption-grid,
-  .investment-kpi-grid {
+  .investment-kpi-grid,
+  .case-study-card-grid {
     grid-template-columns: 1fr;
   }
 

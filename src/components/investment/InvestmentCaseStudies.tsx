@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { InvestmentCaseStudy } from "@/types/api";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { InvestmentCaseStudy, InvestmentCaseStudyCandidate } from "@/types/api";
 
 type InvestmentCaseStudiesProps = {
   activeCaseStudy: InvestmentCaseStudy | null;
@@ -15,36 +15,24 @@ type InvestmentCaseStudiesProps = {
   onExportBrief: (slug: string) => void;
   onMakeActive: (slug: string, parcelId: string) => void;
   onOpen: (slug: string) => void;
+  onOpenFindSites: () => void;
   onOpenIntake: () => void;
   onReport: () => void;
   onSaveNote: (slug: string, note: string) => void;
   onUnderwrite: (parcelId?: string | null) => void;
 };
 
-const caseStudyTabs = [
-  "Overview",
-  "Strategy",
-  "Screening",
-  "Candidates",
-  "Deep Dive",
-  "Underwriting",
-  "Recommendation",
-  "Due Diligence",
-  "Deliverables",
-  "Activity",
+const workflowSteps = [
+  { id: "define", label: "Define" },
+  { id: "screen", label: "Screen" },
+  { id: "shortlist", label: "Shortlist" },
+  { id: "analyze", label: "Analyze" },
+  { id: "underwrite", label: "Underwrite" },
+  { id: "decide", label: "Decide" },
+  { id: "deliver", label: "Deliver" },
 ] as const;
 
-type CaseStudyTab = (typeof caseStudyTabs)[number];
-
-const caseStudyWorkflowSteps = [
-  "Strategy",
-  "Screening",
-  "Candidate Review",
-  "Deep Analysis",
-  "Underwriting",
-  "Recommendation",
-  "Deliverables",
-] as const;
+type WorkflowStep = (typeof workflowSteps)[number]["id"];
 
 export function InvestmentCaseStudies({
   activeCaseStudy,
@@ -58,6 +46,7 @@ export function InvestmentCaseStudies({
   onExportBrief,
   onMakeActive,
   onOpen,
+  onOpenFindSites,
   onOpenIntake,
   onReport,
   onSaveNote,
@@ -65,491 +54,602 @@ export function InvestmentCaseStudies({
 }: InvestmentCaseStudiesProps) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [strategyFilter, setStrategyFilter] = useState("All");
   const [sort, setSort] = useState("updated");
-  const [tab, setTab] = useState<CaseStudyTab>("Overview");
+  const [workspaceSlug, setWorkspaceSlug] = useState<string | null>(() => readCaseStudyUrl().slug);
+  const [step, setStep] = useState<WorkflowStep>(() => readCaseStudyUrl().step ?? "analyze");
   const [note, setNote] = useState("");
+  const titleRef = useRef<HTMLHeadingElement | null>(null);
+
   const visible = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return [...caseStudies]
       .filter((item) => statusFilter === "All" || item.status === statusFilter)
-      .filter((item) => strategyFilter === "All" || item.strategy === strategyFilter)
       .filter((item) => !normalized || [item.title, item.description, item.geography, item.current_stage].join(" ").toLowerCase().includes(normalized))
       .sort((left, right) => sort === "title" ? left.title.localeCompare(right.title) : String(right.updated_at).localeCompare(String(left.updated_at)));
-  }, [caseStudies, query, sort, statusFilter, strategyFilter]);
-  const selected = activeCaseStudy ?? visible[0] ?? null;
-  const packageData = selected?.package as CaseStudyPackage | undefined;
-  const artifacts = packageData?.artifacts ?? {};
-  const candidates = artifacts.shortlisted_candidates?.candidates ?? [];
-  const candidateIds = candidates.map((candidate) => candidate.parcel_id).filter(Boolean);
-  const activeParcelId = selected?.active_parcel_id ?? packageData?.active_parcel_id ?? selected?.priority_candidate_id ?? null;
-  const currentWorkflowStep = selected ? currentCaseStudyWorkflowStep(selected.current_stage) : "Strategy";
-  const continueTab = workflowStepToTab(currentWorkflowStep);
-  const openUnderwriting = (parcelId?: string | null) => {
-    setTab("Underwriting");
-    onUnderwrite(parcelId);
+  }, [caseStudies, query, sort, statusFilter]);
+  const selected = workspaceSlug
+    ? caseStudies.find((item) => item.slug === workspaceSlug) ?? activeCaseStudy ?? visible[0] ?? null
+    : null;
+  const selectedSlug = selected?.slug;
+
+  useEffect(() => {
+    const onPopState = () => {
+      const next = readCaseStudyUrl();
+      setWorkspaceSlug(next.slug);
+      setStep(next.step ?? "analyze");
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  useEffect(() => {
+    if (selectedSlug) titleRef.current?.focus();
+  }, [selectedSlug]);
+
+  const openWorkspace = (slug: string) => {
+    const nextStep = "analyze" as const;
+    setWorkspaceSlug(slug);
+    setStep(nextStep);
+    writeCaseStudyUrl(slug, nextStep, "push");
+    onOpen(slug);
+  };
+  const backToLibrary = () => {
+    setWorkspaceSlug(null);
+    writeCaseStudyUrl(null, null, "push");
+  };
+  const chooseStep = (nextStep: WorkflowStep) => {
+    if (!selected) return;
+    setStep(nextStep);
+    writeCaseStudyUrl(selected.slug, nextStep, "push");
   };
 
-  return (
-    <section className="investment-work-grid">
-      <div className="investment-primary-column">
-        <section className="investment-card">
-          <div className="investment-section-heading">
-            <div>
-              <p>Case Studies</p>
-              <h2>Acquisition and consulting case-study workspace</h2>
-            </div>
-            <span className="investment-pill">{caseStudies.length} saved</span>
+  if (!selected) {
+    return (
+      <section className="investment-card case-study-library" aria-label="Case Studies library">
+        <div className="investment-section-heading">
+          <div>
+            <p>Case Studies</p>
+            <h2>Open a saved acquisition review</h2>
+            <span className="investment-muted">Continue a project, import a package, or create a new case study.</span>
           </div>
-          <div className="investment-action-grid mb-4">
-            <label>
-              Search
-              <input className="investment-input" onChange={(event) => setQuery(event.target.value)} placeholder="Search case studies" value={query} />
-            </label>
-            <label>
-              Status
-              <select className="investment-select" onChange={(event) => setStatusFilter(event.target.value)} value={statusFilter}>
-                {["All", "Draft", "Screening", "Candidate Review", "Deep Analysis", "Underwriting", "Recommendation Review", "Final", "Archived"].map((value) => <option key={value}>{value}</option>)}
-              </select>
-            </label>
-            <label>
-              Strategy
-              <select className="investment-select" onChange={(event) => setStrategyFilter(event.target.value)} value={strategyFilter}>
-                {["All", ...Array.from(new Set(caseStudies.map((item) => item.strategy).filter(Boolean)))].map((value) => <option key={value}>{value}</option>)}
-              </select>
-            </label>
-            <label>
-              Sort
-              <select className="investment-select" onChange={(event) => setSort(event.target.value)} value={sort}>
-                <option value="updated">Last updated</option>
-                <option value="title">Title</option>
-              </select>
-            </label>
+          <span className="investment-pill">{caseStudies.length} saved</span>
+        </div>
+        <div className="investment-action-grid mb-4">
+          <label>
+            Search
+            <input className="investment-input" onChange={(event) => setQuery(event.target.value)} placeholder="Search case studies" value={query} />
+          </label>
+          <label>
+            Status
+            <select className="investment-select" onChange={(event) => setStatusFilter(event.target.value)} value={statusFilter}>
+              {["All", "Draft", "Screening", "Candidate Review", "Deep Analysis", "Underwriting", "Recommendation Review", "Final", "Archived"].map((value) => <option key={value}>{value}</option>)}
+            </select>
+          </label>
+          <label>
+            Sort
+            <select className="investment-select" onChange={(event) => setSort(event.target.value)} value={sort}>
+              <option value="updated">Last updated</option>
+              <option value="title">Title</option>
+            </select>
+          </label>
+        </div>
+        {visible.length ? (
+          <div className="case-study-card-grid">
+            {visible.map((item) => {
+              const normalized = normalizeCaseStudy(item);
+              return (
+                <article className="investment-result-card" key={item.slug}>
+                  <span>{item.status}</span>
+                  <h3>{item.title}</h3>
+                  <Matrix rows={[
+                    ["Strategy", item.strategy],
+                    ["Geography", item.geography],
+                    ["Current stage", item.current_stage],
+                    ["Candidates", displayCount(normalized.candidates.length || item.candidate_count)],
+                    ["Priority candidate", item.priority_candidate_id ?? "Not set"],
+                    ["Last updated", formatDate(item.updated_at)],
+                  ]} />
+                  <p>{normalized.nextAction}</p>
+                  <div className="investment-row-actions mt-3">
+                    <button className="investment-primary-button" onClick={() => openWorkspace(item.slug)} type="button">Continue</button>
+                    <button onClick={() => onDuplicate(item.slug)} type="button">Duplicate</button>
+                    <button onClick={() => onArchive(item.slug)} type="button">Archive</button>
+                    <button onClick={() => onExportBrief(item.slug)} type="button">Export Codex Brief</button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-          {visible.length ? (
-            <div className="investment-table-wrap">
-              <table className="investment-table investment-table--compact">
-                <thead>
-                  <tr>
-                    <th>Case Study</th>
-                    <th>Stage</th>
-                    <th>Candidates</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Next Action</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visible.map((item) => {
-                    const pkg = item.package as CaseStudyPackage;
-                    return (
-                      <tr className={selected?.slug === item.slug ? "is-active" : undefined} key={item.slug}>
-                        <td>
-                          <strong>{item.title}</strong>
-                          <br />
-                          <span className="investment-muted">{item.description}</span>
-                          <br />
-                          <span className="investment-muted">{item.strategy} | {item.geography}</span>
-                        </td>
-                        <td>{item.current_stage}</td>
-                        <td>{item.candidate_count}</td>
-                        <td>{item.priority_candidate_id ?? "Not set"}</td>
-                        <td>{item.status}</td>
-                        <td>{pkg.next_action ?? "Review case-study workspace"}</td>
-                        <td>
-                          <div className="investment-row-actions">
-                            <button className="investment-primary-button" onClick={() => { setTab("Overview"); onOpen(item.slug); }} type="button">Open</button>
-                            <button onClick={() => onDuplicate(item.slug)} type="button">Duplicate</button>
-                            <button onClick={() => onArchive(item.slug)} type="button">Archive</button>
-                            <button onClick={() => onExportBrief(item.slug)} type="button">Export Codex Brief</button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+        ) : (
+          <div className="investment-empty">
+            No case studies match those filters.
+            <div className="investment-row-actions mt-3">
+              <button className="investment-primary-button" type="button">Create Case Study</button>
+              <button className="investment-ghost-button" type="button">Import Package</button>
             </div>
-          ) : (
-            <div className="investment-empty">
-              No case studies have been created yet.
-              <div className="investment-row-actions mt-3">
-                <button className="investment-primary-button" type="button">Create Case Study</button>
-                <button className="investment-ghost-button" type="button">Convert Project to Case Study</button>
-                <button className="investment-ghost-button" type="button">Import Case-Study Package</button>
-              </div>
-            </div>
-          )}
-        </section>
-
-        {selected ? (
-          <section className="investment-card">
-            <div className="investment-section-heading">
-              <div>
-                <p>{selected.case_study_type}</p>
-                <h2>{selected.title}</h2>
-              </div>
-              <span className="investment-pill">{selected.status}</span>
-            </div>
-            <div className="investment-step-strip" aria-label="Case-study status">
-              {[
-                ["Strategy", selected.strategy],
-                ["Geography", selected.geography],
-                ["Stage", selected.current_stage],
-                ["Active candidate", activeParcelId ?? "Not set"],
-                ["Last updated", formatDate(selected.updated_at)],
-              ].map(([label, value]) => <span key={label}>{label}: {value}</span>)}
-            </div>
-            <div className="investment-step-strip investment-step-strip--workflow mt-4" aria-label="Case-study workflow">
-              {caseStudyWorkflowSteps.map((step) => (
-                <span aria-current={currentWorkflowStep === step ? "step" : undefined} key={step}>{step}</span>
-              ))}
-            </div>
-            <div className="investment-row-actions mt-4">
-              <button className="investment-primary-button" onClick={() => setTab(continueTab)} type="button">Continue Next Step</button>
-              <button className="investment-ghost-button" onClick={() => activeParcelId ? onAnalyzeParcel(activeParcelId, selected.title) : undefined} type="button">Open Active Candidate</button>
-              <button className="investment-ghost-button" onClick={() => onCompare(candidateIds)} type="button">Compare Candidates</button>
-              <button className="investment-ghost-button" onClick={() => openUnderwriting(activeParcelId)} type="button">Start or Continue Underwriting</button>
-              <button className="investment-ghost-button" onClick={onReport} type="button">Create Report</button>
-              <button className="investment-ghost-button" onClick={() => onExportBrief(selected.slug)} type="button">Export Codex Brief</button>
-            </div>
-            <div className="investment-tabs mt-4" role="tablist" aria-label="Case study workspace tabs">
-              {caseStudyTabs.map((item) => (
-                <button aria-selected={tab === item} key={item} onClick={() => setTab(item)} role="tab" type="button">{item}</button>
-              ))}
-            </div>
-            <div className="mt-4">
-              <CaseStudyTabPanel
-                activeParcelId={activeParcelId}
-                caseStudy={selected}
-                candidates={candidates}
-                codexBriefMarkdown={codexBriefMarkdown}
-                note={note || String(selected.user_state?.analyst_note ?? "")}
-                onAnalyzeParcel={onAnalyzeParcel}
-                onCompare={onCompare}
-                onExportBrief={onExportBrief}
-                onMakeActive={onMakeActive}
-                onNoteChange={setNote}
-                onOpenIntake={onOpenIntake}
-                onReport={onReport}
-                onSaveNote={() => onSaveNote(selected.slug, note || String(selected.user_state?.analyst_note ?? ""))}
-                onUnderwrite={openUnderwriting}
-                packageData={packageData}
-                tab={tab}
-              />
-            </div>
-          </section>
-        ) : null}
-      </div>
-      <aside className="investment-rail">
-        <section className="investment-card">
-          <div className="investment-section-heading"><div><p>Workspace Guardrails</p><h2>Interpretation and safety</h2></div></div>
-          <SignalList values={[
-            "Internal screening-level research only.",
-            "Not investment advice, not an appraisal, and not a guarantee of future value.",
-            "Utility service, utility capacity, entitlement, access, title, and field environmental conditions require professional verification.",
-            "Owner, mailing, grantor, grantee, raw WSACC, raw model score, exact probability, token, and credential data are excluded.",
-          ]} />
-        </section>
+          </div>
+        )}
         {status ? <p className="investment-status">{status}</p> : null}
-      </aside>
+      </section>
+    );
+  }
+
+  const normalized = normalizeCaseStudy(selected);
+  const activeParcelId = selected.active_parcel_id ?? normalized.caseStudy.active_parcel_id ?? selected.priority_candidate_id ?? null;
+  const candidateIds = normalized.candidates.map((candidate) => candidate.parcel_id);
+  const currentCandidate = normalized.candidates.find((candidate) => candidate.parcel_id === activeParcelId) ?? normalized.candidates[0] ?? null;
+  const continueStep = nextWorkflowStep(step);
+
+  return (
+    <section className="case-study-workspace" aria-label="Case study workspace">
+      <section className="investment-card case-study-workspace-header">
+        <button className="investment-ghost-button" onClick={backToLibrary} type="button">Back to Case Studies</button>
+        <div className="investment-section-heading">
+          <div>
+            <p>{selected.case_study_type}</p>
+            <h2 ref={titleRef} tabIndex={-1}>{selected.title}</h2>
+            <span className="investment-muted">Development-Land Acquisition Review</span>
+          </div>
+          <span className="investment-pill">{selected.status}</span>
+        </div>
+        <div className="investment-step-strip" aria-label="Case-study metadata">
+          <span>Status: {selected.status}</span>
+          <span>Stage: {selected.current_stage}</span>
+          <span>Geography: {selected.geography}</span>
+          <span>Active candidate: {activeParcelId ?? "Not set"}</span>
+          <span>Updated: {formatDate(selected.updated_at)}</span>
+        </div>
+        <div className="investment-row-actions mt-4">
+          <button className="investment-primary-button" onClick={() => chooseStep(continueStep)} type="button">Continue Next Step</button>
+          <button className="investment-ghost-button" onClick={() => activeParcelId ? onAnalyzeParcel(activeParcelId, selected.title) : undefined} type="button">Open Active Property</button>
+          <button className="investment-ghost-button" onClick={() => onCompare(candidateIds)} type="button">Compare Candidates</button>
+          <button className="investment-ghost-button" onClick={() => onExportBrief(selected.slug)} type="button">Export Codex Brief</button>
+          <details className="investment-active-overflow">
+            <summary>More</summary>
+            <button onClick={() => onUnderwrite(activeParcelId)} type="button">Start Underwriting</button>
+            <button onClick={onReport} type="button">Create Report</button>
+            <button onClick={() => onDuplicate(selected.slug)} type="button">Duplicate</button>
+            <button onClick={() => onArchive(selected.slug)} type="button">Archive</button>
+          </details>
+        </div>
+      </section>
+
+      <section className="investment-card">
+        <div className="consulting-workflow-stepper" aria-label="Case-study workflow">
+          {workflowSteps.map((item) => {
+            const status = normalized.workflow[item.label] ?? "Needs Review";
+            return (
+              <button aria-current={step === item.id ? "step" : undefined} key={item.id} onClick={() => chooseStep(item.id)} type="button">
+                <strong>{item.label}</strong>
+                <span>{status}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <CaseStudyOverview normalized={normalized} selected={selected} />
+      <CaseStudyStep
+        activeParcelId={activeParcelId}
+        candidate={currentCandidate}
+        codexBriefMarkdown={codexBriefMarkdown}
+        normalized={normalized}
+        note={note || String(selected.user_state?.analyst_note ?? "")}
+        onAnalyzeParcel={onAnalyzeParcel}
+        onCompare={() => onCompare(candidateIds)}
+        onExportBrief={() => onExportBrief(selected.slug)}
+        onMakeActive={(parcelId) => onMakeActive(selected.slug, parcelId)}
+        onNoteChange={setNote}
+        onOpenFindSites={onOpenFindSites}
+        onOpenIntake={onOpenIntake}
+        onReport={onReport}
+        onSaveNote={() => onSaveNote(selected.slug, note || String(selected.user_state?.analyst_note ?? ""))}
+        onUnderwrite={() => onUnderwrite(activeParcelId)}
+        selected={selected}
+        step={step}
+      />
+      <details className="investment-disclosure">
+        <summary>Interpretation and safety</summary>
+        <SignalList values={normalized.limitations.length ? normalized.limitations : [
+          "Screening-level research only.",
+          "Not investment advice, not an appraisal, and not a purchase recommendation.",
+          "Utility capacity, access, title, entitlement, and field environmental conditions require professional verification.",
+        ]} />
+      </details>
     </section>
   );
 }
 
-function CaseStudyTabPanel({
+function CaseStudyOverview({ normalized, selected }: { normalized: NormalizedCaseStudy; selected: InvestmentCaseStudy }) {
+  const funnel = normalized.funnel;
+  return (
+    <section className="investment-card case-study-overview">
+      <div className="investment-section-heading"><div><p>Overview</p><h2>What this case study is answering</h2></div></div>
+      <div className="investment-two-column">
+        <div>
+          <Matrix rows={[
+            ["Assignment", "Which large Cabarrus County properties should advance into formal acquisition and due-diligence review?"],
+            ["Current status", selected.status],
+            ["Next action", normalized.nextAction],
+          ]} />
+          <div className="case-study-funnel" aria-label="Candidate funnel">
+            {[funnel.countywide_reviewed, funnel.minimum_acreage_pass, funnel.initial_screen_pass, funnel.manual_review_count, funnel.final_shortlist_count].map((value, index) => (
+              <span key={index}>{displayCount(value)}</span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <SignalList title="Current shortlist" values={normalized.candidates.map((candidate) => `${candidate.role_in_case_study ?? "Candidate"}: ${candidate.parcel_id} - ${candidate.decision ?? "Needs review"}`)} />
+          <SignalList title="Main unresolved risks" values={[
+            "Utility capacity",
+            "Legal access",
+            "Zoning interpretation",
+            "Asking basis",
+            "Environmental field verification",
+            "Infrastructure cost",
+          ]} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CaseStudyStep({
   activeParcelId,
-  caseStudy,
-  candidates,
+  candidate,
   codexBriefMarkdown,
+  normalized,
   note,
   onAnalyzeParcel,
   onCompare,
   onExportBrief,
   onMakeActive,
   onNoteChange,
+  onOpenFindSites,
   onOpenIntake,
   onReport,
   onSaveNote,
   onUnderwrite,
-  packageData,
-  tab,
+  selected,
+  step,
 }: {
   activeParcelId: string | null;
-  caseStudy: InvestmentCaseStudy;
-  candidates: CaseStudyCandidate[];
+  candidate: InvestmentCaseStudyCandidate | null;
   codexBriefMarkdown?: string | null;
+  normalized: NormalizedCaseStudy;
   note: string;
   onAnalyzeParcel: (parcelId: string, label?: string) => void;
-  onCompare: (parcelIds: string[]) => void;
-  onExportBrief: (slug: string) => void;
-  onMakeActive: (slug: string, parcelId: string) => void;
+  onCompare: () => void;
+  onExportBrief: () => void;
+  onMakeActive: (parcelId: string) => void;
   onNoteChange: (value: string) => void;
+  onOpenFindSites: () => void;
   onOpenIntake: () => void;
   onReport: () => void;
   onSaveNote: () => void;
-  onUnderwrite: (parcelId?: string | null) => void;
-  packageData?: CaseStudyPackage;
-  tab: CaseStudyTab;
+  onUnderwrite: () => void;
+  selected: InvestmentCaseStudy;
+  step: WorkflowStep;
 }) {
-  const artifacts = packageData?.artifacts ?? {};
-  const strategy = artifacts.strategy ?? {};
-  const funnel = artifacts.screening_funnel;
-  const activeAnalysis = artifacts.active_property_analysis;
-  const developable = artifacts.developable_area_analysis;
-  const underwriting = artifacts.underwriting_scenarios;
-  const dueDiligence = artifacts.due_diligence_plan;
-  const comparison = artifacts.candidate_comparison;
-  const limitations = artifacts.limitations;
-  const deliverables = packageData?.deliverables ?? [];
-
-  if (tab === "Overview") {
+  if (step === "define") {
+    const strategy = normalized.strategy;
     return (
-      <div className="investment-two-column">
-        <div>
-          <Matrix rows={[
-            ["Acquisition question", String(strategy.strategy ?? "Review large development-land acquisition candidates.")],
-            ["Hypothetical client", String(packageData?.client_label ?? "Hypothetical client")],
-            ["Current preliminary conclusion", String(activeAnalysis?.recommendation ?? "Needs review")],
-            ["Candidate funnel", `${displayCount(funnel?.counts?.final_shortlist_count)} shortlisted from ${displayCount(funnel?.counts?.countywide_parcels_reviewed)} countywide parcels`],
-            ["Priority candidate", caseStudy.priority_candidate_id ?? "Not set"],
-            ["Research completeness", caseStudy.research_completeness ?? "Needs review"],
-            ["Underwriting", caseStudy.underwriting_status ?? "Assumptions require review"],
-            ["Deliverables", caseStudy.deliverable_status ?? "Needs review"],
-            ["Next action", String(packageData?.next_action ?? "Continue case study")],
-          ]} />
-          <div className="mt-4">
-            <label className="grid gap-2 text-xs text-[var(--investment-text-muted)]">
-              Analyst note
-              <textarea className="investment-input min-h-24" onChange={(event) => onNoteChange(event.target.value)} value={note} />
-            </label>
-            <button className="investment-primary-button mt-3" onClick={onSaveNote} type="button">Save Note</button>
-          </div>
-        </div>
-        <div>
-          <SignalList title="Main unresolved risks" values={activeAnalysis?.what_limits_development_potential ?? []} />
-          <SignalList title="Missing evidence" values={activeAnalysis?.evidence_still_missing ?? []} />
-        </div>
-      </div>
+      <section className="investment-card">
+        <div className="investment-section-heading"><div><p>Define</p><h2>Strategy and criteria</h2></div></div>
+        <Matrix rows={[
+          ["Client", normalized.caseStudy.client_label ?? "Hypothetical client"],
+          ["Strategy", selected.strategy],
+          ["Geography", selected.geography],
+          ["Minimum acreage", displayCount(strategy.minimum_acres ?? 100)],
+          ["Risk tolerance", "Use CFS screening evidence; verify utility, title, entitlement, access, and field conditions before advancing."],
+        ]} />
+        <SignalList title="Criteria" values={normalized.criteria} />
+        <label className="mt-4 grid gap-2 text-xs text-[var(--investment-text-muted)]">
+          Analyst note
+          <textarea className="investment-input min-h-24" onChange={(event) => onNoteChange(event.target.value)} value={note} />
+        </label>
+        <button className="investment-primary-button mt-3" onClick={onSaveNote} type="button">Save Note</button>
+      </section>
     );
   }
-  if (tab === "Strategy") {
-    const requirements = strategy.primary_requirements ?? {};
+  if (step === "screen") {
+    const funnel = normalized.funnel;
     return (
-      <>
-        <Matrix rows={Object.entries(requirements).map(([key, value]) => [titleText(key), displayValue(value)])} />
-        <div className="investment-disclaimer mt-4">Screening results may need to be rerun if criteria change. Hypothetical client requirements, analyst-defined criteria, CFS evidence, and professional verification requirements are tracked separately in the parent Engagement.</div>
-        <SignalList title="Engagement criteria" values={(packageData?.engagement?.criteria ?? []).map((item) => `${item.source ?? "Criterion"}: ${item.type} - ${item.criterion}`)} />
-      </>
-    );
-  }
-  if (tab === "Screening") {
-    return (
-      <>
-        <Matrix rows={Object.entries(funnel?.counts ?? {}).map(([key, value]) => [titleText(key), displayCount(value)])} />
-        <SignalList title="Criteria used" values={funnel?.criteria ?? []} />
+      <section className="investment-card">
+        <div className="investment-section-heading"><div><p>Screen</p><h2>Saved screening revision</h2></div><span className="investment-pill">{displayCount(funnel.final_shortlist_count)} shortlisted</span></div>
+        <Matrix rows={[
+          ["Screening question", "Which large Cabarrus County parcels meet the development-land review criteria?"],
+          ["Search date", String(funnel.screened_at ?? "Not available")],
+          ["Data vintage", String(funnel.data_vintage ?? "Not available")],
+          ["Countywide reviewed", displayCount(funnel.countywide_reviewed)],
+          ["Minimum acreage pass", displayCount(funnel.minimum_acreage_pass)],
+          ["Evidence ready", displayCount(funnel.evidence_ready)],
+          ["Initial screen pass", displayCount(funnel.initial_screen_pass)],
+          ["Manual review", displayCount(funnel.manual_review_count)],
+          ["Final shortlist", displayCount(funnel.final_shortlist_count)],
+          ["Reproducibility", "Saved package revision; reruns create a new screening revision."],
+        ]} />
+        <SignalList title="Criteria used" values={normalized.criteria} />
         <div className="investment-row-actions mt-4">
-          <button className="investment-primary-button" onClick={onOpenIntake} type="button">Open Find with Criteria</button>
-          <button className="investment-ghost-button" type="button">Rerun Screening</button>
-          <button className="investment-ghost-button" type="button">Review Manual Set</button>
-          <button className="investment-ghost-button" onClick={onOpenIntake} type="button">Add Candidate</button>
-          <button className="investment-ghost-button" onClick={() => onExportBrief(caseStudy.slug)} type="button">Export Funnel</button>
+          <button className="investment-primary-button" onClick={onOpenFindSites} type="button">Open Find Sites</button>
+          <button className="investment-ghost-button" type="button">View Criteria</button>
+          <button className="investment-ghost-button" onClick={onExportBrief} type="button">Export Funnel</button>
+          <details className="investment-active-overflow">
+            <summary>More</summary>
+            <button type="button">Rerun Screening</button>
+            <p className="investment-muted">Rerunning may create a new screening revision. Existing reviewed results will be preserved.</p>
+          </details>
         </div>
-      </>
+      </section>
     );
   }
-  if (tab === "Candidates") {
+  if (step === "shortlist") {
     return (
-      <>
-        {candidates.length ? (
-          <div className="investment-result-grid">
-            {candidates.map((candidate) => (
-              <article className="investment-result-card" key={candidate.parcel_id}>
-                <span>{candidate.role_in_case_study}</span>
-                <h3>{candidate.parcel_id}</h3>
-                <p>{candidate.why_it_surfaced}</p>
+      <section className="investment-card">
+        <div className="investment-section-heading"><div><p>Shortlist</p><h2>Three candidate decisions</h2></div></div>
+        {normalized.candidates.length ? (
+          <div className="case-study-card-grid">
+            {normalized.candidates.map((item) => (
+              <article className="investment-result-card" key={item.parcel_id}>
+                <span>{item.role_in_case_study ?? "Candidate"}</span>
+                <h3>{item.parcel_id}</h3>
+                <p>{item.why_it_surfaced ?? "Case-study candidate evidence requires review."}</p>
                 <Matrix rows={[
-                  ["Approximate acreage", displayCount(candidate.gross_acres)],
-                  ["Developable estimate", displayCount(candidate.preliminary_developable_acres)],
-                  ["Screening score", `${candidate.screening_score}/100`],
-                  ["Review band", candidate.review_band],
-                  ["Data confidence", candidate.data_confidence ?? "Needs Verification"],
-                  ["Decision", candidate.decision],
-                  ["Verification burden", (candidate.missing_information ?? []).slice(0, 2).join("; ") || "Needs verification"],
+                  ["Case-study acreage", displayCount(item.gross_acres)],
+                  ["Developable estimate", displayCount(item.developable_area_estimate ?? item.preliminary_developable_acres)],
+                  ["Screening score", typeof item.screening_score === "number" ? `${item.screening_score}/100` : "Score unavailable - case-study sync requires review"],
+                  ["Review band", item.review_band ?? "Needs review"],
+                  ["Decision", item.decision ?? "Needs review"],
+                  ["Data confidence", item.data_confidence ?? "Needs Verification"],
+                  ["Verification burden", item.verification_burden ?? ((item.missing_information ?? []).slice(0, 2).join("; ") || "Needs verification")],
                 ]} />
-                <SignalList title="Main advantage" values={candidate.positive_evidence?.slice(0, 3) ?? []} compact />
-                <SignalList title="Main risk" values={candidate.major_cautions?.slice(0, 3) ?? []} compact />
-                <ScoreBreakdown candidate={candidate} />
+                <SignalList compact title="Biggest advantage" values={[item.main_advantage ?? item.positive_evidence?.[0] ?? "Needs analyst review"]} />
+                <SignalList compact title="Biggest risk" values={[item.main_risk ?? item.major_cautions?.[0] ?? "Needs analyst review"]} />
+                <SignalList compact title="Missing evidence" values={(item.missing_evidence ?? item.missing_information ?? []).slice(0, 3)} />
+                <ScoreBreakdown candidate={item} />
                 <div className="investment-row-actions mt-3">
-                  <button onClick={() => onAnalyzeParcel(candidate.parcel_id, candidate.parcel_id)} type="button">Analyze</button>
-                  <button onClick={() => onMakeActive(caseStudy.slug, candidate.parcel_id)} type="button">Make Active</button>
-                  <button onClick={() => onCompare(candidates.map((item) => item.parcel_id))} type="button">Compare</button>
-                  <button onClick={() => onUnderwrite(candidate.parcel_id)} type="button">Underwrite</button>
+                  <button className="investment-primary-button" onClick={() => onAnalyzeParcel(item.parcel_id, item.parcel_id)} type="button">Analyze</button>
+                  <button onClick={onCompare} type="button">Compare</button>
+                  <details className="investment-active-overflow">
+                    <summary>More</summary>
+                    <button onClick={() => onMakeActive(item.parcel_id)} type="button">Make Active</button>
+                    <button onClick={onUnderwrite} type="button">Start Underwriting</button>
+                    <button type="button">Change Decision</button>
+                    <button type="button">Remove from Case Study</button>
+                  </details>
                 </div>
               </article>
             ))}
           </div>
-        ) : (
-          <div className="investment-empty">This case study does not yet have a shortlist.</div>
-        )}
-      </>
+        ) : <MissingState message="The case-study package is linked, but detailed candidate evidence has not been synchronized." />}
+      </section>
     );
   }
-  if (tab === "Deep Dive") {
-    const developableRow = developable?.candidates?.find((item) => item.parcel_id === activeParcelId) ?? activeAnalysis?.developable_area;
+  if (step === "analyze") {
     return (
-      <>
-        <div className="investment-disclaimer">Preliminary developable-area screening estimate. This is not engineering-confirmed acreage.</div>
-        <Matrix rows={[
-          ["Active parcel", activeParcelId ?? "Not set"],
-          ["Gross acreage", displayCount(developableRow?.gross_acres)],
-          ["Unioned mapped constrained acreage", displayCount(developableRow?.unioned_flood_wetland_constraint_acres)],
-          ["Preliminary net acreage", displayCount(developableRow?.preliminary_net_acres_after_unioned_flood_wetland)],
-          ["Open-space/stormwater assumption", `${displayCount(developableRow?.additional_open_space_stormwater_assumption_percent)}%`],
-          ["Estimated developable acreage", displayCount(developableRow?.estimated_developable_acres)],
-          ["Overlap handling", String(developable?.critical_rule ?? "Do not double-count overlapping constraints.")],
-          ["Methodology", String(developable?.method ?? developableRow?.method_label ?? "Preliminary screening estimate")],
-        ]} />
-        <SignalList title="Professional verification requirements" values={activeAnalysis?.evidence_still_missing ?? []} />
-        <button className="investment-primary-button mt-4" onClick={() => activeParcelId ? onAnalyzeParcel(activeParcelId, caseStudy.title) : undefined} type="button">Open Full Property Analysis</button>
-      </>
+      <section className="investment-card">
+        <div className="investment-section-heading"><div><p>Analyze</p><h2>Active property evidence</h2></div><span className="investment-pill">{activeParcelId ?? "No active parcel"}</span></div>
+        {candidate ? (
+          <>
+            <Matrix rows={[
+              ["Candidate role", candidate.role_in_case_study ?? "Candidate"],
+              ["Current decision", candidate.decision ?? "Needs review"],
+              ["Case-study score", typeof candidate.screening_score === "number" ? `${candidate.screening_score}/100` : "Score unavailable"],
+              ["Case-study acreage", displayCount(candidate.gross_acres)],
+              ["Developable-area estimate", displayCount(candidate.developable_area_estimate ?? candidate.preliminary_developable_acres)],
+              ["Current CFS evidence", "Open Analyze Property for live planning, market, access, constraints, financial context, verification, and sources."],
+            ]} />
+            <SignalList title="Evidence still missing" values={candidate.missing_evidence ?? candidate.missing_information ?? []} />
+            <button className="investment-primary-button mt-4" onClick={() => onAnalyzeParcel(candidate.parcel_id, selected.title)} type="button">Analyze Property</button>
+          </>
+        ) : <MissingState message="No active case-study candidate is selected." />}
+      </section>
     );
   }
-  if (tab === "Underwriting") {
+  if (step === "underwrite") {
     return (
-      <>
-        <div className="investment-disclaimer">Underwriting assumptions require user review. CFS has not created a final Excel workbook and does not invent asking price, density, finished-lot value, infrastructure cost, or utility-extension cost.</div>
-        <Matrix rows={[
-          ["Status", underwriting?.status ?? caseStudy.underwriting_status ?? "Assumptions Required"],
-          ["Asking price", underwriting?.asking_price_status ?? "Not available"],
-          ["Scenario source", underwriting?.scenario_source ?? "CFS Underwriting Lab"],
-          ["Excel workbook", packageData?.excel_workbook_status ?? "Not Started"],
-        ]} />
-        <div className="investment-table-wrap mt-4">
-          <table className="investment-table investment-table--compact">
-            <thead><tr><th>Scenario</th><th>Developable acres</th><th>Units/lots</th><th>Status</th><th>Top sensitivity</th></tr></thead>
-            <tbody>{(underwriting?.scenarios ?? []).map((scenario) => <tr key={scenario.scenario}><td>{scenario.scenario}</td><td>{displayCount(scenario.developable_acres)}</td><td>{displayCount(scenario.estimated_units_or_lots)}</td><td>Needs Verification</td><td>{(scenario.largest_sensitivity_drivers ?? []).join("; ")}</td></tr>)}</tbody>
-          </table>
+      <section className="investment-card">
+        <div className="investment-section-heading"><div><p>Underwrite</p><h2>Assumptions Required</h2></div></div>
+        <div className="investment-two-column">
+          <SignalList title="Evidence already available" values={[
+            `Gross acreage: ${displayCount(candidate?.gross_acres)}`,
+            `Developable-area screening estimate: ${displayCount(candidate?.developable_area_estimate ?? candidate?.preliminary_developable_acres)}`,
+            "Planning evidence",
+            "Market context",
+            "Environmental context",
+            "Utility proximity proxy",
+            "Transportation context",
+          ]} />
+          <SignalList title="Analyst inputs still required" values={[
+            "Density",
+            "Unit or lot count",
+            "Finished-lot or unit value",
+            "Development cost",
+            "Utility-extension allowance",
+            "Timeline",
+            "Contingency",
+            "Developer margin",
+            "Scenario acquisition basis",
+          ]} />
         </div>
-        <div className="investment-row-actions mt-4">
-          <button className="investment-primary-button" onClick={() => onUnderwrite(activeParcelId)} type="button">Open Underwriting Lab</button>
-          <button className="investment-ghost-button" type="button">Create Scenario</button>
-          <button className="investment-ghost-button" type="button">Compare Scenarios</button>
-          <button className="investment-ghost-button" onClick={onReport} type="button">Add to Report</button>
-        </div>
-      </>
+        <button className="investment-primary-button mt-4" onClick={onUnderwrite} type="button">Review Assumptions</button>
+      </section>
     );
   }
-  if (tab === "Recommendation") {
+  if (step === "decide") {
     return (
-      <>
+      <section className="investment-card">
+        <div className="investment-section-heading"><div><p>Decide</p><h2>Recommendation and due diligence</h2></div><span className="investment-pill">Needs Review</span></div>
         <Matrix rows={[
-          ["Priority candidate", caseStudy.priority_candidate_id ?? "Not set"],
-          ["Secondary candidate", candidates[1]?.parcel_id ?? "Not set"],
-          ["Deferred candidate", candidates[2]?.parcel_id ?? "Not set"],
-          ["Recommendation status", packageData?.recommendation_status ?? "Needs Review"],
+          ["Priority candidate", selected.priority_candidate_id ?? "Not set"],
+          ["Secondary candidate", normalized.candidates[1]?.parcel_id ?? "Not set"],
+          ["Deferred candidate", normalized.candidates[2]?.parcel_id ?? "Not set"],
+          ["Recommendation status", String(normalized.recommendation.status ?? "Needs Review")],
           ["Approval status", "Needs Review"],
         ]} />
-        <SignalList title="Why decisions were reached" values={(comparison?.summary ?? []).map((item) => `${item.parcel_id}: ${item.decision} - ${item.main_advantage}; risk: ${item.main_risk}`)} />
-        <SignalList title="Conditions before advancing" values={activeAnalysis?.evidence_still_missing ?? []} />
-      </>
-    );
-  }
-  if (tab === "Due Diligence") {
-    return (
-      <div className="investment-three-column">
-        {[
-          ["Immediate Verification", dueDiligence?.immediate_verification ?? []],
-          ["Technical Due Diligence", dueDiligence?.technical_due_diligence ?? []],
-          ["Financial and Market Review", dueDiligence?.financial_and_market_review ?? []],
-        ].map(([title, values]) => (
-          <section className="investment-signal-list" key={String(title)}>
-            <h3>{String(title)}</h3>
-            {(values as string[]).map((item) => <p key={item}><span className="investment-chip">Needs Verification</span> {item}</p>)}
-          </section>
-        ))}
-      </div>
-    );
-  }
-  if (tab === "Deliverables") {
-    return (
-      <>
-        <div className="investment-table-wrap">
-          <table className="investment-table investment-table--compact">
-            <thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Source</th><th>Review</th></tr></thead>
-            <tbody>{deliverables.map((item) => <tr key={`${item.title}-${item.type}`}><td>{item.title}</td><td>{item.type}</td><td>{item.status}</td><td>{item.source}</td><td>{item.review_status ?? "Needs Review"}</td></tr>)}</tbody>
-          </table>
-        </div>
-        {codexBriefMarkdown ? <textarea className="investment-input mt-4 min-h-64" readOnly value={codexBriefMarkdown} /> : null}
-      </>
+        <SignalList title="Conditions & due diligence" values={normalized.dueDiligence.immediate_verification ?? []} />
+      </section>
     );
   }
   return (
-    <>
-      <SignalList title="Activity" values={(caseStudy.activity ?? []).map((item) => `${formatDate(item.timestamp)} - ${item.action}: ${item.safe_summary}`)} />
-      <SignalList title="Limitations" values={limitations?.case_study_limitations ?? packageData?.safety_rules ?? []} />
-    </>
+    <section className="investment-card">
+      <div className="investment-section-heading"><div><p>Deliver</p><h2>Deliverable checklist</h2></div></div>
+      <div className="investment-table-wrap">
+        <table className="investment-table investment-table--compact">
+          <thead><tr><th>Deliverable</th><th>Type</th><th>Status</th><th>Review</th></tr></thead>
+          <tbody>{normalized.deliverables.map((item) => <tr key={`${item.title}-${item.type}`}><td>{item.title}</td><td>{item.type}</td><td>{item.status}</td><td>{item.review_status ?? "Needs Review"}</td></tr>)}</tbody>
+        </table>
+      </div>
+      <div className="investment-row-actions mt-4">
+        <button className="investment-primary-button" onClick={onReport} type="button">Create Report</button>
+        <button className="investment-ghost-button" onClick={onOpenIntake} type="button">Add External Opportunity</button>
+      </div>
+      {codexBriefMarkdown ? <textarea className="investment-input mt-4 min-h-64" readOnly value={codexBriefMarkdown} /> : null}
+    </section>
   );
 }
 
-function ScoreBreakdown({ candidate }: { candidate: CaseStudyCandidate }) {
+function ScoreBreakdown({ candidate }: { candidate: InvestmentCaseStudyCandidate }) {
+  const rows = candidate.score_breakdown ?? candidate.score_categories ?? [];
   return (
     <details className="investment-disclosure mt-3">
-      <summary>100-point score explanation</summary>
+      <summary>Score breakdown</summary>
       <div className="investment-table-wrap mt-3">
         <table className="investment-table investment-table--compact">
-          <thead><tr><th>Category</th><th>Max</th><th>Points</th><th>Explanation</th></tr></thead>
-          <tbody>
-            {(candidate.score_categories ?? []).map((item) => (
-              <tr key={item.category}>
-                <td>{item.category}</td>
-                <td>{item.maximum_points}</td>
-                <td>{item.awarded_points}</td>
-                <td>{item.analyst_explanation}</td>
+          <thead><tr><th>Category</th><th>Points</th><th>Evidence</th></tr></thead>
+          <tbody>{rows.map((item) => {
+            const row = item as Record<string, unknown>;
+            return (
+              <tr key={String(row.category)}>
+                <td>{String(row.category)}</td>
+                <td>{displayCount(row.awarded_points)} / {displayCount(row.maximum_points)}</td>
+                <td>{String(row.analyst_explanation ?? row.available_evidence ?? "Needs review")}</td>
               </tr>
-            ))}
-          </tbody>
+            );
+          })}</tbody>
         </table>
       </div>
-      <div className="investment-disclaimer mt-3">This score is an explainable analyst screening aid. It is not a probability, not Model Lab output, not an appraisal, and not a purchase recommendation.</div>
+      <div className="investment-disclaimer mt-3">This is an analyst screening score, not a development probability or purchase recommendation.</div>
     </details>
   );
 }
 
 function Matrix({ rows }: { rows: Array<[string, string]> }) {
-  return (
-    <div className="investment-matrix">
-      {rows.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}
-    </div>
-  );
+  return <div className="investment-matrix">{rows.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>;
 }
 
 function SignalList({ compact = false, title, values }: { compact?: boolean; title?: string; values: string[] }) {
-  if (!values.length) return <p className="investment-empty">No entries yet.</p>;
+  if (!values.length) return <p className="investment-empty">No evidence is attached yet. Retry sync or review the case-study package status.</p>;
+  return <div className={compact ? "investment-signal-list" : "investment-signal-list mt-4"}>{title ? <h3>{title}</h3> : null}{values.map((value) => <p key={value}>{value}</p>)}</div>;
+}
+
+function MissingState({ message }: { message: string }) {
   return (
-    <div className={compact ? "investment-signal-list" : "investment-signal-list mt-4"}>
-      {title ? <h3>{title}</h3> : null}
-      {values.map((value) => <p key={value}>{value}</p>)}
+    <div className="investment-empty">
+      {message}
+      <div className="investment-row-actions mt-3">
+        <button className="investment-primary-button" type="button">Retry</button>
+        <button className="investment-ghost-button" type="button">View Package Status</button>
+      </div>
     </div>
   );
 }
 
-function displayValue(value: unknown) {
-  if (value == null || value === "") return "Not available";
-  if (Array.isArray(value)) return value.join("; ");
-  if (typeof value === "number") return displayCount(value);
-  return String(value);
+function normalizeCaseStudy(caseStudy: InvestmentCaseStudy): NormalizedCaseStudy {
+  const packageData = caseStudy.package as CaseStudyPackage;
+  const artifacts = packageData.artifacts ?? {};
+  const candidates = (caseStudy.candidates?.length ? caseStudy.candidates : artifacts.shortlisted_candidates?.candidates ?? []).map(normalizeCandidate);
+  const funnel = caseStudy.funnel ?? {};
+  const rawWorkflow = caseStudy.workflow ?? [];
+  const workflow = Object.fromEntries(workflowSteps.map((item) => [item.label, rawWorkflow.find((row) => row.step === item.label)?.status ?? defaultWorkflowStatus(item.label)]));
+  return {
+    caseStudy: caseStudy.case_study ?? {
+      active_parcel_id: caseStudy.active_parcel_id,
+      client_label: packageData.client_label,
+      slug: caseStudy.slug,
+      title: caseStudy.title,
+    },
+    candidates,
+    criteria: (funnel.criteria as string[] | undefined) ?? artifacts.screening_funnel?.criteria ?? [],
+    deliverables: (caseStudy.deliverables as Deliverable[] | undefined) ?? packageData.deliverables ?? [],
+    dueDiligence: (caseStudy.due_diligence as DueDiligence | undefined) ?? artifacts.due_diligence_plan ?? {},
+    funnel: {
+      countywide_reviewed: Number(funnel.countywide_reviewed ?? artifacts.screening_funnel?.counts?.countywide_parcels_reviewed),
+      data_vintage: String(funnel.data_vintage ?? packageData.source_data_vintage ?? ""),
+      evidence_ready: Number(funnel.evidence_ready ?? artifacts.screening_funnel?.counts?.parcels_with_usable_planning_and_investment_evidence),
+      final_shortlist_count: Number(funnel.final_shortlist_count ?? artifacts.screening_funnel?.counts?.final_shortlist_count),
+      initial_screen_pass: Number(funnel.initial_screen_pass ?? artifacts.screening_funnel?.counts?.parcels_passing_initial_screens),
+      manual_review_count: Number(funnel.manual_review_count ?? artifacts.screening_funnel?.counts?.parcels_receiving_preliminary_manual_review),
+      minimum_acreage_pass: Number(funnel.minimum_acreage_pass ?? artifacts.screening_funnel?.counts?.parcels_meeting_minimum_100_acres),
+      screened_at: String(funnel.screened_at ?? artifacts.screening_funnel?.as_of ?? ""),
+    },
+    limitations: artifacts.limitations?.case_study_limitations ?? packageData.safety_rules ?? [],
+    nextAction: packageData.next_action ?? "Review the active property's evidence and developable-area assumptions.",
+    recommendation: (caseStudy.recommendation as Recommendation | undefined) ?? { status: packageData.recommendation_status },
+    strategy: packageData.engagement ?? {},
+    workflow,
+  };
+}
+
+function normalizeCandidate(candidate: InvestmentCaseStudyCandidate): InvestmentCaseStudyCandidate {
+  const positive = candidate.positive_evidence ?? [];
+  const negative = candidate.negative_evidence ?? candidate.major_cautions ?? [];
+  const missing = candidate.missing_evidence ?? candidate.missing_information ?? [];
+  return {
+    ...candidate,
+    developable_area_estimate: candidate.developable_area_estimate ?? candidate.preliminary_developable_acres,
+    main_advantage: candidate.main_advantage ?? positive[0],
+    main_risk: candidate.main_risk ?? negative[0],
+    missing_evidence: missing,
+    negative_evidence: negative,
+    score_breakdown: candidate.score_breakdown ?? candidate.score_categories,
+    verification_burden: candidate.verification_burden ?? missing.slice(0, 2).join("; "),
+  };
+}
+
+function readCaseStudyUrl(): { slug: string | null; step: WorkflowStep | null } {
+  if (typeof window === "undefined") return { slug: null, step: null };
+  const params = new URLSearchParams(window.location.search);
+  const step = params.get("caseStep");
+  return {
+    slug: params.get("caseStudy"),
+    step: isWorkflowStep(step) ? step : null,
+  };
+}
+
+function writeCaseStudyUrl(slug: string | null, step: WorkflowStep | null, mode: "push" | "replace") {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  url.searchParams.set("app", "consulting");
+  url.searchParams.set("consultingPage", "case-studies");
+  if (slug) url.searchParams.set("caseStudy", slug);
+  else url.searchParams.delete("caseStudy");
+  if (step) url.searchParams.set("caseStep", step);
+  else url.searchParams.delete("caseStep");
+  window.history[mode === "push" ? "pushState" : "replaceState"](null, "", url);
+}
+
+function nextWorkflowStep(step: WorkflowStep): WorkflowStep {
+  const index = workflowSteps.findIndex((item) => item.id === step);
+  return workflowSteps[Math.min(index + 1, workflowSteps.length - 1)].id;
+}
+
+function isWorkflowStep(value: string | null): value is WorkflowStep {
+  return Boolean(value && workflowSteps.some((item) => item.id === value));
+}
+
+function defaultWorkflowStatus(label: string) {
+  if (["Define", "Screen", "Shortlist"].includes(label)) return "Complete";
+  if (label === "Analyze") return "In Progress";
+  if (label === "Underwrite") return "Assumptions Required";
+  if (label === "Decide") return "Needs Review";
+  return "Draft / Incomplete";
 }
 
 function displayCount(value: unknown) {
-  if (typeof value === "number") return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
-  if (value == null || value === "") return "Not available";
+  if (typeof value === "number" && Number.isFinite(value)) return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  if (value == null || value === "" || (typeof value === "number" && Number.isNaN(value))) return "Not available";
   return String(value);
-}
-
-function titleText(value: string) {
-  return value.replace(/_/g, " ").replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
 function formatDate(value: string | null | undefined) {
@@ -558,117 +658,60 @@ function formatDate(value: string | null | undefined) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("en-US");
 }
 
-function currentCaseStudyWorkflowStep(stage: string): (typeof caseStudyWorkflowSteps)[number] {
-  const normalized = stage.toLowerCase();
-  if (normalized.includes("deliverable")) return "Deliverables";
-  if (normalized.includes("recommend")) return "Recommendation";
-  if (normalized.includes("underwriting")) return "Underwriting";
-  if (normalized.includes("deep")) return "Deep Analysis";
-  if (normalized.includes("candidate")) return "Candidate Review";
-  if (normalized.includes("screen")) return "Screening";
-  return "Strategy";
-}
-
-function workflowStepToTab(step: (typeof caseStudyWorkflowSteps)[number]): CaseStudyTab {
-  if (step === "Candidate Review") return "Candidates";
-  if (step === "Deep Analysis") return "Deep Dive";
-  return step;
-}
+type NormalizedCaseStudy = {
+  caseStudy: NonNullable<InvestmentCaseStudy["case_study"]>;
+  candidates: InvestmentCaseStudyCandidate[];
+  criteria: string[];
+  deliverables: Deliverable[];
+  dueDiligence: DueDiligence;
+  funnel: {
+    countywide_reviewed?: number;
+    data_vintage?: string;
+    evidence_ready?: number;
+    final_shortlist_count?: number;
+    initial_screen_pass?: number;
+    manual_review_count?: number;
+    minimum_acreage_pass?: number;
+    screened_at?: string;
+  };
+  limitations: string[];
+  nextAction: string;
+  recommendation: Recommendation;
+  strategy: { minimum_acres?: number; criteria?: Array<{ criterion?: string }> };
+  workflow: Record<string, string>;
+};
 
 type CaseStudyPackage = {
-  active_parcel_id?: string;
   artifacts?: {
-    active_property_analysis?: {
-      developable_area?: DevelopableArea;
-      evidence_still_missing?: string[];
-      recommendation?: string;
-      what_limits_development_potential?: string[];
-      what_makes_it_interesting?: string[];
-    };
-    candidate_comparison?: {
-      summary?: Array<{ decision: string; main_advantage: string; main_risk: string; parcel_id: string }>;
-    };
-    developable_area_analysis?: {
-      candidates?: DevelopableArea[];
-      critical_rule?: string;
-      method?: string;
-    };
-    due_diligence_plan?: {
-      financial_and_market_review?: string[];
-      immediate_verification?: string[];
-      technical_due_diligence?: string[];
-    };
+    due_diligence_plan?: DueDiligence;
     limitations?: { case_study_limitations?: string[] };
     screening_funnel?: {
+      as_of?: string;
       counts?: Record<string, number>;
       criteria?: string[];
     };
-    shortlisted_candidates?: {
-      candidates?: CaseStudyCandidate[];
-    };
-    strategy?: {
-      primary_requirements?: Record<string, unknown>;
-      strategy?: string;
-    };
-    underwriting_scenarios?: {
-      asking_price_status?: string;
-      scenario_source?: string;
-      scenarios?: Array<{
-        developable_acres?: number;
-        estimated_units_or_lots?: number;
-        largest_sensitivity_drivers?: string[];
-        scenario: string;
-      }>;
-      status?: string;
-    };
+    shortlisted_candidates?: { candidates?: InvestmentCaseStudyCandidate[] };
   };
   client_label?: string;
-  deliverables?: Array<{
-    last_updated?: string;
-    path?: string;
-    reference_id?: string;
-    review_status?: string;
-    source: string;
-    status: string;
-    title: string;
-    type: string;
-  }>;
-  deliverable_status?: string;
-  engagement?: { criteria?: Array<{ criterion: string; source?: string; type: string }> };
-  excel_workbook_status?: string;
+  deliverables?: Deliverable[];
+  engagement?: { minimum_acres?: number; criteria?: Array<{ criterion?: string }> };
   next_action?: string;
   recommendation_status?: string;
   safety_rules?: string[];
-  underwriting_status?: string;
+  source_data_vintage?: string;
 };
 
-type DevelopableArea = {
-  additional_open_space_stormwater_assumption_percent?: number;
-  estimated_developable_acres?: number;
-  gross_acres?: number;
-  method_label?: string;
-  parcel_id?: string;
-  preliminary_net_acres_after_unioned_flood_wetland?: number;
-  unioned_flood_wetland_constraint_acres?: number;
+type Deliverable = {
+  review_status?: string;
+  status: string;
+  title: string;
+  type: string;
 };
 
-type CaseStudyCandidate = {
-  data_confidence?: string;
-  decision: string;
-  gross_acres?: number;
-  major_cautions?: string[];
-  missing_information?: string[];
-  parcel_id: string;
-  positive_evidence?: string[];
-  preliminary_developable_acres?: number;
-  review_band: string;
-  role_in_case_study?: string;
-  score_categories?: Array<{
-    analyst_explanation: string;
-    awarded_points: number;
-    category: string;
-    maximum_points: number;
-  }>;
-  screening_score: number;
-  why_it_surfaced?: string;
+type DueDiligence = {
+  immediate_verification?: string[];
+};
+
+type Recommendation = {
+  status?: unknown;
 };
