@@ -1,11 +1,9 @@
 "use client";
 
 import {
-  BarChart3,
   BriefcaseBusiness,
   Building2,
   Calculator,
-  CheckCircle2,
   Database,
   Gauge,
   MapPinned,
@@ -13,7 +11,6 @@ import {
   PanelLeft,
   Search,
   ShieldAlert,
-  Target,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
@@ -27,7 +24,6 @@ import {
 } from "@/lib/aiSearchService";
 import { buildApiUrl, USE_DEMO_DATA } from "@/lib/api/client";
 import { packageBackedConsultingCaseStudy } from "@/lib/consultingCaseStudyPackage";
-import { searchParcels } from "@/lib/api/parcels";
 import {
   getEconomicsEnterpriseExport,
   getEconomicsIntelligence,
@@ -46,10 +42,8 @@ import {
   createInvestmentSavedSearch,
   createInvestmentUnderwritingScenario,
   deleteInvestmentIntakeCandidate,
-  deleteInvestmentSavedItem,
   deleteInvestmentUnderwritingScenario,
   duplicateInvestmentCaseStudy,
-  convertInvestmentSavedSearchToEngagement,
   exportInvestmentCaseStudyCodexBrief,
   generateInvestmentReport,
   generateInvestmentEngagementReport,
@@ -70,7 +64,6 @@ import {
   matchInvestmentOpportunity,
   prefillInvestmentUnderwriting,
   recordInvestmentRecentWork,
-  rerunInvestmentSavedSearch,
   searchInvestmentRadar,
   updateInvestmentCaseStudy,
   updateInvestmentIntakeCandidate,
@@ -115,7 +108,6 @@ import type {
   InvestmentUnderwritingScenario,
   InvestmentUnderwritingTemplate,
   InvestmentUnderwritingScenarioType,
-  ParcelSearchResult,
 } from "@/types/api";
 
 type EconomicsShellProps = {
@@ -123,10 +115,6 @@ type EconomicsShellProps = {
 };
 
 const defaultConsultingCaseStudy = packageBackedConsultingCaseStudy;
-
-export function ConsultingShell() {
-  return <EconomicsShell mode="consulting" />;
-}
 
 export function EconomicsShell({ mode = "economics" }: EconomicsShellProps = {}) {
   const { economicsSection, setCfsAppMode, setEconomicsSection } = useDashboardState();
@@ -994,6 +982,29 @@ function InvestmentPanelPage({
   const investmentViewMode = "advanced" as const;
 
   useEffect(() => {
+    const syncInvestmentUrlState = () => {
+      const nextPage = readInvestmentDisplayPreference().lastPage;
+      if (nextPage) setActiveInvestmentPage((current) => current === nextPage ? current : nextPage);
+      const nextParcelId = readInvestmentParcelPreference();
+      setActiveCandidateId((current) => current === nextParcelId ? current : nextParcelId);
+    };
+    const timeoutId = window.setTimeout(syncInvestmentUrlState, 0);
+    const intervalId = window.setInterval(syncInvestmentUrlState, 500);
+    window.addEventListener("popstate", syncInvestmentUrlState);
+    window.addEventListener("pageshow", syncInvestmentUrlState);
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.clearInterval(intervalId);
+      window.removeEventListener("popstate", syncInvestmentUrlState);
+      window.removeEventListener("pageshow", syncInvestmentUrlState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const pageFromUrl = new URLSearchParams(window.location.search).get("investmentPage");
+      if (isInvestmentPageId(pageFromUrl) && pageFromUrl !== activeInvestmentPage) return;
+    }
     writeInvestmentDisplayPreference({ lastPage: activeInvestmentPage, viewMode: investmentViewMode });
   }, [activeInvestmentPage, investmentViewMode]);
 
@@ -1180,7 +1191,6 @@ function InvestmentPanelPage({
   const tier1 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 1")).length;
   const tier2 = rows.filter((row) => row.ranking.review_priority_band.startsWith("Tier 2")).length;
   const sewerSupported = rows.filter((row) => hasSewerSupport(row.signal)).length;
-  const confidenceBands = uniqueValues(rows.map((row) => row.signal.data_confidence ?? row.signal.economic_data_confidence)).length;
   const [askRequest, setAskRequest] = useState<AskCfsExternalRequest | null>(null);
   const askAboutSignal = (signal: EconomicsParcelSignal) => {
     setAskRequest({
@@ -1361,14 +1371,6 @@ function InvestmentPanelPage({
     getInvestmentEngagements()
       .then((response) => setEngagements(response.engagements))
       .catch(() => setStatus("Engagements are available only when the local backend and database are running."));
-  const refreshSavedWorkspace = () =>
-    Promise.allSettled([getInvestmentSavedItems(), getInvestmentRecentWork(), getInvestmentSavedSearches()])
-      .then(([savedItems, recentItems, searches]) => {
-        if (savedItems.status === "fulfilled") setMyShortlist(savedItems.value.items);
-        if (recentItems.status === "fulfilled") setRecentWork(recentItems.value.items);
-        if (searches.status === "fulfilled") setSavedSearches(searches.value.searches);
-      })
-      .catch(() => setStatus("Saved CFS Consulting workspace is available when the local backend and database are running."));
   const openCaseStudy = (slug: string) => {
     const selected = visibleCaseStudies.find((item) => item.slug === slug);
     setActiveCaseStudySlug(slug);
@@ -1700,14 +1702,6 @@ function InvestmentPanelPage({
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to save My Shortlist item."));
   };
-  const removeShortlistItem = (id: string) => {
-    void deleteInvestmentSavedItem(id)
-      .then(() => {
-        setMyShortlist((current) => current.filter((item) => item.id !== id));
-        setStatus("Saved shortlist item removed. Underlying parcel or candidate was not deleted.");
-      })
-      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to remove saved item."));
-  };
   const addSignalToShortlist = (signal: EconomicsParcelSignal) => addShortlistItem({
     item_reference_id: signal.parcel_id,
     item_type: "parcel",
@@ -1776,23 +1770,6 @@ function InvestmentPanelPage({
         setStatus("Saved search saved.");
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to save search."));
-  };
-  const rerunSavedSearch = (search: InvestmentSavedSearch) => {
-    void rerunInvestmentSavedSearch(search.id)
-      .then(() => {
-        openInvestmentPage("area-radar", search.search_name);
-        void refreshSavedWorkspace();
-      })
-      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to rerun saved search."));
-  };
-  const convertSavedSearchToProject = (search: InvestmentSavedSearch) => {
-    void convertInvestmentSavedSearchToEngagement(search.id)
-      .then(({ engagement }) => {
-        setEngagements((current) => [engagement, ...current.filter((item) => item.id !== engagement.id)]);
-        openInvestmentPage("engagements", engagement.engagement_name);
-        setStatus("Saved search converted to a project.");
-      })
-      .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to create project from saved search."));
   };
   const askFilterContext = {
     active_page: activeInvestmentPage,
@@ -2002,110 +1979,46 @@ function InvestmentPanelPage({
               <section className="investment-card investment-current-case-study">
                 <div className="investment-section-heading">
                   <div>
-                    <p>Continue Current Case Study</p>
+                    <p>Continue Work</p>
                     <h2>{activeCaseStudy.title}</h2>
                   </div>
-                  <span className="investment-pill">{activeCaseStudy.status}</span>
                 </div>
                 <Matrix rows={[
-                  { label: "Current stage", value: activeCaseStudy.current_stage },
-                  { label: "Active candidate", value: activeCaseStudy.active_parcel_id ?? activeCaseStudy.priority_candidate_id ?? "Not set" },
+                  { label: "Workflow stage", value: activeCaseStudy.current_stage },
+                  { label: "Active property", value: activeCaseStudy.active_parcel_id ?? activeCaseStudy.priority_candidate_id ?? "Not set" },
                   { label: "Candidate count", value: formatNumber(activeCaseStudy.candidate_count) },
-                  { label: "Recommendation", value: String(activeCaseStudyPackage?.recommendation_status ?? "Needs Review") },
-                  { label: "Underwriting", value: activeCaseStudy.underwriting_status ?? "Assumptions Required" },
-                  { label: "Deliverables", value: activeCaseStudy.deliverable_status ?? "Needs Review" },
                   { label: "Next action", value: String(activeCaseStudyPackage?.next_action ?? "Continue Case Study") },
+                  { label: "Last updated", value: formatDate(activeCaseStudy.updated_at) },
                 ]} />
                 <div className="investment-row-actions mt-4">
-                  <button className="investment-primary-button" onClick={() => openCaseStudy(activeCaseStudy.slug)} type="button">Continue Case Study</button>
-                  <button className="investment-ghost-button" onClick={() => activeCaseStudy.active_parcel_id ? analyzeParcel(activeCaseStudy.active_parcel_id, activeCaseStudy.title) : undefined} type="button">Open Active Property</button>
-                  <button className="investment-ghost-button" onClick={() => compareCaseStudyCandidates(activeCaseStudyCandidateIds)} type="button">Compare Candidates</button>
-                  <button className="investment-ghost-button" onClick={() => openInvestmentPage("underwriting", "Review Assumptions")} type="button">Review Assumptions</button>
-                  <button className="investment-ghost-button" onClick={() => openInvestmentPage("report-studio", "Open Deliverables")} type="button">Open Deliverables</button>
+                  <button className="investment-primary-button" onClick={() => openCaseStudy(activeCaseStudy.slug)} type="button">Continue Project</button>
+                  <details className="investment-active-overflow">
+                    <summary>More</summary>
+                    <button onClick={() => activeCaseStudy.active_parcel_id ? analyzeParcel(activeCaseStudy.active_parcel_id, activeCaseStudy.title) : undefined} type="button">Review Property</button>
+                    <button onClick={() => compareCaseStudyCandidates(activeCaseStudyCandidateIds)} type="button">Compare Candidates</button>
+                    <button onClick={() => openInvestmentPage("underwriting", "Review Assumptions")} type="button">Review Assumptions</button>
+                  </details>
                 </div>
               </section>
             ) : null}
-            <section className="investment-home-hero">
-              <div>
-                <p>CFS Consulting</p>
-                <h2>Resume case studies, analyze candidates, underwrite assumptions, and create deliverables.</h2>
-              </div>
-              <InvestmentUniversalSearch
-                engagements={engagements}
-                intakeCandidates={intakeCandidates}
-                onAnalyzeParcel={analyzeParcel}
-                onOpenIntake={openIntakeAnalysis}
-                onOpenPage={openInvestmentPage}
-                opportunities={opportunities}
-                reportBucketItems={reportBucketItems}
-                savedItems={myShortlist}
-                savedSearches={savedSearches}
-                scenarios={underwritingScenarios}
-              />
-            </section>
             <section className="investment-card">
-              <div className="investment-section-heading"><div><p>Next Actions</p><h2>Daily analyst shortcuts</h2></div></div>
+              <div className="investment-section-heading"><div><p>Start New Work</p><h2>Choose the next consulting task</h2></div></div>
               <div className="investment-action-grid">
-                <button className="investment-primary-button" onClick={() => openInvestmentPage("area-radar", "Find Sites")} type="button">Find Sites</button>
-                <button className="investment-ghost-button" onClick={() => activeParcelId ? analyzeParcel(activeParcelId, activePropertySummary?.label) : openInvestmentPage("research", "Analyze Property")} type="button">Analyze Property</button>
-                <button className="investment-ghost-button" onClick={() => openInvestmentPage("compare", "Compare")} type="button">Compare</button>
-                <button className="investment-ghost-button" onClick={() => openInvestmentPage("underwriting", "Underwrite")} type="button">Underwrite</button>
-                <button className="investment-ghost-button" onClick={() => openInvestmentPage("report-studio", "Create Report")} type="button">Create Report</button>
-                <button className="investment-ghost-button" onClick={() => activeCaseStudy ? openCaseStudy(activeCaseStudy.slug) : openInvestmentPage("engagements", "Case Studies")} type="button">Open Case Studies</button>
+                <button className="investment-primary-button" onClick={() => openInvestmentPage("engagements", "Projects")} type="button">Start a Project</button>
+                <button className="investment-ghost-button" onClick={() => openInvestmentPage("area-radar", "Find Sites")} type="button">Find Sites</button>
+                <button className="investment-ghost-button" onClick={() => activeParcelId ? analyzeParcel(activeParcelId, activePropertySummary?.label) : openInvestmentPage("research", "Property Review")} type="button">Review a Property</button>
               </div>
             </section>
             <section className="investment-two-column">
-              <InvestmentRecentWorkPanel items={recentWork} onOpen={(item) => item.reference_type === "case_study" && item.reference_id ? openCaseStudy(item.reference_id) : openInvestmentPage(item.page as InvestmentPageId, item.label)} />
-              <InvestmentShortlistPanel
-                items={myShortlist}
-                onAnalyze={(item) => item.parcel_id ? analyzeParcel(item.parcel_id, item.label) : openInvestmentPage(item.item_type === "opportunity" ? "opportunity-feed" : "research", item.label)}
-                onCompare={() => openInvestmentPage("compare", "Compare shortlist")}
-                onCreateProject={() => createDefaultEngagement(myShortlist)}
-                onRemove={removeShortlistItem}
-                onReport={() => openInvestmentPage("report-studio", "Create report from shortlist")}
-              />
-            </section>
-            <section className="investment-two-column">
-              <InvestmentSavedSearchPanel
-                items={savedSearches}
-                onConvertProject={convertSavedSearchToProject}
-                onOpen={(item) => openInvestmentPage("area-radar", item.search_name)}
-                onRerun={rerunSavedSearch}
-              />
+              <InvestmentRecentWorkPanel items={recentWork.slice(0, 5)} onOpen={(item) => item.reference_type === "case_study" && item.reference_id ? openCaseStudy(item.reference_id) : openInvestmentPage(item.page as InvestmentPageId, item.label)} />
               <section className="investment-card">
-                <div className="investment-section-heading"><div><p>Draft Work</p><h2>Projects and scenarios needing review</h2></div></div>
+                <div className="investment-section-heading"><div><p>System Status</p><h2>Local data service connected</h2></div></div>
                 <Matrix rows={[
-                  { label: "Draft scenarios", value: formatNumber(underwritingScenarios.filter((scenario) => scenario.scenario_status === "Draft").length) },
-                  { label: "Projects needing verification", value: formatNumber(engagements.filter((engagement) => engagement.engagement_status !== "Archived").length) },
-                  { label: "Saved searches", value: formatNumber(savedSearches.length) },
+                  { label: "Data mode", value: statusLabel ?? (USE_DEMO_DATA ? "Portfolio demonstration mode" : "Local development session") },
+                  { label: "Data vintage", value: "Current session" },
+                  { label: "Source coverage", value: signals.length ? `${formatNumber(signals.length)} parcel signals` : "Loading" },
                 ]} />
               </section>
-            </section>
-            <section className="investment-two-column">
-              <InvestmentResearchCompletenessPanel
-                activeSignal={activeSignal}
-                context={activeResearchContext}
-                intakeAnalysis={intakeAnalysis}
-                reportReady={Boolean(investmentReport)}
-                underwritingReady={Boolean(underwritingResult)}
-              />
-              <InvestmentDataStatusPanel
-                engagements={engagements}
-                intakeCandidates={intakeCandidates}
-                opportunities={opportunities}
-                reportCount={reportBucketItems.length}
-                savedItems={myShortlist}
-                savedSearches={savedSearches}
-                signals={signals}
-                underwritingScenarios={underwritingScenarios}
-              />
-            </section>
-            <section className="investment-kpi-grid" aria-label="CFS Consulting readiness">
-              <InvestmentKpiCard icon={Target} label="Priority Review Candidates" status={tier1 + tier2 ? "Active" : "Limited"} note="Tier 1 and Tier 2 review bands." />
-              <InvestmentKpiCard icon={CheckCircle2} label="Intake Opportunities" status={intakeLoading ? "Loading" : formatNumber(intakeCandidates.length)} note="Private listings, leads, and manual candidates." />
-              <InvestmentKpiCard icon={Network} label="Utility Proximity" status={sewerSupported ? "Available" : "Limited"} note="CFS-derived proxy; service and capacity are not confirmed." />
-              <InvestmentKpiCard icon={BarChart3} label="Saved Reports" status={formatNumber(reportBucketItems.length)} note="Report Bucket artifacts ready for print." />
-              <InvestmentKpiCard icon={ShieldAlert} label="Data Confidence" status={confidenceBands > 1 ? "Mixed" : "Verify"} note="Review confidence before presenting findings." />
             </section>
           </>
         );
@@ -2267,7 +2180,6 @@ function InvestmentPanelPage({
               }
               openInvestmentPage("underwriting", "Case Study Underwriting");
             }}
-            savedSearches={savedSearches}
           />
         );
       case "report-bucket":
@@ -2297,10 +2209,13 @@ function InvestmentPanelPage({
     <InvestmentShell
       activePage={activeInvestmentPage}
       activeProperty={activePropertySummary}
-      currentCandidateLabel={activePropertySummary?.parcelId ?? activeSignal?.parcel_id ?? intakeAnalysis?.candidate.candidate_name}
+      activeProject={activeCaseStudy ? {
+        candidateCount: activeCaseStudy.candidate_count,
+        propertyRole: activeCaseStudy.active_parcel_id === activePropertySummary?.parcelId ? "Priority Candidate" : null,
+        stage: activeCaseStudy.case_study?.workflow_step ?? activeCaseStudy.current_stage,
+        title: activeCaseStudy.title,
+      } : null}
       dataMode={statusLabel ?? (USE_DEMO_DATA ? "Portfolio demonstration mode" : "Local development session")}
-      caseStudyCandidateCount={activeCaseStudy?.candidate_count ?? activeCaseStudyCandidateIds.length}
-      shortlistCount={myShortlist.length}
       onActiveAnalyze={() => activeParcelId ? analyzeParcel(activeParcelId, activePropertySummary?.label) : setStatus("Search for a parcel before opening Property Analysis.")}
       onActiveClear={clearActiveProperty}
       onActiveCompare={addActivePropertyToCompare}
@@ -2411,30 +2326,6 @@ function matchesInvestmentStrategy(signal: EconomicsParcelSignal, strategy: Inve
   if (strategy === "land_banking") return hasGrowthPressure(signal) || matchesLandReviewPreset(signal, "More data needed but interesting");
   if (strategy === "entitlement_repositioning") return matchesLandReviewPreset(signal, "Underbuilt + utility proxy") || valueText(signal.zoning_support_band).toLowerCase().includes("support");
   return isSpecialReviewCandidate(signal) || valueText(signal.opportunity_class).toLowerCase().includes("stable") || valueText(signal.economic_segment).toLowerCase().includes("commercial");
-}
-
-function InvestmentKpiCard({
-  icon: Icon,
-  label,
-  note,
-  status,
-}: {
-  icon: typeof Gauge;
-  label: string;
-  note: string;
-  status: string;
-}) {
-  return (
-    <article className="investment-kpi-card">
-      <div>
-        <Icon className="h-5 w-5" aria-hidden="true" />
-        <span>{status}</span>
-      </div>
-      <h2>{label}</h2>
-      <p>{note}</p>
-      <i aria-hidden="true" />
-    </article>
-  );
 }
 
 function InvestmentResearchTabs({
@@ -2616,171 +2507,6 @@ function InvestmentMethodologyPage({ compact = false }: { compact?: boolean }) {
   );
 }
 
-type InvestmentUniversalSearchResult = {
-  kind: string;
-  label: string;
-  parcelId?: string | null;
-  page: InvestmentPageId;
-  referenceId?: string | null;
-  summary: string;
-};
-
-function InvestmentUniversalSearch({
-  engagements,
-  intakeCandidates,
-  onAnalyzeParcel,
-  onOpenIntake,
-  onOpenPage,
-  opportunities,
-  reportBucketItems,
-  savedItems,
-  savedSearches,
-  scenarios,
-}: {
-  engagements: InvestmentEngagement[];
-  intakeCandidates: InvestmentIntakeCandidate[];
-  onAnalyzeParcel: (parcelId: string, label?: string) => void;
-  onOpenIntake: (candidateId: string) => void;
-  onOpenPage: (page: InvestmentPageId, label?: string) => void;
-  opportunities: InvestmentOpportunityReference[];
-  reportBucketItems: ReportBucketItem[];
-  savedItems: InvestmentSavedItem[];
-  savedSearches: InvestmentSavedSearch[];
-  scenarios: InvestmentUnderwritingScenario[];
-}) {
-  const [query, setQuery] = useState("");
-  const [parcelResults, setParcelResults] = useState<ParcelSearchResult[]>([]);
-  const [searchStatus, setSearchStatus] = useState<string | null>(null);
-  const normalized = query.trim().toLowerCase();
-
-  useEffect(() => {
-    let cancelled = false;
-    if (normalized.length < 3 || USE_DEMO_DATA || !isInvestmentParcelLookupQuery(normalized)) {
-      return () => {
-        cancelled = true;
-      };
-    }
-    const timeout = window.setTimeout(() => {
-      void searchParcels({ q: query.trim(), limit: 5, safe_for_dashboard: true }, { timeoutMs: 12000 })
-        .then((response) => {
-          if (!cancelled) {
-            setParcelResults(response.results);
-            setSearchStatus(null);
-          }
-        })
-        .catch(() => {
-          if (!cancelled) setSearchStatus("Parcel search unavailable. Check backend/database health, then retry.");
-        });
-    }, 250);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeout);
-    };
-  }, [normalized, query]);
-
-  const safeParcelResults = normalized.length < 3 || !isInvestmentParcelLookupQuery(normalized) ? [] : parcelResults;
-  const workspaceResults = useMemo(() => {
-    if (!normalized) return [];
-    const matches = (value?: string | null) => String(value ?? "").toLowerCase().includes(normalized);
-    const results: InvestmentUniversalSearchResult[] = [];
-    intakeCandidates.forEach((candidate) => {
-      if (matches(candidate.candidate_name) || matches(candidate.parcel_id)) {
-        results.push({ kind: "Intake candidate", label: candidate.candidate_name, page: "research", parcelId: candidate.parcel_id, referenceId: candidate.id, summary: candidate.review_status });
-      }
-    });
-    opportunities.forEach((opportunity) => {
-      if (matches(opportunity.title) || matches(opportunity.parcel_id) || matches(opportunity.general_location)) {
-        results.push({ kind: "Opportunity reference", label: opportunity.title, page: "opportunity-feed", parcelId: opportunity.parcel_id, referenceId: opportunity.external_opportunity_id, summary: `${opportunity.source_name}; ${opportunity.parcel_match_status}` });
-      }
-    });
-    savedItems.forEach((item) => {
-      if (matches(item.label) || matches(item.parcel_id) || matches(item.item_reference_id)) {
-        results.push({ kind: `Saved ${titleText(item.item_type)}`, label: item.label, page: item.item_type === "underwriting_scenario" ? "underwriting" : item.item_type === "report" ? "report-bucket" : "research", parcelId: item.parcel_id, referenceId: item.item_reference_id, summary: item.summary ?? item.status });
-      }
-    });
-    engagements.forEach((engagement) => {
-      if (matches(engagement.engagement_name)) {
-        results.push({ kind: "Project", label: engagement.engagement_name, page: "engagements", referenceId: engagement.id, summary: engagement.engagement_status });
-      }
-    });
-    scenarios.forEach((scenario) => {
-      if (matches(scenario.scenario_name) || matches(scenario.parcel_id)) {
-        results.push({ kind: "Underwriting scenario", label: scenario.scenario_name, page: "underwriting", parcelId: scenario.parcel_id, referenceId: scenario.id, summary: scenario.scenario_status });
-      }
-    });
-    savedSearches.forEach((search) => {
-      if (matches(search.search_name) || matches(search.goal)) {
-        results.push({ kind: "Saved search", label: search.search_name, page: "area-radar", referenceId: search.id, summary: search.goal });
-      }
-    });
-    reportBucketItems.forEach((item) => {
-      if (matches(item.title) || matches(item.summary)) {
-        results.push({ kind: "Report", label: item.title, page: "report-bucket", referenceId: item.id, summary: item.summary });
-      }
-    });
-    return results.slice(0, 8);
-  }, [engagements, intakeCandidates, normalized, opportunities, reportBucketItems, savedItems, savedSearches, scenarios]);
-
-  const results: InvestmentUniversalSearchResult[] = [
-    ...safeParcelResults.map((parcel) => ({
-      kind: parcel.pin14 ? "Parcel / PIN" : "Parcel",
-      label: parcel.official_parcel_id,
-      page: "research" as InvestmentPageId,
-      parcelId: parcel.official_parcel_id,
-      referenceId: parcel.official_parcel_id,
-      summary: [parcel.pin14 ? `PIN ${parcel.pin14}` : "", parcel.zoning_jurisdiction_name, parcel.dominant_zoning_general_normalized].filter(Boolean).join(" · ") || "Safe parcel result",
-    })),
-    ...workspaceResults,
-  ].slice(0, 12);
-  const visibleSearchStatus = normalized.length >= 3 && isInvestmentParcelLookupQuery(normalized) ? searchStatus : null;
-
-  const openResult = (result: InvestmentUniversalSearchResult) => {
-    if (result.referenceId && result.kind === "Intake candidate") {
-      onOpenIntake(result.referenceId);
-      return;
-    }
-    if (result.parcelId) {
-      onAnalyzeParcel(result.parcelId, result.label);
-      return;
-    }
-    onOpenPage(result.page, result.label);
-  };
-
-  return (
-    <section className="investment-card investment-universal-search" aria-label="Universal CFS Consulting search">
-      <div className="investment-section-heading">
-        <div><p>Universal Search</p><h2>Find a parcel, candidate, project, scenario, report, or saved search</h2></div>
-      </div>
-      <label htmlFor="investment-universal-search-input">Search by Parcel ID, PIN, candidate, opportunity, project, scenario, report, or saved search</label>
-      <div className="investment-search-row">
-        <input
-          id="investment-universal-search-input"
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Example: CFS-PARCEL-0149726579 or a saved candidate name"
-          value={query}
-        />
-        <button className="investment-primary-button" disabled={!results[0]} onClick={() => results[0] && openResult(results[0])} type="button">Analyze</button>
-      </div>
-      <small className="investment-muted">Private identity fields are not searchable or displayed here.</small>
-      {visibleSearchStatus ? <p className="investment-status">{visibleSearchStatus}</p> : null}
-      {normalized ? (
-        results.length ? (
-          <div className="investment-search-results">
-            {results.map((result) => (
-              <button key={`${result.kind}-${result.referenceId ?? result.label}`} onClick={() => openResult(result)} type="button">
-                <span>{result.kind}</span>
-                <strong>{result.label}</strong>
-                <small>{result.summary}</small>
-                <em>Analyze</em>
-              </button>
-            ))}
-          </div>
-        ) : <p className="investment-empty">No safe workspace or parcel matches yet. Check the ID/PIN or search another parcel.</p>
-      ) : null}
-    </section>
-  );
-}
-
 function InvestmentResearchCompletenessPanel({
   activeSignal,
   context,
@@ -2817,49 +2543,6 @@ function InvestmentResearchCompletenessPanel({
   );
 }
 
-function InvestmentDataStatusPanel({
-  engagements,
-  intakeCandidates,
-  opportunities,
-  reportCount,
-  savedItems,
-  savedSearches,
-  signals,
-  underwritingScenarios,
-}: {
-  engagements: InvestmentEngagement[];
-  intakeCandidates: InvestmentIntakeCandidate[];
-  opportunities: InvestmentOpportunityReference[];
-  reportCount: number;
-  savedItems: InvestmentSavedItem[];
-  savedSearches: InvestmentSavedSearch[];
-  signals: EconomicsParcelSignal[];
-  underwritingScenarios: InvestmentUnderwritingScenario[];
-}) {
-  const rows = [
-    { label: "Parcel database", value: `${formatNumber(signals.length)} economics parcel signals loaded` },
-    { label: "Economics intelligence", value: signals.length ? "Available" : "Unavailable" },
-    { label: "ACS", value: "2024 ACS 5-year tract context where assigned" },
-    { label: "FEMA", value: "Flood context available in environmental summaries" },
-    { label: "NWI", value: "Mapped wetland context available where intersected" },
-    { label: "Terrain", value: "USGS terrain/slope summaries where raster coverage exists" },
-    { label: "Soils", value: "NRCS soil context available in environmental summaries" },
-    { label: "EPA", value: "Regulated-facility proximity context available as screening evidence" },
-    { label: "Transportation", value: "Traffic/access context available where matched" },
-    { label: "Utility proxies", value: "WSACC sewer proximity and basin context; capacity not confirmed" },
-    { label: "Comparable context", value: "Historical sales and comparable depth bands where source evidence exists" },
-    { label: "Opportunity references", value: `${formatNumber(opportunities.length)} reference(s); verify source availability` },
-    { label: "Workspace records", value: `${savedItems.length} saved, ${savedSearches.length} searches, ${engagements.length} projects, ${underwritingScenarios.length} scenarios, ${intakeCandidates.length} intake, ${reportCount} report artifacts` },
-  ];
-  return (
-    <section className="investment-card">
-      <div className="investment-section-heading"><div><p>Data Status</p><h2>Source readiness and limitations</h2></div></div>
-      <Matrix rows={rows} />
-      <p className="investment-muted">Refresh actions appear only where a local refresh service already exists. Failures preserve last-good data.</p>
-    </section>
-  );
-}
-
 function InvestmentRecentWorkPanel({
   items,
   onOpen,
@@ -2882,82 +2565,6 @@ function InvestmentRecentWorkPanel({
           ))}
         </div>
       ) : <p className="investment-empty">Recent searches, analyses, projects, underwriting scenarios, and reports appear here after you start.</p>}
-    </section>
-  );
-}
-
-function InvestmentShortlistPanel({
-  items,
-  onAnalyze,
-  onCompare,
-  onCreateProject,
-  onRemove,
-  onReport,
-}: {
-  items: InvestmentSavedItem[];
-  onAnalyze: (item: InvestmentSavedItem) => void;
-  onCompare: () => void;
-  onCreateProject: () => void;
-  onRemove: (id: string) => void;
-  onReport: () => void;
-}) {
-  return (
-    <section className="investment-card">
-      <div className="investment-section-heading"><div><p>My Shortlist</p><h2>Saved areas, parcels, and opportunities</h2></div><span className="investment-pill">{items.length}</span></div>
-      {items.length ? (
-        <div className="investment-bucket-list">
-          {items.map((item) => (
-            <div key={item.id}>
-              <span>{titleText(item.item_type)}</span>
-              <strong>{item.label}</strong>
-              <small>{item.summary ?? item.reference_status ?? "Saved reference"}</small>
-              <div className="investment-row-actions">
-                <button onClick={() => onAnalyze(item)} type="button">Analyze</button>
-                <button onClick={() => onRemove(item.id)} type="button">Remove</button>
-              </div>
-            </div>
-          ))}
-          <div className="investment-row-actions">
-            <button className="investment-primary-button" onClick={onCompare} type="button">Compare</button>
-            <button className="investment-ghost-button" onClick={onCreateProject} type="button">Create Project</button>
-            <button className="investment-ghost-button" onClick={onReport} type="button">Create Report</button>
-          </div>
-        </div>
-      ) : <p className="investment-empty">Your shortlist is empty. Add candidates from Find or Property Analysis.</p>}
-    </section>
-  );
-}
-
-function InvestmentSavedSearchPanel({
-  items,
-  onConvertProject,
-  onOpen,
-  onRerun,
-}: {
-  items: InvestmentSavedSearch[];
-  onConvertProject: (item: InvestmentSavedSearch) => void;
-  onOpen: (item: InvestmentSavedSearch) => void;
-  onRerun: (item: InvestmentSavedSearch) => void;
-}) {
-  return (
-    <section className="investment-card">
-      <div className="investment-section-heading"><div><p>Saved Searches</p><h2>Run again or create a project</h2></div><span className="investment-pill">{items.length}</span></div>
-      {items.length ? (
-        <div className="investment-bucket-list">
-          {items.slice(0, 6).map((item) => (
-            <div key={item.id}>
-              <span>{item.guided_or_advanced === "advanced" ? "Advanced Search" : "Saved Search"}</span>
-              <strong>{item.search_name}</strong>
-              <small>{item.goal} · {item.location_type}</small>
-              <div className="investment-row-actions">
-                <button onClick={() => onRerun(item)} type="button">Run Again</button>
-                <button onClick={() => onOpen(item)} type="button">Open Results</button>
-                <button onClick={() => onConvertProject(item)} type="button">Convert to Project</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : <p className="investment-empty">No saved searches yet. Use Find Sites, then save the criteria for repeat analysis.</p>}
     </section>
   );
 }
@@ -3117,7 +2724,6 @@ function InvestmentEngagementsPage({
   onOpenReport,
   onSaveCaseStudyNote,
   onUnderwriteCaseStudy,
-  savedSearches,
 }: {
   activeCaseStudy: InvestmentCaseStudy | null;
   caseStudies: InvestmentCaseStudy[];
@@ -3138,24 +2744,21 @@ function InvestmentEngagementsPage({
   onOpenReport: () => void;
   onSaveCaseStudyNote: (slug: string, note: string) => void;
   onUnderwriteCaseStudy: (parcelId?: string | null) => void;
-  savedSearches: InvestmentSavedSearch[];
 }) {
-  const [projectView, setProjectView] = useState<"active" | "case-studies" | "saved-searches" | "intake">("case-studies");
+  const [projectView, setProjectView] = useState<"active" | "case-studies">("case-studies");
   const active = engagements[0];
   const projectTabs = [
     ["active", "Active Projects"],
     ["case-studies", "Case Studies"],
-    ["saved-searches", "Saved Searches"],
-    ["intake", "Candidate Intake"],
   ] as const;
   return (
     <>
       <section className="investment-card">
         <div className="investment-section-heading">
-          <div><p>Projects</p><h2>Active projects, case studies, saved searches, and candidate intake</h2></div>
-          <button className="investment-primary-button" onClick={onCreate} type="button">Create Engagement</button>
+          <div><p>Projects</p><h2>Active projects and case studies</h2></div>
+          <button className="investment-primary-button" onClick={onCreate} type="button">New Project</button>
         </div>
-        <div className="investment-tabs" role="tablist" aria-label="Investment Projects sections">
+        <div className="investment-tabs" role="tablist" aria-label="Project sections">
           {projectTabs.map(([id, label]) => (
             <button aria-selected={projectView === id} key={id} onClick={() => setProjectView(id)} role="tab" type="button">{label}</button>
           ))}
@@ -3184,9 +2787,9 @@ function InvestmentEngagementsPage({
         <section className="investment-work-grid">
       <div className="investment-primary-column">
         <section className="investment-card">
-          <div className="investment-section-heading"><div><p>Engagements</p><h2>Client criteria, site screening, shortlists, and deliverables</h2></div><button className="investment-primary-button" onClick={onCreate} type="button">Create Engagement</button></div>
+          <div className="investment-section-heading"><div><p>Active Projects</p><h2>Client criteria, site screening, shortlists, and deliverables</h2></div><button className="investment-primary-button" onClick={onCreate} type="button">New Project</button></div>
           <div className="investment-row-actions mb-4">
-            <button className="investment-ghost-button" onClick={onOpenIntake} type="button">Open Candidate Intake</button>
+            <button className="investment-ghost-button" onClick={onOpenIntake} type="button">Add External Opportunity</button>
           </div>
           {active ? (
             <>
@@ -3214,19 +2817,6 @@ function InvestmentEngagementsPage({
           <InvestmentSignalList title="Avoid" values={["Purchase directives", "Complete listing inventory claims", "Return assurances", "Valuation conclusions"]} />
         </section>
       </aside>
-        </section>
-      ) : null}
-      {projectView === "saved-searches" ? (
-        <section className="investment-card">
-          <div className="investment-section-heading"><div><p>Saved Searches</p><h2>Project search history</h2></div><span className="investment-pill">{savedSearches.length}</span></div>
-          {savedSearches.length ? <InvestmentSignalList title="Saved searches" values={savedSearches.map((item) => `${item.search_name} | ${item.goal} | ${item.location_type}`)} /> : <p className="investment-empty">No saved searches yet.</p>}
-        </section>
-      ) : null}
-      {projectView === "intake" ? (
-        <section className="investment-card">
-          <div className="investment-section-heading"><div><p>Candidate Intake</p><h2>Private candidate queue</h2></div></div>
-          <p className="investment-muted">Candidate Intake remains the writable queue for leads, saved candidates, and parcel references connected to projects and case studies.</p>
-          <button className="investment-primary-button mt-4" onClick={onOpenIntake} type="button">Open Candidate Intake</button>
         </section>
       ) : null}
     </>
@@ -3659,11 +3249,6 @@ function titleText(value: string) {
   return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function isInvestmentParcelLookupQuery(value: string) {
-  const query = value.trim();
-  return /^cfs-parcel-[a-z0-9._:-]+$/i.test(query) || /^\d{8,20}$/.test(query);
-}
-
 function engagementShortlistType(itemType: InvestmentSavedItem["item_type"]) {
   if (itemType === "area") return "search_area";
   if (["parcel", "opportunity", "intake_candidate", "underwriting_scenario"].includes(itemType)) return itemType;
@@ -3698,6 +3283,8 @@ function writeInvestmentDisplayPreference(preference: { lastPage: InvestmentPage
   try {
     localStorage.setItem("cfs-investment-display-preferences", JSON.stringify(preference));
     const url = new URL(window.location.href);
+    const pageFromUrl = url.searchParams.get("investmentPage");
+    if (isInvestmentPageId(pageFromUrl) && pageFromUrl !== preference.lastPage) return;
     url.searchParams.set("investmentPage", preference.lastPage);
     window.history.replaceState(null, "", url);
   } catch {
@@ -3728,8 +3315,25 @@ function writeInvestmentParcelPreference(parcelId: string | null) {
 }
 
 function isInvestmentPageId(value: string | null): value is InvestmentPageId {
-  return Boolean(value && investmentPages.some((page) => page.id === value));
+  return Boolean(value && investmentPageIds.has(value as InvestmentPageId));
 }
+
+const investmentPageIds = new Set<InvestmentPageId>([
+  "overview",
+  "opportunity-feed",
+  "area-radar",
+  "opportunity",
+  "intake",
+  "research",
+  "compare",
+  "market",
+  "underwriting",
+  "due-diligence",
+  "report-studio",
+  "engagements",
+  "report-bucket",
+  "methodology",
+]);
 
 function displayValue(value: unknown): string {
   if (value == null || value === "") return "Not available";

@@ -83,6 +83,25 @@ export function InvestmentCaseStudies({
   }, []);
 
   useEffect(() => {
+    const syncCaseStudyUrl = () => {
+      const next = readCaseStudyUrl();
+      setWorkspaceSlug((current) => current === next.slug ? current : next.slug);
+      const nextStep = next.step;
+      if (nextStep) setStep((current) => current === nextStep ? current : nextStep);
+    };
+    const timeoutId = window.setTimeout(syncCaseStudyUrl, 0);
+    const intervalId = window.setInterval(syncCaseStudyUrl, 500);
+    window.addEventListener("popstate", syncCaseStudyUrl);
+    window.addEventListener("pageshow", syncCaseStudyUrl);
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.clearInterval(intervalId);
+      window.removeEventListener("popstate", syncCaseStudyUrl);
+      window.removeEventListener("pageshow", syncCaseStudyUrl);
+    };
+  }, []);
+
+  useEffect(() => {
     if (selectedSlug) titleRef.current?.focus();
   }, [selectedSlug]);
 
@@ -228,7 +247,7 @@ export function InvestmentCaseStudies({
         </div>
       </section>
 
-      <CaseStudyOverview normalized={normalized} selected={selected} />
+      {step === "define" ? <CaseStudyOverview normalized={normalized} selected={selected} /> : null}
       <CaseStudyStep
         activeParcelId={activeParcelId}
         candidate={currentCandidate}

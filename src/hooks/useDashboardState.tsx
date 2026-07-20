@@ -603,7 +603,7 @@ function writeStoredPlanningSnapshot(snapshot: PlanningSnapshot | null) {
   }
 }
 
-export function DashboardProvider({ children }: { children: ReactNode }) {
+export function DashboardProvider({ children, initialAppMode }: { children: ReactNode; initialAppMode?: CfsAppMode }) {
   const {
     activeLayerIds,
     activeLayers,
@@ -677,7 +677,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     selectedIndicatorCenterContext,
     setSelectedIndicatorCenterContext,
   ] = useState<IndicatorCenterContext | null>(null);
-  const [cfsAppMode, setCfsAppModeState] = useState<CfsAppMode>("planning");
+  const [cfsAppMode, setCfsAppModeState] = useState<CfsAppMode>(initialAppMode ?? "planning");
   const [
     indicatorCenterDisplayMode,
     setIndicatorCenterDisplayMode,
@@ -707,16 +707,47 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
+    const syncAppModeFromUrl = () => {
+      try {
       const params = new URLSearchParams(window.location.search);
-      if (isCfsAppMode(params.get("app")) || params.has("investmentPage")) return;
-    } catch {
-      return;
+      const appMode = params.get("app");
+      if (isCfsAppMode(appMode)) {
+        setCfsAppModeState(appMode);
+        return;
+      }
+      if (params.has("investmentPage")) {
+        setCfsAppModeState("consulting");
+        return;
+      }
+      } catch {
+        return;
+      }
+      return false;
+    };
+    const synced = syncAppModeFromUrl();
+    // ponytail: history restoration in the in-app browser can skip popstate;
+    // poll the tiny product-mode URL contract instead of adding router plumbing.
+    const urlModeIntervalId = window.setInterval(syncAppModeFromUrl, 500);
+    if (synced !== false) {
+      window.addEventListener("popstate", syncAppModeFromUrl);
+      window.addEventListener("pageshow", syncAppModeFromUrl);
+      return () => {
+        window.clearInterval(urlModeIntervalId);
+        window.removeEventListener("popstate", syncAppModeFromUrl);
+        window.removeEventListener("pageshow", syncAppModeFromUrl);
+      };
     }
     const timeoutId = window.setTimeout(() => {
       setCfsAppModeState(readStoredCfsAppMode());
     }, 0);
-    return () => window.clearTimeout(timeoutId);
+    window.addEventListener("popstate", syncAppModeFromUrl);
+    window.addEventListener("pageshow", syncAppModeFromUrl);
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.clearInterval(urlModeIntervalId);
+      window.removeEventListener("popstate", syncAppModeFromUrl);
+      window.removeEventListener("pageshow", syncAppModeFromUrl);
+    };
   }, []);
   const developmentHotspotLayer = useDevelopmentHotspotLayer({
     activityClass: developmentHotspotControls.activityClass,

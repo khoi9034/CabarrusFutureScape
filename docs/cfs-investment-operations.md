@@ -34,23 +34,23 @@ For localhost sessions, successful access is remembered only for the current bro
 
 ## Daily analyst flow
 
-1. Open CFS Investment Home.
-2. Use Universal Search to find a parcel ID, PIN, intake candidate, opportunity reference, saved item, project, underwriting scenario, report, or saved search.
-3. Choose `Analyze`.
-4. Review Property Analysis tabs: Summary, Property, Market, Constraints, Financial, Due Diligence, Sources.
-5. Add useful candidates to My Shortlist.
-6. Compare two to four candidates when needed.
-7. Start Underwriting from the active-property header or Underwriting Lab.
-8. Generate a report from the active parcel, comparison, or saved scenario.
-9. Save useful outputs to Report Bucket and print from the report workflow.
+1. Open CFS Consulting Home.
+2. Use Find Sites to load screening criteria or add an external opportunity.
+3. Choose `Review Property`.
+4. Review Property Review tabs: Summary, Property, Market, Constraints, Financial, Due Diligence, Sources.
+5. Add useful candidates to the active project.
+6. Compare two to four candidates from the project shortlist when needed.
+7. Review assumptions from the active-property menu or project underwrite step.
+8. Generate a report from the active project, property review, comparison, or saved scenario.
+9. Save useful outputs to Supporting Exhibits and print from the report workflow.
 
 ## Adding an opportunity
 
-Use Opportunity Feed or Candidate Intake. Enter only available source context such as asking price, asking date, source name, and source URL. Do not enter private identity or contact fields.
+Use Find Sites -> Add External Opportunity. Enter only available source context such as asking price, asking date, source name, and source URL. Do not enter private identity or contact fields.
 
 ## Data status
 
-CFS Investment Home includes a Data Status panel covering parcels, economics, ACS, FEMA, NWI, terrain, soils, EPA, transportation, utility proxies, comparable context, opportunity references, and workspace records.
+CFS Consulting Home includes a compact System Status line. Data & Methods covers parcels, economics, ACS, FEMA, NWI, terrain, soils, EPA, transportation, utility proxies, comparable context, opportunity references, and workspace records.
 
 Refresh actions are available only where an existing refresh service exists. Refresh failures must preserve last-good data.
 

@@ -487,7 +487,8 @@ select:focus-visible {
 .investment-shell.is-collapsed .investment-nav-group p,
 .investment-shell.is-collapsed .investment-nav small,
 .investment-shell.is-collapsed .investment-nav strong,
-.investment-shell.is-collapsed .investment-sidebar-footer p {
+.investment-shell.is-collapsed .investment-sidebar-footer p,
+.investment-shell.is-collapsed .investment-secondary-nav-link span {
   display: none;
 }
 
@@ -565,6 +566,7 @@ select:focus-visible {
 }
 
 .investment-nav button,
+.investment-secondary-nav-link,
 .investment-icon-button,
 .investment-sidebar-footer button,
 .investment-ghost-button,
@@ -584,6 +586,9 @@ select:focus-visible {
 .investment-nav button:hover,
 .investment-nav button:focus-visible,
 .investment-nav button[aria-current="page"],
+.investment-secondary-nav-link:hover,
+.investment-secondary-nav-link:focus-visible,
+.investment-secondary-nav-link[aria-current="page"],
 .investment-icon-button:hover,
 .investment-icon-button:focus-visible,
 .investment-sidebar-footer button:hover,
@@ -597,6 +602,14 @@ select:focus-visible {
 
 .investment-nav button[aria-current="page"] {
   background: linear-gradient(135deg, rgba(53, 213, 154, 0.16), rgba(99, 216, 255, 0.08));
+}
+
+.investment-secondary-nav-link {
+  width: 100%;
+}
+
+.investment-secondary-nav-link[aria-current="page"] {
+  background: rgba(53, 213, 154, 0.1);
 }
 
 .investment-nav strong {
@@ -614,6 +627,15 @@ select:focus-visible {
   border-radius: 1.25rem;
   margin-top: auto;
   padding: 0.9rem;
+}
+
+.investment-status-dot {
+  background: var(--investment-emerald);
+  border-radius: 999px;
+  display: inline-block;
+  height: 0.5rem;
+  margin-right: 0.45rem;
+  width: 0.5rem;
 }
 
 .investment-workspace {
@@ -680,6 +702,29 @@ select:focus-visible {
   gap: 1rem;
   justify-content: space-between;
   padding: 0.8rem 1.5rem;
+}
+
+.investment-context-bar {
+  align-items: center;
+  background: rgba(53, 213, 154, 0.07);
+  border-bottom: 1px solid var(--investment-border);
+  color: var(--investment-text-muted);
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.65rem 1.5rem;
+}
+
+.investment-context-bar strong {
+  color: var(--investment-text);
+  margin-right: 0.25rem;
+}
+
+.investment-context-bar button {
+  color: var(--investment-emerald);
+  font-weight: 800;
+  margin-left: auto;
 }
 
 .investment-active-overflow {

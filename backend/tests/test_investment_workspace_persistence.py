@@ -142,7 +142,8 @@ def test_frontend_uses_persistent_workspace_apis_instead_of_session_records() ->
     assert "getInvestmentSavedSearches" in shell
     assert "createInvestmentSavedItem" in shell
     assert "createInvestmentSavedSearch" in shell
-    assert "convertInvestmentSavedSearchToEngagement" in shell
+    assert "Find Sites" in shell
+    assert "Save Search" in shell
     assert "cfs-investment-display-preferences" in shell
     assert "cfs-investment-guided-state" not in shell
     assert "/investment/saved-items" in service

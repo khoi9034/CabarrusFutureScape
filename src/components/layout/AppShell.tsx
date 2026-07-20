@@ -34,7 +34,8 @@ import { IndicatorCenterWorkspace } from "@/components/dashboard/IndicatorCenter
 import { IntelligencePanel } from "@/components/dashboard/IntelligencePanel";
 import { MethodologyWorkspace } from "@/components/dashboard/MethodologyWorkspace";
 import { OverviewCommandCenter } from "@/components/dashboard/OverviewCommandCenter";
-import { ConsultingShell, EconomicsShell } from "@/components/economics/EconomicsShell";
+import { ConsultingShell } from "@/components/consulting/ConsultingShell";
+import { EconomicsShell } from "@/components/economics/EconomicsShell";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
@@ -67,9 +68,9 @@ function clampLeftPanelWidth(width: number) {
   );
 }
 
-export function AppShell() {
+export function AppShell({ initialAppMode }: { initialAppMode?: CfsAppMode }) {
   return (
-    <DashboardProvider>
+    <DashboardProvider initialAppMode={initialAppMode}>
       <DashboardUrlSync />
       <ProductShell />
     </DashboardProvider>

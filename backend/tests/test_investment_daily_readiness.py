@@ -23,10 +23,9 @@ def test_universal_search_and_active_property_contracts() -> None:
     shell = ECONOMICS_SHELL.read_text(encoding="utf-8")
     investment_shell = INVESTMENT_SHELL.read_text(encoding="utf-8")
 
-    assert "InvestmentUniversalSearch" in shell
-    assert "searchParcels({ q: query.trim(), limit: 5, safe_for_dashboard: true }" in shell
-    assert "isInvestmentParcelLookupQuery" in shell
-    assert "Private identity fields are not searchable or displayed here." in shell
+    assert "Start New Work" in shell
+    assert "Continue Work" in shell
+    assert "Review a Property" in shell
     assert "analyzeParcel" in shell
     assert "writeInvestmentParcelPreference" in shell
     assert "activeProperty" in investment_shell
@@ -37,10 +36,8 @@ def test_universal_search_and_active_property_contracts() -> None:
 def test_daily_readiness_panels_are_present() -> None:
     shell = ECONOMICS_SHELL.read_text(encoding="utf-8")
 
-    assert "InvestmentResearchCompletenessPanel" in shell
     assert "Research Completeness" in shell
-    assert "InvestmentDataStatusPanel" in shell
-    assert "Data Status" in shell
+    assert "System Status" in shell
     assert "Underwriting" in shell
     assert "Due diligence" in shell
 
@@ -62,6 +59,6 @@ def test_operations_guide_exists_and_uses_safe_language() -> None:
     assert "npm run dev:cfs" in text
     assert "http://localhost:3000" in text
     assert "http://127.0.0.1:8000" in text
-    assert "Universal Search" in text
+    assert "Find Sites" in text
     assert "return assurance" in text
     assert "screening-level review" in text

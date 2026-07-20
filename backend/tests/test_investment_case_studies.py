@@ -144,7 +144,8 @@ def test_case_study_frontend_and_ask_cfs_contracts_are_wired() -> None:
     component = read("src/components/investment/InvestmentCaseStudies.tsx")
     service_source = read("src/lib/investmentIntelligenceService.ts")
 
-    assert "Open Case Studies" in shell
+    assert "Continue Project" in shell
+    assert "Start New Work" in shell
     assert "active_case_study_stage" in shell
     assert "Draft a Codex update brief." in shell
     assert "InvestmentCaseStudies" in shell

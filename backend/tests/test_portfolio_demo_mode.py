@@ -230,7 +230,8 @@ def test_cfs_investment_opportunity_workbench_frontend_contracts() -> None:
     assert "InvestmentEngagementsPage" in economics_shell
     assert "Smart Prefill" in economics_shell
     assert "Assumption template" in economics_shell
-    assert "Continue Current Case Study" in economics_shell
+    assert "Continue Work" in economics_shell
+    assert "Start New Work" in economics_shell
     assert "Find Sites: Industrial Site" in economics_shell
     assert "How this screening works" in economics_shell
     assert "My Shortlist" in economics_shell
@@ -265,6 +266,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     dashboard_state = read("src/hooks/useDashboardState.tsx")
     app_shell = read("src/components/layout/AppShell.tsx")
     economics_shell = read("src/components/economics/EconomicsShell.tsx")
+    consulting_shell = read("src/components/consulting/ConsultingShell.tsx")
     economics_types = read("src/types/index.ts")
     indicator_center = read("src/components/dashboard/IndicatorCenterWorkspace.tsx")
     overview = read("src/components/layout/AppShell.tsx")
@@ -359,22 +361,26 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     investment_shell = read("src/components/investment/InvestmentShell.tsx")
     investment_styles = read("src/styles/cfs-theme.css")
     assert "InvestmentShell" in economics_shell
+    assert 'import { ConsultingShell } from "@/components/consulting/ConsultingShell";' in app_shell
+    assert 'return <EconomicsShell mode="consulting" />;' in consulting_shell
+    assert "export function ConsultingShell" not in economics_shell
     assert "CFS Consulting" in investment_shell
-    assert "Real Estate, Site Selection & Due Diligence" in investment_shell
+    assert "Real Estate Intelligence" in investment_shell
     assert "investmentPageGroups" in investment_shell
     assert "Home" in investment_shell
     assert "Find Sites" in investment_shell
-    assert "Analyze Property" in investment_shell
-    assert "Case Studies" in investment_shell
+    assert "Property Review" in investment_shell
+    assert "Projects" in investment_shell
     assert "Reports" in investment_shell
     assert "Data & Methods" in investment_shell
     assert "Underwriting Lab" in economics_shell
-    assert 'aria-current={activePage === id ? "page" : undefined}' in investment_shell
+    assert 'primaryPageFor(activePage) === id ? "page" : undefined' in investment_shell
     assert 'data-investment-page={activePage}' in investment_shell
     assert "is-collapsed" in investment_shell
     assert "investment-view-toggle" not in investment_shell
-    assert "Global Shortlist" in investment_shell
-    assert "case-study candidates" in investment_shell
+    assert "Global Shortlist" not in investment_shell
+    assert "investment-context-bar" in investment_shell
+    assert "investment-secondary-nav-link" in investment_shell
     assert "switch (activeInvestmentPage)" in economics_shell
     assert "investment-assistant-drawer" in economics_shell
     assert "InvestmentResearchTabs" in economics_shell
@@ -401,11 +407,11 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Investment Report Studio" in economics_shell
     assert "InvestmentUnderwritingLab" in economics_shell
     assert "What are you trying to do?" not in economics_shell
-    assert "Continue Current Case Study" in economics_shell
-    assert "Open Active Property" in economics_shell
+    assert "Continue Work" in economics_shell
+    assert "Review Property" in economics_shell
     assert "Compare Candidates" in economics_shell
     assert "Review Assumptions" in economics_shell
-    assert "Open Deliverables" in economics_shell
+    assert "Continue Project" in economics_shell
     assert "My Shortlist" in economics_shell
     assert "No search results yet." in economics_shell
     assert "Advanced Criteria" in economics_shell
