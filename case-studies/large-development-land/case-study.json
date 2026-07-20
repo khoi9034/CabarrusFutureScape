@@ -49,6 +49,7 @@
     "candidate_comparison": "candidate_comparison.json",
     "active_property_analysis": "active_property_analysis.json",
     "developable_area_analysis": "developable_area_analysis.json",
+    "underwriting_input_register": "underwriting_input_register.json",
     "underwriting_scenarios": "underwriting_scenarios.json",
     "due_diligence_plan": "due_diligence_plan.json",
     "sources": "sources.json",

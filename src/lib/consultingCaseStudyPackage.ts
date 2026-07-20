@@ -7,6 +7,7 @@ import limitations from "../../case-studies/large-development-land/limitations.j
 import screeningFunnel from "../../case-studies/large-development-land/screening_funnel.json";
 import shortlistedCandidates from "../../case-studies/large-development-land/shortlisted_candidates.json";
 import strategy from "../../case-studies/large-development-land/strategy.json";
+import underwritingInputRegister from "../../case-studies/large-development-land/underwriting_input_register.json";
 import underwritingScenarios from "../../case-studies/large-development-land/underwriting_scenarios.json";
 import type { InvestmentCaseStudy, InvestmentCaseStudyCandidate } from "@/types/api";
 
@@ -24,6 +25,7 @@ const artifacts = {
   screening_funnel: screeningFunnel,
   shortlisted_candidates: shortlistedCandidates,
   strategy,
+  underwriting_input_register: underwritingInputRegister,
   underwriting_scenarios: underwritingScenarios,
 };
 const candidates = shortlistedCandidates.candidates as InvestmentCaseStudyCandidate[];

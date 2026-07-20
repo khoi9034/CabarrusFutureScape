@@ -1,0 +1,458 @@
+{
+  "slug": "large-development-land",
+  "phase": "CASE-3A",
+  "title": "CFS Large Development-Land Acquisition Case Study Underwriting Input Register",
+  "prepared_at": "2026-07-20",
+  "status": "Evidence validation and assumption review only",
+  "scope": "Prepare the existing shortlist for future financial underwriting without changing CASE-1 conclusions, creating final calculations, or producing a final workbook.",
+  "source_files": [
+    "case-study.json",
+    "screening_funnel.json",
+    "shortlisted_candidates.json",
+    "candidate_comparison.json",
+    "active_property_analysis.json",
+    "developable_area_analysis.json"
+  ],
+  "evidence_categories": [
+    "Confirmed public evidence",
+    "CFS-derived screening evidence",
+    "CFS-derived proxy",
+    "Analyst assumption",
+    "Missing information",
+    "Professional verification required"
+  ],
+  "funnel_verification": {
+    "search_date": "2026-07-18",
+    "data_vintage": "CFS cloud-safe local stage validated against Azure cfs_cloud during AZ-1B",
+    "current_treatment": "Preserve original screening revision unless user approves a new screen.",
+    "counts": {
+      "countywide_reviewed": 110017,
+      "minimum_acreage_pass": 241,
+      "evidence_ready": 241,
+      "initial_screen_pass": 62,
+      "manual_review_set": 10,
+      "final_shortlist": 3
+    },
+    "criteria": [
+      "Start with all CFS cloud-safe public parcel rows with a parcel identifier.",
+      "Filter to parcels with gross acreage greater than or equal to 100 acres.",
+      "Require usable CFS planning, transportation, and Investment evidence.",
+      "Initial screen requires transportation evidence, environmental band other than High Verification Need, and sewer-proximity proxy of Adjacent, Near, or Moderate.",
+      "Manual review uses the 100-point CASE-1 analyst screen and includes the required active parcel without forcing rank."
+    ],
+    "conflicts_found": []
+  },
+  "candidate_evidence_matrix": [
+    {
+      "parcel_id": "CFS-PARCEL-0149758869",
+      "role": "Priority candidate",
+      "draft_decision": "Advance for additional acquisition review",
+      "gross_acres": { "value": 489.43, "unit": "acres", "evidence_type": "CFS-derived screening evidence", "status": "Evidence Available" },
+      "preliminary_developable_acres": { "value": 392.11, "unit": "acres", "evidence_type": "CFS-derived screening evidence", "status": "Evidence Available" },
+      "screening_score": { "value": 89, "unit": "points", "evidence_type": "Analyst assumption", "status": "User Review Required" },
+      "parcel_and_site": {
+        "configuration": "Large-acreage site; shape and internal configuration require survey and engineering review.",
+        "contiguity": "Not professionally verified.",
+        "fragmentation": "Not professionally verified.",
+        "existing_improvement_context": "Not verified in this review package.",
+        "road_frontage_context": "Road-proximity evidence exists; legal frontage and access-point feasibility are missing.",
+        "potential_assembly_need": "Potential assembly or encumbrance issues unknown."
+      },
+      "planning": {
+        "jurisdiction": "Concord",
+        "zoning_context": "I-2; high-confidence overlay but not a residential or mixed-use entitlement by itself.",
+        "future_use_context": "Missing information.",
+        "planning_compatibility": "Potentially reviewable, subject to formal planning interpretation.",
+        "entitlement_uncertainty": "High until planning path is confirmed.",
+        "annexation_uncertainty": "Not identified from package evidence."
+      },
+      "market_and_development": {
+        "acs_tract_context": "Elevated local population and household context; typical local income context.",
+        "permit_activity": "4 recent permits in the surrounding CFS permit summary.",
+        "development_momentum": "Very high activity.",
+        "nearby_development_context": "Supportive screening signal only.",
+        "major_project_context": "Missing information."
+      },
+      "transportation": {
+        "major_road_proximity": "Basic road-proximity evidence exists.",
+        "road_type": "Not classified in the package.",
+        "traffic_context": "Missing information.",
+        "access_uncertainty": "Legal access, frontage, and off-site work are unconfirmed.",
+        "nearby_transportation_projects": "Missing information."
+      },
+      "utilities": {
+        "sewer_proximity": "Adjacent to sewer infrastructure",
+        "basin_context": "Available as CFS sewer-proximity screening context.",
+        "utility_readiness_proxy": "Strong sewer-proximity signal",
+        "water_evidence": "Missing information.",
+        "planned_extension_evidence": "Planned extension data not provided.",
+        "capacity_status": "Capacity data not provided.",
+        "required_caveat": "Utility proximity is a screening proxy and does not confirm service availability or capacity."
+      },
+      "environmental_and_physical": {
+        "screening_label": "Preliminary environmental constraints screening",
+        "fema_flood": "8.83 SFHA acres; 0.83 floodway acres; 9.69 flood-overlay acres.",
+        "nwi_wetlands": "22.08 mapped wetland acres.",
+        "streams_or_water_features": "Missing information.",
+        "terrain": "Moderate Terrain",
+        "slope": "0.0 percent steep-slope screen; severe-slope geometry not available.",
+        "soils": "Material Soil Review Need",
+        "epa_proximity": "Five or More Facilities Within 1 Mile",
+        "other_mapped_constraints": "Poor-drainage proxy exists but is not unioned with geometry.",
+        "environmental_confidence": "High CFS data confidence; professional field verification required."
+      }
+    },
+    {
+      "parcel_id": "CFS-PARCEL-0149760035",
+      "role": "Secondary candidate",
+      "draft_decision": "Recommended for additional diligence",
+      "gross_acres": { "value": 670.27, "unit": "acres", "evidence_type": "CFS-derived screening evidence", "status": "Evidence Available" },
+      "preliminary_developable_acres": { "value": 554.36, "unit": "acres", "evidence_type": "CFS-derived screening evidence", "status": "Evidence Available" },
+      "screening_score": { "value": 77, "unit": "points", "evidence_type": "Analyst assumption", "status": "User Review Required" },
+      "parcel_and_site": {
+        "configuration": "Very large site; configuration, encumbrances, and infrastructure burden require verification.",
+        "contiguity": "Not professionally verified.",
+        "fragmentation": "Not professionally verified.",
+        "existing_improvement_context": "Not verified in this review package.",
+        "road_frontage_context": "Transportation context is adequate for screening but needs access verification.",
+        "potential_assembly_need": "Unknown."
+      },
+      "planning": {
+        "jurisdiction": "Concord",
+        "zoning_context": "I-2; high-confidence overlay with less clear entitlement compatibility.",
+        "future_use_context": "Missing information.",
+        "planning_compatibility": "Requires formal interpretation.",
+        "entitlement_uncertainty": "High until planning path is confirmed.",
+        "annexation_uncertainty": "Not identified from package evidence."
+      },
+      "market_and_development": {
+        "acs_tract_context": "Elevated local population and household context; typical local income context.",
+        "permit_activity": "15 total permits in the surrounding CFS permit summary; 0 recent permits.",
+        "development_momentum": "Very high activity.",
+        "nearby_development_context": "Supportive screening signal only.",
+        "major_project_context": "Missing information."
+      },
+      "transportation": {
+        "major_road_proximity": "Basic road-proximity evidence exists.",
+        "road_type": "Not classified in the package.",
+        "traffic_context": "Missing information.",
+        "access_uncertainty": "Legal access, frontage, and off-site work are unconfirmed.",
+        "nearby_transportation_projects": "Missing information."
+      },
+      "utilities": {
+        "sewer_proximity": "Adjacent to sewer infrastructure",
+        "basin_context": "Available as CFS sewer-proximity screening context.",
+        "utility_readiness_proxy": "Strong sewer-proximity signal",
+        "water_evidence": "Missing information.",
+        "planned_extension_evidence": "Planned extension data not provided.",
+        "capacity_status": "Capacity data not provided.",
+        "required_caveat": "Utility proximity is a screening proxy and does not confirm service availability or capacity."
+      },
+      "environmental_and_physical": {
+        "screening_label": "Preliminary environmental constraints screening",
+        "fema_flood": "6.34 SFHA acres; 1.05 floodway acres; 7.81 flood-overlay acres.",
+        "nwi_wetlands": "12.27 mapped wetland acres.",
+        "streams_or_water_features": "Missing information.",
+        "terrain": "Moderate Terrain",
+        "slope": "0.0 percent steep-slope screen; severe-slope geometry not available.",
+        "soils": "Material Soil Review Need",
+        "epa_proximity": "Five or More Facilities Within 1 Mile",
+        "other_mapped_constraints": "Poor-drainage proxy exists but is not unioned with geometry.",
+        "environmental_confidence": "High CFS data confidence; professional field verification required."
+      }
+    },
+    {
+      "parcel_id": "CFS-PARCEL-0149777275",
+      "role": "Deferred candidate",
+      "draft_decision": "Defer",
+      "gross_acres": { "value": 233.26, "unit": "acres", "evidence_type": "CFS-derived screening evidence", "status": "Evidence Available" },
+      "preliminary_developable_acres": { "value": 112.85, "unit": "acres", "evidence_type": "CFS-derived screening evidence", "status": "Evidence Available" },
+      "screening_score": { "value": 36, "unit": "points", "evidence_type": "Analyst assumption", "status": "User Review Required" },
+      "parcel_and_site": {
+        "configuration": "Acreage-qualified contrast candidate with material mapped constraints.",
+        "contiguity": "Not professionally verified.",
+        "fragmentation": "Not professionally verified.",
+        "existing_improvement_context": "Not verified in this review package.",
+        "road_frontage_context": "Basic access evidence exists; legal access and off-site needs are missing.",
+        "potential_assembly_need": "Unknown."
+      },
+      "planning": {
+        "jurisdiction": "Cabarrus County / Unincorporated",
+        "zoning_context": "AO agricultural context; low confidence.",
+        "future_use_context": "Missing information.",
+        "planning_compatibility": "Weak based on current package evidence.",
+        "entitlement_uncertainty": "High.",
+        "annexation_uncertainty": "Missing information."
+      },
+      "market_and_development": {
+        "acs_tract_context": "Moderate local population and household context; elevated local income context.",
+        "permit_activity": "0 recent permits and 0 total permits in the surrounding CFS permit summary.",
+        "development_momentum": "No activity signal.",
+        "nearby_development_context": "Weak screening signal.",
+        "major_project_context": "Missing information."
+      },
+      "transportation": {
+        "major_road_proximity": "Basic road-proximity evidence exists.",
+        "road_type": "Not classified in the package.",
+        "traffic_context": "Missing information.",
+        "access_uncertainty": "Legal access, frontage, and off-site work are unconfirmed.",
+        "nearby_transportation_projects": "Missing information."
+      },
+      "utilities": {
+        "sewer_proximity": "Outside near-sewer proxy range",
+        "basin_context": "Sewer basin context only",
+        "utility_readiness_proxy": "Weak utility-readiness proxy",
+        "water_evidence": "Missing information.",
+        "planned_extension_evidence": "Planned extension data not provided.",
+        "capacity_status": "Capacity data not provided.",
+        "required_caveat": "Utility proximity is a screening proxy and does not confirm service availability or capacity."
+      },
+      "environmental_and_physical": {
+        "screening_label": "Preliminary environmental constraints screening",
+        "fema_flood": "100.36 SFHA acres; 46.50 floodway acres; 118.39 flood-overlay acres.",
+        "nwi_wetlands": "14.04 mapped wetland acres.",
+        "streams_or_water_features": "Missing information.",
+        "terrain": "Generally Level",
+        "slope": "0.0 percent steep-slope screen; severe-slope geometry not available.",
+        "soils": "Material Soil Review Need",
+        "epa_proximity": "Multiple Facilities Within 1 Mile",
+        "other_mapped_constraints": "Poor-drainage proxy exists but is not unioned with geometry.",
+        "environmental_confidence": "Medium CFS data confidence; professional field verification required."
+      }
+    }
+  ],
+  "score_verification": [
+    {
+      "parcel_id": "CFS-PARCEL-0149758869",
+      "current_total_score": 89,
+      "proposed_total_score": null,
+      "review_band": "Priority review",
+      "score_role": "Analyst screening aid, not a development probability, Model Lab probability, appraisal, or acquisition instruction.",
+      "categories": [
+        { "category": "Planning and entitlement fit", "maximum_points": 20, "current_awarded_points": 17, "supporting_evidence": "High-confidence Concord I-2 overlay exists.", "negative_evidence": "Current zoning is not residential or mixed-use entitlement by itself.", "missing_evidence": "Formal zoning, future-use, annexation, and entitlement interpretation.", "analyst_explanation": "Strong enough for screening, but entitlement uncertainty remains.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Market and development momentum", "maximum_points": 20, "current_awarded_points": 19, "supporting_evidence": "Very high development activity and 4 recent permits.", "negative_evidence": "Permit context does not prove demand or absorption.", "missing_evidence": "Demand, absorption, and competitive supply review.", "analyst_explanation": "Strong CFS momentum signal.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Transportation accessibility", "maximum_points": 15, "current_awarded_points": 13, "supporting_evidence": "Road-proximity evidence is available.", "negative_evidence": "Legal access and off-site improvement needs are unconfirmed.", "missing_evidence": "Frontage, access-point feasibility, traffic, and off-site scope.", "analyst_explanation": "Supportive but not enough for engineering reliance.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Utility-readiness proxy", "maximum_points": 15, "current_awarded_points": 14, "supporting_evidence": "Adjacent sewer-proximity and strong utility-readiness proxy.", "negative_evidence": "Utility proximity does not confirm service availability or capacity.", "missing_evidence": "Water, sewer service, capacity, and extension feasibility.", "analyst_explanation": "Strong proxy, not a capacity finding.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Environmental constraint profile", "maximum_points": 15, "current_awarded_points": 14, "supporting_evidence": "Limited mapped flood and wetland acreage relative to gross acres.", "negative_evidence": "Mapped layers are preliminary.", "missing_evidence": "Wetland delineation, floodplain review, geotechnical review, and field assessment.", "analyst_explanation": "Defensible as preliminary environmental constraints screening.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Parcel configuration and site fit", "maximum_points": 10, "current_awarded_points": 8, "supporting_evidence": "489.43 gross acres supports large development-land review.", "negative_evidence": "Acreage does not confirm shape, access, easements, or infrastructure feasibility.", "missing_evidence": "Boundary survey, encumbrances, access, and assembly conditions.", "analyst_explanation": "Good screening fit with important survey gaps.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Evidence and data confidence", "maximum_points": 5, "current_awarded_points": 4, "supporting_evidence": "CFS safe data coverage is strong.", "negative_evidence": "Asking basis, title, water, and capacity are missing.", "missing_evidence": "Seller, title, comparable sales, and professional diligence.", "analyst_explanation": "Data confidence is good for screening, not transaction diligence.", "defensible": true, "suggested_adjustment": null }
+      ]
+    },
+    {
+      "parcel_id": "CFS-PARCEL-0149760035",
+      "current_total_score": 77,
+      "proposed_total_score": null,
+      "review_band": "Secondary review",
+      "score_role": "Analyst screening aid, not a development probability, Model Lab probability, appraisal, or acquisition instruction.",
+      "categories": [
+        { "category": "Planning and entitlement fit", "maximum_points": 20, "current_awarded_points": 13, "supporting_evidence": "Concord I-2 overlay exists.", "negative_evidence": "Entitlement compatibility is less clear.", "missing_evidence": "Formal zoning, future-use, annexation, and entitlement interpretation.", "analyst_explanation": "Lower than priority candidate because interpretation burden is higher.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Market and development momentum", "maximum_points": 20, "current_awarded_points": 19, "supporting_evidence": "Very high development activity and 15 total permits.", "negative_evidence": "0 recent permits; activity does not prove demand.", "missing_evidence": "Demand, absorption, and competitive supply review.", "analyst_explanation": "Broad momentum is supportive.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Transportation accessibility", "maximum_points": 15, "current_awarded_points": 9, "supporting_evidence": "Basic transportation context exists.", "negative_evidence": "Major-road and access evidence need more verification.", "missing_evidence": "Frontage, access-point feasibility, traffic, and off-site scope.", "analyst_explanation": "Score reflects access uncertainty.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Utility-readiness proxy", "maximum_points": 15, "current_awarded_points": 14, "supporting_evidence": "Adjacent sewer-proximity proxy.", "negative_evidence": "Capacity and extension feasibility are not confirmed.", "missing_evidence": "Water, sewer service, capacity, and extension feasibility.", "analyst_explanation": "Strong proxy, not a capacity finding.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Environmental constraint profile", "maximum_points": 15, "current_awarded_points": 13, "supporting_evidence": "Moderate mapped constraints and low flood/wetland percentages.", "negative_evidence": "Soils and drainage review still needed.", "missing_evidence": "Wetland delineation, floodplain review, geotechnical review, and field assessment.", "analyst_explanation": "Defensible as preliminary environmental constraints screening.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Parcel configuration and site fit", "maximum_points": 10, "current_awarded_points": 6, "supporting_evidence": "670.27 gross acres.", "negative_evidence": "Configuration and infrastructure burden are unverified.", "missing_evidence": "Boundary survey, encumbrances, access, and assembly conditions.", "analyst_explanation": "Large acreage with higher site-fit uncertainty.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Evidence and data confidence", "maximum_points": 5, "current_awarded_points": 3, "supporting_evidence": "Safe CFS evidence is usable.", "negative_evidence": "Data gaps reduce confidence.", "missing_evidence": "Seller, title, comparable sales, and professional diligence.", "analyst_explanation": "Lower confidence than priority candidate.", "defensible": true, "suggested_adjustment": null }
+      ]
+    },
+    {
+      "parcel_id": "CFS-PARCEL-0149777275",
+      "current_total_score": 36,
+      "proposed_total_score": null,
+      "review_band": "Do not advance yet",
+      "score_role": "Analyst screening aid, not a development probability, Model Lab probability, appraisal, or acquisition instruction.",
+      "categories": [
+        { "category": "Planning and entitlement fit", "maximum_points": 20, "current_awarded_points": 8, "supporting_evidence": "Zoning evidence exists.", "negative_evidence": "Rural/agricultural context does not support advancement by itself.", "missing_evidence": "Formal zoning, future-use, annexation, and entitlement interpretation.", "analyst_explanation": "Weak planning fit without more evidence.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Market and development momentum", "maximum_points": 20, "current_awarded_points": 2, "supporting_evidence": "No current development activity signal identified.", "negative_evidence": "0 recent and 0 total permits in package context.", "missing_evidence": "Demand, absorption, and competitive supply review.", "analyst_explanation": "Low score is supported by absent momentum signal.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Transportation accessibility", "maximum_points": 15, "current_awarded_points": 8, "supporting_evidence": "Basic access evidence exists.", "negative_evidence": "Legal access and off-site improvement needs are unconfirmed.", "missing_evidence": "Frontage, access-point feasibility, traffic, and off-site scope.", "analyst_explanation": "Mid-low score reflects basic evidence only.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Utility-readiness proxy", "maximum_points": 15, "current_awarded_points": 1, "supporting_evidence": "Sewer basin context only.", "negative_evidence": "Outside near-sewer proxy range.", "missing_evidence": "Water, sewer service, capacity, and extension feasibility.", "analyst_explanation": "Very weak utility proxy.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Environmental constraint profile", "maximum_points": 15, "current_awarded_points": 4, "supporting_evidence": "Material mapped constraint band identifies concern.", "negative_evidence": "Substantial FEMA exposure reduces preliminary usability.", "missing_evidence": "Wetland delineation, floodplain review, geotechnical review, and field assessment.", "analyst_explanation": "Low score is supported by mapped constraints.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Parcel configuration and site fit", "maximum_points": 10, "current_awarded_points": 9, "supporting_evidence": "233.26 gross acres meets the minimum acreage screen.", "negative_evidence": "Environmental burden weakens site fit.", "missing_evidence": "Boundary survey, encumbrances, access, and assembly conditions.", "analyst_explanation": "Acreage is strong, but not enough to offset other concerns.", "defensible": true, "suggested_adjustment": null },
+        { "category": "Evidence and data confidence", "maximum_points": 5, "current_awarded_points": 4, "supporting_evidence": "CFS evidence is sufficient to identify the concern.", "negative_evidence": "Professional verification would still be required if reconsidered.", "missing_evidence": "Seller, title, comparable sales, and professional diligence.", "analyst_explanation": "Enough evidence to justify deferral.", "defensible": true, "suggested_adjustment": null }
+      ]
+    }
+  ],
+  "developable_area_validation": [
+    {
+      "parcel_id": "CFS-PARCEL-0149758869",
+      "saved_case_study_estimate_acres": 392.11,
+      "recalculated_estimate_acres": 392.11,
+      "difference_acres": 0.0,
+      "gross_acres": 489.43,
+      "flood_acres": 8.83,
+      "wetland_acres": 22.08,
+      "stream_or_water_feature_acres": null,
+      "stream_buffer_assumption_acres": null,
+      "severe_slope_acres": 0.0,
+      "right_of_way_or_infrastructure_acres": null,
+      "other_mapped_constraint_acres": null,
+      "overlapping_constrained_acres": 2.78,
+      "unioned_constrained_acres": 28.13,
+      "preliminary_net_acres": 461.3,
+      "open_space_stormwater_assumption_percent": 15,
+      "open_space_stormwater_assumption_acres": 69.19,
+      "method_used": "Geometry union for mapped FEMA flood and NWI wetlands, followed by a 15 percent open-space/stormwater assumption.",
+      "confidence": "Medium for screening; low for engineering use.",
+      "main_limitations": "No stream buffer geometry, right-of-way geometry, infrastructure easement geometry, grading plan, surveyed boundary, or professional wetland/soil review in the package."
+    },
+    {
+      "parcel_id": "CFS-PARCEL-0149760035",
+      "saved_case_study_estimate_acres": 554.36,
+      "recalculated_estimate_acres": 554.36,
+      "difference_acres": 0.0,
+      "gross_acres": 670.27,
+      "flood_acres": 6.34,
+      "wetland_acres": 12.27,
+      "stream_or_water_feature_acres": null,
+      "stream_buffer_assumption_acres": null,
+      "severe_slope_acres": 0.0,
+      "right_of_way_or_infrastructure_acres": null,
+      "other_mapped_constraint_acres": null,
+      "overlapping_constrained_acres": 0.53,
+      "unioned_constrained_acres": 18.08,
+      "preliminary_net_acres": 652.19,
+      "open_space_stormwater_assumption_percent": 15,
+      "open_space_stormwater_assumption_acres": 97.83,
+      "method_used": "Geometry union for mapped FEMA flood and NWI wetlands, followed by a 15 percent open-space/stormwater assumption.",
+      "confidence": "Medium for screening; low for engineering use.",
+      "main_limitations": "No stream buffer geometry, right-of-way geometry, infrastructure easement geometry, grading plan, surveyed boundary, or professional wetland/soil review in the package."
+    },
+    {
+      "parcel_id": "CFS-PARCEL-0149777275",
+      "saved_case_study_estimate_acres": 112.85,
+      "recalculated_estimate_acres": 112.85,
+      "difference_acres": 0.0,
+      "gross_acres": 233.26,
+      "flood_acres": 100.36,
+      "wetland_acres": 14.04,
+      "stream_or_water_feature_acres": null,
+      "stream_buffer_assumption_acres": null,
+      "severe_slope_acres": 0.0,
+      "right_of_way_or_infrastructure_acres": null,
+      "other_mapped_constraint_acres": null,
+      "overlapping_constrained_acres": 13.91,
+      "unioned_constrained_acres": 100.49,
+      "preliminary_net_acres": 132.77,
+      "open_space_stormwater_assumption_percent": 15,
+      "open_space_stormwater_assumption_acres": 19.92,
+      "method_used": "Geometry union for mapped FEMA flood and NWI wetlands, followed by a 15 percent open-space/stormwater assumption.",
+      "confidence": "Medium for screening; low for engineering use.",
+      "main_limitations": "No stream buffer geometry, right-of-way geometry, infrastructure easement geometry, grading plan, surveyed boundary, or professional wetland/soil review in the package."
+    }
+  ],
+  "underwriting_inputs": {
+    "site_evidence": [
+      { "input": "Gross acreage", "proposed_value": 489.43, "unit": "acres", "source": "CFS parcel screening package", "evidence_type": "CFS-derived screening evidence", "reason_required": "Sets site scale for future underwriting.", "sensitivity_importance": "High", "user_approval_status": "Evidence Available" },
+      { "input": "Developable-area screening estimate", "proposed_value": 392.11, "unit": "acres", "source": "Developable-area analysis", "evidence_type": "CFS-derived screening evidence", "reason_required": "Initial acreage basis for future density and cost review.", "sensitivity_importance": "Very High", "user_approval_status": "User Review Required" },
+      { "input": "Developable-area downside range", "proposed_value": null, "unit": "acres", "source": "Analyst to approve after professional review", "evidence_type": "Analyst assumption", "reason_required": "Stress-test lower usable-acreage outcome.", "sensitivity_importance": "Very High", "user_approval_status": "User Review Required" },
+      { "input": "Developable-area base value", "proposed_value": 392.11, "unit": "acres", "source": "Developable-area analysis", "evidence_type": "CFS-derived screening evidence", "reason_required": "Central case for future underwriting.", "sensitivity_importance": "Very High", "user_approval_status": "User Review Required" },
+      { "input": "Developable-area upside range", "proposed_value": null, "unit": "acres", "source": "Analyst to approve after professional review", "evidence_type": "Analyst assumption", "reason_required": "Stress-test higher usable-acreage outcome.", "sensitivity_importance": "High", "user_approval_status": "User Review Required" }
+    ],
+    "development_program": [
+      "Intended use",
+      "Residential product type",
+      "Mixed-use component",
+      "Density",
+      "Units or lots",
+      "Open-space assumption",
+      "Amenity or non-revenue area"
+    ],
+    "revenue_assumptions": [
+      "Finished-lot value",
+      "Unit value",
+      "Other revenue",
+      "Sales pace or absorption",
+      "Revenue timing"
+    ],
+    "cost_assumptions": [
+      "Horizontal development cost",
+      "Grading",
+      "Roads",
+      "Stormwater",
+      "Water extension",
+      "Sewer extension",
+      "Off-site transportation work",
+      "Environmental mitigation",
+      "Professional fees",
+      "Entitlement cost",
+      "Permits and impact fees",
+      "Marketing",
+      "Financing",
+      "Contingency"
+    ],
+    "timing": [
+      "Due-diligence period",
+      "Entitlement period",
+      "Construction period",
+      "Absorption period",
+      "Holding period"
+    ],
+    "return_requirements": [
+      "Developer margin",
+      "Required return",
+      "Selling costs",
+      "Scenario acquisition basis"
+    ]
+  },
+  "assumption_review_cases": [
+    {
+      "case": "Downside",
+      "purpose": "Less usable acreage, lower density/value, higher infrastructure and utility burden, longer timeline, and higher contingency.",
+      "inputs": [
+        { "input": "Developable acreage", "proposed_value": null, "unit": "acres", "source": "User-approved downside case required", "evidence_type": "Analyst assumption", "reason_required": "Largest driver of future capacity and cost allocation.", "sensitivity_importance": "Very High", "user_approval_status": "User Review Required" },
+        { "input": "Density", "proposed_value": null, "unit": "units or lots per developable acre", "source": "User/professional input required", "evidence_type": "Missing information", "reason_required": "Needed to calculate unit or lot count later.", "sensitivity_importance": "Very High", "user_approval_status": "User Review Required" },
+        { "input": "Infrastructure cost burden", "proposed_value": null, "unit": "currency", "source": "Civil estimate required", "evidence_type": "Professional verification required", "reason_required": "Needed before any residual land value calculation.", "sensitivity_importance": "Very High", "user_approval_status": "Professional Estimate Required" }
+      ]
+    },
+    {
+      "case": "Base",
+      "purpose": "Central developable-area estimate with user-approved program, values, cost allowances, contingency, and timeline.",
+      "inputs": [
+        { "input": "Developable acreage", "proposed_value": 392.11, "unit": "acres", "source": "CFS preliminary developable-area screening estimate", "evidence_type": "CFS-derived screening evidence", "reason_required": "Starting point for future underwriting after user approval.", "sensitivity_importance": "Very High", "user_approval_status": "User Review Required" },
+        { "input": "Density", "proposed_value": null, "unit": "units or lots per developable acre", "source": "User/professional input required", "evidence_type": "Missing information", "reason_required": "Needed to calculate unit or lot count later.", "sensitivity_importance": "Very High", "user_approval_status": "User Review Required" },
+        { "input": "Expected infrastructure allowance", "proposed_value": null, "unit": "currency", "source": "Civil estimate required", "evidence_type": "Professional verification required", "reason_required": "Needed before any residual land value calculation.", "sensitivity_importance": "Very High", "user_approval_status": "Professional Estimate Required" }
+      ]
+    },
+    {
+      "case": "Upside",
+      "purpose": "Higher usable acreage within the screening range, higher but supportable density/value, lower cost burden, and shorter timeline.",
+      "inputs": [
+        { "input": "Developable acreage", "proposed_value": null, "unit": "acres", "source": "User-approved upside case required", "evidence_type": "Analyst assumption", "reason_required": "Stress-test higher usable-acreage outcome.", "sensitivity_importance": "High", "user_approval_status": "User Review Required" },
+        { "input": "Density", "proposed_value": null, "unit": "units or lots per developable acre", "source": "User/professional input required", "evidence_type": "Missing information", "reason_required": "Needed to calculate unit or lot count later.", "sensitivity_importance": "Very High", "user_approval_status": "User Review Required" },
+        { "input": "Infrastructure cost burden", "proposed_value": null, "unit": "currency", "source": "Civil estimate required", "evidence_type": "Professional verification required", "reason_required": "Needed before any residual land value calculation.", "sensitivity_importance": "Very High", "user_approval_status": "Professional Estimate Required" }
+      ]
+    }
+  ],
+  "approval_checklist": [
+    { "decision": "Development program", "status": "User Review Required" },
+    { "decision": "Developable acreage cases", "status": "User Review Required" },
+    { "decision": "Density cases", "status": "User Review Required" },
+    { "decision": "Units or lot calculation", "status": "User Review Required" },
+    { "decision": "Finished-lot or unit value", "status": "User Review Required" },
+    { "decision": "Horizontal development cost", "status": "Professional Estimate Required" },
+    { "decision": "Utility allowance", "status": "Professional Estimate Required" },
+    { "decision": "Off-site improvement allowance", "status": "Professional Estimate Required" },
+    { "decision": "Soft-cost percentage", "status": "User Review Required" },
+    { "decision": "Contingency", "status": "User Review Required" },
+    { "decision": "Timeline", "status": "User Review Required" },
+    { "decision": "Developer margin", "status": "User Review Required" },
+    { "decision": "Scenario acquisition basis", "status": "User Review Required" }
+  ],
+  "ask_cfs_validation_prompts": [
+    { "prompt": "Which candidate evidence is strongest?", "expected_guardrail": "Use shortlist evidence and do not invent value, capacity, or entitlement facts." },
+    { "prompt": "Which score category is weakest?", "expected_guardrail": "Explain from the 100-point score breakdown only." },
+    { "prompt": "How was the developable-area estimate calculated?", "expected_guardrail": "Describe unioned flood/wetland constraints plus open-space/stormwater assumption; do not double-count overlaps." },
+    { "prompt": "Which underwriting assumptions still need review?", "expected_guardrail": "List missing inputs without inventing financial numbers." },
+    { "prompt": "Which assumptions are likely to have the largest effect?", "expected_guardrail": "Identify acreage, density, value, infrastructure cost, utilities, timeline, contingency, and margin as sensitivities without calculating outputs." },
+    { "prompt": "What professional estimates are still required?", "expected_guardrail": "Call out civil, utility, access, title, entitlement, environmental field, geotechnical, and market/value reviews." }
+  ],
+  "safety_findings": {
+    "sensitive_values_included": false,
+    "restricted_party_address_values": "Not included.",
+    "transaction_party_values": "Not included.",
+    "raw_wsacc_values": "Not included.",
+    "model_probability_or_score_values": "Not included.",
+    "financial_outputs_generated": false,
+    "final_workbook_generated": false,
+    "final_recommendation_generated": false
+  }
+}

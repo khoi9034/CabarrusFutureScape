@@ -23,6 +23,7 @@ def test_case1_artifact_package_exists() -> None:
         CASE_DIR / "candidate_comparison.json",
         CASE_DIR / "active_property_analysis.json",
         CASE_DIR / "developable_area_analysis.json",
+        CASE_DIR / "underwriting_input_register.json",
         CASE_DIR / "underwriting_scenarios.json",
         CASE_DIR / "due_diligence_plan.json",
         CASE_DIR / "sources.json",
@@ -32,6 +33,8 @@ def test_case1_artifact_package_exists() -> None:
         DOC_DIR / "cfs-investment-executive-recommendation.md",
         DOC_DIR / "cfs-investment-acquisition-presentation.md",
         DOC_DIR / "cfs-investment-interview-walkthrough.md",
+        DOC_DIR / "cfs-development-land-assumption-review.md",
+        DOC_DIR / "cfs-case-1-evidence-review.md",
     ):
         assert path.exists(), path
 
@@ -126,3 +129,64 @@ def test_case1_builder_uses_process_local_credentials_only() -> None:
     assert "postgresql://" not in source
     assert "openai_api_key" not in source
     assert "vercel_automation_bypass_secret" not in source
+
+
+def test_case3a_underwriting_register_is_review_only() -> None:
+    payload = _json("underwriting_input_register.json")
+
+    assert payload["phase"] == "CASE-3A"
+    assert payload["safety_findings"]["financial_outputs_generated"] is False
+    assert payload["safety_findings"]["final_workbook_generated"] is False
+    assert payload["safety_findings"]["final_recommendation_generated"] is False
+
+    assert payload["funnel_verification"]["counts"] == {
+        "countywide_reviewed": 110017,
+        "minimum_acreage_pass": 241,
+        "evidence_ready": 241,
+        "initial_screen_pass": 62,
+        "manual_review_set": 10,
+        "final_shortlist": 3,
+    }
+
+    candidates = payload["candidate_evidence_matrix"]
+    assert [item["parcel_id"] for item in candidates] == [ACTIVE, SECONDARY, DEFERRED]
+    assert [item["screening_score"]["value"] for item in candidates] == [89, 77, 36]
+
+    active = next(item for item in payload["developable_area_validation"] if item["parcel_id"] == ACTIVE)
+    assert active["saved_case_study_estimate_acres"] == active["recalculated_estimate_acres"] == 392.11
+    assert round(active["gross_acres"] - active["unioned_constrained_acres"], 2) == active["preliminary_net_acres"]
+    assert active["difference_acres"] == 0.0
+
+    approval_statuses = {item["status"] for item in payload["approval_checklist"]}
+    assert approval_statuses <= {
+        "Evidence Available",
+        "Proposed Assumption",
+        "User Review Required",
+        "Approved",
+        "Professional Estimate Required",
+        "Unavailable",
+    }
+
+
+def test_case3a_review_files_do_not_invent_financial_assumptions() -> None:
+    files = [
+        CASE_DIR / "underwriting_input_register.json",
+        DOC_DIR / "cfs-development-land-assumption-review.md",
+        DOC_DIR / "cfs-case-1-evidence-review.md",
+    ]
+    haystack = "\n".join(path.read_text(encoding="utf-8", errors="ignore") for path in files).lower()
+
+    for forbidden in (
+        "maximum_supportable_land_price",
+        "gross_development_value",
+        "recommended purchase",
+        "buy this parcel",
+        "official appraisal",
+        "confirmed utility capacity",
+        "environmental clearance",
+        "database_url",
+        "postgresql://",
+        "openai_api_key",
+        "vercel_automation_bypass_secret",
+    ):
+        assert forbidden not in haystack
