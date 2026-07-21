@@ -35,6 +35,8 @@ def test_case1_artifact_package_exists() -> None:
         DOC_DIR / "cfs-investment-interview-walkthrough.md",
         DOC_DIR / "cfs-development-land-assumption-review.md",
         DOC_DIR / "cfs-case-1-evidence-review.md",
+        DOC_DIR / "cfs-case-1-market-assumption-benchmarks.md",
+        DOC_DIR / "cfs-case-1-underwriting-consistency-review.md",
     ):
         assert path.exists(), path
 
@@ -190,3 +192,67 @@ def test_case3a_review_files_do_not_invent_financial_assumptions() -> None:
         "vercel_automation_bypass_secret",
     ):
         assert forbidden not in haystack
+
+
+def test_case3a1_market_assumptions_are_unapproved_benchmarks() -> None:
+    payload = _json("underwriting_input_register.json")["case_3a_1_market_benchmarking"]
+
+    assert payload["phase"] == "CASE-3A.1"
+    assert payload["approval_status"] == "Proposed - User Review Required"
+    assert payload["development_program"]["recommended_primary_product"] == "Large Residential Finished-Lot Development"
+    assert len(payload["benchmark_records"]) >= 8
+
+    inputs = {item["input"]: item for item in payload["scenario_assumption_inputs"]}
+    assert inputs["Finished-lot value"]["proposed_base"] == 70000
+    assert inputs["Scenario acquisition basis"]["proposed_base"] is None
+    assert all(item["user_approval_status"] == "Proposed - User Review Required" for item in inputs.values())
+    assert "Vertical home construction" in payload["development_program"]["excluded_from_primary_case"]
+
+
+def test_case3a1_market_memo_stops_before_final_outputs() -> None:
+    memo = (DOC_DIR / "cfs-case-1-market-assumption-benchmarks.md").read_text(encoding="utf-8").lower()
+
+    assert "not an appraisal" in memo
+    assert "no assumption is approved" in memo
+    assert "do not invent a current asking price" in memo
+    for forbidden in (
+        "final excel workbook",
+        "approved assumption",
+        "current asking price is",
+        "we recommend acquisition",
+    ):
+        assert forbidden not in memo
+
+
+def test_case3a2_scenario_arithmetic_and_break_even_diagnostics() -> None:
+    review = _json("underwriting_input_register.json")["case_3a_2_underwriting_consistency_review"]
+    scenarios = {item["scenario"]: item for item in review["current_scenario_math"]}
+    base = scenarios["Base"]
+
+    assert base["estimated_lots"] == 1097.91
+    assert base["gross_lot_sale_revenue"] == 76853560
+    assert base["horizontal_development_cost"] == 76853560
+    assert round(base["gross_lot_sale_revenue"] - base["horizontal_development_cost"] - base["fixed_off_site_costs"] - base["soft_costs"] - base["contingency"] - base["developer_margin"], 2) == base["preliminary_residual_before_land"]
+    assert base["preliminary_residual_before_land"] < 0
+    assert base["residual_after_selling_and_carry"] < base["preliminary_residual_before_land"]
+
+    thresholds = {item["scenario"]: item for item in review["break_even_thresholds"]}
+    assert thresholds["Base"]["break_even_finished_lot_value_after_selling_and_carry"] == 143469.1
+    assert thresholds["Upside"]["maximum_horizontal_cost_per_lot_after_selling_and_carry"] == 51863.65
+    assert thresholds["Downside"]["break_even_density_after_selling_and_carry"] is None
+
+
+def test_case3a2_cost_scope_and_revision_guardrails() -> None:
+    review = _json("underwriting_input_register.json")["case_3a_2_underwriting_consistency_review"]
+    scope = review["horizontal_cost_scope"]
+
+    assert "Internal roads" in scope["included_cost_components"]
+    assert "Water transmission extension" in scope["excluded_cost_components"]
+    assert "overlap" in scope["potential_double_counting"].lower()
+    assert review["formula_conventions"]["developer_margin"] == "Calculated as a percentage of gross lot-sale revenue."
+    assert review["user_approval_status"] == "Proposed - User Review Required"
+
+    revisions = {item["input"]: item for item in review["reconciled_assumption_table"]}
+    assert revisions["Other off-site or pump-station allowance"]["reconciled_base"] is None
+    assert revisions["Finished-lot value"]["reconciled_base"] == 70000
+    assert all("acquisition recommendation" not in item["effect_on_viability"].lower() for item in revisions.values())
