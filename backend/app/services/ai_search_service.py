@@ -1559,7 +1559,7 @@ def _economics_walkthrough_answer(
     answer = _briefing(
         (
             "Executive takeaway",
-            "Walk through CFS Economics in four screens: Overview, Power BI & Tools, Economic Dashboard, then Print. Local live mode uses the FastAPI backend and local PostGIS economics data; portfolio demo mode uses a sanitized cached demo extract.",
+            "Walk through CFS Economics in three screens: Power BI & Tools, Economic Dashboard, then Print. Local live mode uses the FastAPI backend and local PostGIS economics data; portfolio demo mode uses a sanitized cached demo extract.",
         ),
         (
             "Recommended sequence",
@@ -1594,7 +1594,7 @@ def _economics_walkthrough_answer(
         [
             _evidence(
                 "CFS Economics workflow",
-                "Overview -> Power BI & Tools -> Economic Dashboard -> Print.",
+                "Power BI & Tools -> Economic Dashboard -> Print.",
                 "economics_intelligence",
                 "available",
             )

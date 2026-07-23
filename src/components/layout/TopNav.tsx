@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Command,
   FileSearch,
+  Home,
   LayoutDashboard,
   Loader2,
   Map,
@@ -57,14 +58,6 @@ const productModes: Array<{
   icon: typeof LayoutDashboard;
 }> = [
   {
-    description: "Intro and safe-use posture",
-    icon: LayoutDashboard,
-    id: "overview",
-    label: "Overview",
-    shortLabel: "Overview",
-    title: "Cabarrus FutureScape introduction and safe-use overview",
-  },
-  {
     description: "Countywide work area",
     icon: Map,
     id: "workspace",
@@ -98,14 +91,6 @@ const economicsProductModes: Array<{
   title: string;
   icon: typeof LayoutDashboard;
 }> = [
-  {
-    description: "CFS Economics introduction",
-    icon: BriefcaseBusiness,
-    id: "overview",
-    label: "Overview",
-    shortLabel: "Overview",
-    title: "CFS Economics overview",
-  },
   {
     description: "Power BI exports and enterprise tools",
     icon: Search,
@@ -151,8 +136,8 @@ const appModeOptions = [
   {
     description: "Site selection, acquisition screening, due diligence, underwriting, and case studies.",
     id: "consulting",
-    label: "Real Estate Consulting",
-    shortLabel: "CFS Consulting",
+    label: "Investment Intelligence",
+    shortLabel: "CFS Investments",
   },
 ] as const;
 
@@ -192,7 +177,9 @@ export function TopNav() {
   const [quickSearchOpen, setQuickSearchOpen] = useState(false);
   const [quickSearchQuery, setQuickSearchQuery] = useState("");
   const activeEconomicsSection =
-    economicsSection === "workspace" || economicsSection === "enterprise"
+    economicsSection === "overview"
+      ? "dashboard"
+      : economicsSection === "workspace" || economicsSection === "enterprise"
       ? "tools"
       : economicsSection;
   const [quickSearchResults, setQuickSearchResults] = useState<ParcelSearchRecord[]>([]);
@@ -234,13 +221,37 @@ export function TopNav() {
     appModeOptions[0];
   const selectAppMode = useCallback((mode: typeof appModeOptions[number]["id"]) => {
     if (typeof window !== "undefined" && mode !== cfsAppMode) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("app", mode);
-      window.history.pushState(null, "", url);
+      window.history.pushState(
+        null,
+        "",
+        mode === "consulting"
+          ? "/?app=consulting&investmentPage=engagements"
+          : `/?app=${mode}`,
+      );
     }
     setCfsAppMode(mode);
+    if (mode === "planning") {
+      setOverviewCommandMode("countywide");
+      setProductMode("workspace");
+    } else if (mode === "economics") {
+      setEconomicsSection("dashboard");
+    }
     setModeMenuOpen(false);
-  }, [cfsAppMode, setCfsAppMode]);
+  }, [
+    cfsAppMode,
+    setCfsAppMode,
+    setEconomicsSection,
+    setOverviewCommandMode,
+    setProductMode,
+  ]);
+  const goHome = useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", "/");
+    }
+    setCfsAppMode(null);
+    setModeMenuOpen(false);
+    setMoreOpen(false);
+  }, [setCfsAppMode]);
 
   useEffect(() => {
     quickSearchQueryRef.current = trimmedQuickSearchQuery;
@@ -523,7 +534,16 @@ export function TopNav() {
             : "cfs-command-bar border-b border-[#68d8ff]/14 bg-[#03070d]/94",
         )}
       >
-        <div className="order-1 relative flex min-w-[13.5rem] max-w-[18rem] shrink-0 items-center gap-3">
+        <div className="order-1 relative flex min-w-[16rem] max-w-[24rem] shrink-0 items-center gap-3">
+          <button
+            aria-label="Return to CFS Home"
+            className="inline-flex h-12 shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-3 text-sm font-semibold text-slate-200 transition hover:border-[#68d8ff]/35 hover:bg-[#68d8ff]/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#68d8ff]/75"
+            onClick={goHome}
+            type="button"
+          >
+            <Home className="h-4 w-4" />
+            <span className="hidden sm:inline">Home</span>
+          </button>
           <button
             aria-expanded={modeMenuOpen}
             aria-haspopup="menu"
@@ -633,7 +653,7 @@ export function TopNav() {
         ) : cfsAppMode === "planning" ? (
           <nav
             aria-label="CFS product mode"
-            className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-4 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
+            className="cfs-product-nav order-3 grid w-full min-w-0 grid-cols-3 gap-1 rounded-2xl border border-[#68d8ff]/16 bg-[#020812]/82 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.075),0_0_44px_rgba(104,216,255,0.09)] lg:order-2 lg:w-auto lg:shrink-0 lg:auto-cols-max lg:grid-flow-col lg:grid-cols-none"
           >
             {productModes.map((mode) => {
               const Icon = mode.icon;
@@ -963,7 +983,7 @@ export function TopNav() {
                       Economic Intelligence
                     </p>
                     <p className="mt-1 text-sm leading-6 text-slate-300">
-                      Use the top navigation for Overview, Power BI & Tools,
+                      Use the top navigation for Power BI & Tools,
                       Economic Dashboard, and Print.
                     </p>
                   </div>

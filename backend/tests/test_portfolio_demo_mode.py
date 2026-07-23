@@ -16,6 +16,126 @@ def test_frontend_runtime_mode_switch_is_demo_safe() -> None:
     assert "!IS_DEMO_MODE && process.env.NEXT_PUBLIC_USE_BACKEND_API" in client
 
 
+def test_only_explicit_app_url_selects_consulting() -> None:
+    page = read("src/app/page.tsx")
+    url_sync = read("src/components/dashboard/DashboardUrlSync.tsx")
+    dashboard_state = read("src/hooks/useDashboardState.tsx")
+
+    assert 'redirect("/")' in page
+    assert 'redirect("/?app=planning")' not in page
+    assert "params.app !== undefined" in page
+    assert "params.investmentPage !== undefined" in page
+    assert ": params.investmentPage" not in page
+    assert 'has("investmentPage")' not in url_sync
+    assert 'params.has("investmentPage")' not in dashboard_state
+    assert "window.setInterval(syncAppModeFromUrl" not in dashboard_state
+    assert 'window.addEventListener("popstate", syncAppModeFromUrl)' in dashboard_state
+    assert 'window.addEventListener("pageshow", syncAppModeFromUrl)' in dashboard_state
+
+
+def test_root_url_renders_master_home_without_stored_app_fallback() -> None:
+    app_shell = read("src/components/layout/AppShell.tsx")
+    dashboard_state = read("src/hooks/useDashboardState.tsx")
+    home = read("src/components/layout/CfsMasterHome.tsx")
+    url_sync = read("src/components/dashboard/DashboardUrlSync.tsx")
+
+    assert "data-testid=\"cfs-master-home\"" in home
+    assert "Cabarrus FutureScape" in home
+    assert "CFS Planning" in home
+    assert "CFS Economics" in home
+    assert "CFS Investments" in home
+    assert "return <CfsMasterHome />;" in app_shell
+    assert "initialAppMode ?? null" in dashboard_state
+    assert 'initialAppMode ?? "planning"' not in dashboard_state
+    assert "readStoredCfsAppMode" not in dashboard_state
+    assert "setCfsAppMode(null)" in url_sync
+    assert "if (!cfsAppMode)" in url_sync
+
+
+def test_master_home_cards_open_primary_product_workspaces() -> None:
+    dashboard_state = read("src/hooks/useDashboardState.tsx")
+    home = read("src/components/layout/CfsMasterHome.tsx")
+    top_nav = read("src/components/layout/TopNav.tsx")
+
+    assert "Open Planning" in home
+    assert "Open Economics" in home
+    assert "Open Investments" in home
+    assert 'mode: "planning"' in home
+    assert 'mode: "economics"' in home
+    assert 'mode: "consulting"' in home
+    assert 'href: "/?app=planning"' in home
+    assert 'href: "/?app=economics"' in home
+    assert 'href: "/?app=consulting&investmentPage=engagements"' in home
+    assert '/?app=consulting&investmentPage=engagements' in top_nav
+    assert "`/?app=${mode}`" in top_nav
+    assert 'setProductMode("workspace")' in dashboard_state
+    assert 'setEconomicsSection("dashboard")' in dashboard_state
+    assert 'setOverviewCommandMode("countywide")' in top_nav
+
+
+def test_planning_and_economics_internal_overview_nav_removed() -> None:
+    top_nav = read("src/components/layout/TopNav.tsx")
+    dashboard_state = read("src/hooks/useDashboardState.tsx")
+    economics_shell = read("src/components/economics/EconomicsShell.tsx")
+
+    planning_nav = top_nav.split("const productModes", 1)[1].split(
+        "const economicsProductModes",
+        1,
+    )[0]
+    economics_nav = top_nav.split("const economicsProductModes", 1)[1].split(
+        "const QUICK_SEARCH_LIMIT",
+        1,
+    )[0]
+
+    assert 'id: "overview"' not in planning_nav
+    assert 'label: "Overview"' not in planning_nav
+    assert 'id: "overview"' not in economics_nav
+    assert 'label: "Overview"' not in economics_nav
+    assert "grid-cols-3" in top_nav
+    assert 'useState<ProductMode>("workspace")' in dashboard_state
+    assert 'useState<EconomicsSection>("dashboard")' in dashboard_state
+    assert 'setProductMode("overview")' not in dashboard_state
+    assert 'setEconomicsSection("overview")' not in dashboard_state
+    assert 'economicsSection === "overview"' in economics_shell
+    assert '? "dashboard"' in economics_shell
+
+
+def test_home_navigation_clears_product_url_state() -> None:
+    top_nav = read("src/components/layout/TopNav.tsx")
+
+    assert 'aria-label="Return to CFS Home"' in top_nav
+    assert 'window.history.pushState(null, "", "/")' in top_nav
+    assert "setCfsAppMode(null)" in top_nav
+    assert "CFS Investments" in top_nav
+    assert "Investment Intelligence" in top_nav
+
+
+def test_case_study_workflow_buttons_stay_in_project_url_state() -> None:
+    case_studies = read("src/components/investment/InvestmentCaseStudies.tsx")
+    economics_shell = read("src/components/economics/EconomicsShell.tsx")
+
+    assert '"assumptions", "compare", "criteria", "rerun-screening"' in case_studies
+    assert 'url.searchParams.set("investmentPage", "engagements")' in case_studies
+    assert 'url.searchParams.set("casePanel", panel)' in case_studies
+    assert 'window.dispatchEvent(new Event("cfs:case-study-url"))' in case_studies
+    assert 'window.addEventListener("cfs:case-study-url", syncCaseStudyUrl)' in case_studies
+    assert 'const reviewAssumptions = () => openPanel("underwrite", "assumptions");' in case_studies
+    assert 'onClick={() => openPanel(step, "compare")}' in case_studies
+    assert 'onClick={() => openPanel("deliver", "report")}' in case_studies
+    assert 'onOpenPanel("screen", "criteria")' in case_studies
+    assert 'onOpenPanel("screen", "rerun-screening")' in case_studies
+    assert 'onOpenPanel("shortlist", "change-decision", item.parcel_id)' in case_studies
+    assert 'onOpenPanel("shortlist", "remove-candidate", item.parcel_id)' in case_studies
+    assert 'onOpenPanel("deliver", "artifact", String(index))' in case_studies
+    assert "Create Case Study" not in case_studies
+    assert "Import Package" not in case_studies
+    assert "Clear Filters" in case_studies
+    assert 'onCompare={onCompareCaseStudyCandidates}' not in economics_shell
+    assert 'onReport={onOpenReport}' not in economics_shell
+    assert 'window.addEventListener("cfs:case-study-url", syncInvestmentUrlState)' in economics_shell
+    assert 'writeInvestmentDisplayPreference({ lastPage: "research", viewMode: investmentViewMode }, "push")' in economics_shell
+
+
 def test_demo_mode_uses_sanitized_static_search() -> None:
     top_nav = read("src/components/layout/TopNav.tsx")
     command_palette = read("src/components/dashboard/CommandPalette.tsx")
@@ -276,9 +396,9 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
 
     assert "Planning Intelligence" in top_nav
     assert "Economic Intelligence" in top_nav
-    assert "Real Estate Consulting" in top_nav
+    assert "Investment Intelligence" in top_nav
+    assert "CFS Investments" in top_nav
     assert "CFS Consulting" in top_nav
-    assert "Overview" in top_nav
     assert "Power BI & Tools" in top_nav
     assert "Economic Dashboard" in top_nav
     assert "Print" in top_nav
@@ -301,7 +421,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "<ConsultingShell />" in app_shell
     assert "econ-app-backdrop" in app_shell
     assert "consult-app-backdrop" in app_shell
-    assert "ExecutiveBriefPage" in economics_shell
+    assert "ExecutiveBriefPage" not in economics_shell
     assert "PowerBiToolsPage" in economics_shell
     assert "EconomicsWorkspacePage" in economics_shell
     assert "EconomicDashboardPage" in economics_shell
@@ -322,7 +442,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert 'window.addEventListener("resize", queueMeasure)' in economics_shell
     assert 'window.addEventListener("scroll", queueMeasure, true)' in economics_shell
     assert 'scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" })' in economics_shell
-    assert 'data-econ-tour="overview-hero"' in economics_shell
+    assert 'data-econ-tour="overview-hero"' not in economics_shell
     assert "powerbi-tools-header" in economics_shell
     assert "economics-row-selection" in economics_shell
     assert 'data-econ-tour="economics-filters"' in economics_shell
@@ -340,7 +460,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert 'data-econ-tour="print-header"' in economics_shell
     assert 'data-econ-tour="print-scope"' in economics_shell
     assert 'data-econ-tour="print-actions"' in economics_shell
-    assert "overview:" in economics_shell
+    assert "overview:" not in economics_shell
     assert "tools:" in economics_shell
     assert "dashboard:" in economics_shell
     assert "print:" in economics_shell
@@ -424,6 +544,19 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Open Find Sites" in case_studies
     assert "Add External Opportunity" in case_studies
     assert "Score unavailable - case-study sync requires review" in case_studies
+    assert "window.setInterval" not in case_studies
+    assert 'url.searchParams.set("investmentPage", "engagements")' in case_studies
+    assert 'const reviewAssumptions = () => openPanel("underwrite", "assumptions");' in case_studies
+    assert 'onClick={reviewAssumptions} type="button">Start Underwriting</button>' in case_studies
+    assert 'onClick={onUnderwrite} type="button">Review Assumptions</button>' in case_studies
+    assert 'h2 ref={headingRef} tabIndex={-1}>Assumptions Required</h2>' in case_studies
+    assert 'h2 ref={headingRef} tabIndex={-1}>Deliverable checklist</h2>' in case_studies
+    assert "window.setInterval(syncInvestmentUrlState" not in economics_shell
+    assert 'caseStudyFromUrl ? "engagements" : stored.lastPage' in economics_shell
+    assert 'writeInvestmentDisplayPreference({ lastPage: page, viewMode: investmentViewMode }, "push")' in economics_shell
+    assert 'openCaseStudyStep("underwrite")' in economics_shell
+    assert 'openInvestmentPage("underwriting", "Case Study Underwriting")' not in economics_shell
+    assert 'onUnderwriteCaseStudy' not in economics_shell
     assert "Underwriting uses user-entered assumptions and deterministic calculations" in economics_shell
     assert "Calculate Scenario" in economics_shell
     assert "Compare Scenarios" in economics_shell
@@ -508,11 +641,10 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "tools-due-diligence" in economics_shell
     assert "tools-advanced" in economics_shell
     assert "tools-final-output" in economics_shell
-    assert "Overview -> Power BI & Tools -> Economic Dashboard -> Print" in ask_service
-    assert "Uses the local FastAPI backend and local PostGIS economics data." in economics_shell
-    assert "Uses a sanitized cached demo extract for portfolio review." in economics_shell
+    assert "Power BI & Tools -> Economic Dashboard -> Print" in ask_service
+    assert "Local economics data is unavailable" in economics_shell
+    assert "Portfolio Demo / cached demo extract" in economics_shell
     assert "You are here:" in economics_shell
-    assert "Understand the workflow." in economics_shell
     assert "Generate a Power BI-style report preview, save it to the bucket, then send it to Print." in economics_shell
     assert economics_shell.index('tourId="tools-ask-cfs"') < economics_shell.index('tourRowSelectionId="economics-row-selection"')
     assert "Screening-level economic context, not official appraisal, tax bill, or fiscal impact study." in economics_shell
@@ -540,11 +672,6 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Reset filters" in economics_shell
     assert "Three-step Power BI workflow" in economics_shell
     assert "Screening-level economic context for selected rows or current economics summary." in economics_shell
-    assert "What CFS Economics does" in economics_shell
-    assert "What data it uses" in economics_shell
-    assert "What outputs it creates" in economics_shell
-    assert "What it is not" in economics_shell
-    assert "Why this matters" in economics_shell
     assert "Parcel Economic Baseline" in economics_shell
     assert "WorkspaceTableTabs" in economics_shell
     assert "Table type" in economics_shell

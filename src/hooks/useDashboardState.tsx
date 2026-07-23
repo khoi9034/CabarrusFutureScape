@@ -138,7 +138,7 @@ interface DashboardContextValue {
   briefingGenerationState: BriefingGenerationState;
   briefingMode: ExecutiveBriefingMode;
   briefingSections: ExecutiveBriefingSection[];
-  cfsAppMode: CfsAppMode;
+  cfsAppMode: CfsAppMode | null;
   economicsSection: EconomicsSection;
   comparisonMetrics: ScenarioComparisonMetric[];
   comparisonPair: ScenarioComparisonPair;
@@ -232,7 +232,7 @@ interface DashboardContextValue {
     included: boolean,
   ) => void;
   setProductMode: (mode: ProductMode) => void;
-  setCfsAppMode: (mode: CfsAppMode) => void;
+  setCfsAppMode: (mode: CfsAppMode | null) => void;
   setEconomicsSection: (section: EconomicsSection) => void;
   setReportIntent: (intent: ReportExportIntent) => void;
   setLayerVisibility: (layerId: string, visible: boolean) => void;
@@ -317,19 +317,6 @@ const MAX_STORED_PLANNING_SNAPSHOTS = 8;
 
 function isCfsAppMode(value: unknown): value is CfsAppMode {
   return value === "planning" || value === "economics" || value === "consulting";
-}
-
-function readStoredCfsAppMode(): CfsAppMode {
-  if (typeof window === "undefined") {
-    return "planning";
-  }
-
-  try {
-    const storedMode = window.localStorage.getItem(CFS_APP_MODE_STORAGE_KEY);
-    return isCfsAppMode(storedMode) ? storedMode : "planning";
-  } catch {
-    return "planning";
-  }
 }
 
 function writeStoredCfsAppMode(mode: CfsAppMode) {
@@ -643,9 +630,9 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
     selectedSchoolUtilizationZone,
     setSelectedSchoolUtilizationZone,
   ] = useState<SelectedSchoolUtilizationZone | null>(null);
-  const [productMode, setProductMode] = useState<ProductMode>("overview");
+  const [productMode, setProductMode] = useState<ProductMode>("workspace");
   const [economicsSection, setEconomicsSection] =
-    useState<EconomicsSection>("overview");
+    useState<EconomicsSection>("dashboard");
   const [overviewCommandMode, setOverviewCommandModeState] =
     useState<OverviewCommandMode>("countywide");
   const overviewCommandModeRef = useRef<OverviewCommandMode>("countywide");
@@ -677,7 +664,9 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
     selectedIndicatorCenterContext,
     setSelectedIndicatorCenterContext,
   ] = useState<IndicatorCenterContext | null>(null);
-  const [cfsAppMode, setCfsAppModeState] = useState<CfsAppMode>(initialAppMode ?? "planning");
+  const [cfsAppMode, setCfsAppModeState] = useState<CfsAppMode | null>(
+    initialAppMode ?? null,
+  );
   const [
     indicatorCenterDisplayMode,
     setIndicatorCenterDisplayMode,
@@ -709,42 +698,22 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
     if (typeof window === "undefined") return;
     const syncAppModeFromUrl = () => {
       try {
-      const params = new URLSearchParams(window.location.search);
-      const appMode = params.get("app");
-      if (isCfsAppMode(appMode)) {
-        setCfsAppModeState(appMode);
-        return;
-      }
-      if (params.has("investmentPage")) {
-        setCfsAppModeState("consulting");
-        return;
-      }
+        const appMode = new URLSearchParams(window.location.search).get("app");
+        const nextMode = isCfsAppMode(appMode) ? appMode : null;
+        setCfsAppModeState(nextMode);
+        if (nextMode === "planning") {
+          setProductMode("workspace");
+        } else if (nextMode === "economics") {
+          setEconomicsSection("dashboard");
+        }
       } catch {
         return;
       }
-      return false;
     };
-    const synced = syncAppModeFromUrl();
-    // ponytail: history restoration in the in-app browser can skip popstate;
-    // poll the tiny product-mode URL contract instead of adding router plumbing.
-    const urlModeIntervalId = window.setInterval(syncAppModeFromUrl, 500);
-    if (synced !== false) {
-      window.addEventListener("popstate", syncAppModeFromUrl);
-      window.addEventListener("pageshow", syncAppModeFromUrl);
-      return () => {
-        window.clearInterval(urlModeIntervalId);
-        window.removeEventListener("popstate", syncAppModeFromUrl);
-        window.removeEventListener("pageshow", syncAppModeFromUrl);
-      };
-    }
-    const timeoutId = window.setTimeout(() => {
-      setCfsAppModeState(readStoredCfsAppMode());
-    }, 0);
+    syncAppModeFromUrl();
     window.addEventListener("popstate", syncAppModeFromUrl);
     window.addEventListener("pageshow", syncAppModeFromUrl);
     return () => {
-      window.clearTimeout(timeoutId);
-      window.clearInterval(urlModeIntervalId);
       window.removeEventListener("popstate", syncAppModeFromUrl);
       window.removeEventListener("pageshow", syncAppModeFromUrl);
     };
@@ -852,11 +821,13 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
     [],
   );
 
-  const setCfsAppMode = useCallback((mode: CfsAppMode) => {
+  const setCfsAppMode = useCallback((mode: CfsAppMode | null) => {
     setCfsAppModeState(mode);
-    writeStoredCfsAppMode(mode);
-    setEconomicsSection("overview");
-    setProductMode("overview");
+    if (mode) {
+      writeStoredCfsAppMode(mode);
+    }
+    setEconomicsSection("dashboard");
+    setProductMode("workspace");
     setSelectedDevelopmentHotspotContext(null);
     setSelectedModelResearchContext(null);
     setSelectedIndicatorCenterContext(null);

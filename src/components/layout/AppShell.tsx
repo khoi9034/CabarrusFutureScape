@@ -37,6 +37,7 @@ import { OverviewCommandCenter } from "@/components/dashboard/OverviewCommandCen
 import { ConsultingShell } from "@/components/consulting/ConsultingShell";
 import { EconomicsShell } from "@/components/economics/EconomicsShell";
 import { SceneViewContainer } from "@/components/gis/SceneViewContainer";
+import { CfsMasterHome } from "@/components/layout/CfsMasterHome";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary";
@@ -133,6 +134,10 @@ function ProductShell() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMapFocusMode, setMapFocusMode]);
+
+  if (!cfsAppMode) {
+    return <CfsMasterHome />;
+  }
 
   return (
     <div

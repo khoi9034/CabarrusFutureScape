@@ -12,6 +12,7 @@ export function DashboardUrlSync() {
   const {
     applyRolePreset,
     applyWorkspacePreset,
+    cfsAppMode,
     clearSelectedParcel,
     dashboardUrlState,
     selectParcel,
@@ -49,8 +50,9 @@ export function DashboardUrlSync() {
       const appMode = new URLSearchParams(currentSearch).get("app");
       if (appMode === "planning" || appMode === "economics" || appMode === "consulting") {
         setCfsAppMode(appMode);
-      } else if (new URLSearchParams(currentSearch).has("investmentPage")) {
-        setCfsAppMode("consulting");
+      } else {
+        setCfsAppMode(null);
+        return;
       }
 
       if (nextState.roleId) {
@@ -134,6 +136,10 @@ export function DashboardUrlSync() {
       return;
     }
 
+    if (!cfsAppMode) {
+      return;
+    }
+
     const currentSearch = getCurrentSearchString();
 
     if (skipUrlWriteForSearchRef.current === currentSearch) {
@@ -162,7 +168,7 @@ export function DashboardUrlSync() {
 
     window.history.replaceState(null, "", createDashboardUrl(nextSearch));
     lastHydratedSearchRef.current = nextSearch;
-  }, [dashboardUrlState]);
+  }, [cfsAppMode, dashboardUrlState]);
 
   return null;
 }

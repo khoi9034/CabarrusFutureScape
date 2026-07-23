@@ -602,7 +602,7 @@ function demoEconomicsWalkthroughAnswer(asOf: string | null): CfsAiSearchRespons
     answer: briefing(
       [
         "Executive takeaway",
-        "Walk through CFS Economics in four screens: Overview, Power BI & Tools, Economic Dashboard, then Print. The portfolio demo uses a sanitized cached demo extract; local live mode uses the FastAPI backend and local PostGIS economics data.",
+        "Walk through CFS Economics in three screens: Power BI & Tools, Economic Dashboard, then Print. The portfolio demo uses a sanitized cached demo extract; local live mode uses the FastAPI backend and local PostGIS economics data.",
       ],
       [
         "Recommended sequence",
@@ -639,7 +639,7 @@ function demoEconomicsWalkthroughAnswer(asOf: string | null): CfsAiSearchRespons
     evidence: [
       evidence(
         "CFS Economics workflow",
-        "Overview -> Power BI & Tools -> Economic Dashboard -> Print.",
+        "Power BI & Tools -> Economic Dashboard -> Print.",
         "public/demo-data/economics_intelligence.json",
         "available",
       ),

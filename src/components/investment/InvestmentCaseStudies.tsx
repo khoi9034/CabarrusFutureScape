@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { InvestmentCaseStudy, InvestmentCaseStudyCandidate } from "@/types/api";
 
 type InvestmentCaseStudiesProps = {
@@ -10,16 +10,13 @@ type InvestmentCaseStudiesProps = {
   status?: string | null;
   onAnalyzeParcel: (parcelId: string, label?: string) => void;
   onArchive: (slug: string) => void;
-  onCompare: (parcelIds: string[]) => void;
   onDuplicate: (slug: string) => void;
   onExportBrief: (slug: string) => void;
   onMakeActive: (slug: string, parcelId: string) => void;
   onOpen: (slug: string) => void;
   onOpenFindSites: () => void;
   onOpenIntake: () => void;
-  onReport: () => void;
   onSaveNote: (slug: string, note: string) => void;
-  onUnderwrite: (parcelId?: string | null) => void;
 };
 
 const workflowSteps = [
@@ -33,6 +30,8 @@ const workflowSteps = [
 ] as const;
 
 type WorkflowStep = (typeof workflowSteps)[number]["id"];
+const casePanels = ["assumptions", "compare", "criteria", "rerun-screening", "change-decision", "remove-candidate", "report", "artifact", "package-status"] as const;
+type CasePanel = (typeof casePanels)[number];
 
 export function InvestmentCaseStudies({
   activeCaseStudy,
@@ -41,24 +40,25 @@ export function InvestmentCaseStudies({
   status,
   onAnalyzeParcel,
   onArchive,
-  onCompare,
   onDuplicate,
   onExportBrief,
   onMakeActive,
   onOpen,
   onOpenFindSites,
   onOpenIntake,
-  onReport,
   onSaveNote,
-  onUnderwrite,
 }: InvestmentCaseStudiesProps) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sort, setSort] = useState("updated");
-  const [workspaceSlug, setWorkspaceSlug] = useState<string | null>(() => readCaseStudyUrl().slug);
-  const [step, setStep] = useState<WorkflowStep>(() => readCaseStudyUrl().step ?? "analyze");
+  const initialUrlState = readCaseStudyUrl();
+  const [workspaceSlug, setWorkspaceSlug] = useState<string | null>(() => initialUrlState.slug);
+  const [step, setStep] = useState<WorkflowStep>(() => initialUrlState.step ?? "analyze");
+  const [panel, setPanel] = useState<CasePanel | null>(() => initialUrlState.panel);
+  const [panelItem, setPanelItem] = useState<string | null>(() => initialUrlState.item);
   const [note, setNote] = useState("");
   const titleRef = useRef<HTMLHeadingElement | null>(null);
+  const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
   const visible = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -73,53 +73,67 @@ export function InvestmentCaseStudies({
   const selectedSlug = selected?.slug;
 
   useEffect(() => {
-    const onPopState = () => {
+    const syncCaseStudyUrl = () => {
       const next = readCaseStudyUrl();
       setWorkspaceSlug(next.slug);
       setStep(next.step ?? "analyze");
+      setPanel(next.panel);
+      setPanelItem(next.item);
     };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, []);
-
-  useEffect(() => {
-    const syncCaseStudyUrl = () => {
-      const next = readCaseStudyUrl();
-      setWorkspaceSlug((current) => current === next.slug ? current : next.slug);
-      const nextStep = next.step;
-      if (nextStep) setStep((current) => current === nextStep ? current : nextStep);
-    };
-    const timeoutId = window.setTimeout(syncCaseStudyUrl, 0);
-    const intervalId = window.setInterval(syncCaseStudyUrl, 500);
     window.addEventListener("popstate", syncCaseStudyUrl);
     window.addEventListener("pageshow", syncCaseStudyUrl);
+    window.addEventListener("cfs:case-study-url", syncCaseStudyUrl);
     return () => {
-      window.clearTimeout(timeoutId);
-      window.clearInterval(intervalId);
       window.removeEventListener("popstate", syncCaseStudyUrl);
       window.removeEventListener("pageshow", syncCaseStudyUrl);
+      window.removeEventListener("cfs:case-study-url", syncCaseStudyUrl);
     };
   }, []);
 
   useEffect(() => {
-    if (selectedSlug) titleRef.current?.focus();
-  }, [selectedSlug]);
+    if (selectedSlug) stepHeadingRef.current?.focus();
+  }, [selectedSlug, step]);
 
   const openWorkspace = (slug: string) => {
     const nextStep = "analyze" as const;
     setWorkspaceSlug(slug);
     setStep(nextStep);
-    writeCaseStudyUrl(slug, nextStep, "push");
+    setPanel(null);
+    setPanelItem(null);
+    writeCaseStudyUrl(slug, nextStep, null, null, "push");
     onOpen(slug);
   };
   const backToLibrary = () => {
     setWorkspaceSlug(null);
-    writeCaseStudyUrl(null, null, "push");
+    setPanel(null);
+    setPanelItem(null);
+    writeCaseStudyUrl(null, null, null, null, "push");
   };
   const chooseStep = (nextStep: WorkflowStep) => {
     if (!selected) return;
     setStep(nextStep);
-    writeCaseStudyUrl(selected.slug, nextStep, "push");
+    setPanel(null);
+    setPanelItem(null);
+    writeCaseStudyUrl(selected.slug, nextStep, null, null, "push");
+  };
+  const openPanel = (nextStep: WorkflowStep, nextPanel: CasePanel, item?: string | null) => {
+    if (!selected) return;
+    setStep(nextStep);
+    setPanel(nextPanel);
+    setPanelItem(item ?? null);
+    writeCaseStudyUrl(selected.slug, nextStep, nextPanel, item ?? null, "push");
+  };
+  const closePanel = () => {
+    if (!selected) return;
+    setPanel(null);
+    setPanelItem(null);
+    writeCaseStudyUrl(selected.slug, step, null, null, "push");
+  };
+  const reviewAssumptions = () => openPanel("underwrite", "assumptions");
+  const clearLibraryFilters = () => {
+    setQuery("");
+    setStatusFilter("All");
+    setSort("updated");
   };
 
   if (!selected) {
@@ -183,8 +197,8 @@ export function InvestmentCaseStudies({
           <div className="investment-empty">
             No case studies match those filters.
             <div className="investment-row-actions mt-3">
-              <button className="investment-primary-button" type="button">Create Case Study</button>
-              <button className="investment-ghost-button" type="button">Import Package</button>
+              <button className="investment-primary-button" onClick={clearLibraryFilters} type="button">Clear Filters</button>
+              <button className="investment-ghost-button" onClick={onOpenFindSites} type="button">Open Find Sites</button>
             </div>
           </div>
         )}
@@ -195,7 +209,6 @@ export function InvestmentCaseStudies({
 
   const normalized = normalizeCaseStudy(selected);
   const activeParcelId = selected.active_parcel_id ?? normalized.caseStudy.active_parcel_id ?? selected.priority_candidate_id ?? null;
-  const candidateIds = normalized.candidates.map((candidate) => candidate.parcel_id);
   const currentCandidate = normalized.candidates.find((candidate) => candidate.parcel_id === activeParcelId) ?? normalized.candidates[0] ?? null;
   const continueStep = nextWorkflowStep(step);
 
@@ -221,12 +234,12 @@ export function InvestmentCaseStudies({
         <div className="investment-row-actions mt-4">
           <button className="investment-primary-button" onClick={() => chooseStep(continueStep)} type="button">Continue Next Step</button>
           <button className="investment-ghost-button" onClick={() => activeParcelId ? onAnalyzeParcel(activeParcelId, selected.title) : undefined} type="button">Open Active Property</button>
-          <button className="investment-ghost-button" onClick={() => onCompare(candidateIds)} type="button">Compare Candidates</button>
+          <button className="investment-ghost-button" onClick={() => openPanel(step, "compare")} type="button">Compare Candidates</button>
           <button className="investment-ghost-button" onClick={() => onExportBrief(selected.slug)} type="button">Export Codex Brief</button>
           <details className="investment-active-overflow">
             <summary>More</summary>
-            <button onClick={() => onUnderwrite(activeParcelId)} type="button">Start Underwriting</button>
-            <button onClick={onReport} type="button">Create Report</button>
+            <button onClick={reviewAssumptions} type="button">Start Underwriting</button>
+            <button onClick={() => openPanel("deliver", "report")} type="button">Create Report</button>
             <button onClick={() => onDuplicate(selected.slug)} type="button">Duplicate</button>
             <button onClick={() => onArchive(selected.slug)} type="button">Archive</button>
           </details>
@@ -255,18 +268,29 @@ export function InvestmentCaseStudies({
         normalized={normalized}
         note={note || String(selected.user_state?.analyst_note ?? "")}
         onAnalyzeParcel={onAnalyzeParcel}
-        onCompare={() => onCompare(candidateIds)}
+        onCompare={() => openPanel(step, "compare")}
         onExportBrief={() => onExportBrief(selected.slug)}
         onMakeActive={(parcelId) => onMakeActive(selected.slug, parcelId)}
         onNoteChange={setNote}
         onOpenFindSites={onOpenFindSites}
         onOpenIntake={onOpenIntake}
-        onReport={onReport}
+        onOpenPanel={openPanel}
+        onReport={() => openPanel("deliver", "report")}
         onSaveNote={() => onSaveNote(selected.slug, note || String(selected.user_state?.analyst_note ?? ""))}
-        onUnderwrite={() => onUnderwrite(activeParcelId)}
+        headingRef={stepHeadingRef}
+        onUnderwrite={reviewAssumptions}
         selected={selected}
         step={step}
       />
+      {panel ? (
+        <CaseStudyPanel
+          item={panelItem}
+          normalized={normalized}
+          onClose={closePanel}
+          panel={panel}
+          selected={selected}
+        />
+      ) : null}
       <details className="investment-disclosure">
         <summary>Interpretation and safety</summary>
         <SignalList values={normalized.limitations.length ? normalized.limitations : [
@@ -317,6 +341,7 @@ function CaseStudyStep({
   activeParcelId,
   candidate,
   codexBriefMarkdown,
+  headingRef,
   normalized,
   note,
   onAnalyzeParcel,
@@ -326,6 +351,7 @@ function CaseStudyStep({
   onNoteChange,
   onOpenFindSites,
   onOpenIntake,
+  onOpenPanel,
   onReport,
   onSaveNote,
   onUnderwrite,
@@ -344,17 +370,19 @@ function CaseStudyStep({
   onNoteChange: (value: string) => void;
   onOpenFindSites: () => void;
   onOpenIntake: () => void;
+  onOpenPanel: (step: WorkflowStep, panel: CasePanel, item?: string | null) => void;
   onReport: () => void;
   onSaveNote: () => void;
   onUnderwrite: () => void;
   selected: InvestmentCaseStudy;
   step: WorkflowStep;
+  headingRef: RefObject<HTMLHeadingElement | null>;
 }) {
   if (step === "define") {
     const strategy = normalized.strategy;
     return (
       <section className="investment-card">
-        <div className="investment-section-heading"><div><p>Define</p><h2>Strategy and criteria</h2></div></div>
+        <div className="investment-section-heading"><div><p>Define</p><h2 ref={headingRef} tabIndex={-1}>Strategy and criteria</h2></div></div>
         <Matrix rows={[
           ["Client", normalized.caseStudy.client_label ?? "Hypothetical client"],
           ["Strategy", selected.strategy],
@@ -375,7 +403,7 @@ function CaseStudyStep({
     const funnel = normalized.funnel;
     return (
       <section className="investment-card">
-        <div className="investment-section-heading"><div><p>Screen</p><h2>Saved screening revision</h2></div><span className="investment-pill">{displayCount(funnel.final_shortlist_count)} shortlisted</span></div>
+        <div className="investment-section-heading"><div><p>Screen</p><h2 ref={headingRef} tabIndex={-1}>Saved screening revision</h2></div><span className="investment-pill">{displayCount(funnel.final_shortlist_count)} shortlisted</span></div>
         <Matrix rows={[
           ["Screening question", "Which large Cabarrus County parcels meet the development-land review criteria?"],
           ["Search date", String(funnel.screened_at ?? "Not available")],
@@ -391,11 +419,11 @@ function CaseStudyStep({
         <SignalList title="Criteria used" values={normalized.criteria} />
         <div className="investment-row-actions mt-4">
           <button className="investment-primary-button" onClick={onOpenFindSites} type="button">Open Find Sites</button>
-          <button className="investment-ghost-button" type="button">View Criteria</button>
+          <button className="investment-ghost-button" onClick={() => onOpenPanel("screen", "criteria")} type="button">View Criteria</button>
           <button className="investment-ghost-button" onClick={onExportBrief} type="button">Export Funnel</button>
           <details className="investment-active-overflow">
             <summary>More</summary>
-            <button type="button">Rerun Screening</button>
+            <button onClick={() => onOpenPanel("screen", "rerun-screening")} type="button">Rerun Screening</button>
             <p className="investment-muted">Rerunning may create a new screening revision. Existing reviewed results will be preserved.</p>
           </details>
         </div>
@@ -405,7 +433,7 @@ function CaseStudyStep({
   if (step === "shortlist") {
     return (
       <section className="investment-card">
-        <div className="investment-section-heading"><div><p>Shortlist</p><h2>Three candidate decisions</h2></div></div>
+        <div className="investment-section-heading"><div><p>Shortlist</p><h2 ref={headingRef} tabIndex={-1}>Three candidate decisions</h2></div></div>
         {normalized.candidates.length ? (
           <div className="case-study-card-grid">
             {normalized.candidates.map((item) => (
@@ -433,21 +461,21 @@ function CaseStudyStep({
                     <summary>More</summary>
                     <button onClick={() => onMakeActive(item.parcel_id)} type="button">Make Active</button>
                     <button onClick={onUnderwrite} type="button">Start Underwriting</button>
-                    <button type="button">Change Decision</button>
-                    <button type="button">Remove from Case Study</button>
+                    <button onClick={() => onOpenPanel("shortlist", "change-decision", item.parcel_id)} type="button">Change Decision</button>
+                    <button onClick={() => onOpenPanel("shortlist", "remove-candidate", item.parcel_id)} type="button">Remove from Case Study</button>
                   </details>
                 </div>
               </article>
             ))}
           </div>
-        ) : <MissingState message="The case-study package is linked, but detailed candidate evidence has not been synchronized." />}
+        ) : <MissingState message="The case-study package is linked, but detailed candidate evidence has not been synchronized." onViewPackageStatus={() => onOpenPanel("shortlist", "package-status")} />}
       </section>
     );
   }
   if (step === "analyze") {
     return (
       <section className="investment-card">
-        <div className="investment-section-heading"><div><p>Analyze</p><h2>Active property evidence</h2></div><span className="investment-pill">{activeParcelId ?? "No active parcel"}</span></div>
+        <div className="investment-section-heading"><div><p>Analyze</p><h2 ref={headingRef} tabIndex={-1}>Active property evidence</h2></div><span className="investment-pill">{activeParcelId ?? "No active parcel"}</span></div>
         {candidate ? (
           <>
             <Matrix rows={[
@@ -461,14 +489,14 @@ function CaseStudyStep({
             <SignalList title="Evidence still missing" values={candidate.missing_evidence ?? candidate.missing_information ?? []} />
             <button className="investment-primary-button mt-4" onClick={() => onAnalyzeParcel(candidate.parcel_id, selected.title)} type="button">Analyze Property</button>
           </>
-        ) : <MissingState message="No active case-study candidate is selected." />}
+        ) : <MissingState message="No active case-study candidate is selected." onViewPackageStatus={() => onOpenPanel("analyze", "package-status")} />}
       </section>
     );
   }
   if (step === "underwrite") {
     return (
       <section className="investment-card">
-        <div className="investment-section-heading"><div><p>Underwrite</p><h2>Assumptions Required</h2></div></div>
+        <div className="investment-section-heading"><div><p>Underwrite</p><h2 ref={headingRef} tabIndex={-1}>Assumptions Required</h2></div></div>
         <div className="investment-two-column">
           <SignalList title="Evidence already available" values={[
             `Gross acreage: ${displayCount(candidate?.gross_acres)}`,
@@ -498,7 +526,7 @@ function CaseStudyStep({
   if (step === "decide") {
     return (
       <section className="investment-card">
-        <div className="investment-section-heading"><div><p>Decide</p><h2>Recommendation and due diligence</h2></div><span className="investment-pill">Needs Review</span></div>
+        <div className="investment-section-heading"><div><p>Decide</p><h2 ref={headingRef} tabIndex={-1}>Recommendation and due diligence</h2></div><span className="investment-pill">Needs Review</span></div>
         <Matrix rows={[
           ["Priority candidate", selected.priority_candidate_id ?? "Not set"],
           ["Secondary candidate", normalized.candidates[1]?.parcel_id ?? "Not set"],
@@ -512,11 +540,11 @@ function CaseStudyStep({
   }
   return (
     <section className="investment-card">
-      <div className="investment-section-heading"><div><p>Deliver</p><h2>Deliverable checklist</h2></div></div>
+      <div className="investment-section-heading"><div><p>Deliver</p><h2 ref={headingRef} tabIndex={-1}>Deliverable checklist</h2></div></div>
       <div className="investment-table-wrap">
         <table className="investment-table investment-table--compact">
           <thead><tr><th>Deliverable</th><th>Type</th><th>Status</th><th>Review</th></tr></thead>
-          <tbody>{normalized.deliverables.map((item) => <tr key={`${item.title}-${item.type}`}><td>{item.title}</td><td>{item.type}</td><td>{item.status}</td><td>{item.review_status ?? "Needs Review"}</td></tr>)}</tbody>
+          <tbody>{normalized.deliverables.map((item, index) => <tr key={`${item.title}-${item.type}`}><td>{item.title}</td><td>{item.type}</td><td>{item.status}</td><td><button onClick={() => onOpenPanel("deliver", "artifact", String(index))} type="button">{item.review_status ?? "Review"}</button></td></tr>)}</tbody>
         </table>
       </div>
       <div className="investment-row-actions mt-4">
@@ -562,13 +590,86 @@ function SignalList({ compact = false, title, values }: { compact?: boolean; tit
   return <div className={compact ? "investment-signal-list" : "investment-signal-list mt-4"}>{title ? <h3>{title}</h3> : null}{values.map((value) => <p key={value}>{value}</p>)}</div>;
 }
 
-function MissingState({ message }: { message: string }) {
+function CaseStudyPanel({
+  item,
+  normalized,
+  onClose,
+  panel,
+  selected,
+}: {
+  item: string | null;
+  normalized: NormalizedCaseStudy;
+  onClose: () => void;
+  panel: CasePanel;
+  selected: InvestmentCaseStudy;
+}) {
+  const candidate = normalized.candidates.find((row) => row.parcel_id === item) ?? normalized.candidates[0] ?? null;
+  const artifact = panel === "artifact" ? normalized.deliverables[Number(item)] : null;
+  const title = {
+    artifact: artifact?.title ?? "Deliverable review",
+    assumptions: "Underwriting assumption review",
+    compare: "Candidate comparison",
+    criteria: "Screening criteria",
+    "change-decision": "Decision change review",
+    "package-status": "Package status",
+    "remove-candidate": "Candidate removal review",
+    report: "Report preparation",
+    "rerun-screening": "Screening rerun review",
+  }[panel];
+  return (
+    <section className="investment-card" aria-label={title}>
+      <div className="investment-section-heading">
+        <div><p>Project detail</p><h2>{title}</h2></div>
+        <button className="investment-ghost-button" onClick={onClose} type="button">Return to {panel === "artifact" || panel === "report" ? "Deliver" : panel === "assumptions" ? "Underwrite" : "Project"}</button>
+      </div>
+      {panel === "assumptions" ? (
+        <div className="investment-two-column">
+          <SignalList title="Prefilled from CFS evidence" values={[
+            `Active candidate: ${candidate?.parcel_id ?? selected.priority_candidate_id ?? "Not set"}`,
+            `Gross acreage: ${displayCount(candidate?.gross_acres)}`,
+            `Developable-area screening estimate: ${displayCount(candidate?.developable_area_estimate ?? candidate?.preliminary_developable_acres)}`,
+            "Planning, market, transportation, utility-proxy, and environmental context are evidence inputs.",
+          ]} />
+          <SignalList title="Still needs analyst approval" values={["Density", "Revenue/value basis", "Horizontal costs", "Utility and off-site allowances", "Timeline", "Contingency", "Developer margin", "Scenario acquisition basis"]} />
+        </div>
+      ) : null}
+      {panel === "compare" ? (
+        <div className="investment-table-wrap">
+          <table className="investment-table investment-table--compact">
+            <thead><tr><th>Parcel</th><th>Role</th><th>Score</th><th>Developable estimate</th><th>Decision</th></tr></thead>
+            <tbody>{normalized.candidates.map((row) => <tr key={row.parcel_id}><td>{row.parcel_id}</td><td>{row.role_in_case_study ?? "Candidate"}</td><td>{displayCount(row.screening_score)}</td><td>{displayCount(row.developable_area_estimate ?? row.preliminary_developable_acres)}</td><td>{row.decision ?? "Needs review"}</td></tr>)}</tbody>
+          </table>
+        </div>
+      ) : null}
+      {panel === "criteria" ? <SignalList values={normalized.criteria} /> : null}
+      {panel === "rerun-screening" ? <p className="investment-empty">Rerunning is intentionally blocked for this preserved package. Create a new screening revision before replacing reviewed results.</p> : null}
+      {panel === "change-decision" ? <p className="investment-empty">Decision changes require analyst approval for {candidate?.parcel_id ?? "the selected candidate"} before the CASE-1 package is updated.</p> : null}
+      {panel === "remove-candidate" ? <p className="investment-empty">Candidate removal is blocked for this validated shortlist. Start a new revision to change the reviewed three-candidate package.</p> : null}
+      {panel === "report" ? <SignalList title="Available deliverables" values={normalized.deliverables.map((row) => `${row.title}: ${row.status}; ${row.review_status ?? "Needs Review"}`)} /> : null}
+      {panel === "artifact" ? <Matrix rows={[
+        ["Deliverable", artifact?.title ?? "Not found"],
+        ["Type", artifact?.type ?? "Not available"],
+        ["Status", artifact?.status ?? "Not available"],
+        ["Review status", artifact?.review_status ?? "Needs Review"],
+        ["Package path", artifact?.path ?? "Not available"],
+      ]} /> : null}
+      {panel === "package-status" ? <Matrix rows={[
+        ["Case-study status", selected.status],
+        ["Current stage", selected.current_stage],
+        ["Underwriting", selected.underwriting_status ?? "Needs Review"],
+        ["Deliverables", selected.deliverable_status ?? "Needs Review"],
+      ]} /> : null}
+    </section>
+  );
+}
+
+function MissingState({ message, onViewPackageStatus }: { message: string; onViewPackageStatus?: () => void }) {
   return (
     <div className="investment-empty">
       {message}
       <div className="investment-row-actions mt-3">
-        <button className="investment-primary-button" type="button">Retry</button>
-        <button className="investment-ghost-button" type="button">View Package Status</button>
+        <button className="investment-primary-button" onClick={onViewPackageStatus} type="button">Retry</button>
+        <button className="investment-ghost-button" onClick={onViewPackageStatus} type="button">View Package Status</button>
       </div>
     </div>
   );
@@ -626,26 +727,37 @@ function normalizeCandidate(candidate: InvestmentCaseStudyCandidate): Investment
   };
 }
 
-function readCaseStudyUrl(): { slug: string | null; step: WorkflowStep | null } {
-  if (typeof window === "undefined") return { slug: null, step: null };
+function readCaseStudyUrl(): { item: string | null; panel: CasePanel | null; slug: string | null; step: WorkflowStep | null } {
+  if (typeof window === "undefined") return { item: null, panel: null, slug: null, step: null };
   const params = new URLSearchParams(window.location.search);
   const step = params.get("caseStep");
+  const panel = params.get("casePanel");
   return {
+    item: params.get("caseItem"),
+    panel: isCasePanel(panel) ? panel : null,
     slug: params.get("caseStudy"),
     step: isWorkflowStep(step) ? step : null,
   };
 }
 
-function writeCaseStudyUrl(slug: string | null, step: WorkflowStep | null, mode: "push" | "replace") {
+function writeCaseStudyUrl(slug: string | null, step: WorkflowStep | null, panel: CasePanel | null, item: string | null, mode: "push" | "replace") {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
   url.searchParams.set("app", "consulting");
   url.searchParams.set("consultingPage", "case-studies");
+  url.searchParams.set("investmentPage", "engagements");
   if (slug) url.searchParams.set("caseStudy", slug);
   else url.searchParams.delete("caseStudy");
   if (step) url.searchParams.set("caseStep", step);
   else url.searchParams.delete("caseStep");
-  window.history[mode === "push" ? "pushState" : "replaceState"](null, "", url);
+  if (panel) url.searchParams.set("casePanel", panel);
+  else url.searchParams.delete("casePanel");
+  if (item) url.searchParams.set("caseItem", item);
+  else url.searchParams.delete("caseItem");
+  if (url.href !== window.location.href) {
+    window.history[mode === "push" ? "pushState" : "replaceState"](null, "", url);
+    window.dispatchEvent(new Event("cfs:case-study-url"));
+  }
 }
 
 function nextWorkflowStep(step: WorkflowStep): WorkflowStep {
@@ -655,6 +767,10 @@ function nextWorkflowStep(step: WorkflowStep): WorkflowStep {
 
 function isWorkflowStep(value: string | null): value is WorkflowStep {
   return Boolean(value && workflowSteps.some((item) => item.id === value));
+}
+
+function isCasePanel(value: string | null): value is CasePanel {
+  return Boolean(value && casePanels.includes(value as CasePanel));
 }
 
 function defaultWorkflowStatus(label: string) {
@@ -721,6 +837,7 @@ type CaseStudyPackage = {
 };
 
 type Deliverable = {
+  path?: string;
   review_status?: string;
   status: string;
   title: string;

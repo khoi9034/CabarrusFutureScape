@@ -1420,7 +1420,11 @@ def test_phase27a_navigation_refactor_overview_workspace_system() -> None:
         / "DueDiligenceReview.tsx"
     ).read_text(encoding="utf-8")
 
-    assert 'id: "overview"' in top_nav_text
+    planning_nav = top_nav_text.split("const productModes", 1)[1].split(
+        "const economicsProductModes",
+        1,
+    )[0]
+    assert 'id: "overview"' not in planning_nav
     assert 'id: "workspace"' in top_nav_text
     assert 'label: "Planning Snapshot"' in top_nav_text
     assert 'label: "Methodology"' in top_nav_text
@@ -1434,6 +1438,7 @@ def test_phase27a_navigation_refactor_overview_workspace_system() -> None:
     assert '| "indicatorCenter"' in types_text
 
     assert "function OverviewLandingPage" in app_shell_text
+    assert "return <CfsMasterHome />;" in app_shell_text
     assert "Cabarrus FutureScape" in app_shell_text
     assert "Parcel-centered planning intelligence for growth, constraints" in app_shell_text
     assert "Live Capability Strip" in app_shell_text
@@ -2208,7 +2213,7 @@ def test_phase29b_final_ui_polish_overview_and_navigation() -> None:
     for required in [
         "cfs-command-bar",
         "cfs-product-nav",
-        "grid-cols-4",
+        "grid-cols-3",
         "aria-label={`${mode.label}: ${mode.title}`}",
         "mode.shortLabel",
         "mode.description",

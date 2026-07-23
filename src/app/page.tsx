@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { EntraAuthGate } from "@/components/auth/EntraAuthGate";
 import { AppShell } from "@/components/layout/AppShell";
 import type { CfsAppMode } from "@/types";
@@ -10,9 +11,18 @@ export default async function Home({ searchParams }: { searchParams: HomeSearchP
   const initialAppMode: CfsAppMode | undefined =
     appMode === "planning" || appMode === "economics" || appMode === "consulting"
       ? appMode
-      : params.investmentPage
-        ? "consulting"
-        : undefined;
+      : undefined;
+
+  if (
+    !initialAppMode &&
+    (params.app !== undefined ||
+      params.investmentPage !== undefined ||
+      params.caseStudy !== undefined ||
+      params.caseStep !== undefined)
+  ) {
+    redirect("/");
+  }
+
   return (
     <EntraAuthGate>
       <AppShell initialAppMode={initialAppMode} />

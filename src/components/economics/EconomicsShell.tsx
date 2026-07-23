@@ -3,14 +3,10 @@
 import {
   BriefcaseBusiness,
   Building2,
-  Calculator,
-  Database,
   Gauge,
   MapPinned,
   Network,
   PanelLeft,
-  Search,
-  ShieldAlert,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
@@ -134,6 +130,10 @@ export function EconomicsShell({ mode = "economics" }: EconomicsShellProps = {})
     if (consultingMode) {
       return;
     }
+    if (economicsSection === "overview") {
+      setEconomicsSection("dashboard");
+      return;
+    }
     if (economicsSection === "workspace" || economicsSection === "enterprise") {
       setEconomicsSection("tools");
     }
@@ -242,7 +242,9 @@ export function EconomicsShell({ mode = "economics" }: EconomicsShellProps = {})
     );
   };
   const activeEconomicsSection =
-    economicsSection === "workspace" || economicsSection === "enterprise"
+    economicsSection === "overview"
+      ? "dashboard"
+      : economicsSection === "workspace" || economicsSection === "enterprise"
       ? "tools"
       : economicsSection;
   const consultingAuthStatus = USE_DEMO_DATA
@@ -294,9 +296,6 @@ export function EconomicsShell({ mode = "economics" }: EconomicsShellProps = {})
               Retry
             </button>
           </div>
-        ) : null}
-        {activeEconomicsSection === "overview" ? (
-          <ExecutiveBriefPage intelligence={intelligence} />
         ) : null}
         {activeEconomicsSection === "tools" ? (
           <PowerBiToolsPage
@@ -354,7 +353,7 @@ export function EconomicsShell({ mode = "economics" }: EconomicsShellProps = {})
   );
 }
 
-type EconomicsTutorialPage = "overview" | "tools" | "dashboard" | "print";
+type EconomicsTutorialPage = "tools" | "dashboard" | "print";
 
 type EconomicsTutorialStep = {
   actionSection?: EconomicsTutorialPage;
@@ -956,7 +955,7 @@ function InvestmentPanelPage({
   const [investmentReportType, setInvestmentReportType] = useState("development_site_review");
   const [activeInvestmentPage, setActiveInvestmentPage] = useState<InvestmentPageId>(() => readInvestmentDisplayPreference().lastPage ?? "overview");
   const [caseStudies, setCaseStudies] = useState<InvestmentCaseStudy[]>([]);
-  const [activeCaseStudySlug, setActiveCaseStudySlug] = useState<string | null>(null);
+  const [activeCaseStudySlug, setActiveCaseStudySlug] = useState<string | null>(() => readCaseStudyWorkflowUrl().slug);
   const [caseStudyBriefMarkdown, setCaseStudyBriefMarkdown] = useState<string | null>(null);
   const [myShortlist, setMyShortlist] = useState<InvestmentSavedItem[]>([]);
   const [recentWork, setRecentWork] = useState<InvestmentRecentWorkItem[]>([]);
@@ -985,18 +984,20 @@ function InvestmentPanelPage({
     const syncInvestmentUrlState = () => {
       const nextPage = readInvestmentDisplayPreference().lastPage;
       if (nextPage) setActiveInvestmentPage((current) => current === nextPage ? current : nextPage);
+      const nextCaseStudySlug = readCaseStudyWorkflowUrl().slug;
+      setActiveCaseStudySlug((current) => current === nextCaseStudySlug ? current : nextCaseStudySlug);
       const nextParcelId = readInvestmentParcelPreference();
       setActiveCandidateId((current) => current === nextParcelId ? current : nextParcelId);
     };
     const timeoutId = window.setTimeout(syncInvestmentUrlState, 0);
-    const intervalId = window.setInterval(syncInvestmentUrlState, 500);
     window.addEventListener("popstate", syncInvestmentUrlState);
     window.addEventListener("pageshow", syncInvestmentUrlState);
+    window.addEventListener("cfs:case-study-url", syncInvestmentUrlState);
     return () => {
       window.clearTimeout(timeoutId);
-      window.clearInterval(intervalId);
       window.removeEventListener("popstate", syncInvestmentUrlState);
       window.removeEventListener("pageshow", syncInvestmentUrlState);
+      window.removeEventListener("cfs:case-study-url", syncInvestmentUrlState);
     };
   }, []);
 
@@ -1375,6 +1376,7 @@ function InvestmentPanelPage({
     const selected = visibleCaseStudies.find((item) => item.slug === slug);
     setActiveCaseStudySlug(slug);
     setActiveInvestmentPage("engagements");
+    writeCaseStudyWorkflowUrl(slug, readCaseStudyWorkflowUrl().step ?? "analyze", "push");
     if (!selected) return;
     void recordInvestmentRecentWork({
       activity_type: "opened_case_study",
@@ -1389,6 +1391,16 @@ function InvestmentPanelPage({
     })
       .then((response) => setRecentWork(response.items))
       .catch(() => undefined);
+  };
+  const openCaseStudyStep = (step: CaseStudyWorkflowStep) => {
+    const slug = activeCaseStudy?.slug ?? activeCaseStudySlug;
+    if (!slug) {
+      openInvestmentPage("engagements", "Projects");
+      return;
+    }
+    setActiveCaseStudySlug(slug);
+    setActiveInvestmentPage("engagements");
+    writeCaseStudyWorkflowUrl(slug, step, "push");
   };
   const compareCaseStudyCandidates = (parcelIds: string[]) => {
     const ids = new Set(parcelIds);
@@ -1655,6 +1667,7 @@ function InvestmentPanelPage({
   };
   const openInvestmentPage = (page: InvestmentPageId, label?: string) => {
     setActiveInvestmentPage(page);
+    writeInvestmentDisplayPreference({ lastPage: page, viewMode: investmentViewMode }, "push");
     if (label) {
       void recordInvestmentRecentWork({
         activity_type: "opened_workspace",
@@ -1676,6 +1689,7 @@ function InvestmentPanelPage({
     setActiveCandidateId(safeParcelId);
     setActiveResearchContext(null);
     setActiveInvestmentPage("research");
+    writeInvestmentDisplayPreference({ lastPage: "research", viewMode: investmentViewMode }, "push");
     writeInvestmentParcelPreference(safeParcelId);
     setActiveResearchStatus("Loading");
     const safeLabel = label || safeParcelId;
@@ -1996,7 +2010,7 @@ function InvestmentPanelPage({
                     <summary>More</summary>
                     <button onClick={() => activeCaseStudy.active_parcel_id ? analyzeParcel(activeCaseStudy.active_parcel_id, activeCaseStudy.title) : undefined} type="button">Review Property</button>
                     <button onClick={() => compareCaseStudyCandidates(activeCaseStudyCandidateIds)} type="button">Compare Candidates</button>
-                    <button onClick={() => openInvestmentPage("underwriting", "Review Assumptions")} type="button">Review Assumptions</button>
+                    <button onClick={() => openCaseStudyStep("underwrite")} type="button">Review Assumptions</button>
                   </details>
                 </div>
               </section>
@@ -2162,7 +2176,6 @@ function InvestmentPanelPage({
             onAddArea={(areaId) => addToFirstEngagement(areaId, "search_area")}
             onAnalyzeCaseStudyParcel={analyzeParcel}
             onArchiveCaseStudy={archiveCaseStudy}
-            onCompareCaseStudyCandidates={compareCaseStudyCandidates}
             onCreate={createDefaultEngagement}
             onDuplicateCaseStudy={duplicateCaseStudy}
             onExportCaseStudyBrief={exportCaseStudyBrief}
@@ -2171,15 +2184,7 @@ function InvestmentPanelPage({
             onOpenCaseStudy={openCaseStudy}
             onOpenFindSites={() => openInvestmentPage("area-radar", "Find Sites")}
             onOpenIntake={() => openInvestmentPage("intake", "Add External Opportunity")}
-            onOpenReport={() => openInvestmentPage("report-studio", "Case Study Report")}
             onSaveCaseStudyNote={saveCaseStudyNote}
-            onUnderwriteCaseStudy={(parcelId) => {
-              if (parcelId) {
-                setActiveCandidateId(parcelId);
-                writeInvestmentParcelPreference(parcelId);
-              }
-              openInvestmentPage("underwriting", "Case Study Underwriting");
-            }}
           />
         );
       case "report-bucket":
@@ -2223,7 +2228,11 @@ function InvestmentPanelPage({
       onActiveShortlist={addActivePropertyToShortlist}
       onActiveUnderwrite={() => {
         if (activeParcelId) void applyUnderwritingPrefill();
-        openInvestmentPage("underwriting", activePropertySummary?.label ?? "Underwriting");
+        if (activeCaseStudy) {
+          openCaseStudyStep("underwrite");
+        } else {
+          openInvestmentPage("underwriting", activePropertySummary?.label ?? "Underwriting");
+        }
       }}
       onAskCfs={() => setAssistantOpen(true)}
       onPageChange={(page) => openInvestmentPage(page, investmentPages.find((item) => item.id === page)?.label ?? titleText(page))}
@@ -2712,7 +2721,6 @@ function InvestmentEngagementsPage({
   onAddArea,
   onAnalyzeCaseStudyParcel,
   onArchiveCaseStudy,
-  onCompareCaseStudyCandidates,
   onCreate,
   onDuplicateCaseStudy,
   onExportCaseStudyBrief,
@@ -2721,9 +2729,7 @@ function InvestmentEngagementsPage({
   onOpenCaseStudy,
   onOpenFindSites,
   onOpenIntake,
-  onOpenReport,
   onSaveCaseStudyNote,
-  onUnderwriteCaseStudy,
 }: {
   activeCaseStudy: InvestmentCaseStudy | null;
   caseStudies: InvestmentCaseStudy[];
@@ -2732,7 +2738,6 @@ function InvestmentEngagementsPage({
   onAddArea: (areaId: string) => void;
   onAnalyzeCaseStudyParcel: (parcelId: string, label?: string) => void;
   onArchiveCaseStudy: (slug: string) => void;
-  onCompareCaseStudyCandidates: (parcelIds: string[]) => void;
   onCreate: () => void;
   onDuplicateCaseStudy: (slug: string) => void;
   onExportCaseStudyBrief: (slug: string) => void;
@@ -2741,9 +2746,7 @@ function InvestmentEngagementsPage({
   onOpenCaseStudy: (slug: string) => void;
   onOpenFindSites: () => void;
   onOpenIntake: () => void;
-  onOpenReport: () => void;
   onSaveCaseStudyNote: (slug: string, note: string) => void;
-  onUnderwriteCaseStudy: (parcelId?: string | null) => void;
 }) {
   const [projectView, setProjectView] = useState<"active" | "case-studies">("case-studies");
   const active = engagements[0];
@@ -2771,16 +2774,13 @@ function InvestmentEngagementsPage({
           codexBriefMarkdown={caseStudyBriefMarkdown}
           onAnalyzeParcel={onAnalyzeCaseStudyParcel}
           onArchive={onArchiveCaseStudy}
-          onCompare={onCompareCaseStudyCandidates}
           onDuplicate={onDuplicateCaseStudy}
           onExportBrief={onExportCaseStudyBrief}
           onMakeActive={onMakeCaseStudyCandidateActive}
           onOpen={onOpenCaseStudy}
           onOpenFindSites={onOpenFindSites}
           onOpenIntake={onOpenIntake}
-          onReport={onOpenReport}
           onSaveNote={onSaveCaseStudyNote}
-          onUnderwrite={onUnderwriteCaseStudy}
         />
       ) : null}
       {projectView === "active" ? (
@@ -3268,28 +3268,63 @@ function readInvestmentDisplayPreference(): {
   try {
     const params = new URLSearchParams(window.location.search);
     const pageFromUrl = params.get("investmentPage");
+    const caseStudyFromUrl = params.get("caseStudy");
     const stored = JSON.parse(localStorage.getItem("cfs-investment-display-preferences") ?? "{}");
     return {
       ...stored,
-      lastPage: isInvestmentPageId(pageFromUrl) ? pageFromUrl : stored.lastPage,
+      lastPage: isInvestmentPageId(pageFromUrl) ? pageFromUrl : caseStudyFromUrl ? "engagements" : stored.lastPage,
     };
   } catch {
     return {};
   }
 }
 
-function writeInvestmentDisplayPreference(preference: { lastPage: InvestmentPageId; viewMode: "guided" | "advanced" }) {
+function writeInvestmentDisplayPreference(preference: { lastPage: InvestmentPageId; viewMode: "guided" | "advanced" }, mode: "push" | "replace" = "replace") {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem("cfs-investment-display-preferences", JSON.stringify(preference));
     const url = new URL(window.location.href);
-    const pageFromUrl = url.searchParams.get("investmentPage");
-    if (isInvestmentPageId(pageFromUrl) && pageFromUrl !== preference.lastPage) return;
     url.searchParams.set("investmentPage", preference.lastPage);
-    window.history.replaceState(null, "", url);
+    if (url.href !== window.location.href) window.history[mode === "push" ? "pushState" : "replaceState"](null, "", url);
   } catch {
     // Low-risk display preference only; ignore private-mode or quota failures.
   }
+}
+
+type CaseStudyWorkflowStep = "define" | "screen" | "shortlist" | "analyze" | "underwrite" | "decide" | "deliver";
+
+function readCaseStudyWorkflowUrl(): { slug: string | null; step: CaseStudyWorkflowStep | null } {
+  if (typeof window === "undefined") return { slug: null, step: null };
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const step = params.get("caseStep");
+    return {
+      slug: params.get("caseStudy"),
+      step: isCaseStudyWorkflowStep(step) ? step : null,
+    };
+  } catch {
+    return { slug: null, step: null };
+  }
+}
+
+function writeCaseStudyWorkflowUrl(slug: string, step: CaseStudyWorkflowStep, mode: "push" | "replace") {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  url.searchParams.set("app", "consulting");
+  url.searchParams.set("consultingPage", "case-studies");
+  url.searchParams.set("investmentPage", "engagements");
+  url.searchParams.set("caseStudy", slug);
+  url.searchParams.set("caseStep", step);
+  url.searchParams.delete("casePanel");
+  url.searchParams.delete("caseItem");
+  if (url.href !== window.location.href) {
+    window.history[mode === "push" ? "pushState" : "replaceState"](null, "", url);
+    window.dispatchEvent(new Event("cfs:case-study-url"));
+  }
+}
+
+function isCaseStudyWorkflowStep(value: string | null): value is CaseStudyWorkflowStep {
+  return Boolean(value && ["define", "screen", "shortlist", "analyze", "underwrite", "decide", "deliver"].includes(value));
 }
 
 function readInvestmentParcelPreference() {
@@ -4135,145 +4170,6 @@ function InvestmentBucketPanel({
         <p className="investment-empty">Save review guides, candidate notes, or chart plans here before printing.</p>
       )}
     </section>
-  );
-}
-
-function ExecutiveBriefPage({
-  intelligence,
-}: {
-  intelligence: EconomicsIntelligenceResponse | null;
-}) {
-  const summary = intelligence?.summary;
-  return (
-    <>
-      <section className="econ-hero rounded-2xl p-6 md:p-8" data-econ-tour="overview-hero">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="econ-eyebrow">Overview</p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--econ-text)] md:text-5xl">
-              CFS Economics
-            </h1>
-            <p className="mt-4 max-w-4xl text-base leading-8 text-[var(--econ-muted)]">
-              Parcel-based economic intelligence for growth, tax-base
-              opportunity, infrastructure burden, and fiscal/service tradeoffs.
-            </p>
-            <p className="mt-3 max-w-4xl text-sm leading-7 text-[var(--econ-muted)]">
-              Traditional GIS can show where things are. CFS Economics helps
-              explain what those places mean economically.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2" data-econ-tour="data-mode">
-            <EconChip>{USE_DEMO_DATA ? "Portfolio Demo / cached demo extract" : "Local Live Data"}</EconChip>
-            <EconChip>{summary?.as_of ? `As of ${formatDate(summary.as_of)}` : "Freshness pending"}</EconChip>
-          </div>
-        </div>
-      </section>
-
-      <PageHelper text="Understand the workflow." />
-
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        {executiveCards.map((card) => (
-          <EconCard key={card.title}>
-            <card.icon className="h-5 w-5 text-[var(--econ-gold)]" />
-            <h2 className="mt-3 text-base font-semibold text-[var(--econ-text)]">
-              {card.title}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--econ-muted)]">
-              {card.text}
-            </p>
-          </EconCard>
-        ))}
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-        <EconPanel title="What CFS Economics does" kicker="Plain-language purpose">
-          <p className="text-sm leading-7 text-[var(--econ-muted)]">
-            CFS Economics provides screening-level economic intelligence. It
-            turns parcel value, acreage, permit context, constraints, and data
-            confidence into a parcel economic baseline, underbuilt
-            redevelopment watchlist, tax-base opportunity view, and
-            fiscal/service burden context.
-          </p>
-        </EconPanel>
-        <EconPanel title="What data it uses" kicker="Source context">
-          <p className="text-sm leading-7 text-[var(--econ-muted)]">
-            The workflow uses parcel/tax fields, acreage, jurisdiction or
-            geography labels, permit activity where available, constraint
-            context, scenario assumptions, and enterprise export-ready tables.
-          </p>
-        </EconPanel>
-        <EconPanel title="Local live data vs portfolio demo" kicker="Data mode">
-          <div className="space-y-3 text-sm leading-7 text-[var(--econ-muted)]">
-            <p>
-              <span className="font-semibold text-[var(--econ-text)]">Local mode:</span>{" "}
-              Uses the local FastAPI backend and local PostGIS economics data.
-            </p>
-            <p>
-              <span className="font-semibold text-[var(--econ-text)]">Demo mode:</span>{" "}
-              Uses a sanitized cached demo extract for portfolio review.
-            </p>
-          </div>
-        </EconPanel>
-        <EconPanel title="How to use CFS Economics" kicker="Simple workflow" tourId="workflow">
-          <ol className="list-decimal space-y-2 pl-5 text-sm leading-6 text-[var(--econ-muted)]">
-            <li>Start in Power BI & Tools.</li>
-            <li>Review tables, select rows, and export CSVs.</li>
-            <li>Open Economic Dashboard for KPIs and charts.</li>
-            <li>Use Power BI & Tools for planning-model exports and decision packs.</li>
-            <li>Print an economic snapshot.</li>
-          </ol>
-        </EconPanel>
-        <EconPanel title="County economics signal" kicker="Current baseline">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <MiniMetric label="Parcels analyzed" value={formatNumber(summary?.total_parcels_analyzed)} />
-            <MiniMetric label="Assessed value" value={currency(summary?.total_assessed_value)} />
-            <MiniMetric label="Underbuilt watch" value={formatNumber(summary?.underbuilt_candidate_count)} />
-          </div>
-          <p className="mt-4 text-sm leading-7 text-[var(--econ-muted)]">
-            CFS Economics turns parcel, tax, permit, infrastructure, and
-            constraint context into screening-level scorecards for consulting
-            review. It is not an approval recommendation, formal appraisal, tax
-            bill, or full fiscal impact study.
-          </p>
-        </EconPanel>
-        <EconPanel title="What outputs it creates" kicker="Presentation outputs">
-          <ul className="space-y-2 text-sm leading-6 text-[var(--econ-muted)]">
-            <li>Power BI & Tools tables for parcel economics and watchlists.</li>
-            <li>Economic Dashboard indicators and Ask CFS briefings.</li>
-            <li>Power BI-ready JSON and CSV table exports.</li>
-            <li>Planning-model dimensions, measures, scenarios, and decision-pack payloads.</li>
-            <li>Printable economic snapshot for presentation or review.</li>
-          </ul>
-        </EconPanel>
-        <EconPanel title="What it is not" kicker="Safe-use caveat">
-          <p className="text-sm leading-7 text-[var(--econ-muted)]">
-            CFS Economics is not an official appraisal, tax bill, fiscal impact
-            study, or approval recommendation. It is a decision-support workflow
-            for identifying where deeper diligence is needed.
-          </p>
-        </EconPanel>
-        <EconPanel title="Why this matters" kicker="Portfolio reviewer note">
-          <p className="text-sm leading-7 text-[var(--econ-muted)]">
-            CFS Economics connects parcel economics, permit activity,
-            constraints, scenario logic, data confidence, a Power BI Desktop
-            export pack, planning model schema, and decision-pack outputs into a
-            screening-level decision-support platform.
-          </p>
-        </EconPanel>
-        <EconPanel title="Decision questions" kicker="What it helps answer">
-          <div className="grid gap-2">
-            {decisionQuestions.map((question) => (
-              <div
-                className="rounded-lg border border-[var(--econ-border)] bg-white/[0.025] px-3 py-2 text-sm text-[var(--econ-text)]"
-                key={question}
-              >
-                {question}
-              </div>
-            ))}
-          </div>
-        </EconPanel>
-      </section>
-    </>
   );
 }
 
@@ -12557,35 +12453,6 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
       title: "Ask CFS",
     },
   ],
-  overview: [
-    {
-      body: "This mode turns parcel, tax-base, and constraint data into screening-level economic intelligence.",
-      id: "overview-hero",
-      targetSelector: '[data-econ-tour="overview-hero"]',
-      title: "What it is",
-    },
-    {
-      body: "Use Overview, Power BI & Tools, Economic Dashboard, and Print as one workflow.",
-      id: "overview-workflow",
-      targetSelector: '[data-econ-tour="workflow"]',
-      title: "Four-page workflow",
-    },
-    {
-      body: "Local mode uses FastAPI and PostGIS. Portfolio demo uses a cached demo extract.",
-      id: "overview-data",
-      targetSelector: '[data-econ-tour="data-mode"]',
-      title: "Data mode",
-    },
-    {
-      actionSection: "tools",
-      body: "Start by selecting rows or building a Power BI-ready output.",
-      id: "overview-next",
-      keepTutorialOpenOnAction: true,
-      optionalActionLabel: "Open Power BI & Tools tutorial",
-      targetSelector: '[data-econ-tour="workflow"]',
-      title: "Next step",
-    },
-  ],
   print: [
     {
       body: "This page creates a screening-level economics snapshot.",
@@ -12692,42 +12559,6 @@ const economicsTutorialSteps: Record<EconomicsTutorialPage, EconomicsTutorialSte
     },
   ],
 };
-
-const executiveCards = [
-  {
-    icon: Gauge,
-    text: "Value, acreage, permit activity, and confidence summarized for executive review.",
-    title: "Growth & Tax Base Intelligence",
-  },
-  {
-    icon: Search,
-    text: "Underbuilt, constrained, and data-needed parcel signals in a consulting screen.",
-    title: "Parcel Investment Screen",
-  },
-  {
-    icon: ShieldAlert,
-    text: "Fiscal upside reviewed against service burden, infrastructure uncertainty, and constraints.",
-    title: "Fiscal Impact Lens",
-  },
-  {
-    icon: Calculator,
-    text: "Scenario assumptions, measures, and output bands in a planning-model workflow.",
-    title: "Scenario Planning Model",
-  },
-  {
-    icon: Database,
-    text: "Facts, dimensions, and decision-pack exports for future BI and planning tools.",
-    title: "Enterprise Export / BI Readiness",
-  },
-];
-
-const decisionQuestions = [
-  "Where is economic opportunity strongest?",
-  "Which parcels appear underbuilt?",
-  "Where does growth create service burden?",
-  "Which corridors deserve deeper investment review?",
-  "What data gaps limit confidence?",
-];
 
 const fallbackScenarioOutputs: EconomicsScenarioOutput[] = [
   {

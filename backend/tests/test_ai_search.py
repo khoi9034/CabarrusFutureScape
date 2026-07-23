@@ -812,7 +812,7 @@ def test_ai_search_economics_product_guidance_prompt_returns_walkthrough() -> No
     )
 
     assert response.domains == ["economics"]
-    assert "Overview, Power BI & Tools, Economic Dashboard, then Print" in response.answer
+    assert "Power BI & Tools, Economic Dashboard, then Print" in response.answer
     assert "Recommended sequence" in response.answer
     assert any("Power BI & Tools" in action for action in response.suggested_actions)
 
@@ -842,7 +842,7 @@ def test_ai_search_economics_guidance_skips_provider(monkeypatch) -> None:
 
     assert calls["count"] == 0
     assert response.provider == "none"
-    assert "Overview, Power BI & Tools, Economic Dashboard, then Print" in response.answer
+    assert "Power BI & Tools, Economic Dashboard, then Print" in response.answer
 
 
 def test_ai_search_economics_scenario_prompt_returns_model_answer() -> None:
