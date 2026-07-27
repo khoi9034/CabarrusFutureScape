@@ -110,15 +110,15 @@ export function InvestmentShell({
   const [collapsed, setCollapsed] = useState(false);
   const active = consultingPageMeta[primaryPageFor(activePage)];
   return (
-    <section className={`investment-shell ${collapsed ? "is-collapsed" : ""}`} aria-label="CFS Consulting">
-      <aside className="investment-sidebar" aria-label="CFS Consulting navigation">
+    <section className={`investment-shell ${collapsed ? "is-collapsed" : ""}`} aria-label="CFS Investments">
+      <aside className="investment-sidebar" aria-label="CFS Investments navigation">
         <div className="investment-brand">
           <span className="investment-brand-mark"><BriefcaseBusiness className="h-4 w-4" /></span>
           <div>
-            <p>CFS Consulting</p>
+            <p>CFS Investments</p>
             <span>Real Estate Intelligence</span>
           </div>
-          <button className="investment-icon-button" onClick={() => setCollapsed((value) => !value)} type="button" aria-label={collapsed ? "Expand CFS Consulting navigation" : "Collapse CFS Consulting navigation"}>
+          <button className="investment-icon-button" onClick={() => setCollapsed((value) => !value)} type="button" aria-label={collapsed ? "Expand CFS Investments navigation" : "Collapse CFS Investments navigation"}>
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
         </div>
@@ -169,7 +169,7 @@ export function InvestmentShell({
           </div>
         </header>
         {activeProject ? (
-          <section className="investment-context-bar" aria-label="Active consulting context">
+          <section className="investment-context-bar" aria-label="Active investment context">
             <span><strong>Project</strong> {activeProject.title}</span>
             {activeProperty ? <span><strong>Property</strong> {activeProperty.parcelId}</span> : null}
             {activeProject.propertyRole ? <span><strong>Role</strong> {activeProject.propertyRole}</span> : null}
@@ -208,7 +208,7 @@ export function InvestmentShell({
           {children}
         </main>
         <footer className="investment-footer">
-          CFS Consulting is for screening-level real estate research only. It is not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.
+          CFS Investments is a portfolio demonstration using sanitized or cached public demo data where applicable. It is for screening-level real estate research only, not investment advice, not an appraisal, not a utility service confirmation, and not a guarantee of future value.
         </footer>
       </div>
     </section>
@@ -216,7 +216,7 @@ export function InvestmentShell({
 }
 
 const consultingPageMeta: Record<InvestmentPageId, { description: string; label: string; primaryAction: string; primaryPage: InvestmentPageId }> = {
-  overview: { label: "Consulting Home", description: "Continue active work or begin a new site-selection review.", primaryAction: "Continue Active Project", primaryPage: "engagements" },
+  overview: { label: "Investments Home", description: "Continue active work or begin a new site-selection review.", primaryAction: "Continue Active Project", primaryPage: "engagements" },
   engagements: { label: "Projects", description: "Manage acquisition reviews, site-selection studies, and deliverables.", primaryAction: "New Project", primaryPage: "engagements" },
   "area-radar": { label: "Find Sites", description: "Screen county parcels or add an external opportunity.", primaryAction: "Run Screening", primaryPage: "area-radar" },
   research: { label: "Property Review", description: "Evaluate one property's planning, market, access, utility, and constraint evidence.", primaryAction: "Select Property", primaryPage: "research" },

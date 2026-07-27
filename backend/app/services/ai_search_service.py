@@ -923,7 +923,7 @@ def _investment_research_answer(
     candidate = filters.get("active_intake_candidate") or filters.get("selected_candidate") or "the active candidate"
     strategy = filters.get("active_strategy") or "selected strategy"
     underwriting = filters.get("active_underwriting_summary") or filters.get("active_underwriting_result")
-    product_label = "CFS Consulting" if request.app_mode == "consulting" else "CFS Investment"
+    product_label = "CFS Investments" if request.app_mode == "consulting" else "CFS Investment"
     saved_workspace_lines = [
         f"Shortlist count: {filters.get('persisted_shortlist_count') or 0}",
         f"Shortlist preview: {filters.get('persisted_shortlist_preview') or 'No saved shortlist items were provided in context.'}",

@@ -398,7 +398,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Economic Intelligence" in top_nav
     assert "Investment Intelligence" in top_nav
     assert "CFS Investments" in top_nav
-    assert "CFS Consulting" in top_nav
+    assert "CFS Consulting" not in top_nav
     assert "Power BI & Tools" in top_nav
     assert "Economic Dashboard" in top_nav
     assert "Print" in top_nav
@@ -418,7 +418,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "setEconomicsSection" in dashboard_state
     assert "localStorage.setItem(CFS_APP_MODE_STORAGE_KEY" in dashboard_state
     assert "<EconomicsShell />" in app_shell
-    assert "<ConsultingShell />" in app_shell
+    assert "ConsultingShell" in app_shell
     assert "econ-app-backdrop" in app_shell
     assert "consult-app-backdrop" in app_shell
     assert "ExecutiveBriefPage" not in economics_shell
@@ -482,9 +482,11 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     investment_styles = read("src/styles/cfs-theme.css")
     assert "InvestmentShell" in economics_shell
     assert 'import { ConsultingShell } from "@/components/consulting/ConsultingShell";' in app_shell
-    assert 'return <EconomicsShell mode="consulting" />;' in consulting_shell
+    assert "EconomicsShell" in consulting_shell
+    assert 'mode="consulting"' in consulting_shell
     assert "export function ConsultingShell" not in economics_shell
-    assert "CFS Consulting" in investment_shell
+    assert "CFS Investments" in investment_shell
+    assert "CFS Consulting" not in investment_shell
     assert "Real Estate Intelligence" in investment_shell
     assert "investmentPageGroups" in investment_shell
     assert "Home" in investment_shell
@@ -523,7 +525,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "Local convenience gate only" not in economics_shell
     assert "INVESTMENT_PANEL_ACCESS_CODE" not in economics_shell
     assert "Access code did not match" not in economics_shell
-    assert "Ask CFS Consulting" in economics_shell
+    assert "Ask CFS Investments" in economics_shell
     assert "Investment Report Studio" in economics_shell
     assert "InvestmentUnderwritingLab" in economics_shell
     assert "What are you trying to do?" not in economics_shell
@@ -813,7 +815,7 @@ def test_cfs_economics_mode_is_wired_without_new_nav_item() -> None:
     assert "portfolio_demo_extract" in ask_service
     assert "cached_demo_extract" in ask_service
     assert "Traditional GIS can show where things are" in overview
-    assert "Consulting Decision Workflows" in overview
+    assert "Investment Decision Workflows" in overview
     assert "What should I inspect first?" in ask_service
     assert "What does the opportunity class chart mean?" in ask_service
     assert "How do I recreate this dashboard in Power BI?" in ask_service

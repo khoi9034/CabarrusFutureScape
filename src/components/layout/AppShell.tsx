@@ -180,7 +180,7 @@ function ProductShell({
 
       {cfsAppMode === "consulting" ? (
         <EnterpriseErrorBoundary
-          moduleName="CFS Consulting"
+          moduleName="CFS Investments"
           resetKey="consulting"
         >
           <ConsultingShell
@@ -744,7 +744,7 @@ function OverviewLandingPage({
               <ShieldAlert className="h-5 w-5 text-[#d8b86a]" />
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d8b86a]">
-                  Consulting Decision Workflows
+                  Investment Decision Workflows
                 </p>
                 <h2 className="text-xl font-semibold text-white">
                   Growth value, public cost risk, and investment readiness

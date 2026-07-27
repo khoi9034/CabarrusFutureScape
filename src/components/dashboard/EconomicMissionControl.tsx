@@ -218,7 +218,7 @@ export function EconomicMissionControl() {
       <section className="mt-4 cfs-command-surface rounded-xl border-[#a8f3c4]/18 p-4">
         <SectionHeader
           icon={<FileSearch className="h-4 w-4" />}
-          kicker="Enterprise Consulting Toolkit"
+          kicker="Enterprise Investment Toolkit"
           title="Planning model, BI dashboard, location intelligence, and decision pack"
         />
         <div className="mt-4 grid gap-3 lg:grid-cols-4">
@@ -513,9 +513,9 @@ const enterpriseToolkit = [
       "Evidence pack and assumptions",
       "Risk flags, caveats, and next diligence",
     ],
-    kicker: "Consulting deliverable",
+    kicker: "Investment deliverable",
     text: "Decision-pack pattern for turning indicators into a presentation-ready consulting artifact.",
-    title: "Consulting Decision Pack",
+    title: "Investment Decision Pack",
   },
 ];
 

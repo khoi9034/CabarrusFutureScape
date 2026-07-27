@@ -836,7 +836,7 @@ function EconomicsMethodologyWorkspace() {
         "CFS uses spatial layers, parcel selection, overlays, spatial joins, and map-driven decision support to connect economics with place.",
     },
     {
-      concept: "Consulting deliverable",
+      concept: "Investment deliverable",
       detail:
         "CFS structures scorecards, evidence packs, executive memo content, recommendation caveats, and next diligence steps.",
     },

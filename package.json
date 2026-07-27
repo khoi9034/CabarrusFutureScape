@@ -6,6 +6,7 @@
     "dev": "next dev -p 3000",
     "dev:cfs": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-cfs-local.ps1",
     "build": "next build --webpack",
+    "check:acceptance": "node scripts/check-product-acceptance.mjs",
     "check:presentation": "node scripts/check-presentation.mjs",
     "start": "next start",
     "lint": "eslint",

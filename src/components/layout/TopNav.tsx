@@ -927,7 +927,7 @@ export function TopNav() {
               cfsAppMode === "economics"
                 ? "Open economics controls"
                 : consultingMode
-                  ? "Open consulting controls"
+                  ? "Open investment controls"
                 : "Open dashboard controls"
             }
             className="flex h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:text-white"
@@ -936,7 +936,7 @@ export function TopNav() {
               cfsAppMode === "economics"
                 ? "Economics status and mode controls"
                 : consultingMode
-                  ? "Consulting status and mode controls"
+                  ? "Investments status and mode controls"
                 : "Role, workspace, and scenario controls"
             }
             type="button"
@@ -957,7 +957,7 @@ export function TopNav() {
                 <div className="grid gap-3">
                   <div className="rounded-lg border border-[var(--consult-border)] bg-[rgba(53,201,141,0.08)] p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--consult-emerald)]">
-                      CFS Consulting
+                      CFS Investments
                     </p>
                     <p className="mt-1 text-sm leading-6 text-slate-300">
                       Site selection, due diligence, underwriting, reports, and case studies.

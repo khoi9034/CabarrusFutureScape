@@ -1215,7 +1215,7 @@ def test_ai_search_investment_research_intent_routes_reports() -> None:
     assert response.evidence[0].source == "investment_research_context"
 
 
-def test_ai_search_consulting_mode_uses_consulting_label() -> None:
+def test_ai_search_consulting_mode_uses_investments_label() -> None:
     response = CfsAiSearchService(_settings()).search(
         CfsAiSearchRequest(
             app_mode="consulting",
@@ -1228,8 +1228,8 @@ def test_ai_search_consulting_mode_uses_consulting_label() -> None:
         _context(),
     )
 
-    assert "CFS Consulting" in response.answer
-    assert "CFS Investment" not in response.answer
+    assert "CFS Investments" in response.answer
+    assert "CFS Consulting" not in response.answer
     assert response.evidence[0].source == "investment_research_context"
 
 

@@ -549,6 +549,11 @@ function CaseStudyStep({
           ["Recommendation status", String(normalized.recommendation.status ?? "Needs Review")],
           ["Approval status", "Needs Review"],
         ]} />
+        <SignalList title="Decision recommendation" values={[
+          "Targeted diligence only.",
+          "Do not advance to acquisition pricing yet.",
+          "No current scenario supports a positive land basis; revisit only if verified values, density, civil costs, off-site scope, utility requirements, or phasing materially improve.",
+        ]} />
         <SignalList title="Conditions & due diligence" values={normalized.dueDiligence.immediate_verification ?? []} />
       </section>
     );

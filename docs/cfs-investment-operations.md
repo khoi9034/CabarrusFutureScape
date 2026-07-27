@@ -34,7 +34,7 @@ For localhost sessions, successful access is remembered only for the current bro
 
 ## Daily analyst flow
 
-1. Open CFS Consulting Home.
+1. Open CFS Investments Home.
 2. Use Find Sites to load screening criteria or add an external opportunity.
 3. Choose `Review Property`.
 4. Review Property Review tabs: Summary, Property, Market, Constraints, Financial, Due Diligence, Sources.
@@ -50,7 +50,7 @@ Use Find Sites -> Add External Opportunity. Enter only available source context 
 
 ## Data status
 
-CFS Consulting Home includes a compact System Status line. Data & Methods covers parcels, economics, ACS, FEMA, NWI, terrain, soils, EPA, transportation, utility proxies, comparable context, opportunity references, and workspace records.
+CFS Investments Home includes a compact System Status line. Data & Methods covers parcels, economics, ACS, FEMA, NWI, terrain, soils, EPA, transportation, utility proxies, comparable context, opportunity references, and workspace records.
 
 Refresh actions are available only where an existing refresh service exists. Refresh failures must preserve last-good data.
 

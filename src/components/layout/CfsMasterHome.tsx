@@ -79,6 +79,9 @@ export function CfsMasterHome() {
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
             One county intelligence platform for planning, economics, and investment decisions.
           </p>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+            Portfolio demonstration using sanitized, cached public demo data where applicable; screening outputs are preliminary.
+          </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3 lg:gap-5" aria-label="CFS products">

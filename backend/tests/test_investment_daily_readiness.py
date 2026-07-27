@@ -13,7 +13,8 @@ def test_consulting_uses_one_primary_workspace_experience() -> None:
     investment_shell = INVESTMENT_SHELL.read_text(encoding="utf-8")
 
     assert 'const investmentViewMode = "advanced" as const' in shell
-    assert "CFS Consulting" in investment_shell
+    assert "CFS Investments" in investment_shell
+    assert "CFS Consulting" not in investment_shell
     assert ">Guided<" not in investment_shell
     assert ">Analyst<" not in investment_shell
     assert "investment-view-toggle" not in investment_shell

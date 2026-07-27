@@ -1253,14 +1253,14 @@ function InvestmentPanelPage({
       .then((report) => {
         setInvestmentReport(report);
         recordInvestmentEvent("report_generated", { report_type: investmentReportType });
-        setStatus("CFS Consulting report generated");
+        setStatus("CFS Investments report generated");
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Report generation failed."));
   };
   const addReportToBucket = () => {
     if (!investmentReport) return;
     onAddReportBucketItem(investmentReportBucketItem(investmentReport));
-    setStatus("CFS Consulting report saved to Report Bucket");
+    setStatus("CFS Investments report saved to Report Bucket");
   };
   const refreshIntake = () => {
     setIntakeLoading(true);
@@ -1543,7 +1543,7 @@ function InvestmentPanelPage({
   const saveUnderwriting = () => {
     void createInvestmentUnderwritingScenario({
       ...underwritingPayload(),
-      private_notes: "Created from CFS Consulting Underwriting Lab.",
+      private_notes: "Created from CFS Investments Underwriting Lab.",
       scenario_status: "Draft",
     })
       .then((scenario) => {
@@ -1667,7 +1667,7 @@ function InvestmentPanelPage({
   const generateFirstEngagementReport = () => {
     const engagement = engagements[0];
     if (!engagement) {
-      setStatus("Create an engagement before generating a consulting report.");
+      setStatus("Create an engagement before generating an investment report.");
       return;
     }
     void generateInvestmentEngagementReport(engagement.id)
@@ -1837,7 +1837,7 @@ function InvestmentPanelPage({
     active_case_study_candidate_count: activeCaseStudy?.candidate_count,
     active_case_study_underwriting_status: activeCaseStudy?.underwriting_status,
     active_case_study_next_action: activeCaseStudy?.package?.next_action ? String(activeCaseStudy.package.next_action) : undefined,
-    strategy_screening_source: activeInvestmentScreen ? "CFS Consulting Research Engine" : "local product fallback",
+    strategy_screening_source: activeInvestmentScreen ? "CFS Investments Research Engine" : "local product fallback",
     sewer_proxy_supported_candidates: sewerSupported,
     tier_1_candidates: tier1,
     tier_2_candidates: tier2,
@@ -1928,7 +1928,7 @@ function InvestmentPanelPage({
     <section className="investment-card investment-action-card">
       <div>
         <p>Investment Report Studio</p>
-        <span>Configure, preview, then save or print a structured CFS Consulting report.</span>
+        <span>Configure, preview, then save or print a structured CFS Investments report.</span>
       </div>
       <div className="investment-step-strip" aria-label="Report Studio steps">
         <span>1. Configure</span><span>2. Preview</span><span>3. Save / Print</span>
@@ -2028,7 +2028,7 @@ function InvestmentPanelPage({
               </section>
             ) : null}
             <section className="investment-card">
-              <div className="investment-section-heading"><div><p>Start New Work</p><h2>Choose the next consulting task</h2></div></div>
+              <div className="investment-section-heading"><div><p>Start New Work</p><h2>Choose the next investment task</h2></div></div>
               <div className="investment-action-grid">
                 <button className="investment-primary-button" onClick={() => openInvestmentPage("engagements", "Projects")} type="button">Start a Project</button>
                 <button className="investment-ghost-button" onClick={() => openInvestmentPage("area-radar", "Find Sites")} type="button">Find Sites</button>
@@ -2252,10 +2252,10 @@ function InvestmentPanelPage({
     >
       {activePageContent}
       {assistantOpen ? (
-        <div className="investment-assistant-drawer" role="dialog" aria-label="Ask CFS Consulting">
+        <div className="investment-assistant-drawer" role="dialog" aria-label="Ask CFS Investments">
           <div className="investment-assistant-panel">
             <div className="investment-section-heading">
-              <div><p>Ask CFS Consulting</p><h2>Context-aware assistant</h2></div>
+              <div><p>Ask CFS Investments</p><h2>Context-aware assistant</h2></div>
               <button className="investment-ghost-button" onClick={() => setAssistantOpen(false)} type="button">Close</button>
             </div>
             <AskCfsPanel
@@ -2489,7 +2489,7 @@ function InvestmentMethodologyPage({ compact = false }: { compact?: boolean }) {
     { label: "Environmental context", value: "FEMA, NWI, NRCS, EPA, and terrain summaries are screening evidence requiring verification" },
     { label: "Comparable context", value: "Historical sale and assessed context are due-diligence inputs, not appraisal conclusions" },
     { label: "Underwriting formulas", value: "Deterministic scenario calculations use user-entered assumptions, not AI arithmetic or CFS forecasts" },
-    { label: "Safety interpretation", value: "CFS Consulting does not recommend purchases or guarantee future value" },
+    { label: "Safety interpretation", value: "CFS Investments does not recommend purchases or guarantee future value" },
   ];
   const workflow = [
     "Open or create a Case Study",
@@ -2509,14 +2509,14 @@ function InvestmentMethodologyPage({ compact = false }: { compact?: boolean }) {
       <Matrix rows={rows} />
       {!compact ? (
         <section className="investment-card mt-4">
-          <div className="investment-section-heading"><div><p>How to Use CFS Consulting</p><h2>Case-study workflow</h2></div></div>
+          <div className="investment-section-heading"><div><p>How to Use CFS Investments</p><h2>Case-study workflow</h2></div></div>
           <ol className="investment-numbered-list">
             {workflow.map((item) => <li key={item}>{item}</li>)}
           </ol>
           <Matrix rows={[
             { label: "CFS Planning", value: "What is happening and what planning conditions matter?" },
             { label: "CFS Economics", value: "What do the land and development patterns mean economically?" },
-            { label: "CFS Consulting", value: "Which sites should receive deeper analysis, underwriting, and professional due diligence?" },
+            { label: "CFS Investments", value: "Which sites should receive deeper analysis, underwriting, and professional due diligence?" },
           ]} />
         </section>
       ) : null}
@@ -2828,7 +2828,7 @@ function InvestmentEngagementsPage({
       </div>
       <aside className="investment-rail">
         <section className="investment-card">
-          <div className="investment-section-heading"><div><p>Consulting Workflow</p><h2>Safe deliverable language</h2></div></div>
+          <div className="investment-section-heading"><div><p>Investment Workflow</p><h2>Safe deliverable language</h2></div></div>
           <InvestmentSignalList title="Use" values={["Recommended for additional diligence", "Priority Search Area", "Screening-level review", "Verify source availability"]} />
           <InvestmentSignalList title="Avoid" values={["Purchase directives", "Complete listing inventory claims", "Return assurances", "Valuation conclusions"]} />
         </section>
@@ -3213,7 +3213,7 @@ function underwritingBucketItem(result: InvestmentUnderwritingCalculation): Repo
     content: JSON.stringify({ assumptions: result.assumptions, results: result.results, sensitivity: result.sensitivity }, null, 2),
     id: `underwriting-${slugifyReportTitle(result.scenario_name)}-${Date.now()}`,
     selected_for_print: true,
-    source_page: "CFS Consulting",
+    source_page: "CFS Investments",
     summary: `${result.scenario_type_label} with ${result.missing_inputs.length} missing-input warning(s).`,
     title: result.scenario_name,
     type: "scenario_output",
@@ -3234,7 +3234,7 @@ function opportunityBucketItem(opportunity: InvestmentOpportunityReference): Rep
     ].join("\n"),
     id: `opportunity-${slugifyReportTitle(opportunity.external_opportunity_id)}-${Date.now()}`,
     selected_for_print: true,
-    source_page: "CFS Consulting",
+    source_page: "CFS Investments",
     summary: `${opportunity.source_name} reference requiring source verification.`,
     title: `Opportunity reference: ${opportunity.title}`,
     type: "evidence_pack",
@@ -3254,7 +3254,7 @@ function areaRadarBucketItem(area: InvestmentAreaRadarArea): ReportBucketItemInp
     ].join("\n"),
     id: `area-radar-${slugifyReportTitle(area.area_id)}-${Date.now()}`,
     selected_for_print: true,
-    source_page: "CFS Consulting",
+    source_page: "CFS Investments",
     summary: `${area.area_classification} with ${area.candidate_count} CFS candidate records.`,
     title: `Area Opportunity Radar: ${area.area_name}`,
     type: "evidence_pack",
@@ -6418,7 +6418,7 @@ function LandDueDiligenceScreener({
   return (
     <EconPanel
       description={investmentMode ? "Live candidate table for private manual review, comparison, and due diligence guide creation." : "Build a parcel watchlist for manual planning, utility, site, and economics review."}
-      kicker={investmentMode ? "CFS Consulting research" : "Internal screening"}
+      kicker={investmentMode ? "CFS Investments research" : "Internal screening"}
       title={investmentMode ? "Ranked Candidate Table" : "Land Due Diligence Screener"}
       tourId="land-due-diligence-screener"
     >
@@ -9552,7 +9552,7 @@ function investmentReportBucketItem(report: InvestmentReportResponse): ReportBuc
     caveats: report.limitations,
     content: report.sections.map((section) => `${section.title}\n${section.body}`).join("\n\n"),
     id: `investment-report-${report.report_type}-${Date.now()}`,
-    source_page: "CFS Consulting",
+    source_page: "CFS Investments",
     summary: report.report_bucket_item.summary,
     title: report.report_title,
     type: "generated_report",
@@ -10430,7 +10430,7 @@ type ReportBucketItem = {
   related_tables?: PowerBiTableName[];
   report_plan?: PowerBiGeneratedReportPlan;
   selected_for_print: boolean;
-  source_page: "Ask CFS" | "CFS Consulting" | "Economic Dashboard" | "Power BI & Tools" | "Print";
+  source_page: "Ask CFS" | "CFS Investments" | "Economic Dashboard" | "Power BI & Tools" | "Print";
   summary: string;
   title: string;
   type: ReportBucketItemType;
