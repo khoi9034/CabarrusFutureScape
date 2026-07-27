@@ -197,7 +197,7 @@ def test_prewarm_script_warms_model_lab_without_printing_token() -> None:
     assert "/development/prediction/features/summary" in prewarm
     assert "cfs-staging-access-token" in prewarm
     assert "X-CFS-Staging-Token" in prewarm
-    assert "Refusing to write prewarm output inside the repository" in prewarm
+    assert "Refusing to write prewarm output outside local-data." in prewarm
     assert "Write-Output $Token" not in prewarm
 
 
@@ -208,7 +208,7 @@ def test_entra_script_uses_scope_roles_and_safe_output() -> None:
     assert "CFS.Admin" in entra
     assert "requiredResourceAccess" in entra
     assert "admin-consent" in entra
-    assert "Refusing to write Entra output inside the repository" in entra
+    assert "Refusing to write Entra output outside local-data." in entra
     assert "clientSecret" not in entra
 
 

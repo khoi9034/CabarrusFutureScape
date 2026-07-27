@@ -2,14 +2,15 @@ param(
   [string]$ApiAppName = "cfs-api-staging",
   [string]$WebAppName = "cfs-web-staging",
   [string[]]$RedirectUris = @("http://localhost:3000"),
-  [string]$OutputRoot = "C:\CFS_Azure_Migration\az3_entra",
+  [string]$OutputRoot = "",
   [switch]$SkipSignedInUserRoleAssignment
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+if (-not $OutputRoot) { $OutputRoot = Join-Path $RepoRoot.Path "local-data\azure-migration\az3_entra" }
 $OutputRoot = [System.IO.Path]::GetFullPath($OutputRoot)
-if ($OutputRoot.StartsWith($RepoRoot.Path)) { throw "Refusing to write Entra output inside the repository." }
+if (-not ($OutputRoot.StartsWith((Join-Path $RepoRoot.Path "local-data") + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase))) { throw "Refusing to write Entra output outside local-data." }
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
 $RedirectUris = @(
   $RedirectUris |

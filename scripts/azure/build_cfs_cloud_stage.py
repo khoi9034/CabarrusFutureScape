@@ -24,7 +24,7 @@ BACKEND = ROOT / "backend"
 if str(BACKEND) not in sys.path:
     sys.path.insert(0, str(BACKEND))
 
-WORKDIR = Path(r"C:\CFS_Azure_Migration")
+WORKDIR = Path(os.getenv("CFS_AZURE_ARTIFACT_ROOT", ROOT / "local-data" / "azure-migration"))
 STAGE_DB = "cfs_cloud_stage"
 SOURCE_DB = "cfs_dev"
 PG_BIN = Path(r"C:\Program Files\PostgreSQL\18\bin")

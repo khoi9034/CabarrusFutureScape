@@ -10,7 +10,7 @@
   "strategy": "Development land",
   "geography": "Cabarrus County, North Carolina",
   "status": "Deep Analysis",
-  "current_stage": "Candidate Review / Underwriting Assumptions Pending",
+  "current_stage": "Deliverable Review / Targeted Diligence Recommendation",
   "active_parcel_id": "CFS-PARCEL-0149758869",
   "priority_candidate_id": "CFS-PARCEL-0149758869",
   "candidate_ids": [
@@ -20,10 +20,10 @@
   ],
   "recommendation_status": "Needs Review",
   "underwriting_status": "Assumptions Required",
-  "excel_workbook_status": "Not Started - assumptions require review",
+  "excel_workbook_status": "Needs Review - assumptions require professional and user review",
   "research_completeness": "Screening package complete; ownership, title, asking basis, utility capacity, access, and professional field work remain unverified.",
-  "deliverable_status": "Markdown deliverables drafted; Excel workbook not started.",
-  "next_action": "Review priority candidate assumptions, then decide whether to continue underwriting diligence.",
+  "deliverable_status": "CASE-3B workbook, PowerPoint, portfolio page, documentation, and diagnostic exhibits drafted for review.",
+  "next_action": "Review the CASE-3B package and decide whether targeted professional diligence is warranted before any acquisition pricing.",
   "engagement": {
     "existing_engagement_id": "c7cb72b0-02ef-485e-8eba-00674a033338",
     "engagement_name": "CFS Large Development-Land Acquisition Case Study",
@@ -57,7 +57,10 @@
     "visual_exhibits": "visual_exhibits.json",
     "report_bucket_package": "report_bucket_package.json",
     "saved_workspace_records": "saved_workspace_records.json",
-    "ask_cfs_case_study_results": "ask_cfs_case_study_results.json"
+    "ask_cfs_case_study_results": "ask_cfs_case_study_results.json",
+    "final_diagnostic_exhibits": "final_diagnostic_exhibits.json",
+    "underwriting_workbook": "CFS_Development_Land_Underwriting.xlsx",
+    "acquisition_presentation_deck": "CFS_Development_Land_Acquisition_Review.pptx"
   },
   "deliverables": [
     {
@@ -67,7 +70,7 @@
       "source": "Codex package",
       "path": "../../docs/case-studies/cfs-investment-large-development-land.md",
       "review_status": "Needs Review",
-      "last_updated": "2026-07-18"
+      "last_updated": "2026-07-20"
     },
     {
       "title": "Executive recommendation",
@@ -76,7 +79,7 @@
       "source": "Codex package",
       "path": "../../docs/case-studies/cfs-investment-executive-recommendation.md",
       "review_status": "Needs Review",
-      "last_updated": "2026-07-18"
+      "last_updated": "2026-07-20"
     },
     {
       "title": "Acquisition presentation",
@@ -85,7 +88,16 @@
       "source": "Codex package",
       "path": "../../docs/case-studies/cfs-investment-acquisition-presentation.md",
       "review_status": "Needs Review",
-      "last_updated": "2026-07-18"
+      "last_updated": "2026-07-20"
+    },
+    {
+      "title": "Acquisition presentation deck",
+      "type": "Presentation",
+      "status": "Needs Review",
+      "source": "Codex package",
+      "path": "CFS_Development_Land_Acquisition_Review.pptx",
+      "review_status": "Needs Review",
+      "last_updated": "2026-07-20"
     },
     {
       "title": "Interview walkthrough",
@@ -99,10 +111,29 @@
     {
       "title": "Excel underwriting model",
       "type": "Excel underwriting model",
-      "status": "Not Started",
+      "status": "Needs Review",
       "source": "CFS Underwriting Lab",
+      "path": "CFS_Development_Land_Underwriting.xlsx",
       "review_status": "Assumptions require review",
-      "last_updated": "2026-07-18"
+      "last_updated": "2026-07-20"
+    },
+    {
+      "title": "Portfolio case-study page",
+      "type": "Portfolio page",
+      "status": "Needs Review",
+      "source": "Codex package",
+      "path": "../../src/app/case-studies/large-development-land/page.tsx",
+      "review_status": "Needs Review",
+      "last_updated": "2026-07-20"
+    },
+    {
+      "title": "Diagnostic exhibits",
+      "type": "Supporting exhibits",
+      "status": "Needs Review",
+      "source": "Codex package",
+      "path": "final_diagnostic_exhibits.json",
+      "review_status": "Needs Review",
+      "last_updated": "2026-07-20"
     },
     {
       "title": "Report Bucket collection",

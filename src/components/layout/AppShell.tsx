@@ -42,6 +42,8 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { EnterpriseErrorBoundary } from "@/components/ui/EnterpriseErrorBoundary";
 import { DashboardProvider, useDashboardState } from "@/hooks/useDashboardState";
+import type { InitialCaseStudyUrlState } from "@/components/investment/InvestmentCaseStudies";
+import type { InvestmentPageId } from "@/components/investment/InvestmentShell";
 import { USE_DEMO_DATA } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import type { CfsAppMode, OverviewPanelWidthPreset } from "@/types";
@@ -69,16 +71,33 @@ function clampLeftPanelWidth(width: number) {
   );
 }
 
-export function AppShell({ initialAppMode }: { initialAppMode?: CfsAppMode }) {
+export function AppShell({
+  initialAppMode,
+  initialCaseStudyUrlState,
+  initialInvestmentPage,
+}: {
+  initialAppMode?: CfsAppMode;
+  initialCaseStudyUrlState?: InitialCaseStudyUrlState;
+  initialInvestmentPage?: InvestmentPageId;
+}) {
   return (
     <DashboardProvider initialAppMode={initialAppMode}>
       <DashboardUrlSync />
-      <ProductShell />
+      <ProductShell
+        initialCaseStudyUrlState={initialCaseStudyUrlState}
+        initialInvestmentPage={initialInvestmentPage}
+      />
     </DashboardProvider>
   );
 }
 
-function ProductShell() {
+function ProductShell({
+  initialCaseStudyUrlState,
+  initialInvestmentPage,
+}: {
+  initialCaseStudyUrlState?: InitialCaseStudyUrlState;
+  initialInvestmentPage?: InvestmentPageId;
+}) {
   const {
     developmentHotspotsEnabled,
     floodConstraintsEnabled,
@@ -164,7 +183,10 @@ function ProductShell() {
           moduleName="CFS Consulting"
           resetKey="consulting"
         >
-          <ConsultingShell />
+          <ConsultingShell
+            initialCaseStudyUrlState={initialCaseStudyUrlState}
+            initialInvestmentPage={initialInvestmentPage}
+          />
         </EnterpriseErrorBoundary>
       ) : cfsAppMode === "economics" ? (
         <EnterpriseErrorBoundary

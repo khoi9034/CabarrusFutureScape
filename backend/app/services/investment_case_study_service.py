@@ -675,9 +675,9 @@ def _safe_package_path(base_dir: Path, relative_path: str) -> Path:
 
 
 def _scan_file_for_secrets(path: Path) -> None:
-    text_value = path.read_text(encoding="utf-8").lower()
-    blocked = ("database_url", "postgres://", "api_key", "access token", "password=", "x-vercel-protection-bypass")
-    if any(term in text_value for term in blocked):
+    value = path.read_bytes().lower()
+    blocked = (b"database_url", b"postgres://", b"api_key", b"access token", b"password=", b"x-vercel-protection-bypass")
+    if any(term in value for term in blocked):
         raise ValueError(f"Referenced case-study package file contains restricted credential text: {path.name}")
 
 

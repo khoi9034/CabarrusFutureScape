@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/AskCfsPanel";
-import { InvestmentCaseStudies } from "@/components/investment/InvestmentCaseStudies";
+import { InvestmentCaseStudies, type InitialCaseStudyUrlState } from "@/components/investment/InvestmentCaseStudies";
 import { InvestmentShell, investmentPages, type InvestmentPageId } from "@/components/investment/InvestmentShell";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
@@ -107,12 +107,18 @@ import type {
 } from "@/types/api";
 
 type EconomicsShellProps = {
+  initialCaseStudyUrlState?: InitialCaseStudyUrlState;
+  initialInvestmentPage?: InvestmentPageId;
   mode?: "consulting" | "economics";
 };
 
 const defaultConsultingCaseStudy = packageBackedConsultingCaseStudy;
 
-export function EconomicsShell({ mode = "economics" }: EconomicsShellProps = {}) {
+export function EconomicsShell({
+  initialCaseStudyUrlState,
+  initialInvestmentPage,
+  mode = "economics",
+}: EconomicsShellProps = {}) {
   const { economicsSection, setCfsAppMode, setEconomicsSection } = useDashboardState();
   const consultingMode = mode === "consulting";
   const [intelligence, setIntelligence] =
@@ -268,6 +274,8 @@ export function EconomicsShell({ mode = "economics" }: EconomicsShellProps = {})
           onRemoveReportBucketItem={removeReportBucketItem}
           onToggleReportBucketPrint={toggleReportBucketPrint}
           onToggleSignal={toggleSelectedSignal}
+          initialCaseStudyUrlState={initialCaseStudyUrlState}
+          initialInvestmentPage={initialInvestmentPage}
           reportBucketItems={reportBucketItems}
           selectedSignalIds={selectedSignalIds}
           signals={signals}
@@ -913,6 +921,8 @@ function PowerBiToolsPage({
 }
 
 function InvestmentPanelPage({
+  initialCaseStudyUrlState,
+  initialInvestmentPage,
   onAddReportBucketItem,
   onClearReportBucket,
   onClearSelection,
@@ -925,6 +935,8 @@ function InvestmentPanelPage({
   signals,
   statusLabel,
 }: {
+  initialCaseStudyUrlState?: InitialCaseStudyUrlState;
+  initialInvestmentPage?: InvestmentPageId;
   onAddReportBucketItem: (item: ReportBucketItemInput) => void;
   onClearReportBucket: () => void;
   onClearSelection: () => void;
@@ -953,7 +965,7 @@ function InvestmentPanelPage({
   const [intakeForm, setIntakeForm] = useState<InvestmentIntakePayload>(defaultInvestmentIntakeForm(activeStrategy));
   const [investmentReport, setInvestmentReport] = useState<InvestmentReportResponse | null>(null);
   const [investmentReportType, setInvestmentReportType] = useState("development_site_review");
-  const [activeInvestmentPage, setActiveInvestmentPage] = useState<InvestmentPageId>(() => readInvestmentDisplayPreference().lastPage ?? "overview");
+  const [activeInvestmentPage, setActiveInvestmentPage] = useState<InvestmentPageId>(initialInvestmentPage ?? "overview");
   const [caseStudies, setCaseStudies] = useState<InvestmentCaseStudy[]>([]);
   const [activeCaseStudySlug, setActiveCaseStudySlug] = useState<string | null>(() => readCaseStudyWorkflowUrl().slug);
   const [caseStudyBriefMarkdown, setCaseStudyBriefMarkdown] = useState<string | null>(null);
@@ -2173,6 +2185,7 @@ function InvestmentPanelPage({
               caseStudies={visibleCaseStudies}
             caseStudyBriefMarkdown={caseStudyBriefMarkdown}
             engagements={engagements}
+            initialCaseStudyUrlState={initialCaseStudyUrlState}
             onAddArea={(areaId) => addToFirstEngagement(areaId, "search_area")}
             onAnalyzeCaseStudyParcel={analyzeParcel}
             onArchiveCaseStudy={archiveCaseStudy}
@@ -2718,6 +2731,7 @@ function InvestmentEngagementsPage({
   caseStudies,
   caseStudyBriefMarkdown,
   engagements,
+  initialCaseStudyUrlState,
   onAddArea,
   onAnalyzeCaseStudyParcel,
   onArchiveCaseStudy,
@@ -2735,6 +2749,7 @@ function InvestmentEngagementsPage({
   caseStudies: InvestmentCaseStudy[];
   caseStudyBriefMarkdown?: string | null;
   engagements: InvestmentEngagement[];
+  initialCaseStudyUrlState?: InitialCaseStudyUrlState;
   onAddArea: (areaId: string) => void;
   onAnalyzeCaseStudyParcel: (parcelId: string, label?: string) => void;
   onArchiveCaseStudy: (slug: string) => void;
@@ -2772,6 +2787,7 @@ function InvestmentEngagementsPage({
           activeCaseStudy={activeCaseStudy}
           caseStudies={caseStudies}
           codexBriefMarkdown={caseStudyBriefMarkdown}
+          initialUrlState={initialCaseStudyUrlState}
           onAnalyzeParcel={onAnalyzeCaseStudyParcel}
           onArchive={onArchiveCaseStudy}
           onDuplicate={onDuplicateCaseStudy}

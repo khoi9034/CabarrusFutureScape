@@ -30,12 +30,12 @@ def test_case_study_manifest_loads_referenced_safe_package() -> None:
     assert package["slug"] == "large-development-land"
     assert package["title"] == "CFS Large Development-Land Acquisition Case Study"
     assert package["status"] == "Deep Analysis"
-    assert package["current_stage"] == "Candidate Review / Underwriting Assumptions Pending"
+    assert package["current_stage"] == "Deliverable Review / Targeted Diligence Recommendation"
     assert package["active_parcel_id"] == "CFS-PARCEL-0149758869"
     assert package["priority_candidate_id"] == "CFS-PARCEL-0149758869"
     assert package["recommendation_status"] == "Needs Review"
     assert package["underwriting_status"] == "Assumptions Required"
-    assert package["excel_workbook_status"].startswith("Not Started")
+    assert package["excel_workbook_status"].startswith("Needs Review")
     assert len(package["artifacts"]["shortlisted_candidates"]["candidates"]) == 3
     assert package["artifacts"]["screening_funnel"]["counts"]["countywide_parcels_reviewed"] == 110017
     assert "owner_name" not in str(package).lower()

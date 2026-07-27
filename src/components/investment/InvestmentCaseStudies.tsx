@@ -7,6 +7,7 @@ type InvestmentCaseStudiesProps = {
   activeCaseStudy: InvestmentCaseStudy | null;
   caseStudies: InvestmentCaseStudy[];
   codexBriefMarkdown?: string | null;
+  initialUrlState?: InitialCaseStudyUrlState;
   status?: string | null;
   onAnalyzeParcel: (parcelId: string, label?: string) => void;
   onArchive: (slug: string) => void;
@@ -32,11 +33,18 @@ const workflowSteps = [
 type WorkflowStep = (typeof workflowSteps)[number]["id"];
 const casePanels = ["assumptions", "compare", "criteria", "rerun-screening", "change-decision", "remove-candidate", "report", "artifact", "package-status"] as const;
 type CasePanel = (typeof casePanels)[number];
+export type InitialCaseStudyUrlState = {
+  item?: string | null;
+  panel?: string | null;
+  slug?: string | null;
+  step?: string | null;
+};
 
 export function InvestmentCaseStudies({
   activeCaseStudy,
   caseStudies,
   codexBriefMarkdown,
+  initialUrlState,
   status,
   onAnalyzeParcel,
   onArchive,
@@ -51,11 +59,11 @@ export function InvestmentCaseStudies({
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sort, setSort] = useState("updated");
-  const initialUrlState = readCaseStudyUrl();
-  const [workspaceSlug, setWorkspaceSlug] = useState<string | null>(() => initialUrlState.slug);
-  const [step, setStep] = useState<WorkflowStep>(() => initialUrlState.step ?? "analyze");
-  const [panel, setPanel] = useState<CasePanel | null>(() => initialUrlState.panel);
-  const [panelItem, setPanelItem] = useState<string | null>(() => initialUrlState.item);
+  const initialCaseStudyUrlState = normalizeInitialCaseStudyUrl(initialUrlState);
+  const [workspaceSlug, setWorkspaceSlug] = useState<string | null>(() => initialCaseStudyUrlState.slug);
+  const [step, setStep] = useState<WorkflowStep>(() => initialCaseStudyUrlState.step ?? "analyze");
+  const [panel, setPanel] = useState<CasePanel | null>(() => initialCaseStudyUrlState.panel);
+  const [panelItem, setPanelItem] = useState<string | null>(() => initialCaseStudyUrlState.item);
   const [note, setNote] = useState("");
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
@@ -494,6 +502,9 @@ function CaseStudyStep({
     );
   }
   if (step === "underwrite") {
+    const diagnosticResults = normalized.diagnosticScenarios.map((scenario) =>
+      `${scenario.scenario} residual after selling/carry: ${formatMoneyMillions(scenario.residual_after_selling_carry)} - ${scenario.status ?? "Needs Review"}`,
+    );
     return (
       <section className="investment-card">
         <div className="investment-section-heading"><div><p>Underwrite</p><h2 ref={headingRef} tabIndex={-1}>Assumptions Required</h2></div></div>
@@ -518,7 +529,11 @@ function CaseStudyStep({
             "Developer margin",
             "Scenario acquisition basis",
           ]} />
+          {diagnosticResults.length ? <SignalList title="Diagnostic residual results" values={diagnosticResults} /> : null}
         </div>
+        {diagnosticResults.length ? (
+          <p className="investment-empty mt-4">No scenario supports a positive land basis; targeted diligence only; do not advance to acquisition pricing yet.</p>
+        ) : null}
         <button className="investment-primary-button mt-4" onClick={onUnderwrite} type="button">Review Assumptions</button>
       </section>
     );
@@ -605,6 +620,7 @@ function CaseStudyPanel({
 }) {
   const candidate = normalized.candidates.find((row) => row.parcel_id === item) ?? normalized.candidates[0] ?? null;
   const artifact = panel === "artifact" ? normalized.deliverables[Number(item)] : null;
+  const artifactHref = caseStudyArtifactHref(artifact);
   const title = {
     artifact: artifact?.title ?? "Deliverable review",
     assumptions: "Underwriting assumption review",
@@ -630,6 +646,9 @@ function CaseStudyPanel({
             `Developable-area screening estimate: ${displayCount(candidate?.developable_area_estimate ?? candidate?.preliminary_developable_acres)}`,
             "Planning, market, transportation, utility-proxy, and environmental context are evidence inputs.",
           ]} />
+          {normalized.diagnosticScenarios.length ? (
+            <SignalList title="Diagnostic residual results" values={normalized.diagnosticScenarios.map((scenario) => `${scenario.scenario}: ${formatMoneyMillions(scenario.residual_after_selling_carry)} after selling/carry`)} />
+          ) : null}
           <SignalList title="Still needs analyst approval" values={["Density", "Revenue/value basis", "Horizontal costs", "Utility and off-site allowances", "Timeline", "Contingency", "Developer margin", "Scenario acquisition basis"]} />
         </div>
       ) : null}
@@ -646,13 +665,24 @@ function CaseStudyPanel({
       {panel === "change-decision" ? <p className="investment-empty">Decision changes require analyst approval for {candidate?.parcel_id ?? "the selected candidate"} before the CASE-1 package is updated.</p> : null}
       {panel === "remove-candidate" ? <p className="investment-empty">Candidate removal is blocked for this validated shortlist. Start a new revision to change the reviewed three-candidate package.</p> : null}
       {panel === "report" ? <SignalList title="Available deliverables" values={normalized.deliverables.map((row) => `${row.title}: ${row.status}; ${row.review_status ?? "Needs Review"}`)} /> : null}
-      {panel === "artifact" ? <Matrix rows={[
-        ["Deliverable", artifact?.title ?? "Not found"],
-        ["Type", artifact?.type ?? "Not available"],
-        ["Status", artifact?.status ?? "Not available"],
-        ["Review status", artifact?.review_status ?? "Needs Review"],
-        ["Package path", artifact?.path ?? "Not available"],
-      ]} /> : null}
+      {panel === "artifact" ? (
+        <>
+          <Matrix rows={[
+            ["Deliverable", artifact?.title ?? "Not found"],
+            ["Type", artifact?.type ?? "Not available"],
+            ["Status", artifact?.status ?? "Not available"],
+            ["Review status", artifact?.review_status ?? "Needs Review"],
+            ["Package path", artifact?.path ?? "Not available"],
+          ]} />
+          {artifactHref ? (
+            <a className="investment-primary-button mt-4" href={artifactHref} rel="noreferrer" target="_blank">
+              Open artifact
+            </a>
+          ) : (
+            <p className="investment-empty mt-4">No downloadable artifact is registered for this deliverable.</p>
+          )}
+        </>
+      ) : null}
       {panel === "package-status" ? <Matrix rows={[
         ["Case-study status", selected.status],
         ["Current stage", selected.current_stage],
@@ -675,6 +705,27 @@ function MissingState({ message, onViewPackageStatus }: { message: string; onVie
   );
 }
 
+function caseStudyArtifactHref(artifact: Deliverable | null) {
+  const fileName = artifact?.path?.split(/[\\/]/).pop();
+
+  if (!fileName) return null;
+  if (fileName === "page.tsx") return "/case-studies/large-development-land";
+  if (
+    [
+      "CFS_Development_Land_Acquisition_Review.pptx",
+      "CFS_Development_Land_Underwriting.xlsx",
+      "cfs-investment-acquisition-presentation.md",
+      "cfs-investment-executive-recommendation.md",
+      "cfs-investment-interview-walkthrough.md",
+      "cfs-investment-large-development-land.md",
+      "final_diagnostic_exhibits.json",
+    ].includes(fileName)
+  ) {
+    return `/case-studies/large-development-land/artifacts/${encodeURIComponent(fileName)}`;
+  }
+  return null;
+}
+
 function normalizeCaseStudy(caseStudy: InvestmentCaseStudy): NormalizedCaseStudy {
   const packageData = caseStudy.package as CaseStudyPackage;
   const artifacts = packageData.artifacts ?? {};
@@ -692,6 +743,7 @@ function normalizeCaseStudy(caseStudy: InvestmentCaseStudy): NormalizedCaseStudy
     candidates,
     criteria: (funnel.criteria as string[] | undefined) ?? artifacts.screening_funnel?.criteria ?? [],
     deliverables: (caseStudy.deliverables as Deliverable[] | undefined) ?? packageData.deliverables ?? [],
+    diagnosticScenarios: artifacts.final_diagnostic_exhibits?.scenario_comparison ?? [],
     dueDiligence: (caseStudy.due_diligence as DueDiligence | undefined) ?? artifacts.due_diligence_plan ?? {},
     funnel: {
       countywide_reviewed: Number(funnel.countywide_reviewed ?? artifacts.screening_funnel?.counts?.countywide_parcels_reviewed),
@@ -736,6 +788,22 @@ function readCaseStudyUrl(): { item: string | null; panel: CasePanel | null; slu
     item: params.get("caseItem"),
     panel: isCasePanel(panel) ? panel : null,
     slug: params.get("caseStudy"),
+    step: isWorkflowStep(step) ? step : null,
+  };
+}
+
+function normalizeInitialCaseStudyUrl(state: InitialCaseStudyUrlState | undefined): {
+  item: string | null;
+  panel: CasePanel | null;
+  slug: string | null;
+  step: WorkflowStep | null;
+} {
+  const panel = state?.panel ?? null;
+  const step = state?.step ?? null;
+  return {
+    item: state?.item ?? null,
+    panel: isCasePanel(panel) ? panel : null,
+    slug: state?.slug ?? null,
     step: isWorkflowStep(step) ? step : null,
   };
 }
@@ -787,6 +855,12 @@ function displayCount(value: unknown) {
   return String(value);
 }
 
+function formatMoneyMillions(value: unknown) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "Not available";
+  const sign = value < 0 ? "-" : "";
+  return `${sign}$${(Math.abs(value) / 1_000_000).toLocaleString("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 })}M`;
+}
+
 function formatDate(value: string | null | undefined) {
   if (!value) return "Not available";
   const date = new Date(value);
@@ -798,6 +872,7 @@ type NormalizedCaseStudy = {
   candidates: InvestmentCaseStudyCandidate[];
   criteria: string[];
   deliverables: Deliverable[];
+  diagnosticScenarios: DiagnosticScenario[];
   dueDiligence: DueDiligence;
   funnel: {
     countywide_reviewed?: number;
@@ -819,6 +894,7 @@ type NormalizedCaseStudy = {
 type CaseStudyPackage = {
   artifacts?: {
     due_diligence_plan?: DueDiligence;
+    final_diagnostic_exhibits?: { scenario_comparison?: DiagnosticScenario[] };
     limitations?: { case_study_limitations?: string[] };
     screening_funnel?: {
       as_of?: string;
@@ -834,6 +910,12 @@ type CaseStudyPackage = {
   recommendation_status?: string;
   safety_rules?: string[];
   source_data_vintage?: string;
+};
+
+type DiagnosticScenario = {
+  residual_after_selling_carry?: number;
+  scenario: string;
+  status?: string;
 };
 
 type Deliverable = {

@@ -22,5 +22,6 @@ outputs/
 data/
 data_templates/
 CFS_Azure_Migration/
+local-data/
 browser-profile/
 Browser/

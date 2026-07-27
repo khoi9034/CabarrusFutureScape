@@ -29,7 +29,7 @@ Vercel is not connected in AZ-2.
 
 The production image is built from [backend/Dockerfile](/C:/CabarrusFutureScape/backend/Dockerfile).
 
-Images are tagged with commit SHA. The deployment manifest under `C:\CFS_Azure_Migration\az2_container_apps` records the currently deployed tag and digest after each run.
+Images are tagged with commit SHA. The deployment manifest under ignored `local-data\azure-migration\az2_container_apps` records the currently deployed tag and digest after each run.
 
 | Field | Value |
 | --- | --- |
@@ -155,7 +155,7 @@ For config-only convergence:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\azure\deploy_cfs_api_container_app.ps1 -ImageTag <tag> -SkipImageBuild
 ```
 
-Deployment outputs and manifests are written only under `C:\CFS_Azure_Migration\az2_container_apps`.
+Deployment outputs and manifests are written only under ignored `local-data\azure-migration\az2_container_apps`.
 
 ## CI/CD
 
@@ -182,7 +182,7 @@ python scripts\azure\smoke_cfs_api.py `
   --base-url https://cfs-api-staging.whiterock-f4f36359.canadacentral.azurecontainerapps.io `
   --samples 1 `
   --timeout-seconds 240 `
-  --output C:\CFS_Azure_Migration\az2_container_apps\cloud-containerapp-smoke.json
+  --output local-data\azure-migration\az2_container_apps\cloud-containerapp-smoke.json
 Remove-Item Env:\CFS_STAGING_ACCESS_TOKEN
 ```
 

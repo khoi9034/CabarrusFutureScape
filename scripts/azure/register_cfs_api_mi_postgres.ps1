@@ -5,10 +5,12 @@ param(
   [string]$Database = "cfs_cloud",
   [string]$IdentityName = "cfs-api-mi",
   [string]$IdentityResourceGroup = "CFS",
-  [string]$OutputRoot = "C:\CFS_Azure_Migration\az2_container_apps"
+  [string]$OutputRoot = ""
 )
 
 $ErrorActionPreference = "Stop"
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+if (-not $OutputRoot) { $OutputRoot = Join-Path $RepoRoot.Path "local-data\azure-migration\az2_container_apps" }
 $PgBin = "C:\Program Files\PostgreSQL\18\bin"
 $Psql = Join-Path $PgBin "psql.exe"
 $OutputRoot = [System.IO.Path]::GetFullPath($OutputRoot)

@@ -6,7 +6,7 @@ param(
   [string]$ContainerEnvironmentName = "cfs-api-env",
   [string]$Repository = "cfs-api",
   [string]$ImageTag = "",
-  [string]$OutputRoot = "C:\CFS_Azure_Migration\az2_container_apps",
+  [string]$OutputRoot = "",
   [string]$PostgresServer = "cfs.postgres.database.azure.com",
   [string]$PostgresDatabase = "cfs_cloud",
   [string]$PostgresResourceGroup = "CFS",
@@ -22,11 +22,13 @@ param(
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+$AllowedRoot = Join-Path $RepoRoot.Path "local-data\azure-migration"
+if (-not $OutputRoot) { $OutputRoot = Join-Path $AllowedRoot "az2_container_apps" }
+New-Item -ItemType Directory -Force -Path $AllowedRoot | Out-Null
+$AllowedRoot = (Resolve-Path $AllowedRoot).Path
 $OutputRoot = [System.IO.Path]::GetFullPath($OutputRoot)
-$AllowedRoot = (Resolve-Path "C:\CFS_Azure_Migration").Path
-if ($OutputRoot.StartsWith($RepoRoot.Path)) { throw "Refusing to write deployment artifacts inside the repository." }
 if (-not ($OutputRoot.Equals($AllowedRoot, [System.StringComparison]::OrdinalIgnoreCase) -or $OutputRoot.StartsWith($AllowedRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase))) {
-  throw "Refusing to write deployment artifacts outside C:\CFS_Azure_Migration."
+  throw "Refusing to write deployment artifacts outside local-data\azure-migration."
 }
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
 

@@ -1,24 +1,21 @@
 param(
-  [string]$OutputRoot = "C:\CFS_Azure_Migration",
+  [string]$OutputRoot = "",
   [int]$Jobs = 4
 )
 
 $ErrorActionPreference = "Stop"
 $PgBin = "C:\Program Files\PostgreSQL\18\bin"
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$AllowedRoot = "C:\CFS_Azure_Migration"
+$AllowedRoot = Join-Path $RepoRoot.Path "local-data\azure-migration"
+if (-not $OutputRoot) { $OutputRoot = $AllowedRoot }
 New-Item -ItemType Directory -Force -Path $AllowedRoot | Out-Null
 $AllowedRoot = (Resolve-Path $AllowedRoot).Path
 $OutputRoot = [System.IO.Path]::GetFullPath($OutputRoot)
 $DumpRoot = Join-Path $OutputRoot "cfs_cloud_stage_dump"
 $LogPath = Join-Path $OutputRoot "export_cfs_cloud_stage.log"
 
-if ($OutputRoot.StartsWith($RepoRoot.Path)) {
-  throw "Refusing to write migration artifacts inside the repository."
-}
-
 if (-not ($OutputRoot.Equals($AllowedRoot, [System.StringComparison]::OrdinalIgnoreCase) -or $OutputRoot.StartsWith($AllowedRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase))) {
-  throw "Refusing to write migration artifacts outside C:\CFS_Azure_Migration."
+  throw "Refusing to write migration artifacts outside local-data\azure-migration."
 }
 
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null

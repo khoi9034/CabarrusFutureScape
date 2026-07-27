@@ -1,150 +1,102 @@
 # CFS Investment Large Development-Land Acquisition Case Study
 
-## 1. Executive summary
+## 1. Executive Summary
 
-I used a repeatable countywide screen to identify large development-land candidates, reviewed property-level evidence, compared tradeoffs, tested preliminary development scenarios, and prepared a conditional acquisition-review recommendation and due-diligence plan.
+CFS identified CFS-PARCEL-0149758869 as the strongest physical/planning screening candidate in the large development-land case study. It has 489.43 gross acres, a 392.11-acre preliminary developable-area screening estimate, a CASE-1 screening score of 89, adjacent sewer-proximity proxy evidence, and a moderate mapped environmental constraint profile.
 
-This is a hypothetical portfolio case study for a regional residential and mixed-use developer. It is internal screening-level research, not a real client engagement, not investment advice, not an appraisal, not confirmation of utility service or capacity, and not legal entitlement or environmental advice.
+The underwriting conclusion is intentionally different from the screening conclusion: none of the current finished-lot development scenarios produces a positive preliminary residual before land acquisition. The property should not advance to acquisition pricing under the current assumptions.
 
-Preliminary result: **CFS-PARCEL-0149758869 should advance for additional acquisition review**, subject to confirmation of zoning interpretation, utility service and capacity, legal access, environmental conditions, asking basis, title, and infrastructure cost. CFS-PARCEL-0149760035 remains a secondary diligence candidate. CFS-PARCEL-0149777275 should be deferred under the current strategy because its mapped flood burden and sewer-proximity gap outweigh the acreage advantage.
+## 2. Acquisition Question
 
-## 2. Investment question
+Which large Cabarrus County development-land candidate should advance from countywide screening into acquisition pricing and formal transaction diligence?
 
-Which properties should advance from countywide screening into formal acquisition and due-diligence review for future residential or mixed-use development land in Cabarrus County?
+## 3. Hypothetical Client Strategy
 
-## 3. Hypothetical client strategy
+The hypothetical client is a regional residential developer seeking large land positions for entitlement, horizontal development, and sale of finished residential lots to builders. The primary CASE-3B model does not include vertical home construction, retail income, or mixed-use revenue.
 
-- Client label: Hypothetical Regional Residential and Mixed-Use Developer
-- Engagement type: Development-Land Acquisition Review
-- Geography: Cabarrus County, North Carolina
-- Strategy: Medium- to long-term residential or mixed-use development land
-- Minimum gross acreage: approximately 100 acres
-- Risk tolerance: moderate
+## 4. Cabarrus County Study Area
 
-## 4. Study area
+The study area is Cabarrus County, North Carolina. The evidence package uses cloud-safe CFS parcel, planning, transportation, environmental, development-activity, ACS, and utility-proxy evidence. It excludes owner, mailing, raw WSACC, raw score, exact probability, and restricted source data.
 
-The study area is Cabarrus County, North Carolina, using the CFS cloud-safe parcel and Investment dataset restored to Azure in AZ-1B and mirrored locally in `cfs_cloud_stage` for full-database analysis during the current cloud-deployment freeze.
+## 5. Screening Criteria
 
-## 5. Screening methodology
+The 100-point screen used seven categories: planning and entitlement fit, market and development momentum, transportation accessibility, utility-readiness proxy, environmental constraint profile, parcel configuration and site fit, and evidence/data confidence. The score is an analyst screening aid, not a probability, appraisal, or purchase recommendation.
 
-The screen used a transparent 100-point analyst model. It is not the Model Lab score, not a development probability, not an appraisal, and not a hidden ranking score.
-
-- Planning and entitlement fit: 20 points
-- Market and development momentum: 20 points
-- Transportation accessibility: 15 points
-- Utility-readiness proxy: 15 points
-- Environmental constraint profile: 15 points
-- Parcel configuration and site fit: 10 points
-- Evidence and data confidence: 5 points
-
-Review bands: 80-100 Priority review; 65-79 Secondary review; 50-64 Watchlist; below 50 Do not advance yet.
-
-## 6. Candidate funnel
+## 6. Candidate Funnel
 
 | Funnel step | Count |
-|---|---:|
+| --- | ---: |
 | Countywide parcels reviewed | 110,017 |
-| Parcels meeting minimum acreage | 241 |
-| Parcels with usable Planning and Investment evidence | 241 |
-| Parcels passing initial planning/utility/environmental screens | 62 |
-| Parcels receiving preliminary manual review | 10 |
-| Final shortlist count | 3 |
+| Minimum acreage pass | 241 |
+| Evidence ready | 241 |
+| Initial screen pass | 62 |
+| Manual review set | 10 |
+| Final shortlist | 3 |
 
-Initial screen criteria: at least 100 gross acres; usable CFS planning, transportation, and Investment evidence; mapped environmental band other than High Verification Need; and sewer-proximity proxy of Adjacent, Near, or Moderate.
+## 7. Three-Property Shortlist
 
-## 7. Three-property shortlist
+| Candidate | Gross acres | Developable estimate | Score | Current decision |
+| --- | ---: | ---: | ---: | --- |
+| CFS-PARCEL-0149758869 | 489.43 | 392.11 | 89 | Priority review candidate |
+| CFS-PARCEL-0149760035 | 670.27 | 554.36 | 77 | Retain for secondary review |
+| CFS-PARCEL-0149777275 | 233.26 | 112.85 | 36 | Defer |
 
-| Candidate | Acres | Developable estimate | Score | Decision | Main advantage | Main risk |
-|---|---:|---:|---:|---|---|---|
-| CFS-PARCEL-0149758869 | 489.43 | 392.11 | 89 | Advance for additional acquisition review | Strongest combined sewer proxy, development momentum, data confidence, and manageable mapped constraints. | Zoning interpretation, capacity, access, asking basis, and field review are unverified. |
-| CFS-PARCEL-0149760035 | 670.27 | 554.36 | 77 | Recommended for additional diligence | Largest preliminary developable acreage among the comparison set with adjacent sewer proxy. | Larger infrastructure and entitlement verification burden. |
-| CFS-PARCEL-0149777275 | 233.26 | 112.85 | 36 | Defer | Meets minimum acreage threshold and illustrates why acreage alone is insufficient. | Outside near-sewer proxy range and high mapped flood burden. |
+## 8. Candidate Score Explanations
 
-## 8. Candidate comparison
+CFS-PARCEL-0149758869 scored highest because it combines scale, utility-proxy evidence, nearby development momentum, moderate mapped constraints, and high screening data confidence. Its weaknesses are I-2 zoning interpretation, unresolved utility capacity, legal access, title/easements, asking basis, off-site scope, and professional field review.
 
-### CFS-PARCEL-0149758869
+CFS-PARCEL-0149760035 remains secondary because it has larger acreage and adjacent sewer-proximity proxy evidence, but its entitlement, access, and infrastructure burden are unresolved.
 
-Why it could work: 489.43 gross acres; adjacent sewer-proximity proxy; strong utility-readiness proxy; moderate mapped environmental constraint band; very high development-activity context.
+CFS-PARCEL-0149777275 remains deferred because its utility-proxy gap and mapped flood burden outweigh its acreage advantage.
 
-Why it could fail: I-2 zoning must not be treated as residential or mixed-use entitlement; utility capacity and water service are not confirmed; asking basis, title, legal access, easements, infrastructure cost, and environmental field review are missing.
+## 9. Priority-Property Deep Dive
 
-Decision: **Advance for additional acquisition review**.
+CFS-PARCEL-0149758869 is a priority screening candidate, not a financially approved acquisition target. Concord I-2 zoning must not be treated as residential entitlement. Utility proximity does not confirm service availability or capacity. Legal access, frontage, easements, title, seller path, asking basis, infrastructure cost, and environmental/geotechnical conditions remain missing.
 
-### CFS-PARCEL-0149760035
+## 10. Preliminary Developable-Area Estimate
 
-Why it could work: 670.27 gross acres; 554.36-acre preliminary developable-area estimate; adjacent sewer-proximity proxy; moderate mapped environmental constraint band; very high development-activity context.
+The 392.11-acre estimate is a preliminary developable-area screening estimate. It starts with 489.43 gross acres, subtracts 28.13 unioned FEMA/NWI mapped constrained acres without double-counting overlap, then applies a 15% open-space/stormwater screening assumption. It is not surveyed acreage, engineering-confirmed acreage, entitlement capacity, or a professional environmental finding.
 
-Why it could fail: entitlement and access evidence require more verification; very large acreage can imply larger infrastructure burden; asking basis, title, and professional environmental review are missing.
+## 11. Market-Assumption Review
 
-Decision: **Recommended for additional diligence**.
+CASE-3A.1 reviewed public planning, fee, housing-market, and NAHB benchmark sources. Direct verified Cabarrus finished-lot comparables were not obtained. Finished-lot value remains an analyst benchmark requiring professional market study. Horizontal development cost remains an analyst benchmark requiring a civil estimate.
 
-### CFS-PARCEL-0149777275
+## 12. Underwriting Methodology
 
-Why it could work: 233.26 gross acres meets the minimum acreage threshold and remains large enough for future reconsideration if utility or constraint evidence changes.
+The workbook uses this diagnostic formula:
 
-Why it could fail: outside the near-sewer proxy range; material mapped environmental constraint band; about 50.75 percent FEMA flood overlay; no development-activity signal in this screen.
+Gross development revenue minus internal horizontal costs, defined off-site costs, soft costs, contingency, selling costs, financing/carry allowance, and required developer margin equals preliminary residual before land.
 
-Decision: **Defer**.
+When the result is positive, it indicates preliminary maximum supportable land-price context. When the result is zero or negative, it indicates no positive supportable land price under current diagnostic assumptions.
 
-## 9. Priority-property deep dive
+## 13. Downside/Base/Upside Results
 
-CFS-PARCEL-0149758869 has 489.43 gross acres, adjacent sewer-proximity proxy, strong utility-readiness proxy, moderate mapped environmental constraint band, and very high nearby development activity. That combination gives the parcel enough evidence to justify formal acquisition diligence, without treating it as a guaranteed development site.
+| Scenario | Estimated lots | Gross revenue | Residual after selling/carry | Status |
+| --- | ---: | ---: | ---: | --- |
+| Downside | 770.00 | $42.35M | -$110.20M | No positive supportable land price |
+| Base | 1,097.91 | $76.85M | -$64.34M | No positive supportable land price |
+| Upside | 1,462.00 | $124.27M | -$14.25M | No positive supportable land price |
 
-Current zoning code is I-2 in Concord, so residential or mixed-use compatibility requires planning interpretation and likely entitlement work. Utility proximity does not confirm service availability or capacity. Legal access, frontage, easements, title, seller expectations, asking basis, infrastructure costs, and field environmental conditions are missing.
+## 14. Sensitivity Findings
 
-### Score detail
+The most important sensitivity is finished-lot value versus horizontal development cost per lot. The second is developable acreage versus modeled density. The current assumptions fail because the lot-value benchmarks are not high enough to cover internal hard costs, defined off-site costs, soft costs, contingency, selling/carry, and developer margin.
 
-| Category | Max | Points | Explanation |
-|---|---:|---:|---|
-| Planning and entitlement fit | 20 | 17 | High-confidence Concord zoning overlay is available, but I-2 is not treated as residential or mixed-use entitlement and requires interpretation. |
-| Market and development momentum | 20 | 19 | Very high development activity and recent permit evidence support review, while demand and absorption remain professional verification items. |
-| Transportation accessibility | 15 | 13 | Road-proximity evidence is available; legal access, frontage, and off-site improvement needs are not confirmed. |
-| Utility-readiness proxy | 15 | 14 | Adjacent sewer-proximity and strong utility-readiness proxy are supportive; capacity and water service are not confirmed. |
-| Environmental constraint profile | 15 | 14 | Mapped flood and wetland acreage is limited relative to gross acreage; soils and field environmental review remain important. |
-| Parcel configuration and site fit | 10 | 8 | Gross acreage is strong for large development-land review; shape, access, easements, and assembly conditions require verification. |
-| Evidence and data confidence | 5 | 4 | CFS safe data coverage is strong, but asking basis, title, water, and capacity evidence are missing. |
-| **Total** | **100** | **89** | **Priority review** |
+## 15. Recommendation
 
-## 10. Preliminary developable area
+The priority parcel remains the strongest candidate under the physical, planning, transportation, environmental, and utility-proxy screening criteria. However, none of the current finished-lot development scenarios produces a positive residual before land acquisition. The property should not advance to acquisition pricing under the current assumptions. Further review is justified only if verified finished-lot values, entitlement density, civil-development costs, off-site infrastructure scope, utility requirements, or phasing materially improve the modeled economics.
 
-Label: **Preliminary developable-area screening estimate**. This is not certified developable acreage, surveyed usable acreage, engineering-confirmed acreage, environmental clearance, or a development approval.
+## 16. Due-Diligence Plan
 
-For CFS-PARCEL-0149758869: gross acreage is 489.43. FEMA SFHA/floodway/high-severity geometry contributes 8.83 acres, NWI wetland geometry contributes 22.08 acres, and the unioned flood/wetland constrained area is 28.13 acres after accounting for 2.78 acres of overlap. Preliminary net acreage after unioned mapped flood/wetland constraints is 461.30. A 15 percent open-space/stormwater screening assumption removes 69.19 acres, producing an estimated 392.11 developable acres.
+Immediate diligence should focus on verified finished-lot comps, builder interest, civil quantity takeoff, road/intersection scope, water and sewer service/capacity, utility-extension scope, density and entitlement feasibility, legal access, title/easements, boundary/topographic survey, wetland/floodplain review, geotechnical review, traffic impact, phasing, and financing/carry assumptions.
 
-Stream or water-feature acreage, assumed stream-buffer acreage, existing right-of-way or infrastructure acreage, and other mapped constraint acreage were unavailable as geometry in the current cloud-safe stage and are treated as data limitations.
+## 17. Evidence Gaps
 
-## 11. Underwriting scenarios
+Missing evidence includes asking price, seller expectations, finished-lot comps, civil cost, utility capacity, water service, sewer extension scope, traffic/off-site requirements, approved density, legal access, title/easements, survey, environmental/geotechnical findings, and builder absorption.
 
-The following values are analyst scenario assumptions for sensitivity review. Asking price is unavailable and was not invented. Residual land value is not an appraisal or market value.
+## 18. Sources
 
-| Scenario | Developable acres | Density | Units/lots | Value assumption | Supportable land price | Margin under assumed basis |
-|---|---:|---:|---:|---:|---:|---:|
-| Downside | 352.90 | 1.80 | 635 | $105,000 | $0 | $-31,972,000 |
-| Base | 392.11 | 2.40 | 941 | $125,000 | $18,427,300 | $427,300 |
-| Upside | 411.72 | 3.00 | 1,235 | $140,000 | $49,673,000 | $25,673,000 |
+Sources include the CASE-1 CFS package, CASE-3A/3A.1/3A.2 review files, Concord development ordinance and fee materials, Cabarrus planning references, WSACC fee references, Canopy Charlotte market context, Redfin Cabarrus market context, FRED/FHFA price index context, and NAHB national/South Atlantic benchmarks.
 
-The largest sensitivity drivers are finished lot or unit value, approved density, and horizontal development cost. Utility-extension uncertainty is the largest non-market diligence risk.
+## 19. Limitations
 
-## 12. Recommendation
-
-Advance CFS-PARCEL-0149758869 to preliminary acquisition review, subject to confirmation of zoning interpretation, utility service and capacity, legal access, environmental conditions, asking basis, title, and infrastructure cost. Retain CFS-PARCEL-0149760035 as a secondary diligence candidate while its entitlement, access, and infrastructure burden are clarified. Defer CFS-PARCEL-0149777275 because the current utility-proxy gap and mapped flood burden do not justify additional acquisition resources under this strategy.
-
-This is a conditional screening recommendation. It is not a recommendation to purchase property.
-
-## 13. Due-diligence plan
-
-Immediate verification: ownership and contact path, title, asking price or negotiated acquisition basis, seller expectations, recent qualified land sales, zoning interpretation, future-land-use interpretation, water availability, sewer availability, utility capacity, legal access, and easements.
-
-Technical due diligence: boundary survey, topographic survey, wetland delineation, Phase I Environmental Site Assessment, geotechnical study, traffic-impact analysis, preliminary engineering, stormwater review, and infrastructure-cost estimate.
-
-Financial and market review: comparable projects, housing-demand study, absorption, finished-lot or unit pricing, construction costs, development schedule, financing, and sensitivity testing.
-
-GIS screening identifies where to investigate. It does not replace professional due diligence.
-
-## 14. Sources
-
-Primary CFS sources include cloud-safe parcel enrichment, development screening output, WSACC-derived utility proxy classes, transportation accessibility features, zoning overlay, development activity summary, environmental context, ACS market context, FEMA flood geometry, and NWI wetland geometry.
-
-## 15. Limitations
-
-Internal screening-level research only. Not investment advice. Not an appraisal. Not confirmation of utility service or capacity. Not a guarantee of future value. Not a formal environmental assessment. Not legal entitlement advice. Based partly on public and proxy data. Subject to source-date and coverage limitations.
+This is internal screening-level financial analysis. It is not investment advice, an appraisal, market value, fair value, recommended offer, entitlement approval, utility-capacity confirmation, environmental clearance, or engineering confirmation. Screening priority does not equal financial feasibility.

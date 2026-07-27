@@ -11,6 +11,7 @@ from typing import Any
 import requests
 
 PARCEL_ID = "CFS-PARCEL-0149726579"
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class Smoke:
@@ -135,7 +136,7 @@ def main() -> None:
     parser.add_argument("--token", default=os.getenv("CFS_STAGING_ACCESS_TOKEN"))
     parser.add_argument("--samples", type=int, default=1)
     parser.add_argument("--timeout-seconds", type=float, default=90)
-    parser.add_argument("--output", type=Path, default=Path(r"C:\CFS_Azure_Migration\az2_container_apps\cfs-api-smoke.json"))
+    parser.add_argument("--output", type=Path, default=ROOT / "local-data" / "azure-migration" / "az2_container_apps" / "cfs-api-smoke.json")
     args = parser.parse_args()
     report = Smoke(args.base_url, args.token, args.samples, args.timeout_seconds).run()
     args.output.parent.mkdir(parents=True, exist_ok=True)

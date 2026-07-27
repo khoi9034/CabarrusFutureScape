@@ -26,6 +26,7 @@ data/**/*.shp
 data/**/*.dbf
 data/**/*.zip
 CFS_Azure_Migration
+local-data/
 *.dump
 *.backup
 *.bak

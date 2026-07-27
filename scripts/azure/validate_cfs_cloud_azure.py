@@ -11,7 +11,7 @@ from psycopg import sql
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "config" / "cfs_cloud_table_manifest.json"
-DEFAULT_OUTPUT = Path(r"C:\CFS_Azure_Migration\cfs_cloud_azure_validation.json")
+DEFAULT_OUTPUT = ROOT / "local-data" / "azure-migration" / "cfs_cloud_azure_validation.json"
 
 
 def connect_stage() -> psycopg.Connection:

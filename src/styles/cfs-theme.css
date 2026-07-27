@@ -1587,6 +1587,76 @@ select:focus-visible {
   }
 }
 
+@media (max-width: 900px) {
+  .case-study-workspace-header .investment-row-actions {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  }
+
+  .case-study-workspace-header .investment-active-overflow,
+  .case-study-workspace-header .investment-active-overflow summary,
+  .case-study-workspace-header .investment-row-actions > button {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .consulting-workflow-stepper {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+    overflow-x: visible;
+  }
+
+  .investment-table--compact thead {
+    display: none;
+  }
+
+  .investment-table--compact,
+  .investment-table--compact tbody,
+  .investment-table--compact td,
+  .investment-table--compact tr {
+    display: block;
+    width: 100%;
+  }
+
+  .investment-table--compact tr {
+    border-top: 1px solid var(--investment-border);
+    padding: 0.55rem 0;
+  }
+
+  .investment-table--compact td {
+    border-top: 0;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+  }
+
+  .investment-table--compact td::before {
+    color: var(--investment-text-muted);
+    content: "Detail";
+    flex: 0 0 7rem;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .investment-table--compact td:nth-child(1)::before {
+    content: "Item";
+  }
+
+  .investment-table--compact td:nth-child(2)::before {
+    content: "Type";
+  }
+
+  .investment-table--compact td:nth-child(3)::before {
+    content: "Status";
+  }
+
+  .investment-table--compact td:nth-child(4)::before {
+    content: "Action";
+  }
+}
+
 @media (min-width: 768px) {
   .cfs-overview-flow-link {
     display: block;

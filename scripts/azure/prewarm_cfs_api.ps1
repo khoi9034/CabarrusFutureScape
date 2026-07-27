@@ -2,13 +2,14 @@ param(
   [string]$BaseUrl = "https://cfs-api-staging.whiterock-f4f36359.canadacentral.azurecontainerapps.io",
   [string]$KeyVaultName = "cfs-kv-792a9f87",
   [string]$SecretName = "cfs-staging-access-token",
-  [string]$OutputRoot = "C:\CFS_Azure_Migration\az3_performance"
+  [string]$OutputRoot = ""
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+if (-not $OutputRoot) { $OutputRoot = Join-Path $RepoRoot.Path "local-data\azure-migration\az3_performance" }
 $OutputRoot = [System.IO.Path]::GetFullPath($OutputRoot)
-if ($OutputRoot.StartsWith($RepoRoot.Path)) { throw "Refusing to write prewarm output inside the repository." }
+if (-not ($OutputRoot.StartsWith((Join-Path $RepoRoot.Path "local-data") + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase))) { throw "Refusing to write prewarm output outside local-data." }
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
 
 $Token = az keyvault secret show --vault-name $KeyVaultName --name $SecretName --query value -o tsv

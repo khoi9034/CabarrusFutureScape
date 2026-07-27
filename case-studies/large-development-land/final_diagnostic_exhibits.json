@@ -1,0 +1,36 @@
+{
+  "phase": "CASE-3B",
+  "status": "Needs Review",
+  "candidate_funnel": {
+    "countywide_reviewed": 110017,
+    "minimum_acreage_pass": 241,
+    "evidence_ready": 241,
+    "initial_screen_pass": 62,
+    "manual_review_set": 10,
+    "final_shortlist": 3
+  },
+  "priority_site_evidence_summary": {
+    "parcel_id": "CFS-PARCEL-0149758869",
+    "gross_acres": 489.43,
+    "preliminary_developable_acres": 392.11,
+    "screening_score": 89,
+    "physical_planning_conclusion": "Priority Review Candidate",
+    "financial_conclusion": "No positive supportable land price under current diagnostic scenarios",
+    "overall_decision": "Targeted diligence only; do not advance to acquisition pricing yet"
+  },
+  "scenario_comparison": [
+    { "scenario": "Downside", "estimated_lots": 770.0, "gross_revenue": 42350000, "residual_after_selling_carry": -110195250, "status": "No positive supportable land price" },
+    { "scenario": "Base", "estimated_lots": 1097.91, "gross_revenue": 76853560, "residual_after_selling_carry": -64338023.7, "status": "No positive supportable land price" },
+    { "scenario": "Upside", "estimated_lots": 1462.0, "gross_revenue": 124270000, "residual_after_selling_carry": -14247640, "status": "No positive supportable land price" }
+  ],
+  "break_even_lot_value_chart": [
+    { "scenario": "Downside", "break_even_finished_lot_value_after_selling_carry": 238475.27 },
+    { "scenario": "Base", "break_even_finished_lot_value_after_selling_carry": 141464.1 },
+    { "scenario": "Upside", "break_even_finished_lot_value_after_selling_carry": 96331.75 }
+  ],
+  "final_decision_matrix": [
+    { "candidate": "CFS-PARCEL-0149758869", "decision": "Targeted diligence only; do not advance to acquisition pricing yet", "reason": "Strongest screen, negative diagnostic underwriting" },
+    { "candidate": "CFS-PARCEL-0149760035", "decision": "Retain for secondary review", "reason": "Do not underwrite until site and infrastructure questions are resolved" },
+    { "candidate": "CFS-PARCEL-0149777275", "decision": "Defer", "reason": "Constraint and utility burden outweigh screening advantages" }
+  ]
+}

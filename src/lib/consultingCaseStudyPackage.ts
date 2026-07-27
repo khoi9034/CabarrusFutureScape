@@ -3,6 +3,7 @@ import activePropertyAnalysis from "../../case-studies/large-development-land/ac
 import candidateComparison from "../../case-studies/large-development-land/candidate_comparison.json";
 import developableAreaAnalysis from "../../case-studies/large-development-land/developable_area_analysis.json";
 import dueDiligencePlan from "../../case-studies/large-development-land/due_diligence_plan.json";
+import finalDiagnosticExhibits from "../../case-studies/large-development-land/final_diagnostic_exhibits.json";
 import limitations from "../../case-studies/large-development-land/limitations.json";
 import screeningFunnel from "../../case-studies/large-development-land/screening_funnel.json";
 import shortlistedCandidates from "../../case-studies/large-development-land/shortlisted_candidates.json";
@@ -21,6 +22,7 @@ const artifacts = {
   candidate_comparison: candidateComparison,
   developable_area_analysis: developableAreaAnalysis,
   due_diligence_plan: dueDiligencePlan,
+  final_diagnostic_exhibits: finalDiagnosticExhibits,
   limitations,
   screening_funnel: screeningFunnel,
   shortlisted_candidates: shortlistedCandidates,

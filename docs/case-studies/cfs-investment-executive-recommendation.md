@@ -1,15 +1,15 @@
 # CFS Investment Executive Recommendation
 
-**Acquisition objective:** Identify large Cabarrus County development-land candidates for formal acquisition and due-diligence review. This is a hypothetical internal case study, not investment advice or an appraisal.
+**Acquisition question:** Which large Cabarrus County development-land candidate should advance from screening into acquisition pricing?
 
-**Priority candidate:** CFS-PARCEL-0149758869, 489.43 gross acres, CASE-1 score 89, Priority review. Advance for additional acquisition review because CFS shows adjacent sewer-proximity proxy, strong utility-readiness proxy, very high development-activity context, and a moderate mapped environmental constraint profile.
+**Screening result:** CFS reviewed 110,017 parcel records, narrowed the universe to 241 acreage-qualified and evidence-ready parcels, passed 62 through the initial screen, manually reviewed 10, and shortlisted 3.
 
-**Main risks:** zoning interpretation, utility capacity, water service, legal access, title, easements, asking basis, infrastructure cost, and field environmental conditions are unverified.
+**Shortlist:** CFS-PARCEL-0149758869 scored 89 and remains the priority physical/planning review candidate. CFS-PARCEL-0149760035 scored 77 and remains a secondary review candidate. CFS-PARCEL-0149777275 scored 36 and remains deferred.
 
-**Secondary candidate:** CFS-PARCEL-0149760035, 670.27 gross acres, CASE-1 score 77. Retain for additional diligence because it offers larger preliminary developable acreage, but entitlement, access, and infrastructure burden require more review.
+**Financial finding:** The strongest screened property does not currently pass the financial-feasibility test. The priority parcel does not currently support acquisition pricing under the diagnostic finished-lot development scenarios. Downside, base, and upside all produce negative preliminary residual land-value context before land acquisition.
 
-**Deferred candidate:** CFS-PARCEL-0149777275, 233.26 gross acres, CASE-1 score 36. Defer because it is outside the near-sewer proxy range and has material mapped flood exposure.
+**Decision:** Targeted diligence only; do not advance CFS-PARCEL-0149758869 to acquisition pricing yet. Reconsider only if verified finished-lot values, entitlement density, civil-development costs, off-site infrastructure scope, utility requirements, or phasing materially improve the modeled economics.
 
-**Immediate next actions:** verify zoning and future-land-use interpretation; confirm water and sewer service/capacity; verify legal access, title, and easements; obtain seller and asking-basis information; order environmental, survey, traffic, geotechnical, and infrastructure-cost diligence.
+**Immediate diligence:** Verify finished-lot comparables, civil cost, water and sewer service/capacity, utility-extension scope, legal access, title/easements, entitlement feasibility, survey, environmental/geotechnical conditions, traffic/off-site requirements, and phasing.
 
-**Major limitations:** utility proximity is only a screening proxy; developable acreage is preliminary; underwriting values are analyst assumptions awaiting review; no owner names, mailing addresses, raw model scores, exact probabilities, or restricted source fields are included.
+**Limitations:** This is screening-level financial analysis, not an appraisal, market value, fair value, recommended offer, investment advice, entitlement approval, or utility-capacity confirmation. No asking price, owner identity, mailing information, raw score, exact probability, or restricted source data is included.

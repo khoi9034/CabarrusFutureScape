@@ -152,12 +152,12 @@ def test_export_script_is_safe_static_contract() -> None:
     script = EXPORT_SCRIPT.read_text(encoding="utf-8")
     postgres_url_scheme = "postgres" + "ql://"
     assert r"C:\Program Files\PostgreSQL\18\bin" in script
-    assert r"C:\CFS_Azure_Migration" in script
+    assert r"local-data\azure-migration" in script
     assert ('"--format", "directory"' in script) or ("--format directory" in script)
     assert ('"--jobs", "$Jobs"' in script) or ("--jobs $Jobs" in script)
     assert "--no-owner" in script
     assert "--no-acl" in script
-    assert "Refusing to write migration artifacts outside C:\\CFS_Azure_Migration." in script
+    assert "Refusing to write migration artifacts outside local-data\\azure-migration." in script
     assert "DATABASE_URL" not in script
     assert postgres_url_scheme not in script.lower()
     assert "password=" not in script.lower()

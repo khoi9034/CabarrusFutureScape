@@ -63,7 +63,7 @@ from app.services.investment_workspace_service import (
 ROOT = Path(__file__).resolve().parents[2]
 CASE_DIR = ROOT / "case-studies" / "large-development-land"
 DOC_DIR = ROOT / "docs" / "case-studies"
-OUTSIDE = Path(r"C:\CFS_Azure_Migration\case1")
+OUTSIDE = Path(os.getenv("CFS_CASE1_SOURCE_ROOT", ROOT / "local-data" / "azure-migration" / "case1"))
 
 STUDY_DATE = "2026-07-18"
 ACTIVE = "CFS-PARCEL-0149758869"

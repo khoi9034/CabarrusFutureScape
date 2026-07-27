@@ -21,8 +21,8 @@
 - Uses PostgreSQL 18 `pg_dump`.
 - Dumps only local `cfs_cloud_stage`.
 - Uses directory format, `--no-owner`, `--no-acl`, and parallel jobs.
-- Writes only under `C:\CFS_Azure_Migration`.
-- Refuses repository-contained output paths.
+- Writes only under ignored `local-data\azure-migration`.
+- Refuses output paths outside that ignored artifact root.
 - Uses `PGPASSWORD` only from the current process or a secure prompt.
 - Generated SHA256 checksums and an export manifest.
 

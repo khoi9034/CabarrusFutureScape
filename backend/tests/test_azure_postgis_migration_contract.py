@@ -18,8 +18,8 @@ def _text(path: Path) -> str:
 
 def test_export_records_manifest_and_checksums_without_repo_output() -> None:
     script = _text(EXPORT_SCRIPT)
-    assert "C:\\CFS_Azure_Migration" in script
-    assert "Refusing to write migration artifacts inside the repository." in script
+    assert "local-data\\azure-migration" in script
+    assert "Refusing to write migration artifacts outside local-data\\azure-migration." in script
     assert "Get-FileHash -Algorithm SHA256" in script
     assert "started_at" in script
     assert "completed_at" in script
@@ -38,7 +38,7 @@ def test_restore_script_requires_tls_no_owner_no_acl_and_conservative_jobs() -> 
     assert "--exit-on-error" in script
     assert "Azure restore parallelism is capped at 2 jobs" in script
     assert "[int]$Jobs = 1" in script
-    assert "C:\\CFS_Azure_Migration" in script
+    assert "local-data\\azure-migration" in script
 
 
 def test_restore_runner_uses_entra_token_process_only_and_metrics() -> None:

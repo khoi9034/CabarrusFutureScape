@@ -1,21 +1,21 @@
 param(
   [Parameter(Mandatory = $true)][string]$DumpRoot,
   [Parameter(Mandatory = $true)][string]$TocList,
-  [string]$OutputRoot = "C:\CFS_Azure_Migration",
+  [string]$OutputRoot = "",
   [int]$Jobs = 1
 )
 
 $ErrorActionPreference = "Stop"
 $PgBin = "C:\Program Files\PostgreSQL\18\bin"
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$AllowedRoot = (Resolve-Path "C:\CFS_Azure_Migration").Path
+$AllowedRoot = Join-Path $RepoRoot.Path "local-data\azure-migration"
+if (-not $OutputRoot) { $OutputRoot = $AllowedRoot }
+New-Item -ItemType Directory -Force -Path $AllowedRoot | Out-Null
+$AllowedRoot = (Resolve-Path $AllowedRoot).Path
 $OutputRoot = [System.IO.Path]::GetFullPath($OutputRoot)
 
-if ($OutputRoot.StartsWith($RepoRoot.Path)) {
-  throw "Refusing to write restore artifacts inside the repository."
-}
 if (-not ($OutputRoot.Equals($AllowedRoot, [System.StringComparison]::OrdinalIgnoreCase) -or $OutputRoot.StartsWith($AllowedRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase))) {
-  throw "Refusing to write restore artifacts outside C:\CFS_Azure_Migration."
+  throw "Refusing to write restore artifacts outside local-data\azure-migration."
 }
 if ($Jobs -lt 1 -or $Jobs -gt 2) {
   throw "Azure restore parallelism is capped at 2 jobs. Use 1 for B1ms."

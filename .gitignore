@@ -53,6 +53,7 @@ outputs/
 
 # local source-data drops
 data/WSACC/
+local-data/
 
 # typescript
 *.tsbuildinfo
