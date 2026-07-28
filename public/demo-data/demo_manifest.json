@@ -8,7 +8,18 @@
     "economics_signals": 120,
     "school_capacity_rows": 37,
     "permit_segment_buckets": 9,
-    "development_annual_trends": 31
+    "development_annual_trends": 31,
+    "case_1_shortlist_candidates": 3
   },
+  "required_assets": [
+    { "path": "public/demo-data/sample_parcels.json", "feature": "Planning parcel search", "schema": "sample_parcels.v1", "record_count": 300, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
+    { "path": "public/demo-data/economics_intelligence.json", "feature": "CFS Economics dashboard", "schema": "economics_intelligence.v1", "record_count": 120, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
+    { "path": "public/demo-data/economics_powerbi_export.json", "feature": "Economics exports", "schema": "economics_powerbi_export.v1", "record_count": 120, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
+    { "path": "public/demo-data/indicator_intelligence.json", "feature": "Planning Indicator Center", "schema": "indicator_intelligence.v1", "record_count": 1, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
+    { "path": "public/demo-data/map_layers/demo_layer_manifest.json", "feature": "Planning map layers", "schema": "demo_layer_manifest.v1", "record_count": 8, "source_classification": "sanitized cached GeoJSON", "sanitized": true, "required": true },
+    { "path": "case-studies/large-development-land/screening_funnel.json", "feature": "CASE-1 screening funnel", "schema": "case_screening_funnel.v1", "record_count": 6, "source_classification": "sanitized case-study package", "sanitized": true, "required": true },
+    { "path": "case-studies/large-development-land/shortlisted_candidates.json", "feature": "Investments Find Sites and CASE-1 shortlist", "schema": "case_shortlist.v1", "record_count": 3, "source_classification": "sanitized case-study package", "sanitized": true, "required": true },
+    { "path": "case-studies/large-development-land/final_diagnostic_exhibits.json", "feature": "CASE-1 underwriting diagnostic exhibits", "schema": "case_final_diagnostics.v1", "record_count": 3, "source_classification": "sanitized case-study package", "sanitized": true, "required": true }
+  ],
   "source_label": "Local CFS PostGIS cached extract"
 }

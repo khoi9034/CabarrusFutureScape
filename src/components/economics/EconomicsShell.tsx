@@ -1023,11 +1023,6 @@ function InvestmentPanelPage({
 
   useEffect(() => {
     let mounted = true;
-    if (USE_DEMO_DATA) {
-      return () => {
-        mounted = false;
-      };
-    }
     void getInvestmentScreen(activeStrategy)
       .then((response) => {
         if (mounted) setInvestmentScreen(response);
@@ -1041,9 +1036,6 @@ function InvestmentPanelPage({
   }, [activeStrategy]);
   useEffect(() => {
     let mounted = true;
-    if (USE_DEMO_DATA) return () => {
-      mounted = false;
-    };
     void getInvestmentIntake()
       .then((response) => {
         if (mounted) setIntakeCandidates(response.candidates);
@@ -1062,9 +1054,6 @@ function InvestmentPanelPage({
   }, []);
   useEffect(() => {
     let mounted = true;
-    if (USE_DEMO_DATA) return () => {
-      mounted = false;
-    };
     void getInvestmentCaseStudies()
       .then((response) => {
         if (!mounted) return;
@@ -1100,9 +1089,6 @@ function InvestmentPanelPage({
   }, []);
   useEffect(() => {
     let mounted = true;
-    if (USE_DEMO_DATA) return () => {
-      mounted = false;
-    };
     void getInvestmentUnderwritingScenarios()
       .then((response) => {
         if (mounted) setUnderwritingScenarios(response.scenarios);
@@ -2069,6 +2055,8 @@ function InvestmentPanelPage({
         return (
           <InvestmentAreaRadarPage
             areas={radarAreas}
+            candidates={activeCaseStudy?.candidates ?? []}
+            defaultGoal={activeCaseStudy?.slug === "large-development-land" ? "Large Development Land" : investmentStrategyLabel(activeStrategy)}
             onAddToBucket={(area) => onAddReportBucketItem(areaRadarBucketItem(area))}
             onAddToEngagement={(area) => addToFirstEngagement(area.area_id, "search_area")}
             onAddToShortlist={(area) => addShortlistItem({
@@ -2079,8 +2067,15 @@ function InvestmentPanelPage({
               status: "Shortlisted",
               summary: area.area_classification,
             })}
+            onAddExternalOpportunity={() => openInvestmentPage("intake", "Add External Opportunity")}
+            onOpenCandidate={(candidate) => analyzeParcel(candidate.parcel_id, candidate.label ?? candidate.parcel_id)}
             onOpenOpportunityFeed={() => openInvestmentPage("opportunity-feed", "Opportunity Feed")}
-            onSaveSearch={() => saveConsultingSearch("Find Sites: Industrial Site")}
+            onRunScreening={() => searchInvestmentRadar(activeStrategy).then((response) => {
+              setRadarAreas(response.areas);
+              setStatus(`Run Screening completed: ${response.count} cached search area(s), ${activeCaseStudy?.candidate_count ?? 0} canonical candidate(s).`);
+            })}
+            onSaveSearch={() => saveConsultingSearch(`Find Sites: ${investmentStrategyLabel(activeStrategy)}`)}
+            status={status}
           />
         );
       case "opportunity":
@@ -2666,46 +2661,78 @@ function InvestmentOpportunityFeedPage({
 
 function InvestmentAreaRadarPage({
   areas,
+  candidates,
+  defaultGoal,
   onAddToBucket,
   onAddToEngagement,
+  onAddExternalOpportunity,
   onAddToShortlist,
+  onOpenCandidate,
   onOpenOpportunityFeed,
+  onRunScreening,
   onSaveSearch,
+  status,
 }: {
   areas: InvestmentAreaRadarArea[];
+  candidates: InvestmentCaseStudyCandidate[];
+  defaultGoal: string;
   onAddToBucket: (area: InvestmentAreaRadarArea) => void;
   onAddToEngagement: (area: InvestmentAreaRadarArea) => void;
+  onAddExternalOpportunity: () => void;
   onAddToShortlist: (area: InvestmentAreaRadarArea) => void;
+  onOpenCandidate: (candidate: InvestmentCaseStudyCandidate) => void;
   onOpenOpportunityFeed: () => void;
+  onRunScreening: () => Promise<void>;
   onSaveSearch: () => void;
+  status?: string | null;
 }) {
+  const [hasRun, setHasRun] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [searchGoal, setSearchGoal] = useState("development_land");
+  const [minimumAcreage, setMinimumAcreage] = useState("100");
+  const [maxConstraint, setMaxConstraint] = useState("material");
+  const minimum = Number(minimumAcreage);
+  const candidateConstraint = (candidate: InvestmentCaseStudyCandidate) =>
+    String((candidate as unknown as Record<string, unknown>).environmental_constraint_band ?? "");
+  const visibleCandidates = hasRun
+    ? candidates.filter(() => searchGoal === "development_land")
+      .filter((candidate) => !Number.isFinite(minimum) || minimum <= 0 || (candidate.gross_acres ?? 0) >= minimum)
+      .filter((candidate) => maxConstraint === "material" || candidateConstraint(candidate) !== "Material Mapped Constraint")
+    : [];
+  const run = () => {
+    setIsRunning(true);
+    void onRunScreening()
+      .then(() => setHasRun(true))
+      .finally(() => setIsRunning(false));
+  };
   return (
     <section className="investment-primary-column">
       <section className="investment-card">
-        <div className="investment-section-heading"><div><p>Find Sites</p><h2>Screen parcels and opportunities for the current case study.</h2></div>{areas.length ? <span className="investment-pill">{areas.length} results</span> : null}</div>
+        <div className="investment-section-heading"><div><p>Find Sites</p><h2>Screen parcels and opportunities for the current case study.</h2></div>{hasRun ? <span className="investment-pill">{visibleCandidates.length} candidates</span> : null}</div>
         <div className="investment-guided-form">
           <label>Case Study or Project<input className="investment-input" readOnly value="CFS Large Development-Land Acquisition Case Study" /></label>
-          <label>Search Goal<select className="investment-select" defaultValue="industrial_site"><option value="residential_development">Residential Development</option><option value="industrial_site">Industrial Site</option><option value="commercial_retail">Commercial / Retail Site</option><option value="land_banking">Long-Term Land Banking</option><option value="entitlement_repositioning">Entitlement / Repositioning</option><option value="existing_use">Existing-Use Acquisition</option><option value="custom_client">Custom</option></select></label>
+          <label>Search Goal<select className="investment-select" value={searchGoal} onChange={(event) => setSearchGoal(event.target.value)}><option value="development_land">{defaultGoal}</option><option value="land_banking">Long-Term Land Banking</option><option value="entitlement_repositioning">Entitlement / Repositioning</option><option value="existing_use">Existing-Use Acquisition</option></select></label>
           <label>Geography<select className="investment-select" defaultValue="countywide"><option value="countywide">All Cabarrus County</option><option value="municipality">Municipality</option><option value="planning_area">Planning area</option><option value="corridor">Corridor</option></select></label>
-          <label>Minimum Acreage<input className="investment-input" inputMode="decimal" placeholder="Example: 100" /></label>
-          <label>Maximum environmental constraint<select className="investment-select" defaultValue="moderate"><option value="limited">Limited</option><option value="moderate">Moderate</option><option value="material">Material allowed with verification</option></select></label>
+          <label>Minimum Acreage<input className="investment-input" inputMode="decimal" onChange={(event) => setMinimumAcreage(event.target.value)} placeholder="Example: 100" value={minimumAcreage} /></label>
+          <label>Maximum environmental constraint<select className="investment-select" onChange={(event) => setMaxConstraint(event.target.value)} value={maxConstraint}><option value="limited">Limited</option><option value="moderate">Moderate</option><option value="material">Material allowed with verification</option></select></label>
         </div>
         <details className="investment-disclosure">
           <summary>Advanced Criteria</summary>
-          <p>Zoning, traffic, ACS, soils, wetlands, slope, comparable confidence, permit momentum, and detailed source filters remain available in the advanced Opportunity Engine and Data & Methodology views.</p>
+          <p>Minimum acreage and maximum mapped environmental constraint update the visible cached demo candidates. Zoning, traffic, ACS, soils, wetlands, slope, comparable confidence, and permit momentum are already reflected in the CASE-1 cached screening scores.</p>
         </details>
         <details className="investment-disclosure">
           <summary>How this screening works</summary>
-          <p>CFS uses parcel data, zoning, permits, ACS market context, transportation, utility proximity, environmental constraints, basis evidence, and opportunity references. Budget, project type, financing assumptions, development costs, exit assumptions, and utility confirmation still require analyst or professional input.</p>
+          <p>The public demo loads a sanitized cached screening extract for CASE-1. The validated funnel is 110,017 countywide parcel records to 241 acreage-qualified records, 241 evidence-ready records, 62 initial screen passes, 10 manual-review candidates, and 3 final shortlist candidates. It is not processing raw private records in the browser.</p>
         </details>
         <div className="investment-row-actions">
-          <button className="investment-primary-button" onClick={onSaveSearch} type="button">Run Screening</button>
+          <button className="investment-primary-button" disabled={isRunning} onClick={run} type="button">{isRunning ? "Running..." : "Run Screening"}</button>
           <button className="investment-ghost-button" onClick={onSaveSearch} type="button">Save Search</button>
-          <button className="investment-ghost-button" onClick={onOpenOpportunityFeed} type="button">Add External Opportunity</button>
+          <button className="investment-ghost-button" onClick={onAddExternalOpportunity} type="button">Add External Opportunity</button>
         </div>
+        {status ? <p className="investment-status">{status}</p> : null}
       </section>
       <section className="investment-result-grid" aria-label="Find results">
-        {areas.length ? areas.slice(0, 12).map((area) => (
+        {hasRun && searchGoal === "development_land" && areas.length ? areas.slice(0, 12).map((area) => (
           <article className="investment-result-card" key={area.area_id}>
             <span>{area.area_classification}</span>
             <h3>{area.area_name}</h3>
@@ -2720,7 +2747,22 @@ function InvestmentAreaRadarPage({
               <button onClick={() => onAddToBucket(area)} type="button">Create Report</button>
             </div>
           </article>
-        )) : <p className="investment-empty">No search results yet.</p>}
+        )) : null}
+        {visibleCandidates.map((candidate) => (
+          <article className="investment-result-card" key={candidate.parcel_id}>
+            <span>{candidate.review_band ?? "Case-study candidate"}</span>
+            <h3>{candidate.parcel_id}</h3>
+            <p>{candidate.gross_acres?.toLocaleString("en-US")} gross acres | score {candidate.screening_score ?? "N/A"}</p>
+            <InvestmentSignalList title="Why it surfaced" values={[candidate.why_it_surfaced ?? "Large acreage plus usable CFS screening evidence."]} />
+            <InvestmentSignalList title="Main cautions" values={(candidate.major_cautions ?? candidate.missing_information ?? []).slice(0, 2)} />
+            <small>{candidate.decision ?? "Review before advancing."}</small>
+            <div className="investment-row-actions">
+              <button className="investment-primary-button" onClick={() => onOpenCandidate(candidate)} type="button">Open Property Review</button>
+            </div>
+          </article>
+        ))}
+        {!hasRun ? <p className="investment-empty">No search results yet. Run Screening to load the cached CASE-1 demo shortlist.</p> : null}
+        {hasRun && !visibleCandidates.length ? <p className="investment-empty">No candidates match these demo criteria. Lower minimum acreage or allow material mapped constraints.</p> : null}
       </section>
     </section>
   );
