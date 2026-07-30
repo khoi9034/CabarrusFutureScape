@@ -11,10 +11,11 @@ export interface CabarrusSceneView {
 export function createCabarrusSceneView(
   runtime: ArcGISRuntime,
   container: HTMLDivElement,
+  useOnlineBasemap = true,
 ): CabarrusSceneView {
-  const map = new runtime.Map({
-    basemap: cabarrusSceneConfig.basemap,
-  });
+  const map = new runtime.Map(
+    useOnlineBasemap ? { basemap: cabarrusSceneConfig.basemap } : {},
+  );
   const clippingArea = new runtime.Extent({
     spatialReference: {
       wkid: cabarrusSceneConfig.studyExtent.wkid,
@@ -26,6 +27,7 @@ export function createCabarrusSceneView(
   });
 
   const view = new runtime.MapView({
+    background: { color: "#050911" },
     center: [
       cabarrusSceneConfig.center.longitude,
       cabarrusSceneConfig.center.latitude,

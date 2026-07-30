@@ -1030,7 +1030,11 @@ export function SceneViewContainer() {
           return;
         }
 
-        const { map, view } = createCabarrusSceneView(runtime, container);
+        const { map, view } = createCabarrusSceneView(
+          runtime,
+          container,
+          !USE_DEMO_DATA,
+        );
         localView = view;
         viewRef.current = view;
         registerSceneViewSnapshotCapture(runtime, view);

@@ -112,6 +112,9 @@ function isForbiddenBackend(url, origin) {
   const port = parsed.port;
   const sameOrigin = parsed.origin === origin;
   const backendHost =
+    host === "basemaps.arcgis.com" ||
+    host === "services.arcgis.com" ||
+    host.endsWith(".arcgisonline.com") ||
     host.endsWith(".onrender.com") ||
     host.includes("supabase") ||
     host.includes("openai.com") ||
