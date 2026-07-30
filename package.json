@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "assets:arcgis": "node -e \"const f=require('node:fs'),d='public/arcgis-assets/esri/geometry/support',w='public/arcgis-assets/esri/core/workers';f.mkdirSync(d,{recursive:true});f.mkdirSync(w,{recursive:true});f.copyFileSync('node_modules/@arcgis/core/assets/esri/geometry/support/pe-wasm.wasm',d+'/pe-wasm.wasm');f.copyFileSync('node_modules/@arcgis/core/assets/esri/core/workers/RemoteClient.js',w+'/RemoteClient.js');f.cpSync('node_modules/@arcgis/core/assets/esri/core/libs/libtess','public/arcgis-assets/esri/core/libs/libtess',{recursive:true});f.cpSync('node_modules/@arcgis/core/assets/esri/widgets/Zoom/t9n','public/arcgis-assets/esri/widgets/Zoom/t9n',{recursive:true})\"",
+    "assets:arcgis": "node -e \"const f=require('node:fs'),d='public/arcgis-assets/esri/geometry/support';f.mkdirSync(d,{recursive:true});f.copyFileSync('node_modules/@arcgis/core/assets/esri/geometry/support/pe-wasm.wasm',d+'/pe-wasm.wasm');f.cpSync('node_modules/@arcgis/core/assets/esri/core/workers','public/arcgis-assets/esri/core/workers',{recursive:true});f.cpSync('node_modules/@arcgis/core/assets/esri/core/libs/libtess','public/arcgis-assets/esri/core/libs/libtess',{recursive:true});f.cpSync('node_modules/@arcgis/core/assets/esri/widgets/Zoom/t9n','public/arcgis-assets/esri/widgets/Zoom/t9n',{recursive:true})\"",
     "predev": "npm run assets:arcgis",
     "prebuild": "npm run assets:arcgis",
     "dev": "next dev -p 3000",
