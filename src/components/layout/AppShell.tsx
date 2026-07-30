@@ -4,6 +4,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import {
@@ -27,6 +28,7 @@ import {
   ShieldCheck,
   Sparkles,
   Waves,
+  X,
 } from "lucide-react";
 import { DashboardUrlSync } from "@/components/dashboard/DashboardUrlSync";
 import { DueDiligenceReview } from "@/components/dashboard/DueDiligenceReview";
@@ -851,7 +853,7 @@ function StableOverviewWorkspace() {
     LEFT_PANEL_WIDTHS[overviewLayout.leftPanelWidth],
   );
   const [draggingLayerRail, setDraggingLayerRail] = useState(false);
-  const initialLeftRailCollapseAppliedRef = useRef(false);
+  const compactLayoutAppliedRef = useRef<boolean | null>(null);
   const commandCenterHidden = overviewLayout.commandCenter === "hidden";
   const leftPanelHidden = overviewLayout.leftPanel === "hidden";
   const leftPanelCollapsed = overviewLayout.leftPanel === "collapsed";
@@ -860,12 +862,27 @@ function StableOverviewWorkspace() {
   const indicatorCenterDashboardMode = overviewCommandMode === "indicatorCenter";
 
   useEffect(() => {
-    if (initialLeftRailCollapseAppliedRef.current) {
-      return;
-    }
+    const compactViewport = window.matchMedia("(max-width: 767px)");
+    const applyResponsiveLayout = () => {
+      if (compactLayoutAppliedRef.current === compactViewport.matches) return;
+      compactLayoutAppliedRef.current = compactViewport.matches;
+      setOverviewLayoutPanel(
+        "left",
+        compactViewport.matches ? "hidden" : "collapsed",
+      );
+      setOverviewLayoutPanel(
+        "right",
+        compactViewport.matches ? "hidden" : "visible",
+      );
+      window.requestAnimationFrame(() =>
+        window.dispatchEvent(new Event("resize")),
+      );
+    };
 
-    initialLeftRailCollapseAppliedRef.current = true;
-    setOverviewLayoutPanel("left", "collapsed");
+    applyResponsiveLayout();
+    compactViewport.addEventListener("change", applyResponsiveLayout);
+    return () =>
+      compactViewport.removeEventListener("change", applyResponsiveLayout);
   }, [setOverviewLayoutPanel]);
 
   useEffect(() => {
@@ -888,6 +905,12 @@ function StableOverviewWorkspace() {
   }
 
   function toggleLayerRailCollapsed() {
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      setOverviewLayoutPanel("left", "hidden");
+      requestMapResize();
+      return;
+    }
+
     if (leftPanelCollapsed) {
       const nextWidth = clampLeftPanelWidth(lastExpandedLayerRailWidth);
 
@@ -984,12 +1007,12 @@ function StableOverviewWorkspace() {
       >
         {!isMapFocusMode && !leftPanelHidden && !indicatorCenterDashboardMode ? (
           <div
-            className="relative z-30 flex h-full min-h-0 shrink-0 overflow-visible transition-[width] duration-150 ease-out"
+            className="absolute inset-y-0 left-0 z-[70] flex h-full min-h-0 w-[min(22rem,calc(100vw-1.5rem))] shrink-0 overflow-visible shadow-2xl transition-[width] duration-150 ease-out md:relative md:z-30 md:w-[var(--desktop-rail-width)] md:shadow-none"
             style={{
-              width: leftPanelCollapsed
-                ? LEFT_PANEL_COLLAPSED_WIDTH
-                : layerRailWidth,
-            }}
+              "--desktop-rail-width": `${
+                leftPanelCollapsed ? LEFT_PANEL_COLLAPSED_WIDTH : layerRailWidth
+              }px`,
+            } as CSSProperties}
           >
             <Sidebar
               collapsed={leftPanelCollapsed}
@@ -1025,9 +1048,22 @@ function StableOverviewWorkspace() {
 
         {!isMapFocusMode && !rightPanelHidden && !indicatorCenterDashboardMode ? (
           <aside
-            className="flex h-full min-h-0 shrink-0 overflow-visible"
-            style={{ width: rightPanelWidth }}
+            className="absolute inset-y-0 right-0 z-[70] flex h-full min-h-0 w-[min(24rem,calc(100vw-1.5rem))] shrink-0 overflow-visible bg-[#07111f] shadow-2xl md:relative md:z-auto md:w-[var(--desktop-rail-width)] md:bg-transparent md:shadow-none"
+            style={
+              {
+                "--desktop-rail-width": `${rightPanelWidth}px`,
+              } as CSSProperties
+            }
           >
+            <button
+              aria-label="Close intelligence panel"
+              className="absolute right-2 top-2 z-50 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-[#07111f]/95 text-slate-300 md:hidden"
+              onClick={() => setOverviewLayoutPanel("right", "hidden")}
+              title="Close intelligence panel"
+              type="button"
+            >
+              <X className="h-4 w-4" />
+            </button>
             <EnterpriseErrorBoundary
               moduleName="Intelligence Panel"
               resetKey={`overview-stable-${selectedParcelId ?? "none"}`}
@@ -1043,7 +1079,14 @@ function StableOverviewWorkspace() {
           {leftPanelHidden && !indicatorCenterDashboardMode ? (
             <button
               className="pointer-events-auto rounded-full border border-[#68d8ff]/25 bg-[#07111f]/90 px-3 py-2 text-xs font-semibold text-[#d7f8ff] shadow-[0_12px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl transition hover:border-[#68d8ff]/50 hover:bg-[#68d8ff]/12"
-              onClick={() => setOverviewLayoutPanel("left", "collapsed")}
+              onClick={() =>
+                setOverviewLayoutPanel(
+                  "left",
+                  window.matchMedia("(max-width: 767px)").matches
+                    ? "visible"
+                    : "collapsed",
+                )
+              }
               type="button"
             >
               Show Layers

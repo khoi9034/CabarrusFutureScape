@@ -571,17 +571,47 @@ async function mobileChecks(browser, baseUrl) {
     ["Investments", "?app=consulting&investmentPage=overview"],
   ]) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    attachDiagnostics(context, new URL(baseUrl).origin);
     const page = await context.newPage();
     await goto(page, baseUrl, query);
-    if (product === "Planning") await page.getByTestId("cfs-command-center").waitFor();
-    if (product === "Economics") await page.getByRole("navigation", { name: "CFS Economics sections" }).waitFor();
-    if (product === "Investments") await page.getByRole("region", { name: "CFS Investments", exact: true }).waitFor();
+    if (product === "Planning") {
+      await page.getByTestId("cfs-command-center").waitFor();
+      await page.getByLabel("Cabarrus County ArcGIS MapView").waitFor({ timeout: 30_000 });
+      const search = page.getByRole("combobox", { name: "Search parcels" });
+      await search.fill("CFS-PARCEL-0149780354");
+      await page.locator("#top-parcel-search-results").getByRole("option").first().click();
+      await page.getByText(/Selected parcel: CFS-PARCEL-0149780354/i).first().waitFor();
+      await page.getByRole("button", { name: "Show Intelligence" }).click();
+      await page.getByText("Selected Parcel Intelligence", { exact: true }).waitFor();
+      await page.getByRole("button", { name: "Close intelligence panel" }).click();
+      await page.getByRole("button", { name: "Show Layers" }).click();
+      const card = page.locator("article").filter({ has: page.getByText("Development Hotspots", { exact: true }) }).first();
+      await card.getByRole("combobox", { name: "Development hotspot permit segment filter" }).selectOption("residential_growth");
+      await card.getByRole("button", { name: "Show Development Hotspots", exact: true }).click();
+      await card.getByRole("button", { name: /Legend Read the symbols/i }).waitFor();
+      await card.getByRole("button", { name: "Hide Development Hotspots", exact: true }).click();
+      await page.getByRole("button", { name: "Collapse map controls" }).click();
+    }
+    if (product === "Economics") {
+      await page.getByRole("navigation", { name: "CFS Economics sections" }).waitFor();
+      await page.getByRole("button", { name: /Economic Dashboard:/ }).click();
+      const search = page.getByRole("combobox", { name: "Search parcels" });
+      await search.fill("CFS-PARCEL-0149726304");
+      await page.locator("#top-parcel-search-results").getByRole("option").first().click();
+      await page.getByTestId("parcel-economic-context").getByText("CFS-PARCEL-0149726304", { exact: false }).waitFor();
+    }
+    if (product === "Investments") {
+      await page.getByRole("region", { name: "CFS Investments", exact: true }).waitFor();
+      await page.getByRole("button", { name: "Find Sites", exact: true }).first().click();
+      await page.getByRole("button", { name: "Run Screening", exact: true }).click();
+      await page.getByText(/3 candidates/i).first().waitFor();
+    }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert(overflow <= 2, `${product} has ${overflow}px horizontal mobile overflow.`);
     await assertHealthyText(page);
     await context.close();
-    record(product, "mobile viewport smoke", ["mobile layout"]);
-    console.log(`PASS ${product}: mobile viewport smoke`);
+    record(product, "mobile viewport workflow", ["mobile layout"]);
+    console.log(`PASS ${product}: mobile viewport workflow`);
   }
 }
 
