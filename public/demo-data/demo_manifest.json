@@ -1,9 +1,10 @@
 {
   "caveat": "Portfolio demo uses cached CFS demo data, not a live production database.",
-  "generated_at": "2026-07-10T02:22:53Z",
+  "generated_at": "2026-07-30T20:58:25Z",
   "mode": "portfolio_demo",
   "record_counts": {
-    "demo_map_layers": 8,
+    "demo_map_context_features": 212,
+    "demo_map_layers": 11,
     "sample_parcels": 300,
     "economics_signals": 120,
     "school_capacity_rows": 37,
@@ -16,7 +17,12 @@
     { "path": "public/demo-data/economics_intelligence.json", "feature": "CFS Economics dashboard", "schema": "economics_intelligence.v1", "record_count": 120, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
     { "path": "public/demo-data/economics_powerbi_export.json", "feature": "Economics exports", "schema": "economics_powerbi_export.v1", "record_count": 120, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
     { "path": "public/demo-data/indicator_intelligence.json", "feature": "Planning Indicator Center", "schema": "indicator_intelligence.v1", "record_count": 1, "source_classification": "sanitized cached extract", "sanitized": true, "required": true },
-    { "path": "public/demo-data/map_layers/demo_layer_manifest.json", "feature": "Planning map layers", "schema": "demo_layer_manifest.v1", "record_count": 8, "source_classification": "sanitized cached GeoJSON", "sanitized": true, "required": true },
+    { "path": "public/demo-data/map_layers/demo_layer_manifest.json", "feature": "Planning map layers", "schema": "demo_layer_manifest.v2", "record_count": 11, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized cached GeoJSON manifest", "sanitized": true, "required": true },
+    { "path": "public/demo-data/map_layers/demo_county_boundary.geojson", "feature": "Cabarrus County map frame", "schema": "geojson.feature_collection.v1", "record_count": 1, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified U.S. Census Bureau TIGERweb boundary", "sanitized": true, "required": true },
+    { "path": "public/demo-data/map_layers/demo_municipal_boundaries.geojson", "feature": "Municipal map context", "schema": "geojson.feature_collection.v1", "record_count": 6, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified U.S. Census Bureau TIGERweb incorporated places", "sanitized": true, "required": true },
+    { "path": "public/demo-data/map_layers/demo_hydrography.geojson", "feature": "Major water map context", "schema": "geojson.feature_collection.v1", "record_count": 124, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified U.S. Fish and Wildlife Service NWI extract", "sanitized": true, "required": true },
+    { "path": "public/demo-data/map_layers/demo_transportation_context.geojson", "feature": "Major road map context", "schema": "geojson.feature_collection.v1", "record_count": 75, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized simplified local transportation centerline extract", "sanitized": true, "required": true },
+    { "path": "public/demo-data/map_layers/demo_place_labels.geojson", "feature": "Major place map labels", "schema": "geojson.feature_collection.v1", "record_count": 6, "generated_at": "2026-07-30T20:58:25Z", "source_classification": "sanitized representative points derived from TIGERweb municipalities", "sanitized": true, "required": true },
     { "path": "case-studies/large-development-land/screening_funnel.json", "feature": "CASE-1 screening funnel", "schema": "case_screening_funnel.v1", "record_count": 6, "source_classification": "sanitized case-study package", "sanitized": true, "required": true },
     { "path": "case-studies/large-development-land/shortlisted_candidates.json", "feature": "Investments Find Sites and CASE-1 shortlist", "schema": "case_shortlist.v1", "record_count": 3, "source_classification": "sanitized case-study package", "sanitized": true, "required": true },
     { "path": "case-studies/large-development-land/final_diagnostic_exhibits.json", "feature": "CASE-1 underwriting diagnostic exhibits", "schema": "case_final_diagnostics.v1", "record_count": 3, "source_classification": "sanitized case-study package", "sanitized": true, "required": true }

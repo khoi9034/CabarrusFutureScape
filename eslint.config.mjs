@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "local-data/**",
     "outputs/**",
+    "public/arcgis-assets/**",
     "next-env.d.ts",
     "**/__pycache__/**",
   ]),

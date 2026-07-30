@@ -1,14 +1,14 @@
 export const cabarrusSceneConfig = {
   studyExtent: {
-    xmax: -80.195,
-    xmin: -80.905,
-    ymax: 35.565,
-    ymin: 35.17,
+    xmax: -80.265,
+    xmin: -80.817,
+    ymax: 35.537,
+    ymin: 35.155,
     wkid: 4326,
   },
   center: {
-    latitude: 35.3882,
-    longitude: -80.5795,
+    latitude: 35.346,
+    longitude: -80.541,
   },
   camera: {
     heading: 38,

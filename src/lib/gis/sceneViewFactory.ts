@@ -16,15 +16,7 @@ export function createCabarrusSceneView(
   const map = new runtime.Map(
     useOnlineBasemap ? { basemap: cabarrusSceneConfig.basemap } : {},
   );
-  const clippingArea = new runtime.Extent({
-    spatialReference: {
-      wkid: cabarrusSceneConfig.studyExtent.wkid,
-    },
-    xmax: cabarrusSceneConfig.studyExtent.xmax,
-    xmin: cabarrusSceneConfig.studyExtent.xmin,
-    ymax: cabarrusSceneConfig.studyExtent.ymax,
-    ymin: cabarrusSceneConfig.studyExtent.ymin,
-  });
+  const clippingArea = createCabarrusStudyExtent(runtime);
 
   const view = new runtime.MapView({
     background: { color: "#050911" },
@@ -47,4 +39,16 @@ export function createCabarrusSceneView(
   });
 
   return { map, view };
+}
+
+export function createCabarrusStudyExtent(runtime: ArcGISRuntime) {
+  return new runtime.Extent({
+    spatialReference: {
+      wkid: cabarrusSceneConfig.studyExtent.wkid,
+    },
+    xmax: cabarrusSceneConfig.studyExtent.xmax,
+    xmin: cabarrusSceneConfig.studyExtent.xmin,
+    ymax: cabarrusSceneConfig.studyExtent.ymax,
+    ymin: cabarrusSceneConfig.studyExtent.ymin,
+  });
 }

@@ -7,6 +7,7 @@ import type MapView from "@arcgis/core/views/MapView";
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type PointerEvent,
@@ -16,13 +17,17 @@ import {
   ChevronUp,
   GripHorizontal,
   Maximize2,
+  Minus,
   Minimize2,
+  Plus,
+  RotateCcw,
   X,
 } from "lucide-react";
 import {
   PARCEL_SEARCH_INSPECT_EVENT,
   type ParcelSearchEventDetail,
 } from "@/components/dashboard/ParcelSearchState";
+import { LocalContextFallbackMap } from "@/components/gis/LocalContextFallbackMap";
 import { MapViewportPlaceholder } from "@/components/gis/MapViewportPlaceholder";
 import {
   formatDevelopmentCount,
@@ -55,7 +60,10 @@ import {
 } from "@/lib/gis/layerModeOwnership";
 import { operationalLayerRegistry } from "@/lib/gis/layerRegistry";
 import { createMapInteractionController } from "@/lib/gis/mapInteractionController";
-import { createCabarrusSceneView } from "@/lib/gis/sceneViewFactory";
+import {
+  createCabarrusSceneView,
+  createCabarrusStudyExtent,
+} from "@/lib/gis/sceneViewFactory";
 import {
   CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
   dispatchParcelMapFocusResult,
@@ -63,11 +71,10 @@ import {
 } from "@/lib/map/parcelMapFocus";
 import { USE_DEMO_DATA, USE_ONLINE_BASEMAP } from "@/lib/api/client";
 import {
-  getDemoGeoJsonLayer,
-  getDemoParcelFeatures,
-  getDemoTransportationFeatures,
+  getDemoMapContext,
   type DemoGeoJsonFeature,
   type DemoGeoJsonGeometry,
+  type DemoMapContext,
 } from "@/lib/demo-data/mapLayerClient";
 import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
 import type {
@@ -202,6 +209,15 @@ interface CfsMapSnapshotCaptureResult {
 declare global {
   interface Window {
     __cfsCaptureMapSnapshot?: () => Promise<CfsMapSnapshotCaptureResult>;
+    __cfsGetMapDebugState?: () => {
+      layers: Array<{
+        graphicsCount: number | null;
+        id: string;
+        visible: boolean;
+      }>;
+      scale: number | null;
+      zoom: number | null;
+    };
   }
 }
 
@@ -269,6 +285,12 @@ export function SceneViewContainer() {
     useState<OverlayCardPosition | null>(null);
   const [schoolUtilizationHover, setSchoolUtilizationHover] =
     useState<SchoolUtilizationHoverCallout | null>(null);
+  const [mapContext, setMapContext] = useState<DemoMapContext | null>(null);
+  const [mapZoom, setMapZoom] = useState<number | null>(null);
+  const [fallbackZoom, setFallbackZoom] = useState(0);
+  const [fallbackParcelFocus, setFallbackParcelFocus] =
+    useState<ParcelMapFocus | null>(null);
+  const fallbackParcelFocusRef = useRef<ParcelMapFocus | null>(null);
   const [modelResearchRenderTick, setModelResearchRenderTick] = useState(0);
   const {
     activeLayerIds,
@@ -319,10 +341,70 @@ export function SceneViewContainer() {
     enabled: schoolPressureLayerEnabled,
   });
   const modelLabLayersActive = isModelLabMode(overviewCommandMode);
+  const fallbackMapContext = useMemo(
+    () =>
+      USE_DEMO_DATA
+        ? mapContext
+        : buildLiveFallbackMapContext(mapContext, {
+            developmentHotspots: developmentHotspotLayer.markers,
+            floodConstraints: floodConstraintLayer.markers,
+            floodZones: floodZoneLayer.polygons,
+            parcelFocus: fallbackParcelFocus,
+            schoolPressure: schoolPressureLayer.features,
+            schoolZones: schoolUtilizationZoneLayer.polygons,
+          }),
+    [
+      developmentHotspotLayer.markers,
+      fallbackParcelFocus,
+      floodConstraintLayer.markers,
+      floodZoneLayer.polygons,
+      mapContext,
+      schoolPressureLayer.features,
+      schoolUtilizationZoneLayer.polygons,
+    ],
+  );
+  const handleMapNavigationFailure = useCallback(
+    (error: unknown) => {
+      setMapError(getSceneErrorMessage(error));
+      setMapStatus("degraded");
+    },
+    [setMapError, setMapStatus],
+  );
+  const changeMapZoom = useCallback(
+    (delta: number) => {
+      const view = viewRef.current;
+      if (!view || view.destroyed || mapStatus !== "online") {
+        if (mapContext?.requiredReady) {
+          setFallbackZoom((current) =>
+            Math.max(0, Math.min(4, current + delta)),
+          );
+        }
+        return;
+      }
+      const nextZoom = Math.max(9, Math.min(20, (view.zoom ?? 11) + delta));
+      void view
+        .goTo({ zoom: nextZoom }, { duration: 220 })
+        .catch(handleMapNavigationFailure);
+    },
+    [handleMapNavigationFailure, mapContext?.requiredReady, mapStatus],
+  );
+  const resetMapExtent = useCallback(() => {
+    const runtime = runtimeRef.current;
+    const view = viewRef.current;
+    if (!runtime || !view || view.destroyed || mapStatus !== "online") {
+      setFallbackZoom(0);
+      return;
+    }
+    void view
+      .goTo(createCabarrusStudyExtent(runtime), { duration: 320 })
+      .catch(handleMapNavigationFailure);
+  }, [handleMapNavigationFailure, mapStatus]);
   const clearParcelSceneFocus = useCallback(() => {
     latestFocusRequestParcelIdRef.current = null;
     lastFocusedParcelIdRef.current = null;
+    fallbackParcelFocusRef.current = null;
     focusLayerRef.current?.removeAll();
+    setFallbackParcelFocus(null);
     setFocusBeacon(null);
     setLastParcelFocusSummary(null);
 
@@ -1021,25 +1103,63 @@ export function SceneViewContainer() {
     async function initializeScene(container: HTMLDivElement) {
       clearMapError();
       setMapStatus("loading");
+      setMapZoom(null);
+      setFallbackZoom(0);
 
       try {
-        const runtime = await loadArcGISRuntime();
+        const context = await getDemoMapContext(USE_DEMO_DATA);
+        setMapContext(context);
+
+        if (!context.requiredReady) {
+          throw new Error(
+            `Required same-origin map context is unavailable: ${context.issues.join(", ")}.`,
+          );
+        }
+
+        const runtime = await withTimeout(
+          loadArcGISRuntime(),
+          15_000,
+          "ArcGIS runtime initialization timed out.",
+        );
         runtimeRef.current = runtime;
 
         if (cancelled) {
           return;
         }
 
-        const { map, view } = createCabarrusSceneView(
+        let scene = createCabarrusSceneView(
           runtime,
           container,
           USE_ONLINE_BASEMAP,
         );
-        localView = view;
-        viewRef.current = view;
-        registerSceneViewSnapshotCapture(runtime, view);
+        localView = scene.view;
+        viewRef.current = scene.view;
 
-        await view.when();
+        try {
+          await withTimeout(
+            scene.view.when(),
+            15_000,
+            "ArcGIS MapView initialization timed out.",
+          );
+        } catch (onlineError) {
+          if (!USE_ONLINE_BASEMAP) {
+            throw onlineError;
+          }
+
+          scene.view.destroy();
+          scene = createCabarrusSceneView(runtime, container, false);
+          localView = scene.view;
+          viewRef.current = scene.view;
+          await withTimeout(
+            scene.view.when(),
+            15_000,
+            "Offline ArcGIS MapView fallback timed out.",
+          );
+        }
+
+        const { map, view } = scene;
+        registerSceneViewSnapshotCapture(runtime, view);
+        registerSceneViewDebugState(view);
 
         if (cancelled) {
           view.destroy();
@@ -1051,6 +1171,13 @@ export function SceneViewContainer() {
           operationalLayerRegistry,
         );
         map.addMany(getRenderableOperationalLayers(layers));
+        const contextLayers = createLocalContextLayers(runtime);
+        map.add(contextLayers.municipalities, 1);
+        map.add(contextLayers.hydrography, 2);
+        const transportationLayer = layers["transportation-context"];
+        if (transportationLayer) {
+          map.reorder(transportationLayer, 3);
+        }
         hotspotLayerRef.current = createDevelopmentHotspotLayer(runtime);
         map.add(hotspotLayerRef.current);
         floodConstraintLayerRef.current = createFloodConstraintLayer(runtime);
@@ -1067,11 +1194,19 @@ export function SceneViewContainer() {
         map.add(schoolUtilizationZoneLayerRef.current);
         focusLayerRef.current = createParcelFocusLayer(runtime);
         map.add(focusLayerRef.current);
+        map.add(contextLayers.placeLabels);
         layerRefs.current = layers;
+        hydrateLocalContextLayers(runtime, layers, contextLayers, context);
         if (USE_DEMO_DATA) {
-          void hydrateDemoReferenceLayers(runtime, layers);
+          hydrateDemoParcelLayer(runtime, layers, context);
         }
-        applyOperationalLayerVisibility(layers, activeLayerIdsRef.current);
+        applyOperationalLayerVisibility(layers, [
+          ...new Set([
+            ...activeLayerIdsRef.current,
+            "county-boundary",
+            "transportation-context",
+          ]),
+        ]);
         updateSelectedParcelSymbols(
           getMockGraphicsLayerSubset(layers, operationalLayerRegistry),
           getSelectedParcelGraphicsId(
@@ -1219,33 +1354,19 @@ export function SceneViewContainer() {
           });
           interactionController.handleHover(event);
         });
-        focusEventHandler = (event: Event) => {
-          const detail = (
-            event as CustomEvent<ParcelMapFocusRequestEventDetail>
-          ).detail;
-
-          if (detail?.focus && allowsParcelSelectionGraphics(overviewCommandModeRef.current)) {
-            void applyParcelFocus(detail.focus);
-            return;
-          }
-
-          clearParcelSceneFocus();
-        };
-        window.addEventListener(
-          CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
-          focusEventHandler,
-        );
         const queueModelResearchRender = () => {
           setModelResearchRenderTick((currentTick) =>
             currentTick >= 100000 ? 0 : currentTick + 1,
           );
         };
         zoomWatchHandle = runtime.reactiveUtils.watch(() => view.zoom, (zoom) => {
+          setMapZoom(zoom);
           if (focusLayerRef.current) {
             updateParcelFocusMarkerScale(focusLayerRef.current, zoom);
           }
           queueModelResearchRender();
         }) as ArcGISHandle;
+        setMapZoom(view.zoom);
         const publishFloodZoneExtent = () => {
           const extent = getSceneViewWgs84Extent(runtime, view);
 
@@ -1268,18 +1389,58 @@ export function SceneViewContainer() {
           mapStatus: "online",
         });
 
+        if (
+          fallbackParcelFocusRef.current &&
+          latestFocusRequestParcelIdRef.current !==
+            fallbackParcelFocusRef.current.officialParcelId &&
+          lastFocusedParcelIdRef.current !==
+            fallbackParcelFocusRef.current.officialParcelId
+        ) {
+          void applyParcelFocus(fallbackParcelFocusRef.current);
+        }
         setMapStatus("online");
       } catch (error) {
         if (cancelled) {
           return;
         }
 
-        console.error("ArcGIS MapView failed to initialize", error);
+        if (localView && !localView.destroyed) {
+          localView.destroy();
+        }
+        localView = null;
+        viewRef.current = null;
         setMapError(getSceneErrorMessage(error));
         setMapStatus("degraded");
       }
     }
 
+    focusEventHandler = (event: Event) => {
+      const detail = (
+        event as CustomEvent<ParcelMapFocusRequestEventDetail>
+      ).detail;
+
+      if (
+        detail?.focus &&
+        allowsParcelSelectionGraphics(overviewCommandModeRef.current)
+      ) {
+        fallbackParcelFocusRef.current = detail.focus;
+        setFallbackParcelFocus(detail.focus);
+        if (
+          viewRef.current?.ready &&
+          runtimeRef.current &&
+          latestFocusRequestParcelIdRef.current !== detail.focus.officialParcelId
+        ) {
+          void applyParcelFocus(detail.focus);
+        }
+        return;
+      }
+
+      clearParcelSceneFocus();
+    };
+    window.addEventListener(
+      CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
+      focusEventHandler,
+    );
     initializeScene(containerRef.current);
 
     return () => {
@@ -1330,6 +1491,9 @@ export function SceneViewContainer() {
       viewRef.current = null;
       if (window.__cfsCaptureMapSnapshot) {
         delete window.__cfsCaptureMapSnapshot;
+      }
+      if (window.__cfsGetMapDebugState) {
+        delete window.__cfsGetMapDebugState;
       }
 
       if (localView && !localView.destroyed) {
@@ -1809,12 +1973,94 @@ export function SceneViewContainer() {
       selectedParcelIntelligence={selectedParcelIntelligence}
       selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
     >
+      <LocalContextFallbackMap
+        context={fallbackMapContext}
+        mapStatus={mapStatus}
+        selectedParcelId={selectedParcelId}
+        showDevelopment={
+          exploreCountywideLayersActive && developmentHotspotsEnabled
+        }
+        showFlood={
+          exploreCountywideLayersActive &&
+          (floodConstraintsEnabled || floodZonesEnabled)
+        }
+        showSchools={
+          exploreCountywideLayersActive &&
+          (schoolPressureLayerEnabled || schoolUtilizationZonesEnabled)
+        }
+        zoomLevel={fallbackZoom}
+      />
       <div
         aria-label="Cabarrus County ArcGIS MapView"
-        className="absolute inset-0"
+        className={`absolute inset-0 z-10 transition-opacity duration-300 ${
+          mapStatus === "online" ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        data-context-county-features={
+          mapContext?.countyBoundary.features.length ?? 0
+        }
+        data-context-hydro-features={mapContext?.hydrography.features.length ?? 0}
+        data-context-label-features={mapContext?.placeLabels.features.length ?? 0}
+        data-context-municipal-features={
+          mapContext?.municipalities.features.length ?? 0
+        }
+        data-context-ready={mapContext?.requiredReady ? "true" : "false"}
+        data-context-road-features={
+          mapContext?.transportation.features.length ?? 0
+        }
+        data-map-status={mapStatus}
+        data-map-zoom={mapStatus === "online" ? (mapZoom ?? "") : fallbackZoom}
+        data-testid="cfs-arcgis-map"
         ref={containerRef}
         title="Interactive ArcGIS MapView with Cabarrus County operational layers"
       />
+      <div
+        aria-label="Map navigation controls"
+        className="app-chrome absolute left-3 top-[7.25rem] z-[55] flex w-10 flex-col overflow-hidden rounded-md border border-white/15 bg-[#06101a]/90 shadow-[0_14px_42px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:left-4"
+        data-testid="cfs-map-controls"
+        role="group"
+      >
+        <button
+          aria-label="Zoom in"
+          className="grid h-10 w-10 place-items-center border-b border-white/10 text-slate-100 transition hover:bg-white/[0.08] hover:text-[#f0cd79] disabled:cursor-not-allowed disabled:opacity-45"
+          disabled={!mapContext?.requiredReady}
+          onClick={() => changeMapZoom(1)}
+          title="Zoom in"
+          type="button"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+        <button
+          aria-label="Zoom out"
+          className="grid h-10 w-10 place-items-center border-b border-white/10 text-slate-100 transition hover:bg-white/[0.08] hover:text-[#f0cd79] disabled:cursor-not-allowed disabled:opacity-45"
+          disabled={!mapContext?.requiredReady}
+          onClick={() => changeMapZoom(-1)}
+          title="Zoom out"
+          type="button"
+        >
+          <Minus className="h-4 w-4" />
+        </button>
+        <button
+          aria-label="Reset to Cabarrus County"
+          className="grid h-10 w-10 place-items-center text-slate-100 transition hover:bg-white/[0.08] hover:text-[#f0cd79] disabled:cursor-not-allowed disabled:opacity-45"
+          disabled={!mapContext?.requiredReady}
+          onClick={resetMapExtent}
+          title="Reset to Cabarrus County"
+          type="button"
+        >
+          <RotateCcw className="h-4 w-4" />
+        </button>
+        {selectedParcelId ? (
+          <button
+            aria-label="Clear selected parcel"
+            className="grid h-10 w-10 place-items-center border-t border-white/10 text-slate-100 transition hover:bg-white/[0.08] hover:text-[#f0cd79]"
+            onClick={clearSelectedParcel}
+            title="Clear selected parcel"
+            type="button"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        ) : null}
+      </div>
       <button
         aria-label={isMapFocusMode ? "Exit map focus" : "Expand map"}
         aria-pressed={isMapFocusMode}
@@ -2272,6 +2518,143 @@ export function SceneViewContainer() {
   );
 }
 
+interface LiveFallbackMapData {
+  developmentHotspots: DevelopmentHotspotMapMarker[];
+  floodConstraints: FloodConstraintMapMarker[];
+  floodZones: FloodZoneMapPolygon[];
+  parcelFocus: ParcelMapFocus | null;
+  schoolPressure: SchoolPressureFeature[];
+  schoolZones: SchoolUtilizationZoneMapPolygon[];
+}
+
+function buildLiveFallbackMapContext(
+  context: DemoMapContext | null,
+  data: LiveFallbackMapData,
+): DemoMapContext | null {
+  if (!context) {
+    return null;
+  }
+
+  const parcelFeature = data.parcelFocus
+    ? toFallbackParcelFeature(data.parcelFocus)
+    : null;
+
+  return {
+    ...context,
+    developmentHotspots: toFallbackFeatureCollection(
+      data.developmentHotspots.map((marker) =>
+        toFallbackPointFeature(
+          marker.centroid.longitude,
+          marker.centroid.latitude,
+        ),
+      ),
+    ),
+    floodplain: toFallbackFeatureCollection([
+      ...data.floodZones.map((polygon) => ({
+        geometry: {
+          coordinates: polygon.geometry.coordinates,
+          type: polygon.geometry.type,
+        },
+        type: "Feature" as const,
+      })),
+      ...data.floodConstraints.map((marker) =>
+        toFallbackPointFeature(
+          marker.centroid.longitude,
+          marker.centroid.latitude,
+        ),
+      ),
+    ]),
+    parcels: toFallbackFeatureCollection(
+      parcelFeature ? [parcelFeature] : [],
+    ),
+    schoolCapacity: toFallbackFeatureCollection([
+      ...data.schoolZones.map((polygon) => ({
+        geometry: {
+          coordinates: polygon.geometry.coordinates,
+          type: polygon.geometry.type,
+        },
+        type: "Feature" as const,
+      })),
+      ...data.schoolPressure
+        .filter((feature) => feature.geometry)
+        .map((feature) => ({
+          geometry: feature.geometry,
+          type: "Feature" as const,
+        })),
+    ]),
+  };
+}
+
+function toFallbackFeatureCollection(
+  features: DemoGeoJsonFeature[],
+): DemoMapContext["countyBoundary"] {
+  return {
+    features,
+    type: "FeatureCollection",
+  };
+}
+
+function toFallbackPointFeature(
+  longitude: number,
+  latitude: number,
+): DemoGeoJsonFeature {
+  return {
+    geometry: {
+      coordinates: [longitude, latitude],
+      type: "Point",
+    },
+    type: "Feature",
+  };
+}
+
+function toFallbackParcelFeature(
+  focus: ParcelMapFocus,
+): DemoGeoJsonFeature | null {
+  const geometry = focus.highlightGeometry
+    ? {
+        coordinates: focus.highlightGeometry.coordinates,
+        type: focus.highlightGeometry.type,
+      }
+    : focus.centroid
+      ? {
+          coordinates: [
+            focus.centroid.longitude,
+            focus.centroid.latitude,
+          ],
+          type: "Point",
+        }
+      : null;
+
+  return geometry
+    ? {
+        geometry,
+        properties: {
+          official_parcel_id: focus.officialParcelId,
+        },
+        type: "Feature",
+      }
+    : null;
+}
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  message: string,
+) {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+  }
+}
+
 function getSceneErrorMessage(error: unknown) {
   if (error instanceof Error && error.message) {
     return error.message;
@@ -2351,6 +2734,29 @@ function registerSceneViewSnapshotCapture(
       };
     }
   };
+}
+
+function registerSceneViewDebugState(view: SceneView) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.__cfsGetMapDebugState = () => ({
+    layers:
+      view.map?.layers.toArray().map((layer) => {
+        const graphics = (layer as GraphicsLayer).graphics;
+        return {
+          graphicsCount:
+            graphics && typeof graphics.length === "number"
+              ? graphics.length
+              : null,
+          id: layer.id,
+          visible: layer.visible,
+        };
+      }) ?? [],
+    scale: typeof view.scale === "number" ? view.scale : null,
+    zoom: typeof view.zoom === "number" ? view.zoom : null,
+  });
 }
 
 function getSceneViewWgs84Extent(
@@ -2437,49 +2843,95 @@ function formatFloodScore(value: number | null | undefined) {
   return value.toFixed(1);
 }
 
-async function hydrateDemoReferenceLayers(
+interface LocalContextLayers {
+  hydrography: GraphicsLayer;
+  municipalities: GraphicsLayer;
+  placeLabels: GraphicsLayer;
+}
+
+function createLocalContextLayers(runtime: ArcGISRuntime): LocalContextLayers {
+  return {
+    hydrography: new runtime.GraphicsLayer({
+      id: "cfs-local-hydrography",
+      listMode: "hide",
+      title: "Major Water Context",
+    }),
+    municipalities: new runtime.GraphicsLayer({
+      id: "cfs-local-municipalities",
+      listMode: "hide",
+      title: "Municipal Context",
+    }),
+    placeLabels: new runtime.GraphicsLayer({
+      id: "cfs-local-place-labels",
+      listMode: "hide",
+      title: "Place Labels",
+    }),
+  };
+}
+
+function hydrateLocalContextLayers(
   runtime: ArcGISRuntime,
   layers: OperationalLayerInstanceMap,
+  contextLayers: LocalContextLayers,
+  context: DemoMapContext,
 ) {
-  const parcelLayer = layers["parcel-intelligence"] as GraphicsLayer | undefined;
   const boundaryLayer = layers["county-boundary"] as GraphicsLayer | undefined;
   const transportationLayer = layers["transportation-context"] as
     | GraphicsLayer
     | undefined;
+  const boundaryGraphics = context.countyBoundary.features
+    .map((feature) => createDemoBoundaryGraphic(runtime, feature))
+    .filter((graphic): graphic is Graphic => Boolean(graphic));
+  const municipalityGraphics = context.municipalities.features
+    .map((feature) => createDemoMunicipalityGraphic(runtime, feature))
+    .filter((graphic): graphic is Graphic => Boolean(graphic));
+  const hydrographyGraphics = context.hydrography.features
+    .map((feature) => createDemoHydrographyGraphic(runtime, feature))
+    .filter((graphic): graphic is Graphic => Boolean(graphic));
+  const transportationGraphics = context.transportation.features
+    .map((feature) => createDemoTransportationGraphic(runtime, feature))
+    .filter((graphic): graphic is Graphic => Boolean(graphic));
+  const placeLabelGraphics = context.placeLabels.features
+    .map((feature) => createDemoPlaceLabelGraphic(runtime, feature))
+    .filter((graphic): graphic is Graphic => Boolean(graphic));
 
-  const [parcelFeatures, countyBoundary, transportationFeatures] =
-    await Promise.all([
-      getDemoParcelFeatures(),
-      getDemoGeoJsonLayer("county_boundary"),
-      getDemoTransportationFeatures(),
-    ]);
-
-  if (boundaryLayer && countyBoundary.features.length) {
-    boundaryLayer.removeAll();
-    boundaryLayer.addMany(
-      countyBoundary.features
-        .map((feature) => createDemoBoundaryGraphic(runtime, feature))
-        .filter((graphic): graphic is Graphic => Boolean(graphic)),
-    );
+  if (
+    !boundaryLayer ||
+    !transportationLayer ||
+    !boundaryGraphics.length ||
+    !municipalityGraphics.length ||
+    !hydrographyGraphics.length ||
+    !transportationGraphics.length ||
+    !placeLabelGraphics.length
+  ) {
+    throw new Error("Required same-origin map context could not be rendered.");
   }
 
-  if (parcelLayer && parcelFeatures.length) {
-    parcelLayer.removeAll();
-    parcelLayer.addMany(
-      parcelFeatures
-        .map((feature) => createDemoParcelGraphic(runtime, feature))
-        .filter((graphic): graphic is Graphic => Boolean(graphic)),
-    );
+  boundaryLayer.removeAll();
+  boundaryLayer.addMany(boundaryGraphics);
+  contextLayers.municipalities.addMany(municipalityGraphics);
+  contextLayers.hydrography.addMany(hydrographyGraphics);
+  transportationLayer.removeAll();
+  transportationLayer.addMany(transportationGraphics);
+  contextLayers.placeLabels.addMany(placeLabelGraphics);
+}
+
+function hydrateDemoParcelLayer(
+  runtime: ArcGISRuntime,
+  layers: OperationalLayerInstanceMap,
+  context: DemoMapContext,
+) {
+  const parcelLayer = layers["parcel-intelligence"] as GraphicsLayer | undefined;
+  if (!parcelLayer || !context.parcels.features.length) {
+    return;
   }
 
-  if (transportationLayer && transportationFeatures.length) {
-    transportationLayer.removeAll();
-    transportationLayer.addMany(
-      transportationFeatures
-        .map((feature) => createDemoTransportationGraphic(runtime, feature))
-        .filter((graphic): graphic is Graphic => Boolean(graphic)),
-    );
-  }
+  parcelLayer.removeAll();
+  parcelLayer.addMany(
+    context.parcels.features
+      .map((feature) => createDemoParcelGraphic(runtime, feature))
+      .filter((graphic): graphic is Graphic => Boolean(graphic)),
+  );
 }
 
 function createDemoBoundaryGraphic(
@@ -2504,12 +2956,108 @@ function createDemoBoundaryGraphic(
       spatialReference: { wkid: 4326 },
     }),
     symbol: {
-      color: [13, 22, 34, 0.08],
+      color: [16, 33, 49, 0.94],
       outline: {
         color: [216, 184, 106, 0.96],
-        width: 2.1,
+        width: 2.4,
       },
       type: "simple-fill",
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createDemoMunicipalityGraphic(
+  runtime: ArcGISRuntime,
+  feature: DemoGeoJsonFeature,
+) {
+  const rings = convertGeoJsonPolygonCoordinatesToArcGisRings(feature.geometry);
+  const label = stringAttribute(feature.properties?.label);
+  if (!rings.length) {
+    return null;
+  }
+
+  return new runtime.Graphic({
+    attributes: {
+      graphicRole: "demo-municipal-context",
+      label,
+    },
+    geometry: new runtime.Polygon({
+      rings,
+      spatialReference: { wkid: 4326 },
+    }),
+    symbol: {
+      color: [125, 145, 163, 0.08],
+      outline: {
+        color: [166, 180, 193, 0.52],
+        style: "short-dot",
+        width: 1.1,
+      },
+      type: "simple-fill",
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createDemoHydrographyGraphic(
+  runtime: ArcGISRuntime,
+  feature: DemoGeoJsonFeature,
+) {
+  const rings = convertGeoJsonPolygonCoordinatesToArcGisRings(feature.geometry);
+  if (!rings.length) {
+    return null;
+  }
+
+  return new runtime.Graphic({
+    attributes: {
+      graphicRole: "demo-hydrography-context",
+      hydroType: stringAttribute(feature.properties?.hydro_type),
+    },
+    geometry: new runtime.Polygon({
+      rings,
+      spatialReference: { wkid: 4326 },
+    }),
+    symbol: {
+      color: [40, 105, 133, 0.58],
+      outline: {
+        color: [104, 216, 255, 0.42],
+        width: 0.7,
+      },
+      type: "simple-fill",
+    } as unknown as Graphic["symbol"],
+  });
+}
+
+function createDemoPlaceLabelGraphic(
+  runtime: ArcGISRuntime,
+  feature: DemoGeoJsonFeature,
+) {
+  const coordinates = getDemoPointCoordinates(feature.geometry);
+  const label = stringAttribute(feature.properties?.label);
+  if (!coordinates || !label) {
+    return null;
+  }
+
+  return new runtime.Graphic({
+    attributes: {
+      graphicRole: "demo-place-label",
+      label,
+    },
+    geometry: new runtime.Point({
+      spatialReference: { wkid: 4326 },
+      x: coordinates.longitude,
+      y: coordinates.latitude,
+    }),
+    symbol: {
+      color: [238, 244, 248, 0.96],
+      font: {
+        family: "Inter",
+        size: 10,
+        weight: "bold",
+      },
+      haloColor: [7, 17, 31, 0.96],
+      haloSize: 1.5,
+      text: label,
+      type: "text",
+      yoffset: 9,
     } as unknown as Graphic["symbol"],
   });
 }
@@ -2593,10 +3141,12 @@ function createDemoTransportationGraphic(
       title: stringAttribute(properties.road_name) ?? "Transportation Context",
     },
     symbol: {
-      color: [104, 216, 255, Boolean(properties.is_major_road) ? 0.88 : 0.58],
+      color: Boolean(properties.is_major_road)
+        ? [216, 184, 106, 0.84]
+        : [182, 195, 207, 0.62],
       style: "solid",
       type: "simple-line",
-      width: Boolean(properties.is_major_road) ? 2.8 : 1.6,
+      width: Boolean(properties.is_major_road) ? 2.5 : 1.35,
     } as unknown as Graphic["symbol"],
   });
 }
@@ -6862,6 +7412,19 @@ function normalizeGeoJsonLine(line: unknown) {
       return [x, y];
     })
     .filter((position): position is number[] => Boolean(position));
+}
+
+function getDemoPointCoordinates(
+  geometry: DemoGeoJsonGeometry | null | undefined,
+) {
+  if (geometry?.type !== "Point" || !Array.isArray(geometry.coordinates)) {
+    return null;
+  }
+  const longitude = Number(geometry.coordinates[0]);
+  const latitude = Number(geometry.coordinates[1]);
+  return Number.isFinite(longitude) && Number.isFinite(latitude)
+    ? { latitude, longitude }
+    : null;
 }
 
 function createParcelFocusExtent(runtime: ArcGISRuntime, focus: ParcelMapFocus) {

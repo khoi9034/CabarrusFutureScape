@@ -29,6 +29,10 @@ export interface ArcGISRuntime {
 export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
   const { default: config } = await import("@arcgis/core/config.js");
   config.assetsPath = "/arcgis-assets";
+  const publicBasemapKey = process.env.NEXT_PUBLIC_ARCGIS_API_KEY?.trim();
+  if (publicBasemapKey) {
+    config.apiKey = publicBasemapKey;
+  }
   const [
     { default: Map },
     { default: MapView },

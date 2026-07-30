@@ -164,7 +164,7 @@ export const mockOperationalLayers: OperationalLayer[] = [
     category: "Infrastructure",
     description: "Cached portfolio demo sample of major roadway context",
     kind: "GraphicsLayer",
-    defaultVisible: false,
+    defaultVisible: true,
     visibility: true,
     sourceStatus: "mock",
     accent: "#68d8ff",

@@ -1,12 +1,44 @@
 {
-  "generated_at": "2026-07-10T02:22:53Z",
-  "layer_count": 8,
+  "generated_at": "2026-07-30T20:58:25Z",
+  "layer_count": 11,
   "layers": [
     {
       "feature_count": 1,
       "file": "map_layers/demo_county_boundary.geojson",
       "id": "county_boundary",
-      "label": "Demo County Boundary",
+      "feature": "Cabarrus County map frame",
+      "generated_at": "2026-07-30T20:58:25Z",
+      "label": "Cabarrus County Boundary",
+      "required": true,
+      "sanitized": true,
+      "schema": "geojson.feature_collection.v1",
+      "source_classification": "sanitized simplified U.S. Census Bureau TIGERweb boundary",
+      "status": "available"
+    },
+    {
+      "feature_count": 6,
+      "file": "map_layers/demo_municipal_boundaries.geojson",
+      "feature": "Municipal map context",
+      "generated_at": "2026-07-30T20:58:25Z",
+      "id": "municipal_boundaries",
+      "label": "Municipal Boundaries",
+      "required": true,
+      "sanitized": true,
+      "schema": "geojson.feature_collection.v1",
+      "source_classification": "sanitized simplified U.S. Census Bureau TIGERweb incorporated places",
+      "status": "available"
+    },
+    {
+      "feature_count": 124,
+      "file": "map_layers/demo_hydrography.geojson",
+      "feature": "Major water map context",
+      "generated_at": "2026-07-30T20:58:25Z",
+      "id": "hydrography",
+      "label": "Major Water Context",
+      "required": true,
+      "sanitized": true,
+      "schema": "geojson.feature_collection.v1",
+      "source_classification": "sanitized simplified U.S. Fish and Wildlife Service NWI extract",
       "status": "available"
     },
     {
@@ -45,10 +77,29 @@
       "status": "available"
     },
     {
-      "feature_count": 80,
+      "feature_count": 75,
       "file": "map_layers/demo_transportation_context.geojson",
+      "feature": "Major road map context",
+      "generated_at": "2026-07-30T20:58:25Z",
       "id": "transportation_context",
       "label": "Demo Transportation Context",
+      "required": true,
+      "sanitized": true,
+      "schema": "geojson.feature_collection.v1",
+      "source_classification": "sanitized simplified local transportation centerline extract",
+      "status": "available"
+    },
+    {
+      "feature_count": 6,
+      "file": "map_layers/demo_place_labels.geojson",
+      "feature": "Major place map labels",
+      "generated_at": "2026-07-30T20:58:25Z",
+      "id": "place_labels",
+      "label": "Major Place Labels",
+      "required": true,
+      "sanitized": true,
+      "schema": "geojson.feature_collection.v1",
+      "source_classification": "sanitized representative points derived from TIGERweb municipalities",
       "status": "available"
     },
     {

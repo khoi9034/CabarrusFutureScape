@@ -182,6 +182,132 @@ async function assertHealthyText(page) {
   assert(!/Application error|Internal Server Error|Unhandled Runtime Error/i.test(text), "Visible application error.");
 }
 
+async function assertPaintedImage(image, label) {
+  const { default: sharp } = await import("sharp");
+  const stats = await sharp(image).stats();
+  const deviation = Math.max(...stats.channels.slice(0, 3).map((channel) => channel.stdev));
+  assert(deviation >= 4, `${label} is visually uniform (${deviation.toFixed(2)} pixel deviation).`);
+  return deviation;
+}
+
+async function assertImageDifference(before, after, label, minimum = 0.05) {
+  const { default: sharp } = await import("sharp");
+  const left = await sharp(before).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const right = await sharp(after).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  assert.equal(left.info.width, right.info.width, `${label} screenshot width changed`);
+  assert.equal(left.info.height, right.info.height, `${label} screenshot height changed`);
+  let difference = 0;
+  for (let index = 0; index < left.data.length; index += 4) {
+    difference +=
+      Math.abs(left.data[index] - right.data[index]) +
+      Math.abs(left.data[index + 1] - right.data[index + 1]) +
+      Math.abs(left.data[index + 2] - right.data[index + 2]);
+  }
+  const meanDifference = difference / (left.info.width * left.info.height * 3);
+  assert(meanDifference >= minimum, `${label} did not produce a visible pixel change (${meanDifference.toFixed(3)} mean difference).`);
+  return meanDifference;
+}
+
+async function waitForMapReady(page, { interactive = false } = {}) {
+  const map = page.getByTestId("cfs-arcgis-map");
+  await map.waitFor({ timeout: 30_000 });
+  await page.waitForFunction(
+    ({ requireInteractive }) => {
+      const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
+      const status = element?.getAttribute("data-map-status");
+      return (
+        element?.getAttribute("data-context-ready") === "true" &&
+        (requireInteractive ? status === "online" : ["online", "degraded"].includes(status ?? ""))
+      );
+    },
+    { requireInteractive: interactive },
+    { timeout: 35_000 },
+  );
+  const box = await map.boundingBox();
+  assert(box && box.width > 300 && box.height > 250, `Map container is not usable: ${JSON.stringify(box)}`);
+  assert(Number(await map.getAttribute("data-context-county-features")) > 0, "County context is empty.");
+  assert(Number(await map.getAttribute("data-context-road-features")) > 0, "Road context is empty.");
+  assert(Number(await map.getAttribute("data-context-hydro-features")) > 0, "Water context is empty.");
+  assert(Number(await map.getAttribute("data-context-municipal-features")) > 0, "Municipal context is empty.");
+  assert(Number(await map.getAttribute("data-context-label-features")) > 0, "Place label context is empty.");
+  return map;
+}
+
+async function assertRuntimeLayer(page, layerId, { visible = true, withGraphics = true } = {}) {
+  try {
+    await page.waitForFunction(
+      ({ id, expectedVisible, requireGraphics }) => {
+        const layer = window.__cfsGetMapDebugState?.().layers.find((item) => item.id === id);
+        return Boolean(
+          layer &&
+            layer.visible === expectedVisible &&
+            (!requireGraphics || Number(layer.graphicsCount) > 0),
+        );
+      },
+      { expectedVisible: visible, id: layerId, requireGraphics: withGraphics },
+      { timeout: 20_000 },
+    );
+  } catch {
+    const state = await page.evaluate(() => window.__cfsGetMapDebugState?.());
+    assert.fail(`Runtime layer ${layerId} did not render: ${JSON.stringify(state)}`);
+  }
+}
+
+async function mapUsesArcGIS(page) {
+  return (await page.getByTestId("cfs-arcgis-map").getAttribute("data-map-status")) === "online";
+}
+
+async function assertContextMapLayers(page) {
+  if (await mapUsesArcGIS(page)) {
+    for (const layerId of [
+      "county-boundary",
+      "cfs-local-municipalities",
+      "cfs-local-hydrography",
+      "transportation-context",
+      "cfs-local-place-labels",
+    ]) {
+      await assertRuntimeLayer(page, layerId);
+    }
+    return;
+  }
+
+  const fallback = page.getByTestId("cfs-local-context-map");
+  for (const layerId of [
+    "county-boundary",
+    "municipal-boundaries",
+    "hydrography",
+    "major-roads",
+    "place-labels",
+  ]) {
+    await fallback.locator(`[data-layer-id="${layerId}"]`).waitFor();
+  }
+}
+
+async function assertRenderedMapLayer(
+  page,
+  runtimeLayerId,
+  fallbackLayerId,
+  { visible = true } = {},
+) {
+  if (await mapUsesArcGIS(page)) {
+    await assertRuntimeLayer(page, runtimeLayerId, {
+      visible,
+      withGraphics: visible,
+    });
+    return;
+  }
+  await page
+    .getByTestId("cfs-local-context-map")
+    .locator(`[data-layer-id="${fallbackLayerId}"]`)
+    .waitFor({ state: visible ? "attached" : "detached", timeout: 20_000 });
+}
+
+async function captureMapSurface(page) {
+  return (await mapUsesArcGIS(page))
+    ? page.getByTestId("cfs-arcgis-map").screenshot()
+    : page.getByTestId("cfs-local-context-map").screenshot();
+}
+
 async function chooseDifferent(select) {
   const options = await select.locator("option").evaluateAll((nodes) =>
     nodes.map((node) => ({ label: node.textContent?.trim() ?? "", value: node.value })),
@@ -233,15 +359,40 @@ async function assertStaticAssets(baseUrl) {
 
 async function planningChecks(page, baseUrl) {
   await goto(page, baseUrl, "?app=planning");
-  await check("Planning", "workspace and MapView render", ["workspace", "map", "zoom", "pan"], async () => {
+  await check("Planning", "same-origin context map and navigation controls", ["workspace", "map", "county", "municipalities", "water", "roads", "labels", "zoom in", "zoom out", "reset"], async () => {
     await page.getByTestId("command-center-explore-intelligence").click();
-    const map = page.getByLabel("Cabarrus County ArcGIS MapView");
-    await map.waitFor({ timeout: 30_000 });
-    await page.locator(".esri-view-root").waitFor({ timeout: 30_000 });
-    const image = await map.screenshot();
-    assert(image.length > 10_000, "Map screenshot was unexpectedly blank.");
-    await map.hover();
-    await page.mouse.wheel(0, -500);
+    const map = await waitForMapReady(page);
+    await assertContextMapLayers(page);
+    const image = await captureMapSurface(page);
+    await assertPaintedImage(image, "Initial Cabarrus County map");
+
+    const initialZoom = Number(await map.getAttribute("data-map-zoom"));
+    assert(Number.isFinite(initialZoom), "Initial map zoom is unavailable.");
+    await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+    await page.waitForFunction(
+      (before) => Number(document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-zoom")) > before + 0.4,
+      initialZoom,
+    );
+    const zoomedIn = Number(await map.getAttribute("data-map-zoom"));
+    await page.getByRole("button", { name: "Zoom out", exact: true }).click();
+    await page.waitForFunction(
+      (before) => Number(document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-zoom")) < before - 0.4,
+      zoomedIn,
+    );
+    await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+    await page.waitForFunction(
+      (before) => Number(document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-zoom")) > before + 0.4,
+      initialZoom,
+    );
+    await page.getByRole("button", { name: "Reset to Cabarrus County", exact: true }).click();
+    await page.waitForFunction(
+      (expected) =>
+        Math.abs(
+          Number(document.querySelector('[data-testid="cfs-arcgis-map"]')?.getAttribute("data-map-zoom")) -
+            expected,
+        ) < 0.5,
+      initialZoom,
+    );
   });
 
   await check("Planning", "parcel search modes, no-match, select, and clear", ["parcel ID", "PIN", "zoning", "subdivision", "no match", "clear"], async () => {
@@ -265,35 +416,72 @@ async function planningChecks(page, baseUrl) {
     await search.fill("CFS-PARCEL-0149780354");
     await page.locator("#top-parcel-search-results").getByRole("option").first().click();
     await page.getByText(/Selected parcel: CFS-PARCEL-0149780354/i).first().waitFor();
+    await assertRenderedMapLayer(
+      page,
+      "cfs-parcel-focus-layer",
+      "selected-parcel",
+    );
+    await page.getByRole("button", { name: "Clear selected parcel", exact: true }).click();
+    await page.getByText(/Selected parcel: CFS-PARCEL-0149780354/i).first().waitFor({ state: "hidden" });
+    await assertRenderedMapLayer(
+      page,
+      "cfs-parcel-focus-layer",
+      "selected-parcel",
+      { visible: false },
+    );
+    await search.fill("CFS-PARCEL-0149780354");
+    await page.locator("#top-parcel-search-results").getByRole("option").first().click();
+    await page.getByText(/Selected parcel: CFS-PARCEL-0149780354/i).first().waitFor();
     await page.getByRole("button", { name: "Open command palette" }).click();
     await page.getByRole("dialog").getByRole("combobox").fill("Clear parcel selection");
     await page.getByText("Clear parcel selection", { exact: true }).click();
     await page.getByText(/Selected parcel: CFS-PARCEL-0149780354/i).first().waitFor({ state: "hidden" });
   });
 
-  await check("Planning", "operational layers expose live legends", ["county", "parcels", "development", "flood", "FEMA", "schools", "school pressure", "transportation"], async () => {
+  await check("Planning", "operational overlays paint visible geometry", ["county", "parcels", "development", "flood", "FEMA", "schools", "school pressure", "transportation", "pixel difference"], async () => {
     const expandLayers = page.getByRole("button", { name: "Expand map layers panel" });
     if (await expandLayers.count()) await expandLayers.click();
-    for (const [layer, group] of [
-      ["Development Hotspots", "Development Activity"],
-      ["School Utilization + Permit Pressure", "Schools"],
-      ["Transportation Context", "Road Context"],
+    for (const [layer, group, runtimeLayerId, fallbackLayerId] of [
+      ["Development Hotspots", "Development Activity", "cfs-development-hotspots-layer", "development-hotspots"],
+      ["Floodplain Review", "Floodplain Review", "cfs-flood-constraints-layer", "floodplain-review"],
+      ["School Capacity Watch", "Schools", "cfs-school-utilization-zones-layer", "school-capacity"],
     ]) {
-      let toggle = page.getByRole("button", { name: `Show ${layer}`, exact: true });
-      if (!(await toggle.count())) {
-        await page.locator("summary").filter({ hasText: group }).first().click();
-        toggle = page.getByRole("button", { name: `Show ${layer}`, exact: true });
-        await toggle.waitFor();
-      }
       const card = page.locator("article").filter({ has: page.getByText(layer, { exact: true }) }).first();
+      if (!(await card.isVisible())) {
+        const groupDetails = page
+          .locator("details")
+          .filter({ has: page.getByText(group, { exact: true }) })
+          .first();
+        await groupDetails.locator("summary").first().click();
+      }
+      await card.waitFor();
       if (layer === "Development Hotspots") {
         const segment = card.getByRole("combobox", { name: "Development hotspot permit segment filter" });
         await chooseDifferent(segment);
       }
-      if ((await toggle.getAttribute("aria-pressed")) !== "true") await toggle.click();
+      const show = card.getByRole("button", { name: `Show ${layer}`, exact: true });
+      if (await show.count()) await show.click();
+      await assertRenderedMapLayer(page, runtimeLayerId, fallbackLayerId);
+      const renderedByArcGIS = await mapUsesArcGIS(page);
       await card.getByRole("button", { name: /Legend Read the symbols/i }).waitFor();
-      await card.getByRole("button", { name: `Hide ${layer}`, exact: true }).click();
+      await delay(300);
+      const visibleImage = await captureMapSurface(page);
+      const hide = card.getByRole("button", { name: `Hide ${layer}`, exact: true });
+      await hide.click();
+      await assertRenderedMapLayer(page, runtimeLayerId, fallbackLayerId, {
+        visible: false,
+      });
       await card.getByRole("button", { name: /Legend Read the symbols/i }).waitFor({ state: "hidden" });
+      await delay(300);
+      const hiddenImage = await captureMapSurface(page);
+      if (layer !== "School Capacity Watch" || !renderedByArcGIS) {
+        await assertImageDifference(
+          visibleImage,
+          hiddenImage,
+          `${layer} overlay`,
+          layer === "School Capacity Watch" ? 0.005 : 0.05,
+        );
+      }
     }
   });
 
@@ -315,6 +503,8 @@ async function planningChecks(page, baseUrl) {
   await check("Planning", "Model Lab modes and methodology return state", ["Model Lab on/off", "points", "heatmap", "clusters", "methodology return"], async () => {
     await page.getByRole("button", { name: /Workspace:/ }).click();
     await page.getByTestId("command-center-model-lab").click();
+    await waitForMapReady(page);
+    await assertContextMapLayers(page);
     const expandModelLab = page.getByRole("button", { name: "Expand Model Lab panel" }).first();
     if (await expandModelLab.count()) await expandModelLab.click();
     const controlsPanel = page.getByTestId("model-lab-controls");
@@ -589,11 +779,18 @@ async function mobileChecks(browser, baseUrl) {
     await goto(page, baseUrl, query);
     if (product === "Planning") {
       await page.getByTestId("cfs-command-center").waitFor();
-      await page.getByLabel("Cabarrus County ArcGIS MapView").waitFor({ timeout: 30_000 });
+      await waitForMapReady(page);
+      await assertContextMapLayers(page);
+      await assertPaintedImage(await captureMapSurface(page), "Mobile Cabarrus County map");
       const search = page.getByRole("combobox", { name: "Search parcels" });
       await search.fill("CFS-PARCEL-0149780354");
       await page.locator("#top-parcel-search-results").getByRole("option").first().click();
       await page.getByText(/Selected parcel: CFS-PARCEL-0149780354/i).first().waitFor();
+      await assertRenderedMapLayer(
+        page,
+        "cfs-parcel-focus-layer",
+        "selected-parcel",
+      );
       await page.getByRole("button", { name: "Show Intelligence" }).click();
       await page.getByText("Selected Parcel Intelligence", { exact: true }).waitFor();
       await page.getByRole("button", { name: "Close intelligence panel" }).click();
@@ -628,6 +825,125 @@ async function mobileChecks(browser, baseUrl) {
   }
 }
 
+async function offlineMapChecks(browser, baseUrl) {
+  const origin = new URL(baseUrl).origin;
+  for (const scenario of [
+    { blockArcgisAssets: false, label: "external network isolation" },
+    { blockArcgisAssets: true, label: "ArcGIS failure SVG fallback" },
+  ]) {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    const blocked = [];
+    const sameOriginPaths = new Set();
+    await context.route("**/*", async (route) => {
+      const url = new URL(route.request().url());
+      if (
+        url.origin !== origin ||
+        (scenario.blockArcgisAssets && url.pathname.startsWith("/arcgis-assets/"))
+      ) {
+        blocked.push(url.href);
+        await route.abort("blockedbyclient");
+        return;
+      }
+      sameOriginPaths.add(url.pathname);
+      await route.continue();
+    });
+    const page = await context.newPage();
+    try {
+      await goto(page, baseUrl, "?app=planning");
+      await page.getByTestId("command-center-explore-intelligence").click();
+      await waitForMapReady(page);
+      for (const asset of [
+        "/demo-data/map_layers/demo_county_boundary.geojson",
+        "/demo-data/map_layers/demo_municipal_boundaries.geojson",
+        "/demo-data/map_layers/demo_hydrography.geojson",
+        "/demo-data/map_layers/demo_transportation_context.geojson",
+        "/demo-data/map_layers/demo_place_labels.geojson",
+      ]) {
+        assert(sameOriginPaths.has(asset), `${scenario.label} did not load ${asset}`);
+      }
+
+      if (!scenario.blockArcgisAssets) {
+        await assertContextMapLayers(page);
+        await assertPaintedImage(
+          await captureMapSurface(page),
+          "Offline same-origin context map",
+        );
+      } else {
+        const fallback = page.getByTestId("cfs-local-context-map");
+        await fallback.waitFor();
+        await page
+          .getByText(
+            "Local context remains visible; ArcGIS pan and hit-testing are unavailable",
+            { exact: true },
+          )
+          .waitFor();
+        assert.equal(
+          await page.getByRole("button", { name: "Zoom in", exact: true }).isEnabled(),
+          true,
+          "Fallback zoom control should remain available.",
+        );
+        await assertPaintedImage(
+          await fallback.screenshot(),
+          "Same-origin SVG fallback map",
+        );
+
+        const expandLayers = page.getByRole("button", {
+          name: "Expand map layers panel",
+        });
+        if (await expandLayers.count()) await expandLayers.click();
+        const card = page
+          .locator("article")
+          .filter({
+            has: page.getByText("Development Hotspots", { exact: true }),
+          })
+          .first();
+        await card
+          .getByRole("combobox", {
+            name: "Development hotspot permit segment filter",
+          })
+          .selectOption("residential_growth");
+        const beforeOverlay = await fallback.screenshot();
+        await card
+          .getByRole("button", {
+            name: "Show Development Hotspots",
+            exact: true,
+          })
+          .click();
+        await fallback
+          .locator('[data-layer-id="development-hotspots"]')
+          .waitFor();
+        await assertImageDifference(
+          beforeOverlay,
+          await fallback.screenshot(),
+          "SVG fallback development overlay",
+        );
+
+        const search = page.getByRole("combobox", { name: "Search parcels" });
+        await search.fill("CFS-PARCEL-0149780354");
+        await page
+          .locator("#top-parcel-search-results")
+          .getByRole("option")
+          .first()
+          .click();
+        await fallback.locator('[data-layer-id="selected-parcel"]').waitFor();
+      }
+
+      assert(
+        blocked.every((url) => new URL(url).origin !== origin || scenario.blockArcgisAssets),
+        `${scenario.label} blocked an unexpected same-origin request`,
+      );
+      record("Planning", scenario.label, [
+        "offline map",
+        "same-origin context",
+        scenario.blockArcgisAssets ? "SVG fallback" : "external isolation",
+      ]);
+      console.log(`PASS Planning: ${scenario.label}`);
+    } finally {
+      await context.close();
+    }
+  }
+}
+
 async function main() {
   const baseUrl = await startServer();
   const origin = new URL(baseUrl).origin;
@@ -635,7 +951,12 @@ async function main() {
   const browser = await chromium.launch({
     executablePath: browserExecutable(),
     headless: true,
-    args: ["--disable-gpu", "--no-sandbox"],
+    args: [
+      "--enable-unsafe-swiftshader",
+      "--enable-webgl",
+      "--no-sandbox",
+      "--use-angle=swiftshader",
+    ],
   });
   try {
     const context = await browser.newContext({
@@ -653,6 +974,7 @@ async function main() {
     await investmentsChecks(investments, baseUrl);
     await investments.close();
     await mobileChecks(browser, baseUrl);
+    await offlineMapChecks(browser, baseUrl);
     await context.close();
 
     assert.deepEqual(diagnostics.pageErrors, [], `Page errors:\n${diagnostics.pageErrors.join("\n")}`);

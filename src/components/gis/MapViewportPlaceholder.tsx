@@ -1,10 +1,8 @@
 import {
   AlertTriangle,
   LoaderCircle,
-  Maximize2,
   MousePointer2,
   Satellite,
-  Sparkles,
 } from "lucide-react";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
@@ -65,13 +63,13 @@ export function MapViewportPlaceholder({
       className="relative h-full min-h-[58vh] overflow-hidden rounded-lg border border-white/10 bg-[#050911] shadow-[0_28px_120px_rgba(0,0,0,0.46)] md:min-h-[62vh] lg:min-h-0"
     >
       {children}
-      <div className="scene-mask pointer-events-none absolute inset-0" />
-      <div className="map-scanline pointer-events-none absolute inset-0 opacity-40" />
+      <div className="scene-mask pointer-events-none absolute inset-0 z-20" />
+      <div className="map-scanline pointer-events-none absolute inset-0 z-20 opacity-40" />
 
       {(isLoading || hasError) && (
         <div
           aria-live="polite"
-          className="pointer-events-none absolute inset-0 z-10 grid place-items-center px-6"
+          className="pointer-events-none absolute inset-0 z-40 grid place-items-center px-6"
           role={hasError ? "alert" : "status"}
         >
           <div className="max-w-sm rounded-lg border border-white/10 bg-[#060b12]/82 p-4 text-center shadow-2xl backdrop-blur-xl">
@@ -81,21 +79,25 @@ export function MapViewportPlaceholder({
               <LoaderCircle className="mx-auto h-5 w-5 animate-spin text-[#d8b86a]" />
             )}
             <p className="mt-3 text-sm font-semibold text-white">
-              {hasError ? "MapView unavailable" : "Initializing MapView"}
+              {hasError
+                ? "Interactive MapView unavailable"
+                : "Loading Cabarrus County map\u2026"}
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-400">
               {hasError
                 ? sceneError ?? "ArcGIS map initialization did not complete."
-                : "Loading the Cabarrus County 2D operating map."}
+                : "Preparing same-origin county, road, water, and place context."}
             </p>
             <p className="mt-2 text-[10px] uppercase text-slate-500">
-              {hasError ? "Refresh the page to retry" : "Client-only ArcGIS runtime"}
+              {hasError
+                ? "Local context remains visible; ArcGIS pan and hit-testing are unavailable"
+                : "Client-only ArcGIS runtime"}
             </p>
           </div>
         </div>
       )}
 
-      <div className="pointer-events-none absolute left-3 top-3 max-w-[calc(100%-1.5rem)] rounded-lg border border-white/10 bg-[#060b12]/72 p-3 shadow-2xl backdrop-blur-xl sm:left-4 sm:top-4 sm:max-w-[calc(100%-2rem)]">
+      <div className="pointer-events-none absolute left-3 top-3 z-40 max-w-[calc(100%-1.5rem)] rounded-lg border border-white/10 bg-[#060b12]/72 p-3 shadow-2xl backdrop-blur-xl sm:left-4 sm:top-4 sm:max-w-[calc(100%-2rem)]">
         <div className="flex items-center gap-2">
           <Satellite className="h-4 w-4 text-[#d8b86a]" />
           <p className="text-xs font-medium uppercase text-slate-400">
@@ -104,7 +106,11 @@ export function MapViewportPlaceholder({
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-300">
           <span className="rounded-md border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-[#f0cd79]">
-            {mapStatus === "online" ? "Map Live" : "Map Standby"}
+            {mapStatus === "online"
+              ? "Map Live"
+              : hasError
+                ? "Local Context"
+                : "Map Standby"}
           </span>
           <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1">
             County extent
@@ -115,7 +121,7 @@ export function MapViewportPlaceholder({
         </div>
       </div>
 
-      <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex flex-col gap-3 sm:bottom-4 sm:left-4 sm:right-4 md:flex-row md:items-end md:justify-between">
+      <div className="pointer-events-none absolute bottom-3 left-3 right-3 z-40 flex flex-col gap-3 sm:bottom-4 sm:left-4 sm:right-4 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0 rounded-lg border border-white/10 bg-[#060b12]/74 p-3 backdrop-blur-xl md:max-w-[58%]">
           <div className="flex items-center gap-2 text-xs font-medium uppercase text-slate-400">
             <MousePointer2 className="h-3.5 w-3.5 text-[#68d8ff]" />
@@ -150,11 +156,6 @@ export function MapViewportPlaceholder({
         </div>
       </div>
 
-      <div className="pointer-events-none absolute right-4 top-4 hidden items-center gap-2 rounded-lg border border-white/10 bg-[#060b12]/72 p-2 backdrop-blur-xl md:flex">
-        <Sparkles className="h-4 w-4 text-[#8fe7ff]" />
-        <div className="h-5 w-px bg-white/10" />
-        <Maximize2 className="h-4 w-4 text-slate-300" />
-      </div>
     </section>
   );
 }

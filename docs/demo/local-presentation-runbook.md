@@ -46,7 +46,7 @@
 - **Backend is not ready:** Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-cfs-presentation.ps1 -BackendOnly`.
 - **Database is unavailable:** Restore the existing local PostgreSQL listener on port `5433`, confirm database `cfs_dev`, then rerun `npm run present:cfs`.
 - **Ask CFS does not respond:** Run `npm run check:local-apis`. Deterministic Ask CFS requires FastAPI and `cfs_dev`, not OpenAI.
-- **Online basemap is unavailable:** Continue with the local neutral background. Local operational layers do not require internet access.
+- **Online basemap is unavailable:** Continue with the same-origin Cabarrus context map. County, municipality, water, road, place-label, overlay, parcel-focus, zoom, and reset rendering remain available without internet access.
 - **Port 3000 or 8000 is occupied:** The launcher refuses to stop an unrelated process. Identify and close that application yourself, then rerun the launcher.
 - **Validate services without restarting:** Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-cfs-presentation.ps1 -NoRestart`.
 - **Detailed logs:** Inspect `logs/cfs-presentation-frontend.log`, `logs/cfs-presentation-backend.log`, `logs/local-data-readiness.json`, `logs/local-api-inventory.json`, and `logs/local-interactions.json`.

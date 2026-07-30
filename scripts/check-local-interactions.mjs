@@ -19,6 +19,13 @@ const API_ORIGIN = new URL(API_URL).origin;
 const PARCEL = "CFS-PARCEL-0149726579";
 const SECOND_PARCEL = "CFS-PARCEL-0149727441";
 const TEMP_PREFIX = `CFS-PRESENTATION-BROWSER-${Date.now()}`;
+const LIVE_MAP_CONTEXT_PATHS = new Set([
+  "/demo-data/map_layers/demo_county_boundary.geojson",
+  "/demo-data/map_layers/demo_hydrography.geojson",
+  "/demo-data/map_layers/demo_municipal_boundaries.geojson",
+  "/demo-data/map_layers/demo_place_labels.geojson",
+  "/demo-data/map_layers/demo_transportation_context.geojson",
+]);
 const report = {
   checked_at: new Date().toISOString(),
   target: BASE_URL,
@@ -26,6 +33,7 @@ const report = {
   cases: [],
   api_paths: {},
   demo_data_requests: [],
+  map_context_requests: [],
   external_requests: [],
   diagnostics: {
     api_failures: [],
@@ -87,7 +95,14 @@ function attachDiagnostics(context, { offline = false } = {}) {
 
   context.on("request", (request) => {
     const url = request.url();
-    if (/\/demo-data\//.test(url)) report.demo_data_requests.push(url);
+    if (/\/demo-data\//.test(url)) {
+      const pathname = new URL(url).pathname;
+      if (LIVE_MAP_CONTEXT_PATHS.has(pathname)) {
+        report.map_context_requests.push(url);
+      } else {
+        report.demo_data_requests.push(url);
+      }
+    }
     if (/^https?:/i.test(url) && !isLoopback(url)) report.external_requests.push(url);
     if (new URL(url).origin === API_ORIGIN) {
       const key = `${request.method()} ${new URL(url).pathname}`;
@@ -637,6 +652,11 @@ async function main() {
 
   assert(Object.keys(report.api_paths).length >= 20, "Too few local API routes drove the UI.");
   assert((report.api_paths["POST /ai/search"] ?? 0) >= 10, "Ask CFS UI requests were incomplete.");
+  assert(
+    new Set(report.map_context_requests.map((url) => new URL(url).pathname))
+      .size === LIVE_MAP_CONTEXT_PATHS.size,
+    "Live UI did not load every same-origin map context asset.",
+  );
   assert.equal(report.demo_data_requests.length, 0, "Live UI requested demo-data fixtures.");
   assert.deepEqual(report.diagnostics.api_failures, [], "Browser observed failed API calls.");
   assert.deepEqual(report.diagnostics.page_errors, [], "Browser page errors were observed.");
@@ -659,6 +679,7 @@ async function main() {
         offline_cases: report.offline.cases.length,
         api_paths: Object.keys(report.api_paths).length,
         demo_data_requests: report.demo_data_requests.length,
+        map_context_requests: report.map_context_requests.length,
         external_requests: report.external_requests.length,
       },
       null,

@@ -1,0 +1,105 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.63222391070957,
+          35.407559000000006
+        ]
+      },
+      "properties": {
+        "label": "Concord",
+        "place_type": "incorporated_place",
+        "source_label": "U.S. Census Bureau TIGERweb, 2025 vintage"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.6442556696503,
+          35.3159045
+        ]
+      },
+      "properties": {
+        "label": "Harrisburg",
+        "place_type": "incorporated_place",
+        "source_label": "U.S. Census Bureau TIGERweb, 2025 vintage"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.64379417006688,
+          35.457999
+        ]
+      },
+      "properties": {
+        "label": "Kannapolis",
+        "place_type": "incorporated_place",
+        "source_label": "U.S. Census Bureau TIGERweb, 2025 vintage"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.46321266389583,
+          35.261301
+        ]
+      },
+      "properties": {
+        "label": "Locust",
+        "place_type": "incorporated_place",
+        "source_label": "U.S. Census Bureau TIGERweb, 2025 vintage"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.51186272591963,
+          35.2477665
+        ]
+      },
+      "properties": {
+        "label": "Midland",
+        "place_type": "incorporated_place",
+        "source_label": "U.S. Census Bureau TIGERweb, 2025 vintage"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.43445091968658,
+          35.3945505
+        ]
+      },
+      "properties": {
+        "label": "Mount Pleasant",
+        "place_type": "incorporated_place",
+        "source_label": "U.S. Census Bureau TIGERweb, 2025 vintage"
+      },
+      "type": "Feature"
+    }
+  ],
+  "metadata": {
+    "caveat": "Sanitized, simplified context geometry for the public CFS portfolio demo.",
+    "generated_at": "2026-07-30T20:58:25Z",
+    "layer_id": "place_labels",
+    "layer_label": "Major Place Labels",
+    "mode": "portfolio_demo",
+    "sanitized": true,
+    "source_basis": "Representative points derived from sanitized TIGERweb municipality geometry",
+    "status": "available"
+  },
+  "type": "FeatureCollection"
+}

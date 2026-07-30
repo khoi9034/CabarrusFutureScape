@@ -37,8 +37,11 @@ const demoLayerFiles = {
   county_boundary: "demo_county_boundary.geojson",
   development_hotspots: "demo_development_hotspots.geojson",
   floodplain_review: "demo_floodplain_review.geojson",
+  hydrography: "demo_hydrography.geojson",
   model_research: "demo_model_research.geojson",
+  municipal_boundaries: "demo_municipal_boundaries.geojson",
   parcels: "demo_parcels.geojson",
+  place_labels: "demo_place_labels.geojson",
   school_capacity: "demo_school_capacity.geojson",
   school_pressure: "demo_school_pressure_areas.geojson",
   transportation_context: "demo_transportation_context.geojson",
@@ -68,6 +71,20 @@ export interface DemoGeoJsonLayer {
     status?: "available" | "not_available" | string;
   };
   type: "FeatureCollection";
+}
+
+export interface DemoMapContext {
+  countyBoundary: DemoGeoJsonLayer;
+  developmentHotspots: DemoGeoJsonLayer;
+  floodplain: DemoGeoJsonLayer;
+  hydrography: DemoGeoJsonLayer;
+  issues: string[];
+  municipalities: DemoGeoJsonLayer;
+  parcels: DemoGeoJsonLayer;
+  placeLabels: DemoGeoJsonLayer;
+  requiredReady: boolean;
+  schoolCapacity: DemoGeoJsonLayer;
+  transportation: DemoGeoJsonLayer;
 }
 
 export interface DemoLayerManifest {
@@ -169,6 +186,64 @@ export async function getDemoGeoJsonLayer(layerId: DemoMapLayerId | string) {
     (layerId.endsWith(".geojson") ? layerId : `${layerId}.geojson`);
 
   return loadDemoMapJson<DemoGeoJsonLayer>(fileName, emptyFeatureCollection);
+}
+
+export async function getDemoMapContext(
+  includeDemoOverlays = true,
+): Promise<DemoMapContext> {
+  const [
+    countyBoundary,
+    municipalities,
+    hydrography,
+    transportation,
+    placeLabels,
+    parcels,
+    developmentHotspots,
+    floodplain,
+    schoolCapacity,
+  ] = await Promise.all([
+    getDemoGeoJsonLayer("county_boundary"),
+    getDemoGeoJsonLayer("municipal_boundaries"),
+    getDemoGeoJsonLayer("hydrography"),
+    getDemoGeoJsonLayer("transportation_context"),
+    getDemoGeoJsonLayer("place_labels"),
+    includeDemoOverlays
+      ? getDemoGeoJsonLayer("parcels")
+      : emptyFeatureCollection,
+    includeDemoOverlays
+      ? getDemoGeoJsonLayer("development_hotspots")
+      : emptyFeatureCollection,
+    includeDemoOverlays
+      ? getDemoGeoJsonLayer("floodplain_review")
+      : emptyFeatureCollection,
+    includeDemoOverlays
+      ? getDemoGeoJsonLayer("school_capacity")
+      : emptyFeatureCollection,
+  ]);
+  const requiredLayers = [
+    ["county boundary", countyBoundary],
+    ["municipal boundaries", municipalities],
+    ["hydrography", hydrography],
+    ["road context", transportation],
+    ["place labels", placeLabels],
+  ] as const;
+  const issues = requiredLayers
+    .filter(([, layer]) => !layer.features.some(hasGeometry))
+    .map(([label]) => `${label} is unavailable`);
+
+  return {
+    countyBoundary,
+    developmentHotspots,
+    floodplain,
+    hydrography,
+    issues,
+    municipalities,
+    parcels,
+    placeLabels,
+    requiredReady: issues.length === 0,
+    schoolCapacity,
+    transportation,
+  };
 }
 
 export async function getDemoParcelFeatures() {

@@ -99,7 +99,8 @@ export const USE_BACKEND_API =
 export const USE_DEMO_DATA =
   IS_DEMO_MODE || (IS_AUTO_MODE && !USE_BACKEND_API);
 export const USE_ONLINE_BASEMAP =
-  !USE_DEMO_DATA && process.env.NEXT_PUBLIC_CFS_ONLINE_BASEMAP !== "false";
+  process.env.NEXT_PUBLIC_ARCGIS_BASEMAP_ENABLED === "true" ||
+  (!USE_DEMO_DATA && process.env.NEXT_PUBLIC_CFS_ONLINE_BASEMAP !== "false");
 
 export function buildApiUrl(path: string, params?: ApiQueryParams) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
