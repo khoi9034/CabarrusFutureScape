@@ -680,10 +680,6 @@ export function TopNav() {
                       setPlanningSnapshotView("overview");
                     }
 
-                    if (mode.id === "workspace" && productMode !== "workspace") {
-                      setOverviewCommandMode("countywide");
-                    }
-
                     setProductMode(mode.id);
                   }}
                   title={mode.title}

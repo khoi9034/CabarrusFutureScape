@@ -20,6 +20,11 @@ function assertIncludes(path, text, expected) {
 }
 
 function validateAsset(asset) {
+  assert(asset.path, `required demo asset is missing path metadata`);
+  assert(asset.schema, `${asset.path} is missing schema metadata`);
+  assert(Number(asset.record_count) > 0, `${asset.path} is missing record_count metadata`);
+  assert(asset.source_classification, `${asset.path} is missing source metadata`);
+  assert(asset.sanitized === true, `${asset.path} is not marked sanitized`);
   const full = join(root, asset.path);
   assert(existsSync(full), `missing required demo asset: ${asset.path}`);
   assert(statSync(full).size > 0, `empty required demo asset: ${asset.path}`);

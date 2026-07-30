@@ -352,7 +352,7 @@ def test_cfs_investment_opportunity_workbench_frontend_contracts() -> None:
     assert "Assumption template" in economics_shell
     assert "Continue Work" in economics_shell
     assert "Start New Work" in economics_shell
-    assert "Find Sites: ${investmentStrategyLabel(activeStrategy)}" in economics_shell
+    assert 'saveConsultingSearch("Find Sites: Large Development Land")' in economics_shell
     assert "Large Development Land" in economics_shell
     assert "Find Sites: Industrial Site" not in economics_shell
     assert "How this screening works" in economics_shell

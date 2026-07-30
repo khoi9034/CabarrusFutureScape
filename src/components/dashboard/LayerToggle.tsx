@@ -890,28 +890,6 @@ export function LayerToggle() {
       );
     }
 
-    if (layer.id === "school-pressure") {
-      return (
-        <>
-          <div className="grid gap-1.5">
-            {schoolPressureLegendItems.map((item) => (
-              <LayerLegendItem
-                color={item.color}
-                key={item.label}
-                label={item.label}
-                shape="square"
-                size="h-3 w-3"
-              />
-            ))}
-          </div>
-          <p className="mt-2 rounded border border-amber-300/15 bg-amber-300/[0.045] px-2 py-1.5 text-[11px] leading-5 text-amber-100/75">
-            Combines preliminary utilization context with observed permit
-            activity. Not an official enrollment forecast.
-          </p>
-        </>
-      );
-    }
-
     return null;
   }
 
@@ -1109,6 +1087,43 @@ export function LayerToggle() {
       );
     }
 
+    if (layer.id === "school-pressure") {
+      return (
+        <>
+          <div className="grid gap-1.5">
+            {schoolPressureLegendItems.map((item) => (
+              <LayerLegendItem
+                color={item.color}
+                key={item.label}
+                label={item.label}
+                shape="square"
+                size="h-3 w-3"
+              />
+            ))}
+          </div>
+          <p className="mt-2 rounded border border-amber-300/15 bg-amber-300/[0.045] px-2 py-1.5 text-[11px] leading-5 text-amber-100/75">
+            Combines preliminary utilization context with observed permit
+            activity. Not an official enrollment forecast.
+          </p>
+        </>
+      );
+    }
+
+    if (
+      layer.id === "county-boundary" ||
+      layer.id === "parcel-intelligence" ||
+      layer.id === "transportation-context"
+    ) {
+      return (
+        <LayerLegendItem
+          color={layer.accent}
+          label={layer.renderer?.description ?? layer.title}
+          shape="square"
+          size={layer.id === "transportation-context" ? "h-1 w-6" : "h-3 w-3"}
+        />
+      );
+    }
+
     if (layer.id === DEVELOPMENT_HOTSPOT_LAYER_ID && selectedHotspotSegment) {
       return (
         <div className="grid grid-cols-2 gap-1.5">
@@ -1232,13 +1247,18 @@ export function LayerToggle() {
                       layer.id === SCHOOL_UTILIZATION_LAYER_ID;
                     const hasConfigure =
                       isFemaFloodZoneLayer || isSchoolUtilizationLayer;
-                    const hasLegend =
-                      (isDevelopmentHotspotLayer &&
-                        Boolean(selectedHotspotSegment)) ||
-                      isFloodConstraintLayer ||
-                      isFemaFloodZoneLayer ||
-                      isSchoolUtilizationLayer;
                     const active = isLayerOn(layer);
+                    const hasLegend =
+                      active &&
+                      ((isDevelopmentHotspotLayer &&
+                        Boolean(selectedHotspotSegment)) ||
+                        isFloodConstraintLayer ||
+                        isFemaFloodZoneLayer ||
+                        isSchoolUtilizationLayer ||
+                        layer.id === "county-boundary" ||
+                        layer.id === "parcel-intelligence" ||
+                        layer.id === "school-pressure" ||
+                        layer.id === "transportation-context");
                     const unavailable =
                       !USE_BACKEND_API &&
                       !USE_DEMO_DATA &&

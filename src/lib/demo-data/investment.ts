@@ -684,7 +684,7 @@ function analyzeIntakeCandidate(candidate: InvestmentIntakeCandidate): Investmen
     caveats: ["Session-only demo opportunity; no backend write occurred."],
     data_attribution: { asking_basis: "User-entered demo value", environmental_context: "Cached CASE-1 extract where matched", historical_sale_context: "Not available in demo" },
     environmental_context: candidate.parcel_id ? toEnvironmentalContext((findCaseCandidate(candidate.parcel_id) ?? {}) as Record<string, unknown>) : undefined,
-    market_area_context: candidate.parcel_id ? getDemoInvestmentResearchContext(candidate.parcel_id, candidate.strategy).market_area_context as InvestmentIntakeAnalysisResponse["market_area_context"] : undefined,
+    market_area_context: screen ? getDemoInvestmentResearchContext(screen.parcel_id, candidate.strategy).market_area_context as InvestmentIntakeAnalysisResponse["market_area_context"] : undefined,
     parcel_match_status: candidate.parcel_match_status ?? "Manual verification required",
     screening_context: screen,
     source_note: "Stored in this browser session only.",

@@ -113,13 +113,20 @@ type EconomicsShellProps = {
 };
 
 const defaultConsultingCaseStudy = packageBackedConsultingCaseStudy;
+const REPORT_BUCKET_SESSION_KEY = "cfs-report-bucket:v1";
 
 export function EconomicsShell({
   initialCaseStudyUrlState,
   initialInvestmentPage,
   mode = "economics",
 }: EconomicsShellProps = {}) {
-  const { economicsSection, setCfsAppMode, setEconomicsSection } = useDashboardState();
+  const {
+    clearSelectedParcel,
+    economicsSection,
+    selectedParcelId,
+    setCfsAppMode,
+    setEconomicsSection,
+  } = useDashboardState();
   const consultingMode = mode === "consulting";
   const [intelligence, setIntelligence] =
     useState<EconomicsIntelligenceResponse | null>(null);
@@ -130,7 +137,37 @@ export function EconomicsShell({
   const [error, setError] = useState<string | null>(null);
   const [selectedSignalIds, setSelectedSignalIds] = useState<string[]>([]);
   const [reportBucketItems, setReportBucketItems] = useState<ReportBucketItem[]>([]);
+  const [reportBucketReady, setReportBucketReady] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
+
+  useEffect(() => {
+    let storedItems: ReportBucketItem[] = [];
+    try {
+      const stored: unknown = JSON.parse(
+        window.sessionStorage.getItem(REPORT_BUCKET_SESSION_KEY) ?? "[]",
+      );
+      if (Array.isArray(stored)) storedItems = stored as ReportBucketItem[];
+    } catch {
+      window.sessionStorage.removeItem(REPORT_BUCKET_SESSION_KEY);
+    }
+    const timeoutId = window.setTimeout(() => {
+      setReportBucketItems(storedItems);
+      setReportBucketReady(true);
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    if (!reportBucketReady) return;
+    if (reportBucketItems.length) {
+      window.sessionStorage.setItem(
+        REPORT_BUCKET_SESSION_KEY,
+        JSON.stringify(reportBucketItems),
+      );
+    } else {
+      window.sessionStorage.removeItem(REPORT_BUCKET_SESSION_KEY);
+    }
+  }, [reportBucketItems, reportBucketReady]);
 
   useEffect(() => {
     if (consultingMode) {
@@ -332,6 +369,8 @@ export function EconomicsShell({
         {activeEconomicsSection === "dashboard" ? (
           <EconomicDashboardPage
             intelligence={intelligence}
+            onClearParcel={clearSelectedParcel}
+            selectedParcelId={selectedParcelId}
             signals={signals}
             watchlist={watchlist}
           />
@@ -951,7 +990,7 @@ function InvestmentPanelPage({
 }) {
   const [activeStrategy, setActiveStrategy] = useState<InvestmentStrategyId>("development_land");
   const [investmentScreen, setInvestmentScreen] = useState<InvestmentScreenResponse | null>(null);
-  const [activeCandidateId, setActiveCandidateId] = useState<string | null>(() => readInvestmentParcelPreference());
+  const [activeCandidateId, setActiveCandidateId] = useState<string | null>(null);
   const [activeResearchContext, setActiveResearchContext] = useState<InvestmentResearchContext | null>(null);
   const [activeResearchStatus, setActiveResearchStatus] = useState<"Idle" | "Loading" | "Ready" | "Error">("Idle");
   const [comparisonRows, setComparisonRows] = useState<RankedLandReviewCandidate[]>([]);
@@ -1269,7 +1308,9 @@ function InvestmentPanelPage({
     void request
       .then((analysis) => {
         setIntakeAnalysis(analysis);
-        if (analysis.candidate.parcel_id) analyzeParcel(analysis.candidate.parcel_id, analysis.candidate.candidate_name);
+        if (analysis.candidate.parcel_id && analysis.screening_context) {
+          analyzeParcel(analysis.candidate.parcel_id, analysis.candidate.candidate_name);
+        }
         setEditingIntakeId(null);
         setIntakeForm(defaultInvestmentIntakeForm(activeStrategy));
         setStatus(editingIntakeId ? "Candidate intake updated" : "Candidate added to Opportunity Review Queue");
@@ -1311,7 +1352,9 @@ function InvestmentPanelPage({
     void getInvestmentIntakeAnalysis(candidateId)
       .then((analysis) => {
         setIntakeAnalysis(analysis);
-        if (analysis.candidate.parcel_id) analyzeParcel(analysis.candidate.parcel_id, analysis.candidate.candidate_name);
+        if (analysis.candidate.parcel_id && analysis.screening_context) {
+          analyzeParcel(analysis.candidate.parcel_id, analysis.candidate.candidate_name);
+        }
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Candidate analysis failed."));
   };
@@ -1768,10 +1811,14 @@ function InvestmentPanelPage({
     summary: `${opportunity.source_name}; ${opportunity.parcel_match_status}`,
   });
   const saveConsultingSearch = (name?: string) => {
-    const searchName = (name || `${investmentStrategyLabel(activeStrategy)} saved search`).trim();
+    const goal =
+      activeCaseStudy?.slug === "large-development-land"
+        ? "Large Development Land"
+        : investmentStrategyLabel(activeStrategy);
+    const searchName = (name || `${goal} saved search`).trim();
     void createInvestmentSavedSearch({
       essential_criteria: { strategy: activeStrategy },
-      goal: investmentStrategyLabel(activeStrategy),
+      goal,
       guided_or_advanced: investmentViewMode,
       location_type: "All Cabarrus County",
       result_summary: { active_page: activeInvestmentPage, result_count: visibleRows.length },
@@ -2074,7 +2121,8 @@ function InvestmentPanelPage({
               setRadarAreas(response.areas);
               setStatus(`Run Screening completed: ${response.count} cached search area(s), ${activeCaseStudy?.candidate_count ?? 0} canonical candidate(s).`);
             })}
-            onSaveSearch={() => saveConsultingSearch(`Find Sites: ${investmentStrategyLabel(activeStrategy)}`)}
+            onSaveSearch={() => saveConsultingSearch("Find Sites: Large Development Land")}
+            savedSearches={savedSearches}
             status={status}
           />
         );
@@ -2498,10 +2546,54 @@ function InvestmentMethodologyPage({ compact = false }: { compact?: boolean }) {
     "Create the due-diligence plan",
     "Generate the final deliverables",
   ];
+  const demoDatasets = [
+    { href: "/demo-data/demo_manifest.json", label: "Demo asset manifest", records: "8 required assets" },
+    { href: "/demo-data/sample_parcels.json", label: "Planning parcel sample", records: "300 parcels" },
+    { href: "/demo-data/map_layers/demo_layer_manifest.json", label: "Planning map layers", records: "8 layers" },
+    { href: "/demo-data/economics_intelligence.json", label: "Economics intelligence", records: "120 parcel signals" },
+    { href: "/demo-data/economics_powerbi_export.json", label: "Economics Power BI export", records: "120 parcel signals" },
+  ];
   return (
     <section className={compact ? "investment-signal-list" : "investment-card"}>
       <div className="investment-section-heading"><div><p>Data & Methodology</p><h2>Source inventory, proxies, and limits</h2></div></div>
       <Matrix rows={rows} />
+      {!compact ? (
+        <section className="mt-4" id="investment-source-status" aria-label="Demo dataset status">
+          <div className="investment-section-heading">
+            <div><p>Dataset Status</p><h2>Sanitized static sources</h2></div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-left text-sm">
+              <thead className="text-xs uppercase text-[var(--econ-muted)]">
+                <tr>
+                  <th className="px-3 py-2">Dataset</th>
+                  <th className="px-3 py-2">Status</th>
+                  <th className="px-3 py-2">Records</th>
+                  <th className="px-3 py-2">Source</th>
+                </tr>
+              </thead>
+              <tbody>
+                {demoDatasets.map((dataset) => (
+                  <tr className="border-t border-[var(--econ-border)]" key={dataset.href}>
+                    <td className="px-3 py-3 font-semibold text-[var(--econ-text)]">{dataset.label}</td>
+                    <td className="px-3 py-3">
+                      <button className="cursor-not-allowed text-xs text-[var(--econ-muted)]" disabled type="button">
+                        Static in portfolio demo
+                      </button>
+                    </td>
+                    <td className="px-3 py-3 text-[var(--econ-muted)]">{dataset.records}</td>
+                    <td className="px-3 py-3">
+                      <a className="font-semibold text-[var(--econ-gold)]" href={dataset.href} rel="noreferrer" target="_blank">
+                        Open demo asset
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
       {!compact ? (
         <section className="investment-card mt-4">
           <div className="investment-section-heading"><div><p>How to Use CFS Investments</p><h2>Case-study workflow</h2></div></div>
@@ -2671,6 +2763,7 @@ function InvestmentAreaRadarPage({
   onOpenOpportunityFeed,
   onRunScreening,
   onSaveSearch,
+  savedSearches,
   status,
 }: {
   areas: InvestmentAreaRadarArea[];
@@ -2684,6 +2777,7 @@ function InvestmentAreaRadarPage({
   onOpenOpportunityFeed: () => void;
   onRunScreening: () => Promise<void>;
   onSaveSearch: () => void;
+  savedSearches: InvestmentSavedSearch[];
   status?: string | null;
 }) {
   const [hasRun, setHasRun] = useState(false);
@@ -2730,6 +2824,24 @@ function InvestmentAreaRadarPage({
           <button className="investment-ghost-button" onClick={onAddExternalOpportunity} type="button">Add External Opportunity</button>
         </div>
         {status ? <p className="investment-status">{status}</p> : null}
+      </section>
+      <section className="investment-card" aria-label="Saved searches">
+        <div className="investment-section-heading">
+          <div><p>Saved Searches</p><h2>Session searches</h2></div>
+          <span className="investment-pill">{savedSearches.length} saved</span>
+        </div>
+        {savedSearches.length ? (
+          <div className="investment-bucket-list">
+            {savedSearches.map((search) => (
+              <div key={search.id}>
+                <strong>{search.search_name}</strong>
+                <small>{search.goal} · {search.location_type}</small>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="investment-empty">No saved searches in this browser session.</p>
+        )}
       </section>
       <section className="investment-result-grid" aria-label="Find results">
         {hasRun && searchGoal === "development_land" && areas.length ? areas.slice(0, 12).map((area) => (
@@ -4231,12 +4343,104 @@ function InvestmentBucketPanel({
   );
 }
 
+function ParcelEconomicContext({
+  onClear,
+  parcelId,
+  signal,
+}: {
+  onClear: () => void;
+  parcelId: string | null;
+  signal: EconomicsParcelSignal | null;
+}) {
+  const estimatedCountyTax =
+    signal?.estimated_county_tax_screening ?? signal?.estimated_county_tax;
+  const countyRevenuePerAcre =
+    signal?.acreage &&
+    signal.acreage > 0 &&
+    typeof estimatedCountyTax === "number"
+      ? estimatedCountyTax / signal.acreage
+      : null;
+
+  return (
+    <div data-testid="parcel-economic-context">
+      <EconPanel
+        kicker="Selected parcel"
+        title={parcelId ? `Parcel Economic Context: ${parcelId}` : "Parcel Economic Context"}
+      >
+        {!parcelId ? (
+          <p className="text-sm leading-6 text-[var(--econ-muted)]">
+            Search for a supported demo parcel to review its screening-level economic context.
+          </p>
+        ) : signal ? (
+          <>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <MiniMetric label="Assessed value context" value={currency(signal.assessed_value)} />
+              <MiniMetric label="County revenue per acre" value={currency(countyRevenuePerAcre)} />
+              <MiniMetric label="Value per acre" value={currency(signal.value_per_acre)} />
+              <MiniMetric
+                label="Improvement-to-land"
+                value={
+                  typeof signal.improvement_to_land_ratio === "number"
+                    ? `${signal.improvement_to_land_ratio.toFixed(2)}x`
+                    : "Data needed"
+                }
+              />
+              <MiniMetric label="Underbuilt signal" value={titleText(signal.economic_status_band)} />
+              <MiniMetric
+                label="Constraint-adjusted opportunity"
+                value={
+                  signal.economic_opportunity_band ??
+                  signal.constraint_burden_band ??
+                  signal.opportunity_class
+                }
+              />
+              <MiniMetric
+                label="Utility confidence"
+                value={signal.utility_confidence ? titleText(signal.utility_confidence) : "Data needed"}
+              />
+              <MiniMetric
+                label="Transportation confidence"
+                value={signal.transportation_access_band ?? signal.transportation_context ?? "Data needed"}
+              />
+              <MiniMetric
+                label="Flood confidence"
+                value={signal.flood_constraint_band ?? signal.floodplain_context ?? "Data needed"}
+              />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-[var(--econ-muted)]">
+              Screening context only. Assessed value is not an appraisal, and estimated county
+              revenue is not an official tax bill or fiscal forecast.
+            </p>
+            <button className="mt-3 text-sm font-semibold text-[var(--econ-gold)]" onClick={onClear} type="button">
+              Clear parcel
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-sm leading-6 text-[var(--econ-muted)]">
+              Economic context for {parcelId} is not included in the cached demo extract. Choose
+              another supported demo parcel or clear the selection.
+            </p>
+            <button className="mt-3 text-sm font-semibold text-[var(--econ-gold)]" onClick={onClear} type="button">
+              Clear parcel
+            </button>
+          </>
+        )}
+      </EconPanel>
+    </div>
+  );
+}
+
 function EconomicDashboardPage({
   intelligence,
+  onClearParcel,
+  selectedParcelId,
   signals,
   watchlist,
 }: {
   intelligence: EconomicsIntelligenceResponse | null;
+  onClearParcel: () => void;
+  selectedParcelId: string | null;
   signals: EconomicsParcelSignal[];
   watchlist: EconomicsParcelSignal[];
 }) {
@@ -4310,6 +4514,9 @@ function EconomicDashboardPage({
   const opportunityOptions = ["All", ...uniqueValues(signals.map((signal) => signal.opportunity_class))];
   const confidenceOptions = ["All", ...uniqueValues(signals.map((signal) => signal.economic_data_confidence))];
   const summary = intelligence?.summary;
+  const selectedParcelSignal = selectedParcelId
+    ? signals.find((signal) => signal.parcel_id === selectedParcelId) ?? null
+    : null;
   const resetFilters = () => {
     setSelectedSegment("All");
     setSelectedGeography("All");
@@ -4355,6 +4562,11 @@ function EconomicDashboardPage({
           </p>
         </EconPanel>
       ) : null}
+      <ParcelEconomicContext
+        onClear={onClearParcel}
+        parcelId={selectedParcelId}
+        signal={selectedParcelSignal}
+      />
       <EconPanel title="Ask CFS Economics" kicker="Ask first" tourId="ask-cfs">
         <AskCfsPanel
           appMode="economics"
@@ -5937,7 +6149,15 @@ function EnterpriseScenarioConfigurePanel({
         <div className="grid gap-3 sm:grid-cols-2">
           <ScenarioSelect
             label="Development type"
-            onChange={(value) => updateAssumption("developmentType", value)}
+            onChange={(value) =>
+              setAssumptions((current) => ({
+                ...current,
+                developmentType: value,
+                scenarioId:
+                  scenarioRows.find((scenario) => scenario.title === value)?.id ??
+                  current.scenarioId,
+              }))
+            }
             options={developmentTypeOptions}
             value={assumptions.developmentType}
           />
@@ -5977,8 +6197,15 @@ function EnterpriseScenarioConfigurePanel({
             options={burdenBandOptions}
             value={assumptions.floodConstraint}
           />
+          <button
+            className="rounded-lg border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] sm:col-span-2"
+            onClick={() => setAssumptions({ ...initialScenarioAssumptions })}
+            type="button"
+          >
+            Reset scenario
+          </button>
         </div>
-        <div>
+        <div data-testid="scenario-output">
           <h2 className="mb-3 text-sm font-semibold text-[var(--econ-text)]">
             Scenario Output
           </h2>

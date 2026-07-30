@@ -3017,7 +3017,7 @@ function createDevelopmentHotspotAggregateLabelGraphic(
     symbol: {
       color: [255, 255, 255, 0.96],
       font: {
-        family: "Inter, Arial, sans-serif",
+        family: "Arial Unicode MS",
         size: profile.labelSize,
         weight: "bold",
       },
@@ -4022,7 +4022,7 @@ function createModelResearchAggregateLabelGraphic(
     symbol: {
       color: [255, 255, 255, 0.96],
       font: {
-        family: "Inter, Arial, sans-serif",
+        family: "Arial Unicode MS",
         size: profile.labelSize,
         weight: "bold",
       },

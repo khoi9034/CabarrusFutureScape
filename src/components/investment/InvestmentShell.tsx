@@ -164,7 +164,9 @@ export function InvestmentShell({
             <p>{active.description}</p>
           </div>
           <div className="investment-header-actions">
-            <button className="investment-primary-button" onClick={() => onPageChange(active.primaryPage)} type="button">{active.primaryAction}</button>
+            {active.primaryPage !== activePage ? (
+              <button className="investment-primary-button" onClick={() => onPageChange(active.primaryPage)} type="button">{active.primaryAction}</button>
+            ) : null}
             <button className="investment-ghost-button" onClick={onAskCfs} type="button"><Sparkles className="h-4 w-4" /> Ask CFS</button>
           </div>
         </header>

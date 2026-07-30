@@ -8,6 +8,7 @@
     "build": "next build --webpack",
     "check:acceptance": "node scripts/check-product-acceptance.mjs",
     "check:demo-functionality": "node scripts/check-demo-functionality.mjs",
+    "check:demo-interactions": "node scripts/check-demo-interactions.mjs",
     "check:presentation": "node scripts/check-presentation.mjs",
     "start": "next start",
     "lint": "eslint",
@@ -28,6 +29,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "playwright-core": "1.62.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
