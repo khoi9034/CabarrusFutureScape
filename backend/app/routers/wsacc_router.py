@@ -26,12 +26,12 @@ def get_wsacc_inventory() -> dict[str, Any]:
 
 
 @router.get("/statistics")
-def get_wsacc_statistics(db: Session | None = Depends(get_optional_read_only_db)) -> dict[str, Any]:
+def get_wsacc_statistics(db: Session | None = Depends(get_optional_read_only_db, scope="function")) -> dict[str, Any]:
     return build_wsacc_statistics(db)
 
 
 @router.get("/parcel/{parcel_id}")
-def get_wsacc_parcel(parcel_id: str, db: Session | None = Depends(get_optional_read_only_db)) -> dict[str, Any]:
+def get_wsacc_parcel(parcel_id: str, db: Session | None = Depends(get_optional_read_only_db, scope="function")) -> dict[str, Any]:
     return parcel_utility_context(parcel_id, db)
 
 
@@ -49,7 +49,7 @@ def get_wsacc_filter(
     within_pipe_distance: float | None = Query(default=None),
     within_manhole_distance: float | None = Query(default=None),
     subbasin: str | None = Query(default=None),
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     return filter_utility_parcels(
         {
@@ -73,6 +73,6 @@ def get_wsacc_filter(
 @router.get("/summary-by-geography")
 def get_wsacc_summary_by_geography(
     geography_type: str = Query(default="sewer_basin"),
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     return summary_by_geography(geography_type, db)

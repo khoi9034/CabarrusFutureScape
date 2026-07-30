@@ -172,6 +172,7 @@ function attachDiagnostics(context, origin) {
 async function goto(page, baseUrl, query) {
   await page.goto(`${baseUrl}/${query}`, { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => document.body.textContent?.includes("Portfolio Demo"), null, { timeout: 30_000 });
+  await delay(750);
   await assertHealthyText(page);
 }
 
@@ -334,7 +335,12 @@ async function planningChecks(page, baseUrl) {
 
   await check("Planning", "snapshot create, rename, section persistence, print, and delete", ["save", "library", "rename", "sections", "refresh", "print", "delete"], async () => {
     await page.getByRole("button", { name: "Save Planning Snapshot" }).click();
-    await page.getByRole("button", { name: /Planning Snapshot:/ }).click();
+    await page.getByText("1 saved", { exact: true }).first().waitFor();
+    const snapshotMode = page.locator('button[aria-label^="Planning Snapshot:"]');
+    await snapshotMode.click();
+    await page
+      .locator('button[aria-label^="Planning Snapshot:"][aria-pressed="true"]')
+      .waitFor();
     await page.getByText("Planning Snapshot Library", { exact: true }).waitFor();
     page.once("dialog", (dialog) => dialog.accept("Browser acceptance snapshot"));
     await page.getByRole("button", { name: "Rename", exact: true }).first().click();
@@ -344,7 +350,11 @@ async function planningChecks(page, baseUrl) {
       const before = await section.isChecked();
       await section.setChecked(!before);
       await page.reload({ waitUntil: "domcontentloaded" });
-      await page.getByRole("button", { name: /Planning Snapshot:/ }).click();
+      await delay(750);
+      await snapshotMode.click();
+      await page
+        .locator('button[aria-label^="Planning Snapshot:"][aria-pressed="true"]')
+        .waitFor();
       await page.getByText("Planning Snapshot Library", { exact: true }).waitFor();
       assert.equal(await page.getByRole("checkbox", { name: /^(?:Map|Dashboard) Snapshot$/ }).isChecked(), !before);
     }
@@ -635,10 +645,13 @@ async function main() {
     attachDiagnostics(context, origin);
     const planning = await context.newPage();
     await planningChecks(planning, baseUrl);
+    await planning.close();
     const economics = await context.newPage();
     await economicsChecks(economics, baseUrl);
+    await economics.close();
     const investments = await context.newPage();
     await investmentsChecks(investments, baseUrl);
+    await investments.close();
     await mobileChecks(browser, baseUrl);
     await context.close();
 

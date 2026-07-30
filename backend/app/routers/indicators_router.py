@@ -67,7 +67,7 @@ def get_cached_indicator_intelligence() -> dict[str, Any] | None:
 
 @router.get("/intelligence")
 def get_indicator_intelligence(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     """Return normalized planning intelligence signals for Indicator Center."""
 
@@ -166,7 +166,7 @@ def get_indicator_intelligence(
 @router.get("/summary")
 def get_indicator_summary(
     time_window: str = Query(default="all_time"),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     """Return dashboard-ready monitoring metrics for Indicator Center."""
 
@@ -349,7 +349,7 @@ def get_indicator_summary(
 
 @router.get("/school-utilization-detail")
 def get_school_utilization_detail(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     """Return evidence rows for the school capacity watch drilldown."""
 

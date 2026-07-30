@@ -1,5 +1,7 @@
 import csv
+from concurrent.futures import ThreadPoolExecutor
 from io import StringIO
+from time import sleep
 
 from fastapi.testclient import TestClient
 
@@ -150,6 +152,27 @@ def test_economics_cache_does_not_let_fallback_replace_real_payload(monkeypatch)
     assert calls["count"] == 1
     assert second["context_freshness"] == "current_session"
     assert second["parcel_economic_signals"] == [{"parcel_id": "live-1"}]
+    reset_economics_cache()
+
+
+def test_economics_cache_builds_cold_payload_once(monkeypatch) -> None:
+    reset_economics_cache()
+    calls = {"count": 0}
+
+    def fake_builder(_db: object) -> dict[str, object]:
+        calls["count"] += 1
+        sleep(0.05)
+        return {
+            "context_freshness": "current_session",
+            "parcel_economic_signals": [{"parcel_id": "live-1"}],
+        }
+
+    monkeypatch.setattr(economics_router, "build_economics_intelligence", fake_builder)
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        payloads = list(executor.map(economics_router._cached_economics_intelligence, [object()] * 3))
+
+    assert calls["count"] == 1
+    assert all(payload is payloads[0] for payload in payloads)
     reset_economics_cache()
 
 

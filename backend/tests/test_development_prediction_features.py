@@ -1086,7 +1086,7 @@ def test_phase25b_qa1_overview_rail_and_intelligence_panel_layout() -> None:
     assert "right-[-0.85rem] top-1/2" in sidebar_text
     assert "whitespace-nowrap" in sidebar_text
 
-    assert "flex h-full min-h-0 shrink-0 overflow-visible" in app_shell_text
+    assert "shrink-0 overflow-visible shadow-2xl transition-[width]" in app_shell_text
     assert "LEFT_PANEL_COLLAPSED_WIDTH = 64" in app_shell_text
     assert "LEFT_PANEL_COLLAPSE_THRESHOLD = 210" in app_shell_text
 
@@ -1128,7 +1128,8 @@ def test_phase25b_qa2_unified_left_panel_resize_and_layer_drawer_shell() -> None
     assert 'setOverviewLayoutPanel("left", "collapsed")' in app_shell_text
     assert 'document.body.classList.add("cfs-resizing")' in app_shell_text
     assert 'document.body.classList.remove("cfs-resizing")' in app_shell_text
-    assert "width: leftPanelCollapsed" in app_shell_text
+    assert '"--desktop-rail-width"' in app_shell_text
+    assert "leftPanelCollapsed ? LEFT_PANEL_COLLAPSED_WIDTH : layerRailWidth" in app_shell_text
     assert "LEFT_PANEL_COLLAPSED_WIDTH" in app_shell_text
     assert "onToggleCollapsed={toggleLayerRailCollapsed}" in app_shell_text
     explore_countywide_workflow = command_text.split(
@@ -1190,7 +1191,7 @@ def test_phase25c_left_panel_and_snapshot_report_builder_cleanup() -> None:
 
     assert 'setOverviewLayoutPanel("left", "collapsed");' in app_shell_text
     assert "rawWidth <= LEFT_PANEL_COLLAPSE_THRESHOLD" in app_shell_text
-    assert "overflow-visible transition-[width]" in app_shell_text
+    assert "shrink-0 overflow-visible shadow-2xl transition-[width]" in app_shell_text
     assert "cfs-layer-rail-arrow" in sidebar_text
     assert "overflow-visible" in sidebar_text
     assert "overflow-x-hidden overflow-y-auto" in sidebar_text
@@ -2222,7 +2223,7 @@ def test_phase29b_final_ui_polish_overview_and_navigation() -> None:
         "Methodology",
         "Search parcel, PIN, owner, address, subdivision",
         "dashboardStatusLabels[mapStatus]",
-        "API Live",
+        "Live Local Data",
     ]:
         assert required in top_nav_text
 

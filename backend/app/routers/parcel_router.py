@@ -41,7 +41,7 @@ def search_parcels(
     zoning_confidence: str | None = Query(default=None),
     valuation_band: str | None = Query(default=None),
     safe_for_dashboard: bool | None = Query(default=None),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> ParcelSearchResponse:
     if not q.strip():
         raise HTTPException(status_code=422, detail="q must not be blank")
@@ -77,7 +77,7 @@ def filter_parcels(
     subdivision: str | None = Query(default=None),
     neighborhood: str | None = Query(default=None),
     safe_for_dashboard: bool | None = Query(default=None),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> ParcelFilterResponse:
     service = ParcelService(ParcelRepository(db))
     return service.filter_parcels(
@@ -107,7 +107,7 @@ def get_parcel_statistics(
     zoning_confidence: str | None = Query(default=None),
     valuation_band: str | None = Query(default=None),
     safe_for_dashboard: bool | None = Query(default=None),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> ParcelStatisticsResponse:
     service = ParcelService(ParcelRepository(db))
     return service.get_statistics(
@@ -130,7 +130,7 @@ def get_parcel_zoning_summary(
     parcel_quality_status: str | None = Query(default=None),
     zoning_confidence: str | None = Query(default=None),
     safe_for_dashboard: bool | None = Query(default=None),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> ParcelZoningSummaryResponse:
     service = ParcelService(ParcelRepository(db))
     return service.get_zoning_summary(
@@ -155,7 +155,7 @@ def get_parcel_governance_warnings(
     safe_for_dashboard: bool | None = Query(default=None),
     limit: int = Query(20, ge=1, description="Page size; clamped to max 100."),
     offset: int = Query(0, ge=0, description="Offset for governance warnings."),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> ParcelGovernanceWarningResponse:
     service = ParcelService(ParcelRepository(db))
     return service.get_governance_warnings(
@@ -179,7 +179,7 @@ def get_parcel_detail(
         False,
         description="Return lightweight GeoJSON parcel geometry for map highlighting.",
     ),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> JSONResponse:
     service = ParcelService(ParcelRepository(db))
     parcel = service.get_parcel_detail(

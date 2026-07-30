@@ -3,6 +3,7 @@ export type ApiQueryValue = boolean | number | string | null | undefined;
 export type ApiQueryParams = Record<string, ApiQueryValue>;
 
 export interface ApiRequestOptions {
+  keepalive?: boolean;
   signal?: AbortSignal;
   timeoutMs?: number;
 }
@@ -97,6 +98,8 @@ export const USE_BACKEND_API =
   !IS_DEMO_MODE && process.env.NEXT_PUBLIC_USE_BACKEND_API === "true";
 export const USE_DEMO_DATA =
   IS_DEMO_MODE || (IS_AUTO_MODE && !USE_BACKEND_API);
+export const USE_ONLINE_BASEMAP =
+  !USE_DEMO_DATA && process.env.NEXT_PUBLIC_CFS_ONLINE_BASEMAP !== "false";
 
 export function buildApiUrl(path: string, params?: ApiQueryParams) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -242,6 +245,7 @@ export async function apiPost<TResponse>(
         Accept: "application/json",
         "Content-Type": "application/json",
       },
+      keepalive: options.keepalive,
       method: "POST",
       signal: controller.signal,
     });

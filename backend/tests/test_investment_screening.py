@@ -127,6 +127,7 @@ def test_candidate_response_excludes_sensitive_and_internal_fields() -> None:
 
 def test_investment_routes_use_screening_service(monkeypatch) -> None:
     monkeypatch.setattr(investment_router, "_investment_rows", lambda db: sample_rows())
+    monkeypatch.setattr(investment_router, "_investment_rows_for_screen", lambda db: sample_rows())
 
     strategies = client.get("/investment/strategies")
     assert strategies.status_code == 200

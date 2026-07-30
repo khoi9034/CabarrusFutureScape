@@ -159,6 +159,7 @@ def list_recent_work(db: Session) -> dict[str, Any]:
 
 
 def record_recent_work(db: Session, payload: InvestmentRecentWorkPayload) -> dict[str, Any]:
+    db.execute(text("SELECT pg_advisory_xact_lock(hashtext('cfs_investment_recent_work'))"))
     _ensure_tables(db)
     now = datetime.now(UTC)
     existing = db.execute(

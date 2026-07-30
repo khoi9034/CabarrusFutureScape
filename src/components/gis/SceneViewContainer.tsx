@@ -61,7 +61,7 @@ import {
   dispatchParcelMapFocusResult,
   resolveParcelMapFocus,
 } from "@/lib/map/parcelMapFocus";
-import { USE_DEMO_DATA } from "@/lib/api/client";
+import { USE_DEMO_DATA, USE_ONLINE_BASEMAP } from "@/lib/api/client";
 import {
   getDemoGeoJsonLayer,
   getDemoParcelFeatures,
@@ -1033,7 +1033,7 @@ export function SceneViewContainer() {
         const { map, view } = createCabarrusSceneView(
           runtime,
           container,
-          !USE_DEMO_DATA,
+          USE_ONLINE_BASEMAP,
         );
         localView = view;
         viewRef.current = view;

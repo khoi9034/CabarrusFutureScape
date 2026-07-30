@@ -74,7 +74,7 @@ def get_school_statistics(
     has_middle_assignment: bool | None = None,
     has_high_assignment: bool | None = None,
     capacity_data_available: bool | None = None,
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolConstraintStatisticsResponse:
     """Return school assignment and capacity-readiness statistics."""
 
@@ -110,7 +110,7 @@ def filter_school_constraints(
     capacity_data_available: bool | None = None,
     limit: int = Query(default=20, ge=1),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolConstraintFilterResponse:
     """Return paginated parcel school assignment/capacity-readiness records."""
 
@@ -137,7 +137,7 @@ def filter_school_constraints(
 def get_school_district_summary(
     school_level: str | None = None,
     school_name: str | None = None,
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolDistrictSummaryResponse:
     """Return parcel counts grouped by assigned attendance-zone district."""
 
@@ -155,7 +155,7 @@ def get_school_district_summary(
 
 @router.get("/qa-summary", response_model=SchoolQaSummaryResponse)
 def get_school_qa_summary(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolQaSummaryResponse:
     """Return school assignment QA readiness metrics."""
 
@@ -168,7 +168,7 @@ def get_school_lea_pupil_context(
     measure_type: str | None = None,
     limit: int = Query(default=500, ge=1),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolLeaPupilContextResponse:
     """Return district-level LEA pupil context by measure and grade."""
 
@@ -192,7 +192,7 @@ def get_school_lea_pupil_context(
 )
 def get_school_lea_pupil_context_summary(
     school_year: int | None = None,
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolLeaPupilContextSummaryResponse:
     """Return compact district-level LEA pupil context summary."""
 
@@ -205,7 +205,7 @@ def get_school_utilization_seed(
     utilization_class: str | None = None,
     limit: int = Query(default=100, ge=1),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolUtilizationSeedPageResponse:
     """Return presentation-derived school utilization seed rows."""
 
@@ -232,7 +232,7 @@ def get_school_utilization_zones(
     utilization_class: str | None = None,
     limit: int = Query(default=100, ge=1),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolUtilizationZonePageResponse:
     """Return lightweight attendance-zone polygons joined to utilization seed."""
 
@@ -255,7 +255,7 @@ def get_school_pressure(
     level: str = "all",
     limit: int = Query(default=100, ge=1),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolPressureResponse:
     """Return school utilization plus observed permit activity by attendance area."""
 
@@ -278,7 +278,7 @@ def get_school_pressure(
 )
 def get_parcel_school_utilization_seed(
     official_parcel_id: str,
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> ParcelSchoolUtilizationSeedResponse:
     """Return presentation-derived utilization seed values for assigned schools."""
 
@@ -294,7 +294,7 @@ def get_parcel_school_utilization_seed(
 @router.get("/{official_parcel_id}", response_model=SchoolConstraintDetailResponse)
 def get_school_constraint_detail(
     official_parcel_id: str,
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> SchoolConstraintDetailResponse:
     """Return parcel-level school assignment and capacity-readiness data."""
 

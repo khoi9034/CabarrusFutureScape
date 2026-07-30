@@ -390,7 +390,10 @@ export async function recordInvestmentRecentWork(payload: {
 }) {
   if (isDemoInvestmentMode()) return recordDemoInvestmentRecentWork(payload);
   assertLive();
-  return apiPost<InvestmentRecentWorkResponse>("/investment/recent-work", payload, { timeoutMs: 20000 });
+  return apiPost<InvestmentRecentWorkResponse>("/investment/recent-work", payload, {
+    keepalive: true,
+    timeoutMs: 20000,
+  });
 }
 
 export async function getInvestmentSavedSearches() {

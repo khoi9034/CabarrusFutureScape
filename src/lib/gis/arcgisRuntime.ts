@@ -27,6 +27,8 @@ export interface ArcGISRuntime {
 }
 
 export async function loadArcGISRuntime(): Promise<ArcGISRuntime> {
+  const { default: config } = await import("@arcgis/core/config.js");
+  config.assetsPath = "/arcgis-assets";
   const [
     { default: Map },
     { default: MapView },

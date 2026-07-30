@@ -80,18 +80,25 @@ export function useFloodConstraintLayer({
       { signal: controller.signal },
     )
       .then(async (response) => {
-        const detailResults = await Promise.allSettled(
-          response.results.map((constraint) =>
-            getParcelDetail(
-              constraint.official_parcel_id,
-              {},
-              { signal: controller.signal },
-            ).then((parcelDetail) => ({
-              constraint,
-              parcelDetail,
-            })),
-          ),
-        );
+        const detailResults = [];
+        // ponytail: five concurrent detail reads keep the local DB pool responsive; raise only after measured pool headroom.
+        for (let index = 0; index < response.results.length; index += 5) {
+          if (controller.signal.aborted) return;
+          detailResults.push(
+            ...(await Promise.allSettled(
+              response.results.slice(index, index + 5).map((constraint) =>
+                getParcelDetail(
+                  constraint.official_parcel_id,
+                  {},
+                  { signal: controller.signal },
+                ).then((parcelDetail) => ({
+                  constraint,
+                  parcelDetail,
+                })),
+              ),
+            )),
+          );
+        }
 
         if (controller.signal.aborted) {
           return;

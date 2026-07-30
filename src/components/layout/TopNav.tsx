@@ -38,7 +38,13 @@ import {
   getApiErrorDisplayMessage,
   USE_BACKEND_API,
   USE_DEMO_DATA,
+  USE_ONLINE_BASEMAP,
 } from "@/lib/api/client";
+import {
+  getApiAiStatus,
+  getApiDatabaseHealth,
+  getApiReady,
+} from "@/lib/api/health";
 import { getParcelDetail, searchParcels } from "@/lib/api/parcels";
 import { searchDemoParcels } from "@/lib/demo-data/client";
 import { getDemoParcelMapFocus } from "@/lib/demo-data/mapLayerClient";
@@ -199,12 +205,13 @@ export function TopNav() {
     (quickSearchReady ||
       quickSearchStatus === "loading" ||
       quickSearchShowingDemoSuggestions);
+  const localRuntime = useLocalRuntimeStatus();
   const runtimeStatusLabel = USE_DEMO_DATA
     ? "Portfolio Demo"
     : USE_BACKEND_API
-      ? "API Live"
+      ? "Live Local Data"
       : "Static";
-  const runtimeStatusTone = USE_BACKEND_API ? "green" : "blue";
+  const runtimeStatusTone = USE_BACKEND_API ? localRuntime.tone : "blue";
   const consultingMode = cfsAppMode === "consulting";
   const searchPlaceholder = USE_DEMO_DATA
     ? "Search demo parcel, PIN, zoning, subdivision"
@@ -1064,11 +1071,134 @@ export function TopNav() {
                   </div>
                 </div>
               )}
+              {USE_BACKEND_API && !USE_DEMO_DATA ? (
+                <LocalRuntimeStatusPanel status={localRuntime} />
+              ) : null}
             </div>
           ) : null}
         </div>
       </header>
     </>
+  );
+}
+
+type LocalRuntimeState = {
+  api: string;
+  ask: string;
+  database: string;
+  recovery: string | null;
+  tone: "gold" | "green" | "red";
+};
+
+const CONNECTING_RUNTIME: LocalRuntimeState = {
+  api: "Connecting",
+  ask: "Checking grounded answers",
+  database: "Connecting",
+  recovery: null,
+  tone: "gold",
+};
+
+function useLocalRuntimeStatus(): LocalRuntimeState {
+  const [status, setStatus] = useState<LocalRuntimeState>(CONNECTING_RUNTIME);
+
+  useEffect(() => {
+    if (!USE_BACKEND_API || USE_DEMO_DATA) {
+      return;
+    }
+
+    let active = true;
+    let timer: number | undefined;
+    async function refresh() {
+      const options = { timeoutMs: 8000 };
+      const [ready, database, ai] = await Promise.allSettled([
+        getApiReady(options),
+        getApiDatabaseHealth(options),
+        getApiAiStatus(options),
+      ]);
+      if (!active) return;
+
+      const apiReady = ready.status === "fulfilled" && ready.value.status === "ready";
+      const databaseReady =
+        database.status === "fulfilled" && database.value.database === "connected";
+      const ask =
+        ai.status === "fulfilled" &&
+        ai.value.ai_enabled &&
+        ai.value.configured_provider === "openai" &&
+        ai.value.api_key_configured &&
+        ai.value.model_configured
+          ? "OpenAI with grounded fallback"
+          : ai.status === "fulfilled" && ai.value.deterministic_fallback_available
+            ? "Grounded local answers"
+            : "Grounded answers unavailable";
+
+      setStatus({
+        api: apiReady ? "Ready" : "Unavailable",
+        ask,
+        database: databaseReady ? "Connected" : "Local database unavailable",
+        recovery:
+          !databaseReady
+            ? "Start local PostgreSQL, then run npm run present:cfs."
+            : !apiReady
+              ? "Run npm run present:cfs to restart the local API."
+              : null,
+        tone: apiReady && databaseReady ? "green" : "red",
+      });
+      timer = window.setTimeout(refresh, 10_000);
+    }
+
+    void refresh();
+    return () => {
+      active = false;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, []);
+
+  return status;
+}
+
+function LocalRuntimeStatusPanel({ status }: { status: LocalRuntimeState }) {
+  return (
+    <div
+      className="mt-3 border-t border-white/10 pt-3"
+      data-testid="local-runtime-status"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold text-white">Live Local Data</p>
+        <span
+          className={cn(
+            "text-[10px] font-semibold uppercase",
+            status.tone === "green"
+              ? "text-emerald-200"
+              : status.tone === "red"
+                ? "text-rose-200"
+                : "text-amber-100",
+          )}
+        >
+          Frontend Ready
+        </span>
+      </div>
+      <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px]">
+        <dt className="text-slate-500">API</dt>
+        <dd className="text-right text-slate-200" data-testid="local-runtime-api">
+          {status.api}
+        </dd>
+        <dt className="text-slate-500">Database</dt>
+        <dd className="text-right text-slate-200" data-testid="local-runtime-database">
+          {status.database}
+        </dd>
+        <dt className="text-slate-500">Ask CFS</dt>
+        <dd className="text-right text-slate-200" data-testid="local-runtime-ask">
+          {status.ask}
+        </dd>
+        <dt className="text-slate-500">Map</dt>
+        <dd className="text-right text-slate-200">
+          {USE_ONLINE_BASEMAP ? "Online basemap" : "Local neutral background"}
+        </dd>
+      </dl>
+      {status.recovery ? (
+        <p className="mt-2 text-[11px] leading-5 text-amber-100">{status.recovery}</p>
+      ) : null}
+    </div>
   );
 }
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 from datetime import UTC, datetime, timedelta
+from threading import Lock
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -23,13 +24,14 @@ from app.services.wsacc_service import build_wsacc_statistics
 
 router = APIRouter(prefix="/economics", tags=["CFS Economics"])
 
-ECONOMICS_CACHE_TTL = timedelta(minutes=5)
+ECONOMICS_CACHE_TTL = timedelta(minutes=30)
 _ECONOMICS_CACHE: dict[str, Any] = {
     "fallback_expires_at": None,
     "fallback_payload": None,
     "real_expires_at": None,
     "real_payload": None,
 }
+_ECONOMICS_CACHE_LOCK = Lock()
 
 ECONOMIC_SEGMENTS = [
     "Residential",
@@ -46,7 +48,7 @@ ECONOMIC_SEGMENTS = [
 
 @router.get("/intelligence")
 def get_economics_intelligence(
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     """Return parcel economics screening signals for dashboard use."""
 
@@ -55,7 +57,7 @@ def get_economics_intelligence(
 
 @router.get("/enterprise-export")
 def get_economics_enterprise_export(
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     """Return connector-ready economics facts, dimensions, and decision pack."""
 
@@ -64,7 +66,7 @@ def get_economics_enterprise_export(
 
 @router.get("/powerbi-export")
 def get_economics_powerbi_export(
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     """Return Power BI Desktop practice facts, dimensions, and relationship notes."""
 
@@ -73,7 +75,7 @@ def get_economics_powerbi_export(
 
 @router.get("/export-diagnostics")
 def get_economics_export_diagnostics(
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     """Return safe diagnostics for the economics export source."""
 
@@ -99,7 +101,7 @@ def get_economics_export_diagnostics(
 
 @router.get("/powerbi-export/csv-manifest")
 def get_economics_powerbi_csv_manifest(
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     """Return flat CSV table download metadata for Power BI Desktop practice."""
 
@@ -110,7 +112,7 @@ def get_economics_powerbi_csv_manifest(
 @router.get("/powerbi-export/csv/{table_name}")
 def get_economics_powerbi_csv(
     table_name: str,
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> Response:
     """Return one sanitized flat Power BI practice table as CSV."""
 
@@ -131,40 +133,45 @@ def _cached_economics_intelligence(db: Session | None) -> dict[str, Any]:
     if cached_real:
         return cached_real
 
-    if db is None:
-        cached_fallback = _cached_economics_payload("fallback")
-        if cached_fallback:
-            return cached_fallback
-        payload = _unavailable_payload(
-            datetime.now(UTC).isoformat(),
-            "Local economics context is still warming, so CFS used available parcel/economic summary fields.",
-        )
-        _set_cached_economics_payload("fallback", payload)
-        return payload
+    with _ECONOMICS_CACHE_LOCK:
+        cached_real = _cached_economics_payload("real")
+        if cached_real:
+            return cached_real
 
-    try:
-        payload = build_economics_intelligence(db)
-    except Exception as exc:
-        db.rollback()
-        as_of = datetime.now(UTC).isoformat()
-        payload = _land_opportunity_screener_payload(db, as_of, str(exc)) or _unavailable_payload(
-            as_of,
-            "Local economics context is still warming, so CFS used available parcel/economic summary fields.",
-        )
-    else:
-        signals = payload.get("parcel_economic_signals") or payload.get("signals") or []
-        if not signals:
-            derived = _land_opportunity_screener_payload(
-                db,
-                payload.get("as_of") or datetime.now(UTC).isoformat(),
-                "Live parcel economics returned no signal rows.",
+        if db is None:
+            cached_fallback = _cached_economics_payload("fallback")
+            if cached_fallback:
+                return cached_fallback
+            payload = _unavailable_payload(
+                datetime.now(UTC).isoformat(),
+                "Local economics context is still warming, so CFS used available parcel/economic summary fields.",
             )
-            if derived:
-                payload = derived
-    cache_kind = "fallback" if payload.get("context_freshness") == "fallback_partial" else "real"
-    # ponytail: process-local split cache is enough for local presentation; use shared cache if multi-worker freshness matters.
-    _set_cached_economics_payload(cache_kind, payload)
-    return payload
+            _set_cached_economics_payload("fallback", payload)
+            return payload
+
+        try:
+            payload = build_economics_intelligence(db)
+        except Exception as exc:
+            db.rollback()
+            as_of = datetime.now(UTC).isoformat()
+            payload = _land_opportunity_screener_payload(db, as_of, str(exc)) or _unavailable_payload(
+                as_of,
+                "Local economics context is still warming, so CFS used available parcel/economic summary fields.",
+            )
+        else:
+            signals = payload.get("parcel_economic_signals") or payload.get("signals") or []
+            if not signals:
+                derived = _land_opportunity_screener_payload(
+                    db,
+                    payload.get("as_of") or datetime.now(UTC).isoformat(),
+                    "Live parcel economics returned no signal rows.",
+                )
+                if derived:
+                    payload = derived
+        cache_kind = "fallback" if payload.get("context_freshness") == "fallback_partial" else "real"
+        # ponytail: process-local split cache is enough for local presentation; use shared cache if multi-worker freshness matters.
+        _set_cached_economics_payload(cache_kind, payload)
+        return payload
 
 
 def _cached_economics_payload(kind: str) -> dict[str, Any] | None:

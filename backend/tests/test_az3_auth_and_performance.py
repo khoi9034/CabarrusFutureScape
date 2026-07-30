@@ -100,6 +100,26 @@ def test_investment_database_rows_release_transaction_before_scoring() -> None:
     assert db.rolled_back is True
 
 
+def test_investment_database_rows_are_reused_within_cache_ttl(monkeypatch) -> None:
+    calls = 0
+
+    def load_rows(_db):
+        nonlocal calls
+        calls += 1
+        return [{"parcel_id": "large"}]
+
+    monkeypatch.setattr(investment_router, "_investment_rows_cache", (0.0, []))
+    monkeypatch.setattr(investment_router, "_investment_rows_from_database", load_rows)
+
+    assert investment_router._cached_investment_rows_from_database(object()) == [
+        {"parcel_id": "large"}
+    ]
+    assert investment_router._cached_investment_rows_from_database(object()) == [
+        {"parcel_id": "large"}
+    ]
+    assert calls == 1
+
+
 def test_entra_validation_requires_allowed_user_scope_and_write_role(monkeypatch) -> None:
     class FakeKey:
         key = "public-key"

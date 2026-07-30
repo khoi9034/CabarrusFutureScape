@@ -517,15 +517,20 @@ class ParcelRepository:
             ParcelZoningOverlayV2.planning_jurisdiction_name,
         ]
 
-        search_predicate = or_(
-            *[
-                func.lower(func.coalesce(column, "")).like(
-                    like_pattern,
-                    escape="\\",
-                )
-                for column in searchable_columns
-            ],
-        )
+        if normalized_query.startswith("cfs-parcel-"):
+            search_predicate = ParcelEnriched.official_parcel_id == normalized_query.upper()
+        elif len(normalized_query) == 14 and normalized_query.isdigit():
+            search_predicate = ParcelEnriched.pin14 == normalized_query
+        else:
+            search_predicate = or_(
+                *[
+                    func.lower(func.coalesce(column, "")).like(
+                        like_pattern,
+                        escape="\\",
+                    )
+                    for column in searchable_columns
+                ],
+            )
 
         predicates = [search_predicate]
 

@@ -564,7 +564,7 @@ function OverviewLandingPage({
                       : "cfs-status-chip cfs-status-chip--green",
                   )}
                 >
-                  {USE_DEMO_DATA ? "Portfolio Demo" : "API Live"}
+                  {USE_DEMO_DATA ? "Portfolio Demo" : "Live Local Data"}
                 </span>
               </div>
               <div className="grid gap-2">

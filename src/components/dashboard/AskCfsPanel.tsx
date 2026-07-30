@@ -152,7 +152,7 @@ export function AskCfsPanel({
           </div>
         </div>
         <span className="w-fit rounded-full border border-[#f6d98e]/25 bg-[#f6d98e]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f6d98e]">
-          {USE_DEMO_DATA ? "Portfolio Demo AI Preview" : "Backend grounded search"}
+          {USE_DEMO_DATA ? "Portfolio Demo AI Preview" : "Grounded local answers"}
         </span>
       </div>
 

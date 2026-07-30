@@ -95,7 +95,7 @@ def get_flood_statistics(
     dominant_flood_zone: str | None = None,
     percent_constrained_min: float | None = Query(default=None, ge=0, le=100),
     percent_constrained_max: float | None = Query(default=None, ge=0, le=100),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> FloodConstraintStatisticsResponse:
     """Return aggregate FEMA flood constraint metrics."""
 
@@ -135,7 +135,7 @@ def filter_flood_constraints(
     percent_constrained_max: float | None = Query(default=None, ge=0, le=100),
     limit: int = Query(default=20, ge=1),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> FloodConstraintFilterResponse:
     """Return paginated parcel flood constraints matching filters."""
 
@@ -176,7 +176,7 @@ def get_high_review_flood_constraints(
     percent_constrained_max: float | None = Query(default=None, ge=0, le=100),
     limit: int = Query(default=20, ge=1),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> FloodConstraintFilterResponse:
     """Return flood review parcels ordered by flood constraint severity."""
 
@@ -215,7 +215,7 @@ def get_flood_summary(
     dominant_flood_zone: str | None = None,
     percent_constrained_min: float | None = Query(default=None, ge=0, le=100),
     percent_constrained_max: float | None = Query(default=None, ge=0, le=100),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> FloodConstraintSummaryResponse:
     """Return compact dashboard-safe FEMA flood constraint rollups."""
 
@@ -251,7 +251,7 @@ def get_flood_zones(
     ),
     limit: int = Query(default=500, ge=0),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> FloodZonePageResponse:
     """Return authoritative FEMA NFHL Layer 28 flood zone source polygons."""
 
@@ -277,7 +277,7 @@ def get_flood_zones(
 )
 def get_flood_constraint_detail(
     official_parcel_id: str,
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> FloodConstraintDetailResponse:
     """Return parcel-level FEMA flood constraint intelligence."""
 

@@ -22,7 +22,7 @@ from app.services.ai_search_service import CfsAiSearchService, get_ai_provider_s
 
 router = APIRouter(prefix="/ai", tags=["CFS AI Search"])
 LOGGER = logging.getLogger(__name__)
-ASK_CFS_CONTEXT_CACHE_TTL = timedelta(minutes=5)
+ASK_CFS_CONTEXT_CACHE_TTL = timedelta(minutes=30)
 _ASK_CFS_CONTEXT_CACHE: dict[str, Any] = {"expires_at": None, "payload": None}
 
 _FAST_DEVELOPMENT_SQL = text(
@@ -81,7 +81,7 @@ _FAST_DEVELOPMENT_SQL = text(
 @router.post("/search", response_model=CfsAiSearchResponse)
 def search_cfs(
     request: CfsAiSearchRequest,
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> CfsAiSearchResponse:
     """Answer CFS indicator questions from compact server-side context."""
 

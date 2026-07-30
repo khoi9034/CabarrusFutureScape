@@ -52,7 +52,7 @@ def get_development_statistics(
     zoning_jurisdiction: str | None = Query(default=None),
     zoning_category: str | None = Query(default=None),
     activity_class: str | None = Query(default=None),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentStatisticsResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_statistics(
@@ -73,7 +73,7 @@ def get_development_statistics(
     response_model=NewConstructionStatisticsResponse,
 )
 def get_new_construction_statistics(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> NewConstructionStatisticsResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_new_construction_statistics()
@@ -81,7 +81,7 @@ def get_new_construction_statistics(
 
 @router.get("/new-construction/trends", response_model=NewConstructionTrendsResponse)
 def get_new_construction_trends(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> NewConstructionTrendsResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_new_construction_trends()
@@ -93,7 +93,7 @@ def get_new_construction_trends(
 )
 def get_new_construction_parcel_summary(
     official_parcel_id: str,
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> ParcelNewConstructionSummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     try:
@@ -107,7 +107,7 @@ def get_new_construction_parcel_summary(
     response_model=NewConstructionLabelsSummaryResponse,
 )
 def get_new_construction_labels_summary(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> NewConstructionLabelsSummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_new_construction_labels_summary()
@@ -118,7 +118,7 @@ def get_new_construction_labels_summary(
     response_model=DevelopmentPredictionFeaturesSummaryResponse,
 )
 def get_prediction_features_summary(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentPredictionFeaturesSummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_prediction_features_summary()
@@ -129,7 +129,7 @@ def get_prediction_features_summary(
     response_model=DevelopmentPredictionRankingSummaryResponse,
 )
 def get_prediction_ranking_summary(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentPredictionRankingSummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_prediction_ranking_summary()
@@ -143,7 +143,7 @@ def get_development_model_research_preview(
     limit: int = Query(default=500, ge=1, le=1000),
     signal: str = Query(default="higher"),
     include_geometry: bool = Query(default=False),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentModelResearchPreviewResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_model_research_preview(
@@ -158,7 +158,7 @@ def get_development_model_research_preview(
     response_model=DevelopmentPredictionTransportationAccessibilitySummaryResponse,
 )
 def get_transportation_accessibility_summary(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentPredictionTransportationAccessibilitySummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_transportation_accessibility_summary()
@@ -169,7 +169,7 @@ def get_transportation_accessibility_summary(
     response_model=DevelopmentPredictionTransportationPlanTrafficSummaryResponse,
 )
 def get_transportation_plan_traffic_summary(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentPredictionTransportationPlanTrafficSummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_transportation_plan_traffic_summary()
@@ -188,7 +188,7 @@ def get_development_trends(
     zoning_category: str | None = Query(default=None),
     rolling_window: int | None = Query(default=None),
     group_by: str | None = Query(default=None),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentTrendsResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     try:
@@ -235,7 +235,7 @@ def get_development_hotspots(
     sort_by: str | None = Query(default=None),
     limit: int = Query(default=20, ge=1),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentHotspotsResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     try:
@@ -281,7 +281,7 @@ def get_development_zoning_summary(
     month: int | None = Query(default=None, ge=1, le=12),
     limit: int = Query(default=50, ge=1),
     offset: int = Query(default=0, ge=0),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentZoningSummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_zoning_summary(
@@ -312,7 +312,7 @@ def get_development_activity_summary(
     zoning_jurisdiction: str | None = Query(default=None),
     zoning_category: str | None = Query(default=None),
     activity_class: str | None = Query(default=None),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentActivitySummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     try:
@@ -351,7 +351,7 @@ def get_development_temporal_query(
     offset: int = Query(default=0, ge=0),
     bbox: str | None = Query(default=None),
     include_geometry: bool = Query(default=False),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentTemporalQueryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     try:
@@ -380,7 +380,7 @@ def get_development_temporal_query(
 
 @router.get("/permit-types", response_model=DevelopmentLookupResponse)
 def get_development_permit_types(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentLookupResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_permit_types()
@@ -391,7 +391,7 @@ def get_development_permit_types(
     response_model=PermitSegmentStatisticsResponse,
 )
 def get_development_permit_segment_statistics(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> PermitSegmentStatisticsResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_permit_segment_statistics()
@@ -402,7 +402,7 @@ def get_development_permit_segment_statistics(
     response_model=PermitSegmentOptionsResponse,
 )
 def get_development_permit_segment_options(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> PermitSegmentOptionsResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_permit_segment_options()
@@ -414,7 +414,7 @@ def get_development_permit_segment_options(
 )
 def get_development_parcel_permit_segment_summary(
     official_parcel_id: str,
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> ParcelPermitSegmentSummaryResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     try:
@@ -437,7 +437,7 @@ def get_development_parcel_permits(
     limit: int = Query(default=10, ge=1),
     offset: int = Query(default=0, ge=0),
     sort: str = Query(default="latest_first"),
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentParcelPermitEventsResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     try:
@@ -453,7 +453,7 @@ def get_development_parcel_permits(
 
 @router.get("/work-types", response_model=DevelopmentLookupResponse)
 def get_development_work_types(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentLookupResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_work_types()
@@ -461,7 +461,7 @@ def get_development_work_types(
 
 @router.get("/jurisdictions", response_model=DevelopmentLookupResponse)
 def get_development_jurisdictions(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentLookupResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_jurisdictions()
@@ -469,7 +469,7 @@ def get_development_jurisdictions(
 
 @router.get("/activity-classes", response_model=DevelopmentLookupResponse)
 def get_development_activity_classes(
-    db: Session = Depends(get_read_only_db),
+    db: Session = Depends(get_read_only_db, scope="function"),
 ) -> DevelopmentLookupResponse:
     service = DevelopmentService(DevelopmentRepository(db))
     return service.get_activity_classes()

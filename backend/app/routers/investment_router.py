@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from threading import Lock
+from time import monotonic
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -144,6 +146,10 @@ from app.services.investment_workspace_service import (
 
 router = APIRouter(prefix="/investment", tags=["Investment Intelligence"])
 
+_INVESTMENT_ROWS_CACHE_TTL_SECONDS = 1_800.0
+_investment_rows_cache: tuple[float, list[dict[str, Any]]] = (0.0, [])
+_investment_rows_lock = Lock()
+
 _DB_INVESTMENT_ROWS_SQL = """
     SELECT
         p.official_parcel_id AS parcel_id,
@@ -274,10 +280,10 @@ def get_investment_strategies() -> dict[str, Any]:
 @router.post("/screen")
 def post_investment_screen(
     request: InvestmentScreenRequest,
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     return screen_candidates(
-        _investment_rows(db),
+        _investment_rows_for_screen(db),
         filters=request.filters,
         limit=request.limit,
         strategy=request.strategy,
@@ -288,7 +294,7 @@ def post_investment_screen(
 def get_investment_candidate(
     parcel_id: str,
     strategy: InvestmentStrategyId = Query(default="development_land"),
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     return candidate_detail(_investment_rows(db), parcel_id, strategy=strategy)
 
@@ -296,7 +302,7 @@ def get_investment_candidate(
 @router.post("/compare")
 def post_investment_compare(
     request: InvestmentCompareRequest,
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     return compare_candidates(
         _investment_rows(db),
@@ -307,14 +313,14 @@ def post_investment_compare(
 
 @router.get("/data-quality")
 def get_investment_data_quality(
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     return data_quality(_investment_rows(db))
 
 
 @router.get("/environmental/status")
 def get_investment_environmental_status(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return environmental_status(db)
 
@@ -322,7 +328,7 @@ def get_investment_environmental_status(
 @router.post("/environmental/refresh")
 def post_investment_environmental_refresh(
     source: str = Query(default="all"),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     try:
         return refresh_environmental_context(db, source=source)
@@ -334,14 +340,14 @@ def post_investment_environmental_refresh(
 
 @router.get("/market-context/acs/status")
 def get_investment_acs_status(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return acs_status(db)
 
 
 @router.post("/market-context/acs/refresh")
 def post_investment_acs_refresh(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     try:
         return refresh_acs_market_context(db)
@@ -354,7 +360,7 @@ def post_investment_acs_refresh(
 @router.get("/candidates/{parcel_id}/market-context")
 def get_investment_candidate_market_context(
     parcel_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return candidate_market_context(db, parcel_id)
 
@@ -362,7 +368,7 @@ def get_investment_candidate_market_context(
 @router.get("/candidates/{parcel_id}/environmental-context")
 def get_investment_candidate_environmental_context(
     parcel_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return candidate_environmental_context(db, parcel_id)
 
@@ -372,14 +378,14 @@ def get_investment_research_context(
     parcel_id: str,
     strategy: InvestmentStrategyId = Query(default="development_land"),
     candidate_id: str | None = Query(default=None),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return build_parcel_research_context(db, _investment_rows(db), parcel_id, strategy=strategy, candidate_id=candidate_id)
 
 
 @router.get("/intake")
 def get_investment_intake(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return list_intake_candidates(db, _investment_rows(db))
 
@@ -387,7 +393,7 @@ def get_investment_intake(
 @router.post("/intake")
 def post_investment_intake(
     request: InvestmentIntakePayload,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return create_intake_candidate(db, request, _investment_rows(db))
 
@@ -395,7 +401,7 @@ def post_investment_intake(
 @router.post("/intake/import")
 def post_investment_intake_import(
     request: InvestmentCsvImportRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return import_intake_csv(db, request, _investment_rows(db))
 
@@ -403,7 +409,7 @@ def post_investment_intake_import(
 @router.post("/intake/compare")
 def post_investment_intake_compare(
     request: InvestmentIntakeCompareRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return compare_intake_candidates(db, request.candidate_ids, _investment_rows(db))
 
@@ -411,7 +417,7 @@ def post_investment_intake_compare(
 @router.get("/intake/{candidate_id}/market-context")
 def get_investment_intake_market_context(
     candidate_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     candidate = get_intake_candidate(db, candidate_id)
     if not candidate:
@@ -422,7 +428,7 @@ def get_investment_intake_market_context(
 @router.get("/intake/{candidate_id}/environmental-context")
 def get_investment_intake_environmental_context(
     candidate_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     candidate = get_intake_candidate(db, candidate_id)
     if not candidate:
@@ -433,7 +439,7 @@ def get_investment_intake_environmental_context(
 @router.get("/intake/{candidate_id}/research-context")
 def get_investment_intake_research_context(
     candidate_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     context = build_intake_research_context(db, _investment_rows(db), candidate_id)
     if not context:
@@ -444,7 +450,7 @@ def get_investment_intake_research_context(
 @router.get("/intake/{candidate_id}")
 def get_investment_intake_candidate(
     candidate_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     candidate = get_intake_candidate(db, candidate_id)
     if not candidate:
@@ -456,7 +462,7 @@ def get_investment_intake_candidate(
 def patch_investment_intake_candidate(
     candidate_id: str,
     request: InvestmentIntakePatch,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     candidate = update_intake_candidate(db, candidate_id, request, _investment_rows(db))
     if not candidate:
@@ -467,7 +473,7 @@ def patch_investment_intake_candidate(
 @router.delete("/intake/{candidate_id}")
 def delete_investment_intake_candidate(
     candidate_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if not delete_intake_candidate(db, candidate_id):
         raise HTTPException(status_code=404, detail="Investment intake candidate not found.")
@@ -477,7 +483,7 @@ def delete_investment_intake_candidate(
 @router.get("/intake/{candidate_id}/analysis")
 def get_investment_intake_analysis(
     candidate_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     analysis = analyze_intake_candidate(db, candidate_id, _investment_rows(db))
     if not analysis:
@@ -488,7 +494,7 @@ def get_investment_intake_analysis(
 @router.post("/reports/generate")
 def post_investment_report(
     request: InvestmentReportRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     try:
         return generate_investment_report(db, _investment_rows(db), request)
@@ -502,7 +508,7 @@ def get_investment_saved_items(
     strategy: str | None = Query(default=None),
     status: str | None = Query(default=None),
     sort: str = Query(default="recent"),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return list_saved_items(db, item_type=item_type, strategy=strategy, status=status, sort=sort)
 
@@ -510,7 +516,7 @@ def get_investment_saved_items(
 @router.post("/saved-items")
 def post_investment_saved_item(
     request: InvestmentSavedItemPayload,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return create_saved_item(db, request)
 
@@ -519,7 +525,7 @@ def post_investment_saved_item(
 def patch_investment_saved_item(
     item_id: str,
     request: InvestmentSavedItemPatch,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     item = update_saved_item(db, item_id, request)
     if not item:
@@ -530,7 +536,7 @@ def patch_investment_saved_item(
 @router.delete("/saved-items/{item_id}")
 def delete_investment_saved_item(
     item_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if not delete_saved_item(db, item_id):
         raise HTTPException(status_code=404, detail="Saved CFS Investment item not found.")
@@ -540,20 +546,20 @@ def delete_investment_saved_item(
 @router.post("/saved-items/reorder")
 def post_investment_saved_items_reorder(
     request: InvestmentSavedItemReorderRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return reorder_saved_items(db, request)
 
 
 @router.get("/recent-work")
-def get_investment_recent_work(db: Session = Depends(get_db)) -> dict[str, Any]:
+def get_investment_recent_work(db: Session = Depends(get_db, scope="function")) -> dict[str, Any]:
     return list_recent_work(db)
 
 
 @router.post("/recent-work")
 def post_investment_recent_work(
     request: InvestmentRecentWorkPayload,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return record_recent_work(db, request)
 
@@ -561,7 +567,7 @@ def post_investment_recent_work(
 @router.delete("/recent-work/{item_id}")
 def delete_investment_recent_work(
     item_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if not delete_recent_work(db, item_id):
         raise HTTPException(status_code=404, detail="Recent CFS Investment item not found.")
@@ -569,14 +575,14 @@ def delete_investment_recent_work(
 
 
 @router.get("/saved-searches")
-def get_investment_saved_searches(db: Session = Depends(get_db)) -> dict[str, Any]:
+def get_investment_saved_searches(db: Session = Depends(get_db, scope="function")) -> dict[str, Any]:
     return list_saved_searches(db)
 
 
 @router.post("/saved-searches")
 def post_investment_saved_search(
     request: InvestmentSavedSearchPayload,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return create_saved_search(db, request)
 
@@ -585,7 +591,7 @@ def post_investment_saved_search(
 def patch_investment_saved_search(
     search_id: str,
     request: InvestmentSavedSearchPatch,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     search = update_saved_search(db, search_id, request)
     if not search:
@@ -596,7 +602,7 @@ def patch_investment_saved_search(
 @router.delete("/saved-searches/{search_id}")
 def delete_investment_saved_search(
     search_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if not delete_saved_search(db, search_id):
         raise HTTPException(status_code=404, detail="Saved CFS Investment search not found.")
@@ -606,7 +612,7 @@ def delete_investment_saved_search(
 @router.post("/saved-searches/{search_id}/duplicate")
 def post_investment_saved_search_duplicate(
     search_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     search = duplicate_saved_search(db, search_id)
     if not search:
@@ -617,7 +623,7 @@ def post_investment_saved_search_duplicate(
 @router.post("/saved-searches/{search_id}/rerun")
 def post_investment_saved_search_rerun(
     search_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     result = rerun_saved_search(db, search_id, _investment_rows(db))
     if not result:
@@ -628,7 +634,7 @@ def post_investment_saved_search_rerun(
 @router.post("/saved-searches/{search_id}/engagement")
 def post_investment_saved_search_engagement(
     search_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if not get_saved_search(db, search_id):
         raise HTTPException(status_code=404, detail="Saved CFS Investment search not found.")
@@ -636,7 +642,7 @@ def post_investment_saved_search_engagement(
 
 
 @router.get("/case-studies")
-def get_investment_case_studies(db: Session = Depends(get_db)) -> dict[str, Any]:
+def get_investment_case_studies(db: Session = Depends(get_db, scope="function")) -> dict[str, Any]:
     return list_case_studies(db)
 
 
@@ -644,7 +650,7 @@ def get_investment_case_studies(db: Session = Depends(get_db)) -> dict[str, Any]
 def post_investment_case_study_sync(
     case_study: str = Query(..., min_length=1, max_length=80),
     dry_run: bool = Query(default=False),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     try:
         return sync_case_study(db, case_study, dry_run=dry_run)
@@ -655,7 +661,7 @@ def post_investment_case_study_sync(
 @router.get("/case-studies/{slug}")
 def get_investment_case_study(
     slug: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     case_study = get_case_study(db, slug)
     if not case_study:
@@ -667,7 +673,7 @@ def get_investment_case_study(
 def patch_investment_case_study(
     slug: str,
     request: InvestmentCaseStudyPatch,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     case_study = update_case_study(db, slug, request)
     if not case_study:
@@ -678,7 +684,7 @@ def patch_investment_case_study(
 @router.post("/case-studies/{slug}/duplicate")
 def post_investment_case_study_duplicate(
     slug: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     case_study = duplicate_case_study(db, slug)
     if not case_study:
@@ -689,7 +695,7 @@ def post_investment_case_study_duplicate(
 @router.post("/case-studies/{slug}/archive")
 def post_investment_case_study_archive(
     slug: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     case_study = archive_case_study(db, slug)
     if not case_study:
@@ -700,7 +706,7 @@ def post_investment_case_study_archive(
 @router.post("/case-studies/{slug}/codex-brief")
 def post_investment_case_study_codex_brief(
     slug: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     brief = export_codex_brief(db, slug)
     if not brief:
@@ -715,7 +721,7 @@ def get_investment_opportunity_sources() -> dict[str, Any]:
 
 @router.get("/opportunities")
 def get_investment_opportunities(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
     source_id: str | None = Query(default=None),
     property_type: str | None = Query(default=None),
     listing_status: str | None = Query(default=None),
@@ -746,7 +752,7 @@ def post_investment_opportunities_refresh(request: InvestmentOpportunityRefreshR
 def post_investment_opportunity_match(
     opportunity_id: str,
     request: InvestmentOpportunityMatchRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return match_opportunity(db, opportunity_id, _investment_rows(db), request)
 
@@ -755,7 +761,7 @@ def post_investment_opportunity_match(
 def post_investment_opportunity_intake(
     opportunity_id: str,
     request: InvestmentOpportunityIntakeRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return opportunity_to_intake(db, opportunity_id, _investment_rows(db), request)
 
@@ -764,7 +770,7 @@ def post_investment_opportunity_intake(
 def post_investment_radar_search(
     strategy: str = Query(default="industrial_site"),
     limit: int = Query(default=25, ge=1, le=100),
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     return radar_search(_investment_rows(db), strategy=strategy, limit=limit)
 
@@ -773,7 +779,7 @@ def post_investment_radar_search(
 def get_investment_radar_area(
     area_id: str,
     strategy: str = Query(default="industrial_site"),
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     return radar_area(_investment_rows(db), area_id, strategy=strategy)
 
@@ -782,7 +788,7 @@ def get_investment_radar_area(
 def get_investment_radar_area_parcels(
     area_id: str,
     limit: int = Query(default=80, ge=1, le=250),
-    db: Session | None = Depends(get_optional_read_only_db),
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
 ) -> dict[str, Any]:
     return radar_area_parcels(_investment_rows(db), area_id, limit=limit)
 
@@ -790,20 +796,20 @@ def get_investment_radar_area_parcels(
 @router.get("/radar/areas/{area_id}/opportunities")
 def get_investment_radar_area_opportunities(
     area_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return radar_area_opportunities(db, _investment_rows(db), area_id)
 
 
 @router.get("/engagements")
-def get_investment_engagements(db: Session = Depends(get_db)) -> dict[str, Any]:
+def get_investment_engagements(db: Session = Depends(get_db, scope="function")) -> dict[str, Any]:
     return list_engagements(db)
 
 
 @router.post("/engagements")
 def post_investment_engagement(
     request: InvestmentEngagementPayload,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return create_engagement(db, request)
 
@@ -811,7 +817,7 @@ def post_investment_engagement(
 @router.get("/engagements/{engagement_id}")
 def get_investment_engagement(
     engagement_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     engagement = get_engagement(db, engagement_id)
     if not engagement:
@@ -823,7 +829,7 @@ def get_investment_engagement(
 def patch_investment_engagement(
     engagement_id: str,
     request: InvestmentEngagementPatch,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     engagement = update_engagement(db, engagement_id, request)
     if not engagement:
@@ -834,7 +840,7 @@ def patch_investment_engagement(
 @router.delete("/engagements/{engagement_id}")
 def delete_investment_engagement(
     engagement_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if not delete_engagement(db, engagement_id):
         raise HTTPException(status_code=404, detail="Investment engagement not found.")
@@ -845,7 +851,7 @@ def delete_investment_engagement(
 def post_investment_engagement_criteria(
     engagement_id: str,
     request: InvestmentEngagementCriteriaRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     engagement = set_criteria(db, engagement_id, request)
     if not engagement:
@@ -857,7 +863,7 @@ def post_investment_engagement_criteria(
 def post_investment_engagement_shortlist(
     engagement_id: str,
     request: InvestmentEngagementShortlistRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     engagement = add_shortlist_item(db, engagement_id, request)
     if not engagement:
@@ -868,7 +874,7 @@ def post_investment_engagement_shortlist(
 @router.post("/engagements/{engagement_id}/report")
 def post_investment_engagement_report(
     engagement_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     report = engagement_report(db, engagement_id)
     if not report:
@@ -877,14 +883,14 @@ def post_investment_engagement_report(
 
 
 @router.get("/underwriting/templates")
-def get_investment_underwriting_templates(db: Session = Depends(get_db)) -> dict[str, Any]:
+def get_investment_underwriting_templates(db: Session = Depends(get_db, scope="function")) -> dict[str, Any]:
     return list_underwriting_templates(db)
 
 
 @router.post("/underwriting/templates")
 def post_investment_underwriting_template(
     request: InvestmentUnderwritingTemplatePayload,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return create_underwriting_template(db, request)
 
@@ -892,14 +898,14 @@ def post_investment_underwriting_template(
 @router.post("/underwriting/prefill")
 def post_investment_underwriting_prefill(
     request: InvestmentUnderwritingPrefillRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return prefill_underwriting(db, request, _investment_rows(db))
 
 
 @router.get("/underwriting/scenarios")
 def get_investment_underwriting_scenarios(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return list_underwriting_scenarios(db)
 
@@ -907,7 +913,7 @@ def get_investment_underwriting_scenarios(
 @router.post("/underwriting/calculate")
 def post_investment_underwriting_calculate(
     request: InvestmentUnderwritingCalculateRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     context = None
     if request.candidate_id:
@@ -920,7 +926,7 @@ def post_investment_underwriting_calculate(
 @router.post("/underwriting/scenarios")
 def post_investment_underwriting_scenario(
     request: InvestmentUnderwritingScenarioPayload,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return create_underwriting_scenario(db, request, _investment_rows(db))
 
@@ -928,7 +934,7 @@ def post_investment_underwriting_scenario(
 @router.get("/underwriting/scenarios/{scenario_id}")
 def get_investment_underwriting_scenario(
     scenario_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     scenario = get_underwriting_scenario(db, scenario_id)
     if not scenario:
@@ -940,7 +946,7 @@ def get_investment_underwriting_scenario(
 def patch_investment_underwriting_scenario(
     scenario_id: str,
     request: InvestmentUnderwritingScenarioPatch,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     scenario = update_underwriting_scenario(db, scenario_id, request, _investment_rows(db))
     if not scenario:
@@ -951,7 +957,7 @@ def patch_investment_underwriting_scenario(
 @router.delete("/underwriting/scenarios/{scenario_id}")
 def delete_investment_underwriting_scenario(
     scenario_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if not delete_underwriting_scenario(db, scenario_id):
         raise HTTPException(status_code=404, detail="Underwriting scenario not found.")
@@ -961,7 +967,7 @@ def delete_investment_underwriting_scenario(
 @router.post("/underwriting/scenarios/{scenario_id}/calculate")
 def post_investment_underwriting_saved_calculate(
     scenario_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     scenario = calculate_saved_underwriting_scenario(db, scenario_id, _investment_rows(db))
     if not scenario:
@@ -972,17 +978,21 @@ def post_investment_underwriting_saved_calculate(
 @router.post("/underwriting/compare")
 def post_investment_underwriting_compare(
     request: InvestmentUnderwritingCompareRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return compare_underwriting_scenarios(db, request.scenario_ids)
 
 
 def _investment_rows(db: Session | None) -> list[dict[str, Any]]:
     if db is not None:
-        rows = _investment_rows_from_database(db)
+        rows = _cached_investment_rows_from_database(db)
         if rows:
             return rows
 
+    return _investment_rows_for_screen(db)
+
+
+def _investment_rows_for_screen(db: Session | None) -> list[dict[str, Any]]:
     economics = get_cached_economics_intelligence(db)
     powerbi = build_powerbi_export_payload(economics, mode="live")
     tables = powerbi.get("tables") if isinstance(powerbi.get("tables"), dict) else {}
@@ -997,6 +1007,24 @@ def _investment_rows(db: Session | None) -> list[dict[str, Any]]:
         {**row, **environmental.get(str(row.get("parcel_id") or row.get("signal_id") or row.get("row_id") or ""), {})}
         for row in enriched
     ]
+
+
+def _cached_investment_rows_from_database(db: Session) -> list[dict[str, Any]]:
+    global _investment_rows_cache
+
+    cached_at, rows = _investment_rows_cache
+    if rows and monotonic() - cached_at < _INVESTMENT_ROWS_CACHE_TTL_SECONDS:
+        return rows
+
+    with _investment_rows_lock:
+        cached_at, rows = _investment_rows_cache
+        if rows and monotonic() - cached_at < _INVESTMENT_ROWS_CACHE_TTL_SECONDS:
+            return rows
+        rows = _investment_rows_from_database(db)
+        if rows:
+            # ponytail: process-local presentation cache; restart after source-data changes.
+            _investment_rows_cache = (monotonic(), rows)
+        return rows
 
 
 def _investment_rows_from_database(db: Session) -> list[dict[str, Any]]:

@@ -71,4 +71,4 @@ const checks = [
 ];
 
 const ok = (await Promise.all(checks)).every(Boolean);
-process.exit(ok ? 0 : 1);
+process.exitCode = ok ? 0 : 1;

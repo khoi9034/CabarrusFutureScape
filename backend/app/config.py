@@ -92,13 +92,13 @@ class Settings(BaseSettings):
     database_pool_size: int = Field(
         default=2,
         ge=1,
-        le=5,
+        le=10,
         validation_alias=AliasChoices("CFS_DATABASE_POOL_SIZE", "SQLALCHEMY_POOL_SIZE"),
     )
     database_max_overflow: int = Field(
         default=1,
         ge=0,
-        le=3,
+        le=10,
         validation_alias=AliasChoices("CFS_DATABASE_MAX_OVERFLOW", "SQLALCHEMY_MAX_OVERFLOW"),
     )
     database_pool_timeout_seconds: int = Field(
