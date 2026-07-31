@@ -1,30 +1,38 @@
 # Map Runtime And Fallback
 
-## Renderer sequence
+## Public demo
 
 1. Mount the same-origin SVG context map immediately.
-2. Load county boundary, municipalities, roads, hydrography, place labels, and
-   available CFS overlays.
-3. Initialize ArcGIS MapView progressively above that context.
-4. Cross-fade to ArcGIS only after `view.when()` succeeds.
-5. Keep the context map mounted if runtime, WebGL, worker, WASM, localization,
-   online basemap, or view initialization fails.
+2. Load county boundary, municipalities, roads, hydrography, and place labels
+   before optional analytical overlays.
+3. Do not load ArcGIS unless `NEXT_PUBLIC_CFS_DEMO_INTERACTIVE_MAP=true` was
+   explicitly set at build time.
 
 The guaranteed map requires no Esri key and no external service.
+
+## Local live mode
+
+ArcGIS loads progressively above the same-origin map. The interactive surface
+stays transparent until the view is ready, has valid dimensions and extent,
+has finished updating, contains expected layers, and produces a nonblank pixel
+sample. A later fatal, rendering, or map-content error reveals the still-mounted
+vector map.
 
 ## States
 
 The map publishes `data-map-renderer-state` as:
 
-- `loading_context`
-- `loading_interactive`
+- `static_loading`
+- `static_ready`
+- `interactive_loading`
 - `interactive_ready`
-- `degraded_static`
+- `static_degraded`
 - `fatal`
 
-`degraded_static` is usable. It shows a small `Static Map Mode` status and
-`Retry interactive map`. A blocking error is reserved for the case where the
-same-origin context itself is unavailable.
+It also publishes `data-map-renderer`, `data-static-context-ready`,
+`data-interactive-ready`, and `data-map-fatal`. `static_degraded` is usable and
+shows only a small enhancement notice. A blocking error is reserved for the
+case where the same-origin context itself is unavailable.
 
 Retry increments the renderer attempt while leaving context visible. Effect
 cleanup cancels stale initialization, listeners, watches, layers, and views so

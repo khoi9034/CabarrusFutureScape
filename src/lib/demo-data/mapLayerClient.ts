@@ -481,6 +481,7 @@ async function loadDemoMapJson<T>(
     headers: {
       Accept: "application/json",
     },
+    signal: AbortSignal.timeout(15_000),
   })
     .then(async (response) => {
       recordDataProvenance(
@@ -490,12 +491,14 @@ async function loadDemoMapJson<T>(
           : "sanitized_demo_extract",
       );
       if (!response.ok) {
+        layerCache.delete(cacheKey);
         return fallback;
       }
 
       return (await response.json()) as T;
     })
     .catch(() => {
+      layerCache.delete(cacheKey);
       recordDataProvenance(
         cacheKey,
         isStaticGeographicContext(fileName)
@@ -525,16 +528,19 @@ async function loadDemoDataJson<T>(
     headers: {
       Accept: "application/json",
     },
+    signal: AbortSignal.timeout(15_000),
   })
     .then(async (response) => {
       recordDataProvenance(cacheKey, "sanitized_demo_extract");
       if (!response.ok) {
+        dataCache.delete(cacheKey);
         return fallback;
       }
 
       return (await response.json()) as T;
     })
     .catch(() => {
+      dataCache.delete(cacheKey);
       recordDataProvenance(cacheKey, "sanitized_demo_extract");
       return fallback;
     });
@@ -545,11 +551,11 @@ async function loadDemoDataJson<T>(
 
 function isStaticGeographicContext(fileName: string) {
   return [
-    "county_boundary.geojson",
-    "hydrography.geojson",
-    "municipal_boundaries.geojson",
-    "place_labels.geojson",
-    "transportation_context.geojson",
+    "demo_county_boundary.geojson",
+    "demo_hydrography.geojson",
+    "demo_municipal_boundaries.geojson",
+    "demo_place_labels.geojson",
+    "demo_transportation_context.geojson",
   ].includes(fileName);
 }
 

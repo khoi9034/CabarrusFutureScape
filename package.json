@@ -25,6 +25,7 @@
     "check:powerbi": "python scripts/check_powerbi.py",
     "check:product-hardening": "node scripts/check-product-hardening.mjs",
     "check:presentation": "node scripts/check-presentation.mjs",
+    "check:production-map": "node scripts/check-production-map.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"

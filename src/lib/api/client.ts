@@ -160,6 +160,9 @@ export const IS_ENTERPRISE_MODE = CFS_RUNTIME_MODE === "enterprise";
 export const USE_BACKEND_API =
   !IS_DEMO_MODE && process.env.NEXT_PUBLIC_USE_BACKEND_API === "true";
 export const USE_DEMO_DATA = IS_DEMO_MODE;
+export const USE_INTERACTIVE_MAP =
+  !USE_DEMO_DATA ||
+  process.env.NEXT_PUBLIC_CFS_DEMO_INTERACTIVE_MAP === "true";
 export const CFS_DATA_PROVIDER: CfsDataProvider = USE_DEMO_DATA
   ? "sanitized_demo_extract"
   : IS_ENTERPRISE_MODE

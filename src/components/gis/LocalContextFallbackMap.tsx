@@ -7,14 +7,19 @@ import type {
   DemoMapContext,
 } from "@/lib/demo-data/mapLayerClient";
 import { cabarrusSceneConfig } from "@/lib/gis/gisConfig";
-import type { DashboardStatus } from "@/types";
+import type { ModelResearchPreviewMarker } from "@/types/map/modelResearchPreview";
+import type { MapOverlayViewMode } from "@/types/map/overlayViewModes";
 
 interface LocalContextFallbackMapProps {
   context: DemoMapContext | null;
-  mapStatus: DashboardStatus;
+  developmentViewMode: MapOverlayViewMode;
+  interactiveReady: boolean;
+  modelResearchMarkers: ModelResearchPreviewMarker[];
+  modelResearchViewMode: MapOverlayViewMode;
   selectedParcelId: string | null;
   showDevelopment: boolean;
   showFlood: boolean;
+  showModelResearch: boolean;
   showSchools: boolean;
   zoomLevel: number;
 }
@@ -24,14 +29,27 @@ const VIEW_HEIGHT = 650;
 
 export function LocalContextFallbackMap({
   context,
-  mapStatus,
+  developmentViewMode,
+  interactiveReady,
+  modelResearchMarkers,
+  modelResearchViewMode,
   selectedParcelId,
   showDevelopment,
   showFlood,
+  showModelResearch,
   showSchools,
   zoomLevel,
 }: LocalContextFallbackMapProps) {
   const drawing = useMemo(() => buildDrawing(context), [context]);
+  const developmentDisplayPoints = useMemo(
+    () =>
+      buildDisplayPoints(
+        drawing.development,
+        developmentViewMode,
+        "development",
+      ),
+    [developmentViewMode, drawing.development],
+  );
   const selectedParcel = selectedParcelId
     ? context?.parcels.features.find(
         (feature) =>
@@ -42,19 +60,43 @@ export function LocalContextFallbackMap({
     ? polygonPath(selectedParcel.geometry)
     : "";
   const selectedParcelPoint = selectedParcel
-    ? pointCoordinates(selectedParcel.geometry)
+    ? pointCoordinates(selectedParcel.geometry) ?? featureCenter(selectedParcel)
     : null;
-  const visible = mapStatus !== "online";
-  const viewBox = getViewBox(zoomLevel);
+  const modelResearchPoints = useMemo(
+    () =>
+      modelResearchMarkers
+        .filter(
+          (marker) =>
+            Number.isFinite(marker.centroid.longitude) &&
+            Number.isFinite(marker.centroid.latitude),
+        )
+        .map((marker) => ({
+          ...project(marker.centroid.longitude, marker.centroid.latitude),
+          id: marker.officialParcelId,
+        })),
+    [modelResearchMarkers],
+  );
+  const modelResearchDisplayPoints = useMemo(
+    () =>
+      buildDisplayPoints(
+        modelResearchPoints,
+        modelResearchViewMode,
+        "model-research",
+      ),
+    [modelResearchPoints, modelResearchViewMode],
+  );
+  const viewBox = getViewBox(zoomLevel, selectedParcelPoint);
 
   return (
     <svg
-      aria-hidden={!visible}
+      aria-hidden={interactiveReady}
       aria-label="Cabarrus County same-origin context map"
       className={`absolute inset-0 h-full w-full transition-opacity duration-300 ${
-        visible ? "opacity-100" : "pointer-events-none opacity-0"
+        interactiveReady ? "pointer-events-none opacity-0" : "opacity-100"
       }`}
+      data-county-path-ready={drawing.county ? "true" : "false"}
       data-context-ready={context?.requiredReady ? "true" : "false"}
+      data-map-renderer="static"
       data-testid="cfs-local-context-map"
       preserveAspectRatio="xMidYMid meet"
       role="img"
@@ -164,19 +206,81 @@ export function LocalContextFallbackMap({
           </g>
         ) : null}
         {showDevelopment ? (
-          <g data-layer-id="development-hotspots">
-            {drawing.development.map((point, index) => (
-              <circle
-                cx={point.x}
-                cy={point.y}
-                fill="#ff9f43"
-                fillOpacity="0.72"
-                key={`development-${index}`}
-                r="3.6"
-                stroke="#ffe1ad"
-                strokeOpacity="0.7"
-                strokeWidth="0.8"
-              />
+          <g
+            data-development-view-mode={developmentViewMode}
+            data-layer-id="development-hotspots"
+          >
+            {developmentDisplayPoints.map((point) => (
+              <g key={point.id}>
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  fill="#ff9f43"
+                  fillOpacity={developmentViewMode === "heatmap" ? "0.18" : "0.72"}
+                  r={
+                    developmentViewMode === "heatmap"
+                      ? 14
+                      : developmentViewMode === "clusters"
+                        ? Math.min(13, 4.5 + Math.sqrt(point.count))
+                        : 3.6
+                  }
+                  stroke="#ffe1ad"
+                  strokeOpacity={developmentViewMode === "heatmap" ? "0.2" : "0.7"}
+                  strokeWidth="0.8"
+                />
+                {developmentViewMode === "clusters" && point.count > 1 ? (
+                  <text
+                    fill="#ffffff"
+                    fontSize="8"
+                    fontWeight="700"
+                    textAnchor="middle"
+                    x={point.x}
+                    y={point.y + 2.7}
+                  >
+                    {point.count}
+                  </text>
+                ) : null}
+              </g>
+            ))}
+          </g>
+        ) : null}
+        {showModelResearch ? (
+          <g
+            data-layer-id="model-research"
+            data-model-research-view-mode={modelResearchViewMode}
+          >
+            {modelResearchDisplayPoints.map((point) => (
+              <g key={`model-research-${point.id}`}>
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  fill="#c084fc"
+                  fillOpacity={modelResearchViewMode === "heatmap" ? "0.16" : "0.58"}
+                  r={
+                    modelResearchViewMode === "heatmap"
+                      ? 12
+                      : modelResearchViewMode === "clusters"
+                        ? Math.min(12, 4 + Math.sqrt(point.count))
+                        : 3.4
+                  }
+                  stroke="#ead7ff"
+                  strokeOpacity={modelResearchViewMode === "heatmap" ? "0.2" : "0.82"}
+                  strokeWidth="0.9"
+                  vectorEffect="non-scaling-stroke"
+                />
+                {modelResearchViewMode === "clusters" && point.count > 1 ? (
+                  <text
+                    fill="#ffffff"
+                    fontSize="8"
+                    fontWeight="700"
+                    textAnchor="middle"
+                    x={point.x}
+                    y={point.y + 2.7}
+                  >
+                    {point.count}
+                  </text>
+                ) : null}
+              </g>
             ))}
           </g>
         ) : null}
@@ -236,11 +340,19 @@ export function LocalContextFallbackMap({
   );
 }
 
-function getViewBox(zoomLevel: number) {
+function getViewBox(zoomLevel: number, center: SvgPoint | null) {
   const scale = 2 ** Math.max(0, Math.min(4, zoomLevel));
   const width = VIEW_WIDTH / scale;
   const height = VIEW_HEIGHT / scale;
-  return `${(VIEW_WIDTH - width) / 2} ${(VIEW_HEIGHT - height) / 2} ${width} ${height}`;
+  const x = Math.max(
+    0,
+    Math.min(VIEW_WIDTH - width, (center?.x ?? VIEW_WIDTH / 2) - width / 2),
+  );
+  const y = Math.max(
+    0,
+    Math.min(VIEW_HEIGHT - height, (center?.y ?? VIEW_HEIGHT / 2) - height / 2),
+  );
+  return `${x} ${y} ${width} ${height}`;
 }
 
 function buildDrawing(context: DemoMapContext | null) {
@@ -281,6 +393,40 @@ interface SvgPoint {
 
 interface SvgLabel extends SvgPoint {
   label: string;
+}
+
+interface SvgDisplayPoint extends SvgPoint {
+  count: number;
+  id: string;
+}
+
+function buildDisplayPoints(
+  points: Array<SvgPoint & { id?: string }>,
+  viewMode: MapOverlayViewMode,
+  idPrefix: string,
+): SvgDisplayPoint[] {
+  const displayPoints = points.map((point, index) => ({
+    ...point,
+    count: 1,
+    id: point.id ?? `${idPrefix}-${index}`,
+  }));
+  if (viewMode !== "clusters") {
+    return displayPoints;
+  }
+
+  const cells = new Map<string, SvgDisplayPoint>();
+  displayPoints.forEach((point) => {
+    const key = `${Math.round(point.x / 32)}:${Math.round(point.y / 32)}`;
+    const cell = cells.get(key);
+    if (cell) {
+      cell.x = (cell.x * cell.count + point.x) / (cell.count + 1);
+      cell.y = (cell.y * cell.count + point.y) / (cell.count + 1);
+      cell.count += 1;
+    } else {
+      cells.set(key, { ...point, id: `${idPrefix}-${key}` });
+    }
+  });
+  return [...cells.values()];
 }
 
 function featurePath(feature: DemoGeoJsonFeature) {
@@ -357,6 +503,14 @@ function pointCoordinates(geometry: DemoGeoJsonGeometry | null) {
     : null;
 }
 
+function featureCenter(feature: DemoGeoJsonFeature) {
+  const longitude = numberProperty(feature, "centroid_longitude");
+  const latitude = numberProperty(feature, "centroid_latitude");
+  return longitude !== null && latitude !== null
+    ? project(longitude, latitude)
+    : null;
+}
+
 function project(longitude: number, latitude: number) {
   const extent = cabarrusSceneConfig.studyExtent;
   return {
@@ -368,4 +522,9 @@ function project(longitude: number, latitude: number) {
 function stringProperty(feature: DemoGeoJsonFeature, name: string) {
   const value = feature.properties?.[name];
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function numberProperty(feature: DemoGeoJsonFeature, name: string) {
+  const value = feature.properties?.[name];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
 }

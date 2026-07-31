@@ -28,7 +28,10 @@ import {
   type ParcelSearchEventDetail,
 } from "@/components/dashboard/ParcelSearchState";
 import { LocalContextFallbackMap } from "@/components/gis/LocalContextFallbackMap";
-import { MapViewportPlaceholder } from "@/components/gis/MapViewportPlaceholder";
+import {
+  MapViewportPlaceholder,
+  type MapRendererMode,
+} from "@/components/gis/MapViewportPlaceholder";
 import {
   formatDevelopmentCount,
 } from "@/data/intelligence/developmentActivityMetrics";
@@ -72,6 +75,7 @@ import {
 import {
   recordTechnicalEvent,
   USE_DEMO_DATA,
+  USE_INTERACTIVE_MAP,
   USE_ONLINE_BASEMAP,
 } from "@/lib/api/client";
 import {
@@ -112,6 +116,13 @@ import type {
 type ArcGISHandle = {
   remove: () => void;
 };
+
+type ArcGisLoadState =
+  | "disabled"
+  | "failed"
+  | "idle"
+  | "loading"
+  | "ready";
 
 type SceneView = MapView;
 
@@ -291,6 +302,10 @@ export function SceneViewContainer() {
     useState<SchoolUtilizationHoverCallout | null>(null);
   const [mapContext, setMapContext] = useState<DemoMapContext | null>(null);
   const [mapAttempt, setMapAttempt] = useState(0);
+  const [arcGisRuntimeState, setArcGisRuntimeState] =
+    useState<ArcGisLoadState>(USE_INTERACTIVE_MAP ? "idle" : "disabled");
+  const [arcGisViewState, setArcGisViewState] =
+    useState<ArcGisLoadState>(USE_INTERACTIVE_MAP ? "idle" : "disabled");
   const [mapZoom, setMapZoom] = useState<number | null>(null);
   const [fallbackZoom, setFallbackZoom] = useState(0);
   const [fallbackParcelFocus, setFallbackParcelFocus] =
@@ -348,16 +363,14 @@ export function SceneViewContainer() {
   const modelLabLayersActive = isModelLabMode(overviewCommandMode);
   const fallbackMapContext = useMemo(
     () =>
-      USE_DEMO_DATA
-        ? mapContext
-        : buildLiveFallbackMapContext(mapContext, {
-            developmentHotspots: developmentHotspotLayer.markers,
-            floodConstraints: floodConstraintLayer.markers,
-            floodZones: floodZoneLayer.polygons,
-            parcelFocus: fallbackParcelFocus,
-            schoolPressure: schoolPressureLayer.features,
-            schoolZones: schoolUtilizationZoneLayer.polygons,
-          }),
+      buildLiveFallbackMapContext(mapContext, {
+        developmentHotspots: developmentHotspotLayer.markers,
+        floodConstraints: floodConstraintLayer.markers,
+        floodZones: floodZoneLayer.polygons,
+        parcelFocus: fallbackParcelFocus,
+        schoolPressure: schoolPressureLayer.features,
+        schoolZones: schoolUtilizationZoneLayer.polygons,
+      }),
     [
       developmentHotspotLayer.markers,
       fallbackParcelFocus,
@@ -368,12 +381,29 @@ export function SceneViewContainer() {
       schoolUtilizationZoneLayer.polygons,
     ],
   );
+  const staticContextReady = Boolean(mapContext?.requiredReady);
+  const interactiveReady =
+    arcGisRuntimeState === "ready" && arcGisViewState === "ready";
+  const mapRendererMode: MapRendererMode = !staticContextReady
+    ? mapStatus === "degraded"
+      ? "fatal"
+      : "static_loading"
+    : interactiveReady
+      ? "interactive_ready"
+      : arcGisRuntimeState === "loading" || arcGisViewState === "loading"
+        ? "interactive_loading"
+        : arcGisRuntimeState === "failed" || arcGisViewState === "failed"
+          ? "static_degraded"
+          : "static_ready";
+  const activeRenderer = interactiveReady ? "interactive" : "static";
   const handleMapNavigationFailure = useCallback(
     (error: unknown) => {
+      if (isAbortError(error)) {
+        return;
+      }
       setMapError(getSceneErrorMessage(error));
-      setMapStatus("degraded");
     },
-    [setMapError, setMapStatus],
+    [setMapError],
   );
   const retryInteractiveMap = useCallback(() => {
     recordTechnicalEvent("map_retry", {
@@ -384,7 +414,7 @@ export function SceneViewContainer() {
   const changeMapZoom = useCallback(
     (delta: number) => {
       const view = viewRef.current;
-      if (!view || view.destroyed || mapStatus !== "online") {
+      if (!view || view.destroyed || !interactiveReady) {
         if (mapContext?.requiredReady) {
           setFallbackZoom((current) =>
             Math.max(0, Math.min(4, current + delta)),
@@ -397,19 +427,19 @@ export function SceneViewContainer() {
         .goTo({ zoom: nextZoom }, { duration: 220 })
         .catch(handleMapNavigationFailure);
     },
-    [handleMapNavigationFailure, mapContext?.requiredReady, mapStatus],
+    [handleMapNavigationFailure, interactiveReady, mapContext?.requiredReady],
   );
   const resetMapExtent = useCallback(() => {
     const runtime = runtimeRef.current;
     const view = viewRef.current;
-    if (!runtime || !view || view.destroyed || mapStatus !== "online") {
+    if (!runtime || !view || view.destroyed || !interactiveReady) {
       setFallbackZoom(0);
       return;
     }
     void view
       .goTo(createCabarrusStudyExtent(runtime), { duration: 320 })
       .catch(handleMapNavigationFailure);
-  }, [handleMapNavigationFailure, mapStatus]);
+  }, [handleMapNavigationFailure, interactiveReady]);
   const clearParcelSceneFocus = useCallback(() => {
     latestFocusRequestParcelIdRef.current = null;
     lastFocusedParcelIdRef.current = null;
@@ -861,9 +891,11 @@ export function SceneViewContainer() {
     let cancelled = false;
     let clickHandle: ArcGISHandle | null = null;
     let extentWatchHandle: ArcGISHandle | null = null;
+    let fatalWatchHandle: ArcGISHandle | null = null;
     let focusEventHandler: ((event: Event) => void) | null = null;
     let hoverHandle: ArcGISHandle | null = null;
     let localView: SceneView | null = null;
+    let readyWatchHandle: ArcGISHandle | null = null;
     let zoomWatchHandle: ArcGISHandle | null = null;
 
     async function applyParcelFocus(focus: ParcelMapFocus) {
@@ -1115,10 +1147,14 @@ export function SceneViewContainer() {
       clearMapError();
       setMapStatus("loading");
       setMapZoom(null);
-      setFallbackZoom(0);
+      setArcGisRuntimeState(USE_INTERACTIVE_MAP ? "idle" : "disabled");
+      setArcGisViewState(USE_INTERACTIVE_MAP ? "idle" : "disabled");
 
       try {
-        const context = await getDemoMapContext(USE_DEMO_DATA);
+        const context = await getDemoMapContext(false);
+        if (cancelled) {
+          return;
+        }
         setMapContext(context);
 
         if (!context.requiredReady) {
@@ -1127,16 +1163,43 @@ export function SceneViewContainer() {
           );
         }
 
+        registerStaticMapSnapshotCapture();
+        setMapStatus("online");
+
+        const fullContextPromise = USE_DEMO_DATA
+          ? getDemoMapContext(true)
+          : null;
+        if (fullContextPromise) {
+          void fullContextPromise.then((fullContext) => {
+            if (!cancelled) {
+              setMapContext(fullContext);
+            }
+          });
+        }
+
+        if (!USE_INTERACTIVE_MAP) {
+          return;
+        }
+
+        const interactiveContext = fullContextPromise
+          ? await fullContextPromise
+          : context;
+        if (cancelled) {
+          return;
+        }
+
+        setArcGisRuntimeState("loading");
         const runtime = await withTimeout(
           loadArcGISRuntime(),
           15_000,
           "ArcGIS runtime initialization timed out.",
         );
-        runtimeRef.current = runtime;
-
         if (cancelled) {
           return;
         }
+        runtimeRef.current = runtime;
+        setArcGisRuntimeState("ready");
+        setArcGisViewState("loading");
 
         let scene = createCabarrusSceneView(
           runtime,
@@ -1153,6 +1216,9 @@ export function SceneViewContainer() {
             "ArcGIS MapView initialization timed out.",
           );
         } catch (onlineError) {
+          if (cancelled) {
+            return;
+          }
           if (!USE_ONLINE_BASEMAP) {
             throw onlineError;
           }
@@ -1169,8 +1235,6 @@ export function SceneViewContainer() {
         }
 
         const { map, view } = scene;
-        registerSceneViewSnapshotCapture(runtime, view);
-        registerSceneViewDebugState(view);
 
         if (cancelled) {
           view.destroy();
@@ -1207,9 +1271,14 @@ export function SceneViewContainer() {
         map.add(focusLayerRef.current);
         map.add(contextLayers.placeLabels);
         layerRefs.current = layers;
-        hydrateLocalContextLayers(runtime, layers, contextLayers, context);
+        hydrateLocalContextLayers(
+          runtime,
+          layers,
+          contextLayers,
+          interactiveContext,
+        );
         if (USE_DEMO_DATA) {
-          hydrateDemoParcelLayer(runtime, layers, context);
+          hydrateDemoParcelLayer(runtime, layers, interactiveContext);
         }
         applyOperationalLayerVisibility(layers, [
           ...new Set([
@@ -1409,6 +1478,44 @@ export function SceneViewContainer() {
         ) {
           void applyParcelFocus(fallbackParcelFocusRef.current);
         }
+        await waitForUsableArcGisView(runtime, view, container);
+
+        if (cancelled) {
+          view.destroy();
+          return;
+        }
+
+        fatalWatchHandle = runtime.reactiveUtils.watch(
+          () => view.fatalError,
+          (fatalError) => {
+            if (!fatalError || cancelled) {
+              return;
+            }
+            setArcGisViewState("failed");
+            setMapError(getSceneErrorMessage(fatalError));
+            setMapStatus("degraded");
+            registerStaticMapSnapshotCapture();
+          },
+        ) as ArcGISHandle;
+        readyWatchHandle = runtime.reactiveUtils.watch(
+          () => view.readyState,
+          (readyState) => {
+            if (
+              !["map-content-error", "rendering-error"].includes(readyState) ||
+              cancelled ||
+              view.destroyed
+            ) {
+              return;
+            }
+            setArcGisViewState("failed");
+            setMapError(`Interactive map rendering stopped (${readyState}).`);
+            setMapStatus("degraded");
+            registerStaticMapSnapshotCapture();
+          },
+        ) as ArcGISHandle;
+        registerSceneViewSnapshotCapture(runtime, view);
+        registerSceneViewDebugState(view);
+        setArcGisViewState("ready");
         setMapStatus("online");
       } catch (error) {
         if (cancelled) {
@@ -1420,8 +1527,13 @@ export function SceneViewContainer() {
         }
         localView = null;
         viewRef.current = null;
+        if (USE_INTERACTIVE_MAP) {
+          setArcGisRuntimeState(runtimeRef.current ? "ready" : "failed");
+          setArcGisViewState("failed");
+        }
         setMapError(getSceneErrorMessage(error));
         setMapStatus("degraded");
+        registerStaticMapSnapshotCapture();
       }
     }
 
@@ -1436,12 +1548,19 @@ export function SceneViewContainer() {
       ) {
         fallbackParcelFocusRef.current = detail.focus;
         setFallbackParcelFocus(detail.focus);
+        setFallbackZoom((current) => Math.max(2, current));
         if (
           viewRef.current?.ready &&
           runtimeRef.current &&
           latestFocusRequestParcelIdRef.current !== detail.focus.officialParcelId
         ) {
           void applyParcelFocus(detail.focus);
+        } else {
+          dispatchParcelMapFocusResult({
+            focusStatus: "focused",
+            message: "Parcel highlighted on the Cabarrus County map.",
+            officialParcelId: detail.focus.officialParcelId,
+          });
         }
         return;
       }
@@ -1459,6 +1578,7 @@ export function SceneViewContainer() {
       // remount the client-only SceneView without leaking handles or layers.
       cancelled = true;
       clickHandle?.remove();
+      fatalWatchHandle?.remove();
       if (focusEventHandler) {
         window.removeEventListener(
           CFS_PARCEL_MAP_FOCUS_REQUEST_EVENT,
@@ -1467,6 +1587,7 @@ export function SceneViewContainer() {
       }
       hoverHandle?.remove();
       extentWatchHandle?.remove();
+      readyWatchHandle?.remove();
       zoomWatchHandle?.remove();
       if (focusBeaconTimeoutRef.current) {
         clearTimeout(focusBeaconTimeoutRef.current);
@@ -1498,6 +1619,8 @@ export function SceneViewContainer() {
       schoolUtilizationZoneLayerRef.current?.removeAll();
       schoolUtilizationZoneLayerRef.current = null;
       layerRefs.current = {};
+      latestFocusRequestParcelIdRef.current = null;
+      lastFocusedParcelIdRef.current = null;
       runtimeRef.current = null;
       viewRef.current = null;
       if (window.__cfsCaptureMapSnapshot) {
@@ -1535,7 +1658,7 @@ export function SceneViewContainer() {
     const runtime = runtimeRef.current;
     const view = viewRef.current;
 
-    if (!runtime || !view || view.destroyed) {
+    if (arcGisViewState !== "ready" || !runtime || !view || view.destroyed) {
       return;
     }
 
@@ -1620,7 +1743,7 @@ export function SceneViewContainer() {
     developmentHotspotControls.viewMode,
     developmentHotspotsEnabled,
     exploreCountywideLayersActive,
-    mapStatus,
+    arcGisViewState,
     modelResearchRenderTick,
     setSelectedDevelopmentHotspotContext,
   ]);
@@ -1629,7 +1752,7 @@ export function SceneViewContainer() {
     const runtime = runtimeRef.current;
     const view = viewRef.current;
 
-    if (!runtime || !view || view.destroyed) {
+    if (arcGisViewState !== "ready" || !runtime || !view || view.destroyed) {
       return;
     }
 
@@ -1661,14 +1784,14 @@ export function SceneViewContainer() {
     floodConstraintLayer.totalCount,
     exploreCountywideLayersActive,
     floodConstraintsEnabled,
-    mapStatus,
+    arcGisViewState,
   ]);
 
   useEffect(() => {
     const runtime = runtimeRef.current;
     const view = viewRef.current;
 
-    if (!runtime || !view || view.destroyed) {
+    if (arcGisViewState !== "ready" || !runtime || !view || view.destroyed) {
       return;
     }
 
@@ -1702,14 +1825,14 @@ export function SceneViewContainer() {
     floodZoneLayer.totalCount,
     exploreCountywideLayersActive,
     floodZonesEnabled,
-    mapStatus,
+    arcGisViewState,
   ]);
 
   useEffect(() => {
     const runtime = runtimeRef.current;
     const view = viewRef.current;
 
-    if (!runtime || !view || view.destroyed) {
+    if (arcGisViewState !== "ready" || !runtime || !view || view.destroyed) {
       return;
     }
 
@@ -1821,7 +1944,7 @@ export function SceneViewContainer() {
       totalCount: modelResearchPreviewLayer.totalCount,
     });
   }, [
-    mapStatus,
+    arcGisViewState,
     modelResearchRenderTick,
     modelResearchOverlayEnabled,
     modelResearchPreviewLayer.markers,
@@ -1837,7 +1960,7 @@ export function SceneViewContainer() {
     const runtime = runtimeRef.current;
     const view = viewRef.current;
 
-    if (!runtime || !view || view.destroyed) {
+    if (arcGisViewState !== "ready" || !runtime || !view || view.destroyed) {
       return;
     }
 
@@ -1868,7 +1991,7 @@ export function SceneViewContainer() {
     );
   }, [
     exploreCountywideLayersActive,
-    mapStatus,
+    arcGisViewState,
     schoolPressureLayer.features,
     schoolPressureLayer.status,
     schoolPressureLayerEnabled,
@@ -1879,7 +2002,7 @@ export function SceneViewContainer() {
     const runtime = runtimeRef.current;
     const view = viewRef.current;
 
-    if (!runtime || !view || view.destroyed) {
+    if (arcGisViewState !== "ready" || !runtime || !view || view.destroyed) {
       return;
     }
 
@@ -1922,7 +2045,7 @@ export function SceneViewContainer() {
       },
     );
   }, [
-    mapStatus,
+    arcGisViewState,
     clearSchoolUtilizationHover,
     clearSelectedSchoolUtilizationZone,
     exploreCountywideLayersActive,
@@ -1974,35 +2097,30 @@ export function SceneViewContainer() {
     schoolUtilizationZoneLayer.status === "ready"
       ? schoolUtilizationHover
       : null;
-  const mapRendererState =
-    mapStatus === "online"
-      ? "interactive_ready"
-      : mapContext?.requiredReady
-        ? mapStatus === "degraded"
-          ? "degraded_static"
-          : "loading_interactive"
-        : mapStatus === "degraded"
-          ? "fatal"
-          : "loading_context";
   useEffect(() => {
-    if (mapRendererState === "interactive_ready") {
+    if (mapRendererMode === "interactive_ready") {
       recordTechnicalEvent("map_renderer_selected", {
         renderer: "arcgis",
         runtime_mode: USE_DEMO_DATA ? "demo" : "local",
       });
-    } else if (mapRendererState === "degraded_static") {
+    } else if (mapRendererMode === "static_ready") {
+      recordTechnicalEvent("map_renderer_selected", {
+        renderer: "static_context",
+        runtime_mode: USE_DEMO_DATA ? "demo" : "local",
+      });
+    } else if (mapRendererMode === "static_degraded") {
       recordTechnicalEvent("map_fallback", {
         reason: mapError ?? "ArcGIS renderer unavailable",
         renderer: "static_context",
         runtime_mode: USE_DEMO_DATA ? "demo" : "local",
       });
     }
-  }, [mapError, mapRendererState]);
+  }, [mapError, mapRendererMode]);
 
   return (
     <MapViewportPlaceholder
       contextReady={Boolean(mapContext?.requiredReady)}
-      mapStatus={mapStatus}
+      interactiveEnabled={USE_INTERACTIVE_MAP}
       onRetryInteractiveMap={retryInteractiveMap}
       parcelFocusSummary={lastParcelFocusSummary}
       sceneError={mapError}
@@ -2010,10 +2128,14 @@ export function SceneViewContainer() {
       selectedParcelId={selectedParcelId}
       selectedParcelIntelligence={selectedParcelIntelligence}
       selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
+      rendererMode={mapRendererMode}
     >
       <LocalContextFallbackMap
         context={fallbackMapContext}
-        mapStatus={mapStatus}
+        developmentViewMode={developmentHotspotControls.viewMode}
+        interactiveReady={interactiveReady}
+        modelResearchMarkers={modelResearchPreviewLayer.markers}
+        modelResearchViewMode={modelResearchViewMode}
         selectedParcelId={selectedParcelId}
         showDevelopment={
           exploreCountywideLayersActive && developmentHotspotsEnabled
@@ -2022,6 +2144,9 @@ export function SceneViewContainer() {
           exploreCountywideLayersActive &&
           (floodConstraintsEnabled || floodZonesEnabled)
         }
+        showModelResearch={
+          modelLabLayersActive && modelResearchOverlayEnabled
+        }
         showSchools={
           exploreCountywideLayersActive &&
           (schoolPressureLayerEnabled || schoolUtilizationZonesEnabled)
@@ -2029,10 +2154,13 @@ export function SceneViewContainer() {
         zoomLevel={fallbackZoom}
       />
       <div
+        aria-hidden={!interactiveReady}
         aria-label="Cabarrus County ArcGIS MapView"
         className={`absolute inset-0 z-10 transition-opacity duration-300 ${
-          mapStatus === "online" ? "opacity-100" : "pointer-events-none opacity-0"
+          interactiveReady ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
+        data-arcgis-runtime-state={arcGisRuntimeState}
+        data-arcgis-view-state={arcGisViewState}
         data-context-county-features={
           mapContext?.countyBoundary.features.length ?? 0
         }
@@ -2045,12 +2173,17 @@ export function SceneViewContainer() {
         data-context-road-features={
           mapContext?.transportation.features.length ?? 0
         }
+        data-interactive-ready={interactiveReady ? "true" : "false"}
+        data-map-fatal={mapRendererMode === "fatal" ? "true" : "false"}
+        data-map-renderer={activeRenderer}
+        data-map-retry-count={mapAttempt}
         data-map-status={mapStatus}
-        data-map-renderer-state={mapRendererState}
-        data-map-zoom={mapStatus === "online" ? (mapZoom ?? "") : fallbackZoom}
+        data-map-renderer-state={mapRendererMode}
+        data-map-zoom={interactiveReady ? (mapZoom ?? "") : fallbackZoom}
+        data-static-context-ready={staticContextReady ? "true" : "false"}
         data-testid="cfs-arcgis-map"
         ref={containerRef}
-        title="Interactive ArcGIS MapView with Cabarrus County operational layers"
+        title="Optional interactive ArcGIS enhancement for the Cabarrus County map"
       />
       <div
         aria-label="Map navigation controls"
@@ -2603,9 +2736,9 @@ function buildLiveFallbackMapContext(
         ),
       ),
     ]),
-    parcels: toFallbackFeatureCollection(
-      parcelFeature ? [parcelFeature] : [],
-    ),
+    parcels: parcelFeature
+      ? toFallbackFeatureCollection([parcelFeature])
+      : context.parcels,
     schoolCapacity: toFallbackFeatureCollection([
       ...data.schoolZones.map((polygon) => ({
         geometry: {
@@ -2668,6 +2801,8 @@ function toFallbackParcelFeature(
     ? {
         geometry,
         properties: {
+          centroid_latitude: focus.centroid?.latitude,
+          centroid_longitude: focus.centroid?.longitude,
           official_parcel_id: focus.officialParcelId,
         },
         type: "Feature",
@@ -2694,12 +2829,148 @@ async function withTimeout<T>(
   }
 }
 
+async function waitForUsableArcGisView(
+  runtime: ArcGISRuntime,
+  view: SceneView,
+  container: HTMLDivElement,
+) {
+  await withTimeout(
+    runtime.reactiveUtils.whenOnce(() => view.ready && !view.updating),
+    15_000,
+    "ArcGIS MapView did not finish rendering.",
+  );
+  await new Promise<void>((resolve) =>
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve())),
+  );
+
+  const bounds = container.getBoundingClientRect();
+  const extent = view.extent;
+  if (
+    view.destroyed ||
+    !view.ready ||
+    view.fatalError ||
+    bounds.width <= 0 ||
+    bounds.height <= 0 ||
+    !extent ||
+    ![extent.xmin, extent.ymin, extent.xmax, extent.ymax].every(Number.isFinite) ||
+    extent.xmax <= extent.xmin ||
+    extent.ymax <= extent.ymin ||
+    (view.map?.layers.length ?? 0) === 0
+  ) {
+    throw new Error("ArcGIS MapView did not produce a usable Cabarrus County surface.");
+  }
+
+  const screenshot = await withTimeout(
+    view.takeScreenshot({ format: "png", height: 64, width: 96 }),
+    5_000,
+    "ArcGIS MapView paint verification timed out.",
+  );
+  if (!hasRenderedMapPixels(screenshot.data.data)) {
+    throw new Error("ArcGIS MapView rendered a blank surface.");
+  }
+}
+
+function hasRenderedMapPixels(pixels: Uint8ClampedArray) {
+  const minimums = [255, 255, 255];
+  const maximums = [0, 0, 0];
+  let opaquePixels = 0;
+
+  for (let index = 0; index < pixels.length; index += 4) {
+    if (pixels[index + 3] === 0) {
+      continue;
+    }
+    opaquePixels += 1;
+    for (let channel = 0; channel < 3; channel += 1) {
+      minimums[channel] = Math.min(minimums[channel], pixels[index + channel]);
+      maximums[channel] = Math.max(maximums[channel], pixels[index + channel]);
+    }
+  }
+
+  return (
+    opaquePixels > 0 &&
+    maximums.some((maximum, channel) => maximum - minimums[channel] >= 8)
+  );
+}
+
+function registerStaticMapSnapshotCapture() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.__cfsCaptureMapSnapshot = async () => {
+    const source = document.querySelector<SVGSVGElement>(
+      '[data-testid="cfs-local-context-map"]',
+    );
+    const countyPath = source?.querySelector<SVGPathElement>(
+      '[data-layer-id="county-boundary"]',
+    );
+    if (!source || !countyPath?.getAttribute("d")) {
+      return {
+        failureReason: "Cabarrus County vector map is not ready.",
+        status: "unavailable",
+      };
+    }
+
+    const clone = source.cloneNode(true) as SVGSVGElement;
+    clone.removeAttribute("aria-hidden");
+    clone.removeAttribute("class");
+    clone.setAttribute("height", "650");
+    clone.setAttribute("width", "1000");
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+    try {
+      const dataUrl = await blobToDataUrl(
+        new Blob([new XMLSerializer().serializeToString(clone)], {
+          type: "image/svg+xml;charset=utf-8",
+        }),
+      );
+      return {
+        cameraSummary: `Cabarrus County vector map; viewBox ${source.getAttribute("viewBox") ?? "county extent"}`,
+        capturedAt: new Date().toISOString(),
+        dataUrl,
+        extentSummary: "Cabarrus County, North Carolina",
+        status: "captured",
+      };
+    } catch (error) {
+      return {
+        capturedAt: new Date().toISOString(),
+        failureReason:
+          error instanceof Error
+            ? error.message
+            : "Cabarrus County vector map capture failed.",
+        status: "failed",
+      };
+    }
+  };
+}
+
+function blobToDataUrl(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error ?? new Error("Map image encoding failed."));
+    reader.onload = () =>
+      typeof reader.result === "string"
+        ? resolve(reader.result)
+        : reject(new Error("Map image encoding returned no data."));
+    reader.readAsDataURL(blob);
+  });
+}
+
 function getSceneErrorMessage(error: unknown) {
   if (error instanceof Error && error.message) {
     return error.message;
   }
 
   return "ArcGIS modules could not initialize in the browser.";
+}
+
+function isAbortError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    error.name === "AbortError"
+  );
 }
 
 function registerSceneViewSnapshotCapture(

@@ -145,7 +145,8 @@ function Test-PresentationBuildCurrent {
 
   try {
     $marker = Get-Content -Raw -LiteralPath $BuildMarker | ConvertFrom-Json
-    if ($marker.commit -ne (Get-GitHead) -or
+    if ($marker.build_id -ne (Get-Content -Raw -LiteralPath $buildId).Trim() -or
+        $marker.commit -ne (Get-GitHead) -or
         $marker.deployment_mode -ne "live" -or
         $marker.backend_api -ne $true -or
         $marker.api_base_url -ne $ApiBaseUrl -or
@@ -192,6 +193,7 @@ function Build-Frontend {
   }
 
   @{
+    build_id = (Get-Content -Raw -LiteralPath (Join-Path $Root ".next\BUILD_ID")).Trim()
     built_at = (Get-Date).ToUniversalTime().ToString("o")
     commit = Get-GitHead
     deployment_mode = "live"

@@ -202,7 +202,8 @@ assert(!shell.includes('defaultValue="industrial_site"'), "Find Sites still defa
 assert(!shell.includes("Find Sites: Industrial Site"), "Find Sites saved search still uses Industrial Site");
 
 const scene = read("src/components/gis/SceneViewContainer.tsx");
-assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "await getDemoMapContext(USE_DEMO_DATA)");
+assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "await getDemoMapContext(false)");
+assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "if (!USE_INTERACTIVE_MAP)");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "hydrateLocalContextLayers");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, 'aria-label="Zoom in"');
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, 'aria-label="Reset to Cabarrus County"');

@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
-import type { DashboardStatus, ParcelSummary } from "@/types";
+import type { ParcelSummary } from "@/types";
 
 interface ActiveParcelFocusSummary {
   boundaryHighlighted: boolean;
@@ -20,6 +20,14 @@ type ActiveSelectionStat = {
   value: number | string | null;
 };
 
+export type MapRendererMode =
+  | "fatal"
+  | "interactive_loading"
+  | "interactive_ready"
+  | "static_degraded"
+  | "static_loading"
+  | "static_ready";
+
 interface ActiveSelectionDisplay {
   focusStatus: string | null;
   stats: [ActiveSelectionStat, ActiveSelectionStat, ActiveSelectionStat];
@@ -30,7 +38,7 @@ interface ActiveSelectionDisplay {
 interface MapViewportPlaceholderProps {
   children: React.ReactNode;
   contextReady: boolean;
-  mapStatus: DashboardStatus;
+  interactiveEnabled: boolean;
   onRetryInteractiveMap: () => void;
   parcelFocusSummary?: ActiveParcelFocusSummary | null;
   sceneError?: string | null;
@@ -38,12 +46,13 @@ interface MapViewportPlaceholderProps {
   selectedParcelId?: string | null;
   selectedParcelIntelligence?: ParcelSearchRecord | null;
   selectedParcelIntelligenceSource?: SelectedParcelIntelligenceSource | null;
+  rendererMode: MapRendererMode;
 }
 
 export function MapViewportPlaceholder({
   children,
   contextReady,
-  mapStatus,
+  interactiveEnabled,
   onRetryInteractiveMap,
   parcelFocusSummary,
   sceneError,
@@ -51,10 +60,12 @@ export function MapViewportPlaceholder({
   selectedParcelId,
   selectedParcelIntelligence,
   selectedParcelIntelligenceSource,
+  rendererMode,
 }: MapViewportPlaceholderProps) {
-  const isLoading = mapStatus === "idle" || mapStatus === "loading";
-  const hasError = mapStatus === "degraded";
-  const hasUsableStaticMap = contextReady && mapStatus !== "online";
+  const isLoading = rendererMode === "static_loading";
+  const isFatal = rendererMode === "fatal";
+  const isEnhancing = rendererMode === "interactive_loading";
+  const enhancementFailed = rendererMode === "static_degraded";
   const activeSelection = getActiveSelectionDisplay({
     parcelFocusSummary,
     selectedParcel,
@@ -72,70 +83,70 @@ export function MapViewportPlaceholder({
       <div className="scene-mask pointer-events-none absolute inset-0 z-20" />
       <div className="map-scanline pointer-events-none absolute inset-0 z-20 opacity-40" />
 
-      {(isLoading || hasError) && !contextReady && (
+      {(isLoading || isFatal) && !contextReady && (
         <div
           aria-live="polite"
           className="pointer-events-none absolute inset-0 z-40 grid place-items-center px-6"
-          role={hasError ? "alert" : "status"}
+          role={isFatal ? "alert" : "status"}
         >
           <div className="max-w-sm rounded-lg border border-white/10 bg-[#060b12]/82 p-4 text-center shadow-2xl backdrop-blur-xl">
-            {hasError ? (
+            {isFatal ? (
               <AlertTriangle className="mx-auto h-5 w-5 text-amber-200" />
             ) : (
               <LoaderCircle className="mx-auto h-5 w-5 animate-spin text-[#d8b86a]" />
             )}
             <p className="mt-3 text-sm font-semibold text-white">
-              {hasError
-                ? "Interactive MapView unavailable"
+              {isFatal
+                ? "Cabarrus County map unavailable"
                 : "Loading Cabarrus County map\u2026"}
             </p>
             <p className="mt-1 text-xs leading-5 text-slate-400">
-              {hasError
-                ? sceneError ?? "ArcGIS map initialization did not complete."
+              {isFatal
+                ? sceneError ?? "Required county map context could not be rendered."
                 : "Preparing same-origin county, road, water, and place context."}
             </p>
             <p className="mt-2 text-[10px] uppercase text-slate-500">
-              {hasError
-                ? "Local context remains visible; ArcGIS pan and hit-testing are unavailable"
-                : "Client-only ArcGIS runtime"}
+              Same-origin Cabarrus County geography
             </p>
-            {hasError ? (
+            {isFatal ? (
               <button
                 className="pointer-events-auto mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#f0cd79] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/70"
                 onClick={onRetryInteractiveMap}
-                title="Retry map context and interactive renderer"
+                title="Retry Cabarrus County map"
                 type="button"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
-                Retry map
+                Retry county map
               </button>
             ) : null}
           </div>
         </div>
       )}
 
-      {hasUsableStaticMap ? (
+      {contextReady && interactiveEnabled && (isEnhancing || enhancementFailed) ? (
         <div
           aria-live="polite"
           className="pointer-events-auto absolute right-3 top-16 z-50 max-w-[min(19rem,calc(100%-1.5rem))] rounded-md border border-white/15 bg-[#06101a]/92 p-3 shadow-2xl backdrop-blur-xl sm:right-4"
           role="status"
         >
           <div className="flex items-start gap-2">
-            {hasError ? (
+            {enhancementFailed ? (
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-200" />
             ) : (
               <LoaderCircle className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-[#d8b86a]" />
             )}
             <div className="min-w-0">
               <p className="text-xs font-semibold text-white">
-                Static Map Mode
+                {enhancementFailed
+                  ? "Interactive enhancement unavailable"
+                  : "Enhancing interactive map\u2026"}
               </p>
               <p className="mt-1 text-[11px] leading-4 text-slate-300">
-                {hasError
-                  ? "Interactive controls are unavailable. County geography and current overlays remain usable."
-                  : "County context is ready while interactive controls load."}
+                {enhancementFailed
+                  ? "The CFS map and analytical overlays remain available."
+                  : "The Cabarrus County map remains fully visible while enhancement loads."}
               </p>
-              {hasError ? (
+              {enhancementFailed ? (
                 <button
                   className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#f0cd79] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/70"
                   onClick={onRetryInteractiveMap}
@@ -160,10 +171,10 @@ export function MapViewportPlaceholder({
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-300">
           <span className="rounded-md border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-[#f0cd79]">
-            {mapStatus === "online"
-              ? "Map Live"
+            {rendererMode === "interactive_ready"
+              ? "Interactive Map Ready"
               : contextReady
-                ? "Static Map Mode"
+                ? "Cabarrus County Map"
                 : "Map Standby"}
           </span>
           <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1">

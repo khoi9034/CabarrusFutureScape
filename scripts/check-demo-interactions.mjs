@@ -215,16 +215,15 @@ async function waitForMapReady(page, { interactive = false } = {}) {
   await page.waitForFunction(
     ({ requireInteractive }) => {
       const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
-      const status = element?.getAttribute("data-map-status");
       const rendererState = element?.getAttribute("data-map-renderer-state");
       return (
-        element?.getAttribute("data-context-ready") === "true" &&
+        element?.getAttribute("data-static-context-ready") === "true" &&
         (requireInteractive
-          ? status === "online"
+          ? element.getAttribute("data-interactive-ready") === "true"
           : [
-              "loading_interactive",
               "interactive_ready",
-              "degraded_static",
+              "static_degraded",
+              "static_ready",
             ].includes(rendererState ?? ""))
       );
     },
@@ -238,6 +237,29 @@ async function waitForMapReady(page, { interactive = false } = {}) {
   assert(Number(await map.getAttribute("data-context-hydro-features")) > 0, "Water context is empty.");
   assert(Number(await map.getAttribute("data-context-municipal-features")) > 0, "Municipal context is empty.");
   assert(Number(await map.getAttribute("data-context-label-features")) > 0, "Place label context is empty.");
+  await delay(350);
+  const renderer = await map.getAttribute("data-map-renderer");
+  const visibility = await page.evaluate(() => {
+    const interactive = document.querySelector('[data-testid="cfs-arcgis-map"]');
+    const staticMap = document.querySelector('[data-testid="cfs-local-context-map"]');
+    return {
+      interactive: Number(interactive ? getComputedStyle(interactive).opacity : 0),
+      static: Number(staticMap ? getComputedStyle(staticMap).opacity : 0),
+    };
+  });
+  if (renderer === "interactive") {
+    assert.equal(await map.getAttribute("data-interactive-ready"), "true");
+    assert(visibility.interactive >= 0.99, "Interactive renderer is transparent.");
+  } else {
+    assert.equal(renderer, "static");
+    assert(visibility.static >= 0.99, "Static renderer is transparent.");
+    assert(visibility.interactive <= 0.01, "Unproven interactive renderer is visible.");
+  }
+  const countyPath = await page
+    .getByTestId("cfs-local-context-map")
+    .locator('[data-layer-id="county-boundary"]')
+    .getAttribute("d");
+  assert(countyPath?.trim() && !/NaN|Infinity/.test(countyPath), "County SVG path is invalid.");
   return map;
 }
 
@@ -262,7 +284,11 @@ async function assertRuntimeLayer(page, layerId, { visible = true, withGraphics 
 }
 
 async function mapUsesArcGIS(page) {
-  return (await page.getByTestId("cfs-arcgis-map").getAttribute("data-map-status")) === "online";
+  return (
+    (await page
+      .getByTestId("cfs-arcgis-map")
+      .getAttribute("data-map-renderer")) === "interactive"
+  );
 }
 
 async function assertContextMapLayers(page) {
@@ -471,6 +497,22 @@ async function planningChecks(page, baseUrl) {
       if (await show.count()) await show.click();
       await assertRenderedMapLayer(page, runtimeLayerId, fallbackLayerId);
       const renderedByArcGIS = await mapUsesArcGIS(page);
+      if (layer === "Development Hotspots" && !renderedByArcGIS) {
+        for (const mode of ["Points", "Heatmap", "Clusters"]) {
+          await card
+            .getByRole("button", {
+              name: `Show Development Hotspots as ${mode}`,
+            })
+            .click();
+          assert.equal(
+            await page
+              .getByTestId("cfs-local-context-map")
+              .locator('[data-layer-id="development-hotspots"]')
+              .getAttribute("data-development-view-mode"),
+            mode.toLowerCase(),
+          );
+        }
+      }
       await card.getByRole("button", { name: /Legend Read the symbols/i }).waitFor();
       await delay(300);
       const visibleImage = await captureMapSurface(page);
@@ -521,9 +563,41 @@ async function planningChecks(page, baseUrl) {
     const initialOverlay = await overlayToggle.innerText();
     await overlayToggle.click();
     assert.notEqual(await overlayToggle.innerText(), initialOverlay);
+    if (
+      (await overlayToggle.innerText()) === "On" &&
+      !(await mapUsesArcGIS(page))
+    ) {
+      await page
+        .getByTestId("cfs-local-context-map")
+        .locator('[data-layer-id="model-research"] circle')
+        .waitFor({ timeout: 20_000 });
+    }
     await overlayToggle.click();
+    if (
+      (await overlayToggle.innerText()) === "On" &&
+      !(await mapUsesArcGIS(page))
+    ) {
+      await page
+        .getByTestId("cfs-local-context-map")
+        .locator('[data-layer-id="model-research"] circle')
+        .waitFor({ timeout: 20_000 });
+    }
     for (const mode of ["Points", "Heatmap", "Clusters"]) {
       await page.getByRole("button", { name: `Show Model Lab research as ${mode}` }).click();
+      if (!(await mapUsesArcGIS(page))) {
+        await page
+          .getByTestId("cfs-local-context-map")
+          .locator('[data-layer-id="model-research"]')
+          .filter({ has: page.locator("circle") })
+          .waitFor({ timeout: 20_000 });
+        assert.equal(
+          await page
+            .getByTestId("cfs-local-context-map")
+            .locator('[data-layer-id="model-research"]')
+            .getAttribute("data-model-research-view-mode"),
+          mode.toLowerCase(),
+        );
+      }
     }
     await controlsPanel.getByRole("button", { name: "Open Methodology Model Lab" }).click();
     await page.getByRole("button", { name: /Workspace:/ }).click();
@@ -532,6 +606,15 @@ async function planningChecks(page, baseUrl) {
   });
 
   await check("Planning", "snapshot create, rename, section persistence, print, and delete", ["save", "library", "rename", "sections", "refresh", "print", "delete"], async () => {
+    const mapCapture = await page.evaluate(() =>
+      window.__cfsCaptureMapSnapshot?.(),
+    );
+    assert.equal(mapCapture?.status, "captured", mapCapture?.failureReason);
+    assert.match(
+      mapCapture?.dataUrl ?? "",
+      /^data:image\/(?:png|svg\+xml)/,
+      "Planning Snapshot did not capture the visible map.",
+    );
     await page.getByRole("button", { name: "Save Planning Snapshot" }).click();
     await page.getByText("1 saved", { exact: true }).first().waitFor();
     const snapshotMode = page.locator('button[aria-label^="Planning Snapshot:"]');
@@ -540,6 +623,10 @@ async function planningChecks(page, baseUrl) {
       .locator('button[aria-label^="Planning Snapshot:"][aria-pressed="true"]')
       .waitFor();
     await page.getByText("Planning Snapshot Library", { exact: true }).waitFor();
+    await page
+      .getByAltText("Planning snapshot map thumbnail", { exact: true })
+      .first()
+      .waitFor({ timeout: 20_000 });
     page.once("dialog", (dialog) => dialog.accept("Browser acceptance snapshot"));
     await page.getByRole("button", { name: "Rename", exact: true }).first().click();
     await page.getByText("Browser acceptance snapshot", { exact: true }).waitFor();
@@ -837,13 +924,20 @@ async function offlineMapChecks(browser, baseUrl) {
   const origin = new URL(baseUrl).origin;
   for (const scenario of [
     { blockArcgisAssets: false, label: "external network isolation" },
-    { blockArcgisAssets: true, label: "ArcGIS failure SVG fallback" },
+    { blockArcgisAssets: true, label: "ArcGIS assets unavailable in static demo" },
   ]) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    const arcgisRequests = [];
     const blocked = [];
     const sameOriginPaths = new Set();
     await context.route("**/*", async (route) => {
       const url = new URL(route.request().url());
+      if (
+        url.pathname.startsWith("/arcgis-assets/") ||
+        /(?:arcgis|esri)/i.test(url.hostname)
+      ) {
+        arcgisRequests.push(url.href);
+      }
       if (
         url.origin !== origin ||
         (scenario.blockArcgisAssets && url.pathname.startsWith("/arcgis-assets/"))
@@ -869,9 +963,17 @@ async function offlineMapChecks(browser, baseUrl) {
       ]) {
         assert(sameOriginPaths.has(asset), `${scenario.label} did not load ${asset}`);
       }
+      assert.deepEqual(
+        arcgisRequests,
+        [],
+        `${scenario.label} requested ArcGIS in default demo mode`,
+      );
+      const map = page.getByTestId("cfs-arcgis-map");
+      assert.equal(await map.getAttribute("data-arcgis-runtime-state"), "disabled");
+      assert.equal(await map.getAttribute("data-arcgis-view-state"), "disabled");
+      await assertContextMapLayers(page);
 
       if (!scenario.blockArcgisAssets) {
-        await assertContextMapLayers(page);
         await assertPaintedImage(
           await captureMapSurface(page),
           "Offline same-origin context map",
@@ -879,16 +981,24 @@ async function offlineMapChecks(browser, baseUrl) {
       } else {
         const fallback = page.getByTestId("cfs-local-context-map");
         await fallback.waitFor();
-        await page
-          .getByText("Static Map Mode", { exact: true })
-          .first()
-          .waitFor();
-        await page
-          .getByText(
-            "Interactive controls are unavailable. County geography and current overlays remain usable.",
-            { exact: true },
-          )
-          .waitFor();
+        assert.equal(
+          await page
+            .getByTestId("cfs-arcgis-map")
+            .getAttribute("data-map-renderer"),
+          "static",
+        );
+        assert.equal(
+          await page
+            .getByText("Interactive MapView unavailable", { exact: true })
+            .count(),
+          0,
+        );
+        assert.equal(
+          await page
+            .getByText("Interactive enhancement unavailable", { exact: true })
+            .count(),
+          0,
+        );
         assert.equal(
           await page.getByRole("button", { name: "Zoom in", exact: true }).isEnabled(),
           true,
@@ -922,7 +1032,8 @@ async function offlineMapChecks(browser, baseUrl) {
           })
           .click();
         await fallback
-          .locator('[data-layer-id="development-hotspots"]')
+          .locator('[data-layer-id="development-hotspots"] circle')
+          .first()
           .waitFor();
         await assertImageDifference(
           beforeOverlay,
