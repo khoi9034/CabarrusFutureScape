@@ -505,7 +505,7 @@ async function planningChecks(page, baseUrl) {
     const ask = page.getByRole("textbox", { name: "Ask CFS question" });
     await ask.fill("Where is growth pressure highest?");
     await page.getByRole("button", { name: "Ask", exact: true }).click();
-    await page.getByRole("button", { name: "Clear Ask CFS context" }).waitFor({ timeout: 20_000 });
+    await page.getByRole("button", { name: "Reset conversation" }).waitFor({ timeout: 20_000 });
   });
 
   await check("Planning", "Model Lab modes and methodology return state", ["Model Lab on/off", "points", "heatmap", "clusters", "methodology return"], async () => {

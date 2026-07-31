@@ -15,6 +15,7 @@ outputs
 *.tar
 *.tgz
 *.zip
+!public/demo-data/powerbi/cfs-powerbi-starter-pack.zip
 __pycache__
 *.pyc
 .pytest_cache

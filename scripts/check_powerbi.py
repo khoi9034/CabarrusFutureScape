@@ -75,6 +75,9 @@ def main() -> int:
     ).read_text(encoding="utf-8")
     if "cfs-powerbi-starter-pack.zip" not in ui_source:
         failures.append("Power BI Starter Pack download is not visible in the UI")
+    vercel_ignore = (ROOT / ".vercelignore").read_text(encoding="utf-8")
+    if "!public/demo-data/powerbi/cfs-powerbi-starter-pack.zip" not in vercel_ignore:
+        failures.append("Vercel excludes the public Power BI Starter Pack")
 
     for table in REQUIRED_TABLES:
         require_200(f"{API_BASE}/economics/powerbi-export/csv/{table}", failures)
