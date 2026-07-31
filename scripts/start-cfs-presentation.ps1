@@ -108,6 +108,7 @@ function Ensure-FrontendEnv {
     @()
   }
   $next = Upsert-EnvLine -Lines $lines -Key "NEXT_PUBLIC_CFS_DEPLOYMENT_MODE" -Value "live"
+  $next = Upsert-EnvLine -Lines $next -Key "NEXT_PUBLIC_CFS_RUNTIME_MODE" -Value "local"
   $next = Upsert-EnvLine -Lines $next -Key "NEXT_PUBLIC_USE_BACKEND_API" -Value "true"
   $next = Upsert-EnvLine -Lines $next -Key "NEXT_PUBLIC_CFS_API_BASE_URL" -Value $ApiBaseUrl
   $next = Upsert-EnvLine -Lines $next -Key "NEXT_PUBLIC_CFS_ONLINE_BASEMAP" -Value "false"
@@ -175,6 +176,7 @@ function Build-Frontend {
 
   Write-Cfs "Building the stable live frontend."
   $env:NEXT_PUBLIC_CFS_DEPLOYMENT_MODE = "live"
+  $env:NEXT_PUBLIC_CFS_RUNTIME_MODE = "local"
   $env:NEXT_PUBLIC_USE_BACKEND_API = "true"
   $env:NEXT_PUBLIC_CFS_API_BASE_URL = $ApiBaseUrl
   $env:NEXT_PUBLIC_CFS_ONLINE_BASEMAP = "false"
@@ -225,6 +227,8 @@ Set-Location -LiteralPath '$Backend'
 `$env:POSTGRES_HOST='$PostgresHost'
 `$env:POSTGRES_PORT='$PostgresPort'
 `$env:POSTGRES_DB='$PostgresDb'
+`$env:CFS_RUNTIME_MODE='local'
+`$env:CFS_DATA_PROVIDER='local_postgis'
 `$env:CFS_DATABASE_POOL_SIZE='10'
 `$env:CFS_DATABASE_MAX_OVERFLOW='10'
 `$env:CFS_DATABASE_POOL_TIMEOUT_SECONDS='30'

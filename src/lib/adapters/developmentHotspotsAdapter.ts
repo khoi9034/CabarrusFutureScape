@@ -79,6 +79,16 @@ export function getStaticDevelopmentHotspots(): DevelopmentHotspotsViewModel {
   };
 }
 
+export function getUnavailableDevelopmentHotspots(): DevelopmentHotspotsViewModel {
+  return {
+    errorMessage: null,
+    hotspots: [],
+    isLoading: false,
+    source: "fallback",
+    totalCount: 0,
+  };
+}
+
 export function normalizeDevelopmentHotspots(
   response: DevelopmentHotspotsResponse,
 ): Omit<DevelopmentHotspotsViewModel, "errorMessage" | "isLoading" | "source"> {

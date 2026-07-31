@@ -265,12 +265,34 @@ export interface EconomicsPowerBiExportResponse {
   as_of: string | null;
   caveats: string[];
   mode: "demo" | "live";
+  provenance?: {
+    as_of?: string | null;
+    data_origin: "local_api" | "sanitized_demo_extract" | string;
+    generated_at: string;
+    limitations: string[];
+    row_counts: Record<string, number>;
+    runtime_mode: "demo" | "local" | string;
+    source_label: string;
+  };
   relationships: Array<{
+    from_column: string;
+    from_table: string;
+    active?: boolean;
+    cardinality?: "many_to_one" | string;
+    cross_filter_direction?: "single" | string;
+    to_column: string;
+    to_table: string;
+  }>;
+  relationship_guidance?: Array<{
+    active: boolean;
+    cardinality: "many_to_one" | string;
+    cross_filter_direction: "single" | string;
     from_column: string;
     from_table: string;
     to_column: string;
     to_table: string;
   }>;
+  schema_version?: string;
   report_builder_guide?: {
     concepts: Array<{ description: string; term: string }>;
     import_steps: string[];

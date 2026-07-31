@@ -44,10 +44,18 @@ export interface CfsAiConversationTurn {
 }
 
 export interface CfsAiEvidenceItem {
+  as_of?: string | null;
+  caveat?: string | null;
   confidence: "available" | "limited" | "not_available";
   detail: string;
+  geography?: string | null;
+  methodology?: string | null;
   source: string;
+  source_type?: string | null;
+  status?: string | null;
   title: string;
+  unit?: string | null;
+  value?: string | number | null;
 }
 
 export interface CfsAiDashboardActions {
@@ -136,6 +144,7 @@ export interface CfsAiPowerBiActions {
 
 export interface CfsAiSearchResponse {
   answer: string;
+  answer_mode?: "deterministic" | "provider_enhanced" | "safety";
   as_of: string | null;
   caveats: string[];
   context_freshness?: "cached_demo_extract" | "current_session" | "fallback_partial" | string | null;
@@ -144,11 +153,23 @@ export interface CfsAiSearchResponse {
   data_mode: "demo" | "live";
   domains: CfsAiDomain[];
   evidence: CfsAiEvidenceItem[];
+  executive_summary?: string | null;
+  fallback_used?: boolean;
   filtered_context_summary?: string | null;
+  interpretation?: string | null;
+  key_findings?: string[];
+  limitations?: string[];
+  official_data_still_needed?: string[];
+  prompt_version?: string;
   provider: "none" | "openai";
   provider_status?: string | null;
+  provenance?: Record<string, unknown>;
+  recommended_next_actions?: string[];
+  request_id?: string;
+  response_time_ms?: number;
   powerbi_actions?: CfsAiPowerBiActions | null;
   related_layers: string[];
   suggested_actions: string[];
+  suggested_follow_up_questions?: string[];
   timings_ms?: Record<string, number>;
 }

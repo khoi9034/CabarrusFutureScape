@@ -8,7 +8,7 @@ import {
   normalizeBackendParcelDetailResponse,
   normalizeBackendParcelMapFocusResponse,
 } from "@/lib/adapters/parcelDetailAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getParcelDetail } from "@/lib/api/parcels";
 import { getParcelMapFocusStatusLabel } from "@/lib/map/parcelMapFocus";
 import { logParcelMapFocusDiagnostic } from "@/lib/map/parcelMapFocusDiagnostics";
@@ -171,7 +171,7 @@ export function ParcelDetailDrawer({
           parcelId,
           record: null,
         });
-        onParcelDetailHydrated(parcel, "fallback");
+        onParcelDetailHydrated(parcel, "api");
       });
 
     return () => controller.abort();
@@ -205,10 +205,12 @@ export function ParcelDetailDrawer({
   const detailSource = hydratedParcel
     ? "FastAPI"
     : activeHydration?.error
-      ? "Static fallback"
+      ? "API search summary"
       : loadingBackendDetail
         ? "Loading API"
-        : "Static detail";
+        : USE_DEMO_DATA
+          ? "Demo detail"
+          : "Local API unavailable";
   const mapFocusLabel = getParcelMapFocusStatusLabel(mapFocusResult);
 
   return (
@@ -365,15 +367,17 @@ export function ParcelDetailDrawer({
       {activeHydration?.error ? (
         <p className="mt-3 rounded-md border border-amber-300/15 bg-amber-300/[0.055] px-3 py-2 text-[11px] leading-5 text-amber-100/75">
           FastAPI parcel detail is unavailable for this selection, so the
-          static search record is shown. {activeHydration.error}
+          API search summary remains selected. {activeHydration.error}
         </p>
       ) : (
         <p className="mt-3 text-[11px] leading-5 text-slate-500">
           {hydratedParcel
-            ? "Parcel detail hydrated from GET /parcels/{official_parcel_id}; static owner and mailing context remains available as fallback."
+            ? "Parcel detail hydrated from GET /parcels/{official_parcel_id}."
             : loadingBackendDetail
-              ? "Hydrating full parcel detail from FastAPI while preserving the selected static search result."
-              : "Static search-result detail is shown. Enable the backend API flag to hydrate this drawer from FastAPI."}
+              ? "Hydrating full parcel detail from FastAPI while preserving the selected API search summary."
+              : USE_DEMO_DATA
+                ? "Sanitized demonstration parcel detail is shown."
+                : "Local API detail is unavailable; no demonstration parcel detail is substituted."}
         </p>
       )}
       <p className="mt-2 text-[11px] leading-5 text-slate-500">

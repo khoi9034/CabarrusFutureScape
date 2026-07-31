@@ -580,7 +580,10 @@ export function LayerToggle() {
   }, []);
 
   useEffect(() => {
-    if (USE_DEMO_DATA || !USE_BACKEND_API) {
+    if (USE_DEMO_DATA) {
+      return;
+    }
+    if (!USE_BACKEND_API) {
       return;
     }
 

@@ -3,15 +3,18 @@
 import { useEffect, useState } from "react";
 import {
   getStaticParcelDashboardMetrics,
+  getUnavailableParcelDashboardMetrics,
   normalizeParcelStatisticsForDashboard,
   type ParcelDashboardMetricsViewModel,
 } from "@/lib/adapters/parcelDashboardMetricsAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getParcelStatistics } from "@/lib/api/parcels";
 
 export function useParcelDashboardMetrics() {
   const [metrics, setMetrics] = useState<ParcelDashboardMetricsViewModel>(() => {
-    const staticMetrics = getStaticParcelDashboardMetrics();
+    const staticMetrics = USE_DEMO_DATA
+      ? getStaticParcelDashboardMetrics()
+      : getUnavailableParcelDashboardMetrics();
 
     return USE_BACKEND_API
       ? {
@@ -43,7 +46,7 @@ export function useParcelDashboardMetrics() {
           return;
         }
 
-        const fallbackMetrics = getStaticParcelDashboardMetrics();
+        const fallbackMetrics = getUnavailableParcelDashboardMetrics();
         setMetrics({
           ...fallbackMetrics,
           errorMessage:

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const sourceLabels = {
   api: "FastAPI",
-  fallback: "Static fallback",
+  fallback: "Local data unavailable",
   loading: "Loading API",
   static: "Static",
 } as const;
@@ -22,9 +22,9 @@ export function ZoningDistributionPanel() {
     source === "api"
       ? "Jurisdiction coverage is loaded from GET /parcels/zoning-summary."
       : source === "fallback"
-        ? "FastAPI zoning summary is unavailable, so this panel is using generated static artifacts."
+        ? "FastAPI zoning summary is unavailable. No static jurisdiction counts are substituted."
         : source === "loading"
-          ? "Checking FastAPI zoning summary; static distribution remains visible while the request completes."
+          ? "Checking FastAPI zoning summary."
           : "Jurisdiction coverage uses generated static parcel zoning outputs.";
 
   return (

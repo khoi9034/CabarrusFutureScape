@@ -148,10 +148,41 @@ export function getStaticTemporalQueryView(
   };
 }
 
+export function getUnavailableTemporalQueryView(
+  filters: DevelopmentTemporalFilters,
+): TemporalQueryViewModel {
+  return {
+    bboxNote: null,
+    errorMessage: null,
+    isLoading: false,
+    queryPreview: "GET /development/temporal-query\n\n-- Local data unavailable",
+    queryResult: {
+      activePermitCategories: [],
+      activeZoningJurisdictions: [],
+      matchingParcelCount: 0,
+      matchingPermitCount: 0,
+      matchingZoningActivityCount: 0,
+      queryMode: getQueryMode(filters),
+      summaryNote:
+        "Local temporal data is unavailable. No static records are substituted.",
+    },
+    resultCount: 0,
+    source: "fallback",
+    temporalContextLabel: buildTemporalContextLabel(null, filters),
+    trendSummary: {
+      activePermitCategories: [],
+      activeZoningJurisdictions: [],
+      latestYearPermitCount: 0,
+      previousYearPermitCount: 0,
+      trendDirection: "flat",
+      trendLabel: "Local trend data unavailable",
+    },
+  };
+}
+
 export function normalizeDevelopmentTemporalQuery(
   response: DevelopmentTemporalQueryResponse,
   filters: DevelopmentTemporalFilters,
-  fallback: TemporalQueryViewModel,
 ): Omit<TemporalQueryViewModel, "errorMessage" | "isLoading" | "source"> {
   if (!response || !response.summary || !Array.isArray(response.results)) {
     throw new Error("Development temporal query API returned an invalid shape.");
@@ -185,15 +216,12 @@ export function normalizeDevelopmentTemporalQuery(
     resultCount: response.total_count,
     temporalContextLabel: buildTemporalContextLabel(response, filters),
     trendSummary: {
-      ...fallback.trendSummary,
-      activePermitCategories:
-        activePermitCategories.length > 0
-          ? activePermitCategories.slice(0, 4)
-          : fallback.trendSummary.activePermitCategories,
-      activeZoningJurisdictions:
-        activeZoningJurisdictions.length > 0
-          ? activeZoningJurisdictions.slice(0, 4)
-          : fallback.trendSummary.activeZoningJurisdictions,
+      activePermitCategories: activePermitCategories.slice(0, 4),
+      activeZoningJurisdictions: activeZoningJurisdictions.slice(0, 4),
+      latestYearPermitCount: 0,
+      previousYearPermitCount: 0,
+      trendDirection: "flat",
+      trendLabel: "Filtered API result",
     },
   };
 }

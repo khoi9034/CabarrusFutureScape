@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 const sourceLabels = {
   api: "FastAPI",
-  fallback: "Static fallback",
+  fallback: "Local data unavailable",
   loading: "Loading API",
   static: "Static",
 } as const;
@@ -24,9 +24,9 @@ export function DevelopmentHotspotsPanel() {
     source === "api"
       ? "Hotspots are loaded from GET /development/hotspots."
       : source === "fallback"
-        ? "FastAPI development hotspots are unavailable, so this panel is using generated static hotspot artifacts."
+        ? "FastAPI development hotspots are unavailable. No static hotspot records are substituted."
         : source === "loading"
-          ? "Checking FastAPI development hotspots; static hotspots remain visible while the request completes."
+          ? "Checking FastAPI development hotspots."
           : "Hotspots use generated static development activity outputs.";
 
   return (

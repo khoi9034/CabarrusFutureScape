@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import csv
+import json
+import zipfile
 from datetime import datetime
-from io import StringIO
+from io import BytesIO, StringIO
 from typing import Any
 
 PLANNING_DIMENSIONS = [
@@ -94,6 +96,16 @@ POWERBI_CSV_TABLES = {
             "sort_order",
             "parcel_id",
             "geography_label",
+            "acreage",
+            "assessed_value",
+            "land_value",
+            "improvement_value",
+            "estimated_county_tax",
+            "value_per_acre",
+            "land_value_per_acre",
+            "improvement_value_per_acre",
+            "improvement_to_land_ratio",
+            "jurisdiction",
             "economic_segment",
             "economic_segment_order",
             "segment_order",
@@ -271,6 +283,16 @@ def build_powerbi_export_payload(
 
     geography_rows = _powerbi_geography_dim(signals)
     scenario_rows = _powerbi_scenario_dim(scenarios)
+    tables = {
+        "domain_readiness_dim": _powerbi_readiness_dim(readiness),
+        "economics_kpi_fact": _powerbi_kpi_fact(kpis, output_mode, as_of),
+        "geography_dim": geography_rows,
+        "parcel_economic_signal_fact": _powerbi_signal_fact(signals),
+        "scenario_dim": scenario_rows,
+        "scenario_output_fact": _powerbi_scenario_fact(scenario_outputs or scenarios),
+        "time_dim": _powerbi_time_dim(as_of),
+    }
+    runtime_mode = "demo" if output_mode == "demo" else "local"
     return {
         "as_of": as_of,
         "caveats": [
@@ -279,6 +301,28 @@ def build_powerbi_export_payload(
             "Tables exclude contact fields, credential fields, model internals, and probability-style outputs.",
         ],
         "mode": output_mode,
+        "provenance": {
+            "as_of": as_of,
+            "data_origin": (
+                "sanitized_demo_extract"
+                if runtime_mode == "demo"
+                else "local_api"
+            ),
+            "generated_at": datetime.now().astimezone().isoformat(),
+            "limitations": [
+                "Screening-level economics only.",
+                "Missing values remain blank and are not imputed.",
+            ],
+            "row_counts": {
+                name: len(rows) for name, rows in tables.items()
+            },
+            "runtime_mode": runtime_mode,
+            "source_label": (
+                "Portfolio demonstration data"
+                if runtime_mode == "demo"
+                else "Live local CFS API/PostGIS data"
+            ),
+        },
         "relationships": [
             {
                 "from_column": "scenario_id",
@@ -293,17 +337,32 @@ def build_powerbi_export_payload(
                 "to_table": "geography_dim",
             },
         ],
+        "relationship_guidance": [
+            {
+                "active": True,
+                "cardinality": "many_to_one",
+                "cross_filter_direction": "single",
+                **relationship,
+            }
+            for relationship in [
+                {
+                    "from_column": "scenario_id",
+                    "from_table": "scenario_output_fact",
+                    "to_column": "scenario_id",
+                    "to_table": "scenario_dim",
+                },
+                {
+                    "from_column": "geography_label",
+                    "from_table": "parcel_economic_signal_fact",
+                    "to_column": "geography_label",
+                    "to_table": "geography_dim",
+                },
+            ]
+        ],
         "report_builder_guide": _powerbi_report_builder_guide(),
+        "schema_version": "1.0",
         "suggested_visuals": _powerbi_suggested_visuals(),
-        "tables": {
-            "domain_readiness_dim": _powerbi_readiness_dim(readiness),
-            "economics_kpi_fact": _powerbi_kpi_fact(kpis, output_mode, as_of),
-            "geography_dim": geography_rows,
-            "parcel_economic_signal_fact": _powerbi_signal_fact(signals),
-            "scenario_dim": scenario_rows,
-            "scenario_output_fact": _powerbi_scenario_fact(scenario_outputs or scenarios),
-            "time_dim": _powerbi_time_dim(as_of),
-        },
+        "tables": tables,
     }
 
 
@@ -337,6 +396,162 @@ def powerbi_table_to_csv(powerbi_payload: dict[str, Any], table_name: str) -> st
     for row in rows:
         writer.writerow({field: _csv_value(_dict(row).get(field)) for field in fields})
     return output.getvalue()
+
+
+def build_powerbi_starter_pack(powerbi_payload: dict[str, Any]) -> bytes:
+    buffer = BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        for table_name in POWERBI_CSV_IMPORT_ORDER:
+            archive.writestr(
+                f"csv/{table_name}.csv",
+                powerbi_table_to_csv(powerbi_payload, table_name),
+            )
+        archive.writestr(
+            "model.json",
+            json.dumps(powerbi_payload, indent=2, default=str),
+        )
+        archive.writestr(
+            "data_dictionary.csv",
+            _powerbi_data_dictionary_csv(),
+        )
+        archive.writestr(
+            "relationships.json",
+            json.dumps(
+                powerbi_payload.get("relationship_guidance")
+                or powerbi_payload.get("relationships")
+                or [],
+                indent=2,
+            ),
+        )
+        archive.writestr(
+            "provenance.json",
+            json.dumps(powerbi_payload.get("provenance") or {}, indent=2),
+        )
+        archive.writestr("README.md", _powerbi_readme(powerbi_payload))
+        archive.writestr("power-query-m.txt", _powerbi_m_templates())
+        archive.writestr("dax-measures.dax", _powerbi_dax_measures())
+        archive.writestr("report-guide.md", _powerbi_report_guide_markdown())
+        archive.writestr(
+            "import-qa-checklist.md",
+            _powerbi_import_qa_checklist(),
+        )
+    return buffer.getvalue()
+
+
+def _powerbi_data_dictionary_csv() -> str:
+    output = StringIO()
+    writer = csv.DictWriter(
+        output,
+        fieldnames=["table_name", "field_name", "data_type", "table_grain"],
+        lineterminator="\n",
+    )
+    writer.writeheader()
+    for table_name, details in POWERBI_CSV_TABLES.items():
+        for field in details["fields"]:
+            writer.writerow(
+                {
+                    "data_type": _powerbi_field_type(field),
+                    "field_name": field,
+                    "table_grain": details["description"],
+                    "table_name": table_name,
+                },
+            )
+    return output.getvalue()
+
+
+def _powerbi_field_type(field: str) -> str:
+    if field in {
+        "acreage",
+        "assessed_value",
+        "estimated_county_tax",
+        "improvement_to_land_ratio",
+        "improvement_value",
+        "improvement_value_per_acre",
+        "land_value",
+        "land_value_per_acre",
+        "value",
+        "value_per_acre",
+    }:
+        return "decimal number"
+    if field.endswith("_order") or field in {"sort_order", "year"}:
+        return "whole number"
+    if field.endswith("_flag") or field == "data_available":
+        return "true/false"
+    return "text"
+
+
+def _powerbi_readme(payload: dict[str, Any]) -> str:
+    provenance = _dict(payload.get("provenance"))
+    return "\n".join(
+        [
+            "# CFS Economics Power BI Starter Pack",
+            "",
+            f"Source: {provenance.get('source_label') or 'CFS export'}",
+            f"Generated: {provenance.get('generated_at') or 'not available'}",
+            f"Schema version: {payload.get('schema_version') or '1.0'}",
+            "",
+            "1. Extract the ZIP without renaming the csv folder.",
+            "2. Open Power BI Desktop and import the seven CSV files.",
+            "3. Apply the relationships in relationships.json as single-direction many-to-one.",
+            "4. Paste the measures from dax-measures.dax only after checking numeric column types.",
+            "5. Complete import-qa-checklist.md before publishing.",
+            "",
+            "Blank values are missing data, not zeros. CFS Economics is screening-level context, not an appraisal, tax bill, or fiscal impact study.",
+        ],
+    )
+
+
+def _powerbi_m_templates() -> str:
+    return "\n\n".join(
+        (
+            f"// {table_name}\n"
+            "let\n"
+            f'  Source = Csv.Document(File.Contents(PackRoot & "\\\\csv\\\\{table_name}.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),\n'
+            "  PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true])\n"
+            "in\n"
+            "  PromotedHeaders"
+        )
+        for table_name in POWERBI_CSV_IMPORT_ORDER
+    )
+
+
+def _powerbi_dax_measures() -> str:
+    return """
+Total Signals = COUNTROWS('parcel_economic_signal_fact')
+Underbuilt Candidates = CALCULATE([Total Signals], 'parcel_economic_signal_fact'[opportunity_class] = "Underbuilt Redevelopment Candidate")
+Data Needed Signals = CALCULATE([Total Signals], 'parcel_economic_signal_fact'[data_confidence] = "data needed")
+Scenario Count = DISTINCTCOUNT('scenario_dim'[scenario_id])
+Strong Fiscal Scenarios = CALCULATE(COUNTROWS('scenario_output_fact'), 'scenario_output_fact'[fiscal_attractiveness_band] = "strong")
+Average Revenue Per Acre = AVERAGE('parcel_economic_signal_fact'[value_per_acre])
+Median Improvement-to-Land Ratio = MEDIAN('parcel_economic_signal_fact'[improvement_to_land_ratio])
+""".strip()
+
+
+def _powerbi_report_guide_markdown() -> str:
+    return """# Recommended Report Pages
+
+1. Executive Economic Dashboard: KPI cards, opportunity classes, and data confidence.
+2. Parcel Investment Screen: segment, geography, opportunity, and special-asset slicers.
+3. Scenario Planning Model: scenario matrix with the disconnected scenario model.
+4. Data Confidence Register: readiness status and next-data-need table.
+
+Keep scenario tables disconnected from parcel signals unless a validated business key is added. Compare value-per-acre measures within comparable economic segments.
+"""
+
+
+def _powerbi_import_qa_checklist() -> str:
+    return """# Import QA Checklist
+
+- [ ] Seven CSV tables imported with headers.
+- [ ] Numeric columns use decimal/whole-number types.
+- [ ] Blank numeric values remain blank.
+- [ ] Scenario and geography relationships are many-to-one, single direction.
+- [ ] Geography and scenario dimension keys are unique.
+- [ ] Row counts match provenance.json.
+- [ ] Special assets are isolated before comparison.
+- [ ] Demo/local source label matches the active CFS runtime.
+- [ ] No owner, contact, credential, or probability fields are present.
+"""
 
 
 def _dict(value: Any) -> dict[str, Any]:
@@ -574,6 +789,8 @@ def _join_list(value: Any) -> str | None:
 def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         {
+            "acreage": row.get("acreage"),
+            "assessed_value": row.get("assessed_value"),
             "band_order": _signal_band_order(row),
             "comparable_asset_flag": bool(row.get("comparable_asset_flag", not row.get("special_asset_flag"))),
             "comparison_group": row.get("comparison_group") or row.get("economic_segment") or "Unknown / Needs Classification",
@@ -590,8 +807,14 @@ def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "geography_label": row.get("geography_label"),
             "growth_pressure_band": row.get("growth_pressure_band"),
             "improvement_to_land_ratio_band": _ratio_band(row.get("improvement_to_land_ratio")),
+            "improvement_to_land_ratio": row.get("improvement_to_land_ratio"),
+            "improvement_value": row.get("improvement_value"),
+            "improvement_value_per_acre": row.get("improvement_value_per_acre"),
+            "jurisdiction": row.get("jurisdiction"),
             "land_efficiency_band": row.get("land_efficiency_band"),
             "land_opportunity_class": row.get("land_opportunity_class"),
+            "land_value": row.get("land_value"),
+            "land_value_per_acre": row.get("land_value_per_acre"),
             "opportunity_class": row.get("opportunity_class"),
             "opportunity_class_order": _opportunity_class_order(row.get("opportunity_class")),
             "parcel_id": row.get("parcel_id"),
@@ -608,6 +831,7 @@ def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "school_service_pressure_band": row.get("school_service_pressure_band"),
             "suggested_next_checks": _join_list(row.get("suggested_next_checks")),
             "tax_base_opportunity_band": row.get("tax_base_opportunity_band") or _tax_base_opportunity_band(row),
+            "estimated_county_tax": row.get("estimated_county_tax"),
             "sewer_proxy_class": row.get("sewer_proxy_class"),
             "transportation_access_band": row.get("transportation_access_band"),
             "utility_readiness_proxy_class": row.get("utility_readiness_proxy_class"),
@@ -621,6 +845,7 @@ def _powerbi_signal_fact(signals: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "utility_capacity_status": row.get("utility_capacity_status"),
             "planned_extension_status": row.get("planned_extension_status"),
             "value_per_acre_band": _value_per_acre_band(row.get("value_per_acre")),
+            "value_per_acre": row.get("value_per_acre"),
             "visual_recommendation": _signal_visual(row),
         }
         for index, row in enumerate(signals)

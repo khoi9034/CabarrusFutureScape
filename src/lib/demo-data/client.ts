@@ -18,6 +18,7 @@ import type {
   EconomicsEnterpriseExportResponse,
   EconomicsPowerBiExportResponse,
 } from "@/types/api";
+import { recordDataProvenance } from "@/lib/api/client";
 
 const DEMO_DATA_BASE_URL = "/demo-data";
 
@@ -267,12 +268,17 @@ async function loadDemoJson<T>(
   })
     .then(async (response) => {
       if (!response.ok) {
+        recordDataProvenance(cacheKey, "sanitized_demo_extract");
         return fallback();
       }
 
+      recordDataProvenance(cacheKey, "sanitized_demo_extract");
       return (await response.json()) as T;
     })
-    .catch(() => fallback());
+    .catch(() => {
+      recordDataProvenance(cacheKey, "sanitized_demo_extract");
+      return fallback();
+    });
 
   demoJsonCache.set(cacheKey, promise);
   return promise;

@@ -29,6 +29,7 @@ from app.services.enterprise_export_service import (
     build_enterprise_export_payload,
     build_powerbi_csv_manifest,
     build_powerbi_export_payload,
+    build_powerbi_starter_pack,
     powerbi_table_to_csv,
 )
 from app.routers.economics_router import (
@@ -261,6 +262,9 @@ def export_powerbi_csv_files(powerbi_export: dict[str, Any]) -> None:
         )
         table["download_url"] = f"/demo-data/powerbi/{table_name}.csv"
     write_json(manifest_path, manifest)
+    (DEMO_POWERBI_DIR / "cfs-powerbi-starter-pack.zip").write_bytes(
+        build_powerbi_starter_pack(powerbi_export),
+    )
 
 
 def get_local_connection_string() -> str:

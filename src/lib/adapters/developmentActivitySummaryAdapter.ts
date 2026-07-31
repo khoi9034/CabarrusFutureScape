@@ -42,6 +42,22 @@ export function getStaticDevelopmentActivitySummary(): DevelopmentActivitySummar
   };
 }
 
+export function getUnavailableDevelopmentActivitySummary(): DevelopmentActivitySummaryViewModel {
+  return {
+    activityDateMax: null,
+    activityDateMin: null,
+    avgPermitAmount: null,
+    errorMessage: null,
+    isLoading: false,
+    recentActivityParcels1Yr: 0,
+    recentActivityParcels3Yr: 0,
+    source: "fallback",
+    totalPermitAmount: null,
+    totalPermitAmountLabel: "--",
+    totalPermits: 0,
+  };
+}
+
 export function normalizeDevelopmentActivitySummary(
   response: DevelopmentActivitySummaryResponse,
 ): Omit<DevelopmentActivitySummaryViewModel, "errorMessage" | "isLoading" | "source"> {

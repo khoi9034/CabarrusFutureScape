@@ -19,7 +19,7 @@ const qualityToneStyles: Record<IntelligenceMetricTone, string> = {
 
 const sourceLabels = {
   api: "FastAPI",
-  fallback: "Static fallback",
+  fallback: "Local data unavailable",
   loading: "Loading API",
   static: "Static",
 } as const;
@@ -30,9 +30,9 @@ export function ParcelQualityPanel() {
     source === "api"
       ? "Parcel quality status is loaded from GET /parcels/statistics."
       : source === "fallback"
-        ? "FastAPI parcel statistics are unavailable, so this panel is using generated static parcel quality artifacts."
+        ? "FastAPI parcel statistics are unavailable. No static quality counts are substituted."
         : source === "loading"
-          ? "Checking FastAPI parcel statistics; static quality metrics remain visible while the request completes."
+          ? "Checking FastAPI parcel statistics."
           : "Parcel quality uses generated static parcel enrichment outputs.";
 
   return (

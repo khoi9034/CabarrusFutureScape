@@ -69,7 +69,11 @@ import {
   dispatchParcelMapFocusResult,
   resolveParcelMapFocus,
 } from "@/lib/map/parcelMapFocus";
-import { USE_DEMO_DATA, USE_ONLINE_BASEMAP } from "@/lib/api/client";
+import {
+  recordTechnicalEvent,
+  USE_DEMO_DATA,
+  USE_ONLINE_BASEMAP,
+} from "@/lib/api/client";
 import {
   getDemoMapContext,
   type DemoGeoJsonFeature,
@@ -286,6 +290,7 @@ export function SceneViewContainer() {
   const [schoolUtilizationHover, setSchoolUtilizationHover] =
     useState<SchoolUtilizationHoverCallout | null>(null);
   const [mapContext, setMapContext] = useState<DemoMapContext | null>(null);
+  const [mapAttempt, setMapAttempt] = useState(0);
   const [mapZoom, setMapZoom] = useState<number | null>(null);
   const [fallbackZoom, setFallbackZoom] = useState(0);
   const [fallbackParcelFocus, setFallbackParcelFocus] =
@@ -370,6 +375,12 @@ export function SceneViewContainer() {
     },
     [setMapError, setMapStatus],
   );
+  const retryInteractiveMap = useCallback(() => {
+    recordTechnicalEvent("map_retry", {
+      runtime_mode: USE_DEMO_DATA ? "demo" : "local",
+    });
+    setMapAttempt((attempt) => attempt + 1);
+  }, []);
   const changeMapZoom = useCallback(
     (delta: number) => {
       const view = viewRef.current;
@@ -1517,6 +1528,7 @@ export function SceneViewContainer() {
     setSelectedModelResearchContext,
     setSelectedSchoolUtilizationZone,
     updateSchoolUtilizationHover,
+    mapAttempt,
   ]);
 
   useEffect(() => {
@@ -1962,10 +1974,36 @@ export function SceneViewContainer() {
     schoolUtilizationZoneLayer.status === "ready"
       ? schoolUtilizationHover
       : null;
+  const mapRendererState =
+    mapStatus === "online"
+      ? "interactive_ready"
+      : mapContext?.requiredReady
+        ? mapStatus === "degraded"
+          ? "degraded_static"
+          : "loading_interactive"
+        : mapStatus === "degraded"
+          ? "fatal"
+          : "loading_context";
+  useEffect(() => {
+    if (mapRendererState === "interactive_ready") {
+      recordTechnicalEvent("map_renderer_selected", {
+        renderer: "arcgis",
+        runtime_mode: USE_DEMO_DATA ? "demo" : "local",
+      });
+    } else if (mapRendererState === "degraded_static") {
+      recordTechnicalEvent("map_fallback", {
+        reason: mapError ?? "ArcGIS renderer unavailable",
+        renderer: "static_context",
+        runtime_mode: USE_DEMO_DATA ? "demo" : "local",
+      });
+    }
+  }, [mapError, mapRendererState]);
 
   return (
     <MapViewportPlaceholder
+      contextReady={Boolean(mapContext?.requiredReady)}
       mapStatus={mapStatus}
+      onRetryInteractiveMap={retryInteractiveMap}
       parcelFocusSummary={lastParcelFocusSummary}
       sceneError={mapError}
       selectedParcel={selectedParcel}
@@ -2008,6 +2046,7 @@ export function SceneViewContainer() {
           mapContext?.transportation.features.length ?? 0
         }
         data-map-status={mapStatus}
+        data-map-renderer-state={mapRendererState}
         data-map-zoom={mapStatus === "online" ? (mapZoom ?? "") : fallbackZoom}
         data-testid="cfs-arcgis-map"
         ref={containerRef}

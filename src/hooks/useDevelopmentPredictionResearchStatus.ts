@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getApiErrorDisplayMessage, USE_BACKEND_API } from "@/lib/api/client";
+import {
+  getApiErrorDisplayMessage,
+  USE_BACKEND_API,
+  USE_DEMO_DATA,
+} from "@/lib/api/client";
 import {
   getDevelopmentPredictionFeaturesSummary,
   getDevelopmentPredictionRankingSummary,
@@ -51,6 +55,14 @@ const documentedRankingSummary: DevelopmentPredictionRankingSummaryResponse = {
   ranking_row_count: 110017,
   unique_parcel_count: 110017,
 };
+const unavailableRankingSummary: DevelopmentPredictionRankingSummaryResponse = {
+  ...documentedRankingSummary,
+  class_distribution: [],
+  explanation_row_count: 0,
+  ranking_available: false,
+  ranking_row_count: 0,
+  unique_parcel_count: 0,
+};
 
 export const standardizedDevelopmentPredictionMetrics = {
   baselineLiftAtTop5: 1.265508,
@@ -88,16 +100,25 @@ export interface DevelopmentPredictionResearchStatus {
   featuresSummary: DevelopmentPredictionFeaturesSummaryResponse | null;
   isLoading: boolean;
   rankingSummary: DevelopmentPredictionRankingSummaryResponse;
-  source: "api" | "documented" | "loading";
+  source: "api" | "documented" | "loading" | "unavailable";
 }
 
 export function useDevelopmentPredictionResearchStatus() {
   const [status, setStatus] = useState<DevelopmentPredictionResearchStatus>({
-    errorMessage: null,
+    errorMessage:
+      !USE_BACKEND_API && !USE_DEMO_DATA
+        ? "Development prediction research status requires the configured CFS API outside demo mode."
+        : null,
     featuresSummary: null,
     isLoading: USE_BACKEND_API,
-    rankingSummary: documentedRankingSummary,
-    source: USE_BACKEND_API ? "loading" : "documented",
+    rankingSummary: USE_DEMO_DATA
+      ? documentedRankingSummary
+      : unavailableRankingSummary,
+    source: USE_BACKEND_API
+      ? "loading"
+      : USE_DEMO_DATA
+        ? "documented"
+        : "unavailable",
   });
 
   useEffect(() => {
@@ -120,14 +141,7 @@ export function useDevelopmentPredictionResearchStatus() {
           errorMessage: null,
           featuresSummary,
           isLoading: false,
-          rankingSummary: {
-            ...documentedRankingSummary,
-            ...rankingSummary,
-            class_distribution:
-              rankingSummary.class_distribution.length > 0
-                ? rankingSummary.class_distribution
-                : documentedDistribution,
-          },
+          rankingSummary,
           source: "api",
         });
       })
@@ -143,8 +157,8 @@ export function useDevelopmentPredictionResearchStatus() {
           ),
           featuresSummary: null,
           isLoading: false,
-          rankingSummary: documentedRankingSummary,
-          source: "documented",
+          rankingSummary: unavailableRankingSummary,
+          source: "unavailable",
         });
       });
 

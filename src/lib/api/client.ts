@@ -78,6 +78,52 @@ export const CFS_API_BASE_URL =
   process.env.NEXT_PUBLIC_CFS_API_BASE_URL ?? DEFAULT_BACKEND_BASE_URL;
 
 export type CfsDeploymentMode = "auto" | "demo" | "live";
+export type CfsRuntimeMode = "demo" | "enterprise" | "local";
+export type CfsDataProvider =
+  | "local_postgis"
+  | "sanitized_demo_extract"
+  | "enterprise_service";
+export type CfsDataOrigin =
+  | "derived_local_metric"
+  | "enterprise_api"
+  | "local_api"
+  | "sanitized_demo_extract"
+  | "session_only_demo"
+  | "static_geographic_context"
+  | "unavailable";
+
+export interface CfsDataProvenanceEvent {
+  data_origin: CfsDataOrigin;
+  dataset_id: string;
+  domain: string;
+  runtime_mode: CfsRuntimeMode;
+  served_at: string;
+}
+
+export type CfsTechnicalEventName =
+  | "api_readiness"
+  | "ask_cfs_request"
+  | "data_adapter_used"
+  | "failed_domain_load"
+  | "map_fallback"
+  | "map_renderer_selected"
+  | "map_retry"
+  | "powerbi_export"
+  | "provider_fallback"
+  | "report_generation";
+
+export interface CfsTechnicalEvent {
+  detail: Record<string, boolean | number | string | null>;
+  event: CfsTechnicalEventName;
+  occurred_at: string;
+}
+
+declare global {
+  interface Window {
+    __cfsDataProvenance?: CfsDataProvenanceEvent[];
+    __cfsTechnicalEvents?: CfsTechnicalEvent[];
+  }
+}
 
 function normalizeDeploymentMode(value: string | undefined): CfsDeploymentMode {
   if (value === "demo" || value === "live" || value === "auto") {
@@ -91,13 +137,39 @@ export const CFS_DEPLOYMENT_MODE = normalizeDeploymentMode(
   process.env.NEXT_PUBLIC_CFS_DEPLOYMENT_MODE,
 );
 
-export const IS_DEMO_MODE = CFS_DEPLOYMENT_MODE === "demo";
+function normalizeRuntimeMode(
+  value: string | undefined,
+  legacyMode: CfsDeploymentMode,
+): CfsRuntimeMode {
+  if (value === "demo" || value === "enterprise" || value === "local") {
+    return value;
+  }
+
+  return legacyMode === "demo" ? "demo" : "local";
+}
+
+export const CFS_RUNTIME_MODE = normalizeRuntimeMode(
+  process.env.NEXT_PUBLIC_CFS_RUNTIME_MODE,
+  CFS_DEPLOYMENT_MODE,
+);
+export const IS_DEMO_MODE =
+  CFS_DEPLOYMENT_MODE === "demo" || CFS_RUNTIME_MODE === "demo";
 export const IS_AUTO_MODE = CFS_DEPLOYMENT_MODE === "auto";
+export const IS_ENTERPRISE_MODE = CFS_RUNTIME_MODE === "enterprise";
 
 export const USE_BACKEND_API =
   !IS_DEMO_MODE && process.env.NEXT_PUBLIC_USE_BACKEND_API === "true";
-export const USE_DEMO_DATA =
-  IS_DEMO_MODE || (IS_AUTO_MODE && !USE_BACKEND_API);
+export const USE_DEMO_DATA = IS_DEMO_MODE;
+export const CFS_DATA_PROVIDER: CfsDataProvider = USE_DEMO_DATA
+  ? "sanitized_demo_extract"
+  : IS_ENTERPRISE_MODE
+    ? "enterprise_service"
+    : "local_postgis";
+export const CFS_AI_PROVIDER =
+  process.env.NEXT_PUBLIC_CFS_AI_PROVIDER ?? "deterministic";
+export const CFS_AUTH_MODE =
+  process.env.NEXT_PUBLIC_CFS_AUTH_MODE ??
+  (IS_ENTERPRISE_MODE ? "entra" : "off");
 export const USE_ONLINE_BASEMAP =
   process.env.NEXT_PUBLIC_ARCGIS_BASEMAP_ENABLED === "true" ||
   (!USE_DEMO_DATA && process.env.NEXT_PUBLIC_CFS_ONLINE_BASEMAP !== "false");
@@ -168,8 +240,10 @@ export async function apiGet<TResponse>(
       });
     }
 
+    recordDataProvenance(path, "local_api");
     return payload as TResponse;
   } catch (error) {
+    recordDataProvenance(path, "unavailable");
     if (error instanceof ApiClientError) {
       throw error;
     }
@@ -264,8 +338,10 @@ export async function apiPost<TResponse>(
       });
     }
 
+    recordDataProvenance(path, "local_api");
     return payload as TResponse;
   } catch (error) {
+    recordDataProvenance(path, "unavailable");
     if (error instanceof ApiClientError) {
       throw error;
     }
@@ -313,6 +389,59 @@ export function getApiErrorDisplayMessage(
   }
 
   return fallback;
+}
+
+export function recordDataProvenance(
+  datasetId: string,
+  dataOrigin: CfsDataOrigin,
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const normalized = datasetId.replace(/^https?:\/\/[^/]+/i, "");
+  const domain = normalized.split("/").filter(Boolean)[0] ?? "unknown";
+  const events = window.__cfsDataProvenance ?? [];
+  window.__cfsDataProvenance = [
+    ...events,
+    {
+      data_origin: dataOrigin,
+      dataset_id: normalized,
+      domain,
+      runtime_mode: CFS_RUNTIME_MODE,
+      served_at: new Date().toISOString(),
+    },
+  ].slice(-200);
+  recordTechnicalEvent(
+    dataOrigin === "unavailable"
+      ? "failed_domain_load"
+      : "data_adapter_used",
+    {
+      data_origin: dataOrigin,
+      dataset_id: normalized,
+      domain,
+      runtime_mode: CFS_RUNTIME_MODE,
+    },
+  );
+}
+
+export function recordTechnicalEvent(
+  event: CfsTechnicalEventName,
+  detail: CfsTechnicalEvent["detail"] = {},
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const events = window.__cfsTechnicalEvents ?? [];
+  window.__cfsTechnicalEvents = [
+    ...events,
+    {
+      detail,
+      event,
+      occurred_at: new Date().toISOString(),
+    },
+  ].slice(-200);
 }
 
 function getHttpDisplayMessage(status: number, url: string) {

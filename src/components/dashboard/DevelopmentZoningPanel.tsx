@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 const sourceLabels = {
   api: "FastAPI",
-  fallback: "Static fallback",
+  fallback: "Local data unavailable",
   loading: "Loading API",
   static: "Static",
 } as const;
@@ -23,9 +23,9 @@ export function DevelopmentZoningPanel() {
     source === "api"
       ? "Zoning development summaries are loaded from GET /development/zoning-summary."
       : source === "fallback"
-        ? "FastAPI development zoning summary is unavailable, so this panel is using generated static zoning activity artifacts."
+        ? "FastAPI development zoning summary is unavailable. No static zoning activity is substituted."
         : source === "loading"
-          ? "Checking FastAPI development zoning summaries; static records remain visible while the request completes."
+          ? "Checking FastAPI development zoning summaries."
           : "Zoning development summaries use generated static permit activity outputs.";
 
   return (

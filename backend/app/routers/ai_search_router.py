@@ -90,8 +90,12 @@ def search_cfs(
     context_ms = int((time.perf_counter() - start) * 1000)
     response = CfsAiSearchService(get_settings()).search(request, context)
     response.timings_ms = {**response.timings_ms, "context_ms": context_ms}
+    response.response_time_ms = (
+        response.timings_ms.get("total_ms", 0) + context_ms
+    )
     LOGGER.info(
-        "ai_search request_received app_mode=%s context_ms=%s total_ms=%s provider_status=%s",
+        "ai_search request_received request_id=%s app_mode=%s context_ms=%s total_ms=%s provider_status=%s",
+        response.request_id,
         request.app_mode,
         context_ms,
         response.timings_ms.get("total_ms"),
@@ -119,7 +123,12 @@ def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | Non
     expires_key = f"expires_at_{request.app_mode if request else 'planning'}"
     cached = _ASK_CFS_CONTEXT_CACHE.get(cache_key)
     expires_at = _ASK_CFS_CONTEXT_CACHE.get(expires_key)
-    if isinstance(expires_at, datetime) and expires_at > datetime.now(UTC) and cached:
+    if (
+        _db is not None
+        and isinstance(expires_at, datetime)
+        and expires_at > datetime.now(UTC)
+        and cached
+    ):
         return _with_request_context(copy.deepcopy(cached), request)
 
     context: CfsAiContext = {
@@ -127,6 +136,11 @@ def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | Non
         "caveats": [],
         "context_freshness": "current_session",
         "data_source": "local_live_backend",
+        "provenance": {
+            "data_origin": "local_api",
+            "runtime_mode": "local",
+            "schema_version": "1.0",
+        },
         "methodology": {
             "school_pressure": (
                 "CFS combines preliminary school utilization context with observed permit activity "
@@ -135,8 +149,17 @@ def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | Non
             "model_lab": "Model Lab is internal research only and does not expose exact probabilities.",
         },
     }
+    if _db is None:
+        context["context_freshness"] = "fallback_partial"
+        context["data_source"] = "unavailable"
+        context["provenance"]["data_origin"] = "unavailable"
+        context["caveats"].append(
+            "Local PostGIS context is unavailable; no demonstration business data was substituted.",
+        )
 
-    indicator_intelligence = get_cached_indicator_intelligence()
+    indicator_intelligence = (
+        get_cached_indicator_intelligence() if _db is not None else None
+    )
     if indicator_intelligence is None:
         try:
             indicator_intelligence = get_indicator_intelligence(_db) if _db is not None else None
@@ -151,12 +174,17 @@ def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | Non
     context["indicator_summary"] = {}
     context["school_pressure"] = {"features": [], "summary": {}, "total_count": 0}
     if request and request.app_mode in {"consulting", "economics"}:
-        try:
-            context["economics_intelligence"] = get_cached_economics_intelligence(_db)
-        except Exception:
+        if _db is None:
             context["context_freshness"] = "fallback_partial"
             context["caveats"].append("Economics context is unavailable, so CFS used data-needed economics guidance.")
             context["economics_intelligence"] = {}
+        else:
+            try:
+                context["economics_intelligence"] = get_cached_economics_intelligence(_db)
+            except Exception:
+                context["context_freshness"] = "fallback_partial"
+                context["caveats"].append("Economics context is unavailable, so CFS used data-needed economics guidance.")
+                context["economics_intelligence"] = {}
 
     if context.get("context_freshness") != "fallback_partial":
         # ponytail: in-process cache; switch to shared cache if API runs multi-worker locally.
@@ -172,6 +200,19 @@ def _with_request_context(context: CfsAiContext, request: CfsAiSearchRequest | N
         str(key): value
         for key, value in request.filter_context.items()
         if value not in (None, "", "All")
+        and not any(
+            blocked in str(key).lower()
+            for blocked in (
+                "address",
+                "email",
+                "mail",
+                "owner",
+                "password",
+                "phone",
+                "secret",
+                "token",
+            )
+        )
     }
     if clean_filters:
         context["filter_context"] = clean_filters

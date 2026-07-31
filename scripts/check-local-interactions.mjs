@@ -42,6 +42,10 @@ const report = {
     request_failures: [],
     request_loops: [],
   },
+  degraded: {
+    cases: [],
+    demo_data_requests: [],
+  },
   offline: {
     blocked_external_requests: [],
     cases: [],
@@ -230,7 +234,7 @@ async function askQuestions(page, questions) {
     assert(body.caveats?.length > 0, "Ask CFS answer had no caveats.");
     await panel.getByText("Grounded CFS analysis", { exact: true }).waitFor();
     await panel.getByText(/^Evidence used \([1-9]\d*\)$/).waitFor();
-    await panel.getByText("Caveats", { exact: true }).waitFor();
+    await panel.getByText("Limitations", { exact: true }).waitFor();
   }
 }
 
@@ -304,6 +308,16 @@ async function planningWorkflow(page) {
       "What does the flood review indicate?",
       "What does the school-capacity context mean?",
     ]);
+    const askPanel = page
+      .getByRole("textbox", { name: "Ask CFS question" })
+      .first()
+      .locator("xpath=ancestor::section[1]");
+    await askPanel
+      .getByRole("button", { name: "Reset conversation" })
+      .click();
+    await askPanel
+      .getByText("Grounded CFS analysis", { exact: true })
+      .waitFor({ state: "hidden" });
   });
 
   await runCase("Planning", "Model Lab and Planning Snapshot", async () => {
@@ -621,6 +635,77 @@ async function offlineChecks(browser) {
   await context.close();
 }
 
+async function degradedDataChecks(browser) {
+  for (const mode of ["api", "database"]) {
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 900 },
+    });
+    await context.route("**/*", async (route) => {
+      const url = new URL(route.request().url());
+      if (url.origin !== API_ORIGIN) {
+        await route.continue();
+        return;
+      }
+      if (mode === "api") {
+        await route.abort("connectionrefused");
+        return;
+      }
+      if (url.pathname === "/health/ready" || url.pathname === "/ai/status") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        body:
+          url.pathname === "/health/database"
+            ? JSON.stringify({ database: "unavailable", status: "degraded" })
+            : JSON.stringify({ detail: "Local database unavailable" }),
+        contentType: "application/json",
+        status: url.pathname === "/health/database" ? 200 : 503,
+      });
+    });
+    context.on("request", (request) => {
+      const url = new URL(request.url());
+      if (
+        url.pathname.includes("/demo-data/") &&
+        !LIVE_MAP_CONTEXT_PATHS.has(url.pathname)
+      ) {
+        report.degraded.demo_data_requests.push(url.href);
+      }
+    });
+
+    const page = await context.newPage();
+    await page.goto(`${BASE_URL}/?app=planning`, {
+      waitUntil: "domcontentloaded",
+    });
+    await assertHealthyPage(page);
+    await page.getByRole("button", { name: /Open .* controls/i }).click();
+    if (mode === "api") {
+      await page
+        .getByTestId("local-runtime-api")
+        .getByText("Unavailable", { exact: true })
+        .waitFor({ timeout: 20_000 });
+    } else {
+      await page
+        .getByTestId("local-runtime-database")
+        .getByText("Local database unavailable", { exact: true })
+        .waitFor({ timeout: 20_000 });
+    }
+    await page.getByTestId("command-center-indicator-center").click();
+    await page
+      .getByText(/Indicator intelligence endpoint unavailable in live mode/)
+      .first()
+      .waitFor({ timeout: 30_000 });
+    await page.goto(`${BASE_URL}/?app=economics`, {
+      waitUntil: "domcontentloaded",
+    });
+    await assertHealthyPage(page);
+    await delay(2_000);
+    report.degraded.cases.push(`${mode} unavailable`);
+    console.log(`PASS Degraded: ${mode} unavailable remains truthful`);
+    await context.close();
+  }
+}
+
 async function main() {
   await waitForStack();
   const browser = await chromium.launch({
@@ -642,6 +727,7 @@ async function main() {
     await page.waitForLoadState("networkidle", { timeout: 30_000 });
     await context.close();
     await offlineChecks(browser);
+    await degradedDataChecks(browser);
   } finally {
     try {
       await cleanupRecentWork();
@@ -658,6 +744,11 @@ async function main() {
     "Live UI did not load every same-origin map context asset.",
   );
   assert.equal(report.demo_data_requests.length, 0, "Live UI requested demo-data fixtures.");
+  assert.equal(
+    report.degraded.demo_data_requests.length,
+    0,
+    "Degraded live UI requested demo business fixtures.",
+  );
   assert.deepEqual(report.diagnostics.api_failures, [], "Browser observed failed API calls.");
   assert.deepEqual(report.diagnostics.page_errors, [], "Browser page errors were observed.");
   assert.deepEqual(report.diagnostics.request_loops, [], "Probable request loop detected.");
@@ -679,6 +770,7 @@ async function main() {
         offline_cases: report.offline.cases.length,
         api_paths: Object.keys(report.api_paths).length,
         demo_data_requests: report.demo_data_requests.length,
+        degraded_cases: report.degraded.cases.length,
         map_context_requests: report.map_context_requests.length,
         external_requests: report.external_requests.length,
       },

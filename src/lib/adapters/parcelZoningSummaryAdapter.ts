@@ -78,6 +78,15 @@ export function getStaticParcelZoningDistribution(): ParcelZoningDistributionVie
   };
 }
 
+export function getUnavailableParcelZoningDistribution(): ParcelZoningDistributionViewModel {
+  return {
+    errorMessage: null,
+    isLoading: false,
+    metrics: [],
+    source: "fallback",
+  };
+}
+
 export function normalizeParcelZoningSummaryForDistribution(
   summary: ParcelZoningSummaryResponse,
 ): Omit<ParcelZoningDistributionViewModel, "errorMessage" | "isLoading" | "source"> {

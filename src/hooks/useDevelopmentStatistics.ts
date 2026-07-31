@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { DevelopmentActivitySummaryViewModel } from "@/lib/adapters/developmentActivitySummaryAdapter";
 import {
   getStaticDevelopmentStatistics,
+  getUnavailableDevelopmentStatistics,
   normalizeDevelopmentStatistics,
   type DevelopmentStatisticsViewModel,
 } from "@/lib/adapters/developmentStatisticsAdapter";
@@ -16,7 +17,9 @@ export function useDevelopmentStatistics(
 ) {
   const [statistics, setStatistics] = useState<DevelopmentStatisticsViewModel>(
     () => {
-      const staticStatistics = getStaticDevelopmentStatistics();
+      const staticStatistics = USE_DEMO_DATA
+        ? getStaticDevelopmentStatistics()
+        : getUnavailableDevelopmentStatistics();
 
       return USE_BACKEND_API
         ? {
@@ -80,7 +83,7 @@ export function useDevelopmentStatistics(
           return;
         }
 
-        const fallbackStatistics = getStaticDevelopmentStatistics();
+        const fallbackStatistics = getUnavailableDevelopmentStatistics();
         setStatistics({
           ...fallbackStatistics,
           errorMessage:

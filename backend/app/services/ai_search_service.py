@@ -11,6 +11,11 @@ import urllib.request
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from app.ai.prompt_registry import (
+    PROMPT_VERSION,
+    classify_safety_query,
+    provider_system_prompt,
+)
 from app.config import Settings
 from app.schemas.ai_search import (
     CfsAiContext,
@@ -227,6 +232,7 @@ class CfsAiSearchService:
             "provider_ms": 0,
             "total_ms": _elapsed_ms(total_start),
         }
+        fallback.response_time_ms = fallback.timings_ms["total_ms"]
         fallback.provider_status = "grounded_cfs_analysis"
         if request.app_mode == "economics" and request.request_type == "powerbi_report_plan":
             _log_ai_timing("deterministic_powerbi", fallback.timings_ms)
@@ -381,7 +387,10 @@ class CfsAiSearchService:
         payload = {
             "model": self._settings.cfs_ai_model.strip(),
             "messages": [
-                {"role": "system", "content": _provider_system_prompt()},
+                {
+                    "role": "system",
+                    "content": provider_system_prompt(request.app_mode),
+                },
                 {
                     "role": "user",
                     "content": json.dumps(
@@ -507,6 +516,9 @@ def deterministic_answer(
     context: CfsAiContext,
     domains: list[CfsAiDomain],
 ) -> CfsAiSearchResponse:
+    if safety_kind := classify_safety_query(request.query):
+        return _safety_answer(request, context, safety_kind)
+
     if request.selected_signal:
         return _selected_signal_answer(request, context, domains)
 
@@ -529,6 +541,60 @@ def deterministic_answer(
 
 
 def sanitize_response(response: CfsAiSearchResponse) -> CfsAiSearchResponse:
+    response.executive_summary = response.executive_summary or response.answer.split(
+        "\n\n",
+        1,
+    )[0][:500]
+    response.key_findings = response.key_findings or [
+        item.detail for item in response.evidence[:5]
+    ]
+    response.interpretation = response.interpretation or response.executive_summary
+    response.limitations = response.limitations or response.caveats
+    response.official_data_still_needed = (
+        response.official_data_still_needed
+        or [
+            caveat
+            for caveat in response.caveats
+            if "official" in caveat.lower()
+            or "not available" in caveat.lower()
+            or "missing" in caveat.lower()
+        ][:4]
+    )
+    response.recommended_next_actions = (
+        response.recommended_next_actions or response.suggested_actions
+    )
+    response.suggested_follow_up_questions = (
+        response.suggested_follow_up_questions
+        or [
+            "Which CFS evidence supports this answer?",
+            "What should an analyst verify next?",
+        ]
+    )
+    response.answer_mode = (
+        "safety"
+        if response.answer_mode == "safety"
+        else "provider_enhanced"
+        if response.provider == "openai"
+        else "deterministic"
+    )
+    response.fallback_used = "fallback" in str(response.provider_status or "")
+    response.prompt_version = PROMPT_VERSION
+    response.response_time_ms = response.timings_ms.get(
+        "total_ms",
+        response.response_time_ms,
+    )
+    response.provenance = response.provenance or {
+        "as_of": response.as_of,
+        "data_origin": (
+            "sanitized_demo_extract"
+            if response.data_mode == "demo"
+            else "unavailable"
+            if response.data_source == "unavailable"
+            else "local_api"
+        ),
+        "runtime_mode": "demo" if response.data_mode == "demo" else "local",
+        "schema_version": "1.0",
+    }
     payload = response.model_dump()
     sanitized = _sanitize_value(payload)
     return CfsAiSearchResponse.model_validate(sanitized)
@@ -3062,6 +3128,10 @@ def _response(
 ) -> CfsAiSearchResponse:
     active_domains = domains or ["general"]
     caveats = list(dict.fromkeys(SAFE_CAVEATS + context.get("caveats", [])))[:6]
+    data_source = str(
+        context.get("data_source")
+        or ("portfolio_demo_extract" if mode == "demo" else "local_live_backend")
+    )
     if mode == "demo":
         caveats.insert(0, "Portfolio Demo uses a cached demo extract.")
     filter_summary = context.get("filtered_context_summary")
@@ -3073,16 +3143,62 @@ def _response(
         caveats=caveats,
         context_freshness=str(context.get("context_freshness") or ("cached_demo_extract" if mode == "demo" else "current_session")),
         dashboard_actions=dashboard_actions_for_domains(active_domains, None),
-        data_source=str(context.get("data_source") or ("portfolio_demo_extract" if mode == "demo" else "local_live_backend")),
+        data_source=data_source,
         data_mode=mode,  # type: ignore[arg-type]
         domains=active_domains,
         evidence=evidence,
         filtered_context_summary=context.get("filtered_context_summary"),
         powerbi_actions=powerbi_actions,
         provider="none",
+        provenance=context.get("provenance")
+        or {
+            "data_origin": (
+                "sanitized_demo_extract"
+                if mode == "demo"
+                else "unavailable"
+                if data_source == "unavailable"
+                else "local_api"
+            ),
+            "runtime_mode": mode,
+            "schema_version": "1.0",
+        },
         related_layers=_related_layers(active_domains),
         suggested_actions=actions,
     )
+
+
+def _safety_answer(
+    request: CfsAiSearchRequest,
+    context: CfsAiContext,
+    safety_kind: str,
+) -> CfsAiSearchResponse:
+    answer = (
+        "I cannot reveal system instructions, credentials, private data, or "
+        "override CFS evidence and safety rules. I can answer a scoped Planning "
+        "or Economics question using the available CFS evidence."
+        if safety_kind == "prompt_injection"
+        else "I cannot provide credentials or private owner/contact data. Ask CFS "
+        "can summarize non-private Planning or Economics evidence and identify "
+        "the official source that should verify it."
+    )
+    response = _response(
+        answer,
+        context,
+        ["general"],
+        request.mode,
+        [
+            _evidence(
+                "Requested information",
+                "Restricted by the CFS privacy and evidence policy.",
+                "Ask CFS safety policy",
+                "not_available",
+            ),
+        ],
+        ["Ask a scoped question about available CFS evidence."],
+    )
+    response.answer_mode = "safety"
+    response.provider_status = f"safety_{safety_kind}"
+    return sanitize_response(response)
 
 
 def _evidence(title, detail, source, confidence="available") -> CfsAiEvidenceItem:
@@ -3204,21 +3320,6 @@ def _dashboard_actions_from_payload(value: Any) -> CfsAiDashboardActions | None:
         return CfsAiDashboardActions.model_validate(value)
     except Exception:
         return None
-
-
-def _provider_system_prompt() -> str:
-    return (
-        "You are the CFS planning intelligence assistant. Answer only from the supplied CFS context. "
-        "Return valid JSON only. Do not invent data. Do not expose owner names, mailing addresses, secrets, "
-        "exact probabilities, raw model scores, official model classes, official school overcrowding claims, "
-        "or database connection details. Use safe planning language. Distinguish observed permit activity from "
-        "prediction. Distinguish preliminary school capacity watch from official school capacity findings. "
-        "Use conversation_context only to resolve references like 'those areas' or 'that signal'; do not invent "
-        "new data from it. If selected_signal is supplied, prioritize explaining that signal with evidence, "
-        "why it matters, caveats, and what to inspect next. "
-        "dashboard_actions are UI suggestions only and do not create official claims. Return JSON with answer, "
-        "evidence, related_layers, caveats, suggested_actions, and dashboard_actions."
-    )
 
 
 def _post_provider_json(

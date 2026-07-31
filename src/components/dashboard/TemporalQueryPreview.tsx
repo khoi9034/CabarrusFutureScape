@@ -83,7 +83,9 @@ export function TemporalQueryPreview({
           ? `The API returned ${formatDevelopmentCount(
               temporalQuery.resultCount,
             )} paged records for this temporal context.`
-          : "Generated static temporal artifacts remain available for this context."}{" "}
+          : temporalQuery.source === "fallback"
+            ? "Local temporal data is unavailable; no static records are substituted."
+            : "Generated static temporal artifacts are available in demo mode."}{" "}
         It does not alter the MapView.
       </p>
     </section>

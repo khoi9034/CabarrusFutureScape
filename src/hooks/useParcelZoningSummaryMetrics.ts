@@ -3,16 +3,19 @@
 import { useEffect, useState } from "react";
 import {
   getStaticParcelZoningDistribution,
+  getUnavailableParcelZoningDistribution,
   normalizeParcelZoningSummaryForDistribution,
   type ParcelZoningDistributionViewModel,
 } from "@/lib/adapters/parcelZoningSummaryAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getParcelZoningSummary } from "@/lib/api/parcels";
 
 export function useParcelZoningSummaryMetrics() {
   const [metrics, setMetrics] = useState<ParcelZoningDistributionViewModel>(
     () => {
-      const staticMetrics = getStaticParcelZoningDistribution();
+      const staticMetrics = USE_DEMO_DATA
+        ? getStaticParcelZoningDistribution()
+        : getUnavailableParcelZoningDistribution();
 
       return USE_BACKEND_API
         ? {
@@ -45,7 +48,7 @@ export function useParcelZoningSummaryMetrics() {
           return;
         }
 
-        const fallbackMetrics = getStaticParcelZoningDistribution();
+        const fallbackMetrics = getUnavailableParcelZoningDistribution();
         setMetrics({
           ...fallbackMetrics,
           errorMessage:

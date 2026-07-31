@@ -731,6 +731,34 @@ def test_ai_search_context_cache_reuses_full_live_indicator_context(monkeypatch)
     assert first["context_freshness"] == "current_session"
 
 
+def test_ai_search_context_cache_is_bypassed_without_database(monkeypatch) -> None:
+    ai_search_router._ASK_CFS_CONTEXT_CACHE.update(
+        {
+            "expires_at_planning": (
+                ai_search_router.datetime.now(ai_search_router.UTC)
+                + ai_search_router.timedelta(minutes=5)
+            ),
+            "payload_planning": {
+                "context_freshness": "current_session",
+                "data_source": "local_live_backend",
+                "indicator_intelligence": {"signals": [{"title": "stale"}]},
+            },
+        },
+    )
+    monkeypatch.setattr(
+        ai_search_router,
+        "get_cached_indicator_intelligence",
+        lambda: {"signals": [{"title": "stale"}]},
+    )
+
+    context = ai_search_router.gather_cfs_ai_context(None)
+
+    assert context["context_freshness"] == "fallback_partial"
+    assert context["data_source"] == "unavailable"
+    assert context["indicator_intelligence"] == {}
+    assert context["provenance"]["data_origin"] == "unavailable"
+
+
 def test_ai_search_partial_indicator_context_is_not_cached(monkeypatch) -> None:
     calls = {"count": 0}
 

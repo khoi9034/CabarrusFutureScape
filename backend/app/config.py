@@ -9,6 +9,8 @@ EnvironmentName = Literal["dev", "test", "prod"]
 AiProviderName = Literal["none", "openai"]
 DatabaseAuthMode = Literal["password", "managed_identity"]
 ApiAuthMode = Literal["off", "entra"]
+RuntimeMode = Literal["local", "enterprise"]
+DataProviderName = Literal["local_postgis", "enterprise_service"]
 BACKEND_ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 ROOT_BACKEND_ENV_FILE = Path(__file__).resolve().parents[2] / "backend.env"
 LOCAL_FRONTEND_CORS_ORIGINS = (
@@ -33,6 +35,14 @@ class Settings(BaseSettings):
     app_env: EnvironmentName = Field(
         default="dev",
         validation_alias=AliasChoices("APP_ENV", "CFS_API_ENV"),
+    )
+    cfs_runtime_mode: RuntimeMode = Field(
+        default="local",
+        validation_alias=AliasChoices("CFS_RUNTIME_MODE"),
+    )
+    cfs_data_provider: DataProviderName = Field(
+        default="local_postgis",
+        validation_alias=AliasChoices("CFS_DATA_PROVIDER"),
     )
     postgres_host: str = Field(
         default="localhost",

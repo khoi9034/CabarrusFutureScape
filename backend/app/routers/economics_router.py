@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.dependencies.database import get_optional_read_only_db
 from app.services.enterprise_export_service import (
+    build_powerbi_starter_pack,
     build_powerbi_csv_manifest,
     build_enterprise_export_payload,
     build_powerbi_export_payload,
@@ -125,6 +126,25 @@ def get_economics_powerbi_csv(
         content=csv_text,
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{table_name}.csv"'},
+    )
+
+
+@router.get("/powerbi-export/starter-pack.zip")
+def get_economics_powerbi_starter_pack(
+    db: Session | None = Depends(get_optional_read_only_db, scope="function"),
+) -> Response:
+    """Return the complete local-data Power BI Starter Pack."""
+
+    payload = build_powerbi_export_payload(
+        _cached_economics_intelligence(db),
+        mode="live",
+    )
+    return Response(
+        content=build_powerbi_starter_pack(payload),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": 'attachment; filename="cfs-powerbi-starter-pack.zip"',
+        },
     )
 
 

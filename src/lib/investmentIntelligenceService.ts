@@ -75,10 +75,11 @@ import type {
 } from "@/types/api";
 
 export async function getInvestmentScreen(strategy: InvestmentStrategyId) {
-  if (USE_DEMO_DATA || !USE_BACKEND_API) {
+  if (USE_DEMO_DATA) {
     return getDemoInvestmentScreen(strategy);
   }
 
+  assertLive();
   return apiPost<InvestmentScreenResponse>(
     "/investment/screen",
     { limit: 120, strategy },
@@ -475,11 +476,13 @@ export async function exportInvestmentCaseStudyCodexBrief(slug: string) {
 }
 
 function assertLive() {
-  if (isDemoInvestmentMode()) {
-    throw new Error("Investment intake uses local FastAPI in live mode.");
+  if (!USE_BACKEND_API) {
+    throw new Error(
+      "Investment intelligence requires the configured CFS API outside demo mode.",
+    );
   }
 }
 
 function isDemoInvestmentMode() {
-  return USE_DEMO_DATA || !USE_BACKEND_API;
+  return USE_DEMO_DATA;
 }

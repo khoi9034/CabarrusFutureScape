@@ -18,7 +18,7 @@ const warningToneStyles = {
 
 const sourceLabels = {
   api: "FastAPI",
-  fallback: "Static fallback",
+  fallback: "Local data unavailable",
   loading: "Loading API",
   static: "Static",
 } as const;
@@ -30,9 +30,9 @@ export function GovernanceWarningsPanel() {
     source === "api"
       ? "Warning categories are loaded from GET /parcels/governance-warnings."
       : source === "fallback"
-        ? "FastAPI governance warnings are unavailable, so this panel is using generated static QA artifacts."
+        ? "FastAPI governance warnings are unavailable. No static QA counts are substituted."
         : source === "loading"
-          ? "Checking FastAPI governance warnings; static QA metrics remain visible while the request completes."
+          ? "Checking FastAPI governance warnings."
           : "Warning categories use generated static parcel zoning QA outputs.";
 
   return (

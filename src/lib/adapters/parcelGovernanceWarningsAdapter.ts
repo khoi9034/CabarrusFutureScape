@@ -89,6 +89,15 @@ export function getStaticParcelGovernanceWarnings(): ParcelGovernanceWarningsVie
   };
 }
 
+export function getUnavailableParcelGovernanceWarnings(): ParcelGovernanceWarningsViewModel {
+  return {
+    errorMessage: null,
+    isLoading: false,
+    metrics: [],
+    source: "fallback",
+  };
+}
+
 export function normalizeParcelGovernanceWarnings(
   response: ParcelGovernanceWarningResponse,
 ): Omit<ParcelGovernanceWarningsViewModel, "errorMessage" | "isLoading" | "source"> {

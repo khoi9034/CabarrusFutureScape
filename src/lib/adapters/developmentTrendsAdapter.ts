@@ -44,6 +44,17 @@ export function getStaticDevelopmentTrends(): DevelopmentTrendsViewModel {
   };
 }
 
+export function getUnavailableDevelopmentTrends(): DevelopmentTrendsViewModel {
+  return {
+    annualTrend: [],
+    errorMessage: null,
+    isLoading: false,
+    monthlyTrend: [],
+    source: "fallback",
+    trendDirection: null,
+  };
+}
+
 export function normalizeDevelopmentTrends(
   response: DevelopmentTrendsResponse,
 ): Omit<DevelopmentTrendsViewModel, "errorMessage" | "isLoading" | "source"> {

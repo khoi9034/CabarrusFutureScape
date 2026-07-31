@@ -76,7 +76,12 @@ import { useSelectedParcelDevelopmentActivity } from "@/hooks/useSelectedParcelD
 import { useSelectedParcelFloodConstraint } from "@/hooks/useSelectedParcelFloodConstraint";
 import { useSelectedParcelSchoolConstraint } from "@/hooks/useSelectedParcelSchoolConstraint";
 import { useTransportationContextSummary } from "@/hooks/useTransportationContextSummary";
-import { apiGet, CFS_API_BASE_URL, USE_BACKEND_API } from "@/lib/api/client";
+import {
+  apiGet,
+  CFS_API_BASE_URL,
+  USE_BACKEND_API,
+  USE_DEMO_DATA,
+} from "@/lib/api/client";
 import {
   getModeScopedActiveLayers,
   isExploreCountywideMode,
@@ -2132,6 +2137,12 @@ async function loadWsaccExploreData(): Promise<WsaccExploreData> {
     return normalizeWsaccExploreData(stats, geography, "Local live backend");
   }
 
+  if (!USE_DEMO_DATA) {
+    throw new Error(
+      "WSACC intelligence requires the configured CFS API outside demo mode.",
+    );
+  }
+
   const response = await fetch("/demo-data/utility_readiness_summary.json", {
     cache: "force-cache",
     headers: { Accept: "application/json" },
@@ -2822,7 +2833,7 @@ function SelectedParcelBrief({
             source === "api"
               ? "Live parcel intelligence"
               : source === "fallback"
-                ? "Static fallback"
+                ? "API search summary"
                 : "Parcel intelligence"
           }
         />
@@ -3120,7 +3131,7 @@ function OverviewSelectedParcelSummary({
             {source === "api"
               ? "Live parcel intelligence"
               : source === "fallback"
-                ? "Static fallback"
+                ? "API search summary"
                 : "Parcel intelligence"}
           </p>
         </div>
@@ -4996,15 +5007,21 @@ function SystemStatusCard() {
             Data Source Mode
           </p>
           <h3 className="mt-1 text-sm font-semibold text-white">
-            {USE_BACKEND_API ? "FastAPI enabled" : "Static fallback mode"}
+            {USE_DEMO_DATA
+              ? "Portfolio demo fixtures"
+              : USE_BACKEND_API
+                ? "FastAPI enabled"
+                : "Local data unavailable"}
           </h3>
         </div>
         <IntelligenceModeBadge />
       </div>
       <p className="mt-3 text-xs leading-5 text-slate-400">
-        {USE_BACKEND_API
-          ? "Migrated parcel, development, flood, and temporal panels call the local FastAPI backend and retain independent static fallback behavior."
-          : "The dashboard is using generated static artifacts and mock readiness data until backend API mode is enabled."}
+        {USE_DEMO_DATA
+          ? "The public portfolio demo uses sanitized static business fixtures."
+          : USE_BACKEND_API
+            ? "Parcel, development, flood, and temporal panels call the configured FastAPI backend and show unavailable states on failure."
+            : "Live business domains require the configured CFS API; demonstration metrics are not substituted."}
       </p>
     </section>
   );

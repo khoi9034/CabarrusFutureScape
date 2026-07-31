@@ -397,7 +397,11 @@ export function IndicatorCenterWorkspace() {
 
 function PlanningIndicatorCenterWorkspace() {
   const {
+    activeLayerIds,
+    overviewCommandMode,
     selectedIndicatorCenterContext,
+    selectedParcelId,
+    selectedParcelIntelligence,
     savePlanningSnapshot,
     setPlanningSnapshotView,
     setProductMode,
@@ -555,6 +559,14 @@ function PlanningIndicatorCenterWorkspace() {
   const askCfsFilterContext = useMemo(
     () => ({
       active_tab: activeReadinessTabLabel,
+      active_layers: activeLayerIds.join(", "),
+      planning_mode: overviewCommandMode,
+      selected_parcel_id: selectedParcelId,
+      selected_parcel_pin14: selectedParcelIntelligence?.pin14 ?? null,
+      selected_parcel_quality:
+        selectedParcelIntelligence?.parcelQualityStatus ?? null,
+      selected_parcel_zoning:
+        selectedParcelIntelligence?.zoningCode ?? null,
       selected_domain: selectedIndicatorCenterContext?.groupId ?? null,
       selected_signal_id: selectedIndicatorCenterContext?.indicatorId ?? null,
       selected_signal_title: selectedIndicatorCenterContext?.name ?? null,
@@ -563,6 +575,10 @@ function PlanningIndicatorCenterWorkspace() {
     }),
     [
       activeReadinessTabLabel,
+      activeLayerIds,
+      overviewCommandMode,
+      selectedParcelId,
+      selectedParcelIntelligence,
       selectedIndicatorCenterContext,
       visibleAttentionQueue.length,
       visibleExecutiveSignals.length,
@@ -2438,7 +2454,7 @@ function MissionHeader({
               ? "public portfolio demo"
               : USE_BACKEND_API
                 ? "local/live backend"
-                : "static fallback"}
+                : "local data unavailable"}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             {statusPills.map((label) => (

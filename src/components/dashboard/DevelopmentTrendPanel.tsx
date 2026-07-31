@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const sourceLabels = {
   api: "FastAPI",
-  fallback: "Static fallback",
+  fallback: "Local data unavailable",
   loading: "Loading API",
   static: "Static",
 } as const;
@@ -28,9 +28,9 @@ export function DevelopmentTrendPanel() {
     source === "api"
       ? "Trend records are loaded from GET /development/trends."
       : source === "fallback"
-        ? "FastAPI development trends are unavailable, so this panel is using generated static trend artifacts."
+        ? "FastAPI development trends are unavailable. No static trend records are substituted."
         : source === "loading"
-          ? "Checking FastAPI development trends; static trend records remain visible while the request completes."
+          ? "Checking FastAPI development trends."
           : "Trend records use generated static development activity outputs.";
 
   return (

@@ -3,6 +3,7 @@
 import {
   BriefcaseBusiness,
   Building2,
+  Download,
   Gauge,
   MapPinned,
   Network,
@@ -18,7 +19,11 @@ import {
   askCfsEconomicsPrintPrompts,
   askCfsEconomicsWorkspacePrompts,
 } from "@/lib/aiSearchService";
-import { buildApiUrl, USE_DEMO_DATA } from "@/lib/api/client";
+import {
+  buildApiUrl,
+  recordTechnicalEvent,
+  USE_DEMO_DATA,
+} from "@/lib/api/client";
 import { packageBackedConsultingCaseStudy } from "@/lib/consultingCaseStudyPackage";
 import {
   getEconomicsEnterpriseExport,
@@ -3428,6 +3433,9 @@ function engagementShortlistType(itemType: InvestmentSavedItem["item_type"]) {
 function recordInvestmentEvent(eventName: string, detail: Record<string, string | number | boolean | null> = {}) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent("cfs-investment-event", { detail: { eventName, ...detail } }));
+  if (eventName === "report_generated") {
+    recordTechnicalEvent("report_generation", detail);
+  }
 }
 
 function readInvestmentDisplayPreference(): {
@@ -4530,6 +4538,7 @@ function EconomicDashboardPage({
     data_confidence: selectedDataConfidence,
     filtered_signal_count: filteredSignals.length,
     filtered_watchlist_rows: filteredWatchlist.length,
+    selected_parcel_id: selectedParcelId,
   };
 
   return (
@@ -5805,6 +5814,9 @@ function EnterpriseToolsPage({
   const decisionPackPreview = JSON.stringify(decisionPack ?? { status: "Loading decision pack" }, null, 2);
   const reportBuilderGuide = powerBiPayload?.report_builder_guide;
   const csvRows = powerBiCsvRows(powerBiPayload);
+  const starterPackUrl = USE_DEMO_DATA
+    ? "/demo-data/powerbi/cfs-powerbi-starter-pack.zip"
+    : buildApiUrl("/economics/powerbi-export/starter-pack.zip");
   const relationshipNotes = powerBiRelationshipNotes(powerBiPayload);
   const reportLayoutNotes = powerBiReportLayoutNotes(powerBiPayload);
   const importOrderNotes = powerBiCsvImportOrderNotes(csvRows);
@@ -5855,6 +5867,20 @@ function EnterpriseToolsPage({
         {selectedOutput === "powerbi" ? (
           <div className="grid gap-4">
             <div className="flex flex-wrap gap-2">
+              <a
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]"
+                download
+                href={starterPackUrl}
+                onClick={() =>
+                  recordTechnicalEvent("powerbi_export", {
+                    format: "starter_pack_zip",
+                    runtime_mode: USE_DEMO_DATA ? "demo" : "local",
+                  })
+                }
+              >
+                <Download className="h-4 w-4" />
+                Download Starter Pack
+              </a>
               <button
                 className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
                 onClick={() => setPowerBiPreviewMode("summary")}

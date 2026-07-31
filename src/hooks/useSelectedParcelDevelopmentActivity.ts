@@ -6,7 +6,7 @@ import {
   normalizeSelectedParcelDevelopmentActivity,
   type SelectedParcelDevelopmentActivityViewModel,
 } from "@/lib/adapters/selectedParcelDevelopmentActivityAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentHotspots } from "@/lib/api/development";
 
 interface ApiSelectedParcelDevelopmentActivityState
@@ -28,7 +28,7 @@ function emptyState(): SelectedParcelDevelopmentActivityViewModel {
     activity: null,
     errorMessage: null,
     isLoading: false,
-    source: USE_BACKEND_API ? "loading" : "static",
+    source: USE_BACKEND_API ? "loading" : "fallback",
   };
 }
 
@@ -79,7 +79,7 @@ export function useSelectedParcelDevelopmentActivity(
         }
 
         setApiState({
-          ...staticActivity,
+          activity: null,
           errorMessage:
             error instanceof Error
               ? error.message
@@ -98,7 +98,15 @@ export function useSelectedParcelDevelopmentActivity(
   }
 
   if (!USE_BACKEND_API) {
-    return staticActivity;
+    return USE_DEMO_DATA
+      ? staticActivity
+      : {
+          activity: null,
+          errorMessage:
+            "Selected parcel development activity requires the configured CFS API outside demo mode.",
+          isLoading: false,
+          source: "fallback",
+        };
   }
 
   if (apiState.parcelId === officialParcelId) {
@@ -106,7 +114,7 @@ export function useSelectedParcelDevelopmentActivity(
   }
 
   return {
-    ...staticActivity,
+    ...emptyState(),
     isLoading: true,
     source: "loading",
   };

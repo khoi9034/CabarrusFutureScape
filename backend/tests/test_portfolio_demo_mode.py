@@ -1,4 +1,5 @@
 from pathlib import Path
+from zipfile import ZipFile
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -200,11 +201,20 @@ def test_demo_data_files_exist_and_avoid_sensitive_contact_fields() -> None:
         {path.name for path in (demo_dir / "powerbi").glob("*")}
     )
 
-    demo_text = "\n".join(
-        path.read_text(encoding="utf-8").lower()
-        for path in demo_dir.rglob("*")
-        if path.is_file()
-    )
+    demo_parts: list[str] = []
+    for path in demo_dir.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.suffix == ".zip":
+            with ZipFile(path) as archive:
+                demo_parts.extend(
+                    archive.read(name).decode("utf-8").lower()
+                    for name in archive.namelist()
+                    if not name.endswith("/")
+                )
+            continue
+        demo_parts.append(path.read_text(encoding="utf-8").lower())
+    demo_text = "\n".join(demo_parts)
     blocked_terms = [
         "acctname",
         "mailaddr",

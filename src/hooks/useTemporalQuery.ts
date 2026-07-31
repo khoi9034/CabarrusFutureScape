@@ -4,10 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import type { DevelopmentTemporalFilters } from "@/data/intelligence/developmentTemporalIndex";
 import {
   getStaticTemporalQueryView,
+  getUnavailableTemporalQueryView,
   normalizeDevelopmentTemporalQuery,
   type TemporalQueryViewModel,
 } from "@/lib/adapters/temporalQueryAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import {
   getDevelopmentTemporalQuery,
   type DevelopmentTemporalQueryParams,
@@ -55,7 +56,7 @@ export function useTemporalQuery(filters: DevelopmentTemporalFilters) {
         setApiState({
           errorMessage: null,
           requestKey,
-          view: normalizeDevelopmentTemporalQuery(response, filters, staticView),
+          view: normalizeDevelopmentTemporalQuery(response, filters),
         });
       })
       .catch((error: unknown) => {
@@ -74,10 +75,16 @@ export function useTemporalQuery(filters: DevelopmentTemporalFilters) {
       });
 
     return () => controller.abort();
-  }, [filters, queryParams, requestKey, staticView]);
+  }, [filters, queryParams, requestKey]);
 
   if (!USE_BACKEND_API) {
-    return staticView;
+    return USE_DEMO_DATA
+      ? staticView
+      : {
+          ...getUnavailableTemporalQueryView(filters),
+          errorMessage:
+            "Temporal analysis requires the configured CFS API outside demo mode.",
+        };
   }
 
   if (apiState?.requestKey === requestKey && apiState.view) {
@@ -91,7 +98,7 @@ export function useTemporalQuery(filters: DevelopmentTemporalFilters) {
 
   if (apiState?.requestKey === requestKey && apiState.errorMessage) {
     return {
-      ...staticView,
+      ...getUnavailableTemporalQueryView(filters),
       errorMessage: apiState.errorMessage,
       isLoading: false,
       source: "fallback",
@@ -99,7 +106,7 @@ export function useTemporalQuery(filters: DevelopmentTemporalFilters) {
   }
 
   return {
-    ...staticView,
+    ...getUnavailableTemporalQueryView(filters),
     isLoading: true,
     source: "loading",
   } satisfies TemporalQueryViewModel;

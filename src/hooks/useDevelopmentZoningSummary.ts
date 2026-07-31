@@ -3,16 +3,19 @@
 import { useEffect, useState } from "react";
 import {
   getStaticDevelopmentZoningSummary,
+  getUnavailableDevelopmentZoningSummary,
   normalizeDevelopmentZoningSummary,
   type DevelopmentZoningSummaryViewModel,
 } from "@/lib/adapters/developmentZoningSummaryAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentZoningSummary } from "@/lib/api/development";
 
 export function useDevelopmentZoningSummary() {
   const [summary, setSummary] = useState<DevelopmentZoningSummaryViewModel>(
     () => {
-      const staticSummary = getStaticDevelopmentZoningSummary();
+      const staticSummary = USE_DEMO_DATA
+        ? getStaticDevelopmentZoningSummary()
+        : getUnavailableDevelopmentZoningSummary();
 
       return USE_BACKEND_API
         ? {
@@ -45,7 +48,7 @@ export function useDevelopmentZoningSummary() {
           return;
         }
 
-        const fallbackSummary = getStaticDevelopmentZoningSummary();
+        const fallbackSummary = getUnavailableDevelopmentZoningSummary();
         setSummary({
           ...fallbackSummary,
           errorMessage:

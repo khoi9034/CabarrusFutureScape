@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   LoaderCircle,
   MousePointer2,
+  RotateCcw,
   Satellite,
 } from "lucide-react";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
@@ -28,7 +29,9 @@ interface ActiveSelectionDisplay {
 
 interface MapViewportPlaceholderProps {
   children: React.ReactNode;
+  contextReady: boolean;
   mapStatus: DashboardStatus;
+  onRetryInteractiveMap: () => void;
   parcelFocusSummary?: ActiveParcelFocusSummary | null;
   sceneError?: string | null;
   selectedParcel: ParcelSummary | null;
@@ -39,7 +42,9 @@ interface MapViewportPlaceholderProps {
 
 export function MapViewportPlaceholder({
   children,
+  contextReady,
   mapStatus,
+  onRetryInteractiveMap,
   parcelFocusSummary,
   sceneError,
   selectedParcel,
@@ -49,6 +54,7 @@ export function MapViewportPlaceholder({
 }: MapViewportPlaceholderProps) {
   const isLoading = mapStatus === "idle" || mapStatus === "loading";
   const hasError = mapStatus === "degraded";
+  const hasUsableStaticMap = contextReady && mapStatus !== "online";
   const activeSelection = getActiveSelectionDisplay({
     parcelFocusSummary,
     selectedParcel,
@@ -66,7 +72,7 @@ export function MapViewportPlaceholder({
       <div className="scene-mask pointer-events-none absolute inset-0 z-20" />
       <div className="map-scanline pointer-events-none absolute inset-0 z-20 opacity-40" />
 
-      {(isLoading || hasError) && (
+      {(isLoading || hasError) && !contextReady && (
         <div
           aria-live="polite"
           className="pointer-events-none absolute inset-0 z-40 grid place-items-center px-6"
@@ -93,9 +99,57 @@ export function MapViewportPlaceholder({
                 ? "Local context remains visible; ArcGIS pan and hit-testing are unavailable"
                 : "Client-only ArcGIS runtime"}
             </p>
+            {hasError ? (
+              <button
+                className="pointer-events-auto mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#f0cd79] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/70"
+                onClick={onRetryInteractiveMap}
+                title="Retry map context and interactive renderer"
+                type="button"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Retry map
+              </button>
+            ) : null}
           </div>
         </div>
       )}
+
+      {hasUsableStaticMap ? (
+        <div
+          aria-live="polite"
+          className="pointer-events-auto absolute right-3 top-16 z-50 max-w-[min(19rem,calc(100%-1.5rem))] rounded-md border border-white/15 bg-[#06101a]/92 p-3 shadow-2xl backdrop-blur-xl sm:right-4"
+          role="status"
+        >
+          <div className="flex items-start gap-2">
+            {hasError ? (
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-200" />
+            ) : (
+              <LoaderCircle className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-[#d8b86a]" />
+            )}
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-white">
+                Static Map Mode
+              </p>
+              <p className="mt-1 text-[11px] leading-4 text-slate-300">
+                {hasError
+                  ? "Interactive controls are unavailable. County geography and current overlays remain usable."
+                  : "County context is ready while interactive controls load."}
+              </p>
+              {hasError ? (
+                <button
+                  className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#f0cd79] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d8b86a]/70"
+                  onClick={onRetryInteractiveMap}
+                  title="Retry interactive map"
+                  type="button"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Retry interactive map
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="pointer-events-none absolute left-3 top-3 z-40 max-w-[calc(100%-1.5rem)] rounded-lg border border-white/10 bg-[#060b12]/72 p-3 shadow-2xl backdrop-blur-xl sm:left-4 sm:top-4 sm:max-w-[calc(100%-2rem)]">
         <div className="flex items-center gap-2">
@@ -108,8 +162,8 @@ export function MapViewportPlaceholder({
           <span className="rounded-md border border-[#d8b86a]/25 bg-[#d8b86a]/10 px-2 py-1 text-[#f0cd79]">
             {mapStatus === "online"
               ? "Map Live"
-              : hasError
-                ? "Local Context"
+              : contextReady
+                ? "Static Map Mode"
                 : "Map Standby"}
           </span>
           <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1">

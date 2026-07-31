@@ -25,7 +25,7 @@ import {
   dashboardStatusLabels,
 } from "@/data/mock/dashboardMockData";
 import { CommandPalette } from "@/components/dashboard/CommandPalette";
-import { searchParcelIndex, type ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
+import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import { useDashboardState } from "@/hooks/useDashboardState";
 import {
   normalizeBackendParcelDetailResponse,
@@ -36,6 +36,7 @@ import { dashboardRoleRegistry } from "@/lib/dashboard/roleRegistry";
 import { workspaceLayoutPresets } from "@/lib/dashboard/workspacePresets";
 import {
   getApiErrorDisplayMessage,
+  recordTechnicalEvent,
   USE_BACKEND_API,
   USE_DEMO_DATA,
   USE_ONLINE_BASEMAP,
@@ -290,36 +291,23 @@ export function TopNav() {
       setQuickSearchStatus("loading");
       setQuickSearchError(null);
 
-      const runStaticFallback = async (
-        fallbackMessage: string | null,
-      ) => {
-        const staticResults = await (USE_DEMO_DATA
-          ? searchDemoParcels({
-              limit: QUICK_SEARCH_LIMIT,
-              query: trimmedQuickSearchQuery,
-            })
-          : searchParcelIndex({
-              limit: QUICK_SEARCH_LIMIT,
-              query: trimmedQuickSearchQuery,
-            }));
+      const runDemoSearch = async () => {
+        const staticResults = await searchDemoParcels({
+          limit: QUICK_SEARCH_LIMIT,
+          query: trimmedQuickSearchQuery,
+        });
 
         if (controller.signal.aborted) {
           return;
         }
 
         setQuickSearchResults(staticResults);
-        setQuickSearchError(fallbackMessage);
-        setQuickSearchStatus(
-          fallbackMessage
-            ? "fallback"
-            : staticResults.length
-              ? "ready"
-              : "empty",
-        );
+        setQuickSearchError(null);
+        setQuickSearchStatus(staticResults.length ? "ready" : "empty");
       };
 
-      if (!USE_BACKEND_API) {
-        runStaticFallback(null).catch((error: unknown) => {
+      if (USE_DEMO_DATA) {
+        runDemoSearch().catch((error: unknown) => {
           if (controller.signal.aborted) {
             return;
           }
@@ -332,6 +320,15 @@ export function TopNav() {
           );
           setQuickSearchStatus("error");
         });
+        return;
+      }
+
+      if (!USE_BACKEND_API) {
+        setQuickSearchResults([]);
+        setQuickSearchError(
+          "Parcel search requires the configured CFS API outside demo mode.",
+        );
+        setQuickSearchStatus("error");
         return;
       }
 
@@ -358,25 +355,14 @@ export function TopNav() {
             return;
           }
 
-          const fallbackMessage =
-            `${getApiErrorDisplayMessage(
+          setQuickSearchResults([]);
+          setQuickSearchError(
+            getApiErrorDisplayMessage(
               error,
               "Parcel search API is unavailable.",
-            )} Showing static fallback results.`;
-
-          runStaticFallback(fallbackMessage).catch((fallbackError: unknown) => {
-            if (controller.signal.aborted) {
-              return;
-            }
-
-            setQuickSearchResults([]);
-            setQuickSearchError(
-              fallbackError instanceof Error
-                ? fallbackError.message
-                : "Parcel search is unavailable.",
-            );
-            setQuickSearchStatus("error");
-          });
+            ),
+          );
+          setQuickSearchStatus("error");
         });
     }, 250);
 
@@ -479,14 +465,14 @@ export function TopNav() {
             return;
           }
 
-          setSelectedParcelIntelligence(record, "fallback");
+          setSelectedParcelIntelligence(record, "api");
           setQuickSearchError(
             `${getApiErrorDisplayMessage(
               error,
               "Parcel detail API is unavailable.",
-            )} Showing selected search result fallback.`,
+            )} The API search summary remains selected.`,
           );
-          setQuickSearchStatus("fallback");
+          setQuickSearchStatus("error");
         });
     },
     [
@@ -504,7 +490,7 @@ export function TopNav() {
 
       setOverviewCommandMode("countywide");
       setProductMode("workspace");
-      hydrateSelectedParcel(record, USE_BACKEND_API ? "fallback" : "static");
+      hydrateSelectedParcel(record, USE_DEMO_DATA ? "static" : "api");
     },
     [hydrateSelectedParcel, setOverviewCommandMode, setProductMode],
   );
@@ -1142,6 +1128,11 @@ function useLocalRuntimeStatus(): LocalRuntimeState {
               ? "Run npm run present:cfs to restart the local API."
               : null,
         tone: apiReady && databaseReady ? "green" : "red",
+      });
+      recordTechnicalEvent("api_readiness", {
+        api_ready: apiReady,
+        ask_mode: ask,
+        database_ready: databaseReady,
       });
       timer = window.setTimeout(refresh, 10_000);
     }

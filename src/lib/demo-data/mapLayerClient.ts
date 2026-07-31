@@ -2,6 +2,7 @@ import {
   createParcelMapFocus,
   type ParcelFocusRecordLike,
 } from "@/lib/map/parcelMapFocus";
+import { recordDataProvenance } from "@/lib/api/client";
 import type {
   DevelopmentHotspotMapMarker,
   DevelopmentHotspotPermitSegmentFilter,
@@ -482,13 +483,27 @@ async function loadDemoMapJson<T>(
     },
   })
     .then(async (response) => {
+      recordDataProvenance(
+        cacheKey,
+        isStaticGeographicContext(fileName)
+          ? "static_geographic_context"
+          : "sanitized_demo_extract",
+      );
       if (!response.ok) {
         return fallback;
       }
 
       return (await response.json()) as T;
     })
-    .catch(() => fallback);
+    .catch(() => {
+      recordDataProvenance(
+        cacheKey,
+        isStaticGeographicContext(fileName)
+          ? "static_geographic_context"
+          : "sanitized_demo_extract",
+      );
+      return fallback;
+    });
 
   layerCache.set(cacheKey, promise as Promise<DemoGeoJsonLayer>);
   return promise;
@@ -512,16 +527,30 @@ async function loadDemoDataJson<T>(
     },
   })
     .then(async (response) => {
+      recordDataProvenance(cacheKey, "sanitized_demo_extract");
       if (!response.ok) {
         return fallback;
       }
 
       return (await response.json()) as T;
     })
-    .catch(() => fallback);
+    .catch(() => {
+      recordDataProvenance(cacheKey, "sanitized_demo_extract");
+      return fallback;
+    });
 
   dataCache.set(cacheKey, promise);
   return promise;
+}
+
+function isStaticGeographicContext(fileName: string) {
+  return [
+    "county_boundary.geojson",
+    "hydrography.geojson",
+    "municipal_boundaries.geojson",
+    "place_labels.geojson",
+    "transportation_context.geojson",
+  ].includes(fileName);
 }
 
 function toDemoDevelopmentHotspotMarker(

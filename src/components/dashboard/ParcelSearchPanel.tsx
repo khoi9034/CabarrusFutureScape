@@ -21,8 +21,6 @@ import {
 import {
   buildParcelSearchFilterOptions,
   filterParcelSearchRecords,
-  getParcelSearchRecordById,
-  loadParcelSearchIndex,
   type ParcelSearchFilterOptions,
   type ParcelSearchIndexMetadata,
   type ParcelSearchRecord,
@@ -163,15 +161,19 @@ export function ParcelSearchPanel() {
       records: null,
       requestKey: null,
     });
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() =>
+    !USE_DEMO_DATA && !USE_BACKEND_API
+      ? "Parcel discovery requires the configured CFS API outside demo mode."
+      : null,
+  );
   const [filters, setFilters] = useState<ParcelSearchFilters>(
     emptyParcelSearchFilters,
   );
   const [indexMetadata, setIndexMetadata] =
     useState<ParcelSearchIndexMetadata | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(USE_DEMO_DATA);
   const [options, setOptions] = useState<ParcelSearchFilterOptions | null>(
-    null,
+    () => (USE_DEMO_DATA ? null : buildParcelSearchFilterOptions([])),
   );
   const [query, setQuery] = useState("");
   const [records, setRecords] = useState<ParcelSearchRecord[]>([]);
@@ -202,18 +204,21 @@ export function ParcelSearchPanel() {
   useEffect(() => {
     let cancelled = false;
 
-    const parcelRecordsPromise = USE_DEMO_DATA
-      ? Promise.all([getDemoSampleParcels(), getDemoManifest()]).then(
-          ([demoRecords, manifest]) => ({
-            metadata: {
-              generatedAt: manifest.generated_at ?? "Demo data unavailable",
-              recordCount: demoRecords.length,
-              sourceTables: ["public/demo-data/sample_parcels.json"],
-            },
-            records: demoRecords,
-          }),
-        )
-      : loadParcelSearchIndex();
+    if (!USE_DEMO_DATA) {
+      return;
+    }
+
+    const parcelRecordsPromise = Promise.all([
+      getDemoSampleParcels(),
+      getDemoManifest(),
+    ]).then(([demoRecords, manifest]) => ({
+      metadata: {
+        generatedAt: manifest.generated_at ?? "Demo data unavailable",
+        recordCount: demoRecords.length,
+        sourceTables: ["public/demo-data/sample_parcels.json"],
+      },
+      records: demoRecords,
+    }));
 
     parcelRecordsPromise
       .then((index) => {
@@ -284,6 +289,12 @@ export function ParcelSearchPanel() {
           records: filteredRecords,
           requestKey: backendSearchKey,
         });
+        setIndexMetadata({
+          generatedAt: new Date().toISOString(),
+          recordCount: response.total_count,
+          sourceTables: ["GET /parcels/search"],
+        });
+        setOptions(buildParcelSearchFilterOptions(backendRecords));
       })
       .catch((searchError: unknown) => {
         if (controller.signal.aborted) {
@@ -349,6 +360,12 @@ export function ParcelSearchPanel() {
           records: filteredRecords,
           requestKey: backendFilterKey,
         });
+        setIndexMetadata({
+          generatedAt: new Date().toISOString(),
+          recordCount: response.total_count,
+          sourceTables: ["GET /parcels/filter"],
+        });
+        setOptions(buildParcelSearchFilterOptions(backendRecords));
       })
       .catch((filterError: unknown) => {
         if (controller.signal.aborted) {
@@ -388,7 +405,7 @@ export function ParcelSearchPanel() {
       setSelectedRecord(record);
       setSelectedParcelIntelligence(
         record,
-        USE_BACKEND_API ? "fallback" : "static",
+        USE_DEMO_DATA ? "static" : "api",
       );
       setParcelFocusFromRecord(
         {
@@ -425,23 +442,31 @@ export function ParcelSearchPanel() {
       }
 
       setQuery(detail.officialParcelId);
-      const parcelLookupPromise = USE_DEMO_DATA
-        ? getDemoParcelById(detail.officialParcelId)
-        : loadParcelSearchIndex().then((index) =>
-            getParcelSearchRecordById(index.records, detail.officialParcelId),
-          );
+      if (USE_DEMO_DATA) {
+        void getDemoParcelById(detail.officialParcelId)
+          .then((nextRecord) => {
+            if (nextRecord) {
+              handleSelectRecord(nextRecord, "command");
+            }
+          })
+          .catch((lookupError: unknown) => {
+            setError(
+              lookupError instanceof Error
+                ? lookupError.message
+                : "Demo parcel detail is unavailable.",
+            );
+          });
+        return;
+      }
 
-      parcelLookupPromise.then((nextRecord) => {
-        if (nextRecord) {
-          handleSelectRecord(nextRecord, "command");
-          return;
-        }
+      if (!USE_BACKEND_API) {
+        setError(
+          "Parcel detail requires the configured CFS API outside demo mode.",
+        );
+        return;
+      }
 
-        if (!USE_BACKEND_API) {
-          return;
-        }
-
-        getParcelDetail(detail.officialParcelId)
+      void getParcelDetail(detail.officialParcelId)
           .then((response) => {
             const fallbackRecord = createParcelDetailFallbackRecord(
               detail.officialParcelId,
@@ -478,7 +503,6 @@ export function ParcelSearchPanel() {
                 : "Parcel detail API is unavailable.",
             );
           });
-      });
     }
 
     window.addEventListener(PARCEL_SEARCH_INSPECT_EVENT, handleInspectParcel);
@@ -498,7 +522,7 @@ export function ParcelSearchPanel() {
 
   const results = useMemo(
     () => {
-      const staticResults = filterParcelSearchRecords(records, {
+      const demoResults = filterParcelSearchRecords(records, {
         filters,
         limit: RESULT_LIMIT,
         query: deferredQuery,
@@ -522,7 +546,7 @@ export function ParcelSearchPanel() {
         return backendFilterState.records ?? [];
       }
 
-      return staticResults;
+      return USE_DEMO_DATA ? demoResults : [];
     },
     [
       backendFilterEnabled,
@@ -554,7 +578,7 @@ export function ParcelSearchPanel() {
     backendFilterState.requestKey === backendFilterKey &&
     !backendFilterState.error &&
     Boolean(backendFilterState.records);
-  const usingBackendFallback =
+  const backendUnavailable =
     (backendSearchEnabled &&
       backendSearchState.requestKey === backendSearchKey &&
       Boolean(backendSearchState.error)) ||
@@ -577,30 +601,30 @@ export function ParcelSearchPanel() {
     ? "FastAPI Search"
     : usingBackendFilterResults
       ? "FastAPI Filter"
-    : usingBackendFallback
-      ? "Static fallback"
+    : backendUnavailable
+      ? "Local data unavailable"
     : backendSearchLoading
       ? "API Search"
       : backendFilterLoading
         ? "API Filter"
         : USE_DEMO_DATA
           ? "Demo Sample"
-          : "Static Index";
+          : "Local API Required";
   const sourceDescription = usingBackendResults
     ? "Search results are loaded from GET /parcels/search."
     : usingBackendFilterResults
       ? "Structured filters are loaded from GET /parcels/filter."
-    : usingBackendFallback
-      ? "FastAPI parcel discovery is unavailable, so results are using the generated static index."
+    : backendUnavailable
+      ? "FastAPI parcel discovery is unavailable. No demo or static business records are substituted."
     : backendSearchLoading
-      ? "Searching FastAPI parcel intelligence; static results are preserved during the request."
+      ? "Searching FastAPI parcel intelligence."
     : backendFilterLoading
-      ? "Filtering FastAPI parcel intelligence; static results are preserved during the request."
+      ? "Filtering FastAPI parcel intelligence."
       : USE_BACKEND_API
         ? "Blank searches use FastAPI filters when available. Queries of three or more characters use FastAPI search."
         : USE_DEMO_DATA
           ? "Search uses cached, sanitized demo parcels."
-          : "Search uses a generated static parcel intelligence artifact.";
+          : "Search requires the configured CFS API outside demo mode.";
 
   function handleQueryChange(event: ChangeEvent<HTMLInputElement>) {
     setQuery(event.target.value);
@@ -624,7 +648,7 @@ export function ParcelSearchPanel() {
           className={`rounded-md border px-2 py-1 text-[10px] font-semibold uppercase ${
             usingBackendResults || usingBackendFilterResults
               ? "border-emerald-300/20 bg-emerald-300/[0.08] text-emerald-100"
-              : usingBackendFallback
+              : backendUnavailable
                 ? "border-amber-300/20 bg-amber-300/[0.08] text-amber-100"
                 : "border-[#68d8ff]/20 bg-[#68d8ff]/10 text-[#8fe7ff]"
           }`}
@@ -709,11 +733,11 @@ export function ParcelSearchPanel() {
       </div>
 
       <p className="mt-3 text-[11px] leading-5 text-slate-500">
-        {usingBackendFallback
-          ? `API fallback detail: ${
+        {backendUnavailable
+          ? `Local API detail: ${
               backendSearchState.error ??
               backendFilterState.error ??
-              "Static parcel discovery is active."
+              "Parcel discovery is unavailable."
             }`
           : `${focusMessage} Direct PostGIS access, authentication, and permit map workflows remain disconnected.`}
       </p>

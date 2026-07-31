@@ -19,7 +19,7 @@ const toneStyles = {
 
 const sourceLabels = {
   api: "FastAPI",
-  fallback: "Static fallback",
+  fallback: "Local data unavailable",
   loading: "Loading API",
   static: "Static",
 } as const;
@@ -41,9 +41,9 @@ export function DevelopmentActivityPanel() {
     source === "api"
       ? "Metrics are loaded from GET /development/statistics and broad rollups from GET /development/activity-summary."
       : source === "fallback"
-        ? "One or more FastAPI development endpoints are unavailable, so this panel is using generated static artifacts."
+        ? "One or more FastAPI development endpoints are unavailable. No static business metrics are substituted."
         : source === "loading"
-          ? "Checking FastAPI development metrics; generated static values remain visible while requests complete."
+          ? "Checking FastAPI development metrics."
           : "Static metrics from generated pipeline artifacts. No live API or direct PostGIS connection is used.";
 
   return (

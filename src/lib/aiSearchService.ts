@@ -1,4 +1,9 @@
-import { apiPost, USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
+import {
+  apiPost,
+  recordTechnicalEvent,
+  USE_BACKEND_API,
+  USE_DEMO_DATA,
+} from "@/lib/api/client";
 import {
   getDemoDevelopmentTrends,
   getDemoEconomicsIntelligence,
@@ -138,23 +143,45 @@ export async function searchCfsAi(
   options: { signal?: AbortSignal } = {},
 ) {
   if (USE_DEMO_DATA) {
-    return searchDemoCfsAi(request);
+    const response = await searchDemoCfsAi(request);
+    recordTechnicalEvent("ask_cfs_request", {
+      answer_mode: response.answer_mode ?? "deterministic",
+      product: request.app_mode ?? "planning",
+      runtime_mode: "demo",
+    });
+    return response;
   }
 
   if (!USE_BACKEND_API) {
     throw new Error("CFS AI Search requires the local FastAPI backend in live mode.");
   }
 
-  return apiPost<CfsAiSearchResponse>(
+  const response = await apiPost<CfsAiSearchResponse>(
     "/ai/search",
     { ...request, mode: "live" },
     { signal: options.signal, timeoutMs: 20000 },
   );
+  recordTechnicalEvent("ask_cfs_request", {
+    answer_mode: response.answer_mode ?? "deterministic",
+    product: request.app_mode ?? "planning",
+    runtime_mode: "local",
+  });
+  if (response.fallback_used) {
+    recordTechnicalEvent("provider_fallback", {
+      product: request.app_mode ?? "planning",
+      provider: response.provider,
+    });
+  }
+  return response;
 }
 
 async function searchDemoCfsAi(
   request: CfsAiSearchRequest,
 ): Promise<CfsAiSearchResponse> {
+  if (isUnsafeDemoQuery(request.query)) {
+    return sanitizeDemoResponse(demoSafetyAnswer(request.query));
+  }
+
   if (request.app_mode === "consulting" || request.app_mode === "economics") {
     return sanitizeDemoResponse(await demoEconomicsAnswer(request));
   }
@@ -2340,16 +2367,97 @@ function evidence(
   return { confidence, detail, source, title };
 }
 
-function sanitizeDemoResponse(response: CfsAiSearchResponse) {
+function sanitizeDemoResponse(
+  response: CfsAiSearchResponse,
+): CfsAiSearchResponse {
   const serialized = JSON.stringify(response)
     .replace(/will\s+develop/gi, "shows observed permit activity")
     .replace(/raw\s+score/gi, "relative research signal")
     .replace(/official\s+prediction/gi, "planning review signal");
   const sanitized = JSON.parse(serialized) as CfsAiSearchResponse;
+  const executiveSummary =
+    sanitized.executive_summary ??
+    sanitized.answer.split("\n\n").find(Boolean)?.slice(0, 500) ??
+    sanitized.answer.slice(0, 500);
   return {
     ...sanitized,
+    answer_mode:
+      sanitized.provider_status?.startsWith("safety_")
+        ? "safety"
+        : "deterministic",
     context_freshness: sanitized.context_freshness ?? "cached_demo_extract",
     data_source: sanitized.data_source ?? "portfolio_demo_extract",
+    executive_summary: executiveSummary,
+    fallback_used: false,
+    interpretation: sanitized.interpretation ?? executiveSummary,
+    key_findings:
+      sanitized.key_findings ??
+      sanitized.evidence.slice(0, 5).map((item) => item.detail),
+    limitations: sanitized.limitations ?? sanitized.caveats,
+    official_data_still_needed:
+      sanitized.official_data_still_needed ??
+      sanitized.caveats
+        .filter((item) => /official|missing|not available/i.test(item))
+        .slice(0, 4),
+    prompt_version: sanitized.prompt_version ?? "ask-cfs-2026-07-31",
+    provenance: sanitized.provenance ?? {
+      as_of: sanitized.as_of,
+      data_origin: "sanitized_demo_extract",
+      runtime_mode: "demo",
+      schema_version: "1.0",
+    },
+    recommended_next_actions:
+      sanitized.recommended_next_actions ?? sanitized.suggested_actions,
+    request_id: sanitized.request_id ?? crypto.randomUUID(),
+    response_time_ms: sanitized.response_time_ms ?? 0,
+    suggested_follow_up_questions:
+      sanitized.suggested_follow_up_questions ?? [
+        "Which CFS evidence supports this answer?",
+        "What should an analyst verify next?",
+      ],
+  };
+}
+
+function isUnsafeDemoQuery(query: string) {
+  const normalized = query.toLowerCase();
+  return [
+    "ignore previous",
+    "ignore all previous",
+    "reveal your prompt",
+    "show system prompt",
+    "print system prompt",
+    "database password",
+    "connection string",
+    "api key",
+    "staging token",
+    "owner mailing address",
+  ].some((marker) => normalized.includes(marker));
+}
+
+function demoSafetyAnswer(query: string): CfsAiSearchResponse {
+  const asksForPrivateData = /password|connection string|api key|token|owner/i.test(
+    query,
+  );
+  return {
+    ...baseDemoResponse(
+      asksForPrivateData
+        ? "I cannot provide credentials or private owner/contact data. Ask CFS can summarize non-private Planning or Economics evidence."
+        : "I cannot reveal system instructions or override CFS evidence and safety rules. Ask a scoped Planning or Economics question using available CFS evidence.",
+      ["general"],
+      null,
+      [
+        evidence(
+          "Requested information",
+          "Restricted by the CFS privacy and evidence policy.",
+          "Ask CFS safety policy",
+          "not_available",
+        ),
+      ],
+      ["Ask a scoped question about available CFS evidence."],
+    ),
+    provider_status: asksForPrivateData
+      ? "safety_sensitive_data"
+      : "safety_prompt_injection",
   };
 }
 

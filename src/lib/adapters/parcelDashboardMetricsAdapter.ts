@@ -125,6 +125,30 @@ export function getStaticParcelDashboardMetrics(): ParcelDashboardMetricsViewMod
   };
 }
 
+export function getUnavailableParcelDashboardMetrics(): ParcelDashboardMetricsViewModel {
+  return {
+    coreMetrics: [],
+    errorMessage: null,
+    isLoading: false,
+    kpiMetric: {
+      ...parcelDashboardKpiMetric,
+      delta: "Local data unavailable",
+      value: "--",
+    },
+    source: "fallback",
+    summary: {
+      assignedParcels: 0,
+      generatedAt: "",
+      noMatchParcels: 0,
+      reviewParcels: 0,
+      safeForDashboardParcels: 0,
+      sourceArtifacts: [],
+      totalParcels: 0,
+      zoningCoveragePercentage: 0,
+    },
+  };
+}
+
 export function normalizeParcelStatisticsForDashboard(
   statistics: ParcelStatisticsResponse,
 ): Omit<ParcelDashboardMetricsViewModel, "errorMessage" | "isLoading" | "source"> {
@@ -173,4 +197,3 @@ export function normalizeParcelStatisticsForDashboard(
     summary,
   };
 }
-

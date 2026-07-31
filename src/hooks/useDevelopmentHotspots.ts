@@ -3,15 +3,18 @@
 import { useEffect, useState } from "react";
 import {
   getStaticDevelopmentHotspots,
+  getUnavailableDevelopmentHotspots,
   normalizeDevelopmentHotspots,
   type DevelopmentHotspotsViewModel,
 } from "@/lib/adapters/developmentHotspotsAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getDevelopmentHotspots } from "@/lib/api/development";
 
 export function useDevelopmentHotspots() {
   const [hotspots, setHotspots] = useState<DevelopmentHotspotsViewModel>(() => {
-    const staticHotspots = getStaticDevelopmentHotspots();
+    const staticHotspots = USE_DEMO_DATA
+      ? getStaticDevelopmentHotspots()
+      : getUnavailableDevelopmentHotspots();
 
     return USE_BACKEND_API
       ? {
@@ -49,7 +52,7 @@ export function useDevelopmentHotspots() {
           return;
         }
 
-        const fallbackHotspots = getStaticDevelopmentHotspots();
+        const fallbackHotspots = getUnavailableDevelopmentHotspots();
         setHotspots({
           ...fallbackHotspots,
           errorMessage:

@@ -56,6 +56,15 @@ export function getStaticParcelQualityMetrics(): ParcelQualityMetricsViewModel {
   };
 }
 
+export function getUnavailableParcelQualityMetrics(): ParcelQualityMetricsViewModel {
+  return {
+    errorMessage: null,
+    isLoading: false,
+    metrics: [],
+    source: "fallback",
+  };
+}
+
 export function normalizeParcelStatisticsForQuality(
   statistics: ParcelStatisticsResponse,
 ): Omit<ParcelQualityMetricsViewModel, "errorMessage" | "isLoading" | "source"> {

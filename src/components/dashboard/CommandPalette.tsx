@@ -32,10 +32,7 @@ import {
   commandCategoryOrder,
 } from "@/lib/dashboard/commandRegistry";
 import { PARCEL_SEARCH_INSPECT_EVENT } from "@/components/dashboard/ParcelSearchState";
-import {
-  searchParcelIndex,
-  type ParcelSearchRecord,
-} from "@/data/intelligence/parcelSearchData";
+import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import {
   normalizeBackendParcelDetailResponse,
   normalizeBackendParcelMapFocusResponse,
@@ -132,7 +129,7 @@ export function CommandPalette({
 
     let cancelled = false;
 
-    const searchPromise = USE_BACKEND_API
+    const searchPromise: Promise<ParcelSearchRecord[]> = USE_BACKEND_API
       ? searchParcels({
           limit: 6,
           offset: 0,
@@ -143,10 +140,7 @@ export function CommandPalette({
             limit: 6,
             query: trimmedQuery,
           })
-        : searchParcelIndex({
-            limit: 6,
-            query: trimmedQuery,
-          });
+        : Promise.resolve([]);
 
     searchPromise
       .then((parcelResults) => {
@@ -279,7 +273,7 @@ export function CommandPalette({
             if (parcelRecord) {
               setSelectedParcelIntelligence(
                 parcelRecord,
-                USE_BACKEND_API ? "api" : "static",
+                USE_DEMO_DATA ? "static" : "api",
               );
               setParcelFocusFromRecord(
                 {

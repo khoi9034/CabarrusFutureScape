@@ -68,6 +68,16 @@ export function getStaticDevelopmentStatistics(): DevelopmentStatisticsViewModel
   };
 }
 
+export function getUnavailableDevelopmentStatistics(): DevelopmentStatisticsViewModel {
+  return {
+    activityClasses: [],
+    coreMetrics: [],
+    errorMessage: null,
+    isLoading: false,
+    source: "fallback",
+  };
+}
+
 export function normalizeDevelopmentStatistics(
   statistics: DevelopmentStatisticsResponse,
   activitySummary?: DevelopmentActivitySummaryViewModel,

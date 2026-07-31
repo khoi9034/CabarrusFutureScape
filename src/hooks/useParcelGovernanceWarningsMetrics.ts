@@ -3,16 +3,19 @@
 import { useEffect, useState } from "react";
 import {
   getStaticParcelGovernanceWarnings,
+  getUnavailableParcelGovernanceWarnings,
   normalizeParcelGovernanceWarnings,
   type ParcelGovernanceWarningsViewModel,
 } from "@/lib/adapters/parcelGovernanceWarningsAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getParcelGovernanceWarnings } from "@/lib/api/parcels";
 
 export function useParcelGovernanceWarningsMetrics() {
   const [metrics, setMetrics] = useState<ParcelGovernanceWarningsViewModel>(
     () => {
-      const staticMetrics = getStaticParcelGovernanceWarnings();
+      const staticMetrics = USE_DEMO_DATA
+        ? getStaticParcelGovernanceWarnings()
+        : getUnavailableParcelGovernanceWarnings();
 
       return USE_BACKEND_API
         ? {
@@ -45,7 +48,7 @@ export function useParcelGovernanceWarningsMetrics() {
           return;
         }
 
-        const fallbackMetrics = getStaticParcelGovernanceWarnings();
+        const fallbackMetrics = getUnavailableParcelGovernanceWarnings();
         setMetrics({
           ...fallbackMetrics,
           errorMessage:

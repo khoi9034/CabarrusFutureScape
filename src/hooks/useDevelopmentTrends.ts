@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   getStaticDevelopmentTrends,
+  getUnavailableDevelopmentTrends,
   normalizeDevelopmentTrends,
   type DevelopmentTrendsViewModel,
 } from "@/lib/adapters/developmentTrendsAdapter";
@@ -12,7 +13,9 @@ import { getDemoDevelopmentTrendsResponse } from "@/lib/demo-data/client";
 
 export function useDevelopmentTrends() {
   const [trends, setTrends] = useState<DevelopmentTrendsViewModel>(() => {
-    const staticTrends = getStaticDevelopmentTrends();
+    const staticTrends = USE_DEMO_DATA
+      ? getStaticDevelopmentTrends()
+      : getUnavailableDevelopmentTrends();
 
     return USE_BACKEND_API
       ? {
@@ -69,7 +72,7 @@ export function useDevelopmentTrends() {
           return;
         }
 
-        const fallbackTrends = getStaticDevelopmentTrends();
+        const fallbackTrends = getUnavailableDevelopmentTrends();
         setTrends({
           ...fallbackTrends,
           errorMessage:

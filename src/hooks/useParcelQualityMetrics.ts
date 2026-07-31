@@ -3,15 +3,18 @@
 import { useEffect, useState } from "react";
 import {
   getStaticParcelQualityMetrics,
+  getUnavailableParcelQualityMetrics,
   normalizeParcelStatisticsForQuality,
   type ParcelQualityMetricsViewModel,
 } from "@/lib/adapters/parcelStatisticsAdapter";
-import { USE_BACKEND_API } from "@/lib/api/client";
+import { USE_BACKEND_API, USE_DEMO_DATA } from "@/lib/api/client";
 import { getParcelStatistics } from "@/lib/api/parcels";
 
 export function useParcelQualityMetrics() {
   const [metrics, setMetrics] = useState<ParcelQualityMetricsViewModel>(() => {
-    const staticMetrics = getStaticParcelQualityMetrics();
+    const staticMetrics = USE_DEMO_DATA
+      ? getStaticParcelQualityMetrics()
+      : getUnavailableParcelQualityMetrics();
 
     return USE_BACKEND_API
       ? {
@@ -43,7 +46,7 @@ export function useParcelQualityMetrics() {
           return;
         }
 
-        const fallbackMetrics = getStaticParcelQualityMetrics();
+        const fallbackMetrics = getUnavailableParcelQualityMetrics();
         setMetrics({
           ...fallbackMetrics,
           errorMessage:

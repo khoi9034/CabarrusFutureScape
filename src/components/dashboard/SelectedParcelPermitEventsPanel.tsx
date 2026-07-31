@@ -47,7 +47,7 @@ export function SelectedParcelPermitEventsPanel({
           ? "Loading selected parcel permit events from FastAPI."
           : source === "waiting"
             ? "Waiting for parcel selection."
-            : "Permit event records require backend API mode; static fallback does not fabricate permit rows.";
+            : "Permit event records require the configured API; the unavailable state does not fabricate rows.";
 
   return (
     <section

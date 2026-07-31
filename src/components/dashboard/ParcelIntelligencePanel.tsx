@@ -74,7 +74,7 @@ export function ParcelIntelligencePanel() {
     source === "api"
       ? "FastAPI"
       : source === "fallback"
-        ? "Static fallback"
+        ? "Local data unavailable"
         : source === "loading"
           ? "Loading API"
           : "Static";
@@ -82,9 +82,9 @@ export function ParcelIntelligencePanel() {
     source === "api"
       ? "Metrics are loaded from GET /parcels/statistics. Static generated artifacts remain available as the fallback."
       : source === "fallback"
-        ? "FastAPI metrics are unavailable, so the dashboard is showing generated static artifacts."
+        ? "FastAPI metrics are unavailable. No static parcel metrics are substituted."
         : source === "loading"
-          ? "Checking FastAPI parcel statistics; generated static metrics remain visible while the request completes."
+          ? "Checking FastAPI parcel statistics."
           : "Metrics are static artifacts generated from PostGIS QA outputs, not a live frontend database connection.";
 
   return (

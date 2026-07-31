@@ -47,6 +47,16 @@ export function getStaticDevelopmentZoningSummary(): DevelopmentZoningSummaryVie
   };
 }
 
+export function getUnavailableDevelopmentZoningSummary(): DevelopmentZoningSummaryViewModel {
+  return {
+    errorMessage: null,
+    isLoading: false,
+    records: [],
+    source: "fallback",
+    totalCount: 0,
+  };
+}
+
 export function normalizeDevelopmentZoningSummary(
   response: DevelopmentZoningSummaryResponse,
 ): Omit<DevelopmentZoningSummaryViewModel, "errorMessage" | "isLoading" | "source"> {

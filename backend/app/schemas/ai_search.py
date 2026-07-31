@@ -1,4 +1,5 @@
 from typing import Any, Literal
+from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
@@ -66,10 +67,18 @@ class CfsAiSearchRequest(BaseModel):
 
 
 class CfsAiEvidenceItem(BaseModel):
+    as_of: str | None = None
+    caveat: str | None = None
     confidence: Literal["available", "limited", "not_available"] = "available"
     detail: str
+    geography: str | None = None
+    methodology: str | None = None
     source: str
+    source_type: str | None = None
+    status: str | None = None
     title: str
+    unit: str | None = None
+    value: str | float | int | None = None
 
 
 class CfsAiWatchlistFilter(BaseModel):
@@ -99,6 +108,7 @@ class CfsAiDashboardActions(BaseModel):
 
 class CfsAiSearchResponse(BaseModel):
     answer: str
+    answer_mode: Literal["deterministic", "provider_enhanced", "safety"] = "deterministic"
     as_of: str | None = None
     caveats: list[str] = Field(default_factory=list)
     context_freshness: str | None = None
@@ -109,12 +119,24 @@ class CfsAiSearchResponse(BaseModel):
     data_mode: Literal["demo", "live"] = "live"
     domains: list[CfsAiDomain] = Field(default_factory=list)
     evidence: list[CfsAiEvidenceItem] = Field(default_factory=list)
+    executive_summary: str | None = None
+    fallback_used: bool = False
     filtered_context_summary: str | None = None
+    interpretation: str | None = None
+    key_findings: list[str] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
+    official_data_still_needed: list[str] = Field(default_factory=list)
     powerbi_actions: dict[str, Any] | None = None
+    prompt_version: str = "ask-cfs-2026-07-31"
     provider: CfsAiProvider = "none"
     provider_status: str | None = None
+    provenance: dict[str, Any] = Field(default_factory=dict)
+    recommended_next_actions: list[str] = Field(default_factory=list)
     related_layers: list[str] = Field(default_factory=list)
+    request_id: str = Field(default_factory=lambda: str(uuid4()))
+    response_time_ms: int = 0
     suggested_actions: list[str] = Field(default_factory=list)
+    suggested_follow_up_questions: list[str] = Field(default_factory=list)
     timings_ms: dict[str, int] = Field(default_factory=dict)
 
 

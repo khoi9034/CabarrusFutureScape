@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   getStaticDevelopmentActivitySummary,
+  getUnavailableDevelopmentActivitySummary,
   normalizeDevelopmentActivitySummary,
   type DevelopmentActivitySummaryViewModel,
 } from "@/lib/adapters/developmentActivitySummaryAdapter";
@@ -13,7 +14,9 @@ import { getDemoDevelopmentActivitySummaryResponse } from "@/lib/demo-data/clien
 export function useDevelopmentActivitySummary() {
   const [summary, setSummary] = useState<DevelopmentActivitySummaryViewModel>(
     () => {
-      const staticSummary = getStaticDevelopmentActivitySummary();
+      const staticSummary = USE_DEMO_DATA
+        ? getStaticDevelopmentActivitySummary()
+        : getUnavailableDevelopmentActivitySummary();
 
       return USE_BACKEND_API
         ? {
@@ -71,7 +74,7 @@ export function useDevelopmentActivitySummary() {
           return;
         }
 
-        const fallbackSummary = getStaticDevelopmentActivitySummary();
+        const fallbackSummary = getUnavailableDevelopmentActivitySummary();
         setSummary({
           ...fallbackSummary,
           errorMessage:

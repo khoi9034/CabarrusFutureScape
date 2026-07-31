@@ -25,7 +25,7 @@ interface SelectedParcelDevelopmentActivityPanelProps {
 
 const sourceLabels: Record<SelectedParcelPanelSource, string> = {
   api: "FastAPI",
-  fallback: "Static fallback",
+  fallback: "Local data unavailable",
   loading: "Loading API",
   static: "Static",
   waiting: "Waiting",
@@ -51,7 +51,7 @@ export function SelectedParcelDevelopmentActivityPanel({
     source === "api"
       ? "Selected parcel activity is loaded from GET /development/hotspots filtered by official parcel ID."
       : source === "fallback"
-        ? "FastAPI selected parcel activity is unavailable, so this panel is using generated static activity artifacts when the selected parcel appears there."
+        ? "FastAPI selected parcel activity is unavailable. No static activity is substituted."
         : source === "loading"
           ? "Checking FastAPI for selected parcel development activity."
           : source === "waiting"

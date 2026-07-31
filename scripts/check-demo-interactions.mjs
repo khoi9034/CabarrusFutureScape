@@ -73,6 +73,7 @@ async function startServer() {
       env: {
         ...process.env,
         NEXT_PUBLIC_CFS_DEPLOYMENT_MODE: "demo",
+        NEXT_PUBLIC_CFS_RUNTIME_MODE: "demo",
         NEXT_PUBLIC_USE_BACKEND_API: "false",
       },
       stdio: ["ignore", "pipe", "pipe"],
@@ -215,9 +216,16 @@ async function waitForMapReady(page, { interactive = false } = {}) {
     ({ requireInteractive }) => {
       const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
       const status = element?.getAttribute("data-map-status");
+      const rendererState = element?.getAttribute("data-map-renderer-state");
       return (
         element?.getAttribute("data-context-ready") === "true" &&
-        (requireInteractive ? status === "online" : ["online", "degraded"].includes(status ?? ""))
+        (requireInteractive
+          ? status === "online"
+          : [
+              "loading_interactive",
+              "interactive_ready",
+              "degraded_static",
+            ].includes(rendererState ?? ""))
       );
     },
     { requireInteractive: interactive },
@@ -872,8 +880,12 @@ async function offlineMapChecks(browser, baseUrl) {
         const fallback = page.getByTestId("cfs-local-context-map");
         await fallback.waitFor();
         await page
+          .getByText("Static Map Mode", { exact: true })
+          .first()
+          .waitFor();
+        await page
           .getByText(
-            "Local context remains visible; ArcGIS pan and hit-testing are unavailable",
+            "Interactive controls are unavailable. County geography and current overlays remain usable.",
             { exact: true },
           )
           .waitFor();

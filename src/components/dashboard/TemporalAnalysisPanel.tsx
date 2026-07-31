@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 const sourceLabels = {
   api: "FastAPI",
-  fallback: "Static fallback",
+  fallback: "Local data unavailable",
   loading: "Loading API",
   static: "Static",
 } as const;
@@ -122,9 +122,9 @@ export function TemporalAnalysisPanel({
         {temporalQuery.source === "api"
           ? "Temporal counts are loaded from GET /development/temporal-query."
           : temporalQuery.source === "fallback"
-            ? "The temporal API is unavailable, so this panel is using generated static temporal artifacts."
+            ? "The temporal API is unavailable. No static temporal records are substituted."
             : temporalQuery.source === "loading"
-              ? "Checking FastAPI temporal analysis; generated static temporal data remains visible while the request completes."
+              ? "Checking FastAPI temporal analysis."
               : "Static time-slice controls prepare future permit queries and playback."}{" "}
         MapView playback and map filtering remain disconnected.
       </p>
