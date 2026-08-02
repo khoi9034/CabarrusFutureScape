@@ -1007,7 +1007,12 @@ function StableOverviewWorkspace() {
       >
         {!isMapFocusMode && !leftPanelHidden && !indicatorCenterDashboardMode ? (
           <div
-            className="absolute inset-y-0 left-0 z-[70] flex h-full min-h-0 w-[min(22rem,calc(100vw-1.5rem))] shrink-0 overflow-visible shadow-2xl transition-[width] duration-150 ease-out md:relative md:z-30 md:w-[var(--desktop-rail-width)] md:shadow-none"
+            className={cn(
+              "absolute inset-y-0 left-0 z-[70] flex h-full min-h-0 shrink-0 overflow-visible transition-[width] duration-150 ease-out md:relative md:z-30 md:w-[var(--desktop-rail-width)] md:shadow-none",
+              leftPanelCollapsed
+                ? "w-16 shadow-none"
+                : "w-[min(22rem,calc(100vw-1.5rem))] shadow-2xl",
+            )}
             style={{
               "--desktop-rail-width": `${
                 leftPanelCollapsed ? LEFT_PANEL_COLLAPSED_WIDTH : layerRailWidth

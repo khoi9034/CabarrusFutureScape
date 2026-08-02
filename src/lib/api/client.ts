@@ -106,8 +106,10 @@ export type CfsTechnicalEventName =
   | "data_adapter_used"
   | "failed_domain_load"
   | "map_fallback"
+  | "map_interaction_failed"
   | "map_renderer_selected"
   | "map_retry"
+  | "optional_hosted_basemap_unavailable"
   | "powerbi_export"
   | "provider_fallback"
   | "report_generation";
@@ -160,9 +162,7 @@ export const IS_ENTERPRISE_MODE = CFS_RUNTIME_MODE === "enterprise";
 export const USE_BACKEND_API =
   !IS_DEMO_MODE && process.env.NEXT_PUBLIC_USE_BACKEND_API === "true";
 export const USE_DEMO_DATA = IS_DEMO_MODE;
-export const USE_INTERACTIVE_MAP =
-  !USE_DEMO_DATA ||
-  process.env.NEXT_PUBLIC_CFS_DEMO_INTERACTIVE_MAP === "true";
+export const USE_INTERACTIVE_MAP = true;
 export const CFS_DATA_PROVIDER: CfsDataProvider = USE_DEMO_DATA
   ? "sanitized_demo_extract"
   : IS_ENTERPRISE_MODE
@@ -174,8 +174,15 @@ export const CFS_AUTH_MODE =
   process.env.NEXT_PUBLIC_CFS_AUTH_MODE ??
   (IS_ENTERPRISE_MODE ? "entra" : "off");
 export const USE_ONLINE_BASEMAP =
-  process.env.NEXT_PUBLIC_ARCGIS_BASEMAP_ENABLED === "true" ||
-  (!USE_DEMO_DATA && process.env.NEXT_PUBLIC_CFS_ONLINE_BASEMAP !== "false");
+  (process.env.NEXT_PUBLIC_CFS_ESRI_BASEMAP_ENABLED === "true" ||
+    process.env.NEXT_PUBLIC_ARCGIS_BASEMAP_ENABLED === "true") &&
+  Boolean(
+    process.env.NEXT_PUBLIC_CFS_ESRI_API_KEY?.trim() ||
+      process.env.NEXT_PUBLIC_ARCGIS_API_KEY?.trim(),
+  );
+export const CFS_ESRI_BASEMAP_STYLE =
+  process.env.NEXT_PUBLIC_CFS_ESRI_BASEMAP_STYLE ??
+  "arcgis/navigation-night";
 
 export function buildApiUrl(path: string, params?: ApiQueryParams) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

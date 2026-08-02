@@ -292,7 +292,7 @@ def test_workspace_mode_layer_isolation_guards_map_overlays() -> None:
     assert '"flood-risk": "exploreCountywide"' in ownership
     assert '"fema-flood-zones": "exploreCountywide"' in ownership
     assert '"school-utilization-seed": "exploreCountywide"' in ownership
-    assert '"transportation-context": "exploreCountywide"' in ownership
+    assert '"transportation-context": "sharedBase"' in ownership
     assert '"opportunity-extrusions": "modelLab"' in ownership
     assert "getModeScopedActiveLayerIds" in scene
     assert "applyOperationalLayerVisibility(layerRefs.current, scopedLayerIds)" in scene

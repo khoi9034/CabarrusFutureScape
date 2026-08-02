@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+        source: "/arcgis-assets/:version/:directory/:path*",
+      },
+    ];
+  },
   outputFileTracingIncludes: {
     "/case-studies/large-development-land/artifacts/*": [
       "./case-studies/large-development-land/CFS_Development_Land_Acquisition_Review.pptx",

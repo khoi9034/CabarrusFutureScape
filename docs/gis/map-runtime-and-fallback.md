@@ -1,22 +1,18 @@
 # Map Runtime And Fallback
 
-## Public demo
+## Normal runtime
 
-1. Mount the same-origin SVG context map immediately.
-2. Load county boundary, municipalities, roads, hydrography, and place labels
-   before optional analytical overlays.
-3. Do not load ArcGIS unless `NEXT_PUBLIC_CFS_DEMO_INTERACTIVE_MAP=true` was
-   explicitly set at build time.
+ArcGIS MapView is the primary renderer in demo, local, and enterprise modes.
+It starts with a custom `Basemap` made from the existing same-origin Cabarrus
+county, municipality, hydrography, major-road, and place-label graphics. The
+same layer instances are reused by ArcGIS, so the fallback and MapView do not
+fetch the context twice. No API key or external basemap service is required.
 
-The guaranteed map requires no Esri key and no external service.
-
-## Local live mode
-
-ArcGIS loads progressively above the same-origin map. The interactive surface
-stays transparent until the view is ready, has valid dimensions and extent,
-has finished updating, contains expected layers, and produces a nonblank pixel
-sample. A later fatal, rendering, or map-content error reveals the still-mounted
-vector map.
+The SVG renderer mounts underneath MapView while the SDK loads. MapView becomes
+visible and receives pointer input only after it reports `ready`, has a valid
+extent and nonzero dimensions, finishes its initial update, creates the required
+layer views, and produces a nonblank screenshot. A later fatal, rendering, or
+map-content error immediately reveals the still-mounted SVG fallback.
 
 ## States
 
@@ -30,24 +26,43 @@ The map publishes `data-map-renderer-state` as:
 - `fatal`
 
 It also publishes `data-map-renderer`, `data-static-context-ready`,
-`data-interactive-ready`, and `data-map-fatal`. `static_degraded` is usable and
-shows only a small enhancement notice. A blocking error is reserved for the
-case where the same-origin context itself is unavailable.
+`data-interactive-ready`, `data-map-view-ready-state`, and `data-map-fatal`.
+`static_degraded` is reserved for a genuine ArcGIS/WebGL failure and offers one
+user-controlled retry. A blocking error is reserved for the case where both
+ArcGIS and the required same-origin context are unavailable.
 
 Retry increments the renderer attempt while leaving context visible. Effect
 cleanup cancels stale initialization, listeners, watches, layers, and views so
 an old failure cannot replace a newer renderer or update an unmounted route.
 
-## Static interactions
+## Emergency fallback
 
 The fallback preserves zoom in/out, county reset, selected parcel focus,
-legends, and development, flood, school, and Model Lab overlays. ArcGIS adds
-pan, hit testing, and richer graphics when available.
+legends, and development, flood, school, and Model Lab overlays. During normal
+operation it is opacity zero with pointer events disabled; ArcGIS owns pan,
+wheel and touch zoom, keyboard navigation, hit testing, parcel selection, and
+snapshot capture.
 
 ## Assets and validation
 
-The build copies required same-origin geometry WASM, workers, libtess WASM, and
-Zoom localization assets. `npm run check:map-resilience` verifies clean,
-slow-asset, failed-asset, WebGL-off, external-blocked, mobile, retry,
-route-return, refresh, controls, nonblank context, request-loop, console, and
-required-asset behavior.
+Every build copies the complete installed `@arcgis/core/assets` tree to the
+versioned `/arcgis-assets/<sdk-version>` path. The generated manifest records
+the SDK version, every path, byte size, SHA-256 checksum, and generation time;
+`npm run check:arcgis-assets` fails if source, copy, or manifest differs. The
+versioned tree may be cached immutably without keeping incompatible worker
+chunks after an SDK upgrade.
+
+`npm run check:interactive-map` proves primary rendering, local assets, paint,
+pan, zoom, hit testing, layers, snapshot capture, route restoration, mobile,
+slow-network, blocked external Esri services, and WebGL fallback/retry.
+
+## Optional hosted Esri basemap
+
+Set `NEXT_PUBLIC_CFS_ESRI_BASEMAP_ENABLED=true`, provide a browser-safe
+`NEXT_PUBLIC_CFS_ESRI_API_KEY`, and optionally set
+`NEXT_PUBLIC_CFS_ESRI_BASEMAP_STYLE`. MapView first becomes interactive with the
+same-origin basemap, then loads the hosted style underneath it. A timeout or
+hosted-service error leaves the local interactive map unchanged. All
+`NEXT_PUBLIC_` values are visible in the browser, so restrict the key to the
+deployed HTTPS origins and only the basemap services it needs; never use a
+server credential here.

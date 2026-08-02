@@ -3223,7 +3223,7 @@ interface PlanningMapSnapshotCapture {
   status: "captured" | "failed" | "unavailable";
 }
 
-const MAP_SNAPSHOT_CAPTURE_TIMEOUT_MS = 4500;
+const MAP_SNAPSHOT_CAPTURE_TIMEOUT_MS = 15_000;
 
 function createIndicatorCenterSnapshotCapture(): PlanningMapSnapshotCapture {
   return {

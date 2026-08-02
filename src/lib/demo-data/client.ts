@@ -4,6 +4,7 @@ import {
   type ParcelSearchRecord,
   type ParcelSearchRequest,
 } from "@/data/intelligence/parcelSearchData";
+import { getDemoParcelFeatures } from "@/lib/demo-data/mapLayerClient";
 import type {
   DevelopmentActivitySummaryResponse,
   DevelopmentStatisticsResponse,
@@ -206,7 +207,34 @@ export async function searchDemoParcels(request: ParcelSearchRequest) {
 
 export async function getDemoParcelById(officialParcelId: string) {
   const records = await getDemoSampleParcels();
-  return getParcelSearchRecordById(records, officialParcelId) ?? null;
+  const sample = getParcelSearchRecordById(records, officialParcelId);
+  if (sample) {
+    return sample;
+  }
+
+  const mapFeature = (await getDemoParcelFeatures()).find(
+    (feature) =>
+      feature.properties?.official_parcel_id === officialParcelId,
+  );
+  if (!mapFeature) {
+    return null;
+  }
+
+  const properties = mapFeature.properties ?? {};
+  const stringProperty = (name: string) =>
+    typeof properties[name] === "string" ? properties[name] : null;
+
+  return toParcelSearchRecord({
+    development_activity_summary: stringProperty("development_summary"),
+    flood_summary: stringProperty("flood_summary"),
+    municipality: stringProperty("municipality"),
+    official_parcel_id: officialParcelId,
+    parcel_size_category: stringProperty("parcel_size_category"),
+    safe_for_dashboard: true,
+    school_assignment_summary: stringProperty("school_summary"),
+    zoning_category: stringProperty("zoning_category"),
+    zoning_code: stringProperty("zoning"),
+  });
 }
 
 export async function getDemoDevelopmentStatisticsResponse() {

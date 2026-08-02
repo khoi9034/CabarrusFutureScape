@@ -549,7 +549,8 @@ def test_phase23i_model_lab_cluster_scale_calibration() -> None:
     assert "MODEL_LAB_CLUSTER_MAX_CELLS = 52" in scene_text
     assert "MODEL_LAB_PARCEL_DETAIL_MAX_MARKERS = 120" in scene_text
     assert "createModelResearchAggregateLabelGraphic" in scene_text
-    assert "text: formatDevelopmentCount(cell.count)" in scene_text
+    assert "createCountLabelDataUrl(formatDevelopmentCount(cell.count))" in scene_text
+    assert 'family: "Arial Unicode MS"' not in scene_text
     assert "getModelResearchCountSizeProfile" in scene_text
     assert "normalizedCount <= 5" in scene_text
     assert "normalizedCount <= 75" in scene_text
@@ -1086,7 +1087,9 @@ def test_phase25b_qa1_overview_rail_and_intelligence_panel_layout() -> None:
     assert "right-[-0.85rem] top-1/2" in sidebar_text
     assert "whitespace-nowrap" in sidebar_text
 
-    assert "shrink-0 overflow-visible shadow-2xl transition-[width]" in app_shell_text
+    assert 'leftPanelCollapsed' in app_shell_text
+    assert '? "w-16 shadow-none"' in app_shell_text
+    assert ': "w-[min(22rem,calc(100vw-1.5rem))] shadow-2xl"' in app_shell_text
     assert "LEFT_PANEL_COLLAPSED_WIDTH = 64" in app_shell_text
     assert "LEFT_PANEL_COLLAPSE_THRESHOLD = 210" in app_shell_text
 
@@ -1191,7 +1194,8 @@ def test_phase25c_left_panel_and_snapshot_report_builder_cleanup() -> None:
 
     assert 'setOverviewLayoutPanel("left", "collapsed");' in app_shell_text
     assert "rawWidth <= LEFT_PANEL_COLLAPSE_THRESHOLD" in app_shell_text
-    assert "shrink-0 overflow-visible shadow-2xl transition-[width]" in app_shell_text
+    assert '? "w-16 shadow-none"' in app_shell_text
+    assert ': "w-[min(22rem,calc(100vw-1.5rem))] shadow-2xl"' in app_shell_text
     assert "cfs-layer-rail-arrow" in sidebar_text
     assert "overflow-visible" in sidebar_text
     assert "overflow-x-hidden overflow-y-auto" in sidebar_text

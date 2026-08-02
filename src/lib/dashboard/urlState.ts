@@ -337,5 +337,9 @@ function normalizeParcelId(value: string | null) {
     return null;
   }
 
+  if (/^CFS-PARCEL-\d{10}$/.test(parcelId)) {
+    return parcelId;
+  }
+
   return getParcelById(parcelId)?.parcelId;
 }

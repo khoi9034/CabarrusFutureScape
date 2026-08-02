@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import { mockParcels } from "@/data/mock/parcelMockData";
 import type { ParcelSelectionSource } from "@/types";
@@ -15,6 +15,8 @@ export function useSelectedParcel() {
   const [selectedParcelId, setSelectedParcelId] = useState<string | null>(null);
   const [selectedParcelSource, setSelectedParcelSource] =
     useState<ParcelSelectionSource | null>(null);
+  const selectedParcelIdRef = useRef<string | null>(null);
+  const selectedParcelSourceRef = useRef<ParcelSelectionSource | null>(null);
   const [selectedParcelIntelligence, setSelectedParcelIntelligenceState] =
     useState<ParcelSearchRecord | null>(null);
   const [
@@ -33,19 +35,22 @@ export function useSelectedParcel() {
 
   const selectParcel = useCallback(
     (parcelId: string, options: SelectParcelOptions = {}) => {
-      if (selectedParcelId === parcelId) {
-        setSelectedParcelSource(
-          options.source ?? selectedParcelSource ?? "dashboard",
-        );
+      if (selectedParcelIdRef.current === parcelId) {
+        const source =
+          options.source ?? selectedParcelSourceRef.current ?? "dashboard";
+        selectedParcelSourceRef.current = source;
+        setSelectedParcelSource(source);
         return;
       }
 
+      selectedParcelIdRef.current = parcelId;
+      selectedParcelSourceRef.current = options.source ?? "dashboard";
       setSelectedParcelId(parcelId);
-      setSelectedParcelSource(options.source ?? "dashboard");
+      setSelectedParcelSource(selectedParcelSourceRef.current);
       setSelectedParcelIntelligenceState(null);
       setSelectedParcelIntelligenceSource(null);
     },
-    [selectedParcelId, selectedParcelSource],
+    [],
   );
 
   const setSelectedParcelIntelligence = useCallback(
@@ -53,6 +58,8 @@ export function useSelectedParcel() {
       parcel: ParcelSearchRecord,
       source: SelectedParcelIntelligenceSource,
     ) => {
+      selectedParcelIdRef.current = parcel.officialParcelId;
+      selectedParcelSourceRef.current = "dashboard";
       setSelectedParcelId(parcel.officialParcelId);
       setSelectedParcelSource("dashboard");
       setSelectedParcelIntelligenceState(parcel);
@@ -62,6 +69,8 @@ export function useSelectedParcel() {
   );
 
   const clearSelectedParcel = useCallback(() => {
+    selectedParcelIdRef.current = null;
+    selectedParcelSourceRef.current = null;
     setSelectedParcelId(null);
     setSelectedParcelSource(null);
     setSelectedParcelIntelligenceState(null);

@@ -60,7 +60,6 @@ export function createMapInteractionController({
         identifyResult,
         clickEvent,
         emptyClickBehavior,
-        gisServiceAdapter,
       );
 
       onSelection?.(selectionEvent);
@@ -138,37 +137,19 @@ export function createMapInteractionController({
   };
 }
 
-async function resolveSelectionEvent(
+function resolveSelectionEvent(
   identifyResult: IdentifyQueryResult,
   clickEvent: MapClickEvent,
   emptyClickBehavior: EmptyMapClickBehavior,
-  gisServiceAdapter: GisServiceAdapter,
-): Promise<MapSelectionEvent> {
+): MapSelectionEvent {
   const parcelId = identifyResult.primaryParcelId;
 
   if (parcelId) {
-    // Today this validates against mock parcel data. Future real parcel lookup
-    // should stay behind the adapter so the dashboard state API does not care
-    // whether the parcel came from mock graphics or a service-backed identify.
-    const parcel = await gisServiceAdapter.queryParcelById(parcelId);
-
-    if (parcel) {
-      return {
-        action: "select",
-        click: clickEvent,
-        hit: identifyResult.primaryHit,
-        parcelId: parcel.parcelId,
-        source: "map",
-        type: "selection",
-      };
-    }
-
     return {
-      action: "preserve",
+      action: "select",
       click: clickEvent,
       hit: identifyResult.primaryHit,
       parcelId,
-      reason: "parcel-id-not-found",
       source: "map",
       type: "selection",
     };

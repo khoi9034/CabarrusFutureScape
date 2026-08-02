@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "assets:arcgis": "node -e \"const f=require('node:fs'),d='public/arcgis-assets/esri/geometry/support';f.mkdirSync(d,{recursive:true});f.copyFileSync('node_modules/@arcgis/core/assets/esri/geometry/support/pe-wasm.wasm',d+'/pe-wasm.wasm');f.cpSync('node_modules/@arcgis/core/assets/esri/core/workers','public/arcgis-assets/esri/core/workers',{recursive:true});f.cpSync('node_modules/@arcgis/core/assets/esri/core/libs/libtess','public/arcgis-assets/esri/core/libs/libtess',{recursive:true});f.cpSync('node_modules/@arcgis/core/assets/esri/widgets/Zoom/t9n','public/arcgis-assets/esri/widgets/Zoom/t9n',{recursive:true})\"",
+    "assets:arcgis": "node scripts/sync-arcgis-assets.mjs",
     "predev": "npm run assets:arcgis",
     "prebuild": "npm run assets:arcgis",
     "dev": "next dev -p 3000",
@@ -12,6 +12,7 @@
     "stop:cfs": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stop-cfs-local.ps1",
     "build": "next build --webpack",
     "check:acceptance": "node scripts/check-product-acceptance.mjs",
+    "check:arcgis-assets": "node scripts/sync-arcgis-assets.mjs --check",
     "check:ask-cfs": "python scripts/check_ask_cfs.py",
     "check:data-provenance": "python scripts/check_data_provenance.py",
     "check:demo-functionality": "node scripts/check-demo-functionality.mjs",
@@ -21,6 +22,7 @@
     "check:local-interactions": "node scripts/check-local-interactions.mjs",
     "check:local-presentation": "node scripts/check-local-presentation.mjs",
     "check:enterprise-readiness": "python scripts/check_enterprise_readiness.py",
+    "check:interactive-map": "node scripts/check-interactive-map.mjs",
     "check:map-resilience": "node scripts/check-map-resilience.mjs",
     "check:powerbi": "python scripts/check_powerbi.py",
     "check:product-hardening": "node scripts/check-product-hardening.mjs",
@@ -31,7 +33,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@arcgis/core": "^5.0.19",
+    "@arcgis/core": "5.0.19",
     "@azure/msal-browser": "^4.30.0",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
