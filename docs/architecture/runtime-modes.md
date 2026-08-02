@@ -1,37 +1,35 @@
 # CFS Runtime Modes
 
-## Canonical setting
-
-Use one frontend mode:
+## Canonical settings
 
 ```text
-NEXT_PUBLIC_CFS_RUNTIME_MODE=demo | local | enterprise
-```
-
-The backend uses:
-
-```text
-CFS_RUNTIME_MODE=local | enterprise
-CFS_DATA_PROVIDER=local_postgis | enterprise_service
+CFS_RUNTIME_MODE=demo | local | enterprise
+CFS_DATA_PROVIDER=static | local_api | enterprise_api
+CFS_AUTH_MODE=off | local_dev | oidc
 CFS_AI_PROVIDER=none | openai
-CFS_API_AUTH_MODE=off | entra
+CFS_ARTIFACT_PROVIDER=public_static | local_file | object_storage
+CFS_JOB_PROVIDER=inline | external_worker
 ```
 
-`NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo|live` remains compatible. `demo` maps to
-Demo and `live` or the deprecated `auto` value maps to Local Live. `auto` never
-enables demo data when the API is missing.
+Browser-safe settings use matching `NEXT_PUBLIC_CFS_*` names where a value is
+needed by the frontend. Invalid combinations fail configuration validation.
+
+Compatibility remains explicit: `NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo|live`,
+`NEXT_PUBLIC_USE_BACKEND_API`, `local_postgis`, `enterprise_service`, and the
+legacy `CFS_API_AUTH_MODE=off|entra` map to canonical values. Deprecated `auto`
+never enables demo business data after an API failure.
 
 ## Demo
 
-- Provider: `sanitized_demo_extract`
+- Provider: `static`
 - Static same-origin JSON, GeoJSON, CSV, ZIP, and deterministic browser services
 - No backend, private data, or provider key
 - UI label: `Portfolio Demo`
-- Session-only writes are not represented as persistent records
+- Session-only writes are labeled and remain in browser session storage
 
 ## Local Live
 
-- Provider: `local_postgis` through FastAPI
+- Provider: `local_api` through FastAPI to local PostGIS
 - Database: local `cfs_dev` PostgreSQL/PostGIS
 - UI label: `Live Local Data`
 - Ask CFS deterministic baseline; optional backend-only provider enhancement
@@ -52,6 +50,13 @@ not analytical metrics.
 
 Enterprise mode is a contract and configuration target. No cloud resource is
 provisioned by this repository.
+
+Enterprise requires `enterprise_api`, `oidc`, the OIDC tenant/API audience, and
+a provisioned `CFS_ORGANIZATION_ID`; it must not silently permit anonymous or
+organization-less writes. Object storage and external workers remain unhealthy
+contract adapters until implemented by an approved deployment. The
+enterprise-local Compose reference intentionally runs `local` + `local_api` +
+`local_dev`.
 
 ## Diagnostics
 

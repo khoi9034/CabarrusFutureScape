@@ -16,7 +16,7 @@ existing boundaries instead.
 
 ## Provider matrix
 
-| Boundary | Demo adapter | Local adapter | Future enterprise adapter |
+| Boundary | `static` | `local_api` | `enterprise_api` |
 | --- | --- | --- | --- |
 | Parcel and Planning | Sanitized JSON/GeoJSON | FastAPI to local PostGIS | Same typed API contract |
 | Economics and scenarios | Sanitized JSON | FastAPI economics service | Hosted economics API |
@@ -25,8 +25,9 @@ existing boundaries instead.
 | Power BI | Sanitized static package | API-generated local package | Governed export endpoint |
 | Reports | Sanitized/session artifacts | Backend report routes | Authenticated report service |
 
-The future adapter performs no network call until an enterprise endpoint is
-configured. Components continue to consume the same TypeScript contracts.
+The enterprise adapter performs no network call until an enterprise endpoint
+and OIDC boundary are configured. Components continue to consume the same
+TypeScript contracts.
 
 ## Provenance envelope
 
@@ -43,7 +44,7 @@ Technical boundaries may attach:
 - `limitation`
 - `official_verification_required`
 
-Origins are `local_postgis`, `local_api`, `sanitized_demo_extract`,
+Origins are `local_postgis`, `local_api`, `enterprise_api`, `sanitized_demo_extract`,
 `derived_local_metric`, `internal_research`, `session_only_demo`,
 `static_geographic_context`, or `unavailable`.
 

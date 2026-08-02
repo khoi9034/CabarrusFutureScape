@@ -2,11 +2,10 @@
 
 ## Stable contracts
 
-The current FastAPI OpenAPI document is the compatibility baseline. Presentation
-domains expose typed filters, pagination where applicable, structured errors,
-provenance, and health/readiness endpoints. A future `/api/v1` router may be
-introduced behind compatibility routes; current frontend URLs should not be
-broken solely for versioning.
+The current FastAPI OpenAPI document is the compatibility baseline. Existing
+routes remain supported while Product V1 adds `/api/v1` compatibility routes.
+Presentation domains expose typed filters, pagination where applicable,
+structured errors, provenance, request IDs, and health/readiness endpoints.
 
 Recommended hosting order:
 
@@ -29,8 +28,8 @@ Recommended hosting order:
 
 ## Identity and authorization
 
-Local development keeps `CFS_API_AUTH_MODE=off`. Enterprise mode activates the
-existing Entra/OIDC boundary.
+Local development uses `CFS_AUTH_MODE=local_dev`. Enterprise mode requires
+`CFS_AUTH_MODE=oidc`; the existing Entra verifier is the first OIDC adapter.
 
 | Role | Typical permission |
 | --- | --- |
@@ -41,9 +40,10 @@ existing Entra/OIDC boundary.
 | Data Steward | Data-quality and pipeline administration |
 | Administrator | Identity, role, and service administration |
 
-The public demo remains anonymous and read-only/session-only. Persistent writes
-require authentication and role checks. Broad multi-tenancy is intentionally
-deferred until an organization requires it.
+The public demo remains anonymous and session-only. Persistent writes require
+authentication, route permissions, and object ownership checks. Product V1 is
+single-organization; broad multi-tenancy is deferred until a second organization
+and isolation policy exist.
 
 ## Observability
 
