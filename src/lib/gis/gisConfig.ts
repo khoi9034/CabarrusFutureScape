@@ -15,7 +15,6 @@ export const cabarrusSceneConfig = {
     tilt: 62,
     altitudeMeters: 6500,
   },
-  basemap: "dark-gray-vector",
   mockLightingDate: "2026-05-22T19:15:00-04:00",
   zoom: 11,
 };

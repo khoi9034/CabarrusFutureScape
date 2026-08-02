@@ -113,6 +113,7 @@ function isForbiddenBackend(url, origin) {
   const port = parsed.port;
   const sameOrigin = parsed.origin === origin;
   const backendHost =
+    (!sameOrigin && /(?:arcgis|esri)/i.test(host)) ||
     host === "basemaps.arcgis.com" ||
     host === "services.arcgis.com" ||
     host.endsWith(".arcgisonline.com") ||
@@ -162,7 +163,6 @@ function attachDiagnostics(context, origin) {
       if (["error", "warning"].includes(message.type())) {
         const text = message.text();
         if (/GL Driver Message.*GPU stall due to ReadPixels/.test(text)) return;
-        if (/\[@arcgis\/core\/views\/MapView\] Font .* is not available/.test(text)) return;
         const location = message.location().url;
         diagnostics.consoleMessages.push(`${page.url()} :: ${message.type()}: ${text}${location ? ` [${location}]` : ""}`);
       }
@@ -209,25 +209,22 @@ async function assertImageDifference(before, after, label, minimum = 0.05) {
   return meanDifference;
 }
 
-async function waitForMapReady(page, { interactive = false } = {}) {
+async function waitForMapReady(page) {
   const map = page.getByTestId("cfs-arcgis-map");
   await map.waitFor({ timeout: 30_000 });
   await page.waitForFunction(
-    ({ requireInteractive }) => {
+    () => {
       const element = document.querySelector('[data-testid="cfs-arcgis-map"]');
-      const rendererState = element?.getAttribute("data-map-renderer-state");
       return (
         element?.getAttribute("data-static-context-ready") === "true" &&
-        (requireInteractive
-          ? element.getAttribute("data-interactive-ready") === "true"
-          : [
-              "interactive_ready",
-              "static_degraded",
-              "static_ready",
-            ].includes(rendererState ?? ""))
+        element.getAttribute("data-map-renderer-state") === "interactive_ready" &&
+        element.getAttribute("data-interactive-ready") === "true" &&
+        element.getAttribute("data-map-renderer") === "interactive" &&
+        element.getAttribute("data-arcgis-runtime-state") === "ready" &&
+        element.getAttribute("data-arcgis-view-state") === "ready" &&
+        element.getAttribute("data-map-view-ready-state") === "ready"
       );
     },
-    { requireInteractive: interactive },
     { timeout: 35_000 },
   );
   const box = await map.boundingBox();
@@ -237,8 +234,14 @@ async function waitForMapReady(page, { interactive = false } = {}) {
   assert(Number(await map.getAttribute("data-context-hydro-features")) > 0, "Water context is empty.");
   assert(Number(await map.getAttribute("data-context-municipal-features")) > 0, "Municipal context is empty.");
   assert(Number(await map.getAttribute("data-context-label-features")) > 0, "Place label context is empty.");
-  await delay(350);
-  const renderer = await map.getAttribute("data-map-renderer");
+  await page.waitForFunction(() => {
+    const interactive = document.querySelector('[data-testid="cfs-arcgis-map"]');
+    const staticMap = document.querySelector('[data-testid="cfs-local-context-map"]');
+    return (
+      Number(interactive ? getComputedStyle(interactive).opacity : 0) >= 0.99 &&
+      Number(staticMap ? getComputedStyle(staticMap).opacity : 1) <= 0.01
+    );
+  });
   const visibility = await page.evaluate(() => {
     const interactive = document.querySelector('[data-testid="cfs-arcgis-map"]');
     const staticMap = document.querySelector('[data-testid="cfs-local-context-map"]');
@@ -247,14 +250,19 @@ async function waitForMapReady(page, { interactive = false } = {}) {
       static: Number(staticMap ? getComputedStyle(staticMap).opacity : 0),
     };
   });
-  if (renderer === "interactive") {
-    assert.equal(await map.getAttribute("data-interactive-ready"), "true");
-    assert(visibility.interactive >= 0.99, "Interactive renderer is transparent.");
-  } else {
-    assert.equal(renderer, "static");
-    assert(visibility.static >= 0.99, "Static renderer is transparent.");
-    assert(visibility.interactive <= 0.01, "Unproven interactive renderer is visible.");
-  }
+  assert(visibility.interactive >= 0.99, "Interactive renderer is transparent.");
+  assert(visibility.static <= 0.01, "Emergency SVG is visible over a ready MapView.");
+  assert.equal(await map.getAttribute("data-basemap-mode"), "same-origin");
+  const sdkVersion = await map.getAttribute("data-arcgis-sdk-version");
+  assert.match(sdkVersion ?? "", /^\d+\.\d+\.\d+$/);
+  assert.equal(await map.getAttribute("data-arcgis-assets-path"), `/arcgis-assets/${sdkVersion}`);
+  const debug = await page.evaluate(() => window.__cfsGetMapDebugState?.());
+  assert.equal(debug?.ready, true, "MapView debug state is not ready.");
+  assert.equal(debug?.readyState, "ready", "MapView readyState is not ready.");
+  assert.equal(debug?.basemapId, "cfs-same-origin-basemap");
+  assert.equal(debug?.assetsPath, `/arcgis-assets/${sdkVersion}`);
+  assert(Number(debug?.layerCount) >= 5, "ArcGIS basemap layers are missing.");
+  assert(Number(debug?.layerViewCount) >= 5, "ArcGIS basemap layerViews are missing.");
   const countyPath = await page
     .getByTestId("cfs-local-context-map")
     .locator('[data-layer-id="county-boundary"]')
@@ -284,36 +292,22 @@ async function assertRuntimeLayer(page, layerId, { visible = true, withGraphics 
 }
 
 async function mapUsesArcGIS(page) {
-  return (
-    (await page
-      .getByTestId("cfs-arcgis-map")
-      .getAttribute("data-map-renderer")) === "interactive"
-  );
+  const renderer = await page
+    .getByTestId("cfs-arcgis-map")
+    .getAttribute("data-map-renderer");
+  assert.equal(renderer, "interactive", "Normal demo flow fell back to the SVG renderer.");
+  return true;
 }
 
 async function assertContextMapLayers(page) {
-  if (await mapUsesArcGIS(page)) {
-    for (const layerId of [
-      "county-boundary",
-      "cfs-local-municipalities",
-      "cfs-local-hydrography",
-      "transportation-context",
-      "cfs-local-place-labels",
-    ]) {
-      await assertRuntimeLayer(page, layerId);
-    }
-    return;
-  }
-
-  const fallback = page.getByTestId("cfs-local-context-map");
   for (const layerId of [
     "county-boundary",
-    "municipal-boundaries",
-    "hydrography",
-    "major-roads",
-    "place-labels",
+    "cfs-local-municipalities",
+    "cfs-local-hydrography",
+    "transportation-context",
+    "cfs-local-place-labels",
   ]) {
-    await fallback.locator(`[data-layer-id="${layerId}"]`).waitFor();
+    await assertRuntimeLayer(page, layerId);
   }
 }
 
@@ -323,23 +317,16 @@ async function assertRenderedMapLayer(
   fallbackLayerId,
   { visible = true } = {},
 ) {
-  if (await mapUsesArcGIS(page)) {
-    await assertRuntimeLayer(page, runtimeLayerId, {
-      visible,
-      withGraphics: visible,
-    });
-    return;
-  }
-  await page
-    .getByTestId("cfs-local-context-map")
-    .locator(`[data-layer-id="${fallbackLayerId}"]`)
-    .waitFor({ state: visible ? "attached" : "detached", timeout: 20_000 });
+  void fallbackLayerId;
+  await assertRuntimeLayer(page, runtimeLayerId, {
+    visible,
+    withGraphics: visible,
+  });
 }
 
 async function captureMapSurface(page) {
-  return (await mapUsesArcGIS(page))
-    ? page.getByTestId("cfs-arcgis-map").screenshot()
-    : page.getByTestId("cfs-local-context-map").screenshot();
+  await mapUsesArcGIS(page);
+  return page.getByTestId("cfs-arcgis-map").screenshot();
 }
 
 async function chooseDifferent(select) {
@@ -365,6 +352,27 @@ async function chooseExtreme(select) {
 }
 
 async function assertStaticAssets(baseUrl) {
+  const arcgisManifestResponse = await fetch(`${baseUrl}/arcgis-assets/manifest.json`);
+  assert.equal(arcgisManifestResponse.status, 200, "ArcGIS asset manifest is unavailable.");
+  const arcgisManifest = await arcgisManifestResponse.json();
+  assert.match(arcgisManifest.sdkVersion ?? "", /^\d+\.\d+\.\d+$/);
+  assert.equal(arcgisManifest.assetsPath, `/arcgis-assets/${arcgisManifest.sdkVersion}`);
+  assert(Number(arcgisManifest.assetCount) > 1_000, "ArcGIS asset manifest is incomplete.");
+  assert(Number(arcgisManifest.totalBytes) > 1_000_000, "ArcGIS asset tree is incomplete.");
+  for (const path of [
+    "esri/geometry/support/pe-wasm.wasm",
+    "esri/core/workers/RemoteClient.js",
+    "esri/core/libs/libtess/libtess-f32.wasm",
+    "esri/widgets/Zoom/t9n/Zoom_en.json",
+  ]) {
+    assert(
+      arcgisManifest.assets.some((asset) => asset.path === path && Number(asset.size) > 0),
+      `ArcGIS manifest is missing ${path}.`,
+    );
+    const response = await fetch(`${baseUrl}${arcgisManifest.assetsPath}/${path}`);
+    assert.equal(response.status, 200, `${path} returned ${response.status}`);
+  }
+
   const manifestResponse = await fetch(`${baseUrl}/demo-data/demo_manifest.json`);
   assert.equal(manifestResponse.status, 200);
   const manifest = await manifestResponse.json();
@@ -388,7 +396,12 @@ async function assertStaticAssets(baseUrl) {
     assert((await csvResponse.text()).trim().split(/\r?\n/).length > 1, "Economics CSV asset has no data rows.");
     publicAssets += 1;
   }
-  return { manifestAssets: manifest.required_assets.length, publicAssets };
+  return {
+    arcgisAssets: arcgisManifest.assetCount,
+    arcgisSdkVersion: arcgisManifest.sdkVersion,
+    manifestAssets: manifest.required_assets.length,
+    publicAssets,
+  };
 }
 
 async function planningChecks(page, baseUrl) {
@@ -473,6 +486,8 @@ async function planningChecks(page, baseUrl) {
   });
 
   await check("Planning", "operational overlays paint visible geometry", ["county", "parcels", "development", "flood", "FEMA", "schools", "school pressure", "transportation", "pixel difference"], async () => {
+    await page.getByRole("button", { name: "Reset to Cabarrus County", exact: true }).click();
+    await delay(700);
     const expandLayers = page.getByRole("button", { name: "Expand map layers panel" });
     if (await expandLayers.count()) await expandLayers.click();
     for (const [layer, group, runtimeLayerId, fallbackLayerId] of [
@@ -634,8 +649,10 @@ async function planningChecks(page, baseUrl) {
     if (await section.count()) {
       const before = await section.isChecked();
       await section.setChecked(!before);
-      await page.reload({ waitUntil: "domcontentloaded" });
-      await delay(750);
+      await page.reload({ waitUntil: "load" });
+      await page
+        .locator('button[aria-label^="Workspace:"][aria-pressed="true"]')
+        .waitFor();
       await snapshotMode.click();
       await page
         .locator('button[aria-label^="Planning Snapshot:"][aria-pressed="true"]')
@@ -922,148 +939,58 @@ async function mobileChecks(browser, baseUrl) {
 
 async function offlineMapChecks(browser, baseUrl) {
   const origin = new URL(baseUrl).origin;
-  for (const scenario of [
-    { blockArcgisAssets: false, label: "external network isolation" },
-    { blockArcgisAssets: true, label: "ArcGIS assets unavailable in static demo" },
-  ]) {
-    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
-    const arcgisRequests = [];
-    const blocked = [];
-    const sameOriginPaths = new Set();
-    await context.route("**/*", async (route) => {
-      const url = new URL(route.request().url());
-      if (
-        url.pathname.startsWith("/arcgis-assets/") ||
-        /(?:arcgis|esri)/i.test(url.hostname)
-      ) {
-        arcgisRequests.push(url.href);
-      }
-      if (
-        url.origin !== origin ||
-        (scenario.blockArcgisAssets && url.pathname.startsWith("/arcgis-assets/"))
-      ) {
-        blocked.push(url.href);
-        await route.abort("blockedbyclient");
-        return;
-      }
-      sameOriginPaths.add(url.pathname);
-      await route.continue();
-    });
-    const page = await context.newPage();
-    try {
-      await goto(page, baseUrl, "?app=planning");
-      await page.getByTestId("command-center-explore-intelligence").click();
-      await waitForMapReady(page);
-      for (const asset of [
-        "/demo-data/map_layers/demo_county_boundary.geojson",
-        "/demo-data/map_layers/demo_municipal_boundaries.geojson",
-        "/demo-data/map_layers/demo_hydrography.geojson",
-        "/demo-data/map_layers/demo_transportation_context.geojson",
-        "/demo-data/map_layers/demo_place_labels.geojson",
-      ]) {
-        assert(sameOriginPaths.has(asset), `${scenario.label} did not load ${asset}`);
-      }
-      assert.deepEqual(
-        arcgisRequests,
-        [],
-        `${scenario.label} requested ArcGIS in default demo mode`,
-      );
-      const map = page.getByTestId("cfs-arcgis-map");
-      assert.equal(await map.getAttribute("data-arcgis-runtime-state"), "disabled");
-      assert.equal(await map.getAttribute("data-arcgis-view-state"), "disabled");
-      await assertContextMapLayers(page);
-
-      if (!scenario.blockArcgisAssets) {
-        await assertPaintedImage(
-          await captureMapSurface(page),
-          "Offline same-origin context map",
-        );
-      } else {
-        const fallback = page.getByTestId("cfs-local-context-map");
-        await fallback.waitFor();
-        assert.equal(
-          await page
-            .getByTestId("cfs-arcgis-map")
-            .getAttribute("data-map-renderer"),
-          "static",
-        );
-        assert.equal(
-          await page
-            .getByText("Interactive MapView unavailable", { exact: true })
-            .count(),
-          0,
-        );
-        assert.equal(
-          await page
-            .getByText("Interactive enhancement unavailable", { exact: true })
-            .count(),
-          0,
-        );
-        assert.equal(
-          await page.getByRole("button", { name: "Zoom in", exact: true }).isEnabled(),
-          true,
-          "Fallback zoom control should remain available.",
-        );
-        await assertPaintedImage(
-          await fallback.screenshot(),
-          "Same-origin SVG fallback map",
-        );
-
-        const expandLayers = page.getByRole("button", {
-          name: "Expand map layers panel",
-        });
-        if (await expandLayers.count()) await expandLayers.click();
-        const card = page
-          .locator("article")
-          .filter({
-            has: page.getByText("Development Hotspots", { exact: true }),
-          })
-          .first();
-        await card
-          .getByRole("combobox", {
-            name: "Development hotspot permit segment filter",
-          })
-          .selectOption("residential_growth");
-        const beforeOverlay = await fallback.screenshot();
-        await card
-          .getByRole("button", {
-            name: "Show Development Hotspots",
-            exact: true,
-          })
-          .click();
-        await fallback
-          .locator('[data-layer-id="development-hotspots"] circle')
-          .first()
-          .waitFor();
-        await assertImageDifference(
-          beforeOverlay,
-          await fallback.screenshot(),
-          "SVG fallback development overlay",
-        );
-
-        const search = page.getByRole("combobox", { name: "Search parcels" });
-        await search.fill("CFS-PARCEL-0149780354");
-        await page
-          .locator("#top-parcel-search-results")
-          .getByRole("option")
-          .first()
-          .click();
-        await fallback.locator('[data-layer-id="selected-parcel"]').waitFor();
-      }
-
-      assert(
-        blocked.every((url) => new URL(url).origin !== origin || scenario.blockArcgisAssets),
-        `${scenario.label} blocked an unexpected same-origin request`,
-      );
-      record("Planning", scenario.label, [
-        "offline map",
-        "same-origin context",
-        scenario.blockArcgisAssets ? "SVG fallback" : "external isolation",
-      ]);
-      console.log(`PASS Planning: ${scenario.label}`);
-    } finally {
-      await context.close();
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const arcgisRequests = [];
+  const sameOriginPaths = new Set();
+  await context.route("**/*", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.startsWith("/arcgis-assets/") || /(?:arcgis|esri)/i.test(url.hostname)) {
+      arcgisRequests.push(url.href);
     }
+    if (url.origin !== origin) {
+      await route.abort("blockedbyclient");
+      return;
+    }
+    sameOriginPaths.add(url.pathname);
+    await route.continue();
+  });
+  const page = await context.newPage();
+  try {
+    await goto(page, baseUrl, "?app=planning");
+    await page.getByTestId("command-center-explore-intelligence").click();
+    const map = await waitForMapReady(page);
+    for (const asset of [
+      "/demo-data/map_layers/demo_county_boundary.geojson",
+      "/demo-data/map_layers/demo_municipal_boundaries.geojson",
+      "/demo-data/map_layers/demo_hydrography.geojson",
+      "/demo-data/map_layers/demo_transportation_context.geojson",
+      "/demo-data/map_layers/demo_place_labels.geojson",
+    ]) {
+      assert(sameOriginPaths.has(asset), `external network isolation did not load ${asset}`);
+    }
+    const sdkVersion = await map.getAttribute("data-arcgis-sdk-version");
+    const localAssetPrefix = `/arcgis-assets/${sdkVersion}/`;
+    assert(
+      arcgisRequests.some((url) => new URL(url).pathname.startsWith(localAssetPrefix)),
+      "ArcGIS did not load its SDK assets from the versioned same-origin path.",
+    );
+    assert(
+      arcgisRequests.every((url) => {
+        const parsed = new URL(url);
+        return parsed.origin === origin && parsed.pathname.startsWith(localAssetPrefix);
+      }),
+      `ArcGIS attempted an external or unversioned request: ${arcgisRequests.join(" | ")}`,
+    );
+    await assertContextMapLayers(page);
+    await assertPaintedImage(await captureMapSurface(page), "Externally isolated ArcGIS map");
+    record("Planning", "external network isolation", [
+      "interactive ArcGIS map",
+      "same-origin context",
+      "versioned SDK assets",
+    ]);
+    console.log("PASS Planning: external network isolation");
+  } finally {
+    await context.close();
   }
 }
 

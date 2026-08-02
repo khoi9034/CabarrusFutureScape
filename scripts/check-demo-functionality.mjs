@@ -203,10 +203,25 @@ assert(!shell.includes("Find Sites: Industrial Site"), "Find Sites saved search 
 
 const scene = read("src/components/gis/SceneViewContainer.tsx");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "await getDemoMapContext(false)");
-assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "if (!USE_INTERACTIVE_MAP)");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "hydrateLocalContextLayers");
+assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "createCabarrusContextBasemap");
+assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "await waitForUsableArcGisView");
+assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, "data-arcgis-assets-path={ARCGIS_ASSETS_PATH}");
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, 'aria-label="Zoom in"');
 assertIncludes("src/components/gis/SceneViewContainer.tsx", scene, 'aria-label="Reset to Cabarrus County"');
+assert(!scene.includes("if (!USE_INTERACTIVE_MAP)"), "demo still bypasses ArcGIS MapView");
 assert(!scene.includes("void hydrateDemoReferenceLayers"), "required map context hydration is still fire-and-forget");
+
+const apiClient = read("src/lib/api/client.ts");
+assertIncludes("src/lib/api/client.ts", apiClient, "export const USE_INTERACTIVE_MAP = true;");
+
+const runtime = read("src/lib/gis/arcgisRuntime.ts");
+assertIncludes("src/lib/gis/arcgisRuntime.ts", runtime, "`/arcgis-assets/${ARCGIS_SDK_VERSION}`");
+assertIncludes("src/lib/gis/arcgisRuntime.ts", runtime, "config.assetsPath = ARCGIS_ASSETS_PATH");
+
+const sceneFactory = read("src/lib/gis/sceneViewFactory.ts");
+assertIncludes("src/lib/gis/sceneViewFactory.ts", sceneFactory, "baseLayers:");
+assertIncludes("src/lib/gis/sceneViewFactory.ts", sceneFactory, "referenceLayers: [layers.labels]");
+assertIncludes("src/lib/gis/sceneViewFactory.ts", sceneFactory, 'id: "cfs-same-origin-basemap"');
 
 console.log(`PASS demo functionality contracts (${contextAssets.length} required map context assets)`);

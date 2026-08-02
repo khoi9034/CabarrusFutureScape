@@ -5,7 +5,9 @@ const checks = [
   "check:ask-cfs",
   "check:enterprise-readiness",
   "check:powerbi",
+  "check:arcgis-assets",
   "check:map-resilience",
+  "check:interactive-map",
 ];
 
 for (const check of checks) {

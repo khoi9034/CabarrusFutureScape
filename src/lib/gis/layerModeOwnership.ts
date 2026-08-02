@@ -19,7 +19,7 @@ const layerOwnerScopeById: Record<string, MapLayerOwnerScope> = {
   "school-pressure": "exploreCountywide",
   "school-utilization-seed": "exploreCountywide",
   "scenario-envelope": "snapshotOnly",
-  "transportation-context": "exploreCountywide",
+  "transportation-context": "sharedBase",
 };
 
 export function getMapLayerOwnerScope(layerId: string): MapLayerOwnerScope {
@@ -41,7 +41,7 @@ export function isMapLayerVisibleInMode(
   const ownerScope = getMapLayerOwnerScope(layerId);
 
   if (ownerScope === "sharedBase") {
-    return mode === "countywide" || mode === "modelLab";
+    return true;
   }
 
   if (ownerScope === "globalSelection") {

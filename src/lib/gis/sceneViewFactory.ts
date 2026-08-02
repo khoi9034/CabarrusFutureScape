@@ -1,4 +1,7 @@
 import type ArcGISMap from "@arcgis/core/Map";
+import type Basemap from "@arcgis/core/Basemap";
+import type Extent from "@arcgis/core/geometry/Extent";
+import type GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import type MapView from "@arcgis/core/views/MapView";
 import type { ArcGISRuntime } from "@/lib/gis/arcgisRuntime";
 import { cabarrusSceneConfig } from "@/lib/gis/gisConfig";
@@ -8,41 +11,63 @@ export interface CabarrusSceneView {
   view: MapView;
 }
 
+export interface CabarrusContextBasemapLayers {
+  county: GraphicsLayer;
+  hydrography: GraphicsLayer;
+  labels: GraphicsLayer;
+  municipalities: GraphicsLayer;
+  roads: GraphicsLayer;
+}
+
+export function createCabarrusContextBasemap(
+  runtime: ArcGISRuntime,
+  layers: CabarrusContextBasemapLayers,
+) {
+  return new runtime.Basemap({
+    baseLayers: [
+      layers.county,
+      layers.hydrography,
+      layers.municipalities,
+      layers.roads,
+    ],
+    id: "cfs-same-origin-basemap",
+    referenceLayers: [layers.labels],
+    title: "Cabarrus County same-origin basemap",
+  });
+}
+
 export function createCabarrusSceneView(
   runtime: ArcGISRuntime,
   container: HTMLDivElement,
-  useOnlineBasemap = true,
+  basemap: Basemap,
+  initialExtent?: Extent | null,
 ): CabarrusSceneView {
-  const map = new runtime.Map(
-    useOnlineBasemap ? { basemap: cabarrusSceneConfig.basemap } : {},
-  );
+  const map = new runtime.Map({ basemap });
   const clippingArea = createCabarrusStudyExtent(runtime);
+  const spatialReference = { wkid: 3857 };
 
   const view = new runtime.MapView({
     background: { color: "#050911" },
-    center: [
-      cabarrusSceneConfig.center.longitude,
-      cabarrusSceneConfig.center.latitude,
-    ],
     container,
     constraints: {
       geometry: clippingArea,
+      lods: runtime.TileInfo.create().lods,
       maxZoom: 20,
       minZoom: 9,
     },
-    extent: clippingArea,
+    extent: initialExtent ?? clippingArea,
     map,
+    spatialReference,
     ui: {
       components: [],
     },
-    zoom: cabarrusSceneConfig.zoom,
   });
 
   return { map, view };
 }
 
 export function createCabarrusStudyExtent(runtime: ArcGISRuntime) {
-  return new runtime.Extent({
+  const geographicExtent = new runtime.Extent({
     spatialReference: {
       wkid: cabarrusSceneConfig.studyExtent.wkid,
     },
@@ -51,4 +76,8 @@ export function createCabarrusStudyExtent(runtime: ArcGISRuntime) {
     ymax: cabarrusSceneConfig.studyExtent.ymax,
     ymin: cabarrusSceneConfig.studyExtent.ymin,
   });
+
+  return runtime.webMercatorUtils.geographicToWebMercator(
+    geographicExtent,
+  ) as Extent;
 }

@@ -123,7 +123,7 @@ export function MapViewportPlaceholder({
         </div>
       )}
 
-      {contextReady && interactiveEnabled && (isEnhancing || enhancementFailed) ? (
+      {interactiveEnabled && (isEnhancing || enhancementFailed) ? (
         <div
           aria-live="polite"
           className="pointer-events-auto absolute right-3 top-16 z-50 max-w-[min(19rem,calc(100%-1.5rem))] rounded-md border border-white/15 bg-[#06101a]/92 p-3 shadow-2xl backdrop-blur-xl sm:right-4"
@@ -138,13 +138,13 @@ export function MapViewportPlaceholder({
             <div className="min-w-0">
               <p className="text-xs font-semibold text-white">
                 {enhancementFailed
-                  ? "Interactive enhancement unavailable"
-                  : "Enhancing interactive map\u2026"}
+                  ? "Interactive map could not start"
+                  : "Loading interactive map\u2026"}
               </p>
               <p className="mt-1 text-[11px] leading-4 text-slate-300">
                 {enhancementFailed
-                  ? "The CFS map and analytical overlays remain available."
-                  : "The Cabarrus County map remains fully visible while enhancement loads."}
+                  ? "Basic map view remains available."
+                  : "Cabarrus County context remains visible while MapView starts."}
               </p>
               {enhancementFailed ? (
                 <button
