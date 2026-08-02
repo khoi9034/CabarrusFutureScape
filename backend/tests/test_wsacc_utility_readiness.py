@@ -21,8 +21,13 @@ db_required = pytest.mark.skipif(
     not (os.getenv("POSTGRES_PASSWORD") or os.getenv("CFS_POSTGRES_PASSWORD")),
     reason="Database password environment variable is not configured.",
 )
+wsacc_files_required = pytest.mark.skipif(
+    not (REPO_ROOT / "data" / "WSACC" / "WSACC_Pipes26.shp").exists(),
+    reason="Raw WSACC shapefiles are intentionally unavailable in sanitized CI.",
+)
 
 
+@wsacc_files_required
 def test_wsacc_inventory_reads_current_shapefiles() -> None:
     inventory = build_wsacc_inventory()
     by_file = {row["file_name"]: row for row in inventory}
@@ -37,6 +42,7 @@ def test_wsacc_inventory_reads_current_shapefiles() -> None:
     assert by_file["WSACC_Subbasins_Cabarrus_Only.shp"]["target_table"] == "wsacc_basins"
 
 
+@wsacc_files_required
 def test_wsacc_statistics_is_honest_about_missing_capacity_and_parcel_overlay() -> None:
     payload = build_wsacc_statistics()
 

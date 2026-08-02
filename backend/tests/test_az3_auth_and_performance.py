@@ -239,6 +239,7 @@ def test_entra_validation_rejects_jwks_lookup_errors(monkeypatch) -> None:
 
 
 def test_entra_middleware_keeps_health_public_and_protects_root(monkeypatch) -> None:
+    monkeypatch.delenv("CFS_AUTH_MODE", raising=False)
     monkeypatch.setenv("CFS_API_AUTH_MODE", "entra")
     monkeypatch.setenv("CFS_ENTRA_TENANT_ID", "tenant-id")
     monkeypatch.setenv("CFS_ENTRA_API_AUDIENCE", "api://cfs-api")
