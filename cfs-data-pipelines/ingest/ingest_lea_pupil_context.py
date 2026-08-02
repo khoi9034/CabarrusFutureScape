@@ -23,7 +23,7 @@ PIPELINE_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = PIPELINE_ROOT.parent
 SQL_FILE = PIPELINE_ROOT / "sql" / "create_school_lea_pupil_context.sql"
 DEFAULT_SOURCE_FILE = PROJECT_ROOT / "data" / "schools" / "raw" / "lea_pupil_info_2025.csv"
-ROOT_OUTPUT_DIR = PROJECT_ROOT / "outputs"
+ROOT_OUTPUT_DIR = Path(os.getenv("CFS_TEST_OUTPUT_DIR", PROJECT_ROOT / "outputs"))
 
 DEFAULT_DB_HOST = "localhost"
 DEFAULT_DB_PORT = 5433

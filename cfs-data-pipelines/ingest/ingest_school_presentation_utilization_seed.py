@@ -32,7 +32,7 @@ SEED_FILE = (
     / "raw"
     / "presentation_utilization_seed_sy2024_2025.csv"
 )
-ROOT_OUTPUT_DIR = PROJECT_ROOT / "outputs"
+ROOT_OUTPUT_DIR = Path(os.getenv("CFS_TEST_OUTPUT_DIR", PROJECT_ROOT / "outputs"))
 
 sys.path.insert(0, str(TRANSFORM_DIR))
 from validate_school_capacity_data import normalize_school_name  # noqa: E402

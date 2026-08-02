@@ -2,15 +2,23 @@ import hmac
 import logging
 import re
 import time
+from datetime import UTC, datetime
+from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.exception_handlers import http_exception_handler, request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.auth import AuthError, authenticate_bearer_token, classify_route
 from app.config import get_settings
-from app.database import verify_database_connection
+from app.database import get_engine, verify_database_connection
+from app.product.artifacts import ArtifactPathError
+from app.product.principal import AuthorizationError
+from app.product.router import router as product_v1_router
+from app.product.service import ProductConflict, ProductNotFound, ProductValidationError
 from app.routers import (
     ai_search_router,
     constraints_router,
@@ -24,11 +32,13 @@ from app.routers import (
     wsacc_router,
 )
 from app.telemetry import configure_telemetry
+from migrations.runner import check as check_migrations
 
 settings = get_settings()
 configure_telemetry(settings)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+PRODUCT_V1_MAX_REQUEST_BYTES = 12_000_000
 
 app = FastAPI(
     title="Cabarrus FutureScape API",
@@ -49,21 +59,39 @@ if settings.cors_origin_list:
             "Authorization",
             "Content-Type",
             "X-CFS-Staging-Token",
+            "X-Request-ID",
             "X-Requested-With",
         ],
+        expose_headers=["X-CFS-Process-Time-Ms", "X-Request-ID"],
     )
 
 
 @app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
-    started = time.perf_counter()
-    response = await call_next(request)
-    response.headers["X-CFS-Process-Time-Ms"] = f"{(time.perf_counter() - started) * 1000:.1f}"
-    return response
-
-
-@app.middleware("http")
 async def enforce_staging_or_entra_access(request: Request, call_next):
+    if _is_oversized_product_request(request):
+        return _error_response(
+            request,
+            status.HTTP_413_CONTENT_TOO_LARGE,
+            "request_too_large",
+            f"Product V1 requests are limited to {PRODUCT_V1_MAX_REQUEST_BYTES} bytes.",
+        )
+    if _is_v1_legacy_investment_mutation(request) or (
+        settings.cfs_runtime_mode == "enterprise"
+        and _is_unversioned_legacy_investment_mutation(request)
+    ):
+        return _error_response(
+            request,
+            status.HTTP_405_METHOD_NOT_ALLOWED,
+            "read_only_compatibility",
+            "Legacy Investment compatibility is read-only until a governed persistence adapter is available.",
+        )
+    if settings.cfs_runtime_mode == "demo" and _is_product_persistence_mutation(request):
+        return _error_response(
+            request,
+            status.HTTP_405_METHOD_NOT_ALLOWED,
+            "demo_write_disabled",
+            "Persistent Product V1 writes are unavailable in demo mode.",
+        )
     route_policy = classify_route(request.url.path, request.method)
     if (
         (not settings.staging_protection_enabled and not settings.entra_auth_enabled)
@@ -87,12 +115,143 @@ async def enforce_staging_or_entra_access(request: Request, call_next):
                 route_policy,
             )
         except AuthError as exc:
-            return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+            return _error_response(request, exc.status_code, "authentication_error", exc.detail)
         return await call_next(request)
 
     if not expected:
-        return JSONResponse({"detail": "Staging access is not configured."}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
-    return JSONResponse({"detail": "Staging access required."}, status_code=status.HTTP_401_UNAUTHORIZED)
+        return _error_response(
+            request,
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "staging_not_configured",
+            "Staging access is not configured.",
+        )
+    return _error_response(
+        request,
+        status.HTTP_401_UNAUTHORIZED,
+        "staging_access_required",
+        "Staging access required.",
+    )
+
+
+@app.middleware("http")
+async def add_request_context(request: Request, call_next):
+    started = time.perf_counter()
+    supplied = request.headers.get("x-request-id", "").strip()
+    request.state.request_id = supplied if re.fullmatch(r"[A-Za-z0-9._:-]{1,128}", supplied) else str(uuid4())
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request.state.request_id
+    response.headers["X-CFS-Process-Time-Ms"] = f"{(time.perf_counter() - started) * 1000:.1f}"
+    return response
+
+
+@app.exception_handler(ProductNotFound)
+async def product_not_found_handler(request: Request, exc: ProductNotFound):
+    return _error_response(request, 404, "not_found", str(exc))
+
+
+@app.exception_handler(ProductConflict)
+async def product_conflict_handler(request: Request, exc: ProductConflict):
+    return _error_response(request, 409, "conflict", str(exc))
+
+
+@app.exception_handler(ProductValidationError)
+async def product_validation_handler(request: Request, exc: ProductValidationError):
+    return _error_response(request, 422, "validation_error", str(exc))
+
+
+@app.exception_handler(AuthorizationError)
+async def product_authorization_handler(request: Request, exc: AuthorizationError):
+    return _error_response(request, 403, "forbidden", str(exc))
+
+
+@app.exception_handler(ArtifactPathError)
+async def artifact_path_handler(request: Request, exc: ArtifactPathError):
+    return _error_response(request, 422, "invalid_artifact", str(exc))
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_handler(request: Request, exc: RequestValidationError):
+    if not _is_v1(request):
+        return await request_validation_exception_handler(request, exc)
+    return _error_response(request, 422, "validation_error", "Request validation failed.", exc.errors())
+
+
+@app.exception_handler(HTTPException)
+async def http_error_handler(request: Request, exc: HTTPException):
+    if not _is_v1(request):
+        return await http_exception_handler(request, exc)
+    return _error_response(request, exc.status_code, "http_error", str(exc.detail), exc.detail)
+
+
+def _is_v1(request: Request) -> bool:
+    return request.url.path == "/api/v1" or request.url.path.startswith("/api/v1/")
+
+
+def _is_oversized_product_request(request: Request) -> bool:
+    if not _is_v1(request) or request.method in {"GET", "HEAD", "OPTIONS"}:
+        return False
+    content_length = request.headers.get("content-length", "").strip()
+    return content_length.isdigit() and int(content_length) > PRODUCT_V1_MAX_REQUEST_BYTES
+
+
+def _is_v1_legacy_investment_mutation(request: Request) -> bool:
+    return (
+        request.method in {"DELETE", "PATCH", "POST", "PUT"}
+        and (
+            request.url.path == "/api/v1/investment"
+            or request.url.path.startswith("/api/v1/investment/")
+        )
+    )
+
+
+def _is_unversioned_legacy_investment_mutation(request: Request) -> bool:
+    return (
+        request.method in {"DELETE", "PATCH", "POST", "PUT"}
+        and (
+            request.url.path == "/investment"
+            or request.url.path.startswith("/investment/")
+        )
+    )
+
+
+def _is_product_persistence_mutation(request: Request) -> bool:
+    if request.method not in {"DELETE", "PATCH", "POST", "PUT"}:
+        return False
+    return request.url.path.startswith(
+        (
+            "/investment/",
+            "/api/v1/projects",
+            "/api/v1/planning/snapshots",
+            "/api/v1/economics/scenarios",
+            "/api/v1/investments/property-reviews",
+            "/api/v1/reports",
+            "/api/v1/ask-cfs/conversations",
+            "/api/v1/data-sources",
+            "/api/v1/ingestion",
+            "/api/v1/artifacts",
+            "/api/v1/jobs",
+        )
+    )
+
+
+def _error_response(
+    request: Request,
+    status_code: int,
+    code: str,
+    message: str,
+    details: object | None = None,
+) -> JSONResponse:
+    if not _is_v1(request):
+        return JSONResponse({"detail": message}, status_code=status_code)
+    request_id = str(getattr(request.state, "request_id", "")) or str(uuid4())
+    body: dict[str, object] = {
+        "error": {"code": code, "message": message},
+        "request_id": request_id,
+        "timestamp": datetime.now(UTC).isoformat(),
+    }
+    if details is not None:
+        body["error"]["details"] = details  # type: ignore[index]
+    return JSONResponse(body, status_code=status_code, headers={"X-Request-ID": request_id})
 
 
 @app.get("/", tags=["Root"])
@@ -123,8 +282,35 @@ def health() -> dict[str, str]:
 
 
 @app.get("/health/ready", tags=["Health"])
-def health_ready() -> dict[str, str]:
-    return health_database() | {"status": "ready"}
+def health_ready() -> dict[str, object]:
+    database = health_database()
+    migration = check_migrations(get_engine())
+    if not migration["ok"]:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "message": "Product V1 database migration is not current.",
+                "pending": migration["pending"],
+                "problems": migration["problems"],
+            },
+        )
+    providers = {
+        "data": {"provider": settings.cfs_data_provider, "status": "configured"},
+        "artifact": {
+            "provider": settings.cfs_artifact_provider,
+            "status": "contract_only" if settings.cfs_artifact_provider == "object_storage" else "ready",
+        },
+        "jobs": {
+            "provider": settings.cfs_job_provider,
+            "status": "contract_only" if settings.cfs_job_provider == "external_worker" else "ready",
+        },
+    }
+    if any(provider["status"] == "contract_only" for provider in providers.values()):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"message": "A configured provider has only a contract adapter.", "providers": providers},
+        )
+    return database | {"status": "ready", "migration": migration["current"], "providers": providers}
 
 
 @app.get("/health/database", tags=["Health"])
@@ -157,13 +343,20 @@ def _safe_error_summary(exc: BaseException) -> str:
     return re.sub("(?i)(" + "password=" + r")[^\s]+", r"\1<redacted>", summary)
 
 
-app.include_router(parcel_router.router)
-app.include_router(development_router.router)
-app.include_router(economics_router.router)
-app.include_router(temporal_router.router)
-app.include_router(constraints_router.router)
-app.include_router(school_constraints_router.router)
-app.include_router(indicators_router.router)
-app.include_router(ai_search_router.router)
-app.include_router(wsacc_router.router)
-app.include_router(investment_router.router)
+app.include_router(product_v1_router)
+
+legacy_routers = (
+    parcel_router.router,
+    development_router.router,
+    economics_router.router,
+    temporal_router.router,
+    constraints_router.router,
+    school_constraints_router.router,
+    indicators_router.router,
+    ai_search_router.router,
+    wsacc_router.router,
+    investment_router.router,
+)
+for legacy_router in legacy_routers:
+    app.include_router(legacy_router)
+    app.include_router(legacy_router, prefix="/api/v1")

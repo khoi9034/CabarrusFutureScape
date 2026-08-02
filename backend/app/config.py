@@ -1,16 +1,21 @@
 from functools import lru_cache
+from ipaddress import ip_address
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 EnvironmentName = Literal["dev", "test", "prod"]
 AiProviderName = Literal["none", "openai"]
 DatabaseAuthMode = Literal["password", "managed_identity"]
 ApiAuthMode = Literal["off", "entra"]
-RuntimeMode = Literal["local", "enterprise"]
-DataProviderName = Literal["local_postgis", "enterprise_service"]
+RuntimeMode = Literal["demo", "local", "enterprise"]
+DataProviderName = Literal["static", "local_api", "enterprise_api"]
+AuthMode = Literal["off", "local_dev", "oidc"]
+ArtifactProviderName = Literal["public_static", "local_file", "object_storage"]
+JobProviderName = Literal["inline", "external_worker"]
 BACKEND_ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 ROOT_BACKEND_ENV_FILE = Path(__file__).resolve().parents[2] / "backend.env"
 LOCAL_FRONTEND_CORS_ORIGINS = (
@@ -41,8 +46,20 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("CFS_RUNTIME_MODE"),
     )
     cfs_data_provider: DataProviderName = Field(
-        default="local_postgis",
+        default="local_api",
         validation_alias=AliasChoices("CFS_DATA_PROVIDER"),
+    )
+    cfs_auth_mode: AuthMode = Field(
+        default="local_dev",
+        validation_alias=AliasChoices("CFS_AUTH_MODE", "CFS_API_AUTH_MODE"),
+    )
+    cfs_artifact_provider: ArtifactProviderName = Field(
+        default="local_file",
+        validation_alias=AliasChoices("CFS_ARTIFACT_PROVIDER"),
+    )
+    cfs_job_provider: JobProviderName = Field(
+        default="inline",
+        validation_alias=AliasChoices("CFS_JOB_PROVIDER"),
     )
     postgres_host: str = Field(
         default="localhost",
@@ -136,7 +153,11 @@ class Settings(BaseSettings):
     )
     cors_allowed_origins: str = Field(
         default=",".join(LOCAL_FRONTEND_CORS_ORIGINS),
-        validation_alias=AliasChoices("CORS_ALLOWED_ORIGINS", "CFS_CORS_ALLOWED_ORIGINS"),
+        validation_alias=AliasChoices(
+            "CFS_CORS_ORIGINS",
+            "CFS_CORS_ALLOWED_ORIGINS",
+            "CORS_ALLOWED_ORIGINS",
+        ),
     )
     cfs_enable_docs: bool = Field(
         default=True,
@@ -150,10 +171,6 @@ class Settings(BaseSettings):
         default="",
         validation_alias=AliasChoices("CFS_STAGING_ACCESS_TOKEN"),
     )
-    cfs_api_auth_mode: ApiAuthMode = Field(
-        default="off",
-        validation_alias=AliasChoices("CFS_API_AUTH_MODE"),
-    )
     cfs_entra_tenant_id: str = Field(
         default="",
         validation_alias=AliasChoices("CFS_ENTRA_TENANT_ID"),
@@ -161,6 +178,10 @@ class Settings(BaseSettings):
     cfs_entra_api_audience: str = Field(
         default="",
         validation_alias=AliasChoices("CFS_ENTRA_API_AUDIENCE"),
+    )
+    cfs_organization_id: str = Field(
+        default="",
+        validation_alias=AliasChoices("CFS_ORGANIZATION_ID"),
     )
     cfs_entra_required_scope: str = Field(
         default="CFS.Access",
@@ -224,6 +245,72 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @field_validator("cfs_data_provider", mode="before")
+    @classmethod
+    def normalize_legacy_data_provider(cls, value: object) -> object:
+        return {
+            "local_postgis": "local_api",
+            "enterprise_service": "enterprise_api",
+        }.get(value, value)
+
+    @field_validator("cfs_auth_mode", mode="before")
+    @classmethod
+    def normalize_legacy_auth_mode(cls, value: object) -> object:
+        return "oidc" if value == "entra" else value
+
+    @model_validator(mode="after")
+    def validate_runtime_provider_matrix(self) -> "Settings":
+        allowed = {
+            "demo": ({"static"}, {"off"}, {"public_static"}, {"inline"}),
+            "local": (
+                {"static", "local_api"},
+                {"off", "local_dev", "oidc"},
+                {"public_static", "local_file"},
+                {"inline"},
+            ),
+            "enterprise": (
+                {"enterprise_api"},
+                {"oidc"},
+                {"object_storage"},
+                {"external_worker"},
+            ),
+        }
+        providers, auth_modes, artifact_providers, job_providers = allowed[self.cfs_runtime_mode]
+        values = (
+            ("CFS_DATA_PROVIDER", self.cfs_data_provider, providers),
+            ("CFS_AUTH_MODE", self.cfs_auth_mode, auth_modes),
+            ("CFS_ARTIFACT_PROVIDER", self.cfs_artifact_provider, artifact_providers),
+            ("CFS_JOB_PROVIDER", self.cfs_job_provider, job_providers),
+        )
+        invalid = [f"{name}={value}" for name, value, choices in values if value not in choices]
+        if invalid:
+            raise ValueError(
+                f"Invalid {self.cfs_runtime_mode} runtime configuration: {', '.join(invalid)}."
+            )
+        if self.cfs_runtime_mode == "enterprise":
+            required = {
+                "CFS_ENTRA_TENANT_ID": self.cfs_entra_tenant_id,
+                "CFS_ENTRA_API_AUDIENCE": self.cfs_entra_api_audience,
+                "CFS_ORGANIZATION_ID": self.cfs_organization_id,
+            }
+            missing = [name for name, value in required.items() if not value.strip()]
+            if missing:
+                raise ValueError(
+                    f"Enterprise runtime requires: {', '.join(missing)}."
+                )
+            origins = [origin.strip() for origin in self.cors_allowed_origins.split(",") if origin.strip()]
+            invalid_origins = [origin for origin in origins if not _is_enterprise_origin(origin)]
+            if not origins or invalid_origins:
+                raise ValueError(
+                    "Enterprise runtime requires explicit exact HTTPS CFS_CORS_ORIGINS; "
+                    "wildcards, loopback hosts, paths, queries, and fragments are not allowed."
+                )
+        if self.cfs_runtime_mode == "demo" and self.cfs_ai_provider != "none":
+            raise ValueError("Demo runtime requires CFS_AI_PROVIDER=none.")
+        if self.cfs_ai_enabled and self.cfs_ai_provider == "none":
+            raise ValueError("CFS_AI_ENABLED=true requires CFS_AI_PROVIDER=openai.")
+        return self
+
     @property
     def is_production(self) -> bool:
         return self.app_env == "prod"
@@ -253,7 +340,13 @@ class Settings(BaseSettings):
 
     @property
     def entra_auth_enabled(self) -> bool:
-        return self.cfs_api_auth_mode == "entra"
+        return self.cfs_auth_mode == "oidc"
+
+    @property
+    def cfs_api_auth_mode(self) -> ApiAuthMode:
+        """Legacy compatibility for existing Entra middleware and deployment checks."""
+
+        return "entra" if self.cfs_auth_mode == "oidc" else "off"
 
     @property
     def entra_allowed_object_id_set(self) -> set[str]:
@@ -267,3 +360,33 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def _is_enterprise_origin(origin: str) -> bool:
+    if "*" in origin:
+        return False
+    try:
+        parsed = urlsplit(origin)
+        host = parsed.hostname or ""
+        parsed.port
+    except ValueError:
+        return False
+    if (
+        parsed.scheme != "https"
+        or not host
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.path
+        or parsed.query
+        or parsed.fragment
+    ):
+        return False
+    normalized_host = host.rstrip(".").casefold()
+    if normalized_host == "localhost" or normalized_host.endswith(".localhost"):
+        return False
+    try:
+        address = ip_address(normalized_host)
+        mapped = getattr(address, "ipv4_mapped", None)
+        return not (address.is_loopback or (mapped is not None and mapped.is_loopback))
+    except ValueError:
+        return True

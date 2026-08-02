@@ -1,9 +1,18 @@
+import os
+
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 
 
 client = TestClient(app)
+db_required = pytest.mark.skipif(
+    not (os.getenv("POSTGRES_PASSWORD") or os.getenv("CFS_POSTGRES_PASSWORD")),
+    reason="Database password environment variable is not configured.",
+)
+
+pytestmark = db_required
 
 
 def test_indicator_intelligence_returns_stable_schema() -> None:

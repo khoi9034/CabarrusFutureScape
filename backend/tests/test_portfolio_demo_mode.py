@@ -12,9 +12,9 @@ def read(path: str) -> str:
 def test_frontend_runtime_mode_switch_is_demo_safe() -> None:
     client = read("src/lib/api/client.ts")
 
-    assert "NEXT_PUBLIC_CFS_DEPLOYMENT_MODE" in client
-    assert 'CFS_DEPLOYMENT_MODE === "demo"' in client
-    assert "!IS_DEMO_MODE && process.env.NEXT_PUBLIC_USE_BACKEND_API" in client
+    assert "CFS_RUNTIME_CONFIG" in client
+    assert 'CFS_RUNTIME_MODE === "demo"' in client
+    assert "USE_BACKEND_API = CFS_RUNTIME_CONFIG.useBackendApi" in client
 
 
 def test_only_explicit_app_url_selects_consulting() -> None:
@@ -388,8 +388,8 @@ def test_portfolio_demo_mode_is_documented() -> None:
     deployment_report = read("docs/deployment_report.md")
 
     assert "Portfolio Demo Mode" in readme
-    assert "NEXT_PUBLIC_CFS_DEPLOYMENT_MODE=demo" in env_example
-    assert "NEXT_PUBLIC_USE_BACKEND_API=false" in env_example
+    assert "NEXT_PUBLIC_CFS_RUNTIME_MODE=demo" in env_example
+    assert "NEXT_PUBLIC_CFS_DATA_PROVIDER=static" in env_example
     assert "public/demo-data" in deployment_report
 
 

@@ -148,6 +148,16 @@ def test_readiness_route_uses_bounded_database_check(monkeypatch) -> None:
     sys.modules.pop("app.main", None)
     app_main = importlib.import_module("app.main")
     monkeypatch.setattr(app_main, "verify_database_connection", lambda: None)
+    monkeypatch.setattr(
+        app_main,
+        "check_migrations",
+        lambda _engine: {
+            "ok": True,
+            "current": "0001_product_v1",
+            "pending": [],
+            "problems": [],
+        },
+    )
     assert TestClient(app_main.app).get("/health/ready").json()["status"] == "ready"
 
 

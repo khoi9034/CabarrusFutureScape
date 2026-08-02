@@ -311,6 +311,7 @@ def test_no_public_development_prediction_score_endpoint_exists() -> None:
     assert all("{official_parcel_id}" not in path for path in prediction_paths)
 
 
+@db_required
 def test_phase23_model_research_preview_endpoint_is_safe() -> None:
     response = client.get(
         "/development/model-research/preview",
@@ -2029,7 +2030,9 @@ def test_phase28i_indicator_center_drawer_labels_charts_cleanup() -> None:
         assert required in indicator_router_text
 
     assert "indicators_router" in backend_main_text
-    assert "app.include_router(indicators_router.router)" in backend_main_text
+    assert "indicators_router.router," in backend_main_text
+    assert "for legacy_router in legacy_routers:" in backend_main_text
+    assert "app.include_router(legacy_router)" in backend_main_text
 
     for required in [
         "what needs review, why it matters",
@@ -2804,6 +2807,7 @@ def test_phase10g_explanations_generated_without_fake_missing_drivers() -> None:
     assert row["bad_caveat_rows"] == 0
 
 
+@db_required
 def test_phase10g_aggregate_endpoint_is_internal_readiness_only() -> None:
     response = client.get("/development/prediction/ranking/summary")
 

@@ -3,6 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -16,6 +17,10 @@ from app.services.wsacc_service import build_wsacc_inventory, build_wsacc_statis
 
 client = TestClient(app)
 REPO_ROOT = Path(__file__).resolve().parents[2]
+db_required = pytest.mark.skipif(
+    not (os.getenv("POSTGRES_PASSWORD") or os.getenv("CFS_POSTGRES_PASSWORD")),
+    reason="Database password environment variable is not configured.",
+)
 
 
 def test_wsacc_inventory_reads_current_shapefiles() -> None:
@@ -147,6 +152,7 @@ def test_wsacc_endpoints_return_safe_payloads() -> None:
     assert filtered.json()["status"] in {"ok", "data_needed"}
 
 
+@db_required
 def test_development_model_summary_exposes_wsacc_model_ready_evidence() -> None:
     response = client.get("/development/prediction/features/summary")
 
@@ -160,6 +166,7 @@ def test_development_model_summary_exposes_wsacc_model_ready_evidence() -> None:
         assert "sewer_pipe_within_250ft_flag" in body["wsacc_model_feature_columns_present"]
 
 
+@db_required
 def test_indicator_center_uses_wsacc_inventory_for_utility_signal() -> None:
     database_dependencies._OPTIONAL_DB_UNAVAILABLE_UNTIL = None
     indicators_router._INTELLIGENCE_CACHE["payload"] = None

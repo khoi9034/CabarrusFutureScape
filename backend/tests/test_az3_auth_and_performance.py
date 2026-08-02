@@ -152,7 +152,40 @@ def test_entra_validation_requires_allowed_user_scope_and_write_role(monkeypatch
         object_id="allowed-user",
         roles={"CFS.Write"},
         scopes={"CFS.Access"},
+        user_id="allowed-user",
     )
+
+
+def test_entra_validation_accepts_sub_and_rejects_missing_stable_subject(monkeypatch) -> None:
+    class FakeKey:
+        key = "public-key"
+
+    class FakeJwks:
+        def get_signing_key_from_jwt(self, _token: str) -> FakeKey:
+            return FakeKey()
+
+    claims = {"sub": "stable-subject", "roles": [], "scp": "CFS.Access"}
+    monkeypatch.setattr("app.auth._jwks_client", lambda _settings: FakeJwks())
+    monkeypatch.setattr("app.auth.jwt.decode", lambda *_args, **_kwargs: claims)
+    settings = Settings(
+        CFS_API_AUTH_MODE="entra",
+        CFS_ENTRA_TENANT_ID="tenant-id",
+        CFS_ENTRA_API_AUDIENCE="api://cfs-api",
+        _env_file=None,
+    )
+
+    principal = authenticate_bearer_token("jwt", settings, "read")
+    assert principal.object_id == "stable-subject"
+    assert principal.user_id == "stable-subject"
+
+    claims.pop("sub")
+    try:
+        authenticate_bearer_token("jwt", settings, "read")
+    except AuthError as exc:
+        assert exc.status_code == 401
+        assert "stable subject" in exc.detail
+    else:
+        raise AssertionError("a bearer token without oid or sub must fail")
 
 
 def test_entra_validation_rejects_wrong_user(monkeypatch) -> None:

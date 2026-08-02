@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
-from app.dependencies.database import get_read_only_db
+from app.dependencies.database import get_optional_read_only_db
 from app.main import app
 from app.routers import ai_search_router
 from app.schemas.ai_search import CfsAiSearchRequest
@@ -641,7 +641,7 @@ def test_ai_search_endpoint_uses_grounded_context(monkeypatch) -> None:
         context["data_source"] = "local_live_backend"
         return context
 
-    app.dependency_overrides[get_read_only_db] = lambda: object()
+    app.dependency_overrides[get_optional_read_only_db] = lambda: object()
     monkeypatch.setattr(ai_search_router, "gather_cfs_ai_context", fake_context)
     monkeypatch.setattr(ai_search_router, "get_settings", lambda: _settings())
     try:
@@ -690,7 +690,7 @@ def test_ai_status_endpoint_is_safe(monkeypatch) -> None:
 
 
 def test_ai_search_endpoint_returns_fast_fallback_when_intelligence_cache_empty(monkeypatch) -> None:
-    app.dependency_overrides[get_read_only_db] = lambda: object()
+    app.dependency_overrides[get_optional_read_only_db] = lambda: object()
     monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: None)
     monkeypatch.setattr(
         ai_search_router,

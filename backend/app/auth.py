@@ -28,6 +28,9 @@ class Principal:
     object_id: str
     roles: set[str]
     scopes: set[str]
+    organization_id: str | None = None
+    user_id: str | None = None
+    project_ids: set[str] | None = None
 
 
 class AuthError(Exception):
@@ -38,11 +41,12 @@ class AuthError(Exception):
 
 
 def classify_route(path: str, method: str) -> RoutePolicy:
-    if path in PUBLIC_PATHS or method == "OPTIONS":
+    normalized = path.removeprefix("/api/v1") or "/"
+    if normalized in PUBLIC_PATHS or method == "OPTIONS":
         return "public"
-    if path in ADMIN_PATHS or path.startswith("/ops/"):
+    if normalized in ADMIN_PATHS or normalized.startswith("/ops/"):
         return "admin"
-    if method in {"DELETE", "PATCH", "POST"} and path.startswith(WRITE_PREFIXES):
+    if method in {"DELETE", "PATCH", "POST"} and normalized.startswith(WRITE_PREFIXES):
         return "write"
     return "read"
 
@@ -65,10 +69,23 @@ def authenticate_bearer_token(token: str, settings: Settings, policy: RoutePolic
     except (InvalidTokenError, PyJWKClientError) as exc:
         raise AuthError(401, "Invalid authentication token.") from exc
 
+    object_id = str(claims.get("oid") or claims.get("sub") or "").strip()
+    if not object_id:
+        raise AuthError(401, "Authentication token is missing a stable subject.")
+    claimed_organization_id = str(claims.get("cfs_organization_id") or "").strip()
+    if (
+        settings.cfs_organization_id
+        and claimed_organization_id
+        and claimed_organization_id != settings.cfs_organization_id
+    ):
+        raise AuthError(403, "Authentication token belongs to another organization.")
     principal = Principal(
-        object_id=str(claims.get("oid") or "").lower(),
-        roles={str(role) for role in claims.get("roles") or []},
+        object_id=object_id,
+        roles=_claim_set(claims.get("roles")),
         scopes=set(str(claims.get("scp") or "").split()),
+        organization_id=settings.cfs_organization_id or claimed_organization_id or None,
+        user_id=str(claims.get("cfs_user_id") or "").strip() or object_id,
+        project_ids=_claim_set(claims.get("cfs_project_ids")) or None,
     )
     _authorize_principal(principal, settings, policy)
     return principal
@@ -76,7 +93,7 @@ def authenticate_bearer_token(token: str, settings: Settings, policy: RoutePolic
 
 def _authorize_principal(principal: Principal, settings: Settings, policy: RoutePolicy) -> None:
     allowed_ids = settings.entra_allowed_object_id_set
-    if allowed_ids and principal.object_id not in allowed_ids:
+    if allowed_ids and principal.object_id.lower() not in allowed_ids:
         raise AuthError(403, "Account is not authorized for CFS staging.")
 
     required_scope = settings.cfs_entra_required_scope
@@ -96,3 +113,11 @@ def _entra_issuer(tenant_id: str) -> str:
 
 def _jwks_client(settings: Settings) -> PyJWKClient:
     return PyJWKClient(f"{_entra_issuer(settings.cfs_entra_tenant_id)}/discovery/v2.0/keys")
+
+
+def _claim_set(value: object) -> set[str]:
+    if isinstance(value, str):
+        return {item for item in value.split() if item}
+    if isinstance(value, (list, tuple, set)):
+        return {str(item) for item in value if str(item)}
+    return set()

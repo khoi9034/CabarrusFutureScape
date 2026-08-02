@@ -23,7 +23,7 @@ PIPELINE_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = PIPELINE_ROOT.parent
 TRANSFORM_DIR = PIPELINE_ROOT / "transform"
 SQL_FILE = PIPELINE_ROOT / "sql" / "create_school_capacity_readiness_tables.sql"
-ROOT_OUTPUT_DIR = PROJECT_ROOT / "outputs"
+ROOT_OUTPUT_DIR = Path(os.getenv("CFS_TEST_OUTPUT_DIR", PROJECT_ROOT / "outputs"))
 
 sys.path.insert(0, str(TRANSFORM_DIR))
 from validate_school_capacity_data import (  # noqa: E402
