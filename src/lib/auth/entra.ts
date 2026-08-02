@@ -1,6 +1,7 @@
 import type { Configuration } from "@azure/msal-browser";
+import { CFS_RUNTIME_CONFIG } from "@/lib/runtimeConfig";
 
-export const CFS_AUTH_MODE = process.env.NEXT_PUBLIC_CFS_AUTH_MODE ?? "off";
+export const CFS_AUTH_MODE = CFS_RUNTIME_CONFIG.authMode;
 export const CFS_ENTRA_TENANT_ID =
   process.env.NEXT_PUBLIC_CFS_ENTRA_TENANT_ID ?? "";
 export const CFS_ENTRA_CLIENT_ID =
@@ -9,7 +10,7 @@ export const CFS_ENTRA_API_SCOPE =
   process.env.NEXT_PUBLIC_CFS_ENTRA_API_SCOPE ?? "";
 
 export function entraAuthEnabled() {
-  return CFS_AUTH_MODE === "entra";
+  return CFS_AUTH_MODE === "oidc";
 }
 
 export function entraConfigComplete() {

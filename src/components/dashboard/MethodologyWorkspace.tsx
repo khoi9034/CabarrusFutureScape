@@ -37,6 +37,14 @@ import {
   type EnterpriseDiagnosticCheck,
   type EnterpriseDiagnosticStatus,
 } from "@/hooks/useEnterpriseDiagnostics";
+import {
+  getRegisteredDataSources,
+  type RegisteredDataSource,
+} from "@/lib/api/dataSources";
+import {
+  getApiErrorDisplayMessage,
+  USE_DEMO_DATA,
+} from "@/lib/api/client";
 import { useDashboardState } from "@/hooks/useDashboardState";
 
 type ExplorerSection =
@@ -1040,6 +1048,43 @@ function PlanningMethodologyWorkspace() {
     useState<OpenAccordionSet>(() =>
       new Set(faqItems[0]?.question ? [faqItems[0].question] : []),
     );
+  const [registeredSources, setRegisteredSources] = useState<
+    RegisteredDataSource[]
+  >([]);
+  const [sourceRegistryError, setSourceRegistryError] = useState<string | null>(
+    null,
+  );
+  const [sourceRegistryLoading, setSourceRegistryLoading] =
+    useState(!USE_DEMO_DATA);
+
+  useEffect(() => {
+    if (USE_DEMO_DATA) {
+      return;
+    }
+    const controller = new AbortController();
+    void getRegisteredDataSources(controller.signal)
+      .then((sources) => {
+        if (!controller.signal.aborted) {
+          setRegisteredSources(sources);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setSourceRegistryError(
+            getApiErrorDisplayMessage(
+              error,
+              "The governed source registry is unavailable.",
+            ),
+          );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setSourceRegistryLoading(false);
+        }
+      });
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1126,6 +1171,9 @@ function PlanningMethodologyWorkspace() {
             ) : null}
             {activeSection === "data" ? (
               <DataInventorySection
+                registeredSources={registeredSources}
+                sourceRegistryError={sourceRegistryError}
+                sourceRegistryLoading={sourceRegistryLoading}
                 onToggleDomain={(domain) =>
                   setOpenDataDomainIds((openIds) =>
                     toggleOpenAccordionId(openIds, domain),
@@ -1524,12 +1572,26 @@ function CapabilityCard({
 function DataInventorySection({
   onToggleDomain,
   openDataDomainIds,
+  registeredSources,
+  sourceRegistryError,
+  sourceRegistryLoading,
 }: {
   onToggleDomain: (domain: string) => void;
   openDataDomainIds: OpenAccordionSet;
+  registeredSources: RegisteredDataSource[];
+  sourceRegistryError: string | null;
+  sourceRegistryLoading: boolean;
 }) {
   return (
-    <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+    <div className="space-y-4">
+      {!USE_DEMO_DATA ? (
+        <LiveSourceRegistry
+          error={sourceRegistryError}
+          isLoading={sourceRegistryLoading}
+          sources={registeredSources}
+        />
+      ) : null}
+      <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
       <MethodCard
         icon={Database}
         kicker="What CFS has"
@@ -1625,6 +1687,97 @@ function DataInventorySection({
           />
         </div>
       </MethodCard>
+      </div>
+    </div>
+  );
+}
+
+function LiveSourceRegistry({
+  error,
+  isLoading,
+  sources,
+}: {
+  error: string | null;
+  isLoading: boolean;
+  sources: RegisteredDataSource[];
+}) {
+  return (
+    <MethodCard
+      icon={Database}
+      kicker="Live governed metadata"
+      title="Persistent Source Registry"
+    >
+      {isLoading ? (
+        <p className="text-sm text-slate-400">Loading registered sources...</p>
+      ) : error ? (
+        <p className="text-sm text-amber-100" role="alert">
+          {error}
+        </p>
+      ) : sources.length === 0 ? (
+        <p className="text-sm text-slate-400">
+          No governed sources are registered for this organization.
+        </p>
+      ) : (
+        <div className="grid gap-3 lg:grid-cols-2">
+          {sources.map((source) => (
+            <article
+              className="rounded-xl border border-white/10 bg-black/20 p-3"
+              key={source.id}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-white">
+                    {source.sourceName}
+                  </h3>
+                  <p className="mt-1 text-[11px] uppercase tracking-[0.12em] text-slate-500">
+                    {source.domain} / {source.providerSystem}
+                  </p>
+                </div>
+                <StatusTag
+                  label={source.status}
+                  tone={source.status === "Available" ? "green" : "amber"}
+                />
+              </div>
+              <dl className="mt-3 grid gap-2 text-xs text-slate-400 sm:grid-cols-2">
+                <RegistryField label="Authority" value={source.authorityLevel} />
+                <RegistryField label="Steward" value={source.ownerRole} />
+                <RegistryField label="Schema" value={source.schemaVersion} />
+                <RegistryField
+                  label="Refresh"
+                  value={source.expectedRefresh ?? "Not recorded"}
+                />
+                <RegistryField
+                  label="Source date"
+                  value={source.sourceDate ?? "Not recorded"}
+                />
+                <RegistryField
+                  label="Validated"
+                  value={source.validationDate ?? "Not recorded"}
+                />
+              </dl>
+              {source.limitations ? (
+                <p className="mt-3 rounded-lg border border-amber-300/15 bg-amber-300/[0.055] px-3 py-2 text-xs leading-5 text-amber-100/80">
+                  {source.limitations}
+                </p>
+              ) : null}
+              <p className="mt-3 break-all font-mono text-[10px] text-slate-600">
+                Source ID: {source.id}
+              </p>
+            </article>
+          ))}
+        </div>
+      )}
+    </MethodCard>
+  );
+}
+
+function RegistryField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-600">
+        {label}
+      </dt>
+      <dd className="mt-1 text-slate-300">{value}</dd>
     </div>
   );
 }

@@ -21,6 +21,7 @@ import {
 } from "@/lib/aiSearchService";
 import {
   buildApiUrl,
+  CFS_AUTH_MODE,
   recordTechnicalEvent,
   USE_DEMO_DATA,
 } from "@/lib/api/client";
@@ -297,7 +298,7 @@ export function EconomicsShell({
       : economicsSection;
   const consultingAuthStatus = USE_DEMO_DATA
     ? "Portfolio demonstration mode"
-    : process.env.NEXT_PUBLIC_CFS_AUTH_MODE === "entra"
+    : CFS_AUTH_MODE === "oidc"
       ? "Secured with Microsoft Entra"
       : "Local development session";
   const openEconomicsFromConsulting = (section: "print") => {

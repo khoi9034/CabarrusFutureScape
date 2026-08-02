@@ -1,11 +1,25 @@
+import {
+  CFS_RUNTIME_CONFIG,
+  type CfsDataProvider,
+  type CfsRuntimeMode,
+} from "@/lib/runtimeConfig";
+
 export type ApiQueryValue = boolean | number | string | null | undefined;
 
 export type ApiQueryParams = Record<string, ApiQueryValue>;
 
 export interface ApiRequestOptions {
+  headers?: HeadersInit;
   keepalive?: boolean;
+  requestId?: string;
   signal?: AbortSignal;
   timeoutMs?: number;
+}
+
+export interface ApiRequestConfig extends ApiRequestOptions {
+  body?: unknown;
+  method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
+  params?: ApiQueryParams;
 }
 
 export type ApiClientErrorKind =
@@ -20,6 +34,7 @@ export class ApiClientError extends Error {
   displayMessage: string;
   kind: ApiClientErrorKind;
   payload: unknown;
+  requestId: string | null;
   status: number | null;
   url: string;
 
@@ -28,6 +43,7 @@ export class ApiClientError extends Error {
     kind,
     message,
     payload,
+    requestId,
     status,
     url,
   }: {
@@ -35,6 +51,7 @@ export class ApiClientError extends Error {
     kind: ApiClientErrorKind;
     message: string;
     payload?: unknown;
+    requestId?: string | null;
     status: number | null;
     url: string;
   }) {
@@ -43,6 +60,7 @@ export class ApiClientError extends Error {
     this.displayMessage = displayMessage;
     this.kind = kind;
     this.payload = payload;
+    this.requestId = requestId ?? null;
     this.status = status;
     this.url = url;
   }
@@ -74,15 +92,17 @@ const API_TIMEOUT_DISPLAY_MESSAGE =
     ? "CFS API request timed out. Confirm the deployed API base URL and backend health."
     : "CFS API request timed out. Check that FastAPI is running on 127.0.0.1:8000.";
 
+const configuredApiBaseUrl = process.env.NEXT_PUBLIC_CFS_API_BASE_URL?.trim();
+if (CFS_RUNTIME_CONFIG.runtimeMode === "enterprise" && !configuredApiBaseUrl) {
+  throw new Error(
+    "Enterprise mode requires NEXT_PUBLIC_CFS_API_BASE_URL for the browser-safe API endpoint.",
+  );
+}
 export const CFS_API_BASE_URL =
-  process.env.NEXT_PUBLIC_CFS_API_BASE_URL ?? DEFAULT_BACKEND_BASE_URL;
+  configuredApiBaseUrl || DEFAULT_BACKEND_BASE_URL;
 
 export type CfsDeploymentMode = "auto" | "demo" | "live";
-export type CfsRuntimeMode = "demo" | "enterprise" | "local";
-export type CfsDataProvider =
-  | "local_postgis"
-  | "sanitized_demo_extract"
-  | "enterprise_service";
+export type { CfsDataProvider, CfsRuntimeMode };
 export type CfsDataOrigin =
   | "derived_local_metric"
   | "enterprise_api"
@@ -127,52 +147,22 @@ declare global {
   }
 }
 
-function normalizeDeploymentMode(value: string | undefined): CfsDeploymentMode {
-  if (value === "demo" || value === "live" || value === "auto") {
-    return value;
-  }
-
-  return "live";
-}
-
-export const CFS_DEPLOYMENT_MODE = normalizeDeploymentMode(
-  process.env.NEXT_PUBLIC_CFS_DEPLOYMENT_MODE,
-);
-
-function normalizeRuntimeMode(
-  value: string | undefined,
-  legacyMode: CfsDeploymentMode,
-): CfsRuntimeMode {
-  if (value === "demo" || value === "enterprise" || value === "local") {
-    return value;
-  }
-
-  return legacyMode === "demo" ? "demo" : "local";
-}
-
-export const CFS_RUNTIME_MODE = normalizeRuntimeMode(
-  process.env.NEXT_PUBLIC_CFS_RUNTIME_MODE,
-  CFS_DEPLOYMENT_MODE,
-);
-export const IS_DEMO_MODE =
-  CFS_DEPLOYMENT_MODE === "demo" || CFS_RUNTIME_MODE === "demo";
-export const IS_AUTO_MODE = CFS_DEPLOYMENT_MODE === "auto";
+export const CFS_DEPLOYMENT_MODE: CfsDeploymentMode =
+  CFS_RUNTIME_CONFIG.runtimeMode === "demo" ? "demo" : "live";
+export const CFS_RUNTIME_MODE = CFS_RUNTIME_CONFIG.runtimeMode;
+export const IS_DEMO_MODE = CFS_RUNTIME_MODE === "demo";
+export const IS_AUTO_MODE =
+  process.env.NEXT_PUBLIC_CFS_DEPLOYMENT_MODE === "auto";
 export const IS_ENTERPRISE_MODE = CFS_RUNTIME_MODE === "enterprise";
 
-export const USE_BACKEND_API =
-  !IS_DEMO_MODE && process.env.NEXT_PUBLIC_USE_BACKEND_API === "true";
+export const USE_BACKEND_API = CFS_RUNTIME_CONFIG.useBackendApi;
 export const USE_DEMO_DATA = IS_DEMO_MODE;
 export const USE_INTERACTIVE_MAP = true;
-export const CFS_DATA_PROVIDER: CfsDataProvider = USE_DEMO_DATA
-  ? "sanitized_demo_extract"
-  : IS_ENTERPRISE_MODE
-    ? "enterprise_service"
-    : "local_postgis";
-export const CFS_AI_PROVIDER =
-  process.env.NEXT_PUBLIC_CFS_AI_PROVIDER ?? "deterministic";
-export const CFS_AUTH_MODE =
-  process.env.NEXT_PUBLIC_CFS_AUTH_MODE ??
-  (IS_ENTERPRISE_MODE ? "entra" : "off");
+export const CFS_DATA_PROVIDER = CFS_RUNTIME_CONFIG.dataProvider;
+export const CFS_AI_PROVIDER = CFS_RUNTIME_CONFIG.aiProvider;
+export const CFS_AUTH_MODE = CFS_RUNTIME_CONFIG.authMode;
+export const CFS_ARTIFACT_PROVIDER = CFS_RUNTIME_CONFIG.artifactProvider;
+export const CFS_JOB_PROVIDER = CFS_RUNTIME_CONFIG.jobProvider;
 export const USE_ONLINE_BASEMAP =
   (process.env.NEXT_PUBLIC_CFS_ESRI_BASEMAP_ENABLED === "true" ||
     process.env.NEXT_PUBLIC_ARCGIS_BASEMAP_ENABLED === "true") &&
@@ -206,17 +196,56 @@ export async function apiGet<TResponse>(
   params?: ApiQueryParams,
   options: ApiRequestOptions = {},
 ) {
+  return apiRequest<TResponse>(path, { ...options, method: "GET", params });
+}
+
+export async function apiPost<TResponse>(
+  path: string,
+  body: unknown,
+  options: ApiRequestOptions = {},
+) {
+  return apiRequest<TResponse>(path, { ...options, body, method: "POST" });
+}
+
+export async function apiPatch<TResponse>(
+  path: string,
+  body: unknown,
+  options: ApiRequestOptions = {},
+) {
+  return apiRequest<TResponse>(path, { ...options, body, method: "PATCH" });
+}
+
+export async function apiDelete<TResponse>(
+  path: string,
+  options: ApiRequestOptions = {},
+) {
+  return apiRequest<TResponse>(path, { ...options, method: "DELETE" });
+}
+
+export async function apiRequest<TResponse>(
+  path: string,
+  {
+    body,
+    headers: requestHeaders,
+    keepalive,
+    method = "GET",
+    params,
+    requestId: suppliedRequestId,
+    signal,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+  }: ApiRequestConfig = {},
+) {
   const url = buildApiUrl(path, params);
   const controller = new AbortController();
-  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const requestId = suppliedRequestId ?? createRequestId();
   let timedOut = false;
 
   const abortFromParentSignal = () => controller.abort();
-  if (options.signal) {
-    if (options.signal.aborted) {
+  if (signal) {
+    if (signal.aborted) {
       controller.abort();
     } else {
-      options.signal.addEventListener("abort", abortFromParentSignal, {
+      signal.addEventListener("abort", abortFromParentSignal, {
         once: true,
       });
     }
@@ -228,29 +257,45 @@ export async function apiGet<TResponse>(
   }, timeoutMs);
 
   try {
+    const headers = new Headers(requestHeaders);
+    headers.set("Accept", "application/json");
+    headers.set("X-Request-ID", requestId);
+    if (body !== undefined) {
+      headers.set("Content-Type", "application/json");
+    }
     const response = await fetch(url, {
       cache: "no-store",
-      headers: {
-        Accept: "application/json",
-      },
-      method: "GET",
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      headers,
+      keepalive,
+      method,
       signal: controller.signal,
     });
 
     const payload = await parseApiPayload(response, url);
+    const responseRequestId =
+      response.headers.get("x-request-id") ??
+      requestIdFromPayload(payload) ??
+      requestId;
 
     if (!response.ok) {
       throw new ApiClientError({
-        displayMessage: getHttpDisplayMessage(response.status, url),
+        displayMessage:
+          errorMessageFromPayload(payload) ??
+          getHttpDisplayMessage(response.status, url),
         kind: "http",
         message: `CFS API request failed with status ${response.status} for ${url}`,
         payload,
+        requestId: responseRequestId,
         status: response.status,
         url,
       });
     }
 
-    recordDataProvenance(path, "local_api");
+    recordDataProvenance(
+      path,
+      CFS_DATA_PROVIDER === "enterprise_api" ? "enterprise_api" : "local_api",
+    );
     return payload as TResponse;
   } catch (error) {
     recordDataProvenance(path, "unavailable");
@@ -269,6 +314,7 @@ export async function apiGet<TResponse>(
           ? `CFS API request timed out for ${url}`
           : `CFS API request was cancelled for ${url}`,
         payload: error,
+        requestId,
         status: null,
         url,
       });
@@ -278,7 +324,6 @@ export async function apiGet<TResponse>(
       error instanceof TypeError && error.message.toLowerCase().includes("fetch")
         ? "network"
         : "unknown";
-
     throw new ApiClientError({
       displayMessage:
         kind === "network"
@@ -287,102 +332,13 @@ export async function apiGet<TResponse>(
       kind,
       message: `CFS API request failed for ${url}`,
       payload: error,
+      requestId,
       status: null,
       url,
     });
   } finally {
     clearTimeout(timeoutId);
-    options.signal?.removeEventListener("abort", abortFromParentSignal);
-  }
-}
-
-export async function apiPost<TResponse>(
-  path: string,
-  body: unknown,
-  options: ApiRequestOptions = {},
-) {
-  const url = buildApiUrl(path);
-  const controller = new AbortController();
-  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-  let timedOut = false;
-
-  const abortFromParentSignal = () => controller.abort();
-  if (options.signal) {
-    if (options.signal.aborted) {
-      controller.abort();
-    } else {
-      options.signal.addEventListener("abort", abortFromParentSignal, {
-        once: true,
-      });
-    }
-  }
-
-  const timeoutId = setTimeout(() => {
-    timedOut = true;
-    controller.abort();
-  }, timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      cache: "no-store",
-      body: JSON.stringify(body),
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      keepalive: options.keepalive,
-      method: "POST",
-      signal: controller.signal,
-    });
-
-    const payload = await parseApiPayload(response, url);
-
-    if (!response.ok) {
-      throw new ApiClientError({
-        displayMessage: getHttpDisplayMessage(response.status, url),
-        kind: "http",
-        message: `CFS API request failed with status ${response.status} for ${url}`,
-        payload,
-        status: response.status,
-        url,
-      });
-    }
-
-    recordDataProvenance(path, "local_api");
-    return payload as TResponse;
-  } catch (error) {
-    recordDataProvenance(path, "unavailable");
-    if (error instanceof ApiClientError) {
-      throw error;
-    }
-
-    if (error instanceof DOMException && error.name === "AbortError") {
-      const kind = timedOut ? "timeout" : "cancelled";
-      throw new ApiClientError({
-        displayMessage: timedOut
-          ? API_TIMEOUT_DISPLAY_MESSAGE
-          : "CFS API request was cancelled.",
-        kind,
-        message: timedOut
-          ? `CFS API request timed out for ${url}`
-          : `CFS API request was cancelled for ${url}`,
-        payload: error,
-        status: null,
-        url,
-      });
-    }
-
-    throw new ApiClientError({
-      displayMessage: "CFS API request failed unexpectedly.",
-      kind: "unknown",
-      message: `CFS API request failed for ${url}`,
-      payload: error,
-      status: null,
-      url,
-    });
-  } finally {
-    clearTimeout(timeoutId);
-    options.signal?.removeEventListener("abort", abortFromParentSignal);
+    signal?.removeEventListener("abort", abortFromParentSignal);
   }
 }
 
@@ -481,6 +437,10 @@ function getHttpDisplayMessage(status: number, url: string) {
 }
 
 async function parseApiPayload(response: Response, url: string) {
+  if (response.status === 204) {
+    return null;
+  }
+
   const contentType = response.headers.get("content-type") ?? "";
 
   if (!contentType.includes("application/json")) {
@@ -512,6 +472,49 @@ async function parseApiPayload(response: Response, url: string) {
       url,
     });
   }
+}
+
+function createRequestId() {
+  return typeof globalThis.crypto?.randomUUID === "function"
+    ? globalThis.crypto.randomUUID()
+    : `cfs-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function requestIdFromPayload(payload: unknown) {
+  if (!isRecord(payload)) {
+    return null;
+  }
+
+  const rootRequestId = safeString(payload.request_id);
+  if (rootRequestId) {
+    return rootRequestId;
+  }
+
+  return isRecord(payload.error)
+    ? safeString(payload.error.request_id)
+    : null;
+}
+
+function errorMessageFromPayload(payload: unknown) {
+  if (!isRecord(payload)) {
+    return null;
+  }
+
+  if (isRecord(payload.error)) {
+    return safeString(payload.error.message);
+  }
+
+  return safeString(payload.message);
+}
+
+function safeString(value: unknown) {
+  return typeof value === "string" && value.trim()
+    ? value.trim().slice(0, 500)
+    : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
 function getPathForDisplay(url: string) {

@@ -6,3 +6,4 @@ export * from "@/types/api/aiSearch";
 export * from "@/types/api/indicatorIntelligence";
 export * from "@/types/api/investment";
 export * from "@/types/api/economics";
+export * from "@/types/api/admin";
