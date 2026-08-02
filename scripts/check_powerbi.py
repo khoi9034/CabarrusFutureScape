@@ -44,6 +44,9 @@ FORBIDDEN_FIELDS = re.compile(
 
 def main() -> int:
     failures: list[str] = []
+    if os.getenv("CFS_CI_SANITIZED", "").lower() == "true":
+        return check_sanitized_ci_package(failures)
+
     local_payload = get_json(f"{API_BASE}/economics/powerbi-export")
     demo_payload = json.loads(DEMO_PAYLOAD.read_text(encoding="utf-8"))
     local_zip = get_bytes(f"{API_BASE}/economics/powerbi-export/starter-pack.zip")
@@ -70,14 +73,7 @@ def main() -> int:
     for table in REQUIRED_TABLES:
         if table not in guidance.get("answer", ""):
             failures.append(f"Ask CFS Power BI guidance omitted {table}")
-    ui_source = (
-        ROOT / "src/components/economics/EconomicsShell.tsx"
-    ).read_text(encoding="utf-8")
-    if "cfs-powerbi-starter-pack.zip" not in ui_source:
-        failures.append("Power BI Starter Pack download is not visible in the UI")
-    vercel_ignore = (ROOT / ".vercelignore").read_text(encoding="utf-8")
-    if "!public/demo-data/powerbi/cfs-powerbi-starter-pack.zip" not in vercel_ignore:
-        failures.append("Vercel excludes the public Power BI Starter Pack")
+    validate_repository_contracts(failures)
 
     for table in REQUIRED_TABLES:
         require_200(f"{API_BASE}/economics/powerbi-export/csv/{table}", failures)
@@ -100,6 +96,48 @@ def main() -> int:
     for failure in failures:
         print(f"FAIL: {failure}")
     return 1 if failures else 0
+
+
+def check_sanitized_ci_package(failures: list[str]) -> int:
+    """Validate only committed sanitized fixtures; never require canonical tables in CI."""
+
+    demo_payload = json.loads(DEMO_PAYLOAD.read_text(encoding="utf-8"))
+    validate_payload(
+        "demo",
+        demo_payload,
+        "demo",
+        "sanitized_demo_extract",
+        failures,
+    )
+    validate_zip("demo", DEMO_ZIP.read_bytes(), demo_payload, failures)
+    validate_repository_contracts(failures)
+    for table in REQUIRED_TABLES:
+        path = ROOT / "public" / "demo-data" / "powerbi" / f"{table}.csv"
+        if not path.is_file() or path.stat().st_size == 0:
+            failures.append(f"demo: missing or empty {table}.csv")
+
+    result = {
+        "demo_rows": row_counts(demo_payload),
+        "failed": len(failures),
+        "mode": "sanitized_ci",
+        "packages": 1,
+        "tables": len(REQUIRED_TABLES),
+    }
+    print(json.dumps(result, indent=2))
+    for failure in failures:
+        print(f"FAIL: {failure}")
+    return 1 if failures else 0
+
+
+def validate_repository_contracts(failures: list[str]) -> None:
+    ui_source = (
+        ROOT / "src/components/economics/EconomicsShell.tsx"
+    ).read_text(encoding="utf-8")
+    if "cfs-powerbi-starter-pack.zip" not in ui_source:
+        failures.append("Power BI Starter Pack download is not visible in the UI")
+    vercel_ignore = (ROOT / ".vercelignore").read_text(encoding="utf-8")
+    if "!public/demo-data/powerbi/cfs-powerbi-starter-pack.zip" not in vercel_ignore:
+        failures.append("Vercel excludes the public Power BI Starter Pack")
 
 
 def validate_payload(

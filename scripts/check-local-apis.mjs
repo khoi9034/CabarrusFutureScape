@@ -137,10 +137,15 @@ function pathWithCoreFixture(openapiPath) {
     .replace("{table_name}", "economics_kpi_fact");
 }
 
+function legacyOperationPath(openapiPath) {
+  return openapiPath.replace(/^\/api\/v1(?=\/)/, "");
+}
+
 function withCoreQuery(openapiPath, operation, requestPath) {
   const url = new URL(requestPath, base);
-  if (openapiPath === "/parcels/search") url.searchParams.set("q", PARCEL);
-  if (openapiPath === `/parcels/{official_parcel_id}`) {
+  const legacyPath = legacyOperationPath(openapiPath);
+  if (legacyPath === "/parcels/search") url.searchParams.set("q", PARCEL);
+  if (legacyPath === `/parcels/{official_parcel_id}`) {
     url.searchParams.set("include_geometry", "true");
   }
   if ((operation.parameters ?? []).some((parameter) => parameter.name === "limit")) {
@@ -150,17 +155,18 @@ function withCoreQuery(openapiPath, operation, requestPath) {
 }
 
 function coreValidator(openapiPath) {
-  if (openapiPath === "/health/ready") {
+  const legacyPath = legacyOperationPath(openapiPath);
+  if (legacyPath === "/health/ready") {
     return (data) => data?.status === "ready" && data?.database === "connected";
   }
-  if (openapiPath === "/health/database") {
+  if (legacyPath === "/health/database") {
     return (data) => data?.database === "connected";
   }
-  if (openapiPath === "/parcels/search") {
+  if (legacyPath === "/parcels/search") {
     return (data) =>
       data?.total_count >= 1 && data?.results?.[0]?.official_parcel_id === PARCEL;
   }
-  if (openapiPath === `/parcels/{official_parcel_id}`) {
+  if (legacyPath === `/parcels/{official_parcel_id}`) {
     return (data) =>
       JSON.stringify(data).includes(PARCEL) &&
       JSON.stringify(data).toLowerCase().includes("geometry");
@@ -690,6 +696,21 @@ async function runAskChecks() {
       });
     }
   }
+
+  await probe({
+    label: "Ask CFS versioned compatibility",
+    method: "POST",
+    operationPath: "/api/v1/ai/search",
+    body: {
+      app_mode: "planning",
+      filter_context: { selected_parcel_id: PARCEL },
+      mode: "live",
+      query: askQuestions.planning[0],
+    },
+    fixture: "representative versioned planning question",
+    validate: validateAskResponse,
+    timeoutMs: 60_000,
+  });
 }
 
 async function cleanDisposableRecords() {
@@ -751,8 +772,9 @@ async function main() {
         required_parameters: requiredParameters(operation),
         response_schema: responseSchema(operation),
         database_dependency: !["Root", "Health"].includes(groupName(operation)),
-        presentation_relevance:
-          groupName(operation) === "Investments" ? "pending classification" : "presentation",
+        presentation_relevance: ["Investments", "Product V1"].includes(groupName(operation))
+          ? "pending classification"
+          : "presentation",
         test_fixture: null,
         expected_status: expectedStatus(operation),
         measured_status: null,
@@ -763,7 +785,7 @@ async function main() {
   }
 
   for (const item of inventory.filter(
-    (item) => item.group !== "Investments" && item.method === "GET",
+    (item) => !["Investments", "Product V1"].includes(item.group) && item.method === "GET",
   )) {
     const operation = openapi.paths[item.path].get;
     const requestPath = withCoreQuery(

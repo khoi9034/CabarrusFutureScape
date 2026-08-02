@@ -1,6 +1,7 @@
 .git
 .next
 node_modules
+public/arcgis-assets
 venv
 .venv
 env

@@ -36,14 +36,14 @@ def main() -> int:
         if not document.is_file() or document.stat().st_size < 300:
             failures.append(f"Missing or empty architecture document: {path}")
 
-    client = read("src/lib/api/client.ts")
+    runtime_config = read("src/lib/runtimeConfig.ts")
     config = read("backend/app/config.py")
     auth = read("backend/app/auth.py")
     telemetry = read("backend/app/telemetry.py")
     migration = read("docs/architecture/enterprise-migration-readiness.md")
-    if 'CfsRuntimeMode = "demo" | "enterprise" | "local"' not in client:
+    if 'CfsRuntimeMode = "demo" | "enterprise" | "local"' not in runtime_config:
         failures.append("Frontend runtime contract lacks enterprise mode.")
-    if 'RuntimeMode = Literal["local", "enterprise"]' not in config:
+    if 'RuntimeMode = Literal["demo", "local", "enterprise"]' not in config:
         failures.append("Backend runtime contract lacks enterprise mode.")
     if "CFS_API_AUTH_MODE" not in config or "entra" not in auth.lower():
         failures.append("Entra/OIDC authorization boundary is missing.")

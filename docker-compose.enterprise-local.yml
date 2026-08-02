@@ -1,0 +1,60 @@
+name: cfs-enterprise-local
+
+services:
+  api:
+    build:
+      context: ./backend
+    environment:
+      APP_ENV: prod
+      CFS_AI_PROVIDER: none
+      CFS_ARTIFACT_ROOT: /app/product-artifacts
+      CFS_ARTIFACT_PROVIDER: local_file
+      CFS_AUTH_MODE: local_dev
+      CFS_DATA_PROVIDER: local_api
+      CFS_JOB_PROVIDER: inline
+      CFS_RUNTIME_MODE: local
+      DATABASE_URL: ${CFS_ENTERPRISE_DATABASE_URL:?Set CFS_ENTERPRISE_DATABASE_URL to an approved PostgreSQL/PostGIS database}
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3).read()
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    ports:
+      - "127.0.0.1:${CFS_API_PORT:-8000}:8000"
+    restart: unless-stopped
+    volumes:
+      - cfs_product_artifacts:/app/product-artifacts
+
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_CFS_API_BASE_URL: ${CFS_PUBLIC_API_BASE_URL:-http://localhost:8000}
+        NEXT_PUBLIC_CFS_AUTH_MODE: local_dev
+        NEXT_PUBLIC_CFS_DATA_PROVIDER: local_api
+        NEXT_PUBLIC_CFS_RUNTIME_MODE: local
+        NEXT_PUBLIC_USE_BACKEND_API: "true"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "127.0.0.1:${CFS_WEB_PORT:-3000}:3000"
+    restart: unless-stopped
+
+volumes:
+  cfs_product_artifacts:

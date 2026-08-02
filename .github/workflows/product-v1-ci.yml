@@ -1,0 +1,138 @@
+name: CFS Enterprise Product V1 validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - product/cfs-enterprise-v1
+
+permissions:
+  contents: read
+
+concurrency:
+  group: product-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CFS_AI_PROVIDER: none
+  CFS_ARTIFACT_PROVIDER: local_file
+  CFS_AUTH_MODE: local_dev
+  CFS_DATA_PROVIDER: local_api
+  CFS_JOB_PROVIDER: inline
+  CFS_RUNTIME_MODE: local
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build -- --webpack
+      - run: npm run check:runtime-config
+
+  backend-and-product:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_DB: cfs_product_v1_test
+          POSTGRES_PASSWORD: cfs_test
+          POSTGRES_USER: cfs_test
+        options: >-
+          --health-cmd "pg_isready -U cfs_test -d cfs_product_v1_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      CFS_CI_SANITIZED: "true"
+      CFS_TEST_DATABASE_URL: postgresql+psycopg://cfs_test:cfs_test@127.0.0.1:5432/cfs_product_v1_test
+      DATABASE_URL: postgresql+psycopg://cfs_test:cfs_test@127.0.0.1:5432/cfs_product_v1_test
+      POSTGRES_DB: cfs_product_v1_test
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PASSWORD: cfs_test
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: cfs_test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - run: npm ci
+      - run: python -m pip install -r backend/requirements.txt
+      - run: python -m compileall backend scripts/case_studies
+      - run: npm run db:migrate
+      - run: npm run db:check
+      - run: npm run db:rollback-one
+      - run: npm run db:migrate
+      - run: npm run db:check
+      - run: python -m pytest backend -q
+      - run: npm run check:migrations
+      - run: npm run check:api-contracts
+      - run: npm run check:persistence
+      - run: npm run check:authorization
+      - run: npm run check:audit
+      - run: npm run check:ingestion
+      - run: npm run check:ask-cfs
+      - name: Start API against the isolated CI database
+        run: nohup python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 > /tmp/cfs-api.log 2>&1 &
+      - name: Wait for API
+        run: for i in {1..60}; do curl --fail --silent http://127.0.0.1:8000/health && exit 0; sleep 1; done; cat /tmp/cfs-api.log; exit 1
+      - run: npm run check:powerbi
+      - run: npm run check:enterprise-readiness
+      - run: npm run check:product-v1
+
+  map-regression:
+    runs-on: ubuntu-latest
+    env:
+      CFS_INTERACTIVE_MAP_ACCEPTANCE: "false"
+      NEXT_PUBLIC_CFS_DEPLOYMENT_MODE: demo
+      NEXT_PUBLIC_CFS_RUNTIME_MODE: demo
+      NEXT_PUBLIC_USE_BACKEND_API: "false"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright-core install --with-deps chromium
+      - run: npm run build -- --webpack
+      - name: Start sanitized demo
+        run: |
+          mkdir -p .next/standalone/public .next/standalone/.next/static
+          cp -R public/. .next/standalone/public/
+          cp -R .next/static/. .next/standalone/.next/static/
+          cd .next/standalone
+          HOSTNAME=127.0.0.1 PORT=3000 nohup node server.js > /tmp/cfs-web.log 2>&1 &
+      - name: Wait for demo
+        run: for i in {1..90}; do curl --fail --silent http://127.0.0.1:3000/ && exit 0; sleep 1; done; cat /tmp/cfs-web.log; exit 1
+      - name: Run map checks
+        run: |
+          export CFS_BROWSER_EXECUTABLE="$(node -e "const {chromium}=require('playwright-core'); process.stdout.write(chromium.executablePath())")"
+          npm run check:map-resilience
+          npm run check:interactive-map
+
+  containers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm run check:containers
+      - run: docker build --tag cfs-web:${{ github.sha }} .
+      - run: docker build --tag cfs-api:${{ github.sha }} backend
