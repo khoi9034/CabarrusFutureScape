@@ -550,7 +550,14 @@ async function assertInteractiveMap(page, { painted = false } = {}) {
     null,
     { timeout: 75_000 },
   );
-  await delay(300);
+  await page.waitForFunction(() => {
+    const interactive = document.querySelector('[data-testid="cfs-arcgis-map"]');
+    const fallback = document.querySelector('[data-testid="cfs-local-context-map"]');
+    return (
+      Number(interactive ? getComputedStyle(interactive).opacity : 0) >= 0.99 &&
+      Number(fallback ? getComputedStyle(fallback).opacity : 1) <= 0.01
+    );
+  });
   const state = await getDebugState(page);
   const box = await map.boundingBox();
   assert(box && box.width > 240 && box.height > 240, `Map dimensions are invalid: ${JSON.stringify(box)}`);
