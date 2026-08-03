@@ -620,7 +620,7 @@ async function planningChecks(page, baseUrl) {
     await controlsPanel.waitFor();
   });
 
-  await check("Planning", "snapshot create, rename, section persistence, print, and delete", ["save", "library", "rename", "sections", "refresh", "print", "delete"], async () => {
+  await check("Planning", "snapshot create, rename, section persistence, print, and archive", ["save", "library", "rename", "sections", "refresh", "print", "archive"], async () => {
     const mapCapture = await page.evaluate(() =>
       window.__cfsCaptureMapSnapshot?.(),
     );
@@ -631,13 +631,16 @@ async function planningChecks(page, baseUrl) {
       "Planning Snapshot did not capture the visible map.",
     );
     await page.getByRole("button", { name: "Save Planning Snapshot" }).click();
-    await page.getByText("1 saved", { exact: true }).first().waitFor();
+    await page
+      .locator('[data-testid="planning-persistence-status"][data-state="saved"]')
+      .waitFor();
     const snapshotMode = page.locator('button[aria-label^="Planning Snapshot:"]');
     await snapshotMode.click();
     await page
       .locator('button[aria-label^="Planning Snapshot:"][aria-pressed="true"]')
       .waitFor();
     await page.getByText("Planning Snapshot Library", { exact: true }).waitFor();
+    await page.getByText("1 saved", { exact: true }).first().waitFor();
     await page
       .getByAltText("Planning snapshot map thumbnail", { exact: true })
       .first()
@@ -649,6 +652,13 @@ async function planningChecks(page, baseUrl) {
     if (await section.count()) {
       const before = await section.isChecked();
       await section.setChecked(!before);
+      const snapshotLibrary = page.getByTestId("planning-snapshot-library");
+      await snapshotLibrary
+        .getByTestId("planning-snapshot-save-changes")
+        .click();
+      await snapshotLibrary
+        .locator('[data-testid="planning-persistence-status"][data-state="saved"]')
+        .waitFor();
       await page.reload({ waitUntil: "load" });
       await page
         .locator('button[aria-label^="Workspace:"][aria-pressed="true"]')
@@ -667,7 +677,7 @@ async function planningChecks(page, baseUrl) {
     await delay(250);
     assert.equal(await page.evaluate(() => sessionStorage.getItem("cfs-print-invoked")), "true");
     page.once("dialog", (dialog) => dialog.accept());
-    await page.getByRole("button", { name: "Delete", exact: true }).first().click();
+    await page.getByRole("button", { name: "Archive", exact: true }).first().click();
     await page.getByRole("heading", { name: "No planning snapshots saved yet", exact: true }).waitFor();
   });
 }
