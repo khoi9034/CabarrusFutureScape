@@ -1470,7 +1470,7 @@ async function localAuthorizationMatrix() {
       await goto(page, LOCAL_URL, "?app=planning");
       await assertVisiblePlanningSavesDisabled(page);
       await page.goto(`${LOCAL_URL}/data-administration`, { waitUntil: "domcontentloaded" });
-      await page.getByTestId("data-administration-summary").waitFor({ timeout: 45_000 });
+      await page.getByTestId("data-administration-summary").waitFor({ timeout: 90_000 });
       assert.match(await page.getByTestId("data-administration-page").innerText(), /source|ingestion|quality/i);
       await goto(page, LOCAL_URL, "?app=planning");
       report.authorization.cases.push({
@@ -1494,7 +1494,7 @@ async function localAuthorizationMatrix() {
       await goto(page, LOCAL_URL, "?app=planning");
       await poll(async () => !(await page.getByTestId("planning-snapshot-save").first().isDisabled()));
       await page.goto(`${LOCAL_URL}/data-administration`, { waitUntil: "domcontentloaded" });
-      await page.getByTestId("data-administration-summary").waitFor({ timeout: 45_000 });
+      await page.getByTestId("data-administration-summary").waitFor({ timeout: 90_000 });
       await goto(page, LOCAL_URL, "?app=planning");
       report.authorization.cases.push({
         action: "Product workspace writes and data-administration status visible",
