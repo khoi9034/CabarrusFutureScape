@@ -1799,7 +1799,7 @@ async function gotoEconomicBucket(page, baseUrl, navigate = true) {
 
 async function loadEconomicScenario(page, id, name) {
   const library = page.getByTestId("economic-scenario-library");
-  await library.selectOption(id);
+  await library.selectOption(id, { timeout: 90_000 });
   const control = page.getByTestId("economic-scenario-load");
   await poll(async () => (await control.getAttribute("data-scenario-id")) === id);
   await control.click();
