@@ -777,7 +777,8 @@ def test_phase24b_qa1_command_center_cards_are_readable() -> None:
 
     assert "min-h-[68px]" in command_text
     assert "md:grid-cols-3" in command_text
-    assert "snapshotStatusText" in command_text
+    assert "planningSnapshotPersistence.message" in command_text
+    assert 'data-testid="planning-persistence-status"' in command_text
     assert 'className="truncate text-sm font-semibold"' not in command_text
 
 
@@ -859,6 +860,9 @@ def test_phase24e_planning_snapshot_simplified_report_builder() -> None:
     theme_text = (REPO_ROOT / "src" / "styles" / "cfs-theme.css").read_text(
         encoding="utf-8",
     )
+    report_drafts_text = (
+        REPO_ROOT / "src" / "hooks" / "usePlanningReportDrafts.ts"
+    ).read_text(encoding="utf-8")
 
     assert "PlanningSnapshotReportBuilder" in snapshot_text
     assert "PlanningSnapshotTabs" not in snapshot_text
@@ -871,7 +875,11 @@ def test_phase24e_planning_snapshot_simplified_report_builder() -> None:
     assert "No planning snapshots saved yet" in snapshot_text
     assert "Open Methodology" in snapshot_text
     assert "ReportDraftsPanel" in snapshot_text
-    assert "cfs.planningSnapshot.reportDrafts.v1" in snapshot_text
+    assert "usePlanningReportDrafts" in snapshot_text
+    assert "getReportRepository" in report_drafts_text
+    assert 'REPORT_TYPE = "planning_snapshot_draft"' in report_drafts_text
+    assert "cfs.planningSnapshot.reportDrafts.v1" in report_drafts_text
+    assert "localStorage" not in snapshot_text
     assert "New Draft from Snapshot" in snapshot_text
     assert "Save Current Draft" in snapshot_text
     assert "Load Draft" in snapshot_text
@@ -1192,6 +1200,9 @@ def test_phase25c_left_panel_and_snapshot_report_builder_cleanup() -> None:
     state_text = (
         REPO_ROOT / "src" / "hooks" / "useDashboardState.tsx"
     ).read_text(encoding="utf-8")
+    report_drafts_text = (
+        REPO_ROOT / "src" / "hooks" / "usePlanningReportDrafts.ts"
+    ).read_text(encoding="utf-8")
 
     assert 'setOverviewLayoutPanel("left", "collapsed");' in app_shell_text
     assert "rawWidth <= LEFT_PANEL_COLLAPSE_THRESHOLD" in app_shell_text
@@ -1221,7 +1232,10 @@ def test_phase25c_left_panel_and_snapshot_report_builder_cleanup() -> None:
     assert "PlanningSnapshotReportBuilder" in snapshot_text
     assert "Snapshot Library" in snapshot_text
     assert "Report Drafts" in snapshot_text
-    assert "cfs.planningSnapshot.reportDrafts.v1" in snapshot_text
+    assert "usePlanningReportDrafts" in snapshot_text
+    assert "getReportRepository" in report_drafts_text
+    assert "cfs.planningSnapshot.reportDrafts.v1" in report_drafts_text
+    assert "localStorage" not in snapshot_text
     assert "Report title, notes, and sections" in snapshot_text
     assert "Explain the Numbers Appendix" in snapshot_text
     assert "showExplanationCards, setShowExplanationCards] = useState(false)" in snapshot_text
@@ -2049,23 +2063,27 @@ def test_phase28i_indicator_center_drawer_labels_charts_cleanup() -> None:
     assert "customOverviewActive" not in app_shell_text
     assert "OverviewWorkspaceBuilder" not in app_shell_text
     assert "Indicator dashboard filters stay controlled here" not in sidebar_text
-    assert "phase28b_v1" in state_text
+    snapshot_mapper_text = (
+        REPO_ROOT / "src" / "lib" / "product" / "planningSnapshotMapper.ts"
+    ).read_text(encoding="utf-8")
+    assert "phase28b_v1" in snapshot_mapper_text
     assert '"phase28b_v1"' in types_text
-    assert "phase28c_v1" in state_text
+    assert "phase28c_v1" in snapshot_mapper_text
     assert '"phase28c_v1"' in types_text
-    assert "phase28d_v1" in state_text
+    assert "phase28d_v1" in snapshot_mapper_text
     assert '"phase28d_v1"' in types_text
-    assert "phase28e_v1" in state_text
+    assert "phase28e_v1" in snapshot_mapper_text
     assert '"phase28e_v1"' in types_text
-    assert "phase28f_v1" in state_text
+    assert "phase28f_v1" in snapshot_mapper_text
     assert '"phase28f_v1"' in types_text
-    assert "phase28g_v1" in state_text
+    assert "phase28g_v1" in snapshot_mapper_text
     assert '"phase28g_v1"' in types_text
-    assert "phase28h_v1" in state_text
+    assert "phase28h_v1" in snapshot_mapper_text
     assert '"phase28h_v1"' in types_text
-    assert "phase28i_v1" in state_text
+    assert "phase28i_v1" in snapshot_mapper_text
     assert '"phase28i_v1"' in types_text
-    assert "phase28k_v1" in state_text
+    assert "phase28k_v1" in snapshot_mapper_text
+    assert "SNAPSHOT_VERSIONS.has(value.snapshotVersion)" in snapshot_mapper_text
     assert '"phase28k_v1"' in types_text
     assert "map-free monitoring dashboard" in readme_text
     assert "draggable/resizable Inspect" in readme_text
@@ -2109,8 +2127,8 @@ def test_phase28k_indicator_center_dashboard_snapshot_report_integration() -> No
     types_text = (REPO_ROOT / "src" / "types" / "index.ts").read_text(
         encoding="utf-8",
     )
-    state_text = (
-        REPO_ROOT / "src" / "hooks" / "useDashboardState.tsx"
+    snapshot_mapper_text = (
+        REPO_ROOT / "src" / "lib" / "product" / "planningSnapshotMapper.ts"
     ).read_text(encoding="utf-8")
 
     for required in [
@@ -2146,7 +2164,7 @@ def test_phase28k_indicator_center_dashboard_snapshot_report_integration() -> No
     ]:
         assert required in types_text
 
-    assert 'snapshotVersion === "phase28k_v1"' in state_text
+    assert '"phase28k_v1"' in snapshot_mapper_text
 
     for required in [
         "getSnapshotVisualType",

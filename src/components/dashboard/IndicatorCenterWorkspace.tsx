@@ -28,6 +28,7 @@ import {
 } from "react";
 import {
   CFS_PLANNING_SNAPSHOT_SAVED_EVENT,
+  CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
 } from "@/components/dashboard/OverviewCommandCenter";
 import { AskCfsPanel } from "@/components/dashboard/AskCfsPanel";
 import { EconomicMissionControl } from "@/components/dashboard/EconomicMissionControl";
@@ -402,12 +403,14 @@ function PlanningIndicatorCenterWorkspace() {
     selectedIndicatorCenterContext,
     selectedParcelId,
     selectedParcelIntelligence,
+    planningSnapshotCanWrite,
     savePlanningSnapshot,
     setPlanningSnapshotView,
     setProductMode,
     setSelectedIndicatorCenterContext,
   } = useDashboardState();
   const indicatorDashboardSnapshotRef = useRef<HTMLDivElement | null>(null);
+  const saveSnapshotRef = useRef<(() => Promise<void>) | null>(null);
   const [activeReadinessTab, setActiveReadinessTab] =
     useState<IndicatorReadinessTabId>("all");
   const [askCfsActions, setAskCfsActions] =
@@ -682,7 +685,7 @@ function PlanningIndicatorCenterWorkspace() {
     })),
   ];
   async function saveSnapshot() {
-    if (snapshotSaving) {
+    if (!planningSnapshotCanWrite || snapshotSaving) {
       return;
     }
 
@@ -804,12 +807,32 @@ function PlanningIndicatorCenterWorkspace() {
         visualType: "dashboard",
       };
 
-      savePlanningSnapshot(snapshot);
+      const savedSnapshot = await savePlanningSnapshot(snapshot);
+      if (!savedSnapshot) return;
       window.dispatchEvent(new CustomEvent(CFS_PLANNING_SNAPSHOT_SAVED_EVENT));
     } finally {
       setSnapshotSaving(false);
     }
   }
+
+  useEffect(() => {
+    saveSnapshotRef.current = saveSnapshot;
+  });
+  useEffect(() => {
+    function handleCommandCenterSave() {
+      void saveSnapshotRef.current?.();
+    }
+
+    window.addEventListener(
+      CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
+      handleCommandCenterSave,
+    );
+    return () =>
+      window.removeEventListener(
+        CFS_SAVE_PLANNING_SNAPSHOT_EVENT,
+        handleCommandCenterSave,
+      );
+  }, []);
 
   function openPlanningSnapshot() {
     setPlanningSnapshotView("overview");
@@ -882,6 +905,7 @@ function PlanningIndicatorCenterWorkspace() {
     >
       <MissionHeader
         activeTab={activeReadinessTab}
+        canSaveSnapshot={planningSnapshotCanWrite}
         demoGeneratedAt={demoGeneratedAt}
         onOpenPlanningSnapshot={openPlanningSnapshot}
         onSaveSnapshot={() => {
@@ -2403,12 +2427,14 @@ function getSchoolUtilizationCounts(
 
 function MissionHeader({
   activeTab,
+  canSaveSnapshot,
   demoGeneratedAt,
   onOpenPlanningSnapshot,
   onSaveSnapshot,
   snapshotSaving,
 }: {
   activeTab: IndicatorReadinessTabId;
+  canSaveSnapshot: boolean;
   demoGeneratedAt: string | null;
   onOpenPlanningSnapshot: () => void;
   onSaveSnapshot: () => void;
@@ -2471,7 +2497,8 @@ function MissionHeader({
         <div className="flex max-w-full flex-wrap items-center gap-2">
           <button
             className="inline-flex items-center gap-2 rounded-md border border-[#55d38f]/25 bg-[#55d38f]/10 px-3 py-2 text-xs font-semibold text-[#a8f3c4] transition hover:border-[#55d38f]/45 hover:bg-[#55d38f]/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#55d38f]/45"
-            disabled={snapshotSaving}
+            data-testid="planning-snapshot-save-indicator"
+            disabled={!canSaveSnapshot || snapshotSaving}
             onClick={onSaveSnapshot}
             type="button"
           >

@@ -29,6 +29,7 @@ const protectedPaths = [
 const before = new Map(
   protectedPaths.filter(existsSync).map((path) => [path, sha256(path)]),
 );
+const restartManifestPath = "logs/frontend-persistence-restart-manifest.json";
 let startedAt;
 let deadline;
 let restarted = false;
@@ -49,6 +50,7 @@ const live = {
 };
 let primaryFailure = null;
 let canonicalRelationCounts = null;
+const frontendPersistenceRuns = [];
 
 try {
   runNpm("db:migrate", false, {
@@ -79,8 +81,12 @@ try {
     }
 
     if (!restarted && Date.now() >= startedAt + requestedSeconds * 500) {
-      runNpm("stop:cfs");
-      runNpm("present:cfs");
+      runFrontendPersistencePhase("seed", "restart-seed");
+      runNpm("present:cfs", false, {}, ["--", "-FrontendOnly"]);
+      runFrontendPersistencePhase("verify", "frontend-only");
+      runNpm("present:cfs", false, {}, ["--", "-BackendOnly"]);
+      runFrontendPersistencePhase("verify", "backend-only");
+      runFrontendPersistencePhase("cleanup", "restart-cleanup");
       runNpm("check:local-apis");
       await verifyLiveProductRecords();
       await verifyLiveAudit();
@@ -102,13 +108,17 @@ try {
   runAcceptanceRound();
   assert.deepEqual(readCanonicalRelationCounts(), canonicalRelationCounts);
   if (!restarted) throw new Error("Soak ended before the restart checkpoint.");
+  assert.ok(frontendPersistenceRuns.length >= 6, "Browser persistence did not cover acceptance and phased restart proof.");
+  for (const label of ["restart-seed", "frontend-only", "backend-only", "restart-cleanup"]) {
+    assert.ok(frontendPersistenceRuns.some((run) => run.label === label), `Browser persistence omitted ${label}.`);
+  }
   assertProtectedArtifacts();
   const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
   if (elapsedSeconds < requestedSeconds) {
     throw new Error(`Soak ran ${elapsedSeconds}s, expected ${requestedSeconds}s.`);
   }
   console.log(
-    `PASS Product V1 soak (${elapsedSeconds}s, ${round} health rounds, restart verified)`,
+    `PASS Product V1 soak (${elapsedSeconds}s, ${round} health rounds, restart verified, ${frontendPersistenceRuns.length} browser persistence runs)`,
   );
 } catch (error) {
   primaryFailure = error;
@@ -116,9 +126,20 @@ try {
 } finally {
   let cleanupFailure = null;
   try {
-    await archiveLiveProductRecords();
+    if (primaryFailure && restartManifestNeedsCleanup()) {
+      runNpm("check:frontend-persistence", false, {
+        CFS_FRONTEND_PERSISTENCE_FORCE_CLEANUP: "true",
+        CFS_FRONTEND_PERSISTENCE_PHASE: "cleanup",
+        CFS_FRONTEND_PERSISTENCE_RESTART_LABEL: "failure-cleanup",
+      });
+    }
   } catch (error) {
     cleanupFailure = error;
+  }
+  try {
+    await archiveLiveProductRecords();
+  } catch (error) {
+    cleanupFailure ??= error;
   }
   runNpm("stop:cfs", true);
   assertProtectedArtifacts();
@@ -542,19 +563,51 @@ function runAcceptanceRound() {
     "check:powerbi",
   ]) {
     runNpm(script);
+    if (script === "check:local-presentation") {
+      recordFrontendPersistenceProof("full", `acceptance-round-${frontendPersistenceRuns.length + 1}`);
+    }
   }
 }
 
-function runNpm(script, bestEffort = false, environment = {}) {
+function runFrontendPersistencePhase(phase, label) {
+  runNpm("check:frontend-persistence", false, {
+    CFS_FRONTEND_PERSISTENCE_PHASE: phase,
+    CFS_FRONTEND_PERSISTENCE_RESTART_LABEL: phase === "verify" ? label : "",
+  });
+  recordFrontendPersistenceProof(phase, label);
+}
+
+function recordFrontendPersistenceProof(phase, label) {
+  const proof = JSON.parse(readFileSync("logs/frontend-persistence-last-run.json", "utf8").replace(/^\uFEFF/, ""));
+  assert.equal(proof.status, "PASS", `${label} browser persistence report did not pass.`);
+  assert.equal(proof.phase, phase, `${label} browser persistence ran the wrong phase.`);
+  frontendPersistenceRuns.push({
+    branch_head: proof.branch_head,
+    checked_at: proof.checked_at,
+    finished_at: proof.finished_at,
+    label,
+    phase,
+    workflows: proof.workflows?.length ?? 0,
+  });
+  console.log(`PASS ${label}: ${frontendPersistenceRuns.at(-1).workflows} browser persistence workflows`);
+}
+
+function runNpm(script, bestEffort = false, environment = {}, scriptArguments = []) {
   const npmCli = process.env.npm_execpath;
   if (!npmCli) throw new Error("npm_execpath is unavailable.");
-  const result = spawnSync(process.execPath, [npmCli, "run", script], {
+  const result = spawnSync(process.execPath, [npmCli, "run", script, ...scriptArguments], {
     env: { ...process.env, ...environment },
     stdio: "inherit",
   });
   if (!bestEffort && result.status !== 0) {
     throw new Error(`npm run ${script} failed with exit code ${result.status ?? 1}.`);
   }
+}
+
+function restartManifestNeedsCleanup() {
+  if (!existsSync(restartManifestPath)) return false;
+  const manifest = JSON.parse(readFileSync(restartManifestPath, "utf8").replace(/^\uFEFF/, ""));
+  return !["cleaned", "cleanup_after_failure"].includes(manifest.status);
 }
 
 function assertProtectedArtifacts() {

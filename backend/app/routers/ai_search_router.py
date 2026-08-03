@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.dependencies.database import get_optional_read_only_db
 from app.routers.economics_router import get_cached_economics_intelligence
-from app.routers.indicators_router import get_cached_indicator_intelligence, get_indicator_intelligence
+from app.routers.indicators_router import get_cached_indicator_intelligence
 from app.schemas.ai_search import CfsAiContext, CfsAiSearchRequest, CfsAiSearchResponse
 from app.services.ai_search_service import CfsAiSearchService, get_ai_provider_status
 
@@ -160,11 +160,6 @@ def gather_cfs_ai_context(_db: Session | None, request: CfsAiSearchRequest | Non
     indicator_intelligence = (
         get_cached_indicator_intelligence() if _db is not None else None
     )
-    if indicator_intelligence is None:
-        try:
-            indicator_intelligence = get_indicator_intelligence(_db) if _db is not None else None
-        except Exception:
-            indicator_intelligence = None
     context["indicator_intelligence"] = indicator_intelligence or _fast_development_context(_db, context)
     if indicator_intelligence is None:
         context["context_freshness"] = "fallback_partial"

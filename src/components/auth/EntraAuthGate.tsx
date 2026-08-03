@@ -5,7 +5,7 @@ import {
   PublicClientApplication,
   type AccountInfo,
 } from "@azure/msal-browser";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from "react";
 import { CFS_API_BASE_URL } from "@/lib/api/client";
 import {
   CFS_ENTRA_API_SCOPE,
@@ -13,6 +13,8 @@ import {
   entraConfigComplete,
   msalConfig,
 } from "@/lib/auth/entra";
+import { isCfsApiUrl } from "@/lib/auth/requestBoundary.mjs";
+import { ProductPrincipalProvider } from "@/hooks/useProductPrincipal";
 
 type AuthStatus = "checking" | "ready" | "signed-out" | "config-missing";
 
@@ -52,13 +54,13 @@ export function EntraAuthGate({ children }: { children: ReactNode }) {
     };
   }, [authEnabled, msal]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!authEnabled || !msal || !account || !entraConfigComplete()) return;
 
     const originalFetch = window.fetch.bind(window);
     window.fetch = async (input, init = {}) => {
       const url = requestUrl(input);
-      if (!url || !url.toString().startsWith(CFS_API_BASE_URL)) {
+      if (!url || !isCfsApiUrl(url, CFS_API_BASE_URL)) {
         return originalFetch(input, init);
       }
 
@@ -79,10 +81,10 @@ export function EntraAuthGate({ children }: { children: ReactNode }) {
 
   if (!authEnabled || status === "ready") {
     return (
-      <>
+      <ProductPrincipalProvider>
         {authEnabled && account ? <AccountBar account={account} onSignOut={() => msal?.logoutPopup()} /> : null}
         {children}
-      </>
+      </ProductPrincipalProvider>
     );
   }
 

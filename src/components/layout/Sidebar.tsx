@@ -367,6 +367,7 @@ function ParcelModeControlsPanel({
 }) {
   const {
     planningSnapshot,
+    planningSnapshotCanWrite,
     selectedParcelId,
     selectedParcelIntelligence,
     setMapFocusMode,
@@ -425,7 +426,9 @@ function ParcelModeControlsPanel({
 
       <div className="grid gap-2">
         <button
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15 disabled:cursor-not-allowed disabled:opacity-65"
+          data-testid="planning-snapshot-save-parcel-rail"
+          disabled={!planningSnapshotCanWrite}
           onClick={saveSnapshot}
           type="button"
         >
@@ -486,6 +489,7 @@ function ModelLabControlsPanel({
     modelResearchMapSummary,
     modelResearchOverlayEnabled,
     modelResearchViewMode,
+    planningSnapshotCanWrite,
     setModelResearchOverlayEnabled,
     setModelResearchViewMode,
     setProductMode,
@@ -642,7 +646,9 @@ function ModelLabControlsPanel({
 
       <div className="grid gap-2">
         <button
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15 disabled:cursor-not-allowed disabled:opacity-65"
+          data-testid="planning-snapshot-save-model-rail"
+          disabled={!planningSnapshotCanWrite}
           onClick={saveSnapshot}
           type="button"
         >
@@ -687,6 +693,7 @@ function SnapshotModeControlsPanel({
     activeLayerIds,
     overviewCommandMode,
     planningSnapshot,
+    planningSnapshotCanWrite,
     savedPlanningSnapshots,
     selectedParcelId,
     setPlanningSnapshotView,
@@ -738,7 +745,9 @@ function SnapshotModeControlsPanel({
         value={planningSnapshot ? "Available" : "Not saved"}
       />
       <button
-        className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15 disabled:cursor-not-allowed disabled:opacity-65"
+        data-testid="planning-snapshot-save-snapshot-rail"
+        disabled={!planningSnapshotCanWrite}
         onClick={saveSnapshot}
         type="button"
       >

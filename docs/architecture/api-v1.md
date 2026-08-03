@@ -15,6 +15,23 @@ audit. Versioned routers call existing domain services rather than duplicate the
 - Raw database tables and unrestricted SQL are never exposed.
 - Provenance remains attached to analytical evidence and exports.
 
+Successful Product responses use this envelope:
+
+```json
+{
+  "data": {},
+  "request_id": "request-id",
+  "timestamp": "2026-08-02T12:00:00Z",
+  "provenance": {
+    "api_version": "v1",
+    "runtime_mode": "local",
+    "data_provider": "local_api"
+  }
+}
+```
+
+Collection responses add `pagination` with `page`, `page_size`, and `total`.
+
 ## Error envelope
 
 Product V1 errors use a stable shape:
@@ -24,9 +41,10 @@ Product V1 errors use a stable shape:
   "error": {
     "code": "conflict",
     "message": "The record changed before this update.",
-    "request_id": "request-id",
     "details": []
-  }
+  },
+  "request_id": "request-id",
+  "timestamp": "2026-08-02T12:00:00Z"
 }
 ```
 
@@ -37,16 +55,46 @@ dependencies `503`.
 
 ## Collections
 
-Collection endpoints use bounded `limit` and `offset`, stable ordering, explicit
-allowlisted sort fields, and typed filters. A response includes total count and
-the applied paging/sort context where the existing domain contract permits.
-Client-supplied SQL fragments or column names are never accepted.
+Product resource collections use `page` (minimum `1`) and `page_size` (from `1`
+through `100`). Their response envelope includes `pagination.page`,
+`pagination.page_size`, and `pagination.total`; generic resource collections also
+accept the allowlisted `sort`, `project_id`, and `status` parameters. Ask CFS
+message collections use the same `page` and `page_size` bounds.
+
+Existing unversioned analytical routes retain their own contracts, including
+routes that use `limit` and `offset`. `GET /api/v1/audit` is a deliberate Product
+V1 exception: it accepts a bounded `limit` from `1` through `250`, plus
+`object_id` and `action`, and does not return the Product collection pagination
+object. Client-supplied SQL fragments or arbitrary column names are never
+accepted.
 
 ## Conflicts and versions
 
 Mutable records expose an update timestamp or version. Stale writes return a
 conflict rather than overwriting newer work. Snapshot/scenario versions and audit
 events are append-only.
+
+The frontend sends `expected_updated_at` for supported Planning Snapshot,
+Economics scenario, and Report Bucket updates. Reads may be retried once when a
+dependency is temporarily unavailable; creates, updates, versions, resets, and
+archives are never retried automatically.
+
+## Frontend workflow routes
+
+| Workflow | Read/create/update routes | Version, reset, and archive routes |
+| --- | --- | --- |
+| Current principal | `GET /api/v1/me` | None |
+| Planning Snapshots | `GET`/`POST /api/v1/planning/snapshots`; `GET`/`PATCH /api/v1/planning/snapshots/{id}` | `POST /api/v1/planning/snapshots/{id}/versions`; `POST /api/v1/planning/snapshots/{id}/archive` |
+| Planning report drafts | `GET`/`POST /api/v1/reports`; `GET`/`PATCH /api/v1/reports/{id}` | `POST /api/v1/reports/{id}/archive`; reports have no version route |
+| Economics scenarios | `GET`/`POST /api/v1/economics/scenarios`; `GET`/`PATCH /api/v1/economics/scenarios/{id}` | `POST /api/v1/economics/scenarios/{id}/versions`; `POST /api/v1/economics/scenarios/{id}/archive` |
+| Shared Report Bucket | `GET`/`POST /api/v1/reports/bucket`; `GET`/`PATCH /api/v1/reports/bucket/{id}` | `POST /api/v1/reports/bucket/{id}/archive`; bucket items have no version route |
+| Ask CFS conversations | `GET`/`POST /api/v1/ask-cfs/conversations`; `GET`/`PATCH /api/v1/ask-cfs/conversations/{id}`; `GET`/`POST /api/v1/ask-cfs/conversations/{id}/messages` | `POST /api/v1/ask-cfs/conversations/{id}/reset`; `POST /api/v1/ask-cfs/conversations/{id}/archive`; conversations have no version route |
+
+Ask CFS message persistence accepts only safe question/answer summaries and
+bounded entity metadata. Hidden prompts, credentials, unrestricted provider
+payloads, and private contact fields are outside this contract. A conversation's
+`retention_until` value is policy metadata only; Product V1 does not automatically
+expire or prune messages. Reset deletes message rows and records the reset.
 
 ## OpenAPI
 

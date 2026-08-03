@@ -26,6 +26,7 @@
     "check:local-interactions": "node scripts/check-local-interactions.mjs",
     "check:local-presentation": "node scripts/check-local-presentation.mjs",
     "check:enterprise-readiness": "python scripts/check_enterprise_readiness.py",
+    "check:frontend-persistence": "node scripts/check-frontend-persistence.mjs",
     "check:interactive-map": "node scripts/check-interactive-map.mjs",
     "check:map-resilience": "node scripts/check-map-resilience.mjs",
     "check:runtime-config": "node scripts/check-runtime-config.mjs",

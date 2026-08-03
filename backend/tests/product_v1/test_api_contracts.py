@@ -65,6 +65,30 @@ def test_v1_request_ids_errors_pagination_and_legacy_compatibility(
             )
             created = client.post("/api/v1/projects", json={"name": "Contract project"})
             project = created.json()["data"]
+            conversation = client.post(
+                "/api/v1/ask-cfs/conversations",
+                json={"project_id": project["id"], "title": "Contract conversation"},
+            )
+            question = client.post(
+                f"/api/v1/ask-cfs/conversations/{conversation.json()['data']['id']}/messages",
+                json={"role": "user", "safe_question": "What should be reviewed?"},
+            )
+            answer = client.post(
+                f"/api/v1/ask-cfs/conversations/{conversation.json()['data']['id']}/messages",
+                json={
+                    "role": "assistant",
+                    "safe_answer_summary": "Review the verified constraints.",
+                },
+            )
+            conversation_messages = client.get(
+                f"/api/v1/ask-cfs/conversations/{conversation.json()['data']['id']}/messages"
+            )
+            conversation_reset = client.post(
+                f"/api/v1/ask-cfs/conversations/{conversation.json()['data']['id']}/reset"
+            )
+            messages_after_reset = client.get(
+                f"/api/v1/ask-cfs/conversations/{conversation.json()['data']['id']}/messages"
+            )
             listing = client.get("/api/v1/projects?page=1&page_size=1&sort=name")
             conflict = client.patch(
                 f"/api/v1/projects/{project['id']}?expected_updated_at=stale",
@@ -159,6 +183,20 @@ def test_v1_request_ids_errors_pagination_and_legacy_compatibility(
     assert oversized_request.status_code == 413
     assert oversized_request.json()["error"]["code"] == "request_too_large"
     assert created.status_code == 201
+    assert conversation.status_code == 201
+    assert question.status_code == 201
+    assert answer.status_code == 201
+    assert [row["role"] for row in conversation_messages.json()["data"]] == [
+        "user",
+        "assistant",
+    ]
+    assert conversation_messages.json()["pagination"] == {
+        "page": 1,
+        "page_size": 50,
+        "total": 2,
+    }
+    assert conversation_reset.status_code == 200
+    assert messages_after_reset.json()["data"] == []
     assert listing.json()["pagination"] == {"page": 1, "page_size": 1, "total": 1}
     assert conflict.status_code == 409
     assert conflict.json()["error"]["code"] == "conflict"
@@ -227,6 +265,7 @@ def test_openapi_covers_v1_product_and_legacy_compatibility_paths() -> None:
         "/api/v1/projects",
         "/api/v1/reports",
         "/api/v1/ask-cfs/conversations",
+        "/api/v1/ask-cfs/conversations/{conversation_id}/messages",
         "/api/v1/ai/search",
         "/api/v1/data-sources",
         "/api/v1/data-sources/{source_id}",

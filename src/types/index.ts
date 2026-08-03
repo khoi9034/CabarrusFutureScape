@@ -297,6 +297,7 @@ export interface PlanningSnapshot {
   caveats: string[];
   capturedSections?: string[];
   createdAt: string;
+  currentVersion?: number;
   dashboardImageAlt?: string;
   dashboardImageCapturedAt?: string | null;
   dashboardImageDataUrl?: string | null;
@@ -316,6 +317,7 @@ export interface PlanningSnapshot {
     extentCaptured: boolean;
     extentSummary?: string;
   };
+  mapRenderer?: string;
   developmentActivityContext?: PlanningSnapshotDevelopmentActivityContext | null;
   indicatorCenterContext?: PlanningSnapshotIndicatorCenterContext | null;
   mapScreenshotCapturedAt?: string | null;
@@ -360,6 +362,7 @@ export interface PlanningSnapshot {
   };
   overviewCommandMode?: OverviewCommandMode;
   overviewKpis: Array<{ caveat?: string; label: string; value: string }>;
+  notes?: string;
   selectedParcelId: string | null;
   selectedParcelSummary: PlanningSnapshotParcelSummary | null;
   snapshotId: string;
@@ -385,6 +388,7 @@ export interface PlanningSnapshot {
     | "phase28h_v1"
     | "phase28i_v1"
     | "phase28k_v1";
+  updatedAt?: string;
   visualType?: "dashboard" | "map";
 }
 

@@ -268,6 +268,29 @@ def add_message(
     return _envelope(request, result, settings)
 
 
+@router.get("/ask-cfs/conversations/{conversation_id}/messages")
+def get_messages(
+    conversation_id: str,
+    request: Request,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=100),
+    session: Session = Depends(get_db, scope="function"),
+    principal: ProductPrincipal = Depends(get_product_principal),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, Any]:
+    rows, total = _service(request, session, principal).list_ask_messages(
+        conversation_id,
+        page=page,
+        page_size=page_size,
+    )
+    return _envelope(
+        request,
+        rows,
+        settings,
+        pagination={"page": page, "page_size": page_size, "total": total},
+    )
+
+
 @router.post("/ask-cfs/conversations/{conversation_id}/reset")
 def reset_conversation(
     conversation_id: str,

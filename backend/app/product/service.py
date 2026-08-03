@@ -8,7 +8,7 @@ from sqlalchemy import JSON, Table, delete, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.product.audit import append_event, redact
+from app.product.audit import append_event, redact, redact_sensitive_text
 from app.product.models import (
     ask_cfs_conversations,
     ask_cfs_messages,
@@ -369,8 +369,8 @@ class ProductService:
             "id": new_id(),
             "conversation_id": conversation_id,
             "role": role,
-            "safe_question": (safe_question or "")[:500] or None,
-            "safe_answer_summary": (safe_answer_summary or "")[:2000] or None,
+            "safe_question": redact_sensitive_text(safe_question or "")[:500] or None,
+            "safe_answer_summary": redact_sensitive_text(safe_answer_summary or "")[:2000] or None,
             "entity_context": entity_context or {},
             "prompt_version": prompt_version,
             "provider_mode": provider_mode,
@@ -388,6 +388,40 @@ class ProductService:
             request_id=self.request_id,
         )
         return message
+
+    def list_ask_messages(
+        self,
+        conversation_id: str,
+        *,
+        page: int = 1,
+        page_size: int = 50,
+    ) -> tuple[list[dict[str, Any]], int]:
+        conversation = self.get("ask_cfs_conversations", conversation_id)
+        self._authorize_object(
+            Permission.ASK_CFS,
+            organization_id=_string(conversation.get("organization_id")),
+            project_id=_string(conversation.get("project_id")),
+        )
+        page = max(page, 1)
+        page_size = min(max(page_size, 1), 100)
+        clause = ask_cfs_messages.c.conversation_id == conversation_id
+        rows = [
+            dict(row)
+            for row in self.session.execute(
+                select(ask_cfs_messages)
+                .where(clause)
+                .order_by(ask_cfs_messages.c.created_at, ask_cfs_messages.c.id)
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            ).mappings()
+        ]
+        total = int(
+            self.session.scalar(
+                select(func.count()).select_from(ask_cfs_messages).where(clause)
+            )
+            or 0
+        )
+        return rows, total
 
     def reset_ask_conversation(self, conversation_id: str) -> dict[str, Any]:
         conversation = self.get("ask_cfs_conversations", conversation_id)
@@ -573,10 +607,13 @@ class ProductService:
             maximum = getattr(table.c[key].type, "length", None)
             if maximum and isinstance(value, str) and len(value) > maximum:
                 raise ProductValidationError(f"{key} exceeds {maximum} characters.")
-        return {
+        cleaned = {
             key: redact(value) if isinstance(table.c[key].type, JSON) else value
             for key, value in values.items()
         }
+        if table is ask_cfs_conversations and isinstance(cleaned.get("title"), str):
+            cleaned["title"] = redact_sensitive_text(cleaned["title"])
+        return cleaned
 
     def _insert_version(
         self,

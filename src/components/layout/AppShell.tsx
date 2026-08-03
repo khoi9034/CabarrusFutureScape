@@ -33,7 +33,10 @@ import {
 import { DashboardUrlSync } from "@/components/dashboard/DashboardUrlSync";
 import { DueDiligenceReview } from "@/components/dashboard/DueDiligenceReview";
 import { IndicatorCenterWorkspace } from "@/components/dashboard/IndicatorCenterWorkspace";
-import { IntelligencePanel } from "@/components/dashboard/IntelligencePanel";
+import {
+  IntelligencePanel,
+  PlanningSnapshotSaveController,
+} from "@/components/dashboard/IntelligencePanel";
 import { MethodologyWorkspace } from "@/components/dashboard/MethodologyWorkspace";
 import { OverviewCommandCenter } from "@/components/dashboard/OverviewCommandCenter";
 import { ConsultingShell } from "@/components/consulting/ConsultingShell";
@@ -992,6 +995,10 @@ function StableOverviewWorkspace() {
         isMapFocusMode && "p-0 lg:p-0",
       )}
     >
+      {!indicatorCenterDashboardMode && (isMapFocusMode || rightPanelHidden) ? (
+        <PlanningSnapshotSaveController />
+      ) : null}
+
       {!isMapFocusMode && !commandCenterHidden ? (
         <EnterpriseErrorBoundary moduleName="Command Center">
           <OverviewCommandCenter />

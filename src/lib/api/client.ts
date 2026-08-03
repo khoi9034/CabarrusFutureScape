@@ -463,6 +463,9 @@ async function parseApiPayload(response: Response, url: string) {
   try {
     return await response.json();
   } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error;
+    }
     throw new ApiClientError({
       displayMessage: `CFS API returned malformed JSON for ${getPathForDisplay(url)}.`,
       kind: "malformed",

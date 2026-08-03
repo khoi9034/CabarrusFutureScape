@@ -38,6 +38,11 @@ import {
 import { getIndicatorCenterDisplayModeLabel } from "@/data/intelligence/indicatorCenter";
 import { useDevelopmentPredictionResearchStatus } from "@/hooks/useDevelopmentPredictionResearchStatus";
 import { useDashboardState } from "@/hooks/useDashboardState";
+import {
+  usePlanningReportDrafts,
+  type PlanningReportSectionKey,
+  type PlanningSnapshotReportDraft,
+} from "@/hooks/usePlanningReportDrafts";
 import type { SelectedParcelIntelligenceSource } from "@/hooks/useSelectedParcel";
 import { useSelectedParcelDevelopmentActivity } from "@/hooks/useSelectedParcelDevelopmentActivity";
 import { useSelectedParcelFloodConstraint } from "@/hooks/useSelectedParcelFloodConstraint";
@@ -95,23 +100,41 @@ export function DueDiligenceReview({
   const {
     activePlanningSnapshotId,
     clearPlanningSnapshot,
+    createPlanningSnapshotVersion,
     deletePlanningSnapshot,
     planningSnapshot,
+    planningSnapshotCanWrite,
+    planningSnapshotHasUnsavedChanges,
+    planningSnapshotLegacyNotice,
+    planningSnapshotPersistence,
+    reloadPlanningSnapshots,
     renamePlanningSnapshot,
+    retryPlanningSnapshotSave,
+    savePlanningSnapshotChanges,
     savedPlanningSnapshots,
     setActivePlanningSnapshot,
+    setPlanningSnapshotNotes,
     setPlanningSnapshotSectionIncluded,
     setPlanningSnapshotView,
   } = useDashboardState();
 
   const snapshotLibraryProps: PlanningSnapshotLibraryProps = {
     activeSnapshotId: activePlanningSnapshotId,
+    canWrite: planningSnapshotCanWrite,
+    hasUnsavedChanges: planningSnapshotHasUnsavedChanges,
+    legacyNotice: planningSnapshotLegacyNotice,
     onDelete: deletePlanningSnapshot,
+    onReload: reloadPlanningSnapshots,
     onRename: renamePlanningSnapshot,
+    onRetry: retryPlanningSnapshotSave,
+    onSaveChanges: savePlanningSnapshotChanges,
+    onSetNotes: setPlanningSnapshotNotes,
     onUse: (snapshotId) => {
       setActivePlanningSnapshot(snapshotId);
       setPlanningSnapshotView("overview");
     },
+    onVersion: createPlanningSnapshotVersion,
+    persistence: planningSnapshotPersistence,
     snapshots: savedPlanningSnapshots,
   };
 
@@ -764,14 +787,7 @@ function EmptyPlanningSnapshotState({
   );
 }
 
-type ExtraReportSectionKey =
-  | "countywide_indicators"
-  | "key_findings"
-  | "legend_map_notes";
-
-type ReportBuilderSectionKey =
-  | ExtraReportSectionKey
-  | PlanningSnapshotSectionKey;
+type ReportBuilderSectionKey = PlanningReportSectionKey;
 
 interface ReportSectionVisibility {
   countywide_indicators: boolean;
@@ -803,20 +819,7 @@ const defaultExtraReportSections: ReportSectionVisibility = {
   legend_map_notes: true,
 };
 
-const REPORT_DRAFTS_STORAGE_KEY = "cfs.planningSnapshot.reportDrafts.v1";
 const DEFAULT_EXECUTIVE_REPORT_TITLE = "Planning Snapshot Executive Summary";
-
-interface PlanningSnapshotReportDraft {
-  createdAt: string;
-  draftId: string;
-  draftName: string;
-  explainNumbers: boolean;
-  reportNotes?: string;
-  reportTitle: string;
-  selectedSections: Record<ReportBuilderSectionKey, boolean>;
-  sourceSnapshotId: string;
-  updatedAt: string;
-}
 
 function createDraftId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -846,61 +849,6 @@ function getReportSectionSelectionSnapshot(
     }),
     {} as Record<ReportBuilderSectionKey, boolean>,
   );
-}
-
-function readStoredReportDrafts() {
-  if (typeof window === "undefined") {
-    return [] as PlanningSnapshotReportDraft[];
-  }
-
-  try {
-    const storedDrafts = window.localStorage.getItem(REPORT_DRAFTS_STORAGE_KEY);
-
-    if (!storedDrafts) {
-      return [] as PlanningSnapshotReportDraft[];
-    }
-
-    const parsedDrafts = JSON.parse(storedDrafts);
-
-    if (!Array.isArray(parsedDrafts)) {
-      return [] as PlanningSnapshotReportDraft[];
-    }
-
-    return parsedDrafts.filter(
-      (draft): draft is PlanningSnapshotReportDraft =>
-        Boolean(
-          draft &&
-            typeof draft === "object" &&
-            typeof draft.draftId === "string" &&
-            typeof draft.sourceSnapshotId === "string" &&
-            typeof draft.draftName === "string" &&
-            draft.selectedSections &&
-            typeof draft.selectedSections === "object",
-        ),
-    );
-  } catch {
-    return [] as PlanningSnapshotReportDraft[];
-  }
-}
-
-function writeStoredReportDrafts(drafts: PlanningSnapshotReportDraft[]) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    if (!drafts.length) {
-      window.localStorage.removeItem(REPORT_DRAFTS_STORAGE_KEY);
-      return;
-    }
-
-    window.localStorage.setItem(
-      REPORT_DRAFTS_STORAGE_KEY,
-      JSON.stringify(drafts),
-    );
-  } catch {
-    // Local storage can be unavailable or full. Keep the in-memory draft library.
-  }
 }
 
 const snapshotSectionKeys = new Set<PlanningSnapshotSectionKey>([
@@ -951,21 +899,29 @@ function PlanningSnapshotReportBuilder({
   const [extraSections, setExtraSections] = useState<ReportSectionVisibility>({
     ...defaultExtraReportSections,
   });
-  const [reportDrafts, setReportDrafts] = useState<
-    PlanningSnapshotReportDraft[]
-  >(() => readStoredReportDrafts());
-  const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
-  const [draftMessage, setDraftMessage] = useState<string | null>(null);
+  const {
+    activeDraftId,
+    archiveDraft,
+    canWrite: canWriteReportDrafts,
+    createDraft,
+    drafts: reportDrafts,
+    legacyNotice: reportDraftLegacyNotice,
+    markUnsaved: markReportDraftUnsaved,
+    persistence: reportDraftPersistence,
+    reload: reloadReportDrafts,
+    renameDraft,
+    retry: retryReportDraftSave,
+    saveDraft,
+    selectDraft,
+  } = usePlanningReportDrafts();
   const [draftWarning, setDraftWarning] = useState<string | null>(null);
   const [reportTitle, setReportTitle] = useState(
     DEFAULT_EXECUTIVE_REPORT_TITLE,
   );
   const [reportNotes, setReportNotes] = useState("");
-
-  function persistDrafts(nextDrafts: PlanningSnapshotReportDraft[]) {
-    setReportDrafts(nextDrafts);
-    writeStoredReportDrafts(nextDrafts);
-  }
+  const reportDraftBusy =
+    reportDraftPersistence.status === "loading" ||
+    reportDraftPersistence.status === "saving";
 
   function isSectionChecked(sectionKey: ReportBuilderSectionKey) {
     if (sectionKey === "countywide_indicators") {
@@ -987,6 +943,7 @@ function PlanningSnapshotReportBuilder({
     sectionKey: ReportBuilderSectionKey,
     included: boolean,
   ) {
+    markReportDraftUnsaved();
     if (
       sectionKey === "countywide_indicators" ||
       sectionKey === "key_findings" ||
@@ -1008,10 +965,11 @@ function PlanningSnapshotReportBuilder({
     draftId: string,
     draftName: string,
     createdAt: string,
+    clientDraftId = draftId,
+    updatedAt = new Date().toISOString(),
   ): PlanningSnapshotReportDraft {
-    const now = new Date().toISOString();
-
     return {
+      clientDraftId,
       createdAt,
       draftId,
       draftName,
@@ -1023,47 +981,43 @@ function PlanningSnapshotReportBuilder({
         extraSections,
       ),
       sourceSnapshotId: planningSnapshot.snapshotId,
-      updatedAt: now,
+      updatedAt,
     };
   }
 
-  function createDraftFromSnapshot() {
+  async function createDraftFromSnapshot() {
     const draftId = createDraftId();
     const draft = buildDraftPayload(
       draftId,
       createReportDraftName(planningSnapshot),
       new Date().toISOString(),
     );
-    const nextDrafts = [draft, ...reportDrafts].slice(0, 12);
-
-    persistDrafts(nextDrafts);
-    setActiveDraftId(draftId);
-    setDraftWarning(null);
-    setDraftMessage("New report draft created from the selected snapshot.");
+    const saved = await createDraft(draft);
+    if (saved) setDraftWarning(null);
   }
 
-  function saveCurrentDraft() {
+  async function saveCurrentDraft() {
     if (activeDraftId) {
       const existingDraft = reportDrafts.find(
         (draft) => draft.draftId === activeDraftId,
       );
+      if (!existingDraft) {
+        await createDraftFromSnapshot();
+        return;
+      }
       const nextDraft = buildDraftPayload(
         activeDraftId,
-        existingDraft?.draftName ?? createReportDraftName(planningSnapshot),
-        existingDraft?.createdAt ?? new Date().toISOString(),
+        existingDraft.draftName,
+        existingDraft.createdAt,
+        existingDraft.clientDraftId,
+        existingDraft.updatedAt,
       );
-      const nextDrafts = [
-        nextDraft,
-        ...reportDrafts.filter((draft) => draft.draftId !== activeDraftId),
-      ];
-
-      persistDrafts(nextDrafts);
-      setDraftWarning(null);
-      setDraftMessage("Current report draft saved.");
+      const saved = await saveDraft(nextDraft);
+      if (saved) setDraftWarning(null);
       return;
     }
 
-    createDraftFromSnapshot();
+    await createDraftFromSnapshot();
   }
 
   function applyDraft(draft: PlanningSnapshotReportDraft) {
@@ -1071,8 +1025,7 @@ function PlanningSnapshotReportBuilder({
       (snapshot) => snapshot.snapshotId === draft.sourceSnapshotId,
     );
 
-    setActiveDraftId(draft.draftId);
-    setDraftMessage(`Loaded ${draft.draftName}.`);
+    selectDraft(draft.draftId);
     setDraftWarning(
       sourceSnapshotExists
         ? null
@@ -1106,47 +1059,6 @@ function PlanningSnapshotReportBuilder({
     }
 
     restoreDraftSelections();
-  }
-
-  function renameDraft(draft: PlanningSnapshotReportDraft) {
-    const nextName = window.prompt("Rename report draft", draft.draftName);
-
-    if (!nextName?.trim()) {
-      return;
-    }
-
-    const safeName = nextName.trim().slice(0, 80);
-    const nextDrafts = reportDrafts.map((candidate) =>
-      candidate.draftId === draft.draftId
-        ? {
-            ...candidate,
-            draftName: safeName,
-            updatedAt: new Date().toISOString(),
-          }
-        : candidate,
-    );
-
-    persistDrafts(nextDrafts);
-    setDraftMessage("Report draft renamed.");
-  }
-
-  function deleteDraft(draftId: string) {
-    const shouldDelete = window.confirm(
-      "Delete this report draft? The source planning snapshot will not be deleted.",
-    );
-
-    if (!shouldDelete) {
-      return;
-    }
-
-    const nextDrafts = reportDrafts.filter((draft) => draft.draftId !== draftId);
-
-    persistDrafts(nextDrafts);
-    if (activeDraftId === draftId) {
-      setActiveDraftId(null);
-    }
-    setDraftWarning(null);
-    setDraftMessage("Report draft deleted.");
   }
 
   return (
@@ -1198,14 +1110,18 @@ function PlanningSnapshotReportBuilder({
               onClick={onGoOverview}
             />
             <ActionButton
+              disabled={!canWriteReportDrafts || reportDraftBusy}
               icon={<FileText className="h-3.5 w-3.5" />}
               label="New Draft from Snapshot"
-              onClick={createDraftFromSnapshot}
+              onClick={() => void createDraftFromSnapshot()}
+              testId="planning-report-draft-new-header"
             />
             <ActionButton
+              disabled={!canWriteReportDrafts || reportDraftBusy}
               icon={<Save className="h-3.5 w-3.5" />}
               label="Save Draft"
-              onClick={saveCurrentDraft}
+              onClick={() => void saveCurrentDraft()}
+              testId="planning-report-draft-save-header"
             />
             <ActionButton
               icon={<History className="h-3.5 w-3.5" />}
@@ -1224,14 +1140,18 @@ function PlanningSnapshotReportBuilder({
 
       <ReportDraftsPanel
         activeDraftId={activeDraftId}
-        draftMessage={draftMessage}
+        canWrite={canWriteReportDrafts}
         draftWarning={draftWarning}
         drafts={reportDrafts}
-        onDelete={deleteDraft}
-        onLoad={applyDraft}
-        onRename={renameDraft}
-        onSaveCurrent={saveCurrentDraft}
+        legacyNotice={reportDraftLegacyNotice}
+        onArchive={archiveDraft}
         onCreate={createDraftFromSnapshot}
+        onLoad={applyDraft}
+        onReload={reloadReportDrafts}
+        onRename={renameDraft}
+        onRetry={retryReportDraftSave}
+        onSaveCurrent={saveCurrentDraft}
+        persistence={reportDraftPersistence}
         snapshots={snapshotLibrary.snapshots}
       />
 
@@ -1244,10 +1164,19 @@ function PlanningSnapshotReportBuilder({
         reportNotes={reportNotes}
         reportTitle={reportTitle}
         sectionChecked={isSectionChecked}
-        setReportNotes={setReportNotes}
-        setReportTitle={setReportTitle}
+        setReportNotes={(value) => {
+          setReportNotes(value);
+          markReportDraftUnsaved();
+        }}
+        setReportTitle={(value) => {
+          setReportTitle(value);
+          markReportDraftUnsaved();
+        }}
         showExplanationCards={showExplanationCards}
-        toggleExplanationCards={toggleExplanationCards}
+        toggleExplanationCards={(show) => {
+          toggleExplanationCards(show);
+          markReportDraftUnsaved();
+        }}
       />
 
       <SnapshotExecutiveSummary
@@ -1346,6 +1275,7 @@ function ReportBuilderControls({
           Report title
           <input
             className="min-h-10 rounded-md border border-white/10 bg-black/24 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-white outline-none transition placeholder:text-slate-600 focus:border-[#68d8ff]/45"
+            data-testid="planning-report-draft-title"
             onChange={(event) => setReportTitle(event.target.value)}
             placeholder={DEFAULT_EXECUTIVE_REPORT_TITLE}
             type="text"
@@ -1356,6 +1286,7 @@ function ReportBuilderControls({
           Report notes
           <input
             className="min-h-10 rounded-md border border-white/10 bg-black/24 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none transition placeholder:text-slate-600 focus:border-[#68d8ff]/45"
+            data-testid="planning-report-draft-notes"
             onChange={(event) => setReportNotes(event.target.value)}
             placeholder="Optional staff note for the report"
             type="text"
@@ -1373,6 +1304,14 @@ function ReportBuilderControls({
             <input
               checked={sectionChecked(section.key)}
               className="h-3.5 w-3.5 accent-[#68d8ff]"
+              data-report-draft-section={section.key}
+              data-testid={
+                snapshotSectionKeys.has(
+                  section.key as PlanningSnapshotSectionKey,
+                )
+                  ? `planning-snapshot-section-${section.key}`
+                  : undefined
+              }
               onChange={(event) => onToggle(section.key, event.target.checked)}
               type="checkbox"
             />
@@ -1390,30 +1329,50 @@ function ReportBuilderControls({
 
 function ReportDraftsPanel({
   activeDraftId,
-  draftMessage,
+  canWrite,
   draftWarning,
   drafts,
+  legacyNotice,
+  onArchive,
   onCreate,
-  onDelete,
   onLoad,
+  onReload,
   onRename,
+  onRetry,
   onSaveCurrent,
+  persistence,
   snapshots,
 }: {
   activeDraftId: string | null;
-  draftMessage: string | null;
+  canWrite: boolean;
   draftWarning: string | null;
   drafts: PlanningSnapshotReportDraft[];
-  onCreate: () => void;
-  onDelete: (draftId: string) => void;
+  legacyNotice: string | null;
+  onArchive: (draftId: string) => Promise<boolean>;
+  onCreate: () => Promise<void>;
   onLoad: (draft: PlanningSnapshotReportDraft) => void;
-  onRename: (draft: PlanningSnapshotReportDraft) => void;
-  onSaveCurrent: () => void;
+  onReload: () => void;
+  onRename: (
+    draftId: string,
+    name: string,
+  ) => Promise<PlanningSnapshotReportDraft | null>;
+  onRetry: () => Promise<PlanningSnapshotReportDraft | boolean | null>;
+  onSaveCurrent: () => Promise<void>;
+  persistence: ReturnType<typeof usePlanningReportDrafts>["persistence"];
   snapshots: PlanningSnapshot[];
 }) {
+  const [archiveCandidateId, setArchiveCandidateId] = useState<string | null>(
+    null,
+  );
+  const [renameDraftId, setRenameDraftId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const busy =
+    persistence.status === "loading" || persistence.status === "saving";
+
   return (
     <section
       className="cfs-command-card app-chrome no-print rounded-lg p-3"
+      data-testid="planning-report-draft-library"
       id="cfs-report-drafts"
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -1426,13 +1385,17 @@ function ReportDraftsPanel({
           </h3>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">
             Drafts save the chosen snapshot, checked report sections, and
-            Explain the Numbers setting in local storage.
+            Explain the Numbers setting {persistence.sessionOnly
+              ? "for this browser session only."
+              : "in the Product V1 report service."}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <button
             className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
-            onClick={onCreate}
+            data-testid="planning-report-draft-new"
+            disabled={!canWrite || busy}
+            onClick={() => void onCreate()}
             type="button"
           >
             <FileText className="h-3.5 w-3.5" />
@@ -1440,7 +1403,9 @@ function ReportDraftsPanel({
           </button>
           <button
             className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/30 bg-[#d8b86a]/10 px-3 py-2 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/15"
-            onClick={onSaveCurrent}
+            data-testid="planning-report-draft-save"
+            disabled={!canWrite || busy}
+            onClick={() => void onSaveCurrent()}
             type="button"
           >
             <Save className="h-3.5 w-3.5" />
@@ -1449,9 +1414,54 @@ function ReportDraftsPanel({
         </div>
       </div>
 
-      {draftMessage ? (
-        <p className="mt-3 rounded-md border border-[#55d38f]/20 bg-[#55d38f]/[0.06] px-3 py-2 text-xs leading-5 text-[#a8f3c4]">
-          {draftMessage}
+      <div
+        aria-live="polite"
+        className="mt-3 rounded-md border border-white/10 bg-black/18 px-3 py-2 text-xs leading-5 text-slate-300"
+        data-record-id={activeDraftId ?? undefined}
+        data-request-id={persistence.requestId ?? undefined}
+        data-state={persistence.status}
+        data-testid="planning-report-draft-status"
+        role="status"
+      >
+        {persistence.message}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button
+          className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-200"
+          data-testid="planning-report-draft-reload"
+          disabled={busy || persistence.status === "unsaved"}
+          onClick={onReload}
+          type="button"
+        >
+          Reload Drafts
+        </button>
+        {persistence.status === "conflict" ||
+        persistence.status === "error" ||
+        persistence.status === "unavailable" ? (
+          <button
+            className="rounded-md border border-amber-300/25 bg-amber-300/[0.08] px-3 py-1.5 text-xs font-semibold text-amber-100"
+            data-testid="planning-report-draft-retry"
+            disabled={busy}
+            onClick={() => {
+              void onRetry().then((result) => {
+                if (result) {
+                  setArchiveCandidateId(null);
+                  setRenameDraftId(null);
+                }
+              });
+            }}
+            type="button"
+          >
+            Retry
+          </button>
+        ) : null}
+      </div>
+      {legacyNotice ? (
+        <p
+          className="mt-3 rounded-md border border-amber-300/20 bg-amber-300/[0.07] px-3 py-2 text-xs leading-5 text-amber-100"
+          data-testid="legacy-planning-report-draft-notice"
+        >
+          {legacyNotice}
         </p>
       ) : null}
       {draftWarning ? (
@@ -1474,6 +1484,8 @@ function ReportDraftsPanel({
                   "rounded-md border bg-white/[0.035] p-3",
                   active ? "border-[#68d8ff]/35" : "border-white/10",
                 )}
+                data-draft-id={draft.draftId}
+                data-testid="planning-report-draft-card"
                 key={draft.draftId}
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -1508,27 +1520,90 @@ function ReportDraftsPanel({
                     value={draft.explainNumbers ? "On" : "Off"}
                   />
                 </div>
+                {renameDraftId === draft.draftId ? (
+                  <form
+                    className="mt-3 flex gap-2"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void onRename(draft.draftId, renameValue).then(
+                        (renamed) => {
+                          if (renamed) setRenameDraftId(null);
+                        },
+                      );
+                    }}
+                  >
+                    <label className="sr-only" htmlFor={`report-draft-name-${draft.draftId}`}>
+                      Report draft name
+                    </label>
+                    <input
+                      autoFocus
+                      className="min-w-0 flex-1 rounded-md border border-white/10 bg-black/24 px-3 py-2 text-xs text-white outline-none focus:border-[#68d8ff]/45"
+                      data-testid="planning-report-draft-rename-input"
+                      disabled={busy}
+                      id={`report-draft-name-${draft.draftId}`}
+                      maxLength={240}
+                      onChange={(event) => setRenameValue(event.target.value)}
+                      value={renameValue}
+                    />
+                    <button
+                      className="rounded-md border border-[#55d38f]/25 bg-[#55d38f]/10 px-3 py-2 text-xs font-semibold text-[#a8f3c4]"
+                      data-testid="planning-report-draft-rename-save"
+                      disabled={busy || !renameValue.trim()}
+                      type="submit"
+                    >
+                      Save Name
+                    </button>
+                  </form>
+                ) : null}
                 <div className="mt-3 grid grid-cols-3 gap-2">
                   <button
                     className="rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
-                    onClick={() => onLoad(draft)}
+                    data-testid="planning-report-draft-load"
+                    disabled={busy}
+                    onClick={() => {
+                      setArchiveCandidateId(null);
+                      onLoad(draft);
+                    }}
                     type="button"
                   >
                     Load
                   </button>
                   <button
                     className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
-                    onClick={() => onRename(draft)}
+                    data-testid="planning-report-draft-rename"
+                    disabled={!canWrite || busy}
+                    onClick={() => {
+                      setArchiveCandidateId(null);
+                      setRenameDraftId(draft.draftId);
+                      setRenameValue(draft.draftName);
+                    }}
                     type="button"
                   >
                     Rename
                   </button>
                   <button
                     className="rounded-md border border-rose-300/18 bg-rose-400/[0.07] px-3 py-2 text-xs font-semibold text-rose-100 transition hover:bg-rose-400/[0.12]"
-                    onClick={() => onDelete(draft.draftId)}
+                    data-testid={
+                      archiveCandidateId === draft.draftId
+                        ? "planning-report-draft-archive-confirm"
+                        : "planning-report-draft-archive"
+                    }
+                    disabled={!canWrite || busy}
+                    onClick={() => {
+                      if (archiveCandidateId !== draft.draftId) {
+                        setRenameDraftId(null);
+                        setArchiveCandidateId(draft.draftId);
+                        return;
+                      }
+                      void onArchive(draft.draftId).then((archived) => {
+                        if (archived) setArchiveCandidateId(null);
+                      });
+                    }}
                     type="button"
                   >
-                    Delete
+                    {archiveCandidateId === draft.draftId
+                      ? "Confirm Archive"
+                      : "Archive"}
                   </button>
                 </div>
               </article>
@@ -1547,21 +1622,49 @@ function ReportDraftsPanel({
 
 interface PlanningSnapshotLibraryProps {
   activeSnapshotId: string | null;
-  onDelete: (snapshotId: string) => void;
+  canWrite: boolean;
+  hasUnsavedChanges: boolean;
+  legacyNotice: string | null;
+  onDelete: (snapshotId: string) => Promise<boolean>;
+  onReload: () => void;
   onRename: (snapshotId: string, snapshotTitle: string) => void;
+  onRetry: () => Promise<PlanningSnapshot | null>;
+  onSaveChanges: () => Promise<PlanningSnapshot | null>;
+  onSetNotes: (notes: string) => void;
   onUse: (snapshotId: string) => void;
+  onVersion: () => Promise<PlanningSnapshot | null>;
+  persistence: ReturnType<
+    typeof useDashboardState
+  >["planningSnapshotPersistence"];
   snapshots: PlanningSnapshot[];
 }
 
 function PlanningSnapshotLibraryPanel({
   activeSnapshotId,
+  canWrite,
+  hasUnsavedChanges,
+  legacyNotice,
   onDelete,
+  onReload,
   onRename,
+  onRetry,
+  onSaveChanges,
+  onSetNotes,
   onUse,
+  onVersion,
+  persistence,
   snapshots,
 }: PlanningSnapshotLibraryProps) {
+  const activeSnapshot = snapshots.find(
+    (snapshot) => snapshot.snapshotId === activeSnapshotId,
+  );
+  const busy = persistence.status === "loading" || persistence.status === "saving";
+
   return (
-    <section className="cfs-command-surface app-chrome no-print rounded-lg p-4">
+    <section
+      className="cfs-command-surface app-chrome no-print rounded-lg p-4"
+      data-testid="planning-snapshot-library"
+    >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fe7ff]">
@@ -1580,6 +1683,105 @@ function PlanningSnapshotLibraryPanel({
           tone={snapshots.length ? "info" : "neutral"}
         />
       </div>
+
+      <div
+        aria-live="polite"
+        className="mt-3 rounded-md border border-white/10 bg-black/18 px-3 py-2 text-xs leading-5 text-slate-300"
+        data-record-id={activeSnapshotId ?? undefined}
+        data-request-id={persistence.requestId ?? undefined}
+        data-state={persistence.status}
+        data-testid="planning-persistence-status"
+        role="status"
+      >
+        {persistence.message}
+      </div>
+
+      {legacyNotice ? (
+        <p
+          className="mt-3 rounded-md border border-amber-300/20 bg-amber-300/[0.07] px-3 py-2 text-xs leading-5 text-amber-100"
+          data-testid="legacy-planning-snapshot-notice"
+        >
+          {legacyNotice}
+        </p>
+      ) : null}
+
+      {activeSnapshot ? (
+        <div className="mt-4 grid gap-3 rounded-lg border border-[#68d8ff]/20 bg-[#68d8ff]/[0.045] p-3">
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="grid gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Snapshot title
+              <input
+                className="rounded-md border border-white/10 bg-black/24 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none focus:border-[#68d8ff]/45"
+                data-testid="planning-snapshot-title"
+                disabled={!canWrite || busy}
+                maxLength={240}
+                onChange={(event) =>
+                  onRename(activeSnapshot.snapshotId, event.target.value)
+                }
+                value={getSnapshotLibraryTitle(activeSnapshot)}
+              />
+            </label>
+            <label className="grid gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Staff notes
+              <input
+                className="rounded-md border border-white/10 bg-black/24 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none focus:border-[#68d8ff]/45"
+                data-testid="planning-snapshot-notes"
+                disabled={!canWrite || busy}
+                maxLength={4000}
+                onChange={(event) => onSetNotes(event.target.value)}
+                placeholder="Optional governed snapshot note"
+                value={activeSnapshot.notes ?? ""}
+              />
+            </label>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              className="rounded-md border border-[#55d38f]/25 bg-[#55d38f]/10 px-3 py-2 text-xs font-semibold text-[#a8f3c4] disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="planning-snapshot-save-changes"
+              disabled={!canWrite || busy || !hasUnsavedChanges}
+              onClick={() => void onSaveChanges()}
+              type="button"
+            >
+              Save Changes
+            </button>
+            <button
+              className="rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="planning-snapshot-create-version"
+              disabled={!canWrite || busy || hasUnsavedChanges}
+              onClick={() => void onVersion()}
+              type="button"
+            >
+              Create Version {activeSnapshot.currentVersion ?? 1}
+            </button>
+            <button
+              className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200"
+              data-testid="planning-snapshot-reload"
+              disabled={busy || hasUnsavedChanges}
+              onClick={onReload}
+              type="button"
+            >
+              Reload Library
+            </button>
+            {persistence.status === "conflict" ||
+            persistence.status === "error" ||
+            persistence.status === "unavailable" ? (
+              <button
+                className="rounded-md border border-amber-300/25 bg-amber-300/[0.08] px-3 py-2 text-xs font-semibold text-amber-100"
+                data-testid="planning-snapshot-retry"
+                disabled={busy}
+                onClick={() => void onRetry()}
+                type="button"
+              >
+                {persistence.status === "conflict" ? "Review Latest" : "Retry Save"}
+              </button>
+            ) : null}
+            <span className="text-xs text-slate-400">
+              Current version: {activeSnapshot.currentVersion ?? 1}
+              {persistence.sessionOnly ? " / session-only demo" : ""}
+            </span>
+          </div>
+        </div>
+      ) : null}
 
       {snapshots.length ? (
         <div className="mt-4 grid gap-3 xl:grid-cols-2">
@@ -1602,6 +1804,8 @@ function PlanningSnapshotLibraryPanel({
                     ? "border-[#68d8ff]/35 shadow-[0_0_24px_rgba(104,216,255,0.12)]"
                     : "border-white/10",
                 )}
+                data-snapshot-id={snapshot.snapshotId}
+                data-testid="planning-snapshot-card"
                 key={snapshot.snapshotId}
               >
                 <div className="grid gap-0 sm:grid-cols-[9.5rem_minmax(0,1fr)]">
@@ -1698,14 +1902,17 @@ function PlanningSnapshotLibraryPanel({
                     <div className="mt-3 grid grid-cols-3 gap-2">
                       <button
                         className="inline-flex items-center justify-center gap-2 rounded-md border border-[#68d8ff]/25 bg-[#68d8ff]/10 px-3 py-2 text-xs font-semibold text-[#b7f0ff] transition hover:bg-[#68d8ff]/15"
+                        data-testid="planning-snapshot-open"
                         onClick={() => onUse(snapshot.snapshotId)}
                         type="button"
                       >
                         <FileText className="h-3.5 w-3.5" />
-                        Use
+                        Open
                       </button>
                       <button
                         className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07]"
+                        data-testid="planning-snapshot-rename"
+                        disabled={!canWrite || busy}
                         onClick={() => {
                           const nextTitle = window.prompt(
                             "Rename this planning snapshot",
@@ -1721,18 +1928,22 @@ function PlanningSnapshotLibraryPanel({
                       </button>
                       <button
                         className="inline-flex items-center justify-center gap-2 rounded-md border border-rose-300/18 bg-rose-400/[0.07] px-3 py-2 text-xs font-semibold text-rose-100 transition hover:bg-rose-400/[0.12]"
+                        data-testid="planning-snapshot-archive"
+                        disabled={!canWrite || busy}
                         onClick={() => {
                           const shouldDelete = window.confirm(
-                            "Delete this planning snapshot? This only removes the saved local report snapshot.",
+                            persistence.sessionOnly
+                              ? "Archive this session-only planning snapshot?"
+                              : "Archive this planning snapshot in Product V1?",
                           );
                           if (shouldDelete) {
-                            onDelete(snapshot.snapshotId);
+                            void onDelete(snapshot.snapshotId);
                           }
                         }}
                         type="button"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                        Delete
+                        Archive
                       </button>
                     </div>
                   </div>
@@ -3366,7 +3577,8 @@ function buildExecutiveRecommendedActions(
 }
 
 function buildExecutiveCaveats(planningSnapshot: PlanningSnapshot): string[] {
-  return [
+  return [...new Set([
+    ...planningSnapshot.caveats,
     "Snapshot is a saved review context, not a new official record.",
     "FEMA NFHL remains authoritative for regulatory flood context.",
     "Utility proxy does not confirm capacity.",
@@ -3378,7 +3590,7 @@ function buildExecutiveCaveats(planningSnapshot: PlanningSnapshot): string[] {
     ...(planningSnapshot.indicatorCenterContext
       ? ["Indicator Center flags are monitoring indicators, not official determinations."]
       : []),
-  ].slice(0, 6);
+  ])].slice(0, 6);
 }
 
 function ReportMapSnapshotSection({
@@ -3757,27 +3969,33 @@ function ShieldIcon() {
 
 function ActionButton({
   active = false,
+  disabled = false,
   icon,
   label,
   onClick,
+  testId,
   variant = "default",
 }: {
   active?: boolean;
+  disabled?: boolean;
   icon: ReactNode;
   label: string;
   onClick: () => void;
+  testId?: string;
   variant?: "default" | "gold";
 }) {
   return (
     <button
       className={cn(
-        "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-semibold transition",
+        "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50",
         variant === "gold"
           ? "border-[#d8b86a]/35 bg-[#d8b86a]/10 text-[#f6d98e] hover:border-[#d8b86a]/55 hover:bg-[#d8b86a]/15"
           : active
             ? "border-[#68d8ff]/35 bg-[#68d8ff]/10 text-[#dff8ff] shadow-[0_0_22px_rgba(104,216,255,0.12)]"
             : "border-white/10 bg-white/[0.045] text-slate-200 hover:border-[#d8b86a]/35 hover:bg-[#d8b86a]/10 hover:text-[#f0cd79]",
       )}
+      data-testid={testId}
+      disabled={disabled}
       onClick={onClick}
       type="button"
     >

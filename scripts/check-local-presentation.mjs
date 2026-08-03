@@ -9,6 +9,7 @@ const checks = [
   ["Backend and frontend readiness", process.execPath, ["scripts/check-presentation.mjs"]],
   ["OpenAPI and deterministic Ask CFS", process.execPath, ["scripts/check-local-apis.mjs"]],
   ["Live and offline browser workflows", process.execPath, ["scripts/check-local-interactions.mjs"]],
+  ["Product frontend persistence", process.execPath, ["scripts/check-frontend-persistence.mjs"]],
 ];
 const results = [];
 

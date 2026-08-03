@@ -694,8 +694,8 @@ def test_ai_search_endpoint_returns_fast_fallback_when_intelligence_cache_empty(
     monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: None)
     monkeypatch.setattr(
         ai_search_router,
-        "get_indicator_intelligence",
-        lambda _db: (_ for _ in ()).throw(RuntimeError("cold db")),
+        "_fast_development_context",
+        lambda _db, _context: {"development_activity_detail": {"total_records": 18}},
     )
     try:
         response = TestClient(app).post(
@@ -716,12 +716,11 @@ def test_ai_search_endpoint_returns_fast_fallback_when_intelligence_cache_empty(
 def test_ai_search_context_cache_reuses_full_live_indicator_context(monkeypatch) -> None:
     calls = {"count": 0}
 
-    def fake_indicator_context(_db):
+    def fake_indicator_context():
         calls["count"] += 1
         return {"signals": [{"title": "Live indicator"}]}
 
-    monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: None)
-    monkeypatch.setattr(ai_search_router, "get_indicator_intelligence", fake_indicator_context)
+    monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", fake_indicator_context)
 
     first = ai_search_router.gather_cfs_ai_context(object())
     second = ai_search_router.gather_cfs_ai_context(object())
@@ -767,11 +766,6 @@ def test_ai_search_partial_indicator_context_is_not_cached(monkeypatch) -> None:
         return {"development_activity_detail": {"total_records": 18, "active_parcels": 7}}
 
     monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: None)
-    monkeypatch.setattr(
-        ai_search_router,
-        "get_indicator_intelligence",
-        lambda _db: (_ for _ in ()).throw(RuntimeError("cold db")),
-    )
     monkeypatch.setattr(ai_search_router, "_fast_development_context", fake_fast_context)
 
     first = ai_search_router.gather_cfs_ai_context(object())
@@ -1289,6 +1283,7 @@ def test_ai_search_economics_context_uses_cached_economics(monkeypatch) -> None:
         calls["count"] += 1
         return {"summary": {"source_mode": "live"}}
 
+    monkeypatch.setattr(ai_search_router, "get_cached_indicator_intelligence", lambda: {"signals": []})
     monkeypatch.setattr(ai_search_router, "get_cached_economics_intelligence", fake_cached_economics)
 
     request = CfsAiSearchRequest(app_mode="economics", query="How should I use CFS Economics?")

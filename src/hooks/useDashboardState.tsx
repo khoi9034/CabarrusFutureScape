@@ -20,6 +20,10 @@ import { useFloodConstraintLayer } from "@/hooks/useFloodConstraintLayer";
 import { useFloodZoneLayer } from "@/hooks/useFloodZoneLayer";
 import { useLayerVisibility } from "@/hooks/useLayerVisibility";
 import { useMapInteractionState } from "@/hooks/useMapInteractionState";
+import {
+  usePlanningSnapshotLibrary,
+  type PlanningSnapshotPersistenceState,
+} from "@/hooks/usePlanningSnapshotLibrary";
 import { useRoleState } from "@/hooks/useRoleState";
 import { useScenarioState } from "@/hooks/useScenarioState";
 import { useSchoolUtilizationZoneLayer } from "@/hooks/useSchoolUtilizationZoneLayer";
@@ -178,6 +182,10 @@ interface DashboardContextValue {
   planningSnapshot: PlanningSnapshot | null;
   savedPlanningSnapshots: PlanningSnapshot[];
   activePlanningSnapshotId: string | null;
+  planningSnapshotCanWrite: boolean;
+  planningSnapshotHasUnsavedChanges: boolean;
+  planningSnapshotLegacyNotice: string | null;
+  planningSnapshotPersistence: PlanningSnapshotPersistenceState;
   planningSnapshotView: PlanningSnapshotView;
   planningReviewFocusMode: PlanningReviewFocusMode;
   productMode: ProductMode;
@@ -221,12 +229,20 @@ interface DashboardContextValue {
   setParcelReviewView: (view: ParcelReviewView) => void;
   setPlanningSnapshotView: (view: PlanningSnapshotView) => void;
   setPlanningReviewFocusMode: (mode: PlanningReviewFocusMode) => void;
-  savePlanningSnapshot: (snapshot: PlanningSnapshot) => void;
+  savePlanningSnapshot: (
+    snapshot: PlanningSnapshot,
+  ) => Promise<PlanningSnapshot | null>;
   setActivePlanningSnapshot: (snapshotId: string) => void;
-  deletePlanningSnapshot: (snapshotId: string) => void;
+  deletePlanningSnapshot: (snapshotId: string) => Promise<boolean>;
   renamePlanningSnapshot: (snapshotId: string, snapshotTitle: string) => void;
-  clearPlanningSnapshot: () => void;
+  clearPlanningSnapshot: () => Promise<void>;
   clearPlanningSnapshots: () => void;
+  createPlanningSnapshotVersion: () => Promise<PlanningSnapshot | null>;
+  reloadActivePlanningSnapshot: () => void;
+  reloadPlanningSnapshots: () => void;
+  retryPlanningSnapshotSave: () => Promise<PlanningSnapshot | null>;
+  savePlanningSnapshotChanges: () => Promise<PlanningSnapshot | null>;
+  setPlanningSnapshotNotes: (notes: string) => void;
   setPlanningSnapshotSectionIncluded: (
     sectionKey: PlanningSnapshotSectionKey,
     included: boolean,
@@ -303,9 +319,6 @@ interface DashboardContextValue {
 }
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
-const PLANNING_SNAPSHOT_STORAGE_KEY = "cfs.planningSnapshot.phase22a.latest";
-const PLANNING_SNAPSHOT_LIBRARY_STORAGE_KEY =
-  "cfs.planningSnapshots.phase22e.library";
 const CFS_APP_MODE_STORAGE_KEY = "cfs.appMode.v1";
 const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS = [
   "cfs.overview.layout.v2",
@@ -313,7 +326,6 @@ const LEGACY_OVERVIEW_LAYOUT_STORAGE_KEYS = [
   "cfs.overview.customLayout.v2",
   "cfs.overview.customLayout.v1",
 ];
-const MAX_STORED_PLANNING_SNAPSHOTS = 8;
 
 function isCfsAppMode(value: unknown): value is CfsAppMode {
   return value === "planning" || value === "economics" || value === "consulting";
@@ -405,191 +417,6 @@ function clearLegacyOverviewLayoutStorage() {
   }
 }
 
-interface StoredPlanningSnapshotLibrary {
-  activeSnapshotId: string | null;
-  snapshots: PlanningSnapshot[];
-}
-
-function isSupportedPlanningSnapshot(
-  value: unknown,
-): value is PlanningSnapshot {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const snapshotVersion = (value as { snapshotVersion?: unknown })
-    .snapshotVersion;
-
-  return (
-    snapshotVersion === "phase22a_v1" ||
-    snapshotVersion === "phase22b_v1" ||
-    snapshotVersion === "phase22e_v1" ||
-    snapshotVersion === "phase23b_v1" ||
-    snapshotVersion === "phase23c_v1" ||
-    snapshotVersion === "phase23d_v1" ||
-    snapshotVersion === "phase23g_v1" ||
-    snapshotVersion === "phase26a_v1" ||
-    snapshotVersion === "phase27b_v1" ||
-    snapshotVersion === "phase28a_v1" ||
-    snapshotVersion === "phase28b_v1" ||
-    snapshotVersion === "phase28c_v1" ||
-    snapshotVersion === "phase28d_v1" ||
-    snapshotVersion === "phase28e_v1" ||
-    snapshotVersion === "phase28f_v1" ||
-    snapshotVersion === "phase28g_v1" ||
-    snapshotVersion === "phase28h_v1" ||
-    snapshotVersion === "phase28i_v1" ||
-    snapshotVersion === "phase28k_v1"
-  );
-}
-
-function readStoredPlanningSnapshot() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const storedSnapshot = window.localStorage.getItem(
-      PLANNING_SNAPSHOT_STORAGE_KEY,
-    );
-
-    if (!storedSnapshot) {
-      return null;
-    }
-
-    const parsedSnapshot = JSON.parse(storedSnapshot);
-
-    if (!isSupportedPlanningSnapshot(parsedSnapshot)) {
-      return null;
-    }
-
-    return parsedSnapshot;
-  } catch {
-    return null;
-  }
-}
-
-function normalizeSnapshotLibrary(
-  snapshots: PlanningSnapshot[],
-  activeSnapshotId: string | null,
-): StoredPlanningSnapshotLibrary {
-  const supportedSnapshots = snapshots
-    .filter(isSupportedPlanningSnapshot)
-    .filter((snapshot, index, allSnapshots) => {
-      const firstMatchingIndex = allSnapshots.findIndex(
-        (candidate) => candidate.snapshotId === snapshot.snapshotId,
-      );
-      return firstMatchingIndex === index;
-    })
-    .sort(
-      (left, right) =>
-        new Date(right.createdAt).getTime() -
-        new Date(left.createdAt).getTime(),
-    )
-    .slice(0, MAX_STORED_PLANNING_SNAPSHOTS);
-
-  const safeActiveSnapshotId =
-    activeSnapshotId &&
-    supportedSnapshots.some(
-      (snapshot) => snapshot.snapshotId === activeSnapshotId,
-    )
-      ? activeSnapshotId
-      : (supportedSnapshots[0]?.snapshotId ?? null);
-
-  return {
-    activeSnapshotId: safeActiveSnapshotId,
-    snapshots: supportedSnapshots,
-  };
-}
-
-function readStoredPlanningSnapshotLibrary(): StoredPlanningSnapshotLibrary {
-  if (typeof window === "undefined") {
-    return { activeSnapshotId: null, snapshots: [] };
-  }
-
-  try {
-    const storedLibrary = window.localStorage.getItem(
-      PLANNING_SNAPSHOT_LIBRARY_STORAGE_KEY,
-    );
-
-    if (storedLibrary) {
-      const parsedLibrary = JSON.parse(storedLibrary) as Partial<
-        StoredPlanningSnapshotLibrary
-      >;
-      return normalizeSnapshotLibrary(
-        Array.isArray(parsedLibrary.snapshots)
-          ? parsedLibrary.snapshots
-          : [],
-        parsedLibrary.activeSnapshotId ?? null,
-      );
-    }
-  } catch {
-    // Fall back to the legacy latest snapshot key below.
-  }
-
-  const legacySnapshot = readStoredPlanningSnapshot();
-
-  return normalizeSnapshotLibrary(
-    legacySnapshot ? [legacySnapshot] : [],
-    legacySnapshot?.snapshotId ?? null,
-  );
-}
-
-function writeStoredPlanningSnapshotLibrary(
-  snapshots: PlanningSnapshot[],
-  activeSnapshotId: string | null,
-) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    const normalizedLibrary = normalizeSnapshotLibrary(
-      snapshots,
-      activeSnapshotId,
-    );
-
-    if (!normalizedLibrary.snapshots.length) {
-      window.localStorage.removeItem(PLANNING_SNAPSHOT_LIBRARY_STORAGE_KEY);
-      writeStoredPlanningSnapshot(null);
-      return;
-    }
-
-    window.localStorage.setItem(
-      PLANNING_SNAPSHOT_LIBRARY_STORAGE_KEY,
-      JSON.stringify(normalizedLibrary),
-    );
-
-    const activeSnapshot = normalizedLibrary.snapshots.find(
-      (snapshot) =>
-        snapshot.snapshotId === normalizedLibrary.activeSnapshotId,
-    );
-    writeStoredPlanningSnapshot(activeSnapshot ?? null);
-  } catch {
-    // Local storage can be unavailable or full. Keep in-memory state working.
-  }
-}
-
-function writeStoredPlanningSnapshot(snapshot: PlanningSnapshot | null) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    if (!snapshot) {
-      window.localStorage.removeItem(PLANNING_SNAPSHOT_STORAGE_KEY);
-      return;
-    }
-
-    window.localStorage.setItem(
-      PLANNING_SNAPSHOT_STORAGE_KEY,
-      JSON.stringify(snapshot),
-    );
-  } catch {
-    // Local storage can be unavailable in hardened browser contexts.
-  }
-}
-
 export function DashboardProvider({ children, initialAppMode }: { children: ReactNode; initialAppMode?: CfsAppMode }) {
   const {
     activeLayerIds,
@@ -677,14 +504,28 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
   ] = useState<IndicatorCenterGroupId[]>(defaultIndicatorCenterGroupIds);
   const [parcelReviewView, setParcelReviewView] =
     useState<ParcelReviewView>("review");
-  const [planningSnapshot, setPlanningSnapshot] =
-    useState<PlanningSnapshot | null>(null);
-  const [savedPlanningSnapshots, setSavedPlanningSnapshots] = useState<
-    PlanningSnapshot[]
-  >([]);
-  const [activePlanningSnapshotId, setActivePlanningSnapshotId] = useState<
-    string | null
-  >(null);
+  const {
+    activePlanningSnapshotId,
+    clearPlanningSnapshot,
+    clearPlanningSnapshots,
+    createPlanningSnapshotVersion,
+    deletePlanningSnapshot,
+    planningSnapshot,
+    planningSnapshotCanWrite,
+    planningSnapshotHasUnsavedChanges,
+    planningSnapshotLegacyNotice,
+    planningSnapshotPersistence,
+    reloadActivePlanningSnapshot,
+    reloadPlanningSnapshots,
+    renamePlanningSnapshot,
+    retryPlanningSnapshotSave,
+    savePlanningSnapshot,
+    savePlanningSnapshotChanges,
+    savedPlanningSnapshots,
+    setActivePlanningSnapshot,
+    setPlanningSnapshotNotes,
+    setPlanningSnapshotSectionIncluded,
+  } = usePlanningSnapshotLibrary();
   const [planningSnapshotView, setPlanningSnapshotView] =
     useState<PlanningSnapshotView>("overview");
   const [planningReviewFocusMode, setPlanningReviewFocusMode] =
@@ -993,168 +834,6 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
     [updateOverviewLayoutPreference],
   );
 
-  useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
-      const storedLibrary = readStoredPlanningSnapshotLibrary();
-      const activeSnapshot =
-        storedLibrary.snapshots.find(
-          (snapshot) =>
-            snapshot.snapshotId === storedLibrary.activeSnapshotId,
-        ) ?? storedLibrary.snapshots[0] ?? null;
-
-      setSavedPlanningSnapshots(storedLibrary.snapshots);
-      setActivePlanningSnapshotId(activeSnapshot?.snapshotId ?? null);
-      setPlanningSnapshot(activeSnapshot);
-    });
-
-    return () => window.cancelAnimationFrame(frameId);
-  }, []);
-
-  const savePlanningSnapshot = useCallback((snapshot: PlanningSnapshot) => {
-    const versionedSnapshot: PlanningSnapshot = {
-      ...snapshot,
-      snapshotVersion: snapshot.snapshotVersion ?? "phase23g_v1",
-    };
-
-    setSavedPlanningSnapshots((currentSnapshots) => {
-      const nextSnapshots = normalizeSnapshotLibrary(
-        [
-          versionedSnapshot,
-          ...currentSnapshots.filter(
-            (currentSnapshot) =>
-              currentSnapshot.snapshotId !== versionedSnapshot.snapshotId,
-          ),
-        ],
-        versionedSnapshot.snapshotId,
-      ).snapshots;
-
-      writeStoredPlanningSnapshotLibrary(
-        nextSnapshots,
-        versionedSnapshot.snapshotId,
-      );
-      return nextSnapshots;
-    });
-    setActivePlanningSnapshotId(versionedSnapshot.snapshotId);
-    setPlanningSnapshot(versionedSnapshot);
-  }, []);
-
-  const setActivePlanningSnapshot = useCallback(
-    (snapshotId: string) => {
-      const selectedSnapshot = savedPlanningSnapshots.find(
-        (snapshot) => snapshot.snapshotId === snapshotId,
-      );
-
-      if (!selectedSnapshot) {
-        return;
-      }
-
-      setActivePlanningSnapshotId(snapshotId);
-      setPlanningSnapshot(selectedSnapshot);
-      writeStoredPlanningSnapshotLibrary(savedPlanningSnapshots, snapshotId);
-    },
-    [savedPlanningSnapshots],
-  );
-
-  const deletePlanningSnapshot = useCallback((snapshotId: string) => {
-    setSavedPlanningSnapshots((currentSnapshots) => {
-      const nextSnapshots = currentSnapshots.filter(
-        (snapshot) => snapshot.snapshotId !== snapshotId,
-      );
-      const nextActiveSnapshot = nextSnapshots[0] ?? null;
-
-      setActivePlanningSnapshotId(nextActiveSnapshot?.snapshotId ?? null);
-      setPlanningSnapshot((currentSnapshot) =>
-        currentSnapshot?.snapshotId === snapshotId
-          ? nextActiveSnapshot
-          : currentSnapshot,
-      );
-      writeStoredPlanningSnapshotLibrary(
-        nextSnapshots,
-        nextActiveSnapshot?.snapshotId ?? null,
-      );
-
-      return nextSnapshots;
-    });
-  }, []);
-
-  const renamePlanningSnapshot = useCallback(
-    (snapshotId: string, snapshotTitle: string) => {
-      const safeTitle = snapshotTitle.trim().slice(0, 80);
-
-      if (!safeTitle) {
-        return;
-      }
-
-      setSavedPlanningSnapshots((currentSnapshots) => {
-        const nextSnapshots = currentSnapshots.map((snapshot) =>
-          snapshot.snapshotId === snapshotId
-            ? { ...snapshot, snapshotTitle: safeTitle }
-            : snapshot,
-        );
-
-        setPlanningSnapshot((currentSnapshot) =>
-          currentSnapshot?.snapshotId === snapshotId
-            ? { ...currentSnapshot, snapshotTitle: safeTitle }
-            : currentSnapshot,
-        );
-        writeStoredPlanningSnapshotLibrary(nextSnapshots, activePlanningSnapshotId);
-        return nextSnapshots;
-      });
-    },
-    [activePlanningSnapshotId],
-  );
-
-  const clearPlanningSnapshot = useCallback(() => {
-    if (!activePlanningSnapshotId) {
-      setPlanningSnapshot(null);
-      writeStoredPlanningSnapshot(null);
-      return;
-    }
-
-    deletePlanningSnapshot(activePlanningSnapshotId);
-  }, [activePlanningSnapshotId, deletePlanningSnapshot]);
-
-  const clearPlanningSnapshots = useCallback(() => {
-    setSavedPlanningSnapshots([]);
-    setActivePlanningSnapshotId(null);
-    setPlanningSnapshot(null);
-    writeStoredPlanningSnapshotLibrary([], null);
-  }, []);
-
-  const setPlanningSnapshotSectionIncluded = useCallback(
-    (sectionKey: PlanningSnapshotSectionKey, included: boolean) => {
-      setPlanningSnapshot((currentSnapshot) => {
-        if (!currentSnapshot) {
-          return currentSnapshot;
-        }
-
-        const nextSnapshot = {
-          ...currentSnapshot,
-          includedSections: {
-            ...currentSnapshot.includedSections,
-            [sectionKey]: included,
-          },
-        };
-
-        setSavedPlanningSnapshots((currentSnapshots) => {
-          const nextSnapshots = currentSnapshots.map((snapshot) =>
-            snapshot.snapshotId === nextSnapshot.snapshotId
-              ? nextSnapshot
-              : snapshot,
-          );
-          writeStoredPlanningSnapshotLibrary(
-            nextSnapshots,
-            nextSnapshot.snapshotId,
-          );
-          return nextSnapshots;
-        });
-        writeStoredPlanningSnapshot(nextSnapshot);
-        return nextSnapshot;
-      });
-    },
-    [],
-  );
-
   const clearSelectedSchoolUtilizationZone = useCallback(() => {
     setSelectedSchoolUtilizationZone(null);
   }, []);
@@ -1254,6 +933,10 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       planningSnapshot,
       savedPlanningSnapshots,
       activePlanningSnapshotId,
+      planningSnapshotCanWrite,
+      planningSnapshotHasUnsavedChanges,
+      planningSnapshotLegacyNotice,
+      planningSnapshotPersistence,
       planningSnapshotView,
       planningReviewFocusMode,
       productMode,
@@ -1322,6 +1005,12 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       renamePlanningSnapshot,
       clearPlanningSnapshot,
       clearPlanningSnapshots,
+      createPlanningSnapshotVersion,
+      reloadActivePlanningSnapshot,
+      reloadPlanningSnapshots,
+      retryPlanningSnapshotSave,
+      savePlanningSnapshotChanges,
+      setPlanningSnapshotNotes,
       setPlanningSnapshotSectionIncluded,
       setProductMode,
       setReportIntent,
@@ -1396,6 +1085,10 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       planningSnapshot,
       savedPlanningSnapshots,
       activePlanningSnapshotId,
+      planningSnapshotCanWrite,
+      planningSnapshotHasUnsavedChanges,
+      planningSnapshotLegacyNotice,
+      planningSnapshotPersistence,
       planningSnapshotView,
       planningReviewFocusMode,
       productMode,
@@ -1463,6 +1156,12 @@ export function DashboardProvider({ children, initialAppMode }: { children: Reac
       renamePlanningSnapshot,
       clearPlanningSnapshot,
       clearPlanningSnapshots,
+      createPlanningSnapshotVersion,
+      reloadActivePlanningSnapshot,
+      reloadPlanningSnapshots,
+      retryPlanningSnapshotSave,
+      savePlanningSnapshotChanges,
+      setPlanningSnapshotNotes,
       setPlanningSnapshotSectionIncluded,
       setProductMode,
       setReportIntent,

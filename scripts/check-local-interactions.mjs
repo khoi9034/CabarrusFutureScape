@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { existsSync, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -329,9 +330,14 @@ async function planningWorkflow(page) {
     await page.getByRole("button", { name: /Workspace:/ }).click();
     await page.getByRole("button", { name: "Save Planning Snapshot" }).click();
     await page.getByRole("button", { name: /Planning Snapshot:/ }).click();
-    await page.getByText("Planning Snapshot Library", { exact: true }).waitFor();
+    const library = page.getByTestId("planning-snapshot-library");
+    await library.getByText("Planning Snapshot Library", { exact: true }).waitFor();
     page.once("dialog", (dialog) => dialog.accept());
-    await page.getByRole("button", { name: "Delete", exact: true }).first().click();
+    await library.getByRole("button", { name: "Archive", exact: true }).first().click();
+    await library
+      .getByTestId("planning-persistence-status")
+      .filter({ hasText: "Planning Snapshot archived." })
+      .waitFor();
   });
 
   await page.reload({ waitUntil: "domcontentloaded" });
@@ -707,6 +713,13 @@ async function degradedDataChecks(browser) {
 }
 
 async function main() {
+  const architecture = spawnSync(process.execPath, ["scripts/check-enterprise-frontend.mjs"], {
+    cwd: ROOT,
+    env: process.env,
+    stdio: "inherit",
+  });
+  assert.equal(architecture.status, 0, "Product V1 frontend persistence architecture check failed.");
+  report.product_persistence_architecture = "PASS";
   await waitForStack();
   const browser = await chromium.launch({
     executablePath: browserExecutable(),

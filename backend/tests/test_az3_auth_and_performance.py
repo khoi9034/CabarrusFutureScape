@@ -266,6 +266,7 @@ def test_entra_middleware_keeps_health_public_and_protects_root(monkeypatch) -> 
 def test_frontend_entra_gate_uses_msal_without_public_secrets() -> None:
     gate = (ROOT / "src" / "components" / "auth" / "EntraAuthGate.tsx").read_text(encoding="utf-8")
     config = (ROOT / "src" / "lib" / "auth" / "entra.ts").read_text(encoding="utf-8")
+    request_boundary = (ROOT / "src" / "lib" / "auth" / "requestBoundary.mjs").read_text(encoding="utf-8")
     package = (ROOT / "package.json").read_text(encoding="utf-8")
 
     assert "@azure/msal-browser" in package
@@ -273,6 +274,10 @@ def test_frontend_entra_gate_uses_msal_without_public_secrets() -> None:
     assert "acquireTokenSilent" in gate
     assert "forceRefresh" in gate
     assert "Authorization" in gate
+    assert "startsWith(CFS_API_BASE_URL)" not in gate
+    assert "isCfsApiUrl(url, CFS_API_BASE_URL)" in gate
+    assert "requestUrl.origin === apiUrl.origin" in request_boundary
+    assert "requestUrl.pathname.startsWith(`${basePath}/`)" in request_boundary
     assert "localStorage" not in gate + config
     assert "NEXT_PUBLIC_CFS_ENTRA_CLIENT_ID" in config
     assert "NEXT_PUBLIC_CFS_ENTRA_API_SCOPE" in config

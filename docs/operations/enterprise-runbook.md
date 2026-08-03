@@ -25,14 +25,16 @@ For the established PostGIS-backed development product, use the existing owned
 process scripts and readiness checks:
 
 ```powershell
-npm run present:cfs
-npm run check:local-data
-npm run check:local-apis
-npm run check:local-interactions
-npm run check:local-presentation
+npm.cmd run stop:cfs
+npm.cmd run present:cfs
+npm.cmd run check:local-data
+npm.cmd run check:local-apis
+npm.cmd run check:local-interactions
+npm.cmd run check:local-presentation
+npm.cmd run check:frontend-persistence
 ```
 
-Stop only application-owned processes with `npm run stop:cfs`. Logs written by
+Stop only application-owned processes with `npm.cmd run stop:cfs`. Logs written by
 these scripts are local ignored diagnostics and must not be committed.
 
 ## Enterprise-local containers
@@ -42,7 +44,7 @@ isolated/local PostGIS target, then:
 
 ```powershell
 docker compose -f docker-compose.enterprise-local.yml config
-npm run check:containers
+npm.cmd run check:containers
 docker compose -f docker-compose.enterprise-local.yml build
 docker compose -f docker-compose.enterprise-local.yml run --rm api python migrations/manage.py upgrade
 docker compose -f docker-compose.enterprise-local.yml up
@@ -56,18 +58,18 @@ service until database connectivity and Product V1 migration status are valid.
 ## Migration procedure
 
 ```powershell
-npm run db:status
-npm run db:check
-npm run db:migrate
-npm run db:status
+npm.cmd run db:status
+npm.cmd run db:check
+npm.cmd run db:migrate
+npm.cmd run db:status
 ```
 
 Inspect the applied revision and Product V1 tables. If the newest Product V1
 revision must be reversed and its documented downgrade is safe:
 
 ```powershell
-npm run db:rollback-one
-npm run db:status
+npm.cmd run db:rollback-one
+npm.cmd run db:status
 ```
 
 Do not use rollback as a substitute for a verified hosted restore plan.
@@ -109,12 +111,40 @@ release, the owner must define retention, encryption, access, point-in-time
 recovery, artifact backup, and restore testing. A backup claim is not accepted
 until a restore into an isolated target is timed and validated.
 
+## Frontend persistence acceptance
+
+`check:frontend-persistence` is defined to drive the actual Planning, Economics,
+Investments Report Bucket, and Ask CFS interfaces. A successful run must observe
+the resulting Product API requests, refresh and reopen disposable records, check
+audit history, archive them through supported routes, and verify cleanup. Direct
+API persistence tests are lower-level coverage and do not substitute for this
+browser check. Run it only against the owned local presentation stack and its
+disposable local Product V1 data. The command list above is an operator procedure,
+not evidence that a particular branch or commit passed it.
+
+Demo acceptance blocks the backend and confirms session behavior without
+Product V1 writes. Local/Enterprise API failures must remain visibly unsaved;
+do not diagnose them by enabling a browser-storage fallback.
+
 ## Soak
 
 The release soak runs at least 45 minutes against disposable Product V1 records,
-exercises Planning/Economics/Investments/Ask CFS/Power BI/map/roles/audit/dry-run/
-artifact downloads, restarts owned services, cleans up, and compares canonical
-hashes before and after. Short diagnostic runs do not satisfy release soak.
+includes the browser persistence command as an acceptance round, exercises
+Planning/Economics/Investments/Ask CFS/Power BI/map/roles/audit/dry-run/artifact
+downloads, restarts owned services, cleans up, and compares canonical hashes
+before and after. Short diagnostic runs do not satisfy release soak.
+
+Run the release-duration soak explicitly from a stopped owned stack:
+
+```powershell
+npm.cmd run stop:cfs
+$env:CFS_PRODUCT_V1_SOAK_SECONDS = "2700"
+Remove-Item Env:CFS_ALLOW_SHORT_SOAK -ErrorAction SilentlyContinue
+npm.cmd run check:product-v1-soak
+```
+
+Only the command's current final result is evidence for that HEAD. A prior report
+or a run with `CFS_ALLOW_SHORT_SOAK=true` is not release evidence.
 
 ## Escalation
 

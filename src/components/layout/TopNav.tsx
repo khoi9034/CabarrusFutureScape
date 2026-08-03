@@ -27,6 +27,7 @@ import {
 import { CommandPalette } from "@/components/dashboard/CommandPalette";
 import type { ParcelSearchRecord } from "@/data/intelligence/parcelSearchData";
 import { useDashboardState } from "@/hooks/useDashboardState";
+import { useProductPrincipal } from "@/hooks/useProductPrincipal";
 import {
   normalizeBackendParcelDetailResponse,
   normalizeBackendParcelMapFocusResponse,
@@ -177,6 +178,7 @@ export function TopNav() {
     setSelectedParcelIntelligence,
     viewMode,
   } = useDashboardState();
+  const productPrincipal = useProductPrincipal();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [modeMenuOpen, setModeMenuOpen] = useState(false);
@@ -1060,11 +1062,52 @@ export function TopNav() {
               {USE_BACKEND_API && !USE_DEMO_DATA ? (
                 <LocalRuntimeStatusPanel status={localRuntime} />
               ) : null}
+              <ProductPrincipalStatusPanel value={productPrincipal} />
             </div>
           ) : null}
         </div>
       </header>
     </>
+  );
+}
+
+function ProductPrincipalStatusPanel({
+  value,
+}: {
+  value: ReturnType<typeof useProductPrincipal>;
+}) {
+  const identity = USE_DEMO_DATA
+    ? "Session-only demo"
+    : value.principal?.subject ?? "Principal unavailable";
+  const roles = value.principal?.roles.join(", ") || "No role loaded";
+  return (
+    <section
+      aria-live="polite"
+      className="mt-3 rounded-lg border border-white/10 bg-white/[0.035] p-3 text-xs"
+      data-status={value.status}
+      data-testid="product-principal-status"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-semibold text-slate-200">Product persistence</span>
+        <span className="text-right text-[#9be9ff]">
+          {value.status === "loading" ? "Checking…" : USE_DEMO_DATA ? "Browser session" : "Server-backed"}
+        </span>
+      </div>
+      <p className="mt-2 text-slate-300">{identity}</p>
+      <p className="mt-1 text-slate-500">{roles}</p>
+      {value.error ? (
+        <div className="mt-2 flex items-center justify-between gap-3 text-rose-200">
+          <span>{value.error}</span>
+          <button
+            className="rounded border border-rose-200/30 px-2 py-1 font-semibold"
+            onClick={value.reload}
+            type="button"
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
+    </section>
   );
 }
 

@@ -14,6 +14,7 @@ import { AskCfsPanel, type AskCfsExternalRequest } from "@/components/dashboard/
 import { InvestmentCaseStudies, type InitialCaseStudyUrlState } from "@/components/investment/InvestmentCaseStudies";
 import { InvestmentShell, investmentPages, type InvestmentPageId } from "@/components/investment/InvestmentShell";
 import { useDashboardState } from "@/hooks/useDashboardState";
+import { useProductPrincipal } from "@/hooks/useProductPrincipal";
 import {
   askCfsEconomicsPowerBiToolPrompts,
   askCfsEconomicsPrintPrompts,
@@ -25,6 +26,17 @@ import {
   recordTechnicalEvent,
   USE_DEMO_DATA,
 } from "@/lib/api/client";
+import { ProductApiError, toProductApiError } from "@/lib/product/apiClient";
+import { toJsonObject } from "@/lib/product/json";
+import {
+  getEconomicScenarioRepository,
+  getReportBucketRepository,
+} from "@/lib/product/runtimeRepository";
+import type {
+  EconomicScenarioRecord,
+  JsonValue,
+  ReportBucketItemRecord,
+} from "@/lib/product/types";
 import { packageBackedConsultingCaseStudy } from "@/lib/consultingCaseStudyPackage";
 import {
   getEconomicsEnterpriseExport,
@@ -119,7 +131,8 @@ type EconomicsShellProps = {
 };
 
 const defaultConsultingCaseStudy = packageBackedConsultingCaseStudy;
-const REPORT_BUCKET_SESSION_KEY = "cfs-report-bucket:v1";
+const economicScenarioRepository = getEconomicScenarioRepository();
+const reportBucketRepository = getReportBucketRepository();
 
 export function EconomicsShell({
   initialCaseStudyUrlState,
@@ -133,6 +146,13 @@ export function EconomicsShell({
     setCfsAppMode,
     setEconomicsSection,
   } = useDashboardState();
+  const {
+    can,
+    error: principalError,
+    reload: reloadPrincipal,
+    requestId: principalRequestId,
+    status: principalStatus,
+  } = useProductPrincipal();
   const consultingMode = mode === "consulting";
   const [intelligence, setIntelligence] =
     useState<EconomicsIntelligenceResponse | null>(null);
@@ -143,37 +163,86 @@ export function EconomicsShell({
   const [error, setError] = useState<string | null>(null);
   const [selectedSignalIds, setSelectedSignalIds] = useState<string[]>([]);
   const [reportBucketItems, setReportBucketItems] = useState<ReportBucketItem[]>([]);
-  const [reportBucketReady, setReportBucketReady] = useState(false);
+  const [reportBucketAttempt, setReportBucketAttempt] = useState(0);
+  const [reportBucketBusy, setReportBucketBusy] = useState(false);
+  const [reportBucketError, setReportBucketError] = useState<string | null>(null);
+  const [reportBucketRequestId, setReportBucketRequestId] = useState<string | null>(null);
+  const [reportBucketStatus, setReportBucketStatus] = useState<string | null>(null);
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const canWriteReportBucket =
+    reportBucketRepository.provider === "demo" || can("reports:write");
+  const reportBucketMutationsDisabled =
+    !canWriteReportBucket || reportBucketBusy;
 
   useEffect(() => {
-    let storedItems: ReportBucketItem[] = [];
-    try {
-      const stored: unknown = JSON.parse(
-        window.sessionStorage.getItem(REPORT_BUCKET_SESSION_KEY) ?? "[]",
+    if (reportBucketRepository.provider === "api" && principalStatus === "loading") {
+      const timeout = window.setTimeout(
+        () => setReportBucketStatus("Loading Report Bucket access..."),
+        0,
       );
-      if (Array.isArray(stored)) storedItems = stored as ReportBucketItem[];
-    } catch {
-      window.sessionStorage.removeItem(REPORT_BUCKET_SESSION_KEY);
+      return () => window.clearTimeout(timeout);
     }
-    const timeoutId = window.setTimeout(() => {
-      setReportBucketItems(storedItems);
-      setReportBucketReady(true);
-    }, 0);
-    return () => window.clearTimeout(timeoutId);
-  }, []);
-
-  useEffect(() => {
-    if (!reportBucketReady) return;
-    if (reportBucketItems.length) {
-      window.sessionStorage.setItem(
-        REPORT_BUCKET_SESSION_KEY,
-        JSON.stringify(reportBucketItems),
-      );
-    } else {
-      window.sessionStorage.removeItem(REPORT_BUCKET_SESSION_KEY);
+    if (reportBucketRepository.provider === "api" && principalStatus === "error") {
+      const timeout = window.setTimeout(() => {
+        setReportBucketError(principalError ?? "Product access could not be verified.");
+        setReportBucketStatus(null);
+      }, 0);
+      return () => window.clearTimeout(timeout);
     }
-  }, [reportBucketItems, reportBucketReady]);
+    const controller = new AbortController();
+    queueMicrotask(() => {
+      if (controller.signal.aborted) return;
+      setReportBucketBusy(true);
+      setReportBucketError(null);
+      setReportBucketStatus("Loading Report Bucket...");
+    });
+    void reportBucketRepository
+      .list({ pageSize: 100, signal: controller.signal })
+      .then(async (result) => {
+        if (controller.signal.aborted) return;
+        setReportBucketRequestId(result.requestId);
+        const records = [...result.data];
+        const total = result.pagination?.total ?? records.length;
+        const pageSize = result.pagination?.pageSize ?? 100;
+        for (let page = 2; records.length < total; page += 1) {
+          const next = await reportBucketRepository.list({
+            page,
+            pageSize,
+            signal: controller.signal,
+          });
+          records.push(...next.data);
+          setReportBucketRequestId(next.requestId);
+          if (!next.data.length) break;
+        }
+        if (controller.signal.aborted) return;
+        setReportBucketItems(
+          records.map((record) => reportBucketItemFromRecord(record)),
+        );
+        setReportBucketStatus(
+          reportBucketRepository.provider === "demo"
+            ? "Report Bucket is saved only for this demo session."
+            : canWriteReportBucket
+              ? "Report Bucket loaded from CFS."
+              : "Report Bucket is read-only for your role.",
+        );
+      })
+      .catch((caught: unknown) => {
+        if (controller.signal.aborted) return;
+        const failure = productErrorDetails(caught);
+        setReportBucketError(failure.message);
+        setReportBucketRequestId(failure.requestId);
+        setReportBucketStatus(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setReportBucketBusy(false);
+      });
+    return () => controller.abort();
+  }, [
+    canWriteReportBucket,
+    principalError,
+    principalStatus,
+    reportBucketAttempt,
+  ]);
 
   useEffect(() => {
     if (consultingMode) {
@@ -255,40 +324,183 @@ export function EconomicsShell({
         : [...current, signal.parcel_id],
     );
   };
-  const addReportBucketItem = (item: ReportBucketItemInput) => {
+  const addReportBucketItem = async (item: ReportBucketItemInput): Promise<boolean> => {
     const bucketItem: ReportBucketItem = {
       ...item,
       created_at: item.created_at ?? new Date().toISOString(),
       selected_for_print: item.selected_for_print ?? true,
     };
-    setReportBucketItems((current) =>
-      current.some(
+    if (
+      reportBucketItems.some(
         (existing) =>
           existing.id === bucketItem.id ||
           (existing.title === bucketItem.title &&
             existing.type === bucketItem.type &&
             existing.content === bucketItem.content),
       )
-        ? current
-        : [bucketItem, ...current],
-    );
+    ) {
+      setReportBucketStatus("That item is already in the Report Bucket.");
+      return true;
+    }
+    if (!canWriteReportBucket || reportBucketBusy) {
+      setReportBucketError(
+        reportBucketBusy
+          ? "Another Report Bucket change is still saving."
+          : "Your role cannot add Report Bucket items.",
+      );
+      return false;
+    }
+    setReportBucketBusy(true);
+    setReportBucketError(null);
+    setReportBucketStatus("Saving Report Bucket item...");
+    try {
+      const result = await reportBucketRepository.create(
+        reportBucketCreateInput(bucketItem, reportBucketItems.length),
+      );
+      setReportBucketRequestId(result.requestId);
+      setReportBucketItems((current) => [
+        reportBucketItemFromRecord(result.data, bucketItem),
+        ...current,
+      ]);
+      setReportBucketStatus(
+        reportBucketRepository.provider === "demo"
+          ? "Saved in this demo session."
+          : "Saved to CFS Report Bucket.",
+      );
+      return true;
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setReportBucketError(failure.message);
+      setReportBucketRequestId(failure.requestId);
+      setReportBucketStatus(null);
+      return false;
+    } finally {
+      setReportBucketBusy(false);
+    }
   };
-  const removeReportBucketItem = (id: string) => {
-    setReportBucketItems((current) => current.filter((item) => item.id !== id));
+  const removeReportBucketItem = async (id: string) => {
+    const item = reportBucketItems.find((candidate) => candidate.id === id);
+    if (!item?.server_id || !canWriteReportBucket || reportBucketBusy) return;
+    setReportBucketBusy(true);
+    setReportBucketError(null);
+    setReportBucketStatus("Removing Report Bucket item...");
+    try {
+      const result = await reportBucketRepository.archive(item.server_id);
+      setReportBucketRequestId(result.requestId);
+      setReportBucketItems((current) => current.filter((candidate) => candidate.id !== id));
+      setReportBucketStatus("Report Bucket item removed.");
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setReportBucketError(failure.message);
+      setReportBucketRequestId(failure.requestId);
+      setReportBucketStatus(null);
+    } finally {
+      setReportBucketBusy(false);
+    }
   };
-  const toggleReportBucketPrint = (id: string) => {
-    setReportBucketItems((current) =>
-      current.map((item) =>
-        item.id === id
-          ? { ...item, selected_for_print: !item.selected_for_print }
-          : item,
-      ),
-    );
+  const toggleReportBucketPrint = async (id: string) => {
+    const item = reportBucketItems.find((candidate) => candidate.id === id);
+    if (!item?.server_id || !canWriteReportBucket || reportBucketBusy) return;
+    setReportBucketBusy(true);
+    setReportBucketError(null);
+    setReportBucketStatus("Updating Print selection...");
+    try {
+      const result = await reportBucketRepository.update(
+        item.server_id,
+        { include_in_print: !item.selected_for_print },
+        { expectedUpdatedAt: item.updated_at },
+      );
+      setReportBucketRequestId(result.requestId);
+      const updated = reportBucketItemFromRecord(result.data, item);
+      setReportBucketItems((current) =>
+        current.map((candidate) => (candidate.id === id ? updated : candidate)),
+      );
+      setReportBucketStatus("Print selection saved.");
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setReportBucketError(failure.message);
+      setReportBucketRequestId(failure.requestId);
+      setReportBucketStatus(null);
+    } finally {
+      setReportBucketBusy(false);
+    }
   };
-  const setAllReportBucketPrint = (selected: boolean) => {
-    setReportBucketItems((current) =>
-      current.map((item) => ({ ...item, selected_for_print: selected })),
-    );
+  const setAllReportBucketPrint = async (selected: boolean) => {
+    if (!canWriteReportBucket || reportBucketBusy) return;
+    setReportBucketBusy(true);
+    setReportBucketError(null);
+    setReportBucketStatus("Updating Print selections...");
+    try {
+      const results = await Promise.all(
+        reportBucketItems.map((item) =>
+          item.server_id
+            ? reportBucketRepository.update(
+                item.server_id,
+                { include_in_print: selected },
+                { expectedUpdatedAt: item.updated_at },
+              )
+            : Promise.resolve(null),
+        ),
+      );
+      const records = new Map(
+        results
+          .filter((result): result is NonNullable<typeof result> => Boolean(result))
+          .map((result) => [
+            result.data.object_id,
+            reportBucketItemFromRecord(
+              result.data,
+              reportBucketItems.find((item) => item.id === result.data.object_id),
+            ),
+          ]),
+      );
+      setReportBucketRequestId(
+        results.find((result): result is NonNullable<typeof result> => Boolean(result))?.requestId ?? null,
+      );
+      setReportBucketItems((current) =>
+        current.map((item) => records.get(item.id) ?? item),
+      );
+      setReportBucketStatus("Print selections saved.");
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setReportBucketError(failure.message);
+      setReportBucketRequestId(failure.requestId);
+      setReportBucketStatus(null);
+      setReportBucketAttempt((current) => current + 1);
+    } finally {
+      setReportBucketBusy(false);
+    }
+  };
+  const clearReportBucket = async () => {
+    if (!canWriteReportBucket || reportBucketBusy) return;
+    setReportBucketBusy(true);
+    setReportBucketError(null);
+    setReportBucketStatus("Clearing Report Bucket...");
+    try {
+      const results = await Promise.all(
+        reportBucketItems.map((item) =>
+          item.server_id
+            ? reportBucketRepository.archive(item.server_id)
+            : Promise.resolve(null),
+        ),
+      );
+      setReportBucketRequestId(
+        results.find((result): result is NonNullable<typeof result> => Boolean(result))?.requestId ?? null,
+      );
+      setReportBucketItems([]);
+      setReportBucketStatus("Report Bucket cleared.");
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setReportBucketError(failure.message);
+      setReportBucketRequestId(failure.requestId);
+      setReportBucketStatus(null);
+      setReportBucketAttempt((current) => current + 1);
+    } finally {
+      setReportBucketBusy(false);
+    }
+  };
+  const retryReportBucket = () => {
+    if (principalStatus === "error") reloadPrincipal();
+    setReportBucketAttempt((current) => current + 1);
   };
   const activeEconomicsSection =
     economicsSection === "overview"
@@ -311,7 +523,7 @@ export function EconomicsShell({
       <main className="consult-shell relative z-10 flex min-h-0 flex-1 overflow-hidden">
         <InvestmentPanelPage
           onAddReportBucketItem={addReportBucketItem}
-          onClearReportBucket={() => setReportBucketItems([])}
+          onClearReportBucket={clearReportBucket}
           onClearSelection={() => setSelectedSignalIds([])}
           onNavigate={openEconomicsFromConsulting}
           onRemoveReportBucketItem={removeReportBucketItem}
@@ -320,10 +532,20 @@ export function EconomicsShell({
           initialCaseStudyUrlState={initialCaseStudyUrlState}
           initialInvestmentPage={initialInvestmentPage}
           reportBucketItems={reportBucketItems}
+          reportBucketMutationsDisabled={reportBucketMutationsDisabled}
           selectedSignalIds={selectedSignalIds}
           signals={signals}
           statusLabel={consultingAuthStatus}
         />
+        <div className="pointer-events-none absolute bottom-4 right-4 z-50 max-w-md [&_button]:pointer-events-auto">
+          <ProductPersistenceNotice
+            error={reportBucketError}
+            requestId={reportBucketRequestId ?? principalRequestId}
+            status={reportBucketStatus}
+            testId="report-bucket-status"
+            onRetry={retryReportBucket}
+          />
+        </div>
       </main>
     );
   }
@@ -334,6 +556,13 @@ export function EconomicsShell({
         <div className="no-print flex justify-end">
           <EconomicsTutorialButton onClick={() => setTutorialOpen(true)} />
         </div>
+        <ProductPersistenceNotice
+          error={reportBucketError}
+          requestId={reportBucketRequestId ?? principalRequestId}
+          status={reportBucketStatus}
+          testId="report-bucket-status"
+          onRetry={retryReportBucket}
+        />
         {error ? (
           <div className="rounded-xl border border-[var(--econ-risk)]/30 bg-[var(--econ-risk)]/10 px-4 py-3 text-sm text-[#ffd1c2]">
             Local economics data is unavailable. Confirm FastAPI is running at
@@ -355,7 +584,7 @@ export function EconomicsShell({
             inputs={intelligence?.scenario_inputs ?? []}
             onClearSelection={() => setSelectedSignalIds([])}
             onAddReportBucketItem={addReportBucketItem}
-            onClearReportBucket={() => setReportBucketItems([])}
+            onClearReportBucket={clearReportBucket}
             onNavigate={setEconomicsSection}
             onRemoveReportBucketItem={removeReportBucketItem}
             onStartTutorial={() => setTutorialOpen(true)}
@@ -364,6 +593,7 @@ export function EconomicsShell({
             outputs={intelligence?.scenario_outputs ?? []}
             powerBiPayload={powerBiExport}
             reportBucketItems={reportBucketItems}
+            reportBucketMutationsDisabled={reportBucketMutationsDisabled}
             scenarioOutputs={intelligence?.scenario_outputs ?? []}
             scenarios={intelligence?.scenario_templates ?? []}
             selectedSignalIds={selectedSignalIds}
@@ -384,12 +614,13 @@ export function EconomicsShell({
         {activeEconomicsSection === "print" ? (
           <EconomicsPrintPage
             intelligence={intelligence}
-            onClearReportBucket={() => setReportBucketItems([])}
+            onClearReportBucket={clearReportBucket}
             onNavigate={setEconomicsSection}
             onRemoveReportBucketItem={removeReportBucketItem}
             onSetAllReportBucketPrint={setAllReportBucketPrint}
             onToggleReportBucketPrint={toggleReportBucketPrint}
             reportBucketItems={reportBucketItems}
+            reportBucketMutationsDisabled={reportBucketMutationsDisabled}
             selectedSignals={selectedSignals}
           />
         ) : null}
@@ -403,6 +634,46 @@ export function EconomicsShell({
         ) : null}
       </div>
     </main>
+  );
+}
+
+function ProductPersistenceNotice({
+  error,
+  onRetry,
+  requestId,
+  status,
+  testId,
+}: {
+  error: string | null;
+  onRetry: () => void;
+  requestId: string | null;
+  status: string | null;
+  testId: string;
+}) {
+  if (!error && !status) return null;
+  return (
+    <div
+      aria-live="polite"
+      className={`no-print rounded-xl border px-3 py-2 text-xs ${
+        error
+          ? "border-[var(--econ-risk)]/30 bg-[var(--econ-risk)]/10 text-[#ffd1c2]"
+          : "border-[var(--econ-green)]/30 bg-[var(--econ-green)]/10 text-[var(--econ-green)]"
+      }`}
+      data-request-id={requestId ?? undefined}
+      data-testid={testId}
+      role="status"
+    >
+      <span>{error ?? status}</span>
+      {error ? (
+        <button
+          className="ml-2 font-semibold underline underline-offset-4"
+          onClick={onRetry}
+          type="button"
+        >
+          Retry
+        </button>
+      ) : null}
+    </div>
   );
 }
 
@@ -730,6 +1001,7 @@ function PowerBiToolsPage({
   outputs,
   powerBiPayload,
   reportBucketItems,
+  reportBucketMutationsDisabled,
   scenarioOutputs,
   scenarios,
   selectedSignalIds,
@@ -740,7 +1012,7 @@ function PowerBiToolsPage({
   dataReadiness: EconomicsReadinessRow[];
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
-  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onAddReportBucketItem: (item: ReportBucketItemInput) => Promise<boolean>;
   onClearSelection: () => void;
   onClearReportBucket: () => void;
   onNavigate: (section: "tools" | "print") => void;
@@ -751,6 +1023,7 @@ function PowerBiToolsPage({
   outputs: EconomicsScenarioOutput[];
   powerBiPayload: EconomicsPowerBiExportResponse | null;
   reportBucketItems: ReportBucketItem[];
+  reportBucketMutationsDisabled: boolean;
   scenarioOutputs: EconomicsScenarioOutput[];
   scenarios: EconomicsScenarioTemplate[];
   selectedSignalIds: string[];
@@ -818,6 +1091,7 @@ function PowerBiToolsPage({
         {lastAskResponse ? (
           <button
             className="mt-3 rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+            disabled={reportBucketMutationsDisabled}
             onClick={() =>
               onAddReportBucketItem(bucketItemFromAskResponse(lastAskResponse))
             }
@@ -868,6 +1142,7 @@ function PowerBiToolsPage({
         onNavigate={onNavigate}
         outputs={outputs}
         payload={powerBiPayload}
+        reportBucketMutationsDisabled={reportBucketMutationsDisabled}
         signals={signals}
       />
       ) : null}
@@ -879,6 +1154,7 @@ function PowerBiToolsPage({
         onToggleSignal={onToggleSignal}
         selectedSignalIds={selectedSignalIds}
         signals={signals}
+        reportBucketMutationsDisabled={reportBucketMutationsDisabled}
       />
       ) : null}
       {activeToolsTab === "bucket" ? (
@@ -888,6 +1164,7 @@ function PowerBiToolsPage({
         onOpenPrint={() => onNavigate("print")}
         onRemove={onRemoveReportBucketItem}
         onTogglePrint={onToggleReportBucketPrint}
+        reportBucketMutationsDisabled={reportBucketMutationsDisabled}
         title="Report Bucket"
       />
       ) : null}
@@ -953,6 +1230,7 @@ function PowerBiToolsPage({
               outputs={outputs}
               powerBiPayload={powerBiPayload}
               reportBucketItems={reportBucketItems}
+              reportBucketMutationsDisabled={reportBucketMutationsDisabled}
               scenarios={scenarios}
               selectedSignals={selectedSignals}
               showSelectedRowsStep={false}
@@ -976,13 +1254,14 @@ function InvestmentPanelPage({
   onToggleReportBucketPrint,
   onToggleSignal,
   reportBucketItems,
+  reportBucketMutationsDisabled,
   selectedSignalIds,
   signals,
   statusLabel,
 }: {
   initialCaseStudyUrlState?: InitialCaseStudyUrlState;
   initialInvestmentPage?: InvestmentPageId;
-  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onAddReportBucketItem: (item: ReportBucketItemInput) => Promise<boolean>;
   onClearReportBucket: () => void;
   onClearSelection: () => void;
   onNavigate: (section: "print") => void;
@@ -990,6 +1269,7 @@ function InvestmentPanelPage({
   onToggleReportBucketPrint: (id: string) => void;
   onToggleSignal: (signal: EconomicsParcelSignal) => void;
   reportBucketItems: ReportBucketItem[];
+  reportBucketMutationsDisabled: boolean;
   selectedSignalIds: string[];
   signals: EconomicsParcelSignal[];
   statusLabel?: string;
@@ -1260,13 +1540,14 @@ function InvestmentPanelPage({
     setGuide(nextGuide);
     setStatus("Review guide generated");
   };
-  const addGuideToBucket = () => {
+  const addGuideToBucket = async () => {
     if (!guide) return;
-    onAddReportBucketItem(dueDiligencePacketBucketItem(guide));
-    setStatus("Review guide saved to Report Bucket");
+    if (await onAddReportBucketItem(dueDiligencePacketBucketItem(guide))) {
+      setStatus("Review guide saved to Report Bucket");
+    }
   };
-  const sendGuideToPrint = () => {
-    if (guide) onAddReportBucketItem(dueDiligencePacketBucketItem(guide));
+  const sendGuideToPrint = async () => {
+    if (guide && !(await onAddReportBucketItem(dueDiligencePacketBucketItem(guide)))) return;
     onNavigate("print");
   };
   const generateReport = () => {
@@ -1288,10 +1569,11 @@ function InvestmentPanelPage({
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Report generation failed."));
   };
-  const addReportToBucket = () => {
+  const addReportToBucket = async () => {
     if (!investmentReport) return;
-    onAddReportBucketItem(investmentReportBucketItem(investmentReport));
-    setStatus("CFS Investments report saved to Report Bucket");
+    if (await onAddReportBucketItem(investmentReportBucketItem(investmentReport))) {
+      setStatus("CFS Investments report saved to Report Bucket");
+    }
   };
   const refreshIntake = () => {
     setIntakeLoading(true);
@@ -1623,10 +1905,11 @@ function InvestmentPanelPage({
       .then(setUnderwritingComparison)
       .catch((error) => setUnderwritingStatus(error instanceof Error ? error.message : "Unable to compare scenarios."));
   };
-  const addUnderwritingToBucket = () => {
+  const addUnderwritingToBucket = async () => {
     if (!underwritingResult) return;
-    onAddReportBucketItem(underwritingBucketItem(underwritingResult));
-    setUnderwritingStatus("Underwriting summary saved to Report Bucket.");
+    if (await onAddReportBucketItem(underwritingBucketItem(underwritingResult))) {
+      setUnderwritingStatus("Underwriting summary saved to Report Bucket.");
+    }
   };
   const exportUnderwriting = () => {
     if (!underwritingResult) return;
@@ -1706,9 +1989,10 @@ function InvestmentPanelPage({
       return;
     }
     void generateInvestmentEngagementReport(engagement.id)
-      .then((report) => {
-        onAddReportBucketItem(investmentReportBucketItem(report));
-        setStatus("Engagement report saved to Report Bucket.");
+      .then(async (report) => {
+        if (await onAddReportBucketItem(investmentReportBucketItem(report))) {
+          setStatus("Engagement report saved to Report Bucket.");
+        }
       })
       .catch((error) => setStatus(error instanceof Error ? error.message : "Unable to generate engagement report."));
   };
@@ -1954,10 +2238,10 @@ function InvestmentPanelPage({
       <button className="investment-primary-button" disabled={!activeSignal && !selectedRows.length} onClick={createGuide} type="button">
         Generate Review Guide
       </button>
-      <button className="investment-ghost-button" disabled={!guide} onClick={addGuideToBucket} type="button">
+      <button className="investment-ghost-button" disabled={!guide || reportBucketMutationsDisabled} onClick={addGuideToBucket} type="button">
         Save guide to Report Bucket
       </button>
-      <button className="investment-ghost-button" disabled={!guide} onClick={sendGuideToPrint} type="button">
+      <button className="investment-ghost-button" disabled={!guide || reportBucketMutationsDisabled} onClick={sendGuideToPrint} type="button">
         Send to Print
       </button>
       {status ? <span className="investment-status">{status}</span> : null}
@@ -1980,7 +2264,7 @@ function InvestmentPanelPage({
       <button className="investment-primary-button" disabled={!activeParcelId && !intakeAnalysis} onClick={generateReport} type="button">
         Generate Report
       </button>
-      <button className="investment-ghost-button" disabled={!investmentReport} onClick={addReportToBucket} type="button">
+      <button className="investment-ghost-button" disabled={!investmentReport || reportBucketMutationsDisabled} onClick={addReportToBucket} type="button">
         Add report to Report Bucket
       </button>
       {investmentReport ? (
@@ -2003,10 +2287,12 @@ function InvestmentPanelPage({
       form={intakeForm}
       intakeLoading={intakeLoading}
       intakeUnavailable={intakeUnavailable}
-      onAddAnalysisToBucket={() => {
+      reportBucketMutationsDisabled={reportBucketMutationsDisabled}
+      onAddAnalysisToBucket={async () => {
         if (!intakeAnalysis) return;
-        onAddReportBucketItem(intakeAnalysisBucketItem(intakeAnalysis));
-        setStatus("Intake analysis saved to Report Bucket");
+        if (await onAddReportBucketItem(intakeAnalysisBucketItem(intakeAnalysis))) {
+          setStatus("Intake analysis saved to Report Bucket");
+        }
       }}
       onArchive={(candidate) => {
         void updateInvestmentIntakeCandidate(candidate.id, { review_status: "Archived" })
@@ -2090,6 +2376,7 @@ function InvestmentPanelPage({
       case "opportunity-feed":
         return (
           <InvestmentOpportunityFeedPage
+            reportBucketMutationsDisabled={reportBucketMutationsDisabled}
             onAddToBucket={(opportunity) => onAddReportBucketItem(opportunityBucketItem(opportunity))}
             onAddToEngagement={(opportunity) => addToFirstEngagement(opportunity.external_opportunity_id, "opportunity")}
             onAddToIntake={addOpportunityToIntake}
@@ -2110,6 +2397,7 @@ function InvestmentPanelPage({
             areas={radarAreas}
             candidates={activeCaseStudy?.candidates ?? []}
             defaultGoal={activeCaseStudy?.slug === "large-development-land" ? "Large Development Land" : investmentStrategyLabel(activeStrategy)}
+            reportBucketMutationsDisabled={reportBucketMutationsDisabled}
             onAddToBucket={(area) => onAddReportBucketItem(areaRadarBucketItem(area))}
             onAddToEngagement={(area) => addToFirstEngagement(area.area_id, "search_area")}
             onAddToShortlist={(area) => addShortlistItem({
@@ -2221,12 +2509,13 @@ function InvestmentPanelPage({
             strategy={activeStrategy}
             templates={underwritingTemplates}
             prefill={underwritingPrefill}
+            reportBucketMutationsDisabled={reportBucketMutationsDisabled}
           />
         );
       case "due-diligence":
         return <section className="investment-two-column"><div>{dueDiligenceActions}{guide ? <InvestmentGuidePreview guide={guide} /> : null}</div><InvestmentChecklistLibrary /></section>;
       case "report-studio":
-        return <section className="investment-two-column"><div>{reportStudio}</div><InvestmentBucketPanel items={reportBucketItems} onClear={onClearReportBucket} onOpenPrint={() => onNavigate("print")} onRemove={onRemoveReportBucketItem} onTogglePrint={onToggleReportBucketPrint} /></section>;
+        return <section className="investment-two-column"><div>{reportStudio}</div><InvestmentBucketPanel items={reportBucketItems} onClear={onClearReportBucket} onOpenPrint={() => onNavigate("print")} onRemove={onRemoveReportBucketItem} onTogglePrint={onToggleReportBucketPrint} reportBucketMutationsDisabled={reportBucketMutationsDisabled} /></section>;
       case "engagements":
         return (
             <InvestmentEngagementsPage
@@ -2242,6 +2531,7 @@ function InvestmentPanelPage({
             onDuplicateCaseStudy={duplicateCaseStudy}
             onExportCaseStudyBrief={exportCaseStudyBrief}
             onGenerateReport={generateFirstEngagementReport}
+            reportBucketMutationsDisabled={reportBucketMutationsDisabled}
             onMakeCaseStudyCandidateActive={makeCaseStudyCandidateActive}
             onOpenCaseStudy={openCaseStudy}
             onOpenFindSites={() => openInvestmentPage("area-radar", "Find Sites")}
@@ -2250,7 +2540,7 @@ function InvestmentPanelPage({
           />
         );
       case "report-bucket":
-        return <InvestmentBucketPanel items={reportBucketItems} onClear={onClearReportBucket} onOpenPrint={() => onNavigate("print")} onRemove={onRemoveReportBucketItem} onTogglePrint={onToggleReportBucketPrint} />;
+        return <InvestmentBucketPanel items={reportBucketItems} onClear={onClearReportBucket} onOpenPrint={() => onNavigate("print")} onRemove={onRemoveReportBucketItem} onTogglePrint={onToggleReportBucketPrint} reportBucketMutationsDisabled={reportBucketMutationsDisabled} />;
       case "methodology":
         return (
           <section className="investment-two-column">
@@ -2692,6 +2982,7 @@ function InvestmentOpportunityFeedPage({
   onMatch,
   onStartUnderwriting,
   opportunities,
+  reportBucketMutationsDisabled,
   sources,
 }: {
   onAddToBucket: (opportunity: InvestmentOpportunityReference) => void;
@@ -2701,6 +2992,7 @@ function InvestmentOpportunityFeedPage({
   onMatch: (opportunity: InvestmentOpportunityReference) => void;
   onStartUnderwriting: (opportunity: InvestmentOpportunityReference) => void;
   opportunities: InvestmentOpportunityReference[];
+  reportBucketMutationsDisabled: boolean;
   sources: InvestmentOpportunitySource[];
 }) {
   return (
@@ -2729,7 +3021,7 @@ function InvestmentOpportunityFeedPage({
                         <button onClick={() => onStartUnderwriting(opportunity)} type="button">Start Underwriting</button>
                         <button onClick={() => onAddToShortlist(opportunity)} type="button">Add to Shortlist</button>
                         <button onClick={() => onAddToEngagement(opportunity)} type="button">Add to Project</button>
-                        <button onClick={() => onAddToBucket(opportunity)} type="button">Create Report Note</button>
+                        <button disabled={reportBucketMutationsDisabled} onClick={() => onAddToBucket(opportunity)} type="button">Create Report Note</button>
                       </div>
                     </td>
                   </tr>
@@ -2769,6 +3061,7 @@ function InvestmentAreaRadarPage({
   onOpenOpportunityFeed,
   onRunScreening,
   onSaveSearch,
+  reportBucketMutationsDisabled,
   savedSearches,
   status,
 }: {
@@ -2783,6 +3076,7 @@ function InvestmentAreaRadarPage({
   onOpenOpportunityFeed: () => void;
   onRunScreening: () => Promise<void>;
   onSaveSearch: () => void;
+  reportBucketMutationsDisabled: boolean;
   savedSearches: InvestmentSavedSearch[];
   status?: string | null;
 }) {
@@ -2862,7 +3156,7 @@ function InvestmentAreaRadarPage({
               <button className="investment-primary-button" onClick={onOpenOpportunityFeed} type="button">Find Properties</button>
               <button onClick={() => onAddToShortlist(area)} type="button">Add to Shortlist</button>
               <button onClick={() => onAddToEngagement(area)} type="button">Add to Project</button>
-              <button onClick={() => onAddToBucket(area)} type="button">Create Report</button>
+              <button disabled={reportBucketMutationsDisabled} onClick={() => onAddToBucket(area)} type="button">Create Report</button>
             </div>
           </article>
         )) : null}
@@ -2904,6 +3198,7 @@ function InvestmentEngagementsPage({
   onOpenFindSites,
   onOpenIntake,
   onSaveCaseStudyNote,
+  reportBucketMutationsDisabled,
 }: {
   activeCaseStudy: InvestmentCaseStudy | null;
   caseStudies: InvestmentCaseStudy[];
@@ -2922,6 +3217,7 @@ function InvestmentEngagementsPage({
   onOpenFindSites: () => void;
   onOpenIntake: () => void;
   onSaveCaseStudyNote: (slug: string, note: string) => void;
+  reportBucketMutationsDisabled: boolean;
 }) {
   const [projectView, setProjectView] = useState<"active" | "case-studies">("case-studies");
   const active = engagements[0];
@@ -2979,7 +3275,7 @@ function InvestmentEngagementsPage({
               <InvestmentSignalList title="Criteria matrix" values={active.criteria.map((item) => `${String(item.type ?? "Informational")}: ${String(item.criterion ?? item.label ?? "Criteria")}`)} />
               <InvestmentSignalList title="Consultant shortlist" values={active.shortlist.map((item) => `${String(item.item_type)} ${String(item.item_id)} · ${String(item.status)}`)} />
               <div className="investment-row-actions mt-4">
-                <button className="investment-primary-button" onClick={onGenerateReport} type="button">Generate Client-Ready Summary</button>
+                <button className="investment-primary-button" disabled={reportBucketMutationsDisabled} onClick={onGenerateReport} type="button">Generate Client-Ready Summary</button>
                 <button className="investment-ghost-button" onClick={() => onAddArea("countywide")} type="button">Add Countywide Search Area</button>
               </div>
             </>
@@ -3137,6 +3433,7 @@ function InvestmentUnderwritingLab({
   strategy,
   templates,
   prefill,
+  reportBucketMutationsDisabled,
 }: {
   activeSignal: EconomicsParcelSignal | null;
   assumptions: Record<string, number | string | null>;
@@ -3156,6 +3453,7 @@ function InvestmentUnderwritingLab({
   onSetScenarioName: (value: string) => void;
   onSetScenarioType: (value: InvestmentUnderwritingScenarioType) => void;
   onToggleCompare: (scenarioId: string) => void;
+  reportBucketMutationsDisabled: boolean;
   result: InvestmentUnderwritingCalculation | null;
   scenarioName: string;
   scenarios: InvestmentUnderwritingScenario[];
@@ -3239,7 +3537,7 @@ function InvestmentUnderwritingLab({
             <button className="investment-primary-button" onClick={onCalculate} type="button">Calculate Scenario</button>
             <button className="investment-ghost-button" disabled={!result} onClick={onSave} type="button">Save Scenario</button>
             <button className="investment-ghost-button" disabled={!result} onClick={onExport} type="button">Export JSON</button>
-            <button className="investment-ghost-button" disabled={!result} onClick={onAddToBucket} type="button">Add to Report Bucket</button>
+            <button className="investment-ghost-button" disabled={!result || reportBucketMutationsDisabled} onClick={onAddToBucket} type="button">Add to Report Bucket</button>
           </div>
           {status ? <p className="investment-status mt-3">{status}</p> : null}
         </section>
@@ -3608,6 +3906,7 @@ function InvestmentIntakeWorkspace({
   onSetCsvText,
   onSetForm,
   onToggleCompare,
+  reportBucketMutationsDisabled,
 }: {
   analysis: InvestmentIntakeAnalysisResponse | null;
   candidates: InvestmentIntakeCandidate[];
@@ -3631,6 +3930,7 @@ function InvestmentIntakeWorkspace({
   onSetCsvText: (value: string) => void;
   onSetForm: (value: InvestmentIntakePayload | ((current: InvestmentIntakePayload) => InvestmentIntakePayload)) => void;
   onToggleCompare: (candidateId: string) => void;
+  reportBucketMutationsDisabled: boolean;
 }) {
   const [strategyFilter, setStrategyFilter] = useState<InvestmentStrategyId | "All">("All");
   const [reviewFilter, setReviewFilter] = useState<InvestmentReviewStatus | "All">("All");
@@ -3814,7 +4114,7 @@ function InvestmentIntakeWorkspace({
         onOpen={onOpen}
         onToggleCompare={onToggleCompare}
       />
-      {analysis ? <InvestmentIntakeAnalysisCard analysis={analysis} onAddToBucket={onAddAnalysisToBucket} /> : null}
+      {analysis ? <InvestmentIntakeAnalysisCard analysis={analysis} onAddToBucket={onAddAnalysisToBucket} reportBucketMutationsDisabled={reportBucketMutationsDisabled} /> : null}
       {comparison ? <InvestmentIntakeComparison comparison={comparison} /> : null}
     </section>
   );
@@ -3898,9 +4198,11 @@ function InvestmentIntakeQueue({
 function InvestmentIntakeAnalysisCard({
   analysis,
   onAddToBucket,
+  reportBucketMutationsDisabled,
 }: {
   analysis: InvestmentIntakeAnalysisResponse;
   onAddToBucket: () => void;
+  reportBucketMutationsDisabled: boolean;
 }) {
   const candidate = analysis.candidate;
   return (
@@ -3911,7 +4213,7 @@ function InvestmentIntakeAnalysisCard({
           <h3 className="text-lg font-semibold text-[var(--econ-text)]">{candidate.candidate_name}</h3>
           <p className="investment-muted">{analysis.parcel_match_status}</p>
         </div>
-        <button className="investment-ghost-button" onClick={onAddToBucket} type="button">Add to Report Bucket</button>
+        <button className="investment-ghost-button" disabled={reportBucketMutationsDisabled} onClick={onAddToBucket} type="button">Add to Report Bucket</button>
       </div>
       <Matrix
         rows={[
@@ -4313,12 +4615,14 @@ function InvestmentBucketPanel({
   onOpenPrint,
   onRemove,
   onTogglePrint,
+  reportBucketMutationsDisabled,
 }: {
   items: ReportBucketItem[];
   onClear: () => void;
   onOpenPrint: () => void;
   onRemove: (id: string) => void;
   onTogglePrint: (id: string) => void;
+  reportBucketMutationsDisabled: boolean;
 }) {
   return (
     <section className="investment-card" id="report-bucket">
@@ -4332,18 +4636,23 @@ function InvestmentBucketPanel({
       {items.length ? (
         <div className="investment-bucket-list">
           {items.slice(0, 6).map((item) => (
-            <div key={item.id}>
+            <div
+              data-object-id={item.id}
+              data-record-id={item.server_id}
+              data-testid="report-bucket-item"
+              key={item.id}
+            >
               <span>{bucketTypeLabel(item.type)}</span>
               <strong>{item.title}</strong>
               <small>{new Date(item.created_at).toLocaleDateString()}</small>
               <div>
-                <label><input checked={item.selected_for_print} onChange={() => onTogglePrint(item.id)} type="checkbox" /> Print</label>
-                <button onClick={() => onRemove(item.id)} type="button">Remove</button>
+                <label><input checked={item.selected_for_print} disabled={reportBucketMutationsDisabled} onChange={() => onTogglePrint(item.id)} type="checkbox" /> Print</label>
+                <button disabled={reportBucketMutationsDisabled} onClick={() => onRemove(item.id)} type="button">Remove</button>
               </div>
             </div>
           ))}
           <button className="investment-primary-button" onClick={onOpenPrint} type="button">View all in Report Bucket</button>
-          <button className="investment-ghost-button" onClick={onClear} type="button">Clear bucket</button>
+          <button className="investment-ghost-button" disabled={reportBucketMutationsDisabled} onClick={onClear} type="button">Clear bucket</button>
         </div>
       ) : (
         <p className="investment-empty">Save review guides, candidate notes, or chart plans here before printing.</p>
@@ -4963,6 +5272,7 @@ function EnterpriseWorkspacePage({
   powerBiPayload,
   reportAvailability,
   reportBucketItems,
+  reportBucketMutationsDisabled,
   scenarios,
   selectedSignals,
   showSelectedRowsStep = true,
@@ -4971,7 +5281,7 @@ function EnterpriseWorkspacePage({
   embedded?: boolean;
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
-  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onAddReportBucketItem: (item: ReportBucketItemInput) => Promise<boolean>;
   onClearReportBucket: () => void;
   onNavigate: (section: "tools" | "print") => void;
   onRemoveReportBucketItem: (id: string) => void;
@@ -4980,6 +5290,7 @@ function EnterpriseWorkspacePage({
   powerBiPayload: EconomicsPowerBiExportResponse | null;
   reportAvailability: PowerBiReportDataAvailability;
   reportBucketItems: ReportBucketItem[];
+  reportBucketMutationsDisabled: boolean;
   scenarios: EconomicsScenarioTemplate[];
   selectedSignals: EconomicsParcelSignal[];
   showSelectedRowsStep?: boolean;
@@ -5061,6 +5372,7 @@ function EnterpriseWorkspacePage({
             powerBiPayload={powerBiPayload}
             reportAvailability={reportAvailability}
             reportBucketItems={reportBucketItems}
+            reportBucketMutationsDisabled={reportBucketMutationsDisabled}
             scenarios={scenarios}
             selectedOutput={selectedOutput}
             selectedSignals={selectedSignals}
@@ -5146,6 +5458,7 @@ function EconomicsPrintPage({
   onSetAllReportBucketPrint,
   onToggleReportBucketPrint,
   reportBucketItems,
+  reportBucketMutationsDisabled,
   selectedSignals,
 }: {
   intelligence: EconomicsIntelligenceResponse | null;
@@ -5155,6 +5468,7 @@ function EconomicsPrintPage({
   onSetAllReportBucketPrint: (selected: boolean) => void;
   onToggleReportBucketPrint: (id: string) => void;
   reportBucketItems: ReportBucketItem[];
+  reportBucketMutationsDisabled: boolean;
   selectedSignals: EconomicsParcelSignal[];
 }) {
   const summary = intelligence?.summary;
@@ -5273,10 +5587,10 @@ function EconomicsPrintPage({
         <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copyText("Selected report items", selectedBucketText)} type="button">
           Copy selected report items
         </button>
-        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onSetAllReportBucketPrint(true)} type="button">
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" disabled={reportBucketMutationsDisabled} onClick={() => onSetAllReportBucketPrint(true)} type="button">
           Select all bucket items
         </button>
-        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onSetAllReportBucketPrint(false)} type="button">
+        <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" disabled={reportBucketMutationsDisabled} onClick={() => onSetAllReportBucketPrint(false)} type="button">
           Deselect all
         </button>
         <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => onNavigate("tools")} type="button">
@@ -5306,6 +5620,7 @@ function EconomicsPrintPage({
           onClear={onClearReportBucket}
           onRemove={onRemoveReportBucketItem}
           onTogglePrint={onToggleReportBucketPrint}
+          reportBucketMutationsDisabled={reportBucketMutationsDisabled}
           title="Report Bucket"
         />
       </section>
@@ -5782,6 +6097,7 @@ function EnterpriseToolsPage({
   powerBiPayload,
   reportAvailability,
   reportBucketItems,
+  reportBucketMutationsDisabled,
   scenarios,
   selectedOutput,
   selectedSignals,
@@ -5789,7 +6105,7 @@ function EnterpriseToolsPage({
   askPowerBiAction?: PowerBiAskActionRequest | null;
   exportPayload: EconomicsEnterpriseExportResponse | null;
   inputs: EconomicsScenarioInput[];
-  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onAddReportBucketItem: (item: ReportBucketItemInput) => Promise<boolean>;
   onClearReportBucket: () => void;
   onNavigate: (section: "tools" | "print") => void;
   onRemoveReportBucketItem: (id: string) => void;
@@ -5798,6 +6114,7 @@ function EnterpriseToolsPage({
   powerBiPayload: EconomicsPowerBiExportResponse | null;
   reportAvailability: PowerBiReportDataAvailability;
   reportBucketItems: ReportBucketItem[];
+  reportBucketMutationsDisabled: boolean;
   scenarios: EconomicsScenarioTemplate[];
   selectedOutput: EnterpriseOutputKind;
   selectedSignals: EconomicsParcelSignal[];
@@ -5934,6 +6251,7 @@ function EnterpriseToolsPage({
               key={askPowerBiAction?.id ?? "manual-chart-builder"}
               onAddReportBucketItem={onAddReportBucketItem}
               payload={powerBiPayload}
+              reportBucketMutationsDisabled={reportBucketMutationsDisabled}
             />
             <ReportBucketPanel
               items={reportBucketItems}
@@ -5941,6 +6259,7 @@ function EnterpriseToolsPage({
               onOpenPrint={() => onNavigate("print")}
               onRemove={onRemoveReportBucketItem}
               onTogglePrint={onToggleReportBucketPrint}
+              reportBucketMutationsDisabled={reportBucketMutationsDisabled}
               title="Report Bucket"
             />
             <DetailsBlock summary="Show guide" hint="Power BI Report Builder Guide: 4 recommended report pages.">
@@ -6012,7 +6331,7 @@ function EnterpriseToolsPage({
             </button>
             <button
               className="w-fit rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
-              disabled={!decisionPack}
+              disabled={!decisionPack || reportBucketMutationsDisabled}
               onClick={() =>
                 onAddReportBucketItem({
                   content: decisionSummaryNotes,
@@ -6041,6 +6360,7 @@ function EnterpriseToolsPage({
             <>
               <ActionButton label="Copy decision memo" onClick={() => void copyText("Decision memo", scenarioMemoText)} />
               <ActionButton
+                disabled={reportBucketMutationsDisabled}
                 label="Add memo to Report Bucket"
                 onClick={() =>
                   onAddReportBucketItem({
@@ -6062,6 +6382,7 @@ function EnterpriseToolsPage({
               <ActionButton label="Open Power BI Desktop" onClick={() => void copyText("Power BI reminder", "Open Power BI Desktop, then Get Data -> Text/CSV.")} />
               <ActionButton label="Copy import checklist" onClick={() => void copyText("QA checklist", qaChecklistNotes)} />
               <ActionButton
+                disabled={reportBucketMutationsDisabled}
                 label="Add QA checklist to Report Bucket"
                 onClick={() =>
                   onAddReportBucketItem({
@@ -6092,6 +6413,7 @@ function EnterpriseToolsPage({
         </div>
         <DetailsBlock summary="Power BI Import QA Checklist" hint="Quality checks before import and report build.">
           <QaChecklist
+            disabled={reportBucketMutationsDisabled}
             onAddBucket={() =>
               onAddReportBucketItem({
                 content: qaChecklistNotes,
@@ -6126,9 +6448,31 @@ function EnterpriseScenarioConfigurePanel({
   outputs: EconomicsScenarioOutput[];
   scenarios: EconomicsScenarioTemplate[];
 }) {
+  const {
+    can,
+    error: principalError,
+    reload: reloadPrincipal,
+    requestId: principalRequestId,
+    status: principalStatus,
+  } = useProductPrincipal();
   const [assumptions, setAssumptions] = useState<ScenarioAssumptions>(
     initialScenarioAssumptions,
   );
+  const [activeScenario, setActiveScenario] = useState<EconomicScenarioRecord | null>(null);
+  const [analystNotes, setAnalystNotes] = useState("");
+  const [compareScenarioId, setCompareScenarioId] = useState("");
+  const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [libraryAttempt, setLibraryAttempt] = useState(0);
+  const [persistenceBusy, setPersistenceBusy] = useState(false);
+  const [persistenceError, setPersistenceError] = useState<string | null>(null);
+  const [persistenceRequestId, setPersistenceRequestId] = useState<string | null>(null);
+  const [persistenceStatus, setPersistenceStatus] = useState<string | null>(null);
+  const [savedScenarios, setSavedScenarios] = useState<EconomicScenarioRecord[]>([]);
+  const [scenarioName, setScenarioName] = useState("Current Conditions");
+  const [scenarioDirty, setScenarioDirty] = useState(false);
+  const [selectedSavedId, setSelectedSavedId] = useState("");
+  const canWriteScenario =
+    economicScenarioRepository.provider === "demo" || can("economics:write");
   const scenarioRows = scenarioCatalog.map((scenario) => ({
     ...scenario,
     what_it_tests:
@@ -6142,14 +6486,460 @@ function EnterpriseScenarioConfigurePanel({
   const memo = scenarioDecisionMemo(selectedScenario.title, assumptions, output);
   const memoText = matrixRowsToText(memo);
   const evidencePack = scenarioEvidencePack(inputs, assumptions, output);
+  const comparedScenario = savedScenarios.find(
+    (scenario) => scenario.id === compareScenarioId,
+  );
+  const markScenarioDirty = () => {
+    setScenarioDirty(true);
+    setPersistenceStatus(activeScenario ? "Unsaved changes." : "Unsaved draft.");
+  };
   const updateAssumption = (key: keyof ScenarioAssumptions, value: string) => {
     setAssumptions((current) => ({ ...current, [key]: value }));
+    markScenarioDirty();
   };
   useEffect(() => {
     onMemoChange(memoText);
   }, [memoText, onMemoChange]);
+  useEffect(() => {
+    if (economicScenarioRepository.provider === "api" && principalStatus === "loading") {
+      const timeout = window.setTimeout(
+        () => setPersistenceStatus("Loading saved scenario access..."),
+        0,
+      );
+      return () => window.clearTimeout(timeout);
+    }
+    if (economicScenarioRepository.provider === "api" && principalStatus === "error") {
+      const timeout = window.setTimeout(() => {
+        setPersistenceError(principalError ?? "Saved scenario access could not be verified.");
+        setPersistenceRequestId(principalRequestId);
+        setPersistenceStatus(null);
+      }, 0);
+      return () => window.clearTimeout(timeout);
+    }
+    const controller = new AbortController();
+    queueMicrotask(() => {
+      if (controller.signal.aborted) return;
+      setPersistenceBusy(true);
+      setPersistenceError(null);
+      setPersistenceStatus("Loading saved scenarios...");
+    });
+    void economicScenarioRepository
+      .list({ pageSize: 100, signal: controller.signal })
+      .then(async (result) => {
+        if (controller.signal.aborted) return;
+        setPersistenceRequestId(result.requestId);
+        const records = [...result.data];
+        const total = result.pagination?.total ?? records.length;
+        const pageSize = result.pagination?.pageSize ?? 100;
+        for (let page = 2; records.length < total; page += 1) {
+          const next = await economicScenarioRepository.list({
+            page,
+            pageSize,
+            signal: controller.signal,
+          });
+          records.push(...next.data);
+          setPersistenceRequestId(next.requestId);
+          if (!next.data.length) break;
+        }
+        if (controller.signal.aborted) return;
+        records.forEach(scenarioAssumptionsFromRecord);
+        setSavedScenarios(records);
+        setPersistenceStatus(
+          economicScenarioRepository.provider === "demo"
+            ? "Saved scenarios remain in this demo session."
+            : canWriteScenario
+              ? "Saved scenarios loaded from CFS."
+              : "Saved scenarios are read-only for your role.",
+        );
+      })
+      .catch((caught: unknown) => {
+        if (controller.signal.aborted) return;
+        const failure = productErrorDetails(caught);
+        setPersistenceError(failure.message);
+        setPersistenceRequestId(failure.requestId);
+        setPersistenceStatus(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setPersistenceBusy(false);
+      });
+    return () => controller.abort();
+  }, [
+    canWriteScenario,
+    libraryAttempt,
+    principalError,
+    principalRequestId,
+    principalStatus,
+  ]);
+
+  const openSavedScenario = (record: EconomicScenarioRecord) => {
+    let restoredAssumptions: ScenarioAssumptions;
+    try {
+      restoredAssumptions = scenarioAssumptionsFromRecord(record);
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setPersistenceError(failure.message);
+      setPersistenceRequestId(failure.requestId);
+      setPersistenceStatus(null);
+      return;
+    }
+    setActiveScenario(record);
+    setAssumptions(restoredAssumptions);
+    setAnalystNotes(record.notes ?? "");
+    setCompareScenarioId("");
+    setComparisonOpen(false);
+    setScenarioName(record.name);
+    setSelectedSavedId(record.id);
+    setScenarioDirty(false);
+    setPersistenceError(null);
+    setPersistenceStatus(`Opened ${record.name}.`);
+  };
+  const loadSelectedScenario = () => {
+    if (scenarioDirty) {
+      setPersistenceError("Save the current changes or start a new draft before opening another scenario.");
+      return;
+    }
+    const record = savedScenarios.find((scenario) => scenario.id === selectedSavedId);
+    if (record) openSavedScenario(record);
+  };
+  const saveScenario = async (asNew: boolean) => {
+    if (!canWriteScenario || persistenceBusy) {
+      if (!canWriteScenario) setPersistenceError("Your role cannot save Economics scenarios.");
+      return;
+    }
+    const name = scenarioName.trim() || selectedScenario.title;
+    const input = {
+      assumptions: toJsonObject(assumptions),
+      name,
+      notes: analystNotes.trim() || null,
+      outputs: toJsonObject({
+        ...output,
+        calculation_schema_version: ECONOMIC_SCENARIO_SCHEMA_VERSION,
+      }),
+      payload: toJsonObject({
+        decision_memo: memo,
+        evidence_pack: evidencePack,
+        calculation_schema_version: ECONOMIC_SCENARIO_SCHEMA_VERSION,
+        scenario_template_id: assumptions.scenarioId,
+      }),
+      status: "Draft",
+    };
+    setPersistenceBusy(true);
+    setPersistenceError(null);
+    setPersistenceStatus(asNew || !activeScenario ? "Saving scenario..." : "Saving scenario changes...");
+    try {
+      let saved: EconomicScenarioRecord;
+      if (activeScenario && !asNew) {
+        const updated = await economicScenarioRepository.update(
+          activeScenario.id,
+          input,
+          { expectedUpdatedAt: activeScenario.updated_at },
+        );
+        setPersistenceRequestId(updated.requestId);
+        saved = updated.data;
+      } else {
+        const created = await economicScenarioRepository.create(input);
+        saved = created.data;
+        setPersistenceRequestId(created.requestId);
+      }
+      scenarioAssumptionsFromRecord(saved);
+      setActiveScenario(saved);
+      setSavedScenarios((current) => [
+        saved,
+        ...current.filter((scenario) => scenario.id !== saved.id),
+      ]);
+      setScenarioName(saved.name);
+      setSelectedSavedId(saved.id);
+      setScenarioDirty(false);
+      setPersistenceStatus(
+        economicScenarioRepository.provider === "demo"
+          ? `Saved changes to version ${saved.current_version} in this demo session.`
+          : `Saved changes to version ${saved.current_version} in CFS.`,
+      );
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setPersistenceError(failure.message);
+      setPersistenceRequestId(failure.requestId);
+      setPersistenceStatus(null);
+    } finally {
+      setPersistenceBusy(false);
+    }
+  };
+  const createScenarioVersion = async () => {
+    if (!activeScenario || scenarioDirty || !canWriteScenario || persistenceBusy) return;
+    setPersistenceBusy(true);
+    setPersistenceError(null);
+    setPersistenceStatus("Creating scenario version...");
+    try {
+      const result = await economicScenarioRepository.version(
+        activeScenario.id,
+        "Version created from the CFS Economics scenario workspace.",
+      );
+      scenarioAssumptionsFromRecord(result.data);
+      setActiveScenario(result.data);
+      setSavedScenarios((current) => [
+        result.data,
+        ...current.filter((scenario) => scenario.id !== result.data.id),
+      ]);
+      setPersistenceRequestId(result.requestId);
+      setPersistenceStatus(`Created version ${result.data.current_version}.`);
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setPersistenceError(failure.message);
+      setPersistenceRequestId(failure.requestId);
+      setPersistenceStatus(null);
+    } finally {
+      setPersistenceBusy(false);
+    }
+  };
+  const archiveScenario = async () => {
+    if (!activeScenario || !canWriteScenario || persistenceBusy || scenarioDirty) {
+      if (scenarioDirty) {
+        setPersistenceError("Save or reset the current changes before archiving this scenario.");
+      }
+      return;
+    }
+    setPersistenceBusy(true);
+    setPersistenceError(null);
+    setPersistenceStatus("Archiving scenario...");
+    try {
+      const result = await economicScenarioRepository.archive(activeScenario.id);
+      setPersistenceRequestId(result.requestId);
+      setSavedScenarios((current) =>
+        current.filter((scenario) => scenario.id !== activeScenario.id),
+      );
+      setActiveScenario(null);
+      setAnalystNotes("");
+      setCompareScenarioId("");
+      setComparisonOpen(false);
+      setSelectedSavedId("");
+      setPersistenceStatus("Scenario archived.");
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setPersistenceError(failure.message);
+      setPersistenceRequestId(failure.requestId);
+      setPersistenceStatus(null);
+    } finally {
+      setPersistenceBusy(false);
+    }
+  };
+  const resetScenario = () => {
+    if (persistenceBusy) return;
+    setActiveScenario(null);
+    setAnalystNotes("");
+    setCompareScenarioId("");
+    setComparisonOpen(false);
+    setAssumptions({ ...initialScenarioAssumptions });
+    setScenarioName("Current Conditions");
+    setSelectedSavedId("");
+    setScenarioDirty(false);
+    setPersistenceStatus("Started a new scenario draft.");
+  };
+  const retryScenarioPersistence = async () => {
+    if (principalStatus === "error") {
+      reloadPrincipal();
+      setLibraryAttempt((current) => current + 1);
+      return;
+    }
+    if (!activeScenario || !scenarioDirty) {
+      setLibraryAttempt((current) => current + 1);
+      return;
+    }
+    setPersistenceBusy(true);
+    setPersistenceError(null);
+    setPersistenceStatus("Loading the latest saved scenario metadata...");
+    try {
+      const result = await economicScenarioRepository.get(activeScenario.id);
+      scenarioAssumptionsFromRecord(result.data);
+      setActiveScenario(result.data);
+      setSavedScenarios((current) => [
+        result.data,
+        ...current.filter((scenario) => scenario.id !== result.data.id),
+      ]);
+      setPersistenceRequestId(result.requestId);
+      setPersistenceStatus("Latest record loaded. Review retained edits, then Save changes.");
+    } catch (caught) {
+      const failure = productErrorDetails(caught);
+      setPersistenceError(failure.message);
+      setPersistenceRequestId(failure.requestId);
+      setPersistenceStatus(null);
+    } finally {
+      setPersistenceBusy(false);
+    }
+  };
   return (
     <div className="grid gap-4">
+      <section
+        className="grid gap-3 rounded-xl border border-[var(--econ-border)] bg-black/20 p-4"
+        data-provider={economicScenarioRepository.provider}
+        data-testid="economic-scenario-persistence"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-[var(--econ-text)]">Saved scenario library</h2>
+            <p className="mt-1 text-xs leading-5 text-[var(--econ-muted)]">
+              Save a durable scenario, reopen it, and create an explicit version after later edits.
+            </p>
+          </div>
+          <span
+            className="rounded-full border border-[var(--econ-border)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--econ-muted)]"
+            data-scenario-id={activeScenario?.id}
+            data-testid="economic-scenario-version"
+          >
+            {activeScenario ? `Version ${activeScenario.current_version}` : "Unsaved draft"}
+          </span>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <label className="grid gap-1 text-xs font-semibold text-[var(--econ-muted)]">
+            Scenario name
+            <input
+              className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-sm text-[var(--econ-text)] outline-none focus:border-[var(--econ-gold)]"
+              data-testid="economic-scenario-name"
+              disabled={persistenceBusy}
+              onChange={(event) => {
+                setScenarioName(event.target.value);
+                markScenarioDirty();
+              }}
+              value={scenarioName}
+            />
+          </label>
+          <label className="grid gap-1 text-xs font-semibold text-[var(--econ-muted)]">
+            Saved scenarios
+            <select
+              className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-sm text-[var(--econ-text)] outline-none focus:border-[var(--econ-gold)]"
+              data-testid="economic-scenario-library"
+              disabled={persistenceBusy}
+              onChange={(event) => setSelectedSavedId(event.target.value)}
+              value={selectedSavedId}
+            >
+              <option value="">Choose a saved scenario</option>
+              {savedScenarios.map((scenario) => (
+                <option data-scenario-id={scenario.id} key={scenario.id} value={scenario.id}>
+                  {scenario.name} (v{scenario.current_version})
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <label className="grid gap-1 text-xs font-semibold text-[var(--econ-muted)]">
+          Analyst notes
+          <textarea
+            className="min-h-20 rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-sm text-[var(--econ-text)] outline-none focus:border-[var(--econ-gold)]"
+            data-testid="economic-scenario-notes"
+            disabled={persistenceBusy}
+            onChange={(event) => {
+              setAnalystNotes(event.target.value);
+              markScenarioDirty();
+            }}
+            placeholder="Document analyst judgment, review context, or next diligence."
+            value={analystNotes}
+          />
+        </label>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="rounded-lg border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+            data-scenario-id={selectedSavedId || undefined}
+            data-testid="economic-scenario-load"
+            disabled={!selectedSavedId || persistenceBusy || scenarioDirty}
+            onClick={loadSelectedScenario}
+            title={scenarioDirty ? "Save the current changes or start a new draft first." : undefined}
+            type="button"
+          >
+            Open saved scenario
+          </button>
+          <button
+            className="rounded-lg border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+            data-scenario-id={activeScenario?.id}
+            data-testid="economic-scenario-save"
+            disabled={!canWriteScenario || persistenceBusy}
+            onClick={() => void saveScenario(false)}
+            type="button"
+          >
+            {activeScenario ? "Save changes" : "Save scenario"}
+          </button>
+          <button
+            className="rounded-lg border border-[var(--econ-gold)]/50 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+            data-scenario-id={activeScenario?.id}
+            data-testid="economic-scenario-create-version"
+            disabled={
+              !activeScenario ||
+              scenarioDirty ||
+              !canWriteScenario ||
+              persistenceBusy
+            }
+            onClick={() => void createScenarioVersion()}
+            type="button"
+          >
+            Create Version
+          </button>
+          <button
+            className="rounded-lg border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+            data-testid="economic-scenario-save-new"
+            disabled={!canWriteScenario || persistenceBusy}
+            onClick={() => void saveScenario(true)}
+            type="button"
+          >
+            Save as new
+          </button>
+          <button
+            className="rounded-lg border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-risk)] disabled:opacity-50"
+            data-scenario-id={activeScenario?.id}
+            data-testid="economic-scenario-archive"
+            disabled={!activeScenario || !canWriteScenario || persistenceBusy || scenarioDirty}
+            onClick={() => void archiveScenario()}
+            type="button"
+          >
+            Archive
+          </button>
+        </div>
+        <div className="grid gap-2 rounded-lg border border-[var(--econ-border)] bg-white/[0.025] p-3 md:grid-cols-[1fr_auto] md:items-end">
+          <label className="grid gap-1 text-xs font-semibold text-[var(--econ-muted)]">
+            Compare opened scenario with
+            <select
+              className="rounded-lg border border-[var(--econ-border)] bg-black/30 px-3 py-2 text-sm text-[var(--econ-text)] outline-none focus:border-[var(--econ-gold)]"
+              data-testid="economic-scenario-compare-library"
+              disabled={persistenceBusy}
+              onChange={(event) => {
+                setCompareScenarioId(event.target.value);
+                setComparisonOpen(false);
+              }}
+              value={compareScenarioId}
+            >
+              <option value="">Choose a second saved scenario</option>
+              {savedScenarios
+                .filter((scenario) => scenario.id !== activeScenario?.id)
+                .map((scenario) => (
+                  <option data-scenario-id={scenario.id} key={scenario.id} value={scenario.id}>
+                    {scenario.name} (v{scenario.current_version})
+                  </option>
+                ))}
+            </select>
+          </label>
+          <button
+            className="rounded-lg border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
+            data-left-scenario-id={activeScenario?.id}
+            data-right-scenario-id={comparedScenario?.id}
+            data-testid="economic-scenario-compare"
+            disabled={!activeScenario || !comparedScenario || persistenceBusy}
+            onClick={() => setComparisonOpen(true)}
+            type="button"
+          >
+            Compare
+          </button>
+        </div>
+        {comparisonOpen && activeScenario && comparedScenario ? (
+          <ScenarioPersistenceComparison
+            left={activeScenario}
+            right={comparedScenario}
+          />
+        ) : null}
+        <ProductPersistenceNotice
+          error={persistenceError}
+          requestId={persistenceRequestId ?? principalRequestId}
+          status={persistenceStatus}
+          testId="economic-scenario-status"
+          onRetry={() => void retryScenarioPersistence()}
+        />
+      </section>
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
         {scenarioRows.map((scenario) => (
           <button
@@ -6158,14 +6948,23 @@ function EnterpriseScenarioConfigurePanel({
                 ? "border-[var(--econ-gold)] bg-[var(--econ-gold)]/10 text-[#ffe6a6]"
                 : "border-[var(--econ-border)] bg-white/[0.025] text-[var(--econ-muted)] hover:border-[var(--econ-gold)]"
             }`}
+            disabled={persistenceBusy}
             key={scenario.id}
-            onClick={() =>
+            onClick={() => {
+              setActiveScenario(null);
+              setAnalystNotes("");
+              setCompareScenarioId("");
+              setComparisonOpen(false);
+              setSelectedSavedId("");
+              setScenarioName(scenario.title);
+              setScenarioDirty(true);
+              setPersistenceStatus("Unsaved draft.");
               setAssumptions({
                 ...initialScenarioAssumptions,
                 ...scenarioDefaults[scenario.id],
                 scenarioId: scenario.id,
-              })
-            }
+              });
+            }}
             type="button"
           >
             <span className="font-semibold">{scenario.title}</span>
@@ -6175,58 +6974,69 @@ function EnterpriseScenarioConfigurePanel({
       <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
         <div className="grid gap-3 sm:grid-cols-2">
           <ScenarioSelect
+            disabled={persistenceBusy}
             label="Development type"
             onChange={(value) =>
-              setAssumptions((current) => ({
-                ...current,
-                developmentType: value,
-                scenarioId:
-                  scenarioRows.find((scenario) => scenario.title === value)?.id ??
-                  current.scenarioId,
-              }))
+              {
+                setAssumptions((current) => ({
+                  ...current,
+                  developmentType: value,
+                  scenarioId:
+                    scenarioRows.find((scenario) => scenario.title === value)?.id ??
+                    current.scenarioId,
+                }));
+                markScenarioDirty();
+              }
             }
             options={developmentTypeOptions}
             value={assumptions.developmentType}
           />
           <ScenarioSelect
+            disabled={persistenceBusy}
             label="Intensity band"
             onChange={(value) => updateAssumption("intensityBand", value)}
             options={basicBandOptions}
             value={assumptions.intensityBand}
           />
           <ScenarioSelect
+            disabled={persistenceBusy}
             label="Value-per-acre assumption"
             onChange={(value) => updateAssumption("valuePerAcreBand", value)}
             options={basicBandOptions}
             value={assumptions.valuePerAcreBand}
           />
           <ScenarioSelect
+            disabled={persistenceBusy}
             label="School / service burden"
             onChange={(value) => updateAssumption("schoolServiceBurden", value)}
             options={burdenBandOptions}
             value={assumptions.schoolServiceBurden}
           />
           <ScenarioSelect
+            disabled={persistenceBusy}
             label="Utility readiness confidence"
             onChange={(value) => updateAssumption("utilityReadiness", value)}
             options={confidenceBandOptions}
             value={assumptions.utilityReadiness}
           />
           <ScenarioSelect
+            disabled={persistenceBusy}
             label="Transportation access confidence"
             onChange={(value) => updateAssumption("transportationAccess", value)}
             options={confidenceBandOptions}
             value={assumptions.transportationAccess}
           />
           <ScenarioSelect
+            disabled={persistenceBusy}
             label="Flood / environmental constraint"
             onChange={(value) => updateAssumption("floodConstraint", value)}
             options={burdenBandOptions}
             value={assumptions.floodConstraint}
           />
           <button
-            className="rounded-lg border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] sm:col-span-2"
-            onClick={() => setAssumptions({ ...initialScenarioAssumptions })}
+            className="rounded-lg border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50 sm:col-span-2"
+            disabled={persistenceBusy}
+            onClick={resetScenario}
             type="button"
           >
             Reset scenario
@@ -6250,6 +7060,80 @@ function EnterpriseScenarioConfigurePanel({
       </DetailsBlock>
     </div>
   );
+}
+
+const savedScenarioComparisonFields = [
+  ["assumptions", "developmentType", "Development type"],
+  ["assumptions", "intensityBand", "Intensity band"],
+  ["assumptions", "valuePerAcreBand", "Value per acre"],
+  ["assumptions", "schoolServiceBurden", "School / service burden"],
+  ["assumptions", "utilityReadiness", "Utility readiness"],
+  ["assumptions", "transportationAccess", "Transportation access"],
+  ["assumptions", "floodConstraint", "Flood constraint"],
+  ["outputs", "fiscalAttractiveness", "Fiscal attractiveness"],
+  ["outputs", "taxBaseLift", "Tax-base lift"],
+  ["outputs", "infrastructureBurden", "Infrastructure burden"],
+  ["outputs", "dataConfidence", "Data confidence"],
+] as const;
+
+function ScenarioPersistenceComparison({
+  left,
+  right,
+}: {
+  left: EconomicScenarioRecord;
+  right: EconomicScenarioRecord;
+}) {
+  return (
+    <div
+      className="overflow-x-auto rounded-lg border border-[var(--econ-border)] bg-black/20 p-3"
+      data-left-scenario-id={left.id}
+      data-right-scenario-id={right.id}
+      data-testid="economic-scenario-comparison"
+    >
+      <table className="w-full min-w-[640px] text-left text-xs">
+        <caption className="mb-2 text-left font-semibold text-[var(--econ-text)]">
+          {left.name} (v{left.current_version}) compared with {right.name} (v{right.current_version})
+        </caption>
+        <thead className="uppercase tracking-[0.12em] text-[var(--econ-muted)]">
+          <tr>
+            <th className="px-2 py-2">Measure</th>
+            <th className="px-2 py-2">{left.name}</th>
+            <th className="px-2 py-2">{right.name}</th>
+            <th className="px-2 py-2">Delta summary</th>
+          </tr>
+        </thead>
+        <tbody>
+          {savedScenarioComparisonFields.map(([group, key, label]) => {
+            const leftValue = scenarioRecordValue(left, group, key);
+            const rightValue = scenarioRecordValue(right, group, key);
+            return (
+              <tr key={`${group}-${key}`}>
+                <th className="border-t border-[var(--econ-border)] px-2 py-2 font-semibold text-[var(--econ-text)]">
+                  {label}
+                </th>
+                <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{leftValue}</td>
+                <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">{rightValue}</td>
+                <td className="border-t border-[var(--econ-border)] px-2 py-2 text-[var(--econ-muted)]">
+                  {leftValue === rightValue ? "Same" : `${leftValue} -> ${rightValue}`}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function scenarioRecordValue(
+  record: EconomicScenarioRecord,
+  group: "assumptions" | "outputs",
+  key: string,
+) {
+  const value = record[group][key];
+  return typeof value === "string" || typeof value === "number" || typeof value === "boolean"
+    ? String(value)
+    : "Not recorded";
 }
 
 function CsvDownloadTable({ rows }: { rows: ReturnType<typeof powerBiCsvRows> }) {
@@ -6301,15 +7185,17 @@ function PowerBiReportGenerator({
   onNavigate,
   outputs,
   payload,
+  reportBucketMutationsDisabled,
   signals,
 }: {
   askPowerBiAction?: PowerBiAskActionRequest | null;
   availability: PowerBiReportDataAvailability;
   dataReadiness: EconomicsReadinessRow[];
-  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onAddReportBucketItem: (item: ReportBucketItemInput) => Promise<boolean>;
   onNavigate: (section: "print") => void;
   outputs: EconomicsScenarioOutput[];
   payload: EconomicsPowerBiExportResponse | null;
+  reportBucketMutationsDisabled: boolean;
   signals: EconomicsParcelSignal[];
 }) {
   const [prompt, setPrompt] = useState("Build me a Power BI report.");
@@ -6340,13 +7226,14 @@ function PowerBiReportGenerator({
     setPlan(buildPowerBiReportPlan(prompt, payload, availability));
     setStatus("Report preview generated");
   };
-  const saveReport = () => {
+  const saveReport = async () => {
     if (!report) return;
-    onAddReportBucketItem(generatedReportBucketItem(report));
-    setStatus("Generated report saved to Report Bucket");
+    if (await onAddReportBucketItem(generatedReportBucketItem(report))) {
+      setStatus("Generated report saved to Report Bucket");
+    }
   };
-  const sendReportToPrint = () => {
-    saveReport();
+  const sendReportToPrint = async () => {
+    await saveReport();
     onNavigate("print");
   };
   const copySummary = async () => {
@@ -6381,7 +7268,7 @@ function PowerBiReportGenerator({
             <button
               className="rounded-full border border-[var(--econ-border)] px-3 py-1.5 text-xs font-semibold text-[var(--econ-muted)] transition hover:border-[var(--econ-gold)] hover:text-[var(--econ-text)] disabled:cursor-not-allowed disabled:opacity-45"
               disabled={disabled}
-              key={item.type}
+              key={item.label}
               onClick={() => setPrompt(item.prompt)}
               title={disabled ? state?.reason : item.label}
               type="button"
@@ -6455,10 +7342,10 @@ function PowerBiReportGenerator({
               ) : null}
             </div>
             <div className="flex flex-wrap gap-2">
-              <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" onClick={saveReport} type="button">
+              <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-sm font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)]" disabled={reportBucketMutationsDisabled} onClick={saveReport} type="button">
                 Save Report to Bucket
               </button>
-              <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={sendReportToPrint} type="button">
+              <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" disabled={reportBucketMutationsDisabled} onClick={sendReportToPrint} type="button">
                 Send Report to Print
               </button>
               <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]" onClick={() => void copySummary()} type="button">
@@ -6502,6 +7389,7 @@ function PowerBiReportGenerator({
               <div className="grid gap-3 xl:grid-cols-2">
                 {report.visuals.map((visual) => (
                 <GeneratedReportVisualCard
+                  disabled={reportBucketMutationsDisabled}
                   key={visual.visual_id}
                   onSave={() =>
                     onAddReportBucketItem({
@@ -6545,6 +7433,7 @@ function PowerBiReportGenerator({
             <div className="grid gap-3">
               {report.tables.map((table) => (
                 <GeneratedReportTableCard
+                  disabled={reportBucketMutationsDisabled}
                   key={table.title}
                   onSave={() =>
                     onAddReportBucketItem({
@@ -6593,15 +7482,17 @@ function LandDueDiligenceScreener({
   onToggleSignal,
   selectedSignalIds,
   signals,
+  reportBucketMutationsDisabled,
 }: {
   mode?: "investment" | "tools";
-  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onAddReportBucketItem: (item: ReportBucketItemInput) => Promise<boolean>;
   onAskCfs?: (signal: EconomicsParcelSignal) => void;
   onClearSelection: () => void;
   onNavigate: (section: "print") => void;
   onToggleSignal: (signal: EconomicsParcelSignal) => void;
   selectedSignalIds: string[];
   signals: EconomicsParcelSignal[];
+  reportBucketMutationsDisabled: boolean;
 }) {
   const investmentMode = mode === "investment";
   const guideNoun = investmentMode ? "Guide" : "Packet";
@@ -6663,10 +7554,11 @@ function LandDueDiligenceScreener({
   const selectedRankedRows = rankedRows.filter((row) => selectedSignalIds.includes(row.signal.parcel_id));
   const selectedRows = selectedRankedRows.map((row) => row.signal);
   const activeReviewSignal = selectedRows[0] ?? rankedRows[0]?.signal ?? rows[0] ?? null;
-  const addPacketToBucket = (nextPacket = packet) => {
-    if (!nextPacket) return;
-    onAddReportBucketItem(dueDiligencePacketBucketItem(nextPacket));
-    setPacketStatus("Added packet to Report Bucket");
+  const addPacketToBucket = async (nextPacket = packet) => {
+    if (!nextPacket) return false;
+    const saved = await onAddReportBucketItem(dueDiligencePacketBucketItem(nextPacket));
+    if (saved) setPacketStatus("Added packet to Report Bucket");
+    return saved;
   };
   const generateSinglePacket = () => {
     if (!activeReviewSignal) return;
@@ -6680,13 +7572,14 @@ function LandDueDiligenceScreener({
     setPacket(nextPacket);
     setPacketStatus(investmentMode ? "Watchlist review guide generated" : "Watchlist due diligence packet generated");
   };
-  const createTop25Packet = () => {
+  const createTop25Packet = async () => {
     const topRows = rankedRows.slice(0, 25);
     if (!topRows.length) return;
     const nextPacket = topLandReviewWatchlistPacket(topRows);
     setPacket(nextPacket);
-    addPacketToBucket(nextPacket);
-    setPacketStatus(investmentMode ? "Top 25 review guide created and added to Report Bucket" : "Top 25 review watchlist created and added to Report Bucket");
+    if (await addPacketToBucket(nextPacket)) {
+      setPacketStatus(investmentMode ? "Top 25 review guide created and added to Report Bucket" : "Top 25 review watchlist created and added to Report Bucket");
+    }
   };
   const compareSelectedCandidates = () => {
     if (selectedRankedRows.length < 2 || selectedRankedRows.length > 5) return;
@@ -6694,8 +7587,8 @@ function LandDueDiligenceScreener({
     setPacket(candidateComparisonPacket(selectedRankedRows.slice(0, 5)));
     setPacketStatus("Selected candidate comparison generated");
   };
-  const sendPacketToPrint = () => {
-    if (packet) addPacketToBucket(packet);
+  const sendPacketToPrint = async () => {
+    if (packet && !(await addPacketToBucket(packet))) return;
     onNavigate("print");
   };
   const copyPacket = (label: string, text: string) => {
@@ -6759,6 +7652,7 @@ function LandDueDiligenceScreener({
         preset={preset}
         rankedRows={rankedRows}
         selectedCount={selectedRankedRows.length}
+        reportBucketMutationsDisabled={reportBucketMutationsDisabled}
       />
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3" data-econ-tour="land-due-diligence-primary-filters">
         <ScenarioSelect label="Development-readiness" onChange={setReadiness} options={["Priority candidates", "All", ...uniqueValues(rows.map((row) => row.development_readiness_band))]} value={readiness} />
@@ -6822,6 +7716,7 @@ function LandDueDiligenceScreener({
         onDownload={() => packet ? downloadJson(packet, `${slugifyReportTitle(packet.title)}.json`) : undefined}
         onSendToPrint={sendPacketToPrint}
         packet={packet}
+        reportBucketMutationsDisabled={reportBucketMutationsDisabled}
         status={packetStatus}
       />
     </EconPanel>
@@ -6909,6 +7804,7 @@ function TopLandReviewCandidatesPanel({
   preset,
   rankedRows,
   selectedCount,
+  reportBucketMutationsDisabled,
 }: {
   comparisonRows: RankedLandReviewCandidate[];
   onCompareSelected: () => void;
@@ -6917,6 +7813,7 @@ function TopLandReviewCandidatesPanel({
   preset: string;
   rankedRows: RankedLandReviewCandidate[];
   selectedCount: number;
+  reportBucketMutationsDisabled: boolean;
 }) {
   const tierCounts = countRowsBy(rankedRows, (row) => row.ranking.review_priority_band).slice(0, 6);
   const topRows = rankedRows.slice(0, 5);
@@ -6934,7 +7831,7 @@ function TopLandReviewCandidatesPanel({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!rankedRows.length} onClick={onCreateTop25} type="button">
+          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!rankedRows.length || reportBucketMutationsDisabled} onClick={onCreateTop25} type="button">
             Create Top 25 Review Watchlist
           </button>
           <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={selectedCount < 2 || selectedCount > 5} onClick={onCompareSelected} type="button">
@@ -7133,6 +8030,7 @@ function DueDiligencePacketPreview({
   onDownload,
   onSendToPrint,
   packet,
+  reportBucketMutationsDisabled,
   status,
 }: {
   noun?: "Guide" | "Packet";
@@ -7142,6 +8040,7 @@ function DueDiligencePacketPreview({
   onDownload: () => void;
   onSendToPrint: () => void;
   packet: DueDiligencePacket | null;
+  reportBucketMutationsDisabled: boolean;
   status: string | null;
 }) {
   return (
@@ -7155,10 +8054,10 @@ function DueDiligencePacketPreview({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onAddToBucket} type="button">
+          <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet || reportBucketMutationsDisabled} onClick={onAddToBucket} type="button">
             Add {noun} to Report Bucket
           </button>
-          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onSendToPrint} type="button">
+          <button className="rounded-xl border border-[var(--econ-gold)]/50 bg-[var(--econ-gold)]/10 px-3 py-2 text-xs font-semibold text-[#ffe6a6] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet || reportBucketMutationsDisabled} onClick={onSendToPrint} type="button">
             Send {noun} to Print
           </button>
           <button className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50" disabled={!packet} onClick={onCopySummary} type="button">
@@ -7194,11 +8093,13 @@ function PowerBiChartBuilder({
   availability,
   onAddReportBucketItem,
   payload,
+  reportBucketMutationsDisabled,
 }: {
   aiAction?: PowerBiAskActionRequest | null;
   availability: PowerBiReportDataAvailability;
-  onAddReportBucketItem: (item: ReportBucketItemInput) => void;
+  onAddReportBucketItem: (item: ReportBucketItemInput) => Promise<boolean>;
   payload: EconomicsPowerBiExportResponse | null;
+  reportBucketMutationsDisabled: boolean;
 }) {
   const aiGeneratedPlan =
     aiAction?.actions && aiAction.actions.action_type !== "none"
@@ -7338,8 +8239,8 @@ function PowerBiChartBuilder({
     );
     setCopyStatus("Chart added to Power BI Report Canvas");
   };
-  const addChartToBucket = () => {
-    onAddReportBucketItem({
+  const addChartToBucket = async () => {
+    const saved = await onAddReportBucketItem({
       chart_config: currentChartConfig,
       content: recipe,
       id: `chart-${slugifyReportTitle(chartTitle)}-${slugifyReportTitle(recipe)}`,
@@ -7350,7 +8251,7 @@ function PowerBiChartBuilder({
       title: chartTitle,
       type: "chart",
     });
-    setCopyStatus("Added to Report Bucket");
+    if (saved) setCopyStatus("Added to Report Bucket");
   };
   const copyCanvasRecipe = async () => {
     if (!navigator.clipboard) {
@@ -7372,12 +8273,13 @@ function PowerBiChartBuilder({
     setCanvasItems((items) => [...items, ...generatedItems].slice(-8));
     setCopyStatus("Recommended visuals added to Power BI Report Canvas");
   };
-  const addGeneratedPlanToBucket = (plan: PowerBiGeneratedReportPlan) => {
-    onAddReportBucketItem(bucketItemFromGeneratedPlan(plan));
-    setCopyStatus("Added to Report Bucket");
+  const addGeneratedPlanToBucket = async (plan: PowerBiGeneratedReportPlan) => {
+    if (await onAddReportBucketItem(bucketItemFromGeneratedPlan(plan))) {
+      setCopyStatus("Added to Report Bucket");
+    }
   };
-  const addGeneratedVisualToBucket = (visual: PowerBiGeneratedVisual) => {
-    onAddReportBucketItem({
+  const addGeneratedVisualToBucket = async (visual: PowerBiGeneratedVisual) => {
+    const saved = await onAddReportBucketItem({
       caveats: [visual.caveat],
       chart_config: generatedVisualToRecipeConfig(visual),
       content: visual.powerbi_recipe,
@@ -7389,7 +8291,7 @@ function PowerBiChartBuilder({
       title: visual.title,
       type: "chart",
     });
-    setCopyStatus("Added to Report Bucket");
+    if (saved) setCopyStatus("Added to Report Bucket");
   };
   const addGeneratedVisualsToCanvas = () => {
     if (!generatedPlan) return;
@@ -7525,6 +8427,7 @@ function PowerBiChartBuilder({
                       </p>
                       <button
                         className="mt-3 rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                        disabled={reportBucketMutationsDisabled}
                         onClick={() => addGeneratedVisualToBucket(visual)}
                         type="button"
                       >
@@ -7552,6 +8455,7 @@ function PowerBiChartBuilder({
                 </button>
                 <button
                   className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+                  disabled={reportBucketMutationsDisabled}
                   onClick={() => addGeneratedPlanToBucket(generatedPlan)}
                   type="button"
                 >
@@ -7701,6 +8605,7 @@ function PowerBiChartBuilder({
 	          </button>
 	          <button
 	            className="ml-2 mt-3 rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+	            disabled={reportBucketMutationsDisabled}
 	            onClick={addChartToBucket}
 	            type="button"
 	          >
@@ -7730,9 +8635,9 @@ function PowerBiChartBuilder({
 	            </button>
 	            <button
 	              className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)] disabled:opacity-50"
-	              disabled={!canvasItems.length}
-	              onClick={() => {
-	                onAddReportBucketItem({
+	              disabled={!canvasItems.length || reportBucketMutationsDisabled}
+	              onClick={async () => {
+	                const saved = await onAddReportBucketItem({
 	                  content: canvasRecipe,
 	                  id: `report-canvas-${slugifyReportTitle(canvasRecipe)}`,
 	                  powerbi_recipe: canvasRecipe,
@@ -7742,7 +8647,7 @@ function PowerBiChartBuilder({
 	                  title: "Power BI Report Canvas Recipe",
 	                  type: "powerbi_recipe",
 	                });
-	                setCopyStatus("Added to Report Bucket");
+	                if (saved) setCopyStatus("Added to Report Bucket");
 	              }}
 	              type="button"
 	            >
@@ -7883,9 +8788,11 @@ function UserChartMatrix({
 }
 
 function GeneratedReportVisualCard({
+  disabled,
   onSave,
   visual,
 }: {
+  disabled: boolean;
   onSave: () => void;
   visual: GeneratedReportVisualPreview;
 }) {
@@ -7902,6 +8809,7 @@ function GeneratedReportVisualCard({
         </div>
         <button
           className="rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+          disabled={disabled}
           onClick={onSave}
           type="button"
         >
@@ -7927,9 +8835,11 @@ function GeneratedReportVisualCard({
 }
 
 function GeneratedReportTableCard({
+  disabled,
   onSave,
   table,
 }: {
+  disabled: boolean;
   onSave: () => void;
   table: GeneratedReportTablePreview;
 }) {
@@ -7939,6 +8849,7 @@ function GeneratedReportTableCard({
         <h4 className="text-sm font-semibold text-[var(--econ-text)]">{table.title}</h4>
         <button
           className="rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+          disabled={disabled}
           onClick={onSave}
           type="button"
         >
@@ -8062,9 +8973,11 @@ function ConceptList({
 }
 
 function QaChecklist({
+  disabled,
   onAddBucket,
   onCopy,
 }: {
+  disabled: boolean;
   onAddBucket: () => void;
   onCopy: () => void;
 }) {
@@ -8080,6 +8993,7 @@ function QaChecklist({
         </button>
         <button
           className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+          disabled={disabled}
           onClick={onAddBucket}
           type="button"
         >
@@ -8107,6 +9021,7 @@ function ReportBucketPanel({
   onOpenPrint,
   onRemove,
   onTogglePrint,
+  reportBucketMutationsDisabled,
   title,
 }: {
   items: ReportBucketItem[];
@@ -8114,6 +9029,7 @@ function ReportBucketPanel({
   onOpenPrint?: () => void;
   onRemove: (id: string) => void;
   onTogglePrint: (id: string) => void;
+  reportBucketMutationsDisabled: boolean;
   title: string;
 }) {
   return (
@@ -8137,6 +9053,7 @@ function ReportBucketPanel({
             ) : null}
             <button
               className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+              disabled={reportBucketMutationsDisabled}
               onClick={onClear}
               type="button"
             >
@@ -8147,6 +9064,9 @@ function ReportBucketPanel({
             {items.map((item) => (
               <div
                 className="rounded-xl border border-[var(--econ-border)] bg-white/[0.025] p-3"
+                data-object-id={item.id}
+                data-record-id={item.server_id}
+                data-testid="report-bucket-item"
                 key={item.id}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -8165,6 +9085,7 @@ function ReportBucketPanel({
                     <label className="inline-flex items-center gap-2 rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs text-[var(--econ-muted)]">
                       <input
                         checked={item.selected_for_print}
+                        disabled={reportBucketMutationsDisabled}
                         onChange={() => onTogglePrint(item.id)}
                         type="checkbox"
                       />
@@ -8172,6 +9093,7 @@ function ReportBucketPanel({
                     </label>
                     <button
                       className="rounded-lg border border-[var(--econ-border)] px-2.5 py-1.5 text-xs font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-risk)]"
+                      disabled={reportBucketMutationsDisabled}
                       onClick={() => onRemove(item.id)}
                       type="button"
                     >
@@ -8221,15 +9143,18 @@ function DetailsBlock({
 }
 
 function ActionButton({
+  disabled = false,
   label,
   onClick,
 }: {
+  disabled?: boolean;
   label: string;
   onClick: () => void;
 }) {
   return (
     <button
       className="rounded-xl border border-[var(--econ-border)] px-3 py-2 text-left text-sm font-semibold text-[var(--econ-text)] transition hover:border-[var(--econ-gold)]"
+      disabled={disabled}
       onClick={onClick}
       type="button"
     >
@@ -9024,11 +9949,13 @@ function ScenarioOutputList({ rows }: { rows: EconomicsScenarioOutput[] }) {
 }
 
 function ScenarioSelect({
+  disabled = false,
   label,
   onChange,
   options,
   value,
 }: {
+  disabled?: boolean;
   label: string;
   onChange: (value: string) => void;
   options: string[];
@@ -9038,7 +9965,8 @@ function ScenarioSelect({
     <label className="grid gap-1 text-xs text-[var(--econ-muted)]">
       <span className="font-semibold uppercase tracking-[0.12em]">{label}</span>
       <select
-        className="rounded-xl border border-[var(--econ-border)] bg-[#11151b] px-3 py-2 text-sm text-[var(--econ-text)] outline-none focus:border-[var(--econ-gold)]"
+        className="rounded-xl border border-[var(--econ-border)] bg-[#11151b] px-3 py-2 text-sm text-[var(--econ-text)] outline-none focus:border-[var(--econ-gold)] disabled:opacity-50"
+        disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
         value={value}
       >
@@ -10341,6 +11269,63 @@ type ScenarioAssumptions = {
   valuePerAcreBand: string;
 };
 
+const ECONOMIC_SCENARIO_SCHEMA_VERSION = "cfs-economics-scenario-v1";
+
+function scenarioAssumptionsFromRecord(
+  record: EconomicScenarioRecord,
+): ScenarioAssumptions {
+  if (
+    record.payload.calculation_schema_version !== ECONOMIC_SCENARIO_SCHEMA_VERSION ||
+    record.outputs.calculation_schema_version !== ECONOMIC_SCENARIO_SCHEMA_VERSION
+  ) {
+    throw malformedEconomicScenario("Saved Economics scenario uses an unsupported calculation schema.");
+  }
+  const assumptions = {
+    developmentType: scenarioAssumption(record, "developmentType", developmentTypeOptions),
+    floodConstraint: scenarioAssumption(record, "floodConstraint", burdenBandOptions),
+    intensityBand: scenarioAssumption(record, "intensityBand", basicBandOptions),
+    scenarioId: scenarioAssumption(record, "scenarioId", Object.keys(scenarioDefaults)),
+    schoolServiceBurden: scenarioAssumption(record, "schoolServiceBurden", burdenBandOptions),
+    transportationAccess: scenarioAssumption(record, "transportationAccess", confidenceBandOptions),
+    utilityReadiness: scenarioAssumption(record, "utilityReadiness", confidenceBandOptions),
+    valuePerAcreBand: scenarioAssumption(record, "valuePerAcreBand", basicBandOptions),
+  };
+  if (record.payload.scenario_template_id !== assumptions.scenarioId) {
+    throw malformedEconomicScenario("Saved Economics scenario template metadata is inconsistent.");
+  }
+  const expectedOutput = calculateScenarioOutput(assumptions);
+  if (
+    Object.entries(expectedOutput).some(
+      ([key, value]) => record.outputs[key] !== value,
+    )
+  ) {
+    throw malformedEconomicScenario(
+      "Saved Economics scenario outputs do not match its deterministic assumptions.",
+    );
+  }
+  return assumptions;
+}
+
+function scenarioAssumption(
+  record: EconomicScenarioRecord,
+  key: keyof ScenarioAssumptions,
+  allowed: string[],
+) {
+  const value = record.assumptions[key];
+  if (typeof value !== "string" || !allowed.includes(value)) {
+    throw malformedEconomicScenario(`Saved Economics scenario has an unsupported ${key} value.`);
+  }
+  return value;
+}
+
+function malformedEconomicScenario(displayMessage: string) {
+  return new ProductApiError({
+    code: "malformed_economic_scenario",
+    displayMessage,
+    kind: "malformed",
+  });
+}
+
 type ScenarioModelOutput = {
   constraintOpportunity: string;
   dataConfidence: string;
@@ -10726,13 +11711,323 @@ type ReportBucketItem = {
   related_tables?: PowerBiTableName[];
   report_plan?: PowerBiGeneratedReportPlan;
   selected_for_print: boolean;
+  server_id?: string;
   source_page: "Ask CFS" | "CFS Investments" | "Economic Dashboard" | "Power BI & Tools" | "Print";
   summary: string;
   title: string;
   type: ReportBucketItemType;
+  updated_at?: string;
 };
 type ReportBucketItemInput = Omit<ReportBucketItem, "created_at" | "selected_for_print"> &
   Partial<Pick<ReportBucketItem, "created_at" | "selected_for_print">>;
+
+function reportBucketCreateInput(item: ReportBucketItem, position: number) {
+  const { selected_for_print, server_id: _serverId, updated_at: _updatedAt, ...payload } = item;
+  void _serverId;
+  void _updatedAt;
+  return {
+    include_in_print: selected_for_print,
+    object_id: item.id,
+    object_type: item.type,
+    payload: toJsonObject(payload),
+    position,
+    title: item.title,
+  };
+}
+
+function reportBucketItemFromRecord(
+  record: ReportBucketItemRecord,
+  fallback?: ReportBucketItem,
+): ReportBucketItem {
+  const payload = record.payload;
+  const type = reportBucketItemType(record.object_type);
+  const sourcePage = reportBucketSourcePage(payload.source_page);
+  return {
+    ...fallback,
+    caveats: stringArray(payload.caveats) ?? fallback?.caveats,
+    chart_config: isUserChartRecipeConfig(payload.chart_config)
+      ? payload.chart_config
+      : fallback?.chart_config,
+    content: typeof payload.content === "string" ? payload.content : fallback?.content ?? "",
+    created_at: typeof payload.created_at === "string" ? payload.created_at : record.created_at,
+    due_diligence_packet: isDueDiligencePacket(payload.due_diligence_packet)
+      ? payload.due_diligence_packet
+      : fallback?.due_diligence_packet,
+    generated_report: isGeneratedPowerBiReportSnapshot(payload.generated_report)
+      ? payload.generated_report
+      : fallback?.generated_report,
+    id: record.object_id,
+    powerbi_recipe:
+      typeof payload.powerbi_recipe === "string"
+        ? payload.powerbi_recipe
+        : fallback?.powerbi_recipe,
+    related_tables: isPowerBiTableNameArray(payload.related_tables)
+      ? payload.related_tables
+      : fallback?.related_tables,
+    report_plan: isPowerBiGeneratedReportPlan(payload.report_plan)
+      ? payload.report_plan
+      : fallback?.report_plan,
+    selected_for_print: record.include_in_print,
+    server_id: record.id,
+    source_page: sourcePage,
+    summary:
+      typeof payload.summary === "string"
+        ? payload.summary
+        : fallback?.summary ?? record.title,
+    title: record.title,
+    type,
+    updated_at: record.updated_at,
+  };
+}
+
+function productErrorDetails(caught: unknown) {
+  const error = toProductApiError(caught);
+  return {
+    message: error.displayMessage,
+    requestId: error.requestId,
+  };
+}
+
+function reportBucketItemType(value: string): ReportBucketItemType {
+  switch (value) {
+    case "chart":
+    case "decision_memo":
+    case "due_diligence_packet":
+    case "evidence_pack":
+    case "generated_report":
+    case "powerbi_recipe":
+    case "qa_checklist":
+    case "report_plan":
+    case "scenario_output":
+      return value;
+    default:
+      throw new ProductApiError({
+        code: "malformed_report_bucket_item_type",
+        displayMessage: "Report Bucket data contains an unsupported item type.",
+        kind: "malformed",
+      });
+  }
+}
+
+function reportBucketSourcePage(value: JsonValue | undefined): ReportBucketItem["source_page"] {
+  switch (value) {
+    case "Ask CFS":
+    case "CFS Investments":
+    case "Economic Dashboard":
+    case "Power BI & Tools":
+    case "Print":
+      return value;
+    default:
+      throw new ProductApiError({
+        code: "malformed_report_bucket_source_page",
+        displayMessage: "Report Bucket data contains an unsupported source page.",
+        kind: "malformed",
+      });
+  }
+}
+
+function stringArray(value: JsonValue | undefined) {
+  return Array.isArray(value) && value.every((item): item is string => typeof item === "string")
+    ? value
+    : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isPowerBiTableName(value: unknown): value is PowerBiTableName {
+  switch (value) {
+    case "domain_readiness_dim":
+    case "economics_kpi_fact":
+    case "geography_dim":
+    case "parcel_economic_signal_fact":
+    case "scenario_dim":
+    case "scenario_output_fact":
+    case "time_dim":
+      return true;
+    default:
+      return false;
+  }
+}
+
+function isPowerBiTableNameArray(value: unknown): value is PowerBiTableName[] {
+  return Array.isArray(value) && value.every(isPowerBiTableName);
+}
+
+function isChartAggregation(value: unknown): value is UserChartAggregation {
+  return value === "average" || value === "count" || value === "sum";
+}
+
+function isChartVisualType(value: unknown): value is UserChartVisualType {
+  return ["bar", "donut", "line", "matrix", "pie", "table"].includes(
+    typeof value === "string" ? value : "",
+  );
+}
+
+function isUserChartRecipeConfig(value: unknown): value is UserChartRecipeConfig {
+  return (
+    isRecord(value) &&
+    isChartAggregation(value.aggregation) &&
+    typeof value.categoryField === "string" &&
+    typeof value.filterField === "string" &&
+    typeof value.filterValue === "string" &&
+    isPowerBiTableName(value.tableName) &&
+    typeof value.valueField === "string" &&
+    isChartVisualType(value.visualType)
+  );
+}
+
+function isDueDiligencePacket(value: unknown): value is DueDiligencePacket {
+  return (
+    isRecord(value) &&
+    isStringArray(value.caveats) &&
+    typeof value.id === "string" &&
+    (value.packet_type === "single_parcel" || value.packet_type === "watchlist") &&
+    isStringArray(value.questions_to_ask) &&
+    Array.isArray(value.sections) &&
+    value.sections.every(
+      (section) =>
+        isRecord(section) &&
+        isStringArray(section.lines) &&
+        typeof section.title === "string",
+    ) &&
+    typeof value.summary === "string" &&
+    typeof value.title === "string"
+  );
+}
+
+function isPowerBiGeneratedVisual(value: unknown): value is PowerBiGeneratedVisual {
+  return (
+    isRecord(value) &&
+    isChartAggregation(value.aggregation) &&
+    typeof value.axis === "string" &&
+    typeof value.caveat === "string" &&
+    typeof value.filterField === "string" &&
+    typeof value.filterValue === "string" &&
+    typeof value.page_name === "string" &&
+    typeof value.powerbi_recipe === "string" &&
+    isStringArray(value.slicers) &&
+    isPowerBiTableName(value.source_table) &&
+    typeof value.title === "string" &&
+    typeof value.value === "string" &&
+    typeof value.visual_id === "string" &&
+    isChartVisualType(value.visual_type)
+  );
+}
+
+function isPowerBiRelationship(value: unknown) {
+  return (
+    isRecord(value) &&
+    typeof value.from_column === "string" &&
+    typeof value.from_table === "string" &&
+    typeof value.to_column === "string" &&
+    typeof value.to_table === "string" &&
+    (value.active === undefined || typeof value.active === "boolean") &&
+    (value.cardinality === undefined || typeof value.cardinality === "string") &&
+    (value.cross_filter_direction === undefined ||
+      typeof value.cross_filter_direction === "string")
+  );
+}
+
+function isPowerBiGeneratedReportPlan(
+  value: unknown,
+): value is PowerBiGeneratedReportPlan {
+  return (
+    isRecord(value) &&
+    isStringArray(value.caveats) &&
+    isRecord(value.dataset_plan) &&
+    isPowerBiTableNameArray(value.dataset_plan.dimensions) &&
+    isPowerBiTableNameArray(value.dataset_plan.facts) &&
+    isStringArray(value.dataset_plan.measures) &&
+    isStringArray(value.dataset_plan.slicers) &&
+    isStringArray(value.dataset_plan.sort_fields) &&
+    typeof value.generated_from_prompt === "string" &&
+    isStringArray(value.next_steps) &&
+    Array.isArray(value.pages) &&
+    value.pages.every(
+      (page) =>
+        isRecord(page) &&
+        typeof page.page_name === "string" &&
+        typeof page.purpose === "string" &&
+        Array.isArray(page.visuals) &&
+        page.visuals.every(isPowerBiGeneratedVisual),
+    ) &&
+    isPowerBiTableNameArray(value.recommended_tables) &&
+    Array.isArray(value.relationships) &&
+    value.relationships.every(isPowerBiRelationship) &&
+    typeof value.summary === "string" &&
+    typeof value.title === "string"
+  );
+}
+
+function isGeneratedReportIncludes(
+  value: unknown,
+): value is GeneratedReportIncludeState {
+  return (
+    isRecord(value) &&
+    ["caveats", "kpis", "powerbi_details", "summary", "tables", "visuals"].every(
+      (key) => typeof value[key] === "boolean",
+    )
+  );
+}
+
+function isGeneratedReportVisualPreview(
+  value: unknown,
+): value is GeneratedReportVisualPreview {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.rows) &&
+    value.rows.every(isRecord) &&
+    isPowerBiGeneratedVisual(value)
+  );
+}
+
+function isGeneratedPowerBiReportSnapshot(
+  value: unknown,
+): value is GeneratedPowerBiReportSnapshot {
+  return (
+    isRecord(value) &&
+    isStringArray(value.caveats) &&
+    isStringArray(value.diagnostics) &&
+    typeof value.generated_from_prompt === "string" &&
+    isGeneratedReportIncludes(value.include_sections) &&
+    Array.isArray(value.kpis) &&
+    value.kpis.every(
+      (kpi) =>
+        isRecord(kpi) &&
+        typeof kpi.label === "string" &&
+        typeof kpi.value === "string",
+    ) &&
+    typeof value.powerbi_details === "string" &&
+    typeof value.report_type === "string" &&
+    typeof value.summary === "string" &&
+    Array.isArray(value.tables) &&
+    value.tables.every(
+      (table) =>
+        isRecord(table) &&
+        isStringArray(table.columns) &&
+        Array.isArray(table.rows) &&
+        table.rows.every(isRecord) &&
+        typeof table.title === "string",
+    ) &&
+    typeof value.title === "string" &&
+    Array.isArray(value.unavailable_visuals) &&
+    value.unavailable_visuals.every(
+      (visual) =>
+        isRecord(visual) &&
+        typeof visual.reason === "string" &&
+        typeof visual.title === "string" &&
+        isPowerBiGeneratedVisual(visual.visual),
+    ) &&
+    Array.isArray(value.visuals) &&
+    value.visuals.every(isGeneratedReportVisualPreview)
+  );
+}
 type PowerBiGeneratedVisual = {
   aggregation: UserChartAggregation;
   axis: string;

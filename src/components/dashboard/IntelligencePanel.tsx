@@ -188,7 +188,15 @@ const modeMetadata: Record<
   },
 };
 
-export function IntelligencePanel() {
+export function PlanningSnapshotSaveController() {
+  return <IntelligencePanel controllerOnly />;
+}
+
+export function IntelligencePanel({
+  controllerOnly = false,
+}: {
+  controllerOnly?: boolean;
+} = {}) {
   const {
     activeLayers,
     developmentHotspotControls,
@@ -211,6 +219,7 @@ export function IntelligencePanel() {
     selectedModelResearchContext,
     selectedSchoolUtilizationZone,
     planningSnapshot,
+    planningSnapshotCanWrite,
     savedPlanningSnapshots,
     clearSelectedSchoolUtilizationZone,
     savePlanningSnapshot,
@@ -230,6 +239,45 @@ export function IntelligencePanel() {
 
   const metadata = modeMetadata[productMode];
   const ModeIcon = metadata.icon;
+  const overviewModeContent =
+    productMode === "workspace" ? (
+      <OverviewModeContent
+        activeLayers={activeLayers}
+        clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
+        controllerOnly={controllerOnly}
+        developmentHotspotControls={developmentHotspotControls}
+        developmentHotspotsEnabled={developmentHotspotsEnabled}
+        floodConstraintsEnabled={floodConstraintsEnabled}
+        floodZonesEnabled={floodZonesEnabled}
+        indicatorCenterDisplayMode={indicatorCenterDisplayMode}
+        modelResearchOverlayEnabled={modelResearchOverlayEnabled}
+        modelResearchViewMode={modelResearchViewMode}
+        modelResearchMapSummary={modelResearchMapSummary}
+        overviewCommandMode={overviewCommandMode}
+        planningSnapshot={planningSnapshot}
+        planningSnapshotCanWrite={planningSnapshotCanWrite}
+        savedPlanningSnapshots={savedPlanningSnapshots}
+        savePlanningSnapshot={savePlanningSnapshot}
+        schoolUtilizationZonesEnabled={schoolUtilizationZonesEnabled}
+        selectedDevelopmentHotspotContext={selectedDevelopmentHotspotContext}
+        selectedIndicatorCenterGroupIds={selectedIndicatorCenterGroupIds}
+        selectedIndicatorCenterContext={selectedIndicatorCenterContext}
+        selectedModelResearchContext={selectedModelResearchContext}
+        selectedParcelId={selectedParcelId}
+        selectedParcelIntelligence={selectedParcelIntelligence}
+        selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
+        selectedSchoolUtilizationZone={selectedSchoolUtilizationZone}
+        setMapFocusMode={setMapFocusMode}
+        setOverviewCommandMode={setOverviewCommandMode}
+        setPlanningSnapshotView={setPlanningSnapshotView}
+        setProductMode={setProductMode}
+        setSelectedIndicatorCenterContext={setSelectedIndicatorCenterContext}
+      />
+    ) : null;
+
+  if (controllerOnly) {
+    return overviewModeContent;
+  }
 
   return (
     <aside
@@ -260,36 +308,7 @@ export function IntelligencePanel() {
       </div>
 
       {productMode === "workspace" ? (
-        <OverviewModeContent
-          selectedParcelId={selectedParcelId}
-          selectedParcelIntelligence={selectedParcelIntelligence}
-          selectedParcelIntelligenceSource={selectedParcelIntelligenceSource}
-          selectedDevelopmentHotspotContext={selectedDevelopmentHotspotContext}
-          selectedIndicatorCenterGroupIds={selectedIndicatorCenterGroupIds}
-          selectedIndicatorCenterContext={selectedIndicatorCenterContext}
-          selectedModelResearchContext={selectedModelResearchContext}
-          selectedSchoolUtilizationZone={selectedSchoolUtilizationZone}
-          clearSelectedSchoolUtilizationZone={clearSelectedSchoolUtilizationZone}
-          activeLayers={activeLayers}
-          developmentHotspotControls={developmentHotspotControls}
-          developmentHotspotsEnabled={developmentHotspotsEnabled}
-          floodConstraintsEnabled={floodConstraintsEnabled}
-          floodZonesEnabled={floodZonesEnabled}
-          indicatorCenterDisplayMode={indicatorCenterDisplayMode}
-          modelResearchOverlayEnabled={modelResearchOverlayEnabled}
-          modelResearchViewMode={modelResearchViewMode}
-          modelResearchMapSummary={modelResearchMapSummary}
-          overviewCommandMode={overviewCommandMode}
-          schoolUtilizationZonesEnabled={schoolUtilizationZonesEnabled}
-          planningSnapshot={planningSnapshot}
-          savedPlanningSnapshots={savedPlanningSnapshots}
-          savePlanningSnapshot={savePlanningSnapshot}
-          setMapFocusMode={setMapFocusMode}
-          setSelectedIndicatorCenterContext={setSelectedIndicatorCenterContext}
-          setOverviewCommandMode={setOverviewCommandMode}
-          setProductMode={setProductMode}
-          setPlanningSnapshotView={setPlanningSnapshotView}
-        />
+        overviewModeContent
       ) : productMode === "methodology" ? (
         <MethodologyModeContent />
       ) : (
@@ -317,6 +336,7 @@ export function IntelligencePanel() {
 function OverviewModeContent({
   activeLayers,
   clearSelectedSchoolUtilizationZone,
+  controllerOnly,
   developmentHotspotControls,
   developmentHotspotsEnabled,
   floodConstraintsEnabled,
@@ -327,6 +347,7 @@ function OverviewModeContent({
   modelResearchMapSummary,
   overviewCommandMode,
   planningSnapshot,
+  planningSnapshotCanWrite,
   savedPlanningSnapshots,
   savePlanningSnapshot,
   schoolUtilizationZonesEnabled,
@@ -346,6 +367,7 @@ function OverviewModeContent({
 }: {
   activeLayers: ReturnType<typeof useDashboardState>["activeLayers"];
   clearSelectedSchoolUtilizationZone: () => void;
+  controllerOnly: boolean;
   developmentHotspotControls: ReturnType<typeof useDashboardState>["developmentHotspotControls"];
   developmentHotspotsEnabled: boolean;
   floodConstraintsEnabled: boolean;
@@ -356,8 +378,11 @@ function OverviewModeContent({
   modelResearchMapSummary: ModelResearchMapSummary;
   overviewCommandMode: OverviewCommandMode;
   planningSnapshot: PlanningSnapshot | null;
+  planningSnapshotCanWrite: boolean;
   savedPlanningSnapshots: PlanningSnapshot[];
-  savePlanningSnapshot: (snapshot: PlanningSnapshot) => void;
+  savePlanningSnapshot: ReturnType<
+    typeof useDashboardState
+  >["savePlanningSnapshot"];
   schoolUtilizationZonesEnabled: boolean;
   selectedDevelopmentHotspotContext: SelectedDevelopmentHotspotContext | null;
   selectedIndicatorCenterGroupIds: IndicatorCenterGroupId[];
@@ -441,7 +466,7 @@ function OverviewModeContent({
   );
 
   const handleSaveOverviewSnapshot = useCallback(async () => {
-    if (snapshotSaving) {
+    if (!planningSnapshotCanWrite || snapshotSaving) {
       return;
     }
 
@@ -483,7 +508,8 @@ function OverviewModeContent({
           toIndicatorCenterSnapshotSummaries(indicatorCenterCards),
         selectedModelResearchContext,
       });
-      savePlanningSnapshot(nextSnapshot);
+      const savedSnapshot = await savePlanningSnapshot(nextSnapshot);
+      if (!savedSnapshot) return;
       setPlanningSnapshotView("overview");
       setSnapshotSaved(true);
       window.dispatchEvent(
@@ -504,6 +530,7 @@ function OverviewModeContent({
     modelResearchOverlayEnabled,
     modelResearchViewMode,
     overviewCommandMode,
+    planningSnapshotCanWrite,
     savePlanningSnapshot,
     schoolConstraint,
     selectedDevelopmentHotspotContext,
@@ -557,6 +584,10 @@ function OverviewModeContent({
     setOverviewCommandMode,
   ]);
 
+  if (controllerOnly) {
+    return null;
+  }
+
   const countywideBriefVisible =
     overviewCommandMode === "countywide" &&
     (!selectedParcelOfficialId ||
@@ -580,6 +611,7 @@ function OverviewModeContent({
     <div className="space-y-4">
       {overviewCommandMode === "modelLab" ? (
         <ModelLabPanel
+          canSaveSnapshot={planningSnapshotCanWrite}
           modelResearchOverlayEnabled={modelResearchOverlayEnabled}
           modelResearchViewMode={modelResearchViewMode}
           modelResearchMapSummary={modelResearchMapSummary}
@@ -604,6 +636,7 @@ function OverviewModeContent({
         />
       ) : overviewCommandMode === "indicatorCenter" ? (
         <IndicatorCenterPanel
+          canSaveSnapshot={planningSnapshotCanWrite}
           displayMode={indicatorCenterDisplayMode}
           indicatorCards={indicatorCenterCards}
           onOpenMethodology={() => {
@@ -624,6 +657,7 @@ function OverviewModeContent({
       ) : overviewCommandMode === "snapshot" ? (
         <SnapshotCapturePanel
           activeLayerLabels={activeLayerLabels}
+          canSaveSnapshot={planningSnapshotCanWrite}
           onOpenPlanningSnapshot={() => {
             setPlanningSnapshotView("overview");
             setProductMode("due_diligence");
@@ -637,6 +671,7 @@ function OverviewModeContent({
       ) : (
         <IntelligenceBriefPanel
           activeLayerLabels={activeLayerLabels}
+          canSaveSnapshot={planningSnapshotCanWrite}
           developmentActivity={developmentActivity}
           developmentStatistics={developmentStatistics}
           floodConstraint={floodConstraint}
@@ -679,6 +714,7 @@ function OverviewModeContent({
 
 function IntelligenceBriefPanel({
   activeLayerLabels,
+  canSaveSnapshot,
   developmentActivity,
   developmentStatistics,
   floodConstraint,
@@ -704,6 +740,7 @@ function IntelligenceBriefPanel({
   transportationContext,
 }: {
   activeLayerLabels: string[];
+  canSaveSnapshot: boolean;
   developmentActivity: SnapshotDevelopmentActivity;
   developmentStatistics: ReturnType<typeof useDevelopmentStatistics>;
   floodConstraint: SnapshotFloodConstraint;
@@ -813,7 +850,8 @@ function IntelligenceBriefPanel({
       <div className="mt-3 grid gap-2">
         <button
           className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
-          disabled={snapshotSaving}
+          data-testid="planning-snapshot-save-intelligence"
+          disabled={!canSaveSnapshot || snapshotSaving}
           onClick={() => {
             void onSaveSnapshot();
           }}
@@ -920,6 +958,7 @@ function ParcelSearchBrief() {
 
 function SnapshotCapturePanel({
   activeLayerLabels,
+  canSaveSnapshot,
   onOpenPlanningSnapshot,
   onSaveSnapshot,
   planningSnapshot,
@@ -928,6 +967,7 @@ function SnapshotCapturePanel({
   snapshotSaving,
 }: {
   activeLayerLabels: string[];
+  canSaveSnapshot: boolean;
   onOpenPlanningSnapshot: () => void;
   onSaveSnapshot: () => void | Promise<void>;
   planningSnapshot: PlanningSnapshot | null;
@@ -1021,7 +1061,8 @@ function SnapshotCapturePanel({
       <div className="mt-3 grid gap-2">
         <button
           className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
-          disabled={snapshotSaving}
+          data-testid="planning-snapshot-save-snapshot-builder"
+          disabled={!canSaveSnapshot || snapshotSaving}
           onClick={() => {
             void onSaveSnapshot();
           }}
@@ -1125,6 +1166,7 @@ function UtilityFeaturesInModelPanel({
 }
 
 function IndicatorCenterPanel({
+  canSaveSnapshot,
   displayMode,
   indicatorCards,
   onOpenMethodology,
@@ -1136,6 +1178,7 @@ function IndicatorCenterPanel({
   setSelectedIndicator,
   snapshotSaving,
 }: {
+  canSaveSnapshot: boolean;
   displayMode: IndicatorCenterDisplayMode;
   indicatorCards: IndicatorCenterSummaryCard[];
   onOpenMethodology: () => void;
@@ -1429,7 +1472,8 @@ function IndicatorCenterPanel({
       <div className="mt-3 grid gap-2">
         <button
           className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
-          disabled={snapshotSaving}
+          data-testid="planning-snapshot-save-indicator-panel"
+          disabled={!canSaveSnapshot || snapshotSaving}
           onClick={() => {
             void onSaveSnapshot();
           }}
@@ -1460,6 +1504,7 @@ function IndicatorCenterPanel({
 }
 
 function ModelLabPanel({
+  canSaveSnapshot,
   modelResearchOverlayEnabled,
   modelResearchViewMode,
   modelResearchMapSummary,
@@ -1471,6 +1516,7 @@ function ModelLabPanel({
   selectedParcelId,
   snapshotSaving,
 }: {
+  canSaveSnapshot: boolean;
   modelResearchOverlayEnabled: boolean;
   modelResearchViewMode: ReturnType<typeof useDashboardState>["modelResearchViewMode"];
   modelResearchMapSummary: ModelResearchMapSummary;
@@ -1692,7 +1738,8 @@ function ModelLabPanel({
           <div className="mt-3 grid gap-2">
             <button
               className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
-              disabled={snapshotSaving}
+              data-testid="planning-snapshot-save-model-selection"
+              disabled={!canSaveSnapshot || snapshotSaving}
               onClick={() => {
                 void onSaveSnapshot();
               }}
@@ -1879,7 +1926,8 @@ function ModelLabPanel({
         {!selectedModelResearchContext ? (
           <button
             className="inline-flex items-center justify-center gap-2 rounded-md border border-[#d8b86a]/35 bg-[#d8b86a]/12 px-3 py-2.5 text-xs font-semibold text-[#f6d98e] transition hover:bg-[#d8b86a]/18 disabled:cursor-not-allowed disabled:opacity-65"
-            disabled={snapshotSaving}
+            data-testid="planning-snapshot-save-model"
+            disabled={!canSaveSnapshot || snapshotSaving}
             onClick={() => {
               void onSaveSnapshot();
             }}

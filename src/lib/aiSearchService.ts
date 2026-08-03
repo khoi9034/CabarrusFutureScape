@@ -159,7 +159,7 @@ export async function searchCfsAi(
   const response = await apiPost<CfsAiSearchResponse>(
     "/ai/search",
     { ...request, mode: "live" },
-    { signal: options.signal, timeoutMs: 20000 },
+    { signal: options.signal, timeoutMs: 60000 },
   );
   recordTechnicalEvent("ask_cfs_request", {
     answer_mode: response.answer_mode ?? "deterministic",

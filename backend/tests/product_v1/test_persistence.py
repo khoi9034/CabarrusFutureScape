@@ -39,7 +39,15 @@ def test_project_snapshot_version_archive_and_restart_persist(
             "project_id": project["id"],
             "title": "Planning Snapshot",
             "included_sections": ["map", "schools"],
-            "map_state": {"extent": [-80.8, 35.1, -80.4, 35.5]},
+            "map_state": {
+                "extent": [-80.8, 35.1, -80.4, 35.5],
+                "key_findings": ["Preserve legitimate planning data"],
+            },
+            "payload": {
+                "snapshot": {
+                    "keyFacts": [{"label": "County", "value": "Cabarrus"}],
+                }
+            },
             "review_status": "Draft",
         },
     )
@@ -52,6 +60,30 @@ def test_project_snapshot_version_archive_and_restart_persist(
 
     versioned = service.version("planning_snapshots", snapshot["id"], "Reviewed map extent")
     assert versioned["current_version"] == 2
+    report_draft = service.create(
+        "reports",
+        {
+            "project_id": project["id"],
+            "report_type": "planning_snapshot_draft",
+            "title": "Planning Snapshot report",
+            "status": "Draft",
+            "payload": {
+                "source_snapshot_id": snapshot["id"],
+                "selected_sections": {
+                    "key_findings": True,
+                    "map_view": True,
+                    "schools": False,
+                },
+                "schema_version": "planning_snapshot_draft_v1",
+            },
+        },
+    )
+    report_draft = service.update(
+        "reports",
+        report_draft["id"],
+        {"payload": {**report_draft["payload"], "report_notes": "Persisted report note"}},
+        expected_updated_at=report_draft["updated_at"].isoformat(),
+    )
     with pytest.raises(ProductConflict, match="changed after"):
         service.update(
             "planning_snapshots",
@@ -74,6 +106,24 @@ def test_project_snapshot_version_archive_and_restart_persist(
         assert ProductService(reopened, planner).get("planning_snapshots", snapshot["id"])[
             "current_version"
         ] == 2
+        reopened_report = ProductService(reopened, planner).get("reports", report_draft["id"])
+        assert reopened_report["report_type"] == "planning_snapshot_draft"
+        assert reopened_report["payload"]["source_snapshot_id"] == snapshot["id"]
+        assert reopened_report["payload"]["selected_sections"] == {
+            "key_findings": True,
+            "map_view": True,
+            "schools": False,
+        }
+        reopened_snapshot = ProductService(reopened, planner).get(
+            "planning_snapshots", snapshot["id"]
+        )
+        assert reopened_snapshot["map_state"]["key_findings"] == [
+            "Preserve legitimate planning data"
+        ]
+        assert reopened_snapshot["payload"]["snapshot"]["keyFacts"] == [
+            {"label": "County", "value": "Cabarrus"}
+        ]
+        assert reopened_report["payload"]["report_notes"] == "Persisted report note"
         assert reopened.scalar(
             select(func.count()).select_from(audit_events).where(
                 audit_events.c.object_id == snapshot["id"]
@@ -149,14 +199,22 @@ def test_economics_and_ask_cfs_persist_with_safe_fields(
 
     viewer = principal_factory(Role.VIEWER, project_ids=frozenset({project["id"]}))
     ask = ProductService(product_session, viewer)
+    secret_marker = "cfs-redaction-marker"
+    secret_phrase = f"{secret_marker} correct horse, battery staple"
     conversation = ask.create(
         "ask_cfs_conversations",
         {
             "project_id": project["id"],
-            "title": "Parcel context",
+            "title": f"Review password={secret_phrase}; ordinary key constraints",
             "product_context": {
+                "context_scope": "planning|||||||",
                 "parcel_id": "p-1",
-                "private": {"hidden_prompt": "do not persist", "token": "secret-token"},
+                "private": {
+                    "apikey": "unseparated-api-key",
+                    "clientsecret": "unseparated-client-secret",
+                    "hidden_prompt": "do not persist",
+                    "token": "secret-token",
+                },
             },
             "retention_until": datetime.now(UTC) + timedelta(days=30),
         },
@@ -164,7 +222,7 @@ def test_economics_and_ask_cfs_persist_with_safe_fields(
     message = ask.add_ask_message(
         conversation["id"],
         role="user",
-        safe_question="What verified constraints are present?",
+        safe_question=f"api_key={secret_phrase}; what verified constraints are present?",
         entity_context={
             "parcel_id": "p-1",
             "credentials": {"password": "secret-password"},
@@ -172,20 +230,34 @@ def test_economics_and_ask_cfs_persist_with_safe_fields(
         provider_mode="none",
     )
     assert conversation["product_context"]["private"] == {
+        "apikey": "<redacted>",
+        "clientsecret": "<redacted>",
         "hidden_prompt": "<redacted>",
         "token": "<redacted>",
     }
+    assert conversation["product_context"]["context_scope"] == "planning|||||||"
+    assert conversation["title"] == "Review <redacted>"
+    assert message["safe_question"] == "<redacted>"
+    assert secret_marker not in str(conversation) + str(message)
     assert message["entity_context"]["credentials"] == "<redacted>"
     assert report["payload"]["private"] == {"api_key": "<redacted>"}
     assistant = ask.add_ask_message(
         conversation["id"],
         role="assistant",
-        safe_answer_summary="Verified constraint summary only.",
+        safe_answer_summary=f"Bearer {secret_marker}; verified constraint summary only.",
         prompt_version="ask-cfs-v1",
         provider_mode="none",
         safety_status="accepted",
     )
     assert assistant["prompt_version"] == "ask-cfs-v1"
+    assert assistant["safe_answer_summary"] == "<redacted>; verified constraint summary only."
+    assert secret_marker not in str(assistant)
+    messages, total_messages = ask.list_ask_messages(conversation["id"])
+    assert total_messages == 2
+    assert [row["id"] for row in messages] == [
+        message["id"],
+        assistant["id"],
+    ]
     assert product_session.scalar(
         select(func.count()).select_from(ask_cfs_messages).where(
             ask_cfs_messages.c.conversation_id == conversation["id"]
@@ -202,7 +274,10 @@ def test_economics_and_ask_cfs_persist_with_safe_fields(
 
     with Session(product_session.get_bind()) as reopened:
         reopened_service = ProductService(reopened, analyst)
-        assert reopened_service.get("economic_scenarios", scenario["id"])["current_version"] == 2
+        reopened_scenario = reopened_service.get("economic_scenarios", scenario["id"])
+        assert reopened_scenario["current_version"] == 2
+        assert reopened_scenario["assumptions"] == {"horizon_years": 10}
+        assert reopened_scenario["outputs"] == {"status": "analytical only"}
         scenarios, total = reopened_service.list("economic_scenarios", project_id=project["id"])
         assert total == 2
         assert {row["comparison_set_id"] for row in scenarios} == {"comparison-1"}
@@ -210,6 +285,10 @@ def test_economics_and_ask_cfs_persist_with_safe_fields(
             scenario["id"],
             comparison["id"],
         ]
+        assert reopened_service.get("report_bucket_items", bucket["id"])["archived_at"] is not None
+        reopened_ask = ProductService(reopened, viewer)
+        assert reopened_ask.get("ask_cfs_conversations", conversation["id"])["reset_at"] is not None
+        assert reopened_ask.list_ask_messages(conversation["id"])[1] == 0
         assert reopened.scalar(
             select(func.count()).select_from(economic_scenario_versions).where(
                 economic_scenario_versions.c.scenario_id == scenario["id"]

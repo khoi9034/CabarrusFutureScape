@@ -77,7 +77,8 @@ export function OverviewCommandCenter() {
     overviewLayout,
     cfsAppMode,
     planningSnapshot,
-    savedPlanningSnapshots,
+    planningSnapshotCanWrite,
+    planningSnapshotPersistence,
     selectedParcelId,
     setOverviewCommandMode,
     setOverviewLayoutCommandCenter,
@@ -141,6 +142,12 @@ export function OverviewCommandCenter() {
   }
 
   function saveSnapshotForReport() {
+    if (
+      !planningSnapshotCanWrite ||
+      planningSnapshotPersistence.status === "saving"
+    ) {
+      return;
+    }
     window.dispatchEvent(new CustomEvent(CFS_SAVE_PLANNING_SNAPSHOT_EVENT));
   }
 
@@ -165,11 +172,6 @@ export function OverviewCommandCenter() {
     }
   }
 
-  const snapshotStatusText = savedPlanningSnapshots.length
-    ? `${savedPlanningSnapshots.length} saved`
-    : planningSnapshot
-      ? "Snapshot ready"
-      : "No snapshots";
   const commandCenterCompact = overviewLayout.commandCenter === "compact";
   const economicsMode = cfsAppMode === "economics";
   const workflows = economicsMode ? economicsWorkflows : commandWorkflows;
@@ -204,16 +206,32 @@ export function OverviewCommandCenter() {
             <button
               aria-label="Save Planning Snapshot"
               className="inline-flex items-center gap-2 rounded-md border border-[#55d38f]/25 bg-[#55d38f]/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-[#a8f3c4] transition hover:border-[#55d38f]/45 hover:bg-[#55d38f]/15"
+              data-testid="planning-snapshot-save"
+              disabled={
+                !planningSnapshotCanWrite ||
+                planningSnapshotPersistence.status === "saving"
+              }
               onClick={saveSnapshotForReport}
+              title={planningSnapshotPersistence.message}
               type="button"
             >
               <Save className="h-3.5 w-3.5 shrink-0" />
               <span className="whitespace-nowrap">Save Snapshot</span>
             </button>
 
-            <div className="inline-flex max-w-full shrink-0 items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-400">
+            <div
+              aria-live="polite"
+              className="inline-flex max-w-full shrink-0 items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.11em] text-slate-400"
+              data-request-id={planningSnapshotPersistence.requestId ?? undefined}
+              data-state={planningSnapshotPersistence.status}
+              data-testid="planning-persistence-status"
+              role="status"
+              title={planningSnapshotPersistence.message}
+            >
               <Layers3 className="h-3.5 w-3.5 shrink-0 text-[#8fe7ff]" />
-              <span className="whitespace-nowrap">{snapshotStatusText}</span>
+              <span className="max-w-[22rem] normal-case tracking-normal">
+                {planningSnapshotPersistence.message}
+              </span>
             </div>
 
             {USE_DEMO_DATA ? (
@@ -327,7 +345,12 @@ export function OverviewCommandCenter() {
                 <ArrowRight className="h-3 w-3" />
               </button>
               <button
-                className="inline-flex items-center gap-1.5 font-semibold text-[#d7ffe4] underline-offset-4 hover:underline"
+                className="inline-flex items-center gap-1.5 font-semibold text-[#d7ffe4] underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                data-testid="planning-snapshot-save-another"
+                disabled={
+                  !planningSnapshotCanWrite ||
+                  planningSnapshotPersistence.status === "saving"
+                }
                 onClick={saveSnapshotForReport}
                 type="button"
               >
