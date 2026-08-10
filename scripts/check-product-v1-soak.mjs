@@ -178,10 +178,33 @@ async function seedLiveProductRecords() {
 
   const scenario = await api("/api/v1/economics/scenarios", {
     body: {
-      assumptions: { horizon_years: 5 },
+      assumptions: {
+        developmentType: "Current Conditions",
+        floodConstraint: "Medium",
+        intensityBand: "Low",
+        scenarioId: "current_conditions",
+        schoolServiceBurden: "Medium",
+        transportationAccess: "Medium",
+        utilityReadiness: "Medium",
+        valuePerAcreBand: "Medium",
+      },
       name: `${live.prefix} Economics`,
       notes: "Persist across backend restart",
-      outputs: { status: "screening_only" },
+      outputs: {
+        calculation_schema_version: "cfs-economics-scenario-v1",
+        constraintOpportunity: "Low",
+        dataConfidence: "Moderate",
+        fiscalAttractiveness: "Low",
+        infrastructureBurden: "Moderate",
+        recommendedNextDiligence: "Document assumptions and compare output bands with parcel evidence before deeper review.",
+        revenuePerAcre: "Low",
+        serviceBurden: "Moderate",
+        taxBaseLift: "Low",
+      },
+      payload: {
+        calculation_schema_version: "cfs-economics-scenario-v1",
+        scenario_template_id: "current_conditions",
+      },
       project_id: live.projectId,
     },
     method: "POST",
